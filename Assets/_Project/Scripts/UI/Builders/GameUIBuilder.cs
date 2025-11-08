@@ -28,6 +28,7 @@ namespace DigitPark.UI
 
             CreateBackground();
             CreateHUD();
+            CreateBackButton();
             CreateGrid();
             CreatePlayAgainButton();
             CreateWinMessage();
@@ -80,19 +81,52 @@ namespace DigitPark.UI
 
             // Best Time Text (esquina superior derecha)
             TextMeshProUGUI bestTimeHUD = UIFactory.CreateText(
-                hudPanel.transform,
+                canvas.transform,
                 "BestTimeText",
                 "Mejor: --",
-                28,
+                32,
                 UIFactory.BrightGreen,
                 TMPro.TextAlignmentOptions.TopRight
             );
             RectTransform bestTimeRT = bestTimeHUD.GetComponent<RectTransform>();
             bestTimeRT.anchorMin = new Vector2(1, 1);
             bestTimeRT.anchorMax = new Vector2(1, 1);
-            bestTimeRT.anchoredPosition = new Vector2(-30, -30);
-            bestTimeRT.sizeDelta = new Vector2(250, 50);
+            bestTimeRT.pivot = new Vector2(1, 1);
+            bestTimeRT.anchoredPosition = new Vector2(-50, -50);
+            bestTimeRT.sizeDelta = new Vector2(300, 60);
             gameManager.bestTimeText = bestTimeHUD;
+        }
+
+        private void CreateBackButton()
+        {
+            Button backBtn = UIFactory.CreateButton(
+                canvas.transform,
+                "BackButton",
+                "← VOLVER",
+                new Vector2(220, 75),
+                new Color(0.3f, 0.3f, 0.4f)
+            );
+
+            RectTransform backRT = backBtn.GetComponent<RectTransform>();
+            backRT.anchorMin = new Vector2(0, 1);
+            backRT.anchorMax = new Vector2(0, 1);
+            backRT.pivot = new Vector2(0, 1);
+            backRT.anchoredPosition = new Vector2(50, -50);
+
+            TextMeshProUGUI btnText = backBtn.GetComponentInChildren<TextMeshProUGUI>();
+            if (btnText != null)
+            {
+                btnText.fontSize = 24;
+                btnText.fontStyle = TMPro.FontStyles.Bold;
+            }
+
+            AddRoundedCorners(backBtn.gameObject, 15f);
+
+            // Configurar acción del botón para volver al menú principal
+            backBtn.onClick.AddListener(() =>
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+            });
         }
 
         private void CreateGrid()

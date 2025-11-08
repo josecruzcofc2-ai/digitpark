@@ -209,21 +209,21 @@ namespace DigitPark.UI
                 canvas.transform,
                 "BackButton",
                 "← VOLVER",
-                new Vector2(350, 80),
+                new Vector2(220, 75),
                 new Color(0.3f, 0.3f, 0.4f)
             );
 
             RectTransform backRT = backBtn.GetComponent<RectTransform>();
-            backRT.anchorMin = new Vector2(0.5f, 0);
-            backRT.anchorMax = new Vector2(0.5f, 0);
-            backRT.pivot = new Vector2(0.5f, 0);
-            backRT.anchoredPosition = new Vector2(0, 80); // Centrado abajo con margen
+            backRT.anchorMin = new Vector2(0, 1); // Esquina superior izquierda
+            backRT.anchorMax = new Vector2(0, 1); // Esquina superior izquierda
+            backRT.pivot = new Vector2(0, 1); // Pivot en esquina superior izquierda
+            backRT.anchoredPosition = new Vector2(50, -50); // Margen desde la esquina (más adentro)
 
             // Ajustar texto del botón
             TextMeshProUGUI btnText = backBtn.GetComponentInChildren<TextMeshProUGUI>();
             if (btnText != null)
             {
-                btnText.fontSize = 28;
+                btnText.fontSize = 24;
                 btnText.fontStyle = TMPro.FontStyles.Bold;
             }
 
