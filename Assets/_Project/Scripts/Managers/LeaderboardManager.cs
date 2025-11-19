@@ -17,9 +17,9 @@ namespace DigitPark.Managers
     public class LeaderboardManager : MonoBehaviour
     {
         [Header("Tabs")]
-        [SerializeField] public Button personalTabButton;
-        [SerializeField] public Button localTabButton;
-        [SerializeField] public Button globalTabButton;
+        [SerializeField] public Button personalTab;
+        [SerializeField] public Button nacionalTab;
+        [SerializeField] public Button mundialTab;
 
         [Header("Leaderboard UI")]
         [SerializeField] public Transform leaderboardContainer;
@@ -47,18 +47,18 @@ namespace DigitPark.Managers
         private List<LeaderboardEntry> localScores;
         private List<LeaderboardEntry> globalScores;
 
-        private void Start()
+        private async void Start()
         {
             Debug.Log("[Leaderboard] LeaderboardManager iniciado");
 
             // Verificar e inicializar servicios si no existen (para testing directo)
             EnsureServicesExist();
 
-            // Obtener datos del jugador
-            LoadPlayerData();
-
-            // Configurar listeners
+            // Configurar listeners primero
             SetupListeners();
+
+            // Obtener datos del jugador (async)
+            await LoadPlayerDataAsync();
 
             // Cargar leaderboard inicial
             LoadLeaderboard(LeaderboardTab.Personal);
@@ -87,9 +87,9 @@ namespace DigitPark.Managers
         #region Initialization
 
         /// <summary>
-        /// Carga los datos del jugador
+        /// Carga los datos del jugador de forma asíncrona
         /// </summary>
-        private void LoadPlayerData()
+        private async System.Threading.Tasks.Task LoadPlayerDataAsync()
         {
             if (AuthenticationService.Instance != null)
             {
@@ -99,6 +99,26 @@ namespace DigitPark.Managers
                 {
                     Debug.LogError("[Leaderboard] No hay datos del jugador");
                     SceneManager.LoadScene("Login");
+                    return;
+                }
+
+                Debug.Log($"[Leaderboard] Datos iniciales del jugador: {currentPlayer.username}");
+
+                // Recargar datos desde Firebase para tener el historial más actualizado
+                if (DatabaseService.Instance != null)
+                {
+                    Debug.Log("[Leaderboard] Recargando datos del jugador desde Firebase...");
+                    var freshData = await DatabaseService.Instance.LoadPlayerData(currentPlayer.userId);
+                    if (freshData != null)
+                    {
+                        currentPlayer = freshData;
+                        AuthenticationService.Instance.UpdateCurrentPlayerData(currentPlayer);
+                        Debug.Log($"[Leaderboard] Datos actualizados. Scores en historial: {currentPlayer.scoreHistory.Count}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[Leaderboard] No se pudieron recargar datos desde Firebase, usando datos en memoria");
+                    }
                 }
             }
         }
@@ -108,10 +128,53 @@ namespace DigitPark.Managers
         /// </summary>
         private void SetupListeners()
         {
-            personalTabButton?.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Personal));
-            localTabButton?.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Local));
-            globalTabButton?.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Global));
-            backButton?.onClick.AddListener(OnBackButtonClicked);
+            if (personalTab != null)
+            {
+                personalTab.onClick.RemoveAllListeners();
+                personalTab.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Personal));
+                personalTab.interactable = true;
+                Debug.Log($"[Leaderboard] Listener de PERSONALES configurado");
+            }
+            else
+            {
+                Debug.LogError("[Leaderboard] personalTab es NULL!");
+            }
+
+            if (nacionalTab != null)
+            {
+                nacionalTab.onClick.RemoveAllListeners();
+                nacionalTab.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Local));
+                nacionalTab.interactable = true;
+                Debug.Log($"[Leaderboard] Listener de NACIONAL configurado");
+            }
+            else
+            {
+                Debug.LogError("[Leaderboard] nacionalTab es NULL!");
+            }
+
+            if (mundialTab != null)
+            {
+                mundialTab.onClick.RemoveAllListeners();
+                mundialTab.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Global));
+                mundialTab.interactable = true;
+                Debug.Log($"[Leaderboard] Listener de MUNDIAL configurado");
+            }
+            else
+            {
+                Debug.LogError("[Leaderboard] mundialTab es NULL!");
+            }
+
+            if (backButton != null)
+            {
+                backButton.onClick.RemoveAllListeners();
+                backButton.onClick.AddListener(OnBackButtonClicked);
+                backButton.interactable = true;
+                Debug.Log($"[Leaderboard] Listener de VOLVER configurado");
+            }
+            else
+            {
+                Debug.LogError("[Leaderboard] backButton es NULL!");
+            }
         }
 
         #endregion
@@ -123,9 +186,15 @@ namespace DigitPark.Managers
         /// </summary>
         private void OnTabSelected(LeaderboardTab tab)
         {
-            if (currentTab == tab) return;
+            Debug.Log($"[Leaderboard] OnTabSelected llamado - Tab: {tab}, CurrentTab: {currentTab}");
 
-            Debug.Log($"[Leaderboard] Tab seleccionada: {tab}");
+            if (currentTab == tab)
+            {
+                Debug.Log($"[Leaderboard] Tab ya seleccionada, ignorando");
+                return;
+            }
+
+            Debug.Log($"[Leaderboard] Cambiando a tab: {tab}");
 
             currentTab = tab;
             UpdateTabVisuals();
@@ -138,9 +207,9 @@ namespace DigitPark.Managers
         private void UpdateTabVisuals()
         {
             // Resetear todos los botones
-            SetTabButtonState(personalTabButton, currentTab == LeaderboardTab.Personal);
-            SetTabButtonState(localTabButton, currentTab == LeaderboardTab.Local);
-            SetTabButtonState(globalTabButton, currentTab == LeaderboardTab.Global);
+            SetTabButtonState(personalTab, currentTab == LeaderboardTab.Personal);
+            SetTabButtonState(nacionalTab, currentTab == LeaderboardTab.Local);
+            SetTabButtonState(mundialTab, currentTab == LeaderboardTab.Global);
         }
 
         /// <summary>
@@ -150,16 +219,18 @@ namespace DigitPark.Managers
         {
             if (button == null) return;
 
-            ColorBlock colors = button.colors;
-            if (isSelected)
+            Image buttonImage = button.GetComponent<Image>();
+            if (buttonImage != null)
             {
-                colors.normalColor = new Color(0f, 0.83f, 1f); // Azul eléctrico
+                if (isSelected)
+                {
+                    buttonImage.color = new Color(0f, 0.83f, 1f); // Azul eléctrico
+                }
+                else
+                {
+                    buttonImage.color = new Color(0.3f, 0.3f, 0.4f); // Gris oscuro
+                }
             }
-            else
-            {
-                colors.normalColor = Color.gray;
-            }
-            button.colors = colors;
         }
 
         #endregion
@@ -222,10 +293,23 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Leaderboard] Cargando puntuaciones personales...");
 
-            if (currentPlayer == null) return new List<LeaderboardEntry>();
+            if (currentPlayer == null)
+            {
+                Debug.LogWarning("[Leaderboard] No hay jugador actual");
+                return new List<LeaderboardEntry>();
+            }
+
+            Debug.Log($"[Leaderboard] Jugador: {currentPlayer.username}, Scores en historial: {currentPlayer.scoreHistory?.Count ?? 0}");
 
             // Convertir el historial de scores a LeaderboardEntry
             List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
+
+            if (currentPlayer.scoreHistory == null || currentPlayer.scoreHistory.Count == 0)
+            {
+                Debug.LogWarning("[Leaderboard] ⚠️ El jugador no tiene scores personales registrados");
+                Debug.LogWarning("[Leaderboard] ⚠️ Juega una partida primero para ver tus scores personales");
+                return entries;
+            }
 
             foreach (var score in currentPlayer.scoreHistory)
             {
@@ -239,7 +323,7 @@ namespace DigitPark.Managers
                 });
             }
 
-            // Ordenar por mejor tiempo
+            // Ordenar por mejor tiempo (menor a mayor)
             entries.Sort((a, b) => a.time.CompareTo(b.time));
 
             // Asignar posiciones
@@ -248,7 +332,13 @@ namespace DigitPark.Managers
                 entries[i].position = i + 1;
             }
 
+            Debug.Log($"[Leaderboard] Scores personales cargados: {entries.Count}");
+
             personalScores = entries;
+
+            // Delay para simular carga async
+            await System.Threading.Tasks.Task.Delay(100);
+
             return entries;
         }
 
@@ -303,15 +393,171 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Leaderboard] Mostrando {entries.Count} entradas");
 
+            // Configurar el RectTransform del container PRIMERO
+            RectTransform containerRT = leaderboardContainer as RectTransform;
+            if (containerRT != null)
+            {
+                // Configurar anclas para que se estire horizontalmente
+                containerRT.anchorMin = new Vector2(0, 1);
+                containerRT.anchorMax = new Vector2(1, 1);
+                containerRT.pivot = new Vector2(0.5f, 1);
+
+                // Establecer posición inicial
+                containerRT.anchoredPosition = Vector2.zero;
+
+                // CRÍTICO: Asegurar que el container esté visible y activo
+                containerRT.gameObject.SetActive(true);
+
+                // Si tiene ancho 0, establecer un ancho mínimo basado en el viewport
+                if (containerRT.sizeDelta.x <= 0 && scrollRect != null && scrollRect.viewport != null)
+                {
+                    float viewportWidth = scrollRect.viewport.rect.width;
+                    containerRT.sizeDelta = new Vector2(viewportWidth, containerRT.sizeDelta.y);
+                    Debug.Log($"[Leaderboard] Ancho del content corregido a: {viewportWidth}");
+                }
+                else
+                {
+                    Debug.Log($"[Leaderboard] Content ancho actual: {containerRT.sizeDelta.x}");
+                }
+            }
+
+            // Obtener o crear VerticalLayoutGroup
+            var layoutGroup = leaderboardContainer.GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
+            if (layoutGroup == null)
+            {
+                Debug.Log("[Leaderboard] Creando nuevo VerticalLayoutGroup");
+                layoutGroup = leaderboardContainer.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+            }
+            else
+            {
+                Debug.Log("[Leaderboard] VerticalLayoutGroup ya existe, configurándolo");
+            }
+
+            // Configurar el LayoutGroup correctamente
+            layoutGroup.spacing = 5f;
+            layoutGroup.padding = new RectOffset(10, 10, 10, 10);
+            layoutGroup.childAlignment = TextAnchor.UpperCenter;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = true;
+            layoutGroup.childForceExpandWidth = false; // NO forzar expansión horizontal
+            layoutGroup.childForceExpandHeight = false;
+
+            Debug.Log($"[Leaderboard] LayoutGroup configurado - childForceExpandWidth: {layoutGroup.childForceExpandWidth}");
+
+            int createdCount = 0;
             foreach (var entry in entries)
             {
                 CreateLeaderboardEntry(entry);
+                createdCount++;
+            }
+
+            Debug.Log($"[Leaderboard] {createdCount} entradas creadas en el container");
+            Debug.Log($"[Leaderboard] Container tiene {leaderboardContainer.childCount} hijos");
+
+            // DEBUG CRÍTICO: Verificar cada hijo creado
+            for (int i = 0; i < leaderboardContainer.childCount; i++)
+            {
+                Transform child = leaderboardContainer.GetChild(i);
+                RectTransform childRT = child as RectTransform;
+                if (childRT != null)
+                {
+                    Debug.LogWarning($"[Leaderboard] 🔍 HIJO {i}: {child.name}");
+                    Debug.LogWarning($"  ➤ Activo: {child.gameObject.activeSelf}, ActiveInHierarchy: {child.gameObject.activeInHierarchy}");
+                    Debug.LogWarning($"  ➤ Position: {childRT.anchoredPosition}, Size: {childRT.sizeDelta}");
+                    Debug.LogWarning($"  ➤ Rect: {childRT.rect}");
+
+                    var img = child.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        Debug.LogWarning($"  ➤ Image Color: {img.color}, Enabled: {img.enabled}");
+                    }
+                }
+            }
+
+            // Verificar el estado del ScrollRect
+            if (scrollRect != null)
+            {
+                Debug.Log($"[Leaderboard] ScrollRect activo: {scrollRect.gameObject.activeSelf}, enabled: {scrollRect.enabled}");
+                Debug.Log($"[Leaderboard] ScrollRect - viewport: {scrollRect.viewport != null}, content: {scrollRect.content != null}");
+
+                if (scrollRect.viewport != null)
+                {
+                    Debug.Log($"[Leaderboard] Viewport size: {scrollRect.viewport.rect.size}, activo: {scrollRect.viewport.gameObject.activeSelf}");
+                }
+
+                if (scrollRect.content != null)
+                {
+                    RectTransform contentRT = scrollRect.content;
+                    Debug.Log($"[Leaderboard] Content size: {contentRT.sizeDelta}, position: {contentRT.anchoredPosition}, activo: {contentRT.gameObject.activeSelf}");
+                    Debug.Log($"[Leaderboard] Content tiene {contentRT.childCount} hijos visibles");
+                }
             }
 
             // Resaltar posición del jugador si está en la lista
             HighlightPlayerPosition(entries);
 
-            // Scroll al top
+            // Forzar reconstrucción del layout después de varios frames
+            StartCoroutine(ForceLayoutRebuildMultipleTimes(containerRT, entries.Count));
+        }
+
+        /// <summary>
+        /// Fuerza la reconstrucción del layout múltiples veces para asegurar visibilidad
+        /// </summary>
+        private System.Collections.IEnumerator ForceLayoutRebuildMultipleTimes(RectTransform containerRT, int expectedCount)
+        {
+            if (containerRT == null)
+            {
+                Debug.LogError("[Leaderboard] containerRT es NULL en ForceLayoutRebuildMultipleTimes!");
+                yield break;
+            }
+
+            // Frame 0: Rebuild inicial
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+            UnityEngine.Canvas.ForceUpdateCanvases();
+            Debug.Log($"[Leaderboard] Frame 0 - Layout rebuilt. Content size: {containerRT.sizeDelta}");
+
+            yield return null; // Esperar 1 frame
+
+            // Frame 1: Segundo rebuild
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+            UnityEngine.Canvas.ForceUpdateCanvases();
+            Debug.Log($"[Leaderboard] Frame 1 - Layout rebuilt. Content size: {containerRT.sizeDelta}");
+
+            // Log detallado de las primeras entradas
+            for (int i = 0; i < containerRT.childCount && i < 3; i++)
+            {
+                Transform child = containerRT.GetChild(i);
+                RectTransform childRT = child as RectTransform;
+                if (childRT != null)
+                {
+                    var image = child.GetComponent<Image>();
+                    var layoutEl = child.GetComponent<UnityEngine.UI.LayoutElement>();
+                    Debug.Log($"[Leaderboard] Hijo {i}: {child.name}");
+                    Debug.Log($"  - Size: {childRT.sizeDelta}, Pos: {childRT.anchoredPosition}");
+                    Debug.Log($"  - Activo: {child.gameObject.activeSelf}, Image: {image != null && image.enabled}");
+                    Debug.Log($"  - LayoutElement minWidth: {layoutEl?.minWidth}, preferredHeight: {layoutEl?.preferredHeight}");
+                    Debug.Log($"  - Rect (world): {childRT.rect}");
+                }
+            }
+
+            yield return null; // Esperar otro frame
+
+            // Frame 2: Scroll al top
+            if (scrollRect != null)
+            {
+                scrollRect.verticalNormalizedPosition = 1f;
+                Debug.Log($"[Leaderboard] Scroll resetted to top");
+            }
+
+            // Frame 2: Rebuild final
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+            Debug.Log($"[Leaderboard] Frame 2 - Final rebuild. Content size: {containerRT.sizeDelta}");
+            Debug.Log($"[Leaderboard] ✅ DisplayLeaderboard completado. {expectedCount} entradas deberían ser visibles.");
+        }
+
+        private System.Collections.IEnumerator ScrollToTopNextFrame()
+        {
+            yield return null; // Esperar un frame
             if (scrollRect != null)
             {
                 scrollRect.verticalNormalizedPosition = 1f;
@@ -323,17 +569,37 @@ namespace DigitPark.Managers
         /// </summary>
         private void CreateLeaderboardEntry(LeaderboardEntry entry)
         {
-            if (leaderboardContainer == null) return;
+            if (leaderboardContainer == null)
+            {
+                Debug.LogError("[Leaderboard] leaderboardContainer es NULL!");
+                return;
+            }
 
             // Crear entrada programáticamente (sin prefab)
             GameObject entryObj = new GameObject($"Entry_{entry.position}");
             entryObj.transform.SetParent(leaderboardContainer, false);
 
             RectTransform entryRT = entryObj.AddComponent<RectTransform>();
-            entryRT.sizeDelta = new Vector2(1040, 80); // Ancho completo, altura fija
-            entryRT.anchorMin = new Vector2(0, 1);
-            entryRT.anchorMax = new Vector2(0, 1);
-            entryRT.pivot = new Vector2(0, 1);
+
+            // CRÍTICO - Configuración correcta del RectTransform
+            entryRT.anchorMin = new Vector2(0, 1);     // Anclar desde la izquierda-arriba
+            entryRT.anchorMax = new Vector2(1, 1);     // Stretch horizontal completo
+            entryRT.pivot = new Vector2(0.5f, 1);      // Pivot en el centro superior
+            entryRT.anchoredPosition = Vector2.zero;   // IMPORTANTE: Posición (0,0)
+            entryRT.sizeDelta = new Vector2(0, 80);    // Ancho 0 = stretch, altura 80
+
+            Debug.Log($"[Leaderboard] Entry {entry.position} ANTES de LayoutElement - Position: {entryRT.anchoredPosition}, Size: {entryRT.sizeDelta}");
+
+            // LayoutElement para controlar altura
+            var layoutElement = entryObj.AddComponent<UnityEngine.UI.LayoutElement>();
+            layoutElement.preferredHeight = 80;
+            layoutElement.minHeight = 80;
+
+            Debug.Log($"[Leaderboard] Entrada creada: {entry.username} - {entry.time}s (Posición: {entry.position})");
+            Debug.Log($"[Leaderboard] Entry RectTransform FINAL - Ancho: {entryRT.sizeDelta.x}, Alto: {entryRT.sizeDelta.y}, Pos: {entryRT.anchoredPosition}");
+
+            // CRÍTICO: Asegurar que la entrada esté activa
+            entryObj.SetActive(true);
 
             // Fondo de la entrada
             Image bg = entryObj.AddComponent<Image>();
@@ -341,18 +607,19 @@ namespace DigitPark.Managers
 
             if (isCurrentPlayer)
             {
-                bg.color = new Color(0f, 0.83f, 1f, 0.2f); // Azul eléctrico translúcido
+                bg.color = new Color(0f, 0.83f, 1f, 0.95f); // Azul eléctrico MÁS VISIBLE
             }
             else
             {
-                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.5f); // Gris oscuro
+                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f); // Gris oscuro MÁS VISIBLE
             }
+
+            Debug.Log($"[Leaderboard] Fondo de entrada configurado con color: {bg.color}, Enabled: {bg.enabled}");
 
             // Si es modo Personal, NO mostrar el TOP#
             bool isPersonalTab = currentTab == LeaderboardTab.Personal;
 
             float leftPadding = 20f;
-            float dividerWidth = 1f;
 
             if (isPersonalTab)
             {
@@ -550,6 +817,7 @@ namespace DigitPark.Managers
             if (loadingPanel != null)
             {
                 loadingPanel.SetActive(show);
+                Debug.Log($"[Leaderboard] LoadingPanel {(show ? "MOSTRADO" : "OCULTADO")}");
             }
 
             if (loadingText != null && show)
@@ -566,16 +834,20 @@ namespace DigitPark.Managers
             Debug.Log("[Leaderboard] No hay datos para mostrar");
 
             GameObject emptyMsg = new GameObject("EmptyMessage");
-            emptyMsg.transform.SetParent(leaderboardContainer);
+            emptyMsg.transform.SetParent(leaderboardContainer, false);
 
-            Text text = emptyMsg.AddComponent<Text>();
-            text.text = "No hay puntuaciones aún";
-            text.alignment = TextAnchor.MiddleCenter;
+            TextMeshProUGUI text = emptyMsg.AddComponent<TextMeshProUGUI>();
+            text.text = "No hay puntuaciones aún\n\nJuega algunas partidas para ver tus scores aquí";
+            text.alignment = TMPro.TextAlignmentOptions.Center;
             text.fontSize = 24;
             text.color = Color.gray;
 
             RectTransform rt = emptyMsg.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(400, 100);
+            rt.anchorMin = new Vector2(0, 0.5f);
+            rt.anchorMax = new Vector2(1, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(800, 200);
         }
 
         /// <summary>
@@ -586,16 +858,20 @@ namespace DigitPark.Managers
             Debug.LogError($"[Leaderboard] {message}");
 
             GameObject errorMsg = new GameObject("ErrorMessage");
-            errorMsg.transform.SetParent(leaderboardContainer);
+            errorMsg.transform.SetParent(leaderboardContainer, false);
 
-            Text text = errorMsg.AddComponent<Text>();
+            TextMeshProUGUI text = errorMsg.AddComponent<TextMeshProUGUI>();
             text.text = message;
-            text.alignment = TextAnchor.MiddleCenter;
+            text.alignment = TMPro.TextAlignmentOptions.Center;
             text.fontSize = 24;
             text.color = Color.red;
 
             RectTransform rt = errorMsg.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(400, 100);
+            rt.anchorMin = new Vector2(0, 0.5f);
+            rt.anchorMax = new Vector2(1, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(800, 100);
         }
 
         #endregion
@@ -607,7 +883,7 @@ namespace DigitPark.Managers
         /// </summary>
         private void OnBackButtonClicked()
         {
-            Debug.Log("[Leaderboard] Volviendo al menú principal");
+            Debug.Log("[Leaderboard] ✅ BOTÓN VOLVER PRESIONADO - Volviendo al menú principal");
             SceneManager.LoadScene("MainMenu");
         }
 

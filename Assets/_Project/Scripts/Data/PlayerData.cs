@@ -31,7 +31,7 @@ namespace DigitPark.Data
         public int totalGamesPlayed;
         public int totalGamesWon;
 
-        // Historial de mejores tiempos (últimos 50)
+        // Historial de tiempos (últimos 30)
         public List<ScoreEntry> scoreHistory;
 
         // Torneos participados
@@ -133,14 +133,16 @@ namespace DigitPark.Data
         /// </summary>
         public void AddScore(float time)
         {
-            scoreHistory.Add(new ScoreEntry
+            var entry = new ScoreEntry
             {
-                time = time,
-                timestamp = DateTime.Now
-            });
+                time = time
+            };
+            entry.SetTimestamp(DateTime.Now);
 
-            // Mantener solo las últimas 50 puntuaciones
-            if (scoreHistory.Count > 50)
+            scoreHistory.Add(entry);
+
+            // Mantener solo las últimas 30 puntuaciones
+            if (scoreHistory.Count > 30)
             {
                 scoreHistory.RemoveAt(0);
             }
@@ -217,8 +219,21 @@ namespace DigitPark.Data
     public class ScoreEntry
     {
         public float time;
-        public DateTime timestamp;
+        public string timestamp; // Almacenado como string para serialización JSON
         public string tournamentId; // null si es partida casual
+
+        // Propiedad helper para obtener DateTime
+        public DateTime GetTimestamp()
+        {
+            if (DateTime.TryParse(timestamp, out DateTime result))
+                return result;
+            return DateTime.Now;
+        }
+
+        public void SetTimestamp(DateTime value)
+        {
+            timestamp = value.ToString("o"); // ISO 8601 format
+        }
     }
 
     /// <summary>
@@ -233,6 +248,6 @@ namespace DigitPark.Data
         public int finalPosition;
         public int totalParticipants;
         public int prizeWon;
-        public DateTime completionDate;
+        public string completionDate; // String para serialización JSON
     }
 }

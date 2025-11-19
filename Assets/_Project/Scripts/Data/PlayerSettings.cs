@@ -47,7 +47,7 @@ namespace DigitPark.Data
             graphicsQuality = GraphicsQuality.High;
             targetFPS = 60;
 
-            language = Application.systemLanguage;
+            language = SystemLanguage.English; // Default seguro, se detectará después
 
             rememberMe = false;
             connectedToGoogle = false;

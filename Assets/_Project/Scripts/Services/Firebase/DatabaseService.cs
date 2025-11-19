@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Data;
 
+using Firebase;
 using Firebase.Database;
 using Firebase.Firestore;
 using Firebase.Extensions;
@@ -40,31 +41,37 @@ namespace DigitPark.Services.Firebase
         /// <summary>
         /// Inicializa Firebase Database
         /// </summary>
-        private void InitializeDatabase()
+        private async void InitializeDatabase()
         {
             Debug.Log("[Database] Inicializando Firebase Database...");
 
             try
             {
-                // Obtener la app de Firebase y configurar la Database URL
-                // Usar global:: para evitar conflicto con namespace local
-                global::Firebase.FirebaseApp app = global::Firebase.FirebaseApp.DefaultInstance;
+                // Verificar dependencias de Firebase primero
+                var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
 
-                if (app.Options.DatabaseUrl != null)
+                if (dependencyStatus != DependencyStatus.Available)
                 {
-                    app.Options.DatabaseUrl = new System.Uri(DATABASE_URL);
+                    Debug.LogError($"[Database] No se pudieron resolver las dependencias de Firebase: {dependencyStatus}");
+                    return;
                 }
+
+                // Obtener la app de Firebase
+                FirebaseApp app = FirebaseApp.DefaultInstance;
+
+                Debug.Log($"[Database] Firebase App obtenida, configurando Database...");
 
                 // Obtener la instancia con la URL específica
                 databaseRef = FirebaseDatabase.GetInstance(app, DATABASE_URL).RootReference;
                 firestore = FirebaseFirestore.DefaultInstance;
 
-                Debug.Log($"[Database] Firebase Database inicializado con URL: {DATABASE_URL}");
+                Debug.Log($"[Database] Firebase Database inicializado correctamente con URL: {DATABASE_URL}");
+                Debug.Log($"[Database] DatabaseRef es null: {databaseRef == null}");
             }
             catch (System.Exception ex)
             {
                 Debug.LogError($"[Database] Error al inicializar: {ex.Message}");
-                Debug.LogWarning("[Database] Usando modo simulado sin Firebase");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -79,17 +86,23 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log($"[Database] Guardando datos del jugador: {playerData.userId}");
 
+                if (databaseRef == null)
+                {
+                    Debug.LogError("[Database] DatabaseRef es null! Firebase no está inicializado correctamente");
+                    return;
+                }
 
                 string json = JsonUtility.ToJson(playerData);
-                await databaseRef.Child("players").Child(playerData.userId).SetRawJsonValueAsync(json);
-                
+                Debug.Log($"[Database] JSON a guardar: {json.Substring(0, Mathf.Min(200, json.Length))}...");
 
-                await Task.Delay(100); // Simulación
-                Debug.Log("[Database] Datos del jugador guardados");
+                await databaseRef.Child("players").Child(playerData.userId).SetRawJsonValueAsync(json);
+
+                Debug.Log("[Database] Datos del jugador guardados exitosamente en Firebase");
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al guardar datos del jugador: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
                 throw;
             }
         }
@@ -103,24 +116,32 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log($"[Database] Cargando datos del jugador: {userId}");
 
-             
+                if (databaseRef == null)
+                {
+                    Debug.LogError("[Database] DatabaseRef es null! Firebase no está inicializado correctamente");
+                    return null;
+                }
+
                 var snapshot = await databaseRef.Child("players").Child(userId).GetValueAsync();
 
                 if (snapshot.Exists)
                 {
                     string json = snapshot.GetRawJsonValue();
+                    Debug.Log($"[Database] JSON cargado: {json.Substring(0, Mathf.Min(200, json.Length))}...");
                     PlayerData data = JsonUtility.FromJson<PlayerData>(json);
-                    Debug.Log("[Database] Datos del jugador cargados");
+                    Debug.Log($"[Database] Datos del jugador cargados exitosamente. Scores: {data.scoreHistory.Count}");
                     return data;
                 }
-                
-
-                await Task.Delay(100); // Simulación
-                return null;
+                else
+                {
+                    Debug.LogWarning($"[Database] No se encontraron datos para el usuario: {userId}");
+                    return null;
+                }
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al cargar datos del jugador: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
                 return null;
             }
         }
@@ -163,10 +184,14 @@ namespace DigitPark.Services.Firebase
         {
             try
             {
-                Debug.Log($"[Database] Verificando score: {username} - {time}s");
+                Debug.Log($"[Database] Verificando score: {username} - {time}s en país {countryCode}");
 
-                
-                
+                if (databaseRef == null)
+                {
+                    Debug.LogError("[Database] DatabaseRef es null! No se puede guardar el score");
+                    return;
+                }
+
                 var globalSnapshot = await databaseRef.Child("leaderboards").Child("global").Child(userId).GetValueAsync();
 
                 bool shouldUpdate = false;
@@ -203,22 +228,25 @@ namespace DigitPark.Services.Firebase
                         { "timestamp", ServerValue.Timestamp }
                     };
 
+                    Debug.Log($"[Database] Guardando score en Firebase...");
+
                     // Guardar en leaderboard global
                     await databaseRef.Child("leaderboards").Child("global").Child(userId).SetValueAsync(scoreData);
+                    Debug.Log($"[Database] Score guardado en leaderboard global");
 
                     // Guardar en leaderboard por país
                     await databaseRef.Child("leaderboards").Child($"country_{countryCode}").Child(userId).SetValueAsync(scoreData);
+                    Debug.Log($"[Database] Score guardado en leaderboard de país: {countryCode}");
 
                     Debug.Log("[Database] Score actualizado en leaderboards (global y local)");
                 }
-                
 
-                await Task.Delay(100);
-                Debug.Log("[Database] Score procesado");
+                Debug.Log("[Database] Score procesado completamente");
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al guardar score: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -231,7 +259,12 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log($"[Database] Obteniendo top {topCount} global...");
 
-               
+                if (databaseRef == null)
+                {
+                    Debug.LogError("[Database] DatabaseRef es null! No se puede obtener leaderboard global");
+                    return new List<LeaderboardEntry>();
+                }
+
                 var snapshot = await databaseRef.Child("leaderboards").Child("global")
                     .OrderByChild("time")
                     .LimitToFirst(topCount)
@@ -241,6 +274,8 @@ namespace DigitPark.Services.Firebase
 
                 if (snapshot.Exists)
                 {
+                    Debug.Log($"[Database] Snapshot existe, procesando {snapshot.ChildrenCount} entradas");
+
                     foreach (var child in snapshot.Children)
                     {
                         var entry = new LeaderboardEntry
@@ -252,17 +287,20 @@ namespace DigitPark.Services.Firebase
                         };
                         entries.Add(entry);
                     }
+
+                    Debug.Log($"[Database] Leaderboard global cargado: {entries.Count} entradas");
+                }
+                else
+                {
+                    Debug.LogWarning("[Database] No hay datos en el leaderboard global");
                 }
 
                 return entries;
-                
-
-                await Task.Delay(200);
-                return new List<LeaderboardEntry>(); // Simulación
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al obtener leaderboard global: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
                 return new List<LeaderboardEntry>();
             }
         }
@@ -276,7 +314,12 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log($"[Database] Obteniendo top {topCount} de {countryCode}...");
 
-                
+                if (databaseRef == null)
+                {
+                    Debug.LogError("[Database] DatabaseRef es null! No se puede obtener leaderboard de país");
+                    return new List<LeaderboardEntry>();
+                }
+
                 var snapshot = await databaseRef.Child("leaderboards").Child($"country_{countryCode}")
                     .OrderByChild("time")
                     .LimitToFirst(topCount)
@@ -286,6 +329,8 @@ namespace DigitPark.Services.Firebase
 
                 if (snapshot.Exists)
                 {
+                    Debug.Log($"[Database] Snapshot existe, procesando {snapshot.ChildrenCount} entradas de {countryCode}");
+
                     foreach (var child in snapshot.Children)
                     {
                         var entry = new LeaderboardEntry
@@ -297,17 +342,20 @@ namespace DigitPark.Services.Firebase
                         };
                         entries.Add(entry);
                     }
+
+                    Debug.Log($"[Database] Leaderboard de {countryCode} cargado: {entries.Count} entradas");
+                }
+                else
+                {
+                    Debug.LogWarning($"[Database] No hay datos en el leaderboard de {countryCode}");
                 }
 
                 return entries;
-                
-
-                await Task.Delay(200);
-                return new List<LeaderboardEntry>();
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al obtener leaderboard de país: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
                 return new List<LeaderboardEntry>();
             }
         }
@@ -464,6 +512,59 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.LogError($"[Database] Error al unirse al torneo: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el username en todos los leaderboards donde el usuario tenga registros
+        /// Llamar cuando el usuario cambia su nombre
+        /// </summary>
+        public async Task UpdateUsernameInLeaderboards(string userId, string newUsername, string countryCode)
+        {
+            try
+            {
+                Debug.Log($"[Database] Actualizando username en leaderboards para userId: {userId} → {newUsername}");
+
+                if (databaseRef == null)
+                {
+                    Debug.LogError("[Database] DatabaseRef es null! No se puede actualizar username en leaderboards");
+                    return;
+                }
+
+                // Actualizar en leaderboard global
+                var globalRef = databaseRef.Child("leaderboards").Child("global").Child(userId);
+                var globalSnapshot = await globalRef.GetValueAsync();
+
+                if (globalSnapshot.Exists)
+                {
+                    await globalRef.Child("username").SetValueAsync(newUsername);
+                    Debug.Log($"[Database] ✅ Username actualizado en leaderboard global");
+                }
+                else
+                {
+                    Debug.Log($"[Database] ℹ️ Usuario no tiene registro en leaderboard global");
+                }
+
+                // Actualizar en leaderboard de país
+                var countryRef = databaseRef.Child("leaderboards").Child($"country_{countryCode}").Child(userId);
+                var countrySnapshot = await countryRef.GetValueAsync();
+
+                if (countrySnapshot.Exists)
+                {
+                    await countryRef.Child("username").SetValueAsync(newUsername);
+                    Debug.Log($"[Database] ✅ Username actualizado en leaderboard de país: {countryCode}");
+                }
+                else
+                {
+                    Debug.Log($"[Database] ℹ️ Usuario no tiene registro en leaderboard de país: {countryCode}");
+                }
+
+                Debug.Log($"[Database] ✅ Username actualizado exitosamente en todos los leaderboards");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[Database] Error al actualizar username en leaderboards: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
             }
         }
 

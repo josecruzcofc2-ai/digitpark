@@ -11,40 +11,32 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager de la escena Login
-    /// Maneja autenticación de usuarios (Email, Google, Apple) y registro
+    /// Maneja autenticación de usuarios (Email, Google, Apple)
     /// </summary>
     public class LoginManager : MonoBehaviour
     {
-        [Header("UI - Panels")]
+        [Header("UI - Login Panel")]
         [SerializeField] public GameObject loginPanel;
-        [SerializeField] public GameObject registerPanel;
-
-        [Header("UI - Login Fields")]
-        [SerializeField] public TMP_InputField loginEmailInput;
-        [SerializeField] public TMP_InputField loginPasswordInput;
-        [SerializeField] public Toggle rememberMeToggle;
+        [SerializeField] public TextMeshProUGUI titleText;
+        [SerializeField] public TMP_InputField emailInput;
+        [SerializeField] public TMP_InputField passwordInput;
+        [SerializeField] public Toggle rememberToggle;
         [SerializeField] public Button loginButton;
-        [SerializeField] public Button showRegisterButton;
-
-        [Header("UI - Register Fields")]
-        [SerializeField] public TMP_InputField registerUsernameInput;
-        [SerializeField] public TMP_InputField registerEmailInput;
-        [SerializeField] public TMP_InputField registerPasswordInput;
-        [SerializeField] public TMP_InputField registerConfirmPasswordInput;
+        [SerializeField] public Button googleButton;
+        [SerializeField] public Button appleButton;
         [SerializeField] public Button registerButton;
-        [SerializeField] public Button backToLoginButton;
-
-        [Header("UI - Social Login")]
-        [SerializeField] public Button googleLoginButton;
-        [SerializeField] public Button appleLoginButton;
 
         [Header("UI - Other")]
-        [SerializeField] public Button forgotPasswordButton;
-        [SerializeField] public TextMeshProUGUI errorMessageText;
         [SerializeField] public GameObject loadingPanel;
+        [SerializeField] public Button backButton;
 
-        [Header("UI - Title")]
-        [SerializeField] public TextMeshProUGUI titleText;
+        [Header("UI - Error Popup")]
+        [SerializeField] public GameObject errorBlocker;
+        [SerializeField] public GameObject errorPopup;
+        [SerializeField] public TextMeshProUGUI errorMessage;
+        [SerializeField] public Button okButton;
+
+        [Header("Animation")]
         [SerializeField] public Animator titleAnimator;
 
         private bool isLoggingIn = false;
@@ -61,8 +53,12 @@ namespace DigitPark.Managers
             // Configurar listeners
             SetupListeners();
 
-            // Mostrar panel de login por defecto
-            ShowLoginPanel();
+            // Ocultar error popup inicialmente
+            if (errorBlocker != null) errorBlocker.SetActive(false);
+
+            // Mostrar panel de login
+            if (loginPanel != null)
+                loginPanel.SetActive(true);
 
             // Animar título
             if (titleAnimator != null)
@@ -78,9 +74,9 @@ namespace DigitPark.Managers
             }
 
             // Cargar remember me si existe
-            if (PlayerPrefs.HasKey("RememberMe"))
+            if (PlayerPrefs.HasKey("RememberMe") && rememberToggle != null)
             {
-                rememberMeToggle.isOn = PlayerPrefs.GetInt("RememberMe", 0) == 1;
+                rememberToggle.isOn = PlayerPrefs.GetInt("RememberMe", 0) == 1;
             }
 
             // Crear popup de username (oculto inicialmente)
@@ -135,17 +131,29 @@ namespace DigitPark.Managers
         /// </summary>
         private void SetupListeners()
         {
-            loginButton?.onClick.AddListener(OnLoginButtonClicked);
-            showRegisterButton?.onClick.AddListener(GoToRegisterScene); // Cambiado a navegación de escena
-            registerButton?.onClick.AddListener(OnRegisterButtonClicked);
-            backToLoginButton?.onClick.AddListener(ShowLoginPanel);
-            googleLoginButton?.onClick.AddListener(OnGoogleLoginClicked);
-            appleLoginButton?.onClick.AddListener(OnAppleLoginClicked);
-            forgotPasswordButton?.onClick.AddListener(OnForgotPasswordClicked);
+            // Debug para verificar referencias
+            Debug.Log($"[Login] loginButton: {(loginButton != null ? "OK" : "NULL")}");
+            Debug.Log($"[Login] emailInput: {(emailInput != null ? "OK" : "NULL")}");
+            Debug.Log($"[Login] passwordInput: {(passwordInput != null ? "OK" : "NULL")}");
+            Debug.Log($"[Login] registerButton: {(registerButton != null ? "OK" : "NULL")}");
 
-            // Listeners para Enter key
-            loginPasswordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnLoginButtonClicked(); });
-            registerConfirmPasswordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnRegisterButtonClicked(); });
+            if (loginButton != null)
+            {
+                loginButton.onClick.AddListener(OnLoginButtonClicked);
+                Debug.Log("[Login] Listener de loginButton configurado");
+            }
+            else
+            {
+                Debug.LogError("[Login] loginButton es NULL! Asigna la referencia en el Inspector");
+            }
+
+            registerButton?.onClick.AddListener(GoToRegisterScene);
+            googleButton?.onClick.AddListener(OnGoogleLoginClicked);
+            appleButton?.onClick.AddListener(OnAppleLoginClicked);
+            okButton?.onClick.AddListener(HideError);
+
+            // Listener para Enter key
+            passwordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnLoginButtonClicked(); });
         }
 
         /// <summary>
@@ -157,34 +165,6 @@ namespace DigitPark.Managers
             SceneManager.LoadScene("Register");
         }
 
-        #region UI Navigation
-
-        /// <summary>
-        /// Muestra el panel de login
-        /// </summary>
-        private void ShowLoginPanel()
-        {
-            loginPanel?.SetActive(true);
-            registerPanel?.SetActive(false);
-            ClearErrorMessage();
-
-            Debug.Log("[Login] Mostrando panel de login");
-        }
-
-        /// <summary>
-        /// Muestra el panel de registro
-        /// </summary>
-        private void ShowRegisterPanel()
-        {
-            loginPanel?.SetActive(false);
-            registerPanel?.SetActive(true);
-            ClearErrorMessage();
-
-            Debug.Log("[Login] Mostrando panel de registro");
-        }
-
-        #endregion
-
         #region Login
 
         /// <summary>
@@ -192,11 +172,25 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnLoginButtonClicked()
         {
-            if (isLoggingIn) return;
+            Debug.Log("[Login] ===== BOTÓN LOGIN PRESIONADO =====");
+
+            if (isLoggingIn)
+            {
+                Debug.Log("[Login] Ya está intentando login, ignorando...");
+                return;
+            }
 
             // Validar campos
-            string email = loginEmailInput.text.Trim();
-            string password = loginPasswordInput.text;
+            if (emailInput == null || passwordInput == null)
+            {
+                Debug.LogError("[Login] emailInput o passwordInput son NULL!");
+                return;
+            }
+
+            string email = emailInput.text.Trim();
+            string password = passwordInput.text;
+
+            Debug.Log($"[Login] Email: {email}, Password length: {password.Length}");
 
             if (!ValidateLoginInputs(email, password))
             {
@@ -205,7 +199,6 @@ namespace DigitPark.Managers
 
             isLoggingIn = true;
             ShowLoading(true);
-            ClearErrorMessage();
 
             Debug.Log($"[Login] Intentando login para: {email}");
 
@@ -213,7 +206,7 @@ namespace DigitPark.Managers
             bool success = await AuthenticationService.Instance.LoginWithEmail(
                 email,
                 password,
-                rememberMeToggle.isOn
+                rememberToggle != null && rememberToggle.isOn
             );
 
             isLoggingIn = false;
@@ -260,100 +253,6 @@ namespace DigitPark.Managers
 
         #endregion
 
-        #region Register
-
-        /// <summary>
-        /// Maneja el click en el botón de registro
-        /// </summary>
-        private async void OnRegisterButtonClicked()
-        {
-            if (isLoggingIn) return;
-
-            // Validar campos
-            string username = registerUsernameInput.text.Trim();
-            string email = registerEmailInput.text.Trim();
-            string password = registerPasswordInput.text;
-            string confirmPassword = registerConfirmPasswordInput.text;
-
-            if (!ValidateRegisterInputs(username, email, password, confirmPassword))
-            {
-                return;
-            }
-
-            isLoggingIn = true;
-            ShowLoading(true);
-            ClearErrorMessage();
-
-            Debug.Log($"[Login] Intentando registro para: {email}");
-
-            // Intentar registro
-            bool success = await AuthenticationService.Instance.RegisterWithEmail(
-                email,
-                password,
-                username
-            );
-
-            isLoggingIn = false;
-            ShowLoading(false);
-
-            if (!success)
-            {
-                Debug.LogWarning("[Login] Registro fallido");
-            }
-        }
-
-        /// <summary>
-        /// Valida los inputs de registro
-        /// </summary>
-        private bool ValidateRegisterInputs(string username, string email, string password, string confirmPassword)
-        {
-            if (string.IsNullOrEmpty(username))
-            {
-                ShowErrorMessage("Por favor ingresa un nombre de usuario");
-                return false;
-            }
-
-            if (username.Length < 3)
-            {
-                ShowErrorMessage("El nombre de usuario debe tener al menos 3 caracteres");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(email))
-            {
-                ShowErrorMessage("Por favor ingresa tu email");
-                return false;
-            }
-
-            if (!IsValidEmail(email))
-            {
-                ShowErrorMessage("Email inválido");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(password))
-            {
-                ShowErrorMessage("Por favor ingresa una contraseña");
-                return false;
-            }
-
-            if (password.Length < 8)
-            {
-                ShowErrorMessage("La contraseña debe tener al menos 8 caracteres");
-                return false;
-            }
-
-            if (password != confirmPassword)
-            {
-                ShowErrorMessage("Las contraseñas no coinciden");
-                return false;
-            }
-
-            return true;
-        }
-
-        #endregion
-
         #region Social Login
 
         /// <summary>
@@ -365,7 +264,6 @@ namespace DigitPark.Managers
 
             isLoggingIn = true;
             ShowLoading(true);
-            ClearErrorMessage();
 
             Debug.Log("[Login] Intentando login con Google");
 
@@ -394,7 +292,6 @@ namespace DigitPark.Managers
 
             isLoggingIn = true;
             ShowLoading(true);
-            ClearErrorMessage();
 
             Debug.Log("[Login] Intentando login con Apple");
 
@@ -406,40 +303,6 @@ namespace DigitPark.Managers
             if (!success)
             {
                 ShowErrorMessage("Error al iniciar sesión con Apple");
-            }
-        }
-
-        #endregion
-
-        #region Forgot Password
-
-        /// <summary>
-        /// Maneja el click en olvidé mi contraseña
-        /// </summary>
-        private async void OnForgotPasswordClicked()
-        {
-            string email = loginEmailInput.text.Trim();
-
-            if (string.IsNullOrEmpty(email) || !IsValidEmail(email))
-            {
-                ShowErrorMessage("Por favor ingresa un email válido primero");
-                return;
-            }
-
-            ShowLoading(true);
-            ClearErrorMessage();
-
-            bool success = await AuthenticationService.Instance.ResetPassword(email);
-
-            ShowLoading(false);
-
-            if (success)
-            {
-                ShowErrorMessage("Email de recuperación enviado. Revisa tu correo.", Color.green);
-            }
-            else
-            {
-                ShowErrorMessage("Error al enviar email de recuperación");
             }
         }
 
@@ -540,40 +403,44 @@ namespace DigitPark.Managers
         #region UI Helpers
 
         /// <summary>
-        /// Muestra un mensaje de error
+        /// Muestra un mensaje de error usando el popup
         /// </summary>
         private void ShowErrorMessage(string message, Color? color = null)
         {
-            if (errorMessageText != null)
-            {
-                errorMessageText.text = message;
-                errorMessageText.color = color ?? Color.red;
-                errorMessageText.gameObject.SetActive(true);
+            Debug.Log($"[Login] 🚨 Mostrando error: {message}");
 
-                // Auto-ocultar después de 5 segundos
-                StartCoroutine(HideErrorMessageAfterDelay(5f));
+            if (errorMessage != null)
+            {
+                errorMessage.text = message;
+            }
+
+            if (errorBlocker != null)
+            {
+                errorBlocker.SetActive(true);
+            }
+
+            if (errorPopup != null)
+            {
+                errorPopup.SetActive(true);
             }
         }
 
         /// <summary>
-        /// Limpia el mensaje de error
+        /// Oculta el popup de error
         /// </summary>
-        private void ClearErrorMessage()
+        public void HideError()
         {
-            if (errorMessageText != null)
-            {
-                errorMessageText.text = "";
-                errorMessageText.gameObject.SetActive(false);
-            }
-        }
+            Debug.Log("[Login] Ocultando popup de error");
 
-        /// <summary>
-        /// Oculta el mensaje de error después de un delay
-        /// </summary>
-        private IEnumerator HideErrorMessageAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            ClearErrorMessage();
+            if (errorBlocker != null)
+            {
+                errorBlocker.SetActive(false);
+            }
+
+            if (errorPopup != null)
+            {
+                errorPopup.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -597,8 +464,8 @@ namespace DigitPark.Managers
         {
             if (loginButton != null) loginButton.interactable = interactable;
             if (registerButton != null) registerButton.interactable = interactable;
-            if (googleLoginButton != null) googleLoginButton.interactable = interactable;
-            if (appleLoginButton != null) appleLoginButton.interactable = interactable;
+            if (googleButton != null) googleButton.interactable = interactable;
+            if (appleButton != null) appleButton.interactable = interactable;
         }
 
         #endregion
