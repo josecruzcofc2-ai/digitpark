@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -283,11 +284,14 @@ namespace DigitPark.Managers
             finally
             {
                 ShowLoading(false);
+
+                // Actualizar panel de mejor tiempo (mostrar solo en Personal)
+                UpdatePersonalBestPanel();
             }
         }
 
         /// <summary>
-        /// Carga las puntuaciones personales del jugador
+        /// Carga las puntuaciones personales del jugador (orden cronológico inverso - más reciente primero)
         /// </summary>
         private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadPersonalScores()
         {
@@ -311,7 +315,14 @@ namespace DigitPark.Managers
                 return entries;
             }
 
-            foreach (var score in currentPlayer.scoreHistory)
+            // Tomar solo los últimos 30 scores
+            var recentScores = currentPlayer.scoreHistory.TakeLast(30).ToList();
+
+            // IMPORTANTE: Mantener orden cronológico INVERSO (más reciente primero)
+            recentScores.Reverse();
+
+            int position = 1;
+            foreach (var score in recentScores)
             {
                 entries.Add(new LeaderboardEntry
                 {
@@ -319,20 +330,14 @@ namespace DigitPark.Managers
                     username = currentPlayer.username,
                     time = score.time,
                     countryCode = currentPlayer.countryCode,
-                    avatarUrl = currentPlayer.avatarUrl
+                    avatarUrl = currentPlayer.avatarUrl,
+                    position = position,  // Posición cronológica (1 = más reciente)
+                    timestamp = score.timestamp  // Guardamos el timestamp para mostrarlo
                 });
+                position++;
             }
 
-            // Ordenar por mejor tiempo (menor a mayor)
-            entries.Sort((a, b) => a.time.CompareTo(b.time));
-
-            // Asignar posiciones
-            for (int i = 0; i < entries.Count; i++)
-            {
-                entries[i].position = i + 1;
-            }
-
-            Debug.Log($"[Leaderboard] Scores personales cargados: {entries.Count}");
+            Debug.Log($"[Leaderboard] Scores personales cargados: {entries.Count} (en orden cronológico inverso)");
 
             personalScores = entries;
 
@@ -623,22 +628,23 @@ namespace DigitPark.Managers
 
             if (isPersonalTab)
             {
-                // MODO PERSONAL: Solo Nombre y Tiempo
+                // MODO PERSONAL: #N (izquierda, un poco antes del centro) | Tiempo (derecha)
                 // Crear divisor vertical en el centro
                 CreateVerticalDivider(entryObj.transform, 520f); // Centro exacto
 
-                // Nombre (izquierda)
-                TextMeshProUGUI nameText = CreateEntryText(entryObj.transform, "NameText", entry.username, 28, Color.white);
-                RectTransform nameRT = nameText.GetComponent<RectTransform>();
-                nameRT.anchorMin = new Vector2(0, 0);
-                nameRT.anchorMax = new Vector2(0.5f, 1);
-                nameRT.pivot = new Vector2(0.5f, 0.5f);
-                nameRT.anchoredPosition = Vector2.zero;
-                nameRT.sizeDelta = Vector2.zero;
-                nameText.alignment = TMPro.TextAlignmentOptions.Center;
+                // Número del historial (izquierda - un poco a la izquierda del centro)
+                TextMeshProUGUI numberText = CreateEntryText(entryObj.transform, "NumberText", $"#{entry.position}", 32, Color.white);
+                RectTransform numberRT = numberText.GetComponent<RectTransform>();
+                numberRT.anchorMin = new Vector2(0, 0);
+                numberRT.anchorMax = new Vector2(0.5f, 1);
+                numberRT.pivot = new Vector2(0.5f, 0.5f);
+                numberRT.anchoredPosition = Vector2.zero;
+                numberRT.sizeDelta = Vector2.zero;
+                numberText.alignment = TMPro.TextAlignmentOptions.Center;
+                numberText.fontStyle = TMPro.FontStyles.Bold;
 
                 // Tiempo (derecha)
-                TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 28, new Color(0f, 1f, 0.53f)); // BrightGreen
+                TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 32, new Color(0f, 1f, 0.53f)); // BrightGreen
                 RectTransform timeRT = timeText.GetComponent<RectTransform>();
                 timeRT.anchorMin = new Vector2(0.5f, 0);
                 timeRT.anchorMax = new Vector2(1, 1);
@@ -872,6 +878,64 @@ namespace DigitPark.Managers
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(800, 100);
+        }
+
+        /// <summary>
+        /// Formatea un timestamp a formato legible (DD/MM/YYYY HH:MM)
+        /// </summary>
+        private string FormatTimestamp(string timestamp)
+        {
+            if (string.IsNullOrEmpty(timestamp))
+            {
+                return "Sin fecha";
+            }
+
+            try
+            {
+                System.DateTime dateTime = System.DateTime.Parse(timestamp);
+                return dateTime.ToString("dd/MM/yyyy HH:mm");
+            }
+            catch
+            {
+                return "Fecha inválida";
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el panel de mejor tiempo (solo para tab Personal)
+        /// </summary>
+        private void UpdatePersonalBestPanel()
+        {
+            if (playerHighlightPanel == null) return;
+
+            if (currentTab == LeaderboardTab.Personal && currentPlayer != null)
+            {
+                // Mostrar panel con el mejor tiempo
+                playerHighlightPanel.SetActive(true);
+
+                if (playerTimeText != null)
+                {
+                    float bestTime = currentPlayer.bestTime;
+                    if (bestTime == float.MaxValue)
+                    {
+                        playerTimeText.text = "Sin mejor tiempo";
+                    }
+                    else
+                    {
+                        playerTimeText.text = $"Mejor Tiempo: {bestTime:F3}s";
+                    }
+                }
+
+                if (playerPositionText != null)
+                {
+                    playerPositionText.text = $"Historial: {currentPlayer.scoreHistory?.Count ?? 0} partidas";
+                }
+            }
+            else
+            {
+                // Ocultar panel en otras tabs
+                playerHighlightPanel.SetActive(false);
+            }
         }
 
         #endregion

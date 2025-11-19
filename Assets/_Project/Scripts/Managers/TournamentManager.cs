@@ -63,6 +63,9 @@ namespace DigitPark.Managers
         [Header("Navigation")]
         [SerializeField] public Button backButton;
 
+        [Header("Leaderboard View")]
+        [SerializeField] public GameObject leaderboardBackButton;
+
         // Estado
         private TournamentView currentView = TournamentView.Search;
         private PlayerData currentPlayer;
@@ -70,6 +73,9 @@ namespace DigitPark.Managers
         private List<TournamentData> filteredTournaments = new List<TournamentData>();
         private List<TournamentData> myTournaments = new List<TournamentData>();
         private TournamentData selectedTournament;
+
+        // Estado del popup de confirmación
+        private ConfirmPopupMode popupMode = ConfirmPopupMode.None;
 
         // Filtros de búsqueda
         private string searchUsername = "";
@@ -96,6 +102,7 @@ namespace DigitPark.Managers
             if (searchOptionsPanel != null) searchOptionsPanel.SetActive(false);
             if (createTournamentBlock != null) createTournamentBlock.SetActive(false);
             if (confirmPopup != null) confirmPopup.SetActive(false);
+            if (leaderboardBackButton != null) leaderboardBackButton.SetActive(false);
 
             // Mostrar vista inicial
             ShowView(TournamentView.Search);
@@ -170,6 +177,16 @@ namespace DigitPark.Managers
 
             // Navigation
             backButton?.onClick.AddListener(OnBackButtonClicked);
+
+            // Leaderboard Navigation
+            if (leaderboardBackButton != null)
+            {
+                Button backBtn = leaderboardBackButton.GetComponent<Button>();
+                if (backBtn != null)
+                {
+                    backBtn.onClick.AddListener(OnLeaderboardBackClicked);
+                }
+            }
         }
 
         #endregion
@@ -238,6 +255,10 @@ namespace DigitPark.Managers
         private void ShowSearchOptions()
         {
             Debug.Log("[Tournament] Mostrando opciones de búsqueda");
+
+            if (blockerPanel != null)
+                blockerPanel.SetActive(true);
+
             if (searchOptionsPanel != null)
                 searchOptionsPanel.SetActive(true);
         }
@@ -248,8 +269,12 @@ namespace DigitPark.Managers
         private void HideSearchOptions()
         {
             Debug.Log("[Tournament] Ocultando opciones de búsqueda");
+
             if (searchOptionsPanel != null)
                 searchOptionsPanel.SetActive(false);
+
+            if (blockerPanel != null)
+                blockerPanel.SetActive(false);
         }
 
         /// <summary>
@@ -343,6 +368,10 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
+            // Ocultar botón de back del leaderboard
+            if (leaderboardBackButton != null)
+                leaderboardBackButton.SetActive(false);
+
             try
             {
                 activeTournaments = await DatabaseService.Instance.GetActiveTournaments();
@@ -368,6 +397,10 @@ namespace DigitPark.Managers
         {
             ShowLoading(true);
             ClearTournamentsList();
+
+            // Ocultar botón de back del leaderboard
+            if (leaderboardBackButton != null)
+                leaderboardBackButton.SetActive(false);
 
             try
             {
@@ -433,6 +466,20 @@ namespace DigitPark.Managers
             Image bg = itemObj.AddComponent<Image>();
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
             bg.color = isParticipating ? new Color(0f, 0.83f, 1f, 0.3f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
+
+            // Botón (para detectar clics en todo el item)
+            Button itemButton = itemObj.AddComponent<Button>();
+            itemButton.targetGraphic = bg;
+            itemButton.transition = Selectable.Transition.ColorTint;
+            ColorBlock buttonColors = itemButton.colors;
+            buttonColors.normalColor = Color.white;
+            buttonColors.highlightedColor = new Color(0.8f, 0.8f, 1f);
+            buttonColors.pressedColor = new Color(0.6f, 0.6f, 0.8f);
+            itemButton.colors = buttonColors;
+
+            // Agregar listener para el clic
+            TournamentData tournamentCopy = tournament; // Captura para el closure
+            itemButton.onClick.AddListener(() => OnTournamentItemClicked(tournamentCopy));
 
             // Crear divisores verticales
             CreateVerticalDivider(itemObj.transform, 150f);  // Después de Participants
@@ -536,6 +583,29 @@ namespace DigitPark.Managers
             return tmp;
         }
 
+        /// <summary>
+        /// Maneja el clic en un item de torneo
+        /// </summary>
+        private void OnTournamentItemClicked(TournamentData tournament)
+        {
+            Debug.Log($"[Tournament] Clic en torneo: {tournament.tournamentId}");
+
+            selectedTournament = tournament;
+            bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
+
+            if (isParticipating)
+            {
+                // Si ya participa, mostrar leaderboard directamente
+                ShowTournamentLeaderboard(tournament);
+            }
+            else
+            {
+                // Si no participa, preguntar si quiere unirse
+                popupMode = ConfirmPopupMode.JoinTournament;
+                ShowConfirmPopupForJoin(tournament);
+            }
+        }
+
         #endregion
 
         #region Create Tournament
@@ -636,9 +706,9 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Crea un nuevo torneo
+        /// Crea un nuevo torneo (directamente sin popup de confirmación)
         /// </summary>
-        private void OnCreateTournamentClicked()
+        private async void OnCreateTournamentClicked()
         {
             if (currentPlayer == null) return;
 
@@ -647,29 +717,35 @@ namespace DigitPark.Managers
             int durationHours = (int)(durationSlider?.value ?? 24);
             bool isPublic = publicToggle?.isOn ?? true;
 
-            // Mostrar popup de confirmación
-            ShowConfirmPopup(maxParticipants, durationHours, isPublic);
+            Debug.Log($"[Tournament] Creando torneo: {maxParticipants} jugadores, {durationHours}h");
+
+            // Crear torneo directamente
+            await CreateTournamentDirectly(maxParticipants, durationHours, isPublic);
         }
 
         /// <summary>
-        /// Muestra popup de confirmación para crear torneo
+        /// Muestra popup de confirmación para unirse a torneo
         /// </summary>
-        private void ShowConfirmPopup(int maxPlayers, int durationHours, bool isPublic)
+        private void ShowConfirmPopupForJoin(TournamentData tournament)
         {
             if (confirmPopup == null || blockerPanel == null) return;
 
-            // Calcular info
-            string durationText = durationHours < 24 ? $"{durationHours}h" : $"{durationHours / 24}d";
-            string typeText = isPublic ? "Público" : "Privado";
-
-            // Configurar textos
+            // Configurar textos para UNIRSE a torneo
             if (messageText != null)
-                messageText.text = "¿Confirmas la creación del torneo?";
+                messageText.text = "¿Deseas unirte a este torneo?";
 
             if (tournamentInfoText != null)
-                tournamentInfoText.text = $"Jugadores: {maxPlayers}/55\nDuración: {durationText}\nTipo: {typeText}";
+            {
+                string timeRemaining = FormatTimeRemaining(tournament.GetTimeRemaining());
+                tournamentInfoText.text = $"Creador: {tournament.creatorName}\n" +
+                    $"Participantes: {tournament.currentParticipants}/{tournament.maxParticipants}\n" +
+                    $"Tiempo restante: {timeRemaining}";
+            }
 
-            // Mostrar popup
+            // Mostrar blocker y popup
+            if (blockerPanel != null)
+                blockerPanel.SetActive(true);
+
             confirmPopup.SetActive(true);
         }
 
@@ -680,23 +756,42 @@ namespace DigitPark.Managers
         {
             if (confirmPopup != null)
                 confirmPopup.SetActive(false);
+
+            if (blockerPanel != null)
+                blockerPanel.SetActive(false);
         }
 
         /// <summary>
-        /// Confirma la creación del torneo
+        /// Confirma la acción del popup (solo para unirse a torneos)
         /// </summary>
         private async void OnConfirmClicked()
         {
             if (currentPlayer == null) return;
 
-            // Obtener valores
-            int maxParticipants = (int)(maxPlayersSlider?.value ?? 50);
-            int durationHours = (int)(durationSlider?.value ?? 24);
-            bool isPublic = publicToggle?.isOn ?? true;
-
             // Ocultar popup
             HideConfirmPopup();
 
+            // Ejecutar acción según el modo
+            switch (popupMode)
+            {
+                case ConfirmPopupMode.JoinTournament:
+                    await JoinTournamentConfirmed();
+                    break;
+
+                case ConfirmPopupMode.ViewLeaderboard:
+                    ShowTournamentLeaderboard(selectedTournament);
+                    break;
+            }
+
+            // Reset popup mode
+            popupMode = ConfirmPopupMode.None;
+        }
+
+        /// <summary>
+        /// Crea el torneo directamente y une al creador automáticamente
+        /// </summary>
+        private async System.Threading.Tasks.Task CreateTournamentDirectly(int maxParticipants, int durationHours, bool isPublic)
+        {
             // Crear torneo
             TournamentData newTournament = new TournamentData
             {
@@ -720,22 +815,67 @@ namespace DigitPark.Managers
 
                 if (success)
                 {
-                    Debug.Log($"[Tournament] Torneo creado exitosamente");
+                    Debug.Log($"[Tournament] Torneo creado exitosamente: {newTournament.tournamentId}");
+
+                    // Unir automáticamente al creador
+                    await DatabaseService.Instance.JoinTournament(newTournament.tournamentId, currentPlayer.userId);
+                    Debug.Log($"[Tournament] Creador unido automáticamente al torneo");
 
                     // Analytics
                     AnalyticsService.Instance?.LogTournamentCreated(newTournament.tournamentId, 0);
 
                     // Mostrar mensaje de éxito
-                    ShowSuccessMessage("¡Torneo creado exitosamente!");
+                    ShowSuccessMessage("¡Torneo creado exitosamente! Te has unido automáticamente.");
 
                     // Ocultar panel de creación y volver a Search (después de 1.5 segundos)
                     await System.Threading.Tasks.Task.Delay(1500);
                     HideCreatePanel();
+
+                    // Recargar torneos activos
+                    LoadActiveTournaments();
                 }
                 else
                 {
                     Debug.LogError("[Tournament] Error al crear torneo");
                     ShowErrorMessage("No se pudo crear el torneo. Intenta nuevamente.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[Tournament] Error: {ex.Message}");
+                ShowErrorMessage($"Error: {ex.Message}");
+            }
+            finally
+            {
+                ShowLoading(false);
+            }
+        }
+
+        /// <summary>
+        /// Une al jugador al torneo después de confirmar
+        /// </summary>
+        private async System.Threading.Tasks.Task JoinTournamentConfirmed()
+        {
+            if (selectedTournament == null) return;
+
+            ShowLoading(true);
+
+            try
+            {
+                bool success = await DatabaseService.Instance.JoinTournament(selectedTournament.tournamentId, currentPlayer.userId);
+
+                if (success)
+                {
+                    Debug.Log($"[Tournament] Unido exitosamente al torneo: {selectedTournament.tournamentId}");
+                    ShowSuccessMessage("¡Te has unido al torneo exitosamente!");
+
+                    // Recargar torneos
+                    await System.Threading.Tasks.Task.Delay(1500);
+                    LoadActiveTournaments();
+                }
+                else
+                {
+                    ShowErrorMessage("No se pudo unir al torneo. Intenta nuevamente.");
                 }
             }
             catch (System.Exception ex)
@@ -810,6 +950,213 @@ namespace DigitPark.Managers
             }
         }
 
+        /// <summary>
+        /// Muestra mensaje de éxito
+        /// </summary>
+        private void ShowSuccessMessage(string message)
+        {
+            Debug.Log($"[Tournament] ✅ {message}");
+            // TODO: Implementar popup de éxito visual
+        }
+
+        /// <summary>
+        /// Muestra mensaje de error
+        /// </summary>
+        private void ShowErrorMessage(string message)
+        {
+            Debug.LogError($"[Tournament] ❌ {message}");
+            // TODO: Implementar popup de error visual
+        }
+
+        /// <summary>
+        /// Muestra el leaderboard del torneo
+        /// </summary>
+        private void ShowTournamentLeaderboard(TournamentData tournament)
+        {
+            Debug.Log($"[Tournament] Mostrando leaderboard del torneo: {tournament.tournamentId}");
+
+            if (tournament == null || tournament.participants == null)
+            {
+                ShowErrorMessage("No se puede mostrar el leaderboard");
+                return;
+            }
+
+            // Ordenar participantes por mejor tiempo
+            tournament.SortParticipants();
+
+            // Limpiar container
+            ClearTournamentsList();
+
+            // Mostrar botón de back
+            if (leaderboardBackButton != null)
+                leaderboardBackButton.SetActive(true);
+
+            // Título del leaderboard
+            CreateLeaderboardTitle(tournament);
+
+            // Crear items del leaderboard
+            int position = 1;
+            foreach (var participant in tournament.participants)
+            {
+                CreateLeaderboardItem(position, participant);
+                position++;
+            }
+
+            Debug.Log($"[Tournament] Leaderboard mostrado con {tournament.participants.Count} participantes");
+        }
+
+        /// <summary>
+        /// Crea el título del leaderboard
+        /// </summary>
+        private void CreateLeaderboardTitle(TournamentData tournament)
+        {
+            if (tournamentsContainer == null) return;
+
+            GameObject titleObj = new GameObject("LeaderboardTitle");
+            titleObj.transform.SetParent(tournamentsContainer, false);
+
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0, 1);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.pivot = new Vector2(0.5f, 1);
+            titleRT.sizeDelta = new Vector2(0, 100);
+
+            // Layout
+            var layout = titleObj.AddComponent<LayoutElement>();
+            layout.preferredHeight = 100;
+
+            // Fondo
+            Image bg = titleObj.AddComponent<Image>();
+            bg.color = new Color(0f, 0.83f, 1f, 0.5f);
+
+            // Texto del título
+            TextMeshProUGUI titleText = CreateItemText(titleObj.transform, "TitleText",
+                $"LEADERBOARD - {tournament.name}", 32, Color.white);
+            RectTransform titleTextRT = titleText.GetComponent<RectTransform>();
+            titleTextRT.anchorMin = new Vector2(0, 0.5f);
+            titleTextRT.anchorMax = new Vector2(1, 1);
+            titleTextRT.pivot = new Vector2(0.5f, 0.5f);
+            titleTextRT.anchoredPosition = Vector2.zero;
+            titleTextRT.sizeDelta = new Vector2(0, 0);
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.fontStyle = FontStyles.Bold;
+
+            // Texto de info
+            string timeRemaining = FormatTimeRemaining(tournament.GetTimeRemaining());
+            TextMeshProUGUI infoText = CreateItemText(titleObj.transform, "InfoText",
+                $"Participantes: {tournament.currentParticipants}/{tournament.maxParticipants} | Tiempo restante: {timeRemaining}",
+                20, new Color(0.8f, 0.8f, 0.8f));
+            RectTransform infoTextRT = infoText.GetComponent<RectTransform>();
+            infoTextRT.anchorMin = new Vector2(0, 0);
+            infoTextRT.anchorMax = new Vector2(1, 0.5f);
+            infoTextRT.pivot = new Vector2(0.5f, 0.5f);
+            infoTextRT.anchoredPosition = Vector2.zero;
+            infoTextRT.sizeDelta = new Vector2(0, 0);
+            infoText.alignment = TextAlignmentOptions.Center;
+        }
+
+        /// <summary>
+        /// Crea un item del leaderboard
+        /// Estructura: Pos | Username | BestTime | Attempts
+        /// </summary>
+        private void CreateLeaderboardItem(int position, ParticipantScore participant)
+        {
+            if (tournamentsContainer == null) return;
+
+            GameObject itemObj = new GameObject($"LeaderboardItem_{position}");
+            itemObj.transform.SetParent(tournamentsContainer, false);
+
+            RectTransform itemRT = itemObj.AddComponent<RectTransform>();
+            itemRT.anchorMin = new Vector2(0, 1);
+            itemRT.anchorMax = new Vector2(1, 1);
+            itemRT.pivot = new Vector2(0.5f, 1);
+            itemRT.sizeDelta = new Vector2(0, 70);
+
+            // Layout
+            var layout = itemObj.AddComponent<LayoutElement>();
+            layout.preferredHeight = 70;
+
+            // Fondo - color especial para top 3
+            Image bg = itemObj.AddComponent<Image>();
+            if (position == 1)
+                bg.color = new Color(1f, 0.84f, 0f, 0.3f); // Oro
+            else if (position == 2)
+                bg.color = new Color(0.75f, 0.75f, 0.75f, 0.3f); // Plata
+            else if (position == 3)
+                bg.color = new Color(0.8f, 0.5f, 0.2f, 0.3f); // Bronce
+            else
+                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+
+            // Divisores
+            CreateVerticalDivider(itemObj.transform, 80f);   // Después de posición
+            CreateVerticalDivider(itemObj.transform, 600f);  // Después de username
+            CreateVerticalDivider(itemObj.transform, 900f);  // Después de bestTime
+
+            // Posición (izquierda) - "#1"
+            Color posColor = position <= 3 ? new Color(0f, 1f, 0.53f) : Color.white;
+            TextMeshProUGUI posText = CreateItemText(itemObj.transform, "PositionText",
+                $"#{position}", 28, posColor);
+            RectTransform posRT = posText.GetComponent<RectTransform>();
+            posRT.anchorMin = new Vector2(0, 0);
+            posRT.anchorMax = new Vector2(0, 1);
+            posRT.pivot = new Vector2(0, 0.5f);
+            posRT.anchoredPosition = new Vector2(10, 0);
+            posRT.sizeDelta = new Vector2(70, 0);
+            posText.alignment = TextAlignmentOptions.Center;
+            posText.fontStyle = FontStyles.Bold;
+
+            // Username (centro-izquierda)
+            bool isCurrentPlayer = participant.userId == (currentPlayer?.userId ?? "");
+            Color nameColor = isCurrentPlayer ? new Color(0f, 0.83f, 1f) : Color.white;
+            TextMeshProUGUI nameText = CreateItemText(itemObj.transform, "UsernameText",
+                participant.username, 24, nameColor);
+            RectTransform nameRT = nameText.GetComponent<RectTransform>();
+            nameRT.anchorMin = new Vector2(0, 0);
+            nameRT.anchorMax = new Vector2(0, 1);
+            nameRT.pivot = new Vector2(0, 0.5f);
+            nameRT.anchoredPosition = new Vector2(90, 0);
+            nameRT.sizeDelta = new Vector2(500, 0);
+            nameText.alignment = TextAlignmentOptions.Left;
+            if (isCurrentPlayer) nameText.fontStyle = FontStyles.Bold;
+
+            // Best Time (centro-derecha)
+            string timeString = participant.bestTime == float.MaxValue ?
+                "Sin tiempo" : FormatTime(participant.bestTime);
+            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
+                timeString, 24, Color.white);
+            RectTransform timeRT = timeText.GetComponent<RectTransform>();
+            timeRT.anchorMin = new Vector2(0, 0);
+            timeRT.anchorMax = new Vector2(0, 1);
+            timeRT.pivot = new Vector2(0, 0.5f);
+            timeRT.anchoredPosition = new Vector2(610, 0);
+            timeRT.sizeDelta = new Vector2(280, 0);
+            timeText.alignment = TextAlignmentOptions.Center;
+
+            // Attempts (derecha)
+            TextMeshProUGUI attemptsText = CreateItemText(itemObj.transform, "AttemptsText",
+                $"{participant.attempts} intentos", 20, new Color(0.7f, 0.7f, 0.7f));
+            RectTransform attemptsRT = attemptsText.GetComponent<RectTransform>();
+            attemptsRT.anchorMin = new Vector2(1, 0);
+            attemptsRT.anchorMax = new Vector2(1, 1);
+            attemptsRT.pivot = new Vector2(1, 0.5f);
+            attemptsRT.anchoredPosition = new Vector2(-20, 0);
+            attemptsRT.sizeDelta = new Vector2(200, 0);
+            attemptsText.alignment = TextAlignmentOptions.Center;
+
+            // Línea divisoria horizontal
+            CreateHorizontalDivider(itemObj.transform);
+        }
+
+        /// <summary>
+        /// Formatea un tiempo en segundos a formato legible (MM:SS.mmm)
+        /// </summary>
+        private string FormatTime(float timeInSeconds)
+        {
+            int minutes = Mathf.FloorToInt(timeInSeconds / 60f);
+            float seconds = timeInSeconds % 60f;
+            return $"{minutes:00}:{seconds:00.000}";
+        }
+
         #endregion
 
         #region Navigation
@@ -823,6 +1170,21 @@ namespace DigitPark.Managers
             SceneManager.LoadScene("MainMenu");
         }
 
+        /// <summary>
+        /// Vuelve de la vista de leaderboard a la vista de torneos
+        /// </summary>
+        private void OnLeaderboardBackClicked()
+        {
+            Debug.Log("[Tournament] Volviendo a la vista de torneos");
+
+            // Ocultar botón de back
+            if (leaderboardBackButton != null)
+                leaderboardBackButton.SetActive(false);
+
+            // Volver a mostrar la vista actual (Search o MyTournaments)
+            ShowView(currentView);
+        }
+
         #endregion
     }
 
@@ -834,5 +1196,15 @@ namespace DigitPark.Managers
         Search,
         MyTournaments,
         Create
+    }
+
+    /// <summary>
+    /// Modo del popup de confirmación
+    /// </summary>
+    public enum ConfirmPopupMode
+    {
+        None,
+        JoinTournament,
+        ViewLeaderboard
     }
 }
