@@ -372,19 +372,26 @@ namespace DigitPark.Services.Firebase
             try
             {
                 Debug.Log($"[Database] Creando torneo: {tournament.name}");
+                Debug.Log($"[Database] - TournamentId: {tournament.tournamentId}");
+                Debug.Log($"[Database] - CreatorId: {tournament.creatorId}");
+                Debug.Log($"[Database] - Status: {tournament.status}");
+                Debug.Log($"[Database] - MaxParticipants: {tournament.maxParticipants}");
+                Debug.Log($"[Database] - CurrentParticipants: {tournament.currentParticipants}");
+                Debug.Log($"[Database] - Participants Count: {tournament.participants?.Count ?? 0}");
 
-             
                 string json = JsonUtility.ToJson(tournament);
+                Debug.Log($"[Database] JSON: {json.Substring(0, Math.Min(500, json.Length))}");
+
                 await databaseRef.Child("tournaments").Child(tournament.tournamentId).SetRawJsonValueAsync(json);
-                
 
                 await Task.Delay(100);
-                Debug.Log("[Database] Torneo creado exitosamente");
+                Debug.Log("[Database] Torneo creado exitosamente en Firebase");
                 return true;
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al crear torneo: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -419,7 +426,7 @@ namespace DigitPark.Services.Firebase
         }
 
         /// <summary>
-        /// Obtiene todos los torneos activos
+        /// Obtiene todos los torneos activos (Scheduled y Active, no Completed o Cancelled)
         /// </summary>
         public async Task<List<TournamentData>> GetActiveTournaments()
         {
@@ -427,11 +434,8 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log("[Database] Obteniendo torneos activos...");
 
-                
-                var snapshot = await databaseRef.Child("tournaments")
-                    .OrderByChild("status")
-                    .EqualTo("Active")
-                    .GetValueAsync();
+                // Obtener TODOS los torneos (sin filtro)
+                var snapshot = await databaseRef.Child("tournaments").GetValueAsync();
 
                 List<TournamentData> tournaments = new List<TournamentData>();
 
@@ -440,15 +444,21 @@ namespace DigitPark.Services.Firebase
                     foreach (var child in snapshot.Children)
                     {
                         string json = child.GetRawJsonValue();
-                        tournaments.Add(JsonUtility.FromJson<TournamentData>(json));
+                        TournamentData tournament = JsonUtility.FromJson<TournamentData>(json);
+
+                        // Filtrar solo torneos Scheduled y Active (excluir Completed y Cancelled)
+                        if (tournament != null &&
+                            (tournament.status == TournamentStatus.Scheduled ||
+                             tournament.status == TournamentStatus.Active))
+                        {
+                            tournaments.Add(tournament);
+                            Debug.Log($"[Database] Torneo encontrado: {tournament.name} - Status: {tournament.status}");
+                        }
                     }
                 }
 
+                Debug.Log($"[Database] Total de torneos activos encontrados: {tournaments.Count}");
                 return tournaments;
-                
-
-                await Task.Delay(200);
-                return new List<TournamentData>();
             }
             catch (Exception ex)
             {
@@ -487,30 +497,53 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log($"[Database] Usuario {userId} uniéndose al torneo {tournamentId}");
 
-
                 var tournamentData = await GetTournament(tournamentId);
-                if (tournamentData != null)
+                if (tournamentData == null)
                 {
-                    var playerData = await LoadPlayerData(userId);
-                    if (tournamentData.AddParticipant(playerData))
-                    {
-                        await UpdateTournament(tournamentData);
+                    Debug.LogError($"[Database] No se encontró el torneo {tournamentId}");
+                    return false;
+                }
 
-                        // Deducir entrada del balance del jugador
+                Debug.Log($"[Database] Torneo encontrado: {tournamentData.name}");
+                Debug.Log($"[Database] Participantes actuales: {tournamentData.currentParticipants}/{tournamentData.maxParticipants}");
+
+                var playerData = await LoadPlayerData(userId);
+                if (playerData == null)
+                {
+                    Debug.LogError($"[Database] No se encontró el jugador {userId}");
+                    return false;
+                }
+
+                Debug.Log($"[Database] Jugador encontrado: {playerData.username}");
+
+                if (tournamentData.AddParticipant(playerData))
+                {
+                    Debug.Log($"[Database] Participante agregado exitosamente. Nuevos participantes: {tournamentData.currentParticipants}");
+                    Debug.Log($"[Database] Total de participantes en lista: {tournamentData.participants.Count}");
+
+                    await UpdateTournament(tournamentData);
+
+                    // Deducir entrada del balance del jugador
+                    if (tournamentData.entryFee > 0)
+                    {
                         playerData.coins -= tournamentData.entryFee;
                         await SavePlayerData(playerData);
-
-                        return true;
+                        Debug.Log($"[Database] Deducidos {tournamentData.entryFee} coins del jugador");
                     }
-                }
-                
 
-                await Task.Delay(100);
-                return false;
+                    Debug.Log($"[Database] Usuario unido exitosamente al torneo");
+                    return true;
+                }
+                else
+                {
+                    Debug.LogWarning($"[Database] No se pudo agregar el participante (puede que ya esté, torneo lleno, o sin fondos)");
+                    return false;
+                }
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Database] Error al unirse al torneo: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -615,5 +648,6 @@ namespace DigitPark.Services.Firebase
         public string countryCode;
         public string avatarUrl;
         public int position;
+        public string timestamp; // Para scores personales (formato de fecha/hora)
     }
 }
