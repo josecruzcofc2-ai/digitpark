@@ -19,6 +19,7 @@ namespace DigitPark.Services.Firebase
         // Referencias de Firebase
         private FirebaseAuth auth;
         private FirebaseUser currentUser;
+        private bool isFirebaseInitialized = false;
 
         // Eventos
         public event Action<PlayerData> OnLoginSuccess;
@@ -44,38 +45,110 @@ namespace DigitPark.Services.Firebase
         /// <summary>
         /// Inicializa Firebase Authentication
         /// </summary>
-        private void InitializeFirebase()
+        private async void InitializeFirebase()
         {
-            Debug.Log("[Auth] Inicializando Firebase Authentication...");
+            Debug.Log("[Auth] 🔄 Inicializando Firebase Authentication...");
 
-            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
+            try
             {
-                if (task.Result == DependencyStatus.Available)
-                {
-                    auth = FirebaseAuth.DefaultInstance;
-                    Debug.Log("[Auth] Firebase Authentication inicializado correctamente");
+                var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
 
-                    // Verificar si hay usuario guardado
-                    CheckForSavedUser();
+                if (dependencyStatus == DependencyStatus.Available)
+                {
+                    // Importante: Esperar un frame para asegurar que Unity está listo
+                    await Task.Delay(100);
+
+                    auth = FirebaseAuth.DefaultInstance;
+
+                    if (auth != null)
+                    {
+                        isFirebaseInitialized = true;
+                        Debug.Log("[Auth] ✅ Firebase Authentication inicializado correctamente");
+                        Debug.Log($"[Auth] ✅ Firebase App Name: {FirebaseApp.DefaultInstance.Name}");
+                        Debug.Log($"[Auth] ✅ Auth Instance: {auth.App.Name}");
+
+                        // Verificar si hay usuario guardado (esperar a que termine)
+                        await CheckForSavedUser();
+                    }
+                    else
+                    {
+                        Debug.LogError("[Auth] ❌ FirebaseAuth.DefaultInstance es NULL");
+                        isFirebaseInitialized = false;
+                    }
                 }
                 else
                 {
-                    Debug.LogError($"[Auth] Error al inicializar Firebase: {task.Result}");
+                    Debug.LogError($"[Auth] ❌ Error al inicializar Firebase: {dependencyStatus}");
+                    Debug.LogError("[Auth] Verifica que google-services.json (Android) o GoogleService-Info.plist (iOS) estén configurados");
+                    isFirebaseInitialized = false;
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[Auth] ❌ Excepción al inicializar Firebase: {ex.Message}");
+                Debug.LogError($"[Auth] StackTrace: {ex.StackTrace}");
+                isFirebaseInitialized = false;
+            }
         }
 
         /// <summary>
         /// Verifica si hay un usuario guardado (Remember Me)
         /// </summary>
-        private void CheckForSavedUser()
+        private async Task CheckForSavedUser()
         {
+            // Verificar si el usuario marcó "Recordarme"
             if (PlayerPrefs.HasKey("SavedUserId") && PlayerPrefs.GetInt("RememberMe", 0) == 1)
             {
                 string savedUserId = PlayerPrefs.GetString("SavedUserId");
-                Debug.Log($"[Auth] Usuario guardado encontrado: {savedUserId}");
-                // Cargar datos del usuario desde Firebase
-                LoadUserData(savedUserId);
+                Debug.Log($"[Auth] 🔐 Preferencia 'Recordar' encontrada para userId: {savedUserId}");
+
+                // Verificar si Firebase Auth mantiene la sesión activa
+                if (auth.CurrentUser != null)
+                {
+                    Debug.Log($"[Auth] ✅ Sesión de Firebase activa!");
+                    Debug.Log($"[Auth] ✅ Firebase CurrentUser: {auth.CurrentUser.UserId}");
+
+                    // Verificar que el userId coincida
+                    if (auth.CurrentUser.UserId == savedUserId)
+                    {
+                        currentUser = auth.CurrentUser;
+                        Debug.Log($"[Auth] ✅ Auto-login exitoso para: {currentUser.Email}");
+
+                        // Cargar datos del usuario desde Firebase
+                        await LoadUserData(savedUserId);
+
+                        // Verificar que se hayan cargado los datos
+                        if (currentPlayerData != null)
+                        {
+                            Debug.Log($"[Auth] ✅ Auto-login completado. Usuario: {currentPlayerData.username}");
+                            Debug.Log($"[Auth] ✅ BootManager redirigirá al MainMenu automáticamente");
+                        }
+                        else
+                        {
+                            Debug.LogWarning("[Auth] ⚠️ No se pudieron cargar los datos del usuario");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[Auth] ⚠️ El userId guardado ({savedUserId}) no coincide con CurrentUser ({auth.CurrentUser.UserId})");
+                        // Borrar PlayerPrefs desactualizados
+                        PlayerPrefs.DeleteKey("SavedUserId");
+                        PlayerPrefs.DeleteKey("RememberMe");
+                        PlayerPrefs.Save();
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[Auth] ⚠️ No hay sesión activa en Firebase. El usuario debe hacer login de nuevo.");
+                    // Borrar PlayerPrefs ya que no hay sesión válida
+                    PlayerPrefs.DeleteKey("SavedUserId");
+                    PlayerPrefs.DeleteKey("RememberMe");
+                    PlayerPrefs.Save();
+                }
+            }
+            else
+            {
+                Debug.Log("[Auth] ℹ️ No hay preferencia 'Recordar' guardada");
             }
         }
 
@@ -88,28 +161,120 @@ namespace DigitPark.Services.Firebase
             {
                 Debug.Log($"[Auth] Intentando login con email: {email}");
 
-               
-                var authResult = await auth.SignInWithEmailAndPasswordAsync(email, password);
-                currentUser = authResult.User;
+                // Verificar si Firebase está inicializado
+                if (!isFirebaseInitialized || auth == null)
+                {
+                    Debug.LogWarning("[Auth] ⏳ Firebase Auth no está inicializado! Esperando...");
 
-                Debug.Log($"[Auth] Login exitoso: {currentUser.UserId}");
+                    // Esperar hasta 15 segundos para que Firebase se inicialice
+                    int attempts = 0;
+                    while ((!isFirebaseInitialized || auth == null) && attempts < 30)
+                    {
+                        await Task.Delay(500);
+                        attempts++;
 
-                // Guardar preferencia de recordar
+                        if (attempts % 5 == 0) // Log cada 2.5 segundos
+                        {
+                            Debug.Log($"[Auth] ⏳ Esperando inicialización... {attempts * 0.5f}s (isInit: {isFirebaseInitialized}, auth: {auth != null})");
+                        }
+                    }
+
+                    if (!isFirebaseInitialized || auth == null)
+                    {
+                        Debug.LogError("[Auth] ❌ Firebase no se inicializó después de 15 segundos");
+                        Debug.LogError($"[Auth] ❌ Estado final: isFirebaseInitialized={isFirebaseInitialized}, auth={auth != null}");
+                        Debug.LogError("[Auth] ❌ SOLUCIÓN: Verifica que AuthenticationService esté en la escena Boot y que google-services.json esté configurado");
+                        OnLoginFailed?.Invoke("Error: Firebase no está inicializado. Reinicia el juego");
+                        return false;
+                    }
+
+                    Debug.Log("[Auth] ✅ Firebase inicializado después de esperar");
+                }
+
+                Debug.Log("[Auth] ✅ Firebase Auth disponible, intentando SignIn...");
+
+                // Usar ContinueWithOnMainThread para mejor manejo de errores
+                var signInTask = auth.SignInWithEmailAndPasswordAsync(email, password);
+                bool loginSuccess = false;
+
+                await signInTask.ContinueWithOnMainThread(task =>
+                {
+                    if (task.IsCanceled)
+                    {
+                        Debug.LogError("[Auth] ❌ Login cancelado");
+                        OnLoginFailed?.Invoke("Login cancelado");
+                        loginSuccess = false;
+                        return;
+                    }
+
+                    if (task.IsFaulted)
+                    {
+                        Debug.LogError("[Auth] ❌ Login fallido - procesando errores...");
+
+                        foreach (var ex in task.Exception.Flatten().InnerExceptions)
+                        {
+                            if (ex is FirebaseException firebaseEx)
+                            {
+                                var authError = (AuthError)firebaseEx.ErrorCode;
+                                Debug.LogError($"[Auth] 🔥 Firebase AuthError: {authError}");
+                                Debug.LogError($"[Auth] 🔥 Firebase Message: {firebaseEx.Message}");
+                                Debug.LogError($"[Auth] 🔥 Firebase ErrorCode: {firebaseEx.ErrorCode}");
+
+                                string errorMessage = GetFirebaseErrorMessage(firebaseEx);
+                                OnLoginFailed?.Invoke(errorMessage);
+                            }
+                            else
+                            {
+                                Debug.LogError($"[Auth] ❌ Exception: {ex.GetType().Name}");
+                                Debug.LogError($"[Auth] ❌ Message: {ex.Message}");
+                                OnLoginFailed?.Invoke($"Error: {ex.Message}");
+                            }
+                        }
+                        loginSuccess = false;
+                        return;
+                    }
+
+                    // Login exitoso
+                    currentUser = task.Result.User;
+                    Debug.Log($"[Auth] ✅ Login exitoso!");
+                    Debug.Log($"[Auth] ✅ User ID: {currentUser.UserId}");
+                    Debug.Log($"[Auth] ✅ Email: {currentUser.Email}");
+                    loginSuccess = true;
+                });
+
+                // Si el task falló, retornar false inmediatamente
+                if (!loginSuccess)
+                {
+                    Debug.LogError("[Auth] ❌ Retornando false - login falló");
+                    return false;
+                }
+
+                // Guardar o borrar preferencia de recordar
                 if (rememberMe)
                 {
                     PlayerPrefs.SetString("SavedUserId", currentUser.UserId);
                     PlayerPrefs.SetInt("RememberMe", 1);
+                    Debug.Log("[Auth] Preferencia 'Recordar' guardada");
                 }
+                else
+                {
+                    PlayerPrefs.DeleteKey("SavedUserId");
+                    PlayerPrefs.DeleteKey("RememberMe");
+                    Debug.Log("[Auth] Preferencia 'Recordar' borrada");
+                }
+                PlayerPrefs.Save();
 
                 // Cargar datos del usuario
+                Debug.Log("[Auth] Cargando datos del usuario desde Firebase...");
                 await LoadUserData(currentUser.UserId);
 
+                Debug.Log("[Auth] Invocando OnLoginSuccess...");
                 OnLoginSuccess?.Invoke(currentPlayerData);
                 return true;
-                
 
-                // Simulación para desarrollo - verificar si el usuario ya existe
-                await Task.Delay(1000);
+                // MODO SIMULACIÓN (Firebase no configurado)
+                Debug.LogWarning("[Auth] Firebase no configurado, usando modo simulación");
+                await Task.Delay(500);
 
                 string savedDataKey = $"PlayerData_{email}";
 
@@ -122,18 +287,10 @@ namespace DigitPark.Services.Firebase
                 }
                 else
                 {
-                    // Usuario no encontrado (debería fallar en producción)
-                    Debug.LogWarning("[Auth] Usuario no encontrado en simulación");
-                    currentPlayerData = new PlayerData
-                    {
-                        userId = Guid.NewGuid().ToString(),
-                        email = email,
-                        username = "" // SIN username por defecto
-                    };
-
-                    // Guardar nuevo usuario para simulación
-                    string jsonData = JsonUtility.ToJson(currentPlayerData);
-                    PlayerPrefs.SetString(savedDataKey, jsonData);
+                    // Usuario no encontrado en simulación - debe registrarse primero
+                    Debug.LogWarning("[Auth] Usuario no encontrado. Créalo primero con Register.");
+                    OnLoginFailed?.Invoke("Usuario no encontrado. Debes registrarte primero.");
+                    return false;
                 }
 
                 if (rememberMe)
@@ -399,6 +556,15 @@ namespace DigitPark.Services.Firebase
         }
 
         /// <summary>
+        /// Actualiza los datos del jugador actual (usado al recargar desde Firebase)
+        /// </summary>
+        public void UpdateCurrentPlayerData(PlayerData playerData)
+        {
+            currentPlayerData = playerData;
+            Debug.Log($"[Auth] Datos del jugador actualizados: {playerData.username}");
+        }
+
+        /// <summary>
         /// Actualiza el nombre de usuario
         /// </summary>
         public async Task<bool> UpdateUsername(string newUsername)
@@ -407,14 +573,24 @@ namespace DigitPark.Services.Firebase
             {
                 if (currentPlayerData == null) return false;
 
+                string oldUsername = currentPlayerData.username;
                 currentPlayerData.username = newUsername;
 
-                
+
                 UserProfile profile = new UserProfile { DisplayName = newUsername };
                 await currentUser.UpdateUserProfileAsync(profile);
-                
 
+
+                // Guardar datos del jugador
                 await DatabaseService.Instance.SavePlayerData(currentPlayerData);
+
+                // Actualizar username en leaderboards (global y país)
+                Debug.Log($"[Auth] Actualizando username en leaderboards: {oldUsername} → {newUsername}");
+                await DatabaseService.Instance.UpdateUsernameInLeaderboards(
+                    currentPlayerData.userId,
+                    newUsername,
+                    currentPlayerData.countryCode
+                );
 
                 // Actualizar PlayerPrefs para persistencia en simulación
                 string savedDataKey = $"PlayerData_{currentPlayerData.email}";
@@ -422,13 +598,39 @@ namespace DigitPark.Services.Firebase
                 PlayerPrefs.SetString(savedDataKey, jsonData);
                 PlayerPrefs.Save();
 
-                Debug.Log($"[Auth] Nombre de usuario actualizado a: {newUsername}");
+                Debug.Log($"[Auth] ✅ Nombre de usuario actualizado completamente: {oldUsername} → {newUsername}");
                 return true;
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Auth] Error al actualizar username: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Convierte errores de Firebase en mensajes amigables
+        /// </summary>
+        private string GetFirebaseErrorMessage(FirebaseException ex)
+        {
+            switch (ex.ErrorCode)
+            {
+                case (int)AuthError.InvalidEmail:
+                    return "Email inválido";
+                case (int)AuthError.WrongPassword:
+                    return "Contraseña incorrecta";
+                case (int)AuthError.UserNotFound:
+                    return "Usuario no encontrado";
+                case (int)AuthError.EmailAlreadyInUse:
+                    return "Este email ya está registrado";
+                case (int)AuthError.WeakPassword:
+                    return "La contraseña es muy débil";
+                case (int)AuthError.NetworkRequestFailed:
+                    return "Error de conexión. Verifica tu internet";
+                case (int)AuthError.TooManyRequests:
+                    return "Demasiados intentos. Espera un momento";
+                default:
+                    return $"Error de autenticación: {ex.Message}";
             }
         }
     }

@@ -24,6 +24,7 @@ namespace DigitPark.Managers
         [SerializeField] public TextMeshProUGUI timerText;
         [SerializeField] public TextMeshProUGUI bestTimeText;
         [SerializeField] public Button playAgainButton;
+        [SerializeField] public Button backButton;
 
         [Header("Win Message")]
         [SerializeField] public GameObject winMessagePanel;
@@ -111,6 +112,9 @@ namespace DigitPark.Managers
 
             // Botón de jugar de nuevo
             playAgainButton?.onClick.AddListener(StartNewGame);
+
+            // Botón de volver
+            backButton?.onClick.AddListener(OnBackButtonClicked);
         }
 
         /// <summary>
@@ -473,6 +477,14 @@ namespace DigitPark.Managers
                     bestTimeText.text = "Mejor: --";
                 }
             }
+        }
+
+        /// <summary>
+        /// Maneja el click del botón Back
+        /// </summary>
+        private void OnBackButtonClicked()
+        {
+            BackToMenu();
         }
 
         /// <summary>

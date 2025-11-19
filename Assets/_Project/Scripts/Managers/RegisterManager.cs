@@ -22,10 +22,10 @@ namespace DigitPark.Managers
         [SerializeField] public TMP_InputField emailInput;
         [SerializeField] public TMP_InputField passwordInput;
         [SerializeField] public TMP_InputField confirmPasswordInput;
-        [SerializeField] public Toggle rememberMeToggle;
 
         [Header("UI - Buttons")]
-        [SerializeField] public Button confirmButton;
+        [SerializeField] public Button createAccountButton;
+        [SerializeField] public Button backButton;
 
         [Header("UI - Feedback")]
         [SerializeField] public TextMeshProUGUI errorMessageText;
@@ -86,16 +86,17 @@ namespace DigitPark.Managers
         /// </summary>
         private void SetupListeners()
         {
-            confirmButton?.onClick.AddListener(OnConfirmButtonClicked);
+            createAccountButton?.onClick.AddListener(OnCreateAccountClicked);
+            backButton?.onClick.AddListener(OnBackButtonClicked);
 
             // Listeners para Enter key
-            confirmPasswordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnConfirmButtonClicked(); });
+            confirmPasswordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnCreateAccountClicked(); });
         }
 
         /// <summary>
-        /// Maneja el click en el botón CONFIRMAR
+        /// Maneja el click en el botón CREAR CUENTA
         /// </summary>
-        private async void OnConfirmButtonClicked()
+        private async void OnCreateAccountClicked()
         {
             if (isRegistering) return;
 
@@ -104,7 +105,6 @@ namespace DigitPark.Managers
             string email = emailInput?.text.Trim() ?? "";
             string password = passwordInput?.text ?? "";
             string confirmPassword = confirmPasswordInput?.text ?? "";
-            bool rememberMe = rememberMeToggle?.isOn ?? false;
 
             // Validar todos los campos
             if (!ValidateAllFields(username, email, password, confirmPassword))
@@ -133,19 +133,15 @@ namespace DigitPark.Managers
                 // El error se maneja en OnRegisterFailed
                 Debug.LogWarning("[Register] Registro fallido");
             }
-            else
-            {
-                // Guardar preferencia de recordar
-                if (rememberMe)
-                {
-                    PlayerPrefs.SetInt("RememberMe", 1);
-                }
-                else
-                {
-                    PlayerPrefs.SetInt("RememberMe", 0);
-                }
-                PlayerPrefs.Save();
-            }
+        }
+
+        /// <summary>
+        /// Vuelve a la escena de Login
+        /// </summary>
+        private void OnBackButtonClicked()
+        {
+            Debug.Log("[Register] Volviendo a Login");
+            SceneManager.LoadScene("Login");
         }
 
         /// <summary>
@@ -333,7 +329,8 @@ namespace DigitPark.Managers
         /// </summary>
         private void SetButtonsInteractable(bool interactable)
         {
-            if (confirmButton != null) confirmButton.interactable = interactable;
+            if (createAccountButton != null) createAccountButton.interactable = interactable;
+            if (backButton != null) backButton.interactable = interactable;
         }
 
         /// <summary>

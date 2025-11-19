@@ -10,42 +10,25 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager del menú principal
-    /// Hub central de navegación y display de información del jugador
+    /// Hub central de navegación simple
     /// </summary>
     public class MainMenuManager : MonoBehaviour
     {
-        [Header("UI - Title")]
+        [Header("UI - Main Panel")]
+        [SerializeField] public GameObject mainMenuPanel;
         [SerializeField] public TextMeshProUGUI titleText;
-        [SerializeField] public Animator titleAnimator;
-
-        [Header("UI - Player Info")]
-        [SerializeField] public TextMeshProUGUI usernameText;
-        [SerializeField] public Button usernameButton; // Botón clickeable para username
-        [SerializeField] public TextMeshProUGUI levelText;
-        [SerializeField] public TextMeshProUGUI coinsText;
-        [SerializeField] public TextMeshProUGUI gemsText;
-        [SerializeField] public Image experienceBar;
-        [SerializeField] public Image avatarImage;
-
-        [Header("UI - Main Buttons")]
         [SerializeField] public Button playButton;
         [SerializeField] public Button scoresButton;
         [SerializeField] public Button tournamentsButton;
         [SerializeField] public Button settingsButton;
 
-        [Header("UI - Additional")]
-        [SerializeField] public Button profileButton;
-        [SerializeField] public Button dailyRewardButton;
-        [SerializeField] public Button achievementsButton;
-        [SerializeField] public GameObject dailyRewardNotification;
+        [Header("UI - User Info")]
+        [SerializeField] public TextMeshProUGUI userText;
 
-        [Header("UI - Statistics")]
-        [SerializeField] public TextMeshProUGUI bestTimeText;
-        [SerializeField] public TextMeshProUGUI gamesPlayedText;
-        [SerializeField] public TextMeshProUGUI worldRankText;
+        [Header("Animation")]
+        [SerializeField] public Animator titleAnimator;
 
         private PlayerData currentPlayer;
-        private UsernamePopup usernamePopup;
 
         private void Start()
         {
@@ -66,24 +49,9 @@ namespace DigitPark.Managers
                 titleAnimator.SetTrigger("Show");
             }
 
-            // Crear popup de username (oculto inicialmente)
-            CreateUsernamePopup();
-
-            // Verificar daily reward
-            CheckDailyReward();
-        }
-
-        /// <summary>
-        /// Crea el popup de username
-        /// </summary>
-        private void CreateUsernamePopup()
-        {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
-            if (canvas != null)
-            {
-                usernamePopup = UsernamePopup.Create(canvas.transform);
-                usernamePopup.Hide();
-            }
+            // Mostrar panel principal
+            if (mainMenuPanel != null)
+                mainMenuPanel.SetActive(true);
         }
 
         /// <summary>
@@ -95,10 +63,6 @@ namespace DigitPark.Managers
             scoresButton?.onClick.AddListener(OnScoresButtonClicked);
             tournamentsButton?.onClick.AddListener(OnTournamentsButtonClicked);
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
-            profileButton?.onClick.AddListener(OnProfileButtonClicked);
-            dailyRewardButton?.onClick.AddListener(OnDailyRewardButtonClicked);
-            achievementsButton?.onClick.AddListener(OnAchievementsButtonClicked);
-            usernameButton?.onClick.AddListener(OnUsernameButtonClicked);
         }
 
         /// <summary>
@@ -150,48 +114,13 @@ namespace DigitPark.Managers
         /// </summary>
         private void UpdateUI()
         {
-            // Información del jugador
-            string displayUsername = string.IsNullOrEmpty(currentPlayer.username) ? "Sin usuario" : currentPlayer.username;
+            // Mostrar nombre de usuario
+            string displayUsername = string.IsNullOrEmpty(currentPlayer.username) ? "Sin Usuario" : currentPlayer.username;
 
-            if (usernameText != null)
-                usernameText.text = displayUsername;
+            if (userText != null)
+                userText.text = displayUsername;
 
-            if (levelText != null)
-                levelText.text = $"Nivel {currentPlayer.level}";
-
-            if (coinsText != null)
-                coinsText.text = currentPlayer.coins.ToString();
-
-            if (gemsText != null)
-                gemsText.text = currentPlayer.gems.ToString();
-
-            // Barra de experiencia
-            if (experienceBar != null)
-            {
-                float expPercentage = (float)currentPlayer.experience / currentPlayer.experienceToNextLevel;
-                experienceBar.fillAmount = expPercentage;
-            }
-
-            // Estadísticas
-            if (bestTimeText != null)
-            {
-                if (currentPlayer.bestTime < float.MaxValue)
-                    bestTimeText.text = $"Mejor: {currentPlayer.bestTime:F3}s";
-                else
-                    bestTimeText.text = "Mejor: --";
-            }
-
-            if (gamesPlayedText != null)
-                gamesPlayedText.text = $"Partidas: {currentPlayer.totalGamesPlayed}";
-
-            // Avatar (cargar desde URL o usar default)
-            if (avatarImage != null && !string.IsNullOrEmpty(currentPlayer.avatarUrl))
-            {
-                // Aquí iría la lógica para cargar la imagen desde URL
-                // StartCoroutine(LoadAvatarFromURL(currentPlayer.avatarUrl));
-            }
-
-            Debug.Log($"[MainMenu] UI actualizada para {currentPlayer.username}");
+            Debug.Log($"[MainMenu] UI actualizada para {displayUsername}");
         }
 
         #region Button Callbacks
@@ -247,218 +176,6 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             SceneManager.LoadScene("Settings");
-        }
-
-        /// <summary>
-        /// Abre el perfil del jugador
-        /// </summary>
-        private void OnProfileButtonClicked()
-        {
-            Debug.Log("[MainMenu] Abriendo perfil");
-
-            // Aquí se abriría un panel de perfil
-            // ProfilePanel.Instance?.Show(currentPlayer);
-        }
-
-        /// <summary>
-        /// Maneja el click en el botón de username
-        /// </summary>
-        private void OnUsernameButtonClicked()
-        {
-            Debug.Log("[MainMenu] Click en username");
-
-            // Solo mostrar popup si el usuario NO tiene username o es "Sin usuario"
-            if (string.IsNullOrEmpty(currentPlayer.username) || currentPlayer.username == "Sin usuario")
-            {
-                Debug.Log("[MainMenu] Mostrando popup para elegir username");
-
-                usernamePopup?.ShowForUpdate(
-                    onConfirm: async (username) =>
-                    {
-                        Debug.Log($"[MainMenu] Usuario eligió username: {username}");
-
-                        // Actualizar username
-                        bool success = await AuthenticationService.Instance.UpdateUsername(username);
-
-                        if (success)
-                        {
-                            currentPlayer.username = username;
-                            UpdateUI(); // Actualizar la UI con el nuevo nombre
-                            Debug.Log("[MainMenu] Username actualizado correctamente");
-                        }
-                        else
-                        {
-                            Debug.LogError("[MainMenu] Error al actualizar username");
-                        }
-                    },
-                    onCancel: () =>
-                    {
-                        Debug.Log("[MainMenu] Usuario canceló cambio de username");
-                    }
-                );
-            }
-            else
-            {
-                // Si ya tiene username, abrir perfil
-                OnProfileButtonClicked();
-            }
-        }
-
-        /// <summary>
-        /// Reclama la recompensa diaria
-        /// </summary>
-        private void OnDailyRewardButtonClicked()
-        {
-            Debug.Log("[MainMenu] Reclamando recompensa diaria");
-
-            if (!CanClaimDailyReward())
-            {
-                Debug.LogWarning("[MainMenu] Recompensa diaria ya reclamada hoy");
-                return;
-            }
-
-            ClaimDailyReward();
-        }
-
-        /// <summary>
-        /// Abre el panel de logros
-        /// </summary>
-        private void OnAchievementsButtonClicked()
-        {
-            Debug.Log("[MainMenu] Abriendo logros");
-
-            // Aquí se abriría un panel de logros
-            // AchievementsPanel.Instance?.Show(currentPlayer);
-        }
-
-        #endregion
-
-        #region Daily Rewards
-
-        /// <summary>
-        /// Verifica si hay recompensa diaria disponible
-        /// </summary>
-        private void CheckDailyReward()
-        {
-            if (currentPlayer == null) return;
-
-            bool canClaim = CanClaimDailyReward();
-
-            if (dailyRewardNotification != null)
-            {
-                dailyRewardNotification.SetActive(canClaim);
-            }
-
-            if (dailyRewardButton != null)
-            {
-                dailyRewardButton.interactable = canClaim;
-            }
-
-            Debug.Log($"[MainMenu] Recompensa diaria disponible: {canClaim}");
-        }
-
-        /// <summary>
-        /// Verifica si se puede reclamar la recompensa diaria
-        /// </summary>
-        private bool CanClaimDailyReward()
-        {
-            if (currentPlayer == null) return false;
-
-            // Verificar si ya se reclamó hoy
-            System.DateTime lastClaim = currentPlayer.lastDailyRewardClaimed;
-            System.DateTime today = System.DateTime.Now.Date;
-
-            return lastClaim.Date < today;
-        }
-
-        /// <summary>
-        /// Reclama la recompensa diaria
-        /// </summary>
-        private async void ClaimDailyReward()
-        {
-            if (currentPlayer == null) return;
-
-            // Verificar streak de días consecutivos
-            System.DateTime yesterday = System.DateTime.Now.AddDays(-1).Date;
-            if (currentPlayer.lastDailyRewardClaimed.Date == yesterday)
-            {
-                currentPlayer.consecutiveLoginDays++;
-            }
-            else
-            {
-                currentPlayer.consecutiveLoginDays = 1;
-            }
-
-            // Calcular recompensa (aumenta con el streak)
-            int coinsReward = 50 + (currentPlayer.consecutiveLoginDays * 10);
-            int gemsReward = currentPlayer.consecutiveLoginDays >= 7 ? 5 : 0;
-
-            // Dar recompensas
-            currentPlayer.coins += coinsReward;
-            currentPlayer.gems += gemsReward;
-            currentPlayer.lastDailyRewardClaimed = System.DateTime.Now;
-
-            // Guardar en Firebase
-            await DatabaseService.Instance.SavePlayerData(currentPlayer);
-
-            // Registrar en analytics
-            AnalyticsService.Instance?.LogCoinsEarned(coinsReward, "daily_reward");
-
-            // Actualizar UI
-            UpdateUI();
-
-            // Mostrar recompensa al usuario
-            Debug.Log($"[MainMenu] Recompensa diaria reclamada: {coinsReward} coins, {gemsReward} gems");
-
-            // Aquí se mostraría un popup con la recompensa
-            // RewardPopup.Instance?.Show(coinsReward, gemsReward, currentPlayer.consecutiveLoginDays);
-
-            // Ocultar notificación
-            if (dailyRewardNotification != null)
-            {
-                dailyRewardNotification.SetActive(false);
-            }
-        }
-
-        #endregion
-
-        #region World Rank
-
-        /// <summary>
-        /// Actualiza el ranking mundial del jugador
-        /// </summary>
-        private async void UpdateWorldRank()
-        {
-            if (currentPlayer == null || worldRankText == null) return;
-
-            // Obtener leaderboard global
-            var leaderboard = await DatabaseService.Instance.GetGlobalLeaderboard(200);
-
-            // Buscar posición del jugador
-            int position = leaderboard.FindIndex(entry => entry.userId == currentPlayer.userId);
-
-            if (position >= 0)
-            {
-                worldRankText.text = $"Rank #{position + 1}";
-            }
-            else
-            {
-                worldRankText.text = "Rank: --";
-            }
-        }
-
-        #endregion
-
-        #region Notifications
-
-        /// <summary>
-        /// Verifica y muestra notificaciones pendientes
-        /// </summary>
-        private void CheckNotifications()
-        {
-            // Verificar torneos completados
-            // Verificar nuevos logros
-            // Verificar mensajes del sistema
         }
 
         #endregion
