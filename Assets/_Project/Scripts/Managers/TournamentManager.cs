@@ -34,6 +34,7 @@ namespace DigitPark.Managers
         [Header("Tournaments List")]
         [SerializeField] public Transform tournamentsContainer;
         [SerializeField] public ScrollRect scrollRect;
+        [SerializeField] public GameObject tournamentItemPrefab;
 
         [Header("Blocker Panel")]
         [SerializeField] public GameObject blockerPanel;
@@ -65,6 +66,12 @@ namespace DigitPark.Managers
 
         [Header("Leaderboard View")]
         [SerializeField] public GameObject leaderboardBackButton;
+        [SerializeField] public GameObject exitTournamentButton;
+
+        [Header("Exit Tournament Confirmation")]
+        [SerializeField] public GameObject exitTournamentConfirmPanel;
+        [SerializeField] public Button confirmExitButton;
+        [SerializeField] public Button cancelExitButton;
 
         // Estado
         private TournamentView currentView = TournamentView.Search;
@@ -83,6 +90,7 @@ namespace DigitPark.Managers
         private int searchMaxPlayers = 999;
         private float searchMinHours = 0;
         private float searchMaxHours = 999;
+        private bool hasActiveFilters = false;
 
         private void Start()
         {
@@ -103,6 +111,8 @@ namespace DigitPark.Managers
             if (createTournamentBlock != null) createTournamentBlock.SetActive(false);
             if (confirmPopup != null) confirmPopup.SetActive(false);
             if (leaderboardBackButton != null) leaderboardBackButton.SetActive(false);
+            if (exitTournamentButton != null) exitTournamentButton.SetActive(false);
+            if (exitTournamentConfirmPanel != null) exitTournamentConfirmPanel.SetActive(false);
 
             // Mostrar vista inicial
             ShowView(TournamentView.Search);
@@ -187,6 +197,20 @@ namespace DigitPark.Managers
                     backBtn.onClick.AddListener(OnLeaderboardBackClicked);
                 }
             }
+
+            // Exit Tournament
+            if (exitTournamentButton != null)
+            {
+                Button exitBtn = exitTournamentButton.GetComponent<Button>();
+                if (exitBtn != null)
+                {
+                    exitBtn.onClick.AddListener(OnExitTournamentButtonClicked);
+                }
+            }
+
+            // Exit Tournament Confirmation
+            confirmExitButton?.onClick.AddListener(OnConfirmExitClicked);
+            cancelExitButton?.onClick.AddListener(HideExitConfirmPanel);
         }
 
         #endregion
@@ -293,6 +317,13 @@ namespace DigitPark.Managers
             float.TryParse(minHoursInput?.text, out searchMinHours);
             float.TryParse(maxHoursInput?.text, out searchMaxHours);
 
+            // Verificar si hay filtros activos
+            hasActiveFilters = !string.IsNullOrEmpty(searchUsername) ||
+                              !string.IsNullOrEmpty(minPlayersInput?.text) ||
+                              !string.IsNullOrEmpty(maxPlayersInput?.text) ||
+                              !string.IsNullOrEmpty(minHoursInput?.text) ||
+                              !string.IsNullOrEmpty(maxHoursInput?.text);
+
             // Aplicar filtros
             FilterTournaments();
 
@@ -320,6 +351,7 @@ namespace DigitPark.Managers
             searchMaxPlayers = 999;
             searchMinHours = 0;
             searchMaxHours = 999;
+            hasActiveFilters = false;
 
             // Mostrar todos
             FilterTournaments();
@@ -331,6 +363,13 @@ namespace DigitPark.Managers
         private void FilterTournaments()
         {
             filteredTournaments = new List<TournamentData>(activeTournaments);
+
+            // Si NO hay filtros activos y estamos en la vista de búsqueda, ocultar torneos inscritos
+            if (!hasActiveFilters && currentView == TournamentView.Search && currentPlayer != null)
+            {
+                filteredTournaments = filteredTournaments.FindAll(t => !t.IsParticipating(currentPlayer.userId));
+                Debug.Log($"[Tournament] Ocultando torneos inscritos. Quedaron: {filteredTournaments.Count}");
+            }
 
             // Filtrar por username del creador
             if (!string.IsNullOrEmpty(searchUsername))
@@ -368,9 +407,11 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
-            // Ocultar botón de back del leaderboard
+            // Ocultar botón de back del leaderboard y botón de salir del torneo
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(false);
+            if (exitTournamentButton != null)
+                exitTournamentButton.SetActive(false);
 
             try
             {
@@ -378,7 +419,8 @@ namespace DigitPark.Managers
 
                 Debug.Log($"[Tournament] {activeTournaments.Count} torneos activos cargados");
 
-                DisplayTournaments(activeTournaments);
+                // Usar FilterTournaments en lugar de DisplayTournaments para aplicar filtro de inscritos
+                FilterTournaments();
             }
             catch (System.Exception ex)
             {
@@ -398,9 +440,11 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
-            // Ocultar botón de back del leaderboard
+            // Ocultar botón de back del leaderboard y botón de salir del torneo
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(false);
+            if (exitTournamentButton != null)
+                exitTournamentButton.SetActive(false);
 
             try
             {
@@ -439,94 +483,76 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Crea una entrada de torneo (TournamentItem)
-        /// Estructura: Participants | Divider1 | CreatorText | Divider2 | TimeText
+        /// Crea una entrada de torneo usando el prefab TournamentItem
         /// </summary>
         private void CreateTournamentCard(TournamentData tournament)
         {
-            if (tournamentsContainer == null) return;
+            if (tournamentsContainer == null || tournamentItemPrefab == null)
+            {
+                Debug.LogError("[Tournament] Container o prefab nulo");
+                return;
+            }
 
-            // Crear TournamentItem programáticamente
-            GameObject itemObj = new GameObject($"TournamentItem_{tournament.tournamentId}");
-            itemObj.transform.SetParent(tournamentsContainer, false);
+            // Instanciar el prefab
+            GameObject itemObj = Instantiate(tournamentItemPrefab, tournamentsContainer);
+            itemObj.name = $"TournamentItem_{tournament.tournamentId}";
 
-            RectTransform itemRT = itemObj.AddComponent<RectTransform>();
-            itemRT.anchorMin = new Vector2(0, 1);
-            itemRT.anchorMax = new Vector2(1, 1);
-            itemRT.pivot = new Vector2(0.5f, 1);
-            itemRT.anchoredPosition = Vector2.zero;
-            itemRT.sizeDelta = new Vector2(0, 80); // Altura 80
+            // Obtener referencias a los componentes
+            Image bg = itemObj.GetComponent<Image>();
+            Button itemButton = itemObj.GetComponent<Button>();
 
-            // LayoutElement
-            var layoutElement = itemObj.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 80;
-            layoutElement.minHeight = 80;
-
-            // Fondo
-            Image bg = itemObj.AddComponent<Image>();
+            // Configurar color de fondo según participación
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
-            bg.color = isParticipating ? new Color(0f, 0.83f, 1f, 0.3f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
+            if (bg != null)
+            {
+                bg.color = isParticipating ? new Color(0f, 0.83f, 1f, 0.3f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
+            }
 
-            // Botón (para detectar clics en todo el item)
-            Button itemButton = itemObj.AddComponent<Button>();
-            itemButton.targetGraphic = bg;
-            itemButton.transition = Selectable.Transition.ColorTint;
-            ColorBlock buttonColors = itemButton.colors;
-            buttonColors.normalColor = Color.white;
-            buttonColors.highlightedColor = new Color(0.8f, 0.8f, 1f);
-            buttonColors.pressedColor = new Color(0.6f, 0.6f, 0.8f);
-            itemButton.colors = buttonColors;
+            // Configurar botón
+            if (itemButton != null)
+            {
+                itemButton.onClick.RemoveAllListeners();
+                TournamentData tournamentCopy = tournament;
+                itemButton.onClick.AddListener(() => OnTournamentItemClicked(tournamentCopy));
+            }
 
-            // Agregar listener para el clic
-            TournamentData tournamentCopy = tournament; // Captura para el closure
-            itemButton.onClick.AddListener(() => OnTournamentItemClicked(tournamentCopy));
+            // Buscar y configurar los textos hijos
+            Transform participantsTransform = itemObj.transform.Find("ParticipantsText");
+            if (participantsTransform != null)
+            {
+                TextMeshProUGUI participantsText = participantsTransform.GetComponent<TextMeshProUGUI>();
+                if (participantsText != null)
+                {
+                    participantsText.text = $"{tournament.currentParticipants}/{tournament.maxParticipants}";
+                }
+            }
 
-            // Crear divisores verticales
-            CreateVerticalDivider(itemObj.transform, 150f);  // Después de Participants
-            CreateVerticalDivider(itemObj.transform, 670f);  // Después de CreatorText
+            Transform creatorTransform = itemObj.transform.Find("CreatorText");
+            if (creatorTransform != null)
+            {
+                TextMeshProUGUI creatorText = creatorTransform.GetComponent<TextMeshProUGUI>();
+                if (creatorText != null)
+                {
+                    creatorText.text = tournament.creatorName;
+                }
+            }
 
-            // Participants (izquierda) - "20/55"
-            TextMeshProUGUI participantsText = CreateItemText(itemObj.transform, "ParticipantsText",
-                $"{tournament.currentParticipants}/{tournament.maxParticipants}", 28, Color.white);
-            RectTransform participantsRT = participantsText.GetComponent<RectTransform>();
-            participantsRT.anchorMin = new Vector2(0, 0);
-            participantsRT.anchorMax = new Vector2(0, 1);
-            participantsRT.pivot = new Vector2(0, 0.5f);
-            participantsRT.anchoredPosition = new Vector2(20, 0);
-            participantsRT.sizeDelta = new Vector2(130, 0);
-            participantsText.alignment = TextAlignmentOptions.Center;
-
-            // CreatorText (centro) - "NombreUsuario"
-            TextMeshProUGUI creatorText = CreateItemText(itemObj.transform, "CreatorText",
-                tournament.creatorName, 26, Color.white);
-            RectTransform creatorRT = creatorText.GetComponent<RectTransform>();
-            creatorRT.anchorMin = new Vector2(0, 0);
-            creatorRT.anchorMax = new Vector2(0, 1);
-            creatorRT.pivot = new Vector2(0, 0.5f);
-            creatorRT.anchoredPosition = new Vector2(160f, 0);
-            creatorRT.sizeDelta = new Vector2(500, 0);
-            creatorText.alignment = TextAlignmentOptions.Center;
-
-            // TimeText (derecha) - "23:45:00"
-            string timeString = FormatTimeRemaining(tournament.GetTimeRemaining());
-            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
-                timeString, 26, new Color(0f, 1f, 0.53f)); // Verde brillante
-            RectTransform timeRT = timeText.GetComponent<RectTransform>();
-            timeRT.anchorMin = new Vector2(1, 0);
-            timeRT.anchorMax = new Vector2(1, 1);
-            timeRT.pivot = new Vector2(1, 0.5f);
-            timeRT.anchoredPosition = new Vector2(-20, 0);
-            timeRT.sizeDelta = new Vector2(350, 0);
-            timeText.alignment = TextAlignmentOptions.Center;
-
-            // Línea divisoria horizontal
-            CreateHorizontalDivider(itemObj.transform);
+            Transform timeTransform = itemObj.transform.Find("TimeText");
+            if (timeTransform != null)
+            {
+                TextMeshProUGUI timeText = timeTransform.GetComponent<TextMeshProUGUI>();
+                if (timeText != null)
+                {
+                    string timeString = FormatTimeRemaining(tournament.GetTimeRemaining());
+                    timeText.text = timeString;
+                }
+            }
 
             itemObj.SetActive(true);
         }
 
         /// <summary>
-        /// Crea un divisor vertical
+        /// Crea un divisor vertical (helper para leaderboard)
         /// </summary>
         private void CreateVerticalDivider(Transform parent, float xPosition)
         {
@@ -545,7 +571,7 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Crea un divisor horizontal
+        /// Crea un divisor horizontal (helper para leaderboard)
         /// </summary>
         private void CreateHorizontalDivider(Transform parent)
         {
@@ -564,7 +590,7 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Crea un texto para el item
+        /// Crea un texto para el item (helper para leaderboard)
         /// </summary>
         private TextMeshProUGUI CreateItemText(Transform parent, string name, string text, int fontSize, Color color)
         {
@@ -991,6 +1017,20 @@ namespace DigitPark.Managers
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(true);
 
+            // Mostrar botón de salir del torneo si el usuario participa
+            bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
+            Debug.Log($"[Tournament] ¿Usuario participa? {isParticipating}, userId: {currentPlayer?.userId}, participantes: {tournament.participants?.Count ?? 0}");
+
+            if (exitTournamentButton != null && isParticipating)
+            {
+                exitTournamentButton.SetActive(true);
+                Debug.Log("[Tournament] Botón de salir del torneo ACTIVADO");
+            }
+            else
+            {
+                Debug.Log($"[Tournament] Botón de salir NO activado. exitButton null: {exitTournamentButton == null}, isParticipating: {isParticipating}");
+            }
+
             // Título del leaderboard
             CreateLeaderboardTitle(tournament);
 
@@ -1177,12 +1217,106 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Tournament] Volviendo a la vista de torneos");
 
-            // Ocultar botón de back
+            // Ocultar botones de leaderboard
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(false);
+            if (exitTournamentButton != null)
+                exitTournamentButton.SetActive(false);
 
             // Volver a mostrar la vista actual (Search o MyTournaments)
             ShowView(currentView);
+        }
+
+        #endregion
+
+        #region Exit Tournament
+
+        /// <summary>
+        /// Muestra el panel de confirmación para salir del torneo
+        /// </summary>
+        private void OnExitTournamentButtonClicked()
+        {
+            Debug.Log("[Tournament] Mostrando confirmación de salida del torneo");
+
+            if (selectedTournament == null)
+            {
+                Debug.LogError("[Tournament] No hay torneo seleccionado");
+                return;
+            }
+
+            // Mostrar blocker y panel de confirmación
+            if (blockerPanel != null)
+                blockerPanel.SetActive(true);
+
+            if (exitTournamentConfirmPanel != null)
+                exitTournamentConfirmPanel.SetActive(true);
+        }
+
+        /// <summary>
+        /// Oculta el panel de confirmación de salida
+        /// </summary>
+        private void HideExitConfirmPanel()
+        {
+            Debug.Log("[Tournament] Ocultando confirmación de salida");
+
+            if (exitTournamentConfirmPanel != null)
+                exitTournamentConfirmPanel.SetActive(false);
+
+            if (blockerPanel != null)
+                blockerPanel.SetActive(false);
+        }
+
+        /// <summary>
+        /// Confirma la salida del torneo
+        /// </summary>
+        private async void OnConfirmExitClicked()
+        {
+            if (selectedTournament == null || currentPlayer == null)
+            {
+                Debug.LogError("[Tournament] No hay torneo o jugador seleccionado");
+                return;
+            }
+
+            Debug.Log($"[Tournament] Confirmando salida del torneo: {selectedTournament.tournamentId}");
+
+            // Ocultar panel de confirmación
+            HideExitConfirmPanel();
+
+            ShowLoading(true);
+
+            try
+            {
+                bool success = await DatabaseService.Instance.LeaveTournament(selectedTournament.tournamentId, currentPlayer.userId);
+
+                if (success)
+                {
+                    Debug.Log($"[Tournament] Salida exitosa del torneo: {selectedTournament.tournamentId}");
+                    ShowSuccessMessage("Has abandonado el torneo exitosamente");
+
+                    // Ocultar botones de leaderboard
+                    if (leaderboardBackButton != null)
+                        leaderboardBackButton.SetActive(false);
+                    if (exitTournamentButton != null)
+                        exitTournamentButton.SetActive(false);
+
+                    // Esperar y recargar torneos
+                    await System.Threading.Tasks.Task.Delay(1500);
+                    LoadActiveTournaments();
+                }
+                else
+                {
+                    ShowErrorMessage("No se pudo salir del torneo. Intenta nuevamente.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[Tournament] Error al salir del torneo: {ex.Message}");
+                ShowErrorMessage($"Error: {ex.Message}");
+            }
+            finally
+            {
+                ShowLoading(false);
+            }
         }
 
         #endregion

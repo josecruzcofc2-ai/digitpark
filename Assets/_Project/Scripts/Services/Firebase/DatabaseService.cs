@@ -549,6 +549,69 @@ namespace DigitPark.Services.Firebase
         }
 
         /// <summary>
+        /// Remueve un participante de un torneo
+        /// </summary>
+        public async Task<bool> LeaveTournament(string tournamentId, string userId)
+        {
+            try
+            {
+                Debug.Log($"[Database] Usuario {userId} abandonando el torneo {tournamentId}");
+
+                var tournamentData = await GetTournament(tournamentId);
+                if (tournamentData == null)
+                {
+                    Debug.LogError($"[Database] No se encontró el torneo {tournamentId}");
+                    return false;
+                }
+
+                Debug.Log($"[Database] Torneo encontrado: {tournamentData.name}");
+
+                // Verificar si el usuario está en el torneo
+                if (!tournamentData.IsParticipating(userId))
+                {
+                    Debug.LogWarning($"[Database] El usuario no está participando en este torneo");
+                    return false;
+                }
+
+                var playerData = await LoadPlayerData(userId);
+                if (playerData == null)
+                {
+                    Debug.LogError($"[Database] No se encontró el jugador {userId}");
+                    return false;
+                }
+
+                Debug.Log($"[Database] Jugador encontrado: {playerData.username}");
+
+                // Remover participante
+                tournamentData.participants.RemoveAll(p => p.userId == userId);
+                tournamentData.currentParticipants--;
+
+                // Devolver el entryFee al jugador
+                if (tournamentData.entryFee > 0)
+                {
+                    playerData.coins += tournamentData.entryFee;
+                    tournamentData.totalPrizePool -= tournamentData.entryFee;
+                    await SavePlayerData(playerData);
+                    Debug.Log($"[Database] Devueltos {tournamentData.entryFee} coins al jugador");
+                }
+
+                Debug.Log($"[Database] Participante removido. Participantes restantes: {tournamentData.currentParticipants}");
+
+                // Actualizar torneo en Firebase
+                await UpdateTournament(tournamentData);
+
+                Debug.Log($"[Database] Usuario abandonó exitosamente el torneo");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[Database] Error al abandonar el torneo: {ex.Message}");
+                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Actualiza el username en todos los leaderboards donde el usuario tenga registros
         /// Llamar cuando el usuario cambia su nombre
         /// </summary>

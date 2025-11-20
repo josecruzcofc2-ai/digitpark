@@ -295,15 +295,27 @@ namespace DigitPark.Managers
         /// </summary>
         private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadPersonalScores()
         {
-            Debug.Log("[Leaderboard] Cargando puntuaciones personales...");
+            Debug.Log("========== [Leaderboard] CARGANDO PUNTUACIONES PERSONALES ==========");
 
             if (currentPlayer == null)
             {
-                Debug.LogWarning("[Leaderboard] No hay jugador actual");
+                Debug.LogError("[Leaderboard] ❌ currentPlayer es NULL!");
                 return new List<LeaderboardEntry>();
             }
 
-            Debug.Log($"[Leaderboard] Jugador: {currentPlayer.username}, Scores en historial: {currentPlayer.scoreHistory?.Count ?? 0}");
+            Debug.Log($"[Leaderboard] ✓ Jugador encontrado: {currentPlayer.username} (ID: {currentPlayer.userId})");
+            Debug.Log($"[Leaderboard] ✓ Scores en scoreHistory: {currentPlayer.scoreHistory?.Count ?? 0}");
+
+            // DEBUG: Mostrar los scores si existen
+            if (currentPlayer.scoreHistory != null && currentPlayer.scoreHistory.Count > 0)
+            {
+                Debug.Log($"[Leaderboard] 📊 Mostrando primeros 5 scores del historial:");
+                for (int i = 0; i < Mathf.Min(5, currentPlayer.scoreHistory.Count); i++)
+                {
+                    var score = currentPlayer.scoreHistory[i];
+                    Debug.Log($"  [{i}] Tiempo: {score.time}s, Timestamp: {score.timestamp}");
+                }
+            }
 
             // Convertir el historial de scores a LeaderboardEntry
             List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
@@ -337,7 +349,14 @@ namespace DigitPark.Managers
                 position++;
             }
 
-            Debug.Log($"[Leaderboard] Scores personales cargados: {entries.Count} (en orden cronológico inverso)");
+            Debug.Log($"[Leaderboard] ✓ Total de {entries.Count} scores personales procesados");
+            Debug.Log($"[Leaderboard] 📋 Primeras 3 entradas a mostrar:");
+            for (int i = 0; i < Mathf.Min(3, entries.Count); i++)
+            {
+                var entry = entries[i];
+                Debug.Log($"  Entry {i}: Posición #{entry.position}, Tiempo: {entry.time}s");
+            }
+            Debug.Log("========== [Leaderboard] FIN CARGA PERSONAL ==========");
 
             personalScores = entries;
 
@@ -599,9 +618,17 @@ namespace DigitPark.Managers
             var layoutElement = entryObj.AddComponent<UnityEngine.UI.LayoutElement>();
             layoutElement.preferredHeight = 80;
             layoutElement.minHeight = 80;
+            layoutElement.flexibleWidth = 1; // Permitir que se expanda horizontalmente
+
+            // FORZAR anclas de nuevo después del LayoutElement (el LayoutGroup puede cambiarlas)
+            entryRT.anchorMin = new Vector2(0, 1);
+            entryRT.anchorMax = new Vector2(1, 1);
+            entryRT.pivot = new Vector2(0.5f, 1);
+            entryRT.anchoredPosition = Vector2.zero;
+            entryRT.sizeDelta = new Vector2(0, 80);
 
             Debug.Log($"[Leaderboard] Entrada creada: {entry.username} - {entry.time}s (Posición: {entry.position})");
-            Debug.Log($"[Leaderboard] Entry RectTransform FINAL - Ancho: {entryRT.sizeDelta.x}, Alto: {entryRT.sizeDelta.y}, Pos: {entryRT.anchoredPosition}");
+            Debug.Log($"[Leaderboard] Entry RectTransform FINAL - Anchors: {entryRT.anchorMin} to {entryRT.anchorMax}, Size: {entryRT.sizeDelta}, Pos: {entryRT.anchoredPosition}");
 
             // CRÍTICO: Asegurar que la entrada esté activa
             entryObj.SetActive(true);
