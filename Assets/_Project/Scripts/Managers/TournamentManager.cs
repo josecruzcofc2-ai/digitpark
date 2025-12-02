@@ -489,7 +489,7 @@ namespace DigitPark.Managers
         {
             if (tournamentsContainer == null || tournamentItemPrefab == null)
             {
-                Debug.LogError("[Tournament] Container o prefab nulo");
+                Debug.LogError($"[Tournament] Container o prefab nulo - Container: {(tournamentsContainer == null ? "NULL" : "OK")}, Prefab: {(tournamentItemPrefab == null ? "NULL" : "OK")}");
                 return;
             }
 

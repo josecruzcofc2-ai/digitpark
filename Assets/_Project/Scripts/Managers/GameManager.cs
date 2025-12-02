@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -29,6 +30,7 @@ namespace DigitPark.Managers
         [Header("Win Message")]
         [SerializeField] public GameObject winMessagePanel;
         [SerializeField] public CanvasGroup winMessageCanvasGroup;
+        [SerializeField] public TextMeshProUGUI successText;
 
         // Game State
         private int currentTargetNumber = 1; // Número que el jugador debe tocar
@@ -44,6 +46,25 @@ namespace DigitPark.Managers
 
         // Números asignados a cada botón
         private int[] gridNumbers = new int[9];
+
+        // Claves de mensajes de éxito por nivel (para localización)
+        private readonly string[] level1Keys = {
+            "msg_good_job", "msg_complete", "msg_nice_try", "msg_well_done", "msg_task_complete"
+        };
+        private readonly string[] level2Keys = {
+            "msg_great_work", "msg_good_timing", "msg_not_bad", "msg_solid", "msg_keep_it_up"
+        };
+        private readonly string[] level3Keys = {
+            "msg_excellent", "msg_impressive", "msg_great_speed", "msg_well_played", "msg_awesome"
+        };
+        private readonly string[] level4Keys = {
+            "msg_amazing", "msg_outstanding", "msg_superb", "msg_incredible",
+            "msg_spectacular", "msg_on_fire"
+        };
+        private readonly string[] level5Keys = {
+            "msg_perfect", "msg_legendary", "msg_mind_blowing", "msg_master",
+            "msg_unstoppable", "msg_world_class", "msg_godlike", "msg_flawless"
+        };
 
         private void Awake()
         {
@@ -357,12 +378,64 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
+        /// Obtiene un mensaje aleatorio según el tiempo del jugador
+        /// </summary>
+        private string GetSuccessMessage(float time)
+        {
+            string[] keys;
+
+            if (time < 1f)
+            {
+                // Nivel 5 - PERFECTO (menos de 1 segundo)
+                keys = level5Keys;
+            }
+            else if (time < 2f)
+            {
+                // Nivel 4 - MUY BUENO (menos de 2 segundos)
+                keys = level4Keys;
+            }
+            else if (time < 3f)
+            {
+                // Nivel 3 - BUENO (menos de 3 segundos)
+                keys = level3Keys;
+            }
+            else if (time < 4f)
+            {
+                // Nivel 2 - DECENTE (menos de 4 segundos)
+                keys = level2Keys;
+            }
+            else
+            {
+                // Nivel 1 - BÁSICO (4 segundos o más)
+                keys = level1Keys;
+            }
+
+            // Seleccionar clave aleatoria
+            string selectedKey = keys[Random.Range(0, keys.Length)];
+
+            // Obtener texto traducido del LocalizationManager
+            if (LocalizationManager.Instance != null)
+            {
+                return LocalizationManager.Instance.GetText(selectedKey);
+            }
+
+            // Fallback: retornar la clave si no hay LocalizationManager
+            return selectedKey;
+        }
+
+        /// <summary>
         /// Muestra el mensaje de victoria con animación fade
         /// </summary>
         private IEnumerator ShowWinMessage()
         {
             if (winMessagePanel == null || winMessageCanvasGroup == null)
                 yield break;
+
+            // Establecer mensaje de éxito según el tiempo
+            if (successText != null)
+            {
+                successText.text = GetSuccessMessage(currentTime);
+            }
 
             winMessagePanel.SetActive(true);
 

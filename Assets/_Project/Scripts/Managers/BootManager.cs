@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Services.Firebase;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -103,7 +104,15 @@ namespace DigitPark.Managers
         /// </summary>
         private IEnumerator InitializeFirebaseServices()
         {
-            Debug.Log("[Boot] Inicializando servicios de Firebase...");
+            Debug.Log("[Boot] Inicializando servicios...");
+
+            // Crear LocalizationManager primero
+            if (LocalizationManager.Instance == null)
+            {
+                GameObject localizationService = new GameObject("LocalizationManager");
+                localizationService.AddComponent<LocalizationManager>();
+                Debug.Log("[Boot] LocalizationManager creado");
+            }
 
             // Verificar que los servicios existan en la escena o crearlos
             if (AuthenticationService.Instance == null)
@@ -128,7 +137,7 @@ namespace DigitPark.Managers
             yield return new WaitForSeconds(0.5f);
 
             servicesInitialized = true;
-            Debug.Log("[Boot] Servicios de Firebase inicializados");
+            Debug.Log("[Boot] Todos los servicios inicializados");
         }
 
         /// <summary>
