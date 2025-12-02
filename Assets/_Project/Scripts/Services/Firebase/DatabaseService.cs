@@ -4,25 +4,19 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Data;
 
-using Firebase;
-using Firebase.Database;
-using Firebase.Firestore;
-using Firebase.Extensions;
-
 namespace DigitPark.Services.Firebase
 {
     /// <summary>
-    /// Servicio para gestionar la base de datos de Firebase
-    /// Maneja players, scores, tournaments y leaderboards
+    /// Servicio de base de datos (Modo Simulación)
+    /// Usa PlayerPrefs para almacenar datos localmente
     /// </summary>
     public class DatabaseService : MonoBehaviour
     {
         public static DatabaseService Instance { get; private set; }
-        private DatabaseReference databaseRef;
-        private FirebaseFirestore firestore;
 
-  
-        private const string DATABASE_URL = "https://digitpark-7d772-default-rtdb.firebaseio.com/";
+        // Datos en memoria
+        private List<LeaderboardEntry> globalLeaderboard = new List<LeaderboardEntry>();
+        private Dictionary<string, TournamentData> tournaments = new Dictionary<string, TournamentData>();
 
         private void Awake()
         {
@@ -30,7 +24,7 @@ namespace DigitPark.Services.Firebase
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                InitializeDatabase();
+                Initialize();
             }
             else
             {
@@ -38,137 +32,97 @@ namespace DigitPark.Services.Firebase
             }
         }
 
-        /// <summary>
-        /// Inicializa Firebase Database
-        /// </summary>
-        private async void InitializeDatabase()
+        private void Initialize()
         {
-            Debug.Log("[Database] Inicializando Firebase Database...");
+            Debug.Log("[Database] Inicializando servicio de datos (Simulación)...");
+            LoadData();
+            Debug.Log("[Database] Servicio listo");
+        }
 
-            try
+        private void LoadData()
+        {
+            // Cargar leaderboard
+            if (PlayerPrefs.HasKey("SimLeaderboard"))
             {
-                // Verificar dependencias de Firebase primero
-                var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
-
-                if (dependencyStatus != DependencyStatus.Available)
+                string json = PlayerPrefs.GetString("SimLeaderboard");
+                var wrapper = JsonUtility.FromJson<LeaderboardWrapper>(json);
+                if (wrapper?.entries != null)
                 {
-                    Debug.LogError($"[Database] No se pudieron resolver las dependencias de Firebase: {dependencyStatus}");
-                    return;
+                    globalLeaderboard = wrapper.entries;
                 }
-
-                // Obtener la app de Firebase
-                FirebaseApp app = FirebaseApp.DefaultInstance;
-
-                Debug.Log($"[Database] Firebase App obtenida, configurando Database...");
-
-                // Obtener la instancia con la URL específica
-                databaseRef = FirebaseDatabase.GetInstance(app, DATABASE_URL).RootReference;
-                firestore = FirebaseFirestore.DefaultInstance;
-
-                Debug.Log($"[Database] Firebase Database inicializado correctamente con URL: {DATABASE_URL}");
-                Debug.Log($"[Database] DatabaseRef es null: {databaseRef == null}");
             }
-            catch (System.Exception ex)
+
+            if (globalLeaderboard.Count == 0)
             {
-                Debug.LogError($"[Database] Error al inicializar: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
+                CreateSampleData();
             }
+
+            Debug.Log($"[Database] Leaderboard cargado: {globalLeaderboard.Count} entradas");
+        }
+
+        private void CreateSampleData()
+        {
+            string[] names = { "ProGamer99", "SpeedRunner", "ChampionX", "FastFingers", "GoldMaster" };
+            string[] countries = { "US", "MX", "ES", "AR", "CO" };
+
+            for (int i = 0; i < 5; i++)
+            {
+                globalLeaderboard.Add(new LeaderboardEntry
+                {
+                    userId = $"sample_{i}",
+                    username = names[i],
+                    time = 10f + (i * 2.5f) + UnityEngine.Random.Range(0f, 1f),
+                    countryCode = countries[i],
+                    position = i + 1
+                });
+            }
+
+            SaveLeaderboard();
+        }
+
+        private void SaveLeaderboard()
+        {
+            var wrapper = new LeaderboardWrapper { entries = globalLeaderboard };
+            PlayerPrefs.SetString("SimLeaderboard", JsonUtility.ToJson(wrapper));
+            PlayerPrefs.Save();
         }
 
         #region Player Data
 
-        /// <summary>
-        /// Guarda o actualiza los datos del jugador
-        /// </summary>
         public async Task SavePlayerData(PlayerData playerData)
         {
-            try
-            {
-                Debug.Log($"[Database] Guardando datos del jugador: {playerData.userId}");
+            Debug.Log($"[Database] Guardando jugador: {playerData.userId}");
 
-                if (databaseRef == null)
-                {
-                    Debug.LogError("[Database] DatabaseRef es null! Firebase no está inicializado correctamente");
-                    return;
-                }
+            string key = $"SimUser_{playerData.userId}";
+            PlayerPrefs.SetString(key, JsonUtility.ToJson(playerData));
+            PlayerPrefs.Save();
 
-                string json = JsonUtility.ToJson(playerData);
-                Debug.Log($"[Database] JSON a guardar: {json.Substring(0, Mathf.Min(200, json.Length))}...");
-
-                await databaseRef.Child("players").Child(playerData.userId).SetRawJsonValueAsync(json);
-
-                Debug.Log("[Database] Datos del jugador guardados exitosamente en Firebase");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al guardar datos del jugador: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                throw;
-            }
+            await Task.Delay(50);
         }
 
-        /// <summary>
-        /// Carga los datos del jugador
-        /// </summary>
         public async Task<PlayerData> LoadPlayerData(string userId)
         {
-            try
+            Debug.Log($"[Database] Cargando jugador: {userId}");
+
+            string key = $"SimUser_{userId}";
+            if (PlayerPrefs.HasKey(key))
             {
-                Debug.Log($"[Database] Cargando datos del jugador: {userId}");
-
-                if (databaseRef == null)
-                {
-                    Debug.LogError("[Database] DatabaseRef es null! Firebase no está inicializado correctamente");
-                    return null;
-                }
-
-                var snapshot = await databaseRef.Child("players").Child(userId).GetValueAsync();
-
-                if (snapshot.Exists)
-                {
-                    string json = snapshot.GetRawJsonValue();
-                    Debug.Log($"[Database] JSON cargado: {json.Substring(0, Mathf.Min(200, json.Length))}...");
-                    PlayerData data = JsonUtility.FromJson<PlayerData>(json);
-                    Debug.Log($"[Database] Datos del jugador cargados exitosamente. Scores: {data.scoreHistory.Count}");
-                    return data;
-                }
-                else
-                {
-                    Debug.LogWarning($"[Database] No se encontraron datos para el usuario: {userId}");
-                    return null;
-                }
+                string json = PlayerPrefs.GetString(key);
+                await Task.Delay(50);
+                return JsonUtility.FromJson<PlayerData>(json);
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al cargar datos del jugador: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                return null;
-            }
+
+            return null;
         }
 
-        /// <summary>
-        /// Actualiza el balance de monedas del jugador
-        /// </summary>
         public async Task UpdatePlayerCoins(string userId, int coins, int gems)
         {
-            try
+            var player = await LoadPlayerData(userId);
+            if (player != null)
             {
-                
-                Dictionary<string, object> updates = new Dictionary<string, object>
-                {
-                    { "coins", coins },
-                    { "gems", gems }
-                };
-
-                await databaseRef.Child("players").Child(userId).UpdateChildrenAsync(updates);
-                
-
-                await Task.Delay(50);
-                Debug.Log($"[Database] Monedas actualizadas: {coins} coins, {gems} gems");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al actualizar monedas: {ex.Message}");
+                player.coins = coins;
+                player.gems = gems;
+                await SavePlayerData(player);
             }
         }
 
@@ -176,533 +130,231 @@ namespace DigitPark.Services.Firebase
 
         #region Leaderboards
 
-        /// <summary>
-        /// Guarda una nueva puntuación en el leaderboard global
-        /// SOLO actualiza si es el mejor tiempo del jugador
-        /// </summary>
         public async Task SaveScore(string userId, string username, float time, string countryCode)
         {
-            try
+            Debug.Log($"[Database] Guardando score: {username} - {time}s");
+
+            var existing = globalLeaderboard.Find(e => e.userId == userId);
+
+            if (existing != null)
             {
-                Debug.Log($"[Database] Verificando score: {username} - {time}s en país {countryCode}");
-
-                if (databaseRef == null)
+                if (time < existing.time)
                 {
-                    Debug.LogError("[Database] DatabaseRef es null! No se puede guardar el score");
-                    return;
+                    existing.time = time;
+                    existing.username = username;
+                    Debug.Log($"[Database] Nuevo récord: {time}s");
                 }
-
-                var globalSnapshot = await databaseRef.Child("leaderboards").Child("global").Child(userId).GetValueAsync();
-
-                bool shouldUpdate = false;
-
-                if (!globalSnapshot.Exists)
-                {
-                    // No existe, guardar directamente
-                    shouldUpdate = true;
-                    Debug.Log("[Database] Primer score del usuario, guardando...");
-                }
-                else
-                {
-                    // Existe, verificar si el nuevo tiempo es mejor (menor)
-                    float existingTime = float.Parse(globalSnapshot.Child("time").Value.ToString());
-                    if (time < existingTime)
-                    {
-                        shouldUpdate = true;
-                        Debug.Log($"[Database] Nuevo récord! {time}s < {existingTime}s, actualizando...");
-                    }
-                    else
-                    {
-                        Debug.Log($"[Database] Tiempo no mejoró ({time}s >= {existingTime}s), no se actualiza leaderboard");
-                    }
-                }
-
-                if (shouldUpdate)
-                {
-                    var scoreData = new Dictionary<string, object>
-                    {
-                        { "userId", userId },
-                        { "username", username },
-                        { "time", time },
-                        { "countryCode", countryCode },
-                        { "timestamp", ServerValue.Timestamp }
-                    };
-
-                    Debug.Log($"[Database] Guardando score en Firebase...");
-
-                    // Guardar en leaderboard global
-                    await databaseRef.Child("leaderboards").Child("global").Child(userId).SetValueAsync(scoreData);
-                    Debug.Log($"[Database] Score guardado en leaderboard global");
-
-                    // Guardar en leaderboard por país
-                    await databaseRef.Child("leaderboards").Child($"country_{countryCode}").Child(userId).SetValueAsync(scoreData);
-                    Debug.Log($"[Database] Score guardado en leaderboard de país: {countryCode}");
-
-                    Debug.Log("[Database] Score actualizado en leaderboards (global y local)");
-                }
-
-                Debug.Log("[Database] Score procesado completamente");
             }
-            catch (Exception ex)
+            else
             {
-                Debug.LogError($"[Database] Error al guardar score: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
+                globalLeaderboard.Add(new LeaderboardEntry
+                {
+                    userId = userId,
+                    username = username,
+                    time = time,
+                    countryCode = countryCode
+                });
             }
+
+            globalLeaderboard.Sort((a, b) => a.time.CompareTo(b.time));
+
+            for (int i = 0; i < globalLeaderboard.Count; i++)
+            {
+                globalLeaderboard[i].position = i + 1;
+            }
+
+            SaveLeaderboard();
+            await Task.Delay(50);
         }
 
-        /// <summary>
-        /// Obtiene el leaderboard global (top N jugadores)
-        /// </summary>
         public async Task<List<LeaderboardEntry>> GetGlobalLeaderboard(int topCount = 200)
         {
-            try
+            Debug.Log($"[Database] Obteniendo top {topCount} global");
+            await Task.Delay(100);
+
+            var result = new List<LeaderboardEntry>();
+            int count = Math.Min(topCount, globalLeaderboard.Count);
+
+            for (int i = 0; i < count; i++)
             {
-                Debug.Log($"[Database] Obteniendo top {topCount} global...");
-
-                if (databaseRef == null)
-                {
-                    Debug.LogError("[Database] DatabaseRef es null! No se puede obtener leaderboard global");
-                    return new List<LeaderboardEntry>();
-                }
-
-                var snapshot = await databaseRef.Child("leaderboards").Child("global")
-                    .OrderByChild("time")
-                    .LimitToFirst(topCount)
-                    .GetValueAsync();
-
-                List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
-
-                if (snapshot.Exists)
-                {
-                    Debug.Log($"[Database] Snapshot existe, procesando {snapshot.ChildrenCount} entradas");
-
-                    foreach (var child in snapshot.Children)
-                    {
-                        var entry = new LeaderboardEntry
-                        {
-                            userId = child.Child("userId").Value.ToString(),
-                            username = child.Child("username").Value.ToString(),
-                            time = float.Parse(child.Child("time").Value.ToString()),
-                            countryCode = child.Child("countryCode").Value.ToString()
-                        };
-                        entries.Add(entry);
-                    }
-
-                    Debug.Log($"[Database] Leaderboard global cargado: {entries.Count} entradas");
-                }
-                else
-                {
-                    Debug.LogWarning("[Database] No hay datos en el leaderboard global");
-                }
-
-                return entries;
+                result.Add(globalLeaderboard[i]);
             }
-            catch (Exception ex)
+
+            return result;
+        }
+
+        public async Task<List<LeaderboardEntry>> GetCountryLeaderboard(string countryCode, int topCount = 100)
+        {
+            await Task.Delay(50);
+            var filtered = globalLeaderboard.FindAll(e => e.countryCode == countryCode);
+            int count = Math.Min(topCount, filtered.Count);
+            return filtered.GetRange(0, count);
+        }
+
+        public async Task UpdateUsernameInLeaderboards(string userId, string newUsername, string countryCode)
+        {
+            var entry = globalLeaderboard.Find(e => e.userId == userId);
+            if (entry != null)
             {
-                Debug.LogError($"[Database] Error al obtener leaderboard global: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                return new List<LeaderboardEntry>();
+                entry.username = newUsername;
+                SaveLeaderboard();
             }
+            await Task.Delay(50);
         }
 
         /// <summary>
-        /// Obtiene el leaderboard de un país específico
+        /// Elimina al usuario de todos los leaderboards
         /// </summary>
-        public async Task<List<LeaderboardEntry>> GetCountryLeaderboard(string countryCode, int topCount = 100)
+        public async Task RemoveUserFromLeaderboards(string userId)
         {
-            try
+            Debug.Log($"[Database] Eliminando usuario {userId} del leaderboard");
+
+            int removed = globalLeaderboard.RemoveAll(e => e.userId == userId);
+
+            if (removed > 0)
             {
-                Debug.Log($"[Database] Obteniendo top {topCount} de {countryCode}...");
-
-                if (databaseRef == null)
+                // Recalcular posiciones
+                for (int i = 0; i < globalLeaderboard.Count; i++)
                 {
-                    Debug.LogError("[Database] DatabaseRef es null! No se puede obtener leaderboard de país");
-                    return new List<LeaderboardEntry>();
+                    globalLeaderboard[i].position = i + 1;
                 }
 
-                var snapshot = await databaseRef.Child("leaderboards").Child($"country_{countryCode}")
-                    .OrderByChild("time")
-                    .LimitToFirst(topCount)
-                    .GetValueAsync();
-
-                List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
-
-                if (snapshot.Exists)
-                {
-                    Debug.Log($"[Database] Snapshot existe, procesando {snapshot.ChildrenCount} entradas de {countryCode}");
-
-                    foreach (var child in snapshot.Children)
-                    {
-                        var entry = new LeaderboardEntry
-                        {
-                            userId = child.Child("userId").Value.ToString(),
-                            username = child.Child("username").Value.ToString(),
-                            time = float.Parse(child.Child("time").Value.ToString()),
-                            countryCode = child.Child("countryCode").Value.ToString()
-                        };
-                        entries.Add(entry);
-                    }
-
-                    Debug.Log($"[Database] Leaderboard de {countryCode} cargado: {entries.Count} entradas");
-                }
-                else
-                {
-                    Debug.LogWarning($"[Database] No hay datos en el leaderboard de {countryCode}");
-                }
-
-                return entries;
+                SaveLeaderboard();
+                Debug.Log($"[Database] Usuario eliminado del leaderboard ({removed} entradas)");
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al obtener leaderboard de país: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                return new List<LeaderboardEntry>();
-            }
+
+            await Task.Delay(50);
         }
 
         #endregion
 
         #region Tournaments
 
-        /// <summary>
-        /// Crea un nuevo torneo
-        /// </summary>
         public async Task<bool> CreateTournament(TournamentData tournament)
         {
-            try
-            {
-                Debug.Log($"[Database] Creando torneo: {tournament.name}");
-                Debug.Log($"[Database] - TournamentId: {tournament.tournamentId}");
-                Debug.Log($"[Database] - CreatorId: {tournament.creatorId}");
-                Debug.Log($"[Database] - Status: {tournament.status}");
-                Debug.Log($"[Database] - MaxParticipants: {tournament.maxParticipants}");
-                Debug.Log($"[Database] - CurrentParticipants: {tournament.currentParticipants}");
-                Debug.Log($"[Database] - Participants Count: {tournament.participants?.Count ?? 0}");
+            Debug.Log($"[Database] Creando torneo: {tournament.name}");
+            tournaments[tournament.tournamentId] = tournament;
 
-                string json = JsonUtility.ToJson(tournament);
-                Debug.Log($"[Database] JSON: {json.Substring(0, Math.Min(500, json.Length))}");
+            string key = $"SimTournament_{tournament.tournamentId}";
+            PlayerPrefs.SetString(key, JsonUtility.ToJson(tournament));
+            PlayerPrefs.Save();
 
-                await databaseRef.Child("tournaments").Child(tournament.tournamentId).SetRawJsonValueAsync(json);
-
-                await Task.Delay(100);
-                Debug.Log("[Database] Torneo creado exitosamente en Firebase");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al crear torneo: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                return false;
-            }
+            await Task.Delay(100);
+            return true;
         }
 
-        /// <summary>
-        /// Obtiene un torneo por ID
-        /// </summary>
         public async Task<TournamentData> GetTournament(string tournamentId)
         {
-            try
+            if (tournaments.ContainsKey(tournamentId))
             {
-                Debug.Log($"[Database] Obteniendo torneo: {tournamentId}");
-
-               
-                var snapshot = await databaseRef.Child("tournaments").Child(tournamentId).GetValueAsync();
-
-                if (snapshot.Exists)
-                {
-                    string json = snapshot.GetRawJsonValue();
-                    return JsonUtility.FromJson<TournamentData>(json);
-                }
-                
-
-                await Task.Delay(100);
-                return null;
+                await Task.Delay(50);
+                return tournaments[tournamentId];
             }
-            catch (Exception ex)
+
+            string key = $"SimTournament_{tournamentId}";
+            if (PlayerPrefs.HasKey(key))
             {
-                Debug.LogError($"[Database] Error al obtener torneo: {ex.Message}");
-                return null;
+                var tournament = JsonUtility.FromJson<TournamentData>(PlayerPrefs.GetString(key));
+                tournaments[tournamentId] = tournament;
+                return tournament;
             }
+
+            return null;
         }
 
-        /// <summary>
-        /// Obtiene todos los torneos activos (Scheduled y Active, no Completed o Cancelled)
-        /// </summary>
         public async Task<List<TournamentData>> GetActiveTournaments()
         {
-            try
+            await Task.Delay(100);
+            var active = new List<TournamentData>();
+
+            foreach (var t in tournaments.Values)
             {
-                Debug.Log("[Database] Obteniendo torneos activos...");
-
-                // Obtener TODOS los torneos (sin filtro)
-                var snapshot = await databaseRef.Child("tournaments").GetValueAsync();
-
-                List<TournamentData> tournaments = new List<TournamentData>();
-
-                if (snapshot.Exists)
+                if (t.status == TournamentStatus.Scheduled || t.status == TournamentStatus.Active)
                 {
-                    foreach (var child in snapshot.Children)
-                    {
-                        string json = child.GetRawJsonValue();
-                        TournamentData tournament = JsonUtility.FromJson<TournamentData>(json);
-
-                        // Filtrar solo torneos Scheduled y Active (excluir Completed y Cancelled)
-                        if (tournament != null &&
-                            (tournament.status == TournamentStatus.Scheduled ||
-                             tournament.status == TournamentStatus.Active))
-                        {
-                            tournaments.Add(tournament);
-                            Debug.Log($"[Database] Torneo encontrado: {tournament.name} - Status: {tournament.status}");
-                        }
-                    }
+                    active.Add(t);
                 }
+            }
 
-                Debug.Log($"[Database] Total de torneos activos encontrados: {tournaments.Count}");
-                return tournaments;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al obtener torneos activos: {ex.Message}");
-                return new List<TournamentData>();
-            }
+            return active;
         }
 
-        /// <summary>
-        /// Actualiza el torneo en la base de datos
-        /// </summary>
         public async Task UpdateTournament(TournamentData tournament)
         {
-            try
-            {
-                
-                string json = JsonUtility.ToJson(tournament);
-                await databaseRef.Child("tournaments").Child(tournament.tournamentId).SetRawJsonValueAsync(json);
-                
-
-                await Task.Delay(100);
-                Debug.Log($"[Database] Torneo actualizado: {tournament.tournamentId}");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al actualizar torneo: {ex.Message}");
-            }
+            tournaments[tournament.tournamentId] = tournament;
+            string key = $"SimTournament_{tournament.tournamentId}";
+            PlayerPrefs.SetString(key, JsonUtility.ToJson(tournament));
+            PlayerPrefs.Save();
+            await Task.Delay(50);
         }
 
-        /// <summary>
-        /// Añade un participante a un torneo
-        /// </summary>
         public async Task<bool> JoinTournament(string tournamentId, string userId)
         {
-            try
+            var tournament = await GetTournament(tournamentId);
+            if (tournament == null) return false;
+
+            var player = await LoadPlayerData(userId);
+            if (player == null) return false;
+
+            if (tournament.AddParticipant(player))
             {
-                Debug.Log($"[Database] Usuario {userId} uniéndose al torneo {tournamentId}");
+                await UpdateTournament(tournament);
 
-                var tournamentData = await GetTournament(tournamentId);
-                if (tournamentData == null)
+                if (tournament.entryFee > 0)
                 {
-                    Debug.LogError($"[Database] No se encontró el torneo {tournamentId}");
-                    return false;
+                    player.coins -= tournament.entryFee;
+                    await SavePlayerData(player);
                 }
 
-                Debug.Log($"[Database] Torneo encontrado: {tournamentData.name}");
-                Debug.Log($"[Database] Participantes actuales: {tournamentData.currentParticipants}/{tournamentData.maxParticipants}");
-
-                var playerData = await LoadPlayerData(userId);
-                if (playerData == null)
-                {
-                    Debug.LogError($"[Database] No se encontró el jugador {userId}");
-                    return false;
-                }
-
-                Debug.Log($"[Database] Jugador encontrado: {playerData.username}");
-
-                if (tournamentData.AddParticipant(playerData))
-                {
-                    Debug.Log($"[Database] Participante agregado exitosamente. Nuevos participantes: {tournamentData.currentParticipants}");
-                    Debug.Log($"[Database] Total de participantes en lista: {tournamentData.participants.Count}");
-
-                    await UpdateTournament(tournamentData);
-
-                    // Deducir entrada del balance del jugador
-                    if (tournamentData.entryFee > 0)
-                    {
-                        playerData.coins -= tournamentData.entryFee;
-                        await SavePlayerData(playerData);
-                        Debug.Log($"[Database] Deducidos {tournamentData.entryFee} coins del jugador");
-                    }
-
-                    Debug.Log($"[Database] Usuario unido exitosamente al torneo");
-                    return true;
-                }
-                else
-                {
-                    Debug.LogWarning($"[Database] No se pudo agregar el participante (puede que ya esté, torneo lleno, o sin fondos)");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al unirse al torneo: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Remueve un participante de un torneo
-        /// </summary>
-        public async Task<bool> LeaveTournament(string tournamentId, string userId)
-        {
-            try
-            {
-                Debug.Log($"[Database] Usuario {userId} abandonando el torneo {tournamentId}");
-
-                var tournamentData = await GetTournament(tournamentId);
-                if (tournamentData == null)
-                {
-                    Debug.LogError($"[Database] No se encontró el torneo {tournamentId}");
-                    return false;
-                }
-
-                Debug.Log($"[Database] Torneo encontrado: {tournamentData.name}");
-
-                // Verificar si el usuario está en el torneo
-                if (!tournamentData.IsParticipating(userId))
-                {
-                    Debug.LogWarning($"[Database] El usuario no está participando en este torneo");
-                    return false;
-                }
-
-                var playerData = await LoadPlayerData(userId);
-                if (playerData == null)
-                {
-                    Debug.LogError($"[Database] No se encontró el jugador {userId}");
-                    return false;
-                }
-
-                Debug.Log($"[Database] Jugador encontrado: {playerData.username}");
-
-                // Remover participante
-                tournamentData.participants.RemoveAll(p => p.userId == userId);
-                tournamentData.currentParticipants--;
-
-                // Devolver el entryFee al jugador
-                if (tournamentData.entryFee > 0)
-                {
-                    playerData.coins += tournamentData.entryFee;
-                    tournamentData.totalPrizePool -= tournamentData.entryFee;
-                    await SavePlayerData(playerData);
-                    Debug.Log($"[Database] Devueltos {tournamentData.entryFee} coins al jugador");
-                }
-
-                Debug.Log($"[Database] Participante removido. Participantes restantes: {tournamentData.currentParticipants}");
-
-                // Actualizar torneo en Firebase
-                await UpdateTournament(tournamentData);
-
-                Debug.Log($"[Database] Usuario abandonó exitosamente el torneo");
+                Debug.Log($"[Database] {player.username} se unió al torneo");
                 return true;
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al abandonar el torneo: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-                return false;
-            }
+
+            return false;
         }
 
-        /// <summary>
-        /// Actualiza el username en todos los leaderboards donde el usuario tenga registros
-        /// Llamar cuando el usuario cambia su nombre
-        /// </summary>
-        public async Task UpdateUsernameInLeaderboards(string userId, string newUsername, string countryCode)
+        public async Task<bool> LeaveTournament(string tournamentId, string userId)
         {
-            try
+            var tournament = await GetTournament(tournamentId);
+            if (tournament == null) return false;
+
+            if (!tournament.IsParticipating(userId)) return false;
+
+            var player = await LoadPlayerData(userId);
+            if (player == null) return false;
+
+            tournament.participants.RemoveAll(p => p.userId == userId);
+            tournament.currentParticipants--;
+
+            if (tournament.entryFee > 0)
             {
-                Debug.Log($"[Database] Actualizando username en leaderboards para userId: {userId} → {newUsername}");
-
-                if (databaseRef == null)
-                {
-                    Debug.LogError("[Database] DatabaseRef es null! No se puede actualizar username en leaderboards");
-                    return;
-                }
-
-                // Actualizar en leaderboard global
-                var globalRef = databaseRef.Child("leaderboards").Child("global").Child(userId);
-                var globalSnapshot = await globalRef.GetValueAsync();
-
-                if (globalSnapshot.Exists)
-                {
-                    await globalRef.Child("username").SetValueAsync(newUsername);
-                    Debug.Log($"[Database] ✅ Username actualizado en leaderboard global");
-                }
-                else
-                {
-                    Debug.Log($"[Database] ℹ️ Usuario no tiene registro en leaderboard global");
-                }
-
-                // Actualizar en leaderboard de país
-                var countryRef = databaseRef.Child("leaderboards").Child($"country_{countryCode}").Child(userId);
-                var countrySnapshot = await countryRef.GetValueAsync();
-
-                if (countrySnapshot.Exists)
-                {
-                    await countryRef.Child("username").SetValueAsync(newUsername);
-                    Debug.Log($"[Database] ✅ Username actualizado en leaderboard de país: {countryCode}");
-                }
-                else
-                {
-                    Debug.Log($"[Database] ℹ️ Usuario no tiene registro en leaderboard de país: {countryCode}");
-                }
-
-                Debug.Log($"[Database] ✅ Username actualizado exitosamente en todos los leaderboards");
+                player.coins += tournament.entryFee;
+                tournament.totalPrizePool -= tournament.entryFee;
+                await SavePlayerData(player);
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al actualizar username en leaderboards: {ex.Message}");
-                Debug.LogError($"[Database] Stack trace: {ex.StackTrace}");
-            }
+
+            await UpdateTournament(tournament);
+            return true;
         }
 
         #endregion
 
         #region Analytics
 
-        /// <summary>
-        /// Registra un evento de juego
-        /// </summary>
         public void LogGameEvent(string eventName, Dictionary<string, object> parameters)
         {
-            try
-            {
-                Debug.Log($"[Database] Evento: {eventName}");
-
-                // NOTA: Requiere Firebase Analytics
-                // Descomentar cuando Firebase Analytics esté configurado
-                /*
-                var paramArray = new Firebase.Analytics.Parameter[parameters.Count];
-                int i = 0;
-                foreach (var kvp in parameters)
-                {
-                    paramArray[i] = new Firebase.Analytics.Parameter(kvp.Key, kvp.Value.ToString());
-                    i++;
-                }
-                Firebase.Analytics.FirebaseAnalytics.LogEvent(eventName, paramArray);
-                */
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Database] Error al registrar evento: {ex.Message}");
-            }
+            Debug.Log($"[Database] Evento: {eventName}");
         }
 
         #endregion
     }
 
-    /// <summary>
-    /// Entrada del leaderboard
-    /// </summary>
-    [System.Serializable]
+    [Serializable]
+    public class LeaderboardWrapper
+    {
+        public List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
+    }
+
+    [Serializable]
     public class LeaderboardEntry
     {
         public string userId;
@@ -711,6 +363,6 @@ namespace DigitPark.Services.Firebase
         public string countryCode;
         public string avatarUrl;
         public int position;
-        public string timestamp; // Para scores personales (formato de fecha/hora)
+        public string timestamp;
     }
 }
