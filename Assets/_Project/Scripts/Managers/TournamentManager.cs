@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -758,14 +759,17 @@ namespace DigitPark.Managers
 
             // Configurar textos para UNIRSE a torneo
             if (messageText != null)
-                messageText.text = "¿Deseas unirte a este torneo?";
+                messageText.text = AutoLocalizer.Get("join_confirm_message");
 
             if (tournamentInfoText != null)
             {
                 string timeRemaining = FormatTimeRemaining(tournament.GetTimeRemaining());
-                tournamentInfoText.text = $"Creador: {tournament.creatorName}\n" +
-                    $"Participantes: {tournament.currentParticipants}/{tournament.maxParticipants}\n" +
-                    $"Tiempo restante: {timeRemaining}";
+                string creatorLabel = AutoLocalizer.Get("creator_label");
+                string participantsLabel = AutoLocalizer.Get("participants");
+                string timeRemainingLabel = AutoLocalizer.Get("time_remaining");
+                tournamentInfoText.text = $"{creatorLabel} {tournament.creatorName}\n" +
+                    $"{participantsLabel}: {tournament.currentParticipants}/{tournament.maxParticipants}\n" +
+                    $"{timeRemainingLabel} {timeRemaining}";
             }
 
             // Mostrar blocker y popup
@@ -851,7 +855,7 @@ namespace DigitPark.Managers
                     AnalyticsService.Instance?.LogTournamentCreated(newTournament.tournamentId, 0);
 
                     // Mostrar mensaje de éxito
-                    ShowSuccessMessage("¡Torneo creado exitosamente! Te has unido automáticamente.");
+                    ShowSuccessMessage(AutoLocalizer.Get("create_success"));
 
                     // Ocultar panel de creación y volver a Search (después de 1.5 segundos)
                     await System.Threading.Tasks.Task.Delay(1500);
@@ -863,7 +867,7 @@ namespace DigitPark.Managers
                 else
                 {
                     Debug.LogError("[Tournament] Error al crear torneo");
-                    ShowErrorMessage("No se pudo crear el torneo. Intenta nuevamente.");
+                    ShowErrorMessage(AutoLocalizer.Get("create_error"));
                 }
             }
             catch (System.Exception ex)
@@ -893,7 +897,7 @@ namespace DigitPark.Managers
                 if (success)
                 {
                     Debug.Log($"[Tournament] Unido exitosamente al torneo: {selectedTournament.tournamentId}");
-                    ShowSuccessMessage("¡Te has unido al torneo exitosamente!");
+                    ShowSuccessMessage(AutoLocalizer.Get("join_success"));
 
                     // Recargar torneos
                     await System.Threading.Tasks.Task.Delay(1500);
@@ -901,7 +905,7 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    ShowErrorMessage("No se pudo unir al torneo. Intenta nuevamente.");
+                    ShowErrorMessage(AutoLocalizer.Get("join_error"));
                 }
             }
             catch (System.Exception ex)
@@ -925,15 +929,15 @@ namespace DigitPark.Managers
         private string FormatTimeRemaining(System.TimeSpan time)
         {
             if (time.TotalSeconds <= 0)
-                return "Finalizado";
+                return AutoLocalizer.Get("finished");
 
             if (time.TotalDays >= 1)
-                return $"{(int)time.TotalDays}d {time.Hours}h";
+                return AutoLocalizer.Get("time_days_hours", (int)time.TotalDays, time.Hours);
 
             if (time.TotalHours >= 1)
-                return $"{(int)time.TotalHours}h {time.Minutes}m";
+                return AutoLocalizer.Get("time_hours_minutes", (int)time.TotalHours, time.Minutes);
 
-            return $"{(int)time.TotalMinutes}m {time.Seconds}s";
+            return AutoLocalizer.Get("time_minutes_seconds", (int)time.TotalMinutes, time.Seconds);
         }
 
         /// <summary>
@@ -942,6 +946,13 @@ namespace DigitPark.Managers
         private void ClearTournamentsList()
         {
             if (tournamentsContainer == null) return;
+
+            // Resetear la posición del ScrollRect antes de destruir para evitar MissingReferenceException
+            if (scrollRect != null)
+            {
+                scrollRect.StopMovement();
+                scrollRect.normalizedPosition = new Vector2(0, 1);
+            }
 
             foreach (Transform child in tournamentsContainer)
             {
@@ -958,7 +969,9 @@ namespace DigitPark.Managers
             emptyMsg.transform.SetParent(tournamentsContainer);
 
             Text text = emptyMsg.AddComponent<Text>();
-            text.text = currentView == TournamentView.Search ? "No hay torneos activos" : "No participas en ningún torneo";
+            text.text = currentView == TournamentView.Search
+                ? AutoLocalizer.Get("no_active_tournaments")
+                : AutoLocalizer.Get("not_in_tournament");
             text.alignment = TextAnchor.MiddleCenter;
             text.fontSize = 24;
             text.color = Color.gray;
@@ -1161,7 +1174,7 @@ namespace DigitPark.Managers
 
             // Best Time (centro-derecha)
             string timeString = participant.bestTime == float.MaxValue ?
-                "Sin tiempo" : FormatTime(participant.bestTime);
+                AutoLocalizer.Get("no_time") : FormatTime(participant.bestTime);
             TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
                 timeString, 24, Color.white);
             RectTransform timeRT = timeText.GetComponent<RectTransform>();
@@ -1174,7 +1187,7 @@ namespace DigitPark.Managers
 
             // Attempts (derecha)
             TextMeshProUGUI attemptsText = CreateItemText(itemObj.transform, "AttemptsText",
-                $"{participant.attempts} intentos", 20, new Color(0.7f, 0.7f, 0.7f));
+                $"{participant.attempts} {AutoLocalizer.Get("attempts")}", 20, new Color(0.7f, 0.7f, 0.7f));
             RectTransform attemptsRT = attemptsText.GetComponent<RectTransform>();
             attemptsRT.anchorMin = new Vector2(1, 0);
             attemptsRT.anchorMax = new Vector2(1, 1);
@@ -1291,7 +1304,7 @@ namespace DigitPark.Managers
                 if (success)
                 {
                     Debug.Log($"[Tournament] Salida exitosa del torneo: {selectedTournament.tournamentId}");
-                    ShowSuccessMessage("Has abandonado el torneo exitosamente");
+                    ShowSuccessMessage(AutoLocalizer.Get("exit_success"));
 
                     // Ocultar botones de leaderboard
                     if (leaderboardBackButton != null)
@@ -1305,7 +1318,7 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    ShowErrorMessage("No se pudo salir del torneo. Intenta nuevamente.");
+                    ShowErrorMessage(AutoLocalizer.Get("exit_error"));
                 }
             }
             catch (System.Exception ex)

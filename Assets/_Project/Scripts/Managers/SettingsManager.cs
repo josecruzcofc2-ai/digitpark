@@ -107,11 +107,8 @@ namespace DigitPark.Managers
         {
             if (languageDropdown == null) return;
 
-            // Limpiar opciones existentes
-            languageDropdown.ClearOptions();
-
-            // Agregar opciones de idioma
-            languageDropdown.AddOptions(new System.Collections.Generic.List<string> { "English", "Español" });
+            // Las opciones ya están configuradas en el Inspector:
+            // 0: English, 1: Español, 2: Français, 3: Português, 4: Deutsch
 
             // Establecer el valor actual
             int currentIndex = PlayerPrefs.GetInt("Language", 0);
@@ -121,13 +118,18 @@ namespace DigitPark.Managers
                 currentIndex = LocalizationManager.Instance.GetCurrentLanguageIndex();
             }
 
+            // Asegurar que el índice esté dentro del rango
+            currentIndex = Mathf.Clamp(currentIndex, 0, languageDropdown.options.Count - 1);
+
             // Remover listener temporalmente para evitar que se dispare al establecer el valor
             languageDropdown.onValueChanged.RemoveListener(OnLanguageDropdownChanged);
             languageDropdown.value = currentIndex;
             languageDropdown.RefreshShownValue();
             languageDropdown.onValueChanged.AddListener(OnLanguageDropdownChanged);
 
-            Debug.Log($"[Settings] Idioma actual: {(currentIndex == 0 ? "English" : "Español")}");
+            string[] languageNames = { "English", "Español", "Français", "Português", "Deutsch" };
+            string currentLanguage = currentIndex < languageNames.Length ? languageNames[currentIndex] : "Unknown";
+            Debug.Log($"[Settings] Idioma actual: {currentLanguage}");
         }
 
         private void SetupListeners()
@@ -168,7 +170,8 @@ namespace DigitPark.Managers
 
         private void OnLanguageDropdownChanged(int index)
         {
-            string language = index == 0 ? "English" : "Español";
+            string[] languageNames = { "English", "Español", "Français", "Português", "Deutsch" };
+            string language = index < languageNames.Length ? languageNames[index] : "Unknown";
             Debug.Log($"[Settings] Cambiando idioma a: {language}");
 
             if (LocalizationManager.Instance != null)
