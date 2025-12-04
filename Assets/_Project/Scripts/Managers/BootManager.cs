@@ -48,19 +48,19 @@ namespace DigitPark.Managers
 
             // Paso 1: Inicializar configuraciones básicas
             yield return StartCoroutine(InitializeBasicSettings());
-            UpdateLoadingProgress(0.2f, "Inicializando configuración...");
+            UpdateLoadingProgress(0.2f, "boot_initializing_config");
 
             // Paso 2: Inicializar servicios de Firebase
             yield return StartCoroutine(InitializeFirebaseServices());
-            UpdateLoadingProgress(0.5f, "Conectando a servicios...");
+            UpdateLoadingProgress(0.5f, "boot_connecting_services");
 
             // Paso 3: Inicializar managers del juego
             yield return StartCoroutine(InitializeGameManagers());
-            UpdateLoadingProgress(0.7f, "Cargando recursos...");
+            UpdateLoadingProgress(0.7f, "boot_loading_resources");
 
             // Paso 4: Verificar estado de autenticación
             yield return StartCoroutine(CheckAuthenticationStatus());
-            UpdateLoadingProgress(0.9f, "Verificando usuario...");
+            UpdateLoadingProgress(0.9f, "boot_verifying_user");
 
             // Asegurar tiempo mínimo de carga (para mostrar logo/branding)
             float elapsedTime = Time.time - startTime;
@@ -69,7 +69,7 @@ namespace DigitPark.Managers
                 yield return new WaitForSeconds(minimumLoadTime - elapsedTime);
             }
 
-            UpdateLoadingProgress(1f, "Completado!");
+            UpdateLoadingProgress(1f, "boot_completed");
 
             yield return new WaitForSeconds(0.5f);
 
@@ -106,7 +106,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Boot] Inicializando servicios...");
 
-            // Crear LocalizationManager primero
+            // Crear LocalizationManager (automáticamente crea AutoLocalizer)
             if (LocalizationManager.Instance == null)
             {
                 GameObject localizationService = new GameObject("LocalizationManager");
@@ -237,7 +237,7 @@ namespace DigitPark.Managers
         /// <summary>
         /// Actualiza la barra de progreso y el texto
         /// </summary>
-        private void UpdateLoadingProgress(float progress, string statusText)
+        private void UpdateLoadingProgress(float progress, string localizationKey)
         {
             loadingProgress = progress;
 
@@ -248,10 +248,14 @@ namespace DigitPark.Managers
 
             if (loadingText != null)
             {
-                loadingText.text = statusText;
+                // Usar localización si está disponible, sino usar la key como fallback
+                string displayText = LocalizationManager.Instance != null
+                    ? LocalizationManager.Instance.GetText(localizationKey)
+                    : localizationKey;
+                loadingText.text = displayText;
             }
 
-            Debug.Log($"[Boot] {(progress * 100):F0}% - {statusText}");
+            Debug.Log($"[Boot] {(progress * 100):F0}% - {localizationKey}");
         }
 
         /// <summary>
@@ -285,7 +289,10 @@ namespace DigitPark.Managers
             // Mostrar mensaje de error al usuario
             if (loadingText != null)
             {
-                loadingText.text = "Error al inicializar. Por favor reinicia la aplicación.";
+                string errorMessage = LocalizationManager.Instance != null
+                    ? LocalizationManager.Instance.GetText("boot_error")
+                    : "Error initializing. Please restart.";
+                loadingText.text = errorMessage;
                 loadingText.color = Color.red;
             }
 
