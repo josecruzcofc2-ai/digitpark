@@ -68,6 +68,7 @@ namespace DigitPark.Managers
         [Header("Leaderboard View")]
         [SerializeField] public GameObject leaderboardBackButton;
         [SerializeField] public GameObject exitTournamentButton;
+        [SerializeField] public GameObject searchTournamentButton;
 
         [Header("Exit Tournament Confirmation")]
         [SerializeField] public GameObject exitTournamentConfirmPanel;
@@ -113,6 +114,7 @@ namespace DigitPark.Managers
             if (confirmPopup != null) confirmPopup.SetActive(false);
             if (leaderboardBackButton != null) leaderboardBackButton.SetActive(false);
             if (exitTournamentButton != null) exitTournamentButton.SetActive(false);
+            if (searchTournamentButton != null) searchTournamentButton.SetActive(true); // Siempre visible
             if (exitTournamentConfirmPanel != null) exitTournamentConfirmPanel.SetActive(false);
 
             // Mostrar vista inicial
@@ -206,6 +208,16 @@ namespace DigitPark.Managers
                 if (exitBtn != null)
                 {
                     exitBtn.onClick.AddListener(OnExitTournamentButtonClicked);
+                }
+            }
+
+            // Search Tournament (volver a la vista de búsqueda desde el leaderboard)
+            if (searchTournamentButton != null)
+            {
+                Button searchBtn = searchTournamentButton.GetComponent<Button>();
+                if (searchBtn != null)
+                {
+                    searchBtn.onClick.AddListener(OnSearchTournamentButtonClicked);
                 }
             }
 
@@ -408,11 +420,13 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
-            // Ocultar botón de back del leaderboard y botón de salir del torneo
+            // Ocultar botones del leaderboard (excepto buscar torneo que siempre está visible)
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(false);
             if (exitTournamentButton != null)
                 exitTournamentButton.SetActive(false);
+            if (searchTournamentButton != null)
+                searchTournamentButton.SetActive(true); // Siempre visible
 
             try
             {
@@ -441,11 +455,13 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
-            // Ocultar botón de back del leaderboard y botón de salir del torneo
+            // Ocultar botones del leaderboard (excepto buscar torneo que siempre está visible)
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(false);
             if (exitTournamentButton != null)
                 exitTournamentButton.SetActive(false);
+            if (searchTournamentButton != null)
+                searchTournamentButton.SetActive(true); // Siempre visible
 
             try
             {
@@ -948,7 +964,7 @@ namespace DigitPark.Managers
             if (tournamentsContainer == null) return;
 
             // Resetear la posición del ScrollRect antes de destruir para evitar MissingReferenceException
-            if (scrollRect != null)
+            if (scrollRect != null && scrollRect.content != null)
             {
                 scrollRect.StopMovement();
                 scrollRect.normalizedPosition = new Vector2(0, 1);
@@ -1030,6 +1046,10 @@ namespace DigitPark.Managers
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(true);
 
+            // Mostrar botón de buscar torneo
+            if (searchTournamentButton != null)
+                searchTournamentButton.SetActive(true);
+
             // Mostrar botón de salir del torneo si el usuario participa
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
             Debug.Log($"[Tournament] ¿Usuario participa? {isParticipating}, userId: {currentPlayer?.userId}, participantes: {tournament.participants?.Count ?? 0}");
@@ -1109,8 +1129,8 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Crea un item del leaderboard
-        /// Estructura: Pos | Username | BestTime | Attempts
+        /// Crea un item del leaderboard - MISMO ESTILO QUE SCORES
+        /// Estructura: Posición | Username | Tiempo
         /// </summary>
         private void CreateLeaderboardItem(int position, ParticipantScore participant)
         {
@@ -1123,81 +1143,90 @@ namespace DigitPark.Managers
             itemRT.anchorMin = new Vector2(0, 1);
             itemRT.anchorMax = new Vector2(1, 1);
             itemRT.pivot = new Vector2(0.5f, 1);
-            itemRT.sizeDelta = new Vector2(0, 70);
+            itemRT.anchoredPosition = Vector2.zero;
+            itemRT.sizeDelta = new Vector2(0, 80);
 
-            // Layout
-            var layout = itemObj.AddComponent<LayoutElement>();
-            layout.preferredHeight = 70;
+            // Layout element para el container padre
+            var layoutElement = itemObj.AddComponent<LayoutElement>();
+            layoutElement.preferredHeight = 80;
+            layoutElement.minHeight = 80;
+            layoutElement.flexibleWidth = 1;
 
-            // Fondo - color especial para top 3
+            // Verificar si es el jugador actual
+            bool isCurrentPlayer = participant.userId == (currentPlayer?.userId ?? "");
+
+            // Fondo - EXACTAMENTE como en Scores
             Image bg = itemObj.AddComponent<Image>();
-            if (position == 1)
-                bg.color = new Color(1f, 0.84f, 0f, 0.3f); // Oro
-            else if (position == 2)
-                bg.color = new Color(0.75f, 0.75f, 0.75f, 0.3f); // Plata
-            else if (position == 3)
-                bg.color = new Color(0.8f, 0.5f, 0.2f, 0.3f); // Bronce
+            if (isCurrentPlayer)
+            {
+                bg.color = new Color(0f, 0.83f, 1f, 0.95f); // Azul eléctrico
+            }
             else
-                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+            {
+                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f); // Gris oscuro
+            }
 
-            // Divisores
-            CreateVerticalDivider(itemObj.transform, 80f);   // Después de posición
-            CreateVerticalDivider(itemObj.transform, 600f);  // Después de username
-            CreateVerticalDivider(itemObj.transform, 900f);  // Después de bestTime
+            // HorizontalLayoutGroup para controlar el orden de los elementos
+            var hlg = itemObj.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = true;
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(20, 20, 5, 5);
 
-            // Posición (izquierda) - "#1"
-            Color posColor = position <= 3 ? new Color(0f, 1f, 0.53f) : Color.white;
-            TextMeshProUGUI posText = CreateItemText(itemObj.transform, "PositionText",
-                $"#{position}", 28, posColor);
-            RectTransform posRT = posText.GetComponent<RectTransform>();
-            posRT.anchorMin = new Vector2(0, 0);
-            posRT.anchorMax = new Vector2(0, 1);
-            posRT.pivot = new Vector2(0, 0.5f);
-            posRT.anchoredPosition = new Vector2(10, 0);
-            posRT.sizeDelta = new Vector2(70, 0);
+            // 1. POSICIÓN (izquierda) - colores de medalla
+            Color posColor;
+            if (position == 1)
+                posColor = new Color(1f, 0.84f, 0f); // Oro
+            else if (position == 2)
+                posColor = new Color(0.75f, 0.75f, 0.75f); // Plata
+            else if (position == 3)
+                posColor = new Color(0.8f, 0.5f, 0.2f); // Bronce
+            else
+                posColor = new Color(1f, 0.84f, 0f); // Amarillo
+
+            GameObject posObj = new GameObject("Position");
+            posObj.transform.SetParent(itemObj.transform, false);
+            var posLayout = posObj.AddComponent<LayoutElement>();
+            posLayout.preferredWidth = 80;
+            posLayout.minWidth = 80;
+            TextMeshProUGUI posText = posObj.AddComponent<TextMeshProUGUI>();
+            posText.text = $"{position}";
+            posText.fontSize = 32;
+            posText.color = posColor;
             posText.alignment = TextAlignmentOptions.Center;
             posText.fontStyle = FontStyles.Bold;
 
-            // Username (centro-izquierda)
-            bool isCurrentPlayer = participant.userId == (currentPlayer?.userId ?? "");
-            Color nameColor = isCurrentPlayer ? new Color(0f, 0.83f, 1f) : Color.white;
-            TextMeshProUGUI nameText = CreateItemText(itemObj.transform, "UsernameText",
-                participant.username, 24, nameColor);
-            RectTransform nameRT = nameText.GetComponent<RectTransform>();
-            nameRT.anchorMin = new Vector2(0, 0);
-            nameRT.anchorMax = new Vector2(0, 1);
-            nameRT.pivot = new Vector2(0, 0.5f);
-            nameRT.anchoredPosition = new Vector2(90, 0);
-            nameRT.sizeDelta = new Vector2(500, 0);
-            nameText.alignment = TextAlignmentOptions.Left;
-            if (isCurrentPlayer) nameText.fontStyle = FontStyles.Bold;
+            // 2. USERNAME (centro) - blanco
+            GameObject nameObj = new GameObject("Username");
+            nameObj.transform.SetParent(itemObj.transform, false);
+            var nameLayout = nameObj.AddComponent<LayoutElement>();
+            nameLayout.flexibleWidth = 1; // Se expande para llenar el espacio
+            nameLayout.minWidth = 200;
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = participant.username;
+            nameText.fontSize = 26;
+            nameText.color = Color.white;
+            nameText.alignment = TextAlignmentOptions.Center;
 
-            // Best Time (centro-derecha)
+            // 3. TIEMPO (derecha) - verde brillante
             string timeString = participant.bestTime == float.MaxValue ?
-                AutoLocalizer.Get("no_time") : FormatTime(participant.bestTime);
-            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
-                timeString, 24, Color.white);
-            RectTransform timeRT = timeText.GetComponent<RectTransform>();
-            timeRT.anchorMin = new Vector2(0, 0);
-            timeRT.anchorMax = new Vector2(0, 1);
-            timeRT.pivot = new Vector2(0, 0.5f);
-            timeRT.anchoredPosition = new Vector2(610, 0);
-            timeRT.sizeDelta = new Vector2(280, 0);
+                AutoLocalizer.Get("no_time") : $"{participant.bestTime:F3}s";
+
+            GameObject timeObj = new GameObject("Time");
+            timeObj.transform.SetParent(itemObj.transform, false);
+            var timeLayout = timeObj.AddComponent<LayoutElement>();
+            timeLayout.preferredWidth = 150;
+            timeLayout.minWidth = 150;
+            TextMeshProUGUI timeText = timeObj.AddComponent<TextMeshProUGUI>();
+            timeText.text = timeString;
+            timeText.fontSize = 26;
+            timeText.color = new Color(0f, 1f, 0.53f); // Verde brillante
             timeText.alignment = TextAlignmentOptions.Center;
 
-            // Attempts (derecha)
-            TextMeshProUGUI attemptsText = CreateItemText(itemObj.transform, "AttemptsText",
-                $"{participant.attempts} {AutoLocalizer.Get("attempts")}", 20, new Color(0.7f, 0.7f, 0.7f));
-            RectTransform attemptsRT = attemptsText.GetComponent<RectTransform>();
-            attemptsRT.anchorMin = new Vector2(1, 0);
-            attemptsRT.anchorMax = new Vector2(1, 1);
-            attemptsRT.pivot = new Vector2(1, 0.5f);
-            attemptsRT.anchoredPosition = new Vector2(-20, 0);
-            attemptsRT.sizeDelta = new Vector2(200, 0);
-            attemptsText.alignment = TextAlignmentOptions.Center;
-
-            // Línea divisoria horizontal
-            CreateHorizontalDivider(itemObj.transform);
+            itemObj.SetActive(true);
         }
 
         /// <summary>
@@ -1235,9 +1264,22 @@ namespace DigitPark.Managers
                 leaderboardBackButton.SetActive(false);
             if (exitTournamentButton != null)
                 exitTournamentButton.SetActive(false);
+            if (searchTournamentButton != null)
+                searchTournamentButton.SetActive(false);
 
             // Volver a mostrar la vista actual (Search o MyTournaments)
             ShowView(currentView);
+        }
+
+        /// <summary>
+        /// Muestra el panel de opciones de búsqueda desde el leaderboard
+        /// </summary>
+        private void OnSearchTournamentButtonClicked()
+        {
+            Debug.Log("[Tournament] Mostrando opciones de búsqueda desde leaderboard");
+
+            // Mostrar el panel de opciones de búsqueda
+            ShowSearchOptions();
         }
 
         #endregion
@@ -1311,6 +1353,8 @@ namespace DigitPark.Managers
                         leaderboardBackButton.SetActive(false);
                     if (exitTournamentButton != null)
                         exitTournamentButton.SetActive(false);
+                    if (searchTournamentButton != null)
+                        searchTournamentButton.SetActive(false);
 
                     // Esperar y recargar torneos
                     await System.Threading.Tasks.Task.Delay(1500);
