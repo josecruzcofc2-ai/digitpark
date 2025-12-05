@@ -46,6 +46,15 @@ namespace DigitPark.Managers
         [SerializeField] private Button confirmDeleteButton;
         [SerializeField] private Button cancelDeleteButton;
 
+        [Header("UI - Logout Confirm Panel")]
+        [SerializeField] private GameObject logoutBlockerPanel;
+        [SerializeField] private GameObject logoutConfirmPanel;
+        [SerializeField] private TextMeshProUGUI logoutTitleMessage;
+        [SerializeField] private Button confirmLogoutButton;
+        [SerializeField] private TextMeshProUGUI confirmLogoutButtonText;
+        [SerializeField] private Button cancelLogoutButton;
+        [SerializeField] private TextMeshProUGUI cancelLogoutButtonText;
+
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
         private const string EFFECTS_VOLUME_KEY = "EffectsVolume";
@@ -153,6 +162,10 @@ namespace DigitPark.Managers
             // Panel eliminar cuenta
             confirmDeleteButton?.onClick.AddListener(OnConfirmDeleteClicked);
             cancelDeleteButton?.onClick.AddListener(OnCancelDeleteClicked);
+
+            // Panel confirmar logout
+            confirmLogoutButton?.onClick.AddListener(OnConfirmLogoutClicked);
+            cancelLogoutButton?.onClick.AddListener(OnCancelLogoutClicked);
         }
 
         private void HidePanels()
@@ -162,6 +175,12 @@ namespace DigitPark.Managers
 
             if (deleteConfirmPanel != null)
                 deleteConfirmPanel.SetActive(false);
+
+            if (logoutBlockerPanel != null)
+                logoutBlockerPanel.SetActive(false);
+
+            if (logoutConfirmPanel != null)
+                logoutConfirmPanel.SetActive(false);
         }
 
         #endregion
@@ -419,10 +438,32 @@ namespace DigitPark.Managers
 
         private void OnLogoutClicked()
         {
+            Debug.Log("[Settings] Mostrando confirmación de logout");
+
+            if (logoutBlockerPanel != null)
+                logoutBlockerPanel.SetActive(true);
+
+            if (logoutConfirmPanel != null)
+                logoutConfirmPanel.SetActive(true);
+        }
+
+        private void OnConfirmLogoutClicked()
+        {
             Debug.Log("[Settings] Cerrando sesión...");
 
             AuthenticationService.Instance?.Logout();
             SceneManager.LoadScene("Login");
+        }
+
+        private void OnCancelLogoutClicked()
+        {
+            Debug.Log("[Settings] Cancelando logout");
+
+            if (logoutBlockerPanel != null)
+                logoutBlockerPanel.SetActive(false);
+
+            if (logoutConfirmPanel != null)
+                logoutConfirmPanel.SetActive(false);
         }
 
         #endregion

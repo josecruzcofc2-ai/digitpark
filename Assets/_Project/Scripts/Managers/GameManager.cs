@@ -412,13 +412,17 @@ namespace DigitPark.Managers
 
             // Seleccionar clave aleatoria
             string selectedKey = keys[Random.Range(0, keys.Length)];
+            Debug.Log($"[Game] GetSuccessMessage - Tiempo: {time:F3}s, Key seleccionada: {selectedKey}");
 
             // Obtener texto traducido del LocalizationManager
             if (LocalizationManager.Instance != null)
             {
-                return LocalizationManager.Instance.GetText(selectedKey);
+                string translatedText = LocalizationManager.Instance.GetText(selectedKey);
+                Debug.Log($"[Game] Texto traducido: '{translatedText}'");
+                return translatedText;
             }
 
+            Debug.LogWarning("[Game] LocalizationManager.Instance es NULL! Usando key como fallback.");
             // Fallback: retornar la clave si no hay LocalizationManager
             return selectedKey;
         }
@@ -428,16 +432,34 @@ namespace DigitPark.Managers
         /// </summary>
         private IEnumerator ShowWinMessage()
         {
-            if (winMessagePanel == null || winMessageCanvasGroup == null)
+            Debug.Log($"[Game] ShowWinMessage - winMessagePanel: {winMessagePanel != null}, winMessageCanvasGroup: {winMessageCanvasGroup != null}, successText: {successText != null}");
+
+            if (winMessagePanel == null)
+            {
+                Debug.LogError("[Game] winMessagePanel es NULL! Asígnalo en el Inspector.");
                 yield break;
+            }
+
+            if (winMessageCanvasGroup == null)
+            {
+                Debug.LogError("[Game] winMessageCanvasGroup es NULL! Asígnalo en el Inspector.");
+                yield break;
+            }
 
             // Establecer mensaje de éxito según el tiempo
             if (successText != null)
             {
-                successText.text = GetSuccessMessage(currentTime);
+                string message = GetSuccessMessage(currentTime);
+                successText.text = message;
+                Debug.Log($"[Game] SuccessText establecido: '{message}'");
+            }
+            else
+            {
+                Debug.LogWarning("[Game] successText es NULL! El mensaje no se mostrará.");
             }
 
             winMessagePanel.SetActive(true);
+            Debug.Log("[Game] winMessagePanel activado");
 
             // Fade in (aparecer como fantasma)
             float duration = 0.5f;
