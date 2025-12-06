@@ -285,11 +285,11 @@ namespace DigitPark.Managers
         {
             if (isLoggingIn) return;
 
-            #if !UNITY_IOS
+#if !UNITY_IOS
             ShowErrorMessage("Login con Apple solo disponible en iOS");
+            await System.Threading.Tasks.Task.CompletedTask; // Evitar warning CS1998
             return;
-            #endif
-
+#else
             isLoggingIn = true;
             ShowLoading(true);
 
@@ -304,6 +304,7 @@ namespace DigitPark.Managers
             {
                 ShowErrorMessage("Error al iniciar sesión con Apple");
             }
+#endif
         }
 
         #endregion

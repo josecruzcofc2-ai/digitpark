@@ -508,85 +508,203 @@ namespace DigitPark.Managers
         /// </summary>
         private void DisplayTournaments(List<TournamentData> tournaments)
         {
+            // IMPORTANTE: Limpiar el contenedor antes de crear nuevos items
+            ClearTournamentsList();
+
             if (tournaments.Count == 0)
             {
                 ShowEmptyMessage();
                 return;
             }
 
+            // Configurar el contenedor con VerticalLayoutGroup
+            RectTransform containerRT = tournamentsContainer as RectTransform;
+            if (containerRT != null)
+            {
+                containerRT.anchorMin = new Vector2(0, 1);
+                containerRT.anchorMax = new Vector2(1, 1);
+                containerRT.pivot = new Vector2(0.5f, 1);
+                containerRT.anchoredPosition = Vector2.zero;
+                containerRT.sizeDelta = new Vector2(0, 0);
+            }
+
+            var layoutGroup = tournamentsContainer.GetComponent<VerticalLayoutGroup>();
+            if (layoutGroup == null)
+            {
+                layoutGroup = tournamentsContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+            }
+            layoutGroup.spacing = 5f;
+            layoutGroup.padding = new RectOffset(5, 5, 5, 5);
+            layoutGroup.childAlignment = TextAnchor.UpperCenter;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = true;
+            layoutGroup.childForceExpandWidth = true;
+            layoutGroup.childForceExpandHeight = false;
+
+            var sizeFitter = tournamentsContainer.GetComponent<ContentSizeFitter>();
+            if (sizeFitter == null)
+            {
+                sizeFitter = tournamentsContainer.gameObject.AddComponent<ContentSizeFitter>();
+            }
+            sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
             foreach (var tournament in tournaments)
             {
                 CreateTournamentCard(tournament);
             }
+
+            // Forzar rebuild del layout
+            StartCoroutine(ForceLayoutAndScrollToTop(containerRT));
         }
 
+        // Lista para actualizar tiempo en tiempo real
+        private List<(TextMeshProUGUI timeText, TournamentData tournament)> activeTournamentItems = new List<(TextMeshProUGUI, TournamentData)>();
+
         /// <summary>
-        /// Crea una entrada de torneo usando el prefab TournamentItem
+        /// Crea una entrada de torneo por código - ESTILO SCORES NACIONAL
+        /// Estructura: Participantes | Nombre Creador | Tiempo Restante
         /// </summary>
         private void CreateTournamentCard(TournamentData tournament)
         {
-            if (tournamentsContainer == null || tournamentItemPrefab == null)
+            if (tournamentsContainer == null)
             {
-                Debug.LogError($"[Tournament] Container o prefab nulo - Container: {(tournamentsContainer == null ? "NULL" : "OK")}, Prefab: {(tournamentItemPrefab == null ? "NULL" : "OK")}");
+                Debug.LogError("[Tournament] Container nulo");
                 return;
             }
 
-            // Instanciar el prefab
-            GameObject itemObj = Instantiate(tournamentItemPrefab, tournamentsContainer);
-            itemObj.name = $"TournamentItem_{tournament.tournamentId}";
+            // Crear item por código
+            GameObject itemObj = new GameObject($"TournamentItem_{tournament.tournamentId}");
+            itemObj.transform.SetParent(tournamentsContainer, false);
 
-            // Obtener referencias a los componentes
-            Image bg = itemObj.GetComponent<Image>();
-            Button itemButton = itemObj.GetComponent<Button>();
+            RectTransform itemRT = itemObj.AddComponent<RectTransform>();
+            itemRT.sizeDelta = new Vector2(0, 60);
 
-            // Configurar color de fondo según participación
+            // LayoutElement
+            var layoutElement = itemObj.AddComponent<LayoutElement>();
+            layoutElement.preferredHeight = 60;
+            layoutElement.minHeight = 60;
+
+            // Fondo según participación
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
-            if (bg != null)
-            {
-                bg.color = isParticipating ? new Color(0f, 0.83f, 1f, 0.3f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
-            }
+            Image bg = itemObj.AddComponent<Image>();
+            bg.color = isParticipating ? new Color(0f, 0.83f, 1f, 0.95f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
 
-            // Configurar botón
-            if (itemButton != null)
-            {
-                itemButton.onClick.RemoveAllListeners();
-                TournamentData tournamentCopy = tournament;
-                itemButton.onClick.AddListener(() => OnTournamentItemClicked(tournamentCopy));
-            }
+            // Botón para click
+            Button itemButton = itemObj.AddComponent<Button>();
+            itemButton.targetGraphic = bg;
+            TournamentData tournamentCopy = tournament;
+            itemButton.onClick.AddListener(() => OnTournamentItemClicked(tournamentCopy));
 
-            // Buscar y configurar los textos hijos
-            Transform participantsTransform = itemObj.transform.Find("ParticipantsText");
-            if (participantsTransform != null)
-            {
-                TextMeshProUGUI participantsText = participantsTransform.GetComponent<TextMeshProUGUI>();
-                if (participantsText != null)
-                {
-                    participantsText.text = $"{tournament.currentParticipants}/{tournament.maxParticipants}";
-                }
-            }
+            // 1. PARTICIPANTES (izquierda - 0% a 15%)
+            TextMeshProUGUI participantsText = CreateItemText(itemObj.transform, "ParticipantsText",
+                $"{tournament.currentParticipants}/{tournament.maxParticipants}", 24, new Color(1f, 0.84f, 0f));
+            RectTransform participantsRT = participantsText.GetComponent<RectTransform>();
+            participantsRT.anchorMin = new Vector2(0, 0);
+            participantsRT.anchorMax = new Vector2(0.15f, 1);
+            participantsRT.offsetMin = Vector2.zero;
+            participantsRT.offsetMax = Vector2.zero;
+            participantsText.alignment = TextAlignmentOptions.Center;
+            participantsText.fontStyle = FontStyles.Bold;
 
-            Transform creatorTransform = itemObj.transform.Find("CreatorText");
-            if (creatorTransform != null)
-            {
-                TextMeshProUGUI creatorText = creatorTransform.GetComponent<TextMeshProUGUI>();
-                if (creatorText != null)
-                {
-                    creatorText.text = tournament.creatorName;
-                }
-            }
+            // Divisor vertical 1 (15%)
+            CreateTournamentCardDivider(itemObj.transform, 0.15f);
 
-            Transform timeTransform = itemObj.transform.Find("TimeText");
-            if (timeTransform != null)
-            {
-                TextMeshProUGUI timeText = timeTransform.GetComponent<TextMeshProUGUI>();
-                if (timeText != null)
-                {
-                    string timeString = FormatTimeRemaining(tournament.GetTimeRemaining());
-                    timeText.text = timeString;
-                }
-            }
+            // 2. NOMBRE DEL CREADOR (centro - 15% a 70%)
+            TextMeshProUGUI creatorText = CreateItemText(itemObj.transform, "CreatorText",
+                tournament.creatorName, 22, Color.white);
+            RectTransform creatorRT = creatorText.GetComponent<RectTransform>();
+            creatorRT.anchorMin = new Vector2(0.15f, 0);
+            creatorRT.anchorMax = new Vector2(0.70f, 1);
+            creatorRT.offsetMin = new Vector2(10, 0);
+            creatorRT.offsetMax = new Vector2(-10, 0);
+            creatorText.alignment = TextAlignmentOptions.Center;
+
+            // Divisor vertical 2 (70%)
+            CreateTournamentCardDivider(itemObj.transform, 0.70f);
+
+            // 3. TIEMPO RESTANTE (derecha - 70% a 100%)
+            string timeString = FormatTimeRemaining(tournament.GetTimeRemaining());
+            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
+                timeString, 22, new Color(0f, 1f, 0.53f));
+            RectTransform timeRT = timeText.GetComponent<RectTransform>();
+            timeRT.anchorMin = new Vector2(0.70f, 0);
+            timeRT.anchorMax = new Vector2(1f, 1);
+            timeRT.offsetMin = new Vector2(10, 0);
+            timeRT.offsetMax = new Vector2(-10, 0);
+            timeText.alignment = TextAlignmentOptions.Center;
+
+            // Divisor horizontal
+            CreateTournamentCardHorizontalDivider(itemObj.transform);
+
+            // Guardar referencia para actualizar tiempo en tiempo real
+            activeTournamentItems.Add((timeText, tournament));
 
             itemObj.SetActive(true);
+        }
+
+        /// <summary>
+        /// Crea divisor vertical para tournament card
+        /// </summary>
+        private void CreateTournamentCardDivider(Transform parent, float anchorX)
+        {
+            GameObject divider = new GameObject("VerticalDivider");
+            divider.transform.SetParent(parent, false);
+
+            RectTransform divRT = divider.AddComponent<RectTransform>();
+            divRT.anchorMin = new Vector2(anchorX, 0.1f);
+            divRT.anchorMax = new Vector2(anchorX, 0.9f);
+            divRT.pivot = new Vector2(0.5f, 0.5f);
+            divRT.sizeDelta = new Vector2(2f, 0);
+
+            Image divImage = divider.AddComponent<Image>();
+            divImage.color = new Color(0.5f, 0.5f, 0.6f, 0.8f);
+        }
+
+        /// <summary>
+        /// Crea divisor horizontal para tournament card
+        /// </summary>
+        private void CreateTournamentCardHorizontalDivider(Transform parent)
+        {
+            GameObject divider = new GameObject("HorizontalDivider");
+            divider.transform.SetParent(parent, false);
+
+            RectTransform divRT = divider.AddComponent<RectTransform>();
+            divRT.anchorMin = new Vector2(0.02f, 0f);
+            divRT.anchorMax = new Vector2(0.98f, 0f);
+            divRT.pivot = new Vector2(0.5f, 0f);
+            divRT.sizeDelta = new Vector2(0, 1f);
+
+            Image divImage = divider.AddComponent<Image>();
+            divImage.color = new Color(0.4f, 0.4f, 0.5f, 0.5f);
+        }
+
+        /// <summary>
+        /// Actualiza el tiempo restante de los torneos en tiempo real
+        /// </summary>
+        private void Update()
+        {
+            // Actualizar tiempo de torneos activos cada frame
+            for (int i = activeTournamentItems.Count - 1; i >= 0; i--)
+            {
+                var item = activeTournamentItems[i];
+                if (item.timeText == null)
+                {
+                    activeTournamentItems.RemoveAt(i);
+                    continue;
+                }
+
+                System.TimeSpan timeRemaining = item.tournament.GetTimeRemaining();
+                if (timeRemaining.TotalSeconds <= 0)
+                {
+                    item.timeText.text = AutoLocalizer.Get("finished");
+                    item.timeText.color = Color.red;
+                }
+                else
+                {
+                    item.timeText.text = FormatTimeRemaining(timeRemaining);
+                }
+            }
         }
 
         /// <summary>
@@ -984,6 +1102,9 @@ namespace DigitPark.Managers
         {
             if (tournamentsContainer == null) return;
 
+            // Limpiar lista de items activos (para actualización en tiempo real)
+            activeTournamentItems.Clear();
+
             // Resetear la posición del ScrollRect antes de destruir para evitar MissingReferenceException
             if (scrollRect != null && scrollRect.content != null)
             {
@@ -1063,6 +1184,46 @@ namespace DigitPark.Managers
             // Limpiar container
             ClearTournamentsList();
 
+            // Asegurar que scrollRect.content apunte al tournamentsContainer
+            RectTransform containerRT = tournamentsContainer as RectTransform;
+            if (scrollRect != null && containerRT != null)
+            {
+                scrollRect.content = containerRT;
+            }
+
+            // Configurar el RectTransform del container
+            if (containerRT != null)
+            {
+                containerRT.anchorMin = new Vector2(0, 1);
+                containerRT.anchorMax = new Vector2(1, 1);
+                containerRT.pivot = new Vector2(0.5f, 1);
+                containerRT.anchoredPosition = Vector2.zero;
+                containerRT.sizeDelta = new Vector2(0, 0); // Ancho 0 = usar anclas, alto controlado por ContentSizeFitter
+            }
+
+            // Configurar el VerticalLayoutGroup del container
+            var layoutGroup = tournamentsContainer.GetComponent<VerticalLayoutGroup>();
+            if (layoutGroup == null)
+            {
+                layoutGroup = tournamentsContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+            }
+            layoutGroup.spacing = 5f;
+            layoutGroup.padding = new RectOffset(5, 5, 5, 5);
+            layoutGroup.childAlignment = TextAnchor.UpperCenter;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = true;
+            layoutGroup.childForceExpandWidth = true;  // FORZAR expansión horizontal
+            layoutGroup.childForceExpandHeight = false;
+
+            // ContentSizeFitter para que el contenedor se ajuste al contenido
+            var sizeFitter = tournamentsContainer.GetComponent<ContentSizeFitter>();
+            if (sizeFitter == null)
+            {
+                sizeFitter = tournamentsContainer.gameObject.AddComponent<ContentSizeFitter>();
+            }
+            sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
             // Mostrar botón de back
             if (leaderboardBackButton != null)
                 leaderboardBackButton.SetActive(true);
@@ -1096,7 +1257,54 @@ namespace DigitPark.Managers
                 position++;
             }
 
+            // Forzar rebuild del layout y scroll al top
+            StartCoroutine(ForceLayoutAndScrollToTop(containerRT));
+
             Debug.Log($"[Tournament] Leaderboard mostrado con {tournament.participants.Count} participantes");
+        }
+
+        /// <summary>
+        /// Fuerza el rebuild del layout y hace scroll al top (en el siguiente frame)
+        /// </summary>
+        private System.Collections.IEnumerator ForceLayoutAndScrollToTop(RectTransform containerRT)
+        {
+            yield return null; // Esperar un frame
+
+            if (containerRT != null)
+            {
+                // Forzar posición arriba
+                containerRT.anchoredPosition = Vector2.zero;
+
+                LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+                Canvas.ForceUpdateCanvases();
+            }
+
+            yield return null; // Esperar otro frame
+
+            // Forzar posición de nuevo
+            if (containerRT != null)
+            {
+                containerRT.anchoredPosition = Vector2.zero;
+            }
+
+            if (scrollRect != null && scrollRect.content != null)
+            {
+                scrollRect.StopMovement();
+                scrollRect.verticalNormalizedPosition = 1f; // Scroll al top
+
+                // Forzar la posición del content
+                if (scrollRect.content != null)
+                {
+                    scrollRect.content.anchoredPosition = Vector2.zero;
+                }
+            }
+
+            yield return null; // Un frame más para asegurar
+
+            if (containerRT != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+            }
         }
 
         /// <summary>
@@ -1151,7 +1359,7 @@ namespace DigitPark.Managers
 
         /// <summary>
         /// Crea un item del leaderboard - MISMO ESTILO QUE SCORES
-        /// Estructura: Posición | Username | Tiempo
+        /// Estructura: Posición | Username | Tiempo (con divisores verticales)
         /// </summary>
         private void CreateLeaderboardItem(int position, ParticipantScore participant)
         {
@@ -1161,22 +1369,17 @@ namespace DigitPark.Managers
             itemObj.transform.SetParent(tournamentsContainer, false);
 
             RectTransform itemRT = itemObj.AddComponent<RectTransform>();
-            itemRT.anchorMin = new Vector2(0, 1);
-            itemRT.anchorMax = new Vector2(1, 1);
-            itemRT.pivot = new Vector2(0.5f, 1);
-            itemRT.anchoredPosition = Vector2.zero;
-            itemRT.sizeDelta = new Vector2(0, 80);
+            itemRT.sizeDelta = new Vector2(0, 60);
 
-            // Layout element para el container padre
+            // LayoutElement - NO usar flexibleWidth, dejar que el LayoutGroup controle
             var layoutElement = itemObj.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 80;
-            layoutElement.minHeight = 80;
-            layoutElement.flexibleWidth = 1;
+            layoutElement.preferredHeight = 60;
+            layoutElement.minHeight = 60;
 
             // Verificar si es el jugador actual
             bool isCurrentPlayer = participant.userId == (currentPlayer?.userId ?? "");
 
-            // Fondo - EXACTAMENTE como en Scores
+            // Fondo - EXACTAMENTE como en LeaderboardManager
             Image bg = itemObj.AddComponent<Image>();
             if (isCurrentPlayer)
             {
@@ -1187,17 +1390,7 @@ namespace DigitPark.Managers
                 bg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f); // Gris oscuro
             }
 
-            // HorizontalLayoutGroup para controlar el orden de los elementos
-            var hlg = itemObj.AddComponent<HorizontalLayoutGroup>();
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = true;
-            hlg.spacing = 10;
-            hlg.padding = new RectOffset(20, 20, 5, 5);
-
-            // 1. POSICIÓN (izquierda) - colores de medalla
+            // Colores de posición (medallas)
             Color posColor;
             if (position == 1)
                 posColor = new Color(1f, 0.84f, 0f); // Oro
@@ -1208,46 +1401,83 @@ namespace DigitPark.Managers
             else
                 posColor = new Color(1f, 0.84f, 0f); // Amarillo
 
-            GameObject posObj = new GameObject("Position");
-            posObj.transform.SetParent(itemObj.transform, false);
-            var posLayout = posObj.AddComponent<LayoutElement>();
-            posLayout.preferredWidth = 80;
-            posLayout.minWidth = 80;
-            TextMeshProUGUI posText = posObj.AddComponent<TextMeshProUGUI>();
-            posText.text = $"{position}";
-            posText.fontSize = 32;
-            posText.color = posColor;
+            // 1. POSICIÓN (izquierda) - 15% del ancho
+            TextMeshProUGUI posText = CreateItemText(itemObj.transform, "PositionText", $"{position}", 28, posColor);
+            RectTransform posRT = posText.GetComponent<RectTransform>();
+            posRT.anchorMin = new Vector2(0, 0);
+            posRT.anchorMax = new Vector2(0.15f, 1);
+            posRT.offsetMin = Vector2.zero;
+            posRT.offsetMax = Vector2.zero;
             posText.alignment = TextAlignmentOptions.Center;
             posText.fontStyle = FontStyles.Bold;
 
-            // 2. USERNAME (centro) - blanco
-            GameObject nameObj = new GameObject("Username");
-            nameObj.transform.SetParent(itemObj.transform, false);
-            var nameLayout = nameObj.AddComponent<LayoutElement>();
-            nameLayout.flexibleWidth = 1; // Se expande para llenar el espacio
-            nameLayout.minWidth = 200;
-            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
-            nameText.text = participant.username;
-            nameText.fontSize = 26;
-            nameText.color = Color.white;
+            // Divisor vertical 1 (15%)
+            CreateLeaderboardVerticalDivider(itemObj.transform, 0.15f);
+
+            // 2. USERNAME (centro) - del 15% al 70%
+            TextMeshProUGUI nameText = CreateItemText(itemObj.transform, "NameText", participant.username, 22, Color.white);
+            RectTransform nameRT = nameText.GetComponent<RectTransform>();
+            nameRT.anchorMin = new Vector2(0.15f, 0);
+            nameRT.anchorMax = new Vector2(0.70f, 1);
+            nameRT.offsetMin = new Vector2(5, 0);
+            nameRT.offsetMax = new Vector2(-5, 0);
             nameText.alignment = TextAlignmentOptions.Center;
 
-            // 3. TIEMPO (derecha) - verde brillante
+            // Divisor vertical 2 (70%)
+            CreateLeaderboardVerticalDivider(itemObj.transform, 0.70f);
+
+            // 3. TIEMPO (derecha) - del 70% al 100%
             string timeString = participant.bestTime == float.MaxValue ?
                 AutoLocalizer.Get("no_time") : $"{participant.bestTime:F3}s";
 
-            GameObject timeObj = new GameObject("Time");
-            timeObj.transform.SetParent(itemObj.transform, false);
-            var timeLayout = timeObj.AddComponent<LayoutElement>();
-            timeLayout.preferredWidth = 150;
-            timeLayout.minWidth = 150;
-            TextMeshProUGUI timeText = timeObj.AddComponent<TextMeshProUGUI>();
-            timeText.text = timeString;
-            timeText.fontSize = 26;
-            timeText.color = new Color(0f, 1f, 0.53f); // Verde brillante
+            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText", timeString, 22, new Color(0f, 1f, 0.53f));
+            RectTransform timeRT = timeText.GetComponent<RectTransform>();
+            timeRT.anchorMin = new Vector2(0.70f, 0);
+            timeRT.anchorMax = new Vector2(1f, 1);
+            timeRT.offsetMin = new Vector2(5, 0);
+            timeRT.offsetMax = new Vector2(-5, 0);
             timeText.alignment = TextAlignmentOptions.Center;
 
+            // Línea divisoria horizontal (entre entradas)
+            CreateLeaderboardHorizontalDivider(itemObj.transform);
+
             itemObj.SetActive(true);
+        }
+
+        /// <summary>
+        /// Crea un divisor vertical usando anclas relativas (porcentaje)
+        /// </summary>
+        private void CreateLeaderboardVerticalDivider(Transform parent, float anchorX)
+        {
+            GameObject divider = new GameObject("VerticalDivider");
+            divider.transform.SetParent(parent, false);
+
+            RectTransform divRT = divider.AddComponent<RectTransform>();
+            divRT.anchorMin = new Vector2(anchorX, 0.1f);
+            divRT.anchorMax = new Vector2(anchorX, 0.9f);
+            divRT.pivot = new Vector2(0.5f, 0.5f);
+            divRT.sizeDelta = new Vector2(2f, 0);
+
+            Image divImage = divider.AddComponent<Image>();
+            divImage.color = new Color(0.5f, 0.5f, 0.6f, 0.8f);
+        }
+
+        /// <summary>
+        /// Crea un divisor horizontal para el leaderboard
+        /// </summary>
+        private void CreateLeaderboardHorizontalDivider(Transform parent)
+        {
+            GameObject divider = new GameObject("HorizontalDivider");
+            divider.transform.SetParent(parent, false);
+
+            RectTransform divRT = divider.AddComponent<RectTransform>();
+            divRT.anchorMin = new Vector2(0.02f, 0f);
+            divRT.anchorMax = new Vector2(0.98f, 0f);
+            divRT.pivot = new Vector2(0.5f, 0f);
+            divRT.sizeDelta = new Vector2(0, 1f);
+
+            Image divImage = divider.AddComponent<Image>();
+            divImage.color = new Color(0.4f, 0.4f, 0.5f, 0.5f);
         }
 
         /// <summary>

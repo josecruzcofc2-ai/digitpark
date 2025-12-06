@@ -20,7 +20,9 @@ namespace DigitPark.UI.Common
         private Action<string> onConfirmCallback;
         private Action onCancelCallback;
 
+#pragma warning disable 0414
         private bool isFirstTime; // Para saber qué botones mostrar
+#pragma warning restore 0414
 
         /// <summary>
         /// Crea un popup de username
