@@ -19,7 +19,9 @@ namespace DigitPark.Services.Firebase
         public event Action OnLogout;
 
         private PlayerData currentPlayerData;
+#pragma warning disable 0414
         private bool isInitialized = false;
+#pragma warning restore 0414
 
         private void Awake()
         {

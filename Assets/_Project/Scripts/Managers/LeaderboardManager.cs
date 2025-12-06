@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -476,47 +477,6 @@ namespace DigitPark.Managers
             }
 
             Debug.Log($"[Leaderboard] {createdCount} entradas creadas en el container");
-            Debug.Log($"[Leaderboard] Container tiene {leaderboardContainer.childCount} hijos");
-
-            // DEBUG CRÍTICO: Verificar cada hijo creado
-            for (int i = 0; i < leaderboardContainer.childCount; i++)
-            {
-                Transform child = leaderboardContainer.GetChild(i);
-                RectTransform childRT = child as RectTransform;
-                if (childRT != null)
-                {
-                    Debug.LogWarning($"[Leaderboard] 🔍 HIJO {i}: {child.name}");
-                    Debug.LogWarning($"  ➤ Activo: {child.gameObject.activeSelf}, ActiveInHierarchy: {child.gameObject.activeInHierarchy}");
-                    Debug.LogWarning($"  ➤ Position: {childRT.anchoredPosition}, Size: {childRT.sizeDelta}");
-                    Debug.LogWarning($"  ➤ Rect: {childRT.rect}");
-
-                    var img = child.GetComponent<Image>();
-                    if (img != null)
-                    {
-                        Debug.LogWarning($"  ➤ Image Color: {img.color}, Enabled: {img.enabled}");
-                    }
-                }
-            }
-
-            // Verificar el estado del ScrollRect
-            if (scrollRect != null)
-            {
-                Debug.Log($"[Leaderboard] ScrollRect activo: {scrollRect.gameObject.activeSelf}, enabled: {scrollRect.enabled}");
-                Debug.Log($"[Leaderboard] ScrollRect - viewport: {scrollRect.viewport != null}, content: {scrollRect.content != null}");
-
-                if (scrollRect.viewport != null)
-                {
-                    Debug.Log($"[Leaderboard] Viewport size: {scrollRect.viewport.rect.size}, activo: {scrollRect.viewport.gameObject.activeSelf}");
-                }
-
-                if (scrollRect.content != null)
-                {
-                    RectTransform contentRT = scrollRect.content;
-                    Debug.Log($"[Leaderboard] Content size: {contentRT.sizeDelta}, position: {contentRT.anchoredPosition}, activo: {contentRT.gameObject.activeSelf}");
-                    Debug.Log($"[Leaderboard] Content tiene {contentRT.childCount} hijos visibles");
-                }
-            }
-
             // Resaltar posición del jugador si está en la lista
             HighlightPlayerPosition(entries);
 
@@ -655,29 +615,29 @@ namespace DigitPark.Managers
 
             if (isPersonalTab)
             {
-                // MODO PERSONAL: #N (izquierda, un poco antes del centro) | Tiempo (derecha)
-                // Crear divisor vertical en el centro
-                CreateVerticalDivider(entryObj.transform, 520f); // Centro exacto
+                // MODO PERSONAL: Número (izquierda) | Tiempo (centro-derecha) - IGUAL QUE TORNEOS
 
-                // Número del historial (izquierda - un poco a la izquierda del centro)
-                TextMeshProUGUI numberText = CreateEntryText(entryObj.transform, "NumberText", $"#{entry.position}", 32, Color.white);
+                // Número del historial (izquierda - 0% a 15%)
+                Color posColor = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(1f, 0.84f, 0f);
+                TextMeshProUGUI numberText = CreateEntryText(entryObj.transform, "NumberText", $"#{entry.position}", 28, posColor);
                 RectTransform numberRT = numberText.GetComponent<RectTransform>();
                 numberRT.anchorMin = new Vector2(0, 0);
-                numberRT.anchorMax = new Vector2(0.5f, 1);
-                numberRT.pivot = new Vector2(0.5f, 0.5f);
-                numberRT.anchoredPosition = Vector2.zero;
-                numberRT.sizeDelta = Vector2.zero;
+                numberRT.anchorMax = new Vector2(0.15f, 1);
+                numberRT.offsetMin = Vector2.zero;
+                numberRT.offsetMax = Vector2.zero;
                 numberText.alignment = TMPro.TextAlignmentOptions.Center;
                 numberText.fontStyle = TMPro.FontStyles.Bold;
 
-                // Tiempo (derecha)
-                TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 32, new Color(0f, 1f, 0.53f)); // BrightGreen
+                // Divisor vertical (15%)
+                CreatePersonalVerticalDivider(entryObj.transform, 0.15f);
+
+                // Tiempo (centro-derecha - 15% a 100%)
+                TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 28, new Color(0f, 1f, 0.53f));
                 RectTransform timeRT = timeText.GetComponent<RectTransform>();
-                timeRT.anchorMin = new Vector2(0.5f, 0);
-                timeRT.anchorMax = new Vector2(1, 1);
-                timeRT.pivot = new Vector2(0.5f, 0.5f);
-                timeRT.anchoredPosition = Vector2.zero;
-                timeRT.sizeDelta = Vector2.zero;
+                timeRT.anchorMin = new Vector2(0.15f, 0);
+                timeRT.anchorMax = new Vector2(1f, 1);
+                timeRT.offsetMin = new Vector2(10, 0);
+                timeRT.offsetMax = new Vector2(-10, 0);
                 timeText.alignment = TMPro.TextAlignmentOptions.Center;
             }
             else
@@ -763,6 +723,24 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
+        /// Crea un divisor vertical usando anclas relativas (porcentaje) - para modo Personal
+        /// </summary>
+        private void CreatePersonalVerticalDivider(Transform parent, float anchorX)
+        {
+            GameObject divider = new GameObject("VerticalDivider");
+            divider.transform.SetParent(parent, false);
+
+            RectTransform divRT = divider.AddComponent<RectTransform>();
+            divRT.anchorMin = new Vector2(anchorX, 0.1f);
+            divRT.anchorMax = new Vector2(anchorX, 0.9f);
+            divRT.pivot = new Vector2(0.5f, 0.5f);
+            divRT.sizeDelta = new Vector2(2f, 0);
+
+            Image divImage = divider.AddComponent<Image>();
+            divImage.color = new Color(0.5f, 0.5f, 0.6f, 0.8f);
+        }
+
+        /// <summary>
         /// Crea un texto para una entrada del leaderboard
         /// </summary>
         private TextMeshProUGUI CreateEntryText(Transform parent, string name, string text, int fontSize, Color color)
@@ -816,7 +794,8 @@ namespace DigitPark.Managers
 
                 if (playerTimeText != null)
                 {
-                    playerTimeText.text = $"Mejor tiempo: {playerEntry.time:F3}s";
+                    string label = AutoLocalizer.Get("personal_best_time");
+                    playerTimeText.text = $"{label}: {playerEntry.time:F3}s";
                 }
             }
             else
@@ -943,14 +922,16 @@ namespace DigitPark.Managers
                 if (playerTimeText != null)
                 {
                     float bestTime = currentPlayer.bestTime;
-                    if (bestTime == float.MaxValue)
+                    string label = AutoLocalizer.Get("personal_best_time");
+                    if (bestTime == float.MaxValue || bestTime <= 0)
                     {
-                        playerTimeText.text = "Sin mejor tiempo";
+                        playerTimeText.text = $"{label}: {AutoLocalizer.Get("no_best_time_yet")}";
                     }
                     else
                     {
-                        playerTimeText.text = $"Mejor Tiempo: {bestTime:F3}s";
+                        playerTimeText.text = $"{label}: {bestTime:F3}s";
                     }
+                    Debug.Log($"[Leaderboard] Mostrando mejor tiempo personal: {bestTime} (MaxValue={float.MaxValue})");
                 }
 
                 if (playerPositionText != null)
