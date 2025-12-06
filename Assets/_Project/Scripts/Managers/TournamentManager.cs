@@ -28,7 +28,9 @@ namespace DigitPark.Managers
         [SerializeField] public TMP_InputField minPlayersInput;
         [SerializeField] public TMP_InputField maxPlayersInput;
         [SerializeField] public TMP_InputField minHoursInput;
+        [SerializeField] public TMP_Dropdown minTimeUnitDropdown;
         [SerializeField] public TMP_InputField maxHoursInput;
+        [SerializeField] public TMP_Dropdown maxTimeUnitDropdown;
         [SerializeField] public Button applyButton;
         [SerializeField] public Button clearButton;
 
@@ -324,11 +326,26 @@ namespace DigitPark.Managers
             // Leer filtros
             searchUsername = usernameSearchInput?.text ?? "";
 
-            int.TryParse(minPlayersInput?.text, out searchMinPlayers);
-            int.TryParse(maxPlayersInput?.text, out searchMaxPlayers);
+            // Usar valores por defecto si los campos están vacíos
+            if (!int.TryParse(minPlayersInput?.text, out searchMinPlayers) || string.IsNullOrEmpty(minPlayersInput?.text))
+                searchMinPlayers = 0;
+            if (!int.TryParse(maxPlayersInput?.text, out searchMaxPlayers) || string.IsNullOrEmpty(maxPlayersInput?.text))
+                searchMaxPlayers = 999;
 
-            float.TryParse(minHoursInput?.text, out searchMinHours);
-            float.TryParse(maxHoursInput?.text, out searchMaxHours);
+            if (!float.TryParse(minHoursInput?.text, out searchMinHours) || string.IsNullOrEmpty(minHoursInput?.text))
+                searchMinHours = 0;
+            if (!float.TryParse(maxHoursInput?.text, out searchMaxHours) || string.IsNullOrEmpty(maxHoursInput?.text))
+                searchMaxHours = 999;
+
+            // Convertir a horas si la unidad seleccionada es "Días" (índice 1)
+            if (minTimeUnitDropdown != null && minTimeUnitDropdown.value == 1 && !string.IsNullOrEmpty(minHoursInput?.text))
+            {
+                searchMinHours *= 24f;
+            }
+            if (maxTimeUnitDropdown != null && maxTimeUnitDropdown.value == 1 && !string.IsNullOrEmpty(maxHoursInput?.text))
+            {
+                searchMaxHours *= 24f;
+            }
 
             // Verificar si hay filtros activos
             hasActiveFilters = !string.IsNullOrEmpty(searchUsername) ||
@@ -357,6 +374,10 @@ namespace DigitPark.Managers
             if (maxPlayersInput != null) maxPlayersInput.text = "";
             if (minHoursInput != null) minHoursInput.text = "";
             if (maxHoursInput != null) maxHoursInput.text = "";
+
+            // Resetear dropdowns a "Horas" (índice 0)
+            if (minTimeUnitDropdown != null) minTimeUnitDropdown.value = 0;
+            if (maxTimeUnitDropdown != null) maxTimeUnitDropdown.value = 0;
 
             // Resetear valores
             searchUsername = "";
