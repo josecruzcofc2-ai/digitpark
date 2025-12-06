@@ -47,6 +47,11 @@ namespace DigitPark.Managers
         // Números asignados a cada botón
         private int[] gridNumbers = new int[9];
 
+        // Coroutines de shake para poder cancelarlas
+        private Coroutine[] shakeCoroutines = new Coroutine[9];
+        // Posiciones originales guardadas durante el shake
+        private Vector2[] shakeOriginalPositions = new Vector2[9];
+
         // Claves de mensajes de éxito por nivel (para localización)
         private readonly string[] level1Keys = {
             "msg_good_job", "msg_complete", "msg_nice_try", "msg_well_done", "msg_task_complete"
@@ -129,6 +134,7 @@ namespace DigitPark.Managers
             {
                 int index = i; // Capturar el índice en una variable local
                 gridButtons[i].onClick.AddListener(() => OnGridButtonClicked(index));
+                shakeCoroutines[i] = null;
             }
 
             // Botón de jugar de nuevo
@@ -223,6 +229,20 @@ namespace DigitPark.Managers
         {
             for (int i = 0; i < gridButtons.Length; i++)
             {
+                // Cancelar cualquier shake en progreso y restaurar posición
+                if (shakeCoroutines[i] != null)
+                {
+                    StopCoroutine(shakeCoroutines[i]);
+                    shakeCoroutines[i] = null;
+
+                    // Restaurar posición original
+                    RectTransform rt = gridButtons[i].GetComponent<RectTransform>();
+                    if (rt != null)
+                    {
+                        rt.anchoredPosition = shakeOriginalPositions[i];
+                    }
+                }
+
                 gridButtons[i].interactable = true;
 
                 // Resetear color a normal
@@ -315,8 +335,20 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Game] ¡Incorrecto! Clickeó {gridNumbers[buttonIndex]}, esperaba {currentTargetNumber}");
 
-            // Animación de error (shake rápido del botón)
-            StartCoroutine(ShakeButton(gridButtons[buttonIndex]));
+            RectTransform rt = gridButtons[buttonIndex].GetComponent<RectTransform>();
+
+            // Cancelar shake anterior si existe y restaurar posición
+            if (shakeCoroutines[buttonIndex] != null)
+            {
+                StopCoroutine(shakeCoroutines[buttonIndex]);
+                rt.anchoredPosition = shakeOriginalPositions[buttonIndex];
+            }
+
+            // Guardar posición original antes de iniciar shake
+            shakeOriginalPositions[buttonIndex] = rt.anchoredPosition;
+
+            // Iniciar nueva animación de shake
+            shakeCoroutines[buttonIndex] = StartCoroutine(ShakeButton(buttonIndex));
 
             // TODO: Reproducir sonido de error
             // AudioManager.Instance?.PlaySFX("WrongNumber");
@@ -325,10 +357,10 @@ namespace DigitPark.Managers
         /// <summary>
         /// Animación de shake para el botón
         /// </summary>
-        private IEnumerator ShakeButton(Button button)
+        private IEnumerator ShakeButton(int buttonIndex)
         {
-            RectTransform rt = button.GetComponent<RectTransform>();
-            Vector2 originalPos = rt.anchoredPosition;
+            RectTransform rt = gridButtons[buttonIndex].GetComponent<RectTransform>();
+            Vector2 originalPos = shakeOriginalPositions[buttonIndex]; // Usar posición guardada
 
             float elapsed = 0f;
             float duration = 0.3f;
@@ -345,7 +377,8 @@ namespace DigitPark.Managers
                 yield return null;
             }
 
-            rt.anchoredPosition = originalPos;
+            rt.anchoredPosition = originalPos; // Restaurar posición original
+            shakeCoroutines[buttonIndex] = null;
         }
 
         /// <summary>
