@@ -434,6 +434,30 @@ namespace DigitPark.Localization
             // ==================== LEADERBOARD DISPLAY ====================
             AddTranslation("leaderboard_header",
                 "LEADERBOARD", "CLASIFICACIÓN", "CLASSEMENT", "CLASSIFICAÇÃO", "RANGLISTE");
+
+            // ==================== LOGOUT CONFIRM ====================
+            AddTranslation("logout_confirm_title",
+                "Logout?", "¿Cerrar Sesión?", "Déconnexion?", "Sair?", "Abmelden?");
+            AddTranslation("logout_confirm_message",
+                "Are you sure you want to logout?", "¿Estás seguro de que quieres cerrar sesión?", "Êtes-vous sûr de vouloir vous déconnecter?", "Tem certeza de que deseja sair?", "Bist du sicher, dass du dich abmelden möchtest?");
+
+            // ==================== SCORES TABS ====================
+            AddTranslation("personal_tab",
+                "Personal", "Personal", "Personnel", "Pessoal", "Persönlich");
+            AddTranslation("personal_best_time",
+                "Best time", "Mejor tiempo", "Meilleur temps", "Melhor tempo", "Bestzeit");
+
+            // ==================== SEARCH OPTIONS ====================
+            AddTranslation("search_options_title",
+                "Search Options", "Opciones de Búsqueda", "Options de recherche", "Opções de Busca", "Suchoptionen");
+
+            // ==================== CREATE TOURNAMENT ====================
+            AddTranslation("create_tournament_title",
+                "Create Tournament", "Crear Torneo", "Créer un tournoi", "Criar Torneio", "Turnier erstellen");
+
+            // ==================== BUTTONS ====================
+            AddTranslation("later_button",
+                "Later", "Más tarde", "Plus tard", "Mais tarde", "Später");
         }
 
         private void AddTranslation(string key, string english, string spanish, string french, string portuguese, string german)

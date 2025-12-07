@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Common
 {
@@ -80,7 +81,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI titleText = UIFactory.CreateText(
                 popupPanel.transform,
                 "Title",
-                "¡Elige un nombre de usuario!",
+                AutoLocalizer.Get("username_popup_title"),
                 40,
                 UIFactory.ElectricBlue,
                 TMPro.TextAlignmentOptions.Center
@@ -115,7 +116,7 @@ namespace DigitPark.UI.Common
             placeholderRT.offsetMax = new Vector2(-10, 0);
 
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
-            placeholderText.text = "Nombre de usuario";
+            placeholderText.text = AutoLocalizer.Get("username_placeholder");
             placeholderText.fontSize = 24;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TMPro.TextAlignmentOptions.Left;
@@ -149,7 +150,7 @@ namespace DigitPark.UI.Common
             confirmButton = UIFactory.CreateButton(
                 popupPanel.transform,
                 "ConfirmButton",
-                "CONFIRMAR",
+                AutoLocalizer.Get("confirm_button"),
                 new Vector2(200, 60),
                 UIFactory.ElectricBlue
             );
@@ -163,7 +164,7 @@ namespace DigitPark.UI.Common
             laterButton = UIFactory.CreateButton(
                 popupPanel.transform,
                 "LaterButton",
-                "MÁS TARDE",
+                AutoLocalizer.Get("later_button"),
                 new Vector2(200, 60),
                 new Color(0.4f, 0.4f, 0.45f)
             );
@@ -178,7 +179,7 @@ namespace DigitPark.UI.Common
             cancelButton = UIFactory.CreateButton(
                 popupPanel.transform,
                 "CancelButton",
-                "CANCELAR",
+                AutoLocalizer.Get("cancel_button"),
                 new Vector2(200, 60),
                 new Color(0.7f, 0.2f, 0.2f)
             );
@@ -207,7 +208,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI titleText = popupPanel.GetComponentInChildren<TextMeshProUGUI>();
             if (titleText != null)
             {
-                titleText.text = "¡Elige un nombre de usuario!";
+                titleText.text = AutoLocalizer.Get("username_popup_title");
             }
 
             gameObject.SetActive(true);
@@ -232,7 +233,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI titleText = popupPanel.GetComponentInChildren<TextMeshProUGUI>();
             if (titleText != null)
             {
-                titleText.text = "¡Escoge un nombre de usuario!";
+                titleText.text = AutoLocalizer.Get("username_popup_title");
             }
 
             gameObject.SetActive(true);

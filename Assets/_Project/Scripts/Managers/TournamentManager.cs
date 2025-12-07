@@ -980,7 +980,7 @@ namespace DigitPark.Managers
             // Crear torneo
             TournamentData newTournament = new TournamentData
             {
-                name = $"Torneo de {currentPlayer.username}",
+                name = $"{AutoLocalizer.Get("tournament_of")} {currentPlayer.username}",
                 creatorId = currentPlayer.userId,
                 creatorName = currentPlayer.username,
                 entryFee = 0,
@@ -1333,7 +1333,7 @@ namespace DigitPark.Managers
 
             // Texto del título
             TextMeshProUGUI titleText = CreateItemText(titleObj.transform, "TitleText",
-                $"LEADERBOARD - {tournament.name}", 32, Color.white);
+                $"{AutoLocalizer.Get("leaderboard_header")} - {tournament.name}", 32, Color.white);
             RectTransform titleTextRT = titleText.GetComponent<RectTransform>();
             titleTextRT.anchorMin = new Vector2(0, 0.5f);
             titleTextRT.anchorMax = new Vector2(1, 1);
@@ -1345,8 +1345,10 @@ namespace DigitPark.Managers
 
             // Texto de info
             string timeRemaining = FormatTimeRemaining(tournament.GetTimeRemaining());
+            string participantsLabel = AutoLocalizer.Get("participants");
+            string timeRemainingLabel = AutoLocalizer.Get("time_remaining");
             TextMeshProUGUI infoText = CreateItemText(titleObj.transform, "InfoText",
-                $"Participantes: {tournament.currentParticipants}/{tournament.maxParticipants} | Tiempo restante: {timeRemaining}",
+                $"{participantsLabel}: {tournament.currentParticipants}/{tournament.maxParticipants} | {timeRemainingLabel} {timeRemaining}",
                 20, new Color(0.8f, 0.8f, 0.8f));
             RectTransform infoTextRT = infoText.GetComponent<RectTransform>();
             infoTextRT.anchorMin = new Vector2(0, 0);

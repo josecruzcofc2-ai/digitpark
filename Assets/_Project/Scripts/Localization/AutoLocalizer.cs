@@ -198,6 +198,24 @@ namespace DigitPark.Localization
             { "UsernamePopupTitle", "username_popup_title" },
             { "UsernamePopupTitleText", "username_popup_title" },
             { "UsernamePlaceholder", "username_placeholder" },
+
+            // ==================== LOGOUT CONFIRM ====================
+            { "LogoutConfirmTitle", "logout_confirm_title" },
+            { "LogoutConfirmTitleText", "logout_confirm_title" },
+            { "LogoutConfirmMessage", "logout_confirm_message" },
+            { "LogoutConfirmMessageText", "logout_confirm_message" },
+
+            // ==================== SCORES TABS ====================
+            { "PersonalTab", "personal_tab" },
+            { "PersonalTabText", "personal_tab" },
+
+            // ==================== SEARCH OPTIONS ====================
+            { "SearchOptionsTitle", "search_options_title" },
+            { "SearchOptionsTitleText", "search_options_title" },
+
+            // ==================== CREATE TOURNAMENT ====================
+            { "CreateTournamentTitle", "create_tournament_title" },
+            { "CreateTournamentTitleText", "create_tournament_title" },
         };
 
         private void Awake()

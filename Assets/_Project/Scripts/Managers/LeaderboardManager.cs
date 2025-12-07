@@ -244,7 +244,7 @@ namespace DigitPark.Managers
         /// </summary>
         private async void LoadLeaderboard(LeaderboardTab tab)
         {
-            ShowLoading(true, "Cargando rankings...");
+            ShowLoading(true, AutoLocalizer.Get("loading_rankings"));
 
             // Limpiar leaderboard actual
             ClearLeaderboard();
@@ -280,7 +280,7 @@ namespace DigitPark.Managers
             catch (System.Exception ex)
             {
                 Debug.LogError($"[Leaderboard] Error al cargar: {ex.Message}");
-                ShowErrorMessage("Error al cargar rankings");
+                ShowErrorMessage(AutoLocalizer.Get("error_loading_rankings"));
             }
             finally
             {
@@ -789,7 +789,7 @@ namespace DigitPark.Managers
 
                 if (playerPositionText != null)
                 {
-                    playerPositionText.text = $"Tu posición: #{playerEntry.position}";
+                    playerPositionText.text = $"{AutoLocalizer.Get("your_position")} #{playerEntry.position}";
                 }
 
                 if (playerTimeText != null)
@@ -849,7 +849,7 @@ namespace DigitPark.Managers
             emptyMsg.transform.SetParent(leaderboardContainer, false);
 
             TextMeshProUGUI text = emptyMsg.AddComponent<TextMeshProUGUI>();
-            text.text = "No hay puntuaciones aún\n\nJuega algunas partidas para ver tus scores aquí";
+            text.text = AutoLocalizer.Get("no_scores_yet");
             text.alignment = TMPro.TextAlignmentOptions.Center;
             text.fontSize = 24;
             text.color = Color.gray;
@@ -893,7 +893,7 @@ namespace DigitPark.Managers
         {
             if (string.IsNullOrEmpty(timestamp))
             {
-                return "Sin fecha";
+                return AutoLocalizer.Get("no_date");
             }
 
             try
@@ -903,7 +903,7 @@ namespace DigitPark.Managers
             }
             catch
             {
-                return "Fecha inválida";
+                return AutoLocalizer.Get("invalid_date");
             }
         }
 
@@ -936,7 +936,7 @@ namespace DigitPark.Managers
 
                 if (playerPositionText != null)
                 {
-                    playerPositionText.text = $"Historial: {currentPlayer.scoreHistory?.Count ?? 0} partidas";
+                    playerPositionText.text = AutoLocalizer.Get("history_games", currentPlayer.scoreHistory?.Count ?? 0);
                 }
             }
             else
