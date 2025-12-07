@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Common
 {
@@ -68,13 +69,13 @@ namespace DigitPark.UI.Common
             if (currentValueText != null)
             {
                 currentValueText.gameObject.SetActive(true);
-                currentValueText.text = $"Actual: {currentValue}";
+                currentValueText.text = $"{AutoLocalizer.Get("current_value")} {currentValue}";
             }
 
             if (newValueText != null)
             {
                 newValueText.gameObject.SetActive(true);
-                newValueText.text = $"Nuevo: {newValue}";
+                newValueText.text = $"{AutoLocalizer.Get("new_value")} {newValue}";
             }
         }
 

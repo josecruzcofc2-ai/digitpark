@@ -598,11 +598,12 @@ namespace DigitPark.Managers
             {
                 if (bestTime < float.MaxValue)
                 {
-                    bestTimeText.text = $"Mejor: {bestTime:F3}s";
+                    string label = AutoLocalizer.Get("best_label");
+                    bestTimeText.text = $"{label} {bestTime:F3}s";
                 }
                 else
                 {
-                    bestTimeText.text = "Mejor: --";
+                    bestTimeText.text = AutoLocalizer.Get("no_best_time");
                 }
             }
         }
