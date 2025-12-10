@@ -53,22 +53,35 @@ namespace DigitPark.Managers
         private Vector2[] shakeOriginalPositions = new Vector2[9];
 
         // Claves de mensajes de éxito por nivel (para localización)
+        // Nivel 1 = MEJOR tiempo (< 1s) - Mensajes SUPER gratificantes con dopamina
         private readonly string[] level1Keys = {
-            "msg_good_job", "msg_complete", "msg_nice_try", "msg_well_done", "msg_task_complete"
+            "msg_godlike_focus", "msg_mind_on_fire", "msg_exceptional_reflexes",
+            "msg_neural_perfection", "msg_time_master", "msg_superhuman",
+            "msg_unstoppable_force", "msg_legendary_speed", "msg_pure_genius", "msg_absolute_legend"
         };
+        // Nivel 2 = Muy bueno (1-2s) - Muy gratificantes
         private readonly string[] level2Keys = {
-            "msg_great_work", "msg_good_timing", "msg_not_bad", "msg_solid", "msg_keep_it_up"
+            "msg_incredible_focus", "msg_blazing_fast", "msg_sharp_mind",
+            "msg_impressive_reflexes", "msg_excellent_timing", "msg_on_fire",
+            "msg_amazing_speed", "msg_brilliant_play", "msg_stellar_performance", "msg_remarkable"
         };
+        // Nivel 3 = Bueno (2-3s) - Gratificantes
         private readonly string[] level3Keys = {
-            "msg_excellent", "msg_impressive", "msg_great_speed", "msg_well_played", "msg_awesome"
+            "msg_great_job", "msg_well_played", "msg_nice_speed", "msg_good_reflexes", "msg_solid_time"
         };
+        // Nivel 4 = Decente (3-4s) - Positivos
         private readonly string[] level4Keys = {
-            "msg_amazing", "msg_outstanding", "msg_superb", "msg_incredible",
-            "msg_spectacular", "msg_on_fire"
+            "msg_good_effort", "msg_not_bad", "msg_keep_going", "msg_nice_try", "msg_getting_better"
         };
+        // Nivel 5 = Básico (4-5s) - Motivacionales
         private readonly string[] level5Keys = {
-            "msg_perfect", "msg_legendary", "msg_mind_blowing", "msg_master",
-            "msg_unstoppable", "msg_world_class", "msg_godlike", "msg_flawless"
+            "msg_completed", "msg_done", "msg_finished", "msg_keep_practicing", "msg_you_can_improve"
+        };
+        // Nivel 6 = No clasifica (5s+) - Apoyo emocional, sin frustración
+        private readonly string[] level6Keys = {
+            "msg_almost_there", "msg_breathe_continue", "msg_next_will_be_better",
+            "msg_dont_give_up", "msg_patience_wins", "msg_every_try_counts",
+            "msg_progress_not_perfection", "msg_keep_calm", "msg_believe_yourself", "msg_stay_focused"
         };
 
         private void Awake()
@@ -419,28 +432,33 @@ namespace DigitPark.Managers
 
             if (time < 1f)
             {
-                // Nivel 5 - PERFECTO (menos de 1 segundo)
-                keys = level5Keys;
+                // Nivel 1 - PERFECTO (menos de 1 segundo) - SUPER gratificante
+                keys = level1Keys;
             }
             else if (time < 2f)
             {
-                // Nivel 4 - MUY BUENO (menos de 2 segundos)
-                keys = level4Keys;
+                // Nivel 2 - MUY BUENO (1-2 segundos) - Muy gratificante
+                keys = level2Keys;
             }
             else if (time < 3f)
             {
-                // Nivel 3 - BUENO (menos de 3 segundos)
+                // Nivel 3 - BUENO (2-3 segundos) - Gratificante
                 keys = level3Keys;
             }
             else if (time < 4f)
             {
-                // Nivel 2 - DECENTE (menos de 4 segundos)
-                keys = level2Keys;
+                // Nivel 4 - DECENTE (3-4 segundos) - Positivo
+                keys = level4Keys;
+            }
+            else if (time < 5f)
+            {
+                // Nivel 5 - BÁSICO (4-5 segundos) - Motivacional
+                keys = level5Keys;
             }
             else
             {
-                // Nivel 1 - BÁSICO (4 segundos o más)
-                keys = level1Keys;
+                // Nivel 6 - NO CLASIFICA (5+ segundos) - Apoyo emocional
+                keys = level6Keys;
             }
 
             // Seleccionar clave aleatoria

@@ -29,7 +29,6 @@ namespace DigitPark.Data
         // Cuenta
         public bool rememberMe;
         public bool connectedToGoogle;
-        public bool connectedToApple;
         public bool connectedToFacebook;
 
         public PlayerSettings()
@@ -51,7 +50,6 @@ namespace DigitPark.Data
 
             rememberMe = false;
             connectedToGoogle = false;
-            connectedToApple = false;
             connectedToFacebook = false;
         }
 

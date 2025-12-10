@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using DigitPark.Services.Firebase;
 using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.Managers
 {
@@ -92,6 +93,10 @@ namespace DigitPark.Managers
 
             // Configurar orientación
             Screen.orientation = ScreenOrientation.Portrait;
+
+            // Inicializar Safe Area Manager (para dispositivos con notch/cámara)
+            SafeAreaManager.Initialize();
+            Debug.Log("[Boot] SafeAreaManager inicializado");
 
             // Cargar configuraciones guardadas del jugador
             LoadPlayerPreferences();
