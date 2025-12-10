@@ -392,28 +392,30 @@ namespace DigitPark.Managers
             // Deshabilitar botones
             SetDeleteButtonsInteractable(false);
 
-            string userId = currentPlayer.userId;
-            string email = currentPlayer.email?.ToLower() ?? "";
-
-            // Eliminar usuario de todos los leaderboards
-            if (DatabaseService.Instance != null)
+            // Usar el método de AuthenticationService para eliminar la cuenta
+            if (AuthenticationService.Instance != null)
             {
-                await DatabaseService.Instance.RemoveUserFromLeaderboards(userId);
+                bool success = await AuthenticationService.Instance.DeleteAccount();
+
+                if (success)
+                {
+                    Debug.Log("[Settings] Cuenta eliminada exitosamente");
+                    SceneManager.LoadScene("Login");
+                }
+                else
+                {
+                    Debug.LogError("[Settings] Error al eliminar la cuenta");
+                    SetDeleteButtonsInteractable(true);
+
+                    if (deleteConfirmPanel != null)
+                        deleteConfirmPanel.SetActive(false);
+                }
             }
-
-            // Eliminar datos del usuario de PlayerPrefs
-            PlayerPrefs.DeleteKey($"SimUser_{userId}");
-            PlayerPrefs.DeleteKey($"SimUserByEmail_{email}");
-            PlayerPrefs.DeleteKey($"SimPassword_{userId}");
-            PlayerPrefs.DeleteKey("SavedUserId");
-            PlayerPrefs.DeleteKey("RememberMe");
-            PlayerPrefs.Save();
-
-            Debug.Log("[Settings] Cuenta eliminada exitosamente");
-
-            // Logout y volver a Login
-            AuthenticationService.Instance?.Logout();
-            SceneManager.LoadScene("Login");
+            else
+            {
+                Debug.LogError("[Settings] AuthenticationService no disponible");
+                SetDeleteButtonsInteractable(true);
+            }
         }
 
         private void OnCancelDeleteClicked()

@@ -6,12 +6,13 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Common;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager de la escena Login
-    /// Maneja autenticación de usuarios (Email, Google, Apple)
+    /// Maneja autenticación de usuarios (Email)
     /// </summary>
     public class LoginManager : MonoBehaviour
     {
@@ -23,7 +24,6 @@ namespace DigitPark.Managers
         [SerializeField] public Toggle rememberToggle;
         [SerializeField] public Button loginButton;
         [SerializeField] public Button googleButton;
-        [SerializeField] public Button appleButton;
         [SerializeField] public Button registerButton;
 
         [Header("UI - Other")]
@@ -149,7 +149,6 @@ namespace DigitPark.Managers
 
             registerButton?.onClick.AddListener(GoToRegisterScene);
             googleButton?.onClick.AddListener(OnGoogleLoginClicked);
-            appleButton?.onClick.AddListener(OnAppleLoginClicked);
             okButton?.onClick.AddListener(HideError);
 
             // Listener para Enter key
@@ -226,25 +225,25 @@ namespace DigitPark.Managers
         {
             if (string.IsNullOrEmpty(email))
             {
-                ShowErrorMessage("Por favor ingresa tu email");
+                ShowErrorMessage(GetLocalizedText("error_email_empty"));
                 return false;
             }
 
             if (!IsValidEmail(email))
             {
-                ShowErrorMessage("Email inválido");
+                ShowErrorMessage(GetLocalizedText("error_email_invalid"));
                 return false;
             }
 
             if (string.IsNullOrEmpty(password))
             {
-                ShowErrorMessage("Por favor ingresa tu contraseña");
+                ShowErrorMessage(GetLocalizedText("error_password_empty"));
                 return false;
             }
 
-            if (password.Length < 8)
+            if (password.Length < 6)
             {
-                ShowErrorMessage("La contraseña debe tener al menos 8 caracteres");
+                ShowErrorMessage(GetLocalizedText("error_password_too_short"));
                 return false;
             }
 
@@ -274,37 +273,8 @@ namespace DigitPark.Managers
 
             if (!success)
             {
-                ShowErrorMessage("Error al iniciar sesión con Google");
+                ShowErrorMessage(GetLocalizedText("error_auth_generic"));
             }
-        }
-
-        /// <summary>
-        /// Maneja el login con Apple
-        /// </summary>
-        private async void OnAppleLoginClicked()
-        {
-            if (isLoggingIn) return;
-
-#if !UNITY_IOS
-            ShowErrorMessage("Login con Apple solo disponible en iOS");
-            await System.Threading.Tasks.Task.CompletedTask; // Evitar warning CS1998
-            return;
-#else
-            isLoggingIn = true;
-            ShowLoading(true);
-
-            Debug.Log("[Login] Intentando login con Apple");
-
-            bool success = await AuthenticationService.Instance.LoginWithApple();
-
-            isLoggingIn = false;
-            ShowLoading(false);
-
-            if (!success)
-            {
-                ShowErrorMessage("Error al iniciar sesión con Apple");
-            }
-#endif
         }
 
         #endregion
@@ -358,7 +328,7 @@ namespace DigitPark.Managers
                     }
                     else
                     {
-                        ShowErrorMessage("Error al guardar el nombre de usuario");
+                        ShowErrorMessage(GetLocalizedText("error_save_username"));
                     }
                 },
                 onLater: () =>
@@ -466,7 +436,6 @@ namespace DigitPark.Managers
             if (loginButton != null) loginButton.interactable = interactable;
             if (registerButton != null) registerButton.interactable = interactable;
             if (googleButton != null) googleButton.interactable = interactable;
-            if (appleButton != null) appleButton.interactable = interactable;
         }
 
         #endregion
@@ -495,24 +464,39 @@ namespace DigitPark.Managers
         private string GetFriendlyErrorMessage(string technicalError)
         {
             if (technicalError.Contains("auth/user-not-found"))
-                return "Usuario no encontrado";
+                return GetLocalizedText("error_user_not_found");
 
             if (technicalError.Contains("auth/wrong-password"))
-                return "Contraseña incorrecta";
+                return GetLocalizedText("error_wrong_password");
 
             if (technicalError.Contains("auth/email-already-in-use"))
-                return "Este email ya está registrado";
+                return GetLocalizedText("error_email_already_registered");
 
             if (technicalError.Contains("auth/invalid-email"))
-                return "Email inválido";
+                return GetLocalizedText("error_email_invalid");
 
             if (technicalError.Contains("auth/weak-password"))
-                return "La contraseña es muy débil";
+                return GetLocalizedText("error_password_weak");
 
             if (technicalError.Contains("auth/network-request-failed"))
-                return "Error de conexión. Verifica tu internet";
+                return GetLocalizedText("error_no_connection");
 
-            return "Error de autenticación. Intenta nuevamente";
+            if (technicalError.Contains("timeout"))
+                return GetLocalizedText("error_timeout");
+
+            return GetLocalizedText("error_auth_generic");
+        }
+
+        /// <summary>
+        /// Obtiene texto localizado usando LocalizationManager
+        /// </summary>
+        private string GetLocalizedText(string key)
+        {
+            if (LocalizationManager.Instance != null)
+            {
+                return LocalizationManager.Instance.GetText(key);
+            }
+            return key;
         }
 
         #endregion

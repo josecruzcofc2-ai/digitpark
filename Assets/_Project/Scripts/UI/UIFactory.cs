@@ -64,6 +64,55 @@ namespace DigitPark.UI
             }
         }
 
+        /// <summary>
+        /// Crea un contenedor Safe Area que ajusta la UI para evitar notches y cámaras
+        /// </summary>
+        /// <param name="parent">Canvas padre</param>
+        /// <param name="applyTop">Aplicar margen superior (para notch)</param>
+        /// <param name="applyBottom">Aplicar margen inferior (para barra de gestos)</param>
+        /// <param name="applySides">Aplicar márgenes laterales</param>
+        /// <returns>El contenedor Safe Area donde se debe colocar el contenido</returns>
+        public static GameObject CreateSafeAreaContainer(Transform parent, bool applyTop = true, bool applyBottom = true, bool applySides = true)
+        {
+            GameObject safeAreaObj = new GameObject("SafeAreaContainer");
+            safeAreaObj.transform.SetParent(parent, false);
+
+            RectTransform rt = safeAreaObj.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // Agregar el handler que ajustará los márgenes según el safe area del dispositivo
+            SafeAreaHandler handler = safeAreaObj.AddComponent<SafeAreaHandler>();
+            handler.Configure(applyTop, applyBottom, applySides);
+
+            return safeAreaObj;
+        }
+
+        /// <summary>
+        /// Aplica Safe Area a un panel existente (agrega el componente SafeAreaHandler)
+        /// </summary>
+        /// <param name="panel">Panel al que aplicar el Safe Area</param>
+        /// <param name="applyTop">Aplicar margen superior (para notch)</param>
+        /// <param name="applyBottom">Aplicar margen inferior (para barra de gestos)</param>
+        /// <param name="applySides">Aplicar márgenes laterales</param>
+        /// <returns>El SafeAreaHandler agregado</returns>
+        public static SafeAreaHandler ApplySafeArea(GameObject panel, bool applyTop = true, bool applyBottom = true, bool applySides = true)
+        {
+            if (panel == null) return null;
+
+            // Verificar si ya tiene SafeAreaHandler
+            SafeAreaHandler handler = panel.GetComponent<SafeAreaHandler>();
+            if (handler == null)
+            {
+                handler = panel.AddComponent<SafeAreaHandler>();
+            }
+
+            handler.Configure(applyTop, applyBottom, applySides);
+            return handler;
+        }
+
         #endregion
 
         #region Panel

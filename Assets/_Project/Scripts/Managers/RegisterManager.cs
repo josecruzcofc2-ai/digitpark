@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -27,9 +28,13 @@ namespace DigitPark.Managers
         [SerializeField] public Button createAccountButton;
         [SerializeField] public Button backButton;
 
-        [Header("UI - Feedback")]
-        [SerializeField] public TextMeshProUGUI errorMessageText;
+        [Header("UI - Loading")]
         [SerializeField] public GameObject loadingPanel;
+
+        [Header("UI - Error Panel")]
+        [SerializeField] public GameObject errorPanel;
+        [SerializeField] public TextMeshProUGUI errorText;
+        [SerializeField] public Button errorOkButton;
 
         private bool isRegistering = false;
 
@@ -42,6 +47,9 @@ namespace DigitPark.Managers
 
             // Configurar listeners
             SetupListeners();
+
+            // Ocultar error panel inicialmente
+            HideError();
 
             // Suscribirse a eventos de autenticación
             if (AuthenticationService.Instance != null)
@@ -88,6 +96,7 @@ namespace DigitPark.Managers
         {
             createAccountButton?.onClick.AddListener(OnCreateAccountClicked);
             backButton?.onClick.AddListener(OnBackButtonClicked);
+            errorOkButton?.onClick.AddListener(HideError);
 
             // Listeners para Enter key
             confirmPasswordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnCreateAccountClicked(); });
@@ -114,7 +123,7 @@ namespace DigitPark.Managers
 
             isRegistering = true;
             ShowLoading(true);
-            ClearErrorMessage();
+            HideError();
 
             Debug.Log($"[Register] Intentando registrar cuenta para: {email}");
 
@@ -149,63 +158,69 @@ namespace DigitPark.Managers
         /// </summary>
         private bool ValidateAllFields(string username, string email, string password, string confirmPassword)
         {
+            // Validar username primero (es requerido ahora)
+            if (string.IsNullOrEmpty(username))
+            {
+                ShowError(GetLocalizedText("error_username_empty"));
+                return false;
+            }
+
+            if (username.Length < 3)
+            {
+                ShowError(GetLocalizedText("error_username_too_short"));
+                return false;
+            }
+
+            if (username.Length > 20)
+            {
+                ShowError(GetLocalizedText("error_username_too_long"));
+                return false;
+            }
+
+            // Validar caracteres permitidos (letras, números, guión bajo)
+            if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+            {
+                ShowError(GetLocalizedText("error_username_invalid_chars"));
+                return false;
+            }
+
             // Validar email
             if (string.IsNullOrEmpty(email))
             {
-                ShowErrorMessage("Por favor ingresa tu correo electrónico");
+                ShowError(GetLocalizedText("error_email_empty"));
                 return false;
             }
 
             if (!IsValidEmail(email))
             {
-                ShowErrorMessage("El correo debe contener una @");
+                ShowError(GetLocalizedText("error_email_invalid"));
                 return false;
             }
 
             // Validar contraseña
             if (string.IsNullOrEmpty(password))
             {
-                ShowErrorMessage("Por favor ingresa una contraseña");
+                ShowError(GetLocalizedText("error_password_empty"));
                 return false;
             }
 
-            if (password.Length < 8)
+            if (password.Length < 6)
             {
-                ShowErrorMessage("La contraseña debe tener al menos 8 caracteres");
+                ShowError(GetLocalizedText("error_password_too_short"));
                 return false;
             }
 
             // Validar confirmación de contraseña
-            if (password != confirmPassword)
+            if (string.IsNullOrEmpty(confirmPassword))
             {
-                ShowErrorMessage("Las contraseñas no coinciden");
+                ShowError(GetLocalizedText("error_confirm_password_empty"));
                 return false;
             }
 
-            // Validar username (opcional, pero si se proporciona debe cumplir requisitos)
-            if (!string.IsNullOrEmpty(username))
+            if (password != confirmPassword)
             {
-                if (username.Length < 6)
-                {
-                    ShowErrorMessage("El nombre debe tener al menos 6 caracteres");
-                    return false;
-                }
-
-                if (username.Length > 20)
-                {
-                    ShowErrorMessage("El nombre no puede tener más de 20 caracteres");
-                    return false;
-                }
-
-                // Validar caracteres permitidos (letras, números, guión bajo)
-                if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
-                {
-                    ShowErrorMessage("El nombre solo puede contener letras, números y guión bajo");
-                    return false;
-                }
-
-                // TODO: Validar que el nombre de usuario no esté en uso
-                // Esto requiere una consulta a la base de datos
+                ShowError(GetLocalizedText("error_passwords_not_match"));
+                return false;
             }
 
             return true;
@@ -258,7 +273,7 @@ namespace DigitPark.Managers
 
             // Mostrar mensaje de error amigable
             string friendlyMessage = GetFriendlyErrorMessage(errorMessage);
-            ShowErrorMessage(friendlyMessage);
+            ShowError(friendlyMessage);
         }
 
         /// <summary>
@@ -275,39 +290,32 @@ namespace DigitPark.Managers
         #region UI Helpers
 
         /// <summary>
-        /// Muestra un mensaje de error
+        /// Muestra el panel de error con un mensaje
         /// </summary>
-        private void ShowErrorMessage(string message)
+        private void ShowError(string message)
         {
-            if (errorMessageText != null)
-            {
-                errorMessageText.text = message;
-                errorMessageText.gameObject.SetActive(true);
+            Debug.Log($"[Register] Mostrando error: {message}");
 
-                // Auto-ocultar después de 5 segundos
-                StartCoroutine(HideErrorMessageAfterDelay(5f));
+            if (errorText != null)
+            {
+                errorText.text = message;
+            }
+
+            if (errorPanel != null)
+            {
+                errorPanel.SetActive(true);
             }
         }
 
         /// <summary>
-        /// Limpia el mensaje de error
+        /// Oculta el panel de error
         /// </summary>
-        private void ClearErrorMessage()
+        public void HideError()
         {
-            if (errorMessageText != null)
+            if (errorPanel != null)
             {
-                errorMessageText.text = "";
-                errorMessageText.gameObject.SetActive(false);
+                errorPanel.SetActive(false);
             }
-        }
-
-        /// <summary>
-        /// Oculta el mensaje de error después de un delay
-        /// </summary>
-        private IEnumerator HideErrorMessageAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            ClearErrorMessage();
         }
 
         /// <summary>
@@ -334,23 +342,38 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Convierte mensajes de error técnicos en mensajes amigables
+        /// Convierte mensajes de error técnicos en mensajes amigables localizados
         /// </summary>
         private string GetFriendlyErrorMessage(string technicalError)
         {
             if (technicalError.Contains("auth/email-already-in-use"))
-                return "Este correo ya está registrado";
+                return GetLocalizedText("error_email_already_registered");
 
             if (technicalError.Contains("auth/invalid-email"))
-                return "Correo inválido";
+                return GetLocalizedText("error_email_invalid");
 
             if (technicalError.Contains("auth/weak-password"))
-                return "La contraseña es muy débil";
+                return GetLocalizedText("error_password_weak");
 
             if (technicalError.Contains("auth/network-request-failed"))
-                return "Error de conexión. Verifica tu internet";
+                return GetLocalizedText("error_no_connection");
 
-            return "Error al crear la cuenta. Intenta nuevamente";
+            if (technicalError.Contains("timeout"))
+                return GetLocalizedText("error_timeout");
+
+            return GetLocalizedText("error_create_account");
+        }
+
+        /// <summary>
+        /// Obtiene texto localizado usando LocalizationManager
+        /// </summary>
+        private string GetLocalizedText(string key)
+        {
+            if (LocalizationManager.Instance != null)
+            {
+                return LocalizationManager.Instance.GetText(key);
+            }
+            return key;
         }
 
         #endregion

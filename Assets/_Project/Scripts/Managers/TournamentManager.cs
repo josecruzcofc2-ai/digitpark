@@ -1189,6 +1189,9 @@ namespace DigitPark.Managers
             if (scrollRect != null && containerRT != null)
             {
                 scrollRect.content = containerRT;
+                // Desactivar scroll horizontal, solo permitir vertical
+                scrollRect.horizontal = false;
+                scrollRect.vertical = true;
             }
 
             // Configurar el RectTransform del container
@@ -1333,7 +1336,7 @@ namespace DigitPark.Managers
 
             // Texto del título
             TextMeshProUGUI titleText = CreateItemText(titleObj.transform, "TitleText",
-                $"{AutoLocalizer.Get("leaderboard_header")} - {tournament.name}", 32, Color.white);
+                tournament.name, 32, Color.white);
             RectTransform titleTextRT = titleText.GetComponent<RectTransform>();
             titleTextRT.anchorMin = new Vector2(0, 0.5f);
             titleTextRT.anchorMax = new Vector2(1, 1);
