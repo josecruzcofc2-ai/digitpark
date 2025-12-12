@@ -71,6 +71,10 @@ namespace DigitPark.Localization
             { "DeleteAccountButtonText", "delete_account" },
             { "LanguageText", "language" },
             { "LanguageLabel", "language" },
+            { "ChangeLanguageText", "change_language" },
+            { "ChangeLanguageLabel", "change_language" },
+            { "ChangeLanguage", "change_language" },
+            { "ChangueLanguageText", "change_language" }, // Typo in scene
             { "BackButton", "back_button" },
             { "BackButtonText", "back_button" },
             { "BackText", "back_button" },
@@ -216,6 +220,43 @@ namespace DigitPark.Localization
             // ==================== CREATE TOURNAMENT ====================
             { "CreateTournamentTitle", "create_tournament_title" },
             { "CreateTournamentTitleText", "create_tournament_title" },
+
+            // ==================== TOURNAMENTS - Additional Labels ====================
+            { "MinTimeLabel", "min_time" },
+            { "MaxTimeLabel", "max_time" },
+            { "MinPlayersLabel", "min_players" },
+            { "PlayersLabel", "participants" },
+            { "TypeLabel", "type" },
+            { "SearchLabel", "search" },
+            { "LeaderboardBackButton", "back_button" },
+            { "LeaderboardBackButtonText", "back_button" },
+
+            // ==================== REGISTER ====================
+            { "RegisterTitleText", "register_title" },
+
+            // ==================== PREMIUM ====================
+            { "PremiumSectionTitle", "premium_section_title" },
+            { "PremiumSectionTitleText", "premium_section_title" },
+            { "PremiumTitle", "premium_section_title" },
+            { "RemoveAdsButton", "remove_ads_title" },
+            { "RemoveAdsButtonText", "remove_ads_title" },
+            { "RemoveAdsTitle", "remove_ads_title" },
+            { "RemoveAdsDescription", "remove_ads_description" },
+            { "PremiumFullButton", "premium_full_title" },
+            { "PremiumFullButtonText", "premium_full_title" },
+            { "PremiumFullTitle", "premium_full_title" },
+            { "PremiumFullDescription", "premium_full_description" },
+            { "RestorePurchasesButton", "restore_purchases" },
+            { "RestorePurchasesButtonText", "restore_purchases" },
+            { "RestorePurchasesText", "restore_purchases" },
+            { "PremiumRequiredTitle", "premium_required_title" },
+            { "PremiumRequiredTitleText", "premium_required_title" },
+            { "PremiumRequiredMessage", "premium_required_message" },
+            { "PremiumRequiredMessageText", "premium_required_message" },
+            { "GetPremiumButton", "get_premium" },
+            { "GetPremiumButtonText", "get_premium" },
+            { "MaybeLaterButton", "maybe_later" },
+            { "MaybeLaterButtonText", "maybe_later" },
         };
 
         private void Awake()

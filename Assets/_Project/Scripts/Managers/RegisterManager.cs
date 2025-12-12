@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DigitPark.UI.Panels;
 
 namespace DigitPark.Managers
 {
@@ -31,10 +32,8 @@ namespace DigitPark.Managers
         [Header("UI - Loading")]
         [SerializeField] public GameObject loadingPanel;
 
-        [Header("UI - Error Panel")]
-        [SerializeField] public GameObject errorPanel;
-        [SerializeField] public TextMeshProUGUI errorText;
-        [SerializeField] public Button errorOkButton;
+        [Header("UI - Panels (Prefabs)")]
+        [SerializeField] private ErrorPanelUI errorPanel;
 
         private bool isRegistering = false;
 
@@ -96,7 +95,8 @@ namespace DigitPark.Managers
         {
             createAccountButton?.onClick.AddListener(OnCreateAccountClicked);
             backButton?.onClick.AddListener(OnBackButtonClicked);
-            errorOkButton?.onClick.AddListener(HideError);
+
+            // El ErrorPanelUI maneja su propio botón internamente
 
             // Listeners para Enter key
             confirmPasswordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnCreateAccountClicked(); });
@@ -295,16 +295,7 @@ namespace DigitPark.Managers
         private void ShowError(string message)
         {
             Debug.Log($"[Register] Mostrando error: {message}");
-
-            if (errorText != null)
-            {
-                errorText.text = message;
-            }
-
-            if (errorPanel != null)
-            {
-                errorPanel.SetActive(true);
-            }
+            errorPanel?.Show(message);
         }
 
         /// <summary>
@@ -312,10 +303,7 @@ namespace DigitPark.Managers
         /// </summary>
         public void HideError()
         {
-            if (errorPanel != null)
-            {
-                errorPanel.SetActive(false);
-            }
+            errorPanel?.Hide();
         }
 
         /// <summary>

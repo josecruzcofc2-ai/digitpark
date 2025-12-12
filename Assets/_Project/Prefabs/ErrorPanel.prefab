@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 5512050333873845982}
   - component: {fileID: 727593410094670410}
   - component: {fileID: 4951711426780226625}
+  - component: {fileID: 4869196288130303097}
   m_Layer: 5
   m_Name: ErrorPanel
   m_TagString: Untagged
@@ -197,6 +198,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4869196288130303097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2870879376361091433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 220c0d811a28bed4c8bdab2c39bcef82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  panel: {fileID: 2870879376361091433}
+  errorText: {fileID: 780310354763299731}
+  acceptButton: {fileID: 5212624454540572506}
+  acceptButtonText: {fileID: 2740519919384281251}
 --- !u!1 &3898705073917377532
 GameObject:
   m_ObjectHideFlags: 0

@@ -164,8 +164,48 @@ namespace DigitPark.Localization
                 "Delete Account", "Eliminar Cuenta", "Supprimer le compte", "Excluir Conta", "Konto löschen");
             AddTranslation("language",
                 "Language", "Idioma", "Langue", "Idioma", "Sprache");
+            AddTranslation("change_language",
+                "Change Language", "Cambiar Idioma", "Changer de langue", "Mudar Idioma", "Sprache ändern");
             AddTranslation("back_button",
                 "Back", "Volver", "Retour", "Voltar", "Zurück");
+
+            // ==================== PREMIUM / PURCHASES ====================
+            AddTranslation("premium_section_title",
+                "Premium", "Premium", "Premium", "Premium", "Premium");
+            AddTranslation("remove_ads_title",
+                "Remove Ads", "Quitar Anuncios", "Supprimer les pubs", "Remover Anúncios", "Werbung entfernen");
+            AddTranslation("remove_ads_description",
+                "Remove all ads from the app", "Elimina todos los anuncios de la app", "Supprimez toutes les publicités", "Remove todos os anúncios do app", "Entferne alle Werbung");
+            AddTranslation("premium_full_title",
+                "Premium Full", "Premium Completo", "Premium Complet", "Premium Completo", "Premium Vollversion");
+            AddTranslation("premium_full_description",
+                "No ads + Create tournaments", "Sin anuncios + Crear torneos", "Sans pubs + Créer des tournois", "Sem anúncios + Criar torneios", "Keine Werbung + Turniere erstellen");
+            AddTranslation("already_purchased",
+                "Already purchased", "Ya comprado", "Déjà acheté", "Já comprado", "Bereits gekauft");
+            AddTranslation("restore_purchases",
+                "Restore Purchases", "Restaurar Compras", "Restaurer les achats", "Restaurar Compras", "Käufe wiederherstellen");
+            AddTranslation("purchase_success",
+                "Purchase successful!", "¡Compra exitosa!", "Achat réussi!", "Compra realizada!", "Kauf erfolgreich!");
+            AddTranslation("purchase_failed",
+                "Purchase failed. Try again.", "Error en la compra. Intenta de nuevo.", "Échec de l'achat. Réessayez.", "Falha na compra. Tente novamente.", "Kauf fehlgeschlagen. Versuche es erneut.");
+            AddTranslation("purchase_cancelled",
+                "Purchase cancelled", "Compra cancelada", "Achat annulé", "Compra cancelada", "Kauf abgebrochen");
+            AddTranslation("processing_purchase",
+                "Processing purchase...", "Procesando compra...", "Traitement de l'achat...", "Processando compra...", "Kauf wird verarbeitet...");
+
+            // ==================== PREMIUM REQUIRED PANEL ====================
+            AddTranslation("premium_required_title",
+                "Premium Required", "Se Requiere Premium", "Premium Requis", "Premium Necessário", "Premium Erforderlich");
+            AddTranslation("premium_required_message",
+                "You need Premium to create tournaments.\nGet Premium Full to unlock this feature!",
+                "Necesitas Premium para crear torneos.\n¡Obtén Premium Completo para desbloquear esta función!",
+                "Vous avez besoin de Premium pour créer des tournois.\nObtenez Premium Complet!",
+                "Você precisa de Premium para criar torneios.\nAdquira Premium Completo!",
+                "Du brauchst Premium um Turniere zu erstellen.\nHole dir Premium Vollversion!");
+            AddTranslation("get_premium",
+                "Get Premium", "Obtener Premium", "Obtenir Premium", "Obter Premium", "Premium holen");
+            AddTranslation("maybe_later",
+                "Maybe Later", "Quizás Después", "Peut-être plus tard", "Talvez Depois", "Vielleicht später");
 
             // ==================== CHANGE NAME PANEL ====================
             AddTranslation("change_name_title",
@@ -381,9 +421,9 @@ namespace DigitPark.Localization
             AddTranslation("exit_error",
                 "Could not leave tournament. Try again.", "No se pudo salir del torneo. Intenta nuevamente.", "Impossible de quitter le tournoi. Réessayez.", "Não foi possível sair do torneio. Tente novamente.", "Konnte das Turnier nicht verlassen. Versuche es erneut.");
             AddTranslation("exit_confirm_title",
-                "Exit Tournament?", "¿Salir del Torneo?", "Quitter le tournoi?", "Sair do Torneio?", "Turnier verlassen?");
+                "Leave Tournament", "Abandonar Torneo", "Quitter le Tournoi", "Abandonar Torneio", "Turnier Verlassen");
             AddTranslation("exit_confirm_message",
-                "Are you sure you want to leave this tournament?", "¿Estás seguro de que quieres abandonar este torneo?", "Êtes-vous sûr de vouloir quitter ce tournoi?", "Tem certeza de que deseja sair deste torneio?", "Bist du sicher, dass du dieses Turnier verlassen möchtest?");
+                "Are you sure you want to leave? Your progress in this tournament will be lost.", "¿Seguro que quieres abandonar? Tu progreso en este torneo se perderá.", "Êtes-vous sûr de vouloir quitter? Votre progression sera perdue.", "Tem certeza que quer sair? Seu progresso será perdido.", "Bist du sicher? Dein Fortschritt geht verloren.");
             AddTranslation("no_time",
                 "No time", "Sin tiempo", "Pas de temps", "Sem tempo", "Keine Zeit");
             AddTranslation("finished",
@@ -554,6 +594,16 @@ namespace DigitPark.Localization
                 "Error", "Error", "Erreur", "Erro", "Fehler");
             AddTranslation("ErrorButtonText",
                 "Accept", "Aceptar", "Accepter", "Aceitar", "Akzeptieren");
+
+            // ==================== TOURNAMENT FILTERS ====================
+            AddTranslation("min_time",
+                "Min Time", "Tiempo Mín", "Temps min", "Tempo Mín", "Min. Zeit");
+            AddTranslation("max_time",
+                "Max Time", "Tiempo Máx", "Temps max", "Tempo Máx", "Max. Zeit");
+            AddTranslation("min_players",
+                "Min Players", "Mín. Jugadores", "Joueurs min", "Mín. Jogadores", "Min. Spieler");
+            AddTranslation("type",
+                "Type", "Tipo", "Type", "Tipo", "Typ");
 
             // ==================== REGISTER SCREEN ====================
             AddTranslation("register_title",

@@ -8,7 +8,16 @@
       "Bash(dir /s /b \"%USERPROFILE%\\AppData\\LocalLow\\DefaultCompany\\digitPark\\Player.log\")",
       "Bash(dir /s /b \"%USERPROFILE%\\AppData\\Local\\Unity\\Editor\\Editor.log\")",
       "Bash(dir /b \"C:\\Users\\josec\\OneDrive\\Pictures\\Screenshots\")",
-      "Bash(del \"C:\\Users\\josec\\digitPark\\Assets\\_Project\\Scripts\\UI\\SafeAreaInitializer.cs\")"
+      "Bash(del \"C:\\Users\\josec\\digitPark\\Assets\\_Project\\Scripts\\UI\\SafeAreaInitializer.cs\")",
+      "Bash(dir \"C:\\Users\\josec\\OneDrive\\Pictures\\Screenshots\" /o-d)",
+      "Bash(dir \"C:\\Users\\josec\\OneDrive\\Pictures\\Screenshots\")",
+      "Bash(dir /s /b \"C:\\Program Files\\Unity\\Hub\\Editor\\*Unity.exe\")",
+      "Bash(dir /s /b \"C:\\Program Files\\Unity Hub\\*Unity.exe\")",
+      "Bash(where:*)",
+      "Bash(dir \"C:\\Program Files\\Unity\" /s /b)",
+      "Bash(\"/c/Program Files/Unity/Hub/Editor/2022.3.62f3/Editor/Unity.exe\" -batchmode -projectPath \"C:/Users/josec/digitPark\" -executeMethod DigitPark.Editor.NeonThemeApplier.ApplyToAllScenes -logFile - -quit)",
+      "Bash(dir \"C:\\Users\\josec\\OneDrive\\Pictures\\Screenshots\" /o-d /b)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

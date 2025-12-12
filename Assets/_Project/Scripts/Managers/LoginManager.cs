@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Common;
+using DigitPark.UI.Panels;
 using DigitPark.Localization;
 
 namespace DigitPark.Managers
@@ -30,11 +31,8 @@ namespace DigitPark.Managers
         [SerializeField] public GameObject loadingPanel;
         [SerializeField] public Button backButton;
 
-        [Header("UI - Error Popup")]
-        [SerializeField] public GameObject errorBlocker;
-        [SerializeField] public GameObject errorPopup;
-        [SerializeField] public TextMeshProUGUI errorMessage;
-        [SerializeField] public Button okButton;
+        [Header("UI - Panels (Prefabs)")]
+        [SerializeField] private ErrorPanelUI errorPanel;
 
         [Header("Animation")]
         [SerializeField] public Animator titleAnimator;
@@ -53,8 +51,7 @@ namespace DigitPark.Managers
             // Configurar listeners
             SetupListeners();
 
-            // Ocultar error popup inicialmente
-            if (errorBlocker != null) errorBlocker.SetActive(false);
+            // El ErrorPanelUI se oculta automáticamente en su Awake()
 
             // Mostrar panel de login
             if (loginPanel != null)
@@ -149,7 +146,8 @@ namespace DigitPark.Managers
 
             registerButton?.onClick.AddListener(GoToRegisterScene);
             googleButton?.onClick.AddListener(OnGoogleLoginClicked);
-            okButton?.onClick.AddListener(HideError);
+
+            // El ErrorPanelUI maneja su propio botón internamente
 
             // Listener para Enter key
             passwordInput?.onEndEdit.AddListener(delegate { if (Input.GetKeyDown(KeyCode.Return)) OnLoginButtonClicked(); });
@@ -374,44 +372,21 @@ namespace DigitPark.Managers
         #region UI Helpers
 
         /// <summary>
-        /// Muestra un mensaje de error usando el popup
+        /// Muestra un mensaje de error usando el panel
         /// </summary>
         private void ShowErrorMessage(string message, Color? color = null)
         {
-            Debug.Log($"[Login] 🚨 Mostrando error: {message}");
-
-            if (errorMessage != null)
-            {
-                errorMessage.text = message;
-            }
-
-            if (errorBlocker != null)
-            {
-                errorBlocker.SetActive(true);
-            }
-
-            if (errorPopup != null)
-            {
-                errorPopup.SetActive(true);
-            }
+            Debug.Log($"[Login] Mostrando error: {message}");
+            errorPanel?.Show(message);
         }
 
         /// <summary>
-        /// Oculta el popup de error
+        /// Oculta el panel de error
         /// </summary>
         public void HideError()
         {
-            Debug.Log("[Login] Ocultando popup de error");
-
-            if (errorBlocker != null)
-            {
-                errorBlocker.SetActive(false);
-            }
-
-            if (errorPopup != null)
-            {
-                errorPopup.SetActive(false);
-            }
+            Debug.Log("[Login] Ocultando panel de error");
+            errorPanel?.Hide();
         }
 
         /// <summary>
