@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DigitPark.UI.Panels;
 
 namespace DigitPark.Managers
 {
@@ -72,10 +73,11 @@ namespace DigitPark.Managers
         [SerializeField] public GameObject exitTournamentButton;
         [SerializeField] public GameObject searchTournamentButton;
 
-        [Header("Exit Tournament Confirmation")]
-        [SerializeField] public GameObject exitTournamentConfirmPanel;
-        [SerializeField] public Button confirmExitButton;
-        [SerializeField] public Button cancelExitButton;
+        [Header("UI - Panels (Prefabs)")]
+        [SerializeField] private ErrorPanelUI errorPanel;
+        [SerializeField] private ConfirmPanelUI confirmPanel;
+        [SerializeField] private ConfirmPanelUI exitConfirmPanel;
+        [SerializeField] private ConfirmPanelUI premiumRequiredPanel;
 
         // Estado
         private TournamentView currentView = TournamentView.Search;
@@ -117,7 +119,6 @@ namespace DigitPark.Managers
             if (leaderboardBackButton != null) leaderboardBackButton.SetActive(false);
             if (exitTournamentButton != null) exitTournamentButton.SetActive(false);
             if (searchTournamentButton != null) searchTournamentButton.SetActive(true); // Siempre visible
-            if (exitTournamentConfirmPanel != null) exitTournamentConfirmPanel.SetActive(false);
 
             // Mostrar vista inicial
             ShowView(TournamentView.Search);
@@ -223,9 +224,6 @@ namespace DigitPark.Managers
                 }
             }
 
-            // Exit Tournament Confirmation
-            confirmExitButton?.onClick.AddListener(OnConfirmExitClicked);
-            cancelExitButton?.onClick.AddListener(HideExitConfirmPanel);
         }
 
         #endregion
@@ -773,7 +771,18 @@ namespace DigitPark.Managers
             Debug.Log($"[Tournament] Clic en torneo: {tournament.tournamentId}");
 
             selectedTournament = tournament;
+
+            // Si estamos en My Tournaments, el usuario ya participa - ir directo al leaderboard
+            if (currentView == TournamentView.MyTournaments)
+            {
+                Debug.Log("[Tournament] Vista MyTournaments - mostrando leaderboard directamente");
+                ShowTournamentLeaderboard(tournament);
+                return;
+            }
+
+            // En otras vistas, verificar participación
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
+            Debug.Log($"[Tournament] isParticipating: {isParticipating}, participantes: {tournament.participants?.Count ?? 0}");
 
             if (isParticipating)
             {
@@ -793,9 +802,77 @@ namespace DigitPark.Managers
         #region Create Tournament
 
         /// <summary>
-        /// Muestra el panel de crear torneo
+        /// Muestra el panel de crear torneo (verifica premium primero)
         /// </summary>
         private void ShowCreateTournamentPanel()
+        {
+            Debug.Log("[Tournament] Intentando mostrar panel de creación");
+
+            // Verificar si el usuario tiene premium para crear torneos
+            if (PremiumManager.Instance != null && !PremiumManager.Instance.CanCreateTournaments)
+            {
+                Debug.Log("[Tournament] Usuario no tiene premium - Mostrando panel de premium requerido");
+                ShowPremiumRequiredPanel();
+                return;
+            }
+
+            ShowCreateTournamentPanelInternal();
+        }
+
+        /// <summary>
+        /// Muestra el panel de premium requerido
+        /// </summary>
+        private void ShowPremiumRequiredPanel()
+        {
+            ClearTournamentsList();
+
+            if (premiumRequiredPanel != null)
+            {
+                // Configurar textos de botones primero
+                premiumRequiredPanel.SetButtonTexts(
+                    AutoLocalizer.Get("get_premium"),
+                    AutoLocalizer.Get("maybe_later")
+                );
+
+                // Mostrar el panel
+                premiumRequiredPanel.Show(
+                    AutoLocalizer.Get("premium_required_title"),
+                    AutoLocalizer.Get("premium_required_message"),
+                    OnGetPremiumClicked,
+                    OnMaybeLaterClicked
+                );
+            }
+            else
+            {
+                // Fallback si no hay panel de premium
+                errorPanel?.Show(AutoLocalizer.Get("premium_required_message"));
+            }
+        }
+
+        /// <summary>
+        /// Acción cuando el usuario quiere obtener premium
+        /// </summary>
+        private void OnGetPremiumClicked()
+        {
+            Debug.Log("[Tournament] Usuario quiere obtener premium - Abriendo Settings");
+            premiumRequiredPanel?.Hide();
+            SceneManager.LoadScene("Settings");
+        }
+
+        /// <summary>
+        /// Acción cuando el usuario elige "Quizás después"
+        /// </summary>
+        private void OnMaybeLaterClicked()
+        {
+            Debug.Log("[Tournament] Usuario eligió 'Quizás después'");
+            premiumRequiredPanel?.Hide();
+            ShowView(TournamentView.Search);
+        }
+
+        /// <summary>
+        /// Muestra el panel de crear torneo (interno, ya verificado premium)
+        /// </summary>
+        private void ShowCreateTournamentPanelInternal()
         {
             Debug.Log("[Tournament] Mostrando panel de creación");
 
@@ -844,7 +921,7 @@ namespace DigitPark.Managers
         private void OnMaxPlayersChanged(float value)
         {
             if (maxPlayersValue != null)
-                maxPlayersValue.text = $"{(int)value}/55";
+                maxPlayersValue.text = $"{(int)value}/100";
         }
 
         /// <summary>
@@ -1152,8 +1229,9 @@ namespace DigitPark.Managers
         /// </summary>
         private void ShowSuccessMessage(string message)
         {
-            Debug.Log($"[Tournament] ✅ {message}");
-            // TODO: Implementar popup de éxito visual
+            Debug.Log($"[Tournament] {message}");
+            // Usar el mismo panel de error para mostrar éxito (con mensaje positivo)
+            errorPanel?.Show(message);
         }
 
         /// <summary>
@@ -1161,8 +1239,8 @@ namespace DigitPark.Managers
         /// </summary>
         private void ShowErrorMessage(string message)
         {
-            Debug.LogError($"[Tournament] ❌ {message}");
-            // TODO: Implementar popup de error visual
+            Debug.LogError($"[Tournament] {message}");
+            errorPanel?.Show(message);
         }
 
         /// <summary>
@@ -1555,26 +1633,22 @@ namespace DigitPark.Managers
                 return;
             }
 
-            // Mostrar blocker y panel de confirmación
-            if (blockerPanel != null)
-                blockerPanel.SetActive(true);
+            if (exitConfirmPanel == null)
+            {
+                Debug.LogError("[Tournament] exitConfirmPanel no está asignado");
+                return;
+            }
 
-            if (exitTournamentConfirmPanel != null)
-                exitTournamentConfirmPanel.SetActive(true);
-        }
+            // Mostrar panel de confirmación usando el prefab
+            string title = AutoLocalizer.Get("exit_confirm_title");
+            string message = AutoLocalizer.Get("exit_confirm_message");
 
-        /// <summary>
-        /// Oculta el panel de confirmación de salida
-        /// </summary>
-        private void HideExitConfirmPanel()
-        {
-            Debug.Log("[Tournament] Ocultando confirmación de salida");
+            exitConfirmPanel.SetButtonTexts(
+                AutoLocalizer.Get("confirm"),
+                AutoLocalizer.Get("cancel")
+            );
 
-            if (exitTournamentConfirmPanel != null)
-                exitTournamentConfirmPanel.SetActive(false);
-
-            if (blockerPanel != null)
-                blockerPanel.SetActive(false);
+            exitConfirmPanel.Show(title, message, OnConfirmExitClicked, null);
         }
 
         /// <summary>
@@ -1591,7 +1665,7 @@ namespace DigitPark.Managers
             Debug.Log($"[Tournament] Confirmando salida del torneo: {selectedTournament.tournamentId}");
 
             // Ocultar panel de confirmación
-            HideExitConfirmPanel();
+            exitConfirmPanel?.Hide();
 
             ShowLoading(true);
 

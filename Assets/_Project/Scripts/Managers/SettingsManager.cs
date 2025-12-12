@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DigitPark.UI.Panels;
 
 namespace DigitPark.Managers
 {
@@ -33,27 +34,19 @@ namespace DigitPark.Managers
         [SerializeField] private Button deleteAccountButton;
         [SerializeField] private Button backButton;
 
-        [Header("UI - Change Name Panel")]
-        [SerializeField] private GameObject changeNamePanel;
-        [SerializeField] private TextMeshProUGUI changeNameTitleText;
-        [SerializeField] private TMP_InputField newNameInput;
-        [SerializeField] private Button confirmNameButton;
-        [SerializeField] private Button cancelNameButton;
+        [Header("UI - Premium Section")]
+        [SerializeField] private GameObject premiumSection;
+        [SerializeField] private Button removeAdsButton;
+        [SerializeField] private TextMeshProUGUI removeAdsButtonText;
+        [SerializeField] private Button premiumFullButton;
+        [SerializeField] private TextMeshProUGUI premiumFullButtonText;
+        [SerializeField] private Button restorePurchasesButton;
 
-        [Header("UI - Delete Confirm Panel")]
-        [SerializeField] private GameObject deleteConfirmPanel;
-        [SerializeField] private TextMeshProUGUI deleteTitleText;
-        [SerializeField] private Button confirmDeleteButton;
-        [SerializeField] private Button cancelDeleteButton;
-
-        [Header("UI - Logout Confirm Panel")]
-        [SerializeField] private GameObject logoutBlockerPanel;
-        [SerializeField] private GameObject logoutConfirmPanel;
-        [SerializeField] private TextMeshProUGUI logoutTitleMessage;
-        [SerializeField] private Button confirmLogoutButton;
-        [SerializeField] private TextMeshProUGUI confirmLogoutButtonText;
-        [SerializeField] private Button cancelLogoutButton;
-        [SerializeField] private TextMeshProUGUI cancelLogoutButtonText;
+        [Header("UI - Panels (Prefabs)")]
+        [SerializeField] private InputPanelUI changeNamePanel;
+        [SerializeField] private ConfirmPanelUI deleteConfirmPanel;
+        [SerializeField] private ConfirmPanelUI logoutConfirmPanel;
+        [SerializeField] private ErrorPanelUI errorPanel;
 
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
@@ -70,6 +63,7 @@ namespace DigitPark.Managers
             SetupLanguageDropdown();
             SetupListeners();
             HidePanels();
+            UpdatePremiumUI();
 
             if (settingsPanel != null)
                 settingsPanel.SetActive(true);
@@ -155,32 +149,30 @@ namespace DigitPark.Managers
             deleteAccountButton?.onClick.AddListener(OnDeleteAccountButtonClicked);
             backButton?.onClick.AddListener(OnBackButtonClicked);
 
-            // Panel cambiar nombre
-            confirmNameButton?.onClick.AddListener(OnConfirmNameClicked);
-            cancelNameButton?.onClick.AddListener(OnCancelNameClicked);
+            // Premium buttons
+            removeAdsButton?.onClick.AddListener(OnRemoveAdsClicked);
+            premiumFullButton?.onClick.AddListener(OnPremiumFullClicked);
+            restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
 
-            // Panel eliminar cuenta
-            confirmDeleteButton?.onClick.AddListener(OnConfirmDeleteClicked);
-            cancelDeleteButton?.onClick.AddListener(OnCancelDeleteClicked);
+            // Suscribirse a cambios de estado premium
+            PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
 
-            // Panel confirmar logout
-            confirmLogoutButton?.onClick.AddListener(OnConfirmLogoutClicked);
-            cancelLogoutButton?.onClick.AddListener(OnCancelLogoutClicked);
+            // Los paneles ahora manejan sus propios listeners internamente
+        }
+
+        private void OnDestroy()
+        {
+            PremiumManager.OnPremiumStatusChanged -= UpdatePremiumUI;
         }
 
         private void HidePanels()
         {
-            if (changeNamePanel != null)
-                changeNamePanel.SetActive(false);
-
-            if (deleteConfirmPanel != null)
-                deleteConfirmPanel.SetActive(false);
-
-            if (logoutBlockerPanel != null)
-                logoutBlockerPanel.SetActive(false);
-
-            if (logoutConfirmPanel != null)
-                logoutConfirmPanel.SetActive(false);
+            // Los paneles se ocultan automáticamente en su Awake()
+            // Este método ya no es necesario pero se mantiene por compatibilidad
+            changeNamePanel?.Hide();
+            deleteConfirmPanel?.Hide();
+            logoutConfirmPanel?.Hide();
+            errorPanel?.Hide();
         }
 
         #endregion
@@ -288,52 +280,28 @@ namespace DigitPark.Managers
 
             if (changeNamePanel != null)
             {
-                changeNamePanel.SetActive(true);
-
-                if (newNameInput != null)
-                {
-                    newNameInput.text = "";
-                    newNameInput.Select();
-                    newNameInput.ActivateInputField();
-                }
+                changeNamePanel.SetLengthLimits(3, 20);
+                changeNamePanel.Show(
+                    "Cambiar Nombre",
+                    "Nuevo nombre de usuario",
+                    OnConfirmNameClicked,
+                    null // OnCancel se maneja internamente
+                );
             }
         }
 
-        private async void OnConfirmNameClicked()
+        private async void OnConfirmNameClicked(string newUsername)
         {
-            if (newNameInput == null || currentPlayer == null) return;
+            if (currentPlayer == null) return;
 
-            string newUsername = newNameInput.text.Trim();
-
-            // Validaciones
-            if (string.IsNullOrEmpty(newUsername))
-            {
-                Debug.LogWarning("[Settings] El nombre no puede estar vacío");
-                return;
-            }
-
-            if (newUsername.Length < 3)
-            {
-                Debug.LogWarning("[Settings] El nombre debe tener al menos 3 caracteres");
-                return;
-            }
-
-            if (newUsername.Length > 20)
-            {
-                Debug.LogWarning("[Settings] El nombre debe tener máximo 20 caracteres");
-                return;
-            }
-
+            // La validación ya se hace en InputPanelUI
             if (newUsername == currentPlayer.username)
             {
-                OnCancelNameClicked();
+                changeNamePanel?.Hide();
                 return;
             }
 
             Debug.Log($"[Settings] Cambiando nombre a: {newUsername}");
-
-            // Deshabilitar botones
-            SetNameButtonsInteractable(false);
 
             bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
 
@@ -341,32 +309,14 @@ namespace DigitPark.Managers
             {
                 Debug.Log("[Settings] Nombre actualizado exitosamente");
                 currentPlayer.username = newUsername;
-                OnCancelNameClicked();
+                changeNamePanel?.Hide();
             }
             else
             {
                 Debug.LogError("[Settings] Error al actualizar nombre");
-                SetNameButtonsInteractable(true);
+                changeNamePanel?.SetButtonsInteractable(true);
+                errorPanel?.Show("Error al actualizar el nombre. Intenta de nuevo.");
             }
-        }
-
-        private void OnCancelNameClicked()
-        {
-            Debug.Log("[Settings] Cancelando cambio de nombre");
-
-            if (changeNamePanel != null)
-                changeNamePanel.SetActive(false);
-
-            if (newNameInput != null)
-                newNameInput.text = "";
-
-            SetNameButtonsInteractable(true);
-        }
-
-        private void SetNameButtonsInteractable(bool interactable)
-        {
-            if (confirmNameButton != null) confirmNameButton.interactable = interactable;
-            if (cancelNameButton != null) cancelNameButton.interactable = interactable;
         }
 
         #endregion
@@ -379,7 +329,12 @@ namespace DigitPark.Managers
 
             if (deleteConfirmPanel != null)
             {
-                deleteConfirmPanel.SetActive(true);
+                deleteConfirmPanel.Show(
+                    "Eliminar Cuenta",
+                    "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.",
+                    OnConfirmDeleteClicked,
+                    null // OnCancel se maneja internamente
+                );
             }
         }
 
@@ -389,10 +344,6 @@ namespace DigitPark.Managers
 
             if (currentPlayer == null) return;
 
-            // Deshabilitar botones
-            SetDeleteButtonsInteractable(false);
-
-            // Usar el método de AuthenticationService para eliminar la cuenta
             if (AuthenticationService.Instance != null)
             {
                 bool success = await AuthenticationService.Instance.DeleteAccount();
@@ -405,33 +356,16 @@ namespace DigitPark.Managers
                 else
                 {
                     Debug.LogError("[Settings] Error al eliminar la cuenta");
-                    SetDeleteButtonsInteractable(true);
-
-                    if (deleteConfirmPanel != null)
-                        deleteConfirmPanel.SetActive(false);
+                    deleteConfirmPanel?.Hide();
+                    errorPanel?.Show("Error al eliminar la cuenta. Intenta de nuevo.");
                 }
             }
             else
             {
                 Debug.LogError("[Settings] AuthenticationService no disponible");
-                SetDeleteButtonsInteractable(true);
+                deleteConfirmPanel?.Hide();
+                errorPanel?.Show("Servicio no disponible. Intenta más tarde.");
             }
-        }
-
-        private void OnCancelDeleteClicked()
-        {
-            Debug.Log("[Settings] Cancelando eliminación de cuenta");
-
-            if (deleteConfirmPanel != null)
-                deleteConfirmPanel.SetActive(false);
-
-            SetDeleteButtonsInteractable(true);
-        }
-
-        private void SetDeleteButtonsInteractable(bool interactable)
-        {
-            if (confirmDeleteButton != null) confirmDeleteButton.interactable = interactable;
-            if (cancelDeleteButton != null) cancelDeleteButton.interactable = interactable;
         }
 
         #endregion
@@ -442,30 +376,24 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Settings] Mostrando confirmación de logout");
 
-            if (logoutBlockerPanel != null)
-                logoutBlockerPanel.SetActive(true);
-
             if (logoutConfirmPanel != null)
-                logoutConfirmPanel.SetActive(true);
+            {
+                logoutConfirmPanel.Show(
+                    "Cerrar Sesión",
+                    "¿Estás seguro de que deseas cerrar sesión?",
+                    OnConfirmLogoutClicked,
+                    null // OnCancel se maneja internamente
+                );
+            }
         }
 
         private void OnConfirmLogoutClicked()
         {
             Debug.Log("[Settings] Cerrando sesión...");
 
+            logoutConfirmPanel?.Hide();
             AuthenticationService.Instance?.Logout();
             SceneManager.LoadScene("Login");
-        }
-
-        private void OnCancelLogoutClicked()
-        {
-            Debug.Log("[Settings] Cancelando logout");
-
-            if (logoutBlockerPanel != null)
-                logoutBlockerPanel.SetActive(false);
-
-            if (logoutConfirmPanel != null)
-                logoutConfirmPanel.SetActive(false);
         }
 
         #endregion
@@ -476,6 +404,133 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Settings] Volviendo al menú principal");
             SceneManager.LoadScene("MainMenu");
+        }
+
+        #endregion
+
+        #region Premium
+
+        /// <summary>
+        /// Actualiza la UI de premium según el estado actual
+        /// </summary>
+        private void UpdatePremiumUI()
+        {
+            if (PremiumManager.Instance == null) return;
+
+            bool hasNoAds = PremiumManager.Instance.HasNoAds;
+            bool canCreateTournaments = PremiumManager.Instance.CanCreateTournaments;
+
+            // Actualizar botón de quitar anuncios
+            if (removeAdsButton != null)
+            {
+                removeAdsButton.interactable = !hasNoAds;
+                if (removeAdsButtonText != null)
+                {
+                    if (hasNoAds)
+                    {
+                        removeAdsButtonText.text = AutoLocalizer.Get("already_purchased");
+                    }
+                    else
+                    {
+                        removeAdsButtonText.text = $"{AutoLocalizer.Get("remove_ads_title")} - {PremiumManager.PRICE_REMOVE_ADS}";
+                    }
+                }
+            }
+
+            // Actualizar botón de premium completo
+            if (premiumFullButton != null)
+            {
+                premiumFullButton.interactable = !canCreateTournaments;
+                if (premiumFullButtonText != null)
+                {
+                    if (canCreateTournaments)
+                    {
+                        premiumFullButtonText.text = AutoLocalizer.Get("already_purchased");
+                    }
+                    else
+                    {
+                        premiumFullButtonText.text = $"{AutoLocalizer.Get("premium_full_title")} - {PremiumManager.PRICE_PREMIUM_FULL}";
+                    }
+                }
+            }
+
+            // Ocultar sección de premium si ya tiene todo
+            if (premiumSection != null && hasNoAds && canCreateTournaments)
+            {
+                // Opcionalmente ocultar la sección si tiene todo
+                // premiumSection.SetActive(false);
+            }
+
+            Debug.Log($"[Settings] Premium UI actualizada - NoAds: {hasNoAds}, CreateTournaments: {canCreateTournaments}");
+        }
+
+        /// <summary>
+        /// Compra: Quitar anuncios ($10 MXN)
+        /// </summary>
+        private void OnRemoveAdsClicked()
+        {
+            Debug.Log("[Settings] Iniciando compra: Quitar Anuncios");
+
+            if (PremiumManager.Instance.HasNoAds)
+            {
+                errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
+                return;
+            }
+
+            // Deshabilitar botón mientras se procesa
+            if (removeAdsButton != null) removeAdsButton.interactable = false;
+
+            PremiumManager.Instance.PurchaseRemoveAds(success =>
+            {
+                if (success)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("purchase_success"));
+                }
+                else
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
+                    if (removeAdsButton != null) removeAdsButton.interactable = true;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Compra: Premium completo ($20 MXN)
+        /// </summary>
+        private void OnPremiumFullClicked()
+        {
+            Debug.Log("[Settings] Iniciando compra: Premium Completo");
+
+            if (PremiumManager.Instance.CanCreateTournaments)
+            {
+                errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
+                return;
+            }
+
+            // Deshabilitar botón mientras se procesa
+            if (premiumFullButton != null) premiumFullButton.interactable = false;
+
+            PremiumManager.Instance.PurchasePremiumFull(success =>
+            {
+                if (success)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("purchase_success"));
+                }
+                else
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
+                    if (premiumFullButton != null) premiumFullButton.interactable = true;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Restaurar compras (principalmente para iOS)
+        /// </summary>
+        private void OnRestorePurchasesClicked()
+        {
+            Debug.Log("[Settings] Restaurando compras...");
+            PremiumManager.Instance.RestorePurchases();
         }
 
         #endregion
