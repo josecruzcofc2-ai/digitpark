@@ -312,8 +312,13 @@ namespace DigitPark.UI.Theme
                 {
                     ApplyPrimaryButtonStyle(btn);
                 }
+                // Botones con iconos (preservar color del icono)
+                else if (name.Contains("back"))
+                {
+                    ApplyIconButtonStyle(btn);
+                }
                 // Botones secundarios / navegación
-                else if (name.Contains("back") || name.Contains("cancel") || name.Contains("close") ||
+                else if (name.Contains("cancel") || name.Contains("close") ||
                          name.Contains("settings") || name.Contains("scores") || name.Contains("tournament"))
                 {
                     ApplySecondaryButtonStyle(btn);
@@ -324,6 +329,31 @@ namespace DigitPark.UI.Theme
                     ApplyDangerButtonStyle(btn);
                 }
             }
+        }
+
+        /// <summary>
+        /// Aplica estilo para botones con iconos (back, settings, etc.)
+        /// Preserva el color blanco de la imagen para que el icono se vea correctamente
+        /// </summary>
+        public void ApplyIconButtonStyle(Button button)
+        {
+            if (button == null || theme == null) return;
+
+            // NO cambiar el color de la imagen para preservar el icono original
+            var image = button.GetComponent<Image>();
+            if (image != null)
+            {
+                // Mantener el color blanco para que el icono se vea correctamente
+                image.color = Color.white;
+            }
+
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            colors.selectedColor = Color.white;
+            colors.disabledColor = theme.textDisabled;
+            button.colors = colors;
         }
 
         /// <summary>

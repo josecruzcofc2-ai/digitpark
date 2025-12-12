@@ -12,7 +12,8 @@ namespace DigitPark.Services.Firebase
     public enum AuthProvider
     {
         Email,
-        Google
+        Google,
+        Apple
     }
 
     public class AuthenticationService : MonoBehaviour
@@ -304,6 +305,82 @@ namespace DigitPark.Services.Firebase
                 else
                 {
                     OnLoginFailed?.Invoke("Error al iniciar sesión con Google");
+                }
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Login con Apple
+
+        /// <summary>
+        /// Inicia sesión con Apple (iOS obligatorio si hay login social)
+        /// Requiere: Sign in with Apple Unity Plugin
+        /// </summary>
+        public async Task<bool> LoginWithApple()
+        {
+            if (!useFirebaseReal)
+            {
+                return await LoginWithAppleSimulation();
+            }
+
+            try
+            {
+                Debug.Log("[Auth] Iniciando login con Apple...");
+
+                // Crear el provider de Apple
+                var provider = new FederatedOAuthProviderData();
+                provider.ProviderId = "apple.com";
+
+                // Scopes para Apple
+                provider.Scopes = new List<string>
+                {
+                    "email",
+                    "name"
+                };
+
+                var federatedProvider = new FederatedOAuthProvider();
+                federatedProvider.SetProviderData(provider);
+
+                // Iniciar Sign-In con Apple
+                var authResult = await firebaseAuth.SignInWithProviderAsync(federatedProvider);
+                currentUser = authResult.User;
+
+                Debug.Log($"[Auth] Login Apple exitoso: {currentUser.Email ?? currentUser.UserId}");
+
+                // Cargar o crear datos del jugador
+                await LoadOrCreatePlayerData(currentUser);
+
+                OnLoginSuccess?.Invoke(currentPlayerData);
+                return true;
+            }
+            catch (FirebaseException ex)
+            {
+                string errorMessage = GetFirebaseErrorMessage(ex);
+                Debug.LogError($"[Auth] Error Apple: {errorMessage}");
+
+                if (ex.Message.Contains("cancelled") || ex.Message.Contains("canceled"))
+                {
+                    OnLoginFailed?.Invoke("Inicio de sesión cancelado");
+                }
+                else
+                {
+                    OnLoginFailed?.Invoke($"Error con Apple: {errorMessage}");
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[Auth] Error Apple: {ex.Message}");
+
+                if (ex.Message.Contains("cancelled") || ex.Message.Contains("canceled"))
+                {
+                    OnLoginFailed?.Invoke("Inicio de sesión cancelado");
+                }
+                else
+                {
+                    OnLoginFailed?.Invoke("Error al iniciar sesión con Apple");
                 }
                 return false;
             }
@@ -756,6 +833,43 @@ namespace DigitPark.Services.Firebase
                 PlayerPrefs.SetInt("RememberMe", 1);
                 PlayerPrefs.Save();
 
+                OnLoginSuccess?.Invoke(currentPlayerData);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                OnLoginFailed?.Invoke(ex.Message);
+                return false;
+            }
+        }
+
+        private async Task<bool> LoginWithAppleSimulation()
+        {
+            try
+            {
+                await Task.Delay(1000);
+
+                string appleUserId = "apple_" + Guid.NewGuid().ToString().Substring(0, 8);
+                // Apple puede ocultar el email real del usuario
+                string appleEmail = $"privaterelay.{UnityEngine.Random.Range(1000, 9999)}@privaterelay.appleid.com";
+
+                currentPlayerData = new PlayerData
+                {
+                    userId = appleUserId,
+                    email = appleEmail,
+                    username = "Usuario Apple",
+                    createdDate = DateTime.Now,
+                    lastLoginDate = DateTime.Now,
+                    coins = 1000,
+                    gems = 50
+                };
+
+                PlayerPrefs.SetString($"SimUser_{appleUserId}", JsonUtility.ToJson(currentPlayerData));
+                PlayerPrefs.SetString("SavedUserId", appleUserId);
+                PlayerPrefs.SetInt("RememberMe", 1);
+                PlayerPrefs.Save();
+
+                Debug.Log($"[Auth] (Simulación) Login Apple exitoso: {appleEmail}");
                 OnLoginSuccess?.Invoke(currentPlayerData);
                 return true;
             }
