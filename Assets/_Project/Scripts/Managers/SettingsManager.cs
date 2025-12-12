@@ -6,6 +6,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI.Panels;
+using DigitPark.UI.Components;
 
 namespace DigitPark.Managers
 {
@@ -27,6 +28,8 @@ namespace DigitPark.Managers
 
         [Header("UI - Language")]
         [SerializeField] private TMP_Dropdown languageDropdown;
+        [SerializeField] private TextMeshProUGUI changeLangLabel;
+        [SerializeField] private LanguageDropdownStyler languageStyler;
 
         [Header("UI - Buttons")]
         [SerializeField] private Button changeNameButton;
@@ -61,6 +64,7 @@ namespace DigitPark.Managers
             LoadPlayerData();
             LoadVolumeSettings();
             SetupLanguageDropdown();
+            SetupLanguageStyler();
             SetupListeners();
             HidePanels();
             UpdatePremiumUI();
@@ -133,6 +137,26 @@ namespace DigitPark.Managers
             string[] languageNames = { "English", "Español", "Français", "Português", "Deutsch" };
             string currentLanguage = currentIndex < languageNames.Length ? languageNames[currentIndex] : "Unknown";
             Debug.Log($"[Settings] Idioma actual: {currentLanguage}");
+        }
+
+        private void SetupLanguageStyler()
+        {
+            // Si no hay styler asignado, intentar agregarlo al dropdown
+            if (languageStyler == null && languageDropdown != null)
+            {
+                languageStyler = languageDropdown.GetComponent<LanguageDropdownStyler>();
+                if (languageStyler == null)
+                {
+                    languageStyler = languageDropdown.gameObject.AddComponent<LanguageDropdownStyler>();
+                }
+            }
+
+            // Aplicar estilos si el styler existe
+            if (languageStyler != null)
+            {
+                languageStyler.ApplyStyles();
+                Debug.Log("[Settings] Estilos del dropdown de idioma aplicados");
+            }
         }
 
         private void SetupListeners()
