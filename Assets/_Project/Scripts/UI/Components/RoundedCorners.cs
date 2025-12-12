@@ -11,9 +11,9 @@ namespace DigitPark.UI
     [RequireComponent(typeof(Image))]
     public class RoundedCorners : MonoBehaviour
     {
-        [Header("Configuración de Bordes")]
+        [Header("Configuracion de Bordes")]
         [Range(0f, 100f)]
-        [Tooltip("Radio de las esquinas en píxeles")]
+        [Tooltip("Radio de las esquinas en pixeles")]
         [SerializeField] private float cornerRadius = 25f;
 
         [Header("Barra inferior (opcional)")]
@@ -58,10 +58,17 @@ namespace DigitPark.UI
             if (targetImage == null)
                 targetImage = GetComponent<Image>();
 
-            // Solo aplicar en editor cuando no está en play mode
+            // Solo aplicar en editor cuando no esta en play mode
+            // Usamos delayCall para evitar "SendMessage cannot be called during OnValidate"
             if (!Application.isPlaying)
             {
-                ApplyRoundedCorners();
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    if (this != null)
+                    {
+                        ApplyRoundedCorners();
+                    }
+                };
             }
         }
 #endif
@@ -194,7 +201,7 @@ namespace DigitPark.UI
                     bottomBarObject = new GameObject("BottomBar");
                     bottomBarObject.transform.SetParent(transform, false);
 
-                    // Asegurar que esté al frente (último hijo)
+                    // Asegurar que este al frente (ultimo hijo)
                     bottomBarObject.transform.SetAsLastSibling();
 
                     var rt = bottomBarObject.AddComponent<RectTransform>();
@@ -206,7 +213,7 @@ namespace DigitPark.UI
 
                     var barImage = bottomBarObject.AddComponent<Image>();
                     barImage.color = bottomBarColor;
-                    barImage.raycastTarget = false; // MUY IMPORTANTE: No bloquear clicks
+                    barImage.raycastTarget = false;
                 }
                 else
                 {
@@ -256,26 +263,20 @@ namespace DigitPark.UI
             }
         }
 
-        /// <summary>
-        /// Configura los bordes redondeados desde código
-        /// </summary>
         public void SetCornerRadius(float radius)
         {
             cornerRadius = radius;
-            lastRadius = -1f; // Forzar actualización
+            lastRadius = -1f;
             ApplyRoundedCorners();
         }
 
-        /// <summary>
-        /// Configura la barra inferior desde código
-        /// </summary>
         public void SetBottomBar(bool show, float height = 8f, Color? color = null)
         {
             showBottomBar = show;
             bottomBarHeight = height;
             if (color.HasValue)
                 bottomBarColor = color.Value;
-            lastShowBar = !show; // Forzar actualización
+            lastShowBar = !show;
             ApplyRoundedCorners();
         }
     }
