@@ -25,6 +25,7 @@ namespace DigitPark.Managers
         [SerializeField] public Toggle rememberToggle;
         [SerializeField] public Button loginButton;
         [SerializeField] public Button googleButton;
+        [SerializeField] public Button appleButton;
         [SerializeField] public Button registerButton;
 
         [Header("UI - Other")]
@@ -48,6 +49,9 @@ namespace DigitPark.Managers
             // Verificar e inicializar servicios si no existen (para testing directo)
             EnsureServicesExist();
 
+            // Configurar inputs (límites, placeholders, hints)
+            ConfigureInputFields();
+
             // Configurar listeners
             SetupListeners();
 
@@ -69,6 +73,9 @@ namespace DigitPark.Managers
                 AuthenticationService.Instance.OnLoginSuccess += OnLoginSuccess;
                 AuthenticationService.Instance.OnLoginFailed += OnLoginFailed;
             }
+
+            // Suscribirse a cambios de idioma
+            LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
 
             // Cargar remember me si existe
             if (PlayerPrefs.HasKey("RememberMe") && rememberToggle != null)
@@ -121,6 +128,53 @@ namespace DigitPark.Managers
                 AuthenticationService.Instance.OnLoginSuccess -= OnLoginSuccess;
                 AuthenticationService.Instance.OnLoginFailed -= OnLoginFailed;
             }
+            LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
+        }
+
+        /// <summary>
+        /// Configura los input fields con límites y placeholders descriptivos
+        /// </summary>
+        private void ConfigureInputFields()
+        {
+            // Configurar límites de caracteres
+            if (emailInput != null)
+            {
+                emailInput.characterLimit = 100;
+            }
+
+            if (passwordInput != null)
+            {
+                passwordInput.characterLimit = 50;
+            }
+
+            // Actualizar textos localizados
+            UpdateLocalizedTexts();
+        }
+
+        /// <summary>
+        /// Actualiza todos los textos localizados (placeholders y títulos centrados)
+        /// </summary>
+        private void UpdateLocalizedTexts()
+        {
+            // Actualizar placeholders con información de límites
+            if (emailInput != null && emailInput.placeholder is TextMeshProUGUI emailPlaceholder)
+            {
+                emailPlaceholder.text = GetLocalizedText("placeholder_email");
+                emailPlaceholder.alignment = TextAlignmentOptions.Center;
+            }
+
+            if (passwordInput != null && passwordInput.placeholder is TextMeshProUGUI passPlaceholder)
+            {
+                passPlaceholder.text = GetLocalizedText("placeholder_password");
+                passPlaceholder.alignment = TextAlignmentOptions.Center;
+            }
+
+            // Actualizar título
+            if (titleText != null)
+            {
+                titleText.text = GetLocalizedText("login_title");
+                titleText.alignment = TextAlignmentOptions.Center;
+            }
         }
 
         /// <summary>
@@ -146,6 +200,13 @@ namespace DigitPark.Managers
 
             registerButton?.onClick.AddListener(GoToRegisterScene);
             googleButton?.onClick.AddListener(OnGoogleLoginClicked);
+            appleButton?.onClick.AddListener(OnAppleLoginClicked);
+
+            // Ocultar botón de Apple en Android (solo visible en iOS)
+            #if !UNITY_IOS
+            if (appleButton != null)
+                appleButton.gameObject.SetActive(false);
+            #endif
 
             // El ErrorPanelUI maneja su propio botón internamente
 
@@ -265,6 +326,29 @@ namespace DigitPark.Managers
             Debug.Log("[Login] Intentando login con Google");
 
             bool success = await AuthenticationService.Instance.LoginWithGoogle();
+
+            isLoggingIn = false;
+            ShowLoading(false);
+
+            if (!success)
+            {
+                ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+            }
+        }
+
+        /// <summary>
+        /// Maneja el login con Apple (solo iOS)
+        /// </summary>
+        private async void OnAppleLoginClicked()
+        {
+            if (isLoggingIn) return;
+
+            isLoggingIn = true;
+            ShowLoading(true);
+
+            Debug.Log("[Login] Intentando login con Apple");
+
+            bool success = await AuthenticationService.Instance.LoginWithApple();
 
             isLoggingIn = false;
             ShowLoading(false);
@@ -411,6 +495,7 @@ namespace DigitPark.Managers
             if (loginButton != null) loginButton.interactable = interactable;
             if (registerButton != null) registerButton.interactable = interactable;
             if (googleButton != null) googleButton.interactable = interactable;
+            if (appleButton != null) appleButton.interactable = interactable;
         }
 
         #endregion

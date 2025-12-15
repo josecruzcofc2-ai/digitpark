@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Common;
+using DigitPark.UI.Panels;
 
 namespace DigitPark.Managers
 {
@@ -24,6 +25,11 @@ namespace DigitPark.Managers
 
         [Header("UI - User Info")]
         [SerializeField] public TextMeshProUGUI userText;
+
+        [Header("UI - Premium")]
+        [SerializeField] public Button premiumButton;
+        [SerializeField] public GameObject premiumBadge;
+        [SerializeField] public PremiumPanelUI premiumPanel;
 
         [Header("Animation")]
         [SerializeField] public Animator titleAnimator;
@@ -63,6 +69,15 @@ namespace DigitPark.Managers
             scoresButton?.onClick.AddListener(OnScoresButtonClicked);
             tournamentsButton?.onClick.AddListener(OnTournamentsButtonClicked);
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
+            premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
+
+            // Suscribirse a cambios de premium
+            PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
+        }
+
+        private void OnDestroy()
+        {
+            PremiumManager.OnPremiumStatusChanged -= UpdatePremiumUI;
         }
 
         /// <summary>
@@ -120,7 +135,37 @@ namespace DigitPark.Managers
             if (userText != null)
                 userText.text = displayUsername;
 
+            // Actualizar UI de premium
+            UpdatePremiumUI();
+
             Debug.Log($"[MainMenu] UI actualizada para {displayUsername}");
+        }
+
+        /// <summary>
+        /// Actualiza la UI relacionada con premium
+        /// </summary>
+        private void UpdatePremiumUI()
+        {
+            if (PremiumManager.Instance == null) return;
+
+            bool isPremium = PremiumManager.Instance.IsPremium;
+
+            // Mostrar/ocultar badge de premium
+            if (premiumBadge != null)
+                premiumBadge.SetActive(isPremium);
+
+            // Cambiar apariencia del botón si ya es premium
+            if (premiumButton != null)
+            {
+                var buttonImage = premiumButton.GetComponent<Image>();
+                if (buttonImage != null)
+                {
+                    // Si es premium, cambiar a color dorado suave
+                    buttonImage.color = isPremium
+                        ? new Color(1f, 0.84f, 0f, 0.5f)  // Dorado semi-transparente
+                        : new Color(1f, 0.84f, 0f, 1f);   // Dorado completo
+                }
+            }
         }
 
         #region Button Callbacks
@@ -176,6 +221,30 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             SceneManager.LoadScene("Settings");
+        }
+
+        /// <summary>
+        /// Muestra el panel de premium
+        /// </summary>
+        private void OnPremiumButtonClicked()
+        {
+            Debug.Log("[MainMenu] Mostrando panel Premium");
+
+            // AudioManager.Instance?.PlaySFX("ButtonClick");
+
+            if (premiumPanel != null)
+            {
+                premiumPanel.ShowWithDefaultHandlers();
+            }
+            else
+            {
+                // Crear panel por código si no está asignado
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas != null)
+                {
+                    PremiumPanelUI.CreateAndShow(canvas.transform);
+                }
+            }
         }
 
         #endregion

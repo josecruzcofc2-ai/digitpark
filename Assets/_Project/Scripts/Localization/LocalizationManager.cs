@@ -102,10 +102,13 @@ namespace DigitPark.Localization
         {
             textDictionary = new Dictionary<string, LocalizedText>();
 
-            // Agregar traducciones predefinidas
+            // PRIMERO: Cargar desde archivo Translations.txt (fuente centralizada)
+            LoadTranslationsFromFile();
+
+            // SEGUNDO: Agregar traducciones hardcodeadas como fallback
             AddDefaultTranslations();
 
-            // Agregar traducciones del Inspector
+            // TERCERO: Agregar traducciones del Inspector (override)
             foreach (var text in localizedTexts)
             {
                 if (!string.IsNullOrEmpty(text.key))
@@ -115,6 +118,141 @@ namespace DigitPark.Localization
             }
 
             Debug.Log($"[Localization] {textDictionary.Count} traducciones cargadas");
+        }
+
+        /// <summary>
+        /// Carga traducciones desde el archivo Translations.txt centralizado
+        /// </summary>
+        private void LoadTranslationsFromFile()
+        {
+            try
+            {
+                TextAsset translationsFile = Resources.Load<TextAsset>("Translations");
+                if (translationsFile == null)
+                {
+                    // Intentar cargar desde StreamingAssets o ruta directa
+                    string path = System.IO.Path.Combine(Application.streamingAssetsPath, "Translations.txt");
+                    if (!System.IO.File.Exists(path))
+                    {
+                        path = "Assets/_Project/Localization/Translations.txt";
+                    }
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        string content = System.IO.File.ReadAllText(path);
+                        ParseTranslationsFile(content);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[Localization] Archivo Translations.txt no encontrado, usando traducciones hardcodeadas");
+                    }
+                }
+                else
+                {
+                    ParseTranslationsFile(translationsFile.text);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Localization] Error cargando Translations.txt: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Parsea el contenido del archivo Translations.txt
+        /// Formato:
+        /// key_name
+        ///     EN: English text
+        ///     ES: Spanish text
+        ///     FR: French text
+        ///     PT: Portuguese text
+        ///     DE: German text
+        /// </summary>
+        private void ParseTranslationsFile(string content)
+        {
+            if (string.IsNullOrEmpty(content)) return;
+
+            string[] lines = content.Split('\n');
+            string currentKey = null;
+            string en = "", es = "", fr = "", pt = "", de = "";
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].TrimEnd('\r');
+
+                // Saltar líneas vacías y comentarios
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("=") || line.StartsWith("#"))
+                {
+                    // Si teníamos una key pendiente, guardarla
+                    if (!string.IsNullOrEmpty(currentKey) && !string.IsNullOrEmpty(en))
+                    {
+                        SaveParsedTranslation(currentKey, en, es, fr, pt, de);
+                        currentKey = null;
+                        en = es = fr = pt = de = "";
+                    }
+                    continue;
+                }
+
+                string trimmed = line.Trim();
+
+                // Detectar líneas de idioma
+                if (trimmed.StartsWith("EN:"))
+                {
+                    en = trimmed.Substring(3).Trim();
+                }
+                else if (trimmed.StartsWith("ES:"))
+                {
+                    es = trimmed.Substring(3).Trim();
+                }
+                else if (trimmed.StartsWith("FR:"))
+                {
+                    fr = trimmed.Substring(3).Trim();
+                }
+                else if (trimmed.StartsWith("PT:"))
+                {
+                    pt = trimmed.Substring(3).Trim();
+                }
+                else if (trimmed.StartsWith("DE:"))
+                {
+                    de = trimmed.Substring(3).Trim();
+                }
+                // Si no empieza con espacio/tab y no es línea de idioma, es una nueva key
+                else if (!line.StartsWith(" ") && !line.StartsWith("\t") && !trimmed.Contains(":") && !trimmed.Contains("|"))
+                {
+                    // Guardar key anterior si existe
+                    if (!string.IsNullOrEmpty(currentKey) && !string.IsNullOrEmpty(en))
+                    {
+                        SaveParsedTranslation(currentKey, en, es, fr, pt, de);
+                    }
+
+                    // Nueva key
+                    currentKey = trimmed;
+                    en = es = fr = pt = de = "";
+                }
+            }
+
+            // Guardar última key
+            if (!string.IsNullOrEmpty(currentKey) && !string.IsNullOrEmpty(en))
+            {
+                SaveParsedTranslation(currentKey, en, es, fr, pt, de);
+            }
+
+            Debug.Log($"[Localization] {textDictionary.Count} traducciones cargadas desde archivo");
+        }
+
+        private void SaveParsedTranslation(string key, string en, string es, string fr, string pt, string de)
+        {
+            if (textDictionary.ContainsKey(key)) return; // No sobrescribir
+
+            textDictionary[key] = new LocalizedText
+            {
+                key = key,
+                english = !string.IsNullOrEmpty(en) ? en : key,
+                spanish = !string.IsNullOrEmpty(es) ? es : en,
+                french = !string.IsNullOrEmpty(fr) ? fr : en,
+                portuguese = !string.IsNullOrEmpty(pt) ? pt : en,
+                german = !string.IsNullOrEmpty(de) ? de : en
+            };
         }
 
         private void AddDefaultTranslations()
@@ -170,16 +308,42 @@ namespace DigitPark.Localization
                 "Back", "Volver", "Retour", "Voltar", "Zurück");
 
             // ==================== PREMIUM / PURCHASES ====================
+            AddTranslation("premium_title",
+                "PREMIUM", "PREMIUM", "PREMIUM", "PREMIUM", "PREMIUM");
             AddTranslation("premium_section_title",
                 "Premium", "Premium", "Premium", "Premium", "Premium");
+            AddTranslation("no_ads_title",
+                "NO ADS", "SIN ANUNCIOS", "SANS PUBS", "SEM ANUNCIOS", "OHNE WERBUNG");
+            AddTranslation("no_ads_description",
+                "Play without interruptions", "Juega sin interrupciones", "Jouez sans interruptions", "Jogue sem interrupcoes", "Spiele ohne Unterbrechungen");
+            AddTranslation("no_ads_price",
+                "$9.99", "$9.99", "9,99€", "R$9,99", "9,99€");
             AddTranslation("remove_ads_title",
                 "Remove Ads", "Quitar Anuncios", "Supprimer les pubs", "Remover Anúncios", "Werbung entfernen");
             AddTranslation("remove_ads_description",
                 "Remove all ads from the app", "Elimina todos los anuncios de la app", "Supprimez toutes les publicités", "Remove todos os anúncios do app", "Entferne alle Werbung");
             AddTranslation("premium_full_title",
-                "Premium Full", "Premium Completo", "Premium Complet", "Premium Completo", "Premium Vollversion");
+                "PREMIUM", "PREMIUM", "PREMIUM", "PREMIUM", "PREMIUM");
             AddTranslation("premium_full_description",
                 "No ads + Create tournaments", "Sin anuncios + Crear torneos", "Sans pubs + Créer des tournois", "Sem anúncios + Criar torneios", "Keine Werbung + Turniere erstellen");
+            AddTranslation("premium_full_price",
+                "$19.99", "$19.99", "19,99€", "R$19,99", "19,99€");
+            AddTranslation("buy_button",
+                "BUY", "COMPRAR", "ACHETER", "COMPRAR", "KAUFEN");
+            AddTranslation("premium_recommended",
+                "RECOMMENDED", "RECOMENDADO", "RECOMMANDE", "RECOMENDADO", "EMPFOHLEN");
+            AddTranslation("premium_feature_no_ads",
+                "No advertisements", "Sin anuncios", "Sans publicites", "Sem anuncios", "Keine Werbung");
+            AddTranslation("premium_feature_tournaments",
+                "Create unlimited tournaments", "Crear torneos ilimitados", "Creer des tournois illimites", "Criar torneios ilimitados", "Unbegrenzt Turniere erstellen");
+            AddTranslation("premium_feature_badge",
+                "Exclusive badge", "Insignia exclusiva", "Badge exclusif", "Emblema exclusivo", "Exklusives Abzeichen");
+            AddTranslation("premium_active",
+                "Premium Active", "Premium Activo", "Premium Actif", "Premium Ativo", "Premium Aktiv");
+            AddTranslation("you_are_premium",
+                "You are a Premium member!", "Eres miembro Premium!", "Vous etes membre Premium!", "Voce e membro Premium!", "Du bist Premium-Mitglied!");
+            AddTranslation("no_ads_active",
+                "No Ads Active", "Sin Anuncios Activo", "Sans Pubs Actif", "Sem Anuncios Ativo", "Ohne Werbung Aktiv");
             AddTranslation("already_purchased",
                 "Already purchased", "Ya comprado", "Déjà acheté", "Já comprado", "Bereits gekauft");
             AddTranslation("restore_purchases",
@@ -614,6 +778,178 @@ namespace DigitPark.Localization
                 "Confirm Password", "Confirmar Contraseña", "Confirmer le mot de passe", "Confirmar Senha", "Passwort bestätigen");
             AddTranslation("create_account_button",
                 "Create Account", "Crear Cuenta", "Créer un compte", "Criar Conta", "Konto erstellen");
+
+            // ==================== BOOT ERRORS ====================
+            AddTranslation("boot_error_firebase",
+                "Could not connect to services", "No se pudo conectar a los servicios", "Impossible de se connecter aux services", "Não foi possível conectar aos serviços", "Verbindung zu Diensten fehlgeschlagen");
+            AddTranslation("boot_error_no_internet",
+                "Internet connection required", "Se requiere conexión a internet", "Connexion internet requise", "Conexão com internet necessária", "Internetverbindung erforderlich");
+            AddTranslation("boot_error_timeout",
+                "Connection timed out. Check your internet", "Conexión agotada. Revisa tu internet", "Connexion expirée. Vérifiez votre internet", "Conexão expirou. Verifique sua internet", "Verbindung abgelaufen. Prüfe dein Internet");
+            AddTranslation("boot_retry_button",
+                "Retry", "Reintentar", "Réessayer", "Tentar novamente", "Erneut versuchen");
+            AddTranslation("boot_exit_button",
+                "Exit", "Salir", "Quitter", "Sair", "Beenden");
+
+            // ==================== ERROR MESSAGES - ADDITIONAL ====================
+            AddTranslation("error_session_expired",
+                "Your session expired. Please login again", "Tu sesión expiró. Inicia sesión de nuevo", "Votre session a expiré. Reconnectez-vous", "Sua sessão expirou. Faça login novamente", "Deine Sitzung ist abgelaufen. Melde dich erneut an");
+            AddTranslation("error_account_disabled",
+                "Your account has been suspended", "Tu cuenta ha sido suspendida", "Votre compte a été suspendu", "Sua conta foi suspensa", "Dein Konto wurde gesperrt");
+            AddTranslation("error_account_not_found",
+                "No account exists with that email", "No existe una cuenta con ese correo", "Aucun compte n'existe avec cet e-mail", "Não existe conta com esse e-mail", "Kein Konto mit dieser E-Mail vorhanden");
+            AddTranslation("error_wrong_credentials",
+                "Incorrect email or password", "Email o contraseña incorrectos", "E-mail ou mot de passe incorrect", "E-mail ou senha incorretos", "E-Mail oder Passwort falsch");
+            AddTranslation("error_too_many_attempts",
+                "Too many attempts. Wait a few minutes", "Demasiados intentos. Espera unos minutos", "Trop de tentatives. Attendez quelques minutes", "Muitas tentativas. Aguarde alguns minutos", "Zu viele Versuche. Warte ein paar Minuten");
+            AddTranslation("error_google_auth",
+                "Error signing in with Google", "Error al iniciar con Google", "Erreur de connexion avec Google", "Erro ao entrar com Google", "Fehler bei der Anmeldung mit Google");
+            AddTranslation("error_google_auth_cancelled",
+                "Google sign in cancelled", "Inicio con Google cancelado", "Connexion Google annulée", "Login com Google cancelado", "Google-Anmeldung abgebrochen");
+            AddTranslation("error_apple_auth",
+                "Error signing in with Apple", "Error al iniciar con Apple", "Erreur de connexion avec Apple", "Erro ao entrar com Apple", "Fehler bei der Anmeldung mit Apple");
+            AddTranslation("error_apple_auth_cancelled",
+                "Apple sign in cancelled", "Inicio con Apple cancelado", "Connexion Apple annulée", "Login com Apple cancelado", "Apple-Anmeldung abgebrochen");
+            AddTranslation("sign_in_apple",
+                "Sign in with Apple", "Iniciar con Apple", "Se connecter avec Apple", "Entrar com Apple", "Mit Apple anmelden");
+            AddTranslation("sign_in_google",
+                "Sign in with Google", "Iniciar con Google", "Se connecter avec Google", "Entrar com Google", "Mit Google anmelden");
+            AddTranslation("error_register_email_empty",
+                "Enter your email address", "Ingresa tu correo electrónico", "Entrez votre adresse e-mail", "Digite seu e-mail", "Gib deine E-Mail-Adresse ein");
+            AddTranslation("error_register_email_invalid",
+                "That email doesn't look valid", "Ese correo no parece válido", "Cet e-mail ne semble pas valide", "Esse e-mail não parece válido", "Diese E-Mail scheint ungültig zu sein");
+            AddTranslation("error_register_password_empty",
+                "Create a password", "Crea una contraseña", "Créez un mot de passe", "Crie uma senha", "Erstelle ein Passwort");
+
+            // ==================== ERROR MESSAGES - PROFILE/SETTINGS ====================
+            AddTranslation("error_loading_profile",
+                "Error loading your profile", "Error al cargar tu perfil", "Erreur lors du chargement du profil", "Erro ao carregar seu perfil", "Fehler beim Laden deines Profils");
+            AddTranslation("error_name_empty",
+                "Name cannot be empty", "El nombre no puede estar vacío", "Le nom ne peut pas être vide", "O nome não pode estar vazio", "Der Name darf nicht leer sein");
+            AddTranslation("error_name_taken",
+                "That name is already taken", "Ese nombre ya está tomado", "Ce nom est déjà pris", "Esse nome já está em uso", "Dieser Name ist bereits vergeben");
+            AddTranslation("error_changing_name",
+                "Error changing name", "Error al cambiar nombre", "Erreur lors du changement de nom", "Erro ao mudar nome", "Fehler beim Ändern des Namens");
+            AddTranslation("error_logout",
+                "Error logging out", "Error al cerrar sesión", "Erreur lors de la déconnexion", "Erro ao sair", "Fehler beim Abmelden");
+            AddTranslation("error_deleting_account",
+                "Error deleting account", "Error al eliminar cuenta", "Erreur lors de la suppression du compte", "Erro ao excluir conta", "Fehler beim Löschen des Kontos");
+            AddTranslation("confirm_delete_account",
+                "Delete your account? This action cannot be undone", "¿Eliminar tu cuenta? Esta acción no se puede deshacer", "Supprimer votre compte? Cette action est irréversible", "Excluir sua conta? Esta ação não pode ser desfeita", "Konto löschen? Diese Aktion kann nicht rückgängig gemacht werden");
+
+            // ==================== ERROR MESSAGES - SCORES ====================
+            AddTranslation("error_saving_score",
+                "Error saving your score", "Error al guardar tu puntuación", "Erreur lors de l'enregistrement du score", "Erro ao salvar sua pontuação", "Fehler beim Speichern deiner Punktzahl");
+            AddTranslation("error_loading_scores",
+                "Error loading scores", "Error al cargar puntuaciones", "Erreur lors du chargement des scores", "Erro ao carregar pontuações", "Fehler beim Laden der Punktzahlen");
+            AddTranslation("error_scores_need_connection",
+                "Connect to internet to see rankings", "Conecta a internet para ver rankings", "Connectez-vous à internet pour voir le classement", "Conecte-se à internet para ver rankings", "Verbinde dich mit dem Internet für Rankings");
+            AddTranslation("error_no_personal_scores",
+                "You don't have any scores yet", "Aún no tienes puntuaciones", "Vous n'avez pas encore de scores", "Você ainda não tem pontuações", "Du hast noch keine Punktzahlen");
+            AddTranslation("error_no_global_scores",
+                "No scores yet", "No hay puntuaciones todavía", "Pas encore de scores", "Ainda não há pontuações", "Noch keine Punktzahlen");
+
+            // ==================== ERROR MESSAGES - TOURNAMENTS ====================
+            AddTranslation("error_tournaments_need_connection",
+                "Tournaments require internet connection", "Los torneos requieren conexión a internet", "Les tournois nécessitent une connexion internet", "Torneios requerem conexão com a internet", "Turniere benötigen Internetverbindung");
+            AddTranslation("error_loading_tournaments",
+                "Error loading tournaments", "Error al cargar torneos", "Erreur lors du chargement des tournois", "Erro ao carregar torneios", "Fehler beim Laden der Turniere");
+            AddTranslation("error_tournament_not_found",
+                "Tournament not found", "Torneo no encontrado", "Tournoi non trouvé", "Torneio não encontrado", "Turnier nicht gefunden");
+            AddTranslation("error_invalid_code",
+                "Invalid tournament code", "Código de torneo inválido", "Code de tournoi invalide", "Código de torneio inválido", "Ungültiger Turniercode");
+            AddTranslation("error_tournament_full",
+                "This tournament is full", "Este torneo está lleno", "Ce tournoi est complet", "Este torneio está cheio", "Dieses Turnier ist voll");
+            AddTranslation("error_tournament_expired",
+                "This tournament has ended", "Este torneo ya terminó", "Ce tournoi est terminé", "Este torneio já terminou", "Dieses Turnier ist beendet");
+            AddTranslation("error_already_in_tournament",
+                "You're already in this tournament", "Ya estás participando en este torneo", "Vous participez déjà à ce tournoi", "Você já está neste torneio", "Du bist bereits in diesem Turnier");
+            AddTranslation("error_joining_tournament",
+                "Error joining tournament", "Error al unirse al torneo", "Erreur pour rejoindre le tournoi", "Erro ao entrar no torneio", "Fehler beim Beitreten zum Turnier");
+            AddTranslation("error_leaving_tournament",
+                "Error leaving tournament", "Error al salir del torneo", "Erreur pour quitter le tournoi", "Erro ao sair do torneio", "Fehler beim Verlassen des Turniers");
+            AddTranslation("error_not_premium",
+                "You need Premium to create tournaments", "Necesitas Premium para crear torneos", "Vous avez besoin de Premium pour créer des tournois", "Você precisa de Premium para criar torneios", "Du brauchst Premium um Turniere zu erstellen");
+            AddTranslation("error_creating_tournament",
+                "Error creating tournament", "Error al crear torneo", "Erreur lors de la création du tournoi", "Erro ao criar torneio", "Fehler beim Erstellen des Turniers");
+            AddTranslation("error_tournament_limit",
+                "You have the maximum active tournaments", "Ya tienes el máximo de torneos activos", "Vous avez le maximum de tournois actifs", "Você tem o máximo de torneios ativos", "Du hast die maximale Anzahl aktiver Turniere");
+
+            // ==================== ERROR MESSAGES - ADS ====================
+            AddTranslation("error_loading_ad",
+                "Error loading ad", "Error al cargar anuncio", "Erreur lors du chargement de la pub", "Erro ao carregar anúncio", "Fehler beim Laden der Werbung");
+            AddTranslation("error_no_ads_available",
+                "Ad not available. Try again later", "Anuncio no disponible. Intenta más tarde", "Pub non disponible. Réessayez plus tard", "Anúncio não disponível. Tente mais tarde", "Werbung nicht verfügbar. Versuche es später");
+
+            // ==================== PREMIUM - ADDITIONAL ====================
+            AddTranslation("premium_button",
+                "Premium", "Premium", "Premium", "Premium", "Premium");
+            AddTranslation("tired_of_ads",
+                "Tired of ads?", "¿Cansado de anuncios?", "Fatigué des pubs?", "Cansado de anúncios?", "Genug von Werbung?");
+            AddTranslation("remove_ads_now",
+                "Remove ads now", "Quita los anuncios ahora", "Supprimez les pubs maintenant", "Remova os anúncios agora", "Werbung jetzt entfernen");
+            AddTranslation("no_thanks",
+                "No thanks", "No gracias", "Non merci", "Não obrigado", "Nein danke");
+            AddTranslation("premium_unlock_tournaments",
+                "Unlock tournament creation!", "¡Desbloquea la creación de torneos!", "Débloquez la création de tournois!", "Desbloqueie a criação de torneios!", "Schalte Turniererstellung frei!");
+            AddTranslation("purchase_error",
+                "Purchase failed. Try again later", "Error en la compra. Intenta más tarde", "Échec de l'achat. Réessayez plus tard", "Falha na compra. Tente mais tarde", "Kauf fehlgeschlagen. Versuche es später");
+            AddTranslation("restore_success",
+                "Purchases restored successfully!", "¡Compras restauradas exitosamente!", "Achats restaurés avec succès!", "Compras restauradas com sucesso!", "Käufe erfolgreich wiederhergestellt!");
+            AddTranslation("restore_error",
+                "Could not restore purchases", "No se pudieron restaurar las compras", "Impossible de restaurer les achats", "Não foi possível restaurar as compras", "Käufe konnten nicht wiederhergestellt werden");
+            AddTranslation("restore_nothing",
+                "No purchases to restore", "No hay compras para restaurar", "Aucun achat à restaurer", "Nenhuma compra para restaurar", "Keine Käufe zum Wiederherstellen");
+
+            // ==================== SEARCH ====================
+            AddTranslation("search_tournament",
+                "Search Tournament", "Buscar Torneo", "Rechercher Tournoi", "Buscar Torneio", "Turnier suchen");
+            AddTranslation("search_options",
+                "Search Options", "Opciones de Búsqueda", "Options de recherche", "Opções de Busca", "Suchoptionen");
+
+            // ==================== THEMES ====================
+            AddTranslation("theme_selector_title",
+                "Select Theme", "Seleccionar Tema", "Sélectionner le thème", "Selecionar Tema", "Thema auswählen");
+            AddTranslation("theme_current",
+                "Current Theme", "Tema Actual", "Thème actuel", "Tema Atual", "Aktuelles Thema");
+            AddTranslation("theme_preview",
+                "Preview", "Vista Previa", "Aperçu", "Visualização", "Vorschau");
+            AddTranslation("theme_apply",
+                "Apply Theme", "Aplicar Tema", "Appliquer le thème", "Aplicar Tema", "Thema anwenden");
+            AddTranslation("theme_neon_dark",
+                "Neon Dark", "Neón Oscuro", "Néon Sombre", "Neon Escuro", "Neon Dunkel");
+            AddTranslation("theme_clean_light",
+                "Clean Light", "Luz Limpia", "Lumière Pure", "Luz Limpa", "Sauberes Licht");
+            AddTranslation("theme_retro_arcade",
+                "Retro Arcade", "Arcade Retro", "Arcade Rétro", "Arcade Retrô", "Retro Arcade");
+            AddTranslation("theme_ocean",
+                "Ocean", "Océano", "Océan", "Oceano", "Ozean");
+            AddTranslation("theme_volcano",
+                "Volcano", "Volcán", "Volcan", "Vulcão", "Vulkan");
+            AddTranslation("theme_cyberpunk",
+                "Cyberpunk", "Cyberpunk", "Cyberpunk", "Cyberpunk", "Cyberpunk");
+            AddTranslation("theme_premium_required",
+                "Premium theme", "Tema Premium", "Thème Premium", "Tema Premium", "Premium-Thema");
+            AddTranslation("change_theme",
+                "Change Theme", "Cambiar Tema", "Changer le thème", "Mudar Tema", "Thema ändern");
+
+            // ==================== INPUT HINTS ====================
+            AddTranslation("hint_username",
+                "3-20 characters. Letters, numbers and _ only", "3-20 caracteres. Solo letras, números y _", "3-20 caractères. Lettres, chiffres et _ uniquement", "3-20 caracteres. Apenas letras, números e _", "3-20 Zeichen. Nur Buchstaben, Zahlen und _");
+            AddTranslation("hint_email",
+                "Enter a valid email address", "Ingresa un correo válido", "Entrez une adresse e-mail valide", "Digite um e-mail válido", "Gib eine gültige E-Mail-Adresse ein");
+            AddTranslation("hint_password",
+                "Minimum 6 characters", "Mínimo 6 caracteres", "Minimum 6 caractères", "Mínimo 6 caracteres", "Mindestens 6 Zeichen");
+            AddTranslation("hint_confirm_password",
+                "Repeat your password", "Repite tu contraseña", "Répétez votre mot de passe", "Repita sua senha", "Wiederhole dein Passwort");
+            AddTranslation("placeholder_username",
+                "Username (3-20 chars)", "Usuario (3-20 chars)", "Nom d'utilisateur (3-20)", "Usuário (3-20 chars)", "Benutzername (3-20)");
+            AddTranslation("placeholder_email",
+                "email@example.com", "correo@ejemplo.com", "email@exemple.com", "email@exemplo.com", "email@beispiel.com");
+            AddTranslation("placeholder_password",
+                "Password (min 6)", "Contraseña (mín 6)", "Mot de passe (min 6)", "Senha (mín 6)", "Passwort (min 6)");
+            AddTranslation("placeholder_confirm",
+                "Confirm password", "Confirmar contraseña", "Confirmer mot de passe", "Confirmar senha", "Passwort bestätigen");
         }
 
         private void AddTranslation(string key, string english, string spanish, string french, string portuguese, string german)

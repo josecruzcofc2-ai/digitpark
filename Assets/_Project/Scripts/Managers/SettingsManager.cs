@@ -7,6 +7,7 @@ using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI.Panels;
 using DigitPark.UI.Components;
+using DigitPark.Themes;
 
 namespace DigitPark.Managers
 {
@@ -30,6 +31,10 @@ namespace DigitPark.Managers
         [SerializeField] private TMP_Dropdown languageDropdown;
         [SerializeField] private TextMeshProUGUI changeLangLabel;
         [SerializeField] private LanguageDropdownStyler languageStyler;
+
+        [Header("UI - Theme")]
+        [SerializeField] private TMP_Dropdown themeDropdown;
+        [SerializeField] private TextMeshProUGUI changeThemeLabel;
 
         [Header("UI - Buttons")]
         [SerializeField] private Button changeNameButton;
@@ -65,6 +70,7 @@ namespace DigitPark.Managers
             LoadVolumeSettings();
             SetupLanguageDropdown();
             SetupLanguageStyler();
+            SetupThemeDropdown();
             SetupListeners();
             HidePanels();
             UpdatePremiumUI();
@@ -159,6 +165,55 @@ namespace DigitPark.Managers
             }
         }
 
+        private void SetupThemeDropdown()
+        {
+            if (themeDropdown == null) return;
+
+            // Limpiar opciones existentes
+            themeDropdown.ClearOptions();
+
+            // Verificar que ThemeManager existe
+            if (ThemeManager.Instance == null)
+            {
+                Debug.LogWarning("[Settings] ThemeManager no disponible");
+                return;
+            }
+
+            // Agregar todas las opciones de temas disponibles
+            var themes = ThemeManager.Instance.AvailableThemes;
+            var options = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
+
+            foreach (var theme in themes)
+            {
+                string themeName = AutoLocalizer.Get($"theme_{theme.themeId}");
+                if (string.IsNullOrEmpty(themeName) || themeName.StartsWith("theme_"))
+                {
+                    themeName = theme.themeName; // Fallback al nombre original
+                }
+                options.Add(new TMP_Dropdown.OptionData(themeName));
+            }
+
+            themeDropdown.AddOptions(options);
+
+            // Establecer el valor actual
+            int currentIndex = ThemeManager.Instance.CurrentThemeIndex;
+            currentIndex = Mathf.Clamp(currentIndex, 0, themeDropdown.options.Count - 1);
+
+            // Remover listener temporalmente para evitar que se dispare al establecer el valor
+            themeDropdown.onValueChanged.RemoveListener(OnThemeDropdownChanged);
+            themeDropdown.value = currentIndex;
+            themeDropdown.RefreshShownValue();
+            themeDropdown.onValueChanged.AddListener(OnThemeDropdownChanged);
+
+            // Actualizar label si existe
+            if (changeThemeLabel != null)
+            {
+                changeThemeLabel.text = AutoLocalizer.Get("change_theme");
+            }
+
+            Debug.Log($"[Settings] Tema actual: {ThemeManager.Instance.CurrentTheme?.themeName ?? "Ninguno"}");
+        }
+
         private void SetupListeners()
         {
             // Sliders
@@ -184,9 +239,24 @@ namespace DigitPark.Managers
             // Los paneles ahora manejan sus propios listeners internamente
         }
 
+        private void OnEnable()
+        {
+            LocalizationManager.OnLanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnDisable()
+        {
+            LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+        }
+
         private void OnDestroy()
         {
             PremiumManager.OnPremiumStatusChanged -= UpdatePremiumUI;
+        }
+
+        private void OnLanguageChanged()
+        {
+            RefreshThemeDropdownLabels();
         }
 
         private void HidePanels()
@@ -218,6 +288,51 @@ namespace DigitPark.Managers
                 // Guardar en PlayerPrefs si LocalizationManager no existe
                 PlayerPrefs.SetInt("Language", index);
                 PlayerPrefs.Save();
+            }
+        }
+
+        #endregion
+
+        #region Theme
+
+        private void OnThemeDropdownChanged(int index)
+        {
+            if (ThemeManager.Instance == null) return;
+
+            var themes = ThemeManager.Instance.AvailableThemes;
+            if (index < 0 || index >= themes.Count) return;
+
+            ThemeData selectedTheme = themes[index];
+            Debug.Log($"[Settings] Cambiando tema a: {selectedTheme.themeName}");
+
+            ThemeManager.Instance.SetTheme(selectedTheme);
+        }
+
+        /// <summary>
+        /// Actualiza el dropdown de temas cuando cambia el idioma
+        /// </summary>
+        private void RefreshThemeDropdownLabels()
+        {
+            if (themeDropdown == null || ThemeManager.Instance == null) return;
+
+            int currentIndex = themeDropdown.value;
+            var themes = ThemeManager.Instance.AvailableThemes;
+
+            for (int i = 0; i < themeDropdown.options.Count && i < themes.Count; i++)
+            {
+                string themeName = AutoLocalizer.Get($"theme_{themes[i].themeId}");
+                if (string.IsNullOrEmpty(themeName) || themeName.StartsWith("theme_"))
+                {
+                    themeName = themes[i].themeName;
+                }
+                themeDropdown.options[i].text = themeName;
+            }
+
+            themeDropdown.RefreshShownValue();
+
+            if (changeThemeLabel != null)
+            {
+                changeThemeLabel.text = AutoLocalizer.Get("change_theme");
             }
         }
 
@@ -306,8 +421,8 @@ namespace DigitPark.Managers
             {
                 changeNamePanel.SetLengthLimits(3, 20);
                 changeNamePanel.Show(
-                    "Cambiar Nombre",
-                    "Nuevo nombre de usuario",
+                    AutoLocalizer.Get("change_name_title"),
+                    AutoLocalizer.Get("new_name_placeholder"),
                     OnConfirmNameClicked,
                     null // OnCancel se maneja internamente
                 );
@@ -339,7 +454,7 @@ namespace DigitPark.Managers
             {
                 Debug.LogError("[Settings] Error al actualizar nombre");
                 changeNamePanel?.SetButtonsInteractable(true);
-                errorPanel?.Show("Error al actualizar el nombre. Intenta de nuevo.");
+                errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
             }
         }
 
@@ -354,8 +469,8 @@ namespace DigitPark.Managers
             if (deleteConfirmPanel != null)
             {
                 deleteConfirmPanel.Show(
-                    "Eliminar Cuenta",
-                    "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.",
+                    AutoLocalizer.Get("delete_confirm_title"),
+                    AutoLocalizer.Get("confirm_delete_account"),
                     OnConfirmDeleteClicked,
                     null // OnCancel se maneja internamente
                 );
@@ -381,14 +496,14 @@ namespace DigitPark.Managers
                 {
                     Debug.LogError("[Settings] Error al eliminar la cuenta");
                     deleteConfirmPanel?.Hide();
-                    errorPanel?.Show("Error al eliminar la cuenta. Intenta de nuevo.");
+                    errorPanel?.Show(AutoLocalizer.Get("error_deleting_account"));
                 }
             }
             else
             {
                 Debug.LogError("[Settings] AuthenticationService no disponible");
                 deleteConfirmPanel?.Hide();
-                errorPanel?.Show("Servicio no disponible. Intenta más tarde.");
+                errorPanel?.Show(AutoLocalizer.Get("error_server"));
             }
         }
 
@@ -403,8 +518,8 @@ namespace DigitPark.Managers
             if (logoutConfirmPanel != null)
             {
                 logoutConfirmPanel.Show(
-                    "Cerrar Sesión",
-                    "¿Estás seguro de que deseas cerrar sesión?",
+                    AutoLocalizer.Get("logout_confirm_title"),
+                    AutoLocalizer.Get("logout_confirm_message"),
                     OnConfirmLogoutClicked,
                     null // OnCancel se maneja internamente
                 );

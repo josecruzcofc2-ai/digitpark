@@ -44,6 +44,9 @@ namespace DigitPark.Managers
             // Verificar e inicializar servicios si no existen (para testing directo)
             EnsureServicesExist();
 
+            // Configurar inputs (límites, placeholders, hints)
+            ConfigureInputFields();
+
             // Configurar listeners
             SetupListeners();
 
@@ -56,6 +59,9 @@ namespace DigitPark.Managers
                 AuthenticationService.Instance.OnLoginSuccess += OnRegisterSuccess;
                 AuthenticationService.Instance.OnLoginFailed += OnRegisterFailed;
             }
+
+            // Suscribirse a cambios de idioma
+            LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
         }
 
         private void OnDestroy()
@@ -65,6 +71,89 @@ namespace DigitPark.Managers
             {
                 AuthenticationService.Instance.OnLoginSuccess -= OnRegisterSuccess;
                 AuthenticationService.Instance.OnLoginFailed -= OnRegisterFailed;
+            }
+            LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
+        }
+
+        /// <summary>
+        /// Configura los input fields con límites y placeholders descriptivos
+        /// </summary>
+        private void ConfigureInputFields()
+        {
+            // Configurar límites de caracteres
+            if (usernameInput != null)
+            {
+                usernameInput.characterLimit = 20;
+                usernameInput.onValidateInput += ValidateUsernameChar;
+            }
+
+            if (emailInput != null)
+            {
+                emailInput.characterLimit = 100;
+            }
+
+            if (passwordInput != null)
+            {
+                passwordInput.characterLimit = 50;
+            }
+
+            if (confirmPasswordInput != null)
+            {
+                confirmPasswordInput.characterLimit = 50;
+            }
+
+            // Actualizar textos localizados
+            UpdateLocalizedTexts();
+        }
+
+        /// <summary>
+        /// Valida caracteres permitidos para username (letras, números, _)
+        /// </summary>
+        private char ValidateUsernameChar(string text, int charIndex, char addedChar)
+        {
+            // Permitir letras, números y guión bajo
+            if (char.IsLetterOrDigit(addedChar) || addedChar == '_')
+            {
+                return addedChar;
+            }
+            return '\0'; // Rechazar el caracter
+        }
+
+        /// <summary>
+        /// Actualiza todos los textos localizados (placeholders descriptivos)
+        /// </summary>
+        private void UpdateLocalizedTexts()
+        {
+            // Actualizar placeholders con información de límites
+            if (usernameInput != null && usernameInput.placeholder is TextMeshProUGUI userPlaceholder)
+            {
+                userPlaceholder.text = GetLocalizedText("placeholder_username");
+                userPlaceholder.alignment = TextAlignmentOptions.Center;
+            }
+
+            if (emailInput != null && emailInput.placeholder is TextMeshProUGUI emailPlaceholder)
+            {
+                emailPlaceholder.text = GetLocalizedText("placeholder_email");
+                emailPlaceholder.alignment = TextAlignmentOptions.Center;
+            }
+
+            if (passwordInput != null && passwordInput.placeholder is TextMeshProUGUI passPlaceholder)
+            {
+                passPlaceholder.text = GetLocalizedText("placeholder_password");
+                passPlaceholder.alignment = TextAlignmentOptions.Center;
+            }
+
+            if (confirmPasswordInput != null && confirmPasswordInput.placeholder is TextMeshProUGUI confirmPlaceholder)
+            {
+                confirmPlaceholder.text = GetLocalizedText("placeholder_confirm");
+                confirmPlaceholder.alignment = TextAlignmentOptions.Center;
+            }
+
+            // Actualizar título
+            if (titleText != null)
+            {
+                titleText.text = GetLocalizedText("register_title");
+                titleText.alignment = TextAlignmentOptions.Center;
             }
         }
 

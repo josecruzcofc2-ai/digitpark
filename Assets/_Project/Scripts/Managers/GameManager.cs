@@ -32,6 +32,11 @@ namespace DigitPark.Managers
         [SerializeField] public CanvasGroup winMessageCanvasGroup;
         [SerializeField] public TextMeshProUGUI successText;
 
+        [Header("Premium Banner (Result Screen)")]
+        [SerializeField] public GameObject premiumBannerContainer;
+        [SerializeField] public Button premiumBannerButton;
+        [SerializeField] public TextMeshProUGUI premiumBannerText;
+
         // Game State
         private int currentTargetNumber = 1; // Número que el jugador debe tocar
         private bool isGameActive = false;
@@ -155,6 +160,54 @@ namespace DigitPark.Managers
 
             // Botón de volver
             backButton?.onClick.AddListener(OnBackButtonClicked);
+
+            // Banner de premium
+            premiumBannerButton?.onClick.AddListener(OnPremiumBannerClicked);
+
+            // Suscribirse a cambios de premium
+            PremiumManager.OnPremiumStatusChanged += UpdatePremiumBanner;
+
+            // Actualizar estado inicial del banner
+            UpdatePremiumBanner();
+        }
+
+        private void OnDestroy()
+        {
+            PremiumManager.OnPremiumStatusChanged -= UpdatePremiumBanner;
+        }
+
+        /// <summary>
+        /// Actualiza la visibilidad del banner premium
+        /// </summary>
+        private void UpdatePremiumBanner()
+        {
+            if (premiumBannerContainer == null) return;
+
+            bool isPremium = PremiumManager.Instance != null && PremiumManager.Instance.IsPremium;
+
+            // Ocultar banner si ya es premium
+            premiumBannerContainer.SetActive(!isPremium);
+
+            // Actualizar texto del banner
+            if (premiumBannerText != null && !isPremium)
+            {
+                premiumBannerText.text = $"{AutoLocalizer.Get("premium_feature_no_ads")} + {AutoLocalizer.Get("premium_feature_tournaments")}";
+            }
+        }
+
+        /// <summary>
+        /// Handler del click en el banner premium
+        /// </summary>
+        private void OnPremiumBannerClicked()
+        {
+            Debug.Log("[Game] Banner premium clickeado");
+
+            // Buscar canvas y crear panel de premium
+            Canvas canvas = FindObjectOfType<Canvas>();
+            if (canvas != null)
+            {
+                DigitPark.UI.Panels.PremiumPanelUI.CreateAndShow(canvas.transform);
+            }
         }
 
         /// <summary>
@@ -593,7 +646,13 @@ namespace DigitPark.Managers
                 currentPlayer.countryCode
             );
 
-            Debug.Log($"[Game] Score guardado en historial personal y leaderboards: {currentTime:F3}s");
+            // Actualizar score en TODOS los torneos activos del jugador
+            await DatabaseService.Instance.UpdateScoreInAllActiveTournaments(
+                currentPlayer.userId,
+                currentTime
+            );
+
+            Debug.Log($"[Game] Score guardado en historial, leaderboards y torneos: {currentTime:F3}s");
         }
 
         /// <summary>
