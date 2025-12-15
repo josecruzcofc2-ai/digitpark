@@ -309,12 +309,12 @@ namespace DigitPark.Editor
                 Transform existingIcon = existingContainer.Find("LanguageIcon");
                 if (existingIcon != null)
                 {
-                    RectTransform iconRect = existingIcon.GetComponent<RectTransform>();
-                    if (iconRect != null)
+                    RectTransform existingIconRect = existingIcon.GetComponent<RectTransform>();
+                    if (existingIconRect != null)
                     {
-                        Undo.RecordObject(iconRect, "Update Icon Position");
-                        iconRect.anchoredPosition = Vector2.zero;
-                        EditorUtility.SetDirty(iconRect);
+                        Undo.RecordObject(existingIconRect, "Update Icon Position");
+                        existingIconRect.anchoredPosition = Vector2.zero;
+                        EditorUtility.SetDirty(existingIconRect);
                         Debug.Log("[LanguageDropdownSetup] Posición del icono actualizada a (0, 0)");
                     }
                 }

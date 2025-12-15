@@ -17,8 +17,10 @@ namespace DigitPark.Skillz
 
         [Header("Configuración Skillz")]
         [SerializeField] private string gameId = "TU_GAME_ID_AQUI"; // Obtener de Skillz Developer Console
+#pragma warning disable CS0414 // Se usará cuando Skillz SDK esté instalado
         [SerializeField] private SkillzEnvironment environment = SkillzEnvironment.Sandbox;
         [SerializeField] private SkillzOrientation orientation = SkillzOrientation.Portrait;
+#pragma warning restore CS0414
 
         [Header("Configuración de Premios")]
         [SerializeField] private PrizeDistributionConfig prizeConfig;

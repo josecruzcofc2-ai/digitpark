@@ -140,6 +140,11 @@ namespace DigitPark.Localization
             { "SearchTabText", "search_tab" },
             { "SearchButton", "search" },
             { "SearchButtonText", "search" },
+            { "SearchOptionsButtonText", "search_tournament" },
+            { "SearchTournamentButton", "search_tournament" },
+            { "SearchTournamentButtonText", "search_tournament" },
+            { "SearchOptionsTitle", "search_options" },
+            { "SearchOptionsTitleText", "search_options" },
             { "MyTournamentsTab", "my_tournaments_tab" },
             { "MyTournamentsTabText", "my_tournaments_tab" },
             { "MyTournamentsButton", "my_tournaments_tab" },
@@ -213,10 +218,6 @@ namespace DigitPark.Localization
             { "PersonalTab", "personal_tab" },
             { "PersonalTabText", "personal_tab" },
 
-            // ==================== SEARCH OPTIONS ====================
-            { "SearchOptionsTitle", "search_options_title" },
-            { "SearchOptionsTitleText", "search_options_title" },
-
             // ==================== CREATE TOURNAMENT ====================
             { "CreateTournamentTitle", "create_tournament_title" },
             { "CreateTournamentTitleText", "create_tournament_title" },
@@ -257,6 +258,26 @@ namespace DigitPark.Localization
             { "GetPremiumButtonText", "get_premium" },
             { "MaybeLaterButton", "maybe_later" },
             { "MaybeLaterButtonText", "maybe_later" },
+            { "NoAdsTitle", "no_ads_title" },
+            { "NoAdsTitleText", "no_ads_title" },
+            { "NoAdsDescription", "no_ads_description" },
+            { "NoAdsDescriptionText", "no_ads_description" },
+            { "NoAdsPrice", "no_ads_price" },
+            { "NoAdsPriceText", "no_ads_price" },
+            { "PremiumFullPrice", "premium_full_price" },
+            { "PremiumFullPriceText", "premium_full_price" },
+            { "BuyButton", "buy_button" },
+            { "BuyButtonText", "buy_button" },
+            { "RecommendedBadge", "premium_recommended" },
+            { "RecommendedBadgeText", "premium_recommended" },
+            { "TiredOfAds", "tired_of_ads" },
+            { "TiredOfAdsText", "tired_of_ads" },
+            { "NoThanks", "no_thanks" },
+            { "NoThanksText", "no_thanks" },
+            { "NoThanksButton", "no_thanks" },
+            { "Feature1Text", "premium_feature_no_ads" },
+            { "Feature2Text", "premium_feature_tournaments" },
+            { "Feature3Text", "premium_feature_badge" },
         };
 
         private void Awake()
@@ -298,7 +319,7 @@ namespace DigitPark.Localization
         }
 
         /// <summary>
-        /// Localiza todos los textos en la escena actual
+        /// Localiza todos los textos en la escena actual y los centra automáticamente
         /// </summary>
         public void LocalizeAllTexts()
         {
@@ -317,6 +338,8 @@ namespace DigitPark.Localization
                 if (TryLocalizeByName(tmp.gameObject.name, out string key))
                 {
                     tmp.text = LocalizationManager.Instance.GetText(key);
+                    // Centrar el texto automáticamente al localizar
+                    CenterTextIfNeeded(tmp);
                     localizedCount++;
                 }
             }
@@ -328,11 +351,92 @@ namespace DigitPark.Localization
                 if (TryLocalizeByName(text.gameObject.name, out string key))
                 {
                     text.text = LocalizationManager.Instance.GetText(key);
+                    // Centrar el texto automáticamente al localizar
+                    CenterLegacyTextIfNeeded(text);
                     localizedCount++;
                 }
             }
 
             Debug.Log($"[AutoLocalizer] {localizedCount} textos localizados en escena");
+        }
+
+        /// <summary>
+        /// Centra un TextMeshProUGUI si es apropiado (títulos, botones, labels)
+        /// </summary>
+        private void CenterTextIfNeeded(TextMeshProUGUI tmp)
+        {
+            if (tmp == null) return;
+
+            string name = tmp.gameObject.name.ToLower();
+
+            // Centrar títulos, botones, labels y placeholders
+            if (name.Contains("title") ||
+                name.Contains("button") ||
+                name.Contains("label") ||
+                name.Contains("placeholder") ||
+                name.Contains("tab") ||
+                name.Contains("header") ||
+                name.Contains("text"))
+            {
+                // Solo cambiar horizontal, mantener vertical
+                TextAlignmentOptions currentAlign = tmp.alignment;
+
+                // Si está alineado a la izquierda, centrarlo
+                if (currentAlign == TextAlignmentOptions.Left ||
+                    currentAlign == TextAlignmentOptions.TopLeft ||
+                    currentAlign == TextAlignmentOptions.MidlineLeft ||
+                    currentAlign == TextAlignmentOptions.BottomLeft ||
+                    currentAlign == TextAlignmentOptions.BaselineLeft ||
+                    currentAlign == TextAlignmentOptions.CaplineLeft)
+                {
+                    // Convertir a centrado manteniendo la posición vertical
+                    if (currentAlign == TextAlignmentOptions.TopLeft)
+                        tmp.alignment = TextAlignmentOptions.Top;
+                    else if (currentAlign == TextAlignmentOptions.MidlineLeft)
+                        tmp.alignment = TextAlignmentOptions.Midline;
+                    else if (currentAlign == TextAlignmentOptions.BottomLeft)
+                        tmp.alignment = TextAlignmentOptions.Bottom;
+                    else if (currentAlign == TextAlignmentOptions.BaselineLeft)
+                        tmp.alignment = TextAlignmentOptions.Baseline;
+                    else if (currentAlign == TextAlignmentOptions.CaplineLeft)
+                        tmp.alignment = TextAlignmentOptions.Capline;
+                    else
+                        tmp.alignment = TextAlignmentOptions.Center;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Centra un Text legacy si es apropiado
+        /// </summary>
+        private void CenterLegacyTextIfNeeded(Text text)
+        {
+            if (text == null) return;
+
+            string name = text.gameObject.name.ToLower();
+
+            // Centrar títulos, botones, labels y placeholders
+            if (name.Contains("title") ||
+                name.Contains("button") ||
+                name.Contains("label") ||
+                name.Contains("placeholder") ||
+                name.Contains("tab") ||
+                name.Contains("header") ||
+                name.Contains("text"))
+            {
+                // Si está alineado a la izquierda, centrarlo
+                if (text.alignment == TextAnchor.UpperLeft ||
+                    text.alignment == TextAnchor.MiddleLeft ||
+                    text.alignment == TextAnchor.LowerLeft)
+                {
+                    if (text.alignment == TextAnchor.UpperLeft)
+                        text.alignment = TextAnchor.UpperCenter;
+                    else if (text.alignment == TextAnchor.MiddleLeft)
+                        text.alignment = TextAnchor.MiddleCenter;
+                    else
+                        text.alignment = TextAnchor.LowerCenter;
+                }
+            }
         }
 
         /// <summary>

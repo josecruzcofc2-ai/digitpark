@@ -26,21 +26,35 @@ namespace DigitPark.Editor
             GUILayout.Label("Este script configurará la UI de Premium en las escenas.", EditorStyles.wordWrappedLabel);
             GUILayout.Space(20);
 
-            if (GUILayout.Button("1. Setup Settings Scene (Premium Section)", GUILayout.Height(40)))
+            if (GUILayout.Button("1. Setup MainMenu Scene (Premium Button)", GUILayout.Height(40)))
+            {
+                SetupMainMenuScene();
+            }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("2. Setup Game Scene (Premium Banner)", GUILayout.Height(40)))
+            {
+                SetupGameScene();
+            }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("3. Setup Settings Scene (Premium Section)", GUILayout.Height(40)))
             {
                 SetupSettingsScene();
             }
 
             GUILayout.Space(10);
 
-            if (GUILayout.Button("2. Setup Tournaments Scene (Premium Required Panel)", GUILayout.Height(40)))
+            if (GUILayout.Button("4. Setup Tournaments Scene (Premium Required Panel)", GUILayout.Height(40)))
             {
                 SetupTournamentsScene();
             }
 
             GUILayout.Space(10);
 
-            if (GUILayout.Button("3. Setup Boot Scene (Debug Controller)", GUILayout.Height(40)))
+            if (GUILayout.Button("5. Setup Boot Scene (Debug Controller)", GUILayout.Height(40)))
             {
                 SetupBootScene();
             }
@@ -53,6 +67,400 @@ namespace DigitPark.Editor
             GUILayout.Label("Debug Controller:", EditorStyles.boldLabel);
             GUILayout.Label("En la escena Boot, el PremiumDebugController te permite:\n• Activar/desactivar 'Sin Anuncios'\n• Activar/desactivar 'Crear Torneos'\n• Los cambios se aplican en tiempo real", EditorStyles.wordWrappedLabel);
         }
+
+        #region MainMenu Scene Setup
+
+        private static void SetupMainMenuScene()
+        {
+            // Abrir la escena de MainMenu
+            var scene = EditorSceneManager.OpenScene("Assets/_Project/Scenes/MainMenu.unity", OpenSceneMode.Single);
+
+            // Buscar el MainMenuPanel
+            GameObject mainMenuPanel = GameObject.Find("MainMenuPanel");
+            if (mainMenuPanel == null)
+            {
+                Debug.LogError("[PremiumUISetup] No se encontró MainMenuPanel en la escena MainMenu");
+                return;
+            }
+
+            // Buscar Canvas para poner el botón fuera del layout
+            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[PremiumUISetup] No se encontró Canvas en la escena MainMenu");
+                return;
+            }
+
+            // Verificar si ya existe PremiumButton (puede estar en Canvas o MainMenuPanel)
+            GameObject existingButton = GameObject.Find("PremiumButton");
+            if (existingButton != null)
+            {
+                Debug.LogWarning("[PremiumUISetup] PremiumButton ya existe. ¿Deseas recrearlo?");
+                if (!EditorUtility.DisplayDialog("PremiumButton existe",
+                    "PremiumButton ya existe en la escena. ¿Deseas eliminarlo y recrearlo?",
+                    "Sí, recrear", "No, cancelar"))
+                {
+                    return;
+                }
+                DestroyImmediate(existingButton);
+            }
+
+            // Tamaño compacto
+            Vector2 buttonSize = new Vector2(180, 60);
+
+            // Crear PremiumButton como hijo del Canvas (fuera del VerticalLayoutGroup)
+            GameObject premiumButton = CreatePremiumButtonCompact(canvas.transform, Vector2.zero, buttonSize);
+
+            // Buscar MainMenuManager y conectar referencias
+            var mainMenuManager = Object.FindObjectOfType<DigitPark.Managers.MainMenuManager>();
+            if (mainMenuManager != null)
+            {
+                ConnectMainMenuManagerReferences(mainMenuManager, premiumButton);
+            }
+            else
+            {
+                Debug.LogWarning("[PremiumUISetup] No se encontró MainMenuManager. Conecta las referencias manualmente.");
+            }
+
+            // Marcar la escena como modificada
+            EditorSceneManager.MarkSceneDirty(scene);
+
+            Debug.Log("[PremiumUISetup] ✅ MainMenu Scene configurada correctamente. ¡Guarda la escena!");
+            EditorUtility.DisplayDialog("Éxito", "PremiumButton creado en MainMenu.\n\n¡Recuerda guardar la escena (Ctrl+S)!", "OK");
+        }
+
+        private static GameObject CreatePremiumButtonCompact(Transform parent, Vector2 position, Vector2 size)
+        {
+            // Colores del tema Neon
+            Color neonGold = new Color(1f, 0.84f, 0f, 1f);
+            Color bgCard = new Color(0.0627f, 0.0824f, 0.1569f, 1f);
+
+            // Crear el botón
+            GameObject btnObj = new GameObject("PremiumButton");
+            btnObj.transform.SetParent(parent, false);
+
+            RectTransform btnRT = btnObj.AddComponent<RectTransform>();
+            // Anclar a esquina superior derecha
+            btnRT.anchorMin = new Vector2(1, 1);
+            btnRT.anchorMax = new Vector2(1, 1);
+            btnRT.pivot = new Vector2(1, 1);
+            btnRT.anchoredPosition = new Vector2(-20, -20); // Margen desde esquina
+            btnRT.sizeDelta = size;
+
+            // Image de fondo con borde dorado
+            Image btnImage = btnObj.AddComponent<Image>();
+            btnImage.color = bgCard;
+            btnImage.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+            btnImage.type = Image.Type.Sliced;
+
+            // Agregar Outline dorado (efecto neon)
+            Outline outline = btnObj.AddComponent<Outline>();
+            outline.effectColor = neonGold;
+            outline.effectDistance = new Vector2(2, 2);
+
+            // Componente Button
+            Button btn = btnObj.AddComponent<Button>();
+            btn.targetGraphic = btnImage;
+
+            ColorBlock colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
+            colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            btn.colors = colors;
+
+            // Contenedor horizontal para icono + texto
+            GameObject contentObj = new GameObject("Content");
+            contentObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform contentRT = contentObj.AddComponent<RectTransform>();
+            contentRT.anchorMin = Vector2.zero;
+            contentRT.anchorMax = Vector2.one;
+            contentRT.offsetMin = new Vector2(8, 5);
+            contentRT.offsetMax = new Vector2(-8, -5);
+
+            HorizontalLayoutGroup hlg = contentObj.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 5;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+
+            // Icono de estrella
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(contentObj.transform, false);
+
+            RectTransform iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.sizeDelta = new Vector2(30, 30);
+
+            TextMeshProUGUI iconTMP = iconObj.AddComponent<TextMeshProUGUI>();
+            iconTMP.text = "★";
+            iconTMP.fontSize = 24;
+            iconTMP.color = neonGold;
+            iconTMP.alignment = TextAlignmentOptions.Center;
+
+            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
+            iconLE.preferredWidth = 30;
+            iconLE.preferredHeight = 30;
+
+            // Texto del botón
+            GameObject textObj = new GameObject("PremiumButtonText");
+            textObj.transform.SetParent(contentObj.transform, false);
+
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.sizeDelta = new Vector2(100, 30);
+
+            TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+            textTMP.text = "PRO";
+            textTMP.fontSize = 22;
+            textTMP.color = neonGold;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.fontStyle = FontStyles.Bold;
+
+            LayoutElement textLE = textObj.AddComponent<LayoutElement>();
+            textLE.preferredWidth = 100;
+            textLE.preferredHeight = 30;
+
+            // Crear Badge checkmark (se muestra cuando ya es premium)
+            GameObject badgeObj = new GameObject("PremiumBadge");
+            badgeObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform badgeRT = badgeObj.AddComponent<RectTransform>();
+            badgeRT.anchorMin = new Vector2(1, 1);
+            badgeRT.anchorMax = new Vector2(1, 1);
+            badgeRT.pivot = new Vector2(0.5f, 0.5f);
+            badgeRT.anchoredPosition = new Vector2(5, 5);
+            badgeRT.sizeDelta = new Vector2(24, 24);
+
+            Image badgeImage = badgeObj.AddComponent<Image>();
+            badgeImage.color = new Color(0.2f, 1f, 0.4f, 1f); // Verde neon
+
+            GameObject badgeTextObj = new GameObject("BadgeText");
+            badgeTextObj.transform.SetParent(badgeObj.transform, false);
+
+            RectTransform badgeTextRT = badgeTextObj.AddComponent<RectTransform>();
+            badgeTextRT.anchorMin = Vector2.zero;
+            badgeTextRT.anchorMax = Vector2.one;
+            badgeTextRT.offsetMin = Vector2.zero;
+            badgeTextRT.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI badgeTextTMP = badgeTextObj.AddComponent<TextMeshProUGUI>();
+            badgeTextTMP.text = "✓";
+            badgeTextTMP.fontSize = 16;
+            badgeTextTMP.color = Color.black;
+            badgeTextTMP.alignment = TextAlignmentOptions.Center;
+            badgeTextTMP.fontStyle = FontStyles.Bold;
+
+            // El badge empieza oculto
+            badgeObj.SetActive(false);
+
+            return btnObj;
+        }
+
+        private static void ConnectMainMenuManagerReferences(DigitPark.Managers.MainMenuManager manager, GameObject premiumButton)
+        {
+            SerializedObject so = new SerializedObject(manager);
+
+            // Conectar premiumButton
+            SerializedProperty premiumBtnProp = so.FindProperty("premiumButton");
+            if (premiumBtnProp != null)
+                premiumBtnProp.objectReferenceValue = premiumButton.GetComponent<Button>();
+
+            // Conectar premiumBadge
+            Transform badge = premiumButton.transform.Find("PremiumBadge");
+            if (badge != null)
+            {
+                SerializedProperty badgeProp = so.FindProperty("premiumBadge");
+                if (badgeProp != null)
+                    badgeProp.objectReferenceValue = badge.gameObject;
+            }
+
+            // Conectar premiumPanel si existe el campo
+            SerializedProperty panelProp = so.FindProperty("premiumPanel");
+            if (panelProp != null)
+            {
+                // El panel se crea dinámicamente, dejarlo null
+                panelProp.objectReferenceValue = null;
+            }
+
+            so.ApplyModifiedProperties();
+            Debug.Log("[PremiumUISetup] Referencias conectadas al MainMenuManager");
+        }
+
+        #endregion
+
+        #region Game Scene Setup
+
+        private static void SetupGameScene()
+        {
+            // Abrir la escena de Game
+            var scene = EditorSceneManager.OpenScene("Assets/_Project/Scenes/Game.unity", OpenSceneMode.Single);
+
+            // Buscar el WinMessagePanel (panel de resultados)
+            GameObject resultPanel = GameObject.Find("WinMessagePanel");
+            if (resultPanel == null)
+            {
+                // Intentar buscar alternativas
+                resultPanel = GameObject.Find("ResultPanel");
+                if (resultPanel == null)
+                    resultPanel = GameObject.Find("GameOverPanel");
+                if (resultPanel == null)
+                    resultPanel = GameObject.Find("EndPanel");
+
+                // Buscar en el Canvas
+                if (resultPanel == null)
+                {
+                    Canvas canvas = Object.FindObjectOfType<Canvas>();
+                    if (canvas != null)
+                    {
+                        foreach (Transform child in canvas.transform)
+                        {
+                            if (child.name.ToLower().Contains("win") ||
+                                child.name.ToLower().Contains("result") ||
+                                child.name.ToLower().Contains("gameover"))
+                            {
+                                resultPanel = child.gameObject;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (resultPanel == null)
+                {
+                    Debug.LogError("[PremiumUISetup] No se encontró WinMessagePanel en la escena Game.");
+                    EditorUtility.DisplayDialog("Error", "No se encontró el panel de resultados (WinMessagePanel).\n\nVerifica que la escena Game tenga este panel.", "OK");
+                    return;
+                }
+            }
+
+            // Verificar si ya existe PremiumBannerContainer
+            Transform existingBanner = resultPanel.transform.Find("PremiumBannerContainer");
+            if (existingBanner != null)
+            {
+                Debug.LogWarning("[PremiumUISetup] PremiumBannerContainer ya existe. ¿Deseas recrearlo?");
+                if (!EditorUtility.DisplayDialog("PremiumBannerContainer existe",
+                    "PremiumBannerContainer ya existe en la escena. ¿Deseas eliminarlo y recrearlo?",
+                    "Sí, recrear", "No, cancelar"))
+                {
+                    return;
+                }
+                DestroyImmediate(existingBanner.gameObject);
+            }
+
+            // Crear PremiumBanner
+            GameObject premiumBanner = CreatePremiumBanner(resultPanel.transform);
+
+            // Buscar GameManager y conectar referencias
+            var gameManager = Object.FindObjectOfType<DigitPark.Managers.GameManager>();
+            if (gameManager != null)
+            {
+                ConnectGameManagerReferences(gameManager, premiumBanner);
+            }
+            else
+            {
+                Debug.LogWarning("[PremiumUISetup] No se encontró GameManager. Conecta las referencias manualmente.");
+            }
+
+            // Marcar la escena como modificada
+            EditorSceneManager.MarkSceneDirty(scene);
+
+            Debug.Log("[PremiumUISetup] ✅ Game Scene configurada correctamente. ¡Guarda la escena!");
+            EditorUtility.DisplayDialog("Éxito", "PremiumBanner creado en Game.\n\n¡Recuerda guardar la escena (Ctrl+S)!", "OK");
+        }
+
+        private static GameObject CreatePremiumBanner(Transform parent)
+        {
+            // Colores del tema Neon
+            Color neonCyan = new Color(0f, 0.9608f, 1f, 1f);
+            Color bgCard = new Color(0.0627f, 0.0824f, 0.1569f, 0.95f);
+
+            // Crear contenedor
+            GameObject containerObj = new GameObject("PremiumBannerContainer");
+            containerObj.transform.SetParent(parent, false);
+
+            RectTransform containerRT = containerObj.AddComponent<RectTransform>();
+            containerRT.anchorMin = new Vector2(0.5f, 0);
+            containerRT.anchorMax = new Vector2(0.5f, 0);
+            containerRT.pivot = new Vector2(0.5f, 0);
+            containerRT.anchoredPosition = new Vector2(0, 30);
+            containerRT.sizeDelta = new Vector2(600, 80);
+
+            // Fondo con borde neon
+            Image bgImage = containerObj.AddComponent<Image>();
+            bgImage.color = bgCard;
+            bgImage.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+            bgImage.type = Image.Type.Sliced;
+
+            Outline outline = containerObj.AddComponent<Outline>();
+            outline.effectColor = neonCyan;
+            outline.effectDistance = new Vector2(2, 2);
+
+            // Crear botón
+            GameObject btnObj = new GameObject("PremiumBannerButton");
+            btnObj.transform.SetParent(containerObj.transform, false);
+
+            RectTransform btnRT = btnObj.AddComponent<RectTransform>();
+            btnRT.anchorMin = Vector2.zero;
+            btnRT.anchorMax = Vector2.one;
+            btnRT.offsetMin = Vector2.zero;
+            btnRT.offsetMax = Vector2.zero;
+
+            Button btn = btnObj.AddComponent<Button>();
+            btn.targetGraphic = bgImage;
+
+            // Crear texto
+            GameObject textObj = new GameObject("PremiumBannerText");
+            textObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.offsetMin = new Vector2(20, 10);
+            textRT.offsetMax = new Vector2(-20, -10);
+
+            TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+            textTMP.text = "✨ ¡Quita los anuncios por solo $9.99! ✨";
+            textTMP.fontSize = 22;
+            textTMP.color = neonCyan;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.fontStyle = FontStyles.Bold;
+
+            return containerObj;
+        }
+
+        private static void ConnectGameManagerReferences(DigitPark.Managers.GameManager manager, GameObject premiumBanner)
+        {
+            SerializedObject so = new SerializedObject(manager);
+
+            // Conectar premiumBannerContainer
+            SerializedProperty containerProp = so.FindProperty("premiumBannerContainer");
+            if (containerProp != null)
+                containerProp.objectReferenceValue = premiumBanner;
+
+            // Conectar premiumBannerButton
+            Transform btnTransform = premiumBanner.transform.Find("PremiumBannerButton");
+            if (btnTransform != null)
+            {
+                SerializedProperty btnProp = so.FindProperty("premiumBannerButton");
+                if (btnProp != null)
+                    btnProp.objectReferenceValue = btnTransform.GetComponent<Button>();
+            }
+
+            // Conectar premiumBannerText
+            Transform textTransform = premiumBanner.transform.Find("PremiumBannerButton/PremiumBannerText");
+            if (textTransform != null)
+            {
+                SerializedProperty textProp = so.FindProperty("premiumBannerText");
+                if (textProp != null)
+                    textProp.objectReferenceValue = textTransform.GetComponent<TextMeshProUGUI>();
+            }
+
+            so.ApplyModifiedProperties();
+            Debug.Log("[PremiumUISetup] Referencias conectadas al GameManager");
+        }
+
+        #endregion
 
         #region Settings Scene Setup
 

@@ -336,6 +336,74 @@ namespace DigitPark.Services.Firebase
             return true;
         }
 
+        /// <summary>
+        /// Actualiza el score de un participante en un torneo
+        /// </summary>
+        public async Task<bool> UpdateTournamentScore(string tournamentId, string userId, float time)
+        {
+            var tournament = await GetTournament(tournamentId);
+            if (tournament == null)
+            {
+                Debug.LogWarning($"[Database] Torneo no encontrado: {tournamentId}");
+                return false;
+            }
+
+            if (!tournament.IsParticipating(userId))
+            {
+                Debug.LogWarning($"[Database] Usuario {userId} no participa en torneo {tournamentId}");
+                return false;
+            }
+
+            // Actualizar score del participante
+            tournament.UpdateParticipantScore(userId, time);
+
+            // Guardar cambios
+            await UpdateTournament(tournament);
+
+            Debug.Log($"[Database] Score actualizado en torneo {tournamentId}: {time}s");
+            return true;
+        }
+
+        /// <summary>
+        /// Obtiene los torneos activos en los que participa un jugador
+        /// </summary>
+        public async Task<List<TournamentData>> GetPlayerActiveTournaments(string userId)
+        {
+            await Task.Delay(50);
+            var playerTournaments = new List<TournamentData>();
+
+            foreach (var t in tournaments.Values)
+            {
+                // Solo torneos activos o programados donde el jugador participa
+                if ((t.status == TournamentStatus.Scheduled || t.status == TournamentStatus.Active)
+                    && t.IsParticipating(userId))
+                {
+                    playerTournaments.Add(t);
+                }
+            }
+
+            Debug.Log($"[Database] Torneos activos del jugador {userId}: {playerTournaments.Count}");
+            return playerTournaments;
+        }
+
+        /// <summary>
+        /// Actualiza el score en TODOS los torneos activos donde participa el jugador
+        /// </summary>
+        public async Task UpdateScoreInAllActiveTournaments(string userId, float time)
+        {
+            var playerTournaments = await GetPlayerActiveTournaments(userId);
+
+            foreach (var tournament in playerTournaments)
+            {
+                await UpdateTournamentScore(tournament.tournamentId, userId, time);
+            }
+
+            if (playerTournaments.Count > 0)
+            {
+                Debug.Log($"[Database] Score {time}s actualizado en {playerTournaments.Count} torneos");
+            }
+        }
+
         #endregion
 
         #region Analytics

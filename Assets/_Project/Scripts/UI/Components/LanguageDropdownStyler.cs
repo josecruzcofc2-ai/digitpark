@@ -26,14 +26,12 @@ namespace DigitPark.UI.Components
 
         [Header("Configuracion")]
         [SerializeField] private Image languageIconImage;
-        [SerializeField] private float hoverGlowIntensity = 1.2f;
 
         private TMP_Dropdown dropdown;
         private Image dropdownImage;
         private Outline dropdownOutline;
         private Shadow dropdownGlow;
         private Color originalLabelColor;
-        private bool isHovering;
 
         private void Awake()
         {
@@ -301,13 +299,11 @@ namespace DigitPark.UI.Components
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            isHovering = true;
             ApplyHoverEffect(true);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            isHovering = false;
             ApplyHoverEffect(false);
         }
 

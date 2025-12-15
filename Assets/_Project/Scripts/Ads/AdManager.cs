@@ -1,5 +1,9 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 using System;
+using DigitPark.Managers;
+using DigitPark.Localization;
 
 // INSTRUCCIONES DE INSTALACIÓN:
 // 1. Descarga Google Mobile Ads Unity Plugin desde:
@@ -27,10 +31,15 @@ namespace DigitPark.Ads
         private bool isInitialized = false;
         private int gamesPlayedSinceLastAd = 0;
         private bool hasNoAds = false;
+        private int interstitialsShownCount = 0;
+
+        [Header("Post-Ad Popup")]
+        [SerializeField] private bool showRemoveAdsPopup = true;
+        [SerializeField] private int showPopupAfterAds = 2; // Mostrar popup después de X interstitials
+        private GameObject currentPopup;
 
         // Eventos
         public event Action OnRewardedAdCompleted;
-        public event Action OnRewardedAdFailed;
         public event Action OnInterstitialClosed;
 
 #if ADMOB_INSTALLED
@@ -266,6 +275,7 @@ namespace DigitPark.Ads
                     {
                         Debug.Log("[AdManager] Interstitial cerrado");
                         OnInterstitialClosed?.Invoke();
+                        TryShowRemoveAdsPopup(); // Mostrar popup de quitar anuncios
                         LoadInterstitial(); // Precargar siguiente
                     };
                 }
@@ -303,6 +313,7 @@ namespace DigitPark.Ads
 #else
             Debug.Log("[AdManager] Interstitial mostrado (simulación)");
             OnInterstitialClosed?.Invoke();
+            TryShowRemoveAdsPopup(); // Mostrar popup de quitar anuncios
             return true;
 #endif
         }
@@ -408,7 +419,6 @@ namespace DigitPark.Ads
             else
             {
                 Debug.LogWarning("[AdManager] Rewarded no está listo");
-                OnRewardedAdFailed?.Invoke();
                 LoadRewarded();
             }
 #else
@@ -458,6 +468,243 @@ namespace DigitPark.Ads
             HideBanner();
             DestroyAds();
             Debug.Log("[AdManager] Anuncios desactivados permanentemente");
+        }
+
+        #endregion
+
+        #region Remove Ads Popup
+
+        /// <summary>
+        /// Muestra el popup de "quitar anuncios" después de un interstitial
+        /// </summary>
+        private void TryShowRemoveAdsPopup()
+        {
+            if (!showRemoveAdsPopup || hasNoAds) return;
+
+            interstitialsShownCount++;
+
+            // Mostrar popup cada X interstitials
+            if (interstitialsShownCount >= showPopupAfterAds)
+            {
+                interstitialsShownCount = 0;
+                ShowRemoveAdsPopup();
+            }
+        }
+
+        /// <summary>
+        /// Crea y muestra el popup de quitar anuncios con estilo neon
+        /// </summary>
+        public void ShowRemoveAdsPopup()
+        {
+            if (hasNoAds || currentPopup != null) return;
+
+            // Buscar canvas
+            Canvas canvas = FindObjectOfType<Canvas>();
+            if (canvas == null) return;
+
+            // Crear popup
+            currentPopup = CreateRemoveAdsPopup(canvas.transform);
+            Debug.Log("[AdManager] Popup de quitar anuncios mostrado");
+        }
+
+        /// <summary>
+        /// Crea el popup con estilo neon
+        /// </summary>
+        private GameObject CreateRemoveAdsPopup(Transform parent)
+        {
+            // Colores neon
+            Color neonCyan = new Color(0f, 0.9608f, 1f, 1f);
+            Color neonGold = new Color(1f, 0.84f, 0f, 1f);
+            Color darkBg = new Color(0.02f, 0.05f, 0.1f, 0.95f);
+
+            // === CONTENEDOR PRINCIPAL ===
+            GameObject container = new GameObject("RemoveAdsPopup");
+            container.transform.SetParent(parent, false);
+
+            RectTransform containerRt = container.AddComponent<RectTransform>();
+            containerRt.anchorMin = Vector2.zero;
+            containerRt.anchorMax = Vector2.one;
+            containerRt.offsetMin = Vector2.zero;
+            containerRt.offsetMax = Vector2.zero;
+
+            // === BLOCKER ===
+            GameObject blocker = new GameObject("Blocker");
+            blocker.transform.SetParent(container.transform, false);
+
+            RectTransform blockerRt = blocker.AddComponent<RectTransform>();
+            blockerRt.anchorMin = Vector2.zero;
+            blockerRt.anchorMax = Vector2.one;
+            blockerRt.offsetMin = Vector2.zero;
+            blockerRt.offsetMax = Vector2.zero;
+
+            Image blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0f, 0f, 0f, 0.8f);
+
+            // === PANEL PRINCIPAL ===
+            GameObject panel = new GameObject("Panel");
+            panel.transform.SetParent(container.transform, false);
+
+            RectTransform panelRt = panel.AddComponent<RectTransform>();
+            panelRt.anchorMin = new Vector2(0.5f, 0.5f);
+            panelRt.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRt.pivot = new Vector2(0.5f, 0.5f);
+            panelRt.sizeDelta = new Vector2(600, 350);
+
+            Image panelBg = panel.AddComponent<Image>();
+            panelBg.color = darkBg;
+
+            Outline panelOutline = panel.AddComponent<Outline>();
+            panelOutline.effectColor = neonCyan;
+            panelOutline.effectDistance = new Vector2(3, 3);
+
+            // Layout
+            VerticalLayoutGroup vlg = panel.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(30, 30, 30, 30);
+            vlg.spacing = 20;
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // === TITULO ===
+            GameObject titleObj = new GameObject("Title");
+            titleObj.transform.SetParent(panel.transform, false);
+
+            LayoutElement titleLe = titleObj.AddComponent<LayoutElement>();
+            titleLe.preferredHeight = 50;
+
+            TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTmp.text = AutoLocalizer.Get("tired_of_ads");
+            titleTmp.fontSize = 32;
+            titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.color = neonCyan;
+            titleTmp.alignment = TextAlignmentOptions.Center;
+
+            // === DESCRIPCION ===
+            GameObject descObj = new GameObject("Description");
+            descObj.transform.SetParent(panel.transform, false);
+
+            LayoutElement descLe = descObj.AddComponent<LayoutElement>();
+            descLe.preferredHeight = 40;
+
+            TextMeshProUGUI descTmp = descObj.AddComponent<TextMeshProUGUI>();
+            descTmp.text = AutoLocalizer.Get("remove_ads_now");
+            descTmp.fontSize = 20;
+            descTmp.color = new Color(0.8f, 0.8f, 0.85f, 1f);
+            descTmp.alignment = TextAlignmentOptions.Center;
+
+            // === BOTONES CONTAINER ===
+            GameObject buttonsContainer = new GameObject("Buttons");
+            buttonsContainer.transform.SetParent(panel.transform, false);
+
+            LayoutElement buttonsLe = buttonsContainer.AddComponent<LayoutElement>();
+            buttonsLe.preferredHeight = 60;
+
+            HorizontalLayoutGroup hlg = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 20;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+
+            // === BOTON QUITAR ANUNCIOS ===
+            GameObject removeBtn = CreatePopupButton(
+                buttonsContainer.transform,
+                AutoLocalizer.Get("no_ads_title") + " - " + PremiumManager.PRICE_REMOVE_ADS,
+                neonGold,
+                () => {
+                    CloseRemoveAdsPopup();
+                    PremiumManager.Instance?.PurchaseRemoveAds();
+                }
+            );
+
+            // === BOTON NO GRACIAS ===
+            GameObject noThanksBtn = CreatePopupButton(
+                buttonsContainer.transform,
+                AutoLocalizer.Get("no_thanks"),
+                new Color(0.3f, 0.3f, 0.35f, 1f),
+                CloseRemoveAdsPopup
+            );
+
+            // === TEXTO PREMIUM ===
+            GameObject premiumObj = new GameObject("PremiumHint");
+            premiumObj.transform.SetParent(panel.transform, false);
+
+            LayoutElement premiumLe = premiumObj.AddComponent<LayoutElement>();
+            premiumLe.preferredHeight = 30;
+
+            TextMeshProUGUI premiumTmp = premiumObj.AddComponent<TextMeshProUGUI>();
+            premiumTmp.text = $"o {AutoLocalizer.Get("get_premium")} - {PremiumManager.PRICE_PREMIUM_FULL}";
+            premiumTmp.fontSize = 16;
+            premiumTmp.color = neonGold;
+            premiumTmp.fontStyle = FontStyles.Underline;
+            premiumTmp.alignment = TextAlignmentOptions.Center;
+
+            // Hacer clickeable
+            Button premiumBtn = premiumObj.AddComponent<Button>();
+            premiumBtn.onClick.AddListener(() => {
+                CloseRemoveAdsPopup();
+                PremiumManager.Instance?.PurchasePremiumFull();
+            });
+
+            return container;
+        }
+
+        /// <summary>
+        /// Crea un botón para el popup
+        /// </summary>
+        private GameObject CreatePopupButton(Transform parent, string text, Color bgColor, Action onClick)
+        {
+            GameObject btnObj = new GameObject("Button");
+            btnObj.transform.SetParent(parent, false);
+
+            RectTransform rt = btnObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(250, 55);
+
+            LayoutElement le = btnObj.AddComponent<LayoutElement>();
+            le.preferredWidth = 250;
+            le.preferredHeight = 55;
+
+            Image bg = btnObj.AddComponent<Image>();
+            bg.color = bgColor;
+
+            Button btn = btnObj.AddComponent<Button>();
+            btn.targetGraphic = bg;
+            btn.onClick.AddListener(() => onClick?.Invoke());
+
+            // Texto
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform textRt = textObj.AddComponent<RectTransform>();
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(10, 5);
+            textRt.offsetMax = new Vector2(-10, -5);
+
+            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = 18;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = bgColor.grayscale > 0.5f ? Color.black : Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+
+            return btnObj;
+        }
+
+        /// <summary>
+        /// Cierra el popup de quitar anuncios
+        /// </summary>
+        public void CloseRemoveAdsPopup()
+        {
+            if (currentPopup != null)
+            {
+                Destroy(currentPopup);
+                currentPopup = null;
+                Debug.Log("[AdManager] Popup cerrado");
+            }
         }
 
         #endregion

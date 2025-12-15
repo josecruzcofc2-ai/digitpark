@@ -1105,7 +1105,7 @@ namespace DigitPark.Managers
             catch (System.Exception ex)
             {
                 Debug.LogError($"[Tournament] Error: {ex.Message}");
-                ShowErrorMessage($"Error: {ex.Message}");
+                ShowErrorMessage(AutoLocalizer.Get("error_creating_tournament"));
             }
             finally
             {
@@ -1143,7 +1143,7 @@ namespace DigitPark.Managers
             catch (System.Exception ex)
             {
                 Debug.LogError($"[Tournament] Error: {ex.Message}");
-                ShowErrorMessage($"Error: {ex.Message}");
+                ShowErrorMessage(AutoLocalizer.Get("error_joining_tournament"));
             }
             finally
             {
@@ -1252,7 +1252,7 @@ namespace DigitPark.Managers
 
             if (tournament == null || tournament.participants == null)
             {
-                ShowErrorMessage("No se puede mostrar el leaderboard");
+                ShowErrorMessage(AutoLocalizer.Get("error_loading_tournaments"));
                 return;
             }
 
@@ -1698,7 +1698,7 @@ namespace DigitPark.Managers
             catch (System.Exception ex)
             {
                 Debug.LogError($"[Tournament] Error al salir del torneo: {ex.Message}");
-                ShowErrorMessage($"Error: {ex.Message}");
+                ShowErrorMessage(AutoLocalizer.Get("error_leaving_tournament"));
             }
             finally
             {
