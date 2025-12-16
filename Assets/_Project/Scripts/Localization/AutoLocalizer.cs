@@ -363,7 +363,7 @@ namespace DigitPark.Localization
         }
 
         /// <summary>
-        /// Centra un TextMeshProUGUI si es apropiado (títulos, botones, labels)
+        /// Centra un TextMeshProUGUI y configura Auto-Size para que el texto siempre quepa
         /// </summary>
         private void CenterTextIfNeeded(TextMeshProUGUI tmp)
         {
@@ -371,45 +371,56 @@ namespace DigitPark.Localization
 
             string name = tmp.gameObject.name.ToLower();
 
-            // Centrar títulos, botones, labels y placeholders
-            if (name.Contains("title") ||
+            // Aplicar a títulos, botones, labels y placeholders
+            bool shouldProcess = name.Contains("title") ||
                 name.Contains("button") ||
                 name.Contains("label") ||
                 name.Contains("placeholder") ||
                 name.Contains("tab") ||
                 name.Contains("header") ||
-                name.Contains("text"))
+                name.Contains("text");
+
+            if (shouldProcess)
             {
-                // Solo cambiar horizontal, mantener vertical
+                // 1. CENTRAR EL TEXTO - Forzar centrado horizontal
                 TextAlignmentOptions currentAlign = tmp.alignment;
 
-                // Si está alineado a la izquierda, centrarlo
-                if (currentAlign == TextAlignmentOptions.Left ||
-                    currentAlign == TextAlignmentOptions.TopLeft ||
-                    currentAlign == TextAlignmentOptions.MidlineLeft ||
-                    currentAlign == TextAlignmentOptions.BottomLeft ||
-                    currentAlign == TextAlignmentOptions.BaselineLeft ||
-                    currentAlign == TextAlignmentOptions.CaplineLeft)
+                // Convertir cualquier alineación a centrado horizontal manteniendo vertical
+                if (currentAlign == TextAlignmentOptions.Left || currentAlign == TextAlignmentOptions.TopLeft)
+                    tmp.alignment = TextAlignmentOptions.Top;
+                else if (currentAlign == TextAlignmentOptions.MidlineLeft || currentAlign == TextAlignmentOptions.Midline)
+                    tmp.alignment = TextAlignmentOptions.Center;
+                else if (currentAlign == TextAlignmentOptions.BottomLeft)
+                    tmp.alignment = TextAlignmentOptions.Bottom;
+                else if (currentAlign == TextAlignmentOptions.BaselineLeft)
+                    tmp.alignment = TextAlignmentOptions.Baseline;
+                else if (currentAlign == TextAlignmentOptions.CaplineLeft)
+                    tmp.alignment = TextAlignmentOptions.Capline;
+                else if (currentAlign == TextAlignmentOptions.TopRight)
+                    tmp.alignment = TextAlignmentOptions.Top;
+                else if (currentAlign == TextAlignmentOptions.Right || currentAlign == TextAlignmentOptions.MidlineRight)
+                    tmp.alignment = TextAlignmentOptions.Center;
+                else if (currentAlign == TextAlignmentOptions.BottomRight)
+                    tmp.alignment = TextAlignmentOptions.Bottom;
+                // Si ya está centrado, dejarlo como está
+
+                // 2. HABILITAR AUTO-SIZE para que el texto se ajuste al contenedor
+                if (!tmp.enableAutoSizing)
                 {
-                    // Convertir a centrado manteniendo la posición vertical
-                    if (currentAlign == TextAlignmentOptions.TopLeft)
-                        tmp.alignment = TextAlignmentOptions.Top;
-                    else if (currentAlign == TextAlignmentOptions.MidlineLeft)
-                        tmp.alignment = TextAlignmentOptions.Midline;
-                    else if (currentAlign == TextAlignmentOptions.BottomLeft)
-                        tmp.alignment = TextAlignmentOptions.Bottom;
-                    else if (currentAlign == TextAlignmentOptions.BaselineLeft)
-                        tmp.alignment = TextAlignmentOptions.Baseline;
-                    else if (currentAlign == TextAlignmentOptions.CaplineLeft)
-                        tmp.alignment = TextAlignmentOptions.Capline;
-                    else
-                        tmp.alignment = TextAlignmentOptions.Center;
+                    tmp.enableAutoSizing = true;
+                    // Configurar tamaños mínimo y máximo razonables
+                    float currentSize = tmp.fontSize;
+                    tmp.fontSizeMin = Mathf.Max(8f, currentSize * 0.4f); // Mínimo 40% del tamaño original o 8
+                    tmp.fontSizeMax = currentSize > 0 ? currentSize : 36f; // Máximo el tamaño original
                 }
+
+                // 3. CONFIGURAR OVERFLOW para evitar que el texto se salga
+                tmp.overflowMode = TextOverflowModes.Ellipsis; // Mostrar ... si aún no cabe
             }
         }
 
         /// <summary>
-        /// Centra un Text legacy si es apropiado
+        /// Centra un Text legacy y configura para que el texto quepa
         /// </summary>
         private void CenterLegacyTextIfNeeded(Text text)
         {
@@ -417,27 +428,36 @@ namespace DigitPark.Localization
 
             string name = text.gameObject.name.ToLower();
 
-            // Centrar títulos, botones, labels y placeholders
-            if (name.Contains("title") ||
+            // Aplicar a títulos, botones, labels y placeholders
+            bool shouldProcess = name.Contains("title") ||
                 name.Contains("button") ||
                 name.Contains("label") ||
                 name.Contains("placeholder") ||
                 name.Contains("tab") ||
                 name.Contains("header") ||
-                name.Contains("text"))
+                name.Contains("text");
+
+            if (shouldProcess)
             {
-                // Si está alineado a la izquierda, centrarlo
-                if (text.alignment == TextAnchor.UpperLeft ||
-                    text.alignment == TextAnchor.MiddleLeft ||
-                    text.alignment == TextAnchor.LowerLeft)
+                // 1. CENTRAR EL TEXTO - Forzar centrado horizontal
+                if (text.alignment == TextAnchor.UpperLeft || text.alignment == TextAnchor.UpperRight)
+                    text.alignment = TextAnchor.UpperCenter;
+                else if (text.alignment == TextAnchor.MiddleLeft || text.alignment == TextAnchor.MiddleRight)
+                    text.alignment = TextAnchor.MiddleCenter;
+                else if (text.alignment == TextAnchor.LowerLeft || text.alignment == TextAnchor.LowerRight)
+                    text.alignment = TextAnchor.LowerCenter;
+
+                // 2. HABILITAR BEST FIT para que el texto se ajuste al contenedor
+                if (!text.resizeTextForBestFit)
                 {
-                    if (text.alignment == TextAnchor.UpperLeft)
-                        text.alignment = TextAnchor.UpperCenter;
-                    else if (text.alignment == TextAnchor.MiddleLeft)
-                        text.alignment = TextAnchor.MiddleCenter;
-                    else
-                        text.alignment = TextAnchor.LowerCenter;
+                    text.resizeTextForBestFit = true;
+                    text.resizeTextMinSize = 8;
+                    text.resizeTextMaxSize = text.fontSize > 0 ? text.fontSize : 36;
                 }
+
+                // 3. CONFIGURAR OVERFLOW
+                text.horizontalOverflow = HorizontalWrapMode.Wrap;
+                text.verticalOverflow = VerticalWrapMode.Truncate;
             }
         }
 
