@@ -202,11 +202,7 @@ namespace DigitPark.Managers
             googleButton?.onClick.AddListener(OnGoogleLoginClicked);
             appleButton?.onClick.AddListener(OnAppleLoginClicked);
 
-            // Ocultar botón de Apple en Android (solo visible en iOS)
-            #if !UNITY_IOS
-            if (appleButton != null)
-                appleButton.gameObject.SetActive(false);
-            #endif
+            // Ambos botones (Google y Apple) siempre visibles
 
             // El ErrorPanelUI maneja su propio botón internamente
 
