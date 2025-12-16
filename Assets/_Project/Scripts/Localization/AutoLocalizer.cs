@@ -35,6 +35,8 @@ namespace DigitPark.Localization
             { "RememberMeText", "remember_me" },
             { "ForgotPasswordText", "forgot_password" },
             { "OrContinueWithText", "or_continue_with" },
+            { "GoogleSignInText", "sign_in_google" },
+            { "AppleSignInText", "sign_in_apple" },
 
             // ==================== MAIN MENU ====================
             { "PlayButton", "play_button" },
