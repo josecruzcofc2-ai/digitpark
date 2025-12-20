@@ -77,6 +77,15 @@ namespace DigitPark.Localization
             { "ChangeLanguageLabel", "change_language" },
             { "ChangeLanguage", "change_language" },
             { "ChangueLanguageText", "change_language" }, // Typo in scene
+
+            // Theme/Style
+            { "ChangeStyleText", "change_style" },
+            { "ChangeStyleLabel", "change_style" },
+            { "ChangeStyle", "change_style" },
+            { "ChangeThemeText", "change_style" },
+            { "ChangeThemeLabel", "change_style" },
+            { "ThemeLabel", "change_style" },
+
             { "BackButton", "back_button" },
             { "BackButtonText", "back_button" },
             { "BackText", "back_button" },

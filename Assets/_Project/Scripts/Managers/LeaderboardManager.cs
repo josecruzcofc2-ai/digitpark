@@ -748,7 +748,21 @@ namespace DigitPark.Managers
             GameObject textObj = new GameObject(name);
             textObj.transform.SetParent(parent, false);
 
+            // Configurar RectTransform para que el texto sea visible
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.offsetMin = Vector2.zero;
+            textRT.offsetMax = Vector2.zero;
+
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+
+            // IMPORTANTE: Asignar fuente por defecto de TMP
+            if (TMPro.TMP_Settings.defaultFontAsset != null)
+            {
+                tmp.font = TMPro.TMP_Settings.defaultFontAsset;
+            }
+
             tmp.text = text;
             tmp.fontSize = fontSize;
             tmp.color = color;
@@ -756,6 +770,7 @@ namespace DigitPark.Managers
             tmp.fontStyle = TMPro.FontStyles.Normal;
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+            tmp.raycastTarget = false; // Mejor rendimiento
 
             return tmp;
         }
@@ -775,32 +790,55 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Resalta la posición del jugador actual
+        /// Resalta la posición del jugador actual (usado en tabs Local/Global)
         /// </summary>
         private void HighlightPlayerPosition(List<LeaderboardEntry> entries)
         {
-            if (currentPlayer == null || playerHighlightPanel == null) return;
+            if (currentPlayer == null) return;
+
+            // Verificar si hay elementos UI disponibles
+            bool hasPanel = playerHighlightPanel != null;
+            bool hasTimeText = playerTimeText != null;
+            bool hasPositionText = playerPositionText != null;
+
+            if (!hasPanel && !hasTimeText && !hasPositionText) return;
 
             var playerEntry = entries.Find(e => e.userId == currentPlayer.userId);
 
             if (playerEntry != null)
             {
-                playerHighlightPanel.SetActive(true);
-
-                if (playerPositionText != null)
+                if (hasPanel)
                 {
-                    playerPositionText.text = $"{AutoLocalizer.Get("your_position")} #{playerEntry.position}";
+                    playerHighlightPanel.SetActive(true);
                 }
 
-                if (playerTimeText != null)
+                if (hasPositionText)
+                {
+                    playerPositionText.text = $"{AutoLocalizer.Get("your_position")} #{playerEntry.position}";
+                    playerPositionText.gameObject.SetActive(true);
+                }
+
+                if (hasTimeText)
                 {
                     string label = AutoLocalizer.Get("personal_best_time");
                     playerTimeText.text = $"{label}: {playerEntry.time:F3}s";
+                    playerTimeText.gameObject.SetActive(true);
                 }
             }
             else
             {
-                playerHighlightPanel.SetActive(false);
+                if (hasPanel)
+                {
+                    playerHighlightPanel.SetActive(false);
+                }
+                if (hasTimeText)
+                {
+                    playerTimeText.gameObject.SetActive(false);
+                }
+                if (hasPositionText)
+                {
+                    playerPositionText.gameObject.SetActive(false);
+                }
             }
         }
 
@@ -848,18 +886,20 @@ namespace DigitPark.Managers
             GameObject emptyMsg = new GameObject("EmptyMessage");
             emptyMsg.transform.SetParent(leaderboardContainer, false);
 
-            TextMeshProUGUI text = emptyMsg.AddComponent<TextMeshProUGUI>();
-            text.text = AutoLocalizer.Get("no_scores_yet");
-            text.alignment = TMPro.TextAlignmentOptions.Center;
-            text.fontSize = 24;
-            text.color = Color.gray;
-
-            RectTransform rt = emptyMsg.GetComponent<RectTransform>();
+            RectTransform rt = emptyMsg.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(800, 200);
+
+            TextMeshProUGUI text = emptyMsg.AddComponent<TextMeshProUGUI>();
+            if (TMPro.TMP_Settings.defaultFontAsset != null)
+                text.font = TMPro.TMP_Settings.defaultFontAsset;
+            text.text = AutoLocalizer.Get("no_scores_yet");
+            text.alignment = TMPro.TextAlignmentOptions.Center;
+            text.fontSize = 24;
+            text.color = Color.gray;
         }
 
         /// <summary>
@@ -872,18 +912,20 @@ namespace DigitPark.Managers
             GameObject errorMsg = new GameObject("ErrorMessage");
             errorMsg.transform.SetParent(leaderboardContainer, false);
 
-            TextMeshProUGUI text = errorMsg.AddComponent<TextMeshProUGUI>();
-            text.text = message;
-            text.alignment = TMPro.TextAlignmentOptions.Center;
-            text.fontSize = 24;
-            text.color = Color.red;
-
-            RectTransform rt = errorMsg.GetComponent<RectTransform>();
+            RectTransform rt = errorMsg.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(800, 100);
+
+            TextMeshProUGUI text = errorMsg.AddComponent<TextMeshProUGUI>();
+            if (TMPro.TMP_Settings.defaultFontAsset != null)
+                text.font = TMPro.TMP_Settings.defaultFontAsset;
+            text.text = message;
+            text.alignment = TMPro.TextAlignmentOptions.Center;
+            text.fontSize = 24;
+            text.color = Color.red;
         }
 
         /// <summary>
@@ -912,37 +954,64 @@ namespace DigitPark.Managers
         /// </summary>
         private void UpdatePersonalBestPanel()
         {
-            if (playerHighlightPanel == null) return;
+            // Verificar si hay algo que actualizar
+            bool hasPanel = playerHighlightPanel != null;
+            bool hasTimeText = playerTimeText != null;
+            bool hasPositionText = playerPositionText != null;
+
+            if (!hasPanel && !hasTimeText && !hasPositionText)
+            {
+                Debug.LogWarning("[Leaderboard] No hay elementos UI para mostrar el mejor tiempo (playerHighlightPanel, playerTimeText y playerPositionText son null)");
+                return;
+            }
 
             if (currentTab == LeaderboardTab.Personal && currentPlayer != null)
             {
                 // Mostrar panel con el mejor tiempo
-                playerHighlightPanel.SetActive(true);
+                if (hasPanel)
+                {
+                    playerHighlightPanel.SetActive(true);
+                }
 
-                if (playerTimeText != null)
+                if (hasTimeText)
                 {
                     float bestTime = currentPlayer.bestTime;
                     string label = AutoLocalizer.Get("personal_best_time");
                     if (bestTime == float.MaxValue || bestTime <= 0)
                     {
-                        playerTimeText.text = $"{label}: {AutoLocalizer.Get("no_best_time_yet")}";
+                        playerTimeText.text = AutoLocalizer.Get("no_best_time_yet");
                     }
                     else
                     {
                         playerTimeText.text = $"{label}: {bestTime:F3}s";
                     }
-                    Debug.Log($"[Leaderboard] Mostrando mejor tiempo personal: {bestTime} (MaxValue={float.MaxValue})");
+
+                    // Asegurar que el texto esté visible
+                    playerTimeText.gameObject.SetActive(true);
+                    Debug.Log($"[Leaderboard] Mostrando mejor tiempo personal: {bestTime:F3}s (bestTime={bestTime}, MaxValue={float.MaxValue})");
                 }
 
-                if (playerPositionText != null)
+                if (hasPositionText)
                 {
                     playerPositionText.text = AutoLocalizer.Get("history_games", currentPlayer.scoreHistory?.Count ?? 0);
+                    playerPositionText.gameObject.SetActive(true);
                 }
             }
             else
             {
-                // Ocultar panel en otras tabs
-                playerHighlightPanel.SetActive(false);
+                // Ocultar panel/textos en otras tabs
+                if (hasPanel)
+                {
+                    playerHighlightPanel.SetActive(false);
+                }
+                if (hasTimeText)
+                {
+                    playerTimeText.gameObject.SetActive(false);
+                }
+                if (hasPositionText)
+                {
+                    playerPositionText.gameObject.SetActive(false);
+                }
             }
         }
 

@@ -1,0 +1,280 @@
+#if UNITY_EDITOR
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using TMPro;
+using DigitPark.Themes;
+
+namespace DigitPark.Editor
+{
+    /// <summary>
+    /// Agrega ThemeApplier a todos los elementos UI para que respondan a cambios de tema en runtime
+    /// </summary>
+    public class ThemeApplierSetup : EditorWindow
+    {
+        [MenuItem("DigitPark/Themes/Add ThemeApplier to Current Scene")]
+        public static void AddToCurrentScene()
+        {
+            int count = AddThemeAppliers();
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorUtility.DisplayDialog("ThemeApplier Setup",
+                $"Se agregaron {count} componentes ThemeApplier.\n\nGuarda la escena (Ctrl+S)", "OK");
+        }
+
+        [MenuItem("DigitPark/Themes/Add ThemeApplier to ALL Scenes")]
+        public static void AddToAllScenes()
+        {
+            if (!EditorUtility.DisplayDialog("Confirmar",
+                "¿Agregar ThemeApplier a TODAS las escenas?\n\nEsto permitirá cambiar temas en runtime.",
+                "Sí", "Cancelar"))
+                return;
+
+            string[] scenePaths = new string[]
+            {
+                "Assets/_Project/Scenes/Boot.unity",
+                "Assets/_Project/Scenes/Login.unity",
+                "Assets/_Project/Scenes/Register.unity",
+                "Assets/_Project/Scenes/MainMenu.unity",
+                "Assets/_Project/Scenes/Game.unity",
+                "Assets/_Project/Scenes/Scores.unity",
+                "Assets/_Project/Scenes/Tournaments.unity",
+                "Assets/_Project/Scenes/Settings.unity"
+            };
+
+            int totalCount = 0;
+            foreach (string scenePath in scenePaths)
+            {
+                try
+                {
+                    var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                    int count = AddThemeAppliers();
+                    totalCount += count;
+                    EditorSceneManager.SaveScene(scene);
+                    Debug.Log($"[ThemeApplierSetup] {scenePath}: {count} componentes agregados");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[ThemeApplierSetup] Error en {scenePath}: {e.Message}");
+                }
+            }
+
+            EditorUtility.DisplayDialog("Completado",
+                $"ThemeApplier agregado a todas las escenas.\n\nTotal: {totalCount} componentes",
+                "OK");
+        }
+
+        private static int AddThemeAppliers()
+        {
+            int count = 0;
+
+            // Procesar imágenes (fondos, paneles, etc.)
+            count += ProcessImages();
+
+            // Procesar textos
+            count += ProcessTexts();
+
+            // Procesar botones
+            count += ProcessButtons();
+
+            // Procesar sliders
+            count += ProcessSliders();
+
+            return count;
+        }
+
+        private static int ProcessImages()
+        {
+            int count = 0;
+            var images = GameObject.FindObjectsOfType<Image>(true);
+
+            foreach (var img in images)
+            {
+                // Saltar si ya tiene ThemeApplier
+                if (img.GetComponent<ThemeApplier>() != null) continue;
+
+                // Saltar imágenes de botones (se manejan en ProcessButtons)
+                if (img.GetComponent<Button>() != null) continue;
+
+                string name = img.gameObject.name.ToLower();
+                ThemeApplier.ElementType elementType = ThemeApplier.ElementType.None;
+
+                // Detectar tipo de elemento
+                if (name.Contains("background") || name == "bg")
+                {
+                    if (name.Contains("main") || name.Contains("screen"))
+                        elementType = ThemeApplier.ElementType.PrimaryBackground;
+                    else if (name.Contains("card") || name.Contains("panel") || name.Contains("popup"))
+                        elementType = ThemeApplier.ElementType.CardBackground;
+                    else
+                        elementType = ThemeApplier.ElementType.SecondaryBackground;
+                }
+                else if (name.Contains("panel"))
+                {
+                    elementType = ThemeApplier.ElementType.CardBackground;
+                }
+                else if (name.Contains("fill") && img.transform.parent?.name.ToLower().Contains("slider") == true)
+                {
+                    elementType = ThemeApplier.ElementType.SliderFill;
+                }
+                else if (name.Contains("handle"))
+                {
+                    elementType = ThemeApplier.ElementType.SliderHandle;
+                }
+
+                if (elementType != ThemeApplier.ElementType.None)
+                {
+                    var applier = img.gameObject.AddComponent<ThemeApplier>();
+                    SetElementType(applier, elementType);
+                    EditorUtility.SetDirty(img.gameObject);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private static int ProcessTexts()
+        {
+            int count = 0;
+            var texts = GameObject.FindObjectsOfType<TextMeshProUGUI>(true);
+
+            foreach (var text in texts)
+            {
+                if (text.GetComponent<ThemeApplier>() != null) continue;
+
+                // Saltar textos de botones
+                if (text.transform.parent?.GetComponent<Button>() != null) continue;
+
+                string name = text.gameObject.name.ToLower();
+                ThemeApplier.ElementType elementType = ThemeApplier.ElementType.None;
+
+                if (name.Contains("title") || name.Contains("header"))
+                    elementType = ThemeApplier.ElementType.TextTitle;
+                else if (name.Contains("placeholder"))
+                    elementType = ThemeApplier.ElementType.TextDisabled;
+                else if (name.Contains("label") || name.Contains("subtitle"))
+                    elementType = ThemeApplier.ElementType.TextSecondary;
+                else if (name.Contains("error"))
+                    elementType = ThemeApplier.ElementType.Error;
+                else if (name.Contains("value") || name.Contains("score"))
+                    elementType = ThemeApplier.ElementType.Accent;
+                else
+                    elementType = ThemeApplier.ElementType.TextPrimary;
+
+                if (elementType != ThemeApplier.ElementType.None)
+                {
+                    var applier = text.gameObject.AddComponent<ThemeApplier>();
+                    SetElementType(applier, elementType);
+                    SetApplyToText(applier, true);
+                    SetApplyToImage(applier, false);
+                    EditorUtility.SetDirty(text.gameObject);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private static int ProcessButtons()
+        {
+            int count = 0;
+            var buttons = GameObject.FindObjectsOfType<Button>(true);
+
+            foreach (var btn in buttons)
+            {
+                if (btn.GetComponent<ThemeApplier>() != null) continue;
+
+                string name = btn.gameObject.name.ToLower();
+                ThemeApplier.ElementType elementType = ThemeApplier.ElementType.ButtonSecondary;
+
+                // Botones principales
+                if (name.Contains("login") || name.Contains("play") || name.Contains("confirm") ||
+                    name.Contains("create") || name.Contains("submit") || name.Contains("register") ||
+                    name.Contains("save") || name.Contains("accept") || name.Contains("join"))
+                {
+                    elementType = ThemeApplier.ElementType.ButtonPrimary;
+                }
+                // Botones de peligro
+                else if (name.Contains("delete") || name.Contains("logout") || name.Contains("remove") ||
+                         name.Contains("cancel"))
+                {
+                    elementType = ThemeApplier.ElementType.ButtonDanger;
+                }
+
+                var applier = btn.gameObject.AddComponent<ThemeApplier>();
+                SetElementType(applier, elementType);
+                EditorUtility.SetDirty(btn.gameObject);
+                count++;
+            }
+            return count;
+        }
+
+        private static int ProcessSliders()
+        {
+            int count = 0;
+            var sliders = GameObject.FindObjectsOfType<Slider>(true);
+
+            foreach (var slider in sliders)
+            {
+                // Fill
+                if (slider.fillRect != null)
+                {
+                    var fill = slider.fillRect.GetComponent<Image>();
+                    if (fill != null && fill.GetComponent<ThemeApplier>() == null)
+                    {
+                        var applier = fill.gameObject.AddComponent<ThemeApplier>();
+                        SetElementType(applier, ThemeApplier.ElementType.SliderFill);
+                        EditorUtility.SetDirty(fill.gameObject);
+                        count++;
+                    }
+                }
+
+                // Handle
+                if (slider.handleRect != null)
+                {
+                    var handle = slider.handleRect.GetComponent<Image>();
+                    if (handle != null && handle.GetComponent<ThemeApplier>() == null)
+                    {
+                        var applier = handle.gameObject.AddComponent<ThemeApplier>();
+                        SetElementType(applier, ThemeApplier.ElementType.SliderHandle);
+                        EditorUtility.SetDirty(handle.gameObject);
+                        count++;
+                    }
+                }
+
+                // Background
+                var bg = slider.transform.Find("Background")?.GetComponent<Image>();
+                if (bg != null && bg.GetComponent<ThemeApplier>() == null)
+                {
+                    var applier = bg.gameObject.AddComponent<ThemeApplier>();
+                    SetElementType(applier, ThemeApplier.ElementType.SliderTrack);
+                    EditorUtility.SetDirty(bg.gameObject);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        // Helpers para usar SerializedObject
+        private static void SetElementType(ThemeApplier applier, ThemeApplier.ElementType type)
+        {
+            var so = new SerializedObject(applier);
+            so.FindProperty("elementType").enumValueIndex = (int)type;
+            so.ApplyModifiedProperties();
+        }
+
+        private static void SetApplyToText(ThemeApplier applier, bool value)
+        {
+            var so = new SerializedObject(applier);
+            so.FindProperty("applyToText").boolValue = value;
+            so.ApplyModifiedProperties();
+        }
+
+        private static void SetApplyToImage(ThemeApplier applier, bool value)
+        {
+            var so = new SerializedObject(applier);
+            so.FindProperty("applyToImage").boolValue = value;
+            so.ApplyModifiedProperties();
+        }
+    }
+}
+#endif
