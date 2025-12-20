@@ -11,6 +11,9 @@ namespace DigitPark.Tools
     /// </summary>
     public class PremiumDebugController : MonoBehaviour
     {
+        // Instancia estática para acceso fácil
+        public static PremiumDebugController Instance { get; private set; }
+
         [Header("=== PREMIUM DEBUG CONTROLLER ===")]
         [Space(10)]
 
@@ -19,6 +22,15 @@ namespace DigitPark.Tools
 
         [Tooltip("Activa para simular que el usuario puede crear torneos")]
         [SerializeField] private bool canCreateTournaments = false;
+
+        [Tooltip("Activa para simular que el usuario tiene Estilos PRO (temas premium)")]
+        [SerializeField] private bool hasStylesPro = false;
+
+        [Space(20)]
+        [Header("=== DESBLOQUEAR CAMBIO DE TEMAS ===")]
+
+        [Tooltip("✓ MARCADO = Cambias temas sin restricción\n☐ DESMARCADO = Muestra panel 'necesitas premium' al cambiar tema")]
+        [SerializeField] private bool allowThemeChange = false;
 
         [Space(20)]
         [Header("=== ACCIONES RÁPIDAS ===")]
@@ -32,23 +44,33 @@ namespace DigitPark.Tools
         // Para detectar cambios en el inspector
         private bool _lastHasNoAds;
         private bool _lastCanCreateTournaments;
+        private bool _lastHasStylesPro;
+        private bool _lastAllowThemeChange;
+
+        /// <summary>
+        /// Propiedad pública para saber si se permite cambiar temas sin restricción
+        /// </summary>
+        public bool AllowThemeChange => allowThemeChange;
 
         private void Awake()
         {
-            // Solo funciona en Editor o Development Builds
-            #if !UNITY_EDITOR && !DEVELOPMENT_BUILD
-            Destroy(gameObject);
-            return;
-            #endif
-
-            DontDestroyOnLoad(gameObject);
-            LoadCurrentState();
+            // Singleton
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+                LoadCurrentState();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         private void Start()
         {
             // Aplicar estado inicial si está configurado
-            if (hasNoAds || canCreateTournaments)
+            if (hasNoAds || canCreateTournaments || hasStylesPro)
             {
                 ApplyPremiumState();
             }
@@ -71,10 +93,11 @@ namespace DigitPark.Tools
             }
 
             // Auto-aplicar si cambian los valores
-            if (hasNoAds != _lastHasNoAds || canCreateTournaments != _lastCanCreateTournaments)
+            if (hasNoAds != _lastHasNoAds || canCreateTournaments != _lastCanCreateTournaments || hasStylesPro != _lastHasStylesPro)
             {
                 _lastHasNoAds = hasNoAds;
                 _lastCanCreateTournaments = canCreateTournaments;
+                _lastHasStylesPro = hasStylesPro;
                 ApplyPremiumState();
             }
             #endif
@@ -89,8 +112,10 @@ namespace DigitPark.Tools
             {
                 hasNoAds = Managers.PremiumManager.Instance.HasNoAds;
                 canCreateTournaments = Managers.PremiumManager.Instance.CanCreateTournaments;
+                hasStylesPro = Managers.PremiumManager.Instance.HasStylesPro;
                 _lastHasNoAds = hasNoAds;
                 _lastCanCreateTournaments = canCreateTournaments;
+                _lastHasStylesPro = hasStylesPro;
             }
         }
 
@@ -108,6 +133,7 @@ namespace DigitPark.Tools
             // Guardar en PlayerPrefs directamente
             PlayerPrefs.SetInt("Premium_NoAds", hasNoAds ? 1 : 0);
             PlayerPrefs.SetInt("Premium_CreateTournaments", canCreateTournaments ? 1 : 0);
+            PlayerPrefs.SetInt("Premium_StylesPro", hasStylesPro ? 1 : 0);
             PlayerPrefs.Save();
 
             // Forzar recarga del PremiumManager
@@ -115,12 +141,16 @@ namespace DigitPark.Tools
             var pmType = typeof(Managers.PremiumManager);
             var noAdsField = pmType.GetField("_hasNoAds", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var tournamentsField = pmType.GetField("_canCreateTournaments", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var stylesProField = pmType.GetField("_hasStylesPro", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             if (noAdsField != null)
                 noAdsField.SetValue(Managers.PremiumManager.Instance, hasNoAds);
 
             if (tournamentsField != null)
                 tournamentsField.SetValue(Managers.PremiumManager.Instance, canCreateTournaments);
+
+            if (stylesProField != null)
+                stylesProField.SetValue(Managers.PremiumManager.Instance, hasStylesPro);
 
             // Invocar el evento de cambio
             var eventField = pmType.GetField("OnPremiumStatusChanged", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
@@ -130,7 +160,7 @@ namespace DigitPark.Tools
                 eventDelegate?.Invoke();
             }
 
-            string status = $"NoAds: {hasNoAds}, CreateTournaments: {canCreateTournaments}";
+            string status = $"NoAds: {hasNoAds}, CreateTournaments: {canCreateTournaments}, StylesPro: {hasStylesPro}";
             UnityEngine.Debug.Log($"[PremiumDebug] ✅ Estado aplicado: {status}");
         }
 
@@ -141,8 +171,10 @@ namespace DigitPark.Tools
         {
             hasNoAds = false;
             canCreateTournaments = false;
+            hasStylesPro = false;
             _lastHasNoAds = false;
             _lastCanCreateTournaments = false;
+            _lastHasStylesPro = false;
             ApplyPremiumState();
             UnityEngine.Debug.Log("[PremiumDebug] 🔄 Estado premium reseteado");
         }
@@ -150,8 +182,14 @@ namespace DigitPark.Tools
         #if UNITY_EDITOR
         private void OnValidate()
         {
-            // Este método se llama cuando cambias valores en el Inspector
-            // No hacer nada aquí porque Update() ya maneja los cambios
+            // Guardar valores en PlayerPrefs cuando se cambian en el Inspector (antes de Play)
+            // Esto permite que los valores persistan incluso si se configuran antes de ejecutar
+            PlayerPrefs.SetInt("Premium_NoAds", hasNoAds ? 1 : 0);
+            PlayerPrefs.SetInt("Premium_CreateTournaments", canCreateTournaments ? 1 : 0);
+            PlayerPrefs.SetInt("Premium_StylesPro", hasStylesPro ? 1 : 0);
+            PlayerPrefs.Save();
+
+            UnityEngine.Debug.Log($"[PremiumDebug] Inspector values saved: NoAds={hasNoAds}, Tournaments={canCreateTournaments}, StylesPro={hasStylesPro}");
         }
         #endif
     }

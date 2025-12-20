@@ -5,7 +5,6 @@ namespace DigitPark.UI
 {
     /// <summary>
     /// Aplica esquinas redondeadas a un Image usando un sprite generado proceduralmente
-    /// Agrega este componente a cualquier GameObject con Image para redondear sus esquinas
     /// </summary>
     [ExecuteAlways]
     [RequireComponent(typeof(Image))]
@@ -21,35 +20,29 @@ namespace DigitPark.UI
         [SerializeField] private float bottomBarHeight = 8f;
         [SerializeField] private Color bottomBarColor = Color.black;
 
+        // Referencia serializada para evitar duplicados
+        [SerializeField, HideInInspector]
+        private GameObject bottomBarObject;
+
         private Image targetImage;
         private Texture2D generatedTexture;
         private Sprite generatedSprite;
-        private GameObject bottomBarObject;
-
         private float lastRadius = -1f;
-        private bool lastShowBar = false;
-        private bool initialized = false;
 
         private void Awake()
         {
             targetImage = GetComponent<Image>();
+            CleanupDuplicateBottomBars();
         }
 
         private void Start()
         {
-            if (!initialized)
-            {
-                ApplyRoundedCorners();
-                initialized = true;
-            }
+            ApplyRoundedCorners();
         }
 
         private void OnEnable()
         {
-            if (initialized)
-            {
-                ApplyRoundedCorners();
-            }
+            ApplyRoundedCorners();
         }
 
 #if UNITY_EDITOR
@@ -58,20 +51,69 @@ namespace DigitPark.UI
             if (targetImage == null)
                 targetImage = GetComponent<Image>();
 
-            // Solo aplicar en editor cuando no esta en play mode
-            // Usamos delayCall para evitar "SendMessage cannot be called during OnValidate"
             if (!Application.isPlaying)
             {
                 UnityEditor.EditorApplication.delayCall += () =>
                 {
                     if (this != null)
                     {
+                        CleanupDuplicateBottomBars();
                         ApplyRoundedCorners();
                     }
                 };
             }
         }
 #endif
+
+        /// <summary>
+        /// Elimina BottomBars duplicados, dejando solo uno
+        /// </summary>
+        private void CleanupDuplicateBottomBars()
+        {
+            if (this == null || transform == null) return;
+
+            GameObject firstFound = null;
+            var childrenToDestroy = new System.Collections.Generic.List<GameObject>();
+
+            foreach (Transform child in transform)
+            {
+                if (child.name == "BottomBar")
+                {
+                    if (firstFound == null)
+                    {
+                        firstFound = child.gameObject;
+                    }
+                    else
+                    {
+                        childrenToDestroy.Add(child.gameObject);
+                    }
+                }
+            }
+
+            // Destruir duplicados
+            foreach (var obj in childrenToDestroy)
+            {
+                if (Application.isPlaying)
+                    Destroy(obj);
+                else
+                    DestroyImmediate(obj);
+            }
+
+            // Actualizar referencia
+            if (showBottomBar && firstFound != null)
+            {
+                bottomBarObject = firstFound;
+            }
+            else if (!showBottomBar && firstFound != null)
+            {
+                // Si no queremos BottomBar, destruir el existente
+                if (Application.isPlaying)
+                    Destroy(firstFound);
+                else
+                    DestroyImmediate(firstFound);
+                bottomBarObject = null;
+            }
+        }
 
         public void ApplyRoundedCorners()
         {
@@ -81,17 +123,12 @@ namespace DigitPark.UI
                 if (targetImage == null) return;
             }
 
-            // Evitar actualizaciones innecesarias
-            if (Mathf.Approximately(lastRadius, cornerRadius) && lastShowBar == showBottomBar)
+            // Solo actualizar textura si cambió el radio
+            if (!Mathf.Approximately(lastRadius, cornerRadius))
             {
-                return;
+                lastRadius = cornerRadius;
+                CreateRoundedTexture();
             }
-
-            lastRadius = cornerRadius;
-            lastShowBar = showBottomBar;
-
-            // Crear textura redondeada
-            CreateRoundedTexture();
 
             // Manejar barra inferior
             HandleBottomBar();
@@ -103,7 +140,6 @@ namespace DigitPark.UI
             int height = 64;
             int radius = Mathf.RoundToInt(cornerRadius * (width / 100f));
 
-            // Limpiar textura anterior
             if (generatedTexture != null)
             {
                 if (Application.isPlaying)
@@ -132,7 +168,6 @@ namespace DigitPark.UI
             generatedTexture.SetPixels(pixels);
             generatedTexture.Apply();
 
-            // Limpiar sprite anterior
             if (generatedSprite != null)
             {
                 if (Application.isPlaying)
@@ -141,7 +176,6 @@ namespace DigitPark.UI
                     DestroyImmediate(generatedSprite);
             }
 
-            // Border para 9-slice
             float border = Mathf.Max(radius + 1, 2);
             generatedSprite = Sprite.Create(
                 generatedTexture,
@@ -161,26 +195,14 @@ namespace DigitPark.UI
         {
             if (radius <= 0) return true;
 
-            // Esquina inferior izquierda
             if (x < radius && y < radius)
-            {
                 return IsInsideCircle(x, y, radius, radius, radius);
-            }
-            // Esquina inferior derecha
             if (x >= width - radius && y < radius)
-            {
                 return IsInsideCircle(x, y, width - radius - 1, radius, radius);
-            }
-            // Esquina superior izquierda
             if (x < radius && y >= height - radius)
-            {
                 return IsInsideCircle(x, y, radius, height - radius - 1, radius);
-            }
-            // Esquina superior derecha
             if (x >= width - radius && y >= height - radius)
-            {
                 return IsInsideCircle(x, y, width - radius - 1, height - radius - 1, radius);
-            }
 
             return true;
         }
@@ -194,55 +216,76 @@ namespace DigitPark.UI
 
         private void HandleBottomBar()
         {
-            if (showBottomBar)
+            if (!showBottomBar)
             {
-                if (bottomBarObject == null)
+                // Destruir si existe pero no lo queremos
+                if (bottomBarObject != null)
                 {
-                    bottomBarObject = new GameObject("BottomBar");
-                    bottomBarObject.transform.SetParent(transform, false);
+                    if (Application.isPlaying)
+                        Destroy(bottomBarObject);
+                    else
+                        DestroyImmediate(bottomBarObject);
+                    bottomBarObject = null;
+                }
+                return;
+            }
 
-                    // Asegurar que este al frente (ultimo hijo)
-                    bottomBarObject.transform.SetAsLastSibling();
+            // Verificar si la referencia sigue siendo válida
+            if (bottomBarObject == null)
+            {
+                // Buscar existente primero
+                foreach (Transform child in transform)
+                {
+                    if (child.name == "BottomBar")
+                    {
+                        bottomBarObject = child.gameObject;
+                        break;
+                    }
+                }
+            }
 
-                    var rt = bottomBarObject.AddComponent<RectTransform>();
-                    rt.anchorMin = new Vector2(0, 0);
-                    rt.anchorMax = new Vector2(1, 0);
-                    rt.pivot = new Vector2(0.5f, 0);
-                    rt.anchoredPosition = Vector2.zero;
+            // Crear solo si no existe
+            if (bottomBarObject == null)
+            {
+                bottomBarObject = new GameObject("BottomBar");
+                bottomBarObject.transform.SetParent(transform, false);
+                bottomBarObject.transform.SetAsLastSibling();
+
+                var rt = bottomBarObject.AddComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0);
+                rt.anchorMax = new Vector2(1, 0);
+                rt.pivot = new Vector2(0.5f, 0);
+                rt.anchoredPosition = Vector2.zero;
+                rt.sizeDelta = new Vector2(0, bottomBarHeight);
+
+                var barImage = bottomBarObject.AddComponent<Image>();
+                barImage.color = bottomBarColor;
+                barImage.raycastTarget = false;
+
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    UnityEditor.EditorUtility.SetDirty(this);
+#endif
+            }
+            else
+            {
+                // Actualizar propiedades del existente
+                var rt = bottomBarObject.GetComponent<RectTransform>();
+                if (rt != null)
                     rt.sizeDelta = new Vector2(0, bottomBarHeight);
 
-                    var barImage = bottomBarObject.AddComponent<Image>();
+                var barImage = bottomBarObject.GetComponent<Image>();
+                if (barImage != null)
+                {
                     barImage.color = bottomBarColor;
                     barImage.raycastTarget = false;
                 }
-                else
-                {
-                    var rt = bottomBarObject.GetComponent<RectTransform>();
-                    if (rt != null)
-                        rt.sizeDelta = new Vector2(0, bottomBarHeight);
-
-                    var barImage = bottomBarObject.GetComponent<Image>();
-                    if (barImage != null)
-                    {
-                        barImage.color = bottomBarColor;
-                        barImage.raycastTarget = false;
-                    }
-                }
-
-                bottomBarObject.SetActive(true);
             }
-            else if (bottomBarObject != null)
-            {
-                bottomBarObject.SetActive(false);
-            }
+
+            bottomBarObject.SetActive(true);
         }
 
         private void OnDestroy()
-        {
-            CleanupResources();
-        }
-
-        private void CleanupResources()
         {
             if (generatedTexture != null)
             {
@@ -250,7 +293,6 @@ namespace DigitPark.UI
                     Destroy(generatedTexture);
                 else
                     DestroyImmediate(generatedTexture);
-                generatedTexture = null;
             }
 
             if (generatedSprite != null)
@@ -259,7 +301,6 @@ namespace DigitPark.UI
                     Destroy(generatedSprite);
                 else
                     DestroyImmediate(generatedSprite);
-                generatedSprite = null;
             }
         }
 
@@ -267,16 +308,6 @@ namespace DigitPark.UI
         {
             cornerRadius = radius;
             lastRadius = -1f;
-            ApplyRoundedCorners();
-        }
-
-        public void SetBottomBar(bool show, float height = 8f, Color? color = null)
-        {
-            showBottomBar = show;
-            bottomBarHeight = height;
-            if (color.HasValue)
-                bottomBarColor = color.Value;
-            lastShowBar = !show;
             ApplyRoundedCorners();
         }
     }

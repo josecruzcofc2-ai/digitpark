@@ -34,6 +34,8 @@ namespace DigitPark.Themes
             TextDisabled,
             TextTitle,
             TextOnPrimary,
+            TextOnDanger,
+            TextOnSuccess,
             // Input Fields
             InputBackground,
             InputBorder,
@@ -204,6 +206,8 @@ namespace DigitPark.Themes
                 case ElementType.TextDisabled: return theme.textDisabled;
                 case ElementType.TextTitle: return theme.textTitle;
                 case ElementType.TextOnPrimary: return theme.textOnPrimary;
+                case ElementType.TextOnDanger: return theme.textOnDanger;
+                case ElementType.TextOnSuccess: return theme.textOnSuccess;
 
                 // Input
                 case ElementType.InputBackground: return theme.inputBackground;

@@ -12,7 +12,8 @@ namespace DigitPark.Managers
     public enum PremiumProduct
     {
         RemoveAds,          // $10 MXN - Solo quita anuncios
-        PremiumFull         // $20 MXN - Quita anuncios + Crear torneos
+        PremiumFull,        // $20 MXN - Quita anuncios + Crear torneos
+        StylesPro           // $29 MXN - Desbloquea 5 temas premium (Volcano, Ocean, Clean Light, Retro Arcade, Cyberpunk)
     }
 
     /// <summary>
@@ -59,17 +60,23 @@ namespace DigitPark.Managers
         [Tooltip("ID del producto en Google Play / App Store")]
         public const string PRODUCT_ID_PREMIUM_FULL = "com.digitpark.premiumfull";
 
+        [Tooltip("ID del producto en Google Play / App Store")]
+        public const string PRODUCT_ID_STYLES_PRO = "com.digitpark.stylespro";
+
         [Header("=== PRECIOS (Solo para mostrar en UI) ===")]
         public const string PRICE_REMOVE_ADS = "$10 MXN";
         public const string PRICE_PREMIUM_FULL = "$20 MXN";
+        public const string PRICE_STYLES_PRO = "$29 MXN";
 
         // Keys para PlayerPrefs (persistencia local)
         private const string NO_ADS_KEY = "Premium_NoAds";
         private const string CAN_CREATE_TOURNAMENTS_KEY = "Premium_CreateTournaments";
+        private const string STYLES_PRO_KEY = "Premium_StylesPro";
 
         // Estado premium
         private bool _hasNoAds = false;
         private bool _canCreateTournaments = false;
+        private bool _hasStylesPro = false;
 
         // UNITY IAP: Descomentar estas líneas:
         // private static IStoreController _storeController;
@@ -92,9 +99,14 @@ namespace DigitPark.Managers
         public bool CanCreateTournaments => _canCreateTournaments;
 
         /// <summary>
+        /// Indica si el usuario tiene los estilos/temas premium desbloqueados
+        /// </summary>
+        public bool HasStylesPro => _hasStylesPro;
+
+        /// <summary>
         /// Indica si el usuario tiene algún tipo de premium
         /// </summary>
-        public bool IsPremium => _hasNoAds || _canCreateTournaments;
+        public bool IsPremium => _hasNoAds || _canCreateTournaments || _hasStylesPro;
 
         private void Awake()
         {
@@ -143,12 +155,14 @@ namespace DigitPark.Managers
         {
             _hasNoAds = PlayerPrefs.GetInt(NO_ADS_KEY, 0) == 1;
             _canCreateTournaments = PlayerPrefs.GetInt(CAN_CREATE_TOURNAMENTS_KEY, 0) == 1;
+            _hasStylesPro = PlayerPrefs.GetInt(STYLES_PRO_KEY, 0) == 1;
         }
 
         private void SavePremiumStatus()
         {
             PlayerPrefs.SetInt(NO_ADS_KEY, _hasNoAds ? 1 : 0);
             PlayerPrefs.SetInt(CAN_CREATE_TOURNAMENTS_KEY, _canCreateTournaments ? 1 : 0);
+            PlayerPrefs.SetInt(STYLES_PRO_KEY, _hasStylesPro ? 1 : 0);
             PlayerPrefs.Save();
         }
 
@@ -165,6 +179,11 @@ namespace DigitPark.Managers
                     _hasNoAds = true;
                     _canCreateTournaments = true;
                     Debug.Log("[Premium] ✅ Desbloqueado: Premium Completo");
+                    break;
+
+                case PremiumProduct.StylesPro:
+                    _hasStylesPro = true;
+                    Debug.Log("[Premium] ✅ Desbloqueado: Estilos PRO (5 temas premium)");
                     break;
             }
 
@@ -192,6 +211,15 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Premium] Iniciando compra: Premium Completo");
             BuyProduct(PRODUCT_ID_PREMIUM_FULL, PremiumProduct.PremiumFull, onComplete);
+        }
+
+        /// <summary>
+        /// Compra: Estilos PRO ($29 MXN) - Desbloquea 5 temas premium
+        /// </summary>
+        public void PurchaseStylesPro(Action<bool> onComplete = null)
+        {
+            Debug.Log("[Premium] Iniciando compra: Estilos PRO");
+            BuyProduct(PRODUCT_ID_STYLES_PRO, PremiumProduct.StylesPro, onComplete);
         }
 
         private void BuyProduct(string productId, PremiumProduct product, Action<bool> onComplete)
@@ -279,17 +307,31 @@ namespace DigitPark.Managers
             /*
             if (_storeController != null)
             {
-                string productId = product == PremiumProduct.RemoveAds
-                    ? PRODUCT_ID_REMOVE_ADS
-                    : PRODUCT_ID_PREMIUM_FULL;
-
+                string productId = GetProductId(product);
                 Product p = _storeController.products.WithID(productId);
                 if (p != null)
                     return p.metadata.localizedPriceString;
             }
             */
 
-            return product == PremiumProduct.RemoveAds ? PRICE_REMOVE_ADS : PRICE_PREMIUM_FULL;
+            switch (product)
+            {
+                case PremiumProduct.RemoveAds: return PRICE_REMOVE_ADS;
+                case PremiumProduct.PremiumFull: return PRICE_PREMIUM_FULL;
+                case PremiumProduct.StylesPro: return PRICE_STYLES_PRO;
+                default: return "";
+            }
+        }
+
+        public string GetProductId(PremiumProduct product)
+        {
+            switch (product)
+            {
+                case PremiumProduct.RemoveAds: return PRODUCT_ID_REMOVE_ADS;
+                case PremiumProduct.PremiumFull: return PRODUCT_ID_PREMIUM_FULL;
+                case PremiumProduct.StylesPro: return PRODUCT_ID_STYLES_PRO;
+                default: return "";
+            }
         }
 
         public string GetProductDescription(PremiumProduct product, string language = "es")
@@ -306,6 +348,11 @@ namespace DigitPark.Managers
                         ? "Sin anuncios + Crear torneos ilimitados"
                         : "No ads + Create unlimited tournaments";
 
+                case PremiumProduct.StylesPro:
+                    return language == "es"
+                        ? "Desbloquea 5 temas visuales exclusivos: Volcano, Ocean, Clean Light, Retro Arcade y Cyberpunk"
+                        : "Unlock 5 exclusive visual themes: Volcano, Ocean, Clean Light, Retro Arcade, and Cyberpunk";
+
                 default:
                     return "";
             }
@@ -319,6 +366,8 @@ namespace DigitPark.Managers
                     return _hasNoAds;
                 case PremiumProduct.PremiumFull:
                     return _canCreateTournaments;
+                case PremiumProduct.StylesPro:
+                    return _hasStylesPro;
                 default:
                     return false;
             }
@@ -436,11 +485,18 @@ namespace DigitPark.Managers
             UnlockProduct(PremiumProduct.PremiumFull);
         }
 
+        [ContextMenu("Debug: Unlock Styles PRO")]
+        private void DebugUnlockStylesPro()
+        {
+            UnlockProduct(PremiumProduct.StylesPro);
+        }
+
         [ContextMenu("Debug: Reset All Premium")]
         private void DebugResetPremium()
         {
             _hasNoAds = false;
             _canCreateTournaments = false;
+            _hasStylesPro = false;
             SavePremiumStatus();
             OnPremiumStatusChanged?.Invoke();
             Debug.Log("[Premium] Estado premium reseteado");

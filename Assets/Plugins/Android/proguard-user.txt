@@ -1,0 +1,22 @@
+# Prevent R8 StackOverflow with Kotlin metadata
+-keepattributes *Annotation*
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
+-dontwarn kotlinx.**
+
+# Firebase Auth
+-keep class com.google.firebase.auth.** { *; }
+-dontwarn com.google.firebase.auth.**
+
+# Recaptcha
+-keep class com.google.android.recaptcha.** { *; }
+-dontwarn com.google.android.recaptcha.**
+
+# Play Services
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# Prevent issues with type introspection
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}

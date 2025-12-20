@@ -74,8 +74,14 @@ namespace DigitPark.Themes
         [Tooltip("Color de botones de peligro (eliminar, etc)")]
         public Color buttonDanger = new Color(1f, 0.3f, 0.3f, 1f);
 
+        [Tooltip("Color del texto en botones de peligro")]
+        public Color textOnDanger = Color.white;
+
         [Tooltip("Color de botones de éxito")]
         public Color buttonSuccess = new Color(0.3f, 1f, 0.3f, 1f);
+
+        [Tooltip("Color del texto en botones de éxito")]
+        public Color textOnSuccess = Color.black;
 
         [Header("=== INPUT FIELDS ===")]
         [Tooltip("Color de fondo de inputs")]

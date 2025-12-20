@@ -683,7 +683,7 @@ namespace DigitPark.Localization
             AddTranslation("personal_tab",
                 "Personal", "Personal", "Personnel", "Pessoal", "Persönlich");
             AddTranslation("personal_best_time",
-                "Best time", "Mejor tiempo", "Meilleur temps", "Melhor tempo", "Bestzeit");
+                "Personal Best Time", "Mejor Tiempo Personal", "Meilleur Temps Personnel", "Melhor Tempo Pessoal", "Persönliche Bestzeit");
 
             // ==================== SEARCH OPTIONS ====================
             AddTranslation("search_options_title",

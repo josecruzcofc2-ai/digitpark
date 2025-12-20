@@ -9,8 +9,9 @@ namespace DigitPark.UI.Panels
 {
     /// <summary>
     /// Panel de Premium reutilizable que muestra las opciones de compra:
-    /// - Sin Anuncios ($9.99)
-    /// - Premium Completo ($19.99) - Sin anuncios + Crear torneos
+    /// - Sin Anuncios ($10 MXN)
+    /// - Premium Completo ($20 MXN) - Sin anuncios + Crear torneos
+    /// - Estilos PRO ($29 MXN) - 5 temas visuales exclusivos
     ///
     /// Estilo: Neon theme con colores cyan, yellow/gold y purple
     /// </summary>
@@ -46,6 +47,16 @@ namespace DigitPark.UI.Panels
         [SerializeField] private TextMeshProUGUI feature2Text;
         [SerializeField] private TextMeshProUGUI feature3Text;
 
+        [Header("Styles PRO Option")]
+        [SerializeField] private GameObject stylesProCard;
+        [SerializeField] private TextMeshProUGUI stylesProTitleText;
+        [SerializeField] private TextMeshProUGUI stylesProDescriptionText;
+        [SerializeField] private TextMeshProUGUI stylesProPriceText;
+        [SerializeField] private Button stylesProBuyButton;
+        [SerializeField] private TextMeshProUGUI stylesProBuyButtonText;
+        [SerializeField] private TextMeshProUGUI stylesProFeature1Text;
+        [SerializeField] private TextMeshProUGUI stylesProFeature2Text;
+
         [Header("Footer")]
         [SerializeField] private Button restoreButton;
         [SerializeField] private TextMeshProUGUI restoreButtonText;
@@ -61,6 +72,7 @@ namespace DigitPark.UI.Panels
         // Callbacks
         private Action onNoAdsPurchase;
         private Action onPremiumPurchase;
+        private Action onStylesProPurchase;
         private Action onRestorePurchases;
         private Action onClose;
 
@@ -89,6 +101,9 @@ namespace DigitPark.UI.Panels
             if (premiumBuyButton != null)
                 premiumBuyButton.onClick.AddListener(OnPremiumBuyClicked);
 
+            if (stylesProBuyButton != null)
+                stylesProBuyButton.onClick.AddListener(OnStylesProBuyClicked);
+
             if (restoreButton != null)
                 restoreButton.onClick.AddListener(OnRestoreClicked);
 
@@ -115,6 +130,9 @@ namespace DigitPark.UI.Panels
             if (premiumBuyButton != null)
                 premiumBuyButton.onClick.RemoveListener(OnPremiumBuyClicked);
 
+            if (stylesProBuyButton != null)
+                stylesProBuyButton.onClick.RemoveListener(OnStylesProBuyClicked);
+
             if (restoreButton != null)
                 restoreButton.onClick.RemoveListener(OnRestoreClicked);
 
@@ -126,12 +144,14 @@ namespace DigitPark.UI.Panels
         /// Muestra el panel de premium con callbacks personalizados
         /// </summary>
         public void Show(Action onNoAdsCallback = null, Action onPremiumCallback = null,
-                        Action onRestoreCallback = null, Action onCloseCallback = null)
+                        Action onStylesProCallback = null, Action onRestoreCallback = null,
+                        Action onCloseCallback = null)
         {
             ConfigureListeners();
 
             onNoAdsPurchase = onNoAdsCallback;
             onPremiumPurchase = onPremiumCallback;
+            onStylesProPurchase = onStylesProCallback;
             onRestorePurchases = onRestoreCallback;
             onClose = onCloseCallback;
 
@@ -161,6 +181,7 @@ namespace DigitPark.UI.Panels
             Show(
                 onNoAdsCallback: () => PremiumManager.Instance?.PurchaseRemoveAds(),
                 onPremiumCallback: () => PremiumManager.Instance?.PurchasePremiumFull(),
+                onStylesProCallback: () => PremiumManager.Instance?.PurchaseStylesPro(),
                 onRestoreCallback: () => PremiumManager.Instance?.RestorePurchases(),
                 onCloseCallback: Hide
             );
@@ -205,6 +226,20 @@ namespace DigitPark.UI.Panels
             if (feature3Text != null)
                 feature3Text.text = "✓ " + AutoLocalizer.Get("premium_feature_badge");
 
+            // Estilos PRO
+            if (stylesProTitleText != null)
+                stylesProTitleText.text = AutoLocalizer.Get("styles_pro_title");
+            if (stylesProDescriptionText != null)
+                stylesProDescriptionText.text = AutoLocalizer.Get("styles_pro_description");
+            if (stylesProPriceText != null)
+                stylesProPriceText.text = AutoLocalizer.Get("styles_pro_price");
+            if (stylesProBuyButtonText != null)
+                stylesProBuyButtonText.text = AutoLocalizer.Get("buy_button");
+            if (stylesProFeature1Text != null)
+                stylesProFeature1Text.text = "✓ " + AutoLocalizer.Get("styles_pro_feature_themes");
+            if (stylesProFeature2Text != null)
+                stylesProFeature2Text.text = "✓ " + AutoLocalizer.Get("styles_pro_feature_exclusive");
+
             // Restaurar
             if (restoreButtonText != null)
                 restoreButtonText.text = AutoLocalizer.Get("restore_purchases");
@@ -219,6 +254,7 @@ namespace DigitPark.UI.Panels
 
             bool hasNoAds = PremiumManager.Instance.HasNoAds;
             bool hasPremium = PremiumManager.Instance.CanCreateTournaments;
+            bool hasStylesPro = PremiumManager.Instance.HasStylesPro;
 
             // Si ya tiene Premium, deshabilitar ambos botones
             if (hasPremium)
@@ -237,6 +273,16 @@ namespace DigitPark.UI.Panels
             {
                 SetNoAdsCardState(true, null);
                 SetPremiumCardState(true, null);
+            }
+
+            // Estilos PRO es independiente de los otros productos
+            if (hasStylesPro)
+            {
+                SetStylesProCardState(false, AutoLocalizer.Get("styles_pro_active"));
+            }
+            else
+            {
+                SetStylesProCardState(true, null);
             }
         }
 
@@ -258,6 +304,15 @@ namespace DigitPark.UI.Panels
                 premiumBuyButtonText.text = statusText;
         }
 
+        private void SetStylesProCardState(bool canBuy, string statusText)
+        {
+            if (stylesProBuyButton != null)
+                stylesProBuyButton.interactable = canBuy;
+
+            if (!canBuy && stylesProBuyButtonText != null && !string.IsNullOrEmpty(statusText))
+                stylesProBuyButtonText.text = statusText;
+        }
+
         /// <summary>
         /// Oculta el panel
         /// </summary>
@@ -271,6 +326,7 @@ namespace DigitPark.UI.Panels
 
             onNoAdsPurchase = null;
             onPremiumPurchase = null;
+            onStylesProPurchase = null;
             onRestorePurchases = null;
             onClose = null;
 
@@ -294,6 +350,12 @@ namespace DigitPark.UI.Panels
         {
             Debug.Log("[PremiumPanelUI] Comprar Premium clickeado");
             onPremiumPurchase?.Invoke();
+        }
+
+        private void OnStylesProBuyClicked()
+        {
+            Debug.Log("[PremiumPanelUI] Comprar Estilos PRO clickeado");
+            onStylesProPurchase?.Invoke();
         }
 
         private void OnRestoreClicked()
@@ -362,6 +424,9 @@ namespace DigitPark.UI.Panels
             // === CARD PREMIUM ===
             CreatePremiumCard(panel.transform);
 
+            // === CARD ESTILOS PRO ===
+            CreateStylesProCard(panel.transform);
+
             // === RESTAURAR COMPRAS ===
             CreateRestoreButton(panel.transform);
 
@@ -399,7 +464,7 @@ namespace DigitPark.UI.Panels
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(550, 750);
+            rt.sizeDelta = new Vector2(480, 580);
 
             Image bg = mainPanel.AddComponent<Image>();
             bg.color = darkBg;
@@ -407,12 +472,12 @@ namespace DigitPark.UI.Panels
             // Borde neon
             Outline outline = mainPanel.AddComponent<Outline>();
             outline.effectColor = neonCyan;
-            outline.effectDistance = new Vector2(3, 3);
+            outline.effectDistance = new Vector2(2, 2);
 
             // Layout
             VerticalLayoutGroup vlg = mainPanel.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(20, 20, 20, 20);
-            vlg.spacing = 15;
+            vlg.padding = new RectOffset(15, 15, 15, 15);
+            vlg.spacing = 8;
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -428,14 +493,14 @@ namespace DigitPark.UI.Panels
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 50);
+            rt.sizeDelta = new Vector2(0, 35);
 
             LayoutElement le = titleObj.AddComponent<LayoutElement>();
-            le.preferredHeight = 50;
+            le.preferredHeight = 35;
 
             TextMeshProUGUI tmp = titleObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("premium_title");
-            tmp.fontSize = 38;
+            tmp.fontSize = 28;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = neonGold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -470,13 +535,8 @@ namespace DigitPark.UI.Panels
             // Titulo
             premiumTitleText = CreateCardTitle(premiumCard.transform, AutoLocalizer.Get("premium_full_title"), neonGold);
 
-            // Descripcion
+            // Descripcion (incluye los beneficios en una línea)
             premiumDescriptionText = CreateCardDescription(premiumCard.transform, AutoLocalizer.Get("premium_full_description"));
-
-            // Features
-            feature1Text = CreateFeatureText(premiumCard.transform, "✓ " + AutoLocalizer.Get("premium_feature_no_ads"));
-            feature2Text = CreateFeatureText(premiumCard.transform, "✓ " + AutoLocalizer.Get("premium_feature_tournaments"));
-            feature3Text = CreateFeatureText(premiumCard.transform, "✓ " + AutoLocalizer.Get("premium_feature_badge"));
 
             // Precio
             premiumPriceText = CreateCardPrice(premiumCard.transform, AutoLocalizer.Get("premium_full_price"), neonGold);
@@ -485,16 +545,33 @@ namespace DigitPark.UI.Panels
             (premiumBuyButton, premiumBuyButtonText) = CreateBuyButton(premiumCard.transform, neonGold);
         }
 
+        private void CreateStylesProCard(Transform parent)
+        {
+            stylesProCard = CreateCard(parent, "StylesProCard", neonPurple);
+
+            // Titulo
+            stylesProTitleText = CreateCardTitle(stylesProCard.transform, AutoLocalizer.Get("styles_pro_title"), neonPurple);
+
+            // Descripcion
+            stylesProDescriptionText = CreateCardDescription(stylesProCard.transform, AutoLocalizer.Get("styles_pro_description"));
+
+            // Precio
+            stylesProPriceText = CreateCardPrice(stylesProCard.transform, AutoLocalizer.Get("styles_pro_price"), neonPurple);
+
+            // Boton comprar
+            (stylesProBuyButton, stylesProBuyButtonText) = CreateBuyButton(stylesProCard.transform, neonPurple);
+        }
+
         private GameObject CreateCard(Transform parent, string name, Color accentColor)
         {
             GameObject card = new GameObject(name);
             card.transform.SetParent(parent, false);
 
             RectTransform rt = card.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 280);
+            rt.sizeDelta = new Vector2(0, 145);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 280;
+            le.preferredHeight = 145;
 
             Image bg = card.AddComponent<Image>();
             bg.color = cardBg;
@@ -504,8 +581,8 @@ namespace DigitPark.UI.Panels
             outline.effectDistance = new Vector2(2, 2);
 
             VerticalLayoutGroup vlg = card.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(25, 25, 20, 20);
-            vlg.spacing = 10;
+            vlg.padding = new RectOffset(15, 15, 10, 10);
+            vlg.spacing = 5;
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -521,11 +598,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 35;
+            le.preferredHeight = 28;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 26;
+            tmp.fontSize = 20;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -539,11 +616,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 25;
+            le.preferredHeight = 20;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 16;
+            tmp.fontSize = 13;
             tmp.color = new Color(0.8f, 0.8f, 0.85f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
 
@@ -556,11 +633,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 40;
+            le.preferredHeight = 28;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 32;
+            tmp.fontSize = 22;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -574,11 +651,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 22;
+            le.preferredHeight = 18;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 14;
+            tmp.fontSize = 12;
             tmp.color = new Color(0.7f, 1f, 0.7f, 1f);
             tmp.alignment = TextAlignmentOptions.Left;
 
@@ -591,11 +668,11 @@ namespace DigitPark.UI.Panels
             btnObj.transform.SetParent(parent, false);
 
             RectTransform rt = btnObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(180, 45);
+            rt.sizeDelta = new Vector2(160, 35);
 
             LayoutElement le = btnObj.AddComponent<LayoutElement>();
-            le.preferredHeight = 45;
-            le.preferredWidth = 180;
+            le.preferredHeight = 35;
+            le.preferredWidth = 160;
 
             Image bg = btnObj.AddComponent<Image>();
             bg.color = color;
@@ -615,7 +692,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("buy_button");
-            tmp.fontSize = 20;
+            tmp.fontSize = 16;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -664,13 +741,13 @@ namespace DigitPark.UI.Panels
             btnObj.transform.SetParent(parent, false);
 
             LayoutElement le = btnObj.AddComponent<LayoutElement>();
-            le.preferredHeight = 35;
+            le.preferredHeight = 25;
 
             restoreButton = btnObj.AddComponent<Button>();
 
             TextMeshProUGUI tmp = btnObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("restore_purchases");
-            tmp.fontSize = 16;
+            tmp.fontSize = 14;
             tmp.color = neonCyan;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Underline;
