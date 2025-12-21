@@ -30,7 +30,16 @@
       "WebFetch(domain:github.com)",
       "Bash(git fetch:*)",
       "Bash(rm:*)",
-      "WebFetch(domain:developers.google.com)"
+      "WebFetch(domain:developers.google.com)",
+      "Bash(\"/c/Program Files/Unity/Hub/Editor/2022.3.62f3/Editor/Unity.exe\" -batchmode -projectPath \"C:/Users/josec/digitPark\" -executeMethod DigitPark.Editor.BatchEffectsSetup.RunBatchSetup -logFile - -quit)",
+      "Bash(git -C /c/Users/josec/digitPark remote:*)",
+      "Bash(git -C /c/Users/josec/digitPark log --oneline -5)",
+      "Bash(git -C /c/Users/josec/digitPark status docs/)",
+      "Bash(git -C /c/Users/josec/digitPark add:*)",
+      "Bash(git -C /c/Users/josec/digitPark commit -m \"$\\(cat <<''EOF''\nAdd Skillz implementation plan v2.0 - correct real money model\n\nUpdated document to reflect how Skillz actually works:\n- Skillz handles ALL real money \\(deposits, payouts\\)\n- Developer receives commission \\(~20-30%\\) from Skillz\n- Zero financial risk for developer\n- Removed incorrect DigitCoins virtual currency model\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /c/Users/josec/digitPark push digitpark master)",
+      "Bash(git -C /c/Users/josec/digitPark ls-tree:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

@@ -62,6 +62,11 @@ namespace DigitPark.UI.Panels
         [SerializeField] private TextMeshProUGUI restoreButtonText;
         [SerializeField] private Button closeButton;
 
+        [Header("Acquired Overlays")]
+        [SerializeField] private GameObject noAdsAcquiredOverlay;
+        [SerializeField] private GameObject premiumAcquiredOverlay;
+        [SerializeField] private GameObject stylesProAcquiredOverlay;
+
         [Header("Neon Colors")]
         [SerializeField] private Color neonCyan = new Color(0f, 0.9608f, 1f, 1f);
         [SerializeField] private Color neonGold = new Color(1f, 0.84f, 0f, 1f);
@@ -293,6 +298,10 @@ namespace DigitPark.UI.Panels
 
             if (!canBuy && noAdsBuyButtonText != null && !string.IsNullOrEmpty(statusText))
                 noAdsBuyButtonText.text = statusText;
+
+            // Mostrar/ocultar overlay de "Adquirido"
+            if (noAdsAcquiredOverlay != null)
+                noAdsAcquiredOverlay.SetActive(!canBuy);
         }
 
         private void SetPremiumCardState(bool canBuy, string statusText)
@@ -302,6 +311,10 @@ namespace DigitPark.UI.Panels
 
             if (!canBuy && premiumBuyButtonText != null && !string.IsNullOrEmpty(statusText))
                 premiumBuyButtonText.text = statusText;
+
+            // Mostrar/ocultar overlay de "Adquirido"
+            if (premiumAcquiredOverlay != null)
+                premiumAcquiredOverlay.SetActive(!canBuy);
         }
 
         private void SetStylesProCardState(bool canBuy, string statusText)
@@ -311,6 +324,10 @@ namespace DigitPark.UI.Panels
 
             if (!canBuy && stylesProBuyButtonText != null && !string.IsNullOrEmpty(statusText))
                 stylesProBuyButtonText.text = statusText;
+
+            // Mostrar/ocultar overlay de "Adquirido"
+            if (stylesProAcquiredOverlay != null)
+                stylesProAcquiredOverlay.SetActive(!canBuy);
         }
 
         /// <summary>
@@ -523,6 +540,9 @@ namespace DigitPark.UI.Panels
 
             // Boton comprar
             (noAdsBuyButton, noAdsBuyButtonText) = CreateBuyButton(noAdsCard.transform, neonCyan);
+
+            // Overlay de "Adquirido"
+            noAdsAcquiredOverlay = CreateAcquiredOverlay(noAdsCard.transform, neonCyan);
         }
 
         private void CreatePremiumCard(Transform parent)
@@ -543,6 +563,9 @@ namespace DigitPark.UI.Panels
 
             // Boton comprar
             (premiumBuyButton, premiumBuyButtonText) = CreateBuyButton(premiumCard.transform, neonGold);
+
+            // Overlay de "Adquirido"
+            premiumAcquiredOverlay = CreateAcquiredOverlay(premiumCard.transform, neonGold);
         }
 
         private void CreateStylesProCard(Transform parent)
@@ -560,6 +583,62 @@ namespace DigitPark.UI.Panels
 
             // Boton comprar
             (stylesProBuyButton, stylesProBuyButtonText) = CreateBuyButton(stylesProCard.transform, neonPurple);
+
+            // Overlay de "Adquirido"
+            stylesProAcquiredOverlay = CreateAcquiredOverlay(stylesProCard.transform, neonPurple);
+        }
+
+        /// <summary>
+        /// Crea un overlay semi-transparente con texto "Adquirido" sobre una tarjeta
+        /// </summary>
+        private GameObject CreateAcquiredOverlay(Transform parent, Color accentColor)
+        {
+            GameObject overlay = new GameObject("AcquiredOverlay");
+            overlay.transform.SetParent(parent, false);
+
+            // Ignorar layout para que cubra toda la tarjeta
+            LayoutElement le = overlay.AddComponent<LayoutElement>();
+            le.ignoreLayout = true;
+
+            RectTransform rt = overlay.GetComponent<RectTransform>();
+            if (rt == null) rt = overlay.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // Fondo semi-transparente oscuro
+            Image bg = overlay.AddComponent<Image>();
+            bg.color = new Color(0.02f, 0.05f, 0.1f, 0.92f);
+            bg.raycastTarget = true; // Bloquear clicks
+
+            // Borde con el color de acento
+            Outline outline = overlay.AddComponent<Outline>();
+            outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.8f);
+            outline.effectDistance = new Vector2(3, 3);
+
+            // Texto "Adquirido"
+            GameObject textObj = new GameObject("AcquiredText");
+            textObj.transform.SetParent(overlay.transform, false);
+
+            RectTransform textRt = textObj.AddComponent<RectTransform>();
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = Vector2.zero;
+            textRt.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = AutoLocalizer.Get("acquired_text");
+            tmp.fontSize = 28;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = accentColor;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+
+            // Inicialmente oculto
+            overlay.SetActive(false);
+
+            return overlay;
         }
 
         private GameObject CreateCard(Transform parent, string name, Color accentColor)

@@ -234,6 +234,7 @@ namespace DigitPark.Localization
             { "CreateTournamentTitleText", "create_tournament_title" },
 
             // ==================== TOURNAMENTS - Additional Labels ====================
+            { "UsernameSearchPlaceholder", "username_search_placeholder" },
             { "MinTimeLabel", "min_time" },
             { "MaxTimeLabel", "max_time" },
             { "MinPlayersLabel", "min_players" },
@@ -245,8 +246,17 @@ namespace DigitPark.Localization
 
             // ==================== REGISTER ====================
             { "RegisterTitleText", "register_title" },
+            { "EmailInputPlaceholder", "email_placeholder" },
+            { "PasswordInputPlaceholder", "password_placeholder" },
+            { "ConfirmPasswordInputPlaceholder", "confirm_password_placeholder" },
+            { "UsernameInputPlaceholder", "username_placeholder" },
+            { "AlreadyHaveAccountText", "already_have_account" },
+            { "BackToLoginText", "back_to_login" },
+            { "BackToLoginButtonText", "back_to_login" },
 
             // ==================== PREMIUM ====================
+            { "PremiumButtonText", "premium_button" },
+            { "PremiumBannerText", "premium_banner" },
             { "PremiumSectionTitle", "premium_section_title" },
             { "PremiumSectionTitleText", "premium_section_title" },
             { "PremiumTitle", "premium_section_title" },

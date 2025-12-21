@@ -346,6 +346,8 @@ namespace DigitPark.Localization
                 "No Ads Active", "Sin Anuncios Activo", "Sans Pubs Actif", "Sem Anuncios Ativo", "Ohne Werbung Aktiv");
             AddTranslation("already_purchased",
                 "Already purchased", "Ya comprado", "Déjà acheté", "Já comprado", "Bereits gekauft");
+            AddTranslation("acquired_text",
+                "Acquired", "Adquirido", "Acquis", "Adquirido", "Erworben");
             AddTranslation("restore_purchases",
                 "Restore Purchases", "Restaurar Compras", "Restaurer les achats", "Restaurar Compras", "Käufe wiederherstellen");
             AddTranslation("purchase_success",
@@ -881,9 +883,17 @@ namespace DigitPark.Localization
             AddTranslation("error_no_ads_available",
                 "Ad not available. Try again later", "Anuncio no disponible. Intenta más tarde", "Pub non disponible. Réessayez plus tard", "Anúncio não disponível. Tente mais tarde", "Werbung nicht verfügbar. Versuche es später");
 
+            // ==================== REGISTER - ADDITIONAL ====================
+            AddTranslation("already_have_account",
+                "Already have an account?", "¿Ya tienes una cuenta?", "Vous avez déjà un compte?", "Já tem uma conta?", "Bereits ein Konto?");
+            AddTranslation("back_to_login",
+                "Back to Login", "Volver a Iniciar Sesión", "Retour à la connexion", "Voltar ao Login", "Zurück zum Login");
+
             // ==================== PREMIUM - ADDITIONAL ====================
             AddTranslation("premium_button",
                 "Premium", "Premium", "Premium", "Premium", "Premium");
+            AddTranslation("premium_banner",
+                "Go Premium!", "¡Hazte Premium!", "Passez Premium!", "Seja Premium!", "Werde Premium!");
             AddTranslation("tired_of_ads",
                 "Tired of ads?", "¿Cansado de anuncios?", "Fatigué des pubs?", "Cansado de anúncios?", "Genug von Werbung?");
             AddTranslation("remove_ads_now",
@@ -906,6 +916,8 @@ namespace DigitPark.Localization
                 "Search Tournament", "Buscar Torneo", "Rechercher Tournoi", "Buscar Torneio", "Turnier suchen");
             AddTranslation("search_options",
                 "Search Options", "Opciones de Búsqueda", "Options de recherche", "Opções de Busca", "Suchoptionen");
+            AddTranslation("username_search_placeholder",
+                "Search by username...", "Buscar por usuario...", "Rechercher par nom...", "Buscar por usuário...", "Nach Benutzer suchen...");
 
             // ==================== THEMES ====================
             AddTranslation("theme_selector_title",
