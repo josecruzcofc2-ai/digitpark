@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitPark - Plan de Implementación Skillz (Dinero Real)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #00d4ff;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        h2 {
+            color: #1a1a2e;
+            border-bottom: 3px solid #00d4ff;
+            padding-bottom: 10px;
+            margin: 30px 0 20px 0;
+        }
+        h3 {
+            color: #16213e;
+            margin: 20px 0 10px 0;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #00d4ff;
+        }
+        .flow-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .flow-box .title {
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #1a1a2e;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+        .danger {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #17a2b8;
+            margin: 15px 0;
+        }
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .money-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .money-box {
+            background: #1a1a2e;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        .money-box .amount {
+            font-size: 1.5em;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        .arrow {
+            font-size: 2em;
+            color: #00d4ff;
+        }
+        .logo {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+        .version {
+            text-align: center;
+            color: #999;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .big-number {
+            font-size: 3em;
+            color: #00d4ff;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎮💰🏆</div>
+        <h1>DIGIT PARK</h1>
+        <p class="subtitle">Plan de Implementación: Torneos con Dinero Real (Skillz)</p>
+        <p style="text-align: center; color: #666;">Documento Técnico v2.0 - Diciembre 2025</p>
+
+        <!-- SECCIÓN 1: RESUMEN EJECUTIVO -->
+        <h2>1. Resumen Ejecutivo</h2>
+        <div class="section">
+            <p><strong>DigitPark</strong> es un juego de habilidad donde los jugadores tocan números del 1-9 en orden lo más rápido posible. Este documento detalla la implementación de torneos con dinero real usando la plataforma <strong>Skillz</strong>.</p>
+
+            <div class="success">
+                <strong>✅ Modelo de Negocio:</strong> Skillz maneja TODO el dinero real. Tú recibes comisiones por cada torneo jugado. Cero riesgo financiero para ti.
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: ¿CÓMO FUNCIONA SKILLZ? -->
+        <h2>2. ¿Cómo Funciona Skillz?</h2>
+
+        <div class="section">
+            <p>Skillz es una plataforma que maneja <strong>TODO</strong> el flujo de dinero real en juegos de habilidad:</p>
+            <ul>
+                <li>✅ Los usuarios depositan dinero <strong>DIRECTO en Skillz</strong></li>
+                <li>✅ Skillz <strong>guarda el dinero</strong> de los usuarios</li>
+                <li>✅ Skillz <strong>paga a los ganadores</strong></li>
+                <li>✅ <strong>Tú NO tocas el dinero</strong> - solo recibes comisiones</li>
+            </ul>
+        </div>
+
+        <div class="highlight">
+            <strong>⚠️ IMPORTANTE:</strong> Tú NO manejas dinero real. Skillz lo hace TODO. Esto elimina riesgo legal y financiero para ti.
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECCIÓN 3: FLUJO COMPLETO -->
+        <h2>3. Flujo Completo del Dinero</h2>
+
+        <h3>3.1 Usuario Deposita Dinero</h3>
+        <div class="flow-box">
+            <div class="title">PASO 1: DEPÓSITO (Skillz lo maneja)</div>
+            Usuario abre tu app<br>
+            ↓<br>
+            Presiona "Agregar Fondos"<br>
+            ↓<br>
+            Skillz SDK muestra pantalla de pago<br>
+            ↓<br>
+            Usuario paga $100 MXN con tarjeta/PayPal<br>
+            ↓<br>
+            <span style="color: #00ff00;">SKILLZ GUARDA LOS $100 MXN</span><br>
+            ↓<br>
+            Usuario ve $100 MXN de balance en la app<br>
+            <br>
+            <span style="color: #ff6b6b;">TÚ NO RECIBES NADA AÚN</span>
+        </div>
+
+        <h3>3.2 Usuario Entra a Torneo</h3>
+        <div class="flow-box">
+            <div class="title">PASO 2: ENTRADA AL TORNEO</div>
+            Usuario selecciona torneo (Entry: $20 MXN)<br>
+            ↓<br>
+            Skillz descuenta $20 del balance del usuario<br>
+            ↓<br>
+            $20 van al Prize Pool del torneo<br>
+            <br>
+            10 jugadores × $20 = <span style="color: #00ff00;">$200 MXN Prize Pool</span>
+        </div>
+
+        <h3>3.3 Torneo Termina - Reparto</h3>
+        <div class="flow-box">
+            <div class="title">PASO 3: DISTRIBUCIÓN DE PREMIOS</div>
+            Prize Pool Total: $200 MXN<br>
+            ────────────────────────────<br>
+            <br>
+            Skillz toma (~50%): <span style="color: #ff6b6b;">$100 MXN</span><br>
+            ↓<br>
+            De esos $100, Skillz te da comisión:<br>
+            <span style="color: #00ff00;">TÚ RECIBES: ~$20-30 MXN (20-30%)</span><br>
+            <br>
+            ────────────────────────────<br>
+            Premios para ganadores (50%): $100 MXN<br>
+            ├── 1er lugar (70%): $70 MXN<br>
+            └── 2do lugar (30%): $30 MXN
+        </div>
+
+        <h3>3.4 Ganador Retira Dinero</h3>
+        <div class="flow-box">
+            <div class="title">PASO 4: RETIRO DE GANANCIAS</div>
+            Ganador tiene $70 MXN en su balance de Skillz<br>
+            ↓<br>
+            Presiona "Retirar" en la app<br>
+            ↓<br>
+            Skillz verifica identidad (KYC)<br>
+            ↓<br>
+            <span style="color: #00ff00;">SKILLZ deposita $70 MXN al ganador</span><br>
+            (PayPal, banco, etc.)<br>
+            <br>
+            <span style="color: #ff6b6b;">TÚ NO PAGAS NADA - Skillz ya tenía el dinero</span>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECCIÓN 4: TU GANANCIA -->
+        <h2>4. Tu Ganancia con Skillz</h2>
+
+        <div class="section">
+            <p>Skillz te paga una <strong>comisión</strong> por cada torneo jugado en tu app:</p>
+        </div>
+
+        <div class="flow-box">
+            <div class="title">EJEMPLO: 1,000 TORNEOS AL MES</div>
+            Promedio entry fee: $20 MXN<br>
+            Promedio jugadores: 10<br>
+            ────────────────────────────<br>
+            Total jugado: 1,000 × $20 × 10 = $200,000 MXN<br>
+            <br>
+            Skillz toma 50%: $100,000 MXN<br>
+            <br>
+            <span style="color: #00ff00; font-size: 1.3em;">TU COMISIÓN (~20%): $20,000 MXN/mes</span>
+        </div>
+
+        <div class="success">
+            <strong>✅ VENTAJAS DE ESTE MODELO:</strong>
+            <ul>
+                <li>NO manejas dinero real = CERO riesgo financiero</li>
+                <li>NO pagas a ganadores = CERO problemas de pago</li>
+                <li>NO necesitas licencias = Skillz las tiene</li>
+                <li>Entre más jueguen = MÁS ganas tú</li>
+            </ul>
+        </div>
+
+        <!-- SECCIÓN 5: OTRAS FUENTES DE INGRESO -->
+        <h2>5. Otras Fuentes de Ingreso (Además de Skillz)</h2>
+
+        <table>
+            <tr>
+                <th>Fuente</th>
+                <th>Precio</th>
+                <th>App Store (30%)</th>
+                <th>TU GANANCIA</th>
+            </tr>
+            <tr>
+                <td><strong>Premium (Sin Anuncios)</strong></td>
+                <td>$9.99 USD</td>
+                <td>-$3.00</td>
+                <td><strong>$6.99 USD</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Temas Premium</strong></td>
+                <td>$1.99 USD</td>
+                <td>-$0.60</td>
+                <td><strong>$1.39 USD</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Pack de Efectos</strong></td>
+                <td>$2.99 USD</td>
+                <td>-$0.90</td>
+                <td><strong>$2.09 USD</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Anuncios (AdMob)</strong></td>
+                <td colspan="2">Variable por impresiones/clicks</td>
+                <td><strong>~$1-5 USD/1000 usuarios</strong></td>
+            </tr>
+        </table>
+
+        <div class="info">
+            <strong>ℹ️ Nota:</strong> Estas compras son SEPARADAS de Skillz. App Store cobra 30% (o 15% si ganas menos de $1M USD/año).
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECCIÓN 6: SKILLZ MANEJA TODO -->
+        <h2>6. Lo Que Skillz Maneja Por Ti</h2>
+
+        <table>
+            <tr>
+                <th>Aspecto</th>
+                <th>¿Quién lo maneja?</th>
+                <th>Detalles</th>
+            </tr>
+            <tr>
+                <td>Depósitos de usuarios</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Tarjetas, PayPal, etc.</td>
+            </tr>
+            <tr>
+                <td>Custodia del dinero</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Ellos guardan los fondos</td>
+            </tr>
+            <tr>
+                <td>Pago a ganadores</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>De su propia cuenta</td>
+            </tr>
+            <tr>
+                <td>Verificación de identidad (KYC)</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Documentos, edad, etc.</td>
+            </tr>
+            <tr>
+                <td>Licencias de juego</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Por estado/país</td>
+            </tr>
+            <tr>
+                <td>Prevención de fraude</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Anti-trampa, anti-lavado</td>
+            </tr>
+            <tr>
+                <td>Geo-restricciones</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Bloquea regiones prohibidas</td>
+            </tr>
+            <tr>
+                <td>Soporte de pagos</td>
+                <td><strong>SKILLZ</strong></td>
+                <td>Disputas, reembolsos</td>
+            </tr>
+        </table>
+
+        <div class="success">
+            <strong>✅ TÚ SOLO TE PREOCUPAS POR:</strong>
+            <ul>
+                <li>Hacer el juego divertido y adictivo</li>
+                <li>Mantener usuarios activos</li>
+                <li>Marketing para atraer jugadores</li>
+            </ul>
+        </div>
+
+        <!-- SECCIÓN 7: INTEGRACIÓN TÉCNICA -->
+        <h2>7. Integración Técnica con Skillz</h2>
+
+        <h3>7.1 Pasos para Integrar</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Paso</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Crear cuenta</td>
+                <td>Registrarse en <strong>developers.skillz.com</strong></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Registrar juego</td>
+                <td>Subir info de DigitPark</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Obtener SDK</td>
+                <td>Descargar Skillz SDK para Unity</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Integrar SDK</td>
+                <td>Agregar a Unity, configurar callbacks</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Enviar score</td>
+                <td>Al terminar partida, enviar tiempo a Skillz</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Testing sandbox</td>
+                <td>Probar con dinero ficticio</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Aprobación</td>
+                <td>Skillz revisa tu juego</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Lanzamiento</td>
+                <td>Activar dinero real</td>
+            </tr>
+        </table>
+
+        <h3>7.2 Código Básico de Integración</h3>
+        <div class="flow-box">
+            <div class="title">SkillzIntegration.cs (Ejemplo)</div>
+            // Iniciar torneo Skillz<br>
+            public void StartSkillzMatch() {<br>
+            &nbsp;&nbsp;SkillzCrossPlatform.LaunchSkillz();<br>
+            }<br>
+            <br>
+            // Enviar resultado al terminar<br>
+            public void SubmitScore(float time) {<br>
+            &nbsp;&nbsp;SkillzCrossPlatform.ReportFinalScore(time);<br>
+            }<br>
+            <br>
+            // Callback cuando Skillz inicia partida<br>
+            public void OnMatchWillBegin(Match match) {<br>
+            &nbsp;&nbsp;StartGame();<br>
+            }
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECCIÓN 8: CONSIDERACIONES LEGALES -->
+        <h2>8. Consideraciones Legales</h2>
+
+        <div class="success">
+            <strong>✅ ¿Por qué ES LEGAL?</strong>
+            <ul>
+                <li>DigitPark es un juego de <strong>HABILIDAD</strong>, no de azar</li>
+                <li>El resultado depende de la velocidad y precisión del jugador</li>
+                <li>No hay dados, cartas, ni elementos aleatorios</li>
+                <li>Skillz tiene <strong>licencias legales</strong> en jurisdicciones permitidas</li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <strong>⚠️ Restricciones (Skillz las maneja automáticamente):</strong>
+            <ul>
+                <li>Algunos estados de USA prohíben juegos de dinero</li>
+                <li>Algunos países no permiten este tipo de competencias</li>
+                <li>Usuarios deben ser <strong>mayores de 18 años</strong></li>
+                <li>Se requiere verificación de identidad (KYC)</li>
+            </ul>
+            <p><em>Skillz bloquea automáticamente las regiones prohibidas. Tú no tienes que hacer nada.</em></p>
+        </div>
+
+        <!-- SECCIÓN 9: ROADMAP -->
+        <h2>9. Roadmap de Implementación</h2>
+
+        <h3>Fase 1: Preparación</h3>
+        <ul>
+            <li>☐ Crear cuenta en developers.skillz.com</li>
+            <li>☐ Registrar DigitPark como juego</li>
+            <li>☐ Obtener credenciales de sandbox</li>
+            <li>☐ Descargar Skillz SDK para Unity</li>
+        </ul>
+
+        <h3>Fase 2: Integración Básica</h3>
+        <ul>
+            <li>☐ Importar Skillz SDK a Unity</li>
+            <li>☐ Crear SkillzIntegration.cs</li>
+            <li>☐ Conectar inicio de partida con Skillz</li>
+            <li>☐ Enviar tiempo final como score</li>
+        </ul>
+
+        <h3>Fase 3: UI de Skillz</h3>
+        <ul>
+            <li>☐ Agregar botón "Torneos con Dinero" en MainMenu</li>
+            <li>☐ Mostrar balance de Skillz en header</li>
+            <li>☐ Integrar pantallas de Skillz (depósito, retiro, etc.)</li>
+        </ul>
+
+        <h3>Fase 4: Testing</h3>
+        <ul>
+            <li>☐ Probar en sandbox con dinero ficticio</li>
+            <li>☐ Verificar que scores se envían correctamente</li>
+            <li>☐ Probar flujo completo de torneo</li>
+        </ul>
+
+        <h3>Fase 5: Lanzamiento</h3>
+        <ul>
+            <li>☐ Enviar a Skillz para aprobación</li>
+            <li>☐ Recibir aprobación</li>
+            <li>☐ Activar dinero real</li>
+            <li>☐ Monitorear y ajustar</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <!-- SECCIÓN 10: RESUMEN -->
+        <h2>10. Resumen Ejecutivo</h2>
+
+        <div class="section">
+            <table>
+                <tr>
+                    <th>Aspecto</th>
+                    <th>Detalle</th>
+                </tr>
+                <tr>
+                    <td>Plataforma</td>
+                    <td><strong>Skillz</strong> - maneja todo el dinero real</td>
+                </tr>
+                <tr>
+                    <td>Tu Rol</td>
+                    <td>Hacer el juego, recibir comisiones</td>
+                </tr>
+                <tr>
+                    <td>Comisión Skillz</td>
+                    <td>~50% del prize pool</td>
+                </tr>
+                <tr>
+                    <td>Tu Comisión</td>
+                    <td>~20-30% de lo que Skillz toma</td>
+                </tr>
+                <tr>
+                    <td>Manejo de Dinero</td>
+                    <td>Skillz (NO tú)</td>
+                </tr>
+                <tr>
+                    <td>Pago a Ganadores</td>
+                    <td>Skillz (NO tú)</td>
+                </tr>
+                <tr>
+                    <td>Licencias Legales</td>
+                    <td>Skillz (NO tú)</td>
+                </tr>
+                <tr>
+                    <td>Riesgo Financiero</td>
+                    <td><strong>CERO</strong> para ti</td>
+                </tr>
+                <tr>
+                    <td>Otras Ganancias</td>
+                    <td>Premium ($6.99), Ads, Cosméticos</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="success" style="text-align: center; font-size: 1.2em;">
+            <strong>🚀 ¡VAMOS CON TODO!</strong><br>
+            Con Skillz manejando el dinero real,<br>
+            tú te enfocas en hacer el mejor juego posible.
+        </div>
+
+        <div class="version">
+            <p><strong>DigitPark</strong> - Plan de Implementación Skillz</p>
+            <p>Versión 2.0 - Diciembre 2025</p>
+            <p>© 2025 DigitPark. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
