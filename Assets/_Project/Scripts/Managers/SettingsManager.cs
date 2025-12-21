@@ -50,6 +50,11 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI premiumFullButtonText;
         [SerializeField] private Button restorePurchasesButton;
 
+        [Header("UI - Premium Button (Pro)")]
+        [SerializeField] private Button premiumButton;
+        [SerializeField] private GameObject premiumBadge;
+        [SerializeField] private PremiumPanelUI premiumPanel;
+
         [Header("UI - Panels (Prefabs)")]
         [SerializeField] private InputPanelUI changeNamePanel;
         [SerializeField] private ConfirmPanelUI deleteConfirmPanel;
@@ -232,6 +237,7 @@ namespace DigitPark.Managers
             removeAdsButton?.onClick.AddListener(OnRemoveAdsClicked);
             premiumFullButton?.onClick.AddListener(OnPremiumFullClicked);
             restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
+            premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
 
             // Suscribirse a cambios de estado premium
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
@@ -601,6 +607,9 @@ namespace DigitPark.Managers
             }
 
             Debug.Log($"[Settings] Premium UI actualizada - NoAds: {hasNoAds}, CreateTournaments: {canCreateTournaments}");
+
+            // Actualizar el badge del botón Pro
+            UpdatePremiumBadge();
         }
 
         /// <summary>
@@ -670,6 +679,55 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Settings] Restaurando compras...");
             PremiumManager.Instance.RestorePurchases();
+        }
+
+        /// <summary>
+        /// Muestra el panel de compras premium
+        /// </summary>
+        private void OnPremiumButtonClicked()
+        {
+            Debug.Log("[Settings] Mostrando panel premium");
+
+            if (premiumPanel != null)
+            {
+                premiumPanel.Show();
+            }
+            else
+            {
+                // Si no hay panel asignado, crear uno dinámicamente
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas != null)
+                {
+                    PremiumPanelUI.CreateAndShow(canvas.transform);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el badge del botón Pro
+        /// </summary>
+        private void UpdatePremiumBadge()
+        {
+            if (premiumBadge == null) return;
+
+            bool isPremium = PremiumManager.Instance != null &&
+                            PremiumManager.Instance.HasNoAds &&
+                            PremiumManager.Instance.CanCreateTournaments;
+
+            premiumBadge.SetActive(isPremium);
+
+            // Cambiar apariencia del botón si ya es premium
+            if (premiumButton != null)
+            {
+                var buttonImage = premiumButton.GetComponent<Image>();
+                if (buttonImage != null)
+                {
+                    // Si es premium, cambiar a color dorado suave
+                    buttonImage.color = isPremium
+                        ? new Color(0.15f, 0.2f, 0.3f, 1f) // Más sutil cuando ya es premium
+                        : new Color(0.1f, 0.15f, 0.25f, 1f); // Color normal
+                }
+            }
         }
 
         #endregion

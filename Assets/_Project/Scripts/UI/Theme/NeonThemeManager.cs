@@ -45,6 +45,9 @@ namespace DigitPark.UI.Theme
 
         private void Start()
         {
+            // SIEMPRE aplicar cyan a los back buttons
+            ApplyToBackButtons();
+
             if (applyOnStart)
             {
                 ApplyTheme();
@@ -57,6 +60,9 @@ namespace DigitPark.UI.Theme
         [ContextMenu("Apply Theme")]
         public void ApplyTheme()
         {
+            // SIEMPRE aplicar cyan a los back buttons (no depende del tema)
+            ApplyToBackButtons();
+
             if (theme == null) return;
 
             Debug.Log("[NeonTheme] Aplicando tema Neon Gamer...");
@@ -79,6 +85,27 @@ namespace DigitPark.UI.Theme
             }
 
             Debug.Log("[NeonTheme] Tema aplicado correctamente");
+        }
+
+        /// <summary>
+        /// Aplica color cyan a todos los back buttons (independiente del tema)
+        /// </summary>
+        private void ApplyToBackButtons()
+        {
+            Color neonCyan = new Color(0f, 0.9608f, 1f, 1f);
+            var buttons = FindObjectsOfType<Button>(true);
+            foreach (var btn in buttons)
+            {
+                if (btn.gameObject.name.ToLower().Contains("back"))
+                {
+                    var image = btn.GetComponent<Image>();
+                    if (image != null)
+                    {
+                        image.color = neonCyan;
+                        Debug.Log($"[NeonTheme] Applied cyan to BackButton: {btn.gameObject.name}");
+                    }
+                }
+            }
         }
 
         private void ApplyToMainBackground()
@@ -332,27 +359,28 @@ namespace DigitPark.UI.Theme
         }
 
         /// <summary>
-        /// Aplica estilo para botones con iconos (back, settings, etc.)
-        /// Preserva el color blanco de la imagen para que el icono se vea correctamente
+        /// Aplica estilo para botones con iconos de navegación (back, etc.)
+        /// Aplica el color neonCyan del tema para que los iconos blancos se coloreen correctamente
         /// </summary>
         public void ApplyIconButtonStyle(Button button)
         {
-            if (button == null || theme == null) return;
+            if (button == null) return;
 
-            // NO cambiar el color de la imagen para preservar el icono original
+            // Aplicar color cyan fijo al icono (no depende del theme)
+            Color neonCyan = new Color(0f, 0.9608f, 1f, 1f);
+
             var image = button.GetComponent<Image>();
             if (image != null)
             {
-                // Mantener el color blanco para que el icono se vea correctamente
-                image.color = Color.white;
+                image.color = neonCyan;
             }
 
             var colors = button.colors;
             colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            colors.highlightedColor = new Color(0.8f, 1f, 1f, 1f);
+            colors.pressedColor = new Color(0.6f, 0.9f, 0.9f, 1f);
             colors.selectedColor = Color.white;
-            colors.disabledColor = theme.textDisabled;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
             button.colors = colors;
         }
 
