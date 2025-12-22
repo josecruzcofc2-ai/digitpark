@@ -21,7 +21,7 @@ namespace DigitPark.UI.Components
 
         // El índice 0 (Neon Dark) es gratuito, los demás son premium
         private const int FREE_THEME_INDEX = 0;
-        private const string LOCK_ICON = " 🔒";
+        private const string LOCK_ICON = " (PRO)";
 
         private void Awake()
         {

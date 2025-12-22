@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
+  </head>
+  <body class="{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}">
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas"></canvas>
+    </div>
+    <div id="loading-cover" style="display: none">
+      <div id="unity-loading-bar">
+        <div id="unity-logo"><img src="logo.png" /></div>
+        <div id="unity-progress-bar-empty" style="display: none">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div id="unity-fullscreen-button" style="display: none"></div>
+    <script src="index.js"></script>
+    <script>
+            /*
+            Organized Unity Loading Script Below
+            */
+
+            const params = new URLSearchParams(location.search);
+            const isLightLoad = params.get("load") === "light";
+            let myUnityInstance = null;
+            const hideFullScreenButton = 1;
+            const buildUrl = 'Build';
+            const loaderUrl = buildUrl + '/{{{ LOADER_FILENAME }}}';
+            const config = {
+              dataUrl: buildUrl + '/{{{ DATA_FILENAME }}}',
+              frameworkUrl: buildUrl + '/{{{ FRAMEWORK_FILENAME }}}',
+              codeUrl: buildUrl + '/{{{ CODE_FILENAME }}}',
+              streamingAssetsUrl: 'StreamingAssets',
+      #if MEMORY_FILENAME
+              memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+      #endif
+      #if SYMBOLS_FILENAME
+              symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+      #endif
+              companyName: '{{{ COMPANY_NAME }}}',
+              productName: '{{{ PRODUCT_NAME }}}',
+              productVersion: '{{{ PRODUCT_VERSION }}}',
+              // This is a placeholder for the actual version of the SDK
+              // This value will be replaced by the build script
+              unitySdkGitVersion: "2025.0.50",
+            };
+
+            const container = document.querySelector('#unity-container');
+            const canvas = document.querySelector('#unity-canvas');
+            const loadingCover = document.querySelector('#loading-cover');
+            const progressBarEmpty = document.querySelector('#unity-progress-bar-empty');
+            const progressBarFull = document.querySelector('#unity-progress-bar-full');
+            const fullscreenButton = document.querySelector('#unity-fullscreen-button');
+            const spinner = document.querySelector('.spinner');
+
+            const canFullscreen = (function () {
+              for (const key of [
+                'exitFullscreen',
+                'webkitExitFullscreen',
+                'webkitCancelFullScreen',
+                'mozCancelFullScreen',
+                'msExitFullscreen',
+              ]) {
+                if (key in document) {
+                  return true;
+                }
+              }
+              return false;
+            }());
+
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+              container.className = 'unity-mobile';
+              // Cap the device pixel ratio to avoid overtaxing the device
+              const maxDevicePixelRatio = 2.5; // or 2.5, tweak as needed
+              config.devicePixelRatio = Math.min(window.devicePixelRatio || 1, maxDevicePixelRatio);
+            }
+
+            #if BACKGROUND_FILENAME
+              canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
+            #endif
+
+            loadingCover.style.display = ''
+            window.parent.postMessage({topic: 'GameFrameStarted', config}, origin);
+
+            function cleanUp() {
+              if (myUnityInstance) {
+                myUnityInstance.Quit().then(() => {
+                  myUnityInstance = null;
+                  initializeUnity();
+                })
+              } else {
+                // If no instance is available, just initialize
+                initializeUnity();
+              }
+            }
+
+            function initializeUnity() {
+              window.parent.postMessage({topic: 'UnityInitializeBegan', config}, origin);
+              createUnityInstance(canvas, config, (progress) => {
+                console.debug('progress', progress);
+                console.debug('FP: config', config);
+                window.gameLoadingProgress = progress;
+                spinner.style.display = 'none';
+                progressBarEmpty.style.display = '';
+                progressBarFull.style.width = `${100 * progress}%`;
+
+                // Inform the parent about the progress
+                window.parent.postMessage({topic: 'OnGameLoadProgress', progress, config}, origin);
+              })
+                .then((unityInstance) => {
+                  myUnityInstance = unityInstance;
+
+                  loadingCover.style.display = 'none';
+                  if (canFullscreen) {
+                    if (!hideFullScreenButton) {
+                      fullscreenButton.style.display = '';
+                    }
+                    fullscreenButton.onclick = () => {
+                      unityInstance.SetFullscreen(1);
+                    };
+                  }
+
+                  const stableParts = JSON.stringify({
+                    dataUrl: unityInstance.dataUrl,
+                    frameworkUrl: unityInstance.frameworkUrl,
+                    codeUrl: unityInstance.codeUrl,
+                    streamingAssetsUrl: unityInstance.streamingAssetsUrl,
+                    companyName: unityInstance.companyName,
+                    productName: unityInstance.productName,
+                    productVersion: unityInstance.productVersion,
+                    loaderUrl: unityInstance.loaderUrl,
+                    keys: Object.keys(unityInstance),
+                  });
+                  // Notify the parent window that the Unity instance is initialized
+                  window.parent.postMessage(
+                    {
+                      topic: 'UnityInitialized',
+                      instanceReady: true,
+                      config,
+                      unityInstance: JSON.stringify(stableParts),
+                    },
+                    origin
+                  );
+                })
+                .catch((message) => {
+                  alert(message);
+                });
+            }
+
+             if (isLightLoad) {
+              window.parent.postMessage(
+                { topic: "UnityInitializeBegan", config },
+                origin
+              );
+            } else {
+              const script = document.createElement("script");
+              script.src = loaderUrl;
+              script.onload = initializeUnity;
+              document.body.appendChild(script);
+            }
+    </script>
+  </body>
+</html>

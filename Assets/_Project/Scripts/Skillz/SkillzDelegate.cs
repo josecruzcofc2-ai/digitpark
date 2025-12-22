@@ -1,20 +1,17 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using SkillzSDK;
 
 namespace DigitPark.Skillz
 {
     /// <summary>
     /// Delegate que recibe callbacks del SDK de Skillz
-    ///
-    /// IMPORTANTE: Esta clase debe implementar SkillzMatchDelegate cuando el SDK esté instalado
-    /// Descomentar la herencia: public class SkillzDelegate : SkillzMatchDelegate
+    /// Implementa SkillzMatchDelegate para recibir eventos del SDK
     /// </summary>
-    public class SkillzDelegate : MonoBehaviour
-    // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-    // public class SkillzDelegate : MonoBehaviour, SkillzMatchDelegate
+    public class DigitParkSkillzDelegate : MonoBehaviour, SkillzMatchDelegate
     {
-        private static SkillzDelegate _instance;
-        public static SkillzDelegate Instance => _instance;
+        private static DigitParkSkillzDelegate _instance;
+        public static DigitParkSkillzDelegate Instance => _instance;
 
         [Header("Escenas")]
         [SerializeField] private string gameSceneName = "Game";
@@ -34,29 +31,15 @@ namespace DigitPark.Skillz
         }
 
         /// <summary>
-        /// Llamado por Skillz cuando un match está a punto de comenzar
+        /// Llamado por Skillz cuando un match est por comenzar
         /// </summary>
-        public void OnMatchWillBegin(/*SkillzMatchInfo matchInfo*/)
+        public void OnMatchWillBegin(Match matchInfo)
         {
-            Debug.Log("[SkillzDelegate] Match a punto de comenzar");
+            Debug.Log($"[SkillzDelegate] Match comenzando - ID: {matchInfo.ID}");
 
-            // SKILLZ_SDK: Cuando el SDK esté instalado, descomentar:
-            // var info = ConvertMatchInfo(matchInfo);
-            // SkillzManager.Instance.OnSkillzMatchWillBegin(info);
-
-            // Simular inicio de match
-            var simulatedInfo = new SkillzMatchInfo
-            {
-                MatchId = "simulated_match_" + System.DateTime.Now.Ticks,
-                TournamentName = "Torneo de Prueba",
-                EntryFee = 1.00f,
-                PrizePool = 10.00f,
-                IsCash = false, // Sandbox siempre es moneda Z
-                MaxPlayers = 10,
-                CurrentPlayers = 2
-            };
-
-            SkillzManager.Instance?.OnSkillzMatchWillBegin(simulatedInfo);
+            // Convertir la info del SDK a nuestro formato
+            var info = ConvertMatchInfo(matchInfo);
+            DigitParkSkillzManager.Instance?.OnSkillzMatchWillBegin(info);
 
             // Cargar escena del juego
             LoadGameScene();
@@ -67,19 +50,51 @@ namespace DigitPark.Skillz
         /// </summary>
         public void OnSkillzWillExit()
         {
-            Debug.Log("[SkillzDelegate] Skillz UI cerrada, volviendo al menú");
+            Debug.Log("[SkillzDelegate] Skillz UI cerrada, volviendo al men");
 
-            // Volver al menú principal
+            // Volver al men principal
             SceneManager.LoadScene(menuSceneName);
         }
 
         /// <summary>
-        /// Llamado cuando se necesita obtener progreso del juego (para sync)
+        /// Llamado cuando se necesita obtener progreso del juego
         /// </summary>
         public void OnProgressionRoomEnter()
         {
             Debug.Log("[SkillzDelegate] Entrando a progression room");
-            // Aquí puedes sincronizar datos del jugador si es necesario
+            // Sincronizar datos del jugador si es necesario
+            // Por ahora, volver a Skillz
+            SkillzCrossPlatform.ReturnToSkillz();
+        }
+
+        /// <summary>
+        /// Llamado cuando un nuevo usuario de pago entra a su primer match con dinero
+        /// </summary>
+        public void OnNPUConversion()
+        {
+            Debug.Log("[SkillzDelegate] Nuevo usuario de pago - primer match con dinero real");
+            // Aqu puedes enviar analticas o eventos
+        }
+
+        /// <summary>
+        /// Llamado cuando el juego recibe una advertencia de memoria
+        /// </summary>
+        public void OnReceivedMemoryWarning()
+        {
+            Debug.LogWarning("[SkillzDelegate] Advertencia de memoria recibida");
+            // Liberar recursos no esenciales si es necesario
+            Resources.UnloadUnusedAssets();
+            System.GC.Collect();
+        }
+
+        /// <summary>
+        /// Llamado cuando el usuario entra a la pantalla de tutorial
+        /// </summary>
+        public void OnTutorialScreenEnter()
+        {
+            Debug.Log("[SkillzDelegate] Tutorial screen solicitado");
+            // digitPark no tiene tutorial separado, volver a Skillz
+            SkillzCrossPlatform.ReturnToSkillz();
         }
 
         /// <summary>
@@ -92,35 +107,30 @@ namespace DigitPark.Skillz
         }
 
         /// <summary>
-        /// Vuelve a la UI de Skillz después de terminar el match
+        /// Vuelve a la UI de Skillz despus de terminar el match
         /// </summary>
         public void ReturnToSkillz()
         {
             Debug.Log("[SkillzDelegate] Volviendo a Skillz UI");
-
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // SkillzCrossPlatform.ReturnToSkillz();
-
-            // Por ahora, volver al menú
-            SceneManager.LoadScene(menuSceneName);
+            SkillzCrossPlatform.ReturnToSkillz();
         }
 
-        // SKILLZ_SDK: Métodos adicionales del delegate (descomentar cuando el SDK esté instalado)
-        /*
-        private SkillzMatchInfo ConvertMatchInfo(Skillz.MatchInfo matchInfo)
+        /// <summary>
+        /// Convierte la info del match del SDK a nuestro formato interno
+        /// </summary>
+        private SkillzMatchInfo ConvertMatchInfo(Match matchInfo)
         {
             return new SkillzMatchInfo
             {
-                MatchId = matchInfo.Id.ToString(),
-                TournamentId = matchInfo.TournamentId.ToString(),
-                TournamentName = matchInfo.Name,
-                EntryFee = (float)matchInfo.EntryCash,
-                PrizePool = (float)matchInfo.Prize,
-                IsCash = matchInfo.IsCash,
-                MaxPlayers = matchInfo.TournamentPlayerCount,
-                CurrentPlayers = matchInfo.TournamentPlayerCount
+                MatchId = matchInfo.ID?.ToString() ?? "unknown",
+                TournamentId = matchInfo.TemplateID?.ToString() ?? "unknown",
+                TournamentName = matchInfo.Name ?? "Tournament",
+                EntryFee = matchInfo.EntryCash ?? 0f,
+                PrizePool = (matchInfo.EntryCash ?? 0f) * 2f, // Estimado: pozo = entrada x 2
+                IsCash = matchInfo.IsCash ?? false,
+                MaxPlayers = matchInfo.BracketRound ?? 2,
+                CurrentPlayers = matchInfo.BracketRound ?? 2
             };
         }
-        */
     }
 }

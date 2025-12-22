@@ -46,7 +46,7 @@ namespace DigitPark.Skillz
         private void Start()
         {
             // Verificar si estamos en un match de Skillz
-            if (SkillzManager.Instance != null && SkillzManager.Instance.IsInTournament)
+            if (DigitParkSkillzManager.Instance != null && DigitParkSkillzManager.Instance.IsInTournament)
             {
                 isSkillzMatch = true;
                 matchStartTime = Time.time;
@@ -72,7 +72,7 @@ namespace DigitPark.Skillz
         /// </summary>
         private void SetupSkillzMatch()
         {
-            var matchInfo = SkillzManager.Instance.CurrentMatch;
+            var matchInfo = DigitParkSkillzManager.Instance.CurrentMatch;
             if (matchInfo != null)
             {
                 Debug.Log($"[SkillzGame] Match: {matchInfo.TournamentName}");
@@ -88,7 +88,7 @@ namespace DigitPark.Skillz
         {
             if (isSkillzMatch || alwaysUseSkillzRandom)
             {
-                return SkillzManager.Instance?.GetSkillzRandom() ?? Random.value;
+                return DigitParkSkillzManager.Instance?.GetSkillzRandom() ?? Random.value;
             }
             return Random.value;
         }
@@ -100,7 +100,7 @@ namespace DigitPark.Skillz
         {
             if (isSkillzMatch || alwaysUseSkillzRandom)
             {
-                return SkillzManager.Instance?.GetSkillzRandomRange(min, max) ?? Random.Range(min, max);
+                return DigitParkSkillzManager.Instance?.GetSkillzRandomRange(min, max) ?? Random.Range(min, max);
             }
             return Random.Range(min, max);
         }
@@ -143,13 +143,13 @@ namespace DigitPark.Skillz
                 skillzScore = Mathf.Max(0, skillzScore); // No permitir negativos
 
                 Debug.Log($"[SkillzGame] Score para Skillz: {skillzScore}");
-                SkillzManager.Instance?.ReportScore(skillzScore);
+                DigitParkSkillzManager.Instance?.ReportScore(skillzScore);
             }
             else
             {
                 // El jugador abandonó
                 Debug.Log("[SkillzGame] Match abortado por el jugador");
-                SkillzManager.Instance?.AbortMatch("Player quit");
+                DigitParkSkillzManager.Instance?.AbortMatch("Player quit");
             }
 
             isSkillzMatch = false;
@@ -166,7 +166,7 @@ namespace DigitPark.Skillz
             }
 
             Debug.Log("[SkillzGame] Abortando match...");
-            SkillzManager.Instance?.AbortMatch("Player requested abort");
+            DigitParkSkillzManager.Instance?.AbortMatch("Player requested abort");
             isSkillzMatch = false;
         }
 

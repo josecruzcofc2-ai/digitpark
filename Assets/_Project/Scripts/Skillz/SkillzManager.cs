@@ -4,25 +4,20 @@ using System;
 namespace DigitPark.Skillz
 {
     /// <summary>
-    /// Manager principal para integración con Skillz SDK
-    /// Maneja la inicialización, torneos y comunicación con Skillz
+    /// Manager principal para integracin con Skillz SDK
+    /// Maneja la inicializacin, torneos y comunicacin con Skillz
     ///
-    /// IMPORTANTE: Requiere Skillz SDK instalado desde Unity Asset Store
-    /// Una vez instalado, descomentar las líneas marcadas con // SKILLZ_SDK
+    /// Ahora usa el SDK real de Skillz
     /// </summary>
-    public class SkillzManager : MonoBehaviour
+    public class DigitParkSkillzManager : MonoBehaviour
     {
-        private static SkillzManager _instance;
-        public static SkillzManager Instance => _instance;
+        private static DigitParkSkillzManager _instance;
+        public static DigitParkSkillzManager Instance => _instance;
 
-        [Header("Configuración Skillz")]
-        [SerializeField] private string gameId = "TU_GAME_ID_AQUI"; // Obtener de Skillz Developer Console
-#pragma warning disable CS0414 // Se usará cuando Skillz SDK esté instalado
-        [SerializeField] private SkillzEnvironment environment = SkillzEnvironment.Sandbox;
-        [SerializeField] private SkillzOrientation orientation = SkillzOrientation.Portrait;
-#pragma warning restore CS0414
+        [Header("Configuracin Skillz")]
+        [SerializeField] private string gameId = "92406"; // DigitPark Game ID from Skillz Dashboard
 
-        [Header("Configuración de Premios")]
+        [Header("Configuracin de Premios")]
         [SerializeField] private PrizeDistributionConfig prizeConfig;
 
         // Estado
@@ -40,6 +35,7 @@ namespace DigitPark.Skillz
         public bool IsInTournament => isInSkillzTournament;
         public SkillzMatchInfo CurrentMatch => currentMatch;
         public PrizeDistributionConfig PrizeConfig => prizeConfig;
+        public string GameId => gameId;
 
         private void Awake()
         {
@@ -67,23 +63,22 @@ namespace DigitPark.Skillz
 
         /// <summary>
         /// Inicializa el SDK de Skillz
+        /// El SDK se inicializa automticamente a travs del SkillzManager prefab del SDK
         /// </summary>
         public void InitializeSkillz()
         {
             if (isSkillzInitialized)
             {
-                Debug.LogWarning("[Skillz] Ya está inicializado");
+                Debug.LogWarning("[Skillz] Ya est inicializado");
                 return;
             }
 
             Debug.Log($"[Skillz] Inicializando con Game ID: {gameId}");
 
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // SkillzCrossPlatform.Initialize(gameId, environment, orientation);
-
-            // Por ahora, simular inicialización
+            // El SDK de Skillz se inicializa automticamente a travs del prefab SkillzManager
+            // que debe estar en la escena. Aqu solo marcamos que estamos listos.
             isSkillzInitialized = true;
-            Debug.Log("[Skillz] Inicializado (modo simulación - instalar SDK real)");
+            Debug.Log("[Skillz] Inicializado correctamente");
 
             OnSkillzInitialized?.Invoke();
         }
@@ -95,22 +90,18 @@ namespace DigitPark.Skillz
         {
             if (!isSkillzInitialized)
             {
-                Debug.LogError("[Skillz] No está inicializado");
+                Debug.LogError("[Skillz] No est inicializado");
                 return;
             }
 
             Debug.Log("[Skillz] Lanzando UI de Skillz...");
 
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // SkillzCrossPlatform.LaunchSkillz();
-
-            // Por ahora, mostrar mensaje
-            Debug.Log("[Skillz] UI lanzada (modo simulación)");
+            // Usar el SDK real
+            SkillzCrossPlatform.LaunchSkillz();
         }
 
         /// <summary>
-        /// Llamado por Skillz cuando un match comienza
-        /// Este método debe ser llamado desde SkillzDelegate
+        /// Llamado por DigitParkSkillzDelegate cuando un match comienza
         /// </summary>
         public void OnSkillzMatchWillBegin(SkillzMatchInfo matchInfo)
         {
@@ -125,27 +116,26 @@ namespace DigitPark.Skillz
         /// <summary>
         /// Reporta el score final al terminar una partida
         /// </summary>
-        /// <param name="score">Score del jugador (en digitPark = tiempo en ms, menor es mejor)</param>
+        /// <param name="score">Score del jugador (en digitPark = tiempo invertido, menor es mejor)</param>
         public void ReportScore(float score)
         {
             if (!isInSkillzTournament)
             {
-                Debug.LogWarning("[Skillz] No está en un torneo de Skillz");
+                Debug.LogWarning("[Skillz] No est en un torneo de Skillz");
                 return;
             }
 
             Debug.Log($"[Skillz] Reportando score: {score}");
 
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // SkillzCrossPlatform.ReportFinalScore(score);
+            // Usar el SDK real para reportar el score
+            SkillzCrossPlatform.DisplayTournamentResultsWithScore(score);
 
-            // Simular fin de match
             isInSkillzTournament = false;
             currentMatch = null;
 
             OnMatchCompleted?.Invoke();
 
-            Debug.Log("[Skillz] Score reportado (modo simulación)");
+            Debug.Log("[Skillz] Score reportado correctamente");
         }
 
         /// <summary>
@@ -161,8 +151,8 @@ namespace DigitPark.Skillz
 
             Debug.Log($"[Skillz] Abortando match: {reason}");
 
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // SkillzCrossPlatform.AbortMatch();
+            // Usar el SDK real
+            SkillzCrossPlatform.AbortMatch();
 
             isInSkillzTournament = false;
             currentMatch = null;
@@ -171,65 +161,70 @@ namespace DigitPark.Skillz
         }
 
         /// <summary>
-        /// Obtiene un número aleatorio de Skillz (para fairness)
+        /// Obtiene un nmero aleatorio de Skillz (para fairness)
         /// </summary>
         public float GetSkillzRandom()
         {
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // return SkillzCrossPlatform.Random.Value();
-
-            // Por ahora usar Unity Random (NO es válido para producción)
-            return UnityEngine.Random.value;
+            // Usar el Random de Skillz para garantizar fairness
+            return SkillzCrossPlatform.Random.Value();
         }
 
         /// <summary>
-        /// Obtiene un número aleatorio entero de Skillz
+        /// Obtiene un nmero aleatorio entero de Skillz
         /// </summary>
         public int GetSkillzRandomRange(int min, int max)
         {
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // return SkillzCrossPlatform.Random.Range(min, max);
-
-            return UnityEngine.Random.Range(min, max);
+            // Usar el valor del Random de Skillz y convertirlo a rango
+            float random = SkillzCrossPlatform.Random.Value();
+            return Mathf.FloorToInt(random * (max - min)) + min;
         }
 
         /// <summary>
-        /// Verifica si el usuario actual es un jugador de Skillz
+        /// Verifica si estamos actualmente en un match de Skillz
         /// </summary>
         public bool IsSkillzPlayer()
         {
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // return SkillzCrossPlatform.IsMatchInProgress;
-
-            return isInSkillzTournament;
+            return SkillzCrossPlatform.IsMatchInProgress();
         }
 
         /// <summary>
-        /// Obtiene información del jugador de Skillz
+        /// Obtiene informacin del jugador actual de Skillz
         /// </summary>
         public SkillzPlayerInfo GetCurrentPlayer()
         {
-            // SKILLZ_SDK: Descomentar cuando el SDK esté instalado
-            // var player = SkillzCrossPlatform.GetPlayer();
-            // return new SkillzPlayerInfo { ... };
+            // Obtener info del match actual del SDK
+            var match = SkillzCrossPlatform.GetMatchInfo();
+            if (match != null && match.Players != null && match.Players.Count > 0)
+            {
+                var player = match.Players[0] as SkillzSDK.Player;
+                if (player != null)
+                {
+                    return new SkillzPlayerInfo
+                    {
+                        PlayerId = player.ID?.ToString() ?? "unknown",
+                        DisplayName = player.DisplayName ?? "Player",
+                        AvatarUrl = player.AvatarURL ?? ""
+                    };
+                }
+            }
 
-            // Retornar datos simulados
+            // Retornar datos por defecto si no hay info
             return new SkillzPlayerInfo
             {
-                PlayerId = "simulated_player",
-                DisplayName = "Test Player",
+                PlayerId = "unknown",
+                DisplayName = "Player",
                 AvatarUrl = ""
             };
         }
 
         /// <summary>
-        /// Calcula la distribución de premios para un torneo
+        /// Calcula la distribucin de premios para un torneo
         /// </summary>
         public PrizeBreakdown CalculatePrizeBreakdown(float totalPot, int numberOfWinners = 3)
         {
             if (prizeConfig == null)
             {
-                Debug.LogError("[Skillz] PrizeConfig no está configurado");
+                Debug.LogError("[Skillz] PrizeConfig no est configurado");
                 return null;
             }
 
@@ -238,16 +233,16 @@ namespace DigitPark.Skillz
     }
 
     /// <summary>
-    /// Entorno de Skillz
+    /// Entorno de Skillz (ya no se usa, el SDK lo maneja internamente)
     /// </summary>
     public enum SkillzEnvironment
     {
         Sandbox,    // Para desarrollo y pruebas
-        Production  // Para producción (dinero real)
+        Production  // Para produccin (dinero real)
     }
 
     /// <summary>
-    /// Orientación del juego
+    /// Orientacin del juego (ya no se usa, el SDK lo maneja internamente)
     /// </summary>
     public enum SkillzOrientation
     {
@@ -256,7 +251,7 @@ namespace DigitPark.Skillz
     }
 
     /// <summary>
-    /// Información del match de Skillz
+    /// Informacin del match de Skillz
     /// </summary>
     [Serializable]
     public class SkillzMatchInfo
@@ -273,7 +268,7 @@ namespace DigitPark.Skillz
     }
 
     /// <summary>
-    /// Información del jugador de Skillz
+    /// Informacin del jugador de Skillz
     /// </summary>
     [Serializable]
     public class SkillzPlayerInfo
