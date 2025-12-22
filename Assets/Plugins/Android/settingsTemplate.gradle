@@ -19,6 +19,12 @@ dependencyResolutionManagement {
 // Android Resolver Repos Start
         def unityProjectPath = $/file:///**DIR_UNITYPROJECT**/$.replace("\\", "/")
         maven {
+            url "https://nexus.skillz.com/content/groups/public/" // Assets/Skillz/Editor/SkillzDependencies.xml:5
+        }
+        maven {
+            url "https://maven.singular.net/" // Assets/Skillz/Editor/SkillzDependencies.xml:8
+        }
+        maven {
             url (unityProjectPath + "/Assets/GeneratedLocalRepo/Firebase/m2repository") // Assets/Firebase/Editor/AnalyticsDependencies.xml:18, Assets/Firebase/Editor/AppDependencies.xml:22, Assets/Firebase/Editor/AuthDependencies.xml:20, Assets/Firebase/Editor/DatabaseDependencies.xml:22
         }
         maven {

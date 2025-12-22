@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DigitPark.Skillz;
 
 namespace DigitPark.Managers
 {
@@ -248,6 +249,7 @@ namespace DigitPark.Managers
 
         /// <summary>
         /// Genera números aleatorios del 1 al 9 sin repetir
+        /// NOTA: Si estamos en un match de Skillz, usa Skillz Random para garantizar fairness
         /// </summary>
         private void GenerateRandomNumbers()
         {
@@ -255,9 +257,22 @@ namespace DigitPark.Managers
             List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
             // Mezclar aleatoriamente (Fisher-Yates shuffle)
+            // Usa Skillz Random si estamos en un match de Skillz para fairness
+            bool useSkillzRandom = SkillzGameController.Instance != null && SkillzGameController.Instance.IsSkillzMatch;
+
             for (int i = numbers.Count - 1; i > 0; i--)
             {
-                int randomIndex = Random.Range(0, i + 1);
+                int randomIndex;
+                if (useSkillzRandom)
+                {
+                    // Usar Skillz Random para garantizar que ambos jugadores tengan el mismo grid
+                    randomIndex = SkillzGameController.Instance.GetRandomRange(0, i + 1);
+                }
+                else
+                {
+                    randomIndex = Random.Range(0, i + 1);
+                }
+
                 int temp = numbers[i];
                 numbers[i] = numbers[randomIndex];
                 numbers[randomIndex] = temp;
@@ -269,7 +284,7 @@ namespace DigitPark.Managers
                 gridNumbers[i] = numbers[i];
             }
 
-            Debug.Log($"[Game] Números generados: {string.Join(", ", gridNumbers)}");
+            Debug.Log($"[Game] Números generados{(useSkillzRandom ? " (Skillz Random)" : "")}: {string.Join(", ", gridNumbers)}");
         }
 
         /// <summary>
@@ -469,8 +484,21 @@ namespace DigitPark.Managers
                 SaveBestTime();
             }
 
-            // Guardar la partida en scores
+            // Guardar la partida en scores (torneos gratuitos/Firebase)
             SaveScoreToDatabase();
+
+            // ========== SKILLZ INTEGRATION ==========
+            // Si estamos en un match de Skillz, reportar el score
+            if (SkillzGameController.Instance != null && SkillzGameController.Instance.IsSkillzMatch)
+            {
+                Debug.Log($"[Game] Reportando score a Skillz: {currentTime:F3}s");
+                SkillzGameController.Instance.EndMatch(currentTime, completed: true);
+
+                // En Skillz, después de reportar volvemos a la UI de Skillz (no al menú)
+                // SkillzDelegate manejará la transición
+                return;
+            }
+            // ==========================================
 
             // Mostrar mensaje de victoria con animación
             StartCoroutine(ShowWinMessage());

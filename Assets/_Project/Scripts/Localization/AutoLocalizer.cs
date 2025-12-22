@@ -149,6 +149,8 @@ namespace DigitPark.Localization
             { "TournamentsTitleText", "tournaments_title" },
             { "SearchTab", "search_tab" },
             { "SearchTabText", "search_tab" },
+            { "SkillzCashTab", "skillz_cash_tab" },
+            { "SkillzCashTabText", "skillz_cash_tab" },
             { "SearchButton", "search" },
             { "SearchButtonText", "search" },
             { "SearchOptionsButtonText", "search_tournament" },

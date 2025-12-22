@@ -6,6 +6,7 @@ using TMPro;
 using DigitPark.Services.Firebase;
 using DigitPark.Localization;
 using DigitPark.UI;
+using DigitPark.Skillz;
 
 namespace DigitPark.Managers
 {
@@ -158,10 +159,43 @@ namespace DigitPark.Managers
             // Inicializar el pool de objetos para optimización
             InitializeObjectPools();
 
+            // ========== SKILLZ INITIALIZATION ==========
+            // Inicializar Skillz para torneos con dinero real
+            // Estos managers son persistentes (DontDestroyOnLoad)
+            InitializeSkillz();
+            // ============================================
+
             // Precargar recursos críticos
             yield return StartCoroutine(PreloadCriticalResources());
 
             Debug.Log("[Boot] Managers del juego inicializados");
+        }
+
+        /// <summary>
+        /// Inicializa los managers de Skillz para torneos con dinero real
+        /// Estos managers persisten entre escenas (DontDestroyOnLoad)
+        /// </summary>
+        private void InitializeSkillz()
+        {
+            Debug.Log("[Boot] Inicializando Skillz...");
+
+            // Crear DigitParkSkillzManager si no existe
+            if (DigitParkSkillzManager.Instance == null)
+            {
+                GameObject skillzManagerObj = new GameObject("DigitParkSkillzManager");
+                skillzManagerObj.AddComponent<DigitParkSkillzManager>();
+                Debug.Log("[Boot] DigitParkSkillzManager creado");
+            }
+
+            // Crear DigitParkSkillzDelegate si no existe
+            if (DigitParkSkillzDelegate.Instance == null)
+            {
+                GameObject skillzDelegateObj = new GameObject("DigitParkSkillzDelegate");
+                skillzDelegateObj.AddComponent<DigitParkSkillzDelegate>();
+                Debug.Log("[Boot] DigitParkSkillzDelegate creado");
+            }
+
+            Debug.Log("[Boot] Skillz inicializado correctamente");
         }
 
         /// <summary>
