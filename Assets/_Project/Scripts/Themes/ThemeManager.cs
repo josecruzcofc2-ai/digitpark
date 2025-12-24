@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DigitPark.Themes
 {
@@ -97,11 +98,18 @@ namespace DigitPark.Themes
         private void LoadThemesFromResources()
         {
             ThemeData[] themes = Resources.LoadAll<ThemeData>("Themes");
-            availableThemes.AddRange(themes);
+
+            // Ordenar: Neon Dark primero (gratuito), luego los demás alfabéticamente
+            var sortedThemes = themes.OrderBy(t => t.themeId != "neon_dark") // neon_dark primero
+                                     .ThenBy(t => t.themeName)
+                                     .ToList();
+
+            availableThemes.AddRange(sortedThemes);
 
             if (themes.Length > 0)
             {
                 Debug.Log($"[ThemeManager] Cargados {themes.Length} temas desde Resources");
+                Debug.Log($"[ThemeManager] Orden: {string.Join(", ", sortedThemes.Select(t => t.themeName))}");
             }
         }
 

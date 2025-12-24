@@ -946,6 +946,30 @@ namespace DigitPark.Localization
                 "Premium theme", "Tema Premium", "Thème Premium", "Tema Premium", "Premium-Thema");
             AddTranslation("change_theme",
                 "Change Theme", "Cambiar Tema", "Changer le thème", "Mudar Tema", "Thema ändern");
+            AddTranslation("change_style",
+                "Change Style", "Cambiar Estilo", "Changer le style", "Mudar Estilo", "Stil ändern");
+
+            // ==================== STYLES PRO PROMPT ====================
+            AddTranslation("styles_pro_title",
+                "Styles PRO", "Estilos PRO", "Styles PRO", "Estilos PRO", "Styles PRO");
+            AddTranslation("styles_pro_unlock_themes",
+                "Unlock 5 exclusive themes:", "Desbloquea 5 temas exclusivos:", "Débloquez 5 thèmes exclusifs:", "Desbloqueie 5 temas exclusivos:", "Schalte 5 exklusive Themen frei:");
+            AddTranslation("styles_pro_price",
+                "$29 MXN", "$29 MXN", "29 MXN", "R$29", "29 MXN");
+            AddTranslation("close_button",
+                "Close", "Cerrar", "Fermer", "Fechar", "Schließen");
+            AddTranslation("cancel",
+                "Cancel", "Cancelar", "Annuler", "Cancelar", "Abbrechen");
+            AddTranslation("theme_clean_light_desc",
+                "Professional", "Profesional", "Professionnel", "Profissional", "Professionell");
+            AddTranslation("theme_cyberpunk_desc",
+                "Futuristic", "Futurista", "Futuriste", "Futurista", "Futuristisch");
+            AddTranslation("theme_ocean_desc",
+                "Relaxing", "Relajante", "Relaxant", "Relaxante", "Entspannend");
+            AddTranslation("theme_retro_desc",
+                "Nostalgic", "Nostálgico", "Nostalgique", "Nostálgico", "Nostalgisch");
+            AddTranslation("theme_volcano_desc",
+                "Intense", "Intenso", "Intense", "Intenso", "Intensiv");
 
             // ==================== INPUT HINTS ====================
             AddTranslation("hint_username",

@@ -403,6 +403,15 @@ namespace DigitPark.Localization
 
             if (shouldProcess)
             {
+                // FORZAR CENTRADO para textos específicos de Settings (Change Language, Change Style)
+                // Estos textos tienen iconos al lado, solo forzar Left alignment para consistencia
+                if (name.Contains("changelanguage") || name.Contains("changestyle") ||
+                    name.Contains("changetheme"))
+                {
+                    tmp.alignment = TextAlignmentOptions.Left;
+                    return; // No aplicar más transformaciones a estos textos
+                }
+
                 // 1. CENTRAR EL TEXTO - Forzar centrado horizontal
                 TextAlignmentOptions currentAlign = tmp.alignment;
 

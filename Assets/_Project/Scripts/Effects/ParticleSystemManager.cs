@@ -162,6 +162,12 @@ namespace DigitPark.Effects
 
         private void ConfigureNeonBurst(ParticleSystem ps, ParticleSystemRenderer renderer, bool large)
         {
+            // Detener el sistema antes de configurar para evitar el error de duration
+            if (ps.isPlaying)
+            {
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
             var main = ps.main;
             main.duration = 0.5f;
             main.loop = false;

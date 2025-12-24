@@ -13,13 +13,11 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager de la escena de Scores/Rankings
-    /// Muestra tablas de clasificación: Personal, Local (país) y Global
-    /// Usa UIFactory para colores (BrightGreen, NeonYellow, etc.)
+    /// Muestra tablas de clasificación: Nacional (país) y Mundial (global)
     /// </summary>
     public class LeaderboardManager : MonoBehaviour
     {
         [Header("Tabs")]
-        [SerializeField] public Button personalTab;
         [SerializeField] public Button nacionalTab;
         [SerializeField] public Button mundialTab;
 
@@ -32,20 +30,14 @@ namespace DigitPark.Managers
         [SerializeField] public GameObject loadingPanel;
         [SerializeField] public TextMeshProUGUI loadingText;
 
-        [Header("Player Highlight")]
-        [SerializeField] public GameObject playerHighlightPanel;
-        [SerializeField] public TextMeshProUGUI playerPositionText;
-        [SerializeField] public TextMeshProUGUI playerTimeText;
-
         [Header("Navigation")]
         [SerializeField] public Button backButton;
 
         // Estado
-        private LeaderboardTab currentTab = LeaderboardTab.Personal;
+        private LeaderboardTab currentTab = LeaderboardTab.Local;
         private PlayerData currentPlayer;
 
         // Datos
-        private List<LeaderboardEntry> personalScores;
         private List<LeaderboardEntry> localScores;
         private List<LeaderboardEntry> globalScores;
 
@@ -62,8 +54,8 @@ namespace DigitPark.Managers
             // Obtener datos del jugador (async)
             await LoadPlayerDataAsync();
 
-            // Cargar leaderboard inicial
-            LoadLeaderboard(LeaderboardTab.Personal);
+            // Cargar leaderboard inicial (Nacional por defecto)
+            LoadLeaderboard(LeaderboardTab.Local);
         }
 
         /// <summary>
@@ -104,22 +96,16 @@ namespace DigitPark.Managers
                     return;
                 }
 
-                Debug.Log($"[Leaderboard] Datos iniciales del jugador: {currentPlayer.username}");
+                Debug.Log($"[Leaderboard] Datos del jugador: {currentPlayer.username}");
 
                 // Recargar datos desde Firebase para tener el historial más actualizado
                 if (DatabaseService.Instance != null)
                 {
-                    Debug.Log("[Leaderboard] Recargando datos del jugador desde Firebase...");
                     var freshData = await DatabaseService.Instance.LoadPlayerData(currentPlayer.userId);
                     if (freshData != null)
                     {
                         currentPlayer = freshData;
                         AuthenticationService.Instance.UpdateCurrentPlayerData(currentPlayer);
-                        Debug.Log($"[Leaderboard] Datos actualizados. Scores en historial: {currentPlayer.scoreHistory.Count}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[Leaderboard] No se pudieron recargar datos desde Firebase, usando datos en memoria");
                     }
                 }
             }
@@ -130,18 +116,6 @@ namespace DigitPark.Managers
         /// </summary>
         private void SetupListeners()
         {
-            if (personalTab != null)
-            {
-                personalTab.onClick.RemoveAllListeners();
-                personalTab.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Personal));
-                personalTab.interactable = true;
-                Debug.Log($"[Leaderboard] Listener de PERSONALES configurado");
-            }
-            else
-            {
-                Debug.LogError("[Leaderboard] personalTab es NULL!");
-            }
-
             if (nacionalTab != null)
             {
                 nacionalTab.onClick.RemoveAllListeners();
@@ -188,15 +162,12 @@ namespace DigitPark.Managers
         /// </summary>
         private void OnTabSelected(LeaderboardTab tab)
         {
-            Debug.Log($"[Leaderboard] OnTabSelected llamado - Tab: {tab}, CurrentTab: {currentTab}");
+            Debug.Log($"[Leaderboard] OnTabSelected - Tab: {tab}");
 
             if (currentTab == tab)
             {
-                Debug.Log($"[Leaderboard] Tab ya seleccionada, ignorando");
                 return;
             }
-
-            Debug.Log($"[Leaderboard] Cambiando a tab: {tab}");
 
             currentTab = tab;
             UpdateTabVisuals();
@@ -208,8 +179,6 @@ namespace DigitPark.Managers
         /// </summary>
         private void UpdateTabVisuals()
         {
-            // Resetear todos los botones
-            SetTabButtonState(personalTab, currentTab == LeaderboardTab.Personal);
             SetTabButtonState(nacionalTab, currentTab == LeaderboardTab.Local);
             SetTabButtonState(mundialTab, currentTab == LeaderboardTab.Global);
         }
@@ -255,10 +224,6 @@ namespace DigitPark.Managers
             {
                 switch (tab)
                 {
-                    case LeaderboardTab.Personal:
-                        entries = await LoadPersonalScores();
-                        break;
-
                     case LeaderboardTab.Local:
                         entries = await LoadLocalScores();
                         break;
@@ -285,86 +250,7 @@ namespace DigitPark.Managers
             finally
             {
                 ShowLoading(false);
-
-                // Actualizar panel de mejor tiempo (mostrar solo en Personal)
-                UpdatePersonalBestPanel();
             }
-        }
-
-        /// <summary>
-        /// Carga las puntuaciones personales del jugador (orden cronológico inverso - más reciente primero)
-        /// </summary>
-        private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadPersonalScores()
-        {
-            Debug.Log("========== [Leaderboard] CARGANDO PUNTUACIONES PERSONALES ==========");
-
-            if (currentPlayer == null)
-            {
-                Debug.LogError("[Leaderboard] ❌ currentPlayer es NULL!");
-                return new List<LeaderboardEntry>();
-            }
-
-            Debug.Log($"[Leaderboard] ✓ Jugador encontrado: {currentPlayer.username} (ID: {currentPlayer.userId})");
-            Debug.Log($"[Leaderboard] ✓ Scores en scoreHistory: {currentPlayer.scoreHistory?.Count ?? 0}");
-
-            // DEBUG: Mostrar los scores si existen
-            if (currentPlayer.scoreHistory != null && currentPlayer.scoreHistory.Count > 0)
-            {
-                Debug.Log($"[Leaderboard] 📊 Mostrando primeros 5 scores del historial:");
-                for (int i = 0; i < Mathf.Min(5, currentPlayer.scoreHistory.Count); i++)
-                {
-                    var score = currentPlayer.scoreHistory[i];
-                    Debug.Log($"  [{i}] Tiempo: {score.time}s, Timestamp: {score.timestamp}");
-                }
-            }
-
-            // Convertir el historial de scores a LeaderboardEntry
-            List<LeaderboardEntry> entries = new List<LeaderboardEntry>();
-
-            if (currentPlayer.scoreHistory == null || currentPlayer.scoreHistory.Count == 0)
-            {
-                Debug.LogWarning("[Leaderboard] ⚠️ El jugador no tiene scores personales registrados");
-                Debug.LogWarning("[Leaderboard] ⚠️ Juega una partida primero para ver tus scores personales");
-                return entries;
-            }
-
-            // Tomar solo los últimos 30 scores
-            var recentScores = currentPlayer.scoreHistory.TakeLast(30).ToList();
-
-            // IMPORTANTE: Mantener orden cronológico INVERSO (más reciente primero)
-            recentScores.Reverse();
-
-            int position = 1;
-            foreach (var score in recentScores)
-            {
-                entries.Add(new LeaderboardEntry
-                {
-                    userId = currentPlayer.userId,
-                    username = currentPlayer.username,
-                    time = score.time,
-                    countryCode = currentPlayer.countryCode,
-                    avatarUrl = currentPlayer.avatarUrl,
-                    position = position,  // Posición cronológica (1 = más reciente)
-                    timestamp = score.timestamp  // Guardamos el timestamp para mostrarlo
-                });
-                position++;
-            }
-
-            Debug.Log($"[Leaderboard] ✓ Total de {entries.Count} scores personales procesados");
-            Debug.Log($"[Leaderboard] 📋 Primeras 3 entradas a mostrar:");
-            for (int i = 0; i < Mathf.Min(3, entries.Count); i++)
-            {
-                var entry = entries[i];
-                Debug.Log($"  Entry {i}: Posición #{entry.position}, Tiempo: {entry.time}s");
-            }
-            Debug.Log("========== [Leaderboard] FIN CARGA PERSONAL ==========");
-
-            personalScores = entries;
-
-            // Delay para simular carga async
-            await System.Threading.Tasks.Task.Delay(100);
-
-            return entries;
         }
 
         /// <summary>
@@ -372,7 +258,7 @@ namespace DigitPark.Managers
         /// </summary>
         private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadLocalScores()
         {
-            Debug.Log("[Leaderboard] Cargando puntuaciones locales...");
+            Debug.Log("[Leaderboard] Cargando puntuaciones nacionales...");
 
             if (currentPlayer == null) return new List<LeaderboardEntry>();
 
@@ -393,7 +279,7 @@ namespace DigitPark.Managers
         /// </summary>
         private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadGlobalScores()
         {
-            Debug.Log("[Leaderboard] Cargando puntuaciones globales...");
+            Debug.Log("[Leaderboard] Cargando puntuaciones mundiales...");
 
             // Obtener leaderboard global desde Firebase
             globalScores = await DatabaseService.Instance.GetGlobalLeaderboard(200);
@@ -418,31 +304,20 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Leaderboard] Mostrando {entries.Count} entradas");
 
-            // Configurar el RectTransform del container PRIMERO
+            // Configurar el RectTransform del container
             RectTransform containerRT = leaderboardContainer as RectTransform;
             if (containerRT != null)
             {
-                // Configurar anclas para que se estire horizontalmente
                 containerRT.anchorMin = new Vector2(0, 1);
                 containerRT.anchorMax = new Vector2(1, 1);
                 containerRT.pivot = new Vector2(0.5f, 1);
-
-                // Establecer posición inicial
                 containerRT.anchoredPosition = Vector2.zero;
-
-                // CRÍTICO: Asegurar que el container esté visible y activo
                 containerRT.gameObject.SetActive(true);
 
-                // Si tiene ancho 0, establecer un ancho mínimo basado en el viewport
                 if (containerRT.sizeDelta.x <= 0 && scrollRect != null && scrollRect.viewport != null)
                 {
                     float viewportWidth = scrollRect.viewport.rect.width;
                     containerRT.sizeDelta = new Vector2(viewportWidth, containerRT.sizeDelta.y);
-                    Debug.Log($"[Leaderboard] Ancho del content corregido a: {viewportWidth}");
-                }
-                else
-                {
-                    Debug.Log($"[Leaderboard] Content ancho actual: {containerRT.sizeDelta.x}");
                 }
             }
 
@@ -450,98 +325,45 @@ namespace DigitPark.Managers
             var layoutGroup = leaderboardContainer.GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
             if (layoutGroup == null)
             {
-                Debug.Log("[Leaderboard] Creando nuevo VerticalLayoutGroup");
                 layoutGroup = leaderboardContainer.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
             }
-            else
-            {
-                Debug.Log("[Leaderboard] VerticalLayoutGroup ya existe, configurándolo");
-            }
 
-            // Configurar el LayoutGroup correctamente
             layoutGroup.spacing = 5f;
             layoutGroup.padding = new RectOffset(10, 10, 10, 10);
             layoutGroup.childAlignment = TextAnchor.UpperCenter;
             layoutGroup.childControlWidth = true;
             layoutGroup.childControlHeight = true;
-            layoutGroup.childForceExpandWidth = false; // NO forzar expansión horizontal
+            layoutGroup.childForceExpandWidth = false;
             layoutGroup.childForceExpandHeight = false;
 
-            Debug.Log($"[Leaderboard] LayoutGroup configurado - childForceExpandWidth: {layoutGroup.childForceExpandWidth}");
-
-            int createdCount = 0;
             foreach (var entry in entries)
             {
                 CreateLeaderboardEntry(entry);
-                createdCount++;
             }
 
-            Debug.Log($"[Leaderboard] {createdCount} entradas creadas en el container");
             // Resaltar posición del jugador si está en la lista
             HighlightPlayerPosition(entries);
 
-            // Forzar reconstrucción del layout después de varios frames
-            StartCoroutine(ForceLayoutRebuildMultipleTimes(containerRT, entries.Count));
+            // Forzar reconstrucción del layout
+            StartCoroutine(ForceLayoutRebuild(containerRT));
         }
 
         /// <summary>
-        /// Fuerza la reconstrucción del layout múltiples veces para asegurar visibilidad
+        /// Fuerza la reconstrucción del layout
         /// </summary>
-        private System.Collections.IEnumerator ForceLayoutRebuildMultipleTimes(RectTransform containerRT, int expectedCount)
+        private System.Collections.IEnumerator ForceLayoutRebuild(RectTransform containerRT)
         {
-            if (containerRT == null)
-            {
-                Debug.LogError("[Leaderboard] containerRT es NULL en ForceLayoutRebuildMultipleTimes!");
-                yield break;
-            }
+            if (containerRT == null) yield break;
 
-            // Frame 0: Rebuild inicial
             UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
             UnityEngine.Canvas.ForceUpdateCanvases();
-            Debug.Log($"[Leaderboard] Frame 0 - Layout rebuilt. Content size: {containerRT.sizeDelta}");
 
-            yield return null; // Esperar 1 frame
+            yield return null;
 
-            // Frame 1: Segundo rebuild
             UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
-            UnityEngine.Canvas.ForceUpdateCanvases();
-            Debug.Log($"[Leaderboard] Frame 1 - Layout rebuilt. Content size: {containerRT.sizeDelta}");
 
-            // Log detallado de las primeras entradas
-            for (int i = 0; i < containerRT.childCount && i < 3; i++)
-            {
-                Transform child = containerRT.GetChild(i);
-                RectTransform childRT = child as RectTransform;
-                if (childRT != null)
-                {
-                    var image = child.GetComponent<Image>();
-                    var layoutEl = child.GetComponent<UnityEngine.UI.LayoutElement>();
-                    Debug.Log($"[Leaderboard] Hijo {i}: {child.name}");
-                    Debug.Log($"  - Size: {childRT.sizeDelta}, Pos: {childRT.anchoredPosition}");
-                    Debug.Log($"  - Activo: {child.gameObject.activeSelf}, Image: {image != null && image.enabled}");
-                    Debug.Log($"  - LayoutElement minWidth: {layoutEl?.minWidth}, preferredHeight: {layoutEl?.preferredHeight}");
-                    Debug.Log($"  - Rect (world): {childRT.rect}");
-                }
-            }
+            yield return null;
 
-            yield return null; // Esperar otro frame
-
-            // Frame 2: Scroll al top
-            if (scrollRect != null)
-            {
-                scrollRect.verticalNormalizedPosition = 1f;
-                Debug.Log($"[Leaderboard] Scroll resetted to top");
-            }
-
-            // Frame 2: Rebuild final
-            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
-            Debug.Log($"[Leaderboard] Frame 2 - Final rebuild. Content size: {containerRT.sizeDelta}");
-            Debug.Log($"[Leaderboard] ✅ DisplayLeaderboard completado. {expectedCount} entradas deberían ser visibles.");
-        }
-
-        private System.Collections.IEnumerator ScrollToTopNextFrame()
-        {
-            yield return null; // Esperar un frame
             if (scrollRect != null)
             {
                 scrollRect.verticalNormalizedPosition = 1f;
@@ -553,44 +375,31 @@ namespace DigitPark.Managers
         /// </summary>
         private void CreateLeaderboardEntry(LeaderboardEntry entry)
         {
-            if (leaderboardContainer == null)
-            {
-                Debug.LogError("[Leaderboard] leaderboardContainer es NULL!");
-                return;
-            }
+            if (leaderboardContainer == null) return;
 
-            // Crear entrada programáticamente (sin prefab)
+            // Crear entrada programáticamente
             GameObject entryObj = new GameObject($"Entry_{entry.position}");
             entryObj.transform.SetParent(leaderboardContainer, false);
 
             RectTransform entryRT = entryObj.AddComponent<RectTransform>();
-
-            // CRÍTICO - Configuración correcta del RectTransform
-            entryRT.anchorMin = new Vector2(0, 1);     // Anclar desde la izquierda-arriba
-            entryRT.anchorMax = new Vector2(1, 1);     // Stretch horizontal completo
-            entryRT.pivot = new Vector2(0.5f, 1);      // Pivot en el centro superior
-            entryRT.anchoredPosition = Vector2.zero;   // IMPORTANTE: Posición (0,0)
-            entryRT.sizeDelta = new Vector2(0, 80);    // Ancho 0 = stretch, altura 80
-
-            Debug.Log($"[Leaderboard] Entry {entry.position} ANTES de LayoutElement - Position: {entryRT.anchoredPosition}, Size: {entryRT.sizeDelta}");
-
-            // LayoutElement para controlar altura
-            var layoutElement = entryObj.AddComponent<UnityEngine.UI.LayoutElement>();
-            layoutElement.preferredHeight = 80;
-            layoutElement.minHeight = 80;
-            layoutElement.flexibleWidth = 1; // Permitir que se expanda horizontalmente
-
-            // FORZAR anclas de nuevo después del LayoutElement (el LayoutGroup puede cambiarlas)
             entryRT.anchorMin = new Vector2(0, 1);
             entryRT.anchorMax = new Vector2(1, 1);
             entryRT.pivot = new Vector2(0.5f, 1);
             entryRT.anchoredPosition = Vector2.zero;
             entryRT.sizeDelta = new Vector2(0, 80);
 
-            Debug.Log($"[Leaderboard] Entrada creada: {entry.username} - {entry.time}s (Posición: {entry.position})");
-            Debug.Log($"[Leaderboard] Entry RectTransform FINAL - Anchors: {entryRT.anchorMin} to {entryRT.anchorMax}, Size: {entryRT.sizeDelta}, Pos: {entryRT.anchoredPosition}");
+            // LayoutElement para controlar altura
+            var layoutElement = entryObj.AddComponent<UnityEngine.UI.LayoutElement>();
+            layoutElement.preferredHeight = 80;
+            layoutElement.minHeight = 80;
+            layoutElement.flexibleWidth = 1;
 
-            // CRÍTICO: Asegurar que la entrada esté activa
+            entryRT.anchorMin = new Vector2(0, 1);
+            entryRT.anchorMax = new Vector2(1, 1);
+            entryRT.pivot = new Vector2(0.5f, 1);
+            entryRT.anchoredPosition = Vector2.zero;
+            entryRT.sizeDelta = new Vector2(0, 80);
+
             entryObj.SetActive(true);
 
             // Fondo de la entrada
@@ -599,88 +408,52 @@ namespace DigitPark.Managers
 
             if (isCurrentPlayer)
             {
-                bg.color = new Color(0f, 0.83f, 1f, 0.95f); // Azul eléctrico MÁS VISIBLE
+                bg.color = new Color(0f, 0.83f, 1f, 0.95f); // Azul eléctrico
             }
             else
             {
-                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f); // Gris oscuro MÁS VISIBLE
+                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f); // Gris oscuro
             }
-
-            Debug.Log($"[Leaderboard] Fondo de entrada configurado con color: {bg.color}, Enabled: {bg.enabled}");
-
-            // Si es modo Personal, NO mostrar el TOP#
-            bool isPersonalTab = currentTab == LeaderboardTab.Personal;
 
             float leftPadding = 20f;
 
-            if (isPersonalTab)
-            {
-                // MODO PERSONAL: Número (izquierda) | Tiempo (centro-derecha) - IGUAL QUE TORNEOS
+            // Divisores verticales
+            CreateVerticalDivider(entryObj.transform, 150f);
+            CreateVerticalDivider(entryObj.transform, 670f);
 
-                // Número del historial (izquierda - 0% a 15%)
-                Color posColor = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(1f, 0.84f, 0f);
-                TextMeshProUGUI numberText = CreateEntryText(entryObj.transform, "NumberText", $"#{entry.position}", 28, posColor);
-                RectTransform numberRT = numberText.GetComponent<RectTransform>();
-                numberRT.anchorMin = new Vector2(0, 0);
-                numberRT.anchorMax = new Vector2(0.15f, 1);
-                numberRT.offsetMin = Vector2.zero;
-                numberRT.offsetMax = Vector2.zero;
-                numberText.alignment = TMPro.TextAlignmentOptions.Center;
-                numberText.fontStyle = TMPro.FontStyles.Bold;
+            // TOP# (izquierda)
+            Color positionColor = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(1f, 0.84f, 0f);
+            TextMeshProUGUI posText = CreateEntryText(entryObj.transform, "PositionText", $"{entry.position}", 32, positionColor);
+            RectTransform posRT = posText.GetComponent<RectTransform>();
+            posRT.anchorMin = new Vector2(0, 0);
+            posRT.anchorMax = new Vector2(0, 1);
+            posRT.pivot = new Vector2(0, 0.5f);
+            posRT.anchoredPosition = new Vector2(leftPadding, 0);
+            posRT.sizeDelta = new Vector2(130, 0);
+            posText.alignment = TMPro.TextAlignmentOptions.Center;
+            posText.fontStyle = TMPro.FontStyles.Bold;
 
-                // Divisor vertical (15%)
-                CreatePersonalVerticalDivider(entryObj.transform, 0.15f);
+            // Nombre (centro)
+            TextMeshProUGUI nameText = CreateEntryText(entryObj.transform, "NameText", entry.username, 26, Color.white);
+            RectTransform nameRT = nameText.GetComponent<RectTransform>();
+            nameRT.anchorMin = new Vector2(0, 0);
+            nameRT.anchorMax = new Vector2(0, 1);
+            nameRT.pivot = new Vector2(0, 0.5f);
+            nameRT.anchoredPosition = new Vector2(160f, 0);
+            nameRT.sizeDelta = new Vector2(500, 0);
+            nameText.alignment = TMPro.TextAlignmentOptions.Center;
 
-                // Tiempo (centro-derecha - 15% a 100%)
-                TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 28, new Color(0f, 1f, 0.53f));
-                RectTransform timeRT = timeText.GetComponent<RectTransform>();
-                timeRT.anchorMin = new Vector2(0.15f, 0);
-                timeRT.anchorMax = new Vector2(1f, 1);
-                timeRT.offsetMin = new Vector2(10, 0);
-                timeRT.offsetMax = new Vector2(-10, 0);
-                timeText.alignment = TMPro.TextAlignmentOptions.Center;
-            }
-            else
-            {
-                // MODO LOCAL/GLOBAL: TOP#, Nombre y Tiempo (3 columnas)
-                // Divisores verticales
-                CreateVerticalDivider(entryObj.transform, 150f); // Después del TOP#
-                CreateVerticalDivider(entryObj.transform, 670f); // Después del Nombre
+            // Tiempo (derecha)
+            TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 26, new Color(0f, 1f, 0.53f));
+            RectTransform timeRT = timeText.GetComponent<RectTransform>();
+            timeRT.anchorMin = new Vector2(1, 0);
+            timeRT.anchorMax = new Vector2(1, 1);
+            timeRT.pivot = new Vector2(1, 0.5f);
+            timeRT.anchoredPosition = new Vector2(-20, 0);
+            timeRT.sizeDelta = new Vector2(350, 0);
+            timeText.alignment = TMPro.TextAlignmentOptions.Center;
 
-                // TOP# (izquierda)
-                Color positionColor = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(1f, 0.84f, 0f); // NeonYellow
-                TextMeshProUGUI posText = CreateEntryText(entryObj.transform, "PositionText", $"{entry.position}", 32, positionColor);
-                RectTransform posRT = posText.GetComponent<RectTransform>();
-                posRT.anchorMin = new Vector2(0, 0);
-                posRT.anchorMax = new Vector2(0, 1);
-                posRT.pivot = new Vector2(0, 0.5f);
-                posRT.anchoredPosition = new Vector2(leftPadding, 0);
-                posRT.sizeDelta = new Vector2(130, 0);
-                posText.alignment = TMPro.TextAlignmentOptions.Center;
-                posText.fontStyle = TMPro.FontStyles.Bold;
-
-                // Nombre (centro)
-                TextMeshProUGUI nameText = CreateEntryText(entryObj.transform, "NameText", entry.username, 26, Color.white);
-                RectTransform nameRT = nameText.GetComponent<RectTransform>();
-                nameRT.anchorMin = new Vector2(0, 0);
-                nameRT.anchorMax = new Vector2(0, 1);
-                nameRT.pivot = new Vector2(0, 0.5f);
-                nameRT.anchoredPosition = new Vector2(160f, 0);
-                nameRT.sizeDelta = new Vector2(500, 0);
-                nameText.alignment = TMPro.TextAlignmentOptions.Center;
-
-                // Tiempo (derecha)
-                TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 26, new Color(0f, 1f, 0.53f)); // BrightGreen
-                RectTransform timeRT = timeText.GetComponent<RectTransform>();
-                timeRT.anchorMin = new Vector2(1, 0);
-                timeRT.anchorMax = new Vector2(1, 1);
-                timeRT.pivot = new Vector2(1, 0.5f);
-                timeRT.anchoredPosition = new Vector2(-20, 0);
-                timeRT.sizeDelta = new Vector2(350, 0);
-                timeText.alignment = TMPro.TextAlignmentOptions.Center;
-            }
-
-            // Línea divisoria horizontal sutil (entre entradas)
+            // Línea divisoria horizontal
             CreateHorizontalDivider(entryObj.transform);
         }
 
@@ -697,10 +470,10 @@ namespace DigitPark.Managers
             divRT.anchorMax = new Vector2(0, 1);
             divRT.pivot = new Vector2(0.5f, 0.5f);
             divRT.anchoredPosition = new Vector2(xPosition, 0);
-            divRT.sizeDelta = new Vector2(1f, -20); // 1px de ancho, con padding vertical
+            divRT.sizeDelta = new Vector2(1f, -20);
 
             Image divImage = divider.AddComponent<Image>();
-            divImage.color = new Color(0.3f, 0.3f, 0.4f, 0.5f); // Gris sutil
+            divImage.color = new Color(0.3f, 0.3f, 0.4f, 0.5f);
         }
 
         /// <summary>
@@ -716,28 +489,10 @@ namespace DigitPark.Managers
             divRT.anchorMax = new Vector2(1, 0);
             divRT.pivot = new Vector2(0.5f, 0);
             divRT.anchoredPosition = Vector2.zero;
-            divRT.sizeDelta = new Vector2(-40, 1f); // Ancho casi completo, 1px de alto
+            divRT.sizeDelta = new Vector2(-40, 1f);
 
             Image divImage = divider.AddComponent<Image>();
-            divImage.color = new Color(0.3f, 0.3f, 0.4f, 0.3f); // Gris muy sutil
-        }
-
-        /// <summary>
-        /// Crea un divisor vertical usando anclas relativas (porcentaje) - para modo Personal
-        /// </summary>
-        private void CreatePersonalVerticalDivider(Transform parent, float anchorX)
-        {
-            GameObject divider = new GameObject("VerticalDivider");
-            divider.transform.SetParent(parent, false);
-
-            RectTransform divRT = divider.AddComponent<RectTransform>();
-            divRT.anchorMin = new Vector2(anchorX, 0.1f);
-            divRT.anchorMax = new Vector2(anchorX, 0.9f);
-            divRT.pivot = new Vector2(0.5f, 0.5f);
-            divRT.sizeDelta = new Vector2(2f, 0);
-
-            Image divImage = divider.AddComponent<Image>();
-            divImage.color = new Color(0.5f, 0.5f, 0.6f, 0.8f);
+            divImage.color = new Color(0.3f, 0.3f, 0.4f, 0.3f);
         }
 
         /// <summary>
@@ -748,7 +503,6 @@ namespace DigitPark.Managers
             GameObject textObj = new GameObject(name);
             textObj.transform.SetParent(parent, false);
 
-            // Configurar RectTransform para que el texto sea visible
             RectTransform textRT = textObj.AddComponent<RectTransform>();
             textRT.anchorMin = Vector2.zero;
             textRT.anchorMax = Vector2.one;
@@ -757,7 +511,6 @@ namespace DigitPark.Managers
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
 
-            // IMPORTANTE: Asignar fuente por defecto de TMP
             if (TMPro.TMP_Settings.defaultFontAsset != null)
             {
                 tmp.font = TMPro.TMP_Settings.defaultFontAsset;
@@ -770,7 +523,7 @@ namespace DigitPark.Managers
             tmp.fontStyle = TMPro.FontStyles.Normal;
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TMPro.TextOverflowModes.Ellipsis;
-            tmp.raycastTarget = false; // Mejor rendimiento
+            tmp.raycastTarget = false;
 
             return tmp;
         }
@@ -790,55 +543,16 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Resalta la posición del jugador actual (usado en tabs Local/Global)
+        /// Resalta la posición del jugador actual
         /// </summary>
         private void HighlightPlayerPosition(List<LeaderboardEntry> entries)
         {
             if (currentPlayer == null) return;
 
-            // Verificar si hay elementos UI disponibles
-            bool hasPanel = playerHighlightPanel != null;
-            bool hasTimeText = playerTimeText != null;
-            bool hasPositionText = playerPositionText != null;
-
-            if (!hasPanel && !hasTimeText && !hasPositionText) return;
-
             var playerEntry = entries.Find(e => e.userId == currentPlayer.userId);
-
             if (playerEntry != null)
             {
-                if (hasPanel)
-                {
-                    playerHighlightPanel.SetActive(true);
-                }
-
-                if (hasPositionText)
-                {
-                    playerPositionText.text = $"{AutoLocalizer.Get("your_position")} #{playerEntry.position}";
-                    playerPositionText.gameObject.SetActive(true);
-                }
-
-                if (hasTimeText)
-                {
-                    string label = AutoLocalizer.Get("personal_best_time");
-                    playerTimeText.text = $"{label}: {playerEntry.time:F3}s";
-                    playerTimeText.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                if (hasPanel)
-                {
-                    playerHighlightPanel.SetActive(false);
-                }
-                if (hasTimeText)
-                {
-                    playerTimeText.gameObject.SetActive(false);
-                }
-                if (hasPositionText)
-                {
-                    playerPositionText.gameObject.SetActive(false);
-                }
+                Debug.Log($"[Leaderboard] Jugador encontrado en posición #{playerEntry.position}");
             }
         }
 
@@ -867,7 +581,6 @@ namespace DigitPark.Managers
             if (loadingPanel != null)
             {
                 loadingPanel.SetActive(show);
-                Debug.Log($"[Leaderboard] LoadingPanel {(show ? "MOSTRADO" : "OCULTADO")}");
             }
 
             if (loadingText != null && show)
@@ -928,93 +641,6 @@ namespace DigitPark.Managers
             text.color = Color.red;
         }
 
-        /// <summary>
-        /// Formatea un timestamp a formato legible (DD/MM/YYYY HH:MM)
-        /// </summary>
-        private string FormatTimestamp(string timestamp)
-        {
-            if (string.IsNullOrEmpty(timestamp))
-            {
-                return AutoLocalizer.Get("no_date");
-            }
-
-            try
-            {
-                System.DateTime dateTime = System.DateTime.Parse(timestamp);
-                return dateTime.ToString("dd/MM/yyyy HH:mm");
-            }
-            catch
-            {
-                return AutoLocalizer.Get("invalid_date");
-            }
-        }
-
-        /// <summary>
-        /// Actualiza el panel de mejor tiempo (solo para tab Personal)
-        /// </summary>
-        private void UpdatePersonalBestPanel()
-        {
-            // Verificar si hay algo que actualizar
-            bool hasPanel = playerHighlightPanel != null;
-            bool hasTimeText = playerTimeText != null;
-            bool hasPositionText = playerPositionText != null;
-
-            if (!hasPanel && !hasTimeText && !hasPositionText)
-            {
-                Debug.LogWarning("[Leaderboard] No hay elementos UI para mostrar el mejor tiempo (playerHighlightPanel, playerTimeText y playerPositionText son null)");
-                return;
-            }
-
-            if (currentTab == LeaderboardTab.Personal && currentPlayer != null)
-            {
-                // Mostrar panel con el mejor tiempo
-                if (hasPanel)
-                {
-                    playerHighlightPanel.SetActive(true);
-                }
-
-                if (hasTimeText)
-                {
-                    float bestTime = currentPlayer.bestTime;
-                    string label = AutoLocalizer.Get("personal_best_time");
-                    if (bestTime == float.MaxValue || bestTime <= 0)
-                    {
-                        playerTimeText.text = AutoLocalizer.Get("no_best_time_yet");
-                    }
-                    else
-                    {
-                        playerTimeText.text = $"{label}: {bestTime:F3}s";
-                    }
-
-                    // Asegurar que el texto esté visible
-                    playerTimeText.gameObject.SetActive(true);
-                    Debug.Log($"[Leaderboard] Mostrando mejor tiempo personal: {bestTime:F3}s (bestTime={bestTime}, MaxValue={float.MaxValue})");
-                }
-
-                if (hasPositionText)
-                {
-                    playerPositionText.text = AutoLocalizer.Get("history_games", currentPlayer.scoreHistory?.Count ?? 0);
-                    playerPositionText.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                // Ocultar panel/textos en otras tabs
-                if (hasPanel)
-                {
-                    playerHighlightPanel.SetActive(false);
-                }
-                if (hasTimeText)
-                {
-                    playerTimeText.gameObject.SetActive(false);
-                }
-                if (hasPositionText)
-                {
-                    playerPositionText.gameObject.SetActive(false);
-                }
-            }
-        }
-
         #endregion
 
         #region Navigation
@@ -1024,7 +650,7 @@ namespace DigitPark.Managers
         /// </summary>
         private void OnBackButtonClicked()
         {
-            Debug.Log("[Leaderboard] ✅ BOTÓN VOLVER PRESIONADO - Volviendo al menú principal");
+            Debug.Log("[Leaderboard] Volviendo al menú principal");
             SceneManager.LoadScene("MainMenu");
         }
 
@@ -1036,7 +662,6 @@ namespace DigitPark.Managers
     /// </summary>
     public enum LeaderboardTab
     {
-        Personal,
         Local,
         Global
     }

@@ -331,10 +331,12 @@ namespace DigitPark.UI.Panels
         }
 
         /// <summary>
-        /// Oculta el panel
+        /// Oculta el panel y destruye el canvas si fue creado dinámicamente
         /// </summary>
         public void Hide()
         {
+            Debug.Log("[PremiumPanelUI] Hide() llamado");
+
             if (panel != null)
                 panel.SetActive(false);
 
@@ -347,7 +349,16 @@ namespace DigitPark.UI.Panels
             onRestorePurchases = null;
             onClose = null;
 
-            Debug.Log("[PremiumPanelUI] Panel ocultado");
+            // Si el padre es un canvas creado dinámicamente (PremiumPanelCanvas), destruirlo
+            if (transform.parent != null && transform.parent.name == "PremiumPanelCanvas")
+            {
+                Debug.Log("[PremiumPanelUI] Destruyendo canvas dinámico...");
+                Destroy(transform.parent.gameObject);
+            }
+            else
+            {
+                Debug.Log("[PremiumPanelUI] Panel ocultado (sin destruir canvas)");
+            }
         }
 
         /// <summary>
@@ -464,10 +475,10 @@ namespace DigitPark.UI.Panels
 
             Image img = blocker.AddComponent<Image>();
             img.color = new Color(0f, 0f, 0f, 0.85f);
+            img.raycastTarget = true; // Bloquear clicks que pasen al fondo
 
-            // Hacer clickeable para bloquear
-            Button btn = blocker.AddComponent<Button>();
-            btn.transition = Selectable.Transition.None;
+            // NO agregamos Button - solo queremos que el Image bloquee raycast
+            // Esto evita que clicks en el blocker cierren el panel accidentalmente
 
             return blocker;
         }
