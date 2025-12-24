@@ -22,6 +22,85 @@ namespace DigitPark.Editor
                 $"Se agregaron {count} componentes ThemeApplier.\n\nGuarda la escena (Ctrl+S)", "OK");
         }
 
+        [MenuItem("DigitPark/Themes/Add ThemeApplier to Prefabs")]
+        public static void AddToPrefabs()
+        {
+            int count = 0;
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/_Project/Prefabs" });
+
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject prefabRoot = PrefabUtility.LoadPrefabContents(path);
+                bool modified = false;
+
+                // Procesar todos los botones en el prefab
+                var buttons = prefabRoot.GetComponentsInChildren<Button>(true);
+                foreach (var btn in buttons)
+                {
+                    if (btn.GetComponent<ThemeApplier>() == null)
+                    {
+                        string name = btn.gameObject.name.ToLower();
+                        ThemeApplier.ElementType elementType = ThemeApplier.ElementType.ButtonSecondary;
+
+                        if (name.Contains("back") || name.Contains("return") || name.Contains("arrow") ||
+                            name.Contains("close") || name.Contains("exit") || path.ToLower().Contains("back"))
+                        {
+                            elementType = ThemeApplier.ElementType.Accent;
+                        }
+                        else if (name.Contains("login") || name.Contains("play") || name.Contains("confirm") ||
+                            name.Contains("create") || name.Contains("submit") || name.Contains("register") ||
+                            name.Contains("save") || name.Contains("accept") || name.Contains("join"))
+                        {
+                            elementType = ThemeApplier.ElementType.ButtonPrimary;
+                        }
+                        else if (name.Contains("delete") || name.Contains("logout") || name.Contains("remove"))
+                        {
+                            elementType = ThemeApplier.ElementType.ButtonDanger;
+                        }
+
+                        var applier = btn.gameObject.AddComponent<ThemeApplier>();
+                        SetElementType(applier, elementType);
+                        count++;
+                        modified = true;
+                        Debug.Log($"[ThemeApplierSetup] {path} → {btn.gameObject.name} → {elementType}");
+                    }
+                }
+
+                // También revisar si el root tiene Button
+                var rootButton = prefabRoot.GetComponent<Button>();
+                if (rootButton != null && prefabRoot.GetComponent<ThemeApplier>() == null)
+                {
+                    string name = prefabRoot.name.ToLower();
+                    ThemeApplier.ElementType elementType = ThemeApplier.ElementType.ButtonSecondary;
+
+                    if (name.Contains("back") || name.Contains("return") || name.Contains("arrow") ||
+                        name.Contains("close") || name.Contains("exit"))
+                    {
+                        elementType = ThemeApplier.ElementType.Accent;
+                    }
+
+                    var applier = prefabRoot.AddComponent<ThemeApplier>();
+                    SetElementType(applier, elementType);
+                    count++;
+                    modified = true;
+                    Debug.Log($"[ThemeApplierSetup] {path} (root) → {elementType}");
+                }
+
+                if (modified)
+                {
+                    PrefabUtility.SaveAsPrefabAsset(prefabRoot, path);
+                }
+                PrefabUtility.UnloadPrefabContents(prefabRoot);
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            EditorUtility.DisplayDialog("Prefabs Actualizados",
+                $"Se agregaron {count} componentes ThemeApplier a prefabs.", "OK");
+        }
+
         [MenuItem("DigitPark/Themes/Add ThemeApplier to ALL Scenes")]
         public static void AddToAllScenes()
         {
@@ -186,18 +265,29 @@ namespace DigitPark.Editor
                 string name = btn.gameObject.name.ToLower();
                 ThemeApplier.ElementType elementType = ThemeApplier.ElementType.ButtonSecondary;
 
+                // Back Buttons - usan Accent para cambiar con el tema
+                if (name.Contains("back") || name.Contains("return") || name.Contains("arrow") ||
+                    name.Contains("close") || name.Contains("exit"))
+                {
+                    elementType = ThemeApplier.ElementType.Accent;
+                }
                 // Botones principales
-                if (name.Contains("login") || name.Contains("play") || name.Contains("confirm") ||
+                else if (name.Contains("login") || name.Contains("play") || name.Contains("confirm") ||
                     name.Contains("create") || name.Contains("submit") || name.Contains("register") ||
-                    name.Contains("save") || name.Contains("accept") || name.Contains("join"))
+                    name.Contains("save") || name.Contains("accept") || name.Contains("join") ||
+                    name.Contains("start") || name.Contains("ok") || name.Contains("yes"))
                 {
                     elementType = ThemeApplier.ElementType.ButtonPrimary;
                 }
                 // Botones de peligro
-                else if (name.Contains("delete") || name.Contains("logout") || name.Contains("remove") ||
-                         name.Contains("cancel"))
+                else if (name.Contains("delete") || name.Contains("logout") || name.Contains("remove"))
                 {
                     elementType = ThemeApplier.ElementType.ButtonDanger;
+                }
+                // Botones de cancelar
+                else if (name.Contains("cancel") || name.Contains("no"))
+                {
+                    elementType = ThemeApplier.ElementType.ButtonSecondary;
                 }
 
                 var applier = btn.gameObject.AddComponent<ThemeApplier>();

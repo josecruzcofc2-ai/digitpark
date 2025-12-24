@@ -47,13 +47,12 @@ namespace DigitPark.UI.Components
 
         /// <summary>
         /// Inicializa el dropdown con los temas disponibles
+        /// NOTA: Las opciones se configuran manualmente en Unity (no se regeneran)
+        /// El orden debe ser: 0=Neon Dark, 1=Clean Light, 2=Cyberpunk, 3=Ocean, 4=Retro Arcade, 5=Volcano
         /// </summary>
         public void Initialize()
         {
             if (dropdown == null || isInitialized) return;
-
-            // Limpiar opciones existentes
-            dropdown.ClearOptions();
 
             // Verificar que ThemeManager exista
             if (ThemeManager.Instance == null)
@@ -62,29 +61,8 @@ namespace DigitPark.UI.Components
                 return;
             }
 
-            // Agregar los temas disponibles
-            var themes = ThemeManager.Instance.AvailableThemes;
-            var options = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
-
-            bool hasStylesPro = PremiumManager.Instance?.HasStylesPro ?? false;
-
-            for (int i = 0; i < themes.Count; i++)
-            {
-                var theme = themes[i];
-                string displayName = theme.themeName;
-
-                // Agregar candado a temas premium si no tiene StylesPro
-                if (i != FREE_THEME_INDEX && !hasStylesPro)
-                {
-                    displayName += LOCK_ICON;
-                }
-
-                options.Add(new TMP_Dropdown.OptionData(displayName, theme.themeIcon));
-            }
-
-            dropdown.AddOptions(options);
-
-            // Suscribirse al evento de cambio
+            // NO limpiamos ni regeneramos opciones - se configuran en Unity con iconos PRO
+            // Solo suscribirse al evento de cambio
             dropdown.onValueChanged.RemoveListener(OnThemeSelected);
             dropdown.onValueChanged.AddListener(OnThemeSelected);
 
@@ -92,7 +70,7 @@ namespace DigitPark.UI.Components
             SyncWithCurrentTheme();
 
             isInitialized = true;
-            Debug.Log($"[ThemeDropdownController] Inicializado con {options.Count} temas (StylesPro: {hasStylesPro})");
+            Debug.Log($"[ThemeDropdownController] Inicializado con {dropdown.options.Count} temas (opciones de Unity)");
         }
 
         /// <summary>
@@ -164,66 +142,14 @@ namespace DigitPark.UI.Components
         }
 
         /// <summary>
-        /// Muestra el panel para comprar Estilos PRO
+        /// Muestra el panel compacto para comprar Estilos PRO
         /// </summary>
         private void ShowStylesProPurchasePanel()
         {
-            // Buscar el panel premium existente o crear uno
-            var premiumPanel = FindObjectOfType<PremiumPanelUI>(true);
+            Debug.Log("[ThemeDropdownController] ShowStylesProPurchasePanel() - Mostrando panel compacto de temas");
 
-            if (premiumPanel != null)
-            {
-                premiumPanel.Show(
-                    onNoAdsCallback: null,
-                    onPremiumCallback: null,
-                    onRestoreCallback: () => PremiumManager.Instance?.RestorePurchases(),
-                    onCloseCallback: () => premiumPanel.Hide()
-                );
-            }
-            else
-            {
-                // Crear panel simple para comprar StylesPro
-                ShowSimpleStylesProDialog();
-            }
-        }
-
-        /// <summary>
-        /// Muestra un diálogo simple para comprar Estilos PRO
-        /// </summary>
-        private void ShowSimpleStylesProDialog()
-        {
-            Debug.Log("[ThemeDropdownController] Creando panel de compra de Estilos PRO...");
-
-            // Buscar un Canvas para crear el panel
-            Canvas canvas = FindObjectOfType<Canvas>();
-            if (canvas == null)
-            {
-                Debug.LogError("[ThemeDropdownController] No se encontró Canvas para mostrar el panel");
-                return;
-            }
-
-            // Crear el panel de premium dinámicamente
-            var panelUI = PremiumPanelUI.CreateAndShow(canvas.transform);
-
-            // Asegurar que el panel esté al frente de todo
-            if (panelUI != null)
-            {
-                panelUI.transform.SetAsLastSibling();
-
-                // Agregar un Canvas adicional para asegurar que renderice encima
-                Canvas panelCanvas = panelUI.gameObject.AddComponent<Canvas>();
-                panelCanvas.overrideSorting = true;
-                panelCanvas.sortingOrder = 100;
-                panelUI.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-            }
-
-            // Suscribirse al evento de cambio de premium para refrescar
-            void OnPremiumChanged()
-            {
-                Refresh();
-                PremiumManager.OnPremiumStatusChanged -= OnPremiumChanged;
-            }
-            PremiumManager.OnPremiumStatusChanged += OnPremiumChanged;
+            // Usar el nuevo panel compacto específico para temas
+            StylesProPromptPanel.CreateAndShow();
         }
 
         /// <summary>
