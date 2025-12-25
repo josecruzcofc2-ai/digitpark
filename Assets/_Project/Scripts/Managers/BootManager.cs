@@ -26,10 +26,14 @@ namespace DigitPark.Managers
 
         private float loadingProgress = 0f;
         private bool servicesInitialized = false;
+        private DigitPark.UI.BootAnimator bootAnimator;
 
         private void Start()
         {
             Debug.Log("[Boot] Iniciando BootManager...");
+
+            // Buscar BootAnimator en la escena
+            bootAnimator = FindObjectOfType<DigitPark.UI.BootAnimator>();
 
             // Configurar versión
             if (versionText != null)
@@ -285,12 +289,23 @@ namespace DigitPark.Managers
                 loadingBar.fillAmount = progress;
             }
 
-            if (loadingText != null)
+            // Obtener texto localizado
+            string displayText = LocalizationManager.Instance != null
+                ? LocalizationManager.Instance.GetText(localizationKey)
+                : localizationKey;
+
+            // Usar BootAnimator para efectos si está disponible
+            if (bootAnimator != null)
             {
-                // Usar localización si está disponible, sino usar la key como fallback
-                string displayText = LocalizationManager.Instance != null
-                    ? LocalizationManager.Instance.GetText(localizationKey)
-                    : localizationKey;
+                // Efecto typewriter para el texto
+                bootAnimator.SetLoadingText(displayText);
+
+                // Actualizar color de la barra según progreso
+                bootAnimator.UpdateLoadingBarColor(progress);
+            }
+            else if (loadingText != null)
+            {
+                // Fallback sin animación
                 loadingText.text = displayText;
             }
 

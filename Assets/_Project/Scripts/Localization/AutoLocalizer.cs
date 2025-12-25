@@ -193,8 +193,13 @@ namespace DigitPark.Localization
             { "CancelExitButton", "cancel_button" },
             { "CancelExitButtonText", "cancel_button" },
 
+            // ==================== BOOT ====================
+            { "Subtitle", "boot_subtitle" },
+            { "Subtitle2", "boot_subtitle2" },
+            { "LoadingText", "boot_loading" },
+
             // ==================== GENERAL ====================
-            { "LoadingText", "loading" },
+            { "GeneralLoadingText", "loading" },
             { "ErrorText", "error" },
             { "SuccessText", "success" },
             { "YesButton", "yes" },

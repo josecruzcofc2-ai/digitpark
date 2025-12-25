@@ -612,6 +612,12 @@ namespace DigitPark.Localization
                 "Create Tournament", "Crear Torneo", "Créer un tournoi", "Criar Torneio", "Turnier erstellen");
 
             // ==================== BOOT / LOADING ====================
+            AddTranslation("boot_subtitle",
+                "ARCADE EXPERIENCE", "EXPERIENCIA ARCADE", "EXPÉRIENCE ARCADE", "EXPERIÊNCIA ARCADE", "ARCADE-ERLEBNIS");
+            AddTranslation("boot_subtitle2",
+                "TRAIN YOUR MIND", "ENTRENA TU MENTE", "ENTRAÎNE TON ESPRIT", "TREINE SUA MENTE", "TRAINIERE DEINEN GEIST");
+            AddTranslation("boot_loading",
+                "Loading...", "Cargando...", "Chargement...", "Carregando...", "Laden...");
             AddTranslation("boot_initializing_config",
                 "Initializing settings...", "Inicializando configuración...", "Initialisation des paramètres...", "Inicializando configurações...", "Einstellungen werden initialisiert...");
             AddTranslation("boot_connecting_services",
