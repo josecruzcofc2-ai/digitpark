@@ -47,6 +47,9 @@ namespace DigitPark.Ads
 
         public bool IsInitialized => isInitialized;
         public bool HasNoAds => hasNoAds;
+        // isInterstitialLoaded y isRewardedLoaded se usan en IsRewardedReady() y para tracking interno
+        public bool InterstitialLoadedFlag => isInterstitialLoaded;
+        public bool RewardedLoadedFlag => isRewardedLoaded;
 
         private void Awake()
         {

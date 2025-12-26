@@ -88,7 +88,9 @@ namespace DigitPark.Themes
 
         [Header("Animation")]
         [SerializeField] private bool animateTransition = true;
+#pragma warning disable 0414 // Se usa colorTransitionDuration del tema en su lugar
         [SerializeField] private float transitionDuration = 0.2f;
+#pragma warning restore 0414
 
         private Coroutine colorTransitionCoroutine;
 

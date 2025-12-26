@@ -7,6 +7,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI.Panels;
+using DigitPark.UI.Common;
 
 namespace DigitPark.Managers
 {
@@ -102,8 +103,62 @@ namespace DigitPark.Managers
                 confirmPasswordInput.characterLimit = 50;
             }
 
+            // Auto-configurar PasswordToggle si no están asignados
+            ConfigurePasswordToggles();
+
             // Actualizar textos localizados
             UpdateLocalizedTexts();
+        }
+
+        /// <summary>
+        /// Busca y configura automáticamente los PasswordToggle en la escena
+        /// </summary>
+        private void ConfigurePasswordToggles()
+        {
+            var toggles = FindObjectsOfType<PasswordToggle>(true);
+            foreach (var toggle in toggles)
+            {
+                // Buscar el input field más cercano en la jerarquía
+                Transform parent = toggle.transform.parent;
+                while (parent != null)
+                {
+                    // Buscar input field en el mismo contenedor
+                    TMP_InputField input = parent.GetComponentInChildren<TMP_InputField>();
+                    if (input != null)
+                    {
+                        // Verificar si es password o confirm password por nombre
+                        string parentName = parent.name.ToLower();
+                        if (parentName.Contains("confirm"))
+                        {
+                            if (confirmPasswordInput != null)
+                            {
+                                SetPasswordToggleInput(toggle, confirmPasswordInput);
+                            }
+                        }
+                        else if (parentName.Contains("password"))
+                        {
+                            if (passwordInput != null)
+                            {
+                                SetPasswordToggleInput(toggle, passwordInput);
+                            }
+                        }
+                        break;
+                    }
+                    parent = parent.parent;
+                }
+            }
+        }
+
+        private void SetPasswordToggleInput(PasswordToggle toggle, TMP_InputField input)
+        {
+            // Usar reflexión para asignar el campo privado
+            var field = typeof(PasswordToggle).GetField("passwordInput",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field != null)
+            {
+                field.SetValue(toggle, input);
+                Debug.Log($"[Register] PasswordToggle configurado para: {input.name}");
+            }
         }
 
         /// <summary>

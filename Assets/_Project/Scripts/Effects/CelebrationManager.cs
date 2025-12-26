@@ -126,8 +126,10 @@ namespace DigitPark.Effects
             // Velocity over lifetime - flutter effect
             var velocity = ps.velocityOverLifetime;
             velocity.enabled = true;
+            // Todas las curvas deben estar en el mismo modo (TwoConstants)
             velocity.x = new ParticleSystem.MinMaxCurve(-1f, 1f);
             velocity.y = new ParticleSystem.MinMaxCurve(-2f, -0.5f);
+            velocity.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
             // Rotation over lifetime - spinning
             var rotation = ps.rotationOverLifetime;

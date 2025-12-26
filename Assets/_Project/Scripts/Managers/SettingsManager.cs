@@ -248,11 +248,71 @@ namespace DigitPark.Managers
         private void OnEnable()
         {
             LocalizationManager.OnLanguageChanged += OnLanguageChanged;
+            ThemeManager.OnThemeChanged += OnThemeChanged;
         }
 
         private void OnDisable()
         {
             LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+            ThemeManager.OnThemeChanged -= OnThemeChanged;
+        }
+
+        private void OnThemeChanged(ThemeData newTheme)
+        {
+            // Actualizar estilos de los dropdowns cuando cambia el tema
+            ApplyThemeToDropdowns(newTheme);
+        }
+
+        private void ApplyThemeToDropdowns(ThemeData theme)
+        {
+            if (theme == null) return;
+
+            Color accentColor = theme.primaryAccent;
+            Color bgColor = theme.cardBackground;
+
+            // Aplicar al theme dropdown
+            if (themeDropdown != null)
+            {
+                // Label del dropdown de tema
+                var themeLabelTransform = themeDropdown.transform.Find("Label");
+                if (themeLabelTransform != null)
+                {
+                    var themeLabel = themeLabelTransform.GetComponent<TextMeshProUGUI>();
+                    if (themeLabel != null)
+                    {
+                        themeLabel.color = accentColor;
+                    }
+                }
+
+                // Flecha del dropdown de tema
+                var themeArrow = themeDropdown.transform.Find("Arrow");
+                if (themeArrow != null)
+                {
+                    var arrowImg = themeArrow.GetComponent<Image>();
+                    if (arrowImg != null)
+                    {
+                        arrowImg.color = accentColor;
+                    }
+                }
+            }
+
+            // Actualizar label de "Change Theme"
+            if (changeThemeLabel != null)
+            {
+                changeThemeLabel.color = accentColor;
+            }
+
+            // Actualizar label de "Change Language"
+            if (changeLangLabel != null)
+            {
+                changeLangLabel.color = accentColor;
+            }
+
+            // Forzar actualización del language styler
+            if (languageStyler != null)
+            {
+                languageStyler.SetThemeColor(accentColor);
+            }
         }
 
         private void OnDestroy()

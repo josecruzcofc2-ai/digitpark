@@ -74,7 +74,9 @@ namespace DigitPark.Effects
             main.startSize = Mathf.Min(0.5f + comboCount * 0.1f, 1.5f);
 
             var emission = ps.emission;
-            emission.SetBurst(0, new ParticleSystem.Burst(0f, (short)(10 + comboCount * 5)));
+            emission.SetBursts(new ParticleSystem.Burst[] {
+                new ParticleSystem.Burst(0f, (short)(10 + comboCount * 5))
+            });
 
             ps.Play();
         }
@@ -182,7 +184,10 @@ namespace DigitPark.Effects
             var emission = ps.emission;
             emission.enabled = true;
             emission.rateOverTime = 0;
-            emission.SetBurst(0, new ParticleSystem.Burst(0f, (short)(large ? 30 : 20)));
+            // Usar SetBursts con array para evitar el error de índice
+            emission.SetBursts(new ParticleSystem.Burst[] {
+                new ParticleSystem.Burst(0f, (short)(large ? 30 : 20))
+            });
 
             var shape = ps.shape;
             shape.enabled = true;
@@ -230,7 +235,10 @@ namespace DigitPark.Effects
             var emission = ps.emission;
             emission.enabled = true;
             emission.rateOverTime = 0;
-            emission.SetBurst(0, new ParticleSystem.Burst(0f, 25));
+            // Usar SetBursts con array para evitar el error de índice
+            emission.SetBursts(new ParticleSystem.Burst[] {
+                new ParticleSystem.Burst(0f, 25)
+            });
 
             var shape = ps.shape;
             shape.enabled = true;
@@ -278,7 +286,9 @@ namespace DigitPark.Effects
             var emission = ps.emission;
             emission.enabled = true;
             emission.rateOverTime = 0;
-            emission.SetBurst(0, new ParticleSystem.Burst(0f, 15));
+            emission.SetBursts(new ParticleSystem.Burst[] {
+                new ParticleSystem.Burst(0f, 15)
+            });
 
             var shape = ps.shape;
             shape.enabled = true;
@@ -320,7 +330,9 @@ namespace DigitPark.Effects
             var emission = ps.emission;
             emission.enabled = true;
             emission.rateOverTime = 0;
-            emission.SetBurst(0, new ParticleSystem.Burst(0f, 1));
+            emission.SetBursts(new ParticleSystem.Burst[] {
+                new ParticleSystem.Burst(0f, 1)
+            });
 
             var sizeOverLifetime = ps.sizeOverLifetime;
             sizeOverLifetime.enabled = true;
@@ -390,7 +402,9 @@ namespace DigitPark.Effects
             var emission = ps.emission;
             emission.enabled = true;
             emission.rateOverTime = 0;
-            emission.SetBurst(0, new ParticleSystem.Burst(0f, 20));
+            emission.SetBursts(new ParticleSystem.Burst[] {
+                new ParticleSystem.Burst(0f, 20)
+            });
 
             var shape = ps.shape;
             shape.enabled = true;

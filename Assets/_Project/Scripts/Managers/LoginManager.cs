@@ -175,6 +175,7 @@ namespace DigitPark.Managers
                 titleText.text = GetLocalizedText("login_title");
                 titleText.alignment = TextAlignmentOptions.Center;
             }
+            // El layout de los toggles es manejado por LocalizedTextLayoutFixer global
         }
 
         /// <summary>

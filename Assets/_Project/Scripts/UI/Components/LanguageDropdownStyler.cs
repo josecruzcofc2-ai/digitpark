@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using DigitPark.UI.Theme;
+using DigitPark.Themes;
 
 namespace DigitPark.UI.Components
 {
@@ -41,7 +42,44 @@ namespace DigitPark.UI.Components
 
         private void Start()
         {
+            // Obtener colores del tema actual si existe
+            UpdateColorsFromTheme();
             ApplyStyles();
+        }
+
+        private void OnEnable()
+        {
+            // Suscribirse a cambios de tema
+            ThemeManager.OnThemeChanged += OnThemeChanged;
+        }
+
+        private void OnDisable()
+        {
+            // Desuscribirse de cambios de tema
+            ThemeManager.OnThemeChanged -= OnThemeChanged;
+        }
+
+        private void OnThemeChanged(ThemeData newTheme)
+        {
+            if (newTheme != null)
+            {
+                // Actualizar colores basándose en el tema
+                cyanColor = newTheme.primaryAccent;
+                borderColor = new Color(cyanColor.r, cyanColor.g, cyanColor.b, 0.6f);
+                hoverBorderColor = cyanColor;
+                ApplyStyles();
+            }
+        }
+
+        private void UpdateColorsFromTheme()
+        {
+            if (ThemeManager.Instance?.CurrentTheme != null)
+            {
+                var theme = ThemeManager.Instance.CurrentTheme;
+                cyanColor = theme.primaryAccent;
+                borderColor = new Color(cyanColor.r, cyanColor.g, cyanColor.b, 0.6f);
+                hoverBorderColor = cyanColor;
+            }
         }
 
         /// <summary>

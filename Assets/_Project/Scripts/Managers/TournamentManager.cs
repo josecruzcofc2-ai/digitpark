@@ -182,6 +182,9 @@ namespace DigitPark.Managers
             applyButton?.onClick.AddListener(ApplySearchFilters);
             clearButton?.onClick.AddListener(ClearSearchFilters);
 
+            // Remover comportamiento de botón del panel de búsqueda (no debería ser clickeable)
+            RemovePanelButtonBehavior(searchOptionsPanel);
+
             // Create Tournament
             maxPlayersSlider?.onValueChanged.AddListener(OnMaxPlayersChanged);
             durationSlider?.onValueChanged.AddListener(OnDurationChanged);
@@ -1754,6 +1757,44 @@ namespace DigitPark.Managers
             finally
             {
                 ShowLoading(false);
+            }
+        }
+
+        #endregion
+
+        #region Utility
+
+        /// <summary>
+        /// Remueve el comportamiento de botón de un panel (evita animación de clic)
+        /// </summary>
+        private void RemovePanelButtonBehavior(GameObject panel)
+        {
+            if (panel == null) return;
+
+            // Remover Button si existe (no debería estar en un panel)
+            var button = panel.GetComponent<Button>();
+            if (button != null)
+            {
+                Destroy(button);
+                Debug.Log($"[Tournament] Removido Button de {panel.name}");
+            }
+
+            // Remover Selectable si existe y no es necesario
+            var selectable = panel.GetComponent<Selectable>();
+            if (selectable != null && !(selectable is Button) && !(selectable is Toggle) &&
+                !(selectable is Slider) && !(selectable is InputField) && !(selectable is TMP_InputField) &&
+                !(selectable is Dropdown) && !(selectable is TMP_Dropdown) && !(selectable is Scrollbar))
+            {
+                selectable.enabled = false;
+                Debug.Log($"[Tournament] Deshabilitado Selectable de {panel.name}");
+            }
+
+            // Verificar si tiene Image con raycastTarget que puede interferir
+            var image = panel.GetComponent<Image>();
+            if (image != null)
+            {
+                // Asegurar que no tenga transición de color
+                image.type = Image.Type.Sliced;
             }
         }
 

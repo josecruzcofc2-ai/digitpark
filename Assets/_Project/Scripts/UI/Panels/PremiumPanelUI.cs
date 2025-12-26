@@ -289,6 +289,13 @@ namespace DigitPark.UI.Panels
             {
                 SetStylesProCardState(true, null);
             }
+
+            // Ocultar botón de Restore Purchases si tiene TODOS los productos
+            bool hasAllProducts = (hasPremium || hasNoAds) && hasStylesPro;
+            if (restoreButton != null)
+            {
+                restoreButton.gameObject.SetActive(!hasAllProducts);
+            }
         }
 
         private void SetNoAdsCardState(bool canBuy, string statusText)
@@ -328,6 +335,10 @@ namespace DigitPark.UI.Panels
             // Mostrar/ocultar overlay de "Adquirido"
             if (stylesProAcquiredOverlay != null)
                 stylesProAcquiredOverlay.SetActive(!canBuy);
+
+            // Ocultar precio cuando ya tiene StylesPro
+            if (stylesProPriceText != null)
+                stylesProPriceText.gameObject.SetActive(canBuy);
         }
 
         /// <summary>
