@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Panels
 {
@@ -72,7 +73,7 @@ namespace DigitPark.UI.Panels
                 errorText.text = message;
 
             if (acceptButtonText != null)
-                acceptButtonText.text = string.IsNullOrEmpty(buttonText) ? "Aceptar" : buttonText;
+                acceptButtonText.text = string.IsNullOrEmpty(buttonText) ? AutoLocalizer.Get("ErrorButtonText") : buttonText;
 
             onAccept = onAcceptCallback;
 

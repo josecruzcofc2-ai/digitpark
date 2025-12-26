@@ -52,6 +52,15 @@ namespace DigitPark.UI.Theme
             {
                 ApplyTheme();
             }
+
+            // Ejecutar fix de botones sociales con delay para asegurar que sea el último
+            StartCoroutine(DelayedSocialButtonFix());
+        }
+
+        private System.Collections.IEnumerator DelayedSocialButtonFix()
+        {
+            yield return new WaitForSeconds(0.1f);
+            FixSocialButtonTexts();
         }
 
         /// <summary>
@@ -84,7 +93,89 @@ namespace DigitPark.UI.Theme
                 ApplyToAllToggles();
             }
 
+            // ÚLTIMO: Forzar color blanco en botones sociales (después de todo lo demás)
+            FixSocialButtonTexts();
+
             Debug.Log("[NeonTheme] Tema aplicado correctamente");
+        }
+
+        /// <summary>
+        /// Configura los botones sociales con el branding correcto (Dark style)
+        /// Se ejecuta al final para asegurar que no sea sobrescrito
+        /// </summary>
+        private void FixSocialButtonTexts()
+        {
+            // Colores oficiales de Google (Dark style)
+            Color googleBgColor = new Color(0.075f, 0.075f, 0.078f, 1f); // #131314
+            Color googleTextColor = new Color(0.89f, 0.89f, 0.89f, 1f); // #E3E3E3
+
+            // Colores oficiales de Apple (Dark style)
+            Color appleBgColor = Color.black;
+            Color appleTextColor = Color.white;
+
+            // Buscar y configurar GoogleButton
+            var googleButton = GameObject.Find("GoogleButton");
+            if (googleButton != null)
+            {
+                // Configurar fondo
+                var bgImage = googleButton.GetComponent<Image>();
+                if (bgImage != null)
+                {
+                    bgImage.color = googleBgColor;
+                }
+
+                // Configurar ColorBlock del Button
+                var btn = googleButton.GetComponent<Button>();
+                if (btn != null)
+                {
+                    var colors = btn.colors;
+                    colors.normalColor = Color.white; // Neutral para no multiplicar
+                    colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
+                    colors.pressedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+                    colors.selectedColor = Color.white;
+                    btn.colors = colors;
+                }
+
+                // Configurar textos
+                var texts = googleButton.GetComponentsInChildren<TextMeshProUGUI>(true);
+                foreach (var text in texts)
+                {
+                    text.color = googleTextColor;
+                    Debug.Log($"[NeonTheme] GoogleButton '{text.name}' -> configurado (dark style)");
+                }
+            }
+
+            // Buscar y configurar AppleButton
+            var appleButton = GameObject.Find("AppleButton");
+            if (appleButton != null)
+            {
+                // Configurar fondo
+                var bgImage = appleButton.GetComponent<Image>();
+                if (bgImage != null)
+                {
+                    bgImage.color = appleBgColor;
+                }
+
+                // Configurar ColorBlock del Button
+                var btn = appleButton.GetComponent<Button>();
+                if (btn != null)
+                {
+                    var colors = btn.colors;
+                    colors.normalColor = Color.white;
+                    colors.highlightedColor = new Color(0.2f, 0.2f, 0.2f, 1f);
+                    colors.pressedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+                    colors.selectedColor = Color.white;
+                    btn.colors = colors;
+                }
+
+                // Configurar textos
+                var texts = appleButton.GetComponentsInChildren<TextMeshProUGUI>(true);
+                foreach (var text in texts)
+                {
+                    text.color = appleTextColor;
+                    Debug.Log($"[NeonTheme] AppleButton '{text.name}' -> configurado (dark style)");
+                }
+            }
         }
 
         /// <summary>
@@ -294,6 +385,13 @@ namespace DigitPark.UI.Theme
             {
                 string name = text.gameObject.name.ToLower();
 
+                // Botones sociales (Google/Apple) - aplicar color blanco (branding fijo)
+                if (IsSocialButtonText(text))
+                {
+                    text.color = Color.white;
+                    continue;
+                }
+
                 // Títulos - Neon Cyan
                 if (name.Contains("title") || name.Contains("header"))
                 {
@@ -331,6 +429,12 @@ namespace DigitPark.UI.Theme
             foreach (var btn in buttons)
             {
                 string name = btn.gameObject.name.ToLower();
+
+                // EXCLUIR botones sociales (Google/Apple) - tienen branding fijo
+                if (name.Contains("google") || name.Contains("apple"))
+                {
+                    continue;
+                }
 
                 // Botones de acción principal
                 if (name.Contains("login") || name.Contains("play") || name.Contains("confirm") ||
@@ -578,6 +682,36 @@ namespace DigitPark.UI.Theme
             {
                 numberText.color = theme.textPrimary;
             }
+        }
+
+        /// <summary>
+        /// Verifica si un texto pertenece a un botón social (Google/Apple)
+        /// </summary>
+        private bool IsSocialButtonText(TextMeshProUGUI text)
+        {
+            if (text == null) return false;
+
+            // Verificar si el texto o su padre contiene "google" o "apple" en el nombre
+            Transform current = text.transform;
+            while (current != null)
+            {
+                string name = current.gameObject.name.ToLower();
+                if (name.Contains("google") || name.Contains("apple"))
+                {
+                    return true;
+                }
+                current = current.parent;
+            }
+
+            // También verificar por el contenido del texto
+            string textContent = text.text.ToLower();
+            if (textContent.Contains("google") || textContent.Contains("apple") ||
+                textContent.Contains("sign in with"))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

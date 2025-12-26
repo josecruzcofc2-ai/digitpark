@@ -27,7 +27,9 @@ namespace DigitPark.Effects
 
         [Header("Particles")]
         [SerializeField] private bool enableParticles = true;
+#pragma warning disable 0414 // Usado para configuración futura de partículas personalizadas
         [SerializeField] private ParticleType particleType = ParticleType.NeonBurst;
+#pragma warning restore 0414
 
         [Header("Haptic")]
         [SerializeField] private bool enableHaptic = true;

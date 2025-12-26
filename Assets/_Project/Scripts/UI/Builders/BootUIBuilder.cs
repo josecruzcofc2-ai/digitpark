@@ -214,10 +214,12 @@ namespace DigitPark.UI
             ));
 
             // Velocidad sobre tiempo (desacelerar)
+            // Todas las curvas deben estar en el mismo modo (TwoConstants)
             var velocityOverLifetime = neonParticles.velocityOverLifetime;
             velocityOverLifetime.enabled = true;
-            velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(-10f, 10f);
             velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(-5f, 5f);
+            velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(-10f, 10f);
+            velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
             // Renderer
             var renderer = particlesObj.GetComponent<ParticleSystemRenderer>();

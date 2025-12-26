@@ -71,6 +71,9 @@ namespace DigitPark.Localization
 
                 // Asegurar que AutoLocalizer existe
                 EnsureAutoLocalizer();
+
+                // Asegurar que LocalizedTextLayoutFixer existe
+                EnsureLayoutFixer();
             }
             else if (_instance != this)
             {
@@ -95,6 +98,23 @@ namespace DigitPark.Localization
             else
             {
                 Debug.Log("[Localization] AutoLocalizer ya existe en la escena");
+            }
+        }
+
+        private void EnsureLayoutFixer()
+        {
+            Debug.Log("[Localization] Verificando LocalizedTextLayoutFixer...");
+
+            var existingFixer = FindObjectOfType<DigitPark.UI.LocalizedTextLayoutFixer>();
+            if (existingFixer == null)
+            {
+                GameObject fixerObj = new GameObject("LocalizedTextLayoutFixer");
+                fixerObj.AddComponent<DigitPark.UI.LocalizedTextLayoutFixer>();
+                Debug.Log("[Localization] LocalizedTextLayoutFixer creado");
+            }
+            else
+            {
+                Debug.Log("[Localization] LocalizedTextLayoutFixer ya existe");
             }
         }
 

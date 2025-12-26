@@ -13,9 +13,12 @@ namespace DigitPark.Effects
 
         [Header("Haptic Settings")]
         [SerializeField] private bool enableHaptics = true;
+        // Duraciones de vibración para diferentes intensidades (usadas en móvil)
+#pragma warning disable 0414
         [SerializeField] private float lightVibrationDuration = 0.01f;
         [SerializeField] private float mediumVibrationDuration = 0.025f;
         [SerializeField] private float heavyVibrationDuration = 0.05f;
+#pragma warning restore 0414
 
         [Header("Screen Shake")]
         [SerializeField] private float shakeIntensity = 10f;
@@ -39,6 +42,11 @@ namespace DigitPark.Effects
             if (Instance == null)
             {
                 Instance = this;
+                // DontDestroyOnLoad solo funciona en root GameObjects
+                if (transform.parent != null)
+                {
+                    transform.SetParent(null);
+                }
                 DontDestroyOnLoad(gameObject);
                 Initialize();
             }
@@ -302,12 +310,20 @@ namespace DigitPark.Effects
 
             while (elapsed < duration)
             {
+                // Verificar que el objeto no haya sido destruido
+                if (img == null || flashObj == null)
+                {
+                    yield break;
+                }
                 elapsed += Time.deltaTime;
                 img.color = Color.Lerp(startColor, endColor, elapsed / duration);
                 yield return null;
             }
 
-            Destroy(flashObj);
+            if (flashObj != null)
+            {
+                Destroy(flashObj);
+            }
         }
 
         private IEnumerator PulseEffect()
