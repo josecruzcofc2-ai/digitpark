@@ -690,7 +690,7 @@ namespace DigitPark.Managers
         {
             if (timerText != null)
             {
-                timerText.text = $"{currentTime:F3}s";
+                timerText.text = $"{currentTime:F3}{AutoLocalizer.Get("seconds_abbr")}";
             }
         }
 
@@ -704,7 +704,7 @@ namespace DigitPark.Managers
                 if (bestTime < float.MaxValue)
                 {
                     string label = AutoLocalizer.Get("best_label");
-                    bestTimeText.text = $"{label} {bestTime:F3}s";
+                    bestTimeText.text = $"{label} {bestTime:F3}{AutoLocalizer.Get("seconds_abbr")}";
                 }
                 else
                 {

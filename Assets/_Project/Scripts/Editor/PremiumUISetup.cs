@@ -420,7 +420,7 @@ namespace DigitPark.Editor
             textRT.offsetMax = new Vector2(-20, -10);
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
-            textTMP.text = "✨ ¡Quita los anuncios por solo $9.99! ✨";
+            textTMP.text = "¡Quita los anuncios por solo $9.99!";
             textTMP.fontSize = 22;
             textTMP.color = neonCyan;
             textTMP.alignment = TextAlignmentOptions.Center;

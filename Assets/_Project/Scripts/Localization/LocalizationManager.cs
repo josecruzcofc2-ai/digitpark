@@ -427,59 +427,59 @@ namespace DigitPark.Localization
 
             // ==================== SUCCESS MESSAGES - Level 1 (PERFECT < 1s) SUPER DOPAMINE ====================
             AddTranslation("msg_godlike_focus",
-                "GODLIKE FOCUS! 👀✨", "¡ENFOQUE DIVINO! 👀✨", "CONCENTRATION DIVINE! 👀✨", "FOCO DIVINO! 👀✨", "GÖTTLICHER FOKUS! 👀✨");
+                "GODLIKE FOCUS!", "¡ENFOQUE DIVINO!", "CONCENTRATION DIVINE!", "FOCO DIVINO!", "GÖTTLICHER FOKUS!");
             AddTranslation("msg_mind_on_fire",
-                "YOUR MIND IS ON FIRE! 🔥🧠", "¡TU MENTE ESTÁ EN LLAMAS! 🔥🧠", "TON ESPRIT EST EN FEU! 🔥🧠", "SUA MENTE ESTÁ EM CHAMAS! 🔥🧠", "DEIN VERSTAND BRENNT! 🔥🧠");
+                "YOUR MIND IS ON FIRE!", "¡TU MENTE ESTÁ EN LLAMAS!", "TON ESPRIT EST EN FEU!", "SUA MENTE ESTÁ EM CHAMAS!", "DEIN VERSTAND BRENNT!");
             AddTranslation("msg_exceptional_reflexes",
-                "EXCEPTIONAL REFLEXES! 🚀⚡", "¡REFLEJOS EXCEPCIONALES! 🚀⚡", "RÉFLEXES EXCEPTIONNELS! 🚀⚡", "REFLEXOS EXCEPCIONAIS! 🚀⚡", "AUßERGEWÖHNLICHE REFLEXE! 🚀⚡");
+                "EXCEPTIONAL REFLEXES!", "¡REFLEJOS EXCEPCIONALES!", "RÉFLEXES EXCEPTIONNELS!", "REFLEXOS EXCEPCIONAIS!", "AUßERGEWÖHNLICHE REFLEXE!");
             AddTranslation("msg_neural_perfection",
-                "NEURAL PERFECTION! 🧠💫", "¡PERFECCIÓN NEURONAL! 🧠💫", "PERFECTION NEURONALE! 🧠💫", "PERFEIÇÃO NEURAL! 🧠💫", "NEURONALE PERFEKTION! 🧠💫");
+                "NEURAL PERFECTION!", "¡PERFECCIÓN NEURONAL!", "PERFECTION NEURONALE!", "PERFEIÇÃO NEURAL!", "NEURONALE PERFEKTION!");
             AddTranslation("msg_time_master",
-                "MASTER OF TIME! ⏱️👑", "¡MAESTRO DEL TIEMPO! ⏱️👑", "MAÎTRE DU TEMPS! ⏱️👑", "MESTRE DO TEMPO! ⏱️👑", "MEISTER DER ZEIT! ⏱️👑");
+                "MASTER OF TIME!", "¡MAESTRO DEL TIEMPO!", "MAÎTRE DU TEMPS!", "MESTRE DO TEMPO!", "MEISTER DER ZEIT!");
             AddTranslation("msg_superhuman",
-                "SUPERHUMAN SPEED! 💨🦸", "¡VELOCIDAD SOBREHUMANA! 💨🦸", "VITESSE SURHUMAINE! 💨🦸", "VELOCIDADE SOBRE-HUMANA! 💨🦸", "ÜBERMENSCHLICHE GESCHWINDIGKEIT! 💨🦸");
+                "SUPERHUMAN SPEED!", "¡VELOCIDAD SOBREHUMANA!", "VITESSE SURHUMAINE!", "VELOCIDADE SOBRE-HUMANA!", "ÜBERMENSCHLICHE GESCHWINDIGKEIT!");
             AddTranslation("msg_unstoppable_force",
-                "UNSTOPPABLE FORCE! 💪🔥", "¡FUERZA IMPARABLE! 💪🔥", "FORCE IMPARABLE! 💪🔥", "FORÇA IMPARÁVEL! 💪🔥", "UNAUFHALTSAME KRAFT! 💪🔥");
+                "UNSTOPPABLE FORCE!", "¡FUERZA IMPARABLE!", "FORCE IMPARABLE!", "FORÇA IMPARÁVEL!", "UNAUFHALTSAME KRAFT!");
             AddTranslation("msg_legendary_speed",
-                "LEGENDARY SPEED! 🏆⚡", "¡VELOCIDAD LEGENDARIA! 🏆⚡", "VITESSE LÉGENDAIRE! 🏆⚡", "VELOCIDADE LENDÁRIA! 🏆⚡", "LEGENDÄRE GESCHWINDIGKEIT! 🏆⚡");
+                "LEGENDARY SPEED!", "¡VELOCIDAD LEGENDARIA!", "VITESSE LÉGENDAIRE!", "VELOCIDADE LENDÁRIA!", "LEGENDÄRE GESCHWINDIGKEIT!");
             AddTranslation("msg_pure_genius",
-                "PURE GENIUS! 🧠✨", "¡PURO GENIO! 🧠✨", "PUR GÉNIE! 🧠✨", "PURO GÊNIO! 🧠✨", "REINES GENIE! 🧠✨");
+                "PURE GENIUS!", "¡PURO GENIO!", "PUR GÉNIE!", "PURO GÊNIO!", "REINES GENIE!");
             AddTranslation("msg_absolute_legend",
-                "ABSOLUTE LEGEND! 👑🌟", "¡LEYENDA ABSOLUTA! 👑🌟", "LÉGENDE ABSOLUE! 👑🌟", "LENDA ABSOLUTA! 👑🌟", "ABSOLUTE LEGENDE! 👑🌟");
+                "ABSOLUTE LEGEND!", "¡LEYENDA ABSOLUTA!", "LÉGENDE ABSOLUE!", "LENDA ABSOLUTA!", "ABSOLUTE LEGENDE!");
 
             // ==================== SUCCESS MESSAGES - Level 2 (VERY GOOD 1-2s) HIGH DOPAMINE ====================
             AddTranslation("msg_incredible_focus",
-                "Incredible focus! 👀🔥", "¡Enfoque increíble! 👀🔥", "Concentration incroyable! 👀🔥", "Foco incrível! 👀🔥", "Unglaublicher Fokus! 👀🔥");
+                "Incredible focus!", "¡Enfoque increíble!", "Concentration incroyable!", "Foco incrível!", "Unglaublicher Fokus!");
             AddTranslation("msg_blazing_fast",
-                "Blazing fast! ⚡🔥", "¡Velocidad ardiente! ⚡🔥", "Ultra rapide! ⚡🔥", "Velocidade ardente! ⚡🔥", "Blitzschnell! ⚡🔥");
+                "Blazing fast!", "¡Velocidad ardiente!", "Ultra rapide!", "Velocidade ardente!", "Blitzschnell!");
             AddTranslation("msg_sharp_mind",
-                "Sharp mind! 🧠⚡", "¡Mente aguda! 🧠⚡", "Esprit vif! 🧠⚡", "Mente afiada! 🧠⚡", "Scharfer Verstand! 🧠⚡");
+                "Sharp mind!", "¡Mente aguda!", "Esprit vif!", "Mente afiada!", "Scharfer Verstand!");
             AddTranslation("msg_impressive_reflexes",
-                "Impressive reflexes! 🎯✨", "¡Reflejos impresionantes! 🎯✨", "Réflexes impressionnants! 🎯✨", "Reflexos impressionantes! 🎯✨", "Beeindruckende Reflexe! 🎯✨");
+                "Impressive reflexes!", "¡Reflejos impresionantes!", "Réflexes impressionnants!", "Reflexos impressionantes!", "Beeindruckende Reflexe!");
             AddTranslation("msg_excellent_timing",
-                "Excellent timing! ⏱️🌟", "¡Tiempo excelente! ⏱️🌟", "Timing excellent! ⏱️🌟", "Tempo excelente! ⏱️🌟", "Exzellentes Timing! ⏱️🌟");
+                "Excellent timing!", "¡Tiempo excelente!", "Timing excellent!", "Tempo excelente!", "Exzellentes Timing!");
             AddTranslation("msg_on_fire",
-                "You're on fire! 🔥💪", "¡Estás en llamas! 🔥💪", "Tu es en feu! 🔥💪", "Você está pegando fogo! 🔥💪", "Du bist on fire! 🔥💪");
+                "You're on fire!", "¡Estás en llamas!", "Tu es en feu!", "Você está pegando fogo!", "Du bist on fire!");
             AddTranslation("msg_amazing_speed",
-                "Amazing speed! 🚀✨", "¡Velocidad asombrosa! 🚀✨", "Vitesse incroyable! 🚀✨", "Velocidade incrível! 🚀✨", "Erstaunliche Geschwindigkeit! 🚀✨");
+                "Amazing speed!", "¡Velocidad asombrosa!", "Vitesse incroyable!", "Velocidade incrível!", "Erstaunliche Geschwindigkeit!");
             AddTranslation("msg_brilliant_play",
-                "Brilliant play! 💫🎮", "¡Jugada brillante! 💫🎮", "Jeu brillant! 💫🎮", "Jogada brilhante! 💫🎮", "Brillantes Spiel! 💫🎮");
+                "Brilliant play!", "¡Jugada brillante!", "Jeu brillant!", "Jogada brilhante!", "Brillantes Spiel!");
             AddTranslation("msg_stellar_performance",
-                "Stellar performance! ⭐🏆", "¡Rendimiento estelar! ⭐🏆", "Performance stellaire! ⭐🏆", "Desempenho estelar! ⭐🏆", "Herausragende Leistung! ⭐🏆");
+                "Stellar performance!", "¡Rendimiento estelar!", "Performance stellaire!", "Desempenho estelar!", "Herausragende Leistung!");
             AddTranslation("msg_remarkable",
-                "Remarkable! 🌟👏", "¡Notable! 🌟👏", "Remarquable! 🌟👏", "Notável! 🌟👏", "Bemerkenswert! 🌟👏");
+                "Remarkable!", "¡Notable!", "Remarquable!", "Notável!", "Bemerkenswert!");
 
             // ==================== SUCCESS MESSAGES - Level 3 (GOOD 2-3s) POSITIVE ====================
             AddTranslation("msg_great_job",
-                "Great job! 👍", "¡Gran trabajo! 👍", "Super boulot! 👍", "Ótimo trabalho! 👍", "Tolle Arbeit! 👍");
+                "Great job!", "¡Gran trabajo!", "Super boulot!", "Ótimo trabalho!", "Tolle Arbeit!");
             AddTranslation("msg_well_played",
-                "Well played! 🎮", "¡Bien jugado! 🎮", "Bien joué! 🎮", "Bem jogado! 🎮", "Gut gespielt! 🎮");
+                "Well played!", "¡Bien jugado!", "Bien joué!", "Bem jogado!", "Gut gespielt!");
             AddTranslation("msg_nice_speed",
-                "Nice speed! ⚡", "¡Buena velocidad! ⚡", "Belle vitesse! ⚡", "Boa velocidade! ⚡", "Gute Geschwindigkeit! ⚡");
+                "Nice speed!", "¡Buena velocidad!", "Belle vitesse!", "Boa velocidade!", "Gute Geschwindigkeit!");
             AddTranslation("msg_good_reflexes",
-                "Good reflexes! 👀", "¡Buenos reflejos! 👀", "Bons réflexes! 👀", "Bons reflexos! 👀", "Gute Reflexe! 👀");
+                "Good reflexes!", "¡Buenos reflejos!", "Bons réflexes!", "Bons reflexos!", "Gute Reflexe!");
             AddTranslation("msg_solid_time",
-                "Solid time! ⏱️", "¡Tiempo sólido! ⏱️", "Bon temps! ⏱️", "Tempo sólido! ⏱️", "Solide Zeit! ⏱️");
+                "Solid time!", "¡Tiempo sólido!", "Bon temps!", "Tempo sólido!", "Solide Zeit!");
 
             // ==================== SUCCESS MESSAGES - Level 4 (DECENT 3-4s) ENCOURAGING ====================
             AddTranslation("msg_good_effort",
@@ -507,25 +507,25 @@ namespace DigitPark.Localization
 
             // ==================== SUCCESS MESSAGES - Level 6 (NO CLASSIFY 5s+) EMOTIONAL SUPPORT ====================
             AddTranslation("msg_almost_there",
-                "Almost there... keep trying! 💙", "Casi lo logras... ¡sigue intentando! 💙", "Presque... continue d'essayer! 💙", "Quase lá... continue tentando! 💙", "Fast geschafft... bleib dran! 💙");
+                "Almost there... keep trying!", "Casi lo logras... ¡sigue intentando!", "Presque... continue d'essayer!", "Quase lá... continue tentando!", "Fast geschafft... bleib dran!");
             AddTranslation("msg_breathe_continue",
-                "Breathe and continue 💙", "Respira y sigue 💙", "Respire et continue 💙", "Respire e continue 💙", "Atme und mach weiter 💙");
+                "Breathe and continue", "Respira y sigue", "Respire et continue", "Respire e continue", "Atme und mach weiter");
             AddTranslation("msg_next_will_be_better",
-                "Next one will be better! 🌟", "¡El siguiente será mejor! 🌟", "Le prochain sera meilleur! 🌟", "O próximo será melhor! 🌟", "Der nächste wird besser! 🌟");
+                "Next one will be better!", "¡El siguiente será mejor!", "Le prochain sera meilleur!", "O próximo será melhor!", "Der nächste wird besser!");
             AddTranslation("msg_dont_give_up",
-                "Don't give up! 💪", "¡No te rindas! 💪", "N'abandonne pas! 💪", "Não desista! 💪", "Gib nicht auf! 💪");
+                "Don't give up!", "¡No te rindas!", "N'abandonne pas!", "Não desista!", "Gib nicht auf!");
             AddTranslation("msg_patience_wins",
-                "Patience wins 🧘", "La paciencia gana 🧘", "La patience gagne 🧘", "A paciência vence 🧘", "Geduld gewinnt 🧘");
+                "Patience wins", "La paciencia gana", "La patience gagne", "A paciência vence", "Geduld gewinnt");
             AddTranslation("msg_every_try_counts",
-                "Every try counts! 📈", "¡Cada intento cuenta! 📈", "Chaque essai compte! 📈", "Cada tentativa conta! 📈", "Jeder Versuch zählt! 📈");
+                "Every try counts!", "¡Cada intento cuenta!", "Chaque essai compte!", "Cada tentativa conta!", "Jeder Versuch zählt!");
             AddTranslation("msg_progress_not_perfection",
-                "Progress, not perfection 🌱", "Progreso, no perfección 🌱", "Progrès, pas perfection 🌱", "Progresso, não perfeição 🌱", "Fortschritt, nicht Perfektion 🌱");
+                "Progress, not perfection", "Progreso, no perfección", "Progrès, pas perfection", "Progresso, não perfeição", "Fortschritt, nicht Perfektion");
             AddTranslation("msg_keep_calm",
-                "Stay calm and try again 🌊", "Mantén la calma e intenta de nuevo 🌊", "Reste calme et réessaie 🌊", "Fique calmo e tente novamente 🌊", "Bleib ruhig und versuch es nochmal 🌊");
+                "Stay calm and try again", "Mantén la calma e intenta de nuevo", "Reste calme et réessaie", "Fique calmo e tente novamente", "Bleib ruhig und versuch es nochmal");
             AddTranslation("msg_believe_yourself",
-                "Believe in yourself! ✨", "¡Cree en ti mismo! ✨", "Crois en toi! ✨", "Acredite em você! ✨", "Glaub an dich! ✨");
+                "Believe in yourself!", "¡Cree en ti mismo!", "Crois en toi!", "Acredite em você!", "Glaub an dich!");
             AddTranslation("msg_stay_focused",
-                "Stay focused, you got this! 🎯", "¡Concéntrate, tú puedes! 🎯", "Reste concentré, tu peux le faire! 🎯", "Fique focado, você consegue! 🎯", "Bleib fokussiert, du schaffst das! 🎯");
+                "Stay focused, you got this!", "¡Concéntrate, tú puedes!", "Reste concentré, tu peux le faire!", "Fique focado, você consegue!", "Bleib fokussiert, du schaffst das!");
 
             // ==================== LEADERBOARD / SCORES ====================
             AddTranslation("leaderboard_title",
@@ -698,6 +698,12 @@ namespace DigitPark.Localization
                 "{0}h {1}m", "{0}h {1}m", "{0}h {1}m", "{0}h {1}m", "{0}h {1}m");
             AddTranslation("time_minutes_seconds",
                 "{0}m {1}s", "{0}m {1}s", "{0}m {1}s", "{0}m {1}s", "{0}m {1}s");
+            AddTranslation("seconds_abbr",
+                "s", "s", "s", "s", "s");
+            AddTranslation("hours_abbr",
+                "h", "h", "h", "h", "Std");
+            AddTranslation("days_abbr",
+                "d", "d", "j", "d", "T");
 
             // ==================== LEADERBOARD DISPLAY ====================
             AddTranslation("leaderboard_header",

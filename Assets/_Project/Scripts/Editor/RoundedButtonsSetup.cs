@@ -78,7 +78,8 @@ namespace DigitPark.Editor
 
         private List<string> GetLoginSceneButtons()
         {
-            return new List<string> { "GoogleButton", "AppleButton", "LoginButton", "RegisterButton" };
+            // GoogleButton y AppleButton se manejan manualmente
+            return new List<string> { "LoginButton", "RegisterButton" };
         }
 
         private List<string> GetMainMenuSceneButtons()

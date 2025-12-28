@@ -68,15 +68,24 @@ namespace DigitPark.UI.Components
                 return;
             }
 
-            // Configurar botones de navegación
+            // Configurar botones de navegación (limpiar antes para evitar duplicados)
             if (prevButton != null)
+            {
+                prevButton.onClick.RemoveListener(SelectPrevious);
                 prevButton.onClick.AddListener(SelectPrevious);
+            }
 
             if (nextButton != null)
+            {
+                nextButton.onClick.RemoveListener(SelectNext);
                 nextButton.onClick.AddListener(SelectNext);
+            }
 
             if (applyButton != null)
+            {
+                applyButton.onClick.RemoveListener(ApplySelectedTheme);
                 applyButton.onClick.AddListener(ApplySelectedTheme);
+            }
 
             // Generar items si hay contenedor
             if (themesContainer != null)
