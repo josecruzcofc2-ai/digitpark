@@ -12,47 +12,25 @@ namespace DigitPark.UI
     public class BackButtonColorFixer : MonoBehaviour
     {
         private Image image;
-        private Color currentColor;
-        private int frameCount = 0;
 
         private void Awake()
         {
             image = GetComponent<Image>();
         }
 
-        private void Start()
-        {
-            ApplyThemeColor();
-
-            // Suscribirse a cambios de tema
-            ThemeManager.OnThemeChanged += OnThemeChanged;
-        }
-
-        private void OnDestroy()
-        {
-            // Desuscribirse
-            ThemeManager.OnThemeChanged -= OnThemeChanged;
-        }
-
         private void OnEnable()
         {
-            frameCount = 0;
+            ThemeManager.OnThemeChanged += OnThemeChanged;
             ApplyThemeColor();
         }
 
-        private void LateUpdate()
+        private void OnDisable()
         {
-            // Aplicar color durante los primeros frames para asegurar prioridad
-            if (frameCount < 10)
-            {
-                ApplyThemeColor();
-                frameCount++;
-            }
+            ThemeManager.OnThemeChanged -= OnThemeChanged;
         }
 
         private void OnThemeChanged(ThemeData newTheme)
         {
-            frameCount = 0; // Reset para re-aplicar
             ApplyThemeColor();
         }
 
@@ -61,17 +39,11 @@ namespace DigitPark.UI
             if (image == null) return;
 
             Color targetColor = GetThemeAccentColor();
-
-            if (image.color != targetColor)
-            {
-                image.color = targetColor;
-                currentColor = targetColor;
-            }
+            image.color = targetColor;
         }
 
         private Color GetThemeAccentColor()
         {
-            // Usar el color primario del tema activo
             if (ThemeManager.Instance?.CurrentTheme != null)
             {
                 return ThemeManager.Instance.CurrentTheme.primaryAccent;

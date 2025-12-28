@@ -951,11 +951,11 @@ namespace DigitPark.Managers
             {
                 int hours = (int)value;
                 if (hours < 24)
-                    durationValue.text = $"{hours}h";
+                    durationValue.text = $"{hours}{AutoLocalizer.Get("hours_abbr")}";
                 else
                 {
                     int days = hours / 24;
-                    durationValue.text = $"{days}d";
+                    durationValue.text = $"{days}{AutoLocalizer.Get("days_abbr")}";
                 }
             }
         }

@@ -46,11 +46,6 @@ namespace DigitPark.UI
             yield return new WaitForSeconds(0.2f);
             Debug.Log("[LayoutFixer] Ejecutando fix inicial...");
             FixAllLayouts();
-            FixSocialButtons();
-
-            // Ejecutar de nuevo con más delay para asegurar que sea después de ThemeApplier
-            yield return new WaitForSeconds(0.5f);
-            FixSocialButtons();
         }
 
         private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
@@ -63,55 +58,6 @@ namespace DigitPark.UI
         {
             yield return new WaitForSeconds(0.3f);
             FixAllLayouts();
-            FixSocialButtons();
-
-            // Segunda pasada con más delay
-            yield return new WaitForSeconds(0.5f);
-            FixSocialButtons();
-        }
-
-        /// <summary>
-        /// Corrige los colores de los botones sociales (Google/Apple)
-        /// </summary>
-        private void FixSocialButtons()
-        {
-            // Colores oficiales de Google (Dark style)
-            Color googleBgColor = new Color(0.075f, 0.075f, 0.078f, 1f); // #131314
-            Color googleTextColor = new Color(0.89f, 0.89f, 0.89f, 1f); // #E3E3E3
-
-            // Colores oficiales de Apple (Dark style)
-            Color appleBgColor = Color.black;
-            Color appleTextColor = Color.white;
-
-            // Fix GoogleButton
-            var googleButton = GameObject.Find("GoogleButton");
-            if (googleButton != null)
-            {
-                var bgImage = googleButton.GetComponent<UnityEngine.UI.Image>();
-                if (bgImage != null) bgImage.color = googleBgColor;
-
-                var texts = googleButton.GetComponentsInChildren<TextMeshProUGUI>(true);
-                foreach (var text in texts)
-                {
-                    text.color = googleTextColor;
-                }
-                Debug.Log("[LayoutFixer] GoogleButton colores corregidos");
-            }
-
-            // Fix AppleButton
-            var appleButton = GameObject.Find("AppleButton");
-            if (appleButton != null)
-            {
-                var bgImage = appleButton.GetComponent<UnityEngine.UI.Image>();
-                if (bgImage != null) bgImage.color = appleBgColor;
-
-                var texts = appleButton.GetComponentsInChildren<TextMeshProUGUI>(true);
-                foreach (var text in texts)
-                {
-                    text.color = appleTextColor;
-                }
-                Debug.Log("[LayoutFixer] AppleButton colores corregidos");
-            }
         }
 
         private void OnEnable()
