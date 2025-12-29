@@ -126,6 +126,64 @@ namespace DigitPark.Services.Firebase
             }
         }
 
+        /// <summary>
+        /// Obtiene los datos de un jugador por su ID (alias de LoadPlayerData)
+        /// </summary>
+        public async Task<PlayerData> GetPlayerDataById(string playerId)
+        {
+            Debug.Log($"[Database] Obteniendo datos del jugador: {playerId}");
+            return await LoadPlayerData(playerId);
+        }
+
+        /// <summary>
+        /// Busca jugadores por nombre de usuario
+        /// </summary>
+        public async Task<List<PlayerSearchResult>> SearchPlayers(string query, int maxResults = 20)
+        {
+            Debug.Log($"[Database] Buscando jugadores: {query}");
+            await Task.Delay(100); // Simular latencia de red
+
+            var results = new List<PlayerSearchResult>();
+            string queryLower = query.ToLower();
+
+            // Buscar en el leaderboard (donde tenemos usuarios registrados)
+            foreach (var entry in globalLeaderboard)
+            {
+                if (entry.username.ToLower().Contains(queryLower))
+                {
+                    // Intentar cargar datos completos del jugador
+                    var playerData = await LoadPlayerData(entry.userId);
+
+                    float winRate = 0f;
+                    int level = 1;
+
+                    if (playerData != null)
+                    {
+                        level = playerData.level;
+                        winRate = playerData.totalGamesPlayed > 0
+                            ? (float)playerData.totalGamesWon / playerData.totalGamesPlayed * 100f
+                            : 0f;
+                    }
+
+                    results.Add(new PlayerSearchResult
+                    {
+                        playerId = entry.userId,
+                        username = entry.username,
+                        level = level,
+                        winRate = winRate,
+                        isFriend = false, // TODO: Verificar amistad
+                        avatarUrl = entry.avatarUrl ?? ""
+                    });
+
+                    if (results.Count >= maxResults)
+                        break;
+                }
+            }
+
+            Debug.Log($"[Database] Encontrados {results.Count} jugadores");
+            return results;
+        }
+
         #endregion
 
         #region Leaderboards
@@ -432,5 +490,19 @@ namespace DigitPark.Services.Firebase
         public string avatarUrl;
         public int position;
         public string timestamp;
+    }
+
+    /// <summary>
+    /// Datos de resultado de busqueda de jugador
+    /// </summary>
+    [Serializable]
+    public class PlayerSearchResult
+    {
+        public string playerId;
+        public string username;
+        public int level;
+        public float winRate;
+        public bool isFriend;
+        public string avatarUrl;
     }
 }
