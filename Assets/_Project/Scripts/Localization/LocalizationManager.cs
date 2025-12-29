@@ -572,8 +572,6 @@ namespace DigitPark.Localization
                 "My Tournaments", "Mis Torneos", "Mes Tournois", "Meus Torneios", "Meine Turniere");
             AddTranslation("create_tab",
                 "Create", "Crear", "Créer", "Criar", "Erstellen");
-            AddTranslation("skillz_cash_tab",
-                "Cash", "Dinero", "Argent", "Dinheiro", "Geld");
             AddTranslation("join_tournament",
                 "Join", "Unirse", "Rejoindre", "Entrar", "Beitreten");
             AddTranslation("exit_tournament",

@@ -21,10 +21,13 @@ namespace DigitPark.Managers
         [SerializeField] public Button playButton;
         [SerializeField] public Button scoresButton;
         [SerializeField] public Button tournamentsButton;
+        [SerializeField] public Button cashBattleButton;
         [SerializeField] public Button settingsButton;
 
         [Header("UI - User Info")]
+        [SerializeField] public Button userButton;
         [SerializeField] public TextMeshProUGUI userText;
+        [SerializeField] public Button searchButton;
 
         [Header("UI - Premium")]
         [SerializeField] public Button premiumButton;
@@ -68,8 +71,13 @@ namespace DigitPark.Managers
             playButton?.onClick.AddListener(OnPlayButtonClicked);
             scoresButton?.onClick.AddListener(OnScoresButtonClicked);
             tournamentsButton?.onClick.AddListener(OnTournamentsButtonClicked);
+            cashBattleButton?.onClick.AddListener(OnCashBattleButtonClicked);
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
+
+            // User info buttons
+            userButton?.onClick.AddListener(OnUserButtonClicked);
+            searchButton?.onClick.AddListener(OnSearchButtonClicked);
 
             // Suscribirse a cambios de premium
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
@@ -212,6 +220,18 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
+        /// Navega a la escena de Cash Battle (dinero real - 18+)
+        /// </summary>
+        private void OnCashBattleButtonClicked()
+        {
+            Debug.Log("[MainMenu] Navegando a Cash Battle");
+
+            // AudioManager.Instance?.PlaySFX("ButtonClick");
+
+            SceneManager.LoadScene("CashBattle");
+        }
+
+        /// <summary>
         /// Navega a la escena de configuración
         /// </summary>
         private void OnSettingsButtonClicked()
@@ -221,6 +241,32 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             SceneManager.LoadScene("Settings");
+        }
+
+        /// <summary>
+        /// Muestra el perfil del usuario actual
+        /// </summary>
+        private void OnUserButtonClicked()
+        {
+            Debug.Log("[MainMenu] Abriendo perfil de usuario");
+
+            // AudioManager.Instance?.PlaySFX("ButtonClick");
+
+            // TODO: Abrir panel de perfil o navegar a escena Profile
+            SceneManager.LoadScene("Profile");
+        }
+
+        /// <summary>
+        /// Abre el buscador de jugadores
+        /// </summary>
+        private void OnSearchButtonClicked()
+        {
+            Debug.Log("[MainMenu] Abriendo buscador de jugadores");
+
+            // AudioManager.Instance?.PlaySFX("ButtonClick");
+
+            // TODO: Abrir panel de búsqueda de jugadores
+            SceneManager.LoadScene("SearchPlayers");
         }
 
         /// <summary>

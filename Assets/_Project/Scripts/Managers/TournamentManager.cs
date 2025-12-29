@@ -7,7 +7,6 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI.Panels;
-using DigitPark.Skillz;
 
 namespace DigitPark.Managers
 {
@@ -21,7 +20,6 @@ namespace DigitPark.Managers
         [SerializeField] public Button searchTab;
         [SerializeField] public Button myTournamentsTab;
         [SerializeField] public Button createTab;
-        [SerializeField] public Button skillzCashTab; // Tab para torneos con dinero real (Skillz)
 
         [Header("Search Options")]
         [SerializeField] public Button searchOptionsButton;
@@ -174,7 +172,6 @@ namespace DigitPark.Managers
             searchTab?.onClick.AddListener(() => ShowView(TournamentView.Search));
             myTournamentsTab?.onClick.AddListener(() => ShowView(TournamentView.MyTournaments));
             createTab?.onClick.AddListener(() => ShowView(TournamentView.Create));
-            skillzCashTab?.onClick.AddListener(OnSkillzCashTabClicked);
 
             // Search Options
             searchOptionsButton?.onClick.AddListener(ShowSearchOptions);
@@ -274,8 +271,6 @@ namespace DigitPark.Managers
             SetTabButtonState(searchTab, currentView == TournamentView.Search);
             SetTabButtonState(myTournamentsTab, currentView == TournamentView.MyTournaments);
             SetTabButtonState(createTab, currentView == TournamentView.Create);
-            // Skillz tab siempre en estado "no seleccionado" (abre UI externa)
-            SetTabButtonState(skillzCashTab, false);
         }
 
         /// <summary>
@@ -1632,42 +1627,6 @@ namespace DigitPark.Managers
 
             // Mostrar el panel de opciones de búsqueda
             ShowSearchOptions();
-        }
-
-        #endregion
-
-        #region Skillz Cash Tournaments
-
-        /// <summary>
-        /// Lanza la UI de Skillz para torneos con dinero real
-        /// Skillz maneja TODO: depósitos, retiros, matchmaking, premios
-        /// </summary>
-        private void OnSkillzCashTabClicked()
-        {
-            Debug.Log("[Tournament] Abriendo Skillz para torneos con dinero real");
-
-            // Verificar si Skillz está inicializado
-            if (DigitParkSkillzManager.Instance == null)
-            {
-                Debug.LogError("[Tournament] DigitParkSkillzManager no encontrado. Asegúrate de tener el prefab en la escena Boot.");
-                ShowErrorMessage("Skillz no está disponible. Reinicia la aplicación.");
-                return;
-            }
-
-            if (!DigitParkSkillzManager.Instance.IsInitialized)
-            {
-                Debug.LogWarning("[Tournament] Skillz no está inicializado. Intentando inicializar...");
-                DigitParkSkillzManager.Instance.InitializeSkillz();
-            }
-
-            // Lanzar UI de Skillz
-            // Esto abrirá la interfaz nativa de Skillz donde el usuario puede:
-            // - Ver torneos disponibles
-            // - Agregar fondos (depósitos)
-            // - Unirse a torneos con dinero real
-            // - Ver su balance
-            // - Retirar ganancias
-            DigitParkSkillzManager.Instance.LaunchSkillz();
         }
 
         #endregion
