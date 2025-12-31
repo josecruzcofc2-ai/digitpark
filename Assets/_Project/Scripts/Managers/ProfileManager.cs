@@ -10,37 +10,36 @@ namespace DigitPark.Managers
     /// <summary>
     /// Manager del perfil de usuario
     /// Muestra estadisticas, historial y permite gestionar amigos
+    /// Version actualizada - Sin coins, gems, levels
     /// </summary>
     public class ProfileManager : MonoBehaviour
     {
         [Header("UI - Profile Info")]
         [SerializeField] private TextMeshProUGUI usernameText;
-        [SerializeField] private TextMeshProUGUI levelText;
+        [SerializeField] private Image avatarImage;
+
+        [Header("UI - General Stats")]
         [SerializeField] private TextMeshProUGUI totalGamesText;
         [SerializeField] private TextMeshProUGUI winsText;
         [SerializeField] private TextMeshProUGUI winRateText;
-        [SerializeField] private TextMeshProUGUI coinsText;
-        [SerializeField] private TextMeshProUGUI gemsText;
-        [SerializeField] private Image avatarImage;
-
-        [Header("UI - Stats Per Game")]
-        [SerializeField] private TextMeshProUGUI digitRushBestText;
-        [SerializeField] private TextMeshProUGUI memoryPairsBestText;
-        [SerializeField] private TextMeshProUGUI quickMathBestText;
-        [SerializeField] private TextMeshProUGUI flashTapBestText;
-        [SerializeField] private TextMeshProUGUI oddOneOutBestText;
         [SerializeField] private TextMeshProUGUI bestTimeText;
         [SerializeField] private TextMeshProUGUI averageTimeText;
+
+        [Header("UI - Stats Per Game (Best Time + Win Rate)")]
+        [SerializeField] private TextMeshProUGUI digitRushStatsText;
+        [SerializeField] private TextMeshProUGUI memoryPairsStatsText;
+        [SerializeField] private TextMeshProUGUI quickMathStatsText;
+        [SerializeField] private TextMeshProUGUI flashTapStatsText;
+        [SerializeField] private TextMeshProUGUI oddOneOutStatsText;
 
         [Header("UI - Navigation")]
         [SerializeField] private Button friendsButton;
         [SerializeField] private Button historyButton;
-        [SerializeField] private Button achievementsButton;
         [SerializeField] private Button editProfileButton;
         [SerializeField] private Button backButton;
 
         [Header("UI - Other Player Profile")]
-        [SerializeField] private GameObject addFriendButtonContainer;
+        [SerializeField] private GameObject otherProfileButtonsContainer;
         [SerializeField] private Button addFriendButton;
         [SerializeField] private Button challengeButton;
         [SerializeField] private TextMeshProUGUI friendStatusText;
@@ -72,7 +71,6 @@ namespace DigitPark.Managers
         {
             friendsButton?.onClick.AddListener(OnFriendsClicked);
             historyButton?.onClick.AddListener(OnHistoryClicked);
-            achievementsButton?.onClick.AddListener(OnAchievementsClicked);
             editProfileButton?.onClick.AddListener(OnEditProfileClicked);
             backButton?.onClick.AddListener(OnBackClicked);
 
@@ -105,11 +103,9 @@ namespace DigitPark.Managers
                 currentPlayerData = AuthenticationService.Instance.GetCurrentPlayerData();
             }
 
-            // Ocultar botones de agregar amigo en perfil propio
-            if (addFriendButtonContainer != null)
-                addFriendButtonContainer.SetActive(false);
-            if (challengeButton != null)
-                challengeButton.gameObject.SetActive(false);
+            // Ocultar botones de otro perfil en perfil propio
+            if (otherProfileButtonsContainer != null)
+                otherProfileButtonsContainer.SetActive(false);
             if (editProfileButton != null)
                 editProfileButton.gameObject.SetActive(true);
 
@@ -124,11 +120,9 @@ namespace DigitPark.Managers
                 currentPlayerData = await DatabaseService.Instance.GetPlayerDataById(playerId);
             }
 
-            // Mostrar botones de agregar amigo en perfil de otros
-            if (addFriendButtonContainer != null)
-                addFriendButtonContainer.SetActive(true);
-            if (challengeButton != null)
-                challengeButton.gameObject.SetActive(true);
+            // Mostrar botones de otro perfil
+            if (otherProfileButtonsContainer != null)
+                otherProfileButtonsContainer.SetActive(true);
             if (editProfileButton != null)
                 editProfileButton.gameObject.SetActive(false);
 
@@ -140,17 +134,28 @@ namespace DigitPark.Managers
 
         private void CheckFriendStatus(string playerId)
         {
-            // TODO: Verificar en Firebase si ya son amigos
-            bool isFriend = false; // Placeholder
+            // Verificar si ya son amigos usando PlayerData del usuario actual
+            PlayerData myData = null;
+            if (AuthenticationService.Instance != null)
+            {
+                myData = AuthenticationService.Instance.GetCurrentPlayerData();
+            }
+
+            bool isFriend = myData != null && myData.IsFriend(playerId);
 
             if (friendStatusText != null)
             {
-                friendStatusText.text = isFriend ? "Ya son amigos" : "";
+                friendStatusText.text = isFriend ? "Amigos" : "";
                 friendStatusText.gameObject.SetActive(isFriend);
             }
 
+            // Mostrar/ocultar boton de agregar amigo
             if (addFriendButton != null)
                 addFriendButton.gameObject.SetActive(!isFriend);
+
+            // Solo puede retar si son amigos
+            if (challengeButton != null)
+                challengeButton.gameObject.SetActive(isFriend);
         }
 
         private void UpdateUI()
@@ -158,25 +163,13 @@ namespace DigitPark.Managers
             if (currentPlayerData == null)
             {
                 Debug.LogWarning("[Profile] No hay datos del jugador");
-                // Mostrar datos por defecto
                 if (usernameText != null) usernameText.text = "Sin Usuario";
-                if (levelText != null) levelText.text = "Nivel 1";
                 return;
             }
 
             // Info basica
             if (usernameText != null)
                 usernameText.text = currentPlayerData.username ?? "Sin Usuario";
-
-            if (levelText != null)
-                levelText.text = $"Nivel {currentPlayerData.level}";
-
-            // Monedas
-            if (coinsText != null)
-                coinsText.text = $"{currentPlayerData.coins:N0}";
-
-            if (gemsText != null)
-                gemsText.text = $"{currentPlayerData.gems:N0}";
 
             // Estadisticas generales
             if (totalGamesText != null)
@@ -186,20 +179,15 @@ namespace DigitPark.Managers
                 winsText.text = $"{currentPlayerData.totalGamesWon}";
 
             if (winRateText != null)
-            {
-                float winRate = currentPlayerData.totalGamesPlayed > 0
-                    ? (float)currentPlayerData.totalGamesWon / currentPlayerData.totalGamesPlayed * 100f
-                    : 0f;
-                winRateText.text = $"{winRate:F1}%";
-            }
+                winRateText.text = $"{currentPlayerData.GetWinRate():F1}%";
 
-            // Tiempos
+            // Tiempos generales
             if (bestTimeText != null)
             {
                 string bestTimeStr = currentPlayerData.bestTime < float.MaxValue
                     ? $"{currentPlayerData.bestTime:F2}s"
                     : "--";
-                bestTimeText.text = $"Mejor: {bestTimeStr}";
+                bestTimeText.text = bestTimeStr;
             }
 
             if (averageTimeText != null)
@@ -207,10 +195,10 @@ namespace DigitPark.Managers
                 string avgTimeStr = currentPlayerData.averageTime > 0
                     ? $"{currentPlayerData.averageTime:F2}s"
                     : "--";
-                averageTimeText.text = $"Promedio: {avgTimeStr}";
+                averageTimeText.text = avgTimeStr;
             }
 
-            // Best scores por juego
+            // Stats por juego
             UpdateGameStats();
 
             Debug.Log($"[Profile] UI actualizada para {currentPlayerData.username}");
@@ -218,22 +206,40 @@ namespace DigitPark.Managers
 
         private void UpdateGameStats()
         {
-            // TODO: Cuando tengamos los 5 juegos, obtener mejores scores de cada uno
-            // Por ahora mostramos placeholder
-            if (digitRushBestText != null)
-                digitRushBestText.text = "Best: --";
+            // Digit Rush
+            if (digitRushStatsText != null && currentPlayerData.digitRushStats != null)
+            {
+                var stats = currentPlayerData.digitRushStats;
+                digitRushStatsText.text = $"Digit Rush: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+            }
 
-            if (memoryPairsBestText != null)
-                memoryPairsBestText.text = "Best: --";
+            // Memory Pairs
+            if (memoryPairsStatsText != null && currentPlayerData.memoryPairsStats != null)
+            {
+                var stats = currentPlayerData.memoryPairsStats;
+                memoryPairsStatsText.text = $"Memory Pairs: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+            }
 
-            if (quickMathBestText != null)
-                quickMathBestText.text = "Best: --";
+            // Quick Math
+            if (quickMathStatsText != null && currentPlayerData.quickMathStats != null)
+            {
+                var stats = currentPlayerData.quickMathStats;
+                quickMathStatsText.text = $"Quick Math: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+            }
 
-            if (flashTapBestText != null)
-                flashTapBestText.text = "Best: --";
+            // Flash Tap
+            if (flashTapStatsText != null && currentPlayerData.flashTapStats != null)
+            {
+                var stats = currentPlayerData.flashTapStats;
+                flashTapStatsText.text = $"Flash Tap: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+            }
 
-            if (oddOneOutBestText != null)
-                oddOneOutBestText.text = "Best: --";
+            // Odd One Out
+            if (oddOneOutStatsText != null && currentPlayerData.oddOneOutStats != null)
+            {
+                var stats = currentPlayerData.oddOneOutStats;
+                oddOneOutStatsText.text = $"Odd One Out: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+            }
         }
 
         #region Button Callbacks
@@ -248,12 +254,6 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Profile] Abriendo historial de partidas");
             // TODO: Mostrar panel de historial
-        }
-
-        private void OnAchievementsClicked()
-        {
-            Debug.Log("[Profile] Abriendo logros");
-            // TODO: Mostrar panel de logros
         }
 
         private void OnEditProfileClicked()

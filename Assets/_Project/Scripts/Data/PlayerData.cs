@@ -16,22 +16,20 @@ namespace DigitPark.Data
         public string avatarUrl;
         public string countryCode;
 
-        // Progresión
-        public int level;
-        public int experience;
-        public int experienceToNextLevel;
-
-        // Moneda del juego
-        public int coins;
-        public int gems;
-
-        // Estadísticas de juego
+        // Estadisticas generales
         public float bestTime;
         public float averageTime;
         public int totalGamesPlayed;
         public int totalGamesWon;
 
-        // Historial de tiempos (últimos 30)
+        // Estadisticas por juego
+        public GameStats digitRushStats;
+        public GameStats memoryPairsStats;
+        public GameStats quickMathStats;
+        public GameStats flashTapStats;
+        public GameStats oddOneOutStats;
+
+        // Historial de tiempos (ultimos 30)
         public List<ScoreEntry> scoreHistory;
 
         // Torneos participados
@@ -40,20 +38,16 @@ namespace DigitPark.Data
         // Configuraciones del jugador
         public PlayerSettings settings;
 
-        // Logros desbloqueados
-        public List<string> unlockedAchievements;
+        // Lista de amigos
+        public List<string> friends;
 
         // Estado premium
         public bool isPremium;
         public DateTime premiumExpiryDate;
 
-        // Última sesión
+        // Ultima sesion
         public DateTime lastLoginDate;
         public DateTime createdDate;
-
-        // Daily rewards
-        public int consecutiveLoginDays;
-        public DateTime lastDailyRewardClaimed;
 
         public PlayerData()
         {
@@ -63,69 +57,52 @@ namespace DigitPark.Data
             avatarUrl = "";
             countryCode = "US";
 
-            level = 1;
-            experience = 0;
-            experienceToNextLevel = 100;
-
-            coins = 0;
-            gems = 0;
-
             bestTime = float.MaxValue;
             averageTime = 0f;
             totalGamesPlayed = 0;
             totalGamesWon = 0;
 
+            // Inicializar stats por juego
+            digitRushStats = new GameStats();
+            memoryPairsStats = new GameStats();
+            quickMathStats = new GameStats();
+            flashTapStats = new GameStats();
+            oddOneOutStats = new GameStats();
+
             scoreHistory = new List<ScoreEntry>();
             tournaments = new Dictionary<string, TournamentResult>();
             settings = new PlayerSettings();
-            unlockedAchievements = new List<string>();
+            friends = new List<string>();
 
             isPremium = false;
             premiumExpiryDate = DateTime.MinValue;
 
             lastLoginDate = DateTime.Now;
             createdDate = DateTime.Now;
-
-            consecutiveLoginDays = 0;
-            lastDailyRewardClaimed = DateTime.MinValue;
         }
 
         /// <summary>
-        /// Añade experiencia y verifica si sube de nivel
+        /// Obtiene las estadisticas de un juego especifico
         /// </summary>
-        public bool AddExperience(int amount)
+        public GameStats GetGameStats(string gameType)
         {
-            experience += amount;
-
-            if (experience >= experienceToNextLevel)
+            return gameType switch
             {
-                LevelUp();
-                return true;
-            }
-
-            return false;
+                "DigitRush" => digitRushStats,
+                "MemoryPairs" => memoryPairsStats,
+                "QuickMath" => quickMathStats,
+                "FlashTap" => flashTapStats,
+                "OddOneOut" => oddOneOutStats,
+                _ => null
+            };
         }
 
         /// <summary>
-        /// Sube el nivel del jugador
+        /// Verifica si un jugador es amigo
         /// </summary>
-        private void LevelUp()
+        public bool IsFriend(string playerId)
         {
-            level++;
-            experience -= experienceToNextLevel;
-            experienceToNextLevel = CalculateNextLevelXP();
-
-            // Recompensas por subir de nivel
-            coins += level * 10;
-            gems += level;
-        }
-
-        /// <summary>
-        /// Calcula la XP necesaria para el siguiente nivel
-        /// </summary>
-        private int CalculateNextLevelXP()
-        {
-            return Mathf.RoundToInt(100 * Mathf.Pow(level, 1.5f));
+            return friends != null && friends.Contains(playerId);
         }
 
         /// <summary>
@@ -193,11 +170,6 @@ namespace DigitPark.Data
                 { "email", email },
                 { "avatarUrl", avatarUrl },
                 { "countryCode", countryCode },
-                { "level", level },
-                { "experience", experience },
-                { "experienceToNextLevel", experienceToNextLevel },
-                { "coins", coins },
-                { "gems", gems },
                 { "bestTime", bestTime },
                 { "averageTime", averageTime },
                 { "totalGamesPlayed", totalGamesPlayed },
@@ -205,10 +177,55 @@ namespace DigitPark.Data
                 { "isPremium", isPremium },
                 { "premiumExpiryDate", premiumExpiryDate.ToString() },
                 { "lastLoginDate", lastLoginDate.ToString() },
-                { "createdDate", createdDate.ToString() },
-                { "consecutiveLoginDays", consecutiveLoginDays },
-                { "lastDailyRewardClaimed", lastDailyRewardClaimed.ToString() }
+                { "createdDate", createdDate.ToString() }
             };
+        }
+
+        /// <summary>
+        /// Calcula el win rate general
+        /// </summary>
+        public float GetWinRate()
+        {
+            if (totalGamesPlayed == 0) return 0f;
+            return (float)totalGamesWon / totalGamesPlayed * 100f;
+        }
+    }
+
+    /// <summary>
+    /// Estadisticas de un juego especifico
+    /// </summary>
+    [System.Serializable]
+    public class GameStats
+    {
+        public int gamesPlayed;
+        public int gamesWon;
+        public float bestTime;
+        public float averageTime;
+
+        public GameStats()
+        {
+            gamesPlayed = 0;
+            gamesWon = 0;
+            bestTime = float.MaxValue;
+            averageTime = 0f;
+        }
+
+        /// <summary>
+        /// Calcula el porcentaje de victorias
+        /// </summary>
+        public float GetWinRate()
+        {
+            if (gamesPlayed == 0) return 0f;
+            return (float)gamesWon / gamesPlayed * 100f;
+        }
+
+        /// <summary>
+        /// Obtiene el mejor tiempo formateado
+        /// </summary>
+        public string GetBestTimeFormatted()
+        {
+            if (bestTime >= float.MaxValue || bestTime <= 0) return "--";
+            return $"{bestTime:F2}s";
         }
     }
 

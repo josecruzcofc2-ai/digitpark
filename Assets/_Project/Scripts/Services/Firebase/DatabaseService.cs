@@ -146,6 +146,13 @@ namespace DigitPark.Services.Firebase
             var results = new List<PlayerSearchResult>();
             string queryLower = query.ToLower();
 
+            // Obtener datos del usuario actual para verificar amistades
+            PlayerData currentUser = null;
+            if (AuthenticationService.Instance != null)
+            {
+                currentUser = AuthenticationService.Instance.GetCurrentPlayerData();
+            }
+
             // Buscar en el leaderboard (donde tenemos usuarios registrados)
             foreach (var entry in globalLeaderboard)
             {
@@ -155,23 +162,25 @@ namespace DigitPark.Services.Firebase
                     var playerData = await LoadPlayerData(entry.userId);
 
                     float winRate = 0f;
-                    int level = 1;
+                    bool isFriend = false;
 
                     if (playerData != null)
                     {
-                        level = playerData.level;
-                        winRate = playerData.totalGamesPlayed > 0
-                            ? (float)playerData.totalGamesWon / playerData.totalGamesPlayed * 100f
-                            : 0f;
+                        winRate = playerData.GetWinRate();
+                    }
+
+                    // Verificar si es amigo
+                    if (currentUser != null)
+                    {
+                        isFriend = currentUser.IsFriend(entry.userId);
                     }
 
                     results.Add(new PlayerSearchResult
                     {
                         playerId = entry.userId,
                         username = entry.username,
-                        level = level,
                         winRate = winRate,
-                        isFriend = false, // TODO: Verificar amistad
+                        isFriend = isFriend,
                         avatarUrl = entry.avatarUrl ?? ""
                     });
 
@@ -500,7 +509,6 @@ namespace DigitPark.Services.Firebase
     {
         public string playerId;
         public string username;
-        public int level;
         public float winRate;
         public bool isFriend;
         public string avatarUrl;
