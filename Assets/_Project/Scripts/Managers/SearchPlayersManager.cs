@@ -146,9 +146,9 @@ namespace DigitPark.Managers
         {
             return new List<PlayerSearchResult>
             {
-                new PlayerSearchResult { playerId = "player1", username = "ProGamer123", level = 15, winRate = 67.5f },
-                new PlayerSearchResult { playerId = "player2", username = "MathWizard", level = 8, winRate = 54.2f },
-                new PlayerSearchResult { playerId = "player3", username = "SpeedKing", level = 22, winRate = 71.3f },
+                new PlayerSearchResult { playerId = "player1", username = "ProGamer123", winRate = 67.5f, isFriend = false },
+                new PlayerSearchResult { playerId = "player2", username = "MathWizard", winRate = 54.2f, isFriend = true },
+                new PlayerSearchResult { playerId = "player3", username = "SpeedKing", winRate = 71.3f, isFriend = false },
             };
         }
 
@@ -206,10 +206,10 @@ namespace DigitPark.Managers
             {
                 if (text.name.Contains("Username") || text.name.Contains("Name"))
                     text.text = result.username;
-                else if (text.name.Contains("Level"))
-                    text.text = $"Lvl {result.level}";
                 else if (text.name.Contains("WinRate") || text.name.Contains("Rate"))
                     text.text = $"{result.winRate:F1}%";
+                else if (text.name.Contains("Friend") && text.name.Contains("Status"))
+                    text.text = result.isFriend ? "Amigo" : "";
             }
 
             // Configurar boton principal para ver perfil
@@ -226,9 +226,17 @@ namespace DigitPark.Managers
             {
                 string playerId = result.playerId;
                 if (btn.name.Contains("AddFriend") || btn.name.Contains("Friend"))
+                {
+                    // Ocultar si ya es amigo
+                    btn.gameObject.SetActive(!result.isFriend);
                     btn.onClick.AddListener(() => OnAddFriendClicked(playerId));
+                }
                 else if (btn.name.Contains("Challenge") || btn.name.Contains("Retar"))
+                {
+                    // Solo mostrar boton de reto si es amigo
+                    btn.gameObject.SetActive(result.isFriend);
                     btn.onClick.AddListener(() => OnChallengeClicked(playerId));
+                }
             }
         }
 
