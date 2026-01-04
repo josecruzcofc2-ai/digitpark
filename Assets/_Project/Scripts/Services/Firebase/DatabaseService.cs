@@ -115,16 +115,7 @@ namespace DigitPark.Services.Firebase
             return null;
         }
 
-        public async Task UpdatePlayerCoins(string userId, int coins, int gems)
-        {
-            var player = await LoadPlayerData(userId);
-            if (player != null)
-            {
-                player.coins = coins;
-                player.gems = gems;
-                await SavePlayerData(player);
-            }
-        }
+        // UpdatePlayerCoins eliminado - DigitPark usa dinero real, no virtual coins
 
         /// <summary>
         /// Obtiene los datos de un jugador por su ID (alias de LoadPlayerData)
@@ -366,11 +357,7 @@ namespace DigitPark.Services.Firebase
             {
                 await UpdateTournament(tournament);
 
-                if (tournament.entryFee > 0)
-                {
-                    player.coins -= tournament.entryFee;
-                    await SavePlayerData(player);
-                }
+                // Entry fee se maneja via dinero real, no virtual coins
 
                 Debug.Log($"[Database] {player.username} se unió al torneo");
                 return true;
@@ -392,11 +379,10 @@ namespace DigitPark.Services.Firebase
             tournament.participants.RemoveAll(p => p.userId == userId);
             tournament.currentParticipants--;
 
+            // Refund de entry fee se maneja via dinero real, no virtual coins
             if (tournament.entryFee > 0)
             {
-                player.coins += tournament.entryFee;
                 tournament.totalPrizePool -= tournament.entryFee;
-                await SavePlayerData(player);
             }
 
             await UpdateTournament(tournament);

@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace DigitPark.Games
 {
@@ -11,6 +13,10 @@ namespace DigitPark.Games
     {
         [Header("Configuracion")]
         [SerializeField] protected MinigameConfig config;
+
+        [Header("Navigation (Base)")]
+        [SerializeField] protected Button backButton;
+        [SerializeField] protected Button playAgainButton;
 
         // Estado del juego
         protected bool isPlaying;
@@ -39,14 +45,48 @@ namespace DigitPark.Games
 
         protected virtual void Start()
         {
+            // Setup navigation buttons
+            SetupNavigationButtons();
+
             // Verificar si hay un contexto de sesion activo
-            if (GameSessionManager.Instance.HasActiveSession)
+            if (GameSessionManager.Instance != null && GameSessionManager.Instance.HasActiveSession)
             {
                 var context = GameSessionManager.Instance.CurrentContext;
                 Debug.Log($"Iniciando {GameType} en modo {context.Mode}");
             }
 
             Initialize(config);
+        }
+
+        /// <summary>
+        /// Configura los botones de navegacion
+        /// </summary>
+        protected virtual void SetupNavigationButtons()
+        {
+            if (backButton != null)
+                backButton.onClick.AddListener(OnBackClicked);
+
+            if (playAgainButton != null)
+                playAgainButton.onClick.AddListener(OnPlayAgainClicked);
+        }
+
+        /// <summary>
+        /// Vuelve al selector de juegos
+        /// </summary>
+        protected virtual void OnBackClicked()
+        {
+            Debug.Log($"[{GameType}] Volviendo a GameSelector");
+            SceneManager.LoadScene("GameSelector");
+        }
+
+        /// <summary>
+        /// Jugar de nuevo
+        /// </summary>
+        protected virtual void OnPlayAgainClicked()
+        {
+            Debug.Log($"[{GameType}] Jugando de nuevo");
+            ResetGame();
+            StartGame();
         }
 
         protected virtual void Update()

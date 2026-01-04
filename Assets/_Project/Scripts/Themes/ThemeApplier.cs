@@ -68,7 +68,12 @@ namespace DigitPark.Themes
             Rank2,
             Rank3,
             RowEven,
-            RowOdd
+            RowOdd,
+            // Scene Specific
+            HeaderPurple,
+            HeaderNavy,
+            BackgroundNavy,
+            BackgroundPurple
         }
 
         [Header("Element Configuration")]
@@ -250,6 +255,12 @@ namespace DigitPark.Themes
                 case ElementType.Rank3: return theme.rank3Color;
                 case ElementType.RowEven: return theme.rowEven;
                 case ElementType.RowOdd: return theme.rowOdd;
+
+                // Scene Specific
+                case ElementType.HeaderPurple: return theme.headerPurple;
+                case ElementType.HeaderNavy: return theme.headerNavy;
+                case ElementType.BackgroundNavy: return theme.backgroundNavy;
+                case ElementType.BackgroundPurple: return theme.backgroundPurple;
 
                 default: return Color.white;
             }

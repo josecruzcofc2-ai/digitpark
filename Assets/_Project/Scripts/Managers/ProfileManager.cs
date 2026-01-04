@@ -25,12 +25,12 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI bestTimeText;
         [SerializeField] private TextMeshProUGUI averageTimeText;
 
-        [Header("UI - Stats Per Game (Best Time + Win Rate)")]
-        [SerializeField] private TextMeshProUGUI digitRushStatsText;
-        [SerializeField] private TextMeshProUGUI memoryPairsStatsText;
-        [SerializeField] private TextMeshProUGUI quickMathStatsText;
-        [SerializeField] private TextMeshProUGUI flashTapStatsText;
-        [SerializeField] private TextMeshProUGUI oddOneOutStatsText;
+        [Header("UI - Game Stats Values (Solo valores, labels son fijos)")]
+        [SerializeField] private TextMeshProUGUI digitRushValueText;
+        [SerializeField] private TextMeshProUGUI memoryPairsValueText;
+        [SerializeField] private TextMeshProUGUI quickMathValueText;
+        [SerializeField] private TextMeshProUGUI flashTapValueText;
+        [SerializeField] private TextMeshProUGUI oddOneOutValueText;
 
         [Header("UI - Navigation")]
         [SerializeField] private Button friendsButton;
@@ -207,38 +207,48 @@ namespace DigitPark.Managers
         private void UpdateGameStats()
         {
             // Digit Rush
-            if (digitRushStatsText != null && currentPlayerData.digitRushStats != null)
+            if (digitRushValueText != null)
             {
                 var stats = currentPlayerData.digitRushStats;
-                digitRushStatsText.text = $"Digit Rush: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+                digitRushValueText.text = stats != null
+                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
+                    : "-- | 0%";
             }
 
             // Memory Pairs
-            if (memoryPairsStatsText != null && currentPlayerData.memoryPairsStats != null)
+            if (memoryPairsValueText != null)
             {
                 var stats = currentPlayerData.memoryPairsStats;
-                memoryPairsStatsText.text = $"Memory Pairs: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+                memoryPairsValueText.text = stats != null
+                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
+                    : "-- | 0%";
             }
 
             // Quick Math
-            if (quickMathStatsText != null && currentPlayerData.quickMathStats != null)
+            if (quickMathValueText != null)
             {
                 var stats = currentPlayerData.quickMathStats;
-                quickMathStatsText.text = $"Quick Math: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+                quickMathValueText.text = stats != null
+                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
+                    : "-- | 0%";
             }
 
             // Flash Tap
-            if (flashTapStatsText != null && currentPlayerData.flashTapStats != null)
+            if (flashTapValueText != null)
             {
                 var stats = currentPlayerData.flashTapStats;
-                flashTapStatsText.text = $"Flash Tap: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+                flashTapValueText.text = stats != null
+                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
+                    : "-- | 0%";
             }
 
             // Odd One Out
-            if (oddOneOutStatsText != null && currentPlayerData.oddOneOutStats != null)
+            if (oddOneOutValueText != null)
             {
                 var stats = currentPlayerData.oddOneOutStats;
-                oddOneOutStatsText.text = $"Odd One Out: {stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}% wins";
+                oddOneOutValueText.text = stats != null
+                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
+                    : "-- | 0%";
             }
         }
 

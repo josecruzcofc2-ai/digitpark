@@ -125,6 +125,19 @@ namespace DigitPark.Themes
         [Tooltip("Radio de esquinas de cards")]
         public float cardCornerRadius = 10f;
 
+        [Header("=== SCENE SPECIFIC COLORS ===")]
+        [Tooltip("Header morado para escenas especiales (OddOneOut)")]
+        public Color headerPurple = new Color(0.2f, 0.05f, 0.25f, 1f);
+
+        [Tooltip("Header azul marino para escenas especiales (QuickMath)")]
+        public Color headerNavy = new Color(0.02f, 0.05f, 0.15f, 1f);
+
+        [Tooltip("Fondo azul marino neon (OddOneOut)")]
+        public Color backgroundNavy = new Color(0.02f, 0.03f, 0.12f, 1f);
+
+        [Tooltip("Fondo morado neon (QuickMath)")]
+        public Color backgroundPurple = new Color(0.15f, 0.02f, 0.18f, 1f);
+
         [Header("=== TABS & NAVIGATION ===")]
         [Tooltip("Color de tab activo")]
         public Color tabActive = new Color(0f, 1f, 1f, 1f);

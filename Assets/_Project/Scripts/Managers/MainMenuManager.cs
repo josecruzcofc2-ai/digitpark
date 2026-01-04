@@ -191,8 +191,8 @@ namespace DigitPark.Managers
             // Registrar en analytics
             AnalyticsService.Instance?.LogGameStart();
 
-            // Cargar escena de juego
-            SceneManager.LoadScene("Game");
+            // Cargar selector de juegos
+            SceneManager.LoadScene("GameSelector");
         }
 
         /// <summary>

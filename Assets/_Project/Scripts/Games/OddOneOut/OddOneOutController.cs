@@ -8,39 +8,61 @@ namespace DigitPark.Games
 {
     /// <summary>
     /// Controller para el juego Odd One Out
-    /// El jugador debe encontrar el elemento diferente en una cuadricula
+    /// El jugador debe encontrar la diferencia entre DOS cuadriculas 4x4
+    /// Una cuadricula tiene UN elemento diferente
     /// </summary>
     public class OddOneOutController : MinigameBase
     {
         public override GameType GameType => GameType.OddOneOut;
 
-        [Header("Odd One Out - Grid")]
-        [SerializeField] private Button[] gridButtons; // 16 botones (4x4)
-        [SerializeField] private TextMeshProUGUI[] buttonTexts;
-        [SerializeField] private Image[] buttonImages;
+        [Header("Odd One Out - Grid Izquierda")]
+        [SerializeField] private Button[] leftGridButtons; // 16 botones (4x4)
+        [SerializeField] private TextMeshProUGUI[] leftButtonTexts;
+        [SerializeField] private Image[] leftButtonImages;
+
+        [Header("Odd One Out - Grid Derecha")]
+        [SerializeField] private Button[] rightGridButtons; // 16 botones (4x4)
+        [SerializeField] private TextMeshProUGUI[] rightButtonTexts;
+        [SerializeField] private Image[] rightButtonImages;
 
         [Header("Odd One Out - UI")]
         [SerializeField] private TextMeshProUGUI timerText;
         [SerializeField] private TextMeshProUGUI roundText;
         [SerializeField] private TextMeshProUGUI errorsText;
+        [SerializeField] private TextMeshProUGUI instructionText;
         [SerializeField] private GameObject winPanel;
 
         [Header("Odd One Out - Settings")]
         [SerializeField] private int totalRounds = 5;
 
-        // Tipos de diferencia
-        private enum DifferenceType
-        {
-            Number,     // 6 vs 9
-            Rotation,   // Elemento rotado
-            Color,      // Color diferente
-            Size        // Tamano diferente
-        }
-
         // Estado del juego
         private int currentRound;
-        private int oddButtonIndex;
+        private int oddButtonIndex; // Posicion del elemento diferente
+        private bool isDifferenceOnRight; // La diferencia esta en grid derecha?
         private int gridSize = 16;
+
+        // Caracteres para generar puzzles
+        private readonly string[] characters = {
+            "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M",
+            "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+            "★", "●", "■", "▲", "♦", "♥", "♠", "♣"
+        };
+
+        // Pares confusos
+        private readonly string[][] confusablePairs = new string[][]
+        {
+            new string[] { "6", "9" },
+            new string[] { "O", "0" },
+            new string[] { "I", "1" },
+            new string[] { "S", "5" },
+            new string[] { "B", "8" },
+            new string[] { "Z", "2" },
+            new string[] { "b", "d" },
+            new string[] { "p", "q" },
+            new string[] { "n", "u" },
+            new string[] { "M", "W" }
+        };
 
         protected override void Awake()
         {
@@ -57,16 +79,26 @@ namespace DigitPark.Games
 
         private void SetupButtons()
         {
-            if (gridButtons == null || gridButtons.Length < 9)
+            // Setup grid izquierda
+            if (leftGridButtons != null)
             {
-                Debug.LogError("OddOneOut requiere al menos 9 botones");
-                return;
+                for (int i = 0; i < leftGridButtons.Length; i++)
+                {
+                    int index = i;
+                    if (leftGridButtons[i] != null)
+                        leftGridButtons[i].onClick.AddListener(() => OnButtonClicked(index, false));
+                }
             }
 
-            for (int i = 0; i < gridButtons.Length; i++)
+            // Setup grid derecha
+            if (rightGridButtons != null)
             {
-                int index = i;
-                gridButtons[i].onClick.AddListener(() => OnButtonClicked(index));
+                for (int i = 0; i < rightGridButtons.Length; i++)
+                {
+                    int index = i;
+                    if (rightGridButtons[i] != null)
+                        rightGridButtons[i].onClick.AddListener(() => OnButtonClicked(index, true));
+                }
             }
         }
 
@@ -80,110 +112,105 @@ namespace DigitPark.Games
 
         private void GeneratePuzzle()
         {
-            // Seleccionar tipo de diferencia aleatorio
-            DifferenceType diffType = (DifferenceType)Random.Range(0, 2); // Por ahora solo Number y Rotation
+            // Seleccionar un par confuso aleatorio
+            int pairIndex = Random.Range(0, confusablePairs.Length);
+            string baseChar = confusablePairs[pairIndex][0];
+            string differentChar = confusablePairs[pairIndex][1];
 
             // Seleccionar posicion del elemento diferente
             oddButtonIndex = Random.Range(0, gridSize);
 
-            switch (diffType)
+            // Decidir en que grid esta la diferencia
+            isDifferenceOnRight = Random.Range(0, 2) == 1;
+
+            // Llenar ambas cuadriculas con el caracter base
+            for (int i = 0; i < gridSize; i++)
             {
-                case DifferenceType.Number:
-                    GenerateNumberPuzzle();
-                    break;
-                case DifferenceType.Rotation:
-                    GenerateRotationPuzzle();
-                    break;
-                default:
-                    GenerateNumberPuzzle();
-                    break;
+                // Grid izquierda
+                if (leftButtonTexts != null && i < leftButtonTexts.Length && leftButtonTexts[i] != null)
+                {
+                    if (!isDifferenceOnRight && i == oddButtonIndex)
+                        leftButtonTexts[i].text = differentChar;
+                    else
+                        leftButtonTexts[i].text = baseChar;
+                }
+
+                // Grid derecha
+                if (rightButtonTexts != null && i < rightButtonTexts.Length && rightButtonTexts[i] != null)
+                {
+                    if (isDifferenceOnRight && i == oddButtonIndex)
+                        rightButtonTexts[i].text = differentChar;
+                    else
+                        rightButtonTexts[i].text = baseChar;
+                }
+
+                // Resetear visuales
+                ResetButtonVisual(i, leftButtonImages);
+                ResetButtonVisual(i, rightButtonImages);
+            }
+
+            // Activar todos los botones
+            EnableAllButtons(true);
+
+            // Instruccion
+            if (instructionText != null)
+            {
+                instructionText.text = "Encuentra la diferencia!";
             }
         }
 
-        private void GenerateNumberPuzzle()
+        private void ResetButtonVisual(int index, Image[] images)
         {
-            // Pares confusos: 6/9, 2/5, p/d, b/d, etc.
-            string[][] confusablePairs = new string[][]
+            if (images != null && index < images.Length && images[index] != null)
             {
-                new string[] { "6", "9" },
-                new string[] { "2", "5" },
-                new string[] { "M", "W" },
-                new string[] { "b", "d" },
-                new string[] { "p", "q" },
-                new string[] { "n", "u" }
-            };
-
-            // Seleccionar un par aleatorio
-            int pairIndex = Random.Range(0, confusablePairs.Length);
-            string normalChar = confusablePairs[pairIndex][0];
-            string oddChar = confusablePairs[pairIndex][1];
-
-            // Asignar a botones
-            for (int i = 0; i < gridSize && i < gridButtons.Length; i++)
-            {
-                if (buttonTexts != null && i < buttonTexts.Length)
-                {
-                    buttonTexts[i].text = (i == oddButtonIndex) ? oddChar : normalChar;
-                }
-
-                // Resetear rotacion
-                if (gridButtons[i] != null)
-                {
-                    gridButtons[i].transform.rotation = Quaternion.identity;
-                    gridButtons[i].interactable = true;
-                }
+                images[index].color = Color.white;
             }
         }
 
-        private void GenerateRotationPuzzle()
+        private void EnableAllButtons(bool enable)
         {
-            // Simbolos que se ven diferentes rotados
-            string[] rotatableSymbols = { "▲", "►", "◄", "◆", "→", "←" };
-            string symbol = rotatableSymbols[Random.Range(0, rotatableSymbols.Length)];
-
-            // Angulo de rotacion para el elemento diferente
-            float[] rotationAngles = { 90f, 180f, 270f };
-            float oddRotation = rotationAngles[Random.Range(0, rotationAngles.Length)];
-
-            for (int i = 0; i < gridSize && i < gridButtons.Length; i++)
+            if (leftGridButtons != null)
             {
-                if (buttonTexts != null && i < buttonTexts.Length)
+                foreach (var btn in leftGridButtons)
                 {
-                    buttonTexts[i].text = symbol;
+                    if (btn != null) btn.interactable = enable;
                 }
+            }
 
-                if (gridButtons[i] != null)
+            if (rightGridButtons != null)
+            {
+                foreach (var btn in rightGridButtons)
                 {
-                    float rotation = (i == oddButtonIndex) ? oddRotation : 0f;
-                    gridButtons[i].transform.rotation = Quaternion.Euler(0, 0, rotation);
-                    gridButtons[i].interactable = true;
+                    if (btn != null) btn.interactable = enable;
                 }
             }
         }
 
-        private void OnButtonClicked(int buttonIndex)
+        private void OnButtonClicked(int buttonIndex, bool isRightGrid)
         {
             if (!isPlaying || isPaused) return;
 
-            if (buttonIndex == oddButtonIndex)
+            // Verificar si es el boton correcto
+            bool isCorrect = (buttonIndex == oddButtonIndex) && (isRightGrid == isDifferenceOnRight);
+
+            if (isCorrect)
             {
-                // Correcto
-                OnCorrectAnswer(buttonIndex);
+                OnCorrectAnswer(buttonIndex, isRightGrid);
             }
             else
             {
-                // Error
-                RegisterError();
-                StartCoroutine(FlashWrongButton(buttonIndex));
+                OnWrongAnswer(buttonIndex, isRightGrid);
             }
         }
 
-        private void OnCorrectAnswer(int buttonIndex)
+        private void OnCorrectAnswer(int buttonIndex, bool isRightGrid)
         {
             // Efecto visual de acierto
-            StartCoroutine(FlashCorrectButton(buttonIndex));
+            Image[] images = isRightGrid ? rightButtonImages : leftButtonImages;
+            StartCoroutine(FlashButton(buttonIndex, images, Color.green));
 
             currentRound++;
+            UpdateUI();
 
             if (currentRound > totalRounds)
             {
@@ -195,25 +222,23 @@ namespace DigitPark.Games
             }
         }
 
-        private IEnumerator FlashCorrectButton(int buttonIndex)
+        private void OnWrongAnswer(int buttonIndex, bool isRightGrid)
         {
-            if (buttonImages != null && buttonIndex < buttonImages.Length)
-            {
-                Color originalColor = buttonImages[buttonIndex].color;
-                buttonImages[buttonIndex].color = Color.green;
-                yield return new WaitForSeconds(0.3f);
-                buttonImages[buttonIndex].color = originalColor;
-            }
+            RegisterError();
+
+            // Efecto visual de error
+            Image[] images = isRightGrid ? rightButtonImages : leftButtonImages;
+            StartCoroutine(FlashButton(buttonIndex, images, Color.red));
         }
 
-        private IEnumerator FlashWrongButton(int buttonIndex)
+        private IEnumerator FlashButton(int buttonIndex, Image[] images, Color flashColor)
         {
-            if (buttonImages != null && buttonIndex < buttonImages.Length)
+            if (images != null && buttonIndex < images.Length && images[buttonIndex] != null)
             {
-                Color originalColor = buttonImages[buttonIndex].color;
-                buttonImages[buttonIndex].color = Color.red;
-                yield return new WaitForSeconds(0.2f);
-                buttonImages[buttonIndex].color = originalColor;
+                Color originalColor = images[buttonIndex].color;
+                images[buttonIndex].color = flashColor;
+                yield return new WaitForSeconds(0.3f);
+                images[buttonIndex].color = originalColor;
             }
         }
 
@@ -234,7 +259,7 @@ namespace DigitPark.Games
         {
             if (roundText != null)
             {
-                roundText.text = $"{currentRound}/{totalRounds}";
+                roundText.text = $"{Mathf.Min(currentRound, totalRounds)}/{totalRounds}";
             }
 
             if (errorsText != null)
@@ -254,11 +279,7 @@ namespace DigitPark.Games
         protected override void OnGameStarted()
         {
             if (winPanel != null) winPanel.SetActive(false);
-
-            foreach (var btn in gridButtons)
-            {
-                if (btn != null) btn.interactable = true;
-            }
+            EnableAllButtons(true);
         }
 
         protected override void OnGamePaused() { }
@@ -268,26 +289,14 @@ namespace DigitPark.Games
         protected override void OnGameEnded()
         {
             if (winPanel != null) winPanel.SetActive(true);
-
-            foreach (var btn in gridButtons)
-            {
-                if (btn != null) btn.interactable = false;
-            }
+            EnableAllButtons(false);
         }
 
         protected override void OnGameReset()
         {
             currentRound = 1;
             if (winPanel != null) winPanel.SetActive(false);
-
-            foreach (var btn in gridButtons)
-            {
-                if (btn != null)
-                {
-                    btn.interactable = true;
-                    btn.transform.rotation = Quaternion.identity;
-                }
-            }
+            EnableAllButtons(true);
         }
 
         protected override void OnErrorOccurred()
