@@ -94,11 +94,11 @@ namespace DigitPark.Data
 
         /// <summary>
         /// Verifica si un jugador puede unirse
+        /// Entry fee se maneja via dinero real, no virtual coins
         /// </summary>
         public bool CanJoin(PlayerData player)
         {
             if (IsFull()) return false;
-            if (player.coins < entryFee) return false;
             if (status != TournamentStatus.Scheduled && status != TournamentStatus.Active) return false;
             if (IsParticipating(player.userId)) return false;
 

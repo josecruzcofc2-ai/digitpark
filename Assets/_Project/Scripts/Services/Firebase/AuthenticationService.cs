@@ -208,9 +208,7 @@ namespace DigitPark.Services.Firebase
                     email = email,
                     username = username,
                     createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now,
-                    coins = 1000,
-                    gems = 50
+                    lastLoginDate = DateTime.Now
                 };
 
                 // Guardar en base de datos
@@ -647,9 +645,7 @@ namespace DigitPark.Services.Firebase
                     email = user.Email ?? "",
                     username = user.DisplayName ?? "Sin nombre",
                     createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now,
-                    coins = 1000,
-                    gems = 50
+                    lastLoginDate = DateTime.Now
                 };
 
                 await SavePlayerDataToDatabase(currentPlayerData);
@@ -666,9 +662,7 @@ namespace DigitPark.Services.Firebase
                     email = user.Email ?? "",
                     username = user.DisplayName ?? "Sin nombre",
                     createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now,
-                    coins = 1000,
-                    gems = 50
+                    lastLoginDate = DateTime.Now
                 };
             }
         }
@@ -786,9 +780,7 @@ namespace DigitPark.Services.Firebase
                     email = email,
                     username = username,
                     createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now,
-                    coins = 1000,
-                    gems = 50
+                    lastLoginDate = DateTime.Now
                 };
 
                 PlayerPrefs.SetString($"SimUser_{newUserId}", JsonUtility.ToJson(currentPlayerData));
@@ -823,9 +815,7 @@ namespace DigitPark.Services.Firebase
                     email = googleEmail,
                     username = "Sin nombre",
                     createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now,
-                    coins = 1000,
-                    gems = 50
+                    lastLoginDate = DateTime.Now
                 };
 
                 PlayerPrefs.SetString($"SimUser_{googleUserId}", JsonUtility.ToJson(currentPlayerData));
@@ -859,9 +849,7 @@ namespace DigitPark.Services.Firebase
                     email = appleEmail,
                     username = "Usuario Apple",
                     createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now,
-                    coins = 1000,
-                    gems = 50
+                    lastLoginDate = DateTime.Now
                 };
 
                 PlayerPrefs.SetString($"SimUser_{appleUserId}", JsonUtility.ToJson(currentPlayerData));

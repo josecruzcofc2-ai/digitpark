@@ -16,17 +16,7 @@ namespace DigitPark.Editor
         {
             Debug.Log("=== INICIANDO SETUP COMPLETO DE EFECTOS ===");
 
-            string[] scenes = new string[]
-            {
-                "Assets/_Project/Scenes/Boot.unity",
-                "Assets/_Project/Scenes/Login.unity",
-                "Assets/_Project/Scenes/Register.unity",
-                "Assets/_Project/Scenes/MainMenu.unity",
-                "Assets/_Project/Scenes/Game.unity",
-                "Assets/_Project/Scenes/Settings.unity",
-                "Assets/_Project/Scenes/Scores.unity",
-                "Assets/_Project/Scenes/Tournaments.unity"
-            };
+            string[] scenes = GetAllScenePaths();
 
             int totalButtons = 0;
             int totalGlows = 0;
@@ -236,6 +226,34 @@ namespace DigitPark.Editor
         public static void RunBatchSetup()
         {
             SetupCompleteSystem();
+        }
+
+        private static string[] GetAllScenePaths()
+        {
+            return new string[]
+            {
+                // Escenas principales
+                "Assets/_Project/Scenes/Boot.unity",
+                "Assets/_Project/Scenes/Login.unity",
+                "Assets/_Project/Scenes/Register.unity",
+                "Assets/_Project/Scenes/MainMenu.unity",
+                "Assets/_Project/Scenes/Scores.unity",
+                "Assets/_Project/Scenes/Settings.unity",
+                "Assets/_Project/Scenes/Tournaments.unity",
+                "Assets/_Project/Scenes/HowToPlay.unity",
+                "Assets/_Project/Scenes/CountrySelector.unity",
+                // Escenas nuevas
+                "Assets/_Project/Scenes/Profile.unity",
+                "Assets/_Project/Scenes/SearchPlayers.unity",
+                "Assets/_Project/Scenes/CashBattle.unity",
+                // Escenas de juegos
+                "Assets/_Project/Scenes/Games/GameSelector.unity",
+                "Assets/_Project/Scenes/Games/DigitRush.unity",
+                "Assets/_Project/Scenes/Games/MemoryPairs.unity",
+                "Assets/_Project/Scenes/Games/QuickMath.unity",
+                "Assets/_Project/Scenes/Games/FlashTap.unity",
+                "Assets/_Project/Scenes/Games/OddOneOut.unity"
+            };
         }
     }
 }
