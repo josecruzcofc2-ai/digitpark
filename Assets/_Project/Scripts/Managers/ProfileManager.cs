@@ -10,13 +10,22 @@ namespace DigitPark.Managers
     /// <summary>
     /// Manager del perfil de usuario
     /// Muestra estadisticas, historial y permite gestionar amigos
-    /// Version actualizada - Sin coins, gems, levels
+    ///
+    /// NUEVO DISEÑO:
+    /// - AddFriendButton: Icono en esquina superior derecha (solo si NO es amigo)
+    /// - FriendsButton + HistoryButton: Centrados en HorizontalLayoutGroup
+    /// - ChallengeButton: CTA grande abajo (solo si ES amigo)
     /// </summary>
     public class ProfileManager : MonoBehaviour
     {
+        [Header("UI - Header")]
+        [SerializeField] private Button backButton;
+        [SerializeField] private Button addFriendIconButton;  // Icono esquina superior derecha
+
         [Header("UI - Profile Info")]
         [SerializeField] private TextMeshProUGUI usernameText;
         [SerializeField] private Image avatarImage;
+        [SerializeField] private TextMeshProUGUI statusText;  // "Tu perfil", "Amigo", "No es amigo"
 
         [Header("UI - General Stats")]
         [SerializeField] private TextMeshProUGUI totalGamesText;
@@ -25,34 +34,44 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI bestTimeText;
         [SerializeField] private TextMeshProUGUI averageTimeText;
 
-        [Header("UI - Game Stats Values (Solo valores, labels son fijos)")]
+        [Header("UI - Game Stats Values")]
         [SerializeField] private TextMeshProUGUI digitRushValueText;
         [SerializeField] private TextMeshProUGUI memoryPairsValueText;
         [SerializeField] private TextMeshProUGUI quickMathValueText;
         [SerializeField] private TextMeshProUGUI flashTapValueText;
         [SerializeField] private TextMeshProUGUI oddOneOutValueText;
 
-        [Header("UI - Navigation")]
-        [SerializeField] private Button friendsButton;
-        [SerializeField] private Button historyButton;
-        [SerializeField] private Button editProfileButton;
-        [SerializeField] private Button backButton;
+        [Header("UI - Action Buttons (Centrados)")]
+        [SerializeField] private Button friendsButton;    // Ver amigos (puede ocultarse por privacidad)
+        [SerializeField] private Button historyButton;    // Historial (siempre visible)
 
-        [Header("UI - Other Player Profile")]
-        [SerializeField] private GameObject otherProfileButtonsContainer;
-        [SerializeField] private Button addFriendButton;
-        [SerializeField] private Button challengeButton;
-        [SerializeField] private TextMeshProUGUI friendStatusText;
+        [Header("UI - CTA Button")]
+        [SerializeField] private Button challengeButton;  // Retar (solo si es amigo)
 
+        [Header("UI - Challenge Game Selection")]
+        [SerializeField] private GameObject gameSelectionPanel;  // Panel para elegir juego
+        [SerializeField] private Button darkOverlayButton;       // Para cerrar al tocar fuera
+        [SerializeField] private Button cancelButton;            // Botón cancelar
+        [SerializeField] private Button digitRushButton;
+        [SerializeField] private Button memoryPairsButton;
+        [SerializeField] private Button quickMathButton;
+        [SerializeField] private Button flashTapButton;
+        [SerializeField] private Button oddOneOutButton;
+
+        // Estado
         private PlayerData currentPlayerData;
         private string viewingPlayerId;
         private bool isOwnProfile = true;
+        private bool isFriend = false;
+
+        #region Unity Lifecycle
 
         private void Start()
         {
             Debug.Log("[Profile] ProfileManager iniciado");
 
             SetupListeners();
+            HideGameSelectionPanel();
 
             // Verificar si venimos a ver el perfil de otro jugador
             string viewProfileId = PlayerPrefs.GetString("ViewProfileId", "");
@@ -69,26 +88,40 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Header
+            backButton?.onClick.AddListener(OnBackClicked);
+            addFriendIconButton?.onClick.AddListener(OnAddFriendClicked);
+
+            // Action Buttons
             friendsButton?.onClick.AddListener(OnFriendsClicked);
             historyButton?.onClick.AddListener(OnHistoryClicked);
-            editProfileButton?.onClick.AddListener(OnEditProfileClicked);
-            backButton?.onClick.AddListener(OnBackClicked);
 
-            addFriendButton?.onClick.AddListener(OnAddFriendClicked);
+            // CTA
             challengeButton?.onClick.AddListener(OnChallengeClicked);
+
+            // Game Selection Panel
+            darkOverlayButton?.onClick.AddListener(OnGameSelectionCancelled);
+            cancelButton?.onClick.AddListener(OnGameSelectionCancelled);
+            digitRushButton?.onClick.AddListener(() => OnGameSelected("DigitRush"));
+            memoryPairsButton?.onClick.AddListener(() => OnGameSelected("MemoryPairs"));
+            quickMathButton?.onClick.AddListener(() => OnGameSelected("QuickMath"));
+            flashTapButton?.onClick.AddListener(() => OnGameSelected("FlashTap"));
+            oddOneOutButton?.onClick.AddListener(() => OnGameSelected("OddOneOut"));
         }
+
+        #endregion
+
+        #region Load Profile
 
         public void LoadProfileData(string playerId = null)
         {
             if (string.IsNullOrEmpty(playerId))
             {
-                // Cargar perfil propio
                 isOwnProfile = true;
                 LoadOwnProfile();
             }
             else
             {
-                // Cargar perfil de otro jugador
                 isOwnProfile = false;
                 viewingPlayerId = playerId;
                 LoadOtherProfile(playerId);
@@ -97,36 +130,43 @@ namespace DigitPark.Managers
 
         private void LoadOwnProfile()
         {
-            // Obtener datos del jugador actual desde AuthenticationService
+            Debug.Log("[Profile] Cargando perfil propio");
+
             if (AuthenticationService.Instance != null)
             {
                 currentPlayerData = AuthenticationService.Instance.GetCurrentPlayerData();
             }
 
-            // Ocultar botones de otro perfil en perfil propio
-            if (otherProfileButtonsContainer != null)
-                otherProfileButtonsContainer.SetActive(false);
-            if (editProfileButton != null)
-                editProfileButton.gameObject.SetActive(true);
+            // UI para perfil propio
+            SetStatusText("Tu perfil", new Color32(0, 255, 255, 255)); // Cyan
+
+            // Ocultar botones de otros perfiles
+            if (addFriendIconButton != null)
+                addFriendIconButton.gameObject.SetActive(false);
+
+            if (challengeButton != null)
+                challengeButton.gameObject.SetActive(false);
+
+            // Mostrar botones de accion
+            if (friendsButton != null)
+                friendsButton.gameObject.SetActive(true);
+
+            if (historyButton != null)
+                historyButton.gameObject.SetActive(true);
 
             UpdateUI();
         }
 
         private async void LoadOtherProfile(string playerId)
         {
-            // Cargar datos del jugador desde Firebase
+            Debug.Log($"[Profile] Cargando perfil de: {playerId}");
+
             if (DatabaseService.Instance != null)
             {
                 currentPlayerData = await DatabaseService.Instance.GetPlayerDataById(playerId);
             }
 
-            // Mostrar botones de otro perfil
-            if (otherProfileButtonsContainer != null)
-                otherProfileButtonsContainer.SetActive(true);
-            if (editProfileButton != null)
-                editProfileButton.gameObject.SetActive(false);
-
-            // Verificar si ya es amigo
+            // Verificar estado de amistad
             CheckFriendStatus(playerId);
 
             UpdateUI();
@@ -134,29 +174,67 @@ namespace DigitPark.Managers
 
         private void CheckFriendStatus(string playerId)
         {
-            // Verificar si ya son amigos usando PlayerData del usuario actual
             PlayerData myData = null;
             if (AuthenticationService.Instance != null)
             {
                 myData = AuthenticationService.Instance.GetCurrentPlayerData();
             }
 
-            bool isFriend = myData != null && myData.IsFriend(playerId);
+            isFriend = myData != null && myData.IsFriend(playerId);
 
-            if (friendStatusText != null)
+            if (isFriend)
             {
-                friendStatusText.text = isFriend ? "Amigos" : "";
-                friendStatusText.gameObject.SetActive(isFriend);
+                // ES AMIGO
+                SetStatusText("Amigo", new Color32(0, 255, 136, 255)); // Verde
+
+                // Ocultar agregar amigo, mostrar retar
+                if (addFriendIconButton != null)
+                    addFriendIconButton.gameObject.SetActive(false);
+
+                if (challengeButton != null)
+                    challengeButton.gameObject.SetActive(true);
+
+                // Mostrar amigos (si la privacidad lo permite) e historial
+                if (friendsButton != null)
+                    friendsButton.gameObject.SetActive(true); // TODO: Verificar privacidad
+
+                if (historyButton != null)
+                    historyButton.gameObject.SetActive(true);
             }
+            else
+            {
+                // NO ES AMIGO
+                SetStatusText("No es amigo", new Color32(136, 136, 136, 255)); // Gris
 
-            // Mostrar/ocultar boton de agregar amigo
-            if (addFriendButton != null)
-                addFriendButton.gameObject.SetActive(!isFriend);
+                // Mostrar agregar amigo, ocultar retar
+                if (addFriendIconButton != null)
+                    addFriendIconButton.gameObject.SetActive(true);
 
-            // Solo puede retar si son amigos
-            if (challengeButton != null)
-                challengeButton.gameObject.SetActive(isFriend);
+                if (challengeButton != null)
+                    challengeButton.gameObject.SetActive(false);
+
+                // Ocultar amigos (no es amigo), mostrar historial
+                if (friendsButton != null)
+                    friendsButton.gameObject.SetActive(false);
+
+                if (historyButton != null)
+                    historyButton.gameObject.SetActive(true);
+            }
         }
+
+        private void SetStatusText(string text, Color32 color)
+        {
+            if (statusText != null)
+            {
+                statusText.text = text;
+                statusText.color = color;
+                statusText.gameObject.SetActive(true);
+            }
+        }
+
+        #endregion
+
+        #region Update UI
 
         private void UpdateUI()
         {
@@ -181,7 +259,6 @@ namespace DigitPark.Managers
             if (winRateText != null)
                 winRateText.text = $"{currentPlayerData.GetWinRate():F1}%";
 
-            // Tiempos generales
             if (bestTimeText != null)
             {
                 string bestTimeStr = currentPlayerData.bestTime < float.MaxValue
@@ -198,7 +275,6 @@ namespace DigitPark.Managers
                 averageTimeText.text = avgTimeStr;
             }
 
-            // Stats por juego
             UpdateGameStats();
 
             Debug.Log($"[Profile] UI actualizada para {currentPlayerData.username}");
@@ -206,7 +282,6 @@ namespace DigitPark.Managers
 
         private void UpdateGameStats()
         {
-            // Digit Rush
             if (digitRushValueText != null)
             {
                 var stats = currentPlayerData.digitRushStats;
@@ -215,7 +290,6 @@ namespace DigitPark.Managers
                     : "-- | 0%";
             }
 
-            // Memory Pairs
             if (memoryPairsValueText != null)
             {
                 var stats = currentPlayerData.memoryPairsStats;
@@ -224,7 +298,6 @@ namespace DigitPark.Managers
                     : "-- | 0%";
             }
 
-            // Quick Math
             if (quickMathValueText != null)
             {
                 var stats = currentPlayerData.quickMathStats;
@@ -233,7 +306,6 @@ namespace DigitPark.Managers
                     : "-- | 0%";
             }
 
-            // Flash Tap
             if (flashTapValueText != null)
             {
                 var stats = currentPlayerData.flashTapStats;
@@ -242,7 +314,6 @@ namespace DigitPark.Managers
                     : "-- | 0%";
             }
 
-            // Odd One Out
             if (oddOneOutValueText != null)
             {
                 var stats = currentPlayerData.oddOneOutStats;
@@ -252,7 +323,15 @@ namespace DigitPark.Managers
             }
         }
 
+        #endregion
+
         #region Button Callbacks
+
+        private void OnBackClicked()
+        {
+            Debug.Log("[Profile] Volviendo atras");
+            SceneManager.LoadScene("MainMenu");
+        }
 
         private void OnFriendsClicked()
         {
@@ -266,18 +345,6 @@ namespace DigitPark.Managers
             // TODO: Mostrar panel de historial
         }
 
-        private void OnEditProfileClicked()
-        {
-            Debug.Log("[Profile] Editando perfil");
-            // TODO: Mostrar panel de edicion de perfil
-        }
-
-        private void OnBackClicked()
-        {
-            Debug.Log("[Profile] Volviendo al Main Menu");
-            SceneManager.LoadScene("MainMenu");
-        }
-
         private async void OnAddFriendClicked()
         {
             if (string.IsNullOrEmpty(viewingPlayerId))
@@ -286,18 +353,24 @@ namespace DigitPark.Managers
                 return;
             }
 
-            Debug.Log($"[Profile] Agregando amigo: {viewingPlayerId}");
+            Debug.Log($"[Profile] Enviando solicitud de amistad a: {viewingPlayerId}");
 
             // TODO: Enviar solicitud de amistad via Firebase
             // await DatabaseService.Instance.SendFriendRequest(viewingPlayerId);
 
-            if (addFriendButton != null)
+            // Feedback visual - cambiar icono o desactivar
+            if (addFriendIconButton != null)
             {
-                addFriendButton.interactable = false;
-                var buttonText = addFriendButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (buttonText != null)
-                    buttonText.text = "Solicitud enviada";
+                addFriendIconButton.interactable = false;
+
+                // Cambiar color a gris para indicar que ya se envio
+                var image = addFriendIconButton.GetComponent<Image>();
+                if (image != null)
+                    image.color = new Color32(136, 136, 136, 255);
             }
+
+            // Actualizar status
+            SetStatusText("Solicitud enviada", new Color32(255, 204, 0, 255)); // Amarillo
         }
 
         private void OnChallengeClicked()
@@ -308,14 +381,48 @@ namespace DigitPark.Managers
                 return;
             }
 
-            Debug.Log($"[Profile] Retando a: {viewingPlayerId}");
+            Debug.Log($"[Profile] Abriendo seleccion de juego para retar a: {viewingPlayerId}");
 
-            // Guardar el ID del jugador a retar
+            // Mostrar panel de seleccion de juego
+            ShowGameSelectionPanel();
+        }
+
+        #endregion
+
+        #region Game Selection Panel
+
+        private void ShowGameSelectionPanel()
+        {
+            if (gameSelectionPanel != null)
+                gameSelectionPanel.SetActive(true);
+        }
+
+        private void HideGameSelectionPanel()
+        {
+            if (gameSelectionPanel != null)
+                gameSelectionPanel.SetActive(false);
+        }
+
+        // Llamado desde los botones del panel de seleccion de juego
+        public void OnGameSelected(string gameName)
+        {
+            Debug.Log($"[Profile] Juego seleccionado para reto: {gameName}");
+
+            // Guardar datos del reto
             PlayerPrefs.SetString("ChallengePlayerId", viewingPlayerId);
+            PlayerPrefs.SetString("ChallengeGameName", gameName);
             PlayerPrefs.Save();
 
-            // TODO: Navegar a seleccion de juego para reto
-            // SceneManager.LoadScene("ChallengeSetup");
+            HideGameSelectionPanel();
+
+            // TODO: Crear la partida de reto y navegar
+            // SceneManager.LoadScene("Games/" + gameName);
+        }
+
+        public void OnGameSelectionCancelled()
+        {
+            Debug.Log("[Profile] Seleccion de juego cancelada");
+            HideGameSelectionPanel();
         }
 
         #endregion
