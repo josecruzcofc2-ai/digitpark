@@ -103,7 +103,7 @@ namespace DigitPark.Editor
         {
             return new string[]
             {
-                // Escenas principales
+                // Escenas principales (ya tienen diseno perfecto del backup)
                 "Assets/_Project/Scenes/Boot.unity",
                 "Assets/_Project/Scenes/Login.unity",
                 "Assets/_Project/Scenes/Register.unity",
@@ -111,19 +111,17 @@ namespace DigitPark.Editor
                 "Assets/_Project/Scenes/Scores.unity",
                 "Assets/_Project/Scenes/Settings.unity",
                 "Assets/_Project/Scenes/Tournaments.unity",
-                "Assets/_Project/Scenes/HowToPlay.unity",
-                "Assets/_Project/Scenes/CountrySelector.unity",
-                // Escenas nuevas
+                // Escenas nuevas (necesitan ThemeApplier)
                 "Assets/_Project/Scenes/Profile.unity",
                 "Assets/_Project/Scenes/SearchPlayers.unity",
-                "Assets/_Project/Scenes/CashBattle.unity",
                 // Escenas de juegos
                 "Assets/_Project/Scenes/Games/GameSelector.unity",
                 "Assets/_Project/Scenes/Games/DigitRush.unity",
                 "Assets/_Project/Scenes/Games/MemoryPairs.unity",
                 "Assets/_Project/Scenes/Games/QuickMath.unity",
                 "Assets/_Project/Scenes/Games/FlashTap.unity",
-                "Assets/_Project/Scenes/Games/OddOneOut.unity"
+                "Assets/_Project/Scenes/Games/OddOneOut.unity",
+                "Assets/_Project/Scenes/Games/CashBattle.unity"
             };
         }
 
