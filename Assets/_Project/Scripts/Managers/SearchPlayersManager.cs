@@ -146,9 +146,11 @@ namespace DigitPark.Managers
         {
             return new List<PlayerSearchResult>
             {
-                new PlayerSearchResult { playerId = "player1", username = "ProGamer123", winRate = 67.5f, isFriend = false },
-                new PlayerSearchResult { playerId = "player2", username = "MathWizard", winRate = 54.2f, isFriend = true },
-                new PlayerSearchResult { playerId = "player3", username = "SpeedKing", winRate = 71.3f, isFriend = false },
+                new PlayerSearchResult { playerId = "player1", username = "ProGamer123", winRate = 67.5f, isFriend = false, favoriteGame = "MemoryPairs", isOnline = true },
+                new PlayerSearchResult { playerId = "player2", username = "MathWizard", winRate = 54.2f, isFriend = true, favoriteGame = "QuickMath", isOnline = false },
+                new PlayerSearchResult { playerId = "player3", username = "SpeedKing", winRate = 71.3f, isFriend = false, favoriteGame = "FlashTap", isOnline = true },
+                new PlayerSearchResult { playerId = "player4", username = "NeonMaster", winRate = 88.1f, isFriend = false, favoriteGame = "OddOneOut", isOnline = true },
+                new PlayerSearchResult { playerId = "player5", username = "DigitKing", winRate = 45.8f, isFriend = true, favoriteGame = "MemoryPairs", isOnline = false },
             };
         }
 
@@ -200,42 +202,101 @@ namespace DigitPark.Managers
 
         private void SetupBasicPlayerItem(GameObject item, PlayerSearchResult result)
         {
-            // Buscar componentes de texto
-            var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
-            foreach (var text in texts)
+            // ========== INFO SECTION ==========
+            Transform infoSection = item.transform.Find("InfoSection");
+            if (infoSection != null)
             {
-                if (text.name.Contains("Username") || text.name.Contains("Name"))
-                    text.text = result.username;
-                else if (text.name.Contains("WinRate") || text.name.Contains("Rate"))
-                    text.text = $"{result.winRate:F1}%";
-                else if (text.name.Contains("Friend") && text.name.Contains("Status"))
-                    text.text = result.isFriend ? "Amigo" : "";
-            }
-
-            // Configurar boton principal para ver perfil
-            var mainButton = item.GetComponent<Button>();
-            if (mainButton != null)
-            {
-                string playerId = result.playerId;
-                mainButton.onClick.AddListener(() => OnPlayerItemClicked(playerId));
-            }
-
-            // Buscar y configurar botones de accion
-            var buttons = item.GetComponentsInChildren<Button>();
-            foreach (var btn in buttons)
-            {
-                string playerId = result.playerId;
-                if (btn.name.Contains("AddFriend") || btn.name.Contains("Friend"))
+                // Username
+                Transform usernameT = infoSection.Find("Username");
+                if (usernameT != null)
                 {
-                    // Ocultar si ya es amigo
-                    btn.gameObject.SetActive(!result.isFriend);
-                    btn.onClick.AddListener(() => OnAddFriendClicked(playerId));
+                    var tmp = usernameT.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null) tmp.text = result.username;
                 }
-                else if (btn.name.Contains("Challenge") || btn.name.Contains("Retar"))
+
+                // Handle (@username)
+                Transform handleT = infoSection.Find("Handle");
+                if (handleT != null)
                 {
-                    // Solo mostrar boton de reto si es amigo
-                    btn.gameObject.SetActive(result.isFriend);
-                    btn.onClick.AddListener(() => OnChallengeClicked(playerId));
+                    var tmp = handleT.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null) tmp.text = $"@{result.username.ToLower()}";
+                }
+
+                // Stats Row
+                Transform statsRow = infoSection.Find("StatsRow");
+                if (statsRow != null)
+                {
+                    // Win Rate
+                    Transform winRateT = statsRow.Find("WinRateText");
+                    if (winRateT != null)
+                    {
+                        var tmp = winRateT.GetComponent<TextMeshProUGUI>();
+                        if (tmp != null) tmp.text = $"{result.winRate:F0}%";
+                    }
+
+                    // Favorite Game
+                    Transform favGameT = statsRow.Find("FavGameText");
+                    if (favGameT != null)
+                    {
+                        var tmp = favGameT.GetComponent<TextMeshProUGUI>();
+                        if (tmp != null) tmp.text = result.favoriteGame ?? "QuickMath";
+                    }
+                }
+            }
+
+            // ========== ONLINE STATUS ==========
+            bool isOnline = result.isOnline;
+            Color statusColor = isOnline
+                ? new Color(0.2f, 1f, 0.4f, 1f)  // Verde
+                : new Color(0.5f, 0.5f, 0.5f, 1f); // Gris
+            string statusText = isOnline ? "Online" : "Offline";
+
+            Transform onlineStatus = item.transform.Find("OnlineStatus");
+            if (onlineStatus != null)
+            {
+                var img = onlineStatus.GetComponent<Image>();
+                if (img != null) img.color = statusColor;
+            }
+
+            Transform onlineLabel = item.transform.Find("OnlineLabel");
+            if (onlineLabel != null)
+            {
+                var tmp = onlineLabel.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    tmp.text = statusText;
+                    tmp.color = statusColor;
+                }
+            }
+
+            // ========== BUTTONS ==========
+            Transform buttonsRow = item.transform.Find("ButtonsRow");
+            if (buttonsRow != null)
+            {
+                string playerId = result.playerId;
+
+                // Botón Agregar Amigo
+                Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
+                if (addFriendBtn != null)
+                {
+                    var btn = addFriendBtn.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        // Ocultar si ya es amigo
+                        addFriendBtn.gameObject.SetActive(!result.isFriend);
+                        btn.onClick.AddListener(() => OnAddFriendClicked(playerId));
+                    }
+                }
+
+                // Botón Ver Perfil
+                Transform viewProfileBtn = buttonsRow.Find("ViewProfileButton");
+                if (viewProfileBtn != null)
+                {
+                    var btn = viewProfileBtn.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        btn.onClick.AddListener(() => OnPlayerItemClicked(playerId));
+                    }
                 }
             }
         }
