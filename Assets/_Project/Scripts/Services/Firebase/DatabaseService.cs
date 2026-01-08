@@ -498,5 +498,7 @@ namespace DigitPark.Services.Firebase
         public float winRate;
         public bool isFriend;
         public string avatarUrl;
+        public string favoriteGame;
+        public bool isOnline;
     }
 }
