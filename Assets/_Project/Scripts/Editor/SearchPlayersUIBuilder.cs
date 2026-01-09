@@ -82,6 +82,8 @@ namespace DigitPark.Editor
                 "Header", "SearchBar", "ResultsPanel", "EmptyState",
                 // Limpiar elementos de texto viejos que ahora son Images
                 "IconText", "ClearButtonText", "Icon",
+                // Limpiar elementos del SearchBar viejo
+                "SearchIcon", "InputContainer", "ClearIcon",
                 // Player Cards (limpiar cualquier card de prueba)
                 "PlayerCard_Template", "PlayerCard_1", "PlayerCard_2", "PlayerCard_3", "PlayerCard"
             };
@@ -111,50 +113,41 @@ namespace DigitPark.Editor
                 new Vector2(0, 0), new Vector2(500, 60));
             SetupText(title, "BUSCAR JUGADORES", 38, CYAN_NEON, FontStyles.Bold);
 
-            // ========== SEARCH BAR ==========
+            // ========== SEARCH BAR INTEGRADO (Diseño Moderno) ==========
+            // Un único campo de búsqueda con lupa y Clear integrados
             GameObject searchBar = CreateOrFind(canvasTransform, "SearchBar");
             SetupRectTransform(searchBar,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -200), new Vector2(-80, 80));
+                new Vector2(0, -175), new Vector2(-80, 64));
 
+            // Fondo del SearchBar con bordes redondeados simulados
             Image searchBarBg = searchBar.GetComponent<Image>();
             if (searchBarBg == null) searchBarBg = searchBar.AddComponent<Image>();
-            searchBarBg.color = PANEL_BG;
+            searchBarBg.color = INPUT_BG;
 
-            HorizontalLayoutGroup searchLayout = searchBar.GetComponent<HorizontalLayoutGroup>();
-            if (searchLayout == null) searchLayout = searchBar.AddComponent<HorizontalLayoutGroup>();
-            searchLayout.childAlignment = TextAnchor.MiddleCenter;
-            searchLayout.spacing = 15;
-            searchLayout.padding = new RectOffset(20, 20, 12, 12);
-            searchLayout.childForceExpandWidth = false;
-            searchLayout.childForceExpandHeight = true;
-            searchLayout.childControlHeight = true;
+            // Borde neón sutil
+            Outline searchBarOutline = searchBar.GetComponent<Outline>();
+            if (searchBarOutline == null) searchBarOutline = searchBar.AddComponent<Outline>();
+            searchBarOutline.effectColor = CYAN_DARK;
+            searchBarOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
-            // Search Icon - Image para arrastrar sprite de lupa
+            // Icono de Lupa (integrado a la izquierda)
             GameObject searchIcon = CreateOrFind(searchBar.transform, "SearchIcon");
-            AddLayoutElement(searchIcon, 50, 50);
+            RectTransform searchIconRect = SetupRectTransform(searchIcon,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(28, 0), new Vector2(32, 32));
             Image searchIconImg = searchIcon.GetComponent<Image>();
             if (searchIconImg == null) searchIconImg = searchIcon.AddComponent<Image>();
-            searchIconImg.color = CYAN_NEON;
+            searchIconImg.color = PLACEHOLDER_COLOR;
             searchIconImg.preserveAspect = true;
+            searchIconImg.raycastTarget = false;
             // ARRASTRA TU SPRITE DE LUPA AQUI en el Inspector
 
-            // Input Field Container
-            GameObject inputContainer = CreateOrFind(searchBar.transform, "InputContainer");
-            AddLayoutElement(inputContainer, 600, 56);
-
-            Image inputBg = inputContainer.GetComponent<Image>();
-            if (inputBg == null) inputBg = inputContainer.AddComponent<Image>();
-            inputBg.color = INPUT_BG;
-
-            Outline inputOutline = inputContainer.GetComponent<Outline>();
-            if (inputOutline == null) inputOutline = inputContainer.AddComponent<Outline>();
-            inputOutline.effectColor = CYAN_DARK;
-            inputOutline.effectDistance = new Vector2(1, 1);
-
-            // Input Field
-            GameObject inputField = CreateOrFind(inputContainer.transform, "SearchInputField");
-            SetupRectTransform(inputField, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-20, -10));
+            // Input Field (ocupa el espacio central)
+            GameObject inputField = CreateOrFind(searchBar.transform, "SearchInputField");
+            SetupRectTransform(inputField,
+                new Vector2(0, 0), new Vector2(1, 1),
+                new Vector2(30, 0), new Vector2(-140, 0)); // Espacio para lupa y botón Clear
 
             TMP_InputField tmpInput = inputField.GetComponent<TMP_InputField>();
             if (tmpInput == null) tmpInput = inputField.AddComponent<TMP_InputField>();
@@ -169,7 +162,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderTmp = placeholder.GetComponent<TextMeshProUGUI>();
             if (placeholderTmp == null) placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "Buscar por nombre de usuario...";
-            placeholderTmp.fontSize = 24;
+            placeholderTmp.fontSize = 20;
             placeholderTmp.color = PLACEHOLDER_COLOR;
             placeholderTmp.fontStyle = FontStyles.Italic;
             placeholderTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -180,7 +173,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTmp = inputText.GetComponent<TextMeshProUGUI>();
             if (inputTmp == null) inputTmp = inputText.AddComponent<TextMeshProUGUI>();
             inputTmp.text = "";
-            inputTmp.fontSize = 24;
+            inputTmp.fontSize = 20;
             inputTmp.color = Color.white;
             inputTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -189,51 +182,54 @@ namespace DigitPark.Editor
             tmpInput.textComponent = inputTmp;
             tmpInput.placeholder = placeholderTmp;
             tmpInput.fontAsset = inputTmp.font;
-            tmpInput.pointSize = 24;
+            tmpInput.pointSize = 20;
 
-            // Search Button
-            GameObject searchButton = CreateOrFind(searchBar.transform, "SearchButton");
-            AddLayoutElement(searchButton, 120, 56);
-
-            Image searchBtnBg = searchButton.GetComponent<Image>();
-            if (searchBtnBg == null) searchBtnBg = searchButton.AddComponent<Image>();
-            searchBtnBg.color = CYAN_NEON;
-
-            Button searchBtn = searchButton.GetComponent<Button>();
-            if (searchBtn == null) searchBtn = searchButton.AddComponent<Button>();
-            searchBtn.targetGraphic = searchBtnBg;
-
-            GameObject searchBtnText = CreateOrFind(searchButton.transform, "Text");
-            SetupRectTransform(searchBtnText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(searchBtnText, "Buscar", 22, DARK_BG, FontStyles.Bold);
-
-            // Clear Button - Image para arrastrar sprite de X
+            // Clear Button - Botón estilo neón con texto "Clear"
             GameObject clearButton = CreateOrFind(searchBar.transform, "ClearButton");
-            AddLayoutElement(clearButton, 50, 50);
+            RectTransform clearBtnRect = SetupRectTransform(clearButton,
+                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(-50, 0), new Vector2(80, 40));
 
             Image clearBtnBg = clearButton.GetComponent<Image>();
             if (clearBtnBg == null) clearBtnBg = clearButton.AddComponent<Image>();
-            clearBtnBg.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+            clearBtnBg.color = CYAN_NEON;
 
             Button clearBtn = clearButton.GetComponent<Button>();
             if (clearBtn == null) clearBtn = clearButton.AddComponent<Button>();
             clearBtn.targetGraphic = clearBtnBg;
 
-            // Icono X - Image para arrastrar sprite
-            GameObject clearIcon = CreateOrFind(clearButton.transform, "ClearIcon");
-            SetupRectTransform(clearIcon, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -10));
-            Image clearIconImg = clearIcon.GetComponent<Image>();
-            if (clearIconImg == null) clearIconImg = clearIcon.AddComponent<Image>();
-            clearIconImg.color = Color.white;
-            clearIconImg.preserveAspect = true;
-            clearIconImg.raycastTarget = false;
-            // ARRASTRA TU SPRITE DE X AQUI en el Inspector
+            // Configurar colores hover del botón clear
+            ColorBlock clearColors = clearBtn.colors;
+            clearColors.normalColor = Color.white;
+            clearColors.highlightedColor = new Color(0.7f, 1f, 1f, 1f);
+            clearColors.pressedColor = new Color(0.5f, 0.8f, 0.8f, 1f);
+            clearBtn.colors = clearColors;
+
+            // Glow sutil para el botón
+            Outline clearGlow = clearButton.GetComponent<Outline>();
+            if (clearGlow == null) clearGlow = clearButton.AddComponent<Outline>();
+            clearGlow.effectColor = new Color(0f, 1f, 1f, 0.4f);
+            clearGlow.effectDistance = new Vector2(2, 2);
+
+            // Texto "Clear"
+            GameObject clearText = CreateOrFind(clearButton.transform, "Text");
+            SetupRectTransform(clearText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(clearText, "Clear", 16, DARK_BG, FontStyles.Bold);
+
+            // SearchButton oculto (mantener referencia para el Manager pero no visible)
+            // La búsqueda es en tiempo real, no necesita botón
+            GameObject searchButton = CreateOrFind(searchBar.transform, "SearchButton");
+            SetupRectTransform(searchButton, Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
+            Button searchBtn = searchButton.GetComponent<Button>();
+            if (searchBtn == null) searchBtn = searchButton.AddComponent<Button>();
+            searchButton.SetActive(false); // Oculto - búsqueda en tiempo real
 
             // ========== RESULTS PANEL ==========
+            // Ajustado para el SearchBar compacto (empieza después del SearchBar a y=-250)
             GameObject resultsPanel = CreateOrFind(canvasTransform, "ResultsPanel");
             SetupRectTransform(resultsPanel,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(0, -80), new Vector2(-80, -320));
+                new Vector2(0, -80), new Vector2(-80, -280));
 
             Image resultsBg = resultsPanel.GetComponent<Image>();
             if (resultsBg == null) resultsBg = resultsPanel.AddComponent<Image>();
@@ -327,34 +323,34 @@ namespace DigitPark.Editor
             GameObject emptyState = CreateOrFind(resultsPanel.transform, "EmptyState");
             SetupRectTransform(emptyState,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(400, 300));
+                new Vector2(0, 40), new Vector2(400, 350)); // Subido un poco para mejor centrado
             // Mostrar EmptyState por defecto (se oculta cuando hay resultados)
             emptyState.SetActive(true);
 
-            // Empty Icon - Image para arrastrar sprite de personas
+            // Empty Icon - Icono grande y prominente
             GameObject emptyIcon = CreateOrFind(emptyState.transform, "EmptyIcon");
             SetupRectTransform(emptyIcon,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -50), new Vector2(100, 100));
+                new Vector2(0, -20), new Vector2(120, 120)); // Agrandado a 120x120
             Image emptyIconImg = emptyIcon.GetComponent<Image>();
             if (emptyIconImg == null) emptyIconImg = emptyIcon.AddComponent<Image>();
-            emptyIconImg.color = CYAN_DARK;
+            emptyIconImg.color = CYAN_NEON; // Cyan brillante para que destaque
             emptyIconImg.preserveAspect = true;
             // ARRASTRA TU SPRITE DE PERSONAS AQUI en el Inspector
 
-            // Empty Title
+            // Empty Title - Más grande y prominente
             GameObject emptyTitle = CreateOrFind(emptyState.transform, "Title");
             SetupRectTransform(emptyTitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 10), new Vector2(350, 50));
-            SetupText(emptyTitle, "Busca jugadores", 28, Color.white, FontStyles.Bold);
+                new Vector2(0, 20), new Vector2(350, 50));
+            SetupText(emptyTitle, "Busca jugadores", 32, Color.white, FontStyles.Bold);
 
-            // Empty Description
+            // Empty Description - Texto más visible
             GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -50), new Vector2(350, 80));
-            SetupText(emptyDesc, "Encuentra jugadores para\nagregar como amigos o retar", 22, PLACEHOLDER_COLOR, FontStyles.Normal);
+                new Vector2(0, -40), new Vector2(380, 80));
+            SetupText(emptyDesc, "Encuentra jugadores para\nagregar como amigos o retar", 20, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Normal);
 
             // No Results Text (se mostrará cuando no haya resultados)
             GameObject noResultsText = CreateOrFind(resultsPanel.transform, "NoResultsText");

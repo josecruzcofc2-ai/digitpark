@@ -41,6 +41,7 @@ namespace DigitPark.Managers
 
             SetupListeners();
             ClearResults();
+            UpdateClearButtonVisibility();
         }
 
         private void SetupListeners()
@@ -59,6 +60,9 @@ namespace DigitPark.Managers
 
         private void OnSearchInputChanged(string value)
         {
+            // Mostrar/ocultar botón X según si hay texto
+            UpdateClearButtonVisibility();
+
             // Busqueda con delay para no sobrecargar
             if (value.Length >= 3)
             {
@@ -68,6 +72,15 @@ namespace DigitPark.Managers
             else if (value.Length == 0)
             {
                 ClearResults();
+            }
+        }
+
+        private void UpdateClearButtonVisibility()
+        {
+            if (clearButton != null && searchInputField != null)
+            {
+                // Solo mostrar el botón X cuando hay texto
+                clearButton.gameObject.SetActive(!string.IsNullOrEmpty(searchInputField.text));
             }
         }
 
@@ -101,6 +114,7 @@ namespace DigitPark.Managers
                 searchInputField.text = "";
 
             ClearResults();
+            UpdateClearButtonVisibility();
         }
 
         private void OnBackClicked()

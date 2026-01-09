@@ -3,21 +3,30 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Games;
 
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Editor script para reconstruir la UI de QuickMath con diseño profesional neón
+    /// Editor script para reconstruir la UI de QuickMath con diseño IMPACTANTE
+    /// Ecuación gigante, botones 3D, combo system, partículas
     /// </summary>
     public class QuickMathUIBuilder : EditorWindow
     {
         // Colores del tema neón
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
+        private static readonly Color MAGENTA_NEON = new Color(1f, 0f, 0.8f, 1f);
+        private static readonly Color GREEN_NEON = new Color(0.3f, 1f, 0.5f, 1f);
+        private static readonly Color ORANGE_NEON = new Color(1f, 0.6f, 0.2f, 1f);
+        private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
         private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.95f);
-        private static readonly Color BUTTON_BG = new Color(0.08f, 0.15f, 0.2f, 1f);
+        private static readonly Color BUTTON_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
+
+        // Tamaños optimizados
+        private const float ANSWER_BUTTON_SIZE = 140f;
+        private const float EQUATION_FONT_SIZE = 72f;
 
         [MenuItem("DigitPark/Rebuild QuickMath UI")]
         public static void ShowWindow()
@@ -31,9 +40,11 @@ namespace DigitPark.Editor
             GUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "Este script reconstruirá la UI de QuickMath.\n" +
-                "Asegúrate de tener la escena QuickMath abierta.\n" +
-                "Usa el BackButton prefab existente.",
+                "REDISEÑO IMPACTANTE de QuickMath:\n" +
+                "- Ecuación GIGANTE al centro\n" +
+                "- Botones 3D de 140px\n" +
+                "- Sistema de Combo/Streak\n" +
+                "- Partículas y efectos",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -46,355 +57,615 @@ namespace DigitPark.Editor
 
         private static void RebuildQuickMathUI()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
-                Debug.LogError("No se encontró Canvas en la escena");
+                Debug.LogError("[QuickMathUIBuilder] No se encontró Canvas en la escena");
                 return;
             }
 
             Transform canvasTransform = canvas.transform;
 
-            // Verificar Background
-            Transform background = canvasTransform.Find("Background");
-            if (background == null)
-            {
-                Debug.LogError("No se encontró Background");
-                return;
-            }
-
-            // LIMPIAR elementos viejos primero
+            // Limpiar elementos viejos
             CleanOldElements(canvasTransform);
 
             // Crear nueva estructura
             CreateQuickMathLayout(canvasTransform);
 
-            Debug.Log("QuickMath UI reconstruida exitosamente!");
+            // Asignar referencias
+            AssignControllerReferences();
+
+            Debug.Log("[QuickMathUIBuilder] QuickMath UI reconstruida con diseño IMPACTANTE!");
             EditorUtility.SetDirty(canvas.gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
         }
 
         private static void CleanOldElements(Transform canvasTransform)
         {
-            string[] oldElements = new string[]
-            {
-                "RoundText",
-                "TimerText",
-                "ErrorsText",
-                "ProblemText",
-                "AnswersContainer",
-                "AnswerButton_0",
-                "AnswerButton_1",
-                "AnswerButton_2",
-                "ResultText",
-                "Panel",
-                // Nuevos elementos
-                "Header",
-                "StatsBar",
-                "ProblemPanel",
-                "AnswersPanel",
-                "ProgressBar",
-                "WinPanel"
-            };
+            string[] keepElements = { "Main Camera", "EventSystem", "Background" };
 
-            foreach (string elementName in oldElements)
+            for (int i = canvasTransform.childCount - 1; i >= 0; i--)
             {
-                Transform element = canvasTransform.Find(elementName);
-                if (element != null)
+                Transform child = canvasTransform.GetChild(i);
+                bool shouldKeep = false;
+
+                foreach (string keep in keepElements)
                 {
-                    Debug.Log($"Limpiando elemento viejo: {elementName}");
-                    DestroyImmediate(element.gameObject);
+                    if (child.name.Contains(keep) || child.name == keep)
+                    {
+                        shouldKeep = true;
+                        break;
+                    }
+                }
+
+                if (!shouldKeep)
+                {
+                    DestroyImmediate(child.gameObject);
                 }
             }
         }
 
         private static void CreateQuickMathLayout(Transform canvasTransform)
         {
-            // ========== HEADER ==========
-            GameObject header = CreateOrFind(canvasTransform, "Header");
-            SetupRectTransform(header,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -70), new Vector2(0, 140));
+            // ========== SAFE AREA ==========
+            GameObject safeArea = CreateElement(canvasTransform, "SafeArea");
+            SetupRectTransform(safeArea, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SafeAreaHandler safeHandler = safeArea.AddComponent<SafeAreaHandler>();
 
-            // Title
-            GameObject title = CreateOrFind(header.transform, "TitleText");
-            SetupRectTransform(title,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 0), new Vector2(400, 60));
-            SetupText(title, "QUICK MATH", 42, CYAN_NEON, FontStyles.Bold);
+            // ========== HEADER COMPACTO ==========
+            CreateHeader(safeArea.transform);
 
             // ========== STATS BAR ==========
-            GameObject statsBar = CreateOrFind(canvasTransform, "StatsBar");
-            SetupRectTransform(statsBar,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -180), new Vector2(-80, 60));
+            CreateStatsBar(safeArea.transform);
 
-            Image statsBg = statsBar.GetComponent<Image>();
-            if (statsBg == null) statsBg = statsBar.AddComponent<Image>();
-            statsBg.color = PANEL_BG;
+            // ========== COMBO/STREAK DISPLAY ==========
+            CreateComboDisplay(safeArea.transform);
 
-            // Añadir HorizontalLayoutGroup
-            HorizontalLayoutGroup statsLayout = statsBar.GetComponent<HorizontalLayoutGroup>();
-            if (statsLayout == null) statsLayout = statsBar.AddComponent<HorizontalLayoutGroup>();
-            statsLayout.childAlignment = TextAnchor.MiddleCenter;
-            statsLayout.spacing = 60;
-            statsLayout.padding = new RectOffset(40, 40, 10, 10);
-            statsLayout.childForceExpandWidth = false;
-            statsLayout.childForceExpandHeight = true;
-            statsLayout.childControlWidth = true;
-            statsLayout.childControlHeight = true;
+            // ========== ECUACIÓN GIGANTE ==========
+            CreateEquationPanel(safeArea.transform);
 
-            // Timer
-            GameObject timerContainer = CreateOrFind(statsBar.transform, "TimerContainer");
-            AddLayoutElement(timerContainer, 200, 40);
+            // ========== BOTONES DE RESPUESTA 3D ==========
+            CreateAnswerButtons(safeArea.transform);
 
-            GameObject timerIcon = CreateOrFind(timerContainer.transform, "TimerIcon");
-            SetupRectTransform(timerIcon, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(20, 0), new Vector2(30, 30));
-            SetupText(timerIcon, "⏱", 24, CYAN_NEON, FontStyles.Normal);
-
-            GameObject timerText = CreateOrFind(timerContainer.transform, "TimerText");
-            SetupRectTransform(timerText, new Vector2(0, 0), new Vector2(1, 1), new Vector2(20, 0), new Vector2(-30, 0));
-            SetupText(timerText, "0.00s", 28, Color.white, FontStyles.Normal);
-            TextMeshProUGUI timerTmp = timerText.GetComponent<TextMeshProUGUI>();
-            timerTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // Round
-            GameObject roundText = CreateOrFind(statsBar.transform, "RoundText");
-            AddLayoutElement(roundText, 120, 40);
-            SetupText(roundText, "1/10", 28, CYAN_NEON, FontStyles.Bold);
-
-            // Errors
-            GameObject errorsContainer = CreateOrFind(statsBar.transform, "ErrorsContainer");
-            AddLayoutElement(errorsContainer, 100, 40);
-
-            GameObject errorsIcon = CreateOrFind(errorsContainer.transform, "ErrorsIcon");
-            SetupRectTransform(errorsIcon, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(10, 0), new Vector2(30, 30));
-            SetupText(errorsIcon, "✕", 24, ERROR_COLOR, FontStyles.Normal);
-
-            GameObject errorsText = CreateOrFind(errorsContainer.transform, "ErrorsText");
-            SetupRectTransform(errorsText, new Vector2(0, 0), new Vector2(1, 1), new Vector2(20, 0), new Vector2(-20, 0));
-            SetupText(errorsText, "0", 28, ERROR_COLOR, FontStyles.Bold);
-            TextMeshProUGUI errorsTmp = errorsText.GetComponent<TextMeshProUGUI>();
-            errorsTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // ========== PROBLEM PANEL ==========
-            GameObject problemPanel = CreateOrFind(canvasTransform, "ProblemPanel");
-            SetupRectTransform(problemPanel,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 150), new Vector2(700, 300));
-
-            Image problemBg = problemPanel.GetComponent<Image>();
-            if (problemBg == null) problemBg = problemPanel.AddComponent<Image>();
-            problemBg.color = PANEL_BG;
-
-            // Border del panel
-            Outline problemOutline = problemPanel.GetComponent<Outline>();
-            if (problemOutline == null) problemOutline = problemPanel.AddComponent<Outline>();
-            problemOutline.effectColor = CYAN_NEON;
-            problemOutline.effectDistance = new Vector2(3, 3);
-
-            // Problem text (grande)
-            GameObject problemText = CreateOrFind(problemPanel.transform, "ProblemText");
-            SetupRectTransform(problemText,
-                new Vector2(0, 0), new Vector2(1, 1),
-                Vector2.zero, new Vector2(-40, -40));
-            SetupText(problemText, "5 + 7 = ?", 96, Color.white, FontStyles.Bold);
-
-            // ========== ANSWERS PANEL ==========
-            GameObject answersPanel = CreateOrFind(canvasTransform, "AnswersPanel");
-            SetupRectTransform(answersPanel,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -150), new Vector2(750, 180));
-
-            // Layout horizontal para los botones
-            HorizontalLayoutGroup answersLayout = answersPanel.GetComponent<HorizontalLayoutGroup>();
-            if (answersLayout == null) answersLayout = answersPanel.AddComponent<HorizontalLayoutGroup>();
-            answersLayout.childAlignment = TextAnchor.MiddleCenter;
-            answersLayout.spacing = 30;
-            answersLayout.childForceExpandWidth = false;
-            answersLayout.childForceExpandHeight = true;
-            answersLayout.childControlWidth = false;
-            answersLayout.childControlHeight = true;
-
-            // Crear 3 botones de respuesta
-            for (int i = 0; i < 3; i++)
-            {
-                CreateAnswerButton(answersPanel.transform, i);
-            }
-
-            // ========== PROGRESS BAR ==========
-            GameObject progressBar = CreateOrFind(canvasTransform, "ProgressBar");
-            SetupRectTransform(progressBar,
-                new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 120), new Vector2(-120, 12));
-
-            Image progressBg = progressBar.GetComponent<Image>();
-            if (progressBg == null) progressBg = progressBar.AddComponent<Image>();
-            progressBg.color = CYAN_DARK;
-
-            GameObject progressFill = CreateOrFind(progressBar.transform, "ProgressFill");
-            SetupRectTransform(progressFill,
-                new Vector2(0, 0), new Vector2(0.1f, 1),  // 10% inicial
-                Vector2.zero, Vector2.zero);
-            Image progressFillImg = progressFill.GetComponent<Image>();
-            if (progressFillImg == null) progressFillImg = progressFill.AddComponent<Image>();
-            progressFillImg.color = CYAN_NEON;
+            // ========== BARRA DE PROGRESO ==========
+            CreateProgressBar(safeArea.transform);
 
             // ========== WIN PANEL ==========
-            CreateWinPanel(canvasTransform);
+            CreateWinPanel(safeArea.transform);
+
+            // ========== PARTICLE EFFECTS ==========
+            CreateParticleEffects(safeArea.transform);
         }
 
-        private static void CreateAnswerButton(Transform parent, int index)
+        private static void CreateHeader(Transform parent)
         {
-            GameObject btnObj = CreateOrFind(parent, $"AnswerButton_{index}");
+            GameObject header = CreateElement(parent, "Header");
+            SetupRectTransform(header,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -45), new Vector2(0, 90));
 
-            // Layout element
-            LayoutElement layout = btnObj.GetComponent<LayoutElement>();
-            if (layout == null) layout = btnObj.AddComponent<LayoutElement>();
-            layout.preferredWidth = 200;
-            layout.preferredHeight = 160;
+            Image headerBg = header.AddComponent<Image>();
+            headerBg.color = new Color(0f, 0f, 0f, 0.3f);
 
-            // Background
-            Image btnBg = btnObj.GetComponent<Image>();
-            if (btnBg == null) btnBg = btnObj.AddComponent<Image>();
-            btnBg.color = BUTTON_BG;
+            // Title con efecto glow
+            GameObject title = CreateElement(header.transform, "TitleText");
+            SetupRectTransform(title,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, 0), new Vector2(400, 50));
+            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", 36, CYAN_NEON, FontStyles.Bold);
 
-            // Button
-            Button btn = btnObj.GetComponent<Button>();
-            if (btn == null) btn = btnObj.AddComponent<Button>();
-            btn.targetGraphic = btnBg;
+            // Glow effect
+            Outline titleGlow = title.AddComponent<Outline>();
+            titleGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
+            titleGlow.effectDistance = new Vector2(2, -2);
+        }
 
-            ColorBlock colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1.2f, 1.2f, 1.2f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-            btn.colors = colors;
+        private static void CreateStatsBar(Transform parent)
+        {
+            GameObject statsBar = CreateElement(parent, "StatsBar");
+            SetupRectTransform(statsBar,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -110), new Vector2(-40, 40));
 
-            // Border
-            GameObject border = CreateOrFind(btnObj.transform, "Border");
-            SetupRectTransform(border, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            Outline outline = btnObj.GetComponent<Outline>();
-            if (outline == null) outline = btnObj.AddComponent<Outline>();
-            outline.effectColor = CYAN_NEON;
-            outline.effectDistance = new Vector2(2, 2);
+            Image statsBg = statsBar.AddComponent<Image>();
+            statsBg.color = PANEL_BG;
 
-            // Inner background
-            GameObject innerBg = CreateOrFind(btnObj.transform, "InnerBg");
-            SetupRectTransform(innerBg, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-8, -8));
-            Image innerImg = innerBg.GetComponent<Image>();
-            if (innerImg == null) innerImg = innerBg.AddComponent<Image>();
-            innerImg.color = BUTTON_BG;
-            innerImg.raycastTarget = false;
+            HorizontalLayoutGroup statsLayout = statsBar.AddComponent<HorizontalLayoutGroup>();
+            statsLayout.childAlignment = TextAnchor.MiddleCenter;
+            statsLayout.spacing = 40;
+            statsLayout.padding = new RectOffset(20, 20, 5, 5);
+            statsLayout.childForceExpandWidth = false;
+            statsLayout.childForceExpandHeight = true;
 
-            // Answer text
-            GameObject answerText = CreateOrFind(btnObj.transform, $"AnswerButtonText_{index}");
+            // Timer
+            GameObject timerContainer = CreateElement(statsBar.transform, "TimerContainer");
+            AddLayoutElement(timerContainer, 110, 30);
+            GameObject timerText = CreateElement(timerContainer.transform, "TimerText");
+            SetupRectTransform(timerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI timerTmp = SetupText(timerText, "00:00", 22, Color.white, FontStyles.Bold);
+            timerTmp.alignment = TextAlignmentOptions.Center;
+
+            // Round counter
+            GameObject roundText = CreateElement(statsBar.transform, "RoundText");
+            AddLayoutElement(roundText, 80, 30);
+            SetupText(roundText, "1/10", 24, CYAN_NEON, FontStyles.Bold);
+
+            // Errors con icono Image
+            GameObject errorsContainer = CreateElement(statsBar.transform, "ErrorsContainer");
+            AddLayoutElement(errorsContainer, 70, 30);
+
+            HorizontalLayoutGroup errLayout = errorsContainer.AddComponent<HorizontalLayoutGroup>();
+            errLayout.childAlignment = TextAnchor.MiddleCenter;
+            errLayout.spacing = 6;
+
+            GameObject errorsIcon = CreateElement(errorsContainer.transform, "ErrorIcon");
+            AddLayoutElement(errorsIcon, 20, 20);
+            Image errorIconImg = errorsIcon.AddComponent<Image>();
+            errorIconImg.color = ERROR_COLOR;
+            // Asignar sprite en Inspector
+
+            GameObject errorsText = CreateElement(errorsContainer.transform, "ErrorsText");
+            AddLayoutElement(errorsText, 35, 30);
+            SetupText(errorsText, "0", 22, ERROR_COLOR, FontStyles.Bold);
+        }
+
+        private static void CreateComboDisplay(Transform parent)
+        {
+            // Combo container - prominente arriba de la ecuación
+            GameObject comboContainer = CreateElement(parent, "ComboContainer");
+            SetupRectTransform(comboContainer,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, -170), new Vector2(250, 60));
+
+            Image comboBg = comboContainer.AddComponent<Image>();
+            comboBg.color = new Color(0.1f, 0.05f, 0.15f, 0.9f);
+
+            Outline comboOutline = comboContainer.AddComponent<Outline>();
+            comboOutline.effectColor = ORANGE_NEON;
+            comboOutline.effectDistance = new Vector2(2, -2);
+
+            CanvasGroup comboCg = comboContainer.AddComponent<CanvasGroup>();
+            comboCg.alpha = 0; // Oculto inicialmente
+
+            // Streak icon (fuego)
+            GameObject streakIcon = CreateElement(comboContainer.transform, "StreakIcon");
+            SetupRectTransform(streakIcon,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(25, 0), new Vector2(40, 40));
+            Image streakImg = streakIcon.AddComponent<Image>();
+            streakImg.color = ORANGE_NEON;
+            // Asignar sprite de fuego en Inspector
+
+            // Combo text
+            GameObject comboText = CreateElement(comboContainer.transform, "ComboText");
+            SetupRectTransform(comboText,
+                new Vector2(0, 0), new Vector2(1, 1),
+                new Vector2(20, 0), new Vector2(-20, 0));
+            TextMeshProUGUI comboTmp = SetupText(comboText, "x5 STREAK!", 28, ORANGE_NEON, FontStyles.Bold);
+            comboTmp.alignment = TextAlignmentOptions.Center;
+
+            comboContainer.SetActive(false);
+        }
+
+        private static void CreateEquationPanel(Transform parent)
+        {
+            // Panel contenedor de la ecuación - GIGANTE
+            GameObject equationPanel = CreateElement(parent, "EquationPanel");
+            SetupRectTransform(equationPanel,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, 120), new Vector2(900, 250));
+
+            Image panelBg = equationPanel.AddComponent<Image>();
+            panelBg.color = new Color(0.04f, 0.08f, 0.15f, 0.95f);
+
+            // Borde neón animable
+            Outline panelOutline = equationPanel.AddComponent<Outline>();
+            panelOutline.effectColor = CYAN_NEON;
+            panelOutline.effectDistance = new Vector2(3, -3);
+
+            // Segundo borde para efecto glow
+            Shadow panelShadow = equationPanel.AddComponent<Shadow>();
+            panelShadow.effectColor = new Color(0f, 1f, 1f, 0.3f);
+            panelShadow.effectDistance = new Vector2(0, -5);
+
+            // Container para los números de la ecuación
+            GameObject equationContainer = CreateElement(equationPanel.transform, "EquationContainer");
+            SetupRectTransform(equationContainer, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            HorizontalLayoutGroup eqLayout = equationContainer.AddComponent<HorizontalLayoutGroup>();
+            eqLayout.childAlignment = TextAnchor.MiddleCenter;
+            eqLayout.spacing = 20;
+            eqLayout.childForceExpandWidth = false;
+            eqLayout.childForceExpandHeight = true;
+
+            // Número A (izquierda)
+            GameObject numberA = CreateElement(equationContainer.transform, "NumberA");
+            AddLayoutElement(numberA, 150, 200);
+            TextMeshProUGUI numATmp = SetupText(numberA, "5", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
+            numATmp.alignment = TextAlignmentOptions.Center;
+
+            // Operador
+            GameObject operatorText = CreateElement(equationContainer.transform, "OperatorText");
+            AddLayoutElement(operatorText, 80, 200);
+            TextMeshProUGUI opTmp = SetupText(operatorText, "+", EQUATION_FONT_SIZE, CYAN_NEON, FontStyles.Bold);
+            opTmp.alignment = TextAlignmentOptions.Center;
+
+            // Número B (derecha)
+            GameObject numberB = CreateElement(equationContainer.transform, "NumberB");
+            AddLayoutElement(numberB, 150, 200);
+            TextMeshProUGUI numBTmp = SetupText(numberB, "7", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
+            numBTmp.alignment = TextAlignmentOptions.Center;
+
+            // Igual
+            GameObject equalsText = CreateElement(equationContainer.transform, "EqualsText");
+            AddLayoutElement(equalsText, 80, 200);
+            TextMeshProUGUI eqTmp = SetupText(equalsText, "=", EQUATION_FONT_SIZE, CYAN_NEON, FontStyles.Bold);
+            eqTmp.alignment = TextAlignmentOptions.Center;
+
+            // Signo de interrogación (pulsa)
+            GameObject questionMark = CreateElement(equationContainer.transform, "QuestionMark");
+            AddLayoutElement(questionMark, 120, 200);
+            TextMeshProUGUI qTmp = SetupText(questionMark, "?", EQUATION_FONT_SIZE + 10, GOLD, FontStyles.Bold);
+            qTmp.alignment = TextAlignmentOptions.Center;
+
+            // También crear ProblemText oculto para compatibilidad con controller
+            GameObject problemText = CreateElement(equationPanel.transform, "ProblemText");
+            SetupRectTransform(problemText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI probTmp = SetupText(problemText, "5 + 7 = ?", 1, Color.clear, FontStyles.Normal);
+            probTmp.enabled = false; // Solo para datos, no visible
+        }
+
+        private static void CreateAnswerButtons(Transform parent)
+        {
+            // Container para botones de respuesta
+            GameObject answersContainer = CreateElement(parent, "AnswersContainer");
+            SetupRectTransform(answersContainer,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, -120), new Vector2(600, ANSWER_BUTTON_SIZE + 20));
+
+            HorizontalLayoutGroup answersLayout = answersContainer.AddComponent<HorizontalLayoutGroup>();
+            answersLayout.childAlignment = TextAnchor.MiddleCenter;
+            answersLayout.spacing = 40;
+            answersLayout.childForceExpandWidth = false;
+            answersLayout.childForceExpandHeight = false;
+
+            // Crear 3 botones de respuesta con efecto 3D
+            for (int i = 0; i < 3; i++)
+            {
+                CreateAnswerButton3D(answersContainer.transform, i);
+            }
+        }
+
+        private static void CreateAnswerButton3D(Transform parent, int index)
+        {
+            // Cell container
+            GameObject cell = CreateElement(parent, $"AnswerButton_{index}");
+            AddLayoutElement(cell, ANSWER_BUTTON_SIZE, ANSWER_BUTTON_SIZE);
+
+            Image cellBase = cell.AddComponent<Image>();
+            cellBase.color = Color.clear;
+
+            // Shadow
+            GameObject shadow = CreateElement(cell.transform, "Shadow");
+            SetupRectTransform(shadow,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(3, -8), new Vector2(ANSWER_BUTTON_SIZE - 8, ANSWER_BUTTON_SIZE - 8));
+            Image shadowImg = shadow.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
+
+            // Side (depth)
+            GameObject side = CreateElement(cell.transform, "Side");
+            SetupRectTransform(side,
+                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
+                new Vector2(0, 0), new Vector2(ANSWER_BUTTON_SIZE - 8, 10));
+            Image sideImg = side.AddComponent<Image>();
+            sideImg.color = new Color(0f, 0.3f, 0.35f, 1f);
+
+            // Face (top)
+            GameObject face = CreateElement(cell.transform, "Face");
+            SetupRectTransform(face,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, 4), new Vector2(ANSWER_BUTTON_SIZE - 8, ANSWER_BUTTON_SIZE - 8));
+            Image faceImg = face.AddComponent<Image>();
+            faceImg.color = BUTTON_BG;
+
+            Outline faceOutline = face.AddComponent<Outline>();
+            faceOutline.effectColor = CYAN_NEON;
+            faceOutline.effectDistance = new Vector2(2, -2);
+
+            // Answer text - GRANDE
+            GameObject answerText = CreateElement(face.transform, $"AnswerText_{index}");
             SetupRectTransform(answerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(answerText, (10 + index).ToString(), 64, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI answerTmp = SetupText(answerText, "12", 52, CYAN_NEON, FontStyles.Bold);
+            answerTmp.alignment = TextAlignmentOptions.Center;
 
-            // Add GameCardEffect for animations
-            GameCardEffect effect = btnObj.GetComponent<GameCardEffect>();
-            if (effect == null) effect = btnObj.AddComponent<GameCardEffect>();
+            // Button component
+            Button button = cell.AddComponent<Button>();
+            button.targetGraphic = faceImg;
+
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.1f, 1.1f, 1.2f, 1f);
+            colors.pressedColor = new Color(0.8f, 0.9f, 0.85f, 1f);
+            colors.fadeDuration = 0.05f;
+            button.colors = colors;
+
+            // Add QuickMathCell3D component
+            QuickMathCell3D cell3D = cell.AddComponent<QuickMathCell3D>();
+
+            // Assign references via SerializedObject
+            SerializedObject so = new SerializedObject(cell3D);
+            so.FindProperty("buttonFace").objectReferenceValue = face.GetComponent<RectTransform>();
+            so.FindProperty("shadowImage").objectReferenceValue = shadowImg;
+            so.FindProperty("sideImage").objectReferenceValue = sideImg;
+            so.FindProperty("faceImage").objectReferenceValue = faceImg;
+            so.FindProperty("glowOutline").objectReferenceValue = faceOutline;
+            so.FindProperty("answerText").objectReferenceValue = answerTmp;
+            so.ApplyModifiedProperties();
         }
 
-        private static void CreateWinPanel(Transform canvasTransform)
+        private static void CreateProgressBar(Transform parent)
         {
-            GameObject winPanel = CreateOrFind(canvasTransform, "WinPanel");
+            // Container de progreso
+            GameObject progressContainer = CreateElement(parent, "ProgressContainer");
+            SetupRectTransform(progressContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 100), new Vector2(-80, 50));
+
+            // Round indicator text
+            GameObject roundIndicator = CreateElement(progressContainer.transform, "RoundIndicator");
+            SetupRectTransform(roundIndicator,
+                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(-50, 0), new Vector2(80, 30));
+            SetupText(roundIndicator, "8/15", 20, Color.white, FontStyles.Bold);
+
+            // Progress bar background
+            GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
+            SetupRectTransform(progressBar,
+                new Vector2(0, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(0, 0), new Vector2(-100, 16));
+
+            Image progressBg = progressBar.AddComponent<Image>();
+            progressBg.color = new Color(0f, 0.2f, 0.25f, 0.8f);
+
+            Outline progressOutline = progressBar.AddComponent<Outline>();
+            progressOutline.effectColor = CYAN_NEON;
+            progressOutline.effectDistance = new Vector2(1, -1);
+
+            // Progress fill
+            GameObject progressFill = CreateElement(progressBar.transform, "ProgressFill");
+            SetupRectTransform(progressFill,
+                new Vector2(0, 0), new Vector2(0.5f, 1), // 50% como ejemplo
+                Vector2.zero, Vector2.zero);
+
+            Image fillImg = progressFill.AddComponent<Image>();
+            fillImg.color = CYAN_NEON;
+
+            // Glow en el fill
+            Shadow fillGlow = progressFill.AddComponent<Shadow>();
+            fillGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
+            fillGlow.effectDistance = new Vector2(0, -2);
+        }
+
+        private static void CreateWinPanel(Transform parent)
+        {
+            GameObject winPanel = CreateElement(parent, "WinPanel");
             SetupRectTransform(winPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            Image overlayImg = winPanel.GetComponent<Image>();
-            if (overlayImg == null) overlayImg = winPanel.AddComponent<Image>();
-            overlayImg.color = new Color(0, 0, 0, 0.85f);
+            Image overlayImg = winPanel.AddComponent<Image>();
+            overlayImg.color = new Color(0, 0, 0, 0.9f);
+
+            CanvasGroup winCg = winPanel.AddComponent<CanvasGroup>();
+            winCg.alpha = 0;
 
             // Content
-            GameObject content = CreateOrFind(winPanel.transform, "Content");
+            GameObject content = CreateElement(winPanel.transform, "Content");
             SetupRectTransform(content,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(600, 500));
+                Vector2.zero, new Vector2(550, 420));
 
-            Image contentBg = content.GetComponent<Image>();
-            if (contentBg == null) contentBg = content.AddComponent<Image>();
+            Image contentBg = content.AddComponent<Image>();
             contentBg.color = PANEL_BG;
 
-            Outline contentOutline = content.GetComponent<Outline>();
-            if (contentOutline == null) contentOutline = content.AddComponent<Outline>();
-            contentOutline.effectColor = CYAN_NEON;
-            contentOutline.effectDistance = new Vector2(3, 3);
+            Outline contentOutline = content.AddComponent<Outline>();
+            contentOutline.effectColor = GREEN_NEON;
+            contentOutline.effectDistance = new Vector2(3, -3);
 
             // Title
-            GameObject winTitle = CreateOrFind(content.transform, "WinTitle");
+            GameObject winTitle = CreateElement(content.transform, "WinTitle");
             SetupRectTransform(winTitle,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -60), new Vector2(0, 80));
-            SetupText(winTitle, "COMPLETADO!", 48, CYAN_NEON, FontStyles.Bold);
+                new Vector2(0, -45), new Vector2(0, 70));
+            SetupText(winTitle, "¡COMPLETADO!", 44, GREEN_NEON, FontStyles.Bold);
 
             // Stats
-            GameObject statsText = CreateOrFind(content.transform, "StatsText");
+            GameObject statsText = CreateElement(content.transform, "StatsText");
             SetupRectTransform(statsText,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 20), new Vector2(400, 120));
-            SetupText(statsText, "Tiempo: 0.00s\nErrores: 0", 32, Color.white, FontStyles.Normal);
-
-            // Result
-            GameObject resultText = CreateOrFind(content.transform, "ResultText");
-            SetupRectTransform(resultText,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -60), new Vector2(400, 60));
-            SetupText(resultText, "Excelente!", 36, CYAN_NEON, FontStyles.Bold);
+                new Vector2(0, 20), new Vector2(400, 130));
+            TextMeshProUGUI statsTmp = SetupText(statsText, "Tiempo: 00:00\nErrores: 0\nMax Streak: x1", 26, Color.white, FontStyles.Normal);
+            statsTmp.lineSpacing = 15;
 
             // Play again button
-            GameObject playAgainBtn = CreateOrFind(content.transform, "PlayAgainButton");
+            GameObject playAgainBtn = CreateElement(content.transform, "PlayAgainButton");
             SetupRectTransform(playAgainBtn,
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 80), new Vector2(300, 70));
+                new Vector2(0, 60), new Vector2(300, 65));
 
-            Button playBtn = playAgainBtn.GetComponent<Button>();
-            if (playBtn == null) playBtn = playAgainBtn.AddComponent<Button>();
+            Image playBtnImg = playAgainBtn.AddComponent<Image>();
+            playBtnImg.color = GREEN_NEON;
 
-            Image playBtnImg = playAgainBtn.GetComponent<Image>();
-            if (playBtnImg == null) playBtnImg = playAgainBtn.AddComponent<Image>();
-            playBtnImg.color = CYAN_NEON;
+            Outline btnOutline = playAgainBtn.AddComponent<Outline>();
+            btnOutline.effectColor = new Color(0.1f, 0.4f, 0.2f, 1f);
+            btnOutline.effectDistance = new Vector2(2, -2);
 
+            Button playBtn = playAgainBtn.AddComponent<Button>();
             playBtn.targetGraphic = playBtnImg;
 
-            GameObject playBtnText = CreateOrFind(playAgainBtn.transform, "PlayAgainButtonText");
+            GameObject playBtnText = CreateElement(playAgainBtn.transform, "PlayAgainButtonText");
             SetupRectTransform(playBtnText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(playBtnText, "Jugar de Nuevo", 28, DARK_BG, FontStyles.Bold);
+            SetupText(playBtnText, "JUGAR DE NUEVO", 28, DARK_BG, FontStyles.Bold);
 
-            // Desactivar por defecto
             winPanel.SetActive(false);
         }
 
-        // ========== UTILIDADES ==========
-
-        private static GameObject CreateOrFind(Transform parent, string name)
+        private static void CreateParticleEffects(Transform parent)
         {
-            Transform existing = parent.Find(name);
-            if (existing != null) return existing.gameObject;
+            GameObject particleContainer = CreateElement(parent, "ParticleEffects");
+            SetupRectTransform(particleContainer, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            GameObject obj = new GameObject(name);
-            obj.transform.SetParent(parent, false);
+            UISparkleEffect sparkleEffect = particleContainer.AddComponent<UISparkleEffect>();
 
-            if (obj.GetComponent<RectTransform>() == null)
+            particleContainer.transform.SetAsLastSibling();
+        }
+
+        private static void AssignControllerReferences()
+        {
+            var controller = FindFirstObjectByType<QuickMathController>();
+            if (controller == null)
             {
-                obj.AddComponent<RectTransform>();
+                Debug.LogWarning("[QuickMathUIBuilder] No se encontró QuickMathController en la escena");
+                return;
             }
 
+            SerializedObject so = new SerializedObject(controller);
+
+            // Problem text (hidden, for data)
+            AssignTMPReference(so, "problemText", "ProblemText");
+
+            // Equation parts
+            AssignTMPReference(so, "numberAText", "NumberA");
+            AssignTMPReference(so, "numberBText", "NumberB");
+            AssignTMPReference(so, "operatorText", "OperatorText");
+            AssignTMPReference(so, "questionMarkText", "QuestionMark");
+
+            // Answer buttons
+            GameObject answersContainer = GameObject.Find("AnswersContainer");
+            if (answersContainer != null)
+            {
+                SerializedProperty answerButtonsProp = so.FindProperty("answerButtons");
+                SerializedProperty answerTextsProp = so.FindProperty("answerTexts");
+
+                if (answerButtonsProp != null) answerButtonsProp.arraySize = 3;
+                if (answerTextsProp != null) answerTextsProp.arraySize = 3;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    Transform btn = answersContainer.transform.Find($"AnswerButton_{i}");
+                    if (btn != null)
+                    {
+                        if (answerButtonsProp != null)
+                            answerButtonsProp.GetArrayElementAtIndex(i).objectReferenceValue = btn.GetComponent<Button>();
+
+                        Transform face = btn.Find("Face");
+                        if (face != null && answerTextsProp != null)
+                        {
+                            TextMeshProUGUI txt = face.GetComponentInChildren<TextMeshProUGUI>();
+                            if (txt != null)
+                                answerTextsProp.GetArrayElementAtIndex(i).objectReferenceValue = txt;
+                        }
+                    }
+                }
+            }
+
+            // UI elements
+            AssignTMPReference(so, "timerText", "TimerText");
+            AssignTMPReference(so, "roundText", "RoundText");
+            AssignTMPReference(so, "errorsText", "ErrorsText");
+            AssignTMPReference(so, "comboText", "ComboText");
+            AssignTMPReference(so, "statsText", "StatsText");
+            AssignTMPReference(so, "roundIndicatorText", "RoundIndicator");
+
+            // Win panel
+            GameObject winPanel = GameObject.Find("WinPanel");
+            if (winPanel != null)
+            {
+                SerializedProperty winPanelProp = so.FindProperty("winPanel");
+                if (winPanelProp != null)
+                    winPanelProp.objectReferenceValue = winPanel;
+
+                SerializedProperty winCgProp = so.FindProperty("winPanelCanvasGroup");
+                if (winCgProp != null)
+                    winCgProp.objectReferenceValue = winPanel.GetComponent<CanvasGroup>();
+            }
+
+            // Combo container
+            GameObject comboContainer = GameObject.Find("ComboContainer");
+            if (comboContainer != null)
+            {
+                SerializedProperty comboCgProp = so.FindProperty("comboCanvasGroup");
+                if (comboCgProp != null)
+                    comboCgProp.objectReferenceValue = comboContainer.GetComponent<CanvasGroup>();
+            }
+
+            // Progress fill
+            GameObject progressFill = GameObject.Find("ProgressFill");
+            if (progressFill != null)
+            {
+                SerializedProperty progressProp = so.FindProperty("progressFill");
+                if (progressProp != null)
+                    progressProp.objectReferenceValue = progressFill.GetComponent<RectTransform>();
+            }
+
+            // Sparkle effect
+            GameObject particleEffects = GameObject.Find("ParticleEffects");
+            if (particleEffects != null)
+            {
+                SerializedProperty sparkleProp = so.FindProperty("sparkleEffect");
+                if (sparkleProp != null)
+                    sparkleProp.objectReferenceValue = particleEffects.GetComponent<UISparkleEffect>();
+            }
+
+            // Equation panel for animations
+            GameObject equationPanel = GameObject.Find("EquationPanel");
+            if (equationPanel != null)
+            {
+                SerializedProperty eqPanelProp = so.FindProperty("equationPanel");
+                if (eqPanelProp != null)
+                    eqPanelProp.objectReferenceValue = equationPanel.GetComponent<RectTransform>();
+            }
+
+            so.ApplyModifiedProperties();
+            Debug.Log("[QuickMathUIBuilder] Referencias asignadas al Controller");
+        }
+
+        private static void AssignTMPReference(SerializedObject so, string propertyName, string objectName)
+        {
+            SerializedProperty prop = so.FindProperty(propertyName);
+            if (prop != null)
+            {
+                GameObject obj = GameObject.Find(objectName);
+                if (obj != null)
+                {
+                    prop.objectReferenceValue = obj.GetComponent<TextMeshProUGUI>();
+                }
+            }
+        }
+
+        // ========== UTILITIES ==========
+
+        private static GameObject CreateElement(Transform parent, string name)
+        {
+            GameObject obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            obj.AddComponent<RectTransform>();
             return obj;
         }
 
-        private static RectTransform SetupRectTransform(GameObject obj, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 sizeDelta)
+        private static void SetupRectTransform(GameObject obj, Vector2 anchorMin, Vector2 anchorMax,
+            Vector2 anchoredPosition, Vector2 sizeDelta)
         {
-            RectTransform rect = obj.GetComponent<RectTransform>();
-            if (rect == null) rect = obj.AddComponent<RectTransform>();
+            RectTransform rt = obj.GetComponent<RectTransform>();
+            if (rt == null) rt = obj.AddComponent<RectTransform>();
 
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.anchoredPosition = anchoredPos;
-            rect.sizeDelta = sizeDelta;
-
-            return rect;
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.anchoredPosition = anchoredPosition;
+            rt.sizeDelta = sizeDelta;
         }
 
-        private static void SetupText(GameObject obj, string text, int fontSize, Color color, FontStyles style)
+        private static TextMeshProUGUI SetupText(GameObject obj, string text, float fontSize, Color color, FontStyles style)
         {
             TextMeshProUGUI tmp = obj.GetComponent<TextMeshProUGUI>();
             if (tmp == null) tmp = obj.AddComponent<TextMeshProUGUI>();
@@ -404,7 +675,11 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableWordWrapping = false;
+            tmp.overflowMode = TextOverflowModes.Overflow;
             tmp.raycastTarget = false;
+
+            return tmp;
         }
 
         private static void AddLayoutElement(GameObject obj, float width, float height)

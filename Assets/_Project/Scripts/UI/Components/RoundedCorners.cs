@@ -15,15 +15,6 @@ namespace DigitPark.UI
         [Tooltip("Radio de las esquinas en pixeles")]
         [SerializeField] private float cornerRadius = 25f;
 
-        [Header("Barra inferior (opcional)")]
-        [SerializeField] private bool showBottomBar = false;
-        [SerializeField] private float bottomBarHeight = 8f;
-        [SerializeField] private Color bottomBarColor = Color.black;
-
-        // Referencia serializada para evitar duplicados
-        [SerializeField, HideInInspector]
-        private GameObject bottomBarObject;
-
         private Image targetImage;
         private Texture2D generatedTexture;
         private Sprite generatedSprite;
@@ -32,7 +23,6 @@ namespace DigitPark.UI
         private void Awake()
         {
             targetImage = GetComponent<Image>();
-            CleanupDuplicateBottomBars();
         }
 
         private void Start()
@@ -57,63 +47,12 @@ namespace DigitPark.UI
                 {
                     if (this != null)
                     {
-                        CleanupDuplicateBottomBars();
                         ApplyRoundedCorners();
                     }
                 };
             }
         }
 #endif
-
-        /// <summary>
-        /// Elimina BottomBars duplicados, dejando solo uno
-        /// </summary>
-        private void CleanupDuplicateBottomBars()
-        {
-            if (this == null || transform == null) return;
-
-            GameObject firstFound = null;
-            var childrenToDestroy = new System.Collections.Generic.List<GameObject>();
-
-            foreach (Transform child in transform)
-            {
-                if (child.name == "BottomBar")
-                {
-                    if (firstFound == null)
-                    {
-                        firstFound = child.gameObject;
-                    }
-                    else
-                    {
-                        childrenToDestroy.Add(child.gameObject);
-                    }
-                }
-            }
-
-            // Destruir duplicados
-            foreach (var obj in childrenToDestroy)
-            {
-                if (Application.isPlaying)
-                    Destroy(obj);
-                else
-                    DestroyImmediate(obj);
-            }
-
-            // Actualizar referencia
-            if (showBottomBar && firstFound != null)
-            {
-                bottomBarObject = firstFound;
-            }
-            else if (!showBottomBar && firstFound != null)
-            {
-                // Si no queremos BottomBar, destruir el existente
-                if (Application.isPlaying)
-                    Destroy(firstFound);
-                else
-                    DestroyImmediate(firstFound);
-                bottomBarObject = null;
-            }
-        }
 
         public void ApplyRoundedCorners()
         {
@@ -129,9 +68,6 @@ namespace DigitPark.UI
                 lastRadius = cornerRadius;
                 CreateRoundedTexture();
             }
-
-            // Manejar barra inferior
-            HandleBottomBar();
         }
 
         private void CreateRoundedTexture()
@@ -212,77 +148,6 @@ namespace DigitPark.UI
             float dx = x - cx;
             float dy = y - cy;
             return (dx * dx + dy * dy) <= (radius * radius);
-        }
-
-        private void HandleBottomBar()
-        {
-            if (!showBottomBar)
-            {
-                // Destruir si existe pero no lo queremos
-                if (bottomBarObject != null)
-                {
-                    if (Application.isPlaying)
-                        Destroy(bottomBarObject);
-                    else
-                        DestroyImmediate(bottomBarObject);
-                    bottomBarObject = null;
-                }
-                return;
-            }
-
-            // Verificar si la referencia sigue siendo válida
-            if (bottomBarObject == null)
-            {
-                // Buscar existente primero
-                foreach (Transform child in transform)
-                {
-                    if (child.name == "BottomBar")
-                    {
-                        bottomBarObject = child.gameObject;
-                        break;
-                    }
-                }
-            }
-
-            // Crear solo si no existe
-            if (bottomBarObject == null)
-            {
-                bottomBarObject = new GameObject("BottomBar");
-                bottomBarObject.transform.SetParent(transform, false);
-                bottomBarObject.transform.SetAsLastSibling();
-
-                var rt = bottomBarObject.AddComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0, 0);
-                rt.anchorMax = new Vector2(1, 0);
-                rt.pivot = new Vector2(0.5f, 0);
-                rt.anchoredPosition = Vector2.zero;
-                rt.sizeDelta = new Vector2(0, bottomBarHeight);
-
-                var barImage = bottomBarObject.AddComponent<Image>();
-                barImage.color = bottomBarColor;
-                barImage.raycastTarget = false;
-
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    UnityEditor.EditorUtility.SetDirty(this);
-#endif
-            }
-            else
-            {
-                // Actualizar propiedades del existente
-                var rt = bottomBarObject.GetComponent<RectTransform>();
-                if (rt != null)
-                    rt.sizeDelta = new Vector2(0, bottomBarHeight);
-
-                var barImage = bottomBarObject.GetComponent<Image>();
-                if (barImage != null)
-                {
-                    barImage.color = bottomBarColor;
-                    barImage.raycastTarget = false;
-                }
-            }
-
-            bottomBarObject.SetActive(true);
         }
 
         private void OnDestroy()

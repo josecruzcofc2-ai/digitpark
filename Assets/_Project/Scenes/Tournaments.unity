@@ -3463,6 +3463,7 @@ GameObject:
   - component: {fileID: 390209235}
   - component: {fileID: 390209238}
   - component: {fileID: 390209239}
+  - component: {fileID: 390209240}
   m_Layer: 5
   m_Name: CancelButton
   m_TagString: Untagged
@@ -3647,6 +3648,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 3
+--- !u!114 &390209240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390209233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &405595008
 GameObject:
   m_ObjectHideFlags: 0
@@ -4231,6 +4254,7 @@ GameObject:
   - component: {fileID: 430318526}
   - component: {fileID: 430318529}
   - component: {fileID: 430318530}
+  - component: {fileID: 430318531}
   m_Layer: 5
   m_Name: CancelButton
   m_TagString: Untagged
@@ -4414,6 +4438,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 3
+--- !u!114 &430318531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430318524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 4
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &453327142
 GameObject:
   m_ObjectHideFlags: 0
@@ -5414,6 +5460,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1561584748379450492, guid: cce5e3d89c9a7894287d1615774c49cf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 569757568}
+    - targetCorrespondingSourceObject: {fileID: 1561584748379450492, guid: cce5e3d89c9a7894287d1615774c49cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 569757569}
   m_SourcePrefab: {fileID: 100100000, guid: cce5e3d89c9a7894287d1615774c49cf, type: 3}
 --- !u!224 &569757560 stripped
 RectTransform:
@@ -5571,6 +5620,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 2
+--- !u!114 &569757569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569757563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 3
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &614314462
 GameObject:
   m_ObjectHideFlags: 0
@@ -5869,6 +5940,7 @@ GameObject:
   - component: {fileID: 649360671}
   - component: {fileID: 649360674}
   - component: {fileID: 649360675}
+  - component: {fileID: 649360676}
   m_Layer: 5
   m_Name: ApplyButton
   m_TagString: Untagged
@@ -6053,6 +6125,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &649360676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649360669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 3
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &674569196
 GameObject:
   m_ObjectHideFlags: 0
@@ -6882,6 +6976,7 @@ GameObject:
   - component: {fileID: 824693721}
   - component: {fileID: 824693724}
   - component: {fileID: 824693725}
+  - component: {fileID: 824693726}
   m_Layer: 5
   m_Name: ExitTournamentButton
   m_TagString: Untagged
@@ -7066,6 +7161,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &824693726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 824693719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &846543197
 GameObject:
   m_ObjectHideFlags: 0
@@ -7755,6 +7872,8 @@ GameObject:
   - component: {fileID: 926701644}
   - component: {fileID: 926701647}
   - component: {fileID: 926701648}
+  - component: {fileID: 926701649}
+  - component: {fileID: 926701650}
   m_Layer: 5
   m_Name: MyTournamentsTab
   m_TagString: Untagged
@@ -7939,6 +8058,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &926701649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 926701642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &926701650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 926701642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &931420306
 GameObject:
   m_ObjectHideFlags: 0
@@ -8422,6 +8578,8 @@ GameObject:
   - component: {fileID: 1022495590}
   - component: {fileID: 1022495593}
   - component: {fileID: 1022495594}
+  - component: {fileID: 1022495595}
+  - component: {fileID: 1022495596}
   m_Layer: 5
   m_Name: SearchOptionsButton
   m_TagString: Untagged
@@ -8606,6 +8764,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1022495595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022495588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1022495596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022495588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1030760237
 GameObject:
   m_ObjectHideFlags: 0
@@ -9001,6 +9196,7 @@ GameObject:
   - component: {fileID: 1043117139}
   - component: {fileID: 1043117140}
   - component: {fileID: 1043117141}
+  - component: {fileID: 1043117142}
   m_Layer: 0
   m_Name: ConfirmButton
   m_TagString: Untagged
@@ -9185,6 +9381,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 2
+--- !u!114 &1043117142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043117135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 3
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1043282602
 GameObject:
   m_ObjectHideFlags: 0
@@ -10239,6 +10457,7 @@ GameObject:
   - component: {fileID: 1226131700}
   - component: {fileID: 1226131703}
   - component: {fileID: 1226131704}
+  - component: {fileID: 1226131705}
   m_Layer: 5
   m_Name: ClearButton
   m_TagString: Untagged
@@ -10423,6 +10642,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1226131705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226131698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1250148628
 GameObject:
   m_ObjectHideFlags: 0
@@ -11923,12 +12164,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5644943473953342817, guid: fc7acd7628f18bc40a587ee45c07d8d8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1319241002}
+    - targetCorrespondingSourceObject: {fileID: 5644943473953342817, guid: fc7acd7628f18bc40a587ee45c07d8d8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1319241004}
     - targetCorrespondingSourceObject: {fileID: 3581102281062648613, guid: fc7acd7628f18bc40a587ee45c07d8d8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1319241000}
     - targetCorrespondingSourceObject: {fileID: 3581102281062648613, guid: fc7acd7628f18bc40a587ee45c07d8d8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1319241003}
+    - targetCorrespondingSourceObject: {fileID: 3581102281062648613, guid: fc7acd7628f18bc40a587ee45c07d8d8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1319241005}
   m_SourcePrefab: {fileID: 100100000, guid: fc7acd7628f18bc40a587ee45c07d8d8, type: 3}
 --- !u!224 &1319240990 stripped
 RectTransform:
@@ -12196,6 +12443,50 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 3
+--- !u!114 &1319241004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1319240994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 3
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
+--- !u!114 &1319241005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1319240995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1332497877
 GameObject:
   m_ObjectHideFlags: 0
@@ -12530,6 +12821,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4719967581474506113, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1342574093}
+    - targetCorrespondingSourceObject: {fileID: 4719967581474506113, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1342574094}
+    - targetCorrespondingSourceObject: {fileID: 4719967581474506113, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1342574095}
   m_SourcePrefab: {fileID: 100100000, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
 --- !u!224 &1342574090 stripped
 RectTransform:
@@ -12602,6 +12899,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1342574094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342574092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1342574095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342574092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 0
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1405347293
 GameObject:
   m_ObjectHideFlags: 0
@@ -12818,6 +13152,7 @@ GameObject:
   - component: {fileID: 1431348303}
   - component: {fileID: 1431348307}
   - component: {fileID: 1431348308}
+  - component: {fileID: 1431348309}
   m_Layer: 5
   m_Name: LeaderboardBackButton
   m_TagString: Untagged
@@ -13002,6 +13337,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1431348309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1431348302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1451001660
 GameObject:
   m_ObjectHideFlags: 0
@@ -13138,6 +13495,7 @@ GameObject:
   - component: {fileID: 1463787674}
   - component: {fileID: 1463787677}
   - component: {fileID: 1463787678}
+  - component: {fileID: 1463787679}
   m_Layer: 5
   m_Name: BlockerPanel
   m_TagString: Untagged
@@ -13322,6 +13680,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1463787679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1463787672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1534481328
 GameObject:
   m_ObjectHideFlags: 0
@@ -13923,6 +14303,7 @@ GameObject:
   - component: {fileID: 1650370574}
   - component: {fileID: 1650370575}
   - component: {fileID: 1650370576}
+  - component: {fileID: 1650370577}
   m_Layer: 0
   m_Name: CancelButton
   m_TagString: Untagged
@@ -14107,6 +14488,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 3
+--- !u!114 &1650370577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1650370570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1667595806
 GameObject:
   m_ObjectHideFlags: 0
@@ -14121,6 +14524,8 @@ GameObject:
   - component: {fileID: 1667595808}
   - component: {fileID: 1667595811}
   - component: {fileID: 1667595812}
+  - component: {fileID: 1667595813}
+  - component: {fileID: 1667595814}
   m_Layer: 5
   m_Name: SearchTab
   m_TagString: Untagged
@@ -14305,6 +14710,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1667595813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667595806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1667595814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667595806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1680887697
 GameObject:
   m_ObjectHideFlags: 0
@@ -15425,6 +15867,8 @@ GameObject:
   - component: {fileID: 1809872001}
   - component: {fileID: 1809872004}
   - component: {fileID: 1809872005}
+  - component: {fileID: 1809872006}
+  - component: {fileID: 1809872007}
   m_Layer: 5
   m_Name: CreateTab
   m_TagString: Untagged
@@ -15609,6 +16053,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1809872006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809871999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1809872007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809871999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 0
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1825096347
 GameObject:
   m_ObjectHideFlags: 0
@@ -15760,6 +16241,7 @@ GameObject:
   - component: {fileID: 1850992117}
   - component: {fileID: 1850992120}
   - component: {fileID: 1850992121}
+  - component: {fileID: 1850992122}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -15943,6 +16425,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1850992122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850992115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 4
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1854951855
 GameObject:
   m_ObjectHideFlags: 0
@@ -16594,6 +17098,7 @@ GameObject:
   - component: {fileID: 1926354040}
   - component: {fileID: 1926354043}
   - component: {fileID: 1926354044}
+  - component: {fileID: 1926354045}
   m_Layer: 5
   m_Name: CreateButton
   m_TagString: Untagged
@@ -16778,6 +17283,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1926354045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926354038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 0
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1926703202
 GameObject:
   m_ObjectHideFlags: 0
@@ -16952,6 +17479,7 @@ GameObject:
   - component: {fileID: 1944351869}
   - component: {fileID: 1944351872}
   - component: {fileID: 1944351873}
+  - component: {fileID: 1944351874}
   m_Layer: 5
   m_Name: ConfirmButton
   m_TagString: Untagged
@@ -17136,6 +17664,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 2
+--- !u!114 &1944351874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944351867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 3
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1947504331
 GameObject:
   m_ObjectHideFlags: 0

@@ -777,6 +777,8 @@ GameObject:
   - component: {fileID: 1034778388}
   - component: {fileID: 1034778391}
   - component: {fileID: 1034778392}
+  - component: {fileID: 1034778393}
+  - component: {fileID: 1034778394}
   m_Layer: 5
   m_Name: CountryTab
   m_TagString: Untagged
@@ -961,6 +963,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1034778393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034778386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1034778394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034778386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1049328533
 GameObject:
   m_ObjectHideFlags: 0
@@ -1139,6 +1178,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4719967581474506113, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1135158830}
+    - targetCorrespondingSourceObject: {fileID: 4719967581474506113, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1135158831}
+    - targetCorrespondingSourceObject: {fileID: 4719967581474506113, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1135158832}
   m_SourcePrefab: {fileID: 100100000, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
 --- !u!224 &1135158827 stripped
 RectTransform:
@@ -1211,6 +1256,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1135158831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1135158829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1135158832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1135158829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 0
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1206338433
 GameObject:
   m_ObjectHideFlags: 0
@@ -1652,6 +1734,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1561584748379450492, guid: cce5e3d89c9a7894287d1615774c49cf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1221863615}
+    - targetCorrespondingSourceObject: {fileID: 1561584748379450492, guid: cce5e3d89c9a7894287d1615774c49cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1221863616}
   m_SourcePrefab: {fileID: 100100000, guid: cce5e3d89c9a7894287d1615774c49cf, type: 3}
 --- !u!224 &1221863608 stripped
 RectTransform:
@@ -1798,6 +1883,28 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 2
+--- !u!114 &1221863616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221863609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 3
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1254080603
 GameObject:
   m_ObjectHideFlags: 0
@@ -2021,6 +2128,8 @@ GameObject:
   - component: {fileID: 1726163064}
   - component: {fileID: 1726163067}
   - component: {fileID: 1726163068}
+  - component: {fileID: 1726163069}
+  - component: {fileID: 1726163070}
   m_Layer: 5
   m_Name: GlobalTab
   m_TagString: Untagged
@@ -2205,6 +2314,43 @@ MonoBehaviour:
   enableGlow: 1
   glowPulseSpeed: 2
   effectType: 0
+--- !u!114 &1726163069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726163062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.2, b: 0.6, a: 0.7}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
+--- !u!114 &1726163070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726163062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5678be94b8965ce4ea7334411377a284, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowStyle: 6
+  customColor: {r: 0, g: 1, b: 1, a: 1}
+  glowAlpha: 0.7
+  glowDistance: {x: 4, y: 4}
+  enableHoverEffect: 1
+  hoverIntensityMultiplier: 1.5
+  hoverTransitionSpeed: 8
+  enablePulse: 0
+  pulseSpeed: 1.5
+  pulseAmount: 0.2
 --- !u!1 &1933913315
 GameObject:
   m_ObjectHideFlags: 0

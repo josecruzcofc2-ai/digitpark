@@ -95,12 +95,12 @@ namespace DigitPark.Managers
 
             if (passwordInput != null)
             {
-                passwordInput.characterLimit = 50;
+                passwordInput.characterLimit = 128;
             }
 
             if (confirmPasswordInput != null)
             {
-                confirmPasswordInput.characterLimit = 50;
+                confirmPasswordInput.characterLimit = 128;
             }
 
             // Auto-configurar PasswordToggle si no están asignados
@@ -348,7 +348,7 @@ namespace DigitPark.Managers
                 return false;
             }
 
-            if (password.Length < 6)
+            if (password.Length < 8)
             {
                 ShowError(GetLocalizedText("error_password_too_short"));
                 return false;
