@@ -73,7 +73,13 @@ namespace DigitPark.Themes
             HeaderPurple,
             HeaderNavy,
             BackgroundNavy,
-            BackgroundPurple
+            BackgroundPurple,
+            // Button Glow
+            ButtonGlowPrimary,
+            ButtonGlowPremium,
+            ButtonGlowSuccess,
+            ButtonGlowDanger,
+            ButtonGlowNavy
         }
 
         [Header("Element Configuration")]
@@ -261,6 +267,13 @@ namespace DigitPark.Themes
                 case ElementType.HeaderNavy: return theme.headerNavy;
                 case ElementType.BackgroundNavy: return theme.backgroundNavy;
                 case ElementType.BackgroundPurple: return theme.backgroundPurple;
+
+                // Button Glow
+                case ElementType.ButtonGlowPrimary: return theme.glowColor;
+                case ElementType.ButtonGlowPremium: return theme.premiumColor;
+                case ElementType.ButtonGlowSuccess: return theme.successColor;
+                case ElementType.ButtonGlowDanger: return theme.errorColor;
+                case ElementType.ButtonGlowNavy: return theme.primaryAccent; // Cyan glow for navy buttons
 
                 default: return Color.white;
             }

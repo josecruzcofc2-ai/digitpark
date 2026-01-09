@@ -27,6 +27,7 @@ namespace DigitPark.Managers
         [SerializeField] public Button googleButton;
         [SerializeField] public Button appleButton;
         [SerializeField] public Button registerButton;
+        [SerializeField] public Button forgotPasswordButton;
 
         [Header("UI - Other")]
         [SerializeField] public GameObject loadingPanel;
@@ -40,6 +41,7 @@ namespace DigitPark.Managers
 
         private bool isLoggingIn = false;
         private UsernamePopup usernamePopup;
+        private ForgotPasswordPopup forgotPasswordPopup;
         private PlayerData currentPlayerData;
 
         private void Start()
@@ -85,6 +87,9 @@ namespace DigitPark.Managers
 
             // Crear popup de username (oculto inicialmente)
             CreateUsernamePopup();
+
+            // Crear popup de forgot password (oculto inicialmente)
+            CreateForgotPasswordPopup();
         }
 
         /// <summary>
@@ -97,6 +102,19 @@ namespace DigitPark.Managers
             {
                 usernamePopup = UsernamePopup.Create(canvas.transform);
                 usernamePopup.Hide();
+            }
+        }
+
+        /// <summary>
+        /// Crea el popup de forgot password
+        /// </summary>
+        private void CreateForgotPasswordPopup()
+        {
+            Canvas canvas = FindFirstObjectByType<Canvas>();
+            if (canvas != null)
+            {
+                forgotPasswordPopup = ForgotPasswordPopup.Create(canvas.transform);
+                forgotPasswordPopup.Hide();
             }
         }
 
@@ -144,7 +162,7 @@ namespace DigitPark.Managers
 
             if (passwordInput != null)
             {
-                passwordInput.characterLimit = 50;
+                passwordInput.characterLimit = 128;
             }
 
             // Actualizar textos localizados
@@ -202,6 +220,7 @@ namespace DigitPark.Managers
             registerButton?.onClick.AddListener(GoToRegisterScene);
             googleButton?.onClick.AddListener(OnGoogleLoginClicked);
             appleButton?.onClick.AddListener(OnAppleLoginClicked);
+            forgotPasswordButton?.onClick.AddListener(OnForgotPasswordClicked);
 
             // Ambos botones (Google y Apple) siempre visibles
 
@@ -297,7 +316,7 @@ namespace DigitPark.Managers
                 return false;
             }
 
-            if (password.Length < 6)
+            if (password.Length < 8)
             {
                 ShowErrorMessage(GetLocalizedText("error_password_too_short"));
                 return false;
@@ -354,6 +373,75 @@ namespace DigitPark.Managers
             {
                 ShowErrorMessage(GetLocalizedText("error_auth_generic"));
             }
+        }
+
+        #endregion
+
+        #region Forgot Password
+
+        /// <summary>
+        /// Muestra el popup de recuperación de contraseña
+        /// </summary>
+        private void OnForgotPasswordClicked()
+        {
+            Debug.Log("[Login] Abriendo popup de recuperación de contraseña");
+
+            // Prellenar con el email si ya tiene uno escrito
+            string prefillEmail = emailInput?.text.Trim() ?? "";
+
+            forgotPasswordPopup?.Show(
+                onSend: async (email) =>
+                {
+                    await SendPasswordResetEmail(email);
+                },
+                onCancel: () =>
+                {
+                    Debug.Log("[Login] Usuario canceló recuperación de contraseña");
+                },
+                prefillEmail: prefillEmail
+            );
+        }
+
+        /// <summary>
+        /// Envía el email de recuperación de contraseña via Firebase
+        /// </summary>
+        private async System.Threading.Tasks.Task SendPasswordResetEmail(string email)
+        {
+            Debug.Log($"[Login] Enviando email de recuperación a: {email}");
+
+            forgotPasswordPopup?.SetSendButtonInteractable(false);
+
+            try
+            {
+                bool success = await AuthenticationService.Instance.ResetPassword(email);
+
+                if (success)
+                {
+                    Debug.Log("[Login] Email de recuperación enviado exitosamente");
+                    forgotPasswordPopup?.ShowSuccess(GetLocalizedText("forgot_password_success"));
+
+                    // Cerrar popup después de 3 segundos
+                    StartCoroutine(CloseForgotPasswordPopupDelayed(3f));
+                }
+                else
+                {
+                    Debug.LogWarning("[Login] Error al enviar email de recuperación");
+                    forgotPasswordPopup?.ShowError(GetLocalizedText("forgot_password_error"));
+                    forgotPasswordPopup?.SetSendButtonInteractable(true);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Login] Excepción al enviar email de recuperación: {e.Message}");
+                forgotPasswordPopup?.ShowError(GetLocalizedText("forgot_password_error"));
+                forgotPasswordPopup?.SetSendButtonInteractable(true);
+            }
+        }
+
+        private IEnumerator CloseForgotPasswordPopupDelayed(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            forgotPasswordPopup?.Hide();
         }
 
         #endregion
