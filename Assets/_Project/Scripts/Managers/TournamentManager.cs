@@ -68,10 +68,15 @@ namespace DigitPark.Managers
         [Header("Navigation")]
         [SerializeField] public Button backButton;
 
-        [Header("Leaderboard View")]
+        [Header("Leaderboard View (Legacy - Optional)")]
         [SerializeField] public GameObject leaderboardBackButton;
         [SerializeField] public GameObject exitTournamentButton;
         [SerializeField] public GameObject searchTournamentButton;
+
+        [Header("SearchBar Contextual Buttons")]
+        [SerializeField] private Transform searchBarTransform;
+        private Button searchBarLeaderboardButton;
+        private Button searchBarExitButton;
 
         [Header("UI - Panels (Prefabs)")]
         [SerializeField] private ErrorPanelUI errorPanel;
@@ -111,14 +116,17 @@ namespace DigitPark.Managers
             // Configurar listeners
             SetupListeners();
 
+            // Inicializar botones contextuales del SearchBar
+            InitializeSearchBarButtons();
+
             // Ocultar paneles inicialmente
             if (blockerPanel != null) blockerPanel.SetActive(false);
             if (searchOptionsPanel != null) searchOptionsPanel.SetActive(false);
             if (createTournamentBlock != null) createTournamentBlock.SetActive(false);
             if (confirmPopup != null) confirmPopup.SetActive(false);
-            if (leaderboardBackButton != null) leaderboardBackButton.SetActive(false);
-            if (exitTournamentButton != null) exitTournamentButton.SetActive(false);
-            if (searchTournamentButton != null) searchTournamentButton.SetActive(true); // Siempre visible
+
+            // Ocultar botones contextuales inicialmente (se mostrarán en ShowView)
+            UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: true);
 
             // Mostrar vista inicial
             ShowView(TournamentView.Search);
@@ -227,6 +235,90 @@ namespace DigitPark.Managers
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Inicializa los botones contextuales del SearchBar
+        /// Busca los botones creados por TournamentsUIBuilder dentro del SearchBar
+        /// </summary>
+        private void InitializeSearchBarButtons()
+        {
+            // Si no se asignó el SearchBar en el inspector, buscarlo
+            if (searchBarTransform == null)
+            {
+                // Buscar en TournamentsPanel/SearchBar
+                GameObject tournamentsPanel = GameObject.Find("TournamentsPanel");
+                if (tournamentsPanel != null)
+                {
+                    searchBarTransform = tournamentsPanel.transform.Find("SearchBar");
+                }
+
+                // Si no se encontró, buscar directamente
+                if (searchBarTransform == null)
+                {
+                    GameObject searchBar = GameObject.Find("SearchBar");
+                    if (searchBar != null)
+                        searchBarTransform = searchBar.transform;
+                }
+            }
+
+            if (searchBarTransform == null)
+            {
+                Debug.Log("[Tournament] SearchBar no encontrado - usando botones legacy");
+                return;
+            }
+
+            // Buscar LeaderboardButton dentro del SearchBar
+            Transform leaderboardBtnTransform = searchBarTransform.Find("LeaderboardButton");
+            if (leaderboardBtnTransform != null)
+            {
+                searchBarLeaderboardButton = leaderboardBtnTransform.GetComponent<Button>();
+                if (searchBarLeaderboardButton != null)
+                {
+                    searchBarLeaderboardButton.onClick.AddListener(OnLeaderboardBackClicked);
+                    leaderboardBtnTransform.gameObject.SetActive(false);
+                    Debug.Log("[Tournament] SearchBar LeaderboardButton encontrado y configurado");
+                }
+            }
+
+            // Buscar ExitTournamentButton dentro del SearchBar
+            Transform exitBtnTransform = searchBarTransform.Find("ExitTournamentButton");
+            if (exitBtnTransform != null)
+            {
+                searchBarExitButton = exitBtnTransform.GetComponent<Button>();
+                if (searchBarExitButton != null)
+                {
+                    searchBarExitButton.onClick.AddListener(OnExitTournamentButtonClicked);
+                    exitBtnTransform.gameObject.SetActive(false);
+                    Debug.Log("[Tournament] SearchBar ExitTournamentButton encontrado y configurado");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Actualiza la visibilidad de los botones contextuales
+        /// Maneja tanto los botones legacy como los del SearchBar
+        /// </summary>
+        /// <param name="showLeaderboard">Mostrar botón de volver al leaderboard/ranking</param>
+        /// <param name="showExit">Mostrar botón de salir del torneo</param>
+        /// <param name="showSearch">Mostrar botón de buscar torneo</param>
+        private void UpdateContextualButtons(bool showLeaderboard, bool showExit, bool showSearch = true)
+        {
+            // Botones legacy (si existen)
+            if (leaderboardBackButton != null)
+                leaderboardBackButton.SetActive(showLeaderboard);
+            if (exitTournamentButton != null)
+                exitTournamentButton.SetActive(showExit);
+            if (searchTournamentButton != null)
+                searchTournamentButton.SetActive(showSearch);
+
+            // Botones del SearchBar (si existen)
+            if (searchBarLeaderboardButton != null)
+                searchBarLeaderboardButton.gameObject.SetActive(showLeaderboard);
+            if (searchBarExitButton != null)
+                searchBarExitButton.gameObject.SetActive(showExit);
+
+            Debug.Log($"[Tournament] Botones contextuales: Leaderboard={showLeaderboard}, Exit={showExit}, Search={showSearch}");
         }
 
         #endregion
@@ -452,13 +544,8 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
-            // Ocultar botones del leaderboard (excepto buscar torneo que siempre está visible)
-            if (leaderboardBackButton != null)
-                leaderboardBackButton.SetActive(false);
-            if (exitTournamentButton != null)
-                exitTournamentButton.SetActive(false);
-            if (searchTournamentButton != null)
-                searchTournamentButton.SetActive(true); // Siempre visible
+            // Ocultar botones contextuales (vista de lista, no leaderboard)
+            UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: true);
 
             try
             {
@@ -487,13 +574,8 @@ namespace DigitPark.Managers
             ShowLoading(true);
             ClearTournamentsList();
 
-            // Ocultar botones del leaderboard (excepto buscar torneo que siempre está visible)
-            if (leaderboardBackButton != null)
-                leaderboardBackButton.SetActive(false);
-            if (exitTournamentButton != null)
-                exitTournamentButton.SetActive(false);
-            if (searchTournamentButton != null)
-                searchTournamentButton.SetActive(true); // Siempre visible
+            // Ocultar botones contextuales (vista de lista, no leaderboard)
+            UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: true);
 
             try
             {
@@ -1312,27 +1394,15 @@ namespace DigitPark.Managers
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
-            // Mostrar botón de back
-            if (leaderboardBackButton != null)
-                leaderboardBackButton.SetActive(true);
-
-            // Mostrar botón de buscar torneo
-            if (searchTournamentButton != null)
-                searchTournamentButton.SetActive(true);
-
-            // Mostrar botón de salir del torneo si el usuario participa
+            // Verificar si el usuario participa en el torneo
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
             Debug.Log($"[Tournament] ¿Usuario participa? {isParticipating}, userId: {currentPlayer?.userId}, participantes: {tournament.participants?.Count ?? 0}");
 
-            if (exitTournamentButton != null && isParticipating)
-            {
-                exitTournamentButton.SetActive(true);
-                Debug.Log("[Tournament] Botón de salir del torneo ACTIVADO");
-            }
-            else
-            {
-                Debug.Log($"[Tournament] Botón de salir NO activado. exitButton null: {exitTournamentButton == null}, isParticipating: {isParticipating}");
-            }
+            // Mostrar botones contextuales según participación
+            // - Leaderboard (Ranking): siempre visible en vista de leaderboard para volver
+            // - Exit: solo visible si el usuario participa
+            // - Search: siempre visible
+            UpdateContextualButtons(showLeaderboard: true, showExit: isParticipating, showSearch: true);
 
             // Título del leaderboard
             CreateLeaderboardTitle(tournament);
@@ -1600,13 +1670,8 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Tournament] Volviendo a la vista de torneos");
 
-            // Ocultar botones de leaderboard
-            if (leaderboardBackButton != null)
-                leaderboardBackButton.SetActive(false);
-            if (exitTournamentButton != null)
-                exitTournamentButton.SetActive(false);
-            if (searchTournamentButton != null)
-                searchTournamentButton.SetActive(false);
+            // Ocultar todos los botones contextuales
+            UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: false);
 
             // Volver a mostrar la vista actual (Search o MyTournaments)
             ShowView(currentView);
@@ -1685,13 +1750,8 @@ namespace DigitPark.Managers
                     Debug.Log($"[Tournament] Salida exitosa del torneo: {selectedTournament.tournamentId}");
                     ShowSuccessMessage(AutoLocalizer.Get("exit_success"));
 
-                    // Ocultar botones de leaderboard
-                    if (leaderboardBackButton != null)
-                        leaderboardBackButton.SetActive(false);
-                    if (exitTournamentButton != null)
-                        exitTournamentButton.SetActive(false);
-                    if (searchTournamentButton != null)
-                        searchTournamentButton.SetActive(false);
+                    // Ocultar todos los botones contextuales
+                    UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: false);
 
                     // Esperar y recargar torneos
                     await System.Threading.Tasks.Task.Delay(1500);
