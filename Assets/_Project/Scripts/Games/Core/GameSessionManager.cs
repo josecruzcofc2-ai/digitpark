@@ -123,6 +123,23 @@ namespace DigitPark.Games
         }
 
         /// <summary>
+        /// Inicia una sesion de partida online 1v1
+        /// </summary>
+        public void StartOnlineMatch(string matchId, string opponentName)
+        {
+            // El contexto actual ya deberia estar configurado por SetContext
+            // Solo actualizamos los datos de la partida
+            if (CurrentContext != null)
+            {
+                CurrentContext.MatchId = matchId;
+                CurrentContext.OpponentName = opponentName;
+                CurrentContext.Mode = GameMode.Online;
+            }
+
+            Debug.Log($"[GameSessionManager] Online match started: {matchId} vs {opponentName}");
+        }
+
+        /// <summary>
         /// Inicia una sesion de torneo
         /// </summary>
         public void StartTournamentSession(GameType gameType, string tournamentId, string matchId, string opponentId, string opponentName)

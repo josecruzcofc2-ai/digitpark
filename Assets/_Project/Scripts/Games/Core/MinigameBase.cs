@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using DigitPark.UI;
+using DigitPark.Managers;
 
 namespace DigitPark.Games
 {
@@ -17,6 +19,12 @@ namespace DigitPark.Games
         [Header("Navigation (Base)")]
         [SerializeField] protected Button backButton;
         [SerializeField] protected Button playAgainButton;
+
+        [Header("Win/Lose Panels")]
+        [SerializeField] protected WinPanelController winPanelNormal;
+        [SerializeField] protected WinPanelController losePanelNormal;
+        [SerializeField] protected WinPanelController winPanelRealMoney;
+        [SerializeField] protected WinPanelController losePanelRealMoney;
 
         // Estado del juego
         protected bool isPlaying;
@@ -167,7 +175,143 @@ namespace DigitPark.Games
                 GameSessionManager.Instance.RegisterGameResult(currentResult);
             }
 
+            // Show appropriate win/lose panel
+            ShowResultPanel(currentResult);
+
             Debug.Log($"{GameType} terminado: {currentResult}");
+        }
+
+        /// <summary>
+        /// Muestra el panel de resultado apropiado según el modo de juego
+        /// </summary>
+        protected virtual void ShowResultPanel(MinigameResult result)
+        {
+            // Verificar si es una partida online 1v1
+            if (OnlineResultManager.IsOnlineMatch())
+            {
+                HandleOnlineResult(result);
+                return;
+            }
+
+            // Check if we're in a real money session
+            bool isRealMoneyMode = GameSessionManager.Instance?.HasActiveSession == true &&
+                                   GameSessionManager.Instance.CurrentContext?.Mode != GameMode.Practice;
+
+            if (isRealMoneyMode)
+            {
+                // Real money mode - need to wait for opponent result
+                // For now, just show the panel (in future, compare with opponent)
+                var context = GameSessionManager.Instance.CurrentContext;
+
+                // TODO: Get opponent result from server
+                // For now, simulate - player always wins if completed
+                bool playerWon = result.Completed;
+                decimal entryFee = context?.EntryFee ?? 0;
+
+                if (playerWon)
+                {
+                    if (winPanelRealMoney != null)
+                    {
+                        winPanelRealMoney.ShowRealMoneyResult(result, null, entryFee, true, "Opponent");
+                        SetupPanelCallbacks(winPanelRealMoney);
+                    }
+                }
+                else
+                {
+                    if (losePanelRealMoney != null)
+                    {
+                        losePanelRealMoney.ShowRealMoneyResult(result, null, entryFee, false, "Opponent");
+                        SetupPanelCallbacks(losePanelRealMoney);
+                    }
+                }
+            }
+            else
+            {
+                // Practice mode - show normal result panel
+                if (result.Completed)
+                {
+                    if (winPanelNormal != null)
+                    {
+                        winPanelNormal.ShowNormalResult(result);
+                        SetupPanelCallbacks(winPanelNormal);
+                    }
+                }
+                else
+                {
+                    // Game ended without completion (timeout, quit, etc)
+                    if (losePanelNormal != null)
+                    {
+                        losePanelNormal.ShowNormalResult(result);
+                        SetupPanelCallbacks(losePanelNormal);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Maneja el resultado de una partida online 1v1
+        /// Envía el resultado a Firebase y espera al oponente
+        /// </summary>
+        private void HandleOnlineResult(MinigameResult result)
+        {
+            string matchId = OnlineResultManager.GetCurrentMatchId();
+            string playerName = PlayerPrefs.GetString("PlayerName", "Jugador");
+
+            Debug.Log($"[{GameType}] Partida online terminada. MatchId: {matchId}, Tiempo: {result.FinalScore:F2}s");
+
+            // Enviar resultado y esperar al oponente
+            OnlineResultManager.Instance.SubmitAndWaitForResult(
+                matchId,
+                result,
+                playerName,
+                (playerWon) =>
+                {
+                    Debug.Log($"[{GameType}] Resultado online: {(playerWon ? "VICTORIA" : "DERROTA")}");
+                }
+            );
+        }
+
+        /// <summary>
+        /// Configura los callbacks de los botones del panel de resultado
+        /// </summary>
+        private void SetupPanelCallbacks(WinPanelController panel)
+        {
+            if (panel == null) return;
+
+            // Clear previous listeners
+            panel.OnAcceptClicked -= OnPanelAcceptClicked;
+            panel.OnPlayAgainClicked -= OnPanelPlayAgainClicked;
+
+            // Add new listeners
+            panel.OnAcceptClicked += OnPanelAcceptClicked;
+            panel.OnPlayAgainClicked += OnPanelPlayAgainClicked;
+        }
+
+        /// <summary>
+        /// Callback cuando se acepta el resultado (vuelve al selector)
+        /// </summary>
+        private void OnPanelAcceptClicked()
+        {
+            Debug.Log($"[{GameType}] Accept clicked - returning to selector");
+            SceneManager.LoadScene("GameSelector");
+        }
+
+        /// <summary>
+        /// Callback cuando se quiere jugar de nuevo
+        /// </summary>
+        private void OnPanelPlayAgainClicked()
+        {
+            Debug.Log($"[{GameType}] Play Again clicked");
+
+            // Hide panels
+            winPanelNormal?.Hide();
+            losePanelNormal?.Hide();
+            winPanelRealMoney?.Hide();
+            losePanelRealMoney?.Hide();
+
+            // Reset and start
+            ResetGame();
+            StartGame();
         }
 
         /// <summary>

@@ -205,6 +205,42 @@ namespace DigitPark.Games
         }
 
         /// <summary>
+        /// Inicia un Cognitive Sprint online (con oponente)
+        /// </summary>
+        public void StartOnlineSprint()
+        {
+            if (!IsValidSelection())
+            {
+                Debug.LogError($"Seleccion invalida. Se requieren entre {MIN_GAMES} y {MAX_GAMES} juegos");
+                return;
+            }
+
+            // Para online, usar contexto de partida online
+            var context = new GameContext
+            {
+                Mode = GameMode.Online,
+                Games = new List<GameType>(SelectedGames),
+                EntryFee = 0
+            };
+
+            GameSessionManager.Instance.SetContext(context);
+
+            // Cargar primer juego
+            string sceneName = GameSessionManager.Instance.GetSceneNameForGame(SelectedGames[0]);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+
+            // No limpiar seleccion aqui porque puede necesitarse para los siguientes juegos
+        }
+
+        /// <summary>
+        /// Obtiene la lista de juegos seleccionados (para matchmaking)
+        /// </summary>
+        public List<GameType> GetSelectedGames()
+        {
+            return new List<GameType>(SelectedGames);
+        }
+
+        /// <summary>
         /// Obtiene informacion de todos los juegos disponibles
         /// </summary>
         public static GameInfo[] GetAllGameInfos()

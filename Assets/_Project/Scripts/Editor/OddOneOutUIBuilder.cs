@@ -23,11 +23,11 @@ namespace DigitPark.Editor
         private static readonly Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
 
-        // Tamaño de celda optimizado - MÁS GRANDE
-        private const float CELL_SIZE = 85f;
-        private const float CELL_SPACING = 5f;
+        // Tamaño de celda optimizado - MÁS GRANDE para mejor visibilidad
+        private const float CELL_SIZE = 100f;
+        private const float CELL_SPACING = 4f;
         private const int GRID_COLUMNS = 4;
-        private const float GRID_GAP = 20f; // Gap mínimo entre grids
+        private const float GRID_GAP = 15f; // Gap entre grids
 
         [MenuItem("DigitPark/Rebuild OddOneOut UI")]
         public static void ShowWindow()
@@ -250,7 +250,10 @@ namespace DigitPark.Editor
 
             Outline leftOutline = leftGrid.AddComponent<Outline>();
             leftOutline.effectColor = CYAN_NEON;
-            leftOutline.effectDistance = new Vector2(2, -2);
+            leftOutline.effectDistance = new Vector2(2.5f, -2.5f);
+
+            // Agregar glow pulsante al borde de la grid
+            GridGlowPulse leftGlow = leftGrid.AddComponent<GridGlowPulse>();
 
             GridLayoutGroup leftGridLayout = leftGrid.AddComponent<GridLayoutGroup>();
             leftGridLayout.cellSize = new Vector2(CELL_SIZE, CELL_SIZE);
@@ -279,7 +282,10 @@ namespace DigitPark.Editor
 
             Outline rightOutline = rightGrid.AddComponent<Outline>();
             rightOutline.effectColor = MAGENTA_NEON;
-            rightOutline.effectDistance = new Vector2(2, -2);
+            rightOutline.effectDistance = new Vector2(2.5f, -2.5f);
+
+            // Agregar glow pulsante al borde de la grid
+            GridGlowPulse rightGlow = rightGrid.AddComponent<GridGlowPulse>();
 
             GridLayoutGroup rightGridLayout = rightGrid.AddComponent<GridLayoutGroup>();
             rightGridLayout.cellSize = new Vector2(CELL_SIZE, CELL_SIZE);
@@ -335,14 +341,19 @@ namespace DigitPark.Editor
 
             Outline faceOutline = face.AddComponent<Outline>();
             faceOutline.effectColor = borderColor;
-            faceOutline.effectDistance = new Vector2(1.5f, -1.5f);
+            faceOutline.effectDistance = new Vector2(2.5f, -2.5f);
 
-            // Text - más grande para celdas de 85px
+            // Text - más grande para celdas de 100px con glow
             string textName = isRight ? $"RightButtonText_{index}" : $"LeftButtonText_{index}";
             GameObject textObj = CreateElement(face.transform, textName);
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI tmp = SetupText(textObj, "A", 38, Color.white, FontStyles.Bold);
+            TextMeshProUGUI tmp = SetupText(textObj, "A", 46, Color.white, FontStyles.Bold);
             tmp.alignment = TextAlignmentOptions.Center;
+
+            // Agregar outline/glow al texto para mejor visibilidad
+            Outline textOutline = textObj.AddComponent<Outline>();
+            textOutline.effectColor = new Color(borderColor.r * 0.5f, borderColor.g * 0.5f, borderColor.b * 0.5f, 0.8f);
+            textOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Button component
             Button button = cell.AddComponent<Button>();

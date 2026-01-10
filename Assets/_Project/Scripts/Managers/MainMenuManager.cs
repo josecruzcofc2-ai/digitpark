@@ -20,7 +20,6 @@ namespace DigitPark.Managers
         [SerializeField] public TextMeshProUGUI titleText;
         [SerializeField] public Button playButton;
         [SerializeField] public Button scoresButton;
-        [SerializeField] public Button tournamentsButton;
         [SerializeField] public Button cashBattleButton;
         [SerializeField] public Button settingsButton;
 
@@ -70,7 +69,6 @@ namespace DigitPark.Managers
         {
             playButton?.onClick.AddListener(OnPlayButtonClicked);
             scoresButton?.onClick.AddListener(OnScoresButtonClicked);
-            tournamentsButton?.onClick.AddListener(OnTournamentsButtonClicked);
             cashBattleButton?.onClick.AddListener(OnCashBattleButtonClicked);
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
@@ -179,20 +177,17 @@ namespace DigitPark.Managers
         #region Button Callbacks
 
         /// <summary>
-        /// Inicia una partida
+        /// Abre la selección de modo de juego (Solo, 1v1, Torneos)
         /// </summary>
         private void OnPlayButtonClicked()
         {
-            Debug.Log("[MainMenu] Iniciando partida");
+            Debug.Log("[MainMenu] Abriendo selección de modo de juego");
 
             // Efecto de sonido
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            // Registrar en analytics
-            AnalyticsService.Instance?.LogGameStart();
-
-            // Cargar selector de juegos
-            SceneManager.LoadScene("GameSelector");
+            // Cargar la escena de selección de modo
+            SceneManager.LoadScene("PlayModeSelection");
         }
 
         /// <summary>
@@ -205,18 +200,6 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             SceneManager.LoadScene("Scores");
-        }
-
-        /// <summary>
-        /// Navega a la escena de torneos
-        /// </summary>
-        private void OnTournamentsButtonClicked()
-        {
-            Debug.Log("[MainMenu] Navegando a Tournaments");
-
-            // AudioManager.Instance?.PlaySFX("ButtonClick");
-
-            SceneManager.LoadScene("Tournaments");
         }
 
         /// <summary>

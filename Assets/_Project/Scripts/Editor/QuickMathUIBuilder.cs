@@ -24,9 +24,11 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
 
-        // Tamaños optimizados
-        private const float ANSWER_BUTTON_SIZE = 140f;
-        private const float EQUATION_FONT_SIZE = 72f;
+        // Tamaños optimizados - Botones rectangulares anchos
+        private const float ANSWER_BUTTON_WIDTH = 260f;
+        private const float ANSWER_BUTTON_HEIGHT = 110f;
+        private const float EQUATION_PANEL_WIDTH = 850f;
+        private const float EQUATION_FONT_SIZE = 80f;
 
         [MenuItem("DigitPark/Rebuild QuickMath UI")]
         public static void ShowWindow()
@@ -122,6 +124,9 @@ namespace DigitPark.Editor
             // ========== COMBO/STREAK DISPLAY ==========
             CreateComboDisplay(safeArea.transform);
 
+            // ========== GAME ZONE GLOW (contenedor con borde) ==========
+            CreateGameZoneGlow(safeArea.transform);
+
             // ========== ECUACIÓN GIGANTE ==========
             CreateEquationPanel(safeArea.transform);
 
@@ -147,6 +152,27 @@ namespace DigitPark.Editor
 
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0f, 0f, 0f, 0.3f);
+
+            // Back Button (esquina izquierda)
+            GameObject backButton = CreateElement(header.transform, "BackButton");
+            SetupRectTransform(backButton,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(50, 0), new Vector2(80, 60));
+
+            Image backBtnImg = backButton.AddComponent<Image>();
+            backBtnImg.color = new Color(0.1f, 0.15f, 0.2f, 0.9f);
+
+            Outline backBtnOutline = backButton.AddComponent<Outline>();
+            backBtnOutline.effectColor = CYAN_NEON;
+            backBtnOutline.effectDistance = new Vector2(2, -2);
+
+            Button backBtn = backButton.AddComponent<Button>();
+            backBtn.targetGraphic = backBtnImg;
+
+            // Back button text (flecha)
+            GameObject backBtnText = CreateElement(backButton.transform, "BackButtonText");
+            SetupRectTransform(backBtnText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(backBtnText, "<", 32, CYAN_NEON, FontStyles.Bold);
 
             // Title con efecto glow
             GameObject title = CreateElement(header.transform, "TitleText");
@@ -248,65 +274,110 @@ namespace DigitPark.Editor
             comboContainer.SetActive(false);
         }
 
+        private static void CreateGameZoneGlow(Transform parent)
+        {
+            // Container con glow que envuelve ecuación + botones
+            // El usuario ajustará el tamaño manualmente para que cubra ambos elementos
+            GameObject gameZone = CreateElement(parent, "GameZoneGlow");
+            SetupRectTransform(gameZone,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, -40), new Vector2(880, 320)); // Tamaño inicial, ajustar manualmente
+
+            // Fondo semi-transparente opcional
+            Image zoneBg = gameZone.AddComponent<Image>();
+            zoneBg.color = new Color(0.02f, 0.05f, 0.08f, 0.3f);
+            zoneBg.raycastTarget = false;
+
+            // Borde glow
+            Outline zoneOutline = gameZone.AddComponent<Outline>();
+            zoneOutline.effectColor = new Color(0f, 1f, 1f, 0.5f); // Cyan sutil
+            zoneOutline.effectDistance = new Vector2(2, -2);
+
+            // Agregar glow pulsante
+            GridGlowPulse zoneGlow = gameZone.AddComponent<GridGlowPulse>();
+        }
+
         private static void CreateEquationPanel(Transform parent)
         {
-            // Panel contenedor de la ecuación - GIGANTE
+            // Panel contenedor de la ecuación - GIGANTE con efecto 3D
             GameObject equationPanel = CreateElement(parent, "EquationPanel");
             SetupRectTransform(equationPanel,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 120), new Vector2(900, 250));
+                new Vector2(0, 100), new Vector2(850, 180));
 
-            Image panelBg = equationPanel.AddComponent<Image>();
-            panelBg.color = new Color(0.04f, 0.08f, 0.15f, 0.95f);
+            // Sombra profunda para efecto 3D
+            GameObject panelShadow = CreateElement(equationPanel.transform, "PanelShadow");
+            SetupRectTransform(panelShadow,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(5, -12), new Vector2(850, 180));
+            Image shadowImg = panelShadow.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
+            shadowImg.raycastTarget = false;
 
-            // Borde neón animable
-            Outline panelOutline = equationPanel.AddComponent<Outline>();
+            // Side (profundidad)
+            GameObject panelSide = CreateElement(equationPanel.transform, "PanelSide");
+            SetupRectTransform(panelSide,
+                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
+                new Vector2(0, -5), new Vector2(850, 12));
+            Image sideImg = panelSide.AddComponent<Image>();
+            sideImg.color = new Color(0f, 0.3f, 0.35f, 1f);
+            sideImg.raycastTarget = false;
+
+            // Face principal
+            GameObject panelFace = CreateElement(equationPanel.transform, "PanelFace");
+            SetupRectTransform(panelFace,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, 5), new Vector2(850, 170));
+            Image panelBg = panelFace.AddComponent<Image>();
+            panelBg.color = new Color(0.04f, 0.08f, 0.15f, 0.98f);
+
+            // Borde neón brillante
+            Outline panelOutline = panelFace.AddComponent<Outline>();
             panelOutline.effectColor = CYAN_NEON;
             panelOutline.effectDistance = new Vector2(3, -3);
 
-            // Segundo borde para efecto glow
-            Shadow panelShadow = equationPanel.AddComponent<Shadow>();
-            panelShadow.effectColor = new Color(0f, 1f, 1f, 0.3f);
-            panelShadow.effectDistance = new Vector2(0, -5);
+            // Agregar glow pulsante al panel
+            GridGlowPulse panelGlow = panelFace.AddComponent<GridGlowPulse>();
 
-            // Container para los números de la ecuación
-            GameObject equationContainer = CreateElement(equationPanel.transform, "EquationContainer");
+            // Container para los números de la ecuación (dentro del face)
+            GameObject equationContainer = CreateElement(panelFace.transform, "EquationContainer");
             SetupRectTransform(equationContainer, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             HorizontalLayoutGroup eqLayout = equationContainer.AddComponent<HorizontalLayoutGroup>();
             eqLayout.childAlignment = TextAnchor.MiddleCenter;
-            eqLayout.spacing = 20;
+            eqLayout.spacing = 10;
+            eqLayout.padding = new RectOffset(20, 20, 0, 0);
             eqLayout.childForceExpandWidth = false;
             eqLayout.childForceExpandHeight = true;
 
             // Número A (izquierda)
             GameObject numberA = CreateElement(equationContainer.transform, "NumberA");
-            AddLayoutElement(numberA, 150, 200);
+            AddLayoutElement(numberA, 120, 150);
             TextMeshProUGUI numATmp = SetupText(numberA, "5", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
             numATmp.alignment = TextAlignmentOptions.Center;
 
             // Operador
             GameObject operatorText = CreateElement(equationContainer.transform, "OperatorText");
-            AddLayoutElement(operatorText, 80, 200);
+            AddLayoutElement(operatorText, 60, 150);
             TextMeshProUGUI opTmp = SetupText(operatorText, "+", EQUATION_FONT_SIZE, CYAN_NEON, FontStyles.Bold);
             opTmp.alignment = TextAlignmentOptions.Center;
 
             // Número B (derecha)
             GameObject numberB = CreateElement(equationContainer.transform, "NumberB");
-            AddLayoutElement(numberB, 150, 200);
+            AddLayoutElement(numberB, 120, 150);
             TextMeshProUGUI numBTmp = SetupText(numberB, "7", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
             numBTmp.alignment = TextAlignmentOptions.Center;
 
             // Igual
             GameObject equalsText = CreateElement(equationContainer.transform, "EqualsText");
-            AddLayoutElement(equalsText, 80, 200);
+            AddLayoutElement(equalsText, 60, 150);
             TextMeshProUGUI eqTmp = SetupText(equalsText, "=", EQUATION_FONT_SIZE, CYAN_NEON, FontStyles.Bold);
             eqTmp.alignment = TextAlignmentOptions.Center;
 
-            // Signo de interrogación (pulsa)
+            // Signo de interrogación - más compacto
             GameObject questionMark = CreateElement(equationContainer.transform, "QuestionMark");
-            AddLayoutElement(questionMark, 120, 200);
-            TextMeshProUGUI qTmp = SetupText(questionMark, "?", EQUATION_FONT_SIZE + 10, GOLD, FontStyles.Bold);
+            AddLayoutElement(questionMark, 80, 150);
+            TextMeshProUGUI qTmp = SetupText(questionMark, "?", EQUATION_FONT_SIZE - 10, GOLD, FontStyles.Bold);
             qTmp.alignment = TextAlignmentOptions.Center;
 
             // También crear ProblemText oculto para compatibilidad con controller
@@ -318,19 +389,22 @@ namespace DigitPark.Editor
 
         private static void CreateAnswerButtons(Transform parent)
         {
-            // Container para botones de respuesta
+            // Container para botones - mismo ancho que EquationPanel, más separación vertical
             GameObject answersContainer = CreateElement(parent, "AnswersContainer");
             SetupRectTransform(answersContainer,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -120), new Vector2(600, ANSWER_BUTTON_SIZE + 20));
+                new Vector2(0, -190), new Vector2(EQUATION_PANEL_WIDTH, ANSWER_BUTTON_HEIGHT + 30));
 
             HorizontalLayoutGroup answersLayout = answersContainer.AddComponent<HorizontalLayoutGroup>();
             answersLayout.childAlignment = TextAnchor.MiddleCenter;
-            answersLayout.spacing = 40;
+            answersLayout.spacing = 20;
+            answersLayout.padding = new RectOffset(10, 10, 0, 0);
             answersLayout.childForceExpandWidth = false;
             answersLayout.childForceExpandHeight = false;
+            answersLayout.childControlWidth = false;
+            answersLayout.childControlHeight = false;
 
-            // Crear 3 botones de respuesta con efecto 3D
+            // Crear 3 botones de respuesta rectangulares con efecto 3D
             for (int i = 0; i < 3; i++)
             {
                 CreateAnswerButton3D(answersContainer.transform, i);
@@ -339,18 +413,16 @@ namespace DigitPark.Editor
 
         private static void CreateAnswerButton3D(Transform parent, int index)
         {
-            // Cell container
+            // Cell container - SIN Image para evitar bordes
             GameObject cell = CreateElement(parent, $"AnswerButton_{index}");
-            AddLayoutElement(cell, ANSWER_BUTTON_SIZE, ANSWER_BUTTON_SIZE);
-
-            Image cellBase = cell.AddComponent<Image>();
-            cellBase.color = Color.clear;
+            AddLayoutElement(cell, ANSWER_BUTTON_WIDTH, ANSWER_BUTTON_HEIGHT);
+            // NO agregar Image al cell - causa borde visible
 
             // Shadow
             GameObject shadow = CreateElement(cell.transform, "Shadow");
             SetupRectTransform(shadow,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(3, -8), new Vector2(ANSWER_BUTTON_SIZE - 8, ANSWER_BUTTON_SIZE - 8));
+                new Vector2(3, -8), new Vector2(ANSWER_BUTTON_WIDTH - 8, ANSWER_BUTTON_HEIGHT - 8));
             Image shadowImg = shadow.AddComponent<Image>();
             shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
 
@@ -358,27 +430,32 @@ namespace DigitPark.Editor
             GameObject side = CreateElement(cell.transform, "Side");
             SetupRectTransform(side,
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 0), new Vector2(ANSWER_BUTTON_SIZE - 8, 10));
+                new Vector2(0, 0), new Vector2(ANSWER_BUTTON_WIDTH - 8, 10));
             Image sideImg = side.AddComponent<Image>();
             sideImg.color = new Color(0f, 0.3f, 0.35f, 1f);
 
-            // Face (top)
+            // Face (top) - rectangular
             GameObject face = CreateElement(cell.transform, "Face");
             SetupRectTransform(face,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 4), new Vector2(ANSWER_BUTTON_SIZE - 8, ANSWER_BUTTON_SIZE - 8));
+                new Vector2(0, 4), new Vector2(ANSWER_BUTTON_WIDTH - 8, ANSWER_BUTTON_HEIGHT - 8));
             Image faceImg = face.AddComponent<Image>();
             faceImg.color = BUTTON_BG;
 
             Outline faceOutline = face.AddComponent<Outline>();
             faceOutline.effectColor = CYAN_NEON;
-            faceOutline.effectDistance = new Vector2(2, -2);
+            faceOutline.effectDistance = new Vector2(3, -3);
 
-            // Answer text - GRANDE
+            // Answer text - tamaño ajustado para botones rectangulares
             GameObject answerText = CreateElement(face.transform, $"AnswerText_{index}");
             SetupRectTransform(answerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI answerTmp = SetupText(answerText, "12", 52, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI answerTmp = SetupText(answerText, "12", 48, CYAN_NEON, FontStyles.Bold);
             answerTmp.alignment = TextAlignmentOptions.Center;
+
+            // Glow en el texto para mejor visibilidad
+            Outline textGlow = answerText.AddComponent<Outline>();
+            textGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.5f);
+            textGlow.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Button component
             Button button = cell.AddComponent<Button>();
@@ -531,6 +608,64 @@ namespace DigitPark.Editor
 
             SerializedObject so = new SerializedObject(controller);
 
+            // ========== CONFIG ==========
+            // Buscar cualquier MinigameConfig existente
+            string[] configGuids = AssetDatabase.FindAssets("t:MinigameConfig");
+            MinigameConfig foundConfig = null;
+
+            // Primero buscar uno que contenga "QuickMath" en el nombre
+            foreach (string guid in configGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.ToLower().Contains("quickmath"))
+                {
+                    foundConfig = AssetDatabase.LoadAssetAtPath<MinigameConfig>(path);
+                    break;
+                }
+            }
+
+            // Si no hay uno específico, crear uno nuevo
+            if (foundConfig == null)
+            {
+                // Crear carpeta si no existe
+                if (!AssetDatabase.IsValidFolder("Assets/_Project/Resources/Configs"))
+                {
+                    if (!AssetDatabase.IsValidFolder("Assets/_Project/Resources"))
+                        AssetDatabase.CreateFolder("Assets/_Project", "Resources");
+                    AssetDatabase.CreateFolder("Assets/_Project/Resources", "Configs");
+                }
+
+                // Crear nuevo MinigameConfig para QuickMath
+                foundConfig = ScriptableObject.CreateInstance<MinigameConfig>();
+                foundConfig.gameType = GameType.QuickMath;
+                foundConfig.displayName = "Quick Math";
+                foundConfig.description = "Resuelve operaciones matemáticas rápidamente";
+                foundConfig.rounds = 10;
+                foundConfig.timeLimit = 0; // Sin límite
+                foundConfig.difficultyLevel = 2;
+
+                AssetDatabase.CreateAsset(foundConfig, "Assets/_Project/Resources/Configs/QuickMathConfig.asset");
+                AssetDatabase.SaveAssets();
+                Debug.Log("[QuickMathUIBuilder] Creado nuevo MinigameConfig: QuickMathConfig.asset");
+            }
+
+            SerializedProperty configProp = so.FindProperty("config");
+            if (configProp != null && foundConfig != null)
+            {
+                configProp.objectReferenceValue = foundConfig;
+                Debug.Log($"[QuickMathUIBuilder] Config asignado correctamente");
+            }
+
+            // ========== NAVIGATION BUTTONS ==========
+            // Back Button
+            GameObject backButton = GameObject.Find("BackButton");
+            if (backButton != null)
+            {
+                SerializedProperty backBtnProp = so.FindProperty("backButton");
+                if (backBtnProp != null)
+                    backBtnProp.objectReferenceValue = backButton.GetComponent<Button>();
+            }
+
             // Problem text (hidden, for data)
             AssignTMPReference(so, "problemText", "ProblemText");
 
@@ -588,6 +723,15 @@ namespace DigitPark.Editor
                 SerializedProperty winCgProp = so.FindProperty("winPanelCanvasGroup");
                 if (winCgProp != null)
                     winCgProp.objectReferenceValue = winPanel.GetComponent<CanvasGroup>();
+
+                // Play Again Button (dentro del WinPanel)
+                Transform playAgainBtn = winPanel.transform.Find("Content/PlayAgainButton");
+                if (playAgainBtn != null)
+                {
+                    SerializedProperty playAgainProp = so.FindProperty("playAgainButton");
+                    if (playAgainProp != null)
+                        playAgainProp.objectReferenceValue = playAgainBtn.GetComponent<Button>();
+                }
             }
 
             // Combo container

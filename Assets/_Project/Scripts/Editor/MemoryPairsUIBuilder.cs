@@ -24,6 +24,11 @@ namespace DigitPark.Editor
         private static readonly Color CARD_PRESSED = new Color(0.04f, 0.06f, 0.1f, 1f);
         private static readonly Color CARD_FOUND = new Color(0.1f, 0.3f, 0.15f, 1f);
 
+        // Rutas de iconos para Stats Bar
+        private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/TimerIcon.png";
+        private const string PAIRS_ICON_PATH = "Assets/_Project/Art/Icons/PairsIcon.png";
+        private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/ErrorIcon.png";
+
         [MenuItem("DigitPark/Rebuild MemoryPairs UI")]
         public static void ShowWindow()
         {
@@ -179,7 +184,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(600, 70));
-            SetupText(title, "MEMORY PAIRS", 46, MAGENTA_NEON, FontStyles.Bold);
+            SetupText(title, "MEMORY PAIRS", 46, CYAN_NEON, FontStyles.Bold);
 
             // Subtitle
             GameObject subtitle = CreateElement(header.transform, "SubtitleText");
@@ -200,7 +205,7 @@ namespace DigitPark.Editor
             statsBg.color = PANEL_BG;
 
             Outline statsOutline = statsBar.AddComponent<Outline>();
-            statsOutline.effectColor = MAGENTA_NEON;
+            statsOutline.effectColor = CYAN_NEON;
             statsOutline.effectDistance = new Vector2(2, -2);
 
             HorizontalLayoutGroup layout = statsBar.AddComponent<HorizontalLayoutGroup>();
@@ -210,21 +215,26 @@ namespace DigitPark.Editor
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
+            // Cargar iconos
+            Sprite timerIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TIMER_ICON_PATH);
+            Sprite pairsIcon = AssetDatabase.LoadAssetAtPath<Sprite>(PAIRS_ICON_PATH);
+            Sprite errorIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ERROR_ICON_PATH);
+
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "00:00", CYAN_NEON, 180);
+                "00:00", CYAN_NEON, 180, timerIcon);
 
             // Pairs Found
             CreateStatItem(statsBar.transform, "PairsContainer", "PairsIcon", "PairsFoundText",
-                "0/8", GREEN_NEON, 150);
+                "0/8", GREEN_NEON, 150, pairsIcon);
 
             // Errors
             CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
-                "0", ERROR_RED, 100);
+                "0", ERROR_RED, 100, errorIcon);
         }
 
         private static void CreateStatItem(Transform parent, string containerName, string iconName,
-            string textName, string defaultText, Color color, float width)
+            string textName, string defaultText, Color color, float width, Sprite iconSprite = null)
         {
             GameObject container = CreateElement(parent, containerName);
 
@@ -236,15 +246,26 @@ namespace DigitPark.Editor
             GameObject icon = CreateElement(container.transform, iconName);
             SetupRectTransform(icon,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(15, 0), new Vector2(32, 32));
+                new Vector2(15, 0), new Vector2(36, 36)); // Slightly larger icons
             Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = color;
+
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+                iconImg.color = color;
+                iconImg.preserveAspect = true;
+            }
+            else
+            {
+                // Fallback: cuadrado de color si no hay icono
+                iconImg.color = color;
+            }
 
             // Text
             GameObject text = CreateElement(container.transform, textName);
             SetupRectTransform(text,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(25, 0), new Vector2(-30, 0));
+                new Vector2(30, 0), new Vector2(-30, 0)); // Adjusted for larger icon
             TextMeshProUGUI tmp = SetupText(text, defaultText, 28, color, FontStyles.Bold);
             tmp.alignment = TextAlignmentOptions.Left;
         }
@@ -261,7 +282,7 @@ namespace DigitPark.Editor
             panelBg.color = new Color(0.03f, 0.06f, 0.12f, 0.8f);
 
             Outline panelOutline = gamePanel.AddComponent<Outline>();
-            panelOutline.effectColor = new Color(1f, 0f, 0.8f, 0.4f);
+            panelOutline.effectColor = new Color(0f, 1f, 1f, 0.4f); // Cyan neon
             panelOutline.effectDistance = new Vector2(3, -3);
 
             // Grid Container
@@ -310,7 +331,7 @@ namespace DigitPark.Editor
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0),
                 new Vector2(0, 0), new Vector2(200, 10));
             Image sideImg = side.AddComponent<Image>();
-            sideImg.color = new Color(0.5f, 0f, 0.4f, 1f); // Magenta oscuro
+            sideImg.color = new Color(0f, 0.4f, 0.5f, 1f); // Cyan oscuro
 
             // 3. FACE
             GameObject face = CreateElement(card.transform, "Face");
@@ -322,7 +343,7 @@ namespace DigitPark.Editor
 
             // Neon outline
             Outline faceOutline = face.AddComponent<Outline>();
-            faceOutline.effectColor = MAGENTA_NEON;
+            faceOutline.effectColor = CYAN_NEON;
             faceOutline.effectDistance = new Vector2(2, -2);
 
             // 4. CARD IMAGE (for the card sprite - back/front)
@@ -331,24 +352,29 @@ namespace DigitPark.Editor
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(180, 180));
             Image cardImage = cardImageObj.AddComponent<Image>();
-            cardImage.color = Color.white;
+            cardImage.color = Color.clear; // Transparente hasta que se asigne sprite
             cardImage.raycastTarget = false;
             // Sprite assigned at runtime
 
             // 5. DIGIT TEXT (muestra "?" cuando oculto, dígito cuando revelado)
             GameObject digitText = CreateElement(face.transform, $"CardText_{index}");
             SetupRectTransform(digitText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI qText = SetupText(digitText, "?", 90, new Color(1f, 0f, 0.8f, 0.3f), FontStyles.Bold);
+            TextMeshProUGUI qText = SetupText(digitText, "?", 90, new Color(0f, 1f, 1f, 0.8f), FontStyles.Bold);
             qText.alignment = TextAlignmentOptions.Center;
+
+            // Agregar outline/glow al "?"
+            Outline qOutline = digitText.AddComponent<Outline>();
+            qOutline.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
+            qOutline.effectDistance = new Vector2(2, -2);
 
             // Button on card container
             Button button = card.AddComponent<Button>();
             button.targetGraphic = faceImg;
             ColorBlock colors = button.colors;
             colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, 0.9f, 1f, 1f);
-            colors.pressedColor = new Color(0.8f, 0.7f, 0.9f, 1f);
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            colors.highlightedColor = new Color(0.7f, 1f, 1f, 1f); // Cyan highlight
+            colors.pressedColor = new Color(0f, 0.8f, 0.8f, 1f); // Cyan pressed
+            colors.disabledColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
             colors.fadeDuration = 0.05f;
             button.colors = colors;
 
@@ -473,11 +499,11 @@ namespace DigitPark.Editor
             SetupRectTransform(countdownText,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(350, 300));
-            TextMeshProUGUI countTmp = SetupText(countdownText, "3", 180, MAGENTA_NEON, FontStyles.Bold);
+            TextMeshProUGUI countTmp = SetupText(countdownText, "3", 180, CYAN_NEON, FontStyles.Bold);
             countTmp.alignment = TextAlignmentOptions.Center;
 
             Outline numOutline = countdownText.AddComponent<Outline>();
-            numOutline.effectColor = new Color(0.5f, 0f, 0.4f, 0.8f);
+            numOutline.effectColor = new Color(0f, 0.4f, 0.5f, 0.8f); // Cyan oscuro
             numOutline.effectDistance = new Vector2(4, -4);
 
             // Add CountdownUI component
@@ -487,7 +513,7 @@ namespace DigitPark.Editor
             so.FindProperty("countdownPanel").objectReferenceValue = countdownPanel;
             so.FindProperty("countdownText").objectReferenceValue = countTmp;
             so.FindProperty("backgroundOverlay").objectReferenceValue = overlayImg;
-            so.FindProperty("numberColor").colorValue = MAGENTA_NEON;
+            so.FindProperty("numberColor").colorValue = CYAN_NEON;
             so.FindProperty("goColor").colorValue = GREEN_NEON;
             so.ApplyModifiedProperties();
 

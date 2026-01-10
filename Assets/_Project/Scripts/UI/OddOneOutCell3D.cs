@@ -8,10 +8,10 @@ namespace DigitPark.UI
 {
     /// <summary>
     /// Componente para dar efecto 3D a las celdas de OddOneOut
-    /// Con animaciones de acierto, error y celebración
+    /// Con animaciones de acierto, error, hover, breathing y celebración
     /// </summary>
     [RequireComponent(typeof(Button))]
-    public class OddOneOutCell3D : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+    public class OddOneOutCell3D : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("3D Effect Settings")]
         [SerializeField] private float pressDepth = 6f;
@@ -37,10 +37,27 @@ namespace DigitPark.UI
         [SerializeField] private Color errorFaceColor = new Color(0.3f, 0.1f, 0.1f, 1f);
         [SerializeField] private Color comboFaceColor = new Color(0.25f, 0.2f, 0.1f, 1f);
 
+        [Header("Hover Colors")]
+        [SerializeField] private Color hoverGlowColor = new Color(1f, 1f, 1f, 0.9f);
+        [SerializeField] private float hoverLiftAmount = 3f;
+        [SerializeField] private float hoverScaleMultiplier = 1.05f;
+
+        [Header("Breathing Animation")]
+        [SerializeField] private bool enableBreathing = true;
+        [SerializeField] private float breathingSpeed = 2f;
+        [SerializeField] private float breathingScaleMin = 0.98f;
+        [SerializeField] private float breathingScaleMax = 1.02f;
+        [SerializeField] private float breathingGlowMin = 0.6f;
+        [SerializeField] private float breathingGlowMax = 1f;
+
         private Button button;
         private Vector2 originalPosition;
+        private Vector3 originalScale;
         private Coroutine currentAnimation;
+        private Coroutine breathingCoroutine;
         private bool isPressed = false;
+        private bool isHovering = false;
+        private bool isCorrect = false;
 
         private void Awake()
         {
@@ -49,6 +66,7 @@ namespace DigitPark.UI
             if (buttonFace != null)
             {
                 originalPosition = buttonFace.anchoredPosition;
+                originalScale = buttonFace.localScale;
                 if (faceImage == null)
                     faceImage = buttonFace.GetComponent<Image>();
                 if (numberText == null)
@@ -57,6 +75,21 @@ namespace DigitPark.UI
                     glowOutline = buttonFace.GetComponent<Outline>();
             }
         }
+
+        private void OnEnable()
+        {
+            if (enableBreathing && !isCorrect)
+            {
+                StartBreathing();
+            }
+        }
+
+        private void OnDisable()
+        {
+            StopBreathing();
+        }
+
+        #region Pointer Events
 
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -69,6 +102,33 @@ namespace DigitPark.UI
             if (!button.interactable) return;
             ReleaseButton();
         }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (!button.interactable || isCorrect) return;
+
+            isHovering = true;
+            StopBreathing();
+
+            if (currentAnimation != null)
+                StopCoroutine(currentAnimation);
+
+            currentAnimation = StartCoroutine(AnimateHoverEnter());
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (!button.interactable || isCorrect) return;
+
+            isHovering = false;
+
+            if (currentAnimation != null)
+                StopCoroutine(currentAnimation);
+
+            currentAnimation = StartCoroutine(AnimateHoverExit());
+        }
+
+        #endregion
 
         private void PressButton()
         {
@@ -130,10 +190,17 @@ namespace DigitPark.UI
             if (currentAnimation != null)
                 StopCoroutine(currentAnimation);
 
+            StopBreathing();
+
             isPressed = false;
+            isHovering = false;
+            isCorrect = false;
 
             if (buttonFace != null)
+            {
                 buttonFace.anchoredPosition = originalPosition;
+                buttonFace.localScale = originalScale;
+            }
 
             if (faceImage != null)
                 faceImage.color = normalFaceColor;
@@ -152,6 +219,12 @@ namespace DigitPark.UI
 
             if (shadowImage != null)
                 shadowImage.color = new Color(0f, 0f, 0f, 0.4f);
+
+            // Reiniciar breathing
+            if (enableBreathing)
+            {
+                StartBreathing();
+            }
         }
 
         /// <summary>
@@ -232,6 +305,9 @@ namespace DigitPark.UI
         private IEnumerator AnimateCorrectSequence(int comboLevel)
         {
             if (buttonFace == null) yield break;
+
+            isCorrect = true;
+            StopBreathing();
 
             // Calcular colores basados en combo
             float comboBlend = Mathf.Clamp01((comboLevel - 1) * 0.2f);
@@ -399,5 +475,136 @@ namespace DigitPark.UI
 
             buttonFace.localScale = originalScale;
         }
+
+        #region Hover Animations
+
+        private IEnumerator AnimateHoverEnter()
+        {
+            if (buttonFace == null) yield break;
+
+            float duration = 0.12f;
+            float elapsed = 0f;
+
+            Vector2 startPos = buttonFace.anchoredPosition;
+            Vector2 targetPos = originalPosition + new Vector2(0, hoverLiftAmount);
+            Vector3 startScale = buttonFace.localScale;
+            Vector3 targetScale = originalScale * hoverScaleMultiplier;
+            Color startGlow = glowOutline != null ? glowOutline.effectColor : borderColor;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = EaseOutCubic(elapsed / duration);
+
+                buttonFace.anchoredPosition = Vector2.Lerp(startPos, targetPos, t);
+                buttonFace.localScale = Vector3.Lerp(startScale, targetScale, t);
+
+                if (glowOutline != null)
+                    glowOutline.effectColor = Color.Lerp(startGlow, hoverGlowColor, t);
+
+                yield return null;
+            }
+
+            buttonFace.anchoredPosition = targetPos;
+            buttonFace.localScale = targetScale;
+            if (glowOutline != null) glowOutline.effectColor = hoverGlowColor;
+        }
+
+        private IEnumerator AnimateHoverExit()
+        {
+            if (buttonFace == null) yield break;
+
+            float duration = 0.15f;
+            float elapsed = 0f;
+
+            Vector2 startPos = buttonFace.anchoredPosition;
+            Vector3 startScale = buttonFace.localScale;
+            Color startGlow = glowOutline != null ? glowOutline.effectColor : hoverGlowColor;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = EaseOutCubic(elapsed / duration);
+
+                buttonFace.anchoredPosition = Vector2.Lerp(startPos, originalPosition, t);
+                buttonFace.localScale = Vector3.Lerp(startScale, originalScale, t);
+
+                if (glowOutline != null)
+                    glowOutline.effectColor = Color.Lerp(startGlow, borderColor, t);
+
+                yield return null;
+            }
+
+            buttonFace.anchoredPosition = originalPosition;
+            buttonFace.localScale = originalScale;
+            if (glowOutline != null) glowOutline.effectColor = borderColor;
+
+            // Restart breathing after hover exit
+            if (enableBreathing && !isCorrect)
+            {
+                StartBreathing();
+            }
+        }
+
+        #endregion
+
+        #region Breathing Animation
+
+        private void StartBreathing()
+        {
+            if (breathingCoroutine != null)
+                StopCoroutine(breathingCoroutine);
+
+            breathingCoroutine = StartCoroutine(AnimateBreathing());
+        }
+
+        private void StopBreathing()
+        {
+            if (breathingCoroutine != null)
+            {
+                StopCoroutine(breathingCoroutine);
+                breathingCoroutine = null;
+            }
+        }
+
+        private IEnumerator AnimateBreathing()
+        {
+            if (buttonFace == null) yield break;
+
+            float randomOffset = Random.Range(0f, Mathf.PI * 2f); // Desfase aleatorio para que no respiren sincronizadas
+
+            while (enableBreathing && !isCorrect && !isHovering)
+            {
+                float t = (Mathf.Sin(Time.time * breathingSpeed + randomOffset) + 1f) * 0.5f;
+
+                // Escala sutil
+                float scale = Mathf.Lerp(breathingScaleMin, breathingScaleMax, t);
+                buttonFace.localScale = originalScale * scale;
+
+                // Glow pulsante
+                if (glowOutline != null)
+                {
+                    Color glowColor = borderColor * Mathf.Lerp(breathingGlowMin, breathingGlowMax, t);
+                    glowColor.a = borderColor.a;
+                    glowOutline.effectColor = glowColor;
+                }
+
+                yield return null;
+            }
+
+            // Volver a estado normal
+            if (buttonFace != null)
+                buttonFace.localScale = originalScale;
+            if (glowOutline != null)
+                glowOutline.effectColor = borderColor;
+        }
+
+        #endregion
+
+        #region Easing Functions
+
+        private float EaseOutCubic(float t) => 1f - Mathf.Pow(1f - t, 3f);
+
+        #endregion
     }
 }

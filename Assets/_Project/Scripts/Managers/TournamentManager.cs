@@ -815,20 +815,14 @@ namespace DigitPark.Managers
         #region Create Tournament
 
         /// <summary>
-        /// Muestra el panel de crear torneo (verifica premium primero)
+        /// Muestra el panel de crear torneo (torneos gratuitos para todos)
         /// </summary>
         private void ShowCreateTournamentPanel()
         {
-            Debug.Log("[Tournament] Intentando mostrar panel de creación");
+            Debug.Log("[Tournament] Mostrando panel de creación de torneos gratuitos");
 
-            // Verificar si el usuario tiene premium para crear torneos
-            if (PremiumManager.Instance != null && !PremiumManager.Instance.CanCreateTournaments)
-            {
-                Debug.Log("[Tournament] Usuario no tiene premium - Mostrando panel de premium requerido");
-                ShowPremiumRequiredPanel();
-                return;
-            }
-
+            // NOTA: Los torneos gratuitos están disponibles para todos los usuarios
+            // Los torneos de pago (con apuestas) requieren Premium y se crean desde CashBattle
             ShowCreateTournamentPanelInternal();
         }
 
