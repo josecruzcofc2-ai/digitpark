@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.UI;
+using DigitPark.Effects;
 
 namespace DigitPark.Games
 {
     /// <summary>
     /// Controller para el juego Flash Tap
     /// El jugador debe reaccionar a una senal visual lo mas rapido posible
+    /// Usa el boton 3D con sprites Up/Down para mejor feedback visual
     /// </summary>
     public class FlashTapController : MinigameBase
     {
@@ -16,29 +19,36 @@ namespace DigitPark.Games
 
         [Header("Flash Tap - UI")]
         [SerializeField] private Button tapButton;
-        [SerializeField] private Image tapButtonImage;
+        [SerializeField] private FlashTapButton3D button3D;
         [SerializeField] private TextMeshProUGUI instructionText;
         [SerializeField] private TextMeshProUGUI reactionTimeText;
         [SerializeField] private TextMeshProUGUI roundText;
         [SerializeField] private TextMeshProUGUI averageText;
+        [SerializeField] private TextMeshProUGUI bestTimeText;
         [SerializeField] private GameObject winPanel;
 
-        [Header("Flash Tap - Colors")]
-        [SerializeField] private Color waitColor = Color.gray;
-        [SerializeField] private Color goColor = Color.green;
-        [SerializeField] private Color tooEarlyColor = Color.red;
+        [Header("Flash Tap - 3D Button Sprites")]
+        [SerializeField] private Sprite buttonUpSprite;
+        [SerializeField] private Sprite buttonDownSprite;
 
         [Header("Flash Tap - Settings")]
         [SerializeField] private int totalAttempts = 5;
-        [SerializeField] private float minWaitTime = 1.5f;
-        [SerializeField] private float maxWaitTime = 4f;
+        [SerializeField] private float minWaitTime = 2.5f;
+        [SerializeField] private float maxWaitTime = 6f;
+        [SerializeField] private float restartDelayAfterError = 1.2f;
+        [SerializeField] private float delayBetweenAttempts = 1.5f;
+
+        [Header("Flash Tap - Feedback")]
+        [SerializeField] private bool enableSuccessParticles = true;
+        [SerializeField] private bool enableHaptics = true;
 
         // Estado del juego
         private int currentAttempt;
         private List<float> reactionTimes = new List<float>();
-        private bool isWaiting; // Esperando senal
-        private bool isSignalActive; // Senal activa, puede tocar
+        private bool isWaiting;
+        private bool isSignalActive;
         private float signalStartTime;
+        private float bestTime = float.MaxValue;
         private Coroutine waitCoroutine;
 
         protected override void Awake()
@@ -51,9 +61,29 @@ namespace DigitPark.Games
         {
             base.Start();
 
-            if (tapButton != null)
+            // Configurar el boton 3D si existe
+            if (button3D != null)
+            {
+                button3D.OnButtonPressed += OnTap;
+
+                // Asignar sprites si estan configurados
+                if (buttonUpSprite != null && buttonDownSprite != null)
+                {
+                    button3D.SetSprites(buttonUpSprite, buttonDownSprite);
+                }
+            }
+            // Fallback al boton normal
+            else if (tapButton != null)
             {
                 tapButton.onClick.AddListener(OnTap);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (button3D != null)
+            {
+                button3D.OnButtonPressed -= OnTap;
             }
         }
 
@@ -62,6 +92,7 @@ namespace DigitPark.Games
             base.StartGame();
             currentAttempt = 1;
             reactionTimes.Clear();
+            bestTime = float.MaxValue;
             UpdateUI();
             StartWaitPhase();
         }
@@ -71,12 +102,16 @@ namespace DigitPark.Games
             isWaiting = true;
             isSignalActive = false;
 
-            // Visual
-            if (tapButtonImage != null) tapButtonImage.color = waitColor;
-            if (instructionText != null) instructionText.text = "Espera...";
+            // Visual - usar boton 3D si existe
+            if (button3D != null)
+            {
+                button3D.SetState(FlashTapButton3D.ButtonState.Wait);
+            }
+
+            if (instructionText != null) instructionText.text = "ESPERA...";
             if (reactionTimeText != null) reactionTimeText.text = "";
 
-            // Iniciar espera aleatoria
+            // Iniciar espera aleatoria (2.5 a 6 segundos para mayor impredecibilidad)
             float waitTime = Random.Range(minWaitTime, maxWaitTime);
             waitCoroutine = StartCoroutine(WaitAndShowSignal(waitTime));
         }
@@ -85,13 +120,24 @@ namespace DigitPark.Games
         {
             yield return new WaitForSeconds(waitTime);
 
-            // Mostrar senal
+            // Mostrar senal - AHORA!
             isWaiting = false;
             isSignalActive = true;
             signalStartTime = Time.time;
 
-            if (tapButtonImage != null) tapButtonImage.color = goColor;
+            // Visual - activar estado Ready (rojo)
+            if (button3D != null)
+            {
+                button3D.SetState(FlashTapButton3D.ButtonState.Ready);
+            }
+
             if (instructionText != null) instructionText.text = "TAP!";
+
+            // Haptic feedback cuando se activa
+            if (enableHaptics && FeedbackManager.Instance != null)
+            {
+                FeedbackManager.Instance.PlayHaptic(FeedbackManager.HapticType.Medium);
+            }
         }
 
         private void OnTap()
@@ -120,9 +166,13 @@ namespace DigitPark.Games
 
             RegisterError();
 
-            // Visual feedback
-            if (tapButtonImage != null) tapButtonImage.color = tooEarlyColor;
-            if (instructionText != null) instructionText.text = "Muy pronto!";
+            // Visual feedback - estado Error
+            if (button3D != null)
+            {
+                button3D.SetState(FlashTapButton3D.ButtonState.Error);
+            }
+
+            if (instructionText != null) instructionText.text = "MUY PRONTO!";
 
             // Este intento no cuenta, reiniciar fase de espera
             StartCoroutine(RestartAfterTooEarly());
@@ -130,7 +180,7 @@ namespace DigitPark.Games
 
         private IEnumerator RestartAfterTooEarly()
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(restartDelayAfterError);
             StartWaitPhase();
         }
 
@@ -142,10 +192,54 @@ namespace DigitPark.Games
             float reactionTime = (Time.time - signalStartTime) * 1000f; // En milisegundos
             reactionTimes.Add(reactionTime);
 
-            // Mostrar resultado
+            // Actualizar mejor tiempo
+            if (reactionTime < bestTime)
+            {
+                bestTime = reactionTime;
+            }
+
+            // Mostrar resultado con color segun rendimiento
             if (reactionTimeText != null)
             {
-                reactionTimeText.text = $"{reactionTime:F0}ms";
+                string timeText = $"{reactionTime:F0}ms";
+
+                // Agregar indicador de rendimiento
+                if (reactionTime < 200)
+                {
+                    timeText += " INCREIBLE!";
+                    reactionTimeText.color = new Color(0f, 1f, 0.5f); // Verde brillante
+                }
+                else if (reactionTime < 300)
+                {
+                    timeText += " Genial!";
+                    reactionTimeText.color = new Color(0.5f, 1f, 0.5f); // Verde
+                }
+                else if (reactionTime < 400)
+                {
+                    timeText += " Bien";
+                    reactionTimeText.color = new Color(1f, 1f, 0.5f); // Amarillo
+                }
+                else
+                {
+                    reactionTimeText.color = new Color(1f, 0.5f, 0.5f); // Rojo suave
+                }
+
+                reactionTimeText.text = timeText;
+            }
+
+            // Feedback de exito
+            if (enableSuccessParticles && FeedbackManager.Instance != null)
+            {
+                if (button3D != null)
+                {
+                    FeedbackManager.Instance.PlaySuccessFeedback(button3D.transform.position);
+                }
+
+                // Haptic de exito
+                if (enableHaptics)
+                {
+                    FeedbackManager.Instance.PlayHaptic(FeedbackManager.HapticType.Light);
+                }
             }
 
             currentAttempt++;
@@ -164,7 +258,8 @@ namespace DigitPark.Games
 
         private IEnumerator NextAttemptAfterDelay()
         {
-            yield return new WaitForSeconds(1.5f);
+            // Breve pausa para que el usuario vea su tiempo
+            yield return new WaitForSeconds(delayBetweenAttempts);
             StartWaitPhase();
         }
 
@@ -184,12 +279,17 @@ namespace DigitPark.Games
         {
             if (roundText != null)
             {
-                roundText.text = $"{Mathf.Min(currentAttempt, totalAttempts)}/{totalAttempts}";
+                roundText.text = $"Ronda {Mathf.Min(currentAttempt, totalAttempts)}/{totalAttempts}";
             }
 
             if (averageText != null && reactionTimes.Count > 0)
             {
                 averageText.text = $"Promedio: {CalculateAverage():F0}ms";
+            }
+
+            if (bestTimeText != null && bestTime < float.MaxValue)
+            {
+                bestTimeText.text = $"Mejor: {bestTime:F0}ms";
             }
         }
 
@@ -232,20 +332,43 @@ namespace DigitPark.Games
             // Mostrar resultado final
             if (averageText != null)
             {
-                averageText.text = $"Promedio Final: {CalculateAverage():F0}ms";
+                float avg = CalculateAverage();
+                string rating = GetPerformanceRating(avg);
+                averageText.text = $"Promedio Final: {avg:F0}ms\n{rating}";
             }
+
+            // Feedback final
+            if (enableSuccessParticles && FeedbackManager.Instance != null)
+            {
+                FeedbackManager.Instance.PlayImportantFeedback(transform.position);
+            }
+        }
+
+        private string GetPerformanceRating(float avgMs)
+        {
+            if (avgMs < 200) return "REFLEJOS DE RAYO!";
+            if (avgMs < 250) return "Excelente!";
+            if (avgMs < 300) return "Muy Bien!";
+            if (avgMs < 350) return "Bien";
+            if (avgMs < 400) return "Normal";
+            return "Sigue practicando";
         }
 
         protected override void OnGameReset()
         {
             currentAttempt = 1;
             reactionTimes.Clear();
+            bestTime = float.MaxValue;
             isWaiting = false;
             isSignalActive = false;
 
             if (winPanel != null) winPanel.SetActive(false);
             if (tapButton != null) tapButton.interactable = true;
-            if (tapButtonImage != null) tapButtonImage.color = waitColor;
+
+            if (button3D != null)
+            {
+                button3D.SetState(FlashTapButton3D.ButtonState.Wait, true);
+            }
         }
 
         protected override void OnErrorOccurred()

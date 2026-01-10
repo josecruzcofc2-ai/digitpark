@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using DigitPark.Managers;
 
 namespace DigitPark.Games
 {
@@ -40,6 +41,16 @@ namespace DigitPark.Games
 
         [Header("Mode Selection")]
         [SerializeField] private bool isPracticeMode = true; // Por defecto practica
+        [SerializeField] private bool isOnlineMatchMode = false; // Modo 1v1 online
+
+        [Header("Matchmaking UI")]
+        [SerializeField] private GameObject matchmakingPanel;
+        [SerializeField] private TextMeshProUGUI matchmakingStatusText;
+        [SerializeField] private Button cancelMatchmakingButton;
+
+        // Keys for storing mode in PlayerPrefs
+        private const string PRACTICE_MODE_KEY = "DigitPark_IsPracticeMode";
+        private const string ONLINE_MATCH_MODE_KEY = "DigitPark_IsOnlineMatchMode";
 
         // Juego actual seleccionado para las reglas
         private GameType currentRulesGame;
@@ -109,6 +120,9 @@ namespace DigitPark.Games
 
         private void Start()
         {
+            // Load practice mode from PlayerPrefs (set by PlayModeSelectionManager)
+            LoadPracticeModeFromPrefs();
+
             SetupButtons();
             SetupCognitiveSprintPanel();
             SetupRulesPanel();
@@ -295,11 +309,18 @@ namespace DigitPark.Games
             {
                 GameSessionManager.Instance.StartPracticeSession(gameType);
             }
+            else if (isOnlineMatchMode)
+            {
+                // Modo 1v1 online - navegar a matchmaking
+                Debug.Log($"[GameSelector] Iniciando matchmaking para {gameType}");
+                MatchmakingManager.SetMatchGameType(gameType, false);
+                SceneManager.LoadScene("Matchmaking");
+            }
             else
             {
-                // Para modo competitivo, navegar a matchmaking primero
-                // TODO: Implementar flujo de matchmaking
-                Debug.Log($"Modo competitivo para {gameType} - ir a matchmaking");
+                // Modo competitivo sin matchmaking (ej: torneos)
+                Debug.Log($"Modo competitivo para {gameType}");
+                GameSessionManager.Instance.StartPracticeSession(gameType);
             }
         }
 
@@ -402,10 +423,17 @@ namespace DigitPark.Games
             {
                 CognitiveSprintManager.Instance.StartPracticeSprint();
             }
+            else if (isOnlineMatchMode)
+            {
+                // Modo 1v1 online con Cognitive Sprint
+                Debug.Log("[GameSelector] Iniciando matchmaking para Cognitive Sprint");
+                MatchmakingManager.SetMatchGameType(GameType.DigitRush, true); // true = isCognitiveSprint
+                SceneManager.LoadScene("Matchmaking");
+            }
             else
             {
-                // TODO: Ir a matchmaking con los juegos seleccionados
-                Debug.Log("Modo competitivo - ir a matchmaking con Cognitive Sprint");
+                // Modo competitivo sin matchmaking
+                CognitiveSprintManager.Instance.StartPracticeSprint();
             }
         }
 
@@ -418,11 +446,60 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Cambia entre modo practica y competitivo
+        /// Cambia entre modo practica y competitivo (instancia)
         /// </summary>
-        public void SetPracticeMode(bool practice)
+        public void SetPracticeModeInstance(bool practice)
         {
             isPracticeMode = practice;
+        }
+
+        /// <summary>
+        /// Establece el modo de práctica antes de cargar la escena (estático)
+        /// Usa PlayerPrefs para persistir entre escenas
+        /// Llamar desde PlayModeSelectionManager antes de cargar GameSelector
+        /// </summary>
+        public static void SetPracticeMode(bool practice)
+        {
+            PlayerPrefs.SetInt("DigitPark_IsPracticeMode", practice ? 1 : 0);
+            PlayerPrefs.Save();
+            Debug.Log($"[GameSelector] Practice mode set to: {practice}");
+        }
+
+        /// <summary>
+        /// Establece el modo de partida online 1v1 antes de cargar la escena (estático)
+        /// Cuando está activo, al seleccionar un juego se inicia matchmaking
+        /// </summary>
+        public static void SetOnlineMatchMode(bool online)
+        {
+            PlayerPrefs.SetInt("DigitPark_IsOnlineMatchMode", online ? 1 : 0);
+            PlayerPrefs.Save();
+            Debug.Log($"[GameSelector] Online match mode set to: {online}");
+        }
+
+        /// <summary>
+        /// Lee los modos guardados en PlayerPrefs
+        /// </summary>
+        private void LoadPracticeModeFromPrefs()
+        {
+            // Default to practice mode if not set
+            isPracticeMode = PlayerPrefs.GetInt(PRACTICE_MODE_KEY, 1) == 1;
+            isOnlineMatchMode = PlayerPrefs.GetInt(ONLINE_MATCH_MODE_KEY, 0) == 1;
+            Debug.Log($"[GameSelector] Loaded modes - Practice: {isPracticeMode}, Online 1v1: {isOnlineMatchMode}");
+
+            // Update title based on mode
+            UpdateModeTitle();
+        }
+
+        /// <summary>
+        /// Actualiza el título según el modo actual
+        /// </summary>
+        private void UpdateModeTitle()
+        {
+            // Could update a title text here to show "SOLO MODE" or "1v1 MODE"
+            if (isOnlineMatchMode)
+            {
+                Debug.Log("[GameSelector] Modo 1v1 Online - Selecciona un juego para buscar oponente");
+            }
         }
 
         /// <summary>

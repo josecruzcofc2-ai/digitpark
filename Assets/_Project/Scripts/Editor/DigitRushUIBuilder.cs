@@ -377,34 +377,14 @@ namespace DigitPark.Editor
 
         private static void CreateActionButtons(Transform parent)
         {
-            // Play Again Button - Large and prominent
-            GameObject playAgainBtn = CreateElement(parent, "PlayAgainButton");
-            SetupRectTransform(playAgainBtn,
+            // Note: PlayAgainButton removed - game ends and shows WinPanel which handles navigation
+            // Note: Back button removed - user will add their own prefab
+
+            // Empty container kept for future action buttons if needed
+            GameObject actionButtonsContainer = CreateElement(parent, "ActionButtonsContainer");
+            SetupRectTransform(actionButtonsContainer,
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0),
                 new Vector2(0, 150), new Vector2(600, 120));
-
-            Image btnBg = playAgainBtn.AddComponent<Image>();
-            btnBg.color = GREEN_NEON;
-
-            // Add outline for extra pop
-            Outline btnOutline = playAgainBtn.AddComponent<Outline>();
-            btnOutline.effectColor = new Color(0.1f, 0.5f, 0.2f, 1f);
-            btnOutline.effectDistance = new Vector2(3, -3);
-
-            Button btn = playAgainBtn.AddComponent<Button>();
-            ColorBlock colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.8f, 1f, 0.9f, 1f);
-            colors.pressedColor = new Color(0.6f, 0.8f, 0.7f, 1f);
-            btn.colors = colors;
-
-            // Button text - larger font
-            GameObject textObj = CreateElement(playAgainBtn.transform, "PlayAgainButtonText");
-            SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI tmp = SetupText(textObj, "JUGAR DE NUEVO", 38, DARK_BG, FontStyles.Bold);
-            tmp.alignment = TextAlignmentOptions.Center;
-
-            // Note: Back button removed - user will add their own prefab
         }
 
         private static void CreateWinMessagePanel(Transform parent)
@@ -566,8 +546,7 @@ namespace DigitPark.Editor
             // Best Time Text
             AssignReference(serializedManager, "bestTimeText", "BestTimeText");
 
-            // Play Again Button
-            AssignButtonReference(serializedManager, "playAgainButton", "PlayAgainButton");
+            // Note: PlayAgainButton removed - handled by WinPanel
 
             // Win Message Panel
             AssignGameObjectReference(serializedManager, "winMessagePanel", "WinMessagePanel");

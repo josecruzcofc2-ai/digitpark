@@ -304,6 +304,41 @@ namespace DigitPark.Localization
             { "Feature1Text", "premium_feature_no_ads" },
             { "Feature2Text", "premium_feature_tournaments" },
             { "Feature3Text", "premium_feature_badge" },
+
+            // ==================== PLAY MODE SELECTION ====================
+            { "PlayModeTitleText", "play_mode_title" },
+            { "PlayModeTitle", "play_mode_title" },
+            { "SoloTitleText", "solo_title" },
+            { "SoloTitle", "solo_title" },
+            { "SoloDescText", "solo_description" },
+            { "SoloDescription", "solo_description" },
+            { "OneVsOneTitleText", "1v1_title" },
+            { "OneVsOneTitle", "1v1_title" },
+            { "OneVsOneDescText", "1v1_description" },
+            { "OneVsOneDescription", "1v1_description" },
+            // TournamentsTitleText ya está definido en la sección TOURNAMENTS
+            { "TournamentsDescText", "tournaments_description" },
+            { "TournamentsDescription", "tournaments_description" },
+
+            // ==================== CASH BATTLE ====================
+            { "CashBattleTitleText", "cash_battle_title" },
+            { "CashBattleTitle", "cash_battle_title" },
+            { "Battles1v1CardText", "1v1_battles" },
+            { "CashTournamentsCardText", "cash_tournaments" },
+            { "WalletCardText", "wallet" },
+            { "HistoryCardText", "history" },
+            { "AgeVerificationTitle", "age_verification_title" },
+            { "AgeVerificationDesc", "age_verification_desc" },
+            { "VerifyAgeButton", "verify_age" },
+            { "VerifyAgeButtonText", "verify_age" },
+
+            // ==================== WIN/LOSE PANELS ====================
+            { "CompletedText", "completed" },
+            { "WinText", "you_won" },
+            { "LoseText", "you_lost" },
+            { "TimeoutText", "time_expired" },
+            { "AcceptButton", "accept_button" },
+            { "AcceptButtonText", "accept_button" },
         };
 
         private void Awake()

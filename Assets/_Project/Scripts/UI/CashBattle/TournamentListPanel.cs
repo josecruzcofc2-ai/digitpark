@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Games;
+using DigitPark.Managers;
+using DigitPark.UI.Panels;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.CashBattle
 {
@@ -27,9 +30,26 @@ namespace DigitPark.UI.CashBattle
         [SerializeField] private Button refreshButton;
         [SerializeField] private GameObject loadingIndicator;
 
+        [Header("Create Tournament (Premium)")]
+        [SerializeField] private Button createTournamentButton;
+        [SerializeField] private GameObject createTournamentPanel;
+        [SerializeField] private Slider maxPlayersSlider;
+        [SerializeField] private TextMeshProUGUI maxPlayersText;
+        [SerializeField] private Slider entryFeeSlider;
+        [SerializeField] private TextMeshProUGUI entryFeeText;
+        [SerializeField] private Slider durationSlider;
+        [SerializeField] private TextMeshProUGUI durationText;
+        [SerializeField] private TMP_Dropdown gameTypeDropdown;
+        [SerializeField] private Button confirmCreateButton;
+        [SerializeField] private Button cancelCreateButton;
+
+        [Header("Premium Required Panel")]
+        [SerializeField] private ConfirmPanelUI premiumRequiredPanel;
+
         // Events
         public event Action OnBackClicked;
         public event Action<TournamentInfo> OnTournamentSelected;
+        public event Action<TournamentInfo> OnTournamentCreated;
 
         // Data
         private List<TournamentInfo> allTournaments = new List<TournamentInfo>();
@@ -48,7 +68,183 @@ namespace DigitPark.UI.CashBattle
             refreshButton?.onClick.AddListener(LoadTournaments);
             gameFilterDropdown?.onValueChanged.AddListener(_ => ApplyFilters());
             feeFilterDropdown?.onValueChanged.AddListener(_ => ApplyFilters());
+
+            // Create tournament (Premium feature)
+            createTournamentButton?.onClick.AddListener(OnCreateTournamentClicked);
+            confirmCreateButton?.onClick.AddListener(OnConfirmCreateTournament);
+            cancelCreateButton?.onClick.AddListener(HideCreatePanel);
+
+            // Sliders
+            maxPlayersSlider?.onValueChanged.AddListener(OnMaxPlayersChanged);
+            entryFeeSlider?.onValueChanged.AddListener(OnEntryFeeChanged);
+            durationSlider?.onValueChanged.AddListener(OnDurationChanged);
         }
+
+        #region Create Tournament (Premium)
+
+        /// <summary>
+        /// Called when user clicks "Create Tournament" button
+        /// Requires Premium to create paid tournaments
+        /// </summary>
+        private void OnCreateTournamentClicked()
+        {
+            Debug.Log("[CashBattle] Create Tournament clicked");
+
+            // Check if user has Premium
+            if (PremiumManager.Instance == null || !PremiumManager.Instance.CanCreateTournaments)
+            {
+                Debug.Log("[CashBattle] Premium required for paid tournaments");
+                ShowPremiumRequiredPanel();
+                return;
+            }
+
+            ShowCreatePanel();
+        }
+
+        private void ShowPremiumRequiredPanel()
+        {
+            if (premiumRequiredPanel != null)
+            {
+                premiumRequiredPanel.SetButtonTexts(
+                    AutoLocalizer.Get("get_premium"),
+                    AutoLocalizer.Get("maybe_later")
+                );
+
+                premiumRequiredPanel.Show(
+                    AutoLocalizer.Get("premium_required_title"),
+                    AutoLocalizer.Get("premium_cash_tournaments_message"),
+                    OnGetPremiumClicked,
+                    () => premiumRequiredPanel.Hide()
+                );
+            }
+        }
+
+        private void OnGetPremiumClicked()
+        {
+            premiumRequiredPanel?.Hide();
+            // Open premium panel
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                PremiumPanelUI.CreateAndShow(canvas.transform);
+            }
+        }
+
+        private void ShowCreatePanel()
+        {
+            if (createTournamentPanel != null)
+            {
+                createTournamentPanel.SetActive(true);
+
+                // Reset sliders to default values
+                if (maxPlayersSlider != null)
+                {
+                    maxPlayersSlider.value = 16;
+                    OnMaxPlayersChanged(16);
+                }
+                if (entryFeeSlider != null)
+                {
+                    entryFeeSlider.value = 10;
+                    OnEntryFeeChanged(10);
+                }
+                if (durationSlider != null)
+                {
+                    durationSlider.value = 24;
+                    OnDurationChanged(24);
+                }
+
+                // Setup game type dropdown
+                SetupGameTypeDropdown();
+            }
+        }
+
+        private void HideCreatePanel()
+        {
+            if (createTournamentPanel != null)
+                createTournamentPanel.SetActive(false);
+        }
+
+        private void SetupGameTypeDropdown()
+        {
+            if (gameTypeDropdown == null) return;
+
+            gameTypeDropdown.ClearOptions();
+            var options = new List<string>();
+
+            var gameInfos = CognitiveSprintManager.GetAllGameInfos();
+            foreach (var info in gameInfos)
+            {
+                options.Add(info.Name);
+            }
+            options.Add("Cognitive Sprint");
+
+            gameTypeDropdown.AddOptions(options);
+        }
+
+        private void OnMaxPlayersChanged(float value)
+        {
+            int players = (int)value;
+            if (maxPlayersText != null)
+                maxPlayersText.text = $"{players} jugadores";
+        }
+
+        private void OnEntryFeeChanged(float value)
+        {
+            decimal fee = (decimal)value;
+            if (entryFeeText != null)
+                entryFeeText.text = $"${fee:F2}";
+        }
+
+        private void OnDurationChanged(float value)
+        {
+            int hours = (int)value;
+            if (durationText != null)
+            {
+                if (hours < 24)
+                    durationText.text = $"{hours}h";
+                else
+                    durationText.text = $"{hours / 24}d";
+            }
+        }
+
+        private void OnConfirmCreateTournament()
+        {
+            // Get values from sliders
+            int maxPlayers = (int)(maxPlayersSlider?.value ?? 16);
+            decimal entryFee = (decimal)(entryFeeSlider?.value ?? 10);
+            int durationHours = (int)(durationSlider?.value ?? 24);
+
+            // Get game type
+            var gameInfos = CognitiveSprintManager.GetAllGameInfos();
+            int selectedGame = gameTypeDropdown?.value ?? 0;
+            bool isCognitiveSprint = selectedGame >= gameInfos.Length;
+            GameType? gameType = isCognitiveSprint ? null : (GameType?)gameInfos[selectedGame].Type;
+
+            // Create tournament info
+            var tournament = new TournamentInfo
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = isCognitiveSprint ? "Cognitive Sprint Tournament" : $"{gameType} Tournament",
+                GameType = gameType,
+                IsCognitiveSprint = isCognitiveSprint,
+                EntryFee = entryFee,
+                PrizePool = entryFee * maxPlayers * 0.9m, // 90% pool, 10% commission
+                CurrentParticipants = 1, // Creator auto-joins
+                MaxParticipants = maxPlayers,
+                StartsAt = DateTime.Now.AddHours(durationHours),
+                Status = TournamentStatus.Registration
+            };
+
+            Debug.Log($"[CashBattle] Creating paid tournament: {tournament.Name}, Entry: ${entryFee}");
+
+            // TODO: Send to Triumph API
+            OnTournamentCreated?.Invoke(tournament);
+
+            HideCreatePanel();
+            LoadTournaments(); // Refresh list
+        }
+
+        #endregion
 
         private void SetupFilters()
         {

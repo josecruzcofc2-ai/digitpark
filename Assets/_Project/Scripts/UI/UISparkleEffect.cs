@@ -379,13 +379,101 @@ namespace DigitPark.UI
         private float EaseOutQuad(float t) => 1f - (1f - t) * (1f - t);
 
         /// <summary>
+        /// Explosión de monedas doradas (para victoria con dinero real)
+        /// </summary>
+        public void PlayCoinExplosion(Vector2 position, int coinCount = 20)
+        {
+            StartCoroutine(SpawnCoins(position, coinCount));
+        }
+
+        private IEnumerator SpawnCoins(Vector2 position, int count)
+        {
+            Color[] coinColors = new Color[]
+            {
+                new Color(1f, 0.84f, 0f, 1f),      // Dorado
+                new Color(1f, 0.9f, 0.4f, 1f),     // Dorado claro
+                new Color(0.9f, 0.7f, 0.1f, 1f),   // Dorado oscuro
+            };
+
+            for (int i = 0; i < count; i++)
+            {
+                CreateCoin(position, coinColors[Random.Range(0, coinColors.Length)]);
+
+                if (i % 4 == 0)
+                    yield return null;
+            }
+        }
+
+        private void CreateCoin(Vector2 position, Color color)
+        {
+            GameObject coin = new GameObject("Coin");
+            coin.transform.SetParent(transform, false);
+
+            RectTransform rt = coin.AddComponent<RectTransform>();
+            rt.anchoredPosition = position;
+            rt.sizeDelta = new Vector2(30f, 30f);
+
+            Image img = coin.AddComponent<Image>();
+            img.color = color;
+
+            // Dirección hacia arriba con spread
+            float angle = Random.Range(30f, 150f) * Mathf.Deg2Rad;
+            Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+            float speed = Random.Range(400f, 700f);
+
+            StartCoroutine(AnimateCoin(coin, rt, img, direction, speed));
+        }
+
+        private IEnumerator AnimateCoin(GameObject coin, RectTransform rt, Image img, Vector2 initialDirection, float speed)
+        {
+            float duration = 1.5f;
+            float elapsed = 0f;
+            Vector2 position = rt.anchoredPosition;
+            Vector2 velocity = initialDirection * speed;
+            Color startColor = img.color;
+            float rotationSpeed = Random.Range(360f, 720f);
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+
+                // Gravedad
+                velocity.y -= 800f * Time.deltaTime;
+
+                // Actualizar posición
+                position += velocity * Time.deltaTime;
+                rt.anchoredPosition = position;
+
+                // Rotación
+                rt.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+
+                // Efecto de brillo (scale pulse)
+                float pulse = 1f + Mathf.Sin(elapsed * 15f) * 0.1f;
+                rt.sizeDelta = new Vector2(30f * pulse, 30f * pulse);
+
+                // Fade out al final
+                if (t > 0.6f)
+                {
+                    float fadeT = (t - 0.6f) / 0.4f;
+                    img.color = new Color(startColor.r, startColor.g, startColor.b, startColor.a * (1f - fadeT));
+                }
+
+                yield return null;
+            }
+
+            Destroy(coin);
+        }
+
+        /// <summary>
         /// Limpia todas las partículas activas
         /// </summary>
         public void ClearAllParticles()
         {
             foreach (Transform child in transform)
             {
-                if (child.name.Contains("Sparkle") || child.name.Contains("Confetti") || child.name.Contains("Star"))
+                if (child.name.Contains("Sparkle") || child.name.Contains("Confetti") ||
+                    child.name.Contains("Star") || child.name.Contains("Coin"))
                 {
                     Destroy(child.gameObject);
                 }
