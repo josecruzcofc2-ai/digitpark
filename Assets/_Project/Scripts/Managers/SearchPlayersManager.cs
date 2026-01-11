@@ -334,8 +334,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[SearchPlayers] Ver perfil de: {playerId}");
 
-            // Guardar ID y navegar a perfil
+            // Guardar ID y escena de retorno para navegar a perfil
             PlayerPrefs.SetString("ViewProfileId", playerId);
+            PlayerPrefs.SetString("ProfileReturnScene", "SearchPlayers");
             PlayerPrefs.Save();
 
             SceneManager.LoadScene("Profile");

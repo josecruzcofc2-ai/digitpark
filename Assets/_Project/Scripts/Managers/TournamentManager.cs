@@ -7,6 +7,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI.Panels;
+using DigitPark.UI.Items;
 
 namespace DigitPark.Managers
 {
@@ -38,6 +39,9 @@ namespace DigitPark.Managers
         [Header("Tournaments List")]
         [SerializeField] public Transform tournamentsContainer;
         [SerializeField] public ScrollRect scrollRect;
+        [SerializeField] public GameObject tournamentSearchItemPrefab;  // Para vista "Buscar Torneos"
+        [SerializeField] public GameObject tournamentMyItemPrefab;      // Para vista "Mis Torneos"
+        [Tooltip("Legacy - se usa como fallback si los nuevos no están asignados")]
         [SerializeField] public GameObject tournamentItemPrefab;
 
         [Header("Blocker Panel")]
@@ -651,12 +655,17 @@ namespace DigitPark.Managers
             StartCoroutine(ForceLayoutAndScrollToTop(containerRT));
         }
 
-        // Lista para actualizar tiempo en tiempo real
-        private List<(TextMeshProUGUI timeText, TournamentData tournament)> activeTournamentItems = new List<(TextMeshProUGUI, TournamentData)>();
+        // Listas para actualizar tiempo en tiempo real (usando componentes UI)
+        private List<TournamentSearchItemUI> activeSearchItems = new List<TournamentSearchItemUI>();
+        private List<TournamentMyItemUI> activeMyItems = new List<TournamentMyItemUI>();
+        // Legacy - se mantiene para compatibilidad
+        private List<TournamentItemUI> activeTournamentItems = new List<TournamentItemUI>();
 
         /// <summary>
-        /// Crea una entrada de torneo por código - ESTILO SCORES NACIONAL
-        /// Estructura: Participantes | Nombre Creador | Tiempo Restante
+        /// Crea una entrada de torneo usando prefab
+        /// Usa prefab diferente según la vista actual:
+        /// - Search: TournamentSearchItemUI (compacto)
+        /// - MyTournaments: TournamentMyItemUI (tarjeta detallada)
         /// </summary>
         private void CreateTournamentCard(TournamentData tournament)
         {
@@ -666,30 +675,139 @@ namespace DigitPark.Managers
                 return;
             }
 
-            // Crear item por código
+            // Determinar qué prefab usar según la vista actual
+            if (currentView == TournamentView.Search && tournamentSearchItemPrefab != null)
+            {
+                // VISTA BUSCAR: Usar TournamentSearchItemUI (compacto)
+                CreateSearchItem(tournament);
+            }
+            else if (currentView == TournamentView.MyTournaments && tournamentMyItemPrefab != null)
+            {
+                // VISTA MIS TORNEOS: Usar TournamentMyItemUI (tarjeta detallada)
+                CreateMyTournamentItem(tournament);
+            }
+            else if (tournamentItemPrefab != null)
+            {
+                // LEGACY FALLBACK: Usar TournamentItemUI
+                CreateLegacyItem(tournament);
+            }
+            else
+            {
+                // FALLBACK FINAL: Crear por código
+                CreateTournamentCardFallback(tournament);
+            }
+        }
+
+        /// <summary>
+        /// Crea item compacto para vista "Buscar Torneos"
+        /// </summary>
+        private void CreateSearchItem(TournamentData tournament)
+        {
+            GameObject itemObj = Instantiate(tournamentSearchItemPrefab, tournamentsContainer);
+            itemObj.name = $"TournamentSearchItem_{tournament.tournamentId}";
+
+            TournamentSearchItemUI itemUI = itemObj.GetComponent<TournamentSearchItemUI>();
+            if (itemUI != null)
+            {
+                itemUI.Setup(tournament, OnTournamentItemClicked);
+                activeSearchItems.Add(itemUI);
+                Debug.Log($"[Tournament] Creado SearchItem para: {tournament.creatorName}");
+            }
+            else
+            {
+                Debug.LogWarning("[Tournament] Prefab no tiene TournamentSearchItemUI, usando fallback");
+                Destroy(itemObj);
+                CreateTournamentCardFallback(tournament);
+                return;
+            }
+
+            itemObj.SetActive(true);
+        }
+
+        /// <summary>
+        /// Crea item tarjeta para vista "Mis Torneos"
+        /// </summary>
+        private void CreateMyTournamentItem(TournamentData tournament)
+        {
+            GameObject itemObj = Instantiate(tournamentMyItemPrefab, tournamentsContainer);
+            itemObj.name = $"TournamentMyItem_{tournament.tournamentId}";
+
+            TournamentMyItemUI itemUI = itemObj.GetComponent<TournamentMyItemUI>();
+            if (itemUI != null)
+            {
+                string userId = currentPlayer?.userId ?? "";
+                itemUI.Setup(
+                    tournament,
+                    userId,
+                    OnPlayTournament,          // Callback para jugar
+                    OnViewTournamentLeaderboard, // Callback para ver leaderboard
+                    OnExitTournamentFromCard   // Callback para salir
+                );
+                activeMyItems.Add(itemUI);
+                Debug.Log($"[Tournament] Creado MyItem para: {tournament.name}");
+            }
+            else
+            {
+                Debug.LogWarning("[Tournament] Prefab no tiene TournamentMyItemUI, usando fallback");
+                Destroy(itemObj);
+                CreateTournamentCardFallback(tournament);
+                return;
+            }
+
+            itemObj.SetActive(true);
+        }
+
+        /// <summary>
+        /// Crea item legacy con TournamentItemUI
+        /// </summary>
+        private void CreateLegacyItem(TournamentData tournament)
+        {
+            GameObject itemObj = Instantiate(tournamentItemPrefab, tournamentsContainer);
+            itemObj.name = $"TournamentItem_{tournament.tournamentId}";
+
+            TournamentItemUI itemUI = itemObj.GetComponent<TournamentItemUI>();
+            if (itemUI != null)
+            {
+                bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
+                itemUI.Setup(tournament, isParticipating, OnTournamentItemClicked);
+                activeTournamentItems.Add(itemUI);
+            }
+            else
+            {
+                Debug.LogWarning("[Tournament] Prefab no tiene TournamentItemUI, usando fallback");
+                Destroy(itemObj);
+                CreateTournamentCardFallback(tournament);
+                return;
+            }
+
+            itemObj.SetActive(true);
+        }
+
+        /// <summary>
+        /// Fallback: Crea item por codigo si no hay prefab
+        /// </summary>
+        private void CreateTournamentCardFallback(TournamentData tournament)
+        {
             GameObject itemObj = new GameObject($"TournamentItem_{tournament.tournamentId}");
             itemObj.transform.SetParent(tournamentsContainer, false);
 
             RectTransform itemRT = itemObj.AddComponent<RectTransform>();
-            itemRT.sizeDelta = new Vector2(0, 60);
+            itemRT.sizeDelta = new Vector2(0, 70);
 
-            // LayoutElement
             var layoutElement = itemObj.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 60;
-            layoutElement.minHeight = 60;
+            layoutElement.preferredHeight = 70;
+            layoutElement.minHeight = 70;
 
-            // Fondo según participación
             bool isParticipating = tournament.IsParticipating(currentPlayer?.userId ?? "");
             Image bg = itemObj.AddComponent<Image>();
             bg.color = isParticipating ? new Color(0f, 0.83f, 1f, 0.95f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
 
-            // Botón para click
             Button itemButton = itemObj.AddComponent<Button>();
             itemButton.targetGraphic = bg;
             TournamentData tournamentCopy = tournament;
             itemButton.onClick.AddListener(() => OnTournamentItemClicked(tournamentCopy));
 
-            // 1. PARTICIPANTES (izquierda - 0% a 15%)
+            // Participantes
             TextMeshProUGUI participantsText = CreateItemText(itemObj.transform, "ParticipantsText",
                 $"{tournament.currentParticipants}/{tournament.maxParticipants}", 24, new Color(1f, 0.84f, 0f));
             RectTransform participantsRT = participantsText.GetComponent<RectTransform>();
@@ -700,10 +818,9 @@ namespace DigitPark.Managers
             participantsText.alignment = TextAlignmentOptions.Center;
             participantsText.fontStyle = FontStyles.Bold;
 
-            // Divisor vertical 1 (15%)
             CreateTournamentCardDivider(itemObj.transform, 0.15f);
 
-            // 2. NOMBRE DEL CREADOR (centro - 15% a 70%)
+            // Creador
             TextMeshProUGUI creatorText = CreateItemText(itemObj.transform, "CreatorText",
                 tournament.creatorName, 22, Color.white);
             RectTransform creatorRT = creatorText.GetComponent<RectTransform>();
@@ -713,10 +830,9 @@ namespace DigitPark.Managers
             creatorRT.offsetMax = new Vector2(-10, 0);
             creatorText.alignment = TextAlignmentOptions.Center;
 
-            // Divisor vertical 2 (70%)
             CreateTournamentCardDivider(itemObj.transform, 0.70f);
 
-            // 3. TIEMPO RESTANTE (derecha - 70% a 100%)
+            // Tiempo
             string timeString = FormatTimeRemaining(tournament.GetTimeRemaining());
             TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
                 timeString, 22, new Color(0f, 1f, 0.53f));
@@ -727,11 +843,12 @@ namespace DigitPark.Managers
             timeRT.offsetMax = new Vector2(-10, 0);
             timeText.alignment = TextAlignmentOptions.Center;
 
-            // Divisor horizontal
             CreateTournamentCardHorizontalDivider(itemObj.transform);
 
-            // Guardar referencia para actualizar tiempo en tiempo real
-            activeTournamentItems.Add((timeText, tournament));
+            // Agregar componente UI y guardarlo
+            TournamentItemUI itemUI = itemObj.AddComponent<TournamentItemUI>();
+            itemUI.AutoSetupReferences();
+            activeTournamentItems.Add(itemUI);
 
             itemObj.SetActive(true);
         }
@@ -777,26 +894,40 @@ namespace DigitPark.Managers
         /// </summary>
         private void Update()
         {
-            // Actualizar tiempo de torneos activos cada frame
+            // Actualizar tiempo de items de búsqueda (TournamentSearchItemUI)
+            for (int i = activeSearchItems.Count - 1; i >= 0; i--)
+            {
+                var itemUI = activeSearchItems[i];
+                if (itemUI == null)
+                {
+                    activeSearchItems.RemoveAt(i);
+                    continue;
+                }
+                itemUI.UpdateTimeRemaining();
+            }
+
+            // Actualizar tiempo de mis torneos (TournamentMyItemUI)
+            for (int i = activeMyItems.Count - 1; i >= 0; i--)
+            {
+                var itemUI = activeMyItems[i];
+                if (itemUI == null)
+                {
+                    activeMyItems.RemoveAt(i);
+                    continue;
+                }
+                itemUI.UpdateTimeRemaining();
+            }
+
+            // Legacy: Actualizar items antiguos (TournamentItemUI)
             for (int i = activeTournamentItems.Count - 1; i >= 0; i--)
             {
-                var item = activeTournamentItems[i];
-                if (item.timeText == null)
+                var itemUI = activeTournamentItems[i];
+                if (itemUI == null)
                 {
                     activeTournamentItems.RemoveAt(i);
                     continue;
                 }
-
-                System.TimeSpan timeRemaining = item.tournament.GetTimeRemaining();
-                if (timeRemaining.TotalSeconds <= 0)
-                {
-                    item.timeText.text = AutoLocalizer.Get("finished");
-                    item.timeText.color = Color.red;
-                }
-                else
-                {
-                    item.timeText.text = FormatTimeRemaining(timeRemaining);
-                }
+                itemUI.UpdateTimeRemaining();
             }
         }
 
@@ -891,6 +1022,58 @@ namespace DigitPark.Managers
                 ShowConfirmPopupForJoin(tournament);
             }
         }
+
+        #region TournamentMyItemUI Callbacks
+
+        /// <summary>
+        /// Callback: Jugar en el torneo (desde TournamentMyItemUI)
+        /// </summary>
+        private void OnPlayTournament(TournamentData tournament)
+        {
+            Debug.Log($"[Tournament] Jugar torneo: {tournament.tournamentId}");
+
+            if (tournament == null) return;
+
+            selectedTournament = tournament;
+
+            // Guardar datos del torneo para cuando regrese del minijuego
+            PlayerPrefs.SetString("CurrentTournamentId", tournament.tournamentId);
+            PlayerPrefs.SetString("TournamentReturnScene", "Tournaments");
+            PlayerPrefs.Save();
+
+            // Ir al selector de juegos
+            SceneManager.LoadScene("GameSelector");
+        }
+
+        /// <summary>
+        /// Callback: Ver leaderboard del torneo (desde TournamentMyItemUI)
+        /// </summary>
+        private void OnViewTournamentLeaderboard(TournamentData tournament)
+        {
+            Debug.Log($"[Tournament] Ver leaderboard: {tournament.tournamentId}");
+
+            if (tournament == null) return;
+
+            selectedTournament = tournament;
+            ShowTournamentLeaderboard(tournament);
+        }
+
+        /// <summary>
+        /// Callback: Salir del torneo (desde TournamentMyItemUI)
+        /// </summary>
+        private void OnExitTournamentFromCard(TournamentData tournament)
+        {
+            Debug.Log($"[Tournament] Solicitud de salir del torneo: {tournament.tournamentId}");
+
+            if (tournament == null) return;
+
+            selectedTournament = tournament;
+
+            // Mostrar confirmación de salida
+            OnExitTournamentButtonClicked();
+        }
+
+        #endregion
 
         #endregion
 
@@ -1268,7 +1451,9 @@ namespace DigitPark.Managers
         {
             if (tournamentsContainer == null) return;
 
-            // Limpiar lista de items activos (para actualización en tiempo real)
+            // Limpiar todas las listas de items activos
+            activeSearchItems.Clear();
+            activeMyItems.Clear();
             activeTournamentItems.Clear();
 
             // Resetear la posición del ScrollRect antes de destruir para evitar MissingReferenceException

@@ -8,6 +8,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.Localization;
+using DigitPark.UI.Items;
 
 namespace DigitPark.Managers
 {
@@ -32,6 +33,15 @@ namespace DigitPark.Managers
 
         [Header("Navigation")]
         [SerializeField] public Button backButton;
+
+        [Header("Empty State")]
+        [SerializeField] private GameObject emptyState;
+        [SerializeField] private Button playButton;
+
+        [Header("Player Position Panel")]
+        [SerializeField] private GameObject playerPositionPanel;
+        [SerializeField] private TextMeshProUGUI positionNumberText;
+        [SerializeField] private TextMeshProUGUI positionTimeText;
 
         // Estado
         private LeaderboardTab currentTab = LeaderboardTab.Local;
@@ -151,6 +161,22 @@ namespace DigitPark.Managers
             {
                 Debug.LogError("[Leaderboard] backButton es NULL!");
             }
+
+            // Play Button (en EmptyState)
+            if (playButton != null)
+            {
+                playButton.onClick.RemoveAllListeners();
+                playButton.onClick.AddListener(OnPlayButtonClicked);
+            }
+        }
+
+        /// <summary>
+        /// Navega a GameSelector para jugar
+        /// </summary>
+        private void OnPlayButtonClicked()
+        {
+            Debug.Log("[Leaderboard] Navegando a GameSelector");
+            SceneManager.LoadScene("GameSelector");
         }
 
         #endregion
@@ -304,6 +330,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Leaderboard] Mostrando {entries.Count} entradas");
 
+            // Ocultar estado vacío
+            HideEmptyState();
+
             // Configurar el RectTransform del container
             RectTransform containerRT = leaderboardContainer as RectTransform;
             if (containerRT != null)
@@ -371,13 +400,47 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Crea una entrada visual en el leaderboard
+        /// Crea una entrada visual en el leaderboard usando prefab
         /// </summary>
         private void CreateLeaderboardEntry(LeaderboardEntry entry)
         {
             if (leaderboardContainer == null) return;
 
-            // Crear entrada programáticamente
+            bool isCurrentPlayer = currentPlayer != null && entry.userId == currentPlayer.userId;
+
+            // Verificar si hay prefab asignado
+            if (leaderboardEntryPrefab != null)
+            {
+                // USAR PREFAB
+                GameObject entryObj = Instantiate(leaderboardEntryPrefab, leaderboardContainer);
+                entryObj.name = $"Entry_{entry.position}";
+
+                LeaderboardEntryUI entryUI = entryObj.GetComponent<LeaderboardEntryUI>();
+                if (entryUI != null)
+                {
+                    entryUI.Setup(entry, isCurrentPlayer);
+                }
+                else
+                {
+                    Debug.LogWarning("[Leaderboard] Prefab no tiene LeaderboardEntryUI, usando fallback");
+                    Destroy(entryObj);
+                    CreateLeaderboardEntryFallback(entry, isCurrentPlayer);
+                }
+
+                entryObj.SetActive(true);
+            }
+            else
+            {
+                // FALLBACK: Crear por codigo si no hay prefab
+                CreateLeaderboardEntryFallback(entry, isCurrentPlayer);
+            }
+        }
+
+        /// <summary>
+        /// Fallback: Crea entrada por codigo si no hay prefab
+        /// </summary>
+        private void CreateLeaderboardEntryFallback(LeaderboardEntry entry, bool isCurrentPlayer)
+        {
             GameObject entryObj = new GameObject($"Entry_{entry.position}");
             entryObj.transform.SetParent(leaderboardContainer, false);
 
@@ -386,75 +449,76 @@ namespace DigitPark.Managers
             entryRT.anchorMax = new Vector2(1, 1);
             entryRT.pivot = new Vector2(0.5f, 1);
             entryRT.anchoredPosition = Vector2.zero;
-            entryRT.sizeDelta = new Vector2(0, 80);
+            entryRT.sizeDelta = new Vector2(0, 70);
 
-            // LayoutElement para controlar altura
             var layoutElement = entryObj.AddComponent<UnityEngine.UI.LayoutElement>();
-            layoutElement.preferredHeight = 80;
-            layoutElement.minHeight = 80;
-            layoutElement.flexibleWidth = 1;
+            layoutElement.preferredHeight = 70;
+            layoutElement.minHeight = 70;
 
-            entryRT.anchorMin = new Vector2(0, 1);
-            entryRT.anchorMax = new Vector2(1, 1);
-            entryRT.pivot = new Vector2(0.5f, 1);
-            entryRT.anchoredPosition = Vector2.zero;
-            entryRT.sizeDelta = new Vector2(0, 80);
-
-            entryObj.SetActive(true);
-
-            // Fondo de la entrada
             Image bg = entryObj.AddComponent<Image>();
-            bool isCurrentPlayer = currentPlayer != null && entry.userId == currentPlayer.userId;
+            bg.color = isCurrentPlayer ? new Color(0f, 0.83f, 1f, 0.95f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
 
-            if (isCurrentPlayer)
-            {
-                bg.color = new Color(0f, 0.83f, 1f, 0.95f); // Azul eléctrico
-            }
-            else
-            {
-                bg.color = new Color(0.15f, 0.15f, 0.2f, 0.95f); // Gris oscuro
-            }
-
-            float leftPadding = 20f;
-
-            // Divisores verticales
-            CreateVerticalDivider(entryObj.transform, 150f);
-            CreateVerticalDivider(entryObj.transform, 670f);
-
-            // TOP# (izquierda)
+            // Posicion (0% - 15%)
             Color positionColor = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(1f, 0.84f, 0f);
-            TextMeshProUGUI posText = CreateEntryText(entryObj.transform, "PositionText", $"{entry.position}", 32, positionColor);
+            TextMeshProUGUI posText = CreateEntryText(entryObj.transform, "PositionText", $"{entry.position}", 28, positionColor);
             RectTransform posRT = posText.GetComponent<RectTransform>();
             posRT.anchorMin = new Vector2(0, 0);
-            posRT.anchorMax = new Vector2(0, 1);
-            posRT.pivot = new Vector2(0, 0.5f);
-            posRT.anchoredPosition = new Vector2(leftPadding, 0);
-            posRT.sizeDelta = new Vector2(130, 0);
+            posRT.anchorMax = new Vector2(0.15f, 1);
+            posRT.offsetMin = Vector2.zero;
+            posRT.offsetMax = Vector2.zero;
             posText.alignment = TMPro.TextAlignmentOptions.Center;
             posText.fontStyle = TMPro.FontStyles.Bold;
 
-            // Nombre (centro)
-            TextMeshProUGUI nameText = CreateEntryText(entryObj.transform, "NameText", entry.username, 26, Color.white);
+            // Divisor 1
+            CreateVerticalDividerAnchored(entryObj.transform, 0.15f);
+
+            // Username (15% - 70%)
+            TextMeshProUGUI nameText = CreateEntryText(entryObj.transform, "UsernameText", entry.username, 22, Color.white);
             RectTransform nameRT = nameText.GetComponent<RectTransform>();
-            nameRT.anchorMin = new Vector2(0, 0);
-            nameRT.anchorMax = new Vector2(0, 1);
-            nameRT.pivot = new Vector2(0, 0.5f);
-            nameRT.anchoredPosition = new Vector2(160f, 0);
-            nameRT.sizeDelta = new Vector2(500, 0);
+            nameRT.anchorMin = new Vector2(0.15f, 0);
+            nameRT.anchorMax = new Vector2(0.70f, 1);
+            nameRT.offsetMin = new Vector2(10, 0);
+            nameRT.offsetMax = new Vector2(-10, 0);
             nameText.alignment = TMPro.TextAlignmentOptions.Center;
 
-            // Tiempo (derecha)
-            TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 26, new Color(0f, 1f, 0.53f));
+            // Divisor 2
+            CreateVerticalDividerAnchored(entryObj.transform, 0.70f);
+
+            // Tiempo (70% - 100%)
+            TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 22, new Color(0f, 1f, 0.53f));
             RectTransform timeRT = timeText.GetComponent<RectTransform>();
-            timeRT.anchorMin = new Vector2(1, 0);
-            timeRT.anchorMax = new Vector2(1, 1);
-            timeRT.pivot = new Vector2(1, 0.5f);
-            timeRT.anchoredPosition = new Vector2(-20, 0);
-            timeRT.sizeDelta = new Vector2(350, 0);
+            timeRT.anchorMin = new Vector2(0.70f, 0);
+            timeRT.anchorMax = new Vector2(1f, 1);
+            timeRT.offsetMin = new Vector2(10, 0);
+            timeRT.offsetMax = new Vector2(-10, 0);
             timeText.alignment = TMPro.TextAlignmentOptions.Center;
 
-            // Línea divisoria horizontal
             CreateHorizontalDivider(entryObj.transform);
+
+            // Agregar componente UI
+            LeaderboardEntryUI entryUI = entryObj.AddComponent<LeaderboardEntryUI>();
+            entryUI.AutoSetupReferences();
+
+            entryObj.SetActive(true);
+        }
+
+        /// <summary>
+        /// Crea divisor vertical usando anclas (para fallback)
+        /// </summary>
+        private void CreateVerticalDividerAnchored(Transform parent, float anchorX)
+        {
+            GameObject divider = new GameObject("VerticalDivider");
+            divider.transform.SetParent(parent, false);
+
+            RectTransform divRT = divider.AddComponent<RectTransform>();
+            divRT.anchorMin = new Vector2(anchorX, 0.1f);
+            divRT.anchorMax = new Vector2(anchorX, 0.9f);
+            divRT.pivot = new Vector2(0.5f, 0.5f);
+            divRT.sizeDelta = new Vector2(2f, 0);
+
+            Image divImage = divider.AddComponent<Image>();
+            divImage.color = new Color(0.5f, 0.5f, 0.6f, 0.8f);
+            divImage.raycastTarget = false;
         }
 
         /// <summary>
@@ -543,7 +607,7 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Resalta la posición del jugador actual
+        /// Resalta la posición del jugador actual y actualiza el panel inferior
         /// </summary>
         private void HighlightPlayerPosition(List<LeaderboardEntry> entries)
         {
@@ -553,6 +617,48 @@ namespace DigitPark.Managers
             if (playerEntry != null)
             {
                 Debug.Log($"[Leaderboard] Jugador encontrado en posición #{playerEntry.position}");
+                UpdatePlayerPositionPanel(playerEntry.position, playerEntry.time);
+            }
+            else
+            {
+                // El jugador no está en el ranking
+                UpdatePlayerPositionPanel(-1, 0);
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el panel inferior con la posición del jugador
+        /// </summary>
+        private void UpdatePlayerPositionPanel(int position, float time)
+        {
+            if (playerPositionPanel == null) return;
+
+            playerPositionPanel.SetActive(true);
+
+            if (positionNumberText != null)
+            {
+                if (position > 0)
+                {
+                    positionNumberText.text = $"#{position}";
+                    positionNumberText.color = new Color(1f, 0.84f, 0f); // Gold
+                }
+                else
+                {
+                    positionNumberText.text = AutoLocalizer.Get("not_ranked");
+                    positionNumberText.color = new Color(0.5f, 0.5f, 0.5f); // Gray
+                }
+            }
+
+            if (positionTimeText != null)
+            {
+                if (time > 0)
+                {
+                    positionTimeText.text = $"{time:F3}s";
+                }
+                else
+                {
+                    positionTimeText.text = "--";
+                }
             }
         }
 
@@ -590,29 +696,40 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Muestra mensaje cuando no hay datos
+        /// Muestra el estado vacío cuando no hay datos
         /// </summary>
         private void ShowEmptyMessage()
         {
             Debug.Log("[Leaderboard] No hay datos para mostrar");
 
-            GameObject emptyMsg = new GameObject("EmptyMessage");
-            emptyMsg.transform.SetParent(leaderboardContainer, false);
+            // Mostrar EmptyState si existe
+            if (emptyState != null)
+            {
+                emptyState.SetActive(true);
+            }
 
-            RectTransform rt = emptyMsg.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.5f);
-            rt.anchorMax = new Vector2(1, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(800, 200);
+            // Ocultar panel de posición del jugador
+            if (playerPositionPanel != null)
+            {
+                playerPositionPanel.SetActive(false);
+            }
+        }
 
-            TextMeshProUGUI text = emptyMsg.AddComponent<TextMeshProUGUI>();
-            if (TMPro.TMP_Settings.defaultFontAsset != null)
-                text.font = TMPro.TMP_Settings.defaultFontAsset;
-            text.text = AutoLocalizer.Get("no_scores_yet");
-            text.alignment = TMPro.TextAlignmentOptions.Center;
-            text.fontSize = 24;
-            text.color = Color.gray;
+        /// <summary>
+        /// Oculta el estado vacío
+        /// </summary>
+        private void HideEmptyState()
+        {
+            if (emptyState != null)
+            {
+                emptyState.SetActive(false);
+            }
+
+            // Mostrar panel de posición
+            if (playerPositionPanel != null)
+            {
+                playerPositionPanel.SetActive(true);
+            }
         }
 
         /// <summary>
