@@ -828,38 +828,37 @@ namespace DigitPark.Editor
             Canvas canvas = GetCanvas();
             if (canvas == null) return;
 
-            // Buscar el ScrollView content
-            ScrollRect scrollRect = Object.FindObjectOfType<ScrollRect>();
-            Transform contentParent = null;
-
-            if (scrollRect != null && scrollRect.content != null)
+            // IMPORTANTE: EmptyState debe ser HERMANO del ScrollView, no hijo del Content
+            // Buscar TournamentsPanel como padre
+            Transform tournamentsPanel = canvas.transform.Find("TournamentsPanel");
+            if (tournamentsPanel == null)
             {
-                contentParent = scrollRect.content;
+                Debug.LogWarning("[TournamentsUIBuilder] No se encontró TournamentsPanel para EmptyState");
+                return;
             }
-            else
-            {
-                // Buscar alternativo
-                Transform scrollView = canvas.transform.Find("TournamentsPanel/TournamentsScrollView");
-                if (scrollView == null) scrollView = canvas.transform.Find("TournamentsScrollView");
 
-                if (scrollView != null)
+            // Eliminar EmptyState viejo si está dentro del Content (ubicación incorrecta)
+            Transform scrollView = tournamentsPanel.Find("TournamentsScrollView");
+            if (scrollView != null)
+            {
+                Transform viewport = scrollView.Find("Viewport");
+                if (viewport != null)
                 {
-                    Transform viewport = scrollView.Find("Viewport");
-                    if (viewport != null)
+                    Transform content = viewport.Find("Content");
+                    if (content != null)
                     {
-                        contentParent = viewport.Find("Content");
+                        Transform oldEmpty = content.Find("EmptyState");
+                        if (oldEmpty != null)
+                        {
+                            Object.DestroyImmediate(oldEmpty.gameObject);
+                            Debug.Log("[TournamentsUIBuilder] EmptyState viejo eliminado del Content");
+                        }
                     }
                 }
             }
 
-            if (contentParent == null)
-            {
-                Debug.LogWarning("[TournamentsUIBuilder] No se encontró Content para EmptyState");
-                return;
-            }
-
-            // Buscar o crear EmptyState
-            Transform existing = contentParent.Find("EmptyState");
+            // Buscar o crear EmptyState como hermano del ScrollView
+            Transform existing = tournamentsPanel.Find("EmptyState");
             GameObject emptyState;
 
             if (existing != null)
@@ -869,17 +868,17 @@ namespace DigitPark.Editor
             else
             {
                 emptyState = new GameObject("EmptyState");
-                emptyState.transform.SetParent(contentParent, false);
-                emptyState.transform.SetAsFirstSibling();
+                emptyState.transform.SetParent(tournamentsPanel, false);
             }
 
-            // RectTransform
+            // RectTransform - centrado en el área del scroll (debajo de header + tabs + searchbar)
             RectTransform emptyRT = GetOrAddComponent<RectTransform>(emptyState);
-            emptyRT.anchorMin = new Vector2(0.5f, 0.5f);
-            emptyRT.anchorMax = new Vector2(0.5f, 0.5f);
+            // Usar stretch horizontal, centrado vertical en el área visible
+            emptyRT.anchorMin = new Vector2(0.1f, 0.3f);
+            emptyRT.anchorMax = new Vector2(0.9f, 0.7f);
             emptyRT.pivot = new Vector2(0.5f, 0.5f);
-            emptyRT.anchoredPosition = new Vector2(0, 50);
-            emptyRT.sizeDelta = new Vector2(350, 300);
+            emptyRT.anchoredPosition = Vector2.zero;
+            emptyRT.sizeDelta = Vector2.zero; // Usar anchors para el tamaño
 
             // VerticalLayoutGroup
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(emptyState);
@@ -891,20 +890,28 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // === Trophy Icon ===
+            // === Trophy Icon (Image component para icono personalizado) ===
             GameObject iconObj = FindOrCreateChild(emptyState, "TrophyIcon");
-            TextMeshProUGUI iconText = GetOrAddComponent<TextMeshProUGUI>(iconObj);
-            iconText.text = "🏆";
-            iconText.fontSize = 72;
-            iconText.alignment = TextAlignmentOptions.Center;
-            iconText.color = TEXT_MUTED;
+
+            // Remover TextMeshProUGUI si existe (del diseño anterior)
+            TextMeshProUGUI oldText = iconObj.GetComponent<TextMeshProUGUI>();
+            if (oldText != null) Object.DestroyImmediate(oldText);
+
+            // Usar Image en vez de texto para el icono
+            Image iconImage = GetOrAddComponent<Image>(iconObj);
+            iconImage.color = CYAN_GLOW; // Color placeholder hasta que se asigne el sprite
+            iconImage.preserveAspect = true;
+            iconImage.raycastTarget = false;
+            // El sprite se asignará manualmente en el Inspector (icono generado por IA)
 
             LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
-            iconLE.minHeight = 80;
-            iconLE.preferredHeight = 80;
+            iconLE.minHeight = 120;
+            iconLE.preferredHeight = 120;
+            iconLE.minWidth = 120;
+            iconLE.preferredWidth = 120;
 
             // Glow sutil en el icono
-            AddOutline(iconObj, CYAN_GLOW, 2);
+            AddOutline(iconObj, CYAN_GLOW, 3);
 
             // === Title Text ===
             GameObject titleObj = FindOrCreateChild(emptyState, "EmptyTitle");
@@ -1346,42 +1353,111 @@ namespace DigitPark.Editor
             {
                 if (!scrollRect.gameObject.scene.isLoaded) continue;
 
-                // Fondo del ScrollRect
+                // Fondo del ScrollRect - transparente
                 Image scrollBg = scrollRect.GetComponent<Image>();
                 if (scrollBg != null)
                 {
-                    scrollBg.color = DARK_BG;
+                    scrollBg.color = Color.clear;
                     EditorUtility.SetDirty(scrollBg);
                 }
 
-                // Viewport
+                // Remover Mask del ScrollRect si existe
+                Mask scrollMask = scrollRect.GetComponent<Mask>();
+                if (scrollMask != null)
+                {
+                    Object.DestroyImmediate(scrollMask);
+                    Debug.Log($"[TournamentsUIBuilder] Mask removido de {scrollRect.name}");
+                }
+
+                // Viewport - usar RectMask2D en lugar de Mask
                 if (scrollRect.viewport != null)
                 {
-                    Image viewportBg = scrollRect.viewport.GetComponent<Image>();
-                    if (viewportBg != null)
-                    {
-                        viewportBg.color = new Color(0.03f, 0.05f, 0.08f, 1f);
-                        EditorUtility.SetDirty(viewportBg);
-                    }
-
-                    // Margen inferior
                     RectTransform viewportRT = scrollRect.viewport.GetComponent<RectTransform>();
                     if (viewportRT != null)
                     {
-                        viewportRT.offsetMin = new Vector2(viewportRT.offsetMin.x, 15);
+                        // Viewport debe ocupar todo el ScrollRect
+                        viewportRT.anchorMin = Vector2.zero;
+                        viewportRT.anchorMax = Vector2.one;
+                        viewportRT.pivot = new Vector2(0.5f, 0.5f);
+                        viewportRT.anchoredPosition = Vector2.zero;
+                        viewportRT.sizeDelta = Vector2.zero;
+                        // Pequeño margen inferior para el scrollbar
+                        viewportRT.offsetMin = new Vector2(0, 5);
+                        viewportRT.offsetMax = new Vector2(-10, 0); // Espacio para scrollbar
                         EditorUtility.SetDirty(viewportRT);
+                    }
+
+                    // Remover Mask viejo
+                    Mask viewportMask = scrollRect.viewport.GetComponent<Mask>();
+                    if (viewportMask != null)
+                    {
+                        Object.DestroyImmediate(viewportMask);
+                        Debug.Log($"[TournamentsUIBuilder] Mask removido del Viewport");
+                    }
+
+                    // Agregar RectMask2D si no existe
+                    RectMask2D rectMask = scrollRect.viewport.GetComponent<RectMask2D>();
+                    if (rectMask == null)
+                    {
+                        rectMask = scrollRect.viewport.gameObject.AddComponent<RectMask2D>();
+                        Debug.Log($"[TournamentsUIBuilder] RectMask2D agregado al Viewport");
+                    }
+
+                    // La Image del Viewport ya no es necesaria para el mask
+                    Image viewportBg = scrollRect.viewport.GetComponent<Image>();
+                    if (viewportBg != null)
+                    {
+                        Object.DestroyImmediate(viewportBg);
                     }
                 }
 
-                // Content
+                // Content - IMPORTANTE: Configurar anchors correctamente
                 if (scrollRect.content != null)
                 {
+                    RectTransform contentRT = scrollRect.content;
+
+                    // Anchors para scroll vertical: arriba, ancho completo
+                    contentRT.anchorMin = new Vector2(0, 1);
+                    contentRT.anchorMax = new Vector2(1, 1);
+                    contentRT.pivot = new Vector2(0.5f, 1);
+                    contentRT.anchoredPosition = Vector2.zero;
+                    // sizeDelta.x = 0 para que use el ancho del viewport
+                    // sizeDelta.y se controla por ContentSizeFitter
+                    contentRT.sizeDelta = new Vector2(0, 0);
+
+                    // Agregar ContentSizeFitter si no existe
+                    ContentSizeFitter csf = contentRT.GetComponent<ContentSizeFitter>();
+                    if (csf == null)
+                    {
+                        csf = contentRT.gameObject.AddComponent<ContentSizeFitter>();
+                    }
+                    csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+                    csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                    // Agregar VerticalLayoutGroup si no existe
+                    VerticalLayoutGroup vlg = contentRT.GetComponent<VerticalLayoutGroup>();
+                    if (vlg == null)
+                    {
+                        vlg = contentRT.gameObject.AddComponent<VerticalLayoutGroup>();
+                    }
+                    vlg.spacing = 8f;
+                    vlg.padding = new RectOffset(10, 10, 10, 10);
+                    vlg.childAlignment = TextAnchor.UpperCenter;
+                    vlg.childControlWidth = true;
+                    vlg.childControlHeight = true;
+                    vlg.childForceExpandWidth = true;
+                    vlg.childForceExpandHeight = false;
+
+                    // Fondo transparente
                     Image contentBg = scrollRect.content.GetComponent<Image>();
                     if (contentBg != null)
                     {
                         contentBg.color = Color.clear;
                         EditorUtility.SetDirty(contentBg);
                     }
+
+                    EditorUtility.SetDirty(contentRT);
+                    Debug.Log($"[TournamentsUIBuilder] Content '{contentRT.name}' configurado correctamente");
                 }
 
                 // Scrollbar vertical

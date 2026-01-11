@@ -63,6 +63,7 @@ namespace DigitPark.Managers
         private string viewingPlayerId;
         private bool isOwnProfile = true;
         private bool isFriend = false;
+        private string returnScene = "MainMenu"; // Escena a la que volver
 
         #region Unity Lifecycle
 
@@ -72,6 +73,10 @@ namespace DigitPark.Managers
 
             SetupListeners();
             HideGameSelectionPanel();
+
+            // Verificar de qué escena venimos para el botón Back
+            returnScene = PlayerPrefs.GetString("ProfileReturnScene", "MainMenu");
+            PlayerPrefs.DeleteKey("ProfileReturnScene");
 
             // Verificar si venimos a ver el perfil de otro jugador
             string viewProfileId = PlayerPrefs.GetString("ViewProfileId", "");
@@ -329,8 +334,8 @@ namespace DigitPark.Managers
 
         private void OnBackClicked()
         {
-            Debug.Log("[Profile] Volviendo atras");
-            SceneManager.LoadScene("MainMenu");
+            Debug.Log($"[Profile] Volviendo a: {returnScene}");
+            SceneManager.LoadScene(returnScene);
         }
 
         private void OnFriendsClicked()

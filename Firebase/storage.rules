@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// Reglas de Firebase Storage para DigitPark
+// Aplicar estas reglas en Firebase Console > Storage > Rules
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ========================================
+    // AVATARES DE USUARIOS
+    // ========================================
+    match /avatars/{userId}/{fileName} {
+
+      // Cualquier usuario autenticado puede leer avatares (para ver avatares de otros)
+      allow read: if request.auth != null;
+
+      // Solo el propietario puede escribir/modificar su avatar
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && validateAvatarUpload();
+
+      // Solo el propietario puede eliminar su avatar
+      allow delete: if request.auth != null
+                    && request.auth.uid == userId;
+    }
+
+    // ========================================
+    // TEMAS PERSONALIZADOS (futuro)
+    // ========================================
+    match /themes/{themeId}/{allPaths=**} {
+      // Solo lectura para usuarios autenticados
+      allow read: if request.auth != null;
+
+      // Solo admins pueden escribir (se configurará después)
+      allow write: if false;
+    }
+
+    // ========================================
+    // ASSETS DEL JUEGO (públicos)
+    // ========================================
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ========================================
+    // FUNCIONES HELPER
+    // ========================================
+
+    // Valida que el archivo sea una imagen válida
+    function validateAvatarUpload() {
+      let maxSize = 2 * 1024 * 1024; // 2MB máximo
+      let allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+      return request.resource.size < maxSize
+             && request.resource.contentType in allowedTypes;
+    }
+
+    // Verifica si el usuario es premium (requiere custom claims)
+    function isPremiumUser() {
+      return request.auth.token.premium == true;
+    }
+
+    // ========================================
+    // REGLA POR DEFECTO - DENEGAR TODO
+    // ========================================
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
