@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Firebase.Storage;
-using Firebase.Extensions;
 using DigitPark.Data;
 
 namespace DigitPark.Services
@@ -88,9 +87,10 @@ namespace DigitPark.Services
         {
             try
             {
-                var dependencyStatus = await Firebase.FirebaseApp.CheckAndFixDependenciesAsync();
+                // Usar namespace completo para evitar conflicto con DigitPark.Services.Firebase
+                var dependencyStatus = await global::Firebase.FirebaseApp.CheckAndFixDependenciesAsync();
 
-                if (dependencyStatus == Firebase.DependencyStatus.Available)
+                if (dependencyStatus == global::Firebase.DependencyStatus.Available)
                 {
                     storage = FirebaseStorage.DefaultInstance;
                     storageRoot = storage.GetReference(STORAGE_AVATARS_PATH);
@@ -435,29 +435,18 @@ namespace DigitPark.Services
                 // Metadata
                 var metadata = new MetadataChange
                 {
-                    ContentType = "image/jpeg",
-                    CustomMetadata = new System.Collections.Generic.Dictionary<string, string>
-                    {
-                        { "uploadedAt", DateTime.UtcNow.ToString("o") },
-                        { "userId", playerData.userId }
-                    }
+                    ContentType = "image/jpeg"
                 };
 
-                // Subir con seguimiento de progreso
+                // Subir archivo
+                OnUploadProgress?.Invoke(0.5f);
+
                 var uploadTask = avatarRef.PutBytesAsync(imageBytes, metadata);
-
-                // Monitorear progreso
-                uploadTask.Progress.ProgressChanged += (sender, args) =>
-                {
-                    if (args.TotalByteCount > 0)
-                    {
-                        float progress = 0.4f + (0.5f * args.BytesTransferred / args.TotalByteCount);
-                        OnUploadProgress?.Invoke(progress);
-                    }
-                };
 
                 // Esperar a que termine
                 await uploadTask;
+
+                OnUploadProgress?.Invoke(0.9f);
 
                 if (uploadTask.IsFaulted || uploadTask.IsCanceled)
                 {
@@ -621,29 +610,15 @@ namespace DigitPark.Services
         /// </summary>
         private Texture2D ResizeAndCropToSquare(Texture2D source, int targetSize)
         {
-            // Determinar el tamaño del recorte cuadrado (el lado más pequeño)
-            int cropSize = Mathf.Min(source.width, source.height);
-
-            // Calcular offset para centrar el recorte
-            int offsetX = (source.width - cropSize) / 2;
-            int offsetY = (source.height - cropSize) / 2;
-
             // Crear textura temporal para el recorte
             RenderTexture rt = RenderTexture.GetTemporary(targetSize, targetSize, 0, RenderTextureFormat.ARGB32);
             rt.filterMode = FilterMode.Bilinear;
 
-            // Calcular UVs para el recorte centrado
-            float uvOffsetX = (float)offsetX / source.width;
-            float uvOffsetY = (float)offsetY / source.height;
-            float uvSize = (float)cropSize / Mathf.Max(source.width, source.height);
-
-            // Blit con recorte
+            // Blit
             RenderTexture previous = RenderTexture.active;
             RenderTexture.active = rt;
 
             GL.Clear(true, true, Color.black);
-
-            // Usar Graphics.Blit para copiar
             Graphics.Blit(source, rt);
 
             // Leer pixels
