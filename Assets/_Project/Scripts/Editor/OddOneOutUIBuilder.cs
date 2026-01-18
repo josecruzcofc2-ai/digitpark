@@ -29,7 +29,7 @@ namespace DigitPark.Editor
         private const int GRID_COLUMNS = 4;
         private const float GRID_GAP = 15f; // Gap entre grids
 
-        [MenuItem("DigitPark/Rebuild OddOneOut UI")]
+        [MenuItem("DigitPark/UI Builders/Games/OddOneOut", false, 113)]
         public static void ShowWindow()
         {
             GetWindow<OddOneOutUIBuilder>("OddOneOut UI Builder");

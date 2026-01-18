@@ -29,7 +29,7 @@ namespace DigitPark.Editor
         private const string PAIRS_ICON_PATH = "Assets/_Project/Art/Icons/PairsIcon.png";
         private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/ErrorIcon.png";
 
-        [MenuItem("DigitPark/Rebuild MemoryPairs UI")]
+        [MenuItem("DigitPark/UI Builders/Games/MemoryPairs", false, 112)]
         public static void ShowWindow()
         {
             GetWindow<MemoryPairsUIBuilder>("MemoryPairs UI Builder");

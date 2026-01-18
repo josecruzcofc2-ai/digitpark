@@ -1,0 +1,780 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using DigitPark.Monetization;
+
+namespace DigitPark.Managers
+{
+    /// <summary>
+    /// Manager para la escena de onboarding/tutorial.
+    /// Guía a nuevos usuarios a través de la introducción de la aplicación.
+    /// </summary>
+    public class OnboardingManager : MonoBehaviour
+    {
+        [Header("UI - Main")]
+        [SerializeField] private Button skipButton;
+        [SerializeField] private TextMeshProUGUI skipButtonText;
+        [SerializeField] private Button backButton;
+
+        [Header("UI - Step Display")]
+        [SerializeField] private Image stepImage;
+        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private TextMeshProUGUI descriptionText;
+        [SerializeField] private GameObject characterContainer;
+        [SerializeField] private Animator characterAnimator;
+
+        [Header("UI - Navigation")]
+        [SerializeField] private Button nextButton;
+        [SerializeField] private Button prevButton;
+        [SerializeField] private TextMeshProUGUI nextButtonText;
+        [SerializeField] private Transform dotsContainer;
+        [SerializeField] private GameObject dotPrefab;
+
+        [Header("UI - Progress")]
+        [SerializeField] private Slider progressBar;
+        [SerializeField] private TextMeshProUGUI stepCounterText;
+
+        [Header("UI - Interactive Elements")]
+        [SerializeField] private GameObject highlightOverlay;
+        [SerializeField] private RectTransform highlightTarget;
+        [SerializeField] private TextMeshProUGUI highlightTooltipText;
+        [SerializeField] private GameObject tapToContinuePrompt;
+
+        [Header("UI - Name Input (Welcome Step)")]
+        [SerializeField] private GameObject nameInputPanel;
+        [SerializeField] private TMP_InputField nameInput;
+        [SerializeField] private Button confirmNameButton;
+        [SerializeField] private TextMeshProUGUI nameErrorText;
+
+        [Header("UI - Avatar Selection")]
+        [SerializeField] private GameObject avatarSelectionPanel;
+        [SerializeField] private Transform avatarContainer;
+        [SerializeField] private GameObject avatarOptionPrefab;
+
+        [Header("UI - Tutorial Completion")]
+        [SerializeField] private GameObject completionPanel;
+        [SerializeField] private TextMeshProUGUI completionTitleText;
+        [SerializeField] private TextMeshProUGUI completionMessageText;
+        [SerializeField] private TextMeshProUGUI rewardText;
+        [SerializeField] private Button startPlayingButton;
+
+        [Header("Onboarding Steps")]
+        [SerializeField] private List<OnboardingStep> steps = new List<OnboardingStep>();
+
+        [Header("Step Images")]
+        [SerializeField] private Sprite welcomeImage;
+        [SerializeField] private Sprite gamesImage;
+        [SerializeField] private Sprite cashBattleImage;
+        [SerializeField] private Sprite tournamentsImage;
+        [SerializeField] private Sprite rewardsImage;
+        [SerializeField] private Sprite socialImage;
+
+        [Header("Avatar Options")]
+        [SerializeField] private List<AvatarOption> avatarOptions = new List<AvatarOption>();
+
+        [Header("Configuration")]
+        [SerializeField] private int completionRewardCoins = 500;
+        [SerializeField] private int completionRewardGems = 50;
+        [SerializeField] private float autoAdvanceDelay = 0f;
+        [SerializeField] private bool allowSkip = true;
+
+        // State
+        private int currentStepIndex = 0;
+        private List<GameObject> spawnedDots = new List<GameObject>();
+        private List<GameObject> spawnedAvatars = new List<GameObject>();
+        private string selectedAvatarId = "";
+        private string playerName = "";
+        private bool isTransitioning = false;
+
+        private void Start()
+        {
+            InitializeSteps();
+            SetupUI();
+            SetupListeners();
+            ShowStep(0);
+        }
+
+        private void InitializeSteps()
+        {
+            // Default steps if not set in inspector
+            if (steps.Count == 0)
+            {
+                steps = new List<OnboardingStep>
+                {
+                    new OnboardingStep
+                    {
+                        id = "welcome",
+                        title = "¡Bienvenido a DigitPark!",
+                        description = "Tu destino para juegos mentales, competencias y diversión.",
+                        stepType = OnboardingStepType.Info,
+                        requiresInteraction = false
+                    },
+                    new OnboardingStep
+                    {
+                        id = "name",
+                        title = "¿Cómo te llamas?",
+                        description = "Elige un nombre para tu perfil.",
+                        stepType = OnboardingStepType.NameInput,
+                        requiresInteraction = true
+                    },
+                    new OnboardingStep
+                    {
+                        id = "avatar",
+                        title = "Elige tu Avatar",
+                        description = "Selecciona cómo quieres que te vean otros jugadores.",
+                        stepType = OnboardingStepType.AvatarSelection,
+                        requiresInteraction = true
+                    },
+                    new OnboardingStep
+                    {
+                        id = "games",
+                        title = "Juegos Cognitivos",
+                        description = "Entrena tu mente con 6 minijuegos diseñados para mejorar memoria, reflejos, matemáticas y más.",
+                        stepType = OnboardingStepType.Info,
+                        requiresInteraction = false
+                    },
+                    new OnboardingStep
+                    {
+                        id = "cashbattle",
+                        title = "CashBattle",
+                        description = "¿Listo para el desafío? Compite 1v1 contra otros jugadores por premios reales.",
+                        stepType = OnboardingStepType.Info,
+                        requiresInteraction = false
+                    },
+                    new OnboardingStep
+                    {
+                        id = "tournaments",
+                        title = "Torneos",
+                        description = "Participa en torneos con decenas de jugadores. ¡El premio mayor está en juego!",
+                        stepType = OnboardingStepType.Info,
+                        requiresInteraction = false
+                    },
+                    new OnboardingStep
+                    {
+                        id = "rewards",
+                        title = "Recompensas Diarias",
+                        description = "Vuelve cada día para obtener monedas, gemas, cofres y más recompensas.",
+                        stepType = OnboardingStepType.Info,
+                        requiresInteraction = false
+                    },
+                    new OnboardingStep
+                    {
+                        id = "complete",
+                        title = "¡Estás Listo!",
+                        description = "Has completado el tutorial. ¡Es hora de jugar!",
+                        stepType = OnboardingStepType.Completion,
+                        requiresInteraction = true
+                    }
+                };
+            }
+
+            // Initialize avatar options if not set
+            if (avatarOptions.Count == 0)
+            {
+                avatarOptions = new List<AvatarOption>
+                {
+                    new AvatarOption { id = "avatar_01", name = "Explorador" },
+                    new AvatarOption { id = "avatar_02", name = "Guerrero" },
+                    new AvatarOption { id = "avatar_03", name = "Mago" },
+                    new AvatarOption { id = "avatar_04", name = "Ninja" },
+                    new AvatarOption { id = "avatar_05", name = "Robot" },
+                    new AvatarOption { id = "avatar_06", name = "Alien" },
+                };
+            }
+        }
+
+        private void SetupUI()
+        {
+            // Hide all special panels
+            if (nameInputPanel) nameInputPanel.SetActive(false);
+            if (avatarSelectionPanel) avatarSelectionPanel.SetActive(false);
+            if (completionPanel) completionPanel.SetActive(false);
+            if (highlightOverlay) highlightOverlay.SetActive(false);
+            if (tapToContinuePrompt) tapToContinuePrompt.SetActive(false);
+
+            if (skipButton) skipButton.gameObject.SetActive(allowSkip);
+            if (backButton) backButton.gameObject.SetActive(false);
+            if (prevButton) prevButton.gameObject.SetActive(false);
+
+            // Create navigation dots
+            CreateNavigationDots();
+            UpdateProgressBar();
+        }
+
+        private void SetupListeners()
+        {
+            if (skipButton) skipButton.onClick.AddListener(OnSkipClicked);
+            if (backButton) backButton.onClick.AddListener(OnBackClicked);
+            if (nextButton) nextButton.onClick.AddListener(OnNextClicked);
+            if (prevButton) prevButton.onClick.AddListener(OnPrevClicked);
+
+            if (confirmNameButton) confirmNameButton.onClick.AddListener(OnConfirmName);
+            if (nameInput) nameInput.onEndEdit.AddListener(_ => OnConfirmName());
+
+            if (startPlayingButton) startPlayingButton.onClick.AddListener(OnStartPlaying);
+        }
+
+        private void CreateNavigationDots()
+        {
+            if (dotsContainer == null) return;
+
+            // Clear existing
+            foreach (var dot in spawnedDots)
+            {
+                if (dot) Destroy(dot);
+            }
+            spawnedDots.Clear();
+
+            // Create new dots
+            for (int i = 0; i < steps.Count; i++)
+            {
+                GameObject dot;
+                if (dotPrefab != null)
+                {
+                    dot = Instantiate(dotPrefab, dotsContainer);
+                }
+                else
+                {
+                    dot = new GameObject($"Dot_{i}");
+                    dot.transform.SetParent(dotsContainer, false);
+                    var rt = dot.AddComponent<RectTransform>();
+                    rt.sizeDelta = new Vector2(12, 12);
+                    var img = dot.AddComponent<Image>();
+                    img.color = new Color(0.3f, 0.3f, 0.3f);
+                }
+
+                spawnedDots.Add(dot);
+            }
+        }
+
+        private void UpdateNavigationDots()
+        {
+            for (int i = 0; i < spawnedDots.Count; i++)
+            {
+                var dot = spawnedDots[i];
+                if (dot == null) continue;
+
+                var image = dot.GetComponent<Image>();
+                if (image)
+                {
+                    bool isActive = i == currentStepIndex;
+                    bool isPast = i < currentStepIndex;
+
+                    if (isActive)
+                        image.color = new Color(0f, 0.83f, 1f);
+                    else if (isPast)
+                        image.color = new Color(0f, 0.5f, 0.65f);
+                    else
+                        image.color = new Color(0.3f, 0.3f, 0.3f);
+
+                    // Scale active dot
+                    dot.transform.localScale = isActive ? Vector3.one * 1.3f : Vector3.one;
+                }
+            }
+        }
+
+        private void UpdateProgressBar()
+        {
+            if (progressBar)
+            {
+                progressBar.maxValue = steps.Count - 1;
+                progressBar.value = currentStepIndex;
+            }
+
+            if (stepCounterText)
+            {
+                stepCounterText.text = $"{currentStepIndex + 1}/{steps.Count}";
+            }
+        }
+
+        private void ShowStep(int index)
+        {
+            if (index < 0 || index >= steps.Count) return;
+
+            currentStepIndex = index;
+            var step = steps[index];
+
+            // Hide all special panels first
+            if (nameInputPanel) nameInputPanel.SetActive(false);
+            if (avatarSelectionPanel) avatarSelectionPanel.SetActive(false);
+            if (completionPanel) completionPanel.SetActive(false);
+
+            // Update text
+            if (titleText) titleText.text = step.title;
+            if (descriptionText) descriptionText.text = step.description;
+
+            // Update image
+            if (stepImage)
+            {
+                stepImage.sprite = GetStepImage(step.id);
+                stepImage.gameObject.SetActive(stepImage.sprite != null);
+            }
+
+            // Update navigation
+            if (prevButton) prevButton.gameObject.SetActive(index > 0);
+
+            UpdateNextButton(step);
+            UpdateNavigationDots();
+            UpdateProgressBar();
+
+            // Show step-specific UI
+            switch (step.stepType)
+            {
+                case OnboardingStepType.NameInput:
+                    ShowNameInput();
+                    break;
+
+                case OnboardingStepType.AvatarSelection:
+                    ShowAvatarSelection();
+                    break;
+
+                case OnboardingStepType.Completion:
+                    ShowCompletion();
+                    break;
+
+                case OnboardingStepType.Interactive:
+                    ShowInteractiveHighlight(step);
+                    break;
+            }
+
+            // Character animation
+            if (characterAnimator)
+            {
+                characterAnimator.SetTrigger("Talk");
+            }
+
+            // Auto advance for info steps
+            if (!step.requiresInteraction && autoAdvanceDelay > 0)
+            {
+                CancelInvoke(nameof(AutoAdvance));
+                Invoke(nameof(AutoAdvance), autoAdvanceDelay);
+            }
+
+            Debug.Log($"[Onboarding] Showing step {index + 1}: {step.id}");
+        }
+
+        private Sprite GetStepImage(string stepId)
+        {
+            return stepId switch
+            {
+                "welcome" => welcomeImage,
+                "games" => gamesImage,
+                "cashbattle" => cashBattleImage,
+                "tournaments" => tournamentsImage,
+                "rewards" => rewardsImage,
+                "social" => socialImage,
+                _ => null
+            };
+        }
+
+        private void UpdateNextButton(OnboardingStep step)
+        {
+            if (nextButton == null) return;
+
+            bool canAdvance = !step.requiresInteraction ||
+                             step.stepType == OnboardingStepType.Info;
+
+            nextButton.interactable = canAdvance;
+
+            if (nextButtonText)
+            {
+                if (currentStepIndex == steps.Count - 1)
+                {
+                    nextButtonText.text = "Comenzar";
+                }
+                else if (step.stepType == OnboardingStepType.NameInput)
+                {
+                    nextButtonText.text = "Confirmar";
+                }
+                else if (step.stepType == OnboardingStepType.AvatarSelection)
+                {
+                    nextButtonText.text = "Seleccionar";
+                }
+                else
+                {
+                    nextButtonText.text = "Siguiente";
+                }
+            }
+        }
+
+        private void ShowNameInput()
+        {
+            if (nameInputPanel)
+            {
+                nameInputPanel.SetActive(true);
+
+                if (nameInput)
+                {
+                    nameInput.text = playerName;
+                    nameInput.Select();
+                }
+
+                if (nameErrorText) nameErrorText.gameObject.SetActive(false);
+            }
+
+            if (nextButton) nextButton.interactable = !string.IsNullOrWhiteSpace(playerName);
+        }
+
+        private void OnConfirmName()
+        {
+            if (nameInput == null) return;
+
+            string name = nameInput.text.Trim();
+
+            // Validate
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                ShowNameError("Por favor ingresa un nombre");
+                return;
+            }
+
+            if (name.Length < 3)
+            {
+                ShowNameError("El nombre debe tener al menos 3 caracteres");
+                return;
+            }
+
+            if (name.Length > 20)
+            {
+                ShowNameError("El nombre no puede tener más de 20 caracteres");
+                return;
+            }
+
+            playerName = name;
+            PlayerPrefs.SetString("PlayerName", playerName);
+            PlayerPrefs.Save();
+
+            if (nextButton) nextButton.interactable = true;
+            if (nameErrorText) nameErrorText.gameObject.SetActive(false);
+
+            Debug.Log($"[Onboarding] Name set: {playerName}");
+        }
+
+        private void ShowNameError(string message)
+        {
+            if (nameErrorText)
+            {
+                nameErrorText.text = message;
+                nameErrorText.gameObject.SetActive(true);
+            }
+        }
+
+        private void ShowAvatarSelection()
+        {
+            if (avatarSelectionPanel)
+            {
+                avatarSelectionPanel.SetActive(true);
+                PopulateAvatars();
+            }
+
+            if (nextButton) nextButton.interactable = !string.IsNullOrEmpty(selectedAvatarId);
+        }
+
+        private void PopulateAvatars()
+        {
+            if (avatarContainer == null) return;
+
+            // Clear existing
+            foreach (var avatar in spawnedAvatars)
+            {
+                if (avatar) Destroy(avatar);
+            }
+            spawnedAvatars.Clear();
+
+            // Create avatar options
+            foreach (var option in avatarOptions)
+            {
+                CreateAvatarOption(option);
+            }
+        }
+
+        private void CreateAvatarOption(AvatarOption option)
+        {
+            GameObject item;
+
+            if (avatarOptionPrefab != null)
+            {
+                item = Instantiate(avatarOptionPrefab, avatarContainer);
+            }
+            else
+            {
+                item = CreateAvatarOptionFallback(option);
+            }
+
+            spawnedAvatars.Add(item);
+
+            // Setup click
+            var button = item.GetComponent<Button>() ?? item.AddComponent<Button>();
+            var opt = option;
+            button.onClick.AddListener(() => OnAvatarSelected(opt.id, item));
+        }
+
+        private GameObject CreateAvatarOptionFallback(AvatarOption option)
+        {
+            var item = new GameObject($"Avatar_{option.id}");
+            item.transform.SetParent(avatarContainer, false);
+
+            var rt = item.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(100, 130);
+
+            var image = item.AddComponent<Image>();
+            image.color = selectedAvatarId == option.id
+                ? new Color(0f, 0.5f, 0.8f, 0.9f)
+                : new Color(0.2f, 0.2f, 0.25f, 0.9f);
+
+            // Avatar placeholder
+            var avatarObj = new GameObject("AvatarImage");
+            avatarObj.transform.SetParent(item.transform, false);
+            var avatarRT = avatarObj.AddComponent<RectTransform>();
+            avatarRT.anchorMin = new Vector2(0.1f, 0.3f);
+            avatarRT.anchorMax = new Vector2(0.9f, 0.95f);
+            avatarRT.offsetMin = Vector2.zero;
+            avatarRT.offsetMax = Vector2.zero;
+
+            var avatarImg = avatarObj.AddComponent<Image>();
+            avatarImg.color = new Color(0.4f, 0.4f, 0.4f);
+            if (option.sprite != null) avatarImg.sprite = option.sprite;
+
+            // Name
+            var nameObj = new GameObject("Name");
+            nameObj.transform.SetParent(item.transform, false);
+            var nameRT = nameObj.AddComponent<RectTransform>();
+            nameRT.anchorMin = new Vector2(0, 0);
+            nameRT.anchorMax = new Vector2(1, 0.3f);
+            nameRT.offsetMin = new Vector2(5, 5);
+            nameRT.offsetMax = new Vector2(-5, 0);
+
+            var nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = option.name;
+            nameText.fontSize = 12;
+            nameText.alignment = TextAlignmentOptions.Center;
+            nameText.color = Color.white;
+
+            return item;
+        }
+
+        private void OnAvatarSelected(string avatarId, GameObject selectedItem)
+        {
+            selectedAvatarId = avatarId;
+
+            // Update visual selection
+            foreach (var avatar in spawnedAvatars)
+            {
+                if (avatar == null) continue;
+                var image = avatar.GetComponent<Image>();
+                if (image)
+                {
+                    image.color = avatar == selectedItem
+                        ? new Color(0f, 0.5f, 0.8f, 0.9f)
+                        : new Color(0.2f, 0.2f, 0.25f, 0.9f);
+                }
+            }
+
+            PlayerPrefs.SetString("PlayerAvatar", selectedAvatarId);
+            PlayerPrefs.Save();
+
+            if (nextButton) nextButton.interactable = true;
+
+            Debug.Log($"[Onboarding] Avatar selected: {avatarId}");
+        }
+
+        private void ShowInteractiveHighlight(OnboardingStep step)
+        {
+            if (highlightOverlay)
+            {
+                highlightOverlay.SetActive(true);
+
+                if (highlightTooltipText)
+                {
+                    highlightTooltipText.text = step.highlightTooltip;
+                }
+            }
+
+            if (tapToContinuePrompt)
+            {
+                tapToContinuePrompt.SetActive(true);
+            }
+        }
+
+        private void ShowCompletion()
+        {
+            if (completionPanel)
+            {
+                completionPanel.SetActive(true);
+
+                if (completionTitleText)
+                {
+                    completionTitleText.text = $"¡Bien hecho, {playerName}!";
+                }
+
+                if (completionMessageText)
+                {
+                    completionMessageText.text = "Has completado el tutorial. Aquí tienes tus recompensas de bienvenida.";
+                }
+
+                if (rewardText)
+                {
+                    rewardText.text = $"+{completionRewardCoins} Monedas | +{completionRewardGems} Gemas";
+                }
+            }
+
+            if (nextButton) nextButton.gameObject.SetActive(false);
+            if (skipButton) skipButton.gameObject.SetActive(false);
+        }
+
+        private void AutoAdvance()
+        {
+            if (currentStepIndex < steps.Count - 1)
+            {
+                OnNextClicked();
+            }
+        }
+
+        private void OnNextClicked()
+        {
+            if (isTransitioning) return;
+
+            var currentStep = steps[currentStepIndex];
+
+            // Validate required input
+            if (currentStep.stepType == OnboardingStepType.NameInput)
+            {
+                if (string.IsNullOrWhiteSpace(playerName))
+                {
+                    ShowNameError("Por favor ingresa un nombre");
+                    return;
+                }
+            }
+            else if (currentStep.stepType == OnboardingStepType.AvatarSelection)
+            {
+                if (string.IsNullOrEmpty(selectedAvatarId))
+                {
+                    return;
+                }
+            }
+
+            if (currentStepIndex < steps.Count - 1)
+            {
+                StartCoroutine(TransitionToStep(currentStepIndex + 1));
+            }
+            else
+            {
+                CompleteOnboarding();
+            }
+        }
+
+        private void OnPrevClicked()
+        {
+            if (isTransitioning) return;
+
+            if (currentStepIndex > 0)
+            {
+                StartCoroutine(TransitionToStep(currentStepIndex - 1));
+            }
+        }
+
+        private IEnumerator TransitionToStep(int newIndex)
+        {
+            isTransitioning = true;
+
+            // Fade out current (optional animation)
+            yield return new WaitForSeconds(0.1f);
+
+            ShowStep(newIndex);
+
+            yield return new WaitForSeconds(0.1f);
+
+            isTransitioning = false;
+        }
+
+        private void OnSkipClicked()
+        {
+            // Mark as completed without rewards
+            CompleteOnboarding(giveRewards: false);
+        }
+
+        private void OnBackClicked()
+        {
+            OnPrevClicked();
+        }
+
+        private void OnStartPlaying()
+        {
+            CompleteOnboarding();
+        }
+
+        private void CompleteOnboarding(bool giveRewards = true)
+        {
+            // Mark onboarding as complete
+            PlayerPrefs.SetInt("OnboardingComplete", 1);
+
+            if (giveRewards)
+            {
+                // Give completion rewards
+                int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
+                PlayerPrefs.SetInt("PlayerCoins", currentCoins + completionRewardCoins);
+
+                int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
+                PlayerPrefs.SetInt("PlayerGems", currentGems + completionRewardGems);
+            }
+
+            PlayerPrefs.Save();
+
+            Debug.Log($"[Onboarding] Completed. Rewards given: {giveRewards}");
+
+            // Navigate to main menu
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.MAIN_MENU);
+        }
+
+        /// <summary>
+        /// Check if onboarding has been completed
+        /// </summary>
+        public static bool IsOnboardingComplete()
+        {
+            return PlayerPrefs.GetInt("OnboardingComplete", 0) == 1;
+        }
+
+        /// <summary>
+        /// Reset onboarding (for testing)
+        /// </summary>
+        public static void ResetOnboarding()
+        {
+            PlayerPrefs.DeleteKey("OnboardingComplete");
+            PlayerPrefs.DeleteKey("PlayerName");
+            PlayerPrefs.DeleteKey("PlayerAvatar");
+            PlayerPrefs.Save();
+        }
+    }
+
+    [Serializable]
+    public class OnboardingStep
+    {
+        public string id;
+        public string title;
+        [TextArea] public string description;
+        public OnboardingStepType stepType = OnboardingStepType.Info;
+        public bool requiresInteraction = false;
+        public string highlightTooltip;
+        public RectTransform highlightTarget;
+    }
+
+    public enum OnboardingStepType
+    {
+        Info,
+        NameInput,
+        AvatarSelection,
+        Interactive,
+        Completion
+    }
+
+    [Serializable]
+    public class AvatarOption
+    {
+        public string id;
+        public string name;
+        public Sprite sprite;
+    }
+}

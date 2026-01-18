@@ -19,7 +19,7 @@ namespace DigitPark.Editor
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.5f, 0.5f, 1f);
 
-        [MenuItem("DigitPark/Rebuild GameSelector UI")]
+        [MenuItem("DigitPark/UI Builders/Games/GameSelector", false, 115)]
         public static void ShowWindow()
         {
             GetWindow<GameSelectorUIBuilder>("GameSelector UI Builder");

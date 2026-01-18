@@ -51,7 +51,7 @@ namespace DigitPark.Editor
         private const float MISSION_CARD_HEIGHT = 110f;
         private const float CONTENT_PADDING = 20f;
 
-        [MenuItem("DigitPark/Monetization/Build Daily Missions UI", false, 21)]
+        [MenuItem("DigitPark/UI Builders/Monetization/DailyMissions", false, 184)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Daily Missions UI Builder",

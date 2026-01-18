@@ -5,6 +5,7 @@ using TMPro;
 
 namespace DigitPark.Editor
 {
+    using DigitPark.Animations;
     /// <summary>
     /// Editor script para reconstruir la UI del Main Menu con diseño profesional
     /// Resolución: Portrait 9:16 (1080x1920)
@@ -28,7 +29,7 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_SECONDARY = new Color(0.15f, 0.2f, 0.25f, 1f);
         private static readonly Color OVERLAY_COLOR = new Color(0f, 0f, 0f, 0.85f);
 
-        [MenuItem("DigitPark/Main Menu/Rebuild Complete UI")]
+        [MenuItem("DigitPark/UI Builders/Core/MainMenu", false, 150)]
         public static void ShowWindow()
         {
             GetWindow<MainMenuUIBuilder>("Main Menu Builder");
@@ -119,9 +120,96 @@ namespace DigitPark.Editor
             CreatePremiumPanel();
             CreateNotificationsPanel();
 
+            // Add and configure MainMenuAnimator for entrance animations
+            AddMainMenuAnimator(canvas);
+
             Debug.Log("[MainMenuUI] Main Menu reconstruido exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
+        }
+
+        /// <summary>
+        /// Adds and configures MainMenuAnimator for professional entrance animations
+        /// </summary>
+        private static void AddMainMenuAnimator(Canvas canvas)
+        {
+            MainMenuAnimator animator = canvas.GetComponent<MainMenuAnimator>();
+            if (animator == null)
+                animator = canvas.gameObject.AddComponent<MainMenuAnimator>();
+
+            // Get references
+            Transform canvasTransform = canvas.transform;
+            Transform titleSection = canvasTransform.Find("TitleSection");
+            Transform header = canvasTransform.Find("Header");
+            Transform mainMenuPanel = canvasTransform.Find("MainMenuPanel");
+            Transform background = canvasTransform.Find("Background");
+
+            // Find menu buttons
+            System.Collections.Generic.List<RectTransform> buttons = new System.Collections.Generic.List<RectTransform>();
+            if (mainMenuPanel != null)
+            {
+                Transform playBtn = mainMenuPanel.Find("PlayButton");
+                Transform scoresBtn = mainMenuPanel.Find("ScoresButton");
+                Transform searchBtn = mainMenuPanel.Find("SearchButton");
+                Transform cashBtn = mainMenuPanel.Find("CashBattleButton");
+
+                if (playBtn != null) buttons.Add(playBtn.GetComponent<RectTransform>());
+                if (scoresBtn != null) buttons.Add(scoresBtn.GetComponent<RectTransform>());
+                if (searchBtn != null) buttons.Add(searchBtn.GetComponent<RectTransform>());
+                if (cashBtn != null) buttons.Add(cashBtn.GetComponent<RectTransform>());
+            }
+
+            // Configure via SerializedObject
+            SerializedObject so = new SerializedObject(animator);
+
+            // Logo/Title
+            if (titleSection != null)
+            {
+                Transform logo = titleSection.Find("LogoImage") ?? titleSection;
+                so.FindProperty("logo").objectReferenceValue = logo.GetComponent<RectTransform>();
+
+                Transform glow = titleSection.Find("LogoGlow");
+                if (glow != null)
+                    so.FindProperty("logoGlow").objectReferenceValue = glow.GetComponent<Image>();
+            }
+
+            // Menu buttons array
+            SerializedProperty menuButtonsProperty = so.FindProperty("menuButtons");
+            menuButtonsProperty.arraySize = buttons.Count;
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                menuButtonsProperty.GetArrayElementAtIndex(i).objectReferenceValue = buttons[i];
+            }
+
+            // Header
+            if (header != null)
+            {
+                so.FindProperty("headerBar").objectReferenceValue = header.GetComponent<RectTransform>();
+
+                Transform profileBtn = header.Find("ProfileButton");
+                if (profileBtn != null)
+                    so.FindProperty("profileButton").objectReferenceValue = profileBtn.GetComponent<RectTransform>();
+            }
+
+            // Background
+            if (background != null)
+                so.FindProperty("backgroundImage").objectReferenceValue = background.GetComponent<Image>();
+
+            // Animation settings for professional entrance
+            so.FindProperty("logoDropDuration").floatValue = 0.6f;
+            so.FindProperty("buttonEntranceDuration").floatValue = 0.3f;
+            so.FindProperty("buttonStaggerDelay").floatValue = 0.1f;
+            so.FindProperty("headerSlideDuration").floatValue = 0.4f;
+            so.FindProperty("floatSpeed").floatValue = 2f;
+            so.FindProperty("floatDistance").floatValue = 20f;
+
+            so.ApplyModifiedProperties();
+
+            // Add AudioSource if needed
+            if (canvas.GetComponent<AudioSource>() == null)
+                canvas.gameObject.AddComponent<AudioSource>();
+
+            Debug.Log("[MainMenuUI] MainMenuAnimator configurado con animaciones de entrada profesionales");
         }
 
         private static void CleanOldElements(Transform canvasTransform)

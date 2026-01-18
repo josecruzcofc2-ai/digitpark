@@ -39,7 +39,7 @@ namespace DigitPark.Editor
         private const float SECTION_SPACING = 25f;
         private const float FIELD_HEIGHT = 55f;
 
-        [MenuItem("DigitPark/Tournaments/Build TournamentCreate UI", false, 11)]
+        [MenuItem("DigitPark/UI Builders/Tournaments/TournamentCreate", false, 233)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("TournamentCreate UI Builder",

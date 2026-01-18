@@ -21,7 +21,7 @@ namespace DigitPark.Editor
         private static readonly Color CELL_BG = new Color(0.08f, 0.12f, 0.2f, 1f);
         private static readonly Color CELL_PRESSED = new Color(0.2f, 0.7f, 0.3f, 0.5f);
 
-        [MenuItem("DigitPark/Rebuild DigitRush UI")]
+        [MenuItem("DigitPark/UI Builders/Games/DigitRush", false, 110)]
         public static void ShowWindow()
         {
             GetWindow<DigitRushUIBuilder>("DigitRush UI Builder");
@@ -71,7 +71,7 @@ namespace DigitPark.Editor
             CreateDigitRushLayout(canvasTransform);
 
             // Intentar asignar referencias al GameManager
-            AssignGameManagerReferences();
+            AssignDigitRushControllerReferences();
 
             Debug.Log("[DigitRushUIBuilder] DigitRush UI reconstruida exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
@@ -509,12 +509,12 @@ namespace DigitPark.Editor
             particleContainer.transform.SetAsLastSibling();
         }
 
-        private static void AssignGameManagerReferences()
+        private static void AssignDigitRushControllerReferences()
         {
-            var gameManager = FindFirstObjectByType<DigitPark.Managers.GameManager>();
+            var gameManager = FindFirstObjectByType<DigitPark.Managers.DigitRushController>();
             if (gameManager == null)
             {
-                Debug.LogWarning("[DigitRushUIBuilder] No se encontró GameManager en la escena");
+                Debug.LogWarning("[DigitRushUIBuilder] No se encontró DigitRushController en la escena");
                 return;
             }
 
@@ -593,7 +593,7 @@ namespace DigitPark.Editor
             }
 
             serializedManager.ApplyModifiedProperties();
-            Debug.Log("[DigitRushUIBuilder] Referencias asignadas al GameManager");
+            Debug.Log("[DigitRushUIBuilder] Referencias asignadas al DigitRushController");
         }
 
         private static void AssignReference(SerializedObject so, string propertyName, string objectName)

@@ -18,6 +18,45 @@ namespace DigitPark.Editor
     /// </summary>
     public class ShopEntryPointsHelper : EditorWindow
     {
+        // ==================== TAMAÑOS CONFIGURABLES ====================
+        // Ajusta estos valores para cambiar el tamaño de los elementos en todas las escenas
+
+        // --- BOTTOM NAV BAR ---
+        private const float NAVBAR_HEIGHT = 90f;              // Altura total de la barra
+        private const float NAVBAR_ICON_SIZE = 30f;           // Tamaño de iconos
+        private const float NAVBAR_LABEL_FONTSIZE = 11f;      // Tamaño de texto
+        private const float NAVBAR_INDICATOR_HEIGHT = 3f;     // Altura del indicador activo
+        private const int NAVBAR_PADDING_HORIZONTAL = 10;     // Padding izquierda/derecha
+        private const int NAVBAR_PADDING_TOP = 8;             // Padding arriba
+        private const int NAVBAR_PADDING_BOTTOM = 20;         // Padding abajo (safe area)
+
+        // --- CURRENCY DISPLAY (Header) ---
+        private const float CURRENCY_DISPLAY_WIDTH = 280f;    // Ancho total del contenedor
+        private const float CURRENCY_DISPLAY_HEIGHT = 50f;    // Altura del contenedor
+        private const float CURRENCY_ITEM_WIDTH = 125f;       // Ancho de cada item (gemas/monedas)
+        private const float CURRENCY_ITEM_HEIGHT = 45f;       // Altura de cada item
+        private const float CURRENCY_ICON_SIZE = 28f;         // Tamaño de iconos
+        private const float CURRENCY_FONTSIZE = 18f;          // Tamaño del texto de cantidad
+        private const float CURRENCY_PLUS_SIZE = 22f;         // Tamaño del botón +
+        private const float CURRENCY_SPACING = 15f;           // Espacio entre items
+
+        // --- COMPACT CURRENCY BUTTON (Escenas secundarias) ---
+        private const float COMPACT_WIDTH = 115f;             // Ancho del botón compacto
+        private const float COMPACT_HEIGHT = 38f;             // Altura del botón compacto
+        private const float COMPACT_ICON_SIZE = 24f;          // Tamaño del icono
+        private const float COMPACT_FONTSIZE = 15f;           // Tamaño del texto
+        private const float COMPACT_PLUS_SIZE = 20f;          // Tamaño del botón +
+        private const float COMPACT_OFFSET_X = -20f;          // Offset desde la derecha
+        private const float COMPACT_OFFSET_Y = -80f;          // Offset desde arriba
+
+        // --- PREMIUM CARD ---
+        private const float PREMIUM_CARD_HEIGHT = 100f;       // Altura de la tarjeta premium
+        private const float PREMIUM_ICON_SIZE = 50f;          // Tamaño del icono
+        private const float PREMIUM_TITLE_FONTSIZE = 18f;     // Tamaño del título
+        private const float PREMIUM_SUBTITLE_FONTSIZE = 13f;  // Tamaño del subtítulo
+        private const float PREMIUM_PRICE_WIDTH = 80f;        // Ancho del botón de precio
+        private const float PREMIUM_PRICE_HEIGHT = 40f;       // Altura del botón de precio
+
         // ==================== TEMA NEON (Default) ====================
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
@@ -41,28 +80,28 @@ namespace DigitPark.Editor
 
         // ==================== MENU - ESCENAS PRINCIPALES (Neon) ====================
 
-        [MenuItem("DigitPark/Shop Entry Points/Main Scenes (Neon)/Add BottomNavBar + Currency", false, 100)]
+        [MenuItem("DigitPark/Shop/Entry Points/Main Scenes (Neon)/Add BottomNavBar + Currency", false, 100)]
         public static void AddMainEntryPoints_Neon()
         {
             _useCashTheme = false;
             AddMainSceneEntryPoints();
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Main Scenes (Neon)/Add Only BottomNavBar", false, 101)]
+        [MenuItem("DigitPark/Shop/Entry Points/Main Scenes (Neon)/Add Only BottomNavBar", false, 101)]
         public static void AddBottomNavBar_Neon()
         {
             _useCashTheme = false;
             AddBottomNavBar();
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Main Scenes (Neon)/Add Only Currency Display", false, 102)]
+        [MenuItem("DigitPark/Shop/Entry Points/Main Scenes (Neon)/Add Only Currency Display", false, 102)]
         public static void AddCurrency_Neon()
         {
             _useCashTheme = false;
             AddHeaderCurrencyDisplay();
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Main Scenes (Neon)/Add Premium Card (MainMenu)", false, 103)]
+        [MenuItem("DigitPark/Shop/Entry Points/Main Scenes (Neon)/Add Premium Card (MainMenu)", false, 103)]
         public static void AddPremiumCard_Neon()
         {
             _useCashTheme = false;
@@ -71,7 +110,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU - ESCENAS SECUNDARIAS (Neon) ====================
 
-        [MenuItem("DigitPark/Shop Entry Points/Secondary Scenes (Neon)/Add Compact Currency Button", false, 110)]
+        [MenuItem("DigitPark/Shop/Entry Points/Secondary Scenes (Neon)/Add Compact Currency Button", false, 110)]
         public static void AddSecondaryEntryPoint_Neon()
         {
             _useCashTheme = false;
@@ -80,14 +119,14 @@ namespace DigitPark.Editor
 
         // ==================== MENU - ESCENAS PRINCIPALES (Cash/Gold) ====================
 
-        [MenuItem("DigitPark/Shop Entry Points/Main Scenes (Cash-Gold)/Add BottomNavBar + Currency", false, 120)]
+        [MenuItem("DigitPark/Shop/Entry Points/Main Scenes (Cash-Gold)/Add BottomNavBar + Currency", false, 120)]
         public static void AddMainEntryPoints_Cash()
         {
             _useCashTheme = true;
             AddMainSceneEntryPoints();
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Main Scenes (Cash-Gold)/Add Only BottomNavBar", false, 121)]
+        [MenuItem("DigitPark/Shop/Entry Points/Main Scenes (Cash-Gold)/Add Only BottomNavBar", false, 121)]
         public static void AddBottomNavBar_Cash()
         {
             _useCashTheme = true;
@@ -96,7 +135,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU - ESCENAS SECUNDARIAS (Cash/Gold) ====================
 
-        [MenuItem("DigitPark/Shop Entry Points/Secondary Scenes (Cash-Gold)/Add Compact Currency Button", false, 130)]
+        [MenuItem("DigitPark/Shop/Entry Points/Secondary Scenes (Cash-Gold)/Add Compact Currency Button", false, 130)]
         public static void AddSecondaryEntryPoint_Cash()
         {
             _useCashTheme = true;
@@ -105,31 +144,31 @@ namespace DigitPark.Editor
 
         // ==================== MENU - REMOVE ====================
 
-        [MenuItem("DigitPark/Shop Entry Points/Remove/Remove BottomNavBar", false, 200)]
+        [MenuItem("DigitPark/Shop/Entry Points/Remove/Remove BottomNavBar", false, 200)]
         public static void RemoveBottomNavBar()
         {
             RemoveElement("BottomNavBar");
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Remove/Remove Premium Card", false, 201)]
+        [MenuItem("DigitPark/Shop/Entry Points/Remove/Remove Premium Card", false, 201)]
         public static void RemovePremiumCard()
         {
             RemoveElement("PremiumCard");
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Remove/Remove Currency Display", false, 202)]
+        [MenuItem("DigitPark/Shop/Entry Points/Remove/Remove Currency Display", false, 202)]
         public static void RemoveCurrencyDisplay()
         {
             RemoveFromHeader("CurrencyDisplay");
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Remove/Remove Compact Currency", false, 203)]
+        [MenuItem("DigitPark/Shop/Entry Points/Remove/Remove Compact Currency", false, 203)]
         public static void RemoveCompactCurrency()
         {
             RemoveFromHeader("CompactCurrencyButton");
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Remove/Remove ALL Entry Points", false, 210)]
+        [MenuItem("DigitPark/Shop/Entry Points/Remove/Remove ALL Entry Points", false, 210)]
         public static void RemoveAllEntryPoints()
         {
             RemoveElement("BottomNavBar");
@@ -139,7 +178,7 @@ namespace DigitPark.Editor
             Debug.Log("[ShopEntryPointsHelper] All entry points removed!");
         }
 
-        [MenuItem("DigitPark/Shop Entry Points/Remove/Remove Old Premium (MainMenu)", false, 220)]
+        [MenuItem("DigitPark/Shop/Entry Points/Remove/Remove Old Premium (MainMenu)", false, 220)]
         public static void RemoveOldPremiumMainMenu()
         {
             Canvas canvas = Object.FindObjectOfType<Canvas>();
@@ -324,8 +363,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(1, 1);
-            rt.anchoredPosition = new Vector2(-20, -80); // 20px from right, 80px from top (below header)
-            rt.sizeDelta = new Vector2(115, 38);
+            rt.anchoredPosition = new Vector2(COMPACT_OFFSET_X, COMPACT_OFFSET_Y);
+            rt.sizeDelta = new Vector2(COMPACT_WIDTH, COMPACT_HEIGHT);
 
             // Make sure it's on top
             button.transform.SetAsLastSibling();
@@ -365,17 +404,17 @@ namespace DigitPark.Editor
             iconImage.color = GEM_COLOR;
             // Placeholder: white square, user will assign gem sprite
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 24;
-            iconLE.minHeight = 24;
-            iconLE.preferredWidth = 24;
-            iconLE.preferredHeight = 24;
+            iconLE.minWidth = COMPACT_ICON_SIZE;
+            iconLE.minHeight = COMPACT_ICON_SIZE;
+            iconLE.preferredWidth = COMPACT_ICON_SIZE;
+            iconLE.preferredHeight = COMPACT_ICON_SIZE;
 
             // Amount Text
             GameObject textObj = new GameObject("Amount");
             textObj.transform.SetParent(button.transform, false);
             TextMeshProUGUI amountText = textObj.AddComponent<TextMeshProUGUI>();
             amountText.text = "1.2K";
-            amountText.fontSize = 15;
+            amountText.fontSize = COMPACT_FONTSIZE;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             amountText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -389,10 +428,10 @@ namespace DigitPark.Editor
             Image plusBg = plusObj.AddComponent<Image>();
             plusBg.color = GEM_COLOR;
             LayoutElement plusLE = plusObj.AddComponent<LayoutElement>();
-            plusLE.minWidth = 20;
-            plusLE.minHeight = 20;
-            plusLE.preferredWidth = 20;
-            plusLE.preferredHeight = 20;
+            plusLE.minWidth = COMPACT_PLUS_SIZE;
+            plusLE.minHeight = COMPACT_PLUS_SIZE;
+            plusLE.preferredWidth = COMPACT_PLUS_SIZE;
+            plusLE.preferredHeight = COMPACT_PLUS_SIZE;
 
             // Plus text inside button
             GameObject plusTextObj = new GameObject("Text");
@@ -451,10 +490,10 @@ namespace DigitPark.Editor
             currencyRT.anchorMax = new Vector2(1, 0.5f);
             currencyRT.pivot = new Vector2(1, 0.5f);
             currencyRT.anchoredPosition = new Vector2(rightOffset, 0);
-            currencyRT.sizeDelta = new Vector2(280, 50);
+            currencyRT.sizeDelta = new Vector2(CURRENCY_DISPLAY_WIDTH, CURRENCY_DISPLAY_HEIGHT);
 
             HorizontalLayoutGroup hlg = currencyDisplay.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 15;
+            hlg.spacing = CURRENCY_SPACING;
             hlg.childAlignment = TextAnchor.MiddleRight;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
@@ -487,7 +526,7 @@ namespace DigitPark.Editor
             item.transform.SetParent(parent.transform, false);
 
             RectTransform itemRT = item.AddComponent<RectTransform>();
-            itemRT.sizeDelta = new Vector2(125, 45);
+            itemRT.sizeDelta = new Vector2(CURRENCY_ITEM_WIDTH, CURRENCY_ITEM_HEIGHT);
 
             Image itemBg = item.AddComponent<Image>();
             itemBg.color = new Color(0.1f, 0.15f, 0.2f, 0.9f);
@@ -508,8 +547,8 @@ namespace DigitPark.Editor
             hlg.childForceExpandWidth = false;
 
             LayoutElement itemLE = item.AddComponent<LayoutElement>();
-            itemLE.minWidth = 125;
-            itemLE.preferredWidth = 125;
+            itemLE.minWidth = CURRENCY_ITEM_WIDTH;
+            itemLE.preferredWidth = CURRENCY_ITEM_WIDTH;
 
             // Icon
             GameObject iconObj = new GameObject("Icon");
@@ -517,17 +556,17 @@ namespace DigitPark.Editor
             Image iconImage = iconObj.AddComponent<Image>();
             iconImage.color = color;
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 28;
-            iconLE.minHeight = 28;
-            iconLE.preferredWidth = 28;
-            iconLE.preferredHeight = 28;
+            iconLE.minWidth = CURRENCY_ICON_SIZE;
+            iconLE.minHeight = CURRENCY_ICON_SIZE;
+            iconLE.preferredWidth = CURRENCY_ICON_SIZE;
+            iconLE.preferredHeight = CURRENCY_ICON_SIZE;
 
             // Amount
             GameObject amountObj = new GameObject("Amount");
             amountObj.transform.SetParent(item.transform, false);
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = 18;
+            amountText.fontSize = CURRENCY_FONTSIZE;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             amountText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -542,10 +581,10 @@ namespace DigitPark.Editor
             Button plusBtn = plusObj.AddComponent<Button>();
             SetupButtonColors(plusBtn);
             LayoutElement plusLE = plusObj.AddComponent<LayoutElement>();
-            plusLE.minWidth = 22;
-            plusLE.minHeight = 22;
-            plusLE.preferredWidth = 22;
-            plusLE.preferredHeight = 22;
+            plusLE.minWidth = CURRENCY_PLUS_SIZE;
+            plusLE.minHeight = CURRENCY_PLUS_SIZE;
+            plusLE.preferredWidth = CURRENCY_PLUS_SIZE;
+            plusLE.preferredHeight = CURRENCY_PLUS_SIZE;
 
             GameObject plusTextObj = new GameObject("Text");
             plusTextObj.transform.SetParent(plusObj.transform, false);
@@ -581,7 +620,7 @@ namespace DigitPark.Editor
             navRT.anchorMax = new Vector2(1, 0);
             navRT.pivot = new Vector2(0.5f, 0);
             navRT.anchoredPosition = Vector2.zero;
-            navRT.sizeDelta = new Vector2(0, 90);
+            navRT.sizeDelta = new Vector2(0, NAVBAR_HEIGHT);
 
             Image navBg = navBar.AddComponent<Image>();
             navBg.color = HEADER_BG;
@@ -592,7 +631,7 @@ namespace DigitPark.Editor
 
             HorizontalLayoutGroup hlg = navBar.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 0;
-            hlg.padding = new RectOffset(10, 10, 8, 20);
+            hlg.padding = new RectOffset(NAVBAR_PADDING_HORIZONTAL, NAVBAR_PADDING_HORIZONTAL, NAVBAR_PADDING_TOP, NAVBAR_PADDING_BOTTOM);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
@@ -645,17 +684,17 @@ namespace DigitPark.Editor
             Image iconImage = iconObj.AddComponent<Image>();
             iconImage.color = isActive ? color : inactiveColor;
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 30;
-            iconLE.minHeight = 30;
-            iconLE.preferredWidth = 30;
-            iconLE.preferredHeight = 30;
+            iconLE.minWidth = NAVBAR_ICON_SIZE;
+            iconLE.minHeight = NAVBAR_ICON_SIZE;
+            iconLE.preferredWidth = NAVBAR_ICON_SIZE;
+            iconLE.preferredHeight = NAVBAR_ICON_SIZE;
 
             // Label
             GameObject labelObj = new GameObject("Label");
             labelObj.transform.SetParent(item.transform, false);
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = label;
-            labelText.fontSize = 11;
+            labelText.fontSize = NAVBAR_LABEL_FONTSIZE;
             labelText.color = isActive ? color : inactiveColor;
             labelText.alignment = TextAlignmentOptions.Center;
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
@@ -667,8 +706,8 @@ namespace DigitPark.Editor
             Image indicatorImage = indicator.AddComponent<Image>();
             indicatorImage.color = color;
             LayoutElement indicatorLE = indicator.AddComponent<LayoutElement>();
-            indicatorLE.minHeight = 3;
-            indicatorLE.preferredHeight = 3;
+            indicatorLE.minHeight = NAVBAR_INDICATOR_HEIGHT;
+            indicatorLE.preferredHeight = NAVBAR_INDICATOR_HEIGHT;
             indicator.SetActive(isActive);
         }
 
@@ -712,8 +751,8 @@ namespace DigitPark.Editor
             cardRT.anchorMin = new Vector2(0, 0);
             cardRT.anchorMax = new Vector2(1, 0);
             cardRT.pivot = new Vector2(0.5f, 0);
-            cardRT.anchoredPosition = new Vector2(0, 100); // Above BottomNavBar
-            cardRT.sizeDelta = new Vector2(-40, 100);
+            cardRT.anchoredPosition = new Vector2(0, NAVBAR_HEIGHT + 10); // Above BottomNavBar
+            cardRT.sizeDelta = new Vector2(-40, PREMIUM_CARD_HEIGHT);
 
             Image cardBg = premiumCard.AddComponent<Image>();
             cardBg.color = new Color(0.15f, 0.1f, 0.25f, 0.95f);
@@ -741,10 +780,10 @@ namespace DigitPark.Editor
             Image iconImage = iconObj.AddComponent<Image>();
             iconImage.color = PURPLE_PREMIUM;
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 50;
-            iconLE.minHeight = 50;
-            iconLE.preferredWidth = 50;
-            iconLE.preferredHeight = 50;
+            iconLE.minWidth = PREMIUM_ICON_SIZE;
+            iconLE.minHeight = PREMIUM_ICON_SIZE;
+            iconLE.preferredWidth = PREMIUM_ICON_SIZE;
+            iconLE.preferredHeight = PREMIUM_ICON_SIZE;
 
             // Content
             GameObject content = new GameObject("Content");
@@ -763,7 +802,7 @@ namespace DigitPark.Editor
             titleObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "OFERTA ESPECIAL";
-            titleText.fontSize = 18;
+            titleText.fontSize = PREMIUM_TITLE_FONTSIZE;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -773,7 +812,7 @@ namespace DigitPark.Editor
             subtitleObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI subtitleText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subtitleText.text = "500 Gemas + Tema Exclusivo";
-            subtitleText.fontSize = 13;
+            subtitleText.fontSize = PREMIUM_SUBTITLE_FONTSIZE;
             subtitleText.color = TEXT_SECONDARY;
             subtitleText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -783,9 +822,9 @@ namespace DigitPark.Editor
             Image priceBg = priceBtn.AddComponent<Image>();
             priceBg.color = new Color(0.2f, 0.8f, 0.4f, 1f);
             LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
-            priceLE.minWidth = 80;
-            priceLE.minHeight = 40;
-            priceLE.preferredWidth = 80;
+            priceLE.minWidth = PREMIUM_PRICE_WIDTH;
+            priceLE.minHeight = PREMIUM_PRICE_HEIGHT;
+            priceLE.preferredWidth = PREMIUM_PRICE_WIDTH;
 
             GameObject priceText = new GameObject("Text");
             priceText.transform.SetParent(priceBtn.transform, false);

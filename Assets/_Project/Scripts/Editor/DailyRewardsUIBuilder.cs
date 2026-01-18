@@ -5,6 +5,7 @@ using TMPro;
 
 namespace DigitPark.Editor
 {
+    using DigitPark.Animations;
     /// <summary>
     /// Construye la UI completa de Daily Rewards (Recompensas Diarias)
     /// Incluye: SafeArea, Header, Streak, Calendario de 7 dias, Claim popup
@@ -50,7 +51,7 @@ namespace DigitPark.Editor
         private const float DAY_CARD_SIZE = 130f;
         private const float CONTENT_PADDING = 20f;
 
-        [MenuItem("DigitPark/Monetization/Build Daily Rewards UI", false, 22)]
+        [MenuItem("DigitPark/UI Builders/Monetization/DailyRewards", false, 183)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Daily Rewards UI Builder",
@@ -78,8 +79,127 @@ namespace DigitPark.Editor
 
             CreateRewardClaimPopup(canvas);
 
+            // Add screen effects for reward animations
+            GameObject screenEffects = CreateScreenEffects(canvas);
+
+            // Add and configure RewardClaimAnimator
+            AddRewardClaimAnimator(canvas, screenEffects);
+
             MarkSceneDirty();
             Debug.Log("[DailyRewardsUIBuilder] ========== CONSTRUCCION COMPLETADA ==========");
+        }
+
+        /// <summary>
+        /// Creates screen effects for reward claim animations
+        /// </summary>
+        private static GameObject CreateScreenEffects(Canvas canvas)
+        {
+            GameObject effects = FindOrCreateChild(canvas.gameObject, "RewardEffects");
+            effects.transform.SetAsLastSibling();
+
+            RectTransform effectsRT = GetOrAddComponent<RectTransform>(effects);
+            effectsRT.anchorMin = Vector2.zero;
+            effectsRT.anchorMax = Vector2.one;
+            effectsRT.sizeDelta = Vector2.zero;
+
+            // Screen Flash
+            GameObject flash = FindOrCreateChild(effects, "ScreenFlash");
+            RectTransform flashRT = GetOrAddComponent<RectTransform>(flash);
+            flashRT.anchorMin = Vector2.zero;
+            flashRT.anchorMax = Vector2.one;
+            flashRT.sizeDelta = Vector2.zero;
+            Image flashImg = GetOrAddComponent<Image>(flash);
+            flashImg.color = new Color(1, 1, 1, 0);
+            flashImg.raycastTarget = false;
+            flash.SetActive(false);
+
+            // Flying icons parent
+            GameObject flyingParent = FindOrCreateChild(effects, "FlyingIconsParent");
+            RectTransform flyingRT = GetOrAddComponent<RectTransform>(flyingParent);
+            flyingRT.anchorMin = Vector2.zero;
+            flyingRT.anchorMax = Vector2.one;
+            flyingRT.sizeDelta = Vector2.zero;
+
+            Debug.Log("[DailyRewardsUIBuilder] RewardEffects creados");
+            return effects;
+        }
+
+        /// <summary>
+        /// Adds and configures RewardClaimAnimator for fly-to-target animations
+        /// </summary>
+        private static void AddRewardClaimAnimator(Canvas canvas, GameObject screenEffects)
+        {
+            RewardClaimAnimator animator = canvas.GetComponent<RewardClaimAnimator>();
+            if (animator == null)
+                animator = canvas.gameObject.AddComponent<RewardClaimAnimator>();
+
+            // Get references
+            Transform header = canvas.transform.Find("SafeArea/Header");
+            Transform rewardPopup = canvas.transform.Find("RewardClaimPopup/Popup");
+            Transform screenFlash = screenEffects.transform.Find("ScreenFlash");
+            Transform flyingParent = screenEffects.transform.Find("FlyingIconsParent");
+
+            // Find currency displays in header
+            Transform coinsDisplay = header?.Find("CoinsDisplay");
+            Transform gemsDisplay = header?.Find("GemsDisplay");
+
+            // Configure via SerializedObject
+            SerializedObject so = new SerializedObject(animator);
+
+            // Currency targets (these will be the currency displays)
+            if (coinsDisplay != null)
+            {
+                so.FindProperty("coinsTarget").objectReferenceValue = coinsDisplay.GetComponent<RectTransform>();
+                Transform coinsText = coinsDisplay.Find("Value");
+                if (coinsText != null)
+                    so.FindProperty("coinsText").objectReferenceValue = coinsText.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (gemsDisplay != null)
+            {
+                so.FindProperty("gemsTarget").objectReferenceValue = gemsDisplay.GetComponent<RectTransform>();
+                Transform gemsText = gemsDisplay.Find("Value");
+                if (gemsText != null)
+                    so.FindProperty("gemsText").objectReferenceValue = gemsText.GetComponent<TextMeshProUGUI>();
+            }
+
+            // Screen effects
+            if (screenFlash != null)
+                so.FindProperty("screenFlash").objectReferenceValue = screenFlash.GetComponent<Image>();
+
+            if (flyingParent != null)
+                so.FindProperty("flyingIconsParent").objectReferenceValue = flyingParent;
+
+            // Reward popup
+            if (rewardPopup != null)
+            {
+                so.FindProperty("rewardPopup").objectReferenceValue = rewardPopup.GetComponent<RectTransform>();
+
+                Transform rewardIcon = rewardPopup.Find("RewardIcon");
+                Transform rewardName = rewardPopup.Find("RewardName");
+                Transform rewardAmount = rewardPopup.Find("RewardAmount");
+
+                if (rewardIcon != null)
+                    so.FindProperty("rewardIcon").objectReferenceValue = rewardIcon.GetComponent<Image>();
+                if (rewardName != null)
+                    so.FindProperty("rewardNameText").objectReferenceValue = rewardName.GetComponent<TextMeshProUGUI>();
+                if (rewardAmount != null)
+                    so.FindProperty("rewardAmountText").objectReferenceValue = rewardAmount.GetComponent<TextMeshProUGUI>();
+            }
+
+            // Animation settings for satisfying fly-to-target
+            so.FindProperty("maxFlyingIcons").intValue = 10;
+            so.FindProperty("flyDuration").floatValue = 0.6f;
+            so.FindProperty("iconSpawnDelay").floatValue = 0.05f;
+            so.FindProperty("counterAnimDuration").floatValue = 0.5f;
+
+            so.ApplyModifiedProperties();
+
+            // Add AudioSource if needed
+            if (canvas.GetComponent<AudioSource>() == null)
+                canvas.gameObject.AddComponent<AudioSource>();
+
+            Debug.Log("[DailyRewardsUIBuilder] RewardClaimAnimator configurado con animaciones fly-to-target");
         }
 
         // ==================== CANVAS SETUP ====================

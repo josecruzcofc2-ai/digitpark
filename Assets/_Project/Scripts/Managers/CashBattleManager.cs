@@ -6,12 +6,19 @@ using System.Collections.Generic;
 using DigitPark.Localization;
 using DigitPark.UI.CashBattle;
 using DigitPark.Games;
+using DigitPark.CashBattle;
+using DigitPark.Monetization;
+using DigitPark.Services;
+
+// Alias para resolver conflictos de nombres entre namespaces
+using ServiceMatchResult = DigitPark.Services.MatchResult;
+using UITournamentInfo = DigitPark.UI.CashBattle.TournamentInfo;
 
 namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager de Cash Battle - Competencias con dinero real (18+)
-    /// Integra con Triumph para pagos
+    /// Usa ServiceLocator para KYC, Wallet, Matchmaking y Tournaments
     /// Premium UI with card-based layout
     /// </summary>
     public class CashBattleManager : MonoBehaviour
@@ -31,8 +38,6 @@ namespace DigitPark.Managers
         [Header("UI - Sub Panels")]
         [SerializeField] private GameSelectionPanel gameSelectionPanel;
         [SerializeField] private TournamentListPanel tournamentListPanel;
-        [SerializeField] private GameObject walletPanel;
-        [SerializeField] private GameObject historyPanel;
 
         [Header("UI - Age Verification")]
         [SerializeField] private GameObject ageVerificationPanel;
@@ -44,48 +49,124 @@ namespace DigitPark.Managers
         [Header("UI - Matchmaking")]
         [SerializeField] private GameObject matchmakingPanel;
         [SerializeField] private TextMeshProUGUI matchmakingStatusText;
+        [SerializeField] private TextMeshProUGUI matchmakingTimerText;
+        [SerializeField] private TextMeshProUGUI opponentNameText;
         [SerializeField] private Button cancelMatchmakingButton;
 
         [Header("Settings")]
         [SerializeField] private bool requireAgeVerification = true;
 
-        private bool isAgeVerified = false;
-        private float currentBalance = 0f;
+        // Services
+        private IKYCService _kycService;
+        private IWalletService _walletService;
+        private IMatchmakingService _matchmakingService;
+        private ITournamentService _tournamentService;
+
+        private bool isKYCVerified = false;
         private CashBattleState currentState = CashBattleState.Main;
+        private float matchmakingTimer = 0f;
+
+        // Propiedad para obtener balance
+        private decimal CurrentBalance => _walletService?.CurrentBalance ?? 0m;
 
         private void Start()
         {
             Debug.Log("[CashBattle] CashBattleManager iniciado");
 
+            InitializeServices();
             SetupListeners();
-            CheckAgeVerification();
+            SetupServiceListeners();
+            CheckKYCVerification();
             UpdateUI();
             UpdateLocalizedTexts();
 
-            // Subscribe to language changes
             LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
         }
 
         private void OnDestroy()
         {
             LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
+            UnsubscribeServiceListeners();
+        }
+
+        private void Update()
+        {
+            // Actualizar timer de matchmaking
+            if (currentState == CashBattleState.Matchmaking && _matchmakingService?.IsSearching == true)
+            {
+                matchmakingTimer += Time.deltaTime;
+                UpdateMatchmakingTimer();
+            }
+        }
+
+        #region Initialization
+
+        private void InitializeServices()
+        {
+            _kycService = ServiceLocator.KYC;
+            _walletService = ServiceLocator.Wallet;
+            _matchmakingService = ServiceLocator.Matchmaking;
+            _tournamentService = ServiceLocator.Tournament;
+
+            if (_kycService == null || _walletService == null || _matchmakingService == null)
+            {
+                Debug.LogError("[CashBattle] Servicios no disponibles. Verifica que ServiceLocator esté en Boot scene.");
+            }
+
+            Debug.Log($"[CashBattle] Servicios inicializados. Modo: {ServiceLocator.CurrentMode}");
+        }
+
+        private void SetupServiceListeners()
+        {
+            if (_walletService != null)
+            {
+                _walletService.OnBalanceChanged += OnWalletBalanceChanged;
+            }
+
+            if (_kycService != null)
+            {
+                _kycService.OnStatusChanged += OnKYCStatusChanged;
+            }
+
+            if (_matchmakingService != null)
+            {
+                _matchmakingService.OnStatusChanged += OnMatchmakingStatusChanged;
+                _matchmakingService.OnMatchFound += OnMatchFound;
+                _matchmakingService.OnMatchCompleted += OnMatchCompleted;
+            }
+        }
+
+        private void UnsubscribeServiceListeners()
+        {
+            if (_walletService != null)
+            {
+                _walletService.OnBalanceChanged -= OnWalletBalanceChanged;
+            }
+
+            if (_kycService != null)
+            {
+                _kycService.OnStatusChanged -= OnKYCStatusChanged;
+            }
+
+            if (_matchmakingService != null)
+            {
+                _matchmakingService.OnStatusChanged -= OnMatchmakingStatusChanged;
+                _matchmakingService.OnMatchFound -= OnMatchFound;
+                _matchmakingService.OnMatchCompleted -= OnMatchCompleted;
+            }
         }
 
         private void SetupListeners()
         {
-            // Navigation
             backButton?.onClick.AddListener(OnBackClicked);
 
-            // Main cards
             battles1v1Card?.onClick.AddListener(OnBattles1v1Clicked);
             cashTournamentsCard?.onClick.AddListener(OnCashTournamentsClicked);
             walletCard?.onClick.AddListener(OnWalletClicked);
             historyCard?.onClick.AddListener(OnHistoryClicked);
 
-            // Age verification
             verifyAgeButton?.onClick.AddListener(OnVerifyAgeClicked);
 
-            // Game Selection Panel events
             if (gameSelectionPanel != null)
             {
                 gameSelectionPanel.OnBackClicked += () => NavigateTo(CashBattleState.Main);
@@ -93,24 +174,85 @@ namespace DigitPark.Managers
                 gameSelectionPanel.OnCognitiveSprintSelected += OnCognitiveSprintSelected;
             }
 
-            // Tournament List Panel events
             if (tournamentListPanel != null)
             {
                 tournamentListPanel.OnBackClicked += () => NavigateTo(CashBattleState.Main);
                 tournamentListPanel.OnTournamentSelected += OnTournamentSelected;
             }
 
-            // Matchmaking
             cancelMatchmakingButton?.onClick.AddListener(CancelMatchmaking);
         }
 
+        #endregion
+
+        #region Service Event Handlers
+
+        private void OnWalletBalanceChanged(decimal newBalance)
+        {
+            UpdateBalanceDisplay();
+            Debug.Log($"[CashBattle] Balance actualizado: ${newBalance:F2}");
+        }
+
+        private void OnKYCStatusChanged(KYCStatus newStatus)
+        {
+            Debug.Log($"[CashBattle] KYC Status cambió a: {newStatus}");
+            isKYCVerified = newStatus == KYCStatus.FullyVerified;
+
+            if (isKYCVerified)
+            {
+                ShowMainPanel();
+            }
+        }
+
+        private void OnMatchmakingStatusChanged(MatchmakingStatus status)
+        {
+            Debug.Log($"[CashBattle] Matchmaking status: {status}");
+
+            if (matchmakingStatusText != null)
+            {
+                matchmakingStatusText.text = status switch
+                {
+                    MatchmakingStatus.Searching => "Buscando oponente...",
+                    MatchmakingStatus.Found => "¡Oponente encontrado!",
+                    MatchmakingStatus.Confirming => "Confirmando partida...",
+                    MatchmakingStatus.Ready => "¡Listo para jugar!",
+                    MatchmakingStatus.Cancelled => "Búsqueda cancelada",
+                    MatchmakingStatus.Timeout => "Tiempo agotado",
+                    _ => ""
+                };
+            }
+        }
+
+        private void OnMatchFound(MatchInfo match)
+        {
+            Debug.Log($"[CashBattle] Match encontrado! Oponente: {match.Opponent.DisplayName}");
+
+            if (opponentNameText != null)
+            {
+                opponentNameText.text = match.Opponent.DisplayName;
+            }
+
+            // Auto-confirmar y cargar juego después de un momento
+            Invoke(nameof(ConfirmAndLoadGame), 2f);
+        }
+
+        private void OnMatchCompleted(ServiceMatchResult result)
+        {
+            Debug.Log($"[CashBattle] Match completado. Victoria: {result.IsWinner}, Ganancia: ${result.AmountWon:F2}");
+
+            // Mostrar resultado y volver al menú
+            NavigateTo(CashBattleState.Main);
+        }
+
+        #endregion
+
+        #region Localization
+
         private void UpdateLocalizedTexts()
         {
-            // Title is always "Cash Battle" - could be localized if needed
             if (titleText != null)
                 titleText.text = "Cash Battle";
 
-            // Verification texts could be localized
             if (verificationTitleText != null)
                 verificationTitleText.text = GetLocalizedText("cash_battle_verification_title");
 
@@ -125,14 +267,18 @@ namespace DigitPark.Managers
             return key;
         }
 
-        #region Age Verification
+        #endregion
 
-        private void CheckAgeVerification()
+        #region KYC Verification
+
+        private void CheckKYCVerification()
         {
-            // TODO: Verificar con Triumph si el usuario ya está verificado
-            isAgeVerified = PlayerPrefs.GetInt("AgeVerified", 0) == 1;
+            if (_kycService != null)
+            {
+                isKYCVerified = _kycService.CanAccessCashBattle;
+            }
 
-            if (requireAgeVerification && !isAgeVerified)
+            if (requireAgeVerification && !isKYCVerified)
             {
                 ShowAgeVerificationPanel();
             }
@@ -149,7 +295,21 @@ namespace DigitPark.Managers
             if (mainPanel != null)
                 mainPanel.SetActive(false);
 
-            Debug.Log("[CashBattle] Mostrando panel de verificación de edad");
+            // Actualizar texto de estado
+            if (_kycService != null && verificationStatusText != null)
+            {
+                var status = _kycService.CurrentStatus;
+                verificationStatusText.text = status switch
+                {
+                    KYCStatus.NotStarted => "Verificación requerida para continuar",
+                    KYCStatus.AgeVerified => "Completa la verificación de identidad",
+                    KYCStatus.DocumentPending => "Verificación en proceso...",
+                    KYCStatus.Rejected => "Verificación rechazada",
+                    _ => ""
+                };
+            }
+
+            Debug.Log("[CashBattle] Mostrando panel de verificación");
         }
 
         private void ShowMainPanel()
@@ -164,70 +324,8 @@ namespace DigitPark.Managers
 
         private void OnVerifyAgeClicked()
         {
-            Debug.Log("[CashBattle] Iniciando verificación de edad");
-
-            // TODO: Integrar con Triumph para verificación real
-            StartAgeVerification();
-        }
-
-        private void StartAgeVerification()
-        {
-            // TODO: Llamar a Triumph SDK para verificación de ID
-            // Triumph.VerifyAge(OnAgeVerificationComplete);
-
-            if (verificationStatusText != null)
-            {
-                verificationStatusText.text = "Verificando...";
-                verificationStatusText.color = new Color(1f, 0.84f, 0f, 1f); // Gold
-            }
-
-            // Disable button while verifying
-            if (verifyAgeButton != null)
-                verifyAgeButton.interactable = false;
-
-            // Simular delay de verificación
-            Invoke(nameof(SimulateVerificationComplete), 2f);
-        }
-
-        private void SimulateVerificationComplete()
-        {
-            // Simulación - en producción esto viene de Triumph
-            OnAgeVerificationComplete(true);
-        }
-
-        private void OnAgeVerificationComplete(bool verified)
-        {
-            isAgeVerified = verified;
-            PlayerPrefs.SetInt("AgeVerified", verified ? 1 : 0);
-            PlayerPrefs.Save();
-
-            if (verified)
-            {
-                Debug.Log("[CashBattle] Edad verificada exitosamente");
-
-                if (verificationStatusText != null)
-                {
-                    verificationStatusText.text = "¡Verificado!";
-                    verificationStatusText.color = new Color(0.3f, 1f, 0.5f, 1f); // Green
-                }
-
-                // Mostrar panel principal después de un momento
-                Invoke(nameof(ShowMainPanel), 1f);
-            }
-            else
-            {
-                Debug.Log("[CashBattle] Verificación de edad fallida");
-
-                if (verificationStatusText != null)
-                {
-                    verificationStatusText.text = "Verificación fallida. Debes ser mayor de 18.";
-                    verificationStatusText.color = new Color(1f, 0.4f, 0.4f, 1f); // Red
-                }
-
-                // Re-enable button
-                if (verifyAgeButton != null)
-                    verifyAgeButton.interactable = true;
-            }
+            Debug.Log("[CashBattle] Navegando a verificación de edad");
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.AGE_VERIFICATION);
         }
 
         #endregion
@@ -236,28 +334,24 @@ namespace DigitPark.Managers
 
         private void UpdateUI()
         {
-            UpdateBalance();
+            UpdateBalanceDisplay();
         }
 
-        private void UpdateBalance()
+        private void UpdateBalanceDisplay()
         {
-            // TODO: Obtener balance real de Triumph
-            currentBalance = PlayerPrefs.GetFloat("CashBalance", 0f);
-
             if (balanceText != null)
-                balanceText.text = $"{currentBalance:F2}";
+            {
+                balanceText.text = $"${CurrentBalance:F2}";
+            }
         }
 
-        /// <summary>
-        /// Called when balance is updated from Triumph
-        /// </summary>
-        public void SetBalance(float balance)
+        private void UpdateMatchmakingTimer()
         {
-            currentBalance = balance;
-            PlayerPrefs.SetFloat("CashBalance", balance);
-
-            if (balanceText != null)
-                balanceText.text = $"{balance:F2}";
+            if (matchmakingTimerText != null)
+            {
+                int seconds = (int)matchmakingTimer;
+                matchmakingTimerText.text = $"{seconds / 60:00}:{seconds % 60:00}";
+            }
         }
 
         #endregion
@@ -268,16 +362,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[CashBattle] Navegando de {currentState} a {newState}");
 
-            // Hide current panel
             HideCurrentPanel();
-
-            // Update state
             currentState = newState;
-
-            // Show new panel
             ShowCurrentPanel();
-
-            // Update header
             UpdateHeaderForState();
         }
 
@@ -293,12 +380,6 @@ namespace DigitPark.Managers
                     break;
                 case CashBattleState.TournamentList:
                     if (tournamentListPanel != null) tournamentListPanel.Hide();
-                    break;
-                case CashBattleState.Wallet:
-                    if (walletPanel != null) walletPanel.SetActive(false);
-                    break;
-                case CashBattleState.History:
-                    if (historyPanel != null) historyPanel.SetActive(false);
                     break;
                 case CashBattleState.Matchmaking:
                     if (matchmakingPanel != null) matchmakingPanel.SetActive(false);
@@ -319,14 +400,9 @@ namespace DigitPark.Managers
                 case CashBattleState.TournamentList:
                     if (tournamentListPanel != null) tournamentListPanel.Show();
                     break;
-                case CashBattleState.Wallet:
-                    if (walletPanel != null) walletPanel.SetActive(true);
-                    break;
-                case CashBattleState.History:
-                    if (historyPanel != null) historyPanel.SetActive(true);
-                    break;
                 case CashBattleState.Matchmaking:
                     if (matchmakingPanel != null) matchmakingPanel.SetActive(true);
+                    matchmakingTimer = 0f;
                     break;
             }
         }
@@ -335,27 +411,14 @@ namespace DigitPark.Managers
         {
             if (titleText == null) return;
 
-            switch (currentState)
+            titleText.text = currentState switch
             {
-                case CashBattleState.Main:
-                    titleText.text = "Cash Battle";
-                    break;
-                case CashBattleState.GameSelection:
-                    titleText.text = "Batallas 1v1";
-                    break;
-                case CashBattleState.TournamentList:
-                    titleText.text = "Torneos Cash";
-                    break;
-                case CashBattleState.Wallet:
-                    titleText.text = "Mi Wallet";
-                    break;
-                case CashBattleState.History:
-                    titleText.text = "Historial";
-                    break;
-                case CashBattleState.Matchmaking:
-                    titleText.text = "Buscando Oponente...";
-                    break;
-            }
+                CashBattleState.Main => "Cash Battle",
+                CashBattleState.GameSelection => "Batallas 1v1",
+                CashBattleState.TournamentList => "Torneos Cash",
+                CashBattleState.Matchmaking => "Buscando Oponente...",
+                _ => "Cash Battle"
+            };
         }
 
         #endregion
@@ -364,7 +427,6 @@ namespace DigitPark.Managers
 
         private void OnBackClicked()
         {
-            // Handle back based on current state
             switch (currentState)
             {
                 case CashBattleState.Main:
@@ -384,7 +446,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[CashBattle] Navegando a Battles 1v1");
 
-            if (!isAgeVerified && requireAgeVerification)
+            if (!isKYCVerified && requireAgeVerification)
             {
                 ShowAgeVerificationPanel();
                 return;
@@ -397,7 +459,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[CashBattle] Navegando a Cash Tournaments");
 
-            if (!isAgeVerified && requireAgeVerification)
+            if (!isKYCVerified && requireAgeVerification)
             {
                 ShowAgeVerificationPanel();
                 return;
@@ -408,30 +470,28 @@ namespace DigitPark.Managers
 
         private void OnWalletClicked()
         {
-            Debug.Log("[CashBattle] Abriendo Wallet");
+            Debug.Log("[CashBattle] Navegando a escena Wallet");
 
-            if (!isAgeVerified && requireAgeVerification)
+            if (!isKYCVerified && requireAgeVerification)
             {
                 ShowAgeVerificationPanel();
                 return;
             }
 
-            // TODO: Implement wallet panel
-            NavigateTo(CashBattleState.Wallet);
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
         }
 
         private void OnHistoryClicked()
         {
-            Debug.Log("[CashBattle] Abriendo Historial");
+            Debug.Log("[CashBattle] Navegando a escena History");
 
-            if (!isAgeVerified && requireAgeVerification)
+            if (!isKYCVerified && requireAgeVerification)
             {
                 ShowAgeVerificationPanel();
                 return;
             }
 
-            // TODO: Implement history panel
-            NavigateTo(CashBattleState.History);
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_HISTORY);
         }
 
         #endregion
@@ -442,102 +502,167 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[CashBattle] Juego seleccionado: {gameType}, Entry: ${entryFee}");
 
-            // Check balance
-            if (currentBalance < (float)entryFee)
+            if (!_walletService.HasSufficientFunds(entryFee))
             {
                 Debug.LogWarning("[CashBattle] Balance insuficiente");
-                // TODO: Show insufficient balance popup
+                ShowInsufficientBalancePopup(entryFee);
                 return;
             }
 
-            // Start matchmaking for single game
-            StartMatchmaking(new List<GameType> { gameType }, entryFee);
+            // Convertir GameType a CashGameType
+            CashGameType cashGameType = ConvertToCashGameType(gameType);
+
+            // Iniciar matchmaking usando el servicio
+            StartMatchmakingAsync(cashGameType, entryFee);
         }
 
         private void OnCognitiveSprintSelected(List<GameType> games, decimal entryFee)
         {
             Debug.Log($"[CashBattle] Cognitive Sprint seleccionado: {games.Count} juegos, Entry: ${entryFee}");
 
-            // Check balance
-            if (currentBalance < (float)entryFee)
+            if (!_walletService.HasSufficientFunds(entryFee))
             {
                 Debug.LogWarning("[CashBattle] Balance insuficiente");
-                // TODO: Show insufficient balance popup
+                ShowInsufficientBalancePopup(entryFee);
                 return;
             }
 
-            // Start matchmaking for cognitive sprint
-            StartMatchmaking(games, entryFee);
+            // Por ahora usar el primer juego para matchmaking
+            CashGameType cashGameType = ConvertToCashGameType(games[0]);
+            StartMatchmakingAsync(cashGameType, entryFee);
         }
 
-        private void OnTournamentSelected(TournamentInfo tournament)
+        private void OnTournamentSelected(UITournamentInfo tournament)
         {
             Debug.Log($"[CashBattle] Torneo seleccionado: {tournament.Name}, Entry: ${tournament.EntryFee}");
 
-            // Check balance
-            if (currentBalance < (float)tournament.EntryFee)
+            if (!_walletService.HasSufficientFunds(tournament.EntryFee))
             {
                 Debug.LogWarning("[CashBattle] Balance insuficiente");
-                // TODO: Show insufficient balance popup
+                ShowInsufficientBalancePopup(tournament.EntryFee);
                 return;
             }
 
-            // TODO: Join tournament via Triumph API
-            JoinTournament(tournament);
+            JoinTournamentAsync(tournament);
+        }
+
+        private CashGameType ConvertToCashGameType(GameType gameType)
+        {
+            return gameType switch
+            {
+                GameType.DigitRush => CashGameType.DigitRush,
+                GameType.FlashTap => CashGameType.FlashTap,
+                GameType.MemoryPairs => CashGameType.MemoryPairs,
+                GameType.OddOneOut => CashGameType.OddOneOut,
+                GameType.QuickMath => CashGameType.QuickMath,
+                _ => CashGameType.DigitRush
+            };
+        }
+
+        private void ShowInsufficientBalancePopup(decimal requiredAmount)
+        {
+            decimal currentBal = CurrentBalance;
+            decimal needed = requiredAmount - currentBal;
+
+            Debug.Log($"[CashBattle] Balance insuficiente. Necesita: ${requiredAmount:F2}, Tiene: ${currentBal:F2}");
+
+            // Navegar a wallet para depositar
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET,
+                new SceneNavigator.NavigationParams
+                {
+                    TargetTab = "Deposit",
+                    ShowPopup = true
+                });
         }
 
         #endregion
 
         #region Matchmaking
 
-        private void StartMatchmaking(List<GameType> games, decimal entryFee)
+        private async void StartMatchmakingAsync(CashGameType gameType, decimal entryFee)
         {
             NavigateTo(CashBattleState.Matchmaking);
+
+            if (matchmakingStatusText != null)
+            {
+                matchmakingStatusText.text = "Reservando fondos...";
+            }
+
+            // Reservar fondos
+            var reserveResult = await _walletService.ReserveFunds(entryFee, "pending_match");
+
+            if (!reserveResult.Success)
+            {
+                Debug.LogError("[CashBattle] Error al reservar fondos");
+                NavigateTo(CashBattleState.GameSelection);
+                return;
+            }
 
             if (matchmakingStatusText != null)
             {
                 matchmakingStatusText.text = "Buscando oponente...";
             }
 
-            // TODO: Implement actual matchmaking with Triumph
-            // Triumph.FindMatch(games, entryFee, OnMatchFound, OnMatchmakingFailed);
+            // Iniciar matchmaking
+            var result = await _matchmakingService.FindMatch(gameType, entryFee);
 
-            // For now, simulate finding an opponent
-            Invoke(nameof(SimulateMatchFound), 3f);
+            if (!result.Success)
+            {
+                Debug.LogError($"[CashBattle] Error en matchmaking: {result.Message}");
+                await _walletService.ReleaseFunds("pending_match");
+                NavigateTo(CashBattleState.GameSelection);
+            }
+            // Si es exitoso, OnMatchFound se encargará
         }
 
-        private void SimulateMatchFound()
+        private async void ConfirmAndLoadGame()
         {
-            Debug.Log("[CashBattle] Match encontrado (simulación)");
+            if (_matchmakingService.CurrentMatch == null) return;
 
-            if (matchmakingStatusText != null)
+            var result = await _matchmakingService.ConfirmMatch(_matchmakingService.CurrentMatch.MatchId);
+
+            if (result.Success)
             {
-                matchmakingStatusText.text = "¡Oponente encontrado!";
+                LoadGameScene();
             }
-
-            // TODO: Load game scene with context
-            Invoke(nameof(LoadGameScene), 1.5f);
         }
 
         private void LoadGameScene()
         {
-            // TODO: Set up GameContext and load appropriate scene
-            Debug.Log("[CashBattle] Cargando escena de juego...");
+            var match = _matchmakingService.CurrentMatch;
+            if (match == null) return;
 
-            // For now, just return to main
-            NavigateTo(CashBattleState.Main);
+            Debug.Log($"[CashBattle] Cargando juego: {match.GameType}");
+
+            // TODO: Cargar escena del juego correspondiente con contexto de Cash Battle
+            string sceneName = match.GameType switch
+            {
+                CashGameType.DigitRush => "DigitRush",
+                CashGameType.FlashTap => "FlashTap",
+                CashGameType.MemoryPairs => "MemoryPairs",
+                CashGameType.OddOneOut => "OddOneOut",
+                CashGameType.QuickMath => "QuickMath",
+                _ => "DigitRush"
+            };
+
+            // TODO: Pasar contexto de Cash Battle al juego
+            // GameContext.SetCashBattleMode(match);
+
+            SceneManager.LoadScene(sceneName);
         }
 
-        private void CancelMatchmaking()
+        private async void CancelMatchmaking()
         {
-            Debug.Log("[CashBattle] Matchmaking cancelado");
+            Debug.Log("[CashBattle] Cancelando matchmaking...");
 
-            // Cancel any pending invokes
-            CancelInvoke(nameof(SimulateMatchFound));
-            CancelInvoke(nameof(LoadGameScene));
+            CancelInvoke(nameof(ConfirmAndLoadGame));
 
-            // TODO: Cancel matchmaking on server
-            // Triumph.CancelMatchmaking();
+            if (_matchmakingService.IsSearching)
+            {
+                await _matchmakingService.CancelSearch();
+            }
+
+            await _walletService.ReleaseFunds("pending_match");
 
             NavigateTo(CashBattleState.GameSelection);
         }
@@ -546,65 +671,64 @@ namespace DigitPark.Managers
 
         #region Tournament
 
-        private void JoinTournament(TournamentInfo tournament)
+        private async void JoinTournamentAsync(UITournamentInfo tournament)
         {
             Debug.Log($"[CashBattle] Unirse a torneo: {tournament.Name}");
 
-            // TODO: Implement tournament join via Triumph
-            // Triumph.JoinTournament(tournament.Id, OnTournamentJoined, OnTournamentJoinFailed);
+            // Usar el servicio de torneos
+            var result = await _tournamentService.JoinTournament(tournament.Id);
+
+            if (result.Success)
+            {
+                Debug.Log("[CashBattle] Inscripción exitosa");
+                // TODO: Mostrar confirmación y navegar a lobby del torneo
+            }
+            else
+            {
+                Debug.LogError($"[CashBattle] Error al unirse: {result.Message}");
+            }
         }
 
         #endregion
 
-        #region Public API for Triumph Integration
+        #region Public API (Legacy Support)
 
         /// <summary>
-        /// Called by Triumph SDK when age verification completes
-        /// </summary>
-        public void OnTriumphAgeVerified(bool success)
-        {
-            OnAgeVerificationComplete(success);
-        }
-
-        /// <summary>
-        /// Called by Triumph SDK when balance updates
+        /// Called by Triumph SDK when balance updates (legacy)
         /// </summary>
         public void OnTriumphBalanceUpdated(float newBalance)
         {
-            SetBalance(newBalance);
+            // El servicio de wallet maneja esto automáticamente ahora
+            UpdateBalanceDisplay();
         }
 
         /// <summary>
-        /// Opens Triumph deposit flow
+        /// Opens deposit flow
         /// </summary>
         public void OpenDeposit()
         {
-            // TODO: Triumph.OpenDeposit();
-            Debug.Log("[CashBattle] Opening deposit flow");
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
         }
 
         /// <summary>
-        /// Opens Triumph withdraw flow
+        /// Opens withdraw flow
         /// </summary>
         public void OpenWithdraw()
         {
-            // TODO: Triumph.OpenWithdraw();
-            Debug.Log("[CashBattle] Opening withdraw flow");
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
         }
 
         #endregion
     }
 
     /// <summary>
-    /// States for CashBattle navigation
+    /// States for CashBattle navigation (within this scene only)
     /// </summary>
     public enum CashBattleState
     {
         Main,
         GameSelection,
         TournamentList,
-        Wallet,
-        History,
         Matchmaking
     }
 }

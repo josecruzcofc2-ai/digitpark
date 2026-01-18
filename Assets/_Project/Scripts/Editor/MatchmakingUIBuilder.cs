@@ -5,6 +5,7 @@ using UnityEditor;
 
 namespace DigitPark.Editor
 {
+    using DigitPark.Animations;
     /// <summary>
     /// Editor script to build the Matchmaking scene UI with professional neon style
     /// VS screen with player cards, searching animation, and countdown
@@ -21,7 +22,7 @@ namespace DigitPark.Editor
         private static readonly Color DARK_BG = new Color(0.05f, 0.08f, 0.12f);
         private static readonly Color CARD_BG = new Color(0.08f, 0.12f, 0.18f);
 
-        [MenuItem("DigitPark/Build Matchmaking UI")]
+        [MenuItem("DigitPark/UI Builders/Core/Matchmaking", false, 151)]
         public static void BuildUI()
         {
             // Find or create Canvas
@@ -66,7 +67,109 @@ namespace DigitPark.Editor
             // Find and setup MatchmakingManager
             SetupMatchmakingManager(canvas.transform);
 
+            // Add and configure MatchmakingAnimator for VS animations
+            AddMatchmakingAnimator(canvas.gameObject, mainContainer.transform);
+
             Debug.Log("[MatchmakingUIBuilder] UI created successfully!");
+        }
+
+        /// <summary>
+        /// Adds and configures MatchmakingAnimator for professional VS animations
+        /// </summary>
+        private static void AddMatchmakingAnimator(GameObject canvas, Transform mainContainer)
+        {
+            MatchmakingAnimator animator = canvas.GetComponent<MatchmakingAnimator>();
+            if (animator == null)
+                animator = canvas.AddComponent<MatchmakingAnimator>();
+
+            // Get references
+            Transform playerCard = mainContainer.Find("PlayerSection/PlayerCard");
+            Transform opponentCard = mainContainer.Find("OpponentSection/OpponentCard");
+            Transform playerAvatar = mainContainer.Find("PlayerSection/PlayerCard/PlayerAvatar");
+            Transform opponentAvatar = mainContainer.Find("OpponentSection/OpponentCard/OpponentAvatar");
+            Transform playerName = mainContainer.Find("PlayerSection/PlayerCard/PlayerNameText");
+            Transform opponentName = mainContainer.Find("OpponentSection/OpponentCard/OpponentNameText");
+            Transform vsContainer = mainContainer.Find("VSContainer");
+            Transform vsText = vsContainer?.Find("VSText");
+            Transform vsBg = vsContainer?.Find("VSBackground");
+            Transform searchIndicator = mainContainer.Find("StatusSection/SearchingSpinner");
+            Transform searchRing = mainContainer.Find("StatusSection/SearchingSpinner/SearchingRing");
+            Transform statusText = mainContainer.Find("StatusSection/StatusText");
+
+            // Create screen flash for impact effect
+            GameObject screenFlash = CreateElement(mainContainer, "ScreenFlash");
+            RectTransform flashRT = screenFlash.GetComponent<RectTransform>();
+            flashRT.anchorMin = Vector2.zero;
+            flashRT.anchorMax = Vector2.one;
+            flashRT.offsetMin = Vector2.zero;
+            flashRT.offsetMax = Vector2.zero;
+            Image flashImg = screenFlash.AddComponent<Image>();
+            flashImg.color = new Color(1, 1, 1, 0);
+            flashImg.raycastTarget = false;
+            screenFlash.SetActive(false);
+            screenFlash.transform.SetAsLastSibling();
+
+            // Create opponent silhouette for reveal effect
+            GameObject silhouette = CreateElement(mainContainer.Find("OpponentSection/OpponentCard"), "OpponentSilhouette");
+            RectTransform silhouetteRT = silhouette.GetComponent<RectTransform>();
+            silhouetteRT.anchorMin = new Vector2(0.2f, 0.45f);
+            silhouetteRT.anchorMax = new Vector2(0.8f, 0.9f);
+            silhouetteRT.offsetMin = Vector2.zero;
+            silhouetteRT.offsetMax = Vector2.zero;
+            Image silhouetteImg = silhouette.AddComponent<Image>();
+            silhouetteImg.color = Color.black;
+            silhouette.SetActive(false);
+
+            // Configure via SerializedObject
+            SerializedObject so = new SerializedObject(animator);
+
+            // Player cards
+            if (playerCard != null)
+                so.FindProperty("playerCard").objectReferenceValue = playerCard.GetComponent<RectTransform>();
+            if (opponentCard != null)
+                so.FindProperty("opponentCard").objectReferenceValue = opponentCard.GetComponent<RectTransform>();
+            if (playerAvatar != null)
+                so.FindProperty("playerAvatar").objectReferenceValue = playerAvatar.GetComponent<Image>();
+            if (opponentAvatar != null)
+                so.FindProperty("opponentAvatar").objectReferenceValue = opponentAvatar.GetComponent<Image>();
+            if (playerName != null)
+                so.FindProperty("playerName").objectReferenceValue = playerName.GetComponent<TextMeshProUGUI>();
+            if (opponentName != null)
+                so.FindProperty("opponentName").objectReferenceValue = opponentName.GetComponent<TextMeshProUGUI>();
+
+            // VS element
+            if (vsContainer != null)
+                so.FindProperty("vsContainer").objectReferenceValue = vsContainer.GetComponent<RectTransform>();
+            if (vsText != null)
+                so.FindProperty("vsText").objectReferenceValue = vsText.GetComponent<TextMeshProUGUI>();
+            if (vsBg != null)
+                so.FindProperty("vsGlow").objectReferenceValue = vsBg.GetComponent<Image>();
+
+            // Search animation
+            if (searchIndicator != null)
+                so.FindProperty("searchIndicator").objectReferenceValue = searchIndicator.GetComponent<RectTransform>();
+            if (searchRing != null)
+                so.FindProperty("searchRing").objectReferenceValue = searchRing.GetComponent<Image>();
+            if (statusText != null)
+                so.FindProperty("searchingText").objectReferenceValue = statusText.GetComponent<TextMeshProUGUI>();
+
+            // Screen effects
+            so.FindProperty("screenFlash").objectReferenceValue = flashImg;
+            so.FindProperty("opponentSilhouette").objectReferenceValue = silhouetteImg;
+
+            // Animation settings for impactful VS effect
+            so.FindProperty("cardSlideDistance").floatValue = 800f;
+            so.FindProperty("cardSlideDuration").floatValue = 0.5f;
+            so.FindProperty("vsPopDuration").floatValue = 0.4f;
+            so.FindProperty("searchRotationSpeed").floatValue = 2f;
+
+            so.ApplyModifiedProperties();
+
+            // Add AudioSource if needed
+            if (canvas.GetComponent<AudioSource>() == null)
+                canvas.AddComponent<AudioSource>();
+
+            Debug.Log("[MatchmakingUIBuilder] MatchmakingAnimator configurado con animaciones VS profesionales");
         }
 
         private static GameObject CreateElement(Transform parent, string name)

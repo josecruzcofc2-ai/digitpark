@@ -211,7 +211,7 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            SceneManager.LoadScene("CashBattle");
+            SceneManager.LoadScene("CashBattleHub");
         }
 
         /// <summary>

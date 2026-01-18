@@ -51,7 +51,7 @@ namespace DigitPark.Editor
         private const float ITEM_HEIGHT = 180f;
         private const float ITEM_WIDTH = 160f;
 
-        [MenuItem("DigitPark/Monetization/Build Shop UI", false, 20)]
+        [MenuItem("DigitPark/UI Builders/Monetization/Shop", false, 180)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Shop UI Builder",

@@ -327,7 +327,7 @@ namespace DigitPark.Services.Firebase
 
             foreach (var t in tournaments.Values)
             {
-                if (t.status == TournamentStatus.Scheduled || t.status == TournamentStatus.Active)
+                if (t.status == Data.TournamentStatus.Scheduled || t.status == Data.TournamentStatus.Active)
                 {
                     active.Add(t);
                 }
@@ -428,7 +428,7 @@ namespace DigitPark.Services.Firebase
             foreach (var t in tournaments.Values)
             {
                 // Solo torneos activos o programados donde el jugador participa
-                if ((t.status == TournamentStatus.Scheduled || t.status == TournamentStatus.Active)
+                if ((t.status == Data.TournamentStatus.Scheduled || t.status == Data.TournamentStatus.Active)
                     && t.IsParticipating(userId))
                 {
                     playerTournaments.Add(t);

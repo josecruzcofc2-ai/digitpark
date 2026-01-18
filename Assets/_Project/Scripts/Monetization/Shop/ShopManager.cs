@@ -34,18 +34,35 @@ namespace DigitPark.Monetization
         [SerializeField] private GameObject _purchasePopup;
         [SerializeField] private GameObject _notEnoughGemsPopup;
 
+        [Header("Popup UI References")]
+        [SerializeField] private Image _popupItemIcon;
+        [SerializeField] private TextMeshProUGUI _popupItemName;
+        [SerializeField] private TextMeshProUGUI _popupItemPrice;
+        [SerializeField] private Button _popupConfirmButton;
+        [SerializeField] private Button _popupCancelButton;
+        [SerializeField] private Button _notEnoughCloseButton;
+        [SerializeField] private Button _notEnoughGetGemsButton;
+
         [Header("Navigation")]
         [SerializeField] private Button _backButton;
 
         [Header("Currency Display")]
         [SerializeField] private CurrencyDisplayUI _gemsDisplay;
         [SerializeField] private CurrencyDisplayUI _coinsDisplay;
+        [SerializeField] private TextMeshProUGUI _headerGemsText;
+        [SerializeField] private TextMeshProUGUI _headerCoinsText;
+
+        [Header("Shop Items")]
+        [SerializeField] private List<ShopItemUI> _shopItems = new List<ShopItemUI>();
 
         private ShopTab _currentTab = ShopTab.Gems;
         private Dictionary<ShopTab, Button> _tabButtons;
         private Dictionary<ShopTab, GameObject> _tabContents;
         private Dictionary<ShopTab, Image> _tabImages;
         private Dictionary<ShopTab, TextMeshProUGUI> _tabTexts;
+
+        // Current item being purchased
+        private ShopItemUI _currentPurchaseItem;
 
         // Events
         public event Action<ShopTab> OnTabChanged;
@@ -55,12 +72,126 @@ namespace DigitPark.Monetization
         private void Awake()
         {
             InitializeTabDictionaries();
+            FindShopItems();
         }
 
         private void Start()
         {
             SetupButtons();
+            SetupPopups();
+            SetupCurrencyListeners();
             HandleNavigationParams();
+            RefreshCurrencyDisplay();
+        }
+
+        private void OnDestroy()
+        {
+            RemoveCurrencyListeners();
+        }
+
+        private void FindShopItems()
+        {
+            // Find all ShopItemUI components in the scene
+            _shopItems.Clear();
+            _shopItems.AddRange(FindObjectsOfType<ShopItemUI>());
+
+            // Subscribe to item events
+            foreach (var item in _shopItems)
+            {
+                item.OnPurchaseRequested += OnItemPurchaseRequested;
+            }
+
+            Debug.Log($"[ShopManager] Found {_shopItems.Count} shop items");
+        }
+
+        private void SetupPopups()
+        {
+            // Purchase popup buttons
+            if (_popupConfirmButton != null)
+                _popupConfirmButton.onClick.AddListener(ConfirmPurchase);
+            if (_popupCancelButton != null)
+                _popupCancelButton.onClick.AddListener(CancelPurchase);
+
+            // Not enough gems popup buttons
+            if (_notEnoughCloseButton != null)
+                _notEnoughCloseButton.onClick.AddListener(HideNotEnoughGemsPopup);
+            if (_notEnoughGetGemsButton != null)
+                _notEnoughGetGemsButton.onClick.AddListener(OnGetGemsClicked);
+
+            // Make sure popups are hidden initially
+            HidePurchasePopup();
+            HideNotEnoughGemsPopup();
+        }
+
+        private void SetupCurrencyListeners()
+        {
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                currency.OnGemsChanged += OnGemsChanged;
+                currency.OnCoinsChanged += OnCoinsChanged;
+                currency.OnNotEnoughGems += OnNotEnoughGems;
+            }
+        }
+
+        private void RemoveCurrencyListeners()
+        {
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                currency.OnGemsChanged -= OnGemsChanged;
+                currency.OnCoinsChanged -= OnCoinsChanged;
+                currency.OnNotEnoughGems -= OnNotEnoughGems;
+            }
+
+            // Unsubscribe from shop items
+            foreach (var item in _shopItems)
+            {
+                if (item != null)
+                    item.OnPurchaseRequested -= OnItemPurchaseRequested;
+            }
+        }
+
+        private void OnGemsChanged(int newAmount, int delta)
+        {
+            RefreshCurrencyDisplay();
+        }
+
+        private void OnCoinsChanged(int newAmount, int delta)
+        {
+            RefreshCurrencyDisplay();
+        }
+
+        private void OnNotEnoughGems(int amountNeeded)
+        {
+            ShowNotEnoughGemsPopup();
+        }
+
+        private void RefreshCurrencyDisplay()
+        {
+            var currency = CurrencyManager.Instance;
+            if (currency == null) return;
+
+            if (_gemsDisplay != null)
+                _gemsDisplay.SetAmount(currency.Gems);
+            if (_coinsDisplay != null)
+                _coinsDisplay.SetAmount(currency.Coins);
+
+            // Also update header text if available
+            if (_headerGemsText != null)
+                _headerGemsText.text = FormatCurrency(currency.Gems);
+            if (_headerCoinsText != null)
+                _headerCoinsText.text = FormatCurrency(currency.Coins);
+        }
+
+        private string FormatCurrency(int amount)
+        {
+            if (amount >= 1000000)
+                return $"{amount / 1000000f:0.#}M";
+            else if (amount >= 10000)
+                return $"{amount / 1000f:0.#}K";
+            else
+                return amount.ToString("N0");
         }
 
         private void InitializeTabDictionaries()
@@ -214,14 +345,86 @@ namespace DigitPark.Monetization
             SceneNavigator.Instance.GoBack();
         }
 
+        // ==================== ITEM PURCHASE REQUEST ====================
+
+        private void OnItemPurchaseRequested(ShopItemUI item)
+        {
+            if (item == null || item.ItemData == null) return;
+
+            var itemData = item.ItemData;
+
+            // For real money items, show confirmation popup
+            if (itemData.priceType == PriceType.RealMoney)
+            {
+                ShowPurchasePopup(item);
+                return;
+            }
+
+            // For in-game currency, check if can afford
+            if (!itemData.CanAfford())
+            {
+                if (itemData.priceType == PriceType.Gems)
+                {
+                    ShowNotEnoughGemsPopup();
+                }
+                return;
+            }
+
+            // Show confirmation popup for all purchases
+            ShowPurchasePopup(item);
+        }
+
         // ==================== POPUP MANAGEMENT ====================
+
+        public void ShowPurchasePopup(ShopItemUI item)
+        {
+            if (_purchasePopup == null || item == null) return;
+
+            _currentPurchaseItem = item;
+            var itemData = item.ItemData;
+
+            // Populate popup
+            if (_popupItemIcon != null && itemData.icon != null)
+            {
+                _popupItemIcon.sprite = itemData.icon;
+                _popupItemIcon.color = itemData.accentColor;
+            }
+
+            if (_popupItemName != null)
+            {
+                string amountText = "";
+                switch (itemData.itemType)
+                {
+                    case ShopItemType.GemsPack:
+                        amountText = $"{itemData.GetTotalGems():N0} Gemas";
+                        break;
+                    case ShopItemType.CoinsPack:
+                        amountText = $"{itemData.GetTotalCoins():N0} Monedas";
+                        break;
+                    default:
+                        amountText = itemData.displayName;
+                        break;
+                }
+                _popupItemName.text = amountText;
+            }
+
+            if (_popupItemPrice != null)
+            {
+                string pricePrefix = itemData.priceType == PriceType.RealMoney ? "Precio: " : "";
+                _popupItemPrice.text = pricePrefix + itemData.GetFormattedPrice();
+            }
+
+            _purchasePopup.SetActive(true);
+            Debug.Log($"[ShopManager] Showing purchase popup for: {itemData.displayName}");
+        }
 
         public void ShowPurchasePopup(string itemId, string itemName, string price)
         {
             if (_purchasePopup != null)
             {
+                if (_popupItemName != null) _popupItemName.text = itemName;
+                if (_popupItemPrice != null) _popupItemPrice.text = price;
                 _purchasePopup.SetActive(true);
-                // TODO: Populate popup with item details
             }
         }
 
@@ -231,6 +434,7 @@ namespace DigitPark.Monetization
             {
                 _purchasePopup.SetActive(false);
             }
+            _currentPurchaseItem = null;
         }
 
         public void ShowNotEnoughGemsPopup()
@@ -249,20 +453,68 @@ namespace DigitPark.Monetization
             }
         }
 
+        private void OnGetGemsClicked()
+        {
+            HideNotEnoughGemsPopup();
+            SwitchToTab(ShopTab.Gems);
+        }
+
         // ==================== PURCHASE METHODS ====================
 
         public void PurchaseItem(string itemId)
         {
-            // TODO: Implement actual purchase logic with payment provider
             Debug.Log($"[ShopManager] Purchasing item: {itemId}");
             OnItemPurchased?.Invoke(itemId);
         }
 
         public void ConfirmPurchase()
         {
-            // Called when user confirms in popup
+            if (_currentPurchaseItem == null)
+            {
+                HidePurchasePopup();
+                return;
+            }
+
+            var itemData = _currentPurchaseItem.ItemData;
+
+            // Handle real money purchases (IAP)
+            if (itemData.priceType == PriceType.RealMoney)
+            {
+                ProcessIAPPurchase(itemData);
+            }
+            else
+            {
+                // In-game currency purchase
+                bool success = _currentPurchaseItem.TryPurchase();
+                if (success)
+                {
+                    OnItemPurchased?.Invoke(itemData.itemId);
+                    Debug.Log($"[ShopManager] Purchase successful: {itemData.displayName}");
+                }
+            }
+
             HidePurchasePopup();
-            // TODO: Process purchase
+        }
+
+        private void ProcessIAPPurchase(ShopItemData itemData)
+        {
+            // For now, simulate IAP purchase
+            // In production, this would call PremiumManager or Unity IAP
+            Debug.Log($"[ShopManager] Processing IAP: {itemData.iapProductId}");
+
+            // Simulate successful purchase
+            StartCoroutine(SimulateIAPPurchase(itemData));
+        }
+
+        private System.Collections.IEnumerator SimulateIAPPurchase(ShopItemData itemData)
+        {
+            yield return new WaitForSeconds(0.5f);
+
+            // Grant the rewards
+            itemData.GrantRewards();
+
+            OnItemPurchased?.Invoke(itemData.itemId);
+            Debug.Log($"[ShopManager] IAP purchase completed: {itemData.displayName}");
         }
 
         public void CancelPurchase()
@@ -278,6 +530,34 @@ namespace DigitPark.Monetization
                 _gemsDisplay.SetAmount(gems);
             if (_coinsDisplay != null)
                 _coinsDisplay.SetAmount(coins);
+        }
+
+        /// <summary>
+        /// Registra un ShopItemUI manualmente
+        /// </summary>
+        public void RegisterShopItem(ShopItemUI item)
+        {
+            if (item != null && !_shopItems.Contains(item))
+            {
+                _shopItems.Add(item);
+                item.OnPurchaseRequested += OnItemPurchaseRequested;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todos los items de una tab especifica
+        /// </summary>
+        public List<ShopItemUI> GetItemsForTab(ShopTab tab)
+        {
+            var result = new List<ShopItemUI>();
+            foreach (var item in _shopItems)
+            {
+                if (item != null && item.ItemData != null && item.ItemData.shopTab == tab)
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
         }
     }
 }

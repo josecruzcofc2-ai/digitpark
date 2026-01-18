@@ -12,7 +12,7 @@ namespace DigitPark.Editor
     /// </summary>
     public class PremiumUISetup : EditorWindow
     {
-        [MenuItem("DigitPark/Setup Premium UI")]
+        [MenuItem("DigitPark/UI/Setup Premium UI", false, 360)]
         public static void ShowWindow()
         {
             GetWindow<PremiumUISetup>("Premium UI Setup");
@@ -352,14 +352,14 @@ namespace DigitPark.Editor
             GameObject premiumBanner = CreatePremiumBanner(resultPanel.transform);
 
             // Buscar GameManager y conectar referencias
-            var gameManager = Object.FindObjectOfType<DigitPark.Managers.GameManager>();
+            var gameManager = Object.FindObjectOfType<DigitPark.Managers.DigitRushController>();
             if (gameManager != null)
             {
-                ConnectGameManagerReferences(gameManager, premiumBanner);
+                ConnectDigitRushControllerReferences(gameManager, premiumBanner);
             }
             else
             {
-                Debug.LogWarning("[PremiumUISetup] No se encontró GameManager. Conecta las referencias manualmente.");
+                Debug.LogWarning("[PremiumUISetup] No se encontró DigitRushController. Conecta las referencias manualmente.");
             }
 
             // Marcar la escena como modificada
@@ -429,7 +429,7 @@ namespace DigitPark.Editor
             return containerObj;
         }
 
-        private static void ConnectGameManagerReferences(DigitPark.Managers.GameManager manager, GameObject premiumBanner)
+        private static void ConnectDigitRushControllerReferences(DigitPark.Managers.DigitRushController manager, GameObject premiumBanner)
         {
             SerializedObject so = new SerializedObject(manager);
 
@@ -457,7 +457,7 @@ namespace DigitPark.Editor
             }
 
             so.ApplyModifiedProperties();
-            Debug.Log("[PremiumUISetup] Referencias conectadas al GameManager");
+            Debug.Log("[PremiumUISetup] Referencias conectadas al DigitRushController");
         }
 
         #endregion

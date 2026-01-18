@@ -21,7 +21,7 @@ namespace DigitPark.Editor
         private static readonly Color CARD_BG = new Color(0.04f, 0.08f, 0.12f, 0.98f);
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.65f, 0.7f, 1f);
 
-        [MenuItem("DigitPark/Build PlayModeSelection UI")]
+        [MenuItem("DigitPark/UI Builders/Core/PlayModeSelection", false, 152)]
         public static void ShowWindow()
         {
             GetWindow<PlayModeSelectionUIBuilder>("PlayModeSelection UI");

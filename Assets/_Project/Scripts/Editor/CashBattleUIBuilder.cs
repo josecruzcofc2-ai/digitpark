@@ -35,7 +35,7 @@ namespace DigitPark.Editor
 
         private static readonly Color CYAN_ACCENT = new Color(0f, 0.9f, 1f, 1f);             // Keep some cyan for contrast
 
-        [MenuItem("DigitPark/UI Builders/Build CashBattle Premium UI")]
+        [MenuItem("DigitPark/UI Builders/CashBattle/CashBattle Hub", false, 250)]
         public static void ShowWindow()
         {
             GetWindow<CashBattleUIBuilder>("CashBattle UI Builder");

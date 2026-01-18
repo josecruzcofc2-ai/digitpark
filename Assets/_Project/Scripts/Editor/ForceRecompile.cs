@@ -8,7 +8,7 @@ namespace DigitPark.Editor
     /// </summary>
     public static class ForceRecompile
     {
-        [MenuItem("Tools/Force Recompile Scripts")]
+        [MenuItem("DigitPark/Tools/Force Recompile Scripts", false, 10)]
         public static void RecompileScripts()
         {
             Debug.Log("[ForceRecompile] Forzando recompilación...");

@@ -5,6 +5,7 @@ using TMPro;
 
 namespace DigitPark.Editor
 {
+    using DigitPark.Animations;
     /// <summary>
     /// Construye la UI completa de Battle Pass (Pase de Batalla)
     /// Incluye: SafeArea, Header, Season Info, Level Progress, Tier ScrollView, Premium Purchase
@@ -56,7 +57,7 @@ namespace DigitPark.Editor
         private const float CONTENT_PADDING = 20f;
         private const float BOTTOM_BUTTON_HEIGHT = 80f;
 
-        [MenuItem("DigitPark/Monetization/Build Battle Pass UI", false, 23)]
+        [MenuItem("DigitPark/UI Builders/Monetization/BattlePass", false, 181)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Battle Pass UI Builder",
@@ -501,7 +502,47 @@ namespace DigitPark.Editor
                 CreateTierCard(content, $"Tier_{i}", i, isClaimed, isCurrent, isLocked);
             }
 
-            Debug.Log("[BattlePassUIBuilder] TiersScrollView creado");
+            // Add BattlePassController for Clash Royale-style animations
+            AddBattlePassController(scrollView, scrollRect, contentRT, viewportRT);
+
+            Debug.Log("[BattlePassUIBuilder] TiersScrollView creado con BattlePassController");
+        }
+
+        /// <summary>
+        /// Adds and configures the BattlePassController for professional animations
+        /// </summary>
+        private static void AddBattlePassController(GameObject scrollView, ScrollRect scrollRect, RectTransform content, RectTransform viewport)
+        {
+            BattlePassController controller = scrollView.GetComponent<BattlePassController>();
+            if (controller == null)
+                controller = scrollView.AddComponent<BattlePassController>();
+
+            // Configure via SerializedObject for editor
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("scrollRect").objectReferenceValue = scrollRect;
+            so.FindProperty("content").objectReferenceValue = content;
+            so.FindProperty("viewport").objectReferenceValue = viewport;
+            so.FindProperty("tierWidth").floatValue = TIER_WIDTH;
+            so.FindProperty("tierSpacing").floatValue = 0f;
+            so.FindProperty("totalTiers").intValue = 30;
+            so.FindProperty("currentTier").intValue = 12;
+
+            // Snap settings for smooth experience
+            so.FindProperty("enableSnap").boolValue = true;
+            so.FindProperty("snapSpeed").floatValue = 10f;
+
+            // Scale effect for Clash Royale-style depth
+            so.FindProperty("selectedScale").floatValue = 1.15f;
+            so.FindProperty("nearbyScale").floatValue = 1.0f;
+            so.FindProperty("farScale").floatValue = 0.85f;
+
+            // Glow effect
+            so.FindProperty("enableGlow").boolValue = true;
+            so.FindProperty("glowColor").colorValue = new Color(0.6f, 0.3f, 0.9f, 0.5f); // Purple to match theme
+
+            so.ApplyModifiedProperties();
+
+            Debug.Log("[BattlePassUIBuilder] BattlePassController configurado");
         }
 
         private static void CreateTierCard(GameObject parent, string name, int tierNumber, bool isClaimed, bool isCurrent, bool isLocked)

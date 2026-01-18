@@ -127,7 +127,7 @@ namespace DigitPark.Managers
             Debug.Log("[PlayModeSelection] Modo Torneos seleccionado");
 
             // Navigate to Tournaments (free tournaments)
-            SceneManager.LoadScene("Tournaments");
+            SceneManager.LoadScene("TournamentsBrowser");
         }
 
         #endregion

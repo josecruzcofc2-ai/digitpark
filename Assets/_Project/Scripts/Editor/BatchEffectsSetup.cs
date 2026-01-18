@@ -11,7 +11,7 @@ namespace DigitPark.Editor
     /// </summary>
     public class BatchEffectsSetup
     {
-        [MenuItem("DigitPark/Effects/[AUTO] Setup Complete System")]
+        [MenuItem("DigitPark/Effects/[AUTO] Setup Complete System", false, 330)]
         public static void SetupCompleteSystem()
         {
             Debug.Log("=== INICIANDO SETUP COMPLETO DE EFECTOS ===");

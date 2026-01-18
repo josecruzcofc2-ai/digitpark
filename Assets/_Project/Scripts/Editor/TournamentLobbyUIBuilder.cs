@@ -43,7 +43,7 @@ namespace DigitPark.Editor
         private const float ACTION_BUTTONS_HEIGHT = 80f;
         private const float CONTENT_PADDING = 20f;
 
-        [MenuItem("DigitPark/Tournaments/Build TournamentLobby UI", false, 12)]
+        [MenuItem("DigitPark/UI Builders/Tournaments/TournamentLobby", false, 234)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("TournamentLobby UI Builder",

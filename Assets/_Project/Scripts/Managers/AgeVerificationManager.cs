@@ -1,0 +1,275 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System;
+using DigitPark.Monetization;
+using DigitPark.Services;
+
+namespace DigitPark.Managers
+{
+    /// <summary>
+    /// Manager para la escena de verificación de edad (18+).
+    /// SIMPLIFICADO: Triumph SDK maneja todo el flujo de KYC con su propia UI.
+    /// Este manager solo lanza el flujo de Triumph y muestra el estado.
+    /// </summary>
+    public class AgeVerificationManager : MonoBehaviour
+    {
+        [Header("UI - Textos")]
+        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private TextMeshProUGUI descriptionText;
+        [SerializeField] private TextMeshProUGUI statusText;
+
+        [Header("UI - Botones")]
+        [SerializeField] private Button verifyButton;      // Botón principal para iniciar verificación Triumph
+        [SerializeField] private Button backButton;        // Botón de regreso
+
+        [Header("UI - Indicadores (Opcionales)")]
+        [SerializeField] private GameObject loadingIndicator;
+        [SerializeField] private GameObject successIcon;
+        [SerializeField] private GameObject errorIcon;
+
+        [Header("URLs Legales")]
+        [SerializeField] private string termsUrl = "https://digitpark.com/terms";
+        [SerializeField] private string privacyUrl = "https://digitpark.com/privacy";
+
+        // Events
+        public static event Action<bool> OnVerificationComplete;
+
+        private bool isVerifying = false;
+        private IKYCService _kycService;
+
+        private void Start()
+        {
+            _kycService = ServiceLocator.KYC;
+
+            if (_kycService == null)
+            {
+                Debug.LogError("[AgeVerification] ServiceLocator.KYC no disponible.");
+            }
+
+            SetupUI();
+            SetupListeners();
+            LoadCurrentState();
+        }
+
+        private void OnEnable()
+        {
+            if (_kycService != null)
+            {
+                _kycService.OnStatusChanged += OnKYCStatusChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_kycService != null)
+            {
+                _kycService.OnStatusChanged -= OnKYCStatusChanged;
+            }
+        }
+
+        private void SetupUI()
+        {
+            if (loadingIndicator) loadingIndicator.SetActive(false);
+            if (successIcon) successIcon.SetActive(false);
+            if (errorIcon) errorIcon.SetActive(false);
+            if (statusText) statusText.text = "";
+        }
+
+        private void SetupListeners()
+        {
+            if (verifyButton) verifyButton.onClick.AddListener(OnVerifyClicked);
+            if (backButton) backButton.onClick.AddListener(OnBackClicked);
+        }
+
+        private void LoadCurrentState()
+        {
+            if (_kycService == null) return;
+
+            var status = _kycService.CurrentStatus;
+            Debug.Log($"[AgeVerification] Estado KYC actual: {status}");
+            UpdateUIForStatus(status);
+        }
+
+        private void OnKYCStatusChanged(KYCStatus newStatus)
+        {
+            Debug.Log($"[AgeVerification] Estado KYC cambió a: {newStatus}");
+            UpdateUIForStatus(newStatus);
+        }
+
+        private void UpdateUIForStatus(KYCStatus status)
+        {
+            switch (status)
+            {
+                case KYCStatus.NotStarted:
+                case KYCStatus.AgeVerified:
+                    ShowVerificationNeeded();
+                    break;
+
+                case KYCStatus.DocumentPending:
+                    ShowPendingVerification();
+                    break;
+
+                case KYCStatus.FullyVerified:
+                    ShowFullyVerified();
+                    break;
+
+                case KYCStatus.Rejected:
+                    ShowRejected();
+                    break;
+            }
+        }
+
+        private void ShowVerificationNeeded()
+        {
+            if (statusText)
+            {
+                statusText.text = "Toca el botón para iniciar la verificación de edad";
+                statusText.color = Color.white;
+            }
+            if (successIcon) successIcon.SetActive(false);
+            if (errorIcon) errorIcon.SetActive(false);
+            if (verifyButton) verifyButton.interactable = true;
+        }
+
+        private void ShowPendingVerification()
+        {
+            if (statusText)
+            {
+                statusText.text = "Verificación en proceso...";
+                statusText.color = new Color(1f, 0.84f, 0f);
+            }
+            if (loadingIndicator) loadingIndicator.SetActive(true);
+            if (verifyButton) verifyButton.interactable = false;
+        }
+
+        private void ShowFullyVerified()
+        {
+            if (statusText)
+            {
+                statusText.text = "¡Verificación completa! Puedes acceder a Cash Battle.";
+                statusText.color = new Color(0.3f, 1f, 0.5f);
+            }
+            if (successIcon) successIcon.SetActive(true);
+            if (errorIcon) errorIcon.SetActive(false);
+            if (loadingIndicator) loadingIndicator.SetActive(false);
+            if (verifyButton) verifyButton.gameObject.SetActive(false);
+
+            OnVerificationComplete?.Invoke(true);
+            Invoke(nameof(NavigateBack), 1.5f);
+        }
+
+        private void ShowRejected()
+        {
+            if (statusText)
+            {
+                statusText.text = "Verificación rechazada. Debes ser mayor de 18 años.";
+                statusText.color = new Color(1f, 0.4f, 0.4f);
+            }
+            if (successIcon) successIcon.SetActive(false);
+            if (errorIcon) errorIcon.SetActive(true);
+            if (loadingIndicator) loadingIndicator.SetActive(false);
+            if (verifyButton) verifyButton.interactable = true;
+
+            OnVerificationComplete?.Invoke(false);
+        }
+
+        /// <summary>
+        /// Llamado cuando el usuario toca "Verificar mi Edad"
+        /// Lanza el flujo de verificación de Triumph SDK
+        /// </summary>
+        private async void OnVerifyClicked()
+        {
+            if (isVerifying || _kycService == null) return;
+
+            isVerifying = true;
+            if (loadingIndicator) loadingIndicator.SetActive(true);
+            if (statusText) statusText.text = "Iniciando verificación...";
+            if (verifyButton) verifyButton.interactable = false;
+
+            Debug.Log("[AgeVerification] Iniciando verificación via Triumph SDK");
+
+            // Triumph SDK maneja TODO el flujo de verificación con su propia UI
+            var result = await _kycService.StartIdentityVerification();
+
+            isVerifying = false;
+            if (loadingIndicator) loadingIndicator.SetActive(false);
+
+            if (!result.Success)
+            {
+                ShowError(result.Message ?? "Error en la verificación");
+            }
+            // Si es exitoso, OnKYCStatusChanged actualizará la UI
+        }
+
+        private void ShowError(string message)
+        {
+            if (statusText)
+            {
+                statusText.text = message;
+                statusText.color = new Color(1f, 0.4f, 0.4f);
+            }
+            if (successIcon) successIcon.SetActive(false);
+            if (errorIcon) errorIcon.SetActive(true);
+            if (verifyButton) verifyButton.interactable = true;
+        }
+
+        private void OnBackClicked()
+        {
+            NavigateBack();
+        }
+
+        private void NavigateBack()
+        {
+            if (SceneNavigator.Instance != null)
+            {
+                SceneNavigator.Instance.GoBack();
+            }
+        }
+
+        /// <summary>
+        /// Check if user is age verified (legacy static method)
+        /// Ahora usa ServiceLocator
+        /// </summary>
+        public static bool IsVerified()
+        {
+            if (ServiceLocator.KYC != null)
+            {
+                return ServiceLocator.KYC.CanAccessCashBattle;
+            }
+            // Fallback a PlayerPrefs para compatibilidad
+            return PlayerPrefs.GetInt("AgeVerified", 0) == 1;
+        }
+
+        /// <summary>
+        /// Check if user is fully KYC verified
+        /// </summary>
+        public static bool IsFullyVerified()
+        {
+            return ServiceLocator.KYC?.IsFullyVerified ?? false;
+        }
+
+        /// <summary>
+        /// Get current KYC status
+        /// </summary>
+        public static KYCStatus GetKYCStatus()
+        {
+            return ServiceLocator.KYC?.CurrentStatus ?? KYCStatus.NotStarted;
+        }
+
+        /// <summary>
+        /// Reset verification status (for testing)
+        /// </summary>
+        public static async void ResetVerification()
+        {
+            if (ServiceLocator.KYC != null)
+            {
+                await ServiceLocator.KYC.ResetVerification();
+            }
+            // También limpiar PlayerPrefs por compatibilidad
+            PlayerPrefs.DeleteKey("AgeVerified");
+            PlayerPrefs.DeleteKey("BirthDate");
+            PlayerPrefs.Save();
+        }
+    }
+}

@@ -32,7 +32,7 @@ namespace DigitPark.Editor
         private const float MY_TOURNAMENT_HEIGHT = 180f; // Card más grande para "Mis Torneos"
         private const float ITEM_WIDTH = 1000f; // Casi todo el ancho con margenes
 
-        [MenuItem("DigitPark/Create Item Prefabs")]
+        [MenuItem("DigitPark/Prefabs/Create Item Prefabs", false, 600)]
         public static void ShowWindow()
         {
             GetWindow<ItemPrefabBuilder>("Item Prefab Builder");

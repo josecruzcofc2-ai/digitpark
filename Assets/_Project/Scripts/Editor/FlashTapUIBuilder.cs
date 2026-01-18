@@ -23,7 +23,7 @@ namespace DigitPark.Editor
         private const string BUTTON_UP_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Up.png";
         private const string BUTTON_DOWN_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Down.png";
 
-        [MenuItem("DigitPark/Rebuild FlashTap UI")]
+        [MenuItem("DigitPark/UI Builders/Games/FlashTap", false, 111)]
         public static void ShowWindow()
         {
             GetWindow<FlashTapUIBuilder>("FlashTap UI Builder");

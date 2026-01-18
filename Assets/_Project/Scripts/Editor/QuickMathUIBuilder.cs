@@ -30,7 +30,7 @@ namespace DigitPark.Editor
         private const float EQUATION_PANEL_WIDTH = 850f;
         private const float EQUATION_FONT_SIZE = 80f;
 
-        [MenuItem("DigitPark/Rebuild QuickMath UI")]
+        [MenuItem("DigitPark/UI Builders/Games/QuickMath", false, 114)]
         public static void ShowWindow()
         {
             GetWindow<QuickMathUIBuilder>("QuickMath UI Builder");

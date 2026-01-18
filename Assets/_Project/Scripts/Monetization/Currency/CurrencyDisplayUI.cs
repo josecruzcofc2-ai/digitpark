@@ -98,14 +98,46 @@ namespace DigitPark.Monetization
 
         private void SubscribeToCurrencyEvents()
         {
-            // TODO: Subscribe to CurrencyManager events when implemented
-            // CurrencyManager.Instance.OnGemsChanged += OnCurrencyChanged;
-            // CurrencyManager.Instance.OnCoinsChanged += OnCurrencyChanged;
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                if (_currencyType == CurrencyType.Gems)
+                {
+                    currency.OnGemsChanged += OnCurrencyChangedGems;
+                    SetAmount(currency.Gems, false);
+                }
+                else
+                {
+                    currency.OnCoinsChanged += OnCurrencyChangedCoins;
+                    SetAmount(currency.Coins, false);
+                }
+            }
         }
 
         private void UnsubscribeFromCurrencyEvents()
         {
-            // TODO: Unsubscribe from CurrencyManager events
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                currency.OnGemsChanged -= OnCurrencyChangedGems;
+                currency.OnCoinsChanged -= OnCurrencyChangedCoins;
+            }
+        }
+
+        private void OnCurrencyChangedGems(int newAmount, int delta)
+        {
+            if (_currencyType == CurrencyType.Gems)
+            {
+                SetAmount(newAmount);
+            }
+        }
+
+        private void OnCurrencyChangedCoins(int newAmount, int delta)
+        {
+            if (_currencyType == CurrencyType.Coins)
+            {
+                SetAmount(newAmount);
+            }
         }
 
         private void UpdateVisuals()

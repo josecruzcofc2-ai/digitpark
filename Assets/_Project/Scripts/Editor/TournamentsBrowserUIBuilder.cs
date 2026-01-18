@@ -39,7 +39,7 @@ namespace DigitPark.Editor
         private const float CONTENT_PADDING = 20f;
         private const float FAB_SIZE = 70f;
 
-        [MenuItem("DigitPark/Tournaments/Build TournamentsBrowser UI", false, 10)]
+        [MenuItem("DigitPark/UI Builders/Tournaments/TournamentsBrowser", false, 235)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("TournamentsBrowser UI Builder",

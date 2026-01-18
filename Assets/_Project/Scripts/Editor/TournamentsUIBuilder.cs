@@ -47,7 +47,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU ITEMS ====================
 
-        [MenuItem("DigitPark/Tournaments/Rebuild Complete UI", false, 0)]
+        [MenuItem("DigitPark/UI Builders/Tournaments/Rebuild Complete UI", false, 230)]
         public static void RebuildCompleteUI()
         {
             if (!ConfirmAction("Esto reconstruirá TODA la UI de Tournaments. ¿Continuar?"))
@@ -56,13 +56,13 @@ namespace DigitPark.Editor
             RedesignAll();
         }
 
-        [MenuItem("DigitPark/Tournaments/Open Builder Window", false, 1)]
+        [MenuItem("DigitPark/UI Builders/Tournaments/Open Builder Window", false, 231)]
         public static void ShowWindow()
         {
             GetWindow<TournamentsUIBuilder>("Tournaments UI Builder");
         }
 
-        [MenuItem("DigitPark/Tournaments/Quick Fix - Colors Only", false, 20)]
+        [MenuItem("DigitPark/UI Builders/Tournaments/Quick Fix - Colors Only", false, 232)]
         public static void QuickFixColors()
         {
             FixAllColors();

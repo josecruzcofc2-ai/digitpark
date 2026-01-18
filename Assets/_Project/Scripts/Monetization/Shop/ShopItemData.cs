@@ -1,0 +1,310 @@
+using UnityEngine;
+
+namespace DigitPark.Monetization
+{
+    /// <summary>
+    /// Tipo de item en la tienda
+    /// </summary>
+    public enum ShopItemType
+    {
+        GemsPack,       // Paquete de gemas (compra con dinero real)
+        CoinsPack,      // Paquete de monedas (compra con gemas)
+        Theme,          // Tema visual
+        Avatar,         // Avatar
+        SpecialOffer,   // Oferta especial (bundle)
+        BattlePass,     // Pase de batalla
+        StarterPack     // Paquete de inicio
+    }
+
+    /// <summary>
+    /// Tipo de precio del item
+    /// </summary>
+    public enum PriceType
+    {
+        RealMoney,      // Dinero real (USD/MXN)
+        Gems,           // Gemas
+        Coins,          // Monedas
+        Free            // Gratis
+    }
+
+    /// <summary>
+    /// ScriptableObject que define un item de la tienda.
+    /// Crear via: Assets > Create > DigitPark > Shop > Shop Item
+    /// </summary>
+    [CreateAssetMenu(fileName = "NewShopItem", menuName = "DigitPark/Shop/Shop Item", order = 1)]
+    public class ShopItemData : ScriptableObject
+    {
+        [Header("Identification")]
+        [Tooltip("ID unico del item (para analytics y backend)")]
+        public string itemId;
+
+        [Tooltip("Nombre mostrado en la UI")]
+        public string displayName;
+
+        [TextArea(2, 4)]
+        [Tooltip("Descripcion del item")]
+        public string description;
+
+        [Header("Type")]
+        public ShopItemType itemType = ShopItemType.GemsPack;
+        public ShopTab shopTab = ShopTab.Gems;
+
+        [Header("Visuals")]
+        public Sprite icon;
+        public Color accentColor = Color.cyan;
+
+        [Header("Pricing")]
+        public PriceType priceType = PriceType.RealMoney;
+
+        [Tooltip("Precio en dinero real (ej: 0.99, 4.99)")]
+        public float realMoneyPrice;
+
+        [Tooltip("Precio en gemas")]
+        public int gemsPrice;
+
+        [Tooltip("Precio en monedas")]
+        public int coinsPrice;
+
+        [Tooltip("ID del producto IAP (para compras reales)")]
+        public string iapProductId;
+
+        [Header("Rewards")]
+        [Tooltip("Cantidad de gemas que otorga")]
+        public int gemsAmount;
+
+        [Tooltip("Cantidad de monedas que otorga")]
+        public int coinsAmount;
+
+        [Tooltip("Porcentaje de bonus (ej: 20 = +20%)")]
+        [Range(0, 100)]
+        public int bonusPercent;
+
+        [Header("Theme/Avatar Data")]
+        [Tooltip("ID del tema que desbloquea (si aplica)")]
+        public string themeId;
+
+        [Tooltip("ID del avatar que desbloquea (si aplica)")]
+        public string avatarId;
+
+        [Header("Special Offer Settings")]
+        public bool isLimitedTime;
+        public float offerDurationHours = 24f;
+
+        [Tooltip("Precio original antes del descuento")]
+        public float originalPrice;
+
+        [Tooltip("Porcentaje de descuento mostrado")]
+        [Range(0, 99)]
+        public int discountPercent;
+
+        [Header("Display Settings")]
+        public bool isPopular;
+        public bool isBestValue;
+        public bool showBonusBadge = true;
+
+        [Tooltip("Orden de display (menor = primero)")]
+        public int sortOrder;
+
+        // ==================== COMPUTED PROPERTIES ====================
+
+        /// <summary>
+        /// Obtiene el precio formateado como string
+        /// </summary>
+        public string GetFormattedPrice()
+        {
+            switch (priceType)
+            {
+                case PriceType.RealMoney:
+                    return $"${realMoneyPrice:F2}";
+                case PriceType.Gems:
+                    return gemsPrice.ToString("N0");
+                case PriceType.Coins:
+                    return coinsPrice.ToString("N0");
+                case PriceType.Free:
+                    return "GRATIS";
+                default:
+                    return "";
+            }
+        }
+
+        /// <summary>
+        /// Obtiene el texto del bonus (ej: "+20%")
+        /// </summary>
+        public string GetBonusText()
+        {
+            if (bonusPercent > 0)
+            {
+                return $"+{bonusPercent}%";
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Obtiene el total de gemas incluyendo bonus
+        /// </summary>
+        public int GetTotalGems()
+        {
+            if (gemsAmount > 0 && bonusPercent > 0)
+            {
+                int bonus = Mathf.RoundToInt(gemsAmount * (bonusPercent / 100f));
+                return gemsAmount + bonus;
+            }
+            return gemsAmount;
+        }
+
+        /// <summary>
+        /// Obtiene el total de monedas incluyendo bonus
+        /// </summary>
+        public int GetTotalCoins()
+        {
+            if (coinsAmount > 0 && bonusPercent > 0)
+            {
+                int bonus = Mathf.RoundToInt(coinsAmount * (bonusPercent / 100f));
+                return coinsAmount + bonus;
+            }
+            return coinsAmount;
+        }
+
+        /// <summary>
+        /// Verifica si el jugador puede comprar este item
+        /// </summary>
+        public bool CanAfford()
+        {
+            var currency = CurrencyManager.Instance;
+            if (currency == null) return false;
+
+            switch (priceType)
+            {
+                case PriceType.Gems:
+                    return currency.HasEnoughGems(gemsPrice);
+                case PriceType.Coins:
+                    return currency.HasEnoughCoins(coinsPrice);
+                case PriceType.Free:
+                    return true;
+                case PriceType.RealMoney:
+                    return true; // IAP handles this
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Intenta comprar el item
+        /// </summary>
+        /// <returns>true si la compra fue exitosa</returns>
+        public bool TryPurchase()
+        {
+            var currency = CurrencyManager.Instance;
+            if (currency == null) return false;
+
+            switch (priceType)
+            {
+                case PriceType.Gems:
+                    if (!currency.SpendGems(gemsPrice)) return false;
+                    break;
+
+                case PriceType.Coins:
+                    if (!currency.SpendCoins(coinsPrice)) return false;
+                    break;
+
+                case PriceType.Free:
+                    // Free items always succeed
+                    break;
+
+                case PriceType.RealMoney:
+                    // IAP purchase - this should be handled externally
+                    Debug.LogWarning("[ShopItemData] Real money purchases should use IAP system");
+                    return false;
+            }
+
+            // Grant rewards
+            GrantRewards();
+            return true;
+        }
+
+        /// <summary>
+        /// Otorga las recompensas del item
+        /// </summary>
+        public void GrantRewards()
+        {
+            var currency = CurrencyManager.Instance;
+            if (currency == null) return;
+
+            switch (itemType)
+            {
+                case ShopItemType.GemsPack:
+                    currency.ProcessGemsPurchase(gemsAmount, GetBonusGems());
+                    break;
+
+                case ShopItemType.CoinsPack:
+                    currency.AddCoins(GetTotalCoins());
+                    break;
+
+                case ShopItemType.Theme:
+                    // TODO: Unlock theme
+                    Debug.Log($"[ShopItemData] Tema desbloqueado: {themeId}");
+                    break;
+
+                case ShopItemType.Avatar:
+                    // TODO: Unlock avatar
+                    Debug.Log($"[ShopItemData] Avatar desbloqueado: {avatarId}");
+                    break;
+
+                case ShopItemType.SpecialOffer:
+                case ShopItemType.StarterPack:
+                    // Bundle - grant multiple rewards
+                    if (gemsAmount > 0) currency.AddGems(GetTotalGems());
+                    if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
+                    if (!string.IsNullOrEmpty(themeId))
+                    {
+                        // TODO: Unlock theme
+                        Debug.Log($"[ShopItemData] Tema desbloqueado: {themeId}");
+                    }
+                    break;
+            }
+
+            Debug.Log($"[ShopItemData] Recompensas otorgadas para: {displayName}");
+        }
+
+        private int GetBonusGems()
+        {
+            if (bonusPercent > 0)
+            {
+                return Mathf.RoundToInt(gemsAmount * (bonusPercent / 100f));
+            }
+            return 0;
+        }
+
+        // ==================== VALIDATION ====================
+
+        private void OnValidate()
+        {
+            // Auto-generate itemId if empty
+            if (string.IsNullOrEmpty(itemId))
+            {
+                itemId = name.ToLower().Replace(" ", "_");
+            }
+
+            // Ensure proper tab assignment based on type
+            switch (itemType)
+            {
+                case ShopItemType.GemsPack:
+                    shopTab = ShopTab.Gems;
+                    break;
+                case ShopItemType.CoinsPack:
+                    shopTab = ShopTab.Coins;
+                    priceType = PriceType.Gems;
+                    break;
+                case ShopItemType.Theme:
+                case ShopItemType.Avatar:
+                    shopTab = ShopTab.Themes;
+                    break;
+                case ShopItemType.SpecialOffer:
+                case ShopItemType.BattlePass:
+                case ShopItemType.StarterPack:
+                    shopTab = ShopTab.Offers;
+                    break;
+            }
+        }
+    }
+}

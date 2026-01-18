@@ -18,7 +18,7 @@ namespace DigitPark.Editor
         private static readonly Color INPUT_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color PLACEHOLDER_COLOR = new Color(0.4f, 0.4f, 0.4f, 1f);
 
-        [MenuItem("DigitPark/Rebuild SearchPlayers UI")]
+        [MenuItem("DigitPark/UI Builders/Social/SearchPlayers", false, 221)]
         public static void ShowWindow()
         {
             GetWindow<SearchPlayersUIBuilder>("SearchPlayers UI Builder");

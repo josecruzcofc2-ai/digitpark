@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 618542}
   - component: {fileID: 618541}
   - component: {fileID: 618540}
+  - component: {fileID: 618546}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -308,6 +309,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 618538}
   m_CullTransparentMesh: 1
+--- !u!114 &618546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &3247849
 GameObject:
   m_ObjectHideFlags: 0
@@ -1520,6 +1554,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 44870780}
   m_CullTransparentMesh: 1
+--- !u!1 &51339186
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 51339188}
+  - component: {fileID: 51339187}
+  m_Layer: 0
+  m_Name: BattlePassManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &51339187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51339186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bdad8b534aedd44899ad87c767a290d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backButton: {fileID: 0}
+  seasonNameText: {fileID: 0}
+  timeRemainingText: {fileID: 0}
+  currentLevelText: {fileID: 0}
+  currentXPText: {fileID: 0}
+  xpProgressBar: {fileID: 0}
+  xpToNextLevelText: {fileID: 0}
+  premiumBadge: {fileID: 0}
+  buyPremiumButton: {fileID: 0}
+  premiumPriceText: {fileID: 0}
+  rewardsScrollRect: {fileID: 0}
+  rewardsContainer: {fileID: 0}
+  rewardTierPrefab: {fileID: 0}
+  rewardDetailPanel: {fileID: 0}
+  rewardDetailIcon: {fileID: 0}
+  rewardDetailNameText: {fileID: 0}
+  rewardDetailDescText: {fileID: 0}
+  rewardDetailTypeText: {fileID: 0}
+  claimRewardButton: {fileID: 0}
+  closeDetailButton: {fileID: 0}
+  buyPremiumModal: {fileID: 0}
+  premiumBenefitsText: {fileID: 0}
+  confirmBuyButton: {fileID: 0}
+  cancelBuyButton: {fileID: 0}
+  rewardClaimedPopup: {fileID: 0}
+  rewardClaimedIcon: {fileID: 0}
+  rewardClaimedText: {fileID: 0}
+  seasonName: Temporada 1
+  maxLevel: 50
+  xpPerLevel: 1000
+  seasonDurationDays: 60
+--- !u!4 &51339188
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51339186}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 540, y: 960, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &61949943
 GameObject:
   m_ObjectHideFlags: 0
@@ -1535,6 +1644,7 @@ GameObject:
   - component: {fileID: 61949947}
   - component: {fileID: 61949946}
   - component: {fileID: 61949945}
+  - component: {fileID: 61949951}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -1707,6 +1817,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 61949943}
   m_CullTransparentMesh: 1
+--- !u!114 &61949951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61949943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &63661495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1877,6 +2020,7 @@ GameObject:
   - component: {fileID: 68856799}
   - component: {fileID: 68856798}
   - component: {fileID: 68856797}
+  - component: {fileID: 68856803}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -2049,6 +2193,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 68856795}
   m_CullTransparentMesh: 1
+--- !u!114 &68856803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 68856795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &74378344
 GameObject:
   m_ObjectHideFlags: 0
@@ -2198,6 +2375,7 @@ GameObject:
   - component: {fileID: 74774933}
   - component: {fileID: 74774932}
   - component: {fileID: 74774931}
+  - component: {fileID: 74774937}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -2369,6 +2547,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 74774929}
   m_CullTransparentMesh: 1
+--- !u!114 &74774937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74774929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &91638556
 GameObject:
   m_ObjectHideFlags: 0
@@ -3710,6 +3921,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 161549039}
   m_CullTransparentMesh: 1
+--- !u!1 &164378308
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 164378309}
+  - component: {fileID: 164378311}
+  - component: {fileID: 164378310}
+  m_Layer: 0
+  m_Name: FadeImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &164378309
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164378308}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1980731591}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &164378310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164378308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &164378311
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164378308}
+  m_CullTransparentMesh: 1
 --- !u!1 &174194195
 GameObject:
   m_ObjectHideFlags: 0
@@ -4030,6 +4316,7 @@ GameObject:
   - component: {fileID: 180317361}
   - component: {fileID: 180317360}
   - component: {fileID: 180317359}
+  - component: {fileID: 180317365}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -4202,6 +4489,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 180317357}
   m_CullTransparentMesh: 1
+--- !u!114 &180317365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180317357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &185461083
 GameObject:
   m_ObjectHideFlags: 0
@@ -4217,6 +4537,7 @@ GameObject:
   - component: {fileID: 185461087}
   - component: {fileID: 185461086}
   - component: {fileID: 185461085}
+  - component: {fileID: 185461091}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -4388,6 +4709,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 185461083}
   m_CullTransparentMesh: 1
+--- !u!114 &185461091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185461083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &187317632
 GameObject:
   m_ObjectHideFlags: 0
@@ -5066,6 +5420,8 @@ GameObject:
   - component: {fileID: 209768964}
   - component: {fileID: 209768963}
   - component: {fileID: 209768962}
+  - component: {fileID: 209768967}
+  - component: {fileID: 209768968}
   m_Layer: 0
   m_Name: PremiumPurchaseArea
   m_TagString: Untagged
@@ -5218,6 +5574,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 209768960}
   m_CullTransparentMesh: 1
+--- !u!114 &209768967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 209768960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 2070907048}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minScale: 0.95
+  maxScale: 1.05
+  duration: 1
+--- !u!114 &209768968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 209768960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 683848455}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minScale: 0.95
+  maxScale: 1.05
+  duration: 1
 --- !u!1 &210116617
 GameObject:
   m_ObjectHideFlags: 0
@@ -5329,6 +5715,7 @@ GameObject:
   - component: {fileID: 213441205}
   - component: {fileID: 213441204}
   - component: {fileID: 213441203}
+  - component: {fileID: 213441209}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -5501,6 +5888,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 213441201}
   m_CullTransparentMesh: 1
+--- !u!114 &213441209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 213441201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &218002833
 GameObject:
   m_ObjectHideFlags: 0
@@ -5786,6 +6206,7 @@ GameObject:
   - component: {fileID: 236230799}
   - component: {fileID: 236230798}
   - component: {fileID: 236230797}
+  - component: {fileID: 236230803}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -5957,6 +6378,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 236230795}
   m_CullTransparentMesh: 1
+--- !u!114 &236230803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 236230795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &237526233
 GameObject:
   m_ObjectHideFlags: 0
@@ -5972,6 +6426,7 @@ GameObject:
   - component: {fileID: 237526237}
   - component: {fileID: 237526236}
   - component: {fileID: 237526235}
+  - component: {fileID: 237526241}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -6144,6 +6599,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 237526233}
   m_CullTransparentMesh: 1
+--- !u!114 &237526241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 237526233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &240078707
 GameObject:
   m_ObjectHideFlags: 0
@@ -6930,6 +7418,7 @@ GameObject:
   - component: {fileID: 246624575}
   - component: {fileID: 246624574}
   - component: {fileID: 246624573}
+  - component: {fileID: 246624579}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -7102,6 +7591,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 246624571}
   m_CullTransparentMesh: 1
+--- !u!114 &246624579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246624571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &253639294
 GameObject:
   m_ObjectHideFlags: 0
@@ -7612,6 +8134,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 263594391}
+  m_CullTransparentMesh: 1
+--- !u!1 &283196316
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 283196317}
+  - component: {fileID: 283196319}
+  - component: {fileID: 283196318}
+  m_Layer: 0
+  m_Name: ScreenFlash
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &283196317
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283196316}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 436129807}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &283196318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283196316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &283196319
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283196316}
   m_CullTransparentMesh: 1
 --- !u!1 &289092076
 GameObject:
@@ -8504,6 +9101,7 @@ GameObject:
   - component: {fileID: 316161064}
   - component: {fileID: 316161063}
   - component: {fileID: 316161062}
+  - component: {fileID: 316161068}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -8676,6 +9274,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 316161060}
   m_CullTransparentMesh: 1
+--- !u!114 &316161068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 316161060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &319854036
 GameObject:
   m_ObjectHideFlags: 0
@@ -8846,6 +9477,7 @@ GameObject:
   - component: {fileID: 320269136}
   - component: {fileID: 320269135}
   - component: {fileID: 320269134}
+  - component: {fileID: 320269140}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -9018,6 +9650,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 320269132}
   m_CullTransparentMesh: 1
+--- !u!114 &320269140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 320269132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &323114725
 GameObject:
   m_ObjectHideFlags: 0
@@ -9570,6 +10235,7 @@ GameObject:
   - component: {fileID: 346176445}
   - component: {fileID: 346176444}
   - component: {fileID: 346176443}
+  - component: {fileID: 346176449}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -9742,6 +10408,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 346176441}
   m_CullTransparentMesh: 1
+--- !u!114 &346176449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346176441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &348233140
 GameObject:
   m_ObjectHideFlags: 0
@@ -10305,6 +11004,7 @@ GameObject:
   - component: {fileID: 381015362}
   - component: {fileID: 381015361}
   - component: {fileID: 381015360}
+  - component: {fileID: 381015366}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -10476,6 +11176,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 381015358}
   m_CullTransparentMesh: 1
+--- !u!114 &381015366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381015358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &390223229
 GameObject:
   m_ObjectHideFlags: 0
@@ -12392,6 +13125,90 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &436129806
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 436129807}
+  - component: {fileID: 436129809}
+  - component: {fileID: 436129808}
+  m_Layer: 0
+  m_Name: EffectsCanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &436129807
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436129806}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 283196317}
+  m_Father: {fileID: 1902952420}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
+--- !u!114 &436129808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436129806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 1080, y: 1920}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!223 &436129809
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436129806}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 9998
+  m_TargetDisplay: 0
 --- !u!1 &437356464
 GameObject:
   m_ObjectHideFlags: 0
@@ -13023,6 +13840,7 @@ GameObject:
   - component: {fileID: 469614347}
   - component: {fileID: 469614346}
   - component: {fileID: 469614345}
+  - component: {fileID: 469614351}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -13195,6 +14013,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 469614343}
   m_CullTransparentMesh: 1
+--- !u!114 &469614351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 469614343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &485788151
 GameObject:
   m_ObjectHideFlags: 0
@@ -13306,6 +14157,7 @@ GameObject:
   - component: {fileID: 493291697}
   - component: {fileID: 493291696}
   - component: {fileID: 493291695}
+  - component: {fileID: 493291701}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -13478,6 +14330,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 493291693}
   m_CullTransparentMesh: 1
+--- !u!114 &493291701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 493291693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &497515747
 GameObject:
   m_ObjectHideFlags: 0
@@ -15525,6 +16410,7 @@ GameObject:
   - component: {fileID: 570133537}
   - component: {fileID: 570133536}
   - component: {fileID: 570133535}
+  - component: {fileID: 570133541}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -15697,6 +16583,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 570133533}
   m_CullTransparentMesh: 1
+--- !u!114 &570133541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570133533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &570338321
 GameObject:
   m_ObjectHideFlags: 0
@@ -18312,6 +19231,7 @@ GameObject:
   - component: {fileID: 666090799}
   - component: {fileID: 666090798}
   - component: {fileID: 666090797}
+  - component: {fileID: 666090803}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -18483,6 +19403,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 666090795}
   m_CullTransparentMesh: 1
+--- !u!114 &666090803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666090795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &669257436
 GameObject:
   m_ObjectHideFlags: 0
@@ -19070,6 +20023,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 682713915}
   m_CullTransparentMesh: 1
+--- !u!115 &683848455
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: SimplePulse
+  m_Namespace: DigitPark.Animations
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &687827591
 GameObject:
   m_ObjectHideFlags: 0
@@ -20745,6 +21713,21 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!115 &738872651
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: GlowPulse
+  m_Namespace: DigitPark.Animations
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &740374953
 GameObject:
   m_ObjectHideFlags: 0
@@ -20760,6 +21743,7 @@ GameObject:
   - component: {fileID: 740374957}
   - component: {fileID: 740374956}
   - component: {fileID: 740374955}
+  - component: {fileID: 740374961}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -20931,6 +21915,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 740374953}
   m_CullTransparentMesh: 1
+--- !u!114 &740374961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740374953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &741836608
 GameObject:
   m_ObjectHideFlags: 0
@@ -21388,6 +22405,7 @@ GameObject:
   - component: {fileID: 762455249}
   - component: {fileID: 762455248}
   - component: {fileID: 762455247}
+  - component: {fileID: 762455253}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -21560,6 +22578,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 762455245}
   m_CullTransparentMesh: 1
+--- !u!114 &762455253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 762455245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &765800068
 GameObject:
   m_ObjectHideFlags: 0
@@ -21575,6 +22626,7 @@ GameObject:
   - component: {fileID: 765800072}
   - component: {fileID: 765800071}
   - component: {fileID: 765800070}
+  - component: {fileID: 765800076}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -21746,6 +22798,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 765800068}
   m_CullTransparentMesh: 1
+--- !u!114 &765800076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765800068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &767510556
 GameObject:
   m_ObjectHideFlags: 0
@@ -21761,6 +22846,7 @@ GameObject:
   - component: {fileID: 767510560}
   - component: {fileID: 767510559}
   - component: {fileID: 767510558}
+  - component: {fileID: 767510564}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -21932,6 +23018,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 767510556}
   m_CullTransparentMesh: 1
+--- !u!114 &767510564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767510556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &772749895
 GameObject:
   m_ObjectHideFlags: 0
@@ -23437,6 +24556,7 @@ GameObject:
   - component: {fileID: 831739200}
   - component: {fileID: 831739199}
   - component: {fileID: 831739198}
+  - component: {fileID: 831739204}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -23608,6 +24728,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 831739196}
   m_CullTransparentMesh: 1
+--- !u!114 &831739204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 831739196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &839594902
 GameObject:
   m_ObjectHideFlags: 0
@@ -25341,6 +26494,7 @@ GameObject:
   - component: {fileID: 867007003}
   - component: {fileID: 867007002}
   - component: {fileID: 867007001}
+  - component: {fileID: 867007007}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -25513,6 +26667,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 867006999}
   m_CullTransparentMesh: 1
+--- !u!114 &867007007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 867006999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &867334398
 GameObject:
   m_ObjectHideFlags: 0
@@ -25856,6 +27043,7 @@ GameObject:
   - component: {fileID: 899683078}
   - component: {fileID: 899683077}
   - component: {fileID: 899683076}
+  - component: {fileID: 899683082}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -26027,6 +27215,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 899683074}
   m_CullTransparentMesh: 1
+--- !u!114 &899683082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899683074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &905512822
 GameObject:
   m_ObjectHideFlags: 0
@@ -26042,6 +27263,7 @@ GameObject:
   - component: {fileID: 905512826}
   - component: {fileID: 905512825}
   - component: {fileID: 905512824}
+  - component: {fileID: 905512830}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -26214,6 +27436,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 905512822}
   m_CullTransparentMesh: 1
+--- !u!114 &905512830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905512822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &905628828
 GameObject:
   m_ObjectHideFlags: 0
@@ -27706,6 +28961,7 @@ GameObject:
   - component: {fileID: 986789931}
   - component: {fileID: 986789930}
   - component: {fileID: 986789929}
+  - component: {fileID: 986789935}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -27878,6 +29134,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 986789927}
   m_CullTransparentMesh: 1
+--- !u!114 &986789935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 986789927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &987941762
 GameObject:
   m_ObjectHideFlags: 0
@@ -28286,6 +29575,7 @@ GameObject:
   - component: {fileID: 1011960271}
   - component: {fileID: 1011960270}
   - component: {fileID: 1011960269}
+  - component: {fileID: 1011960275}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -28458,6 +29748,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1011960267}
   m_CullTransparentMesh: 1
+--- !u!114 &1011960275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1011960267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1019284258
 GameObject:
   m_ObjectHideFlags: 0
@@ -28971,6 +30294,7 @@ GameObject:
   - component: {fileID: 1044731644}
   - component: {fileID: 1044731643}
   - component: {fileID: 1044731642}
+  - component: {fileID: 1044731648}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -29142,6 +30466,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1044731640}
   m_CullTransparentMesh: 1
+--- !u!114 &1044731648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1044731640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1054151645
 GameObject:
   m_ObjectHideFlags: 0
@@ -29522,6 +30879,7 @@ GameObject:
   - component: {fileID: 1075817613}
   - component: {fileID: 1075817612}
   - component: {fileID: 1075817611}
+  - component: {fileID: 1075817617}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -29694,6 +31052,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1075817609}
   m_CullTransparentMesh: 1
+--- !u!114 &1075817617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075817609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1077444222
 GameObject:
   m_ObjectHideFlags: 0
@@ -30214,6 +31605,7 @@ GameObject:
   - component: {fileID: 1096367254}
   - component: {fileID: 1096367253}
   - component: {fileID: 1096367252}
+  - component: {fileID: 1096367258}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -30385,6 +31777,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1096367250}
   m_CullTransparentMesh: 1
+--- !u!114 &1096367258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096367250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1108187305
 GameObject:
   m_ObjectHideFlags: 0
@@ -30534,6 +31959,7 @@ GameObject:
   - component: {fileID: 1109880328}
   - component: {fileID: 1109880327}
   - component: {fileID: 1109880326}
+  - component: {fileID: 1109880332}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -30706,6 +32132,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1109880324}
   m_CullTransparentMesh: 1
+--- !u!114 &1109880332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1109880324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1114146136
 GameObject:
   m_ObjectHideFlags: 0
@@ -30808,6 +32267,7 @@ GameObject:
   - component: {fileID: 1119737294}
   - component: {fileID: 1119737293}
   - component: {fileID: 1119737292}
+  - component: {fileID: 1119737298}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -30980,6 +32440,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1119737290}
   m_CullTransparentMesh: 1
+--- !u!114 &1119737298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119737290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1120770702
 GameObject:
   m_ObjectHideFlags: 0
@@ -31114,6 +32607,40 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1120770702}
   m_CullTransparentMesh: 1
+--- !u!1 &1129931704
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1129931705}
+  m_Layer: 0
+  m_Name: ---ANIMATION_MANAGERS---
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1129931705
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1129931704}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1902952420}
+  - {fileID: 1980731591}
+  - {fileID: 1407552305}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1131012522
 GameObject:
   m_ObjectHideFlags: 0
@@ -32615,6 +34142,7 @@ GameObject:
   - component: {fileID: 1206402121}
   - component: {fileID: 1206402120}
   - component: {fileID: 1206402119}
+  - component: {fileID: 1206402125}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -32786,6 +34314,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1206402117}
   m_CullTransparentMesh: 1
+--- !u!114 &1206402125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1206402117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1207377726
 GameObject:
   m_ObjectHideFlags: 0
@@ -32801,6 +34362,7 @@ GameObject:
   - component: {fileID: 1207377730}
   - component: {fileID: 1207377729}
   - component: {fileID: 1207377728}
+  - component: {fileID: 1207377734}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -32973,6 +34535,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1207377726}
   m_CullTransparentMesh: 1
+--- !u!114 &1207377734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207377726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1218050860
 GameObject:
   m_ObjectHideFlags: 0
@@ -32988,6 +34583,7 @@ GameObject:
   - component: {fileID: 1218050864}
   - component: {fileID: 1218050863}
   - component: {fileID: 1218050862}
+  - component: {fileID: 1218050868}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -33160,6 +34756,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1218050860}
   m_CullTransparentMesh: 1
+--- !u!114 &1218050868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1218050860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1219788363
 GameObject:
   m_ObjectHideFlags: 0
@@ -34273,6 +35902,7 @@ GameObject:
   - component: {fileID: 1266737833}
   - component: {fileID: 1266737832}
   - component: {fileID: 1266737831}
+  - component: {fileID: 1266737837}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -34445,6 +36075,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1266737829}
   m_CullTransparentMesh: 1
+--- !u!114 &1266737837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1266737829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1281790602
 GameObject:
   m_ObjectHideFlags: 0
@@ -34460,6 +36123,7 @@ GameObject:
   - component: {fileID: 1281790606}
   - component: {fileID: 1281790605}
   - component: {fileID: 1281790604}
+  - component: {fileID: 1281790610}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -34632,6 +36296,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1281790602}
   m_CullTransparentMesh: 1
+--- !u!114 &1281790610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1281790602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1284205515
 GameObject:
   m_ObjectHideFlags: 0
@@ -35353,6 +37050,7 @@ GameObject:
   - component: {fileID: 1317081773}
   - component: {fileID: 1317081772}
   - component: {fileID: 1317081771}
+  - component: {fileID: 1317081777}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -35524,6 +37222,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1317081769}
   m_CullTransparentMesh: 1
+--- !u!114 &1317081777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317081769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1318149348
 GameObject:
   m_ObjectHideFlags: 0
@@ -37170,6 +38901,7 @@ GameObject:
   - component: {fileID: 1394847333}
   - component: {fileID: 1394847332}
   - component: {fileID: 1394847331}
+  - component: {fileID: 1394847337}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -37342,6 +39074,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1394847329}
   m_CullTransparentMesh: 1
+--- !u!114 &1394847337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394847329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1403279910
 GameObject:
   m_ObjectHideFlags: 0
@@ -37669,6 +39434,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1407099592}
   m_CullTransparentMesh: 1
+--- !u!1 &1407552304
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1407552305}
+  - component: {fileID: 1407552306}
+  m_Layer: 0
+  m_Name: ParticleEffectSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1407552305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1407552304}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1953759016}
+  m_Father: {fileID: 1129931705}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1407552306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1407552304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40b6e02314a55b64694b649716a4b430, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confettiPrefab: {fileID: 0}
+  sparklesPrefab: {fileID: 0}
+  burstPrefab: {fileID: 0}
+  coinShowerPrefab: {fileID: 0}
+  starExplosionPrefab: {fileID: 0}
+  smokePuffPrefab: {fileID: 0}
+  glowPrefab: {fileID: 0}
+  particlesParent: {fileID: 0}
+  maxParticleSystems: 20
 --- !u!1 &1407772238
 GameObject:
   m_ObjectHideFlags: 0
@@ -37684,6 +39503,7 @@ GameObject:
   - component: {fileID: 1407772242}
   - component: {fileID: 1407772241}
   - component: {fileID: 1407772240}
+  - component: {fileID: 1407772246}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -37856,6 +39676,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1407772238}
   m_CullTransparentMesh: 1
+--- !u!114 &1407772246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1407772238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1417155195
 GameObject:
   m_ObjectHideFlags: 0
@@ -39119,6 +40972,7 @@ GameObject:
   - component: {fileID: 1498677898}
   - component: {fileID: 1498677897}
   - component: {fileID: 1498677896}
+  - component: {fileID: 1498677902}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -39291,6 +41145,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1498677894}
   m_CullTransparentMesh: 1
+--- !u!114 &1498677902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1498677894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1502738771
 GameObject:
   m_ObjectHideFlags: 0
@@ -39687,6 +41574,8 @@ GameObject:
   - component: {fileID: 1513856199}
   - component: {fileID: 1513856201}
   - component: {fileID: 1513856200}
+  - component: {fileID: 1513856202}
+  - component: {fileID: 1513856203}
   m_Layer: 0
   m_Name: Header
   m_TagString: Untagged
@@ -39755,6 +41644,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1513856198}
   m_CullTransparentMesh: 1
+--- !u!114 &1513856202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1513856198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1649107330}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
+--- !u!114 &1513856203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1513856198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 738872651}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
 --- !u!1 &1515494714
 GameObject:
   m_ObjectHideFlags: 0
@@ -40424,6 +42343,7 @@ GameObject:
   - component: {fileID: 1537665646}
   - component: {fileID: 1537665645}
   - component: {fileID: 1537665644}
+  - component: {fileID: 1537665650}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -40596,6 +42516,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1537665642}
   m_CullTransparentMesh: 1
+--- !u!114 &1537665650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1537665642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1543831449
 GameObject:
   m_ObjectHideFlags: 0
@@ -40879,6 +42832,7 @@ GameObject:
   - component: {fileID: 1552692917}
   - component: {fileID: 1552692916}
   - component: {fileID: 1552692915}
+  - component: {fileID: 1552692921}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -41050,6 +43004,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552692913}
   m_CullTransparentMesh: 1
+--- !u!114 &1552692921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552692913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1553170373
 GameObject:
   m_ObjectHideFlags: 0
@@ -42196,6 +44183,7 @@ GameObject:
   - component: {fileID: 1625102396}
   - component: {fileID: 1625102395}
   - component: {fileID: 1625102394}
+  - component: {fileID: 1625102400}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -42368,6 +44356,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1625102392}
   m_CullTransparentMesh: 1
+--- !u!114 &1625102400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1625102392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1625592692
 GameObject:
   m_ObjectHideFlags: 0
@@ -42644,6 +44665,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1642389620}
   m_CullTransparentMesh: 1
+--- !u!115 &1649107330
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: GlowPulse
+  m_Namespace: DigitPark.Animations
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &1649172099
 GameObject:
   m_ObjectHideFlags: 0
@@ -42659,6 +44695,7 @@ GameObject:
   - component: {fileID: 1649172103}
   - component: {fileID: 1649172102}
   - component: {fileID: 1649172101}
+  - component: {fileID: 1649172107}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -42830,6 +44867,114 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1649172099}
+  m_CullTransparentMesh: 1
+--- !u!114 &1649172107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649172099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
+--- !u!1 &1655535473
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1655535474}
+  - component: {fileID: 1655535476}
+  - component: {fileID: 1655535475}
+  m_Layer: 0
+  m_Name: CircleWipeImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1655535474
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655535473}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1980731591}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1655535475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655535473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1655535476
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655535473}
   m_CullTransparentMesh: 1
 --- !u!1 &1658286299
 GameObject:
@@ -43164,6 +45309,7 @@ GameObject:
   - component: {fileID: 1663320495}
   - component: {fileID: 1663320494}
   - component: {fileID: 1663320493}
+  - component: {fileID: 1663320499}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -43336,6 +45482,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1663320491}
   m_CullTransparentMesh: 1
+--- !u!114 &1663320499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1663320491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1664635728
 GameObject:
   m_ObjectHideFlags: 0
@@ -44217,6 +46396,7 @@ GameObject:
   - component: {fileID: 1692688963}
   - component: {fileID: 1692688962}
   - component: {fileID: 1692688961}
+  - component: {fileID: 1692688967}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -44389,6 +46569,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1692688959}
   m_CullTransparentMesh: 1
+--- !u!114 &1692688967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692688959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1693448141
 GameObject:
   m_ObjectHideFlags: 0
@@ -45520,6 +47733,7 @@ GameObject:
   - component: {fileID: 1724123332}
   - component: {fileID: 1724123331}
   - component: {fileID: 1724123330}
+  - component: {fileID: 1724123336}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -45691,6 +47905,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1724123328}
   m_CullTransparentMesh: 1
+--- !u!114 &1724123336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1724123328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1726014961
 GameObject:
   m_ObjectHideFlags: 0
@@ -46018,6 +48265,7 @@ GameObject:
   - component: {fileID: 1743203926}
   - component: {fileID: 1743203925}
   - component: {fileID: 1743203924}
+  - component: {fileID: 1743203930}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -46190,6 +48438,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1743203922}
   m_CullTransparentMesh: 1
+--- !u!114 &1743203930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743203922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1750283219
 GameObject:
   m_ObjectHideFlags: 0
@@ -46685,6 +48966,7 @@ GameObject:
   - component: {fileID: 1762881082}
   - component: {fileID: 1762881081}
   - component: {fileID: 1762881080}
+  - component: {fileID: 1762881086}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -46857,6 +49139,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1762881078}
   m_CullTransparentMesh: 1
+--- !u!114 &1762881086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1762881078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1763727440
 GameObject:
   m_ObjectHideFlags: 0
@@ -47029,6 +49344,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1767629265}
   m_CullTransparentMesh: 1
+--- !u!1 &1784778022
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1784778023}
+  - component: {fileID: 1784778025}
+  - component: {fileID: 1784778024}
+  m_Layer: 0
+  m_Name: SlidePanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1784778023
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784778022}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1980731591}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1784778024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784778022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1784778025
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784778022}
+  m_CullTransparentMesh: 1
 --- !u!1 &1785347669
 GameObject:
   m_ObjectHideFlags: 0
@@ -47044,6 +49434,7 @@ GameObject:
   - component: {fileID: 1785347673}
   - component: {fileID: 1785347672}
   - component: {fileID: 1785347671}
+  - component: {fileID: 1785347677}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -47216,6 +49607,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1785347669}
   m_CullTransparentMesh: 1
+--- !u!114 &1785347677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1785347669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1790751624
 GameObject:
   m_ObjectHideFlags: 0
@@ -47468,6 +49892,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1801912375}
   - component: {fileID: 1801912376}
+  - component: {fileID: 1801912377}
   m_Layer: 0
   m_Name: TiersScrollView
   m_TagString: Untagged
@@ -47525,6 +49950,43 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1801912377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801912374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eced3905064662e4292bc5467075073b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollRect: {fileID: 1801912376}
+  content: {fileID: 588801811}
+  viewport: {fileID: 533456253}
+  tierWidth: 150
+  tierSpacing: 0
+  totalTiers: 30
+  currentTier: 12
+  enableSnap: 1
+  snapSpeed: 10
+  snapThreshold: 0.1
+  selectedScale: 1.15
+  nearbyScale: 1
+  farScale: 0.85
+  scaleTransitionSpeed: 8
+  enableGlow: 1
+  glowColor: {r: 0.6, g: 0.3, b: 0.9, a: 0.5}
+  glowPulseSpeed: 1.5
+  parallaxLayer1: {fileID: 0}
+  parallaxLayer2: {fileID: 0}
+  parallaxFactor1: 0.3
+  parallaxFactor2: 0.5
+  scrollTickSound: {fileID: 0}
+  selectSound: {fileID: 0}
+  claimSound: {fileID: 0}
+  unlockSound: {fileID: 0}
 --- !u!1 &1802030991
 GameObject:
   m_ObjectHideFlags: 0
@@ -47883,6 +50345,7 @@ GameObject:
   - component: {fileID: 1813242667}
   - component: {fileID: 1813242666}
   - component: {fileID: 1813242665}
+  - component: {fileID: 1813242671}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -48054,6 +50517,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1813242663}
   m_CullTransparentMesh: 1
+--- !u!114 &1813242671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813242663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1816017898
 GameObject:
   m_ObjectHideFlags: 0
@@ -48967,6 +51463,7 @@ GameObject:
   - component: {fileID: 1868746204}
   - component: {fileID: 1868746203}
   - component: {fileID: 1868746202}
+  - component: {fileID: 1868746208}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -49139,6 +51636,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1868746200}
   m_CullTransparentMesh: 1
+--- !u!114 &1868746208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1868746200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1871111640
 GameObject:
   m_ObjectHideFlags: 0
@@ -49154,6 +51684,7 @@ GameObject:
   - component: {fileID: 1871111644}
   - component: {fileID: 1871111643}
   - component: {fileID: 1871111642}
+  - component: {fileID: 1871111648}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -49326,6 +51857,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1871111640}
   m_CullTransparentMesh: 1
+--- !u!114 &1871111648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871111640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1873779118
 GameObject:
   m_ObjectHideFlags: 0
@@ -49557,6 +52121,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1876003204}
   m_CullTransparentMesh: 1
+--- !u!1 &1902952419
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1902952420}
+  - component: {fileID: 1902952421}
+  m_Layer: 0
+  m_Name: UIAnimationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1902952420
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902952419}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 436129807}
+  m_Father: {fileID: 1129931705}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1902952421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902952419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1041a83114376724c80784391e9be5cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableAnimations: 1
+  globalSpeedMultiplier: 1
+  screenFlashImage: {fileID: 283196318}
+  mainCanvasTransform: {fileID: 0}
 --- !u!1 &1930918302
 GameObject:
   m_ObjectHideFlags: 0
@@ -49572,6 +52185,7 @@ GameObject:
   - component: {fileID: 1930918306}
   - component: {fileID: 1930918305}
   - component: {fileID: 1930918304}
+  - component: {fileID: 1930918310}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -49743,6 +52357,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1930918302}
   m_CullTransparentMesh: 1
+--- !u!114 &1930918310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1930918302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1935825180
 GameObject:
   m_ObjectHideFlags: 0
@@ -50026,6 +52673,7 @@ GameObject:
   - component: {fileID: 1941732676}
   - component: {fileID: 1941732675}
   - component: {fileID: 1941732674}
+  - component: {fileID: 1941732680}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -50198,6 +52846,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1941732672}
   m_CullTransparentMesh: 1
+--- !u!114 &1941732680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1941732672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1946940175
 GameObject:
   m_ObjectHideFlags: 0
@@ -50574,6 +53255,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1952826325}
   m_CullTransparentMesh: 1
+--- !u!1 &1953759015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1953759016}
+  m_Layer: 0
+  m_Name: Particles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1953759016
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953759015}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1407552305}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1960899843
 GameObject:
   m_ObjectHideFlags: 0
@@ -51003,6 +53715,130 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1963161896}
   m_CullTransparentMesh: 1
+--- !u!1 &1980731590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1980731591}
+  - component: {fileID: 1980731595}
+  - component: {fileID: 1980731594}
+  - component: {fileID: 1980731593}
+  - component: {fileID: 1980731592}
+  m_Layer: 0
+  m_Name: TransitionCanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1980731591
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980731590}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 164378309}
+  - {fileID: 1655535474}
+  - {fileID: 1784778023}
+  m_Father: {fileID: 1129931705}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
+--- !u!114 &1980731592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980731590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c732b0ca2158f334480725cf1ae38a3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transitionCanvas: {fileID: 1980731595}
+  fadeImage: {fileID: 164378310}
+  circleWipeImage: {fileID: 1655535475}
+  slidePanel: {fileID: 1784778023}
+  defaultDuration: 0.5
+  fadeColor: {r: 0, g: 0, b: 0, a: 1}
+  circleWipeMaterial: {fileID: 0}
+--- !u!114 &1980731593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980731590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &1980731594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980731590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 1080, y: 1920}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0.5
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!223 &1980731595
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980731590}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 9999
+  m_TargetDisplay: 0
 --- !u!1 &1981243404
 GameObject:
   m_ObjectHideFlags: 0
@@ -51683,6 +54519,7 @@ GameObject:
   - component: {fileID: 1991178126}
   - component: {fileID: 1991178125}
   - component: {fileID: 1991178124}
+  - component: {fileID: 1991178130}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -51854,6 +54691,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1991178122}
   m_CullTransparentMesh: 1
+--- !u!114 &1991178130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1991178122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &1994415644
 GameObject:
   m_ObjectHideFlags: 0
@@ -53070,6 +55940,7 @@ GameObject:
   - component: {fileID: 2051380663}
   - component: {fileID: 2051380662}
   - component: {fileID: 2051380661}
+  - component: {fileID: 2051380667}
   m_Layer: 0
   m_Name: FreeReward
   m_TagString: Untagged
@@ -53242,6 +56113,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2051380659}
   m_CullTransparentMesh: 1
+--- !u!114 &2051380667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051380659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &2058350369
 GameObject:
   m_ObjectHideFlags: 0
@@ -53338,6 +56242,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2058350369}
   m_CullTransparentMesh: 1
+--- !u!115 &2070907048
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: SimplePulse
+  m_Namespace: DigitPark.Animations
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &2073474388
 GameObject:
   m_ObjectHideFlags: 0
@@ -54708,6 +57627,7 @@ GameObject:
   - component: {fileID: 2144335359}
   - component: {fileID: 2144335358}
   - component: {fileID: 2144335357}
+  - component: {fileID: 2144335363}
   m_Layer: 0
   m_Name: PremiumReward
   m_TagString: Untagged
@@ -54880,6 +57800,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2144335355}
   m_CullTransparentMesh: 1
+--- !u!114 &2144335363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144335355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a1bb54abfa7db4c9a166f11d7f1bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonFace: {fileID: 0}
+  buttonShadow: {fileID: 0}
+  highlightLine: {fileID: 0}
+  pressDepth: 6
+  pressDuration: 0.08
+  releaseDuration: 0.12
+  enableHoverEffect: 1
+  hoverScale: 1.03
+  hoverDuration: 0.15
+  enableGlow: 1
+  glowImage: {fileID: 0}
+  glowPulseSpeed: 1.5
+  glowMinAlpha: 0.3
+  glowMaxAlpha: 0.8
+  normalColor: {r: 0, g: 1, b: 1, a: 1}
+  pressedColor: {r: 0, g: 0.7, b: 0.7, a: 1}
+  highlightColor: {r: 1, g: 1, b: 1, a: 0.5}
+  pressSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  pressParticles: {fileID: 0}
+  constantParticles: {fileID: 0}
 --- !u!1 &2146087349
 GameObject:
   m_ObjectHideFlags: 0
@@ -55021,3 +57974,5 @@ SceneRoots:
   - {fileID: 416704395}
   - {fileID: 436034743}
   - {fileID: 809186402}
+  - {fileID: 51339188}
+  - {fileID: 1129931705}

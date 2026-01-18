@@ -60,7 +60,12 @@ namespace DigitPark.Monetization
                 _coinsPlusButton.onClick.AddListener(OnCoinsClick);
 
             // Subscribe to currency updates
-            // TODO: CurrencyManager.Instance.OnCurrencyChanged += UpdateDisplay;
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                currency.OnGemsChanged += OnGemsChanged;
+                currency.OnCoinsChanged += OnCoinsChanged;
+            }
 
             // Initial update
             RefreshDisplay();
@@ -76,6 +81,24 @@ namespace DigitPark.Monetization
                 _coinsButton.onClick.RemoveListener(OnCoinsClick);
             if (_coinsPlusButton != null)
                 _coinsPlusButton.onClick.RemoveListener(OnCoinsClick);
+
+            // Unsubscribe from currency updates
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                currency.OnGemsChanged -= OnGemsChanged;
+                currency.OnCoinsChanged -= OnCoinsChanged;
+            }
+        }
+
+        private void OnGemsChanged(int newAmount, int delta)
+        {
+            SetGems(newAmount);
+        }
+
+        private void OnCoinsChanged(int newAmount, int delta)
+        {
+            SetCoins(newAmount);
         }
 
         private void SetupColors()
@@ -113,12 +136,16 @@ namespace DigitPark.Monetization
         /// </summary>
         public void RefreshDisplay()
         {
-            // TODO: Get values from CurrencyManager
-            // var currency = CurrencyManager.Instance;
-            // UpdateDisplay(currency.Gems, currency.Coins);
-
-            // Placeholder values
-            UpdateDisplay(1250, 5430);
+            var currency = CurrencyManager.Instance;
+            if (currency != null)
+            {
+                UpdateDisplay(currency.Gems, currency.Coins);
+            }
+            else
+            {
+                // Fallback placeholder values
+                UpdateDisplay(0, 0);
+            }
         }
 
         /// <summary>

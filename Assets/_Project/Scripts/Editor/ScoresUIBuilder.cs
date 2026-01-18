@@ -22,7 +22,7 @@ namespace DigitPark.Editor
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color DIVIDER_COLOR = new Color(0f, 0.6f, 0.7f, 0.5f);
 
-        [MenuItem("DigitPark/Rebuild Scores UI")]
+        [MenuItem("DigitPark/UI Builders/Social/Scores", false, 220)]
         public static void ShowWindow()
         {
             GetWindow<ScoresUIBuilder>("Scores UI Builder");

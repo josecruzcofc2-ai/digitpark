@@ -102,7 +102,7 @@ namespace DigitPark.Editor
             "rules", "help", "info", "reglas", "ayuda"
         };
 
-        [MenuItem("DigitPark/UI/Add Neon Glow to Buttons")]
+        [MenuItem("DigitPark/UI/Neon Glow/Add to Buttons", false, 350)]
         public static void ShowWindow()
         {
             var window = GetWindow<NeonButtonGlowSetup>("Neon Button Glow Setup");

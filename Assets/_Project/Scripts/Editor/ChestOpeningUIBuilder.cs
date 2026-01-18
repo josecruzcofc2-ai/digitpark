@@ -5,6 +5,7 @@ using TMPro;
 
 namespace DigitPark.Editor
 {
+    using DigitPark.Animations;
     /// <summary>
     /// Construye la UI completa de Chest Opening (Apertura de Cofres)
     /// Incluye: SafeArea, Chest Display, Tap Area, Reward Reveals, Collect Button
@@ -52,7 +53,7 @@ namespace DigitPark.Editor
         private const float REWARD_CARD_SIZE = 140f;
         private const float CONTENT_PADDING = 20f;
 
-        [MenuItem("DigitPark/Monetization/Build Chest Opening UI", false, 24)]
+        [MenuItem("DigitPark/UI Builders/Monetization/ChestOpening", false, 182)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Chest Opening UI Builder",
@@ -74,15 +75,139 @@ namespace DigitPark.Editor
             GameObject safeArea = CreateSafeArea(canvas);
 
             CreateHeader(safeArea);
-            CreateChestDisplay(safeArea);
+            GameObject chestDisplay = CreateChestDisplay(safeArea);
             CreateTapToOpenArea(safeArea);
-            CreateRewardsRevealArea(safeArea);
+            GameObject rewardsArea = CreateRewardsRevealArea(safeArea);
             CreateCollectButton(safeArea);
+
+            // Add screen effects for animations
+            GameObject screenEffects = CreateScreenEffects(canvas);
+
+            // Add and configure ChestOpeningAnimator
+            AddChestOpeningAnimator(canvas.gameObject, chestDisplay, rewardsArea, screenEffects);
 
             CreateChestInfoPanel(canvas);
 
             MarkSceneDirty();
             Debug.Log("[ChestOpeningUIBuilder] ========== CONSTRUCCION COMPLETADA ==========");
+        }
+
+        /// <summary>
+        /// Creates screen-level effects for chest animations (dimmer, flash)
+        /// </summary>
+        private static GameObject CreateScreenEffects(Canvas canvas)
+        {
+            GameObject effectsContainer = FindOrCreateChild(canvas.gameObject, "ScreenEffects");
+            effectsContainer.transform.SetSiblingIndex(1); // Just above background
+            SetRectTransformStretch(effectsContainer);
+
+            // Screen Dimmer
+            GameObject dimmer = FindOrCreateChild(effectsContainer, "ScreenDimmer");
+            SetRectTransformStretch(dimmer);
+            Image dimmerImage = GetOrAddComponent<Image>(dimmer);
+            dimmerImage.color = new Color(0, 0, 0, 0);
+            dimmerImage.raycastTarget = false;
+            CanvasGroup dimmerCG = GetOrAddComponent<CanvasGroup>(dimmer);
+            dimmerCG.alpha = 0;
+            dimmerCG.interactable = false;
+            dimmerCG.blocksRaycasts = false;
+
+            // Screen Flash
+            GameObject flash = FindOrCreateChild(effectsContainer, "ScreenFlash");
+            SetRectTransformStretch(flash);
+            Image flashImage = GetOrAddComponent<Image>(flash);
+            flashImage.color = new Color(1, 1, 1, 0);
+            flashImage.raycastTarget = false;
+            flash.SetActive(false);
+
+            // Light Rays Container
+            GameObject lightRays = FindOrCreateChild(effectsContainer, "LightRaysContainer");
+            RectTransform raysRT = GetOrAddComponent<RectTransform>(lightRays);
+            raysRT.anchorMin = new Vector2(0.5f, 0.5f);
+            raysRT.anchorMax = new Vector2(0.5f, 0.5f);
+            raysRT.anchoredPosition = new Vector2(0, 100);
+            raysRT.sizeDelta = new Vector2(600, 600);
+            lightRays.SetActive(false);
+
+            // Create light rays
+            int rayCount = 8;
+            for (int i = 0; i < rayCount; i++)
+            {
+                GameObject ray = FindOrCreateChild(lightRays, $"Ray_{i}");
+                RectTransform rayRT = GetOrAddComponent<RectTransform>(ray);
+                rayRT.anchorMin = new Vector2(0.5f, 0.5f);
+                rayRT.anchorMax = new Vector2(0.5f, 0.5f);
+                rayRT.sizeDelta = new Vector2(30, 300);
+                rayRT.anchoredPosition = Vector2.zero;
+                rayRT.localRotation = Quaternion.Euler(0, 0, i * (360f / rayCount));
+                rayRT.pivot = new Vector2(0.5f, 0);
+
+                Image rayImage = GetOrAddComponent<Image>(ray);
+                rayImage.color = new Color(1f, 0.9f, 0.5f, 0.6f);
+            }
+
+            Debug.Log("[ChestOpeningUIBuilder] ScreenEffects creados");
+            return effectsContainer;
+        }
+
+        /// <summary>
+        /// Adds and configures ChestOpeningAnimator for cinematic chest opening
+        /// </summary>
+        private static void AddChestOpeningAnimator(GameObject canvas, GameObject chestDisplay, GameObject rewardsArea, GameObject screenEffects)
+        {
+            ChestOpeningAnimator animator = canvas.GetComponent<ChestOpeningAnimator>();
+            if (animator == null)
+                animator = canvas.AddComponent<ChestOpeningAnimator>();
+
+            // Get references
+            Transform chestContainer = chestDisplay.transform.Find("ChestContainer");
+            Transform chestGlow = chestContainer?.Find("ChestGlow");
+            Transform chestImage = chestContainer?.Find("ChestImage");
+            Transform chestLid = chestContainer?.Find("ChestLid");
+            Transform dimmer = screenEffects.transform.Find("ScreenDimmer");
+            Transform flash = screenEffects.transform.Find("ScreenFlash");
+            Transform lightRays = screenEffects.transform.Find("LightRaysContainer");
+
+            // Configure via SerializedObject
+            SerializedObject so = new SerializedObject(animator);
+
+            // Chest elements
+            if (chestContainer != null)
+                so.FindProperty("chestContainer").objectReferenceValue = chestContainer.GetComponent<RectTransform>();
+            if (chestImage != null)
+                so.FindProperty("chestImage").objectReferenceValue = chestImage.GetComponent<Image>();
+            if (chestLid != null)
+                so.FindProperty("chestLid").objectReferenceValue = chestLid.GetComponent<Image>();
+            if (chestGlow != null)
+                so.FindProperty("chestGlow").objectReferenceValue = chestGlow.GetComponent<Image>();
+
+            // Screen effects
+            if (dimmer != null)
+                so.FindProperty("screenDimmer").objectReferenceValue = dimmer.GetComponent<CanvasGroup>();
+            if (flash != null)
+                so.FindProperty("screenFlash").objectReferenceValue = flash.GetComponent<Image>();
+            if (lightRays != null)
+                so.FindProperty("lightRaysContainer").objectReferenceValue = lightRays.GetComponent<RectTransform>();
+
+            // Reward display
+            Transform rewardContainer = rewardsArea?.transform;
+            if (rewardContainer != null)
+                so.FindProperty("rewardContainer").objectReferenceValue = rewardContainer.GetComponent<RectTransform>();
+
+            // Animation settings for cinematic effect
+            so.FindProperty("shakeDuration").floatValue = 1.5f;
+            so.FindProperty("shakeIntensity").floatValue = 10f;
+            so.FindProperty("shakeVibrato").intValue = 20;
+            so.FindProperty("openDuration").floatValue = 0.5f;
+            so.FindProperty("rewardRevealDelay").floatValue = 0.3f;
+
+            so.ApplyModifiedProperties();
+
+            // Add AudioSource if needed
+            if (canvas.GetComponent<AudioSource>() == null)
+                canvas.AddComponent<AudioSource>();
+
+            Debug.Log("[ChestOpeningUIBuilder] ChestOpeningAnimator configurado con efectos cinematicos");
         }
 
         // ==================== CANVAS SETUP ====================
@@ -248,7 +373,7 @@ namespace DigitPark.Editor
 
         // ==================== CHEST DISPLAY ====================
 
-        private static void CreateChestDisplay(GameObject parent)
+        private static GameObject CreateChestDisplay(GameObject parent)
         {
             GameObject chestArea = FindOrCreateChild(parent, "ChestDisplay");
 
@@ -316,6 +441,7 @@ namespace DigitPark.Editor
             }
 
             Debug.Log("[ChestOpeningUIBuilder] ChestDisplay creado");
+            return chestArea;
         }
 
         // ==================== TAP TO OPEN AREA ====================
@@ -379,7 +505,7 @@ namespace DigitPark.Editor
 
         // ==================== REWARDS REVEAL AREA ====================
 
-        private static void CreateRewardsRevealArea(GameObject parent)
+        private static GameObject CreateRewardsRevealArea(GameObject parent)
         {
             GameObject rewardsArea = FindOrCreateChild(parent, "RewardsRevealArea");
             rewardsArea.SetActive(false);
@@ -434,6 +560,7 @@ namespace DigitPark.Editor
             CreateRewardCard(rewardsGrid, "Reward5", PURPLE_PREMIUM, "", "Tema", true);
 
             Debug.Log("[ChestOpeningUIBuilder] RewardsRevealArea creado");
+            return rewardsArea;
         }
 
         private static void CreateRewardCard(GameObject parent, string name, Color color, string amount, string label, bool isSpecial)

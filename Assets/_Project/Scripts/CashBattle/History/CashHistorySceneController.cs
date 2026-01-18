@@ -1,0 +1,638 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System;
+using System.Collections.Generic;
+using DigitPark.Monetization;
+
+namespace DigitPark.CashBattle
+{
+    /// <summary>
+    /// Controller principal para la escena CashHistory.
+    /// Maneja toda la UI y lógica de la pantalla de Historial.
+    /// </summary>
+    public class CashHistorySceneController : MonoBehaviour
+    {
+        // ==================== HEADER ====================
+        [Header("Header")]
+        [SerializeField] private Button backButton;
+        [SerializeField] private TextMeshProUGUI titleText;
+
+        // ==================== STATS PANEL ====================
+        [Header("Stats Panel")]
+        [SerializeField] private GameObject statsPanel;
+        [SerializeField] private TextMeshProUGUI totalMatchesText;
+        [SerializeField] private TextMeshProUGUI winRateText;
+        [SerializeField] private TextMeshProUGUI netProfitText;
+        [SerializeField] private TextMeshProUGUI winsText;
+        [SerializeField] private TextMeshProUGUI lossesText;
+        [SerializeField] private TextMeshProUGUI drawsText;
+        [SerializeField] private TextMeshProUGUI currentStreakText;
+        [SerializeField] private TextMeshProUGUI bestStreakText;
+        [SerializeField] private TextMeshProUGUI tournamentsPlayedText;
+        [SerializeField] private TextMeshProUGUI tournamentWinsText;
+
+        // ==================== TABS ====================
+        [Header("Tabs")]
+        [SerializeField] private Button allTabButton;
+        [SerializeField] private Button matchesTabButton;
+        [SerializeField] private Button tournamentsTabButton;
+        [SerializeField] private Color activeTabColor = new Color(0f, 0.83f, 1f, 1f);
+        [SerializeField] private Color inactiveTabColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+        // ==================== FILTERS ====================
+        [Header("Filters")]
+        [SerializeField] private TMP_Dropdown resultFilterDropdown;
+        [SerializeField] private TMP_Dropdown dateFilterDropdown;
+        [SerializeField] private Button clearFiltersButton;
+
+        // ==================== LIST ====================
+        [Header("History List")]
+        [SerializeField] private Transform entriesContainer;
+        [SerializeField] private GameObject historyEntryPrefab;
+        [SerializeField] private ScrollRect scrollRect;
+        [SerializeField] private TextMeshProUGUI emptyStateText;
+        [SerializeField] private Button loadMoreButton;
+
+        // ==================== DETAIL PANEL ====================
+        [Header("Detail Panel")]
+        [SerializeField] private GameObject detailPanel;
+        [SerializeField] private TextMeshProUGUI detailTitleText;
+        [SerializeField] private TextMeshProUGUI detailSubtitleText;
+        [SerializeField] private TextMeshProUGUI detailResultText;
+        [SerializeField] private TextMeshProUGUI detailScoreText;
+        [SerializeField] private TextMeshProUGUI detailEntryFeeText;
+        [SerializeField] private TextMeshProUGUI detailPrizeText;
+        [SerializeField] private TextMeshProUGUI detailNetText;
+        [SerializeField] private TextMeshProUGUI detailDateText;
+        [SerializeField] private TextMeshProUGUI detailDurationText;
+        [SerializeField] private Button closeDetailButton;
+
+        // ==================== LOADING ====================
+        [Header("Loading")]
+        [SerializeField] private GameObject loadingIndicator;
+
+        // ==================== CONFIGURATION ====================
+        [Header("Configuration")]
+        [SerializeField] private int entriesPerPage = 20;
+
+        // ==================== STATE ====================
+        private HistoryTab currentTab = HistoryTab.All;
+        private HistoryFilter currentFilter = new HistoryFilter();
+        private int currentPage = 0;
+        private List<GameObject> spawnedEntries = new List<GameObject>();
+        private HistoryEntry selectedEntry;
+
+        private enum HistoryTab
+        {
+            All,
+            Matches,
+            Tournaments
+        }
+
+        // ==================== LIFECYCLE ====================
+
+        private void Start()
+        {
+            InitializeUI();
+            SetupButtonListeners();
+            SetupDropdowns();
+            SubscribeToEvents();
+            RefreshStats();
+            LoadEntries(reset: true);
+
+            // Check navigation params
+            CheckNavigationParams();
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeFromEvents();
+        }
+
+        private void InitializeUI()
+        {
+            // Hide panels
+            if (detailPanel) detailPanel.SetActive(false);
+            if (loadingIndicator) loadingIndicator.SetActive(false);
+
+            // Set initial tab
+            ShowTab(HistoryTab.All);
+        }
+
+        private void SetupButtonListeners()
+        {
+            // Back button
+            if (backButton)
+                backButton.onClick.AddListener(OnBackClicked);
+
+            // Tab buttons
+            if (allTabButton)
+                allTabButton.onClick.AddListener(() => ShowTab(HistoryTab.All));
+            if (matchesTabButton)
+                matchesTabButton.onClick.AddListener(() => ShowTab(HistoryTab.Matches));
+            if (tournamentsTabButton)
+                tournamentsTabButton.onClick.AddListener(() => ShowTab(HistoryTab.Tournaments));
+
+            // Filters
+            if (clearFiltersButton)
+                clearFiltersButton.onClick.AddListener(ClearFilters);
+
+            // Load more
+            if (loadMoreButton)
+                loadMoreButton.onClick.AddListener(OnLoadMoreClicked);
+
+            // Detail panel
+            if (closeDetailButton)
+                closeDetailButton.onClick.AddListener(CloseDetailPanel);
+        }
+
+        private void SetupDropdowns()
+        {
+            // Result filter dropdown
+            if (resultFilterDropdown)
+            {
+                resultFilterDropdown.ClearOptions();
+                resultFilterDropdown.AddOptions(new List<string>
+                {
+                    "Todos los resultados",
+                    "Victorias",
+                    "Derrotas",
+                    "Empates",
+                    "En curso"
+                });
+                resultFilterDropdown.onValueChanged.AddListener(OnResultFilterChanged);
+            }
+
+            // Date filter dropdown
+            if (dateFilterDropdown)
+            {
+                dateFilterDropdown.ClearOptions();
+                dateFilterDropdown.AddOptions(new List<string>
+                {
+                    "Todo el tiempo",
+                    "Hoy",
+                    "Últimos 7 días",
+                    "Últimos 30 días",
+                    "Este mes"
+                });
+                dateFilterDropdown.onValueChanged.AddListener(OnDateFilterChanged);
+            }
+        }
+
+        private void SubscribeToEvents()
+        {
+            if (HistoryManager.Instance != null)
+            {
+                HistoryManager.Instance.OnEntryAdded += OnEntryAdded;
+                HistoryManager.Instance.OnEntryUpdated += OnEntryUpdated;
+                HistoryManager.Instance.OnStatsUpdated += OnStatsUpdated;
+            }
+        }
+
+        private void UnsubscribeFromEvents()
+        {
+            if (HistoryManager.Instance != null)
+            {
+                HistoryManager.Instance.OnEntryAdded -= OnEntryAdded;
+                HistoryManager.Instance.OnEntryUpdated -= OnEntryUpdated;
+                HistoryManager.Instance.OnStatsUpdated -= OnStatsUpdated;
+            }
+        }
+
+        private void CheckNavigationParams()
+        {
+            var navParams = SceneNavigator.Instance?.ConsumeParams();
+            if (navParams != null)
+            {
+                // Check if we should show a specific entry
+                if (!string.IsNullOrEmpty(navParams.ItemId))
+                {
+                    var entry = HistoryManager.Instance?.GetEntry(navParams.ItemId);
+                    if (entry != null)
+                    {
+                        ShowEntryDetail(entry);
+                    }
+                }
+
+                // Check if we should show a specific tab
+                if (!string.IsNullOrEmpty(navParams.TargetTab))
+                {
+                    if (Enum.TryParse<HistoryTab>(navParams.TargetTab, out HistoryTab tab))
+                    {
+                        ShowTab(tab);
+                    }
+                }
+            }
+        }
+
+        // ==================== TAB MANAGEMENT ====================
+
+        private void ShowTab(HistoryTab tab)
+        {
+            currentTab = tab;
+
+            // Update filter based on tab
+            switch (tab)
+            {
+                case HistoryTab.All:
+                    currentFilter.typeFilter = null;
+                    break;
+                case HistoryTab.Matches:
+                    currentFilter.typeFilter = HistoryEntryType.Match1v1;
+                    break;
+                case HistoryTab.Tournaments:
+                    currentFilter.typeFilter = HistoryEntryType.Tournament;
+                    break;
+            }
+
+            // Update tab visuals
+            UpdateTabColors();
+
+            // Reload entries
+            LoadEntries(reset: true);
+        }
+
+        private void UpdateTabColors()
+        {
+            UpdateTabButton(allTabButton, currentTab == HistoryTab.All);
+            UpdateTabButton(matchesTabButton, currentTab == HistoryTab.Matches);
+            UpdateTabButton(tournamentsTabButton, currentTab == HistoryTab.Tournaments);
+        }
+
+        private void UpdateTabButton(Button button, bool isActive)
+        {
+            if (button == null) return;
+
+            var image = button.GetComponent<Image>();
+            if (image) image.color = isActive ? activeTabColor : inactiveTabColor;
+
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text) text.color = isActive ? Color.white : new Color(0.7f, 0.7f, 0.7f);
+        }
+
+        // ==================== FILTERS ====================
+
+        private void OnResultFilterChanged(int index)
+        {
+            switch (index)
+            {
+                case 0: // All
+                    currentFilter.resultFilter = null;
+                    break;
+                case 1: // Wins
+                    currentFilter.resultFilter = MatchResult.Win;
+                    break;
+                case 2: // Losses
+                    currentFilter.resultFilter = MatchResult.Loss;
+                    break;
+                case 3: // Draws
+                    currentFilter.resultFilter = MatchResult.Draw;
+                    break;
+                case 4: // Pending
+                    currentFilter.resultFilter = MatchResult.Pending;
+                    break;
+            }
+
+            LoadEntries(reset: true);
+        }
+
+        private void OnDateFilterChanged(int index)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            switch (index)
+            {
+                case 0: // All time
+                    currentFilter.fromDate = null;
+                    break;
+                case 1: // Today
+                    currentFilter.fromDate = now.Date;
+                    break;
+                case 2: // Last 7 days
+                    currentFilter.fromDate = now.AddDays(-7);
+                    break;
+                case 3: // Last 30 days
+                    currentFilter.fromDate = now.AddDays(-30);
+                    break;
+                case 4: // This month
+                    currentFilter.fromDate = new DateTime(now.Year, now.Month, 1);
+                    break;
+            }
+
+            LoadEntries(reset: true);
+        }
+
+        private void ClearFilters()
+        {
+            currentFilter = new HistoryFilter();
+
+            // Keep tab filter
+            if (currentTab == HistoryTab.Matches)
+                currentFilter.typeFilter = HistoryEntryType.Match1v1;
+            else if (currentTab == HistoryTab.Tournaments)
+                currentFilter.typeFilter = HistoryEntryType.Tournament;
+
+            // Reset dropdowns
+            if (resultFilterDropdown) resultFilterDropdown.value = 0;
+            if (dateFilterDropdown) dateFilterDropdown.value = 0;
+
+            LoadEntries(reset: true);
+        }
+
+        // ==================== LOAD ENTRIES ====================
+
+        private void LoadEntries(bool reset)
+        {
+            if (reset)
+            {
+                currentPage = 0;
+                ClearEntries();
+            }
+
+            if (HistoryManager.Instance == null) return;
+
+            ShowLoading(true);
+
+            var entries = HistoryManager.Instance.GetEntries(
+                currentFilter,
+                entriesPerPage,
+                currentPage * entriesPerPage
+            );
+
+            ShowLoading(false);
+
+            // Show empty state if needed
+            bool isEmpty = entries.Count == 0 && currentPage == 0;
+            if (emptyStateText)
+            {
+                emptyStateText.gameObject.SetActive(isEmpty);
+                emptyStateText.text = GetEmptyStateText();
+            }
+
+            // Populate entries
+            PopulateEntries(entries);
+
+            // Show/hide load more button
+            if (loadMoreButton)
+            {
+                loadMoreButton.gameObject.SetActive(entries.Count >= entriesPerPage);
+            }
+        }
+
+        private string GetEmptyStateText()
+        {
+            switch (currentTab)
+            {
+                case HistoryTab.Matches:
+                    return "No hay partidas registradas.\n¡Juega tu primera partida 1v1!";
+                case HistoryTab.Tournaments:
+                    return "No has participado en torneos.\n¡Únete a tu primer torneo!";
+                default:
+                    return "No hay historial.\n¡Comienza a jugar para ver tu progreso!";
+            }
+        }
+
+        private void PopulateEntries(List<HistoryEntry> entries)
+        {
+            if (entriesContainer == null || historyEntryPrefab == null) return;
+
+            foreach (var entry in entries)
+            {
+                var entryObj = Instantiate(historyEntryPrefab, entriesContainer);
+                spawnedEntries.Add(entryObj);
+
+                var entryUI = entryObj.GetComponent<HistoryEntryItemUI>();
+                if (entryUI)
+                {
+                    entryUI.Setup(entry, OnEntryClicked);
+                }
+            }
+        }
+
+        private void ClearEntries()
+        {
+            foreach (var obj in spawnedEntries)
+            {
+                if (obj) Destroy(obj);
+            }
+            spawnedEntries.Clear();
+        }
+
+        private void OnLoadMoreClicked()
+        {
+            currentPage++;
+            LoadEntries(reset: false);
+        }
+
+        // ==================== STATS ====================
+
+        private void RefreshStats()
+        {
+            if (HistoryManager.Instance == null) return;
+
+            var stats = HistoryManager.Instance.GetStats();
+
+            // Main stats
+            if (totalMatchesText)
+                totalMatchesText.text = stats.totalMatches.ToString();
+
+            if (winRateText)
+                winRateText.text = $"{stats.winRate:F1}%";
+
+            if (netProfitText)
+            {
+                netProfitText.text = stats.netProfit >= 0
+                    ? $"+${stats.netProfit:F2}"
+                    : $"-${Math.Abs(stats.netProfit):F2}";
+                netProfitText.color = stats.netProfit >= 0
+                    ? new Color(0f, 1f, 0.5f) // Green
+                    : new Color(1f, 0.4f, 0.4f); // Red
+            }
+
+            // W/L/D
+            if (winsText) winsText.text = stats.wins.ToString();
+            if (lossesText) lossesText.text = stats.losses.ToString();
+            if (drawsText) drawsText.text = stats.draws.ToString();
+
+            // Streaks
+            var (currentStreak, isWinStreak) = HistoryManager.Instance.GetCurrentStreak();
+            if (currentStreakText)
+            {
+                currentStreakText.text = $"{currentStreak} {(isWinStreak ? "W" : "L")}";
+                currentStreakText.color = isWinStreak
+                    ? new Color(0f, 1f, 0.5f)
+                    : new Color(1f, 0.4f, 0.4f);
+            }
+
+            if (bestStreakText)
+            {
+                int bestStreak = HistoryManager.Instance.GetBestWinStreak();
+                bestStreakText.text = $"{bestStreak} W";
+            }
+
+            // Tournaments
+            if (tournamentsPlayedText)
+                tournamentsPlayedText.text = stats.tournamentsPlayed.ToString();
+
+            if (tournamentWinsText)
+                tournamentWinsText.text = stats.tournamentWins.ToString();
+        }
+
+        // ==================== DETAIL PANEL ====================
+
+        private void OnEntryClicked(HistoryEntry entry)
+        {
+            ShowEntryDetail(entry);
+        }
+
+        private void ShowEntryDetail(HistoryEntry entry)
+        {
+            if (detailPanel == null) return;
+
+            selectedEntry = entry;
+            detailPanel.SetActive(true);
+
+            // Populate detail info
+            if (detailTitleText)
+                detailTitleText.text = entry.GetDisplayTitle();
+
+            if (detailSubtitleText)
+                detailSubtitleText.text = entry.GetDisplaySubtitle();
+
+            if (detailResultText)
+            {
+                detailResultText.text = entry.GetResultText();
+                detailResultText.color = entry.GetResultColor();
+            }
+
+            if (detailScoreText)
+            {
+                if (entry.type == HistoryEntryType.Tournament)
+                {
+                    detailScoreText.text = $"Posición: #{entry.myPosition} / {entry.totalParticipants}";
+                }
+                else
+                {
+                    detailScoreText.text = $"{entry.myScore:F0} - {entry.opponentScore:F0}";
+                }
+            }
+
+            if (detailEntryFeeText)
+                detailEntryFeeText.text = $"Entry Fee: ${entry.entryFee:F2}";
+
+            if (detailPrizeText)
+                detailPrizeText.text = $"Premio: ${entry.prize:F2}";
+
+            if (detailNetText)
+            {
+                detailNetText.text = entry.GetFormattedNetResult();
+                detailNetText.color = entry.netResult >= 0
+                    ? new Color(0f, 1f, 0.5f)
+                    : new Color(1f, 0.4f, 0.4f);
+            }
+
+            if (detailDateText)
+                detailDateText.text = entry.timestamp.ToString("dd/MM/yyyy HH:mm");
+
+            if (detailDurationText)
+                detailDurationText.text = entry.GetFormattedDuration();
+        }
+
+        private void CloseDetailPanel()
+        {
+            if (detailPanel)
+            {
+                detailPanel.SetActive(false);
+            }
+            selectedEntry = null;
+        }
+
+        // ==================== EVENT HANDLERS ====================
+
+        private void OnEntryAdded(HistoryEntry entry)
+        {
+            // Refresh if matches current filter
+            if (currentFilter.Matches(entry))
+            {
+                LoadEntries(reset: true);
+            }
+            RefreshStats();
+        }
+
+        private void OnEntryUpdated(HistoryEntry entry)
+        {
+            LoadEntries(reset: true);
+            RefreshStats();
+
+            // Update detail panel if showing this entry
+            if (selectedEntry != null && selectedEntry.entryId == entry.entryId)
+            {
+                ShowEntryDetail(entry);
+            }
+        }
+
+        private void OnStatsUpdated(HistoryStats stats)
+        {
+            RefreshStats();
+        }
+
+        // ==================== LOADING ====================
+
+        private void ShowLoading(bool show)
+        {
+            if (loadingIndicator)
+            {
+                loadingIndicator.SetActive(show);
+            }
+        }
+
+        // ==================== NAVIGATION ====================
+
+        private void OnBackClicked()
+        {
+            // Close detail panel first if open
+            if (detailPanel != null && detailPanel.activeSelf)
+            {
+                CloseDetailPanel();
+                return;
+            }
+
+            SceneNavigator.Instance?.GoBack();
+        }
+
+        // ==================== PUBLIC API ====================
+
+        /// <summary>
+        /// Opens history to a specific tab
+        /// </summary>
+        public void OpenTab(string tabName)
+        {
+            if (Enum.TryParse<HistoryTab>(tabName, out HistoryTab tab))
+            {
+                ShowTab(tab);
+            }
+        }
+
+        /// <summary>
+        /// Shows detail for a specific entry by ID
+        /// </summary>
+        public void ShowEntryById(string entryId)
+        {
+            var entry = HistoryManager.Instance?.GetEntry(entryId);
+            if (entry != null)
+            {
+                ShowEntryDetail(entry);
+            }
+        }
+
+        /// <summary>
+        /// Refreshes all data
+        /// </summary>
+        public void RefreshAll()
+        {
+            RefreshStats();
+            LoadEntries(reset: true);
+        }
+    }
+}
