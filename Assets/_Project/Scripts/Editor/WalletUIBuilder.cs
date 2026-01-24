@@ -24,7 +24,7 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_DEPOSIT = new Color(0.1f, 0.35f, 0.25f, 1f);
         private static readonly Color BUTTON_WITHDRAW = new Color(0.1f, 0.25f, 0.35f, 1f);
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Build Wallet UI", false, 251)]
+        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Wallet", false, 254)]
         public static void BuildWalletUI()
         {
             Canvas canvas = FindObjectOfType<Canvas>();
@@ -55,7 +55,7 @@ namespace DigitPark.Editor
             Debug.Log("[WalletUIBuilder] Wallet UI creada exitosamente");
         }
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Build Transaction Item Prefab", false, 252)]
+        [MenuItem("DigitPark/UI Builders/CashBattle/Wallet - Transaction Prefab", false, 254)]
         public static void BuildTransactionItemPrefab()
         {
             Canvas canvas = FindObjectOfType<Canvas>();
