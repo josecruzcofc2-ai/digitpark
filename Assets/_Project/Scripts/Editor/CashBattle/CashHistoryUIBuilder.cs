@@ -35,8 +35,9 @@ namespace DigitPark.Editor
         private static readonly Color FILTER_ACTIVE = new Color(0.85f, 0.65f, 0.13f, 1f);
         private static readonly Color FILTER_INACTIVE = new Color(0.2f, 0.2f, 0.25f, 1f);
 
-        // Paths to game icons
-        private static readonly string ICONS_PATH = "Assets/_Project/Art/Icons/Games/CashBattle/";
+        // Paths to icons
+        private static readonly string GAME_GAME_ICONS_PATH = "Assets/_Project/Art/Icons/Games/CashBattle/";
+        private static readonly string STAT_GAME_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Stats/";
 
         #endregion
 
@@ -295,8 +296,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(-30, 120);
-            rt.anchoredPosition = new Vector2(0, -110);
+            rt.sizeDelta = new Vector2(-20, 110);
+            rt.anchoredPosition = new Vector2(0, -105);
 
             Image bg = panel.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -305,77 +306,73 @@ namespace DigitPark.Editor
             outline.effectColor = CARD_BORDER;
             outline.effectDistance = new Vector2(1, -1);
 
-            // Horizontal layout for stats
+            // Horizontal layout for stats - más compacto
             HorizontalLayoutGroup hlg = panel.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 5;
-            hlg.padding = new RectOffset(15, 15, 10, 10);
+            hlg.spacing = 0;
+            hlg.padding = new RectOffset(5, 5, 5, 5);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childForceExpandWidth = true;
             hlg.childForceExpandHeight = true;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
 
-            // Stats (sin emojis - TMP no los soporta)
-            CreateStatItem(panel.transform, "W", "Victorias", "24", SUCCESS_GREEN);
-            CreateStatItem(panel.transform, "L", "Derrotas", "12", ERROR_RED);
-            CreateStatItem(panel.transform, "%", "Win Rate", "67%", CYAN_ACCENT);
-            CreateStatItem(panel.transform, "$", "Ganado", "$156", SUCCESS_GREEN);
+            // Stats con iconos de imagen
+            CreateStatItemWithIcon(panel.transform, "stat_victories", "Victorias", "24", SUCCESS_GREEN);
+            CreateStatItemWithIcon(panel.transform, "stat_defeats", "Derrotas", "12", ERROR_RED);
+            CreateStatItemWithIcon(panel.transform, "stat_winrate", "Win Rate", "67%", CYAN_ACCENT);
+            CreateStatItemWithIcon(panel.transform, "stat_earnings", "Ganado", "$156", SUCCESS_GREEN);
         }
 
-        private static void CreateStatItem(Transform parent, string icon, string label, string value, Color valueColor)
+        private static void CreateStatItemWithIcon(Transform parent, string iconName, string label, string value, Color valueColor)
         {
             GameObject item = new GameObject("Stat_" + label);
             item.transform.SetParent(parent, false);
 
             VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 2;
+            vlg.spacing = 0;
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
 
-            // Icon + Value row
-            GameObject valueRow = new GameObject("ValueRow");
-            valueRow.transform.SetParent(item.transform, false);
-
-            LayoutElement valueRowLE = valueRow.AddComponent<LayoutElement>();
-            valueRowLE.preferredHeight = 50;
-
-            HorizontalLayoutGroup valueHLG = valueRow.AddComponent<HorizontalLayoutGroup>();
-            valueHLG.spacing = 5;
-            valueHLG.childAlignment = TextAnchor.MiddleCenter;
-            valueHLG.childForceExpandWidth = false;
-            valueHLG.childForceExpandHeight = true;
-            valueHLG.childControlWidth = false;
-            valueHLG.childControlHeight = true;
-
             // Icon
             GameObject iconObj = new GameObject("Icon");
-            iconObj.transform.SetParent(valueRow.transform, false);
+            iconObj.transform.SetParent(item.transform, false);
 
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.preferredWidth = 35;
-            iconLE.preferredHeight = 35;
+            iconLE.preferredWidth = 45;
+            iconLE.preferredHeight = 45;
 
-            TextMeshProUGUI iconText = iconObj.AddComponent<TextMeshProUGUI>();
-            iconText.text = icon;
-            iconText.fontSize = 28;
-            iconText.alignment = TextAlignmentOptions.Center;
+            Image iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+
+            // Cargar sprite del icono
+            string iconPath = STAT_GAME_ICONS_PATH + iconName + ".png";
+            Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+                iconImg.color = Color.white;
+            }
+            else
+            {
+                iconImg.color = valueColor;
+                Debug.LogWarning($"[CashHistoryUIBuilder] Icon not found: {iconPath}");
+            }
 
             // Value
             GameObject valueObj = new GameObject("Value");
-            valueObj.transform.SetParent(valueRow.transform, false);
+            valueObj.transform.SetParent(item.transform, false);
 
             LayoutElement valueLE = valueObj.AddComponent<LayoutElement>();
-            valueLE.preferredWidth = 80;
-            valueLE.preferredHeight = 45;
+            valueLE.preferredHeight = 30;
 
             TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.text = value;
-            valueText.fontSize = 32;
+            valueText.fontSize = 24;
             valueText.color = valueColor;
-            valueText.alignment = TextAlignmentOptions.Left;
+            valueText.alignment = TextAlignmentOptions.Center;
             valueText.fontStyle = FontStyles.Bold;
 
             // Label
@@ -383,11 +380,11 @@ namespace DigitPark.Editor
             labelObj.transform.SetParent(item.transform, false);
 
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
-            labelLE.preferredHeight = 25;
+            labelLE.preferredHeight = 20;
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = label;
-            labelText.fontSize = 16;
+            labelText.fontSize = 13;
             labelText.color = TEXT_SECONDARY;
             labelText.alignment = TextAlignmentOptions.Center;
         }
@@ -468,8 +465,8 @@ namespace DigitPark.Editor
             RectTransform svRT = scrollView.AddComponent<RectTransform>();
             svRT.anchorMin = new Vector2(0, 0);
             svRT.anchorMax = new Vector2(1, 1);
-            svRT.offsetMin = new Vector2(15, 20);  // Bottom padding
-            svRT.offsetMax = new Vector2(-15, -300);  // Top offset (below filters)
+            svRT.offsetMin = new Vector2(10, 15);  // Bottom padding
+            svRT.offsetMax = new Vector2(-10, -280);  // Top offset (below filters: 105+110+55+10)
 
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
@@ -478,7 +475,8 @@ namespace DigitPark.Editor
 
             scrollView.AddComponent<Image>().color = new Color(0, 0, 0, 0);
 
-            // Viewport
+            // Viewport - IMPORTANTE: RectMask2D en lugar de Mask para mejor rendimiento
+            // y no requiere Image con alpha
             GameObject viewport = new GameObject("Viewport");
             viewport.transform.SetParent(scrollView.transform, false);
 
@@ -486,9 +484,11 @@ namespace DigitPark.Editor
             vpRT.anchorMin = Vector2.zero;
             vpRT.anchorMax = Vector2.one;
             vpRT.sizeDelta = Vector2.zero;
+            vpRT.offsetMin = Vector2.zero;
+            vpRT.offsetMax = Vector2.zero;
 
-            viewport.AddComponent<Image>().color = new Color(0, 0, 0, 0);
-            viewport.AddComponent<Mask>().showMaskGraphic = false;
+            // Usar RectMask2D en lugar de Mask - funciona mejor para ScrollRect
+            viewport.AddComponent<RectMask2D>();
 
             // Content
             GameObject content = new GameObject("Content");
@@ -571,7 +571,7 @@ namespace DigitPark.Editor
 
             // Try to load game icon
             Image iconImg = iconContainer.AddComponent<Image>();
-            string iconPath = ICONS_PATH + game + "Icon.png";
+            string iconPath = GAME_ICONS_PATH + game + "Icon.png";
             Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
             if (iconSprite != null)
             {
