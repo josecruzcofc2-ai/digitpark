@@ -300,8 +300,7 @@ namespace DigitPark.Editor
             // Title "Cash Battle"
             CreateHeaderTitle(header.transform);
 
-            // Balance display
-            CreateBalanceDisplay(header.transform);
+            // NOTE: No balance display here - user is not verified yet
         }
 
         private static void CreateBackButton(Transform parent)
@@ -353,44 +352,6 @@ namespace DigitPark.Editor
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;
             title.fontStyle = FontStyles.Bold;
-        }
-
-        private static void CreateBalanceDisplay(Transform parent)
-        {
-            GameObject balanceObj = new GameObject("BalanceDisplay");
-            balanceObj.transform.SetParent(parent, false);
-
-            RectTransform rt = balanceObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(1, 0.5f);
-            rt.anchorMax = new Vector2(1, 0.5f);
-            rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = new Vector2(150, 50);
-            rt.anchoredPosition = new Vector2(-20, 0);
-
-            // Balance background
-            Image bg = balanceObj.AddComponent<Image>();
-            bg.color = new Color(0, 0, 0, 0.5f);
-
-            // Outline
-            Outline outline = balanceObj.AddComponent<Outline>();
-            outline.effectColor = GOLD_DARK;
-            outline.effectDistance = new Vector2(1, -1);
-
-            // Balance text
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(balanceObj.transform, false);
-
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI balanceText = textObj.AddComponent<TextMeshProUGUI>();
-            balanceText.text = "$ 0.00";
-            balanceText.fontSize = 24;
-            balanceText.color = SUCCESS_GREEN;
-            balanceText.alignment = TextAlignmentOptions.Center;
-            balanceText.fontStyle = FontStyles.Bold;
         }
 
         #endregion
