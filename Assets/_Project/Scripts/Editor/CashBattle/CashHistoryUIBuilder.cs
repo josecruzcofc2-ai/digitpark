@@ -315,11 +315,11 @@ namespace DigitPark.Editor
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
 
-            // Stats with icons
-            CreateStatItem(panel.transform, "🏆", "Victorias", "24", SUCCESS_GREEN);
-            CreateStatItem(panel.transform, "❌", "Derrotas", "12", ERROR_RED);
-            CreateStatItem(panel.transform, "📊", "Win Rate", "67%", CYAN_ACCENT);
-            CreateStatItem(panel.transform, "💰", "Ganado", "$156", SUCCESS_GREEN);
+            // Stats (sin emojis - TMP no los soporta)
+            CreateStatItem(panel.transform, "W", "Victorias", "24", SUCCESS_GREEN);
+            CreateStatItem(panel.transform, "L", "Derrotas", "12", ERROR_RED);
+            CreateStatItem(panel.transform, "%", "Win Rate", "67%", CYAN_ACCENT);
+            CreateStatItem(panel.transform, "$", "Ganado", "$156", SUCCESS_GREEN);
         }
 
         private static void CreateStatItem(Transform parent, string icon, string label, string value, Color valueColor)
@@ -466,10 +466,10 @@ namespace DigitPark.Editor
             scrollView.transform.SetParent(parent, false);
 
             RectTransform svRT = scrollView.AddComponent<RectTransform>();
-            svRT.anchorMin = Vector2.zero;
-            svRT.anchorMax = Vector2.one;
-            svRT.offsetMin = new Vector2(15, 15);
-            svRT.offsetMax = new Vector2(-15, -305);
+            svRT.anchorMin = new Vector2(0, 0);
+            svRT.anchorMax = new Vector2(1, 1);
+            svRT.offsetMin = new Vector2(15, 20);  // Bottom padding
+            svRT.offsetMax = new Vector2(-15, -300);  // Top offset (below filters)
 
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
@@ -498,7 +498,8 @@ namespace DigitPark.Editor
             contentRT.anchorMin = new Vector2(0, 1);
             contentRT.anchorMax = new Vector2(1, 1);
             contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.sizeDelta = new Vector2(0, 0);
+            contentRT.sizeDelta = new Vector2(0, 1000);  // Initial height, ContentSizeFitter will adjust
+            contentRT.anchoredPosition = Vector2.zero;
 
             VerticalLayoutGroup vlg = content.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 12;
