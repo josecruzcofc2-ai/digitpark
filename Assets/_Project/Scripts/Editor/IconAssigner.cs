@@ -78,15 +78,20 @@ namespace DigitPark.Editor
 
             var categories = new Dictionary<string, List<string>>
             {
-                { "Achievements", allIcons.Keys.Where(k => k.Contains("achievement")).OrderBy(k => k).ToList() },
+                { "Achievements/Logros", allIcons.Keys.Where(k => k.Contains("achievement") || k.StartsWith("logro_")).OrderBy(k => k).ToList() },
+                { "Auth (Google/Apple)", allIcons.Keys.Where(k => k.Contains("google") || k.Contains("apple") || k.Contains("icons8")).OrderBy(k => k).ToList() },
                 { "BattlePass", allIcons.Keys.Where(k => k.Contains("battlepass")).OrderBy(k => k).ToList() },
+                { "CashBattle/Ranks", allIcons.Keys.Where(k => k.StartsWith("rango_") || k.Contains("cash")).OrderBy(k => k).ToList() },
                 { "Chests", allIcons.Keys.Where(k => k.Contains("chest")).OrderBy(k => k).ToList() },
                 { "Currency (Coins/Gems/XP)", allIcons.Keys.Where(k => k.Contains("coin") || k.Contains("gem") || k == "icon_xp").OrderBy(k => k).ToList() },
                 { "Daily Rewards", allIcons.Keys.Where(k => k.Contains("daily")).OrderBy(k => k).ToList() },
+                { "Games", allIcons.Keys.Where(k => k.Contains("rush") || k.Contains("tap") || k.Contains("math") || k.Contains("memory") || k.Contains("odd") || k.Contains("cognitive")).OrderBy(k => k).ToList() },
                 { "Missions", allIcons.Keys.Where(k => k.Contains("mission")).OrderBy(k => k).ToList() },
-                { "UI Elements", allIcons.Keys.Where(k => k.StartsWith("icon_ui")).OrderBy(k => k).ToList() },
-                { "Games", allIcons.Keys.Where(k => k.Contains("icon") && (k.Contains("rush") || k.Contains("tap") || k.Contains("math") || k.Contains("memory") || k.Contains("odd"))).OrderBy(k => k).ToList() },
-                { "Other", allIcons.Keys.Where(k => !k.Contains("achievement") && !k.Contains("battlepass") && !k.Contains("chest") && !k.Contains("coin") && !k.Contains("gem") && !k.Contains("daily") && !k.Contains("mission") && !k.StartsWith("icon_ui") && k != "icon_xp").OrderBy(k => k).ToList() },
+                { "Navigation", allIcons.Keys.Where(k => k.Contains("arrow") || k.Contains("close") || k.Contains("search") || k.Contains("home") || k.Contains("settings") || k.Contains("notification")).OrderBy(k => k).ToList() },
+                { "Social", allIcons.Keys.Where(k => k.Contains("person") || k.Contains("user") || k.Contains("adduser")).OrderBy(k => k).ToList() },
+                { "Tournaments", allIcons.Keys.Where(k => k.Contains("trofeo") || k.Contains("corona") || k.Contains("badge") || k.Contains("tournament")).OrderBy(k => k).ToList() },
+                { "UI Elements", allIcons.Keys.Where(k => k.StartsWith("icon_ui") || k.Contains("timer") || k.Contains("warning") || k.Contains("play")).OrderBy(k => k).ToList() },
+                { "Other", allIcons.Keys.Where(k => !IsKnownCategory(k)).OrderBy(k => k).ToList() },
             };
 
             foreach (var category in categories)
@@ -252,6 +257,27 @@ namespace DigitPark.Editor
                 ConfigureAllIconsAsSprites();
             }
             EditorGUILayout.EndVertical();
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        private static bool IsKnownCategory(string k)
+        {
+            return k.Contains("achievement") || k.StartsWith("logro_") ||
+                   k.Contains("google") || k.Contains("apple") || k.Contains("icons8") ||
+                   k.Contains("battlepass") ||
+                   k.StartsWith("rango_") || k.Contains("cash") ||
+                   k.Contains("chest") ||
+                   k.Contains("coin") || k.Contains("gem") || k == "icon_xp" ||
+                   k.Contains("daily") ||
+                   k.Contains("rush") || k.Contains("tap") || k.Contains("math") || k.Contains("memory") || k.Contains("odd") || k.Contains("cognitive") ||
+                   k.Contains("mission") ||
+                   k.Contains("arrow") || k.Contains("close") || k.Contains("search") || k.Contains("home") || k.Contains("settings") || k.Contains("notification") ||
+                   k.Contains("person") || k.Contains("user") || k.Contains("adduser") ||
+                   k.Contains("trofeo") || k.Contains("corona") || k.Contains("badge") || k.Contains("tournament") ||
+                   k.StartsWith("icon_ui") || k.Contains("timer") || k.Contains("warning") || k.Contains("play");
         }
 
         #endregion
@@ -698,14 +724,28 @@ namespace DigitPark.Editor
             // Fallback: buscar por path directo en subcarpetas conocidas
             string[] subfolders = new[]
             {
-                "",           // Root
-                "Chests",
-                "DailyRewards",
-                "Currency",
-                "UI",
+                "",                      // Root
                 "Achievements",
-                "Rangos",
+                "Auth/Google",
+                "Auth/Apple",
+                "Auth/Common",
+                "BattlePass",
+                "CashBattle/Ranks",
+                "CashBattle/UI",
+                "Chests",
+                "Currency",
+                "DailyRewards",
                 "Games",
+                "Missions",
+                "Navigation/TabBar",
+                "Navigation/Buttons",
+                "Navigation/Actions",
+                "PlayModeSelectionIcons",
+                "Social/Profile",
+                "Social/Friends",
+                "Tournaments",
+                "UI",
+                "_App/Logos",
             };
 
             foreach (var subfolder in subfolders)

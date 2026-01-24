@@ -7,9 +7,9 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Premium UI Builder for CashBattle scene
-    /// Creates a VIP/Premium experience for real money competitions
-    /// Features: Gold gradient background, card-based layout, prominent balance display
+    /// UI Builder para la escena CashBattleHub (Menu Principal de Cash Battle)
+    /// Construye: 4 tarjetas principales (Batallas 1v1, Torneos, Wallet, Historial)
+    /// Para la escena CashBattle1v1, usar CashBattle1v1UIBuilder
     /// </summary>
     public class CashBattleUIBuilder : EditorWindow
     {
@@ -35,24 +35,27 @@ namespace DigitPark.Editor
 
         private static readonly Color CYAN_ACCENT = new Color(0f, 0.9f, 1f, 1f);             // Keep some cyan for contrast
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashBattle Hub", false, 250)]
+        [MenuItem("DigitPark/UI Builders/CashBattle/CashBattleHub (Menu Principal)", false, 250)]
         public static void ShowWindow()
         {
-            GetWindow<CashBattleUIBuilder>("CashBattle UI Builder");
+            GetWindow<CashBattleUIBuilder>("CashBattleHub Builder");
         }
 
         private void OnGUI()
         {
-            GUILayout.Label("CashBattle Premium UI Builder", EditorStyles.boldLabel);
+            GUILayout.Label("CashBattleHub UI Builder", EditorStyles.boldLabel);
+            GUILayout.Label("Menu Principal de Cash Battle", EditorStyles.miniLabel);
             EditorGUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "This will create a premium UI for the CashBattle scene:\n\n" +
-                "• Premium gold gradient background\n" +
-                "• Card-based layout for options\n" +
-                "• Prominent balance display\n" +
-                "• Improved age verification panel\n" +
-                "• VIP/Premium aesthetic",
+                "Construye la UI para CashBattleHub.unity:\n\n" +
+                "- 4 tarjetas principales:\n" +
+                "  * Batallas 1v1\n" +
+                "  * Torneos Cash\n" +
+                "  * Mi Wallet\n" +
+                "  * Historial\n" +
+                "- Panel de verificacion de edad\n" +
+                "- Background premium dorado",
                 MessageType.Info);
 
             EditorGUILayout.Space(10);
@@ -132,28 +135,21 @@ namespace DigitPark.Editor
             // 3. Header with Back button and Balance
             CreateHeader(safeArea.transform);
 
-            // 4. Age Verification Panel (shown first if not verified)
-            CreateAgeVerificationPanel(safeArea.transform);
-
-            // 5. Main Panel with Cards
+            // 4. Main Panel with Cards (navega a otras escenas)
+            // NOTA: AgeVerification tiene su propia escena (AgeVerification.unity)
+            // Si el usuario no esta verificado, el Manager navega a esa escena
             CreateMainPanel(safeArea.transform);
 
-            // 6. Game Selection Panel (for 1v1 battles)
-            CreateGameSelectionPanel(safeArea.transform);
+            // NOTA: Los siguientes paneles YA NO se crean aqui porque cada uno
+            // tiene su propia escena separada:
+            // - CashBattle1v1.unity → Seleccion de juego y matchmaking
+            // - CashTournaments.unity → Lista de torneos
+            // - CashWallet.unity → Wallet y transacciones
+            // - CashHistory.unity → Historial de partidas
+            //
+            // Los botones del MainPanel navegan a estas escenas usando SceneManager.LoadScene()
 
-            // 7. Tournament List Panel
-            CreateTournamentListPanel(safeArea.transform);
-
-            // 8. Matchmaking Panel
-            CreateMatchmakingPanel(safeArea.transform);
-
-            // 9. Wallet Panel
-            CreateWalletPanel(safeArea.transform);
-
-            // 10. History Panel
-            CreateHistoryPanel(safeArea.transform);
-
-            Debug.Log("[CashBattleUIBuilder] Premium UI built successfully!");
+            Debug.Log("[CashBattleUIBuilder] CashBattleHub UI built successfully!");
         }
 
         private static void CleanupOldElements(Transform parent)
@@ -670,8 +666,8 @@ namespace DigitPark.Editor
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.sizeDelta = Vector2.zero;
-            rt.offsetMin = new Vector2(20, 20); // Less margin - bigger cards
-            rt.offsetMax = new Vector2(-20, -130); // Below header
+            rt.offsetMin = new Vector2(20, 20);
+            rt.offsetMax = new Vector2(-20, -130);
 
             // Main cards container
             GameObject cardsContainer = new GameObject("CardsContainer");
@@ -682,201 +678,326 @@ namespace DigitPark.Editor
             cardsRT.anchorMax = Vector2.one;
             cardsRT.sizeDelta = Vector2.zero;
 
-            // Create the option cards
+            // NUEVO LAYOUT:
+            // - Batallas 1v1: Card GRANDE arriba (45% altura)
+            // - Torneos + Wallet: Fila de 2 cards (33% altura)
+            // - Historial: Card ancho completo abajo (20% altura)
             CreateBattles1v1Card(cardsContainer.transform);
             CreateTournamentsCashCard(cardsContainer.transform);
             CreateWalletCard(cardsContainer.transform);
             CreateHistoryCard(cardsContainer.transform);
 
-            // Initially hidden (until age verified)
-            panel.SetActive(false);
+            // MainPanel visible por defecto - el Manager lo ocultara si necesita verificacion
+            panel.SetActive(true);
         }
 
         private static void CreateBattles1v1Card(Transform parent)
         {
-            // Top left - bigger cards covering more space
-            GameObject card = CreateOptionCard(parent, "Battles1v1Card",
-                "Batallas 1v1",
+            // CARD PRINCIPAL - Arriba, ancho completo, 45% altura
+            GameObject card = CreatePremiumCard(parent, "Battles1v1Card",
+                "BATALLAS 1v1",
                 "Enfrenta a otros jugadores",
                 "$1 - $100",
-                new Vector2(0, 1),
-                new Vector2(0.49f, 1),
-                new Vector2(0, 0.52f),
-                new Vector2(0.49f, 0.52f));
+                new Vector2(0, 0.57f),      // anchorMin
+                new Vector2(1, 1f));        // anchorMax
 
-            AddCardIcon(card.transform, "⚔");
+            AddCardIconImage(card.transform, "Battles1v1Icon");
         }
 
         private static void CreateTournamentsCashCard(Transform parent)
         {
-            // Top right
-            GameObject card = CreateOptionCard(parent, "CashTournamentsCard",
-                "Torneos Cash",
-                "Compite por grandes premios",
+            // Card izquierdo medio
+            GameObject card = CreatePremiumCard(parent, "CashTournamentsCard",
+                "TORNEOS",
+                "Grandes premios",
                 "$5 - $500",
-                new Vector2(0.51f, 1),
-                new Vector2(1, 1),
-                new Vector2(0.51f, 0.52f),
-                new Vector2(1, 0.52f));
+                new Vector2(0, 0.22f),       // anchorMin
+                new Vector2(0.49f, 0.55f));  // anchorMax
 
-            AddCardIcon(card.transform, "🏆");
+            AddCardIconImage(card.transform, "TournamentsCashIcon");
         }
 
         private static void CreateWalletCard(Transform parent)
         {
-            // Bottom left
-            GameObject card = CreateOptionCard(parent, "WalletCard",
-                "Mi Wallet",
-                "Deposita y retira dinero",
-                "Fondos",
-                new Vector2(0, 0.48f),
-                new Vector2(0.49f, 0.48f),
-                new Vector2(0, 0),
-                new Vector2(0.49f, 0));
+            // Card derecho medio
+            GameObject card = CreatePremiumCard(parent, "WalletCard",
+                "MI WALLET",
+                "Deposita y retira",
+                "",
+                new Vector2(0.51f, 0.22f),   // anchorMin
+                new Vector2(1, 0.55f));      // anchorMax
 
-            AddCardIcon(card.transform, "💳");
+            AddCardIconImage(card.transform, "WalletCashIcon");
         }
 
         private static void CreateHistoryCard(Transform parent)
         {
-            // Bottom right
-            GameObject card = CreateOptionCard(parent, "HistoryCard",
-                "Historial",
-                "Tus batallas anteriores",
+            // Card inferior - ancho completo
+            GameObject card = CreatePremiumCard(parent, "HistoryCard",
+                "HISTORIAL",
+                "Tus batallas y estadisticas",
                 "",
-                new Vector2(0.51f, 0.48f),
-                new Vector2(1, 0.48f),
-                new Vector2(0.51f, 0),
-                new Vector2(1, 0));
+                new Vector2(0, 0),           // anchorMin
+                new Vector2(1, 0.20f));      // anchorMax
 
-            AddCardIcon(card.transform, "📊");
+            AddCardIconImage(card.transform, "HistoryCashIcon");
         }
 
-        private static GameObject CreateOptionCard(Transform parent, string name, string title, string subtitle, string detail,
-            Vector2 anchorMinTop, Vector2 anchorMaxTop, Vector2 anchorMinBottom, Vector2 anchorMaxBottom)
+        /// <summary>
+        /// Crea un card premium con icono de imagen
+        /// </summary>
+        private static GameObject CreatePremiumCard(Transform parent, string name, string title, string subtitle, string detail,
+            Vector2 anchorMin, Vector2 anchorMax)
         {
             GameObject card = new GameObject(name);
             card.transform.SetParent(parent, false);
 
             RectTransform rt = card.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(anchorMinTop.x, anchorMinBottom.y);
-            rt.anchorMax = new Vector2(anchorMaxTop.x, anchorMaxTop.y);
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
             rt.sizeDelta = Vector2.zero;
             rt.offsetMin = new Vector2(5, 5);
             rt.offsetMax = new Vector2(-5, -5);
 
-            // Card background
+            // Card background con gradiente sutil
             Image bg = card.AddComponent<Image>();
-            bg.color = CARD_BG;
+            bg.color = new Color(0.1f, 0.08f, 0.12f, 0.95f);
 
-            // Gold border
+            // Borde dorado premium
             Outline outline = card.AddComponent<Outline>();
-            outline.effectColor = CARD_BORDER;
+            outline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.7f);
             outline.effectDistance = new Vector2(2, -2);
 
             // Button
             Button btn = card.AddComponent<Button>();
             ColorBlock colors = btn.colors;
             colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1.1f, 1.05f, 1f, 1f);
+            colors.highlightedColor = new Color(1.15f, 1.1f, 1f, 1f);
             colors.pressedColor = new Color(0.9f, 0.85f, 0.8f, 1f);
             btn.colors = colors;
             btn.targetGraphic = bg;
 
-            // Title - BIGGER and BOLD
+            // Calcular si es card grande (Batallas 1v1) o pequeño
+            bool isLargeCard = (anchorMax.y - anchorMin.y) > 0.35f;
+            bool isWideCard = (anchorMax.x - anchorMin.x) > 0.6f;
+
+            // === TITULO ===
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(card.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 0.5f);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.sizeDelta = Vector2.zero;
-            titleRT.offsetMin = new Vector2(90, 10);
-            titleRT.offsetMax = new Vector2(-15, -15);
+            if (isLargeCard)
+            {
+                // Card grande - titulo arriba a la derecha del icono (130px + margen)
+                titleRT.anchorMin = new Vector2(0, 0.55f);
+                titleRT.anchorMax = new Vector2(1, 0.95f);
+                titleRT.offsetMin = new Vector2(150, 0);  // Ajustado para icono 130px
+                titleRT.offsetMax = new Vector2(-55, -10);  // Espacio para flecha
+            }
+            else
+            {
+                // Card pequeño (icono 80-85px + margen)
+                titleRT.anchorMin = new Vector2(0, 0.5f);
+                titleRT.anchorMax = new Vector2(1, 1);
+                titleRT.offsetMin = new Vector2(isWideCard ? 110 : 100, 5);  // Ajustado
+                titleRT.offsetMax = new Vector2(-45, -8);  // Espacio para flecha
+            }
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = 38; // Bigger
+            titleText.fontSize = isLargeCard ? 48 : 34;  // AUMENTADO: 42→48, 28→34
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontStyle = FontStyles.Bold;
 
-            // Subtitle - BIGGER and BOLD
+            // === SUBTITULO ===
             GameObject subtitleObj = new GameObject("Subtitle");
             subtitleObj.transform.SetParent(card.transform, false);
 
             RectTransform subRT = subtitleObj.AddComponent<RectTransform>();
-            subRT.anchorMin = new Vector2(0, 0);
-            subRT.anchorMax = new Vector2(1, 0.5f);
-            subRT.sizeDelta = Vector2.zero;
-            subRT.offsetMin = new Vector2(90, 15);
-            subRT.offsetMax = new Vector2(-15, -5);
+            if (isLargeCard)
+            {
+                subRT.anchorMin = new Vector2(0, 0.30f);
+                subRT.anchorMax = new Vector2(1, 0.55f);
+                subRT.offsetMin = new Vector2(150, 0);   // Igual que título
+                subRT.offsetMax = new Vector2(-55, 0);   // Espacio para flecha
+            }
+            else
+            {
+                subRT.anchorMin = new Vector2(0, 0);
+                subRT.anchorMax = new Vector2(1, 0.5f);
+                subRT.offsetMin = new Vector2(isWideCard ? 110 : 100, 8);  // Igual que título
+                subRT.offsetMax = new Vector2(-45, -5);  // Espacio para flecha
+            }
 
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subText.text = subtitle;
-            subText.fontSize = 26; // Bigger
+            subText.fontSize = isLargeCard ? 28 : 22;  // AUMENTADO: 24→28, 18→22
             subText.color = TEXT_SECONDARY;
             subText.alignment = TextAlignmentOptions.Left;
-            subText.fontStyle = FontStyles.Bold; // Bold
 
-            // Detail (price range) - BIGGER
+            // === DETALLE (rango de precio) - BADGE PROMINENTE ===
             if (!string.IsNullOrEmpty(detail))
             {
-                GameObject detailObj = new GameObject("Detail");
+                GameObject detailObj = new GameObject("PriceBadge");
                 detailObj.transform.SetParent(card.transform, false);
 
                 RectTransform detailRT = detailObj.AddComponent<RectTransform>();
-                detailRT.anchorMin = new Vector2(1, 0.5f);
-                detailRT.anchorMax = new Vector2(1, 0.5f);
-                detailRT.pivot = new Vector2(1, 0.5f);
-                detailRT.sizeDelta = new Vector2(150, 40);
-                detailRT.anchoredPosition = new Vector2(-15, 0);
+                detailRT.anchorMin = new Vector2(1, 0);
+                detailRT.anchorMax = new Vector2(1, 0);
+                detailRT.pivot = new Vector2(1, 0);
+                detailRT.sizeDelta = isLargeCard ? new Vector2(160, 45) : new Vector2(130, 38);  // MAS GRANDE
+                detailRT.anchoredPosition = new Vector2(-12, 12);
 
-                TextMeshProUGUI detailText = detailObj.AddComponent<TextMeshProUGUI>();
+                // Fondo con gradiente cyan más visible
+                Image detailBg = detailObj.AddComponent<Image>();
+                detailBg.color = new Color(0f, 0.85f, 1f, 0.25f);  // Más opaco
+
+                // Borde cyan brillante para destacar
+                Outline badgeOutline = detailObj.AddComponent<Outline>();
+                badgeOutline.effectColor = new Color(0f, 0.9f, 1f, 0.8f);
+                badgeOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+                // Texto en objeto hijo separado
+                GameObject detailTextObj = new GameObject("DetailText");
+                detailTextObj.transform.SetParent(detailObj.transform, false);
+
+                RectTransform detailTextRT = detailTextObj.AddComponent<RectTransform>();
+                detailTextRT.anchorMin = Vector2.zero;
+                detailTextRT.anchorMax = Vector2.one;
+                detailTextRT.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI detailText = detailTextObj.AddComponent<TextMeshProUGUI>();
                 detailText.text = detail;
-                detailText.fontSize = 24; // Bigger
+                detailText.fontSize = isLargeCard ? 26 : 22;  // AUMENTADO: 22→26, 18→22
                 detailText.color = CYAN_ACCENT;
-                detailText.alignment = TextAlignmentOptions.Right;
-                detailText.fontStyle = FontStyles.Bold; // Bold
+                detailText.alignment = TextAlignmentOptions.Center;
+                detailText.fontStyle = FontStyles.Bold;
             }
+
+            // === FLECHA INDICADORA (affordance - muestra que es tocable) ===
+            CreateTouchIndicator(card.transform, isLargeCard);
+
+            // NOTA: Indicador de jugadores activos se muestra DENTRO de las escenas
+            // CashBattle1v1 y CashTournaments, no en el Hub
 
             return card;
         }
 
-        private static void AddCardIcon(Transform cardTransform, string icon)
+        /// <summary>
+        /// Crea flecha indicadora que muestra que el card es tocable (affordance)
+        /// </summary>
+        private static void CreateTouchIndicator(Transform cardTransform, bool isLargeCard)
+        {
+            GameObject arrow = new GameObject("TouchArrow");
+            arrow.transform.SetParent(cardTransform, false);
+
+            RectTransform rt = arrow.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(1, 0.5f);
+            rt.anchorMax = new Vector2(1, 0.5f);
+            rt.pivot = new Vector2(1, 0.5f);
+            rt.sizeDelta = isLargeCard ? new Vector2(50, 50) : new Vector2(35, 35);
+            rt.anchoredPosition = new Vector2(-10, 0);
+
+            TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
+            arrowText.text = ">";
+            arrowText.fontSize = isLargeCard ? 42 : 30;
+            arrowText.color = new Color(1f, 0.84f, 0f, 0.6f);  // Dorado semi-transparente
+            arrowText.alignment = TextAlignmentOptions.Center;
+            arrowText.fontStyle = FontStyles.Bold;
+        }
+
+        // NOTA: CreatePlayersCountIndicator eliminado del Hub
+        // El indicador de jugadores activos se muestra en CashBattle1v1 y CashTournaments
+
+        /// <summary>
+        /// Añade icono de imagen al card (carga desde Assets)
+        /// </summary>
+        private static void AddCardIconImage(Transform cardTransform, string iconName)
         {
             GameObject iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(cardTransform, false);
+
+            // Detectar si es card grande basado en el nombre
+            bool isLargeCard = cardTransform.name.Contains("Battles1v1");
+            bool isWideCard = cardTransform.name.Contains("History");
 
             RectTransform rt = iconObj.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 0.5f);
             rt.anchorMax = new Vector2(0, 0.5f);
             rt.pivot = new Vector2(0, 0.5f);
-            rt.sizeDelta = new Vector2(70, 70); // Bigger icon
-            rt.anchoredPosition = new Vector2(15, 0);
 
-            // Icon background
-            Image bg = iconObj.AddComponent<Image>();
-            bg.color = new Color(0.2f, 0.15f, 0.1f, 0.8f);
+            if (isLargeCard)
+            {
+                rt.sizeDelta = new Vector2(130, 130);  // AUMENTADO: 110→130
+                rt.anchoredPosition = new Vector2(12, 0);
+            }
+            else if (isWideCard)
+            {
+                rt.sizeDelta = new Vector2(85, 85);   // AUMENTADO: 70→85
+                rt.anchoredPosition = new Vector2(18, 0);
+            }
+            else
+            {
+                rt.sizeDelta = new Vector2(80, 80);   // AUMENTADO: 70→80
+                rt.anchoredPosition = new Vector2(10, 0);
+            }
 
-            Outline outline = iconObj.AddComponent<Outline>();
-            outline.effectColor = CARD_BORDER;
-            outline.effectDistance = new Vector2(2, -2);
+            // Imagen del icono
+            Image iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.color = Color.white;
 
-            // Icon text
-            GameObject textObj = new GameObject("IconText");
-            textObj.transform.SetParent(iconObj.transform, false);
+            // Intentar cargar el sprite desde la carpeta Hub
+            string iconPath = $"Assets/_Project/Art/Icons/CashBattle/Hub/{iconName}.png";
+            Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
 
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.sizeDelta = Vector2.zero;
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+            }
+            else
+            {
+                // Fallback: fondo con color y emoji como placeholder
+                iconImg.color = new Color(0.15f, 0.12f, 0.08f, 0.9f);
+                Debug.LogWarning($"[CashBattleUIBuilder] Icon not found: {iconPath}. Using placeholder.");
 
-            TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.text = icon;
-            text.fontSize = 38; // Bigger
-            text.color = TEXT_GOLD;
-            text.alignment = TextAlignmentOptions.Center;
+                // Añadir texto placeholder
+                GameObject textObj = new GameObject("IconText");
+                textObj.transform.SetParent(iconObj.transform, false);
+
+                RectTransform textRT = textObj.AddComponent<RectTransform>();
+                textRT.anchorMin = Vector2.zero;
+                textRT.anchorMax = Vector2.one;
+                textRT.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
+                text.text = GetFallbackEmoji(iconName);
+                text.fontSize = isLargeCard ? 50 : 32;
+                text.color = TEXT_GOLD;
+                text.alignment = TextAlignmentOptions.Center;
+            }
+        }
+
+        /// <summary>
+        /// Retorna emoji de fallback basado en el nombre del icono
+        /// </summary>
+        private static string GetFallbackEmoji(string iconName)
+        {
+            if (iconName.Contains("Battles")) return "⚔";
+            if (iconName.Contains("Tournament")) return "🏆";
+            if (iconName.Contains("Wallet")) return "💰";
+            if (iconName.Contains("History")) return "📊";
+            return "?";
+        }
+
+        // Mantener metodo legacy para compatibilidad
+        private static GameObject CreateOptionCard(Transform parent, string name, string title, string subtitle, string detail,
+            Vector2 anchorMinTop, Vector2 anchorMaxTop, Vector2 anchorMinBottom, Vector2 anchorMaxBottom)
+        {
+            return CreatePremiumCard(parent, name, title, subtitle, detail,
+                new Vector2(anchorMinTop.x, anchorMinBottom.y),
+                new Vector2(anchorMaxTop.x, anchorMaxTop.y));
         }
 
         #endregion
@@ -885,6 +1006,8 @@ namespace DigitPark.Editor
 
         private static void CreateGameSelectionPanel(Transform parent)
         {
+            Debug.Log("=== CREANDO GAME SELECTION PANEL CON PREMIUM CARDS v2 ===");
+
             GameObject panel = new GameObject("GameSelectionPanel");
             panel.transform.SetParent(parent, false);
 
@@ -910,43 +1033,126 @@ namespace DigitPark.Editor
             titleRT.anchorMin = new Vector2(0, 1);
             titleRT.anchorMax = new Vector2(1, 1);
             titleRT.pivot = new Vector2(0.5f, 1);
-            titleRT.sizeDelta = new Vector2(0, 60);
+            titleRT.sizeDelta = new Vector2(0, 45);
             titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Selecciona un Juego";
-            titleText.fontSize = 38;
+            titleText.fontSize = 36;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
 
-            // Games Container (ScrollView area)
+            // ========== ONLINE PLAYERS INDICATOR ==========
+            GameObject onlineIndicator = new GameObject("OnlinePlayersIndicator");
+            onlineIndicator.transform.SetParent(panel.transform, false);
+
+            RectTransform onlineRT = onlineIndicator.AddComponent<RectTransform>();
+            onlineRT.anchorMin = new Vector2(0, 1);
+            onlineRT.anchorMax = new Vector2(1, 1);
+            onlineRT.pivot = new Vector2(0.5f, 1);
+            onlineRT.sizeDelta = new Vector2(0, 30);
+            onlineRT.anchoredPosition = new Vector2(0, -48);
+
+            // Online indicator background
+            Image onlineBg = onlineIndicator.AddComponent<Image>();
+            onlineBg.color = new Color(0.05f, 0.08f, 0.12f, 0.8f);
+
+            // Green dot
+            GameObject greenDot = new GameObject("GreenDot");
+            greenDot.transform.SetParent(onlineIndicator.transform, false);
+
+            RectTransform dotRT = greenDot.AddComponent<RectTransform>();
+            dotRT.anchorMin = new Vector2(0.5f, 0.5f);
+            dotRT.anchorMax = new Vector2(0.5f, 0.5f);
+            dotRT.sizeDelta = new Vector2(10, 10);
+            dotRT.anchoredPosition = new Vector2(-140, 0);
+
+            Image dotImg = greenDot.AddComponent<Image>();
+            dotImg.color = new Color(0.2f, 1f, 0.4f, 1f);
+
+            Outline dotGlow = greenDot.AddComponent<Outline>();
+            dotGlow.effectColor = new Color(0.2f, 1f, 0.4f, 0.5f);
+            dotGlow.effectDistance = new Vector2(2, 2);
+
+            // Online text
+            GameObject onlineTextObj = new GameObject("OnlineText");
+            onlineTextObj.transform.SetParent(onlineIndicator.transform, false);
+
+            RectTransform onlineTextRT = onlineTextObj.AddComponent<RectTransform>();
+            onlineTextRT.anchorMin = new Vector2(0.5f, 0);
+            onlineTextRT.anchorMax = new Vector2(0.5f, 1);
+            onlineTextRT.sizeDelta = new Vector2(300, 0);
+            onlineTextRT.anchoredPosition = new Vector2(15, 0);
+
+            TextMeshProUGUI onlineText = onlineTextObj.AddComponent<TextMeshProUGUI>();
+            onlineText.text = "47 jugadores online | Pool: $2,340";
+            onlineText.fontSize = 18;
+            onlineText.color = TEXT_SECONDARY;
+            onlineText.alignment = TextAlignmentOptions.Left;
+            onlineText.fontStyle = FontStyles.Normal;
+
+            // ========== SCROLL VIEW FOR GAME CARDS ==========
+            GameObject scrollView = new GameObject("GamesScrollView");
+            scrollView.transform.SetParent(panel.transform, false);
+
+            RectTransform scrollRT = scrollView.AddComponent<RectTransform>();
+            scrollRT.anchorMin = new Vector2(0, 0.33f); // Ajustado para dar espacio al EntryFeeSection
+            scrollRT.anchorMax = new Vector2(1, 0.9f);  // Ajustado para el header + online indicator
+            scrollRT.sizeDelta = Vector2.zero;
+            scrollRT.offsetMin = new Vector2(5, 0);
+            scrollRT.offsetMax = new Vector2(-5, -5);
+
+            ScrollRect scrollRect = scrollView.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.elasticity = 0.1f;
+            scrollRect.inertia = true;
+            scrollRect.decelerationRate = 0.135f;
+            scrollRect.scrollSensitivity = 20f;
+
+            // Mask for scroll content
+            Image scrollMask = scrollView.AddComponent<Image>();
+            scrollMask.color = Color.clear;
+            Mask mask = scrollView.AddComponent<Mask>();
+            mask.showMaskGraphic = false;
+
+            // Games Container (content)
             GameObject gamesContainer = new GameObject("GamesContainer");
-            gamesContainer.transform.SetParent(panel.transform, false);
+            gamesContainer.transform.SetParent(scrollView.transform, false);
 
             RectTransform gamesRT = gamesContainer.AddComponent<RectTransform>();
-            gamesRT.anchorMin = new Vector2(0, 0.25f);
-            gamesRT.anchorMax = new Vector2(1, 0.9f);
-            gamesRT.sizeDelta = Vector2.zero;
-            gamesRT.offsetMin = new Vector2(10, 10);
-            gamesRT.offsetMax = new Vector2(-10, -10);
+            gamesRT.anchorMin = new Vector2(0, 1);
+            gamesRT.anchorMax = new Vector2(1, 1);
+            gamesRT.pivot = new Vector2(0.5f, 1);
+            gamesRT.sizeDelta = new Vector2(0, 0); // Will be set by ContentSizeFitter
 
-            // Grid Layout for game cards
+            // Content Size Fitter for dynamic height
+            ContentSizeFitter sizeFitter = gamesContainer.AddComponent<ContentSizeFitter>();
+            sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scrollRect.content = gamesRT;
+
+            // Grid Layout for game cards - Premium visual style optimized for new layout
             GridLayoutGroup gridLayout = gamesContainer.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(320, 140);
-            gridLayout.spacing = new Vector2(15, 15);
+            gridLayout.cellSize = new Vector2(320, 320); // Optimizado para el nuevo layout con más elementos
+            gridLayout.spacing = new Vector2(20, 20);
             gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayout.childAlignment = TextAnchor.UpperCenter;
             gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             gridLayout.constraintCount = 2;
+            gridLayout.padding = new RectOffset(50, 50, 10, 10);
 
-            // Create game cards
-            CreateGameCard(gamesContainer.transform, "DigitRush", "Digit Rush", "Toca 1-9 en orden", "🔢");
-            CreateGameCard(gamesContainer.transform, "MemoryPairs", "Memory Pairs", "Encuentra los pares", "🃏");
-            CreateGameCard(gamesContainer.transform, "QuickMath", "Quick Math", "Resuelve operaciones", "➕");
-            CreateGameCard(gamesContainer.transform, "FlashTap", "Flash Tap", "Reflejos rapidos", "⚡");
-            CreateGameCard(gamesContainer.transform, "OddOneOut", "Odd One Out", "Encuentra el diferente", "👁");
+            // Create game cards with visual icons and gold glow
+            Debug.Log("=== CREANDO PREMIUM GAME CARDS CON GLOW DORADO ===");
+            CreatePremiumGameCard(gamesContainer.transform, "DigitRush", "DigitRushIcon");
+            CreatePremiumGameCard(gamesContainer.transform, "MemoryPairs", "MemoryPairsIcon");
+            CreatePremiumGameCard(gamesContainer.transform, "QuickMath", "QuickMathIcon");
+            CreatePremiumGameCard(gamesContainer.transform, "FlashTap", "FlashTapIcon");
+            CreatePremiumGameCard(gamesContainer.transform, "OddOneOut", "OddOneOutIcon");
 
             // Entry Fee Selection
             CreateEntryFeeSection(panel.transform);
@@ -1079,81 +1285,416 @@ namespace DigitPark.Editor
             checkmark.SetActive(false);
         }
 
+        /// <summary>
+        /// Creates a premium game card with visual icon and gold glow effect
+        /// Similar to GameSelector style but with premium gold accents
+        /// </summary>
+        private static void CreatePremiumGameCard(Transform parent, string gameId, string iconName)
+        {
+            GameObject card = new GameObject($"GameCard_{gameId}");
+            card.transform.SetParent(parent, false);
+
+            // Card background - will show the game icon image
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.color = Color.white; // White to show image without tint
+            cardBg.preserveAspect = true;
+
+            // Try to load the game icon sprite
+            string iconPath = $"Assets/_Project/Art/Icons/Games/{iconName}.png";
+            Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (iconSprite != null)
+            {
+                cardBg.sprite = iconSprite;
+            }
+            else
+            {
+                // Fallback to dark card if no image found
+                cardBg.color = CARD_BG;
+                Debug.LogWarning($"[CashBattleUIBuilder] Icon not found: {iconPath}");
+            }
+
+            // ========== PREMIUM GOLD GLOW EFFECT ==========
+            // Multiple outlines create layered glow effect
+
+            // Inner gold border (sharp)
+            Outline innerOutline = card.AddComponent<Outline>();
+            innerOutline.effectColor = GOLD_PRIMARY; // Bright gold
+            innerOutline.effectDistance = new Vector2(3, 3);
+
+            // Middle gold glow (semi-transparent)
+            Outline middleOutline = card.AddComponent<Outline>();
+            middleOutline.effectColor = new Color(1f, 0.84f, 0f, 0.6f); // Gold 60% opacity
+            middleOutline.effectDistance = new Vector2(6, 6);
+
+            // Outer gold glow (soft)
+            Outline outerOutline = card.AddComponent<Outline>();
+            outerOutline.effectColor = new Color(1f, 0.75f, 0f, 0.35f); // Amber 35% opacity
+            outerOutline.effectDistance = new Vector2(10, 10);
+
+            // Extra outer glow (very soft)
+            Outline extraOutline = card.AddComponent<Outline>();
+            extraOutline.effectColor = new Color(1f, 0.65f, 0f, 0.15f); // Dark gold 15% opacity
+            extraOutline.effectDistance = new Vector2(15, 15);
+
+            // Button component
+            Button btn = card.AddComponent<Button>();
+            ColorBlock colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.15f, 1.1f, 1f, 1f); // Brighter on hover
+            colors.pressedColor = new Color(0.9f, 0.85f, 0.8f, 1f);
+            colors.selectedColor = new Color(1.1f, 1.05f, 1f, 1f);
+            btn.colors = colors;
+            btn.targetGraphic = cardBg;
+
+            // ========== SELECTION CHECKMARK ==========
+            GameObject checkmark = new GameObject("Checkmark");
+            checkmark.transform.SetParent(card.transform, false);
+
+            RectTransform checkRT = checkmark.AddComponent<RectTransform>();
+            checkRT.anchorMin = new Vector2(1, 1);
+            checkRT.anchorMax = new Vector2(1, 1);
+            checkRT.pivot = new Vector2(1, 1);
+            checkRT.sizeDelta = new Vector2(60, 60);
+            checkRT.anchoredPosition = new Vector2(-15, -15);
+
+            // Checkmark background circle
+            Image checkBg = checkmark.AddComponent<Image>();
+            checkBg.color = GOLD_PRIMARY; // Gold checkmark background
+
+            // Checkmark border
+            Outline checkOutline = checkmark.AddComponent<Outline>();
+            checkOutline.effectColor = new Color(1f, 1f, 1f, 0.8f);
+            checkOutline.effectDistance = new Vector2(2, 2);
+
+            // Checkmark text
+            GameObject checkText = new GameObject("CheckText");
+            checkText.transform.SetParent(checkmark.transform, false);
+
+            RectTransform checkTextRT = checkText.AddComponent<RectTransform>();
+            checkTextRT.anchorMin = Vector2.zero;
+            checkTextRT.anchorMax = Vector2.one;
+            checkTextRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
+            checkTMP.text = "✓";
+            checkTMP.fontSize = 36;
+            checkTMP.color = BG_DARK; // Dark text on gold background
+            checkTMP.alignment = TextAlignmentOptions.Center;
+            checkTMP.fontStyle = FontStyles.Bold;
+
+            checkmark.SetActive(false); // Hidden by default until selected
+        }
+
+        /// <summary>
+        /// Creates a premium entry fee section with:
+        /// - 6 preset buttons ($1, $5, $10, $25, $50, $100)
+        /// - Custom input field (max $250)
+        /// - Real-time earnings feedback
+        /// </summary>
         private static void CreateEntryFeeSection(Transform parent)
         {
             GameObject feeSection = new GameObject("EntryFeeSection");
             feeSection.transform.SetParent(parent, false);
 
             RectTransform rt = feeSection.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.1f);
-            rt.anchorMax = new Vector2(1, 0.22f);
+            rt.anchorMin = new Vector2(0, 0.08f);
+            rt.anchorMax = new Vector2(1, 0.32f); // Más espacio para el nuevo diseño
             rt.sizeDelta = Vector2.zero;
-            rt.offsetMin = new Vector2(10, 0);
-            rt.offsetMax = new Vector2(-10, 0);
+            rt.offsetMin = new Vector2(15, 0);
+            rt.offsetMax = new Vector2(-15, 0);
 
-            // Label
-            GameObject labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(feeSection.transform, false);
+            // Background card for the section
+            Image sectionBg = feeSection.AddComponent<Image>();
+            sectionBg.color = new Color(0.08f, 0.06f, 0.1f, 0.9f);
 
-            RectTransform labelRT = labelObj.AddComponent<RectTransform>();
-            labelRT.anchorMin = new Vector2(0, 0);
-            labelRT.anchorMax = new Vector2(0.2f, 1);
-            labelRT.sizeDelta = Vector2.zero;
+            Outline sectionOutline = feeSection.AddComponent<Outline>();
+            sectionOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.4f);
+            sectionOutline.effectDistance = new Vector2(2, -2);
 
-            TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
-            label.text = "Entrada:";
-            label.fontSize = 28;
-            label.color = TEXT_PRIMARY;
-            label.fontStyle = FontStyles.Bold;
-            label.alignment = TextAlignmentOptions.Left;
+            // ========== TITLE: "Elige tu apuesta" ==========
+            GameObject titleObj = new GameObject("Title");
+            titleObj.transform.SetParent(feeSection.transform, false);
 
-            // Entry fee buttons container
-            GameObject buttonsContainer = new GameObject("EntryFeeContainer");
-            buttonsContainer.transform.SetParent(feeSection.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0, 0.82f);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.sizeDelta = Vector2.zero;
+            titleRT.offsetMin = new Vector2(15, 0);
+            titleRT.offsetMax = new Vector2(-15, -5);
 
-            RectTransform buttonsRT = buttonsContainer.AddComponent<RectTransform>();
-            buttonsRT.anchorMin = new Vector2(0.22f, 0);
-            buttonsRT.anchorMax = new Vector2(1, 1);
-            buttonsRT.sizeDelta = Vector2.zero;
+            TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
+            titleText.text = "Elige tu apuesta";
+            titleText.fontSize = 28;
+            titleText.color = TEXT_GOLD;
+            titleText.fontStyle = FontStyles.Bold;
+            titleText.alignment = TextAlignmentOptions.Left;
 
-            HorizontalLayoutGroup layout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = 10;
-            layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.childForceExpandWidth = false;
-            layout.childForceExpandHeight = true;
+            // ========== PRESET BUTTONS ROW ==========
+            GameObject presetsContainer = new GameObject("PresetsContainer");
+            presetsContainer.transform.SetParent(feeSection.transform, false);
 
-            // Create fee buttons
-            decimal[] fees = { 1m, 5m, 10m, 25m, 100m };
-            foreach (var fee in fees)
+            RectTransform presetsRT = presetsContainer.AddComponent<RectTransform>();
+            presetsRT.anchorMin = new Vector2(0, 0.52f);
+            presetsRT.anchorMax = new Vector2(1, 0.8f);
+            presetsRT.sizeDelta = Vector2.zero;
+            presetsRT.offsetMin = new Vector2(10, 0);
+            presetsRT.offsetMax = new Vector2(-10, 0);
+
+            HorizontalLayoutGroup presetsLayout = presetsContainer.AddComponent<HorizontalLayoutGroup>();
+            presetsLayout.spacing = 12;
+            presetsLayout.childAlignment = TextAnchor.MiddleCenter;
+            presetsLayout.childForceExpandWidth = true;
+            presetsLayout.childForceExpandHeight = true;
+            presetsLayout.padding = new RectOffset(5, 5, 5, 5);
+
+            // Create 6 preset buttons
+            decimal[] presets = { 1m, 5m, 10m, 25m, 50m, 100m };
+            foreach (var preset in presets)
             {
-                CreateEntryFeeButton(buttonsContainer.transform, fee);
+                CreatePresetButton(presetsContainer.transform, preset);
             }
+
+            // ========== CUSTOM INPUT ROW ==========
+            GameObject customInputContainer = new GameObject("CustomInputContainer");
+            customInputContainer.transform.SetParent(feeSection.transform, false);
+
+            RectTransform customRT = customInputContainer.AddComponent<RectTransform>();
+            customRT.anchorMin = new Vector2(0, 0.28f);
+            customRT.anchorMax = new Vector2(1, 0.5f);
+            customRT.sizeDelta = Vector2.zero;
+            customRT.offsetMin = new Vector2(15, 0);
+            customRT.offsetMax = new Vector2(-15, 0);
+
+            // Dollar sign
+            GameObject dollarSign = new GameObject("DollarSign");
+            dollarSign.transform.SetParent(customInputContainer.transform, false);
+
+            RectTransform dollarRT = dollarSign.AddComponent<RectTransform>();
+            dollarRT.anchorMin = new Vector2(0, 0);
+            dollarRT.anchorMax = new Vector2(0.08f, 1);
+            dollarRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI dollarText = dollarSign.AddComponent<TextMeshProUGUI>();
+            dollarText.text = "$";
+            dollarText.fontSize = 32;
+            dollarText.color = GOLD_PRIMARY;
+            dollarText.fontStyle = FontStyles.Bold;
+            dollarText.alignment = TextAlignmentOptions.Center;
+
+            // Input field background
+            GameObject inputBg = new GameObject("CustomInputField");
+            inputBg.transform.SetParent(customInputContainer.transform, false);
+
+            RectTransform inputBgRT = inputBg.AddComponent<RectTransform>();
+            inputBgRT.anchorMin = new Vector2(0.09f, 0.1f);
+            inputBgRT.anchorMax = new Vector2(0.55f, 0.9f);
+            inputBgRT.sizeDelta = Vector2.zero;
+
+            Image inputBgImg = inputBg.AddComponent<Image>();
+            inputBgImg.color = new Color(0.15f, 0.12f, 0.18f, 1f);
+
+            Outline inputOutline = inputBg.AddComponent<Outline>();
+            inputOutline.effectColor = CARD_BORDER;
+            inputOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            // Input field text area
+            GameObject inputTextArea = new GameObject("Text");
+            inputTextArea.transform.SetParent(inputBg.transform, false);
+
+            RectTransform inputTextRT = inputTextArea.AddComponent<RectTransform>();
+            inputTextRT.anchorMin = Vector2.zero;
+            inputTextRT.anchorMax = Vector2.one;
+            inputTextRT.sizeDelta = Vector2.zero;
+            inputTextRT.offsetMin = new Vector2(10, 0);
+            inputTextRT.offsetMax = new Vector2(-10, 0);
+
+            TextMeshProUGUI inputText = inputTextArea.AddComponent<TextMeshProUGUI>();
+            inputText.text = "";
+            inputText.fontSize = 28;
+            inputText.color = TEXT_PRIMARY;
+            inputText.fontStyle = FontStyles.Bold;
+            inputText.alignment = TextAlignmentOptions.Left;
+
+            // Placeholder
+            GameObject placeholderObj = new GameObject("Placeholder");
+            placeholderObj.transform.SetParent(inputBg.transform, false);
+
+            RectTransform placeholderRT = placeholderObj.AddComponent<RectTransform>();
+            placeholderRT.anchorMin = Vector2.zero;
+            placeholderRT.anchorMax = Vector2.one;
+            placeholderRT.sizeDelta = Vector2.zero;
+            placeholderRT.offsetMin = new Vector2(10, 0);
+            placeholderRT.offsetMax = new Vector2(-10, 0);
+
+            TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
+            placeholderText.text = "Otro monto...";
+            placeholderText.fontSize = 24;
+            placeholderText.color = TEXT_SECONDARY;
+            placeholderText.fontStyle = FontStyles.Italic;
+            placeholderText.alignment = TextAlignmentOptions.Left;
+
+            // TMP_InputField component
+            TMP_InputField inputField = inputBg.AddComponent<TMP_InputField>();
+            inputField.textViewport = inputTextRT;
+            inputField.textComponent = inputText;
+            inputField.placeholder = placeholderText;
+            inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
+            inputField.characterLimit = 6;
+
+            // Max label
+            GameObject maxLabel = new GameObject("MaxLabel");
+            maxLabel.transform.SetParent(customInputContainer.transform, false);
+
+            RectTransform maxRT = maxLabel.AddComponent<RectTransform>();
+            maxRT.anchorMin = new Vector2(0.57f, 0);
+            maxRT.anchorMax = new Vector2(0.78f, 1);
+            maxRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI maxText = maxLabel.AddComponent<TextMeshProUGUI>();
+            maxText.text = "Max: $250";
+            maxText.fontSize = 22;
+            maxText.color = TEXT_SECONDARY;
+            maxText.fontStyle = FontStyles.Bold;
+            maxText.alignment = TextAlignmentOptions.Center;
+
+            // Apply button for custom amount
+            GameObject applyBtn = new GameObject("ApplyButton");
+            applyBtn.transform.SetParent(customInputContainer.transform, false);
+
+            RectTransform applyRT = applyBtn.AddComponent<RectTransform>();
+            applyRT.anchorMin = new Vector2(0.8f, 0.1f);
+            applyRT.anchorMax = new Vector2(1f, 0.9f);
+            applyRT.sizeDelta = Vector2.zero;
+
+            Image applyBg = applyBtn.AddComponent<Image>();
+            applyBg.color = CYAN_ACCENT;
+
+            Button applyButton = applyBtn.AddComponent<Button>();
+            ColorBlock applyColors = applyButton.colors;
+            applyColors.normalColor = CYAN_ACCENT;
+            applyColors.highlightedColor = new Color(0.3f, 1f, 1f, 1f);
+            applyColors.pressedColor = new Color(0f, 0.7f, 0.8f, 1f);
+            applyButton.colors = applyColors;
+
+            Outline applyOutline = applyBtn.AddComponent<Outline>();
+            applyOutline.effectColor = new Color(0f, 1f, 1f, 0.5f);
+            applyOutline.effectDistance = new Vector2(2, -2);
+
+            GameObject applyTextObj = new GameObject("Text");
+            applyTextObj.transform.SetParent(applyBtn.transform, false);
+
+            RectTransform applyTextRT = applyTextObj.AddComponent<RectTransform>();
+            applyTextRT.anchorMin = Vector2.zero;
+            applyTextRT.anchorMax = Vector2.one;
+            applyTextRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI applyText = applyTextObj.AddComponent<TextMeshProUGUI>();
+            applyText.text = "OK";
+            applyText.fontSize = 22;
+            applyText.color = BG_DARK;
+            applyText.fontStyle = FontStyles.Bold;
+            applyText.alignment = TextAlignmentOptions.Center;
+
+            // ========== EARNINGS FEEDBACK SECTION ==========
+            GameObject feedbackContainer = new GameObject("EarningsFeedback");
+            feedbackContainer.transform.SetParent(feeSection.transform, false);
+
+            RectTransform feedbackRT = feedbackContainer.AddComponent<RectTransform>();
+            feedbackRT.anchorMin = new Vector2(0, 0);
+            feedbackRT.anchorMax = new Vector2(1, 0.26f);
+            feedbackRT.sizeDelta = Vector2.zero;
+            feedbackRT.offsetMin = new Vector2(15, 8);
+            feedbackRT.offsetMax = new Vector2(-15, -2);
+
+            // Feedback background
+            Image feedbackBg = feedbackContainer.AddComponent<Image>();
+            feedbackBg.color = new Color(0.05f, 0.12f, 0.08f, 0.9f); // Verde oscuro sutil
+
+            Outline feedbackOutline = feedbackContainer.AddComponent<Outline>();
+            feedbackOutline.effectColor = new Color(0.3f, 1f, 0.5f, 0.4f);
+            feedbackOutline.effectDistance = new Vector2(1, -1);
+
+            // Potential earnings text
+            GameObject earningsObj = new GameObject("PotentialEarningsText");
+            earningsObj.transform.SetParent(feedbackContainer.transform, false);
+
+            RectTransform earningsRT = earningsObj.AddComponent<RectTransform>();
+            earningsRT.anchorMin = new Vector2(0, 0.5f);
+            earningsRT.anchorMax = new Vector2(0.6f, 1);
+            earningsRT.sizeDelta = Vector2.zero;
+            earningsRT.offsetMin = new Vector2(15, 0);
+            earningsRT.offsetMax = new Vector2(0, -3);
+
+            TextMeshProUGUI earningsText = earningsObj.AddComponent<TextMeshProUGUI>();
+            earningsText.text = "Si ganas recibes: $0.00";
+            earningsText.fontSize = 22;
+            earningsText.color = new Color(0.4f, 1f, 0.6f, 1f); // Verde brillante
+            earningsText.fontStyle = FontStyles.Bold;
+            earningsText.alignment = TextAlignmentOptions.Left;
+
+            // Pool info text
+            GameObject poolObj = new GameObject("PoolInfoText");
+            poolObj.transform.SetParent(feedbackContainer.transform, false);
+
+            RectTransform poolRT = poolObj.AddComponent<RectTransform>();
+            poolRT.anchorMin = new Vector2(0, 0);
+            poolRT.anchorMax = new Vector2(1, 0.5f);
+            poolRT.sizeDelta = Vector2.zero;
+            poolRT.offsetMin = new Vector2(15, 3);
+            poolRT.offsetMax = new Vector2(-15, 0);
+
+            TextMeshProUGUI poolText = poolObj.AddComponent<TextMeshProUGUI>();
+            poolText.text = "Pool: $0.00 | Tu apuesta: $0.00 | Fee: 30%";
+            poolText.fontSize = 18;
+            poolText.color = TEXT_SECONDARY;
+            poolText.fontStyle = FontStyles.Normal;
+            poolText.alignment = TextAlignmentOptions.Left;
+
+            // Coin icon for visual appeal
+            GameObject coinIcon = new GameObject("CoinIcon");
+            coinIcon.transform.SetParent(feedbackContainer.transform, false);
+
+            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
+            coinRT.anchorMin = new Vector2(0.85f, 0.2f);
+            coinRT.anchorMax = new Vector2(0.98f, 0.8f);
+            coinRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
+            coinText.text = "💰";
+            coinText.fontSize = 36;
+            coinText.alignment = TextAlignmentOptions.Center;
         }
 
-        private static void CreateEntryFeeButton(Transform parent, decimal fee)
+        /// <summary>
+        /// Creates a preset amount button with premium styling
+        /// </summary>
+        private static void CreatePresetButton(Transform parent, decimal amount)
         {
-            GameObject btnObj = new GameObject($"Fee_{fee}");
+            GameObject btnObj = new GameObject($"Preset_{amount}");
             btnObj.transform.SetParent(parent, false);
 
             LayoutElement le = btnObj.AddComponent<LayoutElement>();
-            le.preferredWidth = 90;
-            le.preferredHeight = 50;
+            le.flexibleWidth = 1;
+            le.preferredHeight = 55;
 
             Image bg = btnObj.AddComponent<Image>();
-            bg.color = new Color(0.2f, 0.18f, 0.25f, 1f);
+            bg.color = new Color(0.18f, 0.15f, 0.22f, 1f);
 
             Button btn = btnObj.AddComponent<Button>();
             ColorBlock colors = btn.colors;
-            colors.normalColor = new Color(0.2f, 0.18f, 0.25f, 1f);
-            colors.highlightedColor = new Color(0.85f, 0.65f, 0.13f, 0.5f);
+            colors.normalColor = new Color(0.18f, 0.15f, 0.22f, 1f);
+            colors.highlightedColor = new Color(0.85f, 0.65f, 0.13f, 0.6f);
             colors.pressedColor = GOLD_PRIMARY;
             colors.selectedColor = GOLD_PRIMARY;
             btn.colors = colors;
+            btn.targetGraphic = bg;
 
+            // Gold border
             Outline outline = btnObj.AddComponent<Outline>();
             outline.effectColor = CARD_BORDER;
-            outline.effectDistance = new Vector2(1, -1);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
 
+            // Amount text
             GameObject textObj = new GameObject("Text");
             textObj.transform.SetParent(btnObj.transform, false);
 
@@ -1163,21 +1704,59 @@ namespace DigitPark.Editor
             textRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.text = $"${fee}";
-            text.fontSize = 24;
+            text.text = $"${amount}";
+            text.fontSize = 22;
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
+
+            // Selection indicator (hidden by default)
+            GameObject selectedIndicator = new GameObject("SelectedIndicator");
+            selectedIndicator.transform.SetParent(btnObj.transform, false);
+
+            RectTransform indicatorRT = selectedIndicator.AddComponent<RectTransform>();
+            indicatorRT.anchorMin = new Vector2(0.5f, 0);
+            indicatorRT.anchorMax = new Vector2(0.5f, 0);
+            indicatorRT.pivot = new Vector2(0.5f, 0);
+            indicatorRT.sizeDelta = new Vector2(40, 4);
+            indicatorRT.anchoredPosition = new Vector2(0, 2);
+
+            Image indicatorImg = selectedIndicator.AddComponent<Image>();
+            indicatorImg.color = GOLD_PRIMARY;
+
+            selectedIndicator.SetActive(false);
         }
 
+        // Legacy method kept for backwards compatibility
+        private static void CreateEntryFeeButton(Transform parent, decimal fee)
+        {
+            CreatePresetButton(parent, fee);
+        }
+
+        /// <summary>
+        /// Creates a premium "Find Opponent" button with:
+        /// - Eye-catching fire emoji
+        /// - Online players counter
+        /// - Pulsing glow effect styling
+        /// </summary>
         private static void CreateFindOpponentButton(Transform parent)
         {
+            // Main button container
+            GameObject btnContainer = new GameObject("FindOpponentContainer");
+            btnContainer.transform.SetParent(parent, false);
+
+            RectTransform containerRT = btnContainer.AddComponent<RectTransform>();
+            containerRT.anchorMin = new Vector2(0.08f, 0);
+            containerRT.anchorMax = new Vector2(0.92f, 0.07f);
+            containerRT.sizeDelta = Vector2.zero;
+
+            // The actual button
             GameObject btnObj = new GameObject("FindOpponentButton");
-            btnObj.transform.SetParent(parent, false);
+            btnObj.transform.SetParent(btnContainer.transform, false);
 
             RectTransform rt = btnObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.15f, 0);
-            rt.anchorMax = new Vector2(0.85f, 0.08f);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
             rt.sizeDelta = Vector2.zero;
 
             Image bg = btnObj.AddComponent<Image>();
@@ -1190,25 +1769,103 @@ namespace DigitPark.Editor
             colors.pressedColor = GOLD_DARK;
             colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
             btn.colors = colors;
+            btn.targetGraphic = bg;
 
-            Outline glow = btnObj.AddComponent<Outline>();
-            glow.effectColor = new Color(1f, 0.8f, 0.3f, 0.5f);
-            glow.effectDistance = new Vector2(3, -3);
+            // Multiple outlines for glow effect
+            Outline glow1 = btnObj.AddComponent<Outline>();
+            glow1.effectColor = new Color(1f, 0.8f, 0.3f, 0.7f);
+            glow1.effectDistance = new Vector2(3, -3);
 
+            Outline glow2 = btnObj.AddComponent<Outline>();
+            glow2.effectColor = new Color(1f, 0.6f, 0.1f, 0.4f);
+            glow2.effectDistance = new Vector2(6, -6);
+
+            Outline glow3 = btnObj.AddComponent<Outline>();
+            glow3.effectColor = new Color(1f, 0.5f, 0f, 0.2f);
+            glow3.effectDistance = new Vector2(10, -10);
+
+            // Main text with fire emojis
             GameObject textObj = new GameObject("Text");
             textObj.transform.SetParent(btnObj.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
+            textRT.anchorMin = new Vector2(0, 0.35f);
+            textRT.anchorMax = new Vector2(1, 1);
             textRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.text = "Buscar Oponente";
-            text.fontSize = 32;
+            text.text = "BUSCAR RIVAL";
+            text.fontSize = 34;
             text.color = BG_DARK;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
+
+            // Subtitle with online players count
+            GameObject subtitleObj = new GameObject("OnlinePlayersText");
+            subtitleObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform subtitleRT = subtitleObj.AddComponent<RectTransform>();
+            subtitleRT.anchorMin = new Vector2(0, 0);
+            subtitleRT.anchorMax = new Vector2(1, 0.4f);
+            subtitleRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI subtitleText = subtitleObj.AddComponent<TextMeshProUGUI>();
+            subtitleText.text = "12 jugadores buscando ahora";
+            subtitleText.fontSize = 18;
+            subtitleText.color = new Color(0.2f, 0.15f, 0.1f, 0.9f);
+            subtitleText.fontStyle = FontStyles.Normal;
+            subtitleText.alignment = TextAlignmentOptions.Center;
+
+            // Left fire icon
+            GameObject leftFire = new GameObject("LeftFireIcon");
+            leftFire.transform.SetParent(btnObj.transform, false);
+
+            RectTransform leftFireRT = leftFire.AddComponent<RectTransform>();
+            leftFireRT.anchorMin = new Vector2(0, 0.5f);
+            leftFireRT.anchorMax = new Vector2(0, 0.5f);
+            leftFireRT.pivot = new Vector2(0, 0.5f);
+            leftFireRT.sizeDelta = new Vector2(50, 50);
+            leftFireRT.anchoredPosition = new Vector2(15, 5);
+
+            TextMeshProUGUI leftFireText = leftFire.AddComponent<TextMeshProUGUI>();
+            leftFireText.text = "🔥";
+            leftFireText.fontSize = 32;
+            leftFireText.alignment = TextAlignmentOptions.Center;
+
+            // Right fire icon
+            GameObject rightFire = new GameObject("RightFireIcon");
+            rightFire.transform.SetParent(btnObj.transform, false);
+
+            RectTransform rightFireRT = rightFire.AddComponent<RectTransform>();
+            rightFireRT.anchorMin = new Vector2(1, 0.5f);
+            rightFireRT.anchorMax = new Vector2(1, 0.5f);
+            rightFireRT.pivot = new Vector2(1, 0.5f);
+            rightFireRT.sizeDelta = new Vector2(50, 50);
+            rightFireRT.anchoredPosition = new Vector2(-15, 5);
+
+            TextMeshProUGUI rightFireText = rightFire.AddComponent<TextMeshProUGUI>();
+            rightFireText.text = "🔥";
+            rightFireText.fontSize = 32;
+            rightFireText.alignment = TextAlignmentOptions.Center;
+
+            // Online indicator dot
+            GameObject onlineDot = new GameObject("OnlineDot");
+            onlineDot.transform.SetParent(btnObj.transform, false);
+
+            RectTransform dotRT = onlineDot.AddComponent<RectTransform>();
+            dotRT.anchorMin = new Vector2(0.5f, 0);
+            dotRT.anchorMax = new Vector2(0.5f, 0);
+            dotRT.pivot = new Vector2(0.5f, 0);
+            dotRT.sizeDelta = new Vector2(12, 12);
+            dotRT.anchoredPosition = new Vector2(-80, 12);
+
+            Image dotImg = onlineDot.AddComponent<Image>();
+            dotImg.color = new Color(0.2f, 0.9f, 0.3f, 1f); // Verde brillante
+
+            // Glow around the dot
+            Outline dotGlow = onlineDot.AddComponent<Outline>();
+            dotGlow.effectColor = new Color(0.2f, 1f, 0.3f, 0.6f);
+            dotGlow.effectDistance = new Vector2(2, 2);
         }
 
         // Note: CreatePanelBackButton removed - user will add their own prefab

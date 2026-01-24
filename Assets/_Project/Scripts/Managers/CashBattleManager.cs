@@ -290,10 +290,9 @@ namespace DigitPark.Managers
 
         private void ShowAgeVerificationPanel()
         {
-            if (ageVerificationPanel != null)
-                ageVerificationPanel.SetActive(true);
-            if (mainPanel != null)
-                mainPanel.SetActive(false);
+            // Navegar directamente a la escena de verificacion de edad
+            Debug.Log("[CashBattle] Usuario no verificado - navegando a AgeVerification");
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.AGE_VERIFICATION);
 
             // Actualizar texto de estado
             if (_kycService != null && verificationStatusText != null)
@@ -444,7 +443,7 @@ namespace DigitPark.Managers
 
         private void OnBattles1v1Clicked()
         {
-            Debug.Log("[CashBattle] Navegando a Battles 1v1");
+            Debug.Log("[CashBattle] Navegando a escena CashBattle1v1");
 
             if (!isKYCVerified && requireAgeVerification)
             {
@@ -452,12 +451,13 @@ namespace DigitPark.Managers
                 return;
             }
 
-            NavigateTo(CashBattleState.GameSelection);
+            // Navegar a la escena de Batallas 1v1
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_BATTLE_1V1);
         }
 
         private void OnCashTournamentsClicked()
         {
-            Debug.Log("[CashBattle] Navegando a Cash Tournaments");
+            Debug.Log("[CashBattle] Navegando a escena CashTournaments");
 
             if (!isKYCVerified && requireAgeVerification)
             {
@@ -465,7 +465,8 @@ namespace DigitPark.Managers
                 return;
             }
 
-            NavigateTo(CashBattleState.TournamentList);
+            // Navegar a la escena de Torneos Cash
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_TOURNAMENTS);
         }
 
         private void OnWalletClicked()

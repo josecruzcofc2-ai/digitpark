@@ -61,6 +61,20 @@ namespace DigitPark.Managers
         [SerializeField] private ConfirmPanelUI logoutConfirmPanel;
         [SerializeField] private ErrorPanelUI errorPanel;
 
+        [Header("UI - Legal Section")]
+        [SerializeField] private Button termsButton;
+        [SerializeField] private Button privacyButton;
+        [SerializeField] private Button responsibleGamingButton;
+        [SerializeField] private Button triumphTermsButton;
+        [SerializeField] private Button selfExclusionButton;
+        [SerializeField] private ConfirmPanelUI selfExclusionConfirmPanel;
+
+        // URLs Legales
+        private const string URL_TERMS = "https://digitpark.com/terms";
+        private const string URL_PRIVACY = "https://digitpark.com/privacy";
+        private const string URL_RESPONSIBLE_GAMING = "https://docs.triumpharcade.com/responsible-gaming-policy";
+        private const string URL_TRIUMPH_TERMS = "https://docs.triumpharcade.com/terms-of-use";
+
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
         private const string EFFECTS_VOLUME_KEY = "EffectsVolume";
@@ -238,6 +252,13 @@ namespace DigitPark.Managers
             premiumFullButton?.onClick.AddListener(OnPremiumFullClicked);
             restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
+
+            // Legal buttons
+            termsButton?.onClick.AddListener(() => OpenURL(URL_TERMS));
+            privacyButton?.onClick.AddListener(() => OpenURL(URL_PRIVACY));
+            responsibleGamingButton?.onClick.AddListener(() => OpenURL(URL_RESPONSIBLE_GAMING));
+            triumphTermsButton?.onClick.AddListener(() => OpenURL(URL_TRIUMPH_TERMS));
+            selfExclusionButton?.onClick.AddListener(OnSelfExclusionClicked);
 
             // Suscribirse a cambios de estado premium
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
@@ -788,6 +809,47 @@ namespace DigitPark.Managers
                         : new Color(0.1f, 0.15f, 0.25f, 1f); // Color normal
                 }
             }
+        }
+
+        #endregion
+
+        #region Legal
+
+        /// <summary>
+        /// Abre una URL en el navegador del sistema
+        /// </summary>
+        private void OpenURL(string url)
+        {
+            Debug.Log($"[Settings] Abriendo URL: {url}");
+            Application.OpenURL(url);
+        }
+
+        /// <summary>
+        /// Muestra confirmacion de auto-exclusion de Cash Battle
+        /// </summary>
+        private void OnSelfExclusionClicked()
+        {
+            Debug.Log("[Settings] Mostrando panel de auto-exclusion");
+
+            if (selfExclusionConfirmPanel != null)
+            {
+                selfExclusionConfirmPanel.Show(
+                    "Auto-Exclusion",
+                    "¿Deseas excluirte de Cash Battle?\n\nEsto desactivara tu acceso a todas las funciones de dinero real. Deberas contactar soporte para reactivar tu cuenta.\n\nIMPORTANTE: Retira tu saldo antes de continuar.",
+                    OnConfirmSelfExclusion,
+                    null
+                );
+            }
+        }
+
+        private void OnConfirmSelfExclusion()
+        {
+            Debug.Log("[Settings] Usuario solicito auto-exclusion");
+
+            // TODO: Implementar llamada a Triumph SDK para auto-exclusion
+            // Por ahora, mostrar mensaje de contacto
+            selfExclusionConfirmPanel?.Hide();
+            errorPanel?.Show("Para completar la auto-exclusion, contacta a soporte:\nsupport@digitpark.com\n\nRecuerda retirar tu saldo primero.");
         }
 
         #endregion

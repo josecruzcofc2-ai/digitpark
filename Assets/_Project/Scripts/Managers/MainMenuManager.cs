@@ -204,14 +204,28 @@ namespace DigitPark.Managers
 
         /// <summary>
         /// Navega a la escena de Cash Battle (dinero real - 18+)
+        /// Verifica primero si el usuario tiene 18+ años
         /// </summary>
         private void OnCashBattleButtonClicked()
         {
-            Debug.Log("[MainMenu] Navegando a Cash Battle");
+            Debug.Log("[MainMenu] Intentando acceder a Cash Battle");
 
-            // AudioManager.Instance?.PlaySFX("ButtonClick");
+            // Verificar si el usuario esta verificado (18+)
+            var kycService = DigitPark.Services.ServiceLocator.KYC;
+            bool isVerified = kycService?.CanAccessCashBattle ?? false;
 
-            SceneManager.LoadScene("CashBattleHub");
+            if (!isVerified)
+            {
+                // Usuario NO verificado - ir a verificacion de edad primero
+                Debug.Log("[MainMenu] Usuario no verificado - navegando a AgeVerification");
+                SceneManager.LoadScene("AgeVerification");
+            }
+            else
+            {
+                // Usuario verificado - ir directo al Hub
+                Debug.Log("[MainMenu] Usuario verificado - navegando a CashBattleHub");
+                SceneManager.LoadScene("CashBattleHub");
+            }
         }
 
         /// <summary>
