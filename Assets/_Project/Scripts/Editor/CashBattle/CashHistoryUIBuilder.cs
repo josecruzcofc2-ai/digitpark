@@ -36,8 +36,8 @@ namespace DigitPark.Editor
         private static readonly Color FILTER_INACTIVE = new Color(0.2f, 0.2f, 0.25f, 1f);
 
         // Paths to icons
-        private static readonly string GAME_GAME_ICONS_PATH = "Assets/_Project/Art/Icons/Games/CashBattle/";
-        private static readonly string STAT_GAME_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Stats/";
+        private static readonly string GAME_ICONS_PATH = "Assets/_Project/Art/Icons/Games/CashBattle/";
+        private static readonly string STAT_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Stats/";
 
         #endregion
 
@@ -296,7 +296,7 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(-20, 110);
+            rt.sizeDelta = new Vector2(-16, 130);  // Panel más grande
             rt.anchoredPosition = new Vector2(0, -105);
 
             Image bg = panel.AddComponent<Image>();
@@ -306,10 +306,10 @@ namespace DigitPark.Editor
             outline.effectColor = CARD_BORDER;
             outline.effectDistance = new Vector2(1, -1);
 
-            // Horizontal layout for stats - más compacto
+            // Horizontal layout for stats - distribución uniforme
             HorizontalLayoutGroup hlg = panel.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 0;
-            hlg.padding = new RectOffset(5, 5, 5, 5);
+            hlg.padding = new RectOffset(10, 10, 10, 10);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childForceExpandWidth = true;
             hlg.childForceExpandHeight = true;
@@ -328,27 +328,23 @@ namespace DigitPark.Editor
             GameObject item = new GameObject("Stat_" + label);
             item.transform.SetParent(parent, false);
 
-            VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 0;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
+            RectTransform itemRT = item.AddComponent<RectTransform>();
 
-            // Icon
+            // Icon - arriba, más grande
             GameObject iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(item.transform, false);
 
-            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.preferredWidth = 45;
-            iconLE.preferredHeight = 45;
+            RectTransform iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = new Vector2(0.5f, 1);
+            iconRT.anchorMax = new Vector2(0.5f, 1);
+            iconRT.pivot = new Vector2(0.5f, 1);
+            iconRT.sizeDelta = new Vector2(50, 50);  // Iconos más grandes
+            iconRT.anchoredPosition = new Vector2(0, -5);
 
             Image iconImg = iconObj.AddComponent<Image>();
             iconImg.preserveAspect = true;
 
-            // Cargar sprite del icono
-            string iconPath = STAT_GAME_ICONS_PATH + iconName + ".png";
+            string iconPath = STAT_ICONS_PATH + iconName + ".png";
             Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
             if (iconSprite != null)
             {
@@ -361,26 +357,34 @@ namespace DigitPark.Editor
                 Debug.LogWarning($"[CashHistoryUIBuilder] Icon not found: {iconPath}");
             }
 
-            // Value
+            // Value - debajo del icono
             GameObject valueObj = new GameObject("Value");
             valueObj.transform.SetParent(item.transform, false);
 
-            LayoutElement valueLE = valueObj.AddComponent<LayoutElement>();
-            valueLE.preferredHeight = 30;
+            RectTransform valueRT = valueObj.AddComponent<RectTransform>();
+            valueRT.anchorMin = new Vector2(0, 1);
+            valueRT.anchorMax = new Vector2(1, 1);
+            valueRT.pivot = new Vector2(0.5f, 1);
+            valueRT.sizeDelta = new Vector2(0, 26);
+            valueRT.anchoredPosition = new Vector2(0, -58);  // Debajo del icono (5 + 50 + 3)
 
             TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.text = value;
-            valueText.fontSize = 24;
+            valueText.fontSize = 20;
             valueText.color = valueColor;
             valueText.alignment = TextAlignmentOptions.Center;
             valueText.fontStyle = FontStyles.Bold;
 
-            // Label
+            // Label - debajo del value
             GameObject labelObj = new GameObject("Label");
             labelObj.transform.SetParent(item.transform, false);
 
-            LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
-            labelLE.preferredHeight = 20;
+            RectTransform labelRT = labelObj.AddComponent<RectTransform>();
+            labelRT.anchorMin = new Vector2(0, 1);
+            labelRT.anchorMax = new Vector2(1, 1);
+            labelRT.pivot = new Vector2(0.5f, 1);
+            labelRT.sizeDelta = new Vector2(0, 20);
+            labelRT.anchoredPosition = new Vector2(0, -85);  // Debajo del value
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = label;
@@ -402,8 +406,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(-30, 55);
-            rt.anchoredPosition = new Vector2(0, -240);
+            rt.sizeDelta = new Vector2(-30, 50);
+            rt.anchoredPosition = new Vector2(0, -240);  // Debajo del stats panel expandido
 
             // Horizontal layout for filters
             HorizontalLayoutGroup hlg = panel.AddComponent<HorizontalLayoutGroup>();
@@ -466,7 +470,7 @@ namespace DigitPark.Editor
             svRT.anchorMin = new Vector2(0, 0);
             svRT.anchorMax = new Vector2(1, 1);
             svRT.offsetMin = new Vector2(10, 15);  // Bottom padding
-            svRT.offsetMax = new Vector2(-10, -280);  // Top offset (below filters: 105+110+55+10)
+            svRT.offsetMax = new Vector2(-10, -295);  // Top offset (header 105 + stats 130 + gap 5 + filters 50 + gap 5)
 
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
