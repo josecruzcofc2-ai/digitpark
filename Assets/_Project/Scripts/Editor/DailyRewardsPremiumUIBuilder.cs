@@ -347,6 +347,7 @@ namespace DigitPark.Editor
             GameObject icon = FindOrCreateChild(badge, "Icon");
             Image iconImg = GetOrAddComponent<Image>(icon);
             iconImg.color = color;
+            iconImg.preserveAspect = true;
             LayoutElement iconLE = GetOrAddComponent<LayoutElement>(icon);
             iconLE.minWidth = 24;
             iconLE.minHeight = 24;
@@ -1177,6 +1178,7 @@ namespace DigitPark.Editor
             GameObject icon = FindOrCreateChild(row, "Icon");
             Image iconImg = GetOrAddComponent<Image>(icon);
             iconImg.color = color;
+            iconImg.preserveAspect = true;
             LayoutElement iconLE = GetOrAddComponent<LayoutElement>(icon);
             iconLE.minWidth = 40;
             iconLE.minHeight = 40;

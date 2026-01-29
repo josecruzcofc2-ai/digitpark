@@ -168,7 +168,7 @@ namespace DigitPark.Editor
             itemUI.AutoSetupReferences();
 
             // Guardar prefab
-            string prefabPath = "Assets/_Project/Prefabs/UI/Tournaments/TournamentSearchItem.prefab";
+            string prefabPath = "Assets/_Project/Prefabs/Tournaments/Browser/TournamentSearchItem.prefab";
             EnsureDirectoryExists(prefabPath);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);
@@ -356,7 +356,7 @@ namespace DigitPark.Editor
             itemUI.AutoSetupReferences();
 
             // Guardar prefab
-            string prefabPath = "Assets/_Project/Prefabs/UI/Tournaments/TournamentMyItem.prefab";
+            string prefabPath = "Assets/_Project/Prefabs/Tournaments/Browser/TournamentMyItem.prefab";
             EnsureDirectoryExists(prefabPath);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);
@@ -463,7 +463,7 @@ namespace DigitPark.Editor
             itemUI.AutoSetupReferences();
 
             // Guardar prefab
-            string prefabPath = "Assets/_Project/Prefabs/UI/Scores/LeaderboardEntry.prefab";
+            string prefabPath = "Assets/_Project/Prefabs/Social/LeaderboardEntry.prefab";
             EnsureDirectoryExists(prefabPath);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);

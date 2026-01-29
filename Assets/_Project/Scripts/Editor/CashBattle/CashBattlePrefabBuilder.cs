@@ -152,7 +152,8 @@ namespace DigitPark.Editor
             amountText.alignment = TextAlignmentOptions.Right;
 
             // Guardar prefab
-            string path = $"{PREFAB_PATH}/TransactionItemUI.prefab";
+            string path = $"{PREFAB_PATH}/Wallet/TransactionItemUI.prefab";
+            EnsureDirectoryExists(path);
             PrefabUtility.SaveAsPrefabAsset(root, path);
             DestroyImmediate(root);
 
@@ -352,12 +353,13 @@ namespace DigitPark.Editor
             netText.color = GREEN;
             netText.alignment = TextAlignmentOptions.Center;
 
-            // Guardar prefab
-            string path = $"{PREFAB_PATH}/HistoryEntryItemUI.prefab";
+            // Guardar prefab - Renombrado a MatchHistoryItem según la nueva estructura
+            string path = $"{PREFAB_PATH}/History/MatchHistoryItem.prefab";
+            EnsureDirectoryExists(path);
             PrefabUtility.SaveAsPrefabAsset(root, path);
             DestroyImmediate(root);
 
-            Debug.Log($"[CashBattlePrefabBuilder] HistoryEntryItemUI.prefab creado: {path}");
+            Debug.Log($"[CashBattlePrefabBuilder] MatchHistoryItem.prefab creado: {path}");
         }
 
         [MenuItem("DigitPark/Prefabs/CashBattle/DepositOptionUI Prefab", false, 112)]
@@ -510,7 +512,8 @@ namespace DigitPark.Editor
             selTMP.alignment = TextAlignmentOptions.Center;
 
             // Guardar prefab
-            string path = $"{PREFAB_PATH}/DepositOptionUI.prefab";
+            string path = $"{PREFAB_PATH}/Wallet/DepositOptionUI.prefab";
+            EnsureDirectoryExists(path);
             PrefabUtility.SaveAsPrefabAsset(root, path);
             DestroyImmediate(root);
 
@@ -840,7 +843,8 @@ namespace DigitPark.Editor
             jtTMP.alignment = TextAlignmentOptions.Center;
 
             // Guardar prefab
-            string path = $"{PREFAB_PATH}/TournamentCardUI.prefab";
+            string path = $"{PREFAB_PATH}/Tournaments/TournamentCardUI.prefab";
+            EnsureDirectoryExists(path);
             PrefabUtility.SaveAsPrefabAsset(root, path);
             DestroyImmediate(root);
 
@@ -852,6 +856,16 @@ namespace DigitPark.Editor
             if (!Directory.Exists(PREFAB_PATH))
             {
                 Directory.CreateDirectory(PREFAB_PATH);
+                AssetDatabase.Refresh();
+            }
+        }
+
+        private static void EnsureDirectoryExists(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
                 AssetDatabase.Refresh();
             }
         }

@@ -22,15 +22,15 @@ namespace DigitPark.Editor
         private static readonly Color CARD_BG = new Color(0.05f, 0.08f, 0.12f);
         private static readonly Color PANEL_BG = new Color(0.08f, 0.12f, 0.18f);
 
-        private const string PREFAB_PATH = "Assets/_Project/Prefabs/UI/WinPanels";
+        private const string PREFAB_PATH = "Assets/_Project/Prefabs/Games/WinPanels";
 
-        [MenuItem("DigitPark/Create Online Win Panel Prefab")]
+        [MenuItem("DigitPark/UI Builders/Games/Online Win Panel", false, 117)]
         public static void BuildWinPanel()
         {
             BuildPanelPrefab(true);
         }
 
-        [MenuItem("DigitPark/Create Online Lose Panel Prefab")]
+        [MenuItem("DigitPark/UI Builders/Games/Online Lose Panel", false, 118)]
         public static void BuildLosePanel()
         {
             BuildPanelPrefab(false);

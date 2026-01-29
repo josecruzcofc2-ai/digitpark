@@ -103,8 +103,8 @@ namespace DigitPark.Managers
         {
             Debug.Log("[PlayModeSelection] Modo Solo seleccionado");
 
-            // Analytics
-            AnalyticsService.Instance?.LogGameStart();
+            // Analytics - screen view ya que aún no se selecciona juego
+            AnalyticsService.Instance?.LogScreenView("GameSelector", "PlayModeSelection");
 
             // Navigate to game selector in practice mode
             GameSelectorManager.SetPracticeMode(true);

@@ -28,6 +28,13 @@ namespace DigitPark.Managers
         [SerializeField] public TextMeshProUGUI userText;
         [SerializeField] public Button searchButton;
 
+        [Header("UI - Notifications")]
+        [SerializeField] public Button notificationsButton;
+        [SerializeField] public Image notificationIconImage;
+        [SerializeField] public Sprite notificationIconNormal;
+        [SerializeField] public Sprite notificationIconActive;
+        [SerializeField] public TextMeshProUGUI notificationBadgeText;
+
         [Header("UI - Premium")]
         [SerializeField] public Button premiumButton;
         [SerializeField] public GameObject premiumBadge;
@@ -37,10 +44,14 @@ namespace DigitPark.Managers
         [SerializeField] public Animator titleAnimator;
 
         private PlayerData currentPlayer;
+        private int pendingNotificationsCount = 0;
 
         private void Start()
         {
             Debug.Log("[MainMenu] MainMenuManager iniciado");
+
+            // Analytics - Screen tracking
+            AnalyticsService.Instance?.LogScreenView("MainMenu", "MainMenuManager");
 
             // Verificar e inicializar servicios si no existen (para testing directo)
             EnsureServicesExist();
@@ -76,14 +87,27 @@ namespace DigitPark.Managers
             // User info buttons
             userButton?.onClick.AddListener(OnUserButtonClicked);
             searchButton?.onClick.AddListener(OnSearchButtonClicked);
+            notificationsButton?.onClick.AddListener(OnNotificationsButtonClicked);
 
             // Suscribirse a cambios de premium
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumUI;
+
+            // Suscribirse a eventos de notificaciones
+            if (NotificationService.Instance != null)
+            {
+                NotificationService.Instance.OnNotificationReceived += OnNotificationReceived;
+            }
         }
 
         private void OnDestroy()
         {
             PremiumManager.OnPremiumStatusChanged -= UpdatePremiumUI;
+
+            // Desuscribirse de eventos de notificaciones
+            if (NotificationService.Instance != null)
+            {
+                NotificationService.Instance.OnNotificationReceived -= OnNotificationReceived;
+            }
         }
 
         /// <summary>
@@ -172,6 +196,62 @@ namespace DigitPark.Managers
                         : new Color(1f, 0.84f, 0f, 1f);   // Dorado completo
                 }
             }
+        }
+
+        /// <summary>
+        /// Callback cuando se recibe una notificación
+        /// </summary>
+        private void OnNotificationReceived(NotificationData notification)
+        {
+            pendingNotificationsCount++;
+            UpdateNotificationIcon();
+            Debug.Log($"[MainMenu] Notificación recibida: {notification.Title}");
+        }
+
+        /// <summary>
+        /// Actualiza el icono de notificaciones según el contador
+        /// </summary>
+        public void UpdateNotificationIcon()
+        {
+            bool hasNotifications = pendingNotificationsCount > 0;
+
+            // Cambiar sprite del icono
+            if (notificationIconImage != null)
+            {
+                notificationIconImage.sprite = hasNotifications
+                    ? notificationIconActive
+                    : notificationIconNormal;
+            }
+
+            // Actualizar badge de texto (opcional)
+            if (notificationBadgeText != null)
+            {
+                notificationBadgeText.gameObject.SetActive(hasNotifications);
+                if (hasNotifications)
+                {
+                    notificationBadgeText.text = pendingNotificationsCount > 99
+                        ? "99+"
+                        : pendingNotificationsCount.ToString();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Establece el contador de notificaciones pendientes
+        /// </summary>
+        public void SetNotificationCount(int count)
+        {
+            pendingNotificationsCount = Mathf.Max(0, count);
+            UpdateNotificationIcon();
+        }
+
+        /// <summary>
+        /// Limpia todas las notificaciones pendientes
+        /// </summary>
+        public void ClearNotifications()
+        {
+            pendingNotificationsCount = 0;
+            UpdateNotificationIcon();
         }
 
         #region Button Callbacks
@@ -264,6 +344,24 @@ namespace DigitPark.Managers
 
             // TODO: Abrir panel de búsqueda de jugadores
             SceneManager.LoadScene("SearchPlayers");
+        }
+
+        /// <summary>
+        /// Abre el panel/escena de notificaciones
+        /// </summary>
+        private void OnNotificationsButtonClicked()
+        {
+            Debug.Log("[MainMenu] Abriendo notificaciones");
+
+            // AudioManager.Instance?.PlaySFX("ButtonClick");
+
+            // Limpiar contador al ver notificaciones
+            ClearNotifications();
+
+            // TODO: Abrir panel de notificaciones o navegar a escena
+            // Por ahora, navegar a Profile con panel de notificaciones
+            PlayerPrefs.SetString("OpenPanel", "Notifications");
+            SceneManager.LoadScene("Profile");
         }
 
         /// <summary>

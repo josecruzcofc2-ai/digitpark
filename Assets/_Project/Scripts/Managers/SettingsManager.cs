@@ -78,6 +78,8 @@ namespace DigitPark.Managers
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
         private const string EFFECTS_VOLUME_KEY = "EffectsVolume";
+        private const string VIBRATION_KEY = "VibrationEnabled";
+        private const string NOTIFICATIONS_KEY = "NotificationsEnabled";
 
         private PlayerData currentPlayer;
 
@@ -494,6 +496,82 @@ namespace DigitPark.Managers
         public static float GetEffectsVolume()
         {
             return PlayerPrefs.GetFloat(EFFECTS_VOLUME_KEY, 0.5f);
+        }
+
+        /// <summary>
+        /// Verifica si la vibración está habilitada
+        /// </summary>
+        public static bool IsVibrationEnabled()
+        {
+            return PlayerPrefs.GetInt(VIBRATION_KEY, 1) == 1;
+        }
+
+        /// <summary>
+        /// Establece el estado de vibración
+        /// </summary>
+        public static void SetVibrationEnabled(bool enabled)
+        {
+            PlayerPrefs.SetInt(VIBRATION_KEY, enabled ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// Vibra el dispositivo si está habilitado
+        /// </summary>
+        public static void Vibrate()
+        {
+            if (IsVibrationEnabled())
+            {
+#if UNITY_IOS || UNITY_ANDROID
+                Handheld.Vibrate();
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Vibra ligeramente (para feedback de UI)
+        /// </summary>
+        public static void VibrateTap()
+        {
+            if (!IsVibrationEnabled()) return;
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (AndroidJavaObject vibrator = activity.Call<AndroidJavaObject>("getSystemService", "vibrator"))
+                {
+                    vibrator.Call("vibrate", 10L); // 10ms
+                }
+            }
+            catch { }
+#elif UNITY_IOS && !UNITY_EDITOR
+            Handheld.Vibrate();
+#endif
+        }
+
+        /// <summary>
+        /// Verifica si las notificaciones están habilitadas
+        /// </summary>
+        public static bool AreNotificationsEnabled()
+        {
+            return PlayerPrefs.GetInt(NOTIFICATIONS_KEY, 1) == 1;
+        }
+
+        /// <summary>
+        /// Establece el estado de notificaciones
+        /// </summary>
+        public static void SetNotificationsEnabled(bool enabled)
+        {
+            PlayerPrefs.SetInt(NOTIFICATIONS_KEY, enabled ? 1 : 0);
+            PlayerPrefs.Save();
+
+            // Sincronizar con NotificationService si existe
+            if (Services.Firebase.NotificationService.Instance != null)
+            {
+                Services.Firebase.NotificationService.Instance.SetNotificationsEnabled(enabled);
+            }
         }
 
         #endregion

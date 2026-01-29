@@ -1355,8 +1355,8 @@ namespace DigitPark.Managers
                     await DatabaseService.Instance.JoinTournament(newTournament.tournamentId, currentPlayer.userId);
                     Debug.Log($"[Tournament] Creador unido automáticamente al torneo");
 
-                    // Analytics
-                    AnalyticsService.Instance?.LogTournamentCreated(newTournament.tournamentId, 0);
+                    // Analytics - torneo creado (usando LogTournamentJoined como creador)
+                    AnalyticsService.Instance?.LogTournamentJoined(newTournament.tournamentId, newTournament.category ?? "Standard", 0);
 
                     // Mostrar mensaje de éxito
                     ShowSuccessMessage(AutoLocalizer.Get("create_success"));

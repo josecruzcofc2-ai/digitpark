@@ -27,7 +27,7 @@ namespace DigitPark.Editor
         private static readonly Color PREMIUM_PANEL = new Color(0.15f, 0.12f, 0.05f, 0.95f);
         private static readonly Color LOSE_RED = new Color(1f, 0.3f, 0.3f, 1f);
 
-        [MenuItem("DigitPark/Create Win Panels")]
+        [MenuItem("DigitPark/UI Builders/Games/Win Panels", false, 116)]
         public static void ShowWindow()
         {
             GetWindow<WinPanelUIBuilder>("Win Panel Builder");

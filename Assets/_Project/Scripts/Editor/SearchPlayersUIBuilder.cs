@@ -585,12 +585,12 @@ namespace DigitPark.Editor
             CreatePrefabButton(buttonsRow.transform, "ViewProfileButton", "Ver Perfil", new Color(0.05f, 0.1f, 0.15f, 1f), CYAN_NEON, 140, true);
 
             // Guardar como prefab
-            string prefabPath = "Assets/_Project/Prefabs/UI/PlayerCard.prefab";
+            string prefabPath = "Assets/_Project/Prefabs/Common/PlayerCard.prefab";
 
             // Asegurar que el directorio existe
-            if (!System.IO.Directory.Exists("Assets/_Project/Prefabs/UI"))
+            if (!System.IO.Directory.Exists("Assets/_Project/Prefabs/Common"))
             {
-                System.IO.Directory.CreateDirectory("Assets/_Project/Prefabs/UI");
+                System.IO.Directory.CreateDirectory("Assets/_Project/Prefabs/Common");
             }
 
             PrefabUtility.SaveAsPrefabAsset(card, prefabPath);

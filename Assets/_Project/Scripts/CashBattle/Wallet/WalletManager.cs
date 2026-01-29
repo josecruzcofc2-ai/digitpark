@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using DigitPark.Services;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.CashBattle
 {
@@ -274,6 +275,9 @@ namespace DigitPark.CashBattle
 
                 if (result.Success)
                 {
+                    // Analytics
+                    AnalyticsService.Instance?.LogDeposit(amount, method.ToString());
+
                     OnDepositCompleted?.Invoke(true, "Depósito exitoso");
                     Debug.Log($"[WalletManager] Depósito completado. Nuevo balance: ${Balance:F2}");
                     return true;
@@ -345,6 +349,9 @@ namespace DigitPark.CashBattle
 
                 if (result.Success)
                 {
+                    // Analytics
+                    AnalyticsService.Instance?.LogWithdrawal(amount, method.ToString());
+
                     var transaction = new WalletTransaction
                     {
                         type = TransactionType.Withdrawal,

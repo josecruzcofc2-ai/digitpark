@@ -45,7 +45,7 @@ namespace DigitPark.Editor
         private const float DOTS_HEIGHT = 30f;
         private const float BUTTON_HEIGHT = 60f;
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Onboarding", false, 186)]
+        [MenuItem("DigitPark/UI Builders/Core/Onboarding", false, 153)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Onboarding UI Builder",

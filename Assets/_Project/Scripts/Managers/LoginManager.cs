@@ -346,7 +346,11 @@ namespace DigitPark.Managers
             isLoggingIn = false;
             ShowLoading(false);
 
-            if (!success)
+            if (success)
+            {
+                AnalyticsService.Instance?.LogLogin("google");
+            }
+            else
             {
                 ShowErrorMessage(GetLocalizedText("error_auth_generic"));
             }
@@ -369,7 +373,11 @@ namespace DigitPark.Managers
             isLoggingIn = false;
             ShowLoading(false);
 
-            if (!success)
+            if (success)
+            {
+                AnalyticsService.Instance?.LogLogin("apple");
+            }
+            else
             {
                 ShowErrorMessage(GetLocalizedText("error_auth_generic"));
             }
@@ -460,6 +468,7 @@ namespace DigitPark.Managers
 
             // Registrar en analytics
             AnalyticsService.Instance?.SetUserId(playerData.userId);
+            AnalyticsService.Instance?.LogLogin("email");
 
             // Verificar si es primera vez (no tiene username o es "Sin usuario")
             if (string.IsNullOrEmpty(playerData.username) || playerData.username == "Sin usuario")

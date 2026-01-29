@@ -2,8 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using System.Collections.Generic;
 
 namespace DigitPark.Managers
 {
@@ -47,6 +49,10 @@ namespace DigitPark.Managers
 
         [Header("UI - CTA Button")]
         [SerializeField] private Button challengeButton;  // Retar (solo si es amigo)
+
+        [Header("UI - Friends Panel")]
+        [SerializeField] private FriendsListManager friendsListManager;
+        [SerializeField] private FriendRequestsManager friendRequestsManager;
 
         [Header("UI - Challenge Game Selection")]
         [SerializeField] private GameObject gameSelectionPanel;  // Panel para elegir juego
@@ -179,13 +185,10 @@ namespace DigitPark.Managers
 
         private void CheckFriendStatus(string playerId)
         {
-            PlayerData myData = null;
-            if (AuthenticationService.Instance != null)
-            {
-                myData = AuthenticationService.Instance.GetCurrentPlayerData();
-            }
-
-            isFriend = myData != null && myData.IsFriend(playerId);
+            // Usar FriendService para verificar estado
+            isFriend = FriendService.Instance.IsFriend(playerId);
+            bool hasPendingRequest = FriendService.Instance.HasPendingRequestWith(playerId);
+            bool sentRequest = FriendService.Instance.HasSentRequestTo(playerId);
 
             if (isFriend)
             {
@@ -209,11 +212,41 @@ namespace DigitPark.Managers
             else
             {
                 // NO ES AMIGO
-                SetStatusText("No es amigo", new Color32(136, 136, 136, 255)); // Gris
-
-                // Mostrar agregar amigo, ocultar retar
-                if (addFriendIconButton != null)
-                    addFriendIconButton.gameObject.SetActive(true);
+                if (hasPendingRequest)
+                {
+                    // Hay solicitud pendiente
+                    if (sentRequest)
+                    {
+                        SetStatusText("Solicitud enviada", new Color32(255, 204, 0, 255)); // Amarillo
+                        if (addFriendIconButton != null)
+                        {
+                            addFriendIconButton.gameObject.SetActive(true);
+                            addFriendIconButton.interactable = false;
+                            var image = addFriendIconButton.GetComponent<Image>();
+                            if (image != null) image.color = new Color32(136, 136, 136, 255);
+                        }
+                    }
+                    else
+                    {
+                        // Recibimos solicitud de este jugador
+                        SetStatusText("Te envio solicitud", new Color32(0, 255, 136, 255)); // Verde
+                        if (addFriendIconButton != null)
+                        {
+                            addFriendIconButton.gameObject.SetActive(true);
+                            addFriendIconButton.interactable = true;
+                            // Cambiar texto del boton a "Aceptar"
+                        }
+                    }
+                }
+                else
+                {
+                    SetStatusText("No es amigo", new Color32(136, 136, 136, 255)); // Gris
+                    if (addFriendIconButton != null)
+                    {
+                        addFriendIconButton.gameObject.SetActive(true);
+                        addFriendIconButton.interactable = true;
+                    }
+                }
 
                 if (challengeButton != null)
                     challengeButton.gameObject.SetActive(false);
@@ -341,13 +374,28 @@ namespace DigitPark.Managers
         private void OnFriendsClicked()
         {
             Debug.Log("[Profile] Abriendo lista de amigos");
-            // TODO: Mostrar panel de amigos o navegar a escena Friends
+
+            if (friendsListManager != null)
+            {
+                friendsListManager.Show();
+            }
+            else
+            {
+                // Navegar a escena de amigos si no hay panel
+                PlayerPrefs.SetString("FriendsReturnScene", "Profile");
+                PlayerPrefs.Save();
+                SceneManager.LoadScene("Friends");
+            }
         }
 
         private void OnHistoryClicked()
         {
             Debug.Log("[Profile] Abriendo historial de partidas");
-            // TODO: Mostrar panel de historial
+
+            // Navegar a escena de historial
+            PlayerPrefs.SetString("HistoryReturnScene", "Profile");
+            PlayerPrefs.Save();
+            SceneManager.LoadScene("Scores");
         }
 
         private async void OnAddFriendClicked()
@@ -358,24 +406,40 @@ namespace DigitPark.Managers
                 return;
             }
 
-            Debug.Log($"[Profile] Enviando solicitud de amistad a: {viewingPlayerId}");
-
-            // TODO: Enviar solicitud de amistad via Firebase
-            // await DatabaseService.Instance.SendFriendRequest(viewingPlayerId);
-
-            // Feedback visual - cambiar icono o desactivar
-            if (addFriendIconButton != null)
+            // Verificar si ya hay solicitud pendiente
+            if (FriendService.Instance.HasPendingRequestWith(viewingPlayerId))
             {
-                addFriendIconButton.interactable = false;
-
-                // Cambiar color a gris para indicar que ya se envio
-                var image = addFriendIconButton.GetComponent<Image>();
-                if (image != null)
-                    image.color = new Color32(136, 136, 136, 255);
+                Debug.Log("[Profile] Ya existe solicitud pendiente");
+                SetStatusText("Solicitud pendiente", new Color32(255, 204, 0, 255));
+                return;
             }
 
-            // Actualizar status
-            SetStatusText("Solicitud enviada", new Color32(255, 204, 0, 255)); // Amarillo
+            Debug.Log($"[Profile] Enviando solicitud de amistad a: {viewingPlayerId}");
+
+            // Enviar solicitud usando FriendService
+            var result = await FriendService.Instance.SendFriendRequest(viewingPlayerId);
+
+            if (result.Success)
+            {
+                // Feedback visual - cambiar icono o desactivar
+                if (addFriendIconButton != null)
+                {
+                    addFriendIconButton.interactable = false;
+
+                    // Cambiar color a gris para indicar que ya se envio
+                    var image = addFriendIconButton.GetComponent<Image>();
+                    if (image != null)
+                        image.color = new Color32(136, 136, 136, 255);
+                }
+
+                // Actualizar status
+                SetStatusText("Solicitud enviada", new Color32(255, 204, 0, 255)); // Amarillo
+            }
+            else
+            {
+                Debug.LogWarning($"[Profile] Error al enviar solicitud: {result.Message}");
+                SetStatusText(result.Message, new Color32(255, 100, 100, 255)); // Rojo
+            }
         }
 
         private void OnChallengeClicked()

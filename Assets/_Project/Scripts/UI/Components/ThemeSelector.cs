@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using DigitPark.Themes;
 using DigitPark.Localization;
+using DigitPark.Managers;
 
 namespace DigitPark.UI.Components
 {
@@ -31,6 +32,11 @@ namespace DigitPark.UI.Components
         [SerializeField] private Button nextButton;
         [SerializeField] private Button applyButton;
 
+        [Header("Premium Lock")]
+        [SerializeField] private GameObject lockedPanel;
+        [SerializeField] private Button unlockButton;
+        [SerializeField] private TextMeshProUGUI lockedMessageText;
+
         [Header("Style")]
         [SerializeField] private Color selectedColor = new Color(0, 1, 1, 1);
         [SerializeField] private Color unselectedColor = new Color(0.3f, 0.3f, 0.3f, 1);
@@ -48,6 +54,7 @@ namespace DigitPark.UI.Components
         {
             ThemeManager.OnThemeChanged += OnThemeChanged;
             LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
+            PremiumManager.OnPremiumStatusChanged += OnPremiumStatusChanged;
             UpdateLocalizedTexts();
         }
 
@@ -55,6 +62,17 @@ namespace DigitPark.UI.Components
         {
             ThemeManager.OnThemeChanged -= OnThemeChanged;
             LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
+            PremiumManager.OnPremiumStatusChanged -= OnPremiumStatusChanged;
+        }
+
+        /// <summary>
+        /// Callback cuando cambia el estado premium del usuario
+        /// </summary>
+        private void OnPremiumStatusChanged()
+        {
+            // Actualizar todos los items con el nuevo estado de desbloqueo
+            RefreshThemeItems();
+            UpdatePreview();
         }
 
         /// <summary>
@@ -92,6 +110,16 @@ namespace DigitPark.UI.Components
             {
                 GenerateThemeItems();
             }
+
+            // Configurar botón de desbloqueo
+            if (unlockButton != null)
+            {
+                unlockButton.onClick.RemoveListener(OnUnlockButtonClicked);
+                unlockButton.onClick.AddListener(OnUnlockButtonClicked);
+            }
+
+            // Ocultar panel de bloqueado inicialmente
+            HideLockedPanel();
 
             // Seleccionar tema actual
             selectedIndex = ThemeManager.Instance.CurrentThemeIndex;
@@ -239,10 +267,104 @@ namespace DigitPark.UI.Components
         /// </summary>
         public void ApplySelectedTheme()
         {
-            if (previewTheme != null)
+            if (previewTheme == null) return;
+
+            // Verificar si el tema está disponible
+            if (ThemeManager.Instance.TrySetTheme(previewTheme))
             {
-                ThemeManager.Instance.SetTheme(previewTheme);
                 Debug.Log($"[ThemeSelector] Tema aplicado: {previewTheme.themeName}");
+                HideLockedPanel();
+            }
+            else
+            {
+                // Tema bloqueado - mostrar opción de compra
+                Debug.Log($"[ThemeSelector] Tema bloqueado: {previewTheme.themeName} - Requiere Styles PRO");
+                ShowLockedPanel();
+            }
+        }
+
+        /// <summary>
+        /// Muestra el panel de tema bloqueado
+        /// </summary>
+        private void ShowLockedPanel()
+        {
+            if (lockedPanel != null)
+            {
+                lockedPanel.SetActive(true);
+            }
+
+            if (lockedMessageText != null)
+            {
+                lockedMessageText.text = AutoLocalizer.Get("theme_locked_message");
+            }
+
+            // Configurar botón de desbloqueo
+            if (unlockButton != null)
+            {
+                unlockButton.onClick.RemoveAllListeners();
+                unlockButton.onClick.AddListener(OnUnlockButtonClicked);
+
+                // Mostrar precio
+                var btnText = unlockButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (btnText != null)
+                {
+                    string price = PremiumManager.Instance?.GetProductPrice(PremiumProduct.StylesPro) ?? "$29 MXN";
+                    btnText.text = $"{AutoLocalizer.Get("unlock")} - {price}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Oculta el panel de tema bloqueado
+        /// </summary>
+        private void HideLockedPanel()
+        {
+            if (lockedPanel != null)
+            {
+                lockedPanel.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Callback cuando se presiona el botón de desbloquear
+        /// </summary>
+        private void OnUnlockButtonClicked()
+        {
+            if (PremiumManager.Instance != null)
+            {
+                PremiumManager.Instance.PurchaseStylesPro((success) =>
+                {
+                    if (success)
+                    {
+                        Debug.Log("[ThemeSelector] Styles PRO desbloqueado!");
+                        HideLockedPanel();
+
+                        // Aplicar el tema ahora que está desbloqueado
+                        if (previewTheme != null)
+                        {
+                            ThemeManager.Instance.SetTheme(previewTheme);
+                        }
+
+                        // Actualizar UI de todos los items
+                        RefreshThemeItems();
+                    }
+                    else
+                    {
+                        Debug.Log("[ThemeSelector] Compra cancelada o fallida");
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Refresca los items de tema (para actualizar estados de bloqueo)
+        /// </summary>
+        private void RefreshThemeItems()
+        {
+            for (int i = 0; i < themeItems.Count; i++)
+            {
+                var theme = ThemeManager.Instance.AvailableThemes[i];
+                themeItems[i].UpdateLockState(ThemeManager.Instance.IsThemeAvailable(theme));
             }
         }
 
@@ -264,6 +386,8 @@ namespace DigitPark.UI.Components
         {
             if (previewTheme == null) return;
 
+            bool isAvailable = ThemeManager.Instance.IsThemeAvailable(previewTheme);
+
             if (previewBackground != null)
                 previewBackground.color = previewTheme.primaryBackground;
 
@@ -276,7 +400,8 @@ namespace DigitPark.UI.Components
             if (previewTitle != null)
             {
                 previewTitle.color = previewTheme.textTitle;
-                previewTitle.text = previewTheme.themeName;
+                // Añadir indicador de bloqueado al nombre
+                previewTitle.text = isAvailable ? previewTheme.themeName : $"🔒 {previewTheme.themeName}";
             }
 
             if (previewText != null)
@@ -287,6 +412,31 @@ namespace DigitPark.UI.Components
             {
                 currentThemeText.text = previewTheme.themeName;
                 currentThemeText.color = previewTheme.primaryAccent;
+            }
+
+            // Actualizar botón aplicar según disponibilidad
+            UpdateApplyButton(isAvailable);
+
+            // Ocultar panel de bloqueado si el tema está disponible
+            if (isAvailable)
+            {
+                HideLockedPanel();
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el estado del botón aplicar según disponibilidad
+        /// </summary>
+        private void UpdateApplyButton(bool themeAvailable)
+        {
+            if (applyButton == null) return;
+
+            var btnText = applyButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (btnText != null)
+            {
+                btnText.text = themeAvailable
+                    ? AutoLocalizer.Get("apply")
+                    : AutoLocalizer.Get("unlock");
             }
         }
 
@@ -349,10 +499,13 @@ namespace DigitPark.UI.Components
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private GameObject selectedIndicator;
         [SerializeField] private Image premiumBadge;
+        [SerializeField] private GameObject lockIcon;
+        [SerializeField] private CanvasGroup canvasGroup;
 
         private ThemeData theme;
         private Button button;
         private System.Action onClick;
+        private bool isUnlocked = true;
 
         /// <summary>
         /// Configura el item con los datos del tema
@@ -372,6 +525,12 @@ namespace DigitPark.UI.Components
             if (nameText == null)
                 nameText = GetComponentInChildren<TextMeshProUGUI>();
 
+            if (lockIcon == null)
+                lockIcon = transform.Find("LockIcon")?.gameObject;
+
+            if (canvasGroup == null)
+                canvasGroup = GetComponent<CanvasGroup>();
+
             button = GetComponent<Button>();
 
             // Configurar visuales
@@ -387,6 +546,11 @@ namespace DigitPark.UI.Components
             if (background != null)
                 background.color = theme.secondaryBackground;
 
+            // Verificar si el tema está disponible
+            bool isAvailable = ThemeManager.Instance != null && ThemeManager.Instance.IsThemeAvailable(theme);
+            UpdateLockState(isAvailable);
+
+            // Mostrar badge premium (siempre visible para temas premium)
             if (premiumBadge != null)
                 premiumBadge.gameObject.SetActive(theme.isPremium);
 
@@ -395,6 +559,26 @@ namespace DigitPark.UI.Components
             {
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(() => onClick?.Invoke());
+            }
+        }
+
+        /// <summary>
+        /// Actualiza el estado visual de bloqueo
+        /// </summary>
+        public void UpdateLockState(bool unlocked)
+        {
+            isUnlocked = unlocked;
+
+            // Mostrar/ocultar icono de candado
+            if (lockIcon != null)
+            {
+                lockIcon.SetActive(!unlocked && theme.isPremium);
+            }
+
+            // Reducir opacidad si está bloqueado
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = unlocked ? 1f : 0.6f;
             }
         }
 

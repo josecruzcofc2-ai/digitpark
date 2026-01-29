@@ -5,283 +5,210 @@ using TMPro;
 
 namespace DigitPark.Editor
 {
-    using DigitPark.Animations;
     /// <summary>
-    /// Editor script para reconstruir la UI del Main Menu con diseño profesional
+    /// MainMenu UI Builder - REDISEÑO COMPLETO 2026
+    /// Diseño innovador con cards, estilo Neon profesional
     /// Resolución: Portrait 9:16 (1080x1920)
     /// </summary>
     public class MainMenuUIBuilder : EditorWindow
     {
-        // Colores del tema
+        #region Colors - Neon Theme
+
+        // Primary Colors
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color CYAN_GLOW = new Color(0f, 0.83f, 1f, 1f);
+        private static readonly Color CYAN_GLOW = new Color(0f, 0.85f, 1f, 0.8f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.5f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
-        private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.98f);
-        private static readonly Color HEADER_BG = new Color(0.03f, 0.06f, 0.1f, 0.95f);
+
+        // Gold/Money Colors
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
-        private static readonly Color GOLD_DARK = new Color(0.7f, 0.5f, 0.1f, 1f);
-        private static readonly Color GREEN_CASH = new Color(0.2f, 0.9f, 0.4f, 1f);
-        private static readonly Color GREEN_DARK = new Color(0.1f, 0.5f, 0.2f, 1f);
-        private static readonly Color TEXT_PRIMARY = Color.white;
-        private static readonly Color TEXT_SECONDARY = new Color(0.7f, 0.7f, 0.7f, 1f);
+        private static readonly Color GOLD_DARK = new Color(0.8f, 0.6f, 0.1f, 1f);
+        private static readonly Color GOLD_GLOW = new Color(1f, 0.75f, 0f, 0.7f);
+
+        // Backgrounds
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
+        private static readonly Color CARD_BG_LIGHT = new Color(0.08f, 0.1f, 0.14f, 1f);
+        private static readonly Color HEADER_BG = new Color(0.04f, 0.06f, 0.1f, 0.98f);
+
+        // Text
+        private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
+        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.6f, 0.65f, 1f);
         private static readonly Color TEXT_DARK = new Color(0.1f, 0.1f, 0.1f, 1f);
-        private static readonly Color BUTTON_SECONDARY = new Color(0.15f, 0.2f, 0.25f, 1f);
-        private static readonly Color OVERLAY_COLOR = new Color(0f, 0f, 0f, 0.85f);
+
+        // Accents
+        private static readonly Color GREEN_SUCCESS = new Color(0.2f, 0.9f, 0.4f, 1f);
+        private static readonly Color PURPLE_ACCENT = new Color(0.6f, 0.3f, 1f, 1f);
+
+        #endregion
+
+        #region Layout Constants
+
+        private const float HEADER_HEIGHT = 100f;
+        private const float PLAYER_CARD_HEIGHT = 180f;
+        private const float QUICK_ACTION_HEIGHT = 90f;
+        private const float MAIN_CARD_HEIGHT = 140f;
+        private const float DAILY_REWARDS_HEIGHT = 130f;
+        private const float SECTION_SPACING = 20f;
+        private const float CARD_BORDER_WIDTH = 2f;
+
+        #endregion
+
+        #region Icon Paths - Neon Icons
+
+        private const string ICONS_BASE = "Assets/_Project/Art/Icons";
+
+        // Header Icons
+        private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/Actions/SettingsIconNeon.png";
+        private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/Actions/NotificationsNeon.png";
+        private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/Actions/NotificationsActiveNeon.png";
+        private const string ICON_PROFILE = ICONS_BASE + "/Social/Profile/ProfileIconNeon.png";
+
+        // Player Card Icons
+        private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/Profile/AvatarDefaultNeon.png";
+        private const string ICON_TROPHY = ICONS_BASE + "/Tournaments/TrophyIconNeon.png";
+        private const string ICON_GEM = ICONS_BASE + "/Currency/GemIconNeon.png";
+        private const string ICON_COIN = ICONS_BASE + "/Currency/CoinIconNeon.png";
+
+        // Quick Actions Icons
+        private const string ICON_RANKINGS = ICONS_BASE + "/Tournaments/RankingsIconNeon.png";
+        private const string ICON_SEARCH = ICONS_BASE + "/Navigation/Buttons/SearchIconNeon.png";
+        private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIconNeon.png";
+
+        // Main Cards Icons
+        private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIconNeon.png";
+        private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIconNeon.png";
+
+        // Daily Rewards Icon
+        private const string ICON_GIFT = ICONS_BASE + "/DailyRewards/GiftIconNeon.png";
+
+        #endregion
 
         [MenuItem("DigitPark/UI Builders/Core/MainMenu", false, 150)]
         public static void ShowWindow()
         {
-            GetWindow<MainMenuUIBuilder>("Main Menu Builder");
+            GetWindow<MainMenuUIBuilder>("MainMenu Builder v2");
         }
 
         private void OnGUI()
         {
-            GUILayout.Label("Main Menu UI Builder", EditorStyles.boldLabel);
-            GUILayout.Label("Resolución: Portrait 9:16 (1080x1920)", EditorStyles.miniLabel);
+            GUILayout.Label("MainMenu UI Builder", EditorStyles.boldLabel);
+            GUILayout.Label("REDISEÑO COMPLETO 2026 - Estilo Neon", EditorStyles.miniLabel);
             GUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "Este script reconstruirá la UI del Main Menu.\n" +
-                "Asegúrate de tener la escena MainMenu abierta.\n\n" +
-                "Nueva estructura:\n" +
-                "• Header (Settings, Notifications, Profile)\n" +
-                "• User Section (Avatar + Username)\n" +
-                "• Play Button (CTA Principal)\n" +
-                "• Secondary Buttons (Scores, Search)\n" +
-                "• Cash Battle Button\n" +
-                "• Premium Banner + Panel\n" +
-                "• Notifications Panel",
+                "Nueva estructura:\n\n" +
+                "1. Header (Settings, Logo, Notifications, Profile)\n" +
+                "2. Player Card (Avatar, Username, Level, Stats)\n" +
+                "3. Quick Actions (Rankings, Buscar, Misiones)\n" +
+                "4. Main Cards (JUGAR + CASH BATTLE)\n" +
+                "5. Daily Rewards Banner\n" +
+                "6. Panels (Premium, Notifications)",
                 MessageType.Info);
 
             GUILayout.Space(15);
 
-            if (GUILayout.Button("RECONSTRUIR TODO", GUILayout.Height(50)))
+            GUI.backgroundColor = CYAN_NEON;
+            if (GUILayout.Button("RECONSTRUIR MAINMENU COMPLETO", GUILayout.Height(50)))
             {
                 RebuildMainMenu();
             }
+            GUI.backgroundColor = Color.white;
 
-            GUILayout.Space(10);
+            GUILayout.Space(15);
             GUILayout.Label("Componentes Individuales:", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("1. Crear Header", GUILayout.Height(30)))
-            {
+            if (GUILayout.Button("1. Header", GUILayout.Height(28)))
                 CreateHeader();
-            }
+            if (GUILayout.Button("2. Player Card", GUILayout.Height(28)))
+                CreatePlayerCard();
+            if (GUILayout.Button("3. Quick Actions", GUILayout.Height(28)))
+                CreateQuickActions();
+            if (GUILayout.Button("4. Main Cards (Jugar + Cash)", GUILayout.Height(28)))
+                CreateMainCards();
+            if (GUILayout.Button("5. Daily Rewards", GUILayout.Height(28)))
+                CreateDailyRewards();
+            if (GUILayout.Button("6. Panels (Premium + Notif)", GUILayout.Height(28)))
+                CreatePanels();
 
-            if (GUILayout.Button("2. Crear User Section", GUILayout.Height(30)))
-            {
-                CreateUserSection();
-            }
+            GUILayout.Space(15);
 
-            if (GUILayout.Button("3. Crear Main Buttons", GUILayout.Height(30)))
+            GUI.backgroundColor = new Color(0.3f, 0.8f, 0.3f);
+            if (GUILayout.Button("ASIGNAR ICONOS NEON", GUILayout.Height(40)))
             {
-                CreateMainButtons();
+                AssignNeonIcons();
             }
+            GUI.backgroundColor = Color.white;
 
-            if (GUILayout.Button("4. Crear Premium Banner", GUILayout.Height(30)))
-            {
-                CreatePremiumBanner();
-            }
-
-            if (GUILayout.Button("5. Crear Premium Panel", GUILayout.Height(30)))
-            {
-                CreatePremiumPanel();
-            }
-
-            if (GUILayout.Button("6. Crear Notifications Panel", GUILayout.Height(30)))
-            {
-                CreateNotificationsPanel();
-            }
+            GUILayout.Space(5);
+            EditorGUILayout.HelpBox(
+                "Los iconos deben estar en:\n" +
+                "Assets/_Project/Art/Icons/[Carpeta]/[NombreIconNeon].png",
+                MessageType.Info);
         }
 
         #region Main Rebuild
 
         private static void RebuildMainMenu()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
                 Debug.LogError("[MainMenuUI] No se encontró Canvas en la escena");
                 return;
             }
 
-            // PRIMERO: Limpiar elementos viejos
+            // Limpiar elementos viejos
             CleanOldElements(canvas.transform);
 
-            // Crear estructura base (nuevo orden)
+            // Crear nueva estructura
             CreateBackground(canvas.transform);
             CreateHeader();
-            CreateTitleSection();      // NUEVO: Título arriba
-            CreateUserSection();       // Usuario debajo del título
-            CreateMainMenuPanel(canvas.transform);
-            CreateMainButtons();
-            CreatePremiumBanner();
-            CreatePremiumPanel();
-            CreateNotificationsPanel();
+            CreatePlayerCard();
+            CreateQuickActions();
+            CreateMainCards();
+            CreateDailyRewards();
+            CreatePanels();
 
-            // Add and configure MainMenuAnimator for entrance animations
-            AddMainMenuAnimator(canvas);
-
-            Debug.Log("[MainMenuUI] Main Menu reconstruido exitosamente!");
+            Debug.Log("[MainMenuUI] MainMenu REDISEÑADO exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
 
-        /// <summary>
-        /// Adds and configures MainMenuAnimator for professional entrance animations
-        /// </summary>
-        private static void AddMainMenuAnimator(Canvas canvas)
-        {
-            MainMenuAnimator animator = canvas.GetComponent<MainMenuAnimator>();
-            if (animator == null)
-                animator = canvas.gameObject.AddComponent<MainMenuAnimator>();
-
-            // Get references
-            Transform canvasTransform = canvas.transform;
-            Transform titleSection = canvasTransform.Find("TitleSection");
-            Transform header = canvasTransform.Find("Header");
-            Transform mainMenuPanel = canvasTransform.Find("MainMenuPanel");
-            Transform background = canvasTransform.Find("Background");
-
-            // Find menu buttons
-            System.Collections.Generic.List<RectTransform> buttons = new System.Collections.Generic.List<RectTransform>();
-            if (mainMenuPanel != null)
-            {
-                Transform playBtn = mainMenuPanel.Find("PlayButton");
-                Transform scoresBtn = mainMenuPanel.Find("ScoresButton");
-                Transform searchBtn = mainMenuPanel.Find("SearchButton");
-                Transform cashBtn = mainMenuPanel.Find("CashBattleButton");
-
-                if (playBtn != null) buttons.Add(playBtn.GetComponent<RectTransform>());
-                if (scoresBtn != null) buttons.Add(scoresBtn.GetComponent<RectTransform>());
-                if (searchBtn != null) buttons.Add(searchBtn.GetComponent<RectTransform>());
-                if (cashBtn != null) buttons.Add(cashBtn.GetComponent<RectTransform>());
-            }
-
-            // Configure via SerializedObject
-            SerializedObject so = new SerializedObject(animator);
-
-            // Logo/Title
-            if (titleSection != null)
-            {
-                Transform logo = titleSection.Find("LogoImage") ?? titleSection;
-                so.FindProperty("logo").objectReferenceValue = logo.GetComponent<RectTransform>();
-
-                Transform glow = titleSection.Find("LogoGlow");
-                if (glow != null)
-                    so.FindProperty("logoGlow").objectReferenceValue = glow.GetComponent<Image>();
-            }
-
-            // Menu buttons array
-            SerializedProperty menuButtonsProperty = so.FindProperty("menuButtons");
-            menuButtonsProperty.arraySize = buttons.Count;
-            for (int i = 0; i < buttons.Count; i++)
-            {
-                menuButtonsProperty.GetArrayElementAtIndex(i).objectReferenceValue = buttons[i];
-            }
-
-            // Header
-            if (header != null)
-            {
-                so.FindProperty("headerBar").objectReferenceValue = header.GetComponent<RectTransform>();
-
-                Transform profileBtn = header.Find("ProfileButton");
-                if (profileBtn != null)
-                    so.FindProperty("profileButton").objectReferenceValue = profileBtn.GetComponent<RectTransform>();
-            }
-
-            // Background
-            if (background != null)
-                so.FindProperty("backgroundImage").objectReferenceValue = background.GetComponent<Image>();
-
-            // Animation settings for professional entrance
-            so.FindProperty("logoDropDuration").floatValue = 0.6f;
-            so.FindProperty("buttonEntranceDuration").floatValue = 0.3f;
-            so.FindProperty("buttonStaggerDelay").floatValue = 0.1f;
-            so.FindProperty("headerSlideDuration").floatValue = 0.4f;
-            so.FindProperty("floatSpeed").floatValue = 2f;
-            so.FindProperty("floatDistance").floatValue = 20f;
-
-            so.ApplyModifiedProperties();
-
-            // Add AudioSource if needed
-            if (canvas.GetComponent<AudioSource>() == null)
-                canvas.gameObject.AddComponent<AudioSource>();
-
-            Debug.Log("[MainMenuUI] MainMenuAnimator configurado con animaciones de entrada profesionales");
-        }
-
         private static void CleanOldElements(Transform canvasTransform)
         {
-            // Lista de elementos viejos a eliminar
-            string[] oldElements = new string[]
-            {
-                "ScoresButton", "SettingsButton", "PlayButton", "CashBattleButton",
-                "PremiumButton", "UserButton", "SearchButton", "TitleText",
-                "MainMenuPanel", "Header", "UserSection", "PremiumBanner",
-                "PremiumPanel", "NotificationsPanel", "TitleSection", "EditProfileButton"
+            string[] oldElements = {
+                "Background", "Header", "TitleSection", "UserSection",
+                "MainMenuPanel", "PremiumBanner", "PremiumPanel", "NotificationsPanel",
+                "PlayerCard", "QuickActionsPanel", "MainCardsPanel", "DailyRewardsCard"
             };
 
-            foreach (string elementName in oldElements)
+            foreach (string name in oldElements)
             {
-                // Buscar en el canvas directamente
-                Transform element = canvasTransform.Find(elementName);
+                Transform element = canvasTransform.Find(name);
                 if (element != null)
                 {
-                    Debug.Log($"[MainMenuUI] Eliminando elemento viejo: {elementName}");
                     DestroyImmediate(element.gameObject);
                 }
-
-                // También buscar dentro de MainMenuPanel si existe
-                Transform mainMenuPanel = canvasTransform.Find("MainMenuPanel");
-                if (mainMenuPanel != null)
-                {
-                    Transform child = mainMenuPanel.Find(elementName);
-                    if (child != null)
-                    {
-                        Debug.Log($"[MainMenuUI] Eliminando de MainMenuPanel: {elementName}");
-                        DestroyImmediate(child.gameObject);
-                    }
-                }
             }
-
-            Debug.Log("[MainMenuUI] Limpieza de elementos viejos completada");
         }
 
         #endregion
 
         #region Background
 
-        private static void CreateBackground(Transform canvasTransform)
+        private static void CreateBackground(Transform parent)
         {
-            // Background principal
-            GameObject bg = FindOrCreate(canvasTransform, "Background");
+            GameObject bg = new GameObject("Background");
+            bg.transform.SetParent(parent, false);
             bg.transform.SetAsFirstSibling();
 
-            RectTransform bgRT = GetOrAdd<RectTransform>(bg);
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
-            bgRT.offsetMin = Vector2.zero;
-            bgRT.offsetMax = Vector2.zero;
+            RectTransform rt = bg.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
 
-            Image bgImage = GetOrAdd<Image>(bg);
-            bgImage.color = DARK_BG;
-            bgImage.raycastTarget = true;
-
-            // Gradient overlay (para más profundidad)
-            GameObject gradient = FindOrCreate(bg.transform, "GradientOverlay");
-            RectTransform gradRT = GetOrAdd<RectTransform>(gradient);
-            gradRT.anchorMin = Vector2.zero;
-            gradRT.anchorMax = Vector2.one;
-            gradRT.offsetMin = Vector2.zero;
-            gradRT.offsetMax = Vector2.zero;
-
-            Image gradImage = GetOrAdd<Image>(gradient);
-            gradImage.color = new Color(0f, 0.1f, 0.15f, 0.5f);
-            gradImage.raycastTarget = false;
-
-            Debug.Log("[MainMenuUI] Background creado");
+            Image img = bg.AddComponent<Image>();
+            img.color = DARK_BG;
         }
 
         #endregion
@@ -290,338 +217,306 @@ namespace DigitPark.Editor
 
         private static void CreateHeader()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
             GameObject header = FindOrCreate(canvas.transform, "Header");
-            // Poner después del Background para que se renderice encima
-            Transform bg = canvas.transform.Find("Background");
-            if (bg != null)
-            {
-                header.transform.SetSiblingIndex(bg.GetSiblingIndex() + 1);
-            }
+            header.transform.SetSiblingIndex(1);
 
-            RectTransform headerRT = GetOrAdd<RectTransform>(header);
-            headerRT.anchorMin = new Vector2(0, 1);
-            headerRT.anchorMax = new Vector2(1, 1);
-            headerRT.pivot = new Vector2(0.5f, 1);
-            headerRT.anchoredPosition = Vector2.zero;
-            headerRT.sizeDelta = new Vector2(0, 120); // Más alto
+            RectTransform rt = GetOrAdd<RectTransform>(header);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
 
-            Image headerBg = GetOrAdd<Image>(header);
-            headerBg.color = new Color(0.05f, 0.08f, 0.12f, 0.95f); // Más visible
+            Image bg = GetOrAdd<Image>(header);
+            bg.color = HEADER_BG;
 
             // Settings Button (izquierda)
-            CreateHeaderButton(header.transform, "SettingsButton", "settings_icon",
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(70, 0));
+            CreateHeaderIconButton(header.transform, "SettingsButton",
+                new Vector2(0, 0.5f), new Vector2(50, 0), "settings");
 
-            // Notifications Button (derecha, junto al profile)
-            CreateHeaderButton(header.transform, "NotificationsButton", "notifications_icon",
-                new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-140, 0));
+            // Logo DIGIT PARK (centro)
+            GameObject logo = FindOrCreate(header.transform, "LogoText");
+            RectTransform logoRT = GetOrAdd<RectTransform>(logo);
+            logoRT.anchorMin = new Vector2(0.5f, 0.5f);
+            logoRT.anchorMax = new Vector2(0.5f, 0.5f);
+            logoRT.sizeDelta = new Vector2(200, 50);
 
-            // Notification Badge (punto rojo)
-            GameObject notifBtn = header.transform.Find("NotificationsButton")?.gameObject;
-            if (notifBtn != null)
-            {
-                GameObject badge = FindOrCreate(notifBtn.transform, "Badge");
-                RectTransform badgeRT = GetOrAdd<RectTransform>(badge);
-                badgeRT.anchorMin = new Vector2(1, 1);
-                badgeRT.anchorMax = new Vector2(1, 1);
-                badgeRT.pivot = new Vector2(0.5f, 0.5f);
-                badgeRT.anchoredPosition = new Vector2(-5, -5);
-                badgeRT.sizeDelta = new Vector2(20, 20);
+            TextMeshProUGUI logoTMP = GetOrAdd<TextMeshProUGUI>(logo);
+            logoTMP.text = "DIGIT PARK";
+            logoTMP.fontSize = 32;
+            logoTMP.color = CYAN_NEON;
+            logoTMP.fontStyle = FontStyles.Bold;
+            logoTMP.alignment = TextAlignmentOptions.Center;
 
-                Image badgeImg = GetOrAdd<Image>(badge);
-                badgeImg.color = new Color(1f, 0.3f, 0.3f, 1f);
+            // Glow effect
+            Shadow logoShadow = GetOrAdd<Shadow>(logo);
+            logoShadow.effectColor = new Color(0, 1, 1, 0.5f);
+            logoShadow.effectDistance = new Vector2(2, -2);
 
-                // Badge count text
-                GameObject badgeText = FindOrCreate(badge.transform, "Count");
-                RectTransform countRT = GetOrAdd<RectTransform>(badgeText);
-                countRT.anchorMin = Vector2.zero;
-                countRT.anchorMax = Vector2.one;
-                countRT.sizeDelta = Vector2.zero;
+            // Notifications Button (derecha)
+            GameObject notifBtn = CreateHeaderIconButton(header.transform, "NotificationsButton",
+                new Vector2(1, 0.5f), new Vector2(-100, 0), "bell");
 
-                TextMeshProUGUI countTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
-                countTMP.text = "3";
-                countTMP.fontSize = 12;
-                countTMP.color = Color.white;
-                countTMP.alignment = TextAlignmentOptions.Center;
-                countTMP.fontStyle = FontStyles.Bold;
+            // Notification Badge
+            GameObject badge = FindOrCreate(notifBtn.transform, "Badge");
+            RectTransform badgeRT = GetOrAdd<RectTransform>(badge);
+            badgeRT.anchorMin = new Vector2(1, 1);
+            badgeRT.anchorMax = new Vector2(1, 1);
+            badgeRT.pivot = new Vector2(0.5f, 0.5f);
+            badgeRT.anchoredPosition = new Vector2(-8, -8);
+            badgeRT.sizeDelta = new Vector2(22, 22);
 
-                badge.SetActive(true); // Mostrar badge por defecto para demo
-            }
+            Image badgeImg = GetOrAdd<Image>(badge);
+            badgeImg.color = new Color(1f, 0.2f, 0.2f, 1f);
 
             // Profile Button (extremo derecha)
-            CreateHeaderButton(header.transform, "ProfileButton", "profile_icon",
-                new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-60, 0));
+            CreateHeaderIconButton(header.transform, "ProfileButton",
+                new Vector2(1, 0.5f), new Vector2(-40, 0), "profile");
 
             Debug.Log("[MainMenuUI] Header creado");
         }
 
-        #endregion
-
-        #region Title Section
-
-        private static void CreateTitleSection()
-        {
-            Canvas canvas = FindObjectOfType<Canvas>();
-            if (canvas == null) return;
-
-            GameObject titleSection = FindOrCreate(canvas.transform, "TitleSection");
-
-            RectTransform titleRT = GetOrAdd<RectTransform>(titleSection);
-            titleRT.anchorMin = new Vector2(0, 1);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.pivot = new Vector2(0.5f, 1);
-            titleRT.anchoredPosition = new Vector2(0, -120); // Debajo del header
-            titleRT.sizeDelta = new Vector2(0, 80);
-
-            // Título DIGIT PARK
-            GameObject title = FindOrCreate(titleSection.transform, "TitleText");
-            RectTransform titleTextRT = GetOrAdd<RectTransform>(title);
-            titleTextRT.anchorMin = Vector2.zero;
-            titleTextRT.anchorMax = Vector2.one;
-            titleTextRT.offsetMin = Vector2.zero;
-            titleTextRT.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI titleTMP = GetOrAdd<TextMeshProUGUI>(title);
-            titleTMP.text = "DIGIT PARK";
-            titleTMP.fontSize = 56;
-            titleTMP.color = CYAN_NEON;
-            titleTMP.fontStyle = FontStyles.Bold;
-            titleTMP.alignment = TextAlignmentOptions.Center;
-
-            // Glow del título
-            Shadow titleShadow = GetOrAdd<Shadow>(title);
-            titleShadow.effectColor = new Color(CYAN_GLOW.r, CYAN_GLOW.g, CYAN_GLOW.b, 0.6f);
-            titleShadow.effectDistance = new Vector2(3, -3);
-
-            Debug.Log("[MainMenuUI] Title Section creada");
-        }
-
-        private static void CreateHeaderButton(Transform parent, string name, string iconPlaceholder,
-            Vector2 anchorMin, Vector2 anchorMax, Vector2 position)
+        private static GameObject CreateHeaderIconButton(Transform parent, string name, Vector2 anchor, Vector2 position, string iconType)
         {
             GameObject btn = FindOrCreate(parent, name);
 
-            RectTransform btnRT = GetOrAdd<RectTransform>(btn);
-            btnRT.anchorMin = anchorMin;
-            btnRT.anchorMax = anchorMax;
-            btnRT.pivot = new Vector2(0.5f, 0.5f);
-            btnRT.anchoredPosition = position;
-            btnRT.sizeDelta = new Vector2(70, 70); // Más grande
+            RectTransform rt = GetOrAdd<RectTransform>(btn);
+            rt.anchorMin = anchor;
+            rt.anchorMax = anchor;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = position;
+            rt.sizeDelta = new Vector2(55, 55);
 
-            // Background circular sutil
-            Image btnBg = GetOrAdd<Image>(btn);
-            btnBg.color = new Color(1f, 1f, 1f, 0.08f); // Muy sutil
+            Image bg = GetOrAdd<Image>(btn);
+            bg.color = new Color(1, 1, 1, 0.08f);
 
             Button button = GetOrAdd<Button>(btn);
-            button.targetGraphic = btnBg;
+            button.targetGraphic = bg;
 
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-            button.colors = colors;
-
-            // Icon (Image para el icono real)
+            // Icon placeholder
             GameObject icon = FindOrCreate(btn.transform, "Icon");
             RectTransform iconRT = GetOrAdd<RectTransform>(icon);
-            iconRT.anchorMin = new Vector2(0.1f, 0.1f);
-            iconRT.anchorMax = new Vector2(0.9f, 0.9f);
-            iconRT.offsetMin = Vector2.zero;
-            iconRT.offsetMax = Vector2.zero;
+            iconRT.anchorMin = new Vector2(0.15f, 0.15f);
+            iconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            iconRT.sizeDelta = Vector2.zero;
 
             Image iconImg = GetOrAdd<Image>(icon);
-            iconImg.color = Color.white; // Blanco para que se vea el icono
+            iconImg.color = TEXT_WHITE;
             iconImg.preserveAspect = true;
-            iconImg.raycastTarget = false;
-            // El sprite se asignará manualmente en el Inspector
+
+            return btn;
         }
 
         #endregion
 
-        #region User Section
+        #region Player Card
 
-        private static void CreateUserSection()
+        private static void CreatePlayerCard()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject userSection = FindOrCreate(canvas.transform, "UserSection");
+            GameObject card = FindOrCreate(canvas.transform, "PlayerCard");
 
-            RectTransform userRT = GetOrAdd<RectTransform>(userSection);
-            userRT.anchorMin = new Vector2(0, 1);  // Stretch horizontal
-            userRT.anchorMax = new Vector2(1, 1);
-            userRT.pivot = new Vector2(0.5f, 1);
-            userRT.anchoredPosition = new Vector2(0, -200); // Justo debajo del título
-            userRT.sizeDelta = new Vector2(-80, 170); // Padding horizontal 40px cada lado, más alto para separator
+            RectTransform rt = GetOrAdd<RectTransform>(card);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = new Vector2(0, -HEADER_HEIGHT - 15);
+            rt.sizeDelta = new Vector2(-40, PLAYER_CARD_HEIGHT);
 
-            // Layout vertical
-            VerticalLayoutGroup vlg = GetOrAdd<VerticalLayoutGroup>(userSection);
-            vlg.spacing = 10;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childControlWidth = false;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = false;
-            vlg.childForceExpandHeight = false;
+            // Card Background
+            Image cardBg = GetOrAdd<Image>(card);
+            cardBg.color = CARD_BG;
 
-            // Avatar Container (más grande)
-            GameObject avatarContainer = FindOrCreate(userSection.transform, "AvatarContainer");
-            RectTransform avatarContRT = GetOrAdd<RectTransform>(avatarContainer);
-            avatarContRT.sizeDelta = new Vector2(120, 120); // Más grande
+            // Cyan border
+            Outline outline = GetOrAdd<Outline>(card);
+            outline.effectColor = CYAN_DARK;
+            outline.effectDistance = new Vector2(CARD_BORDER_WIDTH, CARD_BORDER_WIDTH);
 
-            LayoutElement avatarLE = GetOrAdd<LayoutElement>(avatarContainer);
-            avatarLE.preferredWidth = 120;
-            avatarLE.preferredHeight = 120;
+            // === Avatar Section (izquierda) ===
+            GameObject avatarSection = FindOrCreate(card.transform, "AvatarSection");
+            RectTransform avatarSecRT = GetOrAdd<RectTransform>(avatarSection);
+            avatarSecRT.anchorMin = new Vector2(0, 0);
+            avatarSecRT.anchorMax = new Vector2(0, 1);
+            avatarSecRT.pivot = new Vector2(0, 0.5f);
+            avatarSecRT.anchoredPosition = new Vector2(20, 0);
+            avatarSecRT.sizeDelta = new Vector2(100, 0);
 
-            // Avatar Frame (borde neón)
-            Image frameImg = GetOrAdd<Image>(avatarContainer);
+            // Avatar Frame (cyan ring)
+            GameObject avatarFrame = FindOrCreate(avatarSection.transform, "AvatarFrame");
+            RectTransform frameRT = GetOrAdd<RectTransform>(avatarFrame);
+            frameRT.anchorMin = new Vector2(0.5f, 0.6f);
+            frameRT.anchorMax = new Vector2(0.5f, 0.6f);
+            frameRT.sizeDelta = new Vector2(85, 85);
+
+            Image frameImg = GetOrAdd<Image>(avatarFrame);
             frameImg.color = CYAN_NEON;
 
-            Outline frameOutline = GetOrAdd<Outline>(avatarContainer);
+            Outline frameOutline = GetOrAdd<Outline>(avatarFrame);
             frameOutline.effectColor = CYAN_GLOW;
-            frameOutline.effectDistance = new Vector2(4, 4);
+            frameOutline.effectDistance = new Vector2(3, 3);
 
-            // Avatar Image (interior - para foto del usuario)
-            GameObject avatarImg = FindOrCreate(avatarContainer.transform, "AvatarImage");
-            RectTransform avatarImgRT = GetOrAdd<RectTransform>(avatarImg);
-            avatarImgRT.anchorMin = new Vector2(0.05f, 0.05f);
-            avatarImgRT.anchorMax = new Vector2(0.95f, 0.95f);
-            avatarImgRT.offsetMin = Vector2.zero;
-            avatarImgRT.offsetMax = Vector2.zero;
+            // Avatar Image (interior)
+            GameObject avatarImg = FindOrCreate(avatarFrame.transform, "AvatarImage");
+            RectTransform avImgRT = GetOrAdd<RectTransform>(avatarImg);
+            avImgRT.anchorMin = new Vector2(0.08f, 0.08f);
+            avImgRT.anchorMax = new Vector2(0.92f, 0.92f);
+            avImgRT.sizeDelta = Vector2.zero;
 
-            Image avatar = GetOrAdd<Image>(avatarImg);
-            avatar.color = PANEL_BG; // Fondo oscuro
-            avatar.preserveAspect = true;
-            avatar.type = Image.Type.Simple;
+            Image avImg = GetOrAdd<Image>(avatarImg);
+            avImg.color = CARD_BG_LIGHT;
+            avImg.preserveAspect = true;
 
-            // Default Avatar Icon (icono de persona por defecto)
-            GameObject defaultIcon = FindOrCreate(avatarImg.transform, "DefaultIcon");
-            RectTransform defaultIconRT = GetOrAdd<RectTransform>(defaultIcon);
-            defaultIconRT.anchorMin = new Vector2(0.15f, 0.15f);
-            defaultIconRT.anchorMax = new Vector2(0.85f, 0.85f);
-            defaultIconRT.offsetMin = Vector2.zero;
-            defaultIconRT.offsetMax = Vector2.zero;
+            // Level Badge
+            GameObject levelBadge = FindOrCreate(avatarSection.transform, "LevelBadge");
+            RectTransform levelRT = GetOrAdd<RectTransform>(levelBadge);
+            levelRT.anchorMin = new Vector2(0.5f, 0.2f);
+            levelRT.anchorMax = new Vector2(0.5f, 0.2f);
+            levelRT.sizeDelta = new Vector2(60, 28);
 
-            Image defaultIconImg = GetOrAdd<Image>(defaultIcon);
-            defaultIconImg.color = new Color(0.5f, 0.5f, 0.5f, 0.8f); // Gris para el icono
-            defaultIconImg.preserveAspect = true;
-            // Asignar sprite de persona en el Inspector
+            Image levelBg = GetOrAdd<Image>(levelBadge);
+            levelBg.color = CYAN_NEON;
+
+            GameObject levelText = FindOrCreate(levelBadge.transform, "Text");
+            RectTransform lvlTxtRT = GetOrAdd<RectTransform>(levelText);
+            lvlTxtRT.anchorMin = Vector2.zero;
+            lvlTxtRT.anchorMax = Vector2.one;
+            lvlTxtRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI lvlTMP = GetOrAdd<TextMeshProUGUI>(levelText);
+            lvlTMP.text = "Nv. 12";
+            lvlTMP.fontSize = 16;
+            lvlTMP.color = TEXT_DARK;
+            lvlTMP.fontStyle = FontStyles.Bold;
+            lvlTMP.alignment = TextAlignmentOptions.Center;
+
+            // === Info Section (centro-derecha) ===
+            GameObject infoSection = FindOrCreate(card.transform, "InfoSection");
+            RectTransform infoRT = GetOrAdd<RectTransform>(infoSection);
+            infoRT.anchorMin = new Vector2(0, 0);
+            infoRT.anchorMax = new Vector2(1, 1);
+            infoRT.offsetMin = new Vector2(130, 15);
+            infoRT.offsetMax = new Vector2(-15, -15);
 
             // Username
-            GameObject usernameObj = FindOrCreate(userSection.transform, "UsernameText");
-            LayoutElement userLE = GetOrAdd<LayoutElement>(usernameObj);
-            userLE.preferredHeight = 40;
+            GameObject username = FindOrCreate(infoSection.transform, "Username");
+            RectTransform userRT = GetOrAdd<RectTransform>(username);
+            userRT.anchorMin = new Vector2(0, 0.7f);
+            userRT.anchorMax = new Vector2(1, 1);
+            userRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI usernameTMP = GetOrAdd<TextMeshProUGUI>(usernameObj);
-            usernameTMP.text = "@Username";
-            usernameTMP.fontSize = 26;
-            usernameTMP.color = TEXT_PRIMARY;
-            usernameTMP.fontStyle = FontStyles.Bold;
-            usernameTMP.alignment = TextAlignmentOptions.Center;
+            TextMeshProUGUI userTMP = GetOrAdd<TextMeshProUGUI>(username);
+            userTMP.text = "@Username";
+            userTMP.fontSize = 28;
+            userTMP.color = TEXT_WHITE;
+            userTMP.fontStyle = FontStyles.Bold;
+            userTMP.alignment = TextAlignmentOptions.Left;
 
-            // Línea separadora cyan (stretch - ancho completo)
-            GameObject separator = FindOrCreate(userSection.transform, "Separator");
+            // Stats Row
+            GameObject statsRow = FindOrCreate(infoSection.transform, "StatsRow");
+            RectTransform statsRT = GetOrAdd<RectTransform>(statsRow);
+            statsRT.anchorMin = new Vector2(0, 0.35f);
+            statsRT.anchorMax = new Vector2(1, 0.65f);
+            statsRT.sizeDelta = Vector2.zero;
 
-            RectTransform sepRT = GetOrAdd<RectTransform>(separator);
-            sepRT.anchorMin = new Vector2(0.05f, 0.5f);  // 5% desde los bordes
-            sepRT.anchorMax = new Vector2(0.95f, 0.5f);
-            sepRT.pivot = new Vector2(0.5f, 0.5f);
-            sepRT.sizeDelta = new Vector2(0, 2);  // Ancho desde anchors, 2px alto
+            HorizontalLayoutGroup statsHLG = GetOrAdd<HorizontalLayoutGroup>(statsRow);
+            statsHLG.spacing = 25;
+            statsHLG.childAlignment = TextAnchor.MiddleLeft;
+            statsHLG.childControlWidth = false;
+            statsHLG.childControlHeight = true;
+            statsHLG.childForceExpandWidth = false;
 
-            LayoutElement sepLE = GetOrAdd<LayoutElement>(separator);
-            sepLE.preferredHeight = 2;
-            sepLE.minHeight = 2;
-            sepLE.flexibleWidth = 1;  // Permitir stretch
-            sepLE.flexibleHeight = 0;
-            sepLE.ignoreLayout = true;  // Ignorar el VerticalLayoutGroup para usar anchors
+            // Stat Items
+            CreateStatItem(statsRow.transform, "Trophies", "1,250", GOLD);
+            CreateStatItem(statsRow.transform, "Gems", "500", PURPLE_ACCENT);
+            CreateStatItem(statsRow.transform, "Coins", "2,400", CYAN_NEON);
 
-            Image sepImg = GetOrAdd<Image>(separator);
-            sepImg.color = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.6f);
+            // Win Rate / Streak
+            GameObject streakRow = FindOrCreate(infoSection.transform, "StreakRow");
+            RectTransform streakRT = GetOrAdd<RectTransform>(streakRow);
+            streakRT.anchorMin = new Vector2(0, 0);
+            streakRT.anchorMax = new Vector2(1, 0.3f);
+            streakRT.sizeDelta = Vector2.zero;
 
-            Debug.Log("[MainMenuUI] User Section creada");
+            TextMeshProUGUI streakTMP = GetOrAdd<TextMeshProUGUI>(streakRow);
+            streakTMP.text = "Racha: 5 victorias";
+            streakTMP.fontSize = 16;
+            streakTMP.color = GREEN_SUCCESS;
+            streakTMP.fontStyle = FontStyles.Normal;
+            streakTMP.alignment = TextAlignmentOptions.Left;
+
+            Debug.Log("[MainMenuUI] Player Card creado");
         }
 
-        #endregion
-
-        #region Main Menu Panel
-
-        private static void CreateMainMenuPanel(Transform canvasTransform)
+        private static void CreateStatItem(Transform parent, string name, string value, Color color)
         {
-            GameObject panel = FindOrCreate(canvasTransform, "MainMenuPanel");
+            GameObject stat = new GameObject(name);
+            stat.transform.SetParent(parent, false);
 
-            RectTransform panelRT = GetOrAdd<RectTransform>(panel);
-            panelRT.anchorMin = new Vector2(0, 0.15f); // Espacio para premium banner
-            panelRT.anchorMax = new Vector2(1, 0.52f); // Subir los botones (menos espacio vacío)
-            panelRT.offsetMin = new Vector2(40, 0);
-            panelRT.offsetMax = new Vector2(-40, 0);
+            RectTransform rt = stat.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(75, 40);
 
-            VerticalLayoutGroup vlg = GetOrAdd<VerticalLayoutGroup>(panel);
-            vlg.spacing = 12;
-            vlg.padding = new RectOffset(0, 0, 5, 5);
+            LayoutElement le = stat.AddComponent<LayoutElement>();
+            le.preferredWidth = 75;
+
+            VerticalLayoutGroup vlg = stat.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 2;
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = true;
+            vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
+
+            // Icon placeholder
+            GameObject icon = new GameObject("Icon");
+            icon.transform.SetParent(stat.transform, false);
+            RectTransform iconRT = icon.AddComponent<RectTransform>();
+            iconRT.sizeDelta = new Vector2(24, 24);
+            LayoutElement iconLE = icon.AddComponent<LayoutElement>();
+            iconLE.preferredHeight = 24;
+
+            Image iconImg = icon.AddComponent<Image>();
+            iconImg.color = color;
+            iconImg.preserveAspect = true;
+
+            // Value
+            GameObject valueObj = new GameObject("Value");
+            valueObj.transform.SetParent(stat.transform, false);
+            LayoutElement valLE = valueObj.AddComponent<LayoutElement>();
+            valLE.preferredHeight = 20;
+
+            TextMeshProUGUI valTMP = valueObj.AddComponent<TextMeshProUGUI>();
+            valTMP.text = value;
+            valTMP.fontSize = 16;
+            valTMP.color = color;
+            valTMP.fontStyle = FontStyles.Bold;
+            valTMP.alignment = TextAlignmentOptions.Center;
         }
 
         #endregion
 
-        #region Main Buttons
+        #region Quick Actions
 
-        private static void CreateMainButtons()
+        private static void CreateQuickActions()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            Transform panel = canvas.transform.Find("MainMenuPanel");
-            if (panel == null)
-            {
-                CreateMainMenuPanel(canvas.transform);
-                panel = canvas.transform.Find("MainMenuPanel");
-            }
+            GameObject panel = FindOrCreate(canvas.transform, "QuickActionsPanel");
 
-            // Limpiar botones viejos
-            string[] oldButtons = { "PlayButton", "TitleText", "SecondaryButtons", "CashBattleButton" };
-            foreach (string btnName in oldButtons)
-            {
-                Transform old = panel.Find(btnName);
-                if (old != null) DestroyImmediate(old.gameObject);
-            }
+            float topOffset = HEADER_HEIGHT + PLAYER_CARD_HEIGHT + SECTION_SPACING * 2 + 15;
 
-            // === PLAY BUTTON (CTA Principal - MÁS GRANDE) ===
-            GameObject playBtn = CreateMainButton(panel, "PlayButton", "JUGAR", CYAN_NEON, TEXT_DARK, 95);
+            RectTransform rt = GetOrAdd<RectTransform>(panel);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = new Vector2(0, -topOffset);
+            rt.sizeDelta = new Vector2(-40, QUICK_ACTION_HEIGHT);
 
-            // Agregar glow especial al botón Play
-            Outline playOutline = playBtn.GetComponent<Outline>();
-            if (playOutline == null) playOutline = playBtn.AddComponent<Outline>();
-            playOutline.effectColor = CYAN_GLOW;
-            playOutline.effectDistance = new Vector2(4, 4);
-
-            // Icon para Play
-            GameObject playIcon = FindOrCreate(playBtn.transform, "Icon");
-            RectTransform playIconRT = GetOrAdd<RectTransform>(playIcon);
-            playIconRT.anchorMin = new Vector2(0, 0.5f);
-            playIconRT.anchorMax = new Vector2(0, 0.5f);
-            playIconRT.pivot = new Vector2(0, 0.5f);
-            playIconRT.anchoredPosition = new Vector2(30, 0);
-            playIconRT.sizeDelta = new Vector2(50, 50);
-
-            Image playIconImg = GetOrAdd<Image>(playIcon);
-            playIconImg.color = TEXT_DARK;
-            playIconImg.preserveAspect = true;
-
-            // === SECONDARY BUTTONS (50/50) ===
-            GameObject secondary = new GameObject("SecondaryButtons");
-            secondary.transform.SetParent(panel, false);
-
-            LayoutElement secLE = secondary.AddComponent<LayoutElement>();
-            secLE.preferredHeight = 60;
-            secLE.minHeight = 60;
-
-            HorizontalLayoutGroup hlg = secondary.AddComponent<HorizontalLayoutGroup>();
+            HorizontalLayoutGroup hlg = GetOrAdd<HorizontalLayoutGroup>(panel);
             hlg.spacing = 15;
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
@@ -629,208 +524,180 @@ namespace DigitPark.Editor
             hlg.childForceExpandWidth = true;
             hlg.childForceExpandHeight = true;
 
-            // Scores Button
-            CreateSecondaryButton(secondary.transform, "ScoresButton", "Rankings", "scores_icon");
+            // Quick Action Cards
+            CreateQuickActionCard(panel.transform, "RankingsCard", "Rankings", "trophy", GOLD);
+            CreateQuickActionCard(panel.transform, "SearchCard", "Buscar", "search", CYAN_NEON);
+            CreateQuickActionCard(panel.transform, "MissionsCard", "Misiones", "target", GREEN_SUCCESS);
 
-            // Search Button (AHORA CON TEXTO)
-            CreateSecondaryButton(secondary.transform, "SearchButton", "Buscar", "search_icon");
-
-            // === CASH BATTLE BUTTON (Estilo Dorado Premium) ===
-            GameObject cashBtn = CreateMainButton(panel, "CashBattleButton", "CASH BATTLE", GOLD, TEXT_DARK, 60);
-
-            // Fondo dorado degradado
-            Image cashBg = cashBtn.GetComponent<Image>();
-            if (cashBg != null) cashBg.color = new Color(0.85f, 0.65f, 0.1f, 1f); // Dorado rico
-
-            // Glow dorado sutil
-            Outline cashOutline = cashBtn.GetComponent<Outline>();
-            if (cashOutline == null) cashOutline = cashBtn.AddComponent<Outline>();
-            cashOutline.effectColor = new Color(1f, 0.84f, 0f, 0.7f); // Glow dorado
-            cashOutline.effectDistance = new Vector2(3, 3);
-
-            // Shadow para más profundidad
-            Shadow cashShadow = cashBtn.GetComponent<Shadow>();
-            if (cashShadow == null) cashShadow = cashBtn.AddComponent<Shadow>();
-            cashShadow.effectColor = new Color(0.6f, 0.4f, 0f, 0.5f);
-            cashShadow.effectDistance = new Vector2(2, -2);
-
-            // Icon para Cash
-            GameObject cashIcon = FindOrCreate(cashBtn.transform, "Icon");
-            RectTransform cashIconRT = GetOrAdd<RectTransform>(cashIcon);
-            cashIconRT.anchorMin = new Vector2(0, 0.5f);
-            cashIconRT.anchorMax = new Vector2(0, 0.5f);
-            cashIconRT.pivot = new Vector2(0, 0.5f);
-            cashIconRT.anchoredPosition = new Vector2(20, 0);
-            cashIconRT.sizeDelta = new Vector2(35, 35);
-
-            Image cashIconImg = GetOrAdd<Image>(cashIcon);
-            cashIconImg.color = TEXT_DARK;
-            cashIconImg.preserveAspect = true;
-
-            Debug.Log("[MainMenuUI] Main Buttons creados");
+            Debug.Log("[MainMenuUI] Quick Actions creado");
         }
 
-        private static GameObject CreateMainButton(Transform parent, string name, string text, Color bgColor, Color textColor, float height)
+        private static void CreateQuickActionCard(Transform parent, string name, string label, string iconType, Color accentColor)
         {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
+            GameObject card = new GameObject(name);
+            card.transform.SetParent(parent, false);
 
-            LayoutElement le = btn.AddComponent<LayoutElement>();
-            le.preferredHeight = height;
-            le.minHeight = height;
+            Image bg = card.AddComponent<Image>();
+            bg.color = CARD_BG;
 
-            Image bg = btn.AddComponent<Image>();
-            bg.color = bgColor;
+            Button btn = card.AddComponent<Button>();
+            btn.targetGraphic = bg;
 
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
-
-            ColorBlock colors = button.colors;
-            colors.highlightedColor = new Color(bgColor.r * 0.9f, bgColor.g * 0.9f, bgColor.b * 0.9f, 1f);
-            colors.pressedColor = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 1f);
-            button.colors = colors;
-
-            // Text
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
-
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = new Vector2(80, 0); // Espacio para icono
-            textRT.offsetMax = new Vector2(-20, 0);
-
-            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = height > 100 ? 36 : 24;
-            tmp.color = textColor;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.alignment = TextAlignmentOptions.Center;
-
-            return btn;
-        }
-
-        private static void CreateSecondaryButton(Transform parent, string name, string text, string iconPlaceholder)
-        {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
-
-            Image bg = btn.AddComponent<Image>();
-            bg.color = BUTTON_SECONDARY;
-
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
-
-            Outline outline = btn.AddComponent<Outline>();
-            outline.effectColor = CYAN_DARK;
+            Outline outline = card.AddComponent<Outline>();
+            outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.5f);
             outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            // Layout
+            VerticalLayoutGroup vlg = card.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 5;
+            vlg.padding = new RectOffset(10, 10, 12, 8);
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
 
             // Icon
             GameObject icon = new GameObject("Icon");
-            icon.transform.SetParent(btn.transform, false);
-
-            RectTransform iconRT = icon.AddComponent<RectTransform>();
-            iconRT.anchorMin = new Vector2(0, 0.5f);
-            iconRT.anchorMax = new Vector2(0, 0.5f);
-            iconRT.pivot = new Vector2(0, 0.5f);
-            iconRT.anchoredPosition = new Vector2(15, 0);
-            iconRT.sizeDelta = new Vector2(30, 30);
+            icon.transform.SetParent(card.transform, false);
+            LayoutElement iconLE = icon.AddComponent<LayoutElement>();
+            iconLE.preferredHeight = 35;
 
             Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = CYAN_NEON;
+            iconImg.color = accentColor;
             iconImg.preserveAspect = true;
 
-            // Text
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
+            // Label
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(card.transform, false);
+            LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
+            labelLE.preferredHeight = 22;
 
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = new Vector2(50, 0);
-            textRT.offsetMax = new Vector2(-10, 0);
-
-            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = 20;
-            tmp.color = TEXT_PRIMARY;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.alignment = TextAlignmentOptions.Center;
+            TextMeshProUGUI labelTMP = labelObj.AddComponent<TextMeshProUGUI>();
+            labelTMP.text = label;
+            labelTMP.fontSize = 16;
+            labelTMP.color = TEXT_WHITE;
+            labelTMP.fontStyle = FontStyles.Bold;
+            labelTMP.alignment = TextAlignmentOptions.Center;
         }
 
         #endregion
 
-        #region Premium Banner
+        #region Main Cards
 
-        private static void CreatePremiumBanner()
+        private static void CreateMainCards()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject banner = FindOrCreate(canvas.transform, "PremiumBanner");
+            GameObject panel = FindOrCreate(canvas.transform, "MainCardsPanel");
 
-            RectTransform bannerRT = GetOrAdd<RectTransform>(banner);
-            bannerRT.anchorMin = new Vector2(0, 0);
-            bannerRT.anchorMax = new Vector2(1, 0);
-            bannerRT.pivot = new Vector2(0.5f, 0);
-            bannerRT.anchoredPosition = new Vector2(0, 30);
-            bannerRT.sizeDelta = new Vector2(-60, 100);
+            float topOffset = HEADER_HEIGHT + PLAYER_CARD_HEIGHT + QUICK_ACTION_HEIGHT + SECTION_SPACING * 3 + 20;
 
-            // Gradiente dorado
-            Image bannerBg = GetOrAdd<Image>(banner);
-            bannerBg.color = new Color(0.3f, 0.25f, 0.1f, 1f);
+            RectTransform rt = GetOrAdd<RectTransform>(panel);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = new Vector2(0, -topOffset);
+            rt.sizeDelta = new Vector2(-40, MAIN_CARD_HEIGHT * 2 + 15);
 
-            Button bannerBtn = GetOrAdd<Button>(banner);
-            bannerBtn.targetGraphic = bannerBg;
+            VerticalLayoutGroup vlg = GetOrAdd<VerticalLayoutGroup>(panel);
+            vlg.spacing = 15;
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
 
-            Outline bannerOutline = GetOrAdd<Outline>(banner);
-            bannerOutline.effectColor = GOLD;
-            bannerOutline.effectDistance = new Vector2(2, 2);
+            // === JUGAR Card (Cyan) ===
+            CreateMainCard(panel.transform, "PlayCard", "JUGAR",
+                "Elige un juego y compite", CYAN_NEON, CYAN_GLOW, TEXT_DARK, true);
 
-            // Star Icon
-            GameObject starIcon = FindOrCreate(banner.transform, "StarIcon");
-            RectTransform starRT = GetOrAdd<RectTransform>(starIcon);
-            starRT.anchorMin = new Vector2(0, 0.5f);
-            starRT.anchorMax = new Vector2(0, 0.5f);
-            starRT.pivot = new Vector2(0, 0.5f);
-            starRT.anchoredPosition = new Vector2(20, 0);
-            starRT.sizeDelta = new Vector2(50, 50);
+            // === CASH BATTLE Card (Gold - Premium) ===
+            CreateMainCard(panel.transform, "CashBattleCard", "CASH BATTLE",
+                "Compite por dinero real", GOLD, GOLD_GLOW, TEXT_DARK, false);
 
-            Image starImg = GetOrAdd<Image>(starIcon);
-            starImg.color = GOLD;
-            starImg.preserveAspect = true;
+            Debug.Log("[MainMenuUI] Main Cards creados");
+        }
+
+        private static void CreateMainCard(Transform parent, string name, string title, string subtitle,
+            Color bgColor, Color glowColor, Color textColor, bool isCyan)
+        {
+            GameObject card = new GameObject(name);
+            card.transform.SetParent(parent, false);
+
+            LayoutElement le = card.AddComponent<LayoutElement>();
+            le.preferredHeight = MAIN_CARD_HEIGHT;
+            le.minHeight = MAIN_CARD_HEIGHT;
+
+            Image bg = card.AddComponent<Image>();
+            bg.color = bgColor;
+
+            Button btn = card.AddComponent<Button>();
+            btn.targetGraphic = bg;
+
+            ColorBlock colors = btn.colors;
+            colors.highlightedColor = new Color(bgColor.r * 0.9f, bgColor.g * 0.9f, bgColor.b * 0.9f, 1f);
+            colors.pressedColor = new Color(bgColor.r * 0.75f, bgColor.g * 0.75f, bgColor.b * 0.75f, 1f);
+            btn.colors = colors;
+
+            // Glow effect
+            Outline outline = card.AddComponent<Outline>();
+            outline.effectColor = glowColor;
+            outline.effectDistance = new Vector2(4, 4);
+
+            Shadow shadow = card.AddComponent<Shadow>();
+            shadow.effectColor = new Color(glowColor.r * 0.5f, glowColor.g * 0.5f, glowColor.b * 0.5f, 0.5f);
+            shadow.effectDistance = new Vector2(3, -3);
+
+            // Icon (izquierda)
+            GameObject icon = FindOrCreate(card.transform, "Icon");
+            RectTransform iconRT = GetOrAdd<RectTransform>(icon);
+            iconRT.anchorMin = new Vector2(0, 0.5f);
+            iconRT.anchorMax = new Vector2(0, 0.5f);
+            iconRT.pivot = new Vector2(0, 0.5f);
+            iconRT.anchoredPosition = new Vector2(25, 0);
+            iconRT.sizeDelta = new Vector2(60, 60);
+
+            Image iconImg = GetOrAdd<Image>(icon);
+            iconImg.color = textColor;
+            iconImg.preserveAspect = true;
+
+            // Text Container
+            GameObject textContainer = FindOrCreate(card.transform, "TextContainer");
+            RectTransform textRT = GetOrAdd<RectTransform>(textContainer);
+            textRT.anchorMin = new Vector2(0, 0);
+            textRT.anchorMax = new Vector2(1, 1);
+            textRT.offsetMin = new Vector2(100, 20);
+            textRT.offsetMax = new Vector2(-20, -20);
 
             // Title
-            GameObject titleObj = FindOrCreate(banner.transform, "TitleText");
+            GameObject titleObj = FindOrCreate(textContainer.transform, "Title");
             RectTransform titleRT = GetOrAdd<RectTransform>(titleObj);
             titleRT.anchorMin = new Vector2(0, 0.5f);
-            titleRT.anchorMax = new Vector2(0.8f, 1);
-            titleRT.offsetMin = new Vector2(80, 5);
-            titleRT.offsetMax = new Vector2(0, -5);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI titleTMP = GetOrAdd<TextMeshProUGUI>(titleObj);
-            titleTMP.text = "PREMIUM";
-            titleTMP.fontSize = 24;
-            titleTMP.color = GOLD;
+            titleTMP.text = title;
+            titleTMP.fontSize = 36;
+            titleTMP.color = textColor;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Left;
 
             // Subtitle
-            GameObject subObj = FindOrCreate(banner.transform, "SubtitleText");
+            GameObject subObj = FindOrCreate(textContainer.transform, "Subtitle");
             RectTransform subRT = GetOrAdd<RectTransform>(subObj);
             subRT.anchorMin = new Vector2(0, 0);
-            subRT.anchorMax = new Vector2(0.8f, 0.5f);
-            subRT.offsetMin = new Vector2(80, 5);
-            subRT.offsetMax = new Vector2(0, -5);
+            subRT.anchorMax = new Vector2(1, 0.45f);
+            subRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI subTMP = GetOrAdd<TextMeshProUGUI>(subObj);
-            subTMP.text = "10 Temas | Sin Anuncios";
+            subTMP.text = subtitle;
             subTMP.fontSize = 16;
-            subTMP.color = new Color(0.9f, 0.85f, 0.6f, 1f);
+            subTMP.color = new Color(textColor.r, textColor.g, textColor.b, 0.8f);
             subTMP.alignment = TextAlignmentOptions.Left;
 
-            // Arrow
-            GameObject arrow = FindOrCreate(banner.transform, "ArrowIcon");
+            // Arrow indicator (derecha)
+            GameObject arrow = FindOrCreate(card.transform, "Arrow");
             RectTransform arrowRT = GetOrAdd<RectTransform>(arrow);
             arrowRT.anchorMin = new Vector2(1, 0.5f);
             arrowRT.anchorMax = new Vector2(1, 0.5f);
@@ -840,379 +707,394 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI arrowTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             arrowTMP.text = ">";
-            arrowTMP.fontSize = 28;
-            arrowTMP.color = GOLD;
+            arrowTMP.fontSize = 32;
+            arrowTMP.color = textColor;
             arrowTMP.fontStyle = FontStyles.Bold;
             arrowTMP.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[MainMenuUI] Premium Banner creado");
         }
 
         #endregion
 
-        #region Premium Panel
+        #region Daily Rewards
+
+        private static void CreateDailyRewards()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            GameObject card = FindOrCreate(canvas.transform, "DailyRewardsCard");
+
+            RectTransform rt = GetOrAdd<RectTransform>(card);
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 0);
+            rt.pivot = new Vector2(0.5f, 0);
+            rt.anchoredPosition = new Vector2(0, 25);
+            rt.sizeDelta = new Vector2(-40, DAILY_REWARDS_HEIGHT);
+
+            // Background with gradient effect
+            Image bg = GetOrAdd<Image>(card);
+            bg.color = new Color(0.15f, 0.08f, 0.25f, 1f); // Purple-ish dark
+
+            Button btn = GetOrAdd<Button>(card);
+            btn.targetGraphic = bg;
+
+            // Colorful border
+            Outline outline = GetOrAdd<Outline>(card);
+            outline.effectColor = PURPLE_ACCENT;
+            outline.effectDistance = new Vector2(2, 2);
+
+            // Gift Icon (izquierda)
+            GameObject icon = FindOrCreate(card.transform, "GiftIcon");
+            RectTransform iconRT = GetOrAdd<RectTransform>(icon);
+            iconRT.anchorMin = new Vector2(0, 0.5f);
+            iconRT.anchorMax = new Vector2(0, 0.5f);
+            iconRT.pivot = new Vector2(0, 0.5f);
+            iconRT.anchoredPosition = new Vector2(20, 0);
+            iconRT.sizeDelta = new Vector2(70, 70);
+
+            Image iconImg = GetOrAdd<Image>(icon);
+            iconImg.color = GOLD;
+            iconImg.preserveAspect = true;
+
+            // Text Container
+            GameObject textContainer = FindOrCreate(card.transform, "TextContainer");
+            RectTransform textRT = GetOrAdd<RectTransform>(textContainer);
+            textRT.anchorMin = new Vector2(0, 0);
+            textRT.anchorMax = new Vector2(0.65f, 1);
+            textRT.offsetMin = new Vector2(100, 20);
+            textRT.offsetMax = new Vector2(0, -20);
+
+            // Title
+            GameObject title = FindOrCreate(textContainer.transform, "Title");
+            RectTransform titleRT = GetOrAdd<RectTransform>(title);
+            titleRT.anchorMin = new Vector2(0, 0.55f);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI titleTMP = GetOrAdd<TextMeshProUGUI>(title);
+            titleTMP.text = "RECOMPENSA DIARIA";
+            titleTMP.fontSize = 20;
+            titleTMP.color = GOLD;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.alignment = TextAlignmentOptions.Left;
+
+            // Subtitle (day info)
+            GameObject sub = FindOrCreate(textContainer.transform, "Subtitle");
+            RectTransform subRT = GetOrAdd<RectTransform>(sub);
+            subRT.anchorMin = new Vector2(0, 0);
+            subRT.anchorMax = new Vector2(1, 0.5f);
+            subRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI subTMP = GetOrAdd<TextMeshProUGUI>(sub);
+            subTMP.text = "Dia 3 de 7 - Reclama tu premio!";
+            subTMP.fontSize = 15;
+            subTMP.color = TEXT_SECONDARY;
+            subTMP.alignment = TextAlignmentOptions.Left;
+
+            // Claim Button (derecha)
+            GameObject claimBtn = FindOrCreate(card.transform, "ClaimButton");
+            RectTransform claimRT = GetOrAdd<RectTransform>(claimBtn);
+            claimRT.anchorMin = new Vector2(1, 0.5f);
+            claimRT.anchorMax = new Vector2(1, 0.5f);
+            claimRT.pivot = new Vector2(1, 0.5f);
+            claimRT.anchoredPosition = new Vector2(-20, 0);
+            claimRT.sizeDelta = new Vector2(100, 50);
+
+            Image claimBg = GetOrAdd<Image>(claimBtn);
+            claimBg.color = GREEN_SUCCESS;
+
+            Button claimButton = GetOrAdd<Button>(claimBtn);
+            claimButton.targetGraphic = claimBg;
+
+            GameObject claimText = FindOrCreate(claimBtn.transform, "Text");
+            RectTransform claimTextRT = GetOrAdd<RectTransform>(claimText);
+            claimTextRT.anchorMin = Vector2.zero;
+            claimTextRT.anchorMax = Vector2.one;
+            claimTextRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI claimTMP = GetOrAdd<TextMeshProUGUI>(claimText);
+            claimTMP.text = "Reclamar";
+            claimTMP.fontSize = 16;
+            claimTMP.color = TEXT_DARK;
+            claimTMP.fontStyle = FontStyles.Bold;
+            claimTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[MainMenuUI] Daily Rewards creado");
+        }
+
+        #endregion
+
+        #region Panels (Premium + Notifications)
+
+        private static void CreatePanels()
+        {
+            CreatePremiumPanel();
+            CreateNotificationsPanel();
+        }
 
         private static void CreatePremiumPanel()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
             GameObject panel = FindOrCreate(canvas.transform, "PremiumPanel");
-            panel.SetActive(false); // Oculto por defecto
+            panel.SetActive(false);
 
-            RectTransform panelRT = GetOrAdd<RectTransform>(panel);
-            panelRT.anchorMin = Vector2.zero;
-            panelRT.anchorMax = Vector2.one;
-            panelRT.offsetMin = Vector2.zero;
-            panelRT.offsetMax = Vector2.zero;
+            RectTransform rt = GetOrAdd<RectTransform>(panel);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
 
-            // Dark Overlay
-            GameObject overlay = FindOrCreate(panel.transform, "DarkOverlay");
-            RectTransform overlayRT = GetOrAdd<RectTransform>(overlay);
-            overlayRT.anchorMin = Vector2.zero;
-            overlayRT.anchorMax = Vector2.one;
-            overlayRT.offsetMin = Vector2.zero;
-            overlayRT.offsetMax = Vector2.zero;
+            // Overlay
+            GameObject overlay = FindOrCreate(panel.transform, "Overlay");
+            RectTransform ovRT = GetOrAdd<RectTransform>(overlay);
+            ovRT.anchorMin = Vector2.zero;
+            ovRT.anchorMax = Vector2.one;
+            ovRT.sizeDelta = Vector2.zero;
 
-            Image overlayImg = GetOrAdd<Image>(overlay);
-            overlayImg.color = OVERLAY_COLOR;
+            Image ovImg = GetOrAdd<Image>(overlay);
+            ovImg.color = new Color(0, 0, 0, 0.85f);
 
-            Button overlayBtn = GetOrAdd<Button>(overlay);
-            overlayBtn.targetGraphic = overlayImg;
-            // Este botón cierra el panel al hacer clic fuera
+            Button ovBtn = GetOrAdd<Button>(overlay);
+            ovBtn.targetGraphic = ovImg;
 
-            // Panel Container
-            GameObject container = FindOrCreate(panel.transform, "PanelContainer");
+            // Container
+            GameObject container = FindOrCreate(panel.transform, "Container");
             RectTransform contRT = GetOrAdd<RectTransform>(container);
             contRT.anchorMin = new Vector2(0.05f, 0.1f);
             contRT.anchorMax = new Vector2(0.95f, 0.9f);
-            contRT.offsetMin = Vector2.zero;
-            contRT.offsetMax = Vector2.zero;
+            contRT.sizeDelta = Vector2.zero;
 
             Image contBg = GetOrAdd<Image>(container);
-            contBg.color = PANEL_BG;
+            contBg.color = CARD_BG;
 
             Outline contOutline = GetOrAdd<Outline>(container);
             contOutline.effectColor = GOLD;
             contOutline.effectDistance = new Vector2(2, 2);
 
-            // Header
-            GameObject header = FindOrCreate(container.transform, "Header");
-            RectTransform headerRT = GetOrAdd<RectTransform>(header);
-            headerRT.anchorMin = new Vector2(0, 1);
-            headerRT.anchorMax = new Vector2(1, 1);
-            headerRT.pivot = new Vector2(0.5f, 1);
-            headerRT.anchoredPosition = Vector2.zero;
-            headerRT.sizeDelta = new Vector2(0, 70);
-
-            Image headerBg = GetOrAdd<Image>(header);
-            headerBg.color = new Color(0.2f, 0.15f, 0.05f, 1f);
-
-            // Header Title
-            GameObject headerTitle = FindOrCreate(header.transform, "TitleText");
-            RectTransform htRT = GetOrAdd<RectTransform>(headerTitle);
-            htRT.anchorMin = Vector2.zero;
-            htRT.anchorMax = Vector2.one;
-            htRT.offsetMin = new Vector2(20, 0);
-            htRT.offsetMax = new Vector2(-60, 0);
-
-            TextMeshProUGUI htTMP = GetOrAdd<TextMeshProUGUI>(headerTitle);
-            htTMP.text = "TIENDA PREMIUM";
-            htTMP.fontSize = 28;
-            htTMP.color = GOLD;
-            htTMP.fontStyle = FontStyles.Bold;
-            htTMP.alignment = TextAlignmentOptions.Left;
-
-            // Close Button
-            GameObject closeBtn = FindOrCreate(header.transform, "CloseButton");
-            RectTransform closeRT = GetOrAdd<RectTransform>(closeBtn);
-            closeRT.anchorMin = new Vector2(1, 0.5f);
-            closeRT.anchorMax = new Vector2(1, 0.5f);
-            closeRT.pivot = new Vector2(1, 0.5f);
-            closeRT.anchoredPosition = new Vector2(-15, 0);
-            closeRT.sizeDelta = new Vector2(50, 50);
-
-            Image closeBg = GetOrAdd<Image>(closeBtn);
-            closeBg.color = new Color(1f, 1f, 1f, 0.1f);
-
-            Button closeButton = GetOrAdd<Button>(closeBtn);
-            closeButton.targetGraphic = closeBg;
-
-            GameObject closeX = FindOrCreate(closeBtn.transform, "X");
-            RectTransform closeXRT = GetOrAdd<RectTransform>(closeX);
-            closeXRT.anchorMin = Vector2.zero;
-            closeXRT.anchorMax = Vector2.one;
-            closeXRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI closeTMP = GetOrAdd<TextMeshProUGUI>(closeX);
-            closeTMP.text = "X";
-            closeTMP.fontSize = 24;
-            closeTMP.color = TEXT_PRIMARY;
-            closeTMP.fontStyle = FontStyles.Bold;
-            closeTMP.alignment = TextAlignmentOptions.Center;
-
-            // Content ScrollView
-            GameObject scrollView = FindOrCreate(container.transform, "ScrollView");
-            RectTransform scrollRT = GetOrAdd<RectTransform>(scrollView);
-            scrollRT.anchorMin = new Vector2(0, 0.08f);
-            scrollRT.anchorMax = new Vector2(1, 1);
-            scrollRT.offsetMin = new Vector2(10, 0);
-            scrollRT.offsetMax = new Vector2(-10, -70);
-
-            ScrollRect scroll = GetOrAdd<ScrollRect>(scrollView);
-            scroll.horizontal = false;
-            scroll.vertical = true;
-
-            // Viewport
-            GameObject viewport = FindOrCreate(scrollView.transform, "Viewport");
-            RectTransform vpRT = GetOrAdd<RectTransform>(viewport);
-            vpRT.anchorMin = Vector2.zero;
-            vpRT.anchorMax = Vector2.one;
-            vpRT.offsetMin = Vector2.zero;
-            vpRT.offsetMax = Vector2.zero;
-
-            RectMask2D vpMask = GetOrAdd<RectMask2D>(viewport);
-
-            // Content
-            GameObject content = FindOrCreate(viewport.transform, "Content");
-            RectTransform contentRT = GetOrAdd<RectTransform>(content);
-            contentRT.anchorMin = new Vector2(0, 1);
-            contentRT.anchorMax = new Vector2(1, 1);
-            contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.anchoredPosition = Vector2.zero;
-            contentRT.sizeDelta = new Vector2(0, 0);
-
-            VerticalLayoutGroup vlg = GetOrAdd<VerticalLayoutGroup>(content);
-            vlg.spacing = 15;
-            vlg.padding = new RectOffset(10, 10, 15, 15);
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-
-            ContentSizeFitter csf = GetOrAdd<ContentSizeFitter>(content);
-            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            scroll.viewport = vpRT;
-            scroll.content = contentRT;
-
-            // Placeholder text
-            GameObject placeholder = FindOrCreate(content.transform, "PlaceholderText");
-            LayoutElement plLE = GetOrAdd<LayoutElement>(placeholder);
-            plLE.preferredHeight = 200;
-
-            TextMeshProUGUI plTMP = GetOrAdd<TextMeshProUGUI>(placeholder);
-            plTMP.text = "Contenido de la tienda\n(Temas, paquetes, etc.)\n\nSe definirá después";
-            plTMP.fontSize = 18;
-            plTMP.color = TEXT_SECONDARY;
-            plTMP.alignment = TextAlignmentOptions.Center;
-
-            // Footer - Restore Purchases
-            GameObject footer = FindOrCreate(container.transform, "Footer");
-            RectTransform footerRT = GetOrAdd<RectTransform>(footer);
-            footerRT.anchorMin = new Vector2(0, 0);
-            footerRT.anchorMax = new Vector2(1, 0);
-            footerRT.pivot = new Vector2(0.5f, 0);
-            footerRT.anchoredPosition = Vector2.zero;
-            footerRT.sizeDelta = new Vector2(0, 50);
-
-            GameObject restoreBtn = FindOrCreate(footer.transform, "RestoreButton");
-            RectTransform restoreRT = GetOrAdd<RectTransform>(restoreBtn);
-            restoreRT.anchorMin = new Vector2(0.5f, 0.5f);
-            restoreRT.anchorMax = new Vector2(0.5f, 0.5f);
-            restoreRT.sizeDelta = new Vector2(250, 40);
-
-            Image restoreBg = GetOrAdd<Image>(restoreBtn);
-            restoreBg.color = Color.clear;
-
-            Button restoreButton = GetOrAdd<Button>(restoreBtn);
-            restoreButton.targetGraphic = restoreBg;
-
-            // Texto en objeto hijo
-            GameObject restoreTextObj = FindOrCreate(restoreBtn.transform, "Text");
-            RectTransform restoreTextRT = GetOrAdd<RectTransform>(restoreTextObj);
-            restoreTextRT.anchorMin = Vector2.zero;
-            restoreTextRT.anchorMax = Vector2.one;
-            restoreTextRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI restoreTMP = GetOrAdd<TextMeshProUGUI>(restoreTextObj);
-            restoreTMP.text = "Restaurar Compras";
-            restoreTMP.fontSize = 16;
-            restoreTMP.color = TEXT_SECONDARY;
-            restoreTMP.alignment = TextAlignmentOptions.Center;
-
             Debug.Log("[MainMenuUI] Premium Panel creado");
         }
 
-        #endregion
-
-        #region Notifications Panel
-
         private static void CreateNotificationsPanel()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
             GameObject panel = FindOrCreate(canvas.transform, "NotificationsPanel");
-            panel.SetActive(false); // Oculto por defecto
+            panel.SetActive(false);
 
-            RectTransform panelRT = GetOrAdd<RectTransform>(panel);
-            panelRT.anchorMin = Vector2.zero;
-            panelRT.anchorMax = Vector2.one;
-            panelRT.offsetMin = Vector2.zero;
-            panelRT.offsetMax = Vector2.zero;
+            RectTransform rt = GetOrAdd<RectTransform>(panel);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
 
-            // Dark Overlay
-            GameObject overlay = FindOrCreate(panel.transform, "DarkOverlay");
-            RectTransform overlayRT = GetOrAdd<RectTransform>(overlay);
-            overlayRT.anchorMin = Vector2.zero;
-            overlayRT.anchorMax = Vector2.one;
-            overlayRT.offsetMin = Vector2.zero;
-            overlayRT.offsetMax = Vector2.zero;
+            // Overlay
+            GameObject overlay = FindOrCreate(panel.transform, "Overlay");
+            RectTransform ovRT = GetOrAdd<RectTransform>(overlay);
+            ovRT.anchorMin = Vector2.zero;
+            ovRT.anchorMax = Vector2.one;
+            ovRT.sizeDelta = Vector2.zero;
 
-            Image overlayImg = GetOrAdd<Image>(overlay);
-            overlayImg.color = OVERLAY_COLOR;
+            Image ovImg = GetOrAdd<Image>(overlay);
+            ovImg.color = new Color(0, 0, 0, 0.85f);
 
-            Button overlayBtn = GetOrAdd<Button>(overlay);
-            overlayBtn.targetGraphic = overlayImg;
+            Button ovBtn = GetOrAdd<Button>(overlay);
+            ovBtn.targetGraphic = ovImg;
 
-            // Panel Container (derecha, estilo slide-in)
-            GameObject container = FindOrCreate(panel.transform, "PanelContainer");
+            // Container
+            GameObject container = FindOrCreate(panel.transform, "Container");
             RectTransform contRT = GetOrAdd<RectTransform>(container);
-            contRT.anchorMin = new Vector2(0.1f, 0.15f);
-            contRT.anchorMax = new Vector2(0.9f, 0.85f);
-            contRT.offsetMin = Vector2.zero;
-            contRT.offsetMax = Vector2.zero;
+            contRT.anchorMin = new Vector2(0.05f, 0.15f);
+            contRT.anchorMax = new Vector2(0.95f, 0.85f);
+            contRT.sizeDelta = Vector2.zero;
 
             Image contBg = GetOrAdd<Image>(container);
-            contBg.color = PANEL_BG;
+            contBg.color = CARD_BG;
 
             Outline contOutline = GetOrAdd<Outline>(container);
             contOutline.effectColor = CYAN_DARK;
             contOutline.effectDistance = new Vector2(2, 2);
 
-            // Header
-            GameObject header = FindOrCreate(container.transform, "Header");
-            RectTransform headerRT = GetOrAdd<RectTransform>(header);
-            headerRT.anchorMin = new Vector2(0, 1);
-            headerRT.anchorMax = new Vector2(1, 1);
-            headerRT.pivot = new Vector2(0.5f, 1);
-            headerRT.anchoredPosition = Vector2.zero;
-            headerRT.sizeDelta = new Vector2(0, 70);
-
-            Image headerBg = GetOrAdd<Image>(header);
-            headerBg.color = HEADER_BG;
-
-            // Header line
-            GameObject headerLine = FindOrCreate(header.transform, "Line");
-            RectTransform lineRT = GetOrAdd<RectTransform>(headerLine);
-            lineRT.anchorMin = new Vector2(0, 0);
-            lineRT.anchorMax = new Vector2(1, 0);
-            lineRT.sizeDelta = new Vector2(0, 2);
-
-            Image lineImg = GetOrAdd<Image>(headerLine);
-            lineImg.color = CYAN_NEON;
-
-            // Header Title
-            GameObject headerTitle = FindOrCreate(header.transform, "TitleText");
-            RectTransform htRT = GetOrAdd<RectTransform>(headerTitle);
-            htRT.anchorMin = Vector2.zero;
-            htRT.anchorMax = Vector2.one;
-            htRT.offsetMin = new Vector2(20, 0);
-            htRT.offsetMax = new Vector2(-60, 0);
-
-            TextMeshProUGUI htTMP = GetOrAdd<TextMeshProUGUI>(headerTitle);
-            htTMP.text = "NOTIFICACIONES";
-            htTMP.fontSize = 24;
-            htTMP.color = CYAN_NEON;
-            htTMP.fontStyle = FontStyles.Bold;
-            htTMP.alignment = TextAlignmentOptions.Left;
-
-            // Close Button
-            GameObject closeBtn = FindOrCreate(header.transform, "CloseButton");
-            RectTransform closeRT = GetOrAdd<RectTransform>(closeBtn);
-            closeRT.anchorMin = new Vector2(1, 0.5f);
-            closeRT.anchorMax = new Vector2(1, 0.5f);
-            closeRT.pivot = new Vector2(1, 0.5f);
-            closeRT.anchoredPosition = new Vector2(-15, 0);
-            closeRT.sizeDelta = new Vector2(50, 50);
-
-            Image closeBg = GetOrAdd<Image>(closeBtn);
-            closeBg.color = new Color(1f, 1f, 1f, 0.1f);
-
-            Button closeButton = GetOrAdd<Button>(closeBtn);
-            closeButton.targetGraphic = closeBg;
-
-            GameObject closeX = FindOrCreate(closeBtn.transform, "X");
-            RectTransform closeXRT = GetOrAdd<RectTransform>(closeX);
-            closeXRT.anchorMin = Vector2.zero;
-            closeXRT.anchorMax = Vector2.one;
-            closeXRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI closeTMP = GetOrAdd<TextMeshProUGUI>(closeX);
-            closeTMP.text = "X";
-            closeTMP.fontSize = 24;
-            closeTMP.color = TEXT_PRIMARY;
-            closeTMP.fontStyle = FontStyles.Bold;
-            closeTMP.alignment = TextAlignmentOptions.Center;
-
-            // Content ScrollView
-            GameObject scrollView = FindOrCreate(container.transform, "ScrollView");
-            RectTransform scrollRT = GetOrAdd<RectTransform>(scrollView);
-            scrollRT.anchorMin = Vector2.zero;
-            scrollRT.anchorMax = Vector2.one;
-            scrollRT.offsetMin = new Vector2(10, 10);
-            scrollRT.offsetMax = new Vector2(-10, -70);
-
-            ScrollRect scroll = GetOrAdd<ScrollRect>(scrollView);
-            scroll.horizontal = false;
-            scroll.vertical = true;
-
-            // Viewport
-            GameObject viewport = FindOrCreate(scrollView.transform, "Viewport");
-            RectTransform vpRT = GetOrAdd<RectTransform>(viewport);
-            vpRT.anchorMin = Vector2.zero;
-            vpRT.anchorMax = Vector2.one;
-            vpRT.offsetMin = Vector2.zero;
-            vpRT.offsetMax = Vector2.zero;
-
-            RectMask2D vpMask = GetOrAdd<RectMask2D>(viewport);
-
-            // Content
-            GameObject content = FindOrCreate(viewport.transform, "Content");
-            RectTransform contentRT = GetOrAdd<RectTransform>(content);
-            contentRT.anchorMin = new Vector2(0, 1);
-            contentRT.anchorMax = new Vector2(1, 1);
-            contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.anchoredPosition = Vector2.zero;
-            contentRT.sizeDelta = new Vector2(0, 0);
-
-            VerticalLayoutGroup vlg = GetOrAdd<VerticalLayoutGroup>(content);
-            vlg.spacing = 10;
-            vlg.padding = new RectOffset(5, 5, 10, 10);
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-
-            ContentSizeFitter csf = GetOrAdd<ContentSizeFitter>(content);
-            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            scroll.viewport = vpRT;
-            scroll.content = contentRT;
-
-            // Empty State
-            GameObject emptyState = FindOrCreate(content.transform, "EmptyState");
-            LayoutElement emptyLE = GetOrAdd<LayoutElement>(emptyState);
-            emptyLE.preferredHeight = 150;
-
-            TextMeshProUGUI emptyTMP = GetOrAdd<TextMeshProUGUI>(emptyState);
-            emptyTMP.text = "No hay notificaciones\n\nLos torneos concluidos y\nnoticias aparecerán aquí";
-            emptyTMP.fontSize = 18;
-            emptyTMP.color = TEXT_SECONDARY;
-            emptyTMP.alignment = TextAlignmentOptions.Center;
-
             Debug.Log("[MainMenuUI] Notifications Panel creado");
+        }
+
+        #endregion
+
+        #region Assign Neon Icons
+
+        private static void AssignNeonIcons()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[MainMenuUI] No se encontró Canvas en la escena");
+                return;
+            }
+
+            int assigned = 0;
+
+            // Header Icons
+            assigned += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
+            assigned += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
+            assigned += TryAssignIcon(canvas.transform, "Header/ProfileButton/Icon", ICON_PROFILE);
+
+            // Player Card Icons
+            assigned += TryAssignIcon(canvas.transform, "PlayerCard/AvatarSection/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
+            assigned += TryAssignIcon(canvas.transform, "PlayerCard/InfoSection/StatsRow/Trophies/Icon", ICON_TROPHY);
+            assigned += TryAssignIcon(canvas.transform, "PlayerCard/InfoSection/StatsRow/Gems/Icon", ICON_GEM);
+            assigned += TryAssignIcon(canvas.transform, "PlayerCard/InfoSection/StatsRow/Coins/Icon", ICON_COIN);
+
+            // Quick Actions Icons
+            assigned += TryAssignIcon(canvas.transform, "QuickActionsPanel/RankingsCard/Icon", ICON_RANKINGS);
+            assigned += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
+            assigned += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
+
+            // Main Cards Icons
+            assigned += TryAssignIcon(canvas.transform, "MainCardsPanel/PlayCard/Icon", ICON_PLAY);
+            assigned += TryAssignIcon(canvas.transform, "MainCardsPanel/CashBattleCard/Icon", ICON_CASH_BATTLE);
+
+            // Daily Rewards Icon
+            assigned += TryAssignIcon(canvas.transform, "DailyRewardsCard/GiftIcon", ICON_GIFT);
+
+            // Assign notification icon references to MainMenuManager
+            AssignNotificationReferences(canvas.transform);
+
+            Debug.Log($"[MainMenuUI] Iconos asignados: {assigned}/13");
+
+            if (assigned > 0)
+            {
+                EditorUtility.SetDirty(canvas.gameObject);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
+            }
+
+            EditorUtility.DisplayDialog("Asignación de Iconos",
+                $"Iconos asignados: {assigned}/13\n\n" +
+                "Revisa la Console para ver detalles de iconos faltantes.",
+                "OK");
+        }
+
+        private static void AssignNotificationReferences(Transform canvasTransform)
+        {
+            // Buscar MainMenuManager en la escena
+            var manager = Object.FindFirstObjectByType<DigitPark.Managers.MainMenuManager>();
+            if (manager == null)
+            {
+                Debug.LogWarning("[MainMenuUI] MainMenuManager no encontrado en la escena");
+                return;
+            }
+
+            // Cargar sprites de notificación
+            Sprite normalSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_NOTIFICATIONS);
+            Sprite activeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_NOTIFICATIONS_ACTIVE);
+
+            if (normalSprite != null)
+            {
+                var serializedObject = new SerializedObject(manager);
+                var normalProp = serializedObject.FindProperty("notificationIconNormal");
+                if (normalProp != null)
+                {
+                    normalProp.objectReferenceValue = normalSprite;
+                    Debug.Log("[MainMenuUI] Asignado: notificationIconNormal");
+                }
+                serializedObject.ApplyModifiedProperties();
+            }
+            else
+            {
+                Debug.LogWarning($"[MainMenuUI] No se encontró sprite: {ICON_NOTIFICATIONS}");
+            }
+
+            if (activeSprite != null)
+            {
+                var serializedObject = new SerializedObject(manager);
+                var activeProp = serializedObject.FindProperty("notificationIconActive");
+                if (activeProp != null)
+                {
+                    activeProp.objectReferenceValue = activeSprite;
+                    Debug.Log("[MainMenuUI] Asignado: notificationIconActive");
+                }
+                serializedObject.ApplyModifiedProperties();
+            }
+            else
+            {
+                Debug.LogWarning($"[MainMenuUI] No se encontró sprite: {ICON_NOTIFICATIONS_ACTIVE}");
+            }
+
+            // Buscar y asignar NotificationsButton
+            Transform notifBtn = canvasTransform.Find("Header/NotificationsButton");
+            if (notifBtn != null)
+            {
+                Button btnComponent = notifBtn.GetComponent<Button>();
+                if (btnComponent != null)
+                {
+                    var serializedObject = new SerializedObject(manager);
+                    var btnProp = serializedObject.FindProperty("notificationsButton");
+                    if (btnProp != null)
+                    {
+                        btnProp.objectReferenceValue = btnComponent;
+                        Debug.Log("[MainMenuUI] Asignado: notificationsButton");
+                    }
+                    serializedObject.ApplyModifiedProperties();
+                }
+
+                // Buscar y asignar el Image del icono
+                Transform iconTransform = notifBtn.Find("Icon");
+                if (iconTransform != null)
+                {
+                    Image iconImg = iconTransform.GetComponent<Image>();
+                    if (iconImg != null)
+                    {
+                        var serializedObject = new SerializedObject(manager);
+                        var imgProp = serializedObject.FindProperty("notificationIconImage");
+                        if (imgProp != null)
+                        {
+                            imgProp.objectReferenceValue = iconImg;
+                            Debug.Log("[MainMenuUI] Asignado: notificationIconImage");
+                        }
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                }
+            }
+
+            EditorUtility.SetDirty(manager);
+            Debug.Log("[MainMenuUI] Referencias de notificación asignadas al MainMenuManager");
+        }
+
+        private static int TryAssignIcon(Transform root, string path, string iconPath)
+        {
+            // Buscar el elemento por path
+            Transform target = root;
+            string[] parts = path.Split('/');
+
+            foreach (string part in parts)
+            {
+                target = target.Find(part);
+                if (target == null)
+                {
+                    Debug.LogWarning($"[MainMenuUI] No se encontró: {path}");
+                    return 0;
+                }
+            }
+
+            // Cargar el icono
+            Sprite icon = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (icon == null)
+            {
+                Debug.LogWarning($"[MainMenuUI] Icono no encontrado: {iconPath}");
+                return 0;
+            }
+
+            // Asignar al Image component
+            Image img = target.GetComponent<Image>();
+            if (img == null)
+            {
+                Debug.LogWarning($"[MainMenuUI] No tiene Image component: {path}");
+                return 0;
+            }
+
+            img.sprite = icon;
+            img.preserveAspect = true;
+            Debug.Log($"[MainMenuUI] Asignado: {path} = {System.IO.Path.GetFileName(iconPath)}");
+            return 1;
         }
 
         #endregion

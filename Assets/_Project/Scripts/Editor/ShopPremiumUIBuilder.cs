@@ -318,6 +318,7 @@ namespace DigitPark.Editor
             GameObject icon = CreateChild(pill, "Icon");
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
+            iconImg.preserveAspect = true;
             LayoutElement iconLE = icon.AddComponent<LayoutElement>();
             iconLE.minWidth = 26;
             iconLE.minHeight = 26;

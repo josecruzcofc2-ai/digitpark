@@ -746,7 +746,7 @@ namespace DigitPark.Editor
             // Add UI Component
             PrizeRowItemUI ui = item.AddComponent<PrizeRowItemUI>();
 
-            SavePrefab(item, "Assets/_Project/Prefabs/Tournaments/PrizeRowItem.prefab");
+            SavePrefab(item, "Assets/_Project/Prefabs/Tournaments/Lobby/PrizeRowItem.prefab");
         }
 
         #endregion
@@ -834,7 +834,7 @@ namespace DigitPark.Editor
             // Add UI Component
             ParticipantItemUI ui = item.AddComponent<ParticipantItemUI>();
 
-            SavePrefab(item, "Assets/_Project/Prefabs/Tournaments/ParticipantItem.prefab");
+            SavePrefab(item, "Assets/_Project/Prefabs/Tournaments/Lobby/ParticipantItem.prefab");
         }
 
         #endregion

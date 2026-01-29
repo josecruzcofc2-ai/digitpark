@@ -1,15 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Firebase.Analytics;
 
 namespace DigitPark.Services.Firebase
 {
     /// <summary>
-    /// Servicio de Analytics (Modo Simulación)
-    /// Solo hace logs locales
+    /// Servicio de Firebase Analytics
+    /// Trackea eventos importantes para entender el comportamiento del usuario
     /// </summary>
     public class AnalyticsService : MonoBehaviour
     {
         public static AnalyticsService Instance { get; private set; }
+
+        [Header("Settings")]
+        [SerializeField] private bool enableAnalytics = true;
+        [SerializeField] private bool debugMode = true;
+
+        private bool _isInitialized = false;
 
         private void Awake()
         {
@@ -17,7 +24,7 @@ namespace DigitPark.Services.Firebase
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                Debug.Log("[Analytics] Servicio inicializado (Simulación)");
+                Initialize();
             }
             else
             {
@@ -25,166 +32,435 @@ namespace DigitPark.Services.Firebase
             }
         }
 
+        private void Initialize()
+        {
+            if (!enableAnalytics)
+            {
+                Debug.Log("[Analytics] Analytics deshabilitado");
+                return;
+            }
+
+            // Firebase Analytics se inicializa automaticamente con FirebaseApp
+            // Solo necesitamos configurar algunas opciones
+            FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
+
+            _isInitialized = true;
+            Debug.Log("[Analytics] Firebase Analytics inicializado");
+        }
+
+        #region Screen Tracking
+
+        /// <summary>
+        /// Registra cuando el usuario ve una pantalla
+        /// </summary>
+        public void LogScreenView(string screenName, string screenClass = null)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventScreenView,
+                new Parameter(FirebaseAnalytics.ParameterScreenName, screenName),
+                new Parameter(FirebaseAnalytics.ParameterScreenClass, screenClass ?? screenName)
+            );
+
+            LogDebug($"screen_view: {screenName}");
+        }
+
+        #endregion
+
         #region Game Events
 
-        public void LogGameStart()
+        public void LogGameStart(string gameType)
         {
-            LogEvent("game_start");
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("game_start",
+                new Parameter("game_type", gameType)
+            );
+
+            LogDebug($"game_start: {gameType}");
         }
 
-        public void LogGameComplete(float time, bool isNewRecord)
+        public void LogGameComplete(string gameType, float time, int score, bool isWin, bool isNewRecord)
         {
-            LogEvent("game_complete", new Dictionary<string, object>
-            {
-                { "time", time },
-                { "is_new_record", isNewRecord }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("game_complete",
+                new Parameter("game_type", gameType),
+                new Parameter("time_seconds", time),
+                new Parameter("score", score),
+                new Parameter("is_win", isWin ? 1 : 0),
+                new Parameter("is_new_record", isNewRecord ? 1 : 0)
+            );
+
+            LogDebug($"game_complete: {gameType}, time={time}, win={isWin}");
         }
 
-        public void LogGameAbandoned()
+        public void LogGameAbandoned(string gameType, float timeElapsed)
         {
-            LogEvent("game_abandoned");
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("game_abandoned",
+                new Parameter("game_type", gameType),
+                new Parameter("time_elapsed", timeElapsed)
+            );
+
+            LogDebug($"game_abandoned: {gameType}");
+        }
+
+        #endregion
+
+        #region Matchmaking Events
+
+        public void LogMatchmakingStart(string gameType, decimal entryFee)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("matchmaking_start",
+                new Parameter("game_type", gameType),
+                new Parameter("entry_fee", (double)entryFee)
+            );
+
+            LogDebug($"matchmaking_start: {gameType}, fee={entryFee}");
+        }
+
+        public void LogMatchFound(string gameType, float searchTime)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("match_found",
+                new Parameter("game_type", gameType),
+                new Parameter("search_time_seconds", searchTime)
+            );
+
+            LogDebug($"match_found: {gameType}, search_time={searchTime}s");
+        }
+
+        public void LogMatchComplete(string gameType, bool isWin, decimal prizeWon)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("match_complete",
+                new Parameter("game_type", gameType),
+                new Parameter("is_win", isWin ? 1 : 0),
+                new Parameter("prize_won", (double)prizeWon)
+            );
+
+            LogDebug($"match_complete: {gameType}, win={isWin}, prize={prizeWon}");
         }
 
         #endregion
 
         #region Tournament Events
 
-        public void LogTournamentCreated(string tournamentId, int entryFee)
+        public void LogTournamentJoined(string tournamentId, string gameType, decimal entryFee)
         {
-            LogEvent("tournament_created", new Dictionary<string, object>
-            {
-                { "tournament_id", tournamentId },
-                { "entry_fee", entryFee }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("tournament_joined",
+                new Parameter("tournament_id", tournamentId),
+                new Parameter("game_type", gameType),
+                new Parameter("entry_fee", (double)entryFee)
+            );
+
+            LogDebug($"tournament_joined: {tournamentId}");
         }
 
-        public void LogTournamentJoined(string tournamentId)
+        public void LogTournamentCompleted(string tournamentId, int finalPosition, int totalParticipants, decimal prizeWon)
         {
-            LogEvent("tournament_joined", new Dictionary<string, object>
-            {
-                { "tournament_id", tournamentId }
-            });
-        }
+            if (!_isInitialized) return;
 
-        public void LogTournamentCompleted(string tournamentId, int participants, int position)
-        {
-            LogEvent("tournament_completed", new Dictionary<string, object>
-            {
-                { "tournament_id", tournamentId },
-                { "participants", participants },
-                { "final_position", position }
-            });
+            FirebaseAnalytics.LogEvent("tournament_completed",
+                new Parameter("tournament_id", tournamentId),
+                new Parameter("final_position", finalPosition),
+                new Parameter("total_participants", totalParticipants),
+                new Parameter("prize_won", (double)prizeWon)
+            );
+
+            LogDebug($"tournament_completed: pos={finalPosition}/{totalParticipants}, prize={prizeWon}");
         }
 
         #endregion
 
         #region Economy Events
 
-        public void LogCoinsEarned(int amount, string source)
+        public void LogVirtualCurrencyEarned(string currencyType, int amount, string source)
         {
-            LogEvent("coins_earned", new Dictionary<string, object>
-            {
-                { "amount", amount },
-                { "source", source }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventEarnVirtualCurrency,
+                new Parameter(FirebaseAnalytics.ParameterVirtualCurrencyName, currencyType),
+                new Parameter(FirebaseAnalytics.ParameterValue, amount),
+                new Parameter("source", source)
+            );
+
+            LogDebug($"earn_virtual_currency: {amount} {currencyType} from {source}");
         }
 
-        public void LogCoinsSpent(int amount, string item)
+        public void LogVirtualCurrencySpent(string currencyType, int amount, string itemName)
         {
-            LogEvent("coins_spent", new Dictionary<string, object>
-            {
-                { "amount", amount },
-                { "item", item }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventSpendVirtualCurrency,
+                new Parameter(FirebaseAnalytics.ParameterVirtualCurrencyName, currencyType),
+                new Parameter(FirebaseAnalytics.ParameterValue, amount),
+                new Parameter(FirebaseAnalytics.ParameterItemName, itemName)
+            );
+
+            LogDebug($"spend_virtual_currency: {amount} {currencyType} on {itemName}");
         }
 
-        public void LogGemsPurchased(int amount, float price)
+        public void LogDeposit(decimal amount, string paymentMethod)
         {
-            LogEvent("gems_purchased", new Dictionary<string, object>
-            {
-                { "amount", amount },
-                { "price", price }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("cash_deposit",
+                new Parameter("amount", (double)amount),
+                new Parameter("payment_method", paymentMethod)
+            );
+
+            LogDebug($"cash_deposit: ${amount} via {paymentMethod}");
+        }
+
+        public void LogWithdrawal(decimal amount, string paymentMethod)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("cash_withdrawal",
+                new Parameter("amount", (double)amount),
+                new Parameter("payment_method", paymentMethod)
+            );
+
+            LogDebug($"cash_withdrawal: ${amount} via {paymentMethod}");
         }
 
         #endregion
 
-        #region User Progress
+        #region IAP Events
 
-        public void LogLevelUp(int newLevel)
+        public void LogPurchaseStarted(string productId, double price, string currency)
         {
-            LogEvent("level_up", new Dictionary<string, object>
-            {
-                { "level", newLevel }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("purchase_started",
+                new Parameter("item_id", productId),
+                new Parameter(FirebaseAnalytics.ParameterPrice, price),
+                new Parameter(FirebaseAnalytics.ParameterCurrency, currency)
+            );
+
+            LogDebug($"purchase_started: {productId} at {price} {currency}");
         }
 
-        public void LogAchievementUnlocked(string achievementId)
+        public void LogPurchaseCompleted(string productId, double price, string currency, string transactionId)
         {
-            LogEvent("achievement_unlocked", new Dictionary<string, object>
-            {
-                { "achievement_id", achievementId }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventPurchase,
+                new Parameter("item_id", productId),
+                new Parameter(FirebaseAnalytics.ParameterPrice, price),
+                new Parameter(FirebaseAnalytics.ParameterCurrency, currency),
+                new Parameter("transaction_id", transactionId)
+            );
+
+            LogDebug($"purchase: {productId} completed, txn={transactionId}");
+        }
+
+        public void LogPurchaseFailed(string productId, string errorReason)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("purchase_failed",
+                new Parameter("item_id", productId),
+                new Parameter("error_reason", errorReason)
+            );
+
+            LogDebug($"purchase_failed: {productId}, reason={errorReason}");
         }
 
         #endregion
 
-        #region Ads & Monetization
+        #region Social Events
 
-        public void LogAdWatched(string adType, bool completed)
+        public void LogFriendRequestSent()
         {
-            LogEvent("ad_watched", new Dictionary<string, object>
-            {
-                { "ad_type", adType },
-                { "completed", completed }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("friend_request_sent");
+            LogDebug("friend_request_sent");
         }
 
-        public void LogIAPPurchase(string productId, float price, string currency)
+        public void LogFriendAdded()
         {
-            LogEvent("iap_purchase", new Dictionary<string, object>
-            {
-                { "product_id", productId },
-                { "price", price },
-                { "currency", currency }
-            });
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("friend_added");
+            LogDebug("friend_added");
+        }
+
+        public void LogChallengeCreated(string gameType)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("challenge_created",
+                new Parameter("game_type", gameType)
+            );
+
+            LogDebug($"challenge_created: {gameType}");
         }
 
         #endregion
 
         #region User Properties
 
-        public void SetUserId(string userId)
+        public void SetUserId(string odId)
         {
-            Debug.Log($"[Analytics] Usuario ID: {userId}");
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.SetUserId(odId);
+            LogDebug($"set_user_id: {odId}");
+        }
+
+        public void SetUserProperty(string name, string value)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.SetUserProperty(name, value);
+            LogDebug($"set_user_property: {name}={value}");
         }
 
         public void SetUserPremiumStatus(bool isPremium)
         {
-            Debug.Log($"[Analytics] Premium: {isPremium}");
+            SetUserProperty("is_premium", isPremium ? "true" : "false");
         }
 
         public void SetUserCountry(string countryCode)
         {
-            Debug.Log($"[Analytics] País: {countryCode}");
+            SetUserProperty("country", countryCode);
+        }
+
+        public void SetUserLevel(int level)
+        {
+            SetUserProperty("player_level", level.ToString());
         }
 
         #endregion
 
-        private void LogEvent(string eventName, Dictionary<string, object> parameters = null)
+        #region KYC Events
+
+        public void LogKYCAgeVerified()
         {
-            string log = $"[Analytics] {eventName}";
+            if (!_isInitialized) return;
 
-            if (parameters != null)
-            {
-                foreach (var p in parameters)
-                {
-                    log += $" | {p.Key}={p.Value}";
-                }
-            }
-
-            Debug.Log(log);
+            FirebaseAnalytics.LogEvent("kyc_age_verified");
+            LogDebug("kyc_age_verified");
         }
+
+        public void LogKYCFullyVerified()
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("kyc_fully_verified");
+            LogDebug("kyc_fully_verified");
+        }
+
+        public void LogKYCRejected(string reason)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("kyc_rejected",
+                new Parameter("reason", reason)
+            );
+
+            LogDebug($"kyc_rejected: {reason}");
+        }
+
+        #endregion
+
+        #region Daily Rewards / Missions
+
+        public void LogDailyRewardClaimed(int day, string rewardType, int rewardAmount)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("daily_reward_claimed",
+                new Parameter("day", day),
+                new Parameter("reward_type", rewardType),
+                new Parameter("reward_amount", rewardAmount)
+            );
+
+            LogDebug($"daily_reward_claimed: day {day}, {rewardAmount} {rewardType}");
+        }
+
+        public void LogMissionCompleted(string missionId, string rewardType, int rewardAmount)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent("mission_completed",
+                new Parameter("mission_id", missionId),
+                new Parameter("reward_type", rewardType),
+                new Parameter("reward_amount", rewardAmount)
+            );
+
+            LogDebug($"mission_completed: {missionId}");
+        }
+
+        #endregion
+
+        #region Login Events
+
+        public void LogLogin(string method)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventLogin,
+                new Parameter(FirebaseAnalytics.ParameterMethod, method)
+            );
+
+            LogDebug($"login: {method}");
+        }
+
+        public void LogSignUp(string method)
+        {
+            if (!_isInitialized) return;
+
+            FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventSignUp,
+                new Parameter(FirebaseAnalytics.ParameterMethod, method)
+            );
+
+            LogDebug($"sign_up: {method}");
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private void LogDebug(string message)
+        {
+            if (debugMode)
+            {
+                Debug.Log($"[Analytics] {message}");
+            }
+        }
+
+        /// <summary>
+        /// Desactiva la coleccion de analytics (para GDPR/privacidad)
+        /// </summary>
+        public void DisableAnalytics()
+        {
+            FirebaseAnalytics.SetAnalyticsCollectionEnabled(false);
+            _isInitialized = false;
+            Debug.Log("[Analytics] Analytics deshabilitado por usuario");
+        }
+
+        /// <summary>
+        /// Reactiva la coleccion de analytics
+        /// </summary>
+        public void EnableAnalytics()
+        {
+            FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
+            _isInitialized = true;
+            Debug.Log("[Analytics] Analytics habilitado");
+        }
+
+        #endregion
     }
 }

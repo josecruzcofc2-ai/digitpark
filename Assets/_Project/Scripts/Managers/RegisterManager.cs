@@ -403,6 +403,7 @@ namespace DigitPark.Managers
 
             // Registrar en analytics
             AnalyticsService.Instance?.SetUserId(playerData.userId);
+            AnalyticsService.Instance?.LogSignUp("email");
 
             // Transición a MainMenu
             StartCoroutine(TransitionToMainMenu());

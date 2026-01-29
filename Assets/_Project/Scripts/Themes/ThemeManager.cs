@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DigitPark.Managers;
 
 namespace DigitPark.Themes
 {
@@ -245,9 +246,45 @@ namespace DigitPark.Themes
             if (theme == null) return false;
             if (!theme.isPremium) return true;
 
-            // TODO: Verificar si el usuario tiene premium
-            // Por ahora, todos los temas están disponibles
+            // Verificar si el usuario tiene Styles PRO comprado
+            if (PremiumManager.Instance != null)
+            {
+                return PremiumManager.Instance.HasStylesPro;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Intenta cambiar a un tema, verificando si está disponible
+        /// </summary>
+        /// <returns>True si se cambió exitosamente, false si el tema está bloqueado</returns>
+        public bool TrySetTheme(ThemeData theme)
+        {
+            if (!IsThemeAvailable(theme))
+            {
+                Debug.Log($"[ThemeManager] Tema '{theme?.themeName}' requiere Styles PRO");
+                return false;
+            }
+
+            SetTheme(theme);
             return true;
+        }
+
+        /// <summary>
+        /// Obtiene los temas disponibles para el usuario actual
+        /// </summary>
+        public List<ThemeData> GetAvailableThemes()
+        {
+            return availableThemes.FindAll(t => IsThemeAvailable(t));
+        }
+
+        /// <summary>
+        /// Obtiene los temas bloqueados (premium no comprados)
+        /// </summary>
+        public List<ThemeData> GetLockedThemes()
+        {
+            return availableThemes.FindAll(t => !IsThemeAvailable(t));
         }
 
         /// <summary>

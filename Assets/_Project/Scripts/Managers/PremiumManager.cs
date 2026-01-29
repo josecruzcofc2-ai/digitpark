@@ -1,8 +1,8 @@
 using UnityEngine;
 using System;
-// Descomentar después de instalar Unity IAP desde Package Manager:
-// using UnityEngine.Purchasing;
-// using UnityEngine.Purchasing.Extension;
+using UnityEngine.Purchasing;
+using UnityEngine.Purchasing.Extension;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Managers
 {
@@ -26,9 +26,7 @@ namespace DigitPark.Managers
     /// 4. Descomentar todo el código marcado con "// UNITY IAP:"
     /// 5. Configurar productos en Google Play Console / App Store Connect
     /// </summary>
-    public class PremiumManager : MonoBehaviour
-        // UNITY IAP: Descomentar la siguiente línea:
-        // , IDetailedStoreListener
+    public class PremiumManager : MonoBehaviour, IDetailedStoreListener
     {
         private static PremiumManager _instance;
         public static PremiumManager Instance
@@ -78,9 +76,9 @@ namespace DigitPark.Managers
         private bool _canCreateTournaments = false;
         private bool _hasStylesPro = false;
 
-        // UNITY IAP: Descomentar estas líneas:
-        // private static IStoreController _storeController;
-        // private static IExtensionProvider _extensionProvider;
+        // Unity IAP
+        private static IStoreController _storeController;
+        private static IExtensionProvider _extensionProvider;
 
         // Callback temporal para compras
         private Action<bool> _purchaseCallback;
@@ -128,23 +126,17 @@ namespace DigitPark.Managers
 
         private void InitializePurchasing()
         {
-            // UNITY IAP: Descomentar este bloque:
-            /*
             if (_storeController != null) return;
 
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 
-            // Agregar productos
-            // Consumable = se puede comprar múltiples veces
-            // NonConsumable = se compra una vez y se mantiene para siempre
+            // Agregar productos NonConsumable (se compra una vez y se mantiene para siempre)
             builder.AddProduct(PRODUCT_ID_REMOVE_ADS, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_PREMIUM_FULL, ProductType.NonConsumable);
+            builder.AddProduct(PRODUCT_ID_STYLES_PRO, ProductType.NonConsumable);
 
             Debug.Log("[Premium] Inicializando Unity IAP...");
             UnityPurchasing.Initialize(this, builder);
-            */
-
-            Debug.Log("[Premium] Unity IAP no configurado. Las compras están simuladas.");
         }
 
         #endregion
@@ -226,8 +218,6 @@ namespace DigitPark.Managers
         {
             _purchaseCallback = onComplete;
 
-            // UNITY IAP: Descomentar este bloque y comentar la simulación:
-            /*
             if (_storeController == null)
             {
                 Debug.LogError("[Premium] Store no inicializado");
@@ -239,6 +229,14 @@ namespace DigitPark.Managers
             if (p != null && p.availableToPurchase)
             {
                 Debug.Log($"[Premium] Comprando: {p.definition.id} - {p.metadata.localizedPriceString}");
+
+                // Analytics - Log purchase started
+                AnalyticsService.Instance?.LogPurchaseStarted(
+                    productId,
+                    (double)p.metadata.localizedPrice,
+                    p.metadata.isoCurrencyCode
+                );
+
                 _storeController.InitiatePurchase(p);
             }
             else
@@ -246,22 +244,6 @@ namespace DigitPark.Managers
                 Debug.LogError($"[Premium] Producto no disponible: {productId}");
                 onComplete?.Invoke(false);
             }
-            */
-
-            // SIMULACIÓN (Eliminar cuando actives Unity IAP):
-            Debug.Log($"[Premium] 🔄 Simulando compra de {productId}...");
-            StartCoroutine(SimulatePurchase(product, onComplete));
-        }
-
-        private System.Collections.IEnumerator SimulatePurchase(PremiumProduct product, Action<bool> onComplete)
-        {
-            // Simular delay de procesamiento
-            yield return new WaitForSeconds(1.5f);
-
-            // Simular compra exitosa
-            UnlockProduct(product);
-            onComplete?.Invoke(true);
-            Debug.Log("[Premium] ✅ Compra simulada exitosa");
         }
 
         /// <summary>
@@ -271,30 +253,25 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Premium] Restaurando compras...");
 
-            // UNITY IAP: Descomentar este bloque:
-            /*
             if (_storeController == null)
             {
                 Debug.LogError("[Premium] Store no inicializado");
                 return;
             }
 
-            #if UNITY_IOS
+#if UNITY_IOS
             var apple = _extensionProvider.GetExtension<IAppleExtensions>();
             apple.RestoreTransactions((result, error) =>
             {
                 if (result)
-                    Debug.Log("[Premium] ✅ Compras restauradas");
+                    Debug.Log("[Premium] Compras restauradas");
                 else
                     Debug.LogError($"[Premium] Error al restaurar: {error}");
             });
-            #elif UNITY_ANDROID
+#elif UNITY_ANDROID
             // En Android, las compras se restauran automáticamente al inicializar
             Debug.Log("[Premium] En Android, las compras se restauran automáticamente");
-            #endif
-            */
-
-            Debug.Log("[Premium] Restauración simulada - Unity IAP no configurado");
+#endif
         }
 
         #endregion
@@ -303,8 +280,7 @@ namespace DigitPark.Managers
 
         public string GetProductPrice(PremiumProduct product)
         {
-            // UNITY IAP: Reemplazar con precio real de la tienda:
-            /*
+            // Obtener precio real de la tienda si está disponible
             if (_storeController != null)
             {
                 string productId = GetProductId(product);
@@ -312,8 +288,8 @@ namespace DigitPark.Managers
                 if (p != null)
                     return p.metadata.localizedPriceString;
             }
-            */
 
+            // Fallback a precios por defecto
             switch (product)
             {
                 case PremiumProduct.RemoveAds: return PRICE_REMOVE_ADS;
@@ -377,15 +353,12 @@ namespace DigitPark.Managers
 
         #region Unity IAP Callbacks
 
-        // ============================================================
-        // UNITY IAP: Descomentar todo este bloque después de instalar
-        // ============================================================
-
-        /*
-        // Callback: IAP inicializado correctamente
+        /// <summary>
+        /// Callback: IAP inicializado correctamente
+        /// </summary>
         public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
         {
-            Debug.Log("[Premium] ✅ Unity IAP inicializado correctamente");
+            Debug.Log("[Premium] Unity IAP inicializado correctamente");
             _storeController = controller;
             _extensionProvider = extensions;
 
@@ -412,26 +385,46 @@ namespace DigitPark.Managers
                 _canCreateTournaments = true;
             }
 
+            // Verificar Styles PRO
+            Product stylesPro = _storeController.products.WithID(PRODUCT_ID_STYLES_PRO);
+            if (stylesPro != null && stylesPro.hasReceipt)
+            {
+                Debug.Log("[Premium] Usuario ya tiene Styles PRO");
+                _hasStylesPro = true;
+            }
+
             SavePremiumStatus();
             OnPremiumStatusChanged?.Invoke();
         }
 
-        // Callback: Error al inicializar IAP
+        /// <summary>
+        /// Callback: Error al inicializar IAP
+        /// </summary>
         public void OnInitializeFailed(InitializationFailureReason error)
         {
-            Debug.LogError($"[Premium] ❌ Error al inicializar IAP: {error}");
+            Debug.LogError($"[Premium] Error al inicializar IAP: {error}");
         }
 
         public void OnInitializeFailed(InitializationFailureReason error, string message)
         {
-            Debug.LogError($"[Premium] ❌ Error al inicializar IAP: {error} - {message}");
+            Debug.LogError($"[Premium] Error al inicializar IAP: {error} - {message}");
         }
 
-        // Callback: Compra procesada
+        /// <summary>
+        /// Callback: Compra procesada exitosamente
+        /// </summary>
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
         {
             string productId = args.purchasedProduct.definition.id;
             Debug.Log($"[Premium] Procesando compra: {productId}");
+
+            // Analytics - Log purchase completed
+            AnalyticsService.Instance?.LogPurchaseCompleted(
+                productId,
+                (double)args.purchasedProduct.metadata.localizedPrice,
+                args.purchasedProduct.metadata.isoCurrencyCode,
+                args.purchasedProduct.transactionID
+            );
 
             if (productId == PRODUCT_ID_REMOVE_ADS)
             {
@@ -443,6 +436,11 @@ namespace DigitPark.Managers
                 UnlockProduct(PremiumProduct.PremiumFull);
                 _purchaseCallback?.Invoke(true);
             }
+            else if (productId == PRODUCT_ID_STYLES_PRO)
+            {
+                UnlockProduct(PremiumProduct.StylesPro);
+                _purchaseCallback?.Invoke(true);
+            }
             else
             {
                 Debug.LogWarning($"[Premium] Producto desconocido: {productId}");
@@ -452,21 +450,30 @@ namespace DigitPark.Managers
             return PurchaseProcessingResult.Complete;
         }
 
-        // Callback: Compra fallida
+        /// <summary>
+        /// Callback: Compra fallida
+        /// </summary>
         public void OnPurchaseFailed(Product product, PurchaseFailureReason reason)
         {
-            Debug.LogError($"[Premium] ❌ Compra fallida: {product.definition.id} - {reason}");
+            Debug.LogError($"[Premium] Compra fallida: {product.definition.id} - {reason}");
+
+            // Analytics - Log purchase failed
+            AnalyticsService.Instance?.LogPurchaseFailed(product.definition.id, reason.ToString());
+
             _purchaseCallback?.Invoke(false);
             _purchaseCallback = null;
         }
 
         public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
         {
-            Debug.LogError($"[Premium] ❌ Compra fallida: {product.definition.id} - {failureDescription.message}");
+            Debug.LogError($"[Premium] Compra fallida: {product.definition.id} - {failureDescription.message}");
+
+            // Analytics - Log purchase failed
+            AnalyticsService.Instance?.LogPurchaseFailed(product.definition.id, failureDescription.message);
+
             _purchaseCallback?.Invoke(false);
             _purchaseCallback = null;
         }
-        */
 
         #endregion
 

@@ -322,6 +322,7 @@ namespace DigitPark.Editor
             GameObject icon = FindOrCreateChild(item, "Icon");
             Image iconImage = GetOrAddComponent<Image>(icon);
             iconImage.color = color;
+            iconImage.preserveAspect = true;
             LayoutElement iconLE = GetOrAddComponent<LayoutElement>(icon);
             iconLE.minWidth = 30;
             iconLE.minHeight = 30;

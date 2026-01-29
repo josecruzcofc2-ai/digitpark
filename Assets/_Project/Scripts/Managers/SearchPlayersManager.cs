@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 
 namespace DigitPark.Managers
@@ -294,11 +295,38 @@ namespace DigitPark.Managers
                 if (addFriendBtn != null)
                 {
                     var btn = addFriendBtn.GetComponent<Button>();
+                    var btnText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
+
                     if (btn != null)
                     {
                         // Ocultar si ya es amigo
-                        addFriendBtn.gameObject.SetActive(!result.isFriend);
-                        btn.onClick.AddListener(() => OnAddFriendClicked(playerId));
+                        if (result.isFriend)
+                        {
+                            addFriendBtn.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            addFriendBtn.gameObject.SetActive(true);
+
+                            // Verificar si ya hay solicitud pendiente
+                            bool hasPendingRequest = FriendService.Instance.HasPendingRequestWith(playerId);
+                            bool sentRequest = FriendService.Instance.HasSentRequestTo(playerId);
+
+                            if (hasPendingRequest)
+                            {
+                                if (btnText != null)
+                                    btnText.text = sentRequest ? "Enviada" : "Responder";
+                                btn.interactable = !sentRequest;
+                            }
+                            else
+                            {
+                                if (btnText != null)
+                                    btnText.text = "Agregar";
+                                btn.interactable = true;
+                            }
+
+                            btn.onClick.AddListener(() => OnAddFriendClicked(playerId));
+                        }
                     }
                 }
 
@@ -342,11 +370,64 @@ namespace DigitPark.Managers
             SceneManager.LoadScene("Profile");
         }
 
-        private void OnAddFriendClicked(string playerId)
+        private async void OnAddFriendClicked(string playerId)
         {
             Debug.Log($"[SearchPlayers] Agregar amigo: {playerId}");
 
-            // TODO: Enviar solicitud de amistad via Firebase
+            // Verificar si ya hay solicitud pendiente
+            if (FriendService.Instance.HasPendingRequestWith(playerId))
+            {
+                ShowMessage("Ya tienes una solicitud pendiente con este jugador");
+                return;
+            }
+
+            // Enviar solicitud de amistad
+            var result = await FriendService.Instance.SendFriendRequest(playerId);
+
+            if (result.Success)
+            {
+                ShowMessage(result.Message);
+                // Actualizar UI del botón
+                UpdateAddFriendButton(playerId, true);
+            }
+            else
+            {
+                ShowMessage(result.Message);
+            }
+        }
+
+        private void UpdateAddFriendButton(string playerId, bool requestSent)
+        {
+            foreach (var item in currentResults)
+            {
+                // Buscar el item correspondiente a este playerId
+                Transform buttonsRow = item.transform.Find("ButtonsRow");
+                if (buttonsRow != null)
+                {
+                    Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
+                    if (addFriendBtn != null)
+                    {
+                        var btn = addFriendBtn.GetComponent<Button>();
+                        if (btn != null)
+                        {
+                            // Verificar si este es el item correcto comparando con los datos almacenados
+                            var tmpText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
+                            if (requestSent && tmpText != null)
+                            {
+                                tmpText.text = "Enviada";
+                                btn.interactable = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ShowMessage(string message)
+        {
+            Debug.Log($"[SearchPlayers] {message}");
+            // TODO: Mostrar toast o popup con el mensaje
+            // Por ahora solo log
         }
 
         private void OnChallengeClicked(string playerId)
