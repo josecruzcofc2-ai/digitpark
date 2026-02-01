@@ -6,48 +6,48 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Modern Age Verification UI builder with premium GOLD theme
-    /// (Cash Battle style for real money verification)
+    /// Modern Register UI builder with neon card design
     /// </summary>
-    public static class AgeVerificationUIBuilder
+    public static class RegisterUIBuilder
     {
         private const float SCREEN_WIDTH = 1080f;
         private const float SCREEN_HEIGHT = 1920f;
 
-        // Colors - GOLD Theme (Cash Battle)
-        private static readonly Color GoldPremium = new Color(1f, 0.843f, 0f, 1f); // #FFD700
-        private static readonly Color DarkBrown = new Color(0.039f, 0.031f, 0.02f, 1f); // #0A0805
-        private static readonly Color CardBackground = new Color(0.2f, 0.133f, 0.067f, 0.95f); // Marrón oscuro con alpha
-        private static readonly Color InputBackground = new Color(0.133f, 0.086f, 0.043f, 1f); // Marrón más oscuro
+        // Colors
+        private static readonly Color CyanNeon = new Color(0f, 1f, 1f, 1f); // #00FFFF
+        private static readonly Color DarkNavy = new Color(0.039f, 0.055f, 0.153f, 1f); // #0A0E27
+        private static readonly Color CardBackground = new Color(0.125f, 0.188f, 0.376f, 0.95f); // #202860 con alpha
+        private static readonly Color InputBackground = new Color(0.078f, 0.11f, 0.22f, 1f); // Más oscuro para inputs
         private static readonly Color TextWhite = Color.white;
         private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
-        private static readonly Color CyanNeon = new Color(0f, 1f, 1f, 1f); // Para el logo
 
         // Paths
         private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
         private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
-        private const string VERIFICATION_ICON_PATH = "Assets/_Project/Art/Icons/CashBattle/UI/VerificationIcon.png";
+        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeOpenNeon.png";
+        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeClosedNeon.png";
 
         // Spacing
         private const float PADDING = 30f;
         private const float CARD_PADDING = 40f;
         private const float ELEMENT_SPACING = 20f;
-        private const float BUTTON_HEIGHT = 70f;
-        private const float ICON_SIZE = 150f;
+        private const float INPUT_HEIGHT = 60f;
+        private const float BUTTON_HEIGHT = 60f;
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
-        private static Sprite VerificationIcon => AssetDatabase.LoadAssetAtPath<Sprite>(VERIFICATION_ICON_PATH);
+        private static Sprite EyeOpenIcon => AssetDatabase.LoadAssetAtPath<Sprite>(EYE_OPEN_PATH);
+        private static Sprite EyeClosedIcon => AssetDatabase.LoadAssetAtPath<Sprite>(EYE_CLOSED_PATH);
 
-        [MenuItem("DigitPark/UI Builders/Auth/AgeVerification", false, 202)]
-        public static void RebuildAgeVerificationScene()
+        [MenuItem("DigitPark/UI Builders/Auth/Register", false, 201)]
+        public static void RebuildRegisterScene()
         {
             try
             {
                 // Verify prerequisites
-                if (WhiteSprite == null || DefaultFont == null || VerificationIcon == null)
+                if (WhiteSprite == null || DefaultFont == null)
                 {
-                    Debug.LogError("❌ Missing prerequisites! Check WhiteSquare.png, Font, and VerificationIcon.png");
+                    Debug.LogError("❌ Missing prerequisites! Run 'Create White Sprite' first.");
                     return;
                 }
 
@@ -58,7 +58,7 @@ namespace DigitPark.Editor
                     return;
                 }
 
-                Debug.Log("🎨 Starting AgeVerification UI Rebuild (GOLD Theme)...");
+                Debug.Log("🎨 Starting Register UI Rebuild...");
 
                 // Clean existing UI
                 CleanExistingUI(canvas);
@@ -66,17 +66,17 @@ namespace DigitPark.Editor
                 // Build UI
                 BuildBackground(canvas);
                 BuildLogo(canvas);
-                BuildVerificationCard(canvas);
+                BuildRegisterCard(canvas);
 
                 // Force layout update
                 Canvas.ForceUpdateCanvases();
 
-                Debug.Log("✅ AgeVerification UI rebuilt successfully!");
+                Debug.Log("✅ Register UI rebuilt successfully!");
                 EditorUtility.SetDirty(canvas.gameObject);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"❌ Error in AgeVerificationUIBuilder: {e.Message}\n{e.StackTrace}");
+                Debug.LogError($"❌ Error in RegisterUIBuilder: {e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -119,7 +119,7 @@ namespace DigitPark.Editor
 
             Image image = bg.AddComponent<Image>();
             image.sprite = WhiteSprite;
-            image.color = DarkBrown;
+            image.color = DarkNavy;
 
             bg.transform.SetAsFirstSibling();
         }
@@ -145,10 +145,10 @@ namespace DigitPark.Editor
             text.alignment = TextAlignmentOptions.Center;
         }
 
-        private static void BuildVerificationCard(Canvas canvas)
+        private static void BuildRegisterCard(Canvas canvas)
         {
             // Card container
-            GameObject card = new GameObject("VerificationCard");
+            GameObject card = new GameObject("RegisterCard");
             card.transform.SetParent(canvas.transform, false);
 
             RectTransform cardRect = card.AddComponent<RectTransform>();
@@ -158,14 +158,14 @@ namespace DigitPark.Editor
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
             cardRect.anchoredPosition = new Vector2(0, 0); // Centrado verticalmente
 
-            // Card background with GOLD neon border
+            // Card background with neon border
             Image cardBg = card.AddComponent<Image>();
             cardBg.sprite = WhiteSprite;
             cardBg.color = CardBackground;
 
-            // GOLD neon border
+            // Neon border
             Outline outline = card.AddComponent<Outline>();
-            outline.effectColor = GoldPremium;
+            outline.effectColor = CyanNeon;
             outline.effectDistance = new Vector2(3, -3);
 
             // Content container
@@ -188,32 +188,12 @@ namespace DigitPark.Editor
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // Build card content
-            CreateVerificationIcon(content.transform);
-            CreateTitle(content.transform, "VERIFICACIÓN DE EDAD\nREQUERIDA");
-            CreateSpacer(content.transform, 10f);
-            CreateDescription(content.transform, "Las competencias con dinero real requieren que seas mayor de 18 años.");
-            CreateDescription(content.transform, "Debes verificar tu identidad para continuar.");
-            CreateSpacer(content.transform, 10f);
-            CreateGoldButton(content.transform, "VerifyButton", "VERIFICAR MI EDAD");
-            CreateSpacer(content.transform, 10f);
-            CreateLegalText(content.transform, "Powered by Triump™ • Verificación segura y confidencial");
-        }
-
-        private static void CreateVerificationIcon(Transform parent)
-        {
-            GameObject icon = new GameObject("VerificationIcon");
-            icon.transform.SetParent(parent, false);
-
-            RectTransform rect = icon.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(ICON_SIZE, ICON_SIZE);
-
-            // Use the premium verification icon (18+ shield)
-            Image iconImage = icon.AddComponent<Image>();
-            iconImage.sprite = VerificationIcon;
-            iconImage.preserveAspect = true;
-
-            LayoutElement layout = icon.AddComponent<LayoutElement>();
-            layout.preferredHeight = ICON_SIZE;
+            CreateTitle(content.transform, "CREA UNA CUENTA");
+            CreateInputField(content.transform, "UsernameInput", "Nombre de usuario", false);
+            CreateInputField(content.transform, "EmailInput", "Email", false);
+            CreateInputField(content.transform, "PasswordInput", "Contraseña", true);
+            CreateInputField(content.transform, "ConfirmPasswordInput", "Confirmar Contraseña", true);
+            CreatePrimaryButton(content.transform, "RegisterButton", "Crear Cuenta");
         }
 
         private static void CreateTitle(Transform parent, string text)
@@ -224,54 +204,121 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = 28;
+            titleText.fontSize = 32;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = GoldPremium;
+            titleText.color = CyanNeon;
             titleText.alignment = TextAlignmentOptions.Center;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 80;
+            layout.preferredHeight = 60;
         }
 
-        private static void CreateDescription(Transform parent, string text)
+        private static void CreateInputField(Transform parent, string name, string placeholder, bool isPassword)
         {
-            GameObject desc = new GameObject("Description");
-            desc.transform.SetParent(parent, false);
+            GameObject inputObj = new GameObject(name);
+            inputObj.transform.SetParent(parent, false);
 
-            TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
-            descText.font = DefaultFont;
-            descText.text = text;
-            descText.fontSize = 18;
-            descText.color = TextWhite;
-            descText.alignment = TextAlignmentOptions.Center;
-            descText.enableWordWrapping = true;
+            // Background with neon border
+            Image bg = inputObj.AddComponent<Image>();
+            bg.sprite = WhiteSprite;
+            bg.color = InputBackground;
 
-            LayoutElement layout = desc.AddComponent<LayoutElement>();
-            layout.preferredHeight = 50;
+            Outline outline = inputObj.AddComponent<Outline>();
+            outline.effectColor = CyanNeon;
+            outline.effectDistance = new Vector2(2, -2);
+
+            LayoutElement inputLayout = inputObj.AddComponent<LayoutElement>();
+            inputLayout.preferredHeight = INPUT_HEIGHT;
+
+            // InputField component
+            TMP_InputField inputField = inputObj.AddComponent<TMP_InputField>();
+            inputField.textViewport = inputObj.GetComponent<RectTransform>();
+
+            // Text area
+            GameObject textArea = new GameObject("TextArea");
+            textArea.transform.SetParent(inputObj.transform, false);
+
+            RectTransform textAreaRect = textArea.AddComponent<RectTransform>();
+            textAreaRect.anchorMin = Vector2.zero;
+            textAreaRect.anchorMax = Vector2.one;
+            textAreaRect.offsetMin = new Vector2(20, 0);
+            textAreaRect.offsetMax = new Vector2(isPassword ? -60 : -20, 0);
+
+            // Placeholder
+            GameObject placeholderObj = new GameObject("Placeholder");
+            placeholderObj.transform.SetParent(textArea.transform, false);
+
+            RectTransform placeholderRect = placeholderObj.AddComponent<RectTransform>();
+            placeholderRect.anchorMin = Vector2.zero;
+            placeholderRect.anchorMax = Vector2.one;
+            placeholderRect.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
+            placeholderText.font = DefaultFont;
+            placeholderText.text = placeholder;
+            placeholderText.fontSize = 18;
+            placeholderText.color = TextGray;
+            placeholderText.alignment = TextAlignmentOptions.Left;
+
+            // Input text
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(textArea.transform, false);
+
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
+            inputText.font = DefaultFont;
+            inputText.fontSize = 20;
+            inputText.color = TextWhite;
+            inputText.alignment = TextAlignmentOptions.Left;
+
+            inputField.textViewport = textAreaRect;
+            inputField.textComponent = inputText;
+            inputField.placeholder = placeholderText;
+
+            if (isPassword)
+            {
+                inputField.contentType = TMP_InputField.ContentType.Password;
+                CreateEyeToggle(inputObj.transform, inputField);
+            }
         }
 
-        private static void CreateGoldButton(Transform parent, string name, string text)
+        private static void CreateEyeToggle(Transform parent, TMP_InputField inputField)
+        {
+            GameObject eyeBtn = new GameObject("EyeToggle");
+            eyeBtn.transform.SetParent(parent, false);
+
+            RectTransform rect = eyeBtn.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1, 0.5f);
+            rect.anchorMax = new Vector2(1, 0.5f);
+            rect.pivot = new Vector2(1, 0.5f);
+            rect.sizeDelta = new Vector2(40, 40);
+            rect.anchoredPosition = new Vector2(-10, 0);
+
+            Button btn = eyeBtn.AddComponent<Button>();
+            btn.transition = Selectable.Transition.None;
+
+            Image eyeImage = eyeBtn.AddComponent<Image>();
+            eyeImage.sprite = EyeClosedIcon;
+            eyeImage.color = CyanNeon;
+
+            // TODO: Add toggle functionality in runtime script
+        }
+
+        private static void CreatePrimaryButton(Transform parent, string name, string text)
         {
             GameObject btn = new GameObject(name);
             btn.transform.SetParent(parent, false);
 
             Image bg = btn.AddComponent<Image>();
             bg.sprite = WhiteSprite;
-            bg.color = GoldPremium;
+            bg.color = CyanNeon;
 
             Button button = btn.AddComponent<Button>();
             button.targetGraphic = bg;
-
-            // Gold button hover effect
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, 0.647f, 0f, 0.9f); // Lighter gold
-            colors.pressedColor = new Color(1f, 0.549f, 0f, 1f); // Orange gold
-            colors.selectedColor = new Color(1f, 0.647f, 0f, 0.9f);
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
 
             LayoutElement layout = btn.AddComponent<LayoutElement>();
             layout.preferredHeight = BUTTON_HEIGHT;
@@ -287,36 +334,10 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = text;
-            btnText.fontSize = 24;
+            btnText.fontSize = 22;
             btnText.fontStyle = FontStyles.Bold;
-            btnText.color = DarkBrown;
+            btnText.color = DarkNavy;
             btnText.alignment = TextAlignmentOptions.Center;
-        }
-
-        private static void CreateLegalText(Transform parent, string text)
-        {
-            GameObject legal = new GameObject("LegalText");
-            legal.transform.SetParent(parent, false);
-
-            TextMeshProUGUI legalText = legal.AddComponent<TextMeshProUGUI>();
-            legalText.font = DefaultFont;
-            legalText.text = text;
-            legalText.fontSize = 12;
-            legalText.color = TextGray;
-            legalText.alignment = TextAlignmentOptions.Center;
-            legalText.enableWordWrapping = true;
-
-            LayoutElement layout = legal.AddComponent<LayoutElement>();
-            layout.preferredHeight = 30;
-        }
-
-        private static void CreateSpacer(Transform parent, float height)
-        {
-            GameObject spacer = new GameObject("Spacer");
-            spacer.transform.SetParent(parent, false);
-
-            LayoutElement layout = spacer.AddComponent<LayoutElement>();
-            layout.preferredHeight = height;
         }
     }
 }
