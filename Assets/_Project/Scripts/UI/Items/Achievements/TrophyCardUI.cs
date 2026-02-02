@@ -89,11 +89,110 @@ namespace DigitPark.UI.Items
             _isInProgress = !data.isCompleted && data.currentProgress > 0;
             _isSecret = data.isSecret && !data.isCompleted;
 
+            // Auto-find references if not assigned in Inspector
+            FindReferencesIfNeeded();
+
             UpdateVisuals();
 
             if (_isUnlocked)
             {
                 StartIdleAnimations();
+            }
+        }
+
+        /// <summary>
+        /// Automatically find child references if not assigned in Inspector
+        /// </summary>
+        private void FindReferencesIfNeeded()
+        {
+            if (cardContainer == null)
+                cardContainer = transform.Find("CardContainer")?.GetComponent<RectTransform>();
+
+            if (cardBackground == null && cardContainer != null)
+                cardBackground = cardContainer.GetComponent<Image>();
+
+            if (trophyIcon == null)
+            {
+                var trophyIconTransform = transform.Find("CardContainer/TrophyIcon");
+                if (trophyIconTransform != null)
+                    trophyIcon = trophyIconTransform.GetComponent<Image>();
+            }
+
+            if (glassOverlay == null)
+            {
+                var glassTransform = transform.Find("CardContainer/GlassOverlay");
+                if (glassTransform != null)
+                    glassOverlay = glassTransform.GetComponent<Image>();
+            }
+
+            if (borderGlow == null)
+            {
+                var borderTransform = transform.Find("CardContainer/BorderGlow");
+                if (borderTransform != null)
+                    borderGlow = borderTransform.GetComponent<Image>();
+            }
+
+            if (lockedOverlay == null)
+            {
+                var lockedTransform = transform.Find("CardContainer/TrophyIcon/LockedOverlay");
+                if (lockedTransform != null)
+                    lockedOverlay = lockedTransform.GetComponent<Image>();
+            }
+
+            if (questionMark == null)
+            {
+                var questionTransform = transform.Find("CardContainer/TrophyIcon/QuestionMark");
+                if (questionTransform != null)
+                    questionMark = questionTransform.GetComponent<Image>();
+            }
+
+            if (progressContainer == null)
+            {
+                var progressTransform = transform.Find("CardContainer/ProgressContainer");
+                if (progressTransform != null)
+                    progressContainer = progressTransform.gameObject;
+            }
+
+            if (progressFill == null && progressContainer != null)
+            {
+                var fillTransform = progressContainer.transform.Find("ProgressBackground/ProgressFill");
+                if (fillTransform != null)
+                    progressFill = fillTransform.GetComponent<Image>();
+            }
+
+            if (progressText == null && progressContainer != null)
+            {
+                var textTransform = progressContainer.transform.Find("ProgressText");
+                if (textTransform != null)
+                    progressText = textTransform.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (titleText == null)
+            {
+                var titleTransform = transform.Find("CardContainer/TitleText");
+                if (titleTransform != null)
+                    titleText = titleTransform.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (pointsText == null)
+            {
+                var pointsTransform = transform.Find("CardContainer/PointsText");
+                if (pointsTransform != null)
+                    pointsText = pointsTransform.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (completedBadge == null)
+            {
+                var badgeTransform = transform.Find("CardContainer/CompletedBadge");
+                if (badgeTransform != null)
+                    completedBadge = badgeTransform.GetComponent<Image>();
+            }
+
+            if (shineEffect == null)
+            {
+                var shineTransform = transform.Find("CardContainer/ShineEffect");
+                if (shineTransform != null)
+                    shineEffect = shineTransform.GetComponent<Image>();
             }
         }
 
@@ -130,11 +229,20 @@ namespace DigitPark.UI.Items
                     if (_data.icon != null)
                     {
                         trophyIcon.sprite = _data.icon;
+                        Debug.Log($"[TrophyCard] Icon assigned for: {_data.title}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[TrophyCard] No icon for: {_data.title} (id: {_data.id})");
                     }
 
                     // Grayscale if locked
                     trophyIcon.color = _isUnlocked ? Color.white : new Color(0.4f, 0.4f, 0.4f);
                 }
+            }
+            else
+            {
+                Debug.LogError($"[TrophyCard] trophyIcon reference is NULL for: {_data?.title}");
             }
 
             // Shadow

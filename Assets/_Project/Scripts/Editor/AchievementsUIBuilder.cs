@@ -94,6 +94,7 @@ namespace DigitPark.Editor
             CreateHeader(safeArea);
             CreateCategoryTabs(safeArea);
             CreateTrophyShowcaseGrid(safeArea);
+            CreateEmptyState(safeArea);
 
             CreateDetailPanel(canvas);
             CreateRewardCelebration(canvas);
@@ -389,7 +390,7 @@ namespace DigitPark.Editor
             progressRightText.color = CYAN_NEON;
             progressRightText.alignment = TextAlignmentOptions.MidlineRight;
 
-            // Overall Progress Bar
+            // Overall Progress Bar (Slider)
             GameObject progressBar = FindOrCreateChild(progressSection, "OverallProgressBar");
             LayoutElement progressBarLE = GetOrAddComponent<LayoutElement>(progressBar);
             progressBarLE.minHeight = 16;
@@ -399,8 +400,22 @@ namespace DigitPark.Editor
             progressBarBg.color = new Color(0.08f, 0.1f, 0.14f, 1f);
             AddOutline(progressBar, CYAN_DARK * 0.5f);
 
+            // Add Slider component for auto-assigner
+            Slider progressSlider = GetOrAddComponent<Slider>(progressBar);
+            progressSlider.minValue = 0;
+            progressSlider.maxValue = 1;
+            progressSlider.value = 0.54f;
+            progressSlider.interactable = false;
+
+            // Progress Fill Area
+            GameObject fillArea = FindOrCreateChild(progressBar, "Fill Area");
+            SetRectTransformStretch(fillArea);
+            RectTransform fillAreaRT = fillArea.GetComponent<RectTransform>();
+            fillAreaRT.offsetMin = new Vector2(0, 0);
+            fillAreaRT.offsetMax = new Vector2(0, 0);
+
             // Progress Fill
-            GameObject progressFill = FindOrCreateChild(progressBar, "Fill");
+            GameObject progressFill = FindOrCreateChild(fillArea, "Fill");
             RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
             fillRT.anchorMin = Vector2.zero;
             fillRT.anchorMax = new Vector2(0.54f, 1);
@@ -408,6 +423,10 @@ namespace DigitPark.Editor
 
             Image fillImage = GetOrAddComponent<Image>(progressFill);
             fillImage.color = GOLD;
+
+            // Configure slider
+            progressSlider.fillRect = fillRT;
+            progressSlider.targetGraphic = progressBarBg;
 
             // Progress Glow
             GameObject progressGlow = FindOrCreateChild(progressBar, "Glow");
@@ -482,11 +501,11 @@ namespace DigitPark.Editor
             CreateCategoryTab(tabsContent, "TournamentsTab", "TORNEOS", false, CAT_COMPETITION, 80);
             CreateCategoryTab(tabsContent, "SocialTab", "SOCIAL", false, new Color(0.4f, 0.6f, 1f, 1f), 70);
             CreateCategoryTab(tabsContent, "ProgressionTab", "PROGRESO", false, new Color(0.8f, 0.6f, 1f, 1f), 85);
-            CreateCategoryTab(tabsContent, "CollectorTab", "COFRES", false, new Color(1f, 0.7f, 0.3f, 1f), 75);
+            // CollectorTab removido para V1 (sin cofres/battlepass)
             CreateCategoryTab(tabsContent, "TimeTab", "TIEMPO", false, new Color(0.5f, 0.8f, 0.9f, 1f), 75);
             CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 50);
 
-            Debug.Log("[TrophyShowcase] CategoryTabs creado con 11 categorías");
+            Debug.Log("[TrophyShowcase] CategoryTabs creado con 10 categorías (V1)");
         }
 
         private static void CreateCategoryTab(GameObject parent, string name, string label, bool isActive, Color color, float width = 0)
@@ -575,7 +594,7 @@ namespace DigitPark.Editor
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 3;
 
-            // ==================== CREATE ALL 54 ACHIEVEMENT CARDS ====================
+            // ==================== CREATE ALL 53 ACHIEVEMENT CARDS (V1) ====================
 
             // --- BEGINNER (4) ---
             CreateTrophyCard(content, "Trophy_first_game", "Primer Paso", 0, false, false, CAT_BEGINNER, false, 10);
@@ -636,12 +655,7 @@ namespace DigitPark.Editor
             CreateTrophyCard(content, "Trophy_rank_legend", "Leyenda", 0, false, false, new Color(1f, 0.6f, 0f, 1f), false, 200);
             CreateTrophyCard(content, "Trophy_rank_immortal", "Inmortal", 0, false, false, CAT_SECRET, true, 500); // SECRET
 
-            // --- COLLECTOR (5) ---
-            CreateTrophyCard(content, "Trophy_chest_first", "Primer Cofre", 100, true, false, new Color(1f, 0.7f, 0.3f, 1f), false, 10);
-            CreateTrophyCard(content, "Trophy_chest_50", "Coleccionista", 40, false, true, new Color(1f, 0.7f, 0.3f, 1f), false, 40);
-            CreateTrophyCard(content, "Trophy_chest_legendary", "Suertudo", 0, false, false, new Color(0.8f, 0.2f, 1f, 1f), false, 75);
-            CreateTrophyCard(content, "Trophy_battlepass_complete", "Dedicación", 75, false, true, GOLD, false, 100);
-            CreateTrophyCard(content, "Trophy_battlepass_premium", "VIP", 100, true, false, new Color(1f, 0.7f, 0.3f, 1f), false, 50);
+            // --- COLLECTOR --- Removido para V1 (sin cofres/battlepass)
 
             // --- TIME (6) ---
             CreateTrophyCard(content, "Trophy_days_7", "Una Semana", 100, true, false, new Color(0.5f, 0.8f, 0.9f, 1f), false, 25);
@@ -657,7 +671,69 @@ namespace DigitPark.Editor
             CreateTrophyCard(content, "Trophy_comeback_king", "Rey del Comeback", 0, false, false, CAT_SECRET, true, 75);
             CreateTrophyCard(content, "Trophy_speed_demon", "Demonio de Velocidad", 0, false, false, CAT_SECRET, true, 100);
 
-            Debug.Log("[TrophyShowcase] TrophyShowcaseGrid creado con 54 logros");
+            Debug.Log("[TrophyShowcase] TrophyShowcaseGrid creado con 53 logros (V1)");
+        }
+
+        // ==================== EMPTY STATE ====================
+
+        private static void CreateEmptyState(GameObject parent)
+        {
+            float topOffset = HEADER_HEIGHT + TABS_HEIGHT + 30;
+
+            GameObject emptyState = FindOrCreateChild(parent, "EmptyStateContainer");
+            emptyState.SetActive(false); // Hidden by default, shown when no results
+
+            RectTransform emptyRT = GetOrAddComponent<RectTransform>(emptyState);
+            emptyRT.anchorMin = Vector2.zero;
+            emptyRT.anchorMax = Vector2.one;
+            emptyRT.offsetMin = new Vector2(CONTENT_PADDING, CONTENT_PADDING);
+            emptyRT.offsetMax = new Vector2(-CONTENT_PADDING, -topOffset);
+
+            // Center content
+            GameObject centerContent = FindOrCreateChild(emptyState, "CenterContent");
+            RectTransform centerRT = GetOrAddComponent<RectTransform>(centerContent);
+            centerRT.anchorMin = new Vector2(0.5f, 0.5f);
+            centerRT.anchorMax = new Vector2(0.5f, 0.5f);
+            centerRT.sizeDelta = new Vector2(300, 250);
+
+            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(centerContent);
+            vlg.spacing = 20;
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            // Empty Icon
+            GameObject iconObj = FindOrCreateChild(centerContent, "EmptyStateIcon");
+            Image iconImage = GetOrAddComponent<Image>(iconObj);
+            iconImage.color = TEXT_SECONDARY;
+            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
+            iconLE.minWidth = 80;
+            iconLE.minHeight = 80;
+            iconLE.preferredWidth = 80;
+            iconLE.preferredHeight = 80;
+
+            // Empty Text
+            GameObject textObj = FindOrCreateChild(centerContent, "EmptyStateText");
+            TextMeshProUGUI emptyText = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            emptyText.text = "No hay logros en esta categoría";
+            emptyText.fontSize = 18;
+            emptyText.color = TEXT_SECONDARY;
+            emptyText.alignment = TextAlignmentOptions.Center;
+            LayoutElement textLE = GetOrAddComponent<LayoutElement>(textObj);
+            textLE.minHeight = 50;
+
+            // Subtitle
+            GameObject subtitleObj = FindOrCreateChild(centerContent, "Subtitle");
+            TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
+            subtitleText.text = "Sigue jugando para desbloquear más logros";
+            subtitleText.fontSize = 14;
+            subtitleText.color = new Color(TEXT_SECONDARY.r, TEXT_SECONDARY.g, TEXT_SECONDARY.b, 0.7f);
+            subtitleText.alignment = TextAlignmentOptions.Center;
+            LayoutElement subtitleLE = GetOrAddComponent<LayoutElement>(subtitleObj);
+            subtitleLE.minHeight = 30;
+
+            Debug.Log("[TrophyShowcase] EmptyState creado");
         }
 
         private static void CreateTrophyCard(GameObject parent, string name, string title, int progressPercent,
@@ -876,6 +952,10 @@ namespace DigitPark.Editor
             panelBg.color = POPUP_BG;
             AddOutline(panel, CYAN_NEON, 2);
 
+            // Add CanvasGroup for fade animations
+            CanvasGroup panelCanvasGroup = GetOrAddComponent<CanvasGroup>(panel);
+            panelCanvasGroup.alpha = 1f;
+
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(panel);
             vlg.spacing = 18;
             vlg.padding = new RectOffset(30, 30, 30, 25);
@@ -950,7 +1030,7 @@ namespace DigitPark.Editor
             LayoutElement progLE = GetOrAddComponent<LayoutElement>(progressSection);
             progLE.minHeight = 55;
 
-            // Progress Bar
+            // Progress Bar (Slider)
             GameObject progressBar = FindOrCreateChild(progressSection, "DetailProgressBar");
             Image progressBarBg = GetOrAddComponent<Image>(progressBar);
             progressBarBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
@@ -958,7 +1038,18 @@ namespace DigitPark.Editor
             LayoutElement progressBarLE = GetOrAddComponent<LayoutElement>(progressBar);
             progressBarLE.minHeight = 22;
 
-            GameObject progressFill = FindOrCreateChild(progressBar, "Fill");
+            // Add Slider component
+            Slider detailSlider = GetOrAddComponent<Slider>(progressBar);
+            detailSlider.minValue = 0;
+            detailSlider.maxValue = 1;
+            detailSlider.value = 1f;
+            detailSlider.interactable = false;
+
+            // Fill Area
+            GameObject detailFillArea = FindOrCreateChild(progressBar, "Fill Area");
+            SetRectTransformStretch(detailFillArea);
+
+            GameObject progressFill = FindOrCreateChild(detailFillArea, "Fill");
             RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
             fillRT.anchorMin = Vector2.zero;
             fillRT.anchorMax = new Vector2(1f, 1);
@@ -966,6 +1057,10 @@ namespace DigitPark.Editor
 
             Image fillImage = GetOrAddComponent<Image>(progressFill);
             fillImage.color = BUTTON_SUCCESS;
+
+            // Configure slider
+            detailSlider.fillRect = fillRT;
+            detailSlider.targetGraphic = progressBarBg;
 
             // Progress Text
             GameObject progressTextObj = FindOrCreateChild(progressSection, "DetailProgressText");

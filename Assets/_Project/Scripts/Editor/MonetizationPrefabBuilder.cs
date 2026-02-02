@@ -8,7 +8,7 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// Editor script para crear prefabs de items de Monetizacion
-    /// Incluye: Achievements, BattlePass, DailyMissions, DailyRewards, ChestOpening, Onboarding
+    /// Incluye: Achievements, DailyMissions, DailyRewards, Onboarding (V1)
     /// Resolucion: Portrait 9:16 (1080x1920)
     /// </summary>
     public class MonetizationPrefabBuilder : EditorWindow
@@ -71,10 +71,10 @@ namespace DigitPark.Editor
 
             if (GUILayout.Button("AchievementItem")) CreateAchievementItemPrefab();
             if (GUILayout.Button("CategoryHeader")) CreateCategoryHeaderPrefab();
-            if (GUILayout.Button("RewardTierItem")) CreateRewardTierItemPrefab();
+            // RewardTierItem - Removed for V1 (BattlePass)
             if (GUILayout.Button("MissionItem")) CreateMissionItemPrefab();
             if (GUILayout.Button("RewardDayItem")) CreateRewardDayItemPrefab();
-            if (GUILayout.Button("ChestRewardItem")) CreateChestRewardItemPrefab();
+            // ChestRewardItem - Removed for V1 (Chests)
             if (GUILayout.Button("StepDotItem")) CreateStepDotItemPrefab();
             if (GUILayout.Button("AvatarOptionItem")) CreateAvatarOptionItemPrefab();
             if (GUILayout.Button("PrizeRowItem")) CreatePrizeRowItemPrefab();
@@ -86,10 +86,10 @@ namespace DigitPark.Editor
         {
             CreateAchievementItemPrefab();
             CreateCategoryHeaderPrefab();
-            CreateRewardTierItemPrefab();
+            // CreateRewardTierItemPrefab(); // Removed for V1 (BattlePass)
             CreateMissionItemPrefab();
             CreateRewardDayItemPrefab();
-            CreateChestRewardItemPrefab();
+            // CreateChestRewardItemPrefab(); // Removed for V1 (Chests)
             CreateStepDotItemPrefab();
             CreateAvatarOptionItemPrefab();
             CreatePrizeRowItemPrefab();
@@ -249,10 +249,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Battle Pass - Reward Tier Prefab
-
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create RewardTierItem")]
-        private static void CreateRewardTierItemPrefab()
+        #region Battle Pass - REMOVED FOR V1
+        /*
+        // BattlePass removido para V1
+        // [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create RewardTierItem")]
+        private static void CreateRewardTierItemPrefab_DISABLED()
         {
             GameObject item = new GameObject("RewardTierItem");
 
@@ -339,7 +340,7 @@ namespace DigitPark.Editor
 
             SavePrefab(item, "Assets/_Project/Prefabs/Monetization/BattlePass/RewardTierItem.prefab");
         }
-
+        */
         #endregion
 
         #region Daily Missions - Mission Item Prefab
@@ -522,72 +523,15 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Chest Opening - Chest Reward Item Prefab
-
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create ChestRewardItem")]
-        private static void CreateChestRewardItemPrefab()
+        #region Chest Opening - REMOVED FOR V1
+        /*
+        // ChestOpening removido para V1
+        // [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create ChestRewardItem")]
+        private static void CreateChestRewardItemPrefab_DISABLED()
         {
-            GameObject item = new GameObject("ChestRewardItem");
-
-            RectTransform rt = item.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(CHEST_REWARD_SIZE, CHEST_REWARD_SIZE + 30);
-
-            LayoutElement le = item.AddComponent<LayoutElement>();
-            le.preferredWidth = CHEST_REWARD_SIZE;
-            le.preferredHeight = CHEST_REWARD_SIZE + 30;
-
-            // Background
-            Image bg = item.AddComponent<Image>();
-            bg.color = CARD_BG;
-
-            // Border (rarity color)
-            GameObject border = CreateImageElement(item.transform, "BorderImage",
-                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            Outline outline = border.AddComponent<Outline>();
-            outline.effectColor = new Color(0.6f, 0.6f, 0.6f);
-            outline.effectDistance = new Vector2(2, 2);
-
-            // Glow (for rare+)
-            GameObject glow = CreateImageElement(item.transform, "GlowImage",
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-60, -60), new Vector2(60, 60));
-            glow.GetComponent<Image>().color = new Color(1, 1, 1, 0.2f);
-            glow.SetActive(false);
-
-            // Reward Icon
-            GameObject rewardIcon = CreateImageElement(item.transform, "RewardIcon",
-                new Vector2(0.5f, 0.55f), new Vector2(0.5f, 0.55f),
-                new Vector2(-30, -30), new Vector2(30, 30));
-            rewardIcon.GetComponent<Image>().color = Color.white;
-
-            // Name Text
-            CreateTextElement(item.transform, "NameText", "Recompensa",
-                new Vector2(0, 0.15f), new Vector2(1, 0.35f), 12, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
-
-            // Amount Text
-            CreateTextElement(item.transform, "AmountText", "x10",
-                new Vector2(0, 0.35f), new Vector2(1, 0.5f), 14, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
-
-            // Rarity Text
-            CreateTextElement(item.transform, "RarityText", "Comun",
-                new Vector2(0, 0), new Vector2(1, 0.15f), 10, new Color(0.6f, 0.6f, 0.6f), FontStyles.Italic, TextAlignmentOptions.Center);
-
-            // New Tag
-            GameObject newTag = CreateContainer(item.transform, "NewTag",
-                new Vector2(0, 1), new Vector2(0, 1),
-                new Vector2(2, -20), new Vector2(35, -2));
-            Image newBg = newTag.AddComponent<Image>();
-            newBg.color = GREEN;
-            CreateTextElement(newTag.transform, "Text", "NEW",
-                Vector2.zero, Vector2.one, 9, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
-            newTag.SetActive(false);
-
-            // Add UI Component
-            ChestRewardItemUI ui = item.AddComponent<ChestRewardItemUI>();
-
-            SavePrefab(item, "Assets/_Project/Prefabs/Monetization/ChestOpening/ChestRewardItem.prefab");
+            // Código deshabilitado para V1
         }
-
+        */
         #endregion
 
         #region Onboarding - Step Dot Item Prefab

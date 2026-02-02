@@ -48,8 +48,6 @@ namespace DigitPark.Editor
             { "Shop", new[] { "ShopManager" } },
             { "DailyMissions", new[] { "DailyMissionsManager" } },
             { "DailyRewards", new[] { "DailyRewardsManager" } },
-            { "BattlePass", new[] { "BattlePassManager" } },
-            { "ChestOpening", new[] { "ChestOpeningManager" } },
             { "Achievements", new[] { "AchievementsManager" } },
             { "Onboarding", new[] { "OnboardingManager" } },
             { "DigitRush", new[] { "DigitRushController" } },

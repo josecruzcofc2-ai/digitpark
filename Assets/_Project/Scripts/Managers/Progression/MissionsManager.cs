@@ -122,11 +122,11 @@ namespace DigitPark.Progression
 
         private static readonly MissionTemplate[] SeasonMissionTemplates = new MissionTemplate[]
         {
-            // Battle Pass
-            new MissionTemplate("season_bp_25", "Medio Camino", "Alcanza nivel 25 del Pase de Batalla", MissionType.BattlePassLevel, 25,
-                new MissionReward(2000, 5000, 100)),
-            new MissionTemplate("season_bp_50", "Pase Completo", "Completa el Pase de Batalla", MissionType.BattlePassLevel, 50,
-                new MissionReward(5000, 10000, 250)),
+            // Battle Pass - REMOVED FOR V1
+            // new MissionTemplate("season_bp_25", "Medio Camino", "Alcanza nivel 25 del Pase de Batalla", MissionType.BattlePassLevel, 25,
+            //     new MissionReward(2000, 5000, 100)),
+            // new MissionTemplate("season_bp_50", "Pase Completo", "Completa el Pase de Batalla", MissionType.BattlePassLevel, 50,
+            //     new MissionReward(5000, 10000, 250)),
 
             // Wins
             new MissionTemplate("season_wins_50", "Veterano de Temporada", "Gana 50 partidas", MissionType.WinGames, 50,
@@ -346,19 +346,13 @@ namespace DigitPark.Progression
         }
 
         /// <summary>
-        /// Report Battle Pass level
+        /// Report Battle Pass level - DISABLED FOR V1
         /// </summary>
+        [System.Obsolete("BattlePass removed for V1")]
         public void ReportBattlePassLevel(int level)
         {
-            var allMissions = GetAllActiveMissions();
-            foreach (var mission in allMissions)
-            {
-                if (mission.Template.type == MissionType.BattlePassLevel)
-                {
-                    mission.CurrentProgress = level;
-                    CheckMissionCompletion(mission);
-                }
-            }
+            // BattlePass removed for V1 - method kept for API compatibility
+            return;
         }
 
         /// <summary>

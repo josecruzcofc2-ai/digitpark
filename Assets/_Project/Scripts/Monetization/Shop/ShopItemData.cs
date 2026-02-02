@@ -12,7 +12,7 @@ namespace DigitPark.Monetization
         Theme,          // Tema visual
         Avatar,         // Avatar
         SpecialOffer,   // Oferta especial (bundle)
-        BattlePass,     // Pase de batalla
+        PremiumBundle,  // Bundle premium (era BattlePass)
         StarterPack     // Paquete de inicio
     }
 
@@ -300,7 +300,7 @@ namespace DigitPark.Monetization
                     shopTab = ShopTab.Themes;
                     break;
                 case ShopItemType.SpecialOffer:
-                case ShopItemType.BattlePass:
+                case ShopItemType.PremiumBundle:
                 case ShopItemType.StarterPack:
                     shopTab = ShopTab.Offers;
                     break;

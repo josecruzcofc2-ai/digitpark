@@ -27,7 +27,7 @@ namespace DigitPark.UI
 
         [Header("Visual Settings")]
         [SerializeField] private Color _offerColor = new Color(0.6f, 0.3f, 0.9f, 1f);
-        [SerializeField] private Color _battlePassColor = new Color(1f, 0.5f, 0.1f, 1f);
+        [SerializeField] private Color _premiumBundleColor = new Color(1f, 0.5f, 0.1f, 1f);
         [SerializeField] private Color _starterPackColor = new Color(0.2f, 0.8f, 0.4f, 1f);
 
         [Header("Offer Data")]
@@ -42,7 +42,7 @@ namespace DigitPark.UI
         public enum PremiumCardType
         {
             SpecialOffer,
-            BattlePass,
+            PremiumBundle, // Era BattlePass, renombrado para V1
             StarterPack,
             DailyDeal,
             WeeklyBundle
@@ -116,8 +116,8 @@ namespace DigitPark.UI
         {
             switch (_cardType)
             {
-                case PremiumCardType.BattlePass:
-                    return _battlePassColor;
+                case PremiumCardType.PremiumBundle:
+                    return _premiumBundleColor;
                 case PremiumCardType.StarterPack:
                     return _starterPackColor;
                 case PremiumCardType.SpecialOffer:
@@ -132,8 +132,8 @@ namespace DigitPark.UI
         {
             switch (_cardType)
             {
-                case PremiumCardType.BattlePass:
-                    SetContent("PASE DE BATALLA", "Temporada 1 - Neon Dreams", "$9.99", "", false);
+                case PremiumCardType.PremiumBundle:
+                    SetContent("BUNDLE PREMIUM", "1000 Gemas + Temas Exclusivos", "$14.99", "50%", true);
                     _targetTab = Monetization.ShopTab.Offers;
                     break;
 
@@ -221,10 +221,10 @@ namespace DigitPark.UI
                 // Navigate to specific offer
                 navigator.NavigateToShopOffer(_offerId);
             }
-            else if (_cardType == PremiumCardType.BattlePass)
+            else if (_cardType == PremiumCardType.PremiumBundle)
             {
-                // Navigate to Battle Pass scene
-                navigator.NavigateTo(Monetization.SceneNavigator.Scenes.BATTLE_PASS);
+                // Navigate to shop offers (BattlePass removed for V1)
+                navigator.NavigateToShop(Monetization.ShopTab.Offers);
             }
             else
             {

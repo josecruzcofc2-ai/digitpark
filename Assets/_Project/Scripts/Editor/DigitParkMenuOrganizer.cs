@@ -37,8 +37,6 @@ namespace DigitPark.Editor
     /// │   │
     /// │   ├── Monetization/                      [180-219]
     /// │   │   ├── Shop
-    /// │   │   ├── BattlePass
-    /// │   │   ├── ChestOpening
     /// │   │   ├── DailyRewards
     /// │   │   ├── DailyMissions
     /// │   │   ├── Achievements
@@ -124,7 +122,7 @@ namespace DigitPark.Editor
                 "🎨 UI BUILDERS\n" +
                 "   • Games (DigitRush, FlashTap, etc.)\n" +
                 "   • Core (MainMenu, Matchmaking)\n" +
-                "   • Monetization (Shop, BattlePass)\n" +
+                "   • Monetization (Shop, DailyRewards)\n" +
                 "   • Social (Scores, SearchPlayers)\n" +
                 "   • Tournaments\n" +
                 "   • CashBattle\n\n" +

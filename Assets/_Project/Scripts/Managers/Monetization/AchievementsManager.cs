@@ -122,88 +122,84 @@ namespace DigitPark.Managers
         private void InitializeAchievements()
         {
             // Define all achievements with their data
-            // Total: 54 achievements across 11 categories
+            // Total: 53 achievements across 11 categories (V1 - sin BattlePass/Cofres)
             allAchievements = new List<AchievementDefinition>
             {
                 // ==================== BEGINNER (Onboarding) ====================
-                new AchievementDefinition("first_game", "Primer Paso", "Completa tu primera partida", AchievementCategory.Beginner, 10, 1, "first_game"),
-                new AchievementDefinition("tutorial_complete", "Aprendiz", "Completa el tutorial", AchievementCategory.Beginner, 10, 1, "tutorial_complete"),
-                new AchievementDefinition("first_win", "Primera Victoria", "Gana tu primera partida", AchievementCategory.Beginner, 15, 1, "first_win"),
-                new AchievementDefinition("profile_complete", "Identidad", "Completa tu perfil (avatar, nombre)", AchievementCategory.Beginner, 10, 1, "profile_complete"),
+                new AchievementDefinition("first_game", "Primer Paso", "Completa tu primera partida", AchievementCategory.Beginner, 10, 1, "Logro_Primeros_Pasos"),
+                new AchievementDefinition("tutorial_complete", "Aprendiz", "Completa el tutorial", AchievementCategory.Beginner, 10, 1, "Logro_Graduado"),
+                new AchievementDefinition("first_win", "Primera Victoria", "Gana tu primera partida", AchievementCategory.Beginner, 15, 1, "Logro_Primera_Victoria"),
+                new AchievementDefinition("profile_complete", "Identidad", "Completa tu perfil (avatar, nombre)", AchievementCategory.Beginner, 10, 1, "Logro_Perfil_Completo"),
 
                 // ==================== MASTERY (Per Game) ====================
-                new AchievementDefinition("digitrush_master", "Maestro de Dígitos", "Alcanza 10,000 puntos en DigitRush", AchievementCategory.Mastery, 50, 10000, "digitrush_master"),
-                new AchievementDefinition("flashtap_master", "Reflejos de Luz", "Alcanza 100 taps perfectos en FlashTap", AchievementCategory.Mastery, 50, 100, "flashtap_master"),
-                new AchievementDefinition("memorypairs_master", "Memoria Fotográfica", "Completa MemoryPairs sin errores", AchievementCategory.Mastery, 50, 1, "memorypairs_master"),
-                new AchievementDefinition("quickmath_master", "Calculadora Humana", "Resuelve 50 problemas seguidos en QuickMath", AchievementCategory.Mastery, 50, 50, "quickmath_master"),
-                new AchievementDefinition("oddoneout_master", "Ojo de Águila", "Encuentra 100 diferencias en OddOneOut", AchievementCategory.Mastery, 50, 100, "oddoneout_master"),
+                new AchievementDefinition("digitrush_master", "Maestro de Dígitos", "Alcanza 10,000 puntos en DigitRush", AchievementCategory.Mastery, 50, 10000, "Logro_Maestro_Numeros"),
+                new AchievementDefinition("flashtap_master", "Reflejos de Luz", "Alcanza 100 taps perfectos en FlashTap", AchievementCategory.Mastery, 50, 100, "Logro_Reflejos_Rayo"),
+                new AchievementDefinition("memorypairs_master", "Memoria Fotográfica", "Completa MemoryPairs sin errores", AchievementCategory.Mastery, 50, 1, "Logro_Genio"),
+                new AchievementDefinition("quickmath_master", "Calculadora Humana", "Resuelve 50 problemas seguidos en QuickMath", AchievementCategory.Mastery, 50, 50, "Logro_Maestro_Matematicas"),
+                new AchievementDefinition("oddoneout_master", "Ojo de Águila", "Encuentra 100 diferencias en OddOneOut", AchievementCategory.Mastery, 50, 100, "Logro_Ojo_Aguila"),
 
                 // ==================== VICTORIES ====================
-                new AchievementDefinition("wins_10", "Competidor", "Gana 10 partidas", AchievementCategory.Victories, 20, 10, "wins_10"),
-                new AchievementDefinition("wins_50", "Veterano", "Gana 50 partidas", AchievementCategory.Victories, 40, 50, "wins_50"),
-                new AchievementDefinition("wins_100", "Centurión", "Gana 100 partidas", AchievementCategory.Victories, 60, 100, "wins_100"),
-                new AchievementDefinition("wins_500", "Leyenda", "Gana 500 partidas", AchievementCategory.Victories, 100, 500, "wins_500"),
-                new AchievementDefinition("wins_1000", "Inmortal", "Gana 1,000 partidas", AchievementCategory.Victories, 200, 1000, "wins_1000"),
+                new AchievementDefinition("wins_10", "Competidor", "Gana 10 partidas", AchievementCategory.Victories, 20, 10, "Logro_10_Victorias"),
+                new AchievementDefinition("wins_50", "Veterano", "Gana 50 partidas", AchievementCategory.Victories, 40, 50, "Logro_50_Victorias"),
+                new AchievementDefinition("wins_100", "Centurión", "Gana 100 partidas", AchievementCategory.Victories, 60, 100, "Logro_Centurion"),
+                new AchievementDefinition("wins_500", "Leyenda", "Gana 500 partidas", AchievementCategory.Victories, 100, 500, "Logro_500_Victorias"),
+                new AchievementDefinition("wins_1000", "Inmortal", "Gana 1,000 partidas", AchievementCategory.Victories, 200, 1000, "Logro_1000_Victorias"),
 
                 // ==================== STREAKS ====================
-                new AchievementDefinition("streak_3", "En Racha", "Gana 3 partidas seguidas", AchievementCategory.Streaks, 25, 3, "streak_3"),
-                new AchievementDefinition("streak_5", "Imparable", "Gana 5 partidas seguidas", AchievementCategory.Streaks, 40, 5, "streak_5"),
-                new AchievementDefinition("streak_10", "Dominación", "Gana 10 partidas seguidas", AchievementCategory.Streaks, 75, 10, "streak_10"),
-                new AchievementDefinition("streak_20", "Invencible", "Gana 20 partidas seguidas", AchievementCategory.Streaks, 150, 20, "streak_20", true), // SECRET
+                new AchievementDefinition("streak_3", "En Racha", "Gana 3 partidas seguidas", AchievementCategory.Streaks, 25, 3, "Logro_Racha_Fuego"),
+                new AchievementDefinition("streak_5", "Imparable", "Gana 5 partidas seguidas", AchievementCategory.Streaks, 40, 5, "Logro_Victoria_Racha_7"),
+                new AchievementDefinition("streak_10", "Dominación", "Gana 10 partidas seguidas", AchievementCategory.Streaks, 75, 10, "Logro_Demoledor"),
+                new AchievementDefinition("streak_20", "Invencible", "Gana 20 partidas seguidas", AchievementCategory.Streaks, 150, 20, "Logro_Victoria_Racha_30", true), // SECRET
 
                 // ==================== CASH BATTLE ====================
-                new AchievementDefinition("cash_first", "Apostador", "Completa tu primera Cash Battle", AchievementCategory.CashBattle, 25, 1, "cash_first"),
-                new AchievementDefinition("cash_first_win", "Ganador Real", "Gana tu primera Cash Battle", AchievementCategory.CashBattle, 35, 1, "cash_first_win"),
-                new AchievementDefinition("cash_10_wins", "Jugador Serio", "Gana 10 Cash Battles", AchievementCategory.CashBattle, 50, 10, "cash_10_wins"),
-                new AchievementDefinition("cash_50_wins", "High Roller", "Gana 50 Cash Battles", AchievementCategory.CashBattle, 100, 50, "cash_50_wins"),
-                new AchievementDefinition("cash_100_wins", "Tiburón", "Gana 100 Cash Battles", AchievementCategory.CashBattle, 200, 100, "cash_100_wins"),
-                new AchievementDefinition("cash_earnings_100", "Primeros $100", "Acumula $100 en ganancias", AchievementCategory.CashBattle, 75, 100, "cash_earnings_100"),
-                new AchievementDefinition("cash_earnings_1000", "Club de los Mil", "Acumula $1,000 en ganancias", AchievementCategory.CashBattle, 250, 1000, "cash_earnings_1000", true), // SECRET
+                new AchievementDefinition("cash_first", "Apostador", "Completa tu primera Cash Battle", AchievementCategory.CashBattle, 25, 1, "Logro_Ficha_Cash"),
+                new AchievementDefinition("cash_first_win", "Ganador Real", "Gana tu primera Cash Battle", AchievementCategory.CashBattle, 35, 1, "Logro_Rey_Monedas"),
+                new AchievementDefinition("cash_10_wins", "Jugador Serio", "Gana 10 Cash Battles", AchievementCategory.CashBattle, 50, 10, "Logro_VIP_1000"),
+                new AchievementDefinition("cash_50_wins", "High Roller", "Gana 50 Cash Battles", AchievementCategory.CashBattle, 100, 50, "Logro_VIP_Dados"),
+                new AchievementDefinition("cash_100_wins", "Tiburón", "Gana 100 Cash Battles", AchievementCategory.CashBattle, 200, 100, "Logro_Tiburon_Cash"),
+                new AchievementDefinition("cash_earnings_100", "Primeros $100", "Acumula $100 en ganancias", AchievementCategory.CashBattle, 75, 100, "Logro_Bolsa_100"),
+                new AchievementDefinition("cash_earnings_1000", "Club de los Mil", "Acumula $1,000 en ganancias", AchievementCategory.CashBattle, 250, 1000, "Logro_Millonario", true), // SECRET
 
                 // ==================== TOURNAMENTS ====================
-                new AchievementDefinition("tournament_first", "Participante", "Participa en tu primer torneo", AchievementCategory.Tournaments, 20, 1, "tournament_first"),
-                new AchievementDefinition("tournament_top3", "Podio", "Termina en Top 3 de un torneo", AchievementCategory.Tournaments, 50, 1, "tournament_top3"),
-                new AchievementDefinition("tournament_win", "Campeón", "Gana un torneo", AchievementCategory.Tournaments, 100, 1, "tournament_win"),
-                new AchievementDefinition("tournament_5_wins", "Multicampeón", "Gana 5 torneos", AchievementCategory.Tournaments, 200, 5, "tournament_5_wins"),
-                new AchievementDefinition("tournament_create", "Organizador", "Crea tu primer torneo", AchievementCategory.Tournaments, 30, 1, "tournament_create"),
+                new AchievementDefinition("tournament_first", "Participante", "Participa en tu primer torneo", AchievementCategory.Tournaments, 20, 1, "Logro_Torneo_Bracket"),
+                new AchievementDefinition("tournament_top3", "Podio", "Termina en Top 3 de un torneo", AchievementCategory.Tournaments, 50, 1, "Logro_Coleccion_Trofeos"),
+                new AchievementDefinition("tournament_win", "Campeón", "Gana un torneo", AchievementCategory.Tournaments, 100, 1, "Logro_Campeon_1"),
+                new AchievementDefinition("tournament_5_wins", "Multicampeón", "Gana 5 torneos", AchievementCategory.Tournaments, 200, 5, "Logro_4_Estrellas"),
+                new AchievementDefinition("tournament_create", "Organizador", "Crea tu primer torneo", AchievementCategory.Tournaments, 30, 1, "Logro_Organizador_Torneo"),
 
                 // ==================== SOCIAL ====================
-                new AchievementDefinition("friend_first", "Primer Amigo", "Añade tu primer amigo", AchievementCategory.Social, 15, 1, "friend_first"),
-                new AchievementDefinition("friends_10", "Popular", "Tiene 10 amigos", AchievementCategory.Social, 30, 10, "friends_10"),
-                new AchievementDefinition("friends_50", "Influencer", "Tiene 50 amigos", AchievementCategory.Social, 75, 50, "friends_50"),
-                new AchievementDefinition("challenge_friend", "Retador", "Reta a un amigo a una partida", AchievementCategory.Social, 20, 1, "challenge_friend"),
-                new AchievementDefinition("beat_friend", "Rival", "Vence a un amigo", AchievementCategory.Social, 25, 1, "beat_friend"),
+                new AchievementDefinition("friend_first", "Primer Amigo", "Añade tu primer amigo", AchievementCategory.Social, 15, 1, "Logro_Primer_Rival"),
+                new AchievementDefinition("friends_10", "Popular", "Tiene 10 amigos", AchievementCategory.Social, 30, 10, "Logro_Social_10_Amigos"),
+                new AchievementDefinition("friends_50", "Influencer", "Tiene 50 amigos", AchievementCategory.Social, 75, 50, "Logro_Influencer"),
+                new AchievementDefinition("challenge_friend", "Retador", "Reta a un amigo a una partida", AchievementCategory.Social, 20, 1, "Logro_Versus"),
+                new AchievementDefinition("beat_friend", "Rival", "Vence a un amigo", AchievementCategory.Social, 25, 1, "Logro_Amigo_Rival"),
 
                 // ==================== PROGRESSION ====================
-                new AchievementDefinition("level_10", "Nivel 10", "Alcanza el nivel 10", AchievementCategory.Progression, 25, 10, "level_10"),
-                new AchievementDefinition("level_25", "Nivel 25", "Alcanza el nivel 25", AchievementCategory.Progression, 50, 25, "level_25"),
-                new AchievementDefinition("level_50", "Nivel 50", "Alcanza el nivel 50", AchievementCategory.Progression, 75, 50, "level_50"),
-                new AchievementDefinition("level_100", "Nivel 100", "Alcanza el nivel 100", AchievementCategory.Progression, 150, 100, "level_100"),
-                new AchievementDefinition("rank_up", "Ascenso", "Sube de rango por primera vez", AchievementCategory.Progression, 30, 1, "rank_up"),
-                new AchievementDefinition("rank_elite", "Élite", "Alcanza rango Diamante o superior", AchievementCategory.Progression, 100, 5, "rank_elite"), // Rank 5 = Diamante
-                new AchievementDefinition("rank_legend", "Leyenda", "Alcanza rango Leyenda", AchievementCategory.Progression, 200, 8, "rank_legend"), // Rank 8 = Leyenda
-                new AchievementDefinition("rank_immortal", "Inmortal", "Alcanza rango Inmortal", AchievementCategory.Progression, 500, 9, "rank_immortal", true), // SECRET
+                new AchievementDefinition("level_10", "Nivel 10", "Alcanza el nivel 10", AchievementCategory.Progression, 25, 10, "Logro_Nivel_10"),
+                new AchievementDefinition("level_25", "Nivel 25", "Alcanza el nivel 25", AchievementCategory.Progression, 50, 25, "Logro_Nivel_25"),
+                new AchievementDefinition("level_50", "Nivel 50", "Alcanza el nivel 50", AchievementCategory.Progression, 75, 50, "Logro_Nivel50"),
+                new AchievementDefinition("level_100", "Nivel 100", "Alcanza el nivel 100", AchievementCategory.Progression, 150, 100, "Logro_Avance_Epico"),
+                new AchievementDefinition("rank_up", "Ascenso", "Sube de rango por primera vez", AchievementCategory.Progression, 30, 1, "Logro_Ascenso"),
+                new AchievementDefinition("rank_elite", "Élite", "Alcanza rango Diamante o superior", AchievementCategory.Progression, 100, 5, "Logro_Elite"),
+                new AchievementDefinition("rank_legend", "Leyenda", "Alcanza rango Leyenda", AchievementCategory.Progression, 200, 8, "Logro_Leyenda"),
+                new AchievementDefinition("rank_immortal", "Inmortal", "Alcanza rango Inmortal", AchievementCategory.Progression, 500, 9, "Logro_Inmortal", true), // SECRET
 
-                // ==================== COLLECTOR ====================
-                new AchievementDefinition("chest_first", "Primer Cofre", "Abre tu primer cofre", AchievementCategory.Collector, 10, 1, "chest_first"),
-                new AchievementDefinition("chest_50", "Coleccionista", "Abre 50 cofres", AchievementCategory.Collector, 40, 50, "chest_50"),
-                new AchievementDefinition("chest_legendary", "Suertudo", "Abre un cofre legendario", AchievementCategory.Collector, 75, 1, "chest_legendary"),
-                new AchievementDefinition("battlepass_complete", "Dedicación", "Completa un Pase de Batalla", AchievementCategory.Collector, 100, 1, "battlepass_complete"),
-                new AchievementDefinition("battlepass_premium", "VIP", "Adquiere el Pase Premium", AchievementCategory.Collector, 50, 1, "battlepass_premium"),
+                // ==================== COLLECTOR ==================== (Categoría reservada para V2)
+                // Nota: Cofres y BattlePass removidos para V1
 
                 // ==================== TIME ====================
-                new AchievementDefinition("days_7", "Una Semana", "Juega 7 días", AchievementCategory.Time, 25, 7, "days_7"),
-                new AchievementDefinition("days_30", "Un Mes", "Juega 30 días", AchievementCategory.Time, 50, 30, "days_30"),
-                new AchievementDefinition("days_100", "100 Días", "Juega 100 días", AchievementCategory.Time, 100, 100, "days_100"),
-                new AchievementDefinition("days_365", "Un Año", "Juega 365 días", AchievementCategory.Time, 300, 365, "days_365", true), // SECRET
-                new AchievementDefinition("daily_streak_7", "Racha Semanal", "Login 7 días seguidos", AchievementCategory.Time, 30, 7, "daily_streak_7"),
-                new AchievementDefinition("daily_streak_30", "Racha Mensual", "Login 30 días seguidos", AchievementCategory.Time, 75, 30, "daily_streak_30"),
+                new AchievementDefinition("days_7", "Una Semana", "Juega 7 días", AchievementCategory.Time, 25, 7, "Logro_Racha_7_Dias"),
+                new AchievementDefinition("days_30", "Un Mes", "Juega 30 días", AchievementCategory.Time, 50, 30, "Logro_Racha_30_Dias"),
+                new AchievementDefinition("days_100", "100 Días", "Juega 100 días", AchievementCategory.Time, 100, 100, "Logro_Racha_100_Dias"),
+                new AchievementDefinition("days_365", "Un Año", "Juega 365 días", AchievementCategory.Time, 300, 365, "Logro_Racha_365_Dias", true), // SECRET
+                new AchievementDefinition("daily_streak_7", "Racha Semanal", "Login 7 días seguidos", AchievementCategory.Time, 30, 7, "Logro_Login_Semanal"),
+                new AchievementDefinition("daily_streak_30", "Racha Mensual", "Login 30 días seguidos", AchievementCategory.Time, 75, 30, "Logro_Login_Mensual"),
 
                 // ==================== SECRET ====================
-                new AchievementDefinition("night_owl", "Búho Nocturno", "Juega a las 3:00 AM", AchievementCategory.Secret, 50, 1, "night_owl", true),
-                new AchievementDefinition("perfect_game", "Perfección", "Completa cualquier juego con 100% precisión", AchievementCategory.Secret, 100, 1, "perfect_game", true),
-                new AchievementDefinition("comeback_king", "Rey del Comeback", "Gana perdiendo por 50%+", AchievementCategory.Secret, 75, 1, "comeback_king", true),
-                new AchievementDefinition("speed_demon", "Demonio de Velocidad", "Completa un juego en menos de 10 segundos", AchievementCategory.Secret, 100, 1, "speed_demon", true),
+                new AchievementDefinition("night_owl", "Búho Nocturno", "Juega a las 3:00 AM", AchievementCategory.Secret, 50, 1, "Logro_Buho_Nocturno", true),
+                new AchievementDefinition("perfect_game", "Perfección", "Completa cualquier juego con 100% precisión", AchievementCategory.Secret, 100, 1, "Logro_Perfeccionista", true),
+                new AchievementDefinition("comeback_king", "Rey del Comeback", "Gana perdiendo por 50%+", AchievementCategory.Secret, 75, 1, "Logro_Ave_Fenix", true),
+                new AchievementDefinition("speed_demon", "Demonio de Velocidad", "Completa un juego en menos de 10 segundos", AchievementCategory.Secret, 100, 1, "Logro_Demonio_Velocidad", true),
             };
 
             // Load saved progress
@@ -453,16 +449,29 @@ namespace DigitPark.Managers
 
         private Sprite LoadAchievementIcon(string iconName)
         {
-            if (string.IsNullOrEmpty(iconName)) return defaultTrophyIcon;
+            if (string.IsNullOrEmpty(iconName))
+            {
+                Debug.LogWarning($"[Achievements] Icon name is empty, using default");
+                return defaultTrophyIcon;
+            }
 
             // Try to load from Resources
             var sprite = Resources.Load<Sprite>($"Icons/Achievements/{iconName}");
-            if (sprite != null) return sprite;
+            if (sprite != null)
+            {
+                Debug.Log($"[Achievements] Loaded icon: {iconName}");
+                return sprite;
+            }
 
-            // Try loading from project path
+            // Try loading from alternate path
             sprite = Resources.Load<Sprite>($"Achievements/{iconName}");
-            if (sprite != null) return sprite;
+            if (sprite != null)
+            {
+                Debug.Log($"[Achievements] Loaded icon from alternate path: {iconName}");
+                return sprite;
+            }
 
+            Debug.LogWarning($"[Achievements] Could not load icon: {iconName} - using default");
             return defaultTrophyIcon;
         }
 
@@ -748,7 +757,13 @@ namespace DigitPark.Managers
                 achievement.isCompleted = true;
                 Debug.Log($"[Achievements] Completed: {achievement.title}");
 
-                // Find and animate the card
+                // Show toast notification (works in any scene)
+                if (AchievementNotificationManager.Instance != null)
+                {
+                    AchievementNotificationManager.Instance.ShowNotification(achievement);
+                }
+
+                // Find and animate the card (only if in Achievements scene)
                 var card = spawnedCards.Find(c => c.GetData()?.id == achievementId);
                 if (card != null)
                 {
