@@ -50,11 +50,12 @@ namespace DigitPark.Editor
             // Matchmaking (has cancel button instead)
             "Matchmaking",
 
-            // Onboarding (has own navigation)
+            // Onboarding scenes (have own navigation)
             "Onboarding",
+            "CashBattleOnboarding",
 
-            // Chest opening (special animation scene)
-            "ChestOpening"
+            // Boot scene
+            "Boot"
         };
 
         [MenuItem("DigitPark/UI/Auto-Add/Add BackButtons to All Scenes", false, 200)]
@@ -163,59 +164,34 @@ namespace DigitPark.Editor
                     return false;
                 }
 
-                // Check if BackButton already exists
+                // Remove existing BackButton if any (clean install)
                 var existingBackButton = FindExistingBackButton(canvas.transform);
-
                 if (existingBackButton != null)
                 {
-                    Debug.Log($"⏭️ {sceneName}: BackButton already exists");
-                    return false;
+                    Object.DestroyImmediate(existingBackButton.gameObject);
+                    Debug.Log($"  🗑️ Removed old BackButton from {sceneName}");
                 }
 
-                // Find or create Header
-                Transform header = canvas.transform.Find("Header");
-                if (header == null)
-                {
-                    // Create header if it doesn't exist
-                    GameObject headerObj = new GameObject("Header");
-                    headerObj.transform.SetParent(canvas.transform, false);
+                // Find SafeArea or use Canvas directly (NO Header creation)
+                Transform parent = canvas.transform.Find("SafeArea") ?? canvas.transform;
 
-                    RectTransform headerRect = headerObj.AddComponent<RectTransform>();
-                    headerRect.anchorMin = new Vector2(0, 1);
-                    headerRect.anchorMax = new Vector2(1, 1);
-                    headerRect.pivot = new Vector2(0.5f, 1);
-                    headerRect.sizeDelta = new Vector2(0, 80);
-                    headerRect.anchoredPosition = Vector2.zero;
+                // Instantiate BackButton prefab directly on parent
+                GameObject backButtonInstance = (GameObject)PrefabUtility.InstantiatePrefab(backButtonPrefab, parent);
+                backButtonInstance.name = buttonType == "GOLD" ? "BackButtonGold" : "BackButton";
 
-                    // Background color based on button type
-                    Image headerBg = headerObj.AddComponent<Image>();
-                    if (buttonType == "GOLD")
-                    {
-                        headerBg.color = new Color(0.039f, 0.031f, 0.02f, 1f); // Dark brown for gold theme
-                    }
-                    else
-                    {
-                        headerBg.color = new Color(0.039f, 0.055f, 0.153f, 1f); // Dark Navy for cyan
-                    }
-
-                    header = headerObj.transform;
-
-                    Debug.Log($"  📦 Created Header in {sceneName}");
-                }
-
-                // Instantiate BackButton prefab
-                GameObject backButtonInstance = (GameObject)PrefabUtility.InstantiatePrefab(backButtonPrefab, header);
-
-                // Position it
+                // Position it at top-left corner
                 RectTransform backButtonRect = backButtonInstance.GetComponent<RectTransform>();
                 if (backButtonRect != null)
                 {
-                    backButtonRect.anchorMin = new Vector2(0, 0.5f);
-                    backButtonRect.anchorMax = new Vector2(0, 0.5f);
-                    backButtonRect.pivot = new Vector2(0, 0.5f);
-                    backButtonRect.anchoredPosition = new Vector2(20, 0);
-                    backButtonRect.sizeDelta = new Vector2(80, 80);
+                    backButtonRect.anchorMin = new Vector2(0, 1);
+                    backButtonRect.anchorMax = new Vector2(0, 1);
+                    backButtonRect.pivot = new Vector2(0, 1);
+                    backButtonRect.anchoredPosition = new Vector2(15, -15);
+                    backButtonRect.sizeDelta = new Vector2(50, 50);
                 }
+
+                // Make sure it's on top (last sibling = rendered last = on top)
+                backButtonInstance.transform.SetAsLastSibling();
 
                 // Mark scene as dirty and save
                 EditorSceneManager.MarkSceneDirty(scene);
@@ -234,18 +210,30 @@ namespace DigitPark.Editor
 
         private static Transform FindExistingBackButton(Transform canvas)
         {
-            // Try common locations
-            Transform backButton = canvas.Find("Header/BackButton");
-            if (backButton != null) return backButton;
+            // Try all common locations
+            string[] searchPaths = new string[]
+            {
+                "BackButton",
+                "BackButtonGold",
+                "SafeArea/BackButton",
+                "SafeArea/BackButtonGold",
+                "Header/BackButton",
+                "Header/BackButtonGold"
+            };
 
-            backButton = canvas.Find("Header/BackButtonGold");
-            if (backButton != null) return backButton;
+            foreach (string path in searchPaths)
+            {
+                Transform backButton = canvas.Find(path);
+                if (backButton != null) return backButton;
+            }
 
-            backButton = canvas.Find("BackButton");
-            if (backButton != null) return backButton;
-
-            backButton = canvas.Find("BackButtonGold");
-            if (backButton != null) return backButton;
+            // Also search recursively for any BackButton component
+            var allButtons = canvas.GetComponentsInChildren<Transform>(true);
+            foreach (var t in allButtons)
+            {
+                if (t.name == "BackButton" || t.name == "BackButtonGold")
+                    return t;
+            }
 
             return null;
         }
