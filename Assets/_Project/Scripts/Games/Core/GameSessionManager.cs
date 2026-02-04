@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 
@@ -271,6 +272,15 @@ namespace DigitPark.Games
 
             CurrentContext.AddResult(result);
             OnGameCompleted?.Invoke(result);
+
+            // Incrementar contador de partidas en ReviewService
+            ReviewService.Instance?.IncrementGamesPlayed();
+
+            // Intentar mostrar review prompt si gano (no despues de perder)
+            if (result.Completed)
+            {
+                ReviewService.Instance?.TryRequestReview(justLost: false);
+            }
 
             // Si hay mas juegos en Cognitive Sprint, avanzar
             if (CurrentContext.Mode == GameMode.CognitiveSprint && CurrentContext.HasMoreGames)

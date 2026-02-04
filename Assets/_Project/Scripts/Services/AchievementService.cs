@@ -454,6 +454,9 @@ namespace DigitPark.Services
             Debug.Log($"[Achievements] Desbloqueado: {achievementId}");
 
             OnAchievementUnlocked?.Invoke(achievement);
+
+            // Intentar mostrar review prompt despues de desbloquear logro
+            ReviewService.Instance?.TryRequestReview(justLost: false);
         }
 
         private void GiveReward(AchievementData achievement)

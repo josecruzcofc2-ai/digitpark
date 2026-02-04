@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Localization;
 using DigitPark.UI;
@@ -51,19 +52,23 @@ namespace DigitPark.Managers
         {
             float startTime = Time.time;
 
-            // Paso 1: Inicializar configuraciones básicas
+            // Paso 1: Inicializar configuraciones básicas + NetworkService + ATT
             yield return StartCoroutine(InitializeBasicSettings());
-            UpdateLoadingProgress(0.2f, "boot_initializing_config");
+            UpdateLoadingProgress(0.15f, "boot_initializing_config");
 
-            // Paso 2: Inicializar servicios de Firebase
+            // Paso 2: Solicitar ATT (iOS) - ANTES de Firebase Analytics
+            yield return StartCoroutine(RequestTrackingAuthorization());
+            UpdateLoadingProgress(0.25f, "boot_initializing_config");
+
+            // Paso 3: Inicializar servicios de Firebase
             yield return StartCoroutine(InitializeFirebaseServices());
             UpdateLoadingProgress(0.5f, "boot_connecting_services");
 
-            // Paso 3: Inicializar managers del juego
+            // Paso 4: Inicializar managers del juego
             yield return StartCoroutine(InitializeGameManagers());
             UpdateLoadingProgress(0.7f, "boot_loading_resources");
 
-            // Paso 4: Verificar estado de autenticación
+            // Paso 5: Verificar estado de autenticación
             yield return StartCoroutine(CheckAuthenticationStatus());
             UpdateLoadingProgress(0.9f, "boot_verifying_user");
 
@@ -75,6 +80,9 @@ namespace DigitPark.Managers
             }
 
             UpdateLoadingProgress(1f, "boot_completed");
+
+            // Auto-etiquetar accesibilidad de la escena actual
+            AccessibilityHelper.AutoLabelScene();
 
             yield return new WaitForSeconds(0.5f);
 
@@ -102,10 +110,72 @@ namespace DigitPark.Managers
             SafeAreaManager.Initialize();
             Debug.Log("[Boot] SafeAreaManager inicializado");
 
+            // Crear NetworkService (antes de Firebase para monitorear conectividad)
+            if (NetworkService.Instance == null)
+            {
+                GameObject networkObj = new GameObject("NetworkService");
+                networkObj.AddComponent<NetworkService>();
+                Debug.Log("[Boot] NetworkService creado");
+            }
+
+            // Crear NetworkStatusBanner (UI de estado de red)
+            if (NetworkStatusBanner.Instance == null)
+            {
+                GameObject bannerObj = new GameObject("NetworkStatusBanner");
+                bannerObj.AddComponent<NetworkStatusBanner>();
+                Debug.Log("[Boot] NetworkStatusBanner creado");
+            }
+
+            // Crear ReviewService
+            if (ReviewService.Instance == null)
+            {
+                GameObject reviewObj = new GameObject("ReviewService");
+                reviewObj.AddComponent<ReviewService>();
+                Debug.Log("[Boot] ReviewService creado");
+            }
+            ReviewService.Instance?.IncrementSessionCount();
+
+            // Crear DeepLinkService
+            if (DeepLinkService.Instance == null)
+            {
+                GameObject deepLinkObj = new GameObject("DeepLinkService");
+                deepLinkObj.AddComponent<DeepLinkService>();
+                Debug.Log("[Boot] DeepLinkService creado");
+            }
+
             // Cargar configuraciones guardadas del jugador
             LoadPlayerPreferences();
 
             yield return null;
+        }
+
+        /// <summary>
+        /// Solicita permiso de App Tracking Transparency (iOS 14.5+)
+        /// Debe ejecutarse ANTES de inicializar Firebase Analytics
+        /// </summary>
+        private IEnumerator RequestTrackingAuthorization()
+        {
+            // Crear ATTService
+            if (ATTService.Instance == null)
+            {
+                GameObject attObj = new GameObject("ATTService");
+                attObj.AddComponent<ATTService>();
+                Debug.Log("[Boot] ATTService creado");
+            }
+
+            // Solicitar permiso
+            ATTService.Instance.RequestTrackingAuthorization();
+
+            // Esperar respuesta (maximo 30 segundos)
+            float timeout = 30f;
+            float elapsed = 0f;
+            while (!ATTService.Instance.RequestCompleted && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            Debug.Log($"[Boot] ATT completado: {ATTService.Instance.TrackingStatus}");
         }
 
         /// <summary>

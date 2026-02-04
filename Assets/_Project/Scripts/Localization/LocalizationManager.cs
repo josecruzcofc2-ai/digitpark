@@ -1018,6 +1018,220 @@ namespace DigitPark.Localization
                 "Password (min 6)", "Contraseña (mín 6)", "Mot de passe (min 6)", "Senha (mín 6)", "Passwort (min 6)");
             AddTranslation("placeholder_confirm",
                 "Confirm password", "Confirmar contraseña", "Confirmer mot de passe", "Confirmar senha", "Passwort bestätigen");
+
+            // ==================== NETWORK STATUS ====================
+            AddTranslation("net_offline",
+                "No internet connection", "Sin conexion a internet", "Pas de connexion internet", "Sem conexao com a internet", "Keine Internetverbindung");
+            AddTranslation("net_reconnecting",
+                "Reconnecting...", "Reconectando...", "Reconnexion...", "Reconectando...", "Verbindung wird wiederhergestellt...");
+            AddTranslation("net_restored",
+                "Connection restored", "Conexion restaurada", "Connexion restauree", "Conexao restaurada", "Verbindung wiederhergestellt");
+            AddTranslation("net_mobile_warning",
+                "Using mobile data", "Usando datos moviles", "Utilisation des donnees mobiles", "Usando dados moveis", "Mobile Daten werden verwendet");
+
+            // ==================== DEEP LINKING / SHARING ====================
+            AddTranslation("share_profile",
+                "Check my profile on digitPark!", "Mira mi perfil en digitPark!", "Decouvrez mon profil sur digitPark!", "Confira meu perfil no digitPark!", "Schau dir mein Profil auf digitPark an!");
+            AddTranslation("share_tournament",
+                "Join this tournament!", "Unete a este torneo!", "Rejoignez ce tournoi!", "Entre neste torneio!", "Nimm an diesem Turnier teil!");
+            AddTranslation("share_match_result",
+                "I scored {0} points!", "Obtuve {0} puntos!", "J'ai obtenu {0} points!", "Fiz {0} pontos!", "Ich habe {0} Punkte erzielt!");
+            AddTranslation("btn_share",
+                "Share", "Compartir", "Partager", "Compartilhar", "Teilen");
+            AddTranslation("btn_copy_link",
+                "Copy Link", "Copiar enlace", "Copier le lien", "Copiar link", "Link kopieren");
+
+            // ==================== ACCESSIBILITY LABELS ====================
+            AddTranslation("acc_btn_play",
+                "Play game", "Jugar", "Jouer", "Jogar", "Spielen");
+            AddTranslation("acc_btn_settings",
+                "Open settings", "Abrir configuracion", "Ouvrir les parametres", "Abrir configuracoes", "Einstellungen offnen");
+            AddTranslation("acc_btn_shop",
+                "Open shop", "Abrir tienda", "Ouvrir la boutique", "Abrir loja", "Shop offnen");
+            AddTranslation("acc_btn_profile",
+                "View profile", "Ver perfil", "Voir le profil", "Ver perfil", "Profil anzeigen");
+            AddTranslation("acc_btn_login",
+                "Sign in button", "Boton iniciar sesion", "Bouton connexion", "Botao entrar", "Anmelde-Button");
+            AddTranslation("acc_btn_register",
+                "Create account button", "Boton crear cuenta", "Bouton creer un compte", "Botao criar conta", "Konto-erstellen-Button");
+            AddTranslation("acc_btn_back",
+                "Go back", "Volver atras", "Retour", "Voltar", "Zuruck");
+            AddTranslation("acc_btn_close",
+                "Close", "Cerrar", "Fermer", "Fechar", "Schliessen");
+            AddTranslation("acc_input_email",
+                "Email input field", "Campo de correo electronico", "Champ e-mail", "Campo de e-mail", "E-Mail-Eingabefeld");
+            AddTranslation("acc_input_password",
+                "Password input field", "Campo de contrasena", "Champ mot de passe", "Campo de senha", "Passwort-Eingabefeld");
+            AddTranslation("acc_input_username",
+                "Username input field", "Campo de nombre de usuario", "Champ nom d'utilisateur", "Campo de nome de usuario", "Benutzername-Eingabefeld");
+            AddTranslation("acc_label_coins",
+                "Coins balance", "Saldo de monedas", "Solde de pieces", "Saldo de moedas", "Munzen-Guthaben");
+            AddTranslation("acc_label_gems",
+                "Gems balance", "Saldo de gemas", "Solde de gemmes", "Saldo de gemas", "Edelstein-Guthaben");
+            AddTranslation("acc_label_trophies",
+                "Trophies count", "Cantidad de trofeos", "Nombre de trophees", "Quantidade de trofeus", "Trophäen-Anzahl");
+            AddTranslation("acc_label_balance",
+                "Cash balance", "Saldo en efectivo", "Solde en especes", "Saldo em dinheiro", "Bargeld-Guthaben");
+            AddTranslation("acc_btn_deposit",
+                "Deposit money", "Depositar dinero", "Deposer de l'argent", "Depositar dinheiro", "Geld einzahlen");
+            AddTranslation("acc_btn_withdraw",
+                "Withdraw money", "Retirar dinero", "Retirer de l'argent", "Sacar dinheiro", "Geld abheben");
+            AddTranslation("acc_btn_start_game",
+                "Start game", "Iniciar juego", "Demarrer le jeu", "Iniciar jogo", "Spiel starten");
+            AddTranslation("acc_btn_find_match",
+                "Find match", "Buscar partida", "Trouver un match", "Encontrar partida", "Gegner finden");
+            AddTranslation("acc_btn_cancel",
+                "Cancel action", "Cancelar accion", "Annuler l'action", "Cancelar acao", "Aktion abbrechen");
+            AddTranslation("acc_btn_tournaments",
+                "View tournaments", "Ver torneos", "Voir les tournois", "Ver torneios", "Turniere anzeigen");
+            AddTranslation("acc_btn_scores",
+                "View scores", "Ver puntuaciones", "Voir les scores", "Ver pontuacoes", "Punkte anzeigen");
+            AddTranslation("acc_btn_friends",
+                "View friends", "Ver amigos", "Voir les amis", "Ver amigos", "Freunde anzeigen");
+            AddTranslation("acc_btn_achievements",
+                "View achievements", "Ver logros", "Voir les succes", "Ver conquistas", "Erfolge anzeigen");
+            AddTranslation("acc_btn_daily_reward",
+                "Claim daily reward", "Reclamar recompensa diaria", "Reclamer la recompense quotidienne", "Resgatar recompensa diaria", "Tagliche Belohnung abholen");
+            AddTranslation("acc_label_game_timer",
+                "Game timer", "Temporizador del juego", "Chronometre du jeu", "Cronometro do jogo", "Spiel-Timer");
+            AddTranslation("acc_label_game_score",
+                "Current score", "Puntuacion actual", "Score actuel", "Pontuacao atual", "Aktuelle Punktzahl");
+            AddTranslation("acc_btn_play_again",
+                "Play again", "Jugar de nuevo", "Rejouer", "Jogar novamente", "Nochmal spielen");
+            AddTranslation("acc_btn_main_menu",
+                "Return to main menu", "Volver al menu principal", "Retour au menu principal", "Voltar ao menu principal", "Zuruck zum Hauptmenu");
+
+            // ==================== DAILY REWARDS ====================
+            AddTranslation("dr_title",
+                "DAILY REWARDS", "RECOMPENSAS DIARIAS", "RECOMPENSES QUOTIDIENNES", "RECOMPENSAS DIARIAS", "TAGLICHE BELOHNUNGEN");
+            AddTranslation("dr_streak",
+                "Streak: {0} days", "Racha: {0} dias", "Serie: {0} jours", "Sequencia: {0} dias", "Serie: {0} Tage");
+            AddTranslation("dr_bonus_day",
+                "Day {0} bonus: +{1} gems", "Bonus dia {0}: +{1} gemas", "Bonus jour {0}: +{1} gemmes", "Bonus dia {0}: +{1} gemas", "Tag {0} Bonus: +{1} Edelsteine");
+            AddTranslation("dr_available_now",
+                "Available now!", "Disponible ahora!", "Disponible maintenant!", "Disponivel agora!", "Jetzt verfugbar!");
+            AddTranslation("dr_next_in",
+                "Next in: {0}", "Proximo en: {0}", "Prochain dans: {0}", "Proximo em: {0}", "Nachster in: {0}");
+            AddTranslation("dr_claim",
+                "CLAIM REWARD", "RECLAMAR RECOMPENSA", "RECLAMER", "RESGATAR RECOMPENSA", "BELOHNUNG ABHOLEN");
+            AddTranslation("dr_claimed",
+                "Already claimed", "Ya reclamado", "Deja reclame", "Ja resgatado", "Bereits abgeholt");
+            AddTranslation("dr_day",
+                "DAY {0}", "DIA {0}", "JOUR {0}", "DIA {0}", "TAG {0}");
+            AddTranslation("dr_today",
+                "TODAY!", "HOY!", "AUJOURD'HUI!", "HOJE!", "HEUTE!");
+            AddTranslation("dr_milestone",
+                "{0} days in a row!", "{0} dias seguidos!", "{0} jours consecutifs!", "{0} dias seguidos!", "{0} Tage in Folge!");
+            AddTranslation("dr_milestone_bonus",
+                "+{0} bonus gems", "+{0} gemas de bonus", "+{0} gemmes bonus", "+{0} gemas de bonus", "+{0} Bonus-Edelsteine");
+            AddTranslation("dr_grand_prize",
+                "DAY 7 - GRAND PRIZE", "DIA 7 - GRAN PREMIO", "JOUR 7 - GRAND PRIX", "DIA 7 - GRANDE PREMIO", "TAG 7 - GROSSER PREIS");
+            AddTranslation("dr_unlocks_in",
+                "Unlocks in {0} days", "Se desbloquea en {0} dias", "Debloque dans {0} jours", "Desbloqueia em {0} dias", "Freischaltung in {0} Tagen");
+            AddTranslation("dr_week",
+                "WEEK {0}", "SEMANA {0}", "SEMAINE {0}", "SEMANA {0}", "WOCHE {0}");
+            AddTranslation("dr_today_reward",
+                "TODAY'S REWARD", "RECOMPENSA DE HOY", "RECOMPENSE DU JOUR", "RECOMPENSA DE HOJE", "HEUTIGE BELOHNUNG");
+            AddTranslation("dr_next_reward",
+                "Next reward in:", "Proxima recompensa en:", "Prochaine recompense dans:", "Proxima recompensa em:", "Nachste Belohnung in:");
+
+            // ==================== REWARD TYPES ====================
+            AddTranslation("reward_coins",
+                "Coins", "Monedas", "Pieces", "Moedas", "Munzen");
+            AddTranslation("reward_gems",
+                "Gems", "Gemas", "Gemmes", "Gemas", "Edelsteine");
+            AddTranslation("reward_xp",
+                "XP", "XP", "XP", "XP", "XP");
+
+            // ==================== DAILY MISSIONS ====================
+            AddTranslation("ms_title",
+                "MISSIONS", "MISIONES", "MISSIONS", "MISSOES", "MISSIONEN");
+            AddTranslation("ms_refresh_in",
+                "Resets in: {0}", "Reinicio en: {0}", "Reinitialisation dans: {0}", "Reinicia em: {0}", "Neustart in: {0}");
+            AddTranslation("ms_points_earned",
+                "{0} pts earned", "{0} pts ganados", "{0} pts gagnes", "{0} pts ganhos", "{0} Pkt. verdient");
+            AddTranslation("ms_progress",
+                "{0}/{1} missions completed", "{0}/{1} misiones completadas", "{0}/{1} missions terminees", "{0}/{1} missoes completas", "{0}/{1} Missionen abgeschlossen");
+            AddTranslation("ms_bonus",
+                "Bonus: +{0} coins", "Bonus: +{0} monedas", "Bonus: +{0} pieces", "Bonus: +{0} moedas", "Bonus: +{0} Munzen");
+            AddTranslation("ms_completed",
+                "Completed", "Completada", "Terminee", "Completa", "Abgeschlossen");
+            AddTranslation("ms_ready_claim",
+                "Ready to claim!", "Lista para reclamar!", "Prete a reclamer!", "Pronta para resgatar!", "Bereit zum Abholen!");
+            AddTranslation("ms_in_progress",
+                "In Progress", "En Progreso", "En cours", "Em Progresso", "In Bearbeitung");
+            AddTranslation("ms_no_missions",
+                "No missions available", "No hay misiones disponibles", "Aucune mission disponible", "Nenhuma missao disponivel", "Keine Missionen verfugbar");
+            AddTranslation("ms_tab_daily",
+                "Daily", "Diarias", "Quotidiennes", "Diarias", "Taglich");
+            AddTranslation("ms_tab_weekly",
+                "Weekly", "Semanales", "Hebdomadaires", "Semanais", "Wochentlich");
+            AddTranslation("ms_tab_special",
+                "Special", "Especiales", "Speciales", "Especiais", "Spezial");
+            AddTranslation("ms_weekly_header",
+                "WEEKLY MISSIONS", "MISIONES SEMANALES", "MISSIONS HEBDOMADAIRES", "MISSOES SEMANAIS", "WOCHENTLICHE MISSIONEN");
+            AddTranslation("ms_special_header",
+                "SPECIAL MISSIONS", "MISIONES ESPECIALES", "MISSIONS SPECIALES", "MISSOES ESPECIAIS", "SPEZIAL-MISSIONEN");
+            AddTranslation("ms_daily_progress",
+                "Daily Progress", "Progreso Diario", "Progres quotidien", "Progresso Diario", "Taglicher Fortschritt");
+
+            // Mission titles
+            AddTranslation("ms_daily_play_3_title",
+                "Active Player", "Jugador Activo", "Joueur Actif", "Jogador Ativo", "Aktiver Spieler");
+            AddTranslation("ms_daily_play_3_desc",
+                "Play 3 matches", "Juega 3 partidas", "Jouez 3 parties", "Jogue 3 partidas", "Spiele 3 Partien");
+            AddTranslation("ms_daily_win_1_title",
+                "First Victory", "Primera Victoria", "Premiere Victoire", "Primeira Vitoria", "Erster Sieg");
+            AddTranslation("ms_daily_win_1_desc",
+                "Win 1 match", "Gana 1 partida", "Gagnez 1 partie", "Venca 1 partida", "Gewinne 1 Partie");
+            AddTranslation("ms_daily_score_1000_title",
+                "Point Hunter", "Cazador de Puntos", "Chasseur de Points", "Cacador de Pontos", "Punktejager");
+            AddTranslation("ms_daily_score_1000_desc",
+                "Get 1000 total points", "Obten 1000 puntos totales", "Obtenez 1000 points au total", "Obtenha 1000 pontos totais", "Erreiche 1000 Gesamtpunkte");
+            AddTranslation("ms_daily_complete_minigame_title",
+                "Explorer", "Explorador", "Explorateur", "Explorador", "Entdecker");
+            AddTranslation("ms_daily_complete_minigame_desc",
+                "Complete any minigame", "Completa cualquier minijuego", "Completez n'importe quel mini-jeu", "Complete qualquer minijogo", "Schliesse ein Minispiel ab");
+            AddTranslation("ms_daily_play_memory_title",
+                "Elephant Memory", "Memoria de Elefante", "Memoire d'Elephant", "Memoria de Elefante", "Elefantengedachtnis");
+            AddTranslation("ms_daily_play_memory_desc",
+                "Play 2 Memory Pairs matches", "Juega 2 partidas de Memory Pairs", "Jouez 2 parties de Memory Pairs", "Jogue 2 partidas de Memory Pairs", "Spiele 2 Memory Pairs Partien");
+            AddTranslation("ms_daily_perfect_round_title",
+                "Perfectionist", "Perfeccionista", "Perfectionniste", "Perfeccionista", "Perfektionist");
+            AddTranslation("ms_daily_perfect_round_desc",
+                "Get a perfect round", "Obten ronda perfecta", "Obtenez un tour parfait", "Obtenha rodada perfeita", "Erreiche eine perfekte Runde");
+            AddTranslation("ms_weekly_play_20_title",
+                "Marathon Runner", "Maratonista", "Marathonien", "Maratonista", "Marathonlaufer");
+            AddTranslation("ms_weekly_play_20_desc",
+                "Play 20 matches this week", "Juega 20 partidas esta semana", "Jouez 20 parties cette semaine", "Jogue 20 partidas esta semana", "Spiele 20 Partien diese Woche");
+            AddTranslation("ms_weekly_win_10_title",
+                "Weekly Champion", "Campeon Semanal", "Champion Hebdomadaire", "Campeao Semanal", "Wochen-Champion");
+            AddTranslation("ms_weekly_win_10_desc",
+                "Win 10 matches", "Gana 10 partidas", "Gagnez 10 parties", "Venca 10 partidas", "Gewinne 10 Partien");
+            AddTranslation("ms_weekly_all_games_title",
+                "Versatile", "Versatil", "Polyvalent", "Versatil", "Vielseitig");
+            AddTranslation("ms_weekly_all_games_desc",
+                "Play all minigames", "Juega todos los minijuegos", "Jouez a tous les mini-jeux", "Jogue todos os minijogos", "Spiele alle Minispiele");
+            AddTranslation("ms_weekly_streak_5_title",
+                "On a Roll", "En Racha", "En Serie", "Em Sequencia", "Am Laufen");
+            AddTranslation("ms_weekly_streak_5_desc",
+                "Keep a 5 win streak", "Manten racha de 5 victorias", "Gardez une serie de 5 victoires", "Mantenha sequencia de 5 vitorias", "Halte eine 5er Siegesserie");
+            AddTranslation("ms_weekly_tournament_title",
+                "Competitor", "Competidor", "Competiteur", "Competidor", "Wettbewerber");
+            AddTranslation("ms_weekly_tournament_desc",
+                "Join a tournament", "Participa en un torneo", "Participez a un tournoi", "Participe de um torneio", "Nimm an einem Turnier teil");
+            AddTranslation("ms_special_master_title",
+                "Grand Master", "Gran Maestro", "Grand Maitre", "Grande Mestre", "Grossmeister");
+            AddTranslation("ms_special_master_desc",
+                "Reach level 10", "Alcanza nivel 10", "Atteignez le niveau 10", "Alcance nivel 10", "Erreiche Level 10");
+            AddTranslation("ms_special_social_title",
+                "Influencer", "Influencer", "Influenceur", "Influencer", "Influencer");
+            AddTranslation("ms_special_social_desc",
+                "Share the game 5 times", "Comparte el juego 5 veces", "Partagez le jeu 5 fois", "Compartilhe o jogo 5 vezes", "Teile das Spiel 5 Mal");
+            AddTranslation("ms_special_collector_title",
+                "Collector", "Coleccionista", "Collectionneur", "Colecionador", "Sammler");
+            AddTranslation("ms_special_collector_desc",
+                "Unlock 10 avatars", "Desbloquea 10 avatares", "Debloquez 10 avatars", "Desbloqueie 10 avatares", "Schalte 10 Avatare frei");
         }
 
         private void AddTranslation(string key, string english, string spanish, string french, string portuguese, string german)

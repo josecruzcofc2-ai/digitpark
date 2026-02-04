@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Firebase.Analytics;
+using DigitPark.Services;
 
 namespace DigitPark.Services.Firebase
 {
@@ -40,12 +41,23 @@ namespace DigitPark.Services.Firebase
                 return;
             }
 
+            // Verificar ATT status antes de habilitar analytics (iOS 14.5+)
+            bool trackingAllowed = true;
+
+#if UNITY_IOS
+            if (ATTService.Instance != null)
+            {
+                trackingAllowed = ATTService.Instance.IsTrackingAuthorized;
+                Debug.Log($"[Analytics] ATT Status: {ATTService.Instance.TrackingStatus}, Tracking allowed: {trackingAllowed}");
+            }
+#endif
+
             // Firebase Analytics se inicializa automaticamente con FirebaseApp
-            // Solo necesitamos configurar algunas opciones
-            FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
+            // Solo habilitar coleccion si ATT lo permite
+            FirebaseAnalytics.SetAnalyticsCollectionEnabled(trackingAllowed);
 
             _isInitialized = true;
-            Debug.Log("[Analytics] Firebase Analytics inicializado");
+            Debug.Log($"[Analytics] Firebase Analytics inicializado (collection: {trackingAllowed})");
         }
 
         #region Screen Tracking

@@ -4,6 +4,9 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Localization;
+using DigitPark.Services.Firebase;
+using DigitPark.UI;
 
 namespace DigitPark.Managers
 {
@@ -51,10 +54,26 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI rewardPopupText;
         [SerializeField] private Image rewardPopupIcon;
 
+        [Header("Reward Icons")]
+        [SerializeField] private Sprite coinIcon;
+        [SerializeField] private Sprite gemIcon;
+
         [Header("Configuration")]
         [SerializeField] private int dailyMissionsRequired = 3;
         [SerializeField] private int dailyBonusReward = 100;
         [SerializeField] private float refreshCheckInterval = 60f;
+
+        // Neon theme colors
+        private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+        private static readonly Color CARD_BG_COMPLETED = new Color(0.08f, 0.2f, 0.1f, 0.95f);
+        private static readonly Color CARD_BG_CLAIMED = new Color(0.08f, 0.08f, 0.1f, 0.6f);
+        private static readonly Color PURPLE_WEEKLY = new Color(0.6f, 0.2f, 1f, 1f);
+        private static readonly Color GOLD_SPECIAL = new Color(1f, 0.84f, 0f, 1f);
+        private static readonly Color GREEN_SUCCESS = new Color(0.2f, 0.9f, 0.4f, 1f);
+        private static readonly Color COIN_COLOR = new Color(1f, 0.85f, 0.3f, 1f);
+        private static readonly Color GEM_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
+        private static readonly Color SEPARATOR_BG = new Color(0.04f, 0.05f, 0.08f, 1f);
 
         // State
         private MissionTab currentTab = MissionTab.Daily;
@@ -66,6 +85,10 @@ namespace DigitPark.Managers
         private DateTime lastRefreshDate;
         private DateTime weekStartDate;
 
+        // Neon icon sprites
+        private Sprite coinIconNeon;
+        private Sprite gemIconNeon;
+
         public enum MissionTab
         {
             Daily,
@@ -75,6 +98,7 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            LoadNeonIcons();
             InitializeMissions();
             SetupUI();
             SetupListeners();
@@ -83,6 +107,20 @@ namespace DigitPark.Managers
 
             // Check refresh timer
             InvokeRepeating(nameof(UpdateRefreshTimer), 1f, refreshCheckInterval);
+
+            // Scroll fade indicator
+            SetupScrollFade();
+
+            // Analytics: screen view
+            AnalyticsService.Instance?.LogScreenView("DailyMissions");
+        }
+
+        private void SetupScrollFade()
+        {
+            if (scrollRect != null && scrollRect.GetComponent<ScrollFadeIndicator>() == null)
+            {
+                scrollRect.gameObject.AddComponent<ScrollFadeIndicator>();
+            }
         }
 
         private void OnDestroy()
@@ -90,35 +128,82 @@ namespace DigitPark.Managers
             CancelInvoke();
         }
 
+        private void LoadNeonIcons()
+        {
+            coinIconNeon = Resources.Load<Sprite>("Icons/CoinIconNeon");
+            gemIconNeon = Resources.Load<Sprite>("Icons/GemIconNeon");
+        }
+
+        /// <summary>
+        /// Helper de localizacion
+        /// </summary>
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            return args.Length > 0
+                ? LocalizationManager.Instance.GetText(key, args)
+                : LocalizationManager.Instance.GetText(key);
+        }
+
+        private string GetRewardTypeName(string type)
+        {
+            return type switch
+            {
+                "coins" => L("reward_coins"),
+                "gems" => L("reward_gems"),
+                _ => type
+            };
+        }
+
+        private Color GetRewardTypeColor(string type)
+        {
+            return type switch
+            {
+                "coins" => COIN_COLOR,
+                "gems" => GEM_COLOR,
+                _ => Color.white
+            };
+        }
+
+        private Sprite GetRewardTypeIcon(string type)
+        {
+            return type switch
+            {
+                "coins" => coinIconNeon != null ? coinIconNeon : coinIcon,
+                "gems" => gemIconNeon != null ? gemIconNeon : gemIcon,
+                _ => coinIcon
+            };
+        }
+
         private void InitializeMissions()
         {
-            // Daily Missions
+            // Daily Missions - usando claves de localizacion
             dailyMissions = new List<Mission>
             {
-                new Mission("daily_play_3", "Jugador Activo", "Juega 3 partidas", MissionCategory.Daily, 3, 25, "coins"),
-                new Mission("daily_win_1", "Primera Victoria", "Gana 1 partida", MissionCategory.Daily, 1, 50, "coins"),
-                new Mission("daily_score_1000", "Cazador de Puntos", "Obtén 1000 puntos totales", MissionCategory.Daily, 1000, 30, "coins"),
-                new Mission("daily_complete_minigame", "Explorador", "Completa cualquier minijuego", MissionCategory.Daily, 1, 20, "coins"),
-                new Mission("daily_play_memory", "Memoria de Elefante", "Juega 2 partidas de Memory Pairs", MissionCategory.Daily, 2, 35, "coins"),
-                new Mission("daily_perfect_round", "Perfeccionista", "Obtén ronda perfecta", MissionCategory.Daily, 1, 75, "gems"),
+                new Mission("daily_play_3", "ms_daily_play_3_title", "ms_daily_play_3_desc", MissionCategory.Daily, 3, 25, "coins"),
+                new Mission("daily_win_1", "ms_daily_win_1_title", "ms_daily_win_1_desc", MissionCategory.Daily, 1, 50, "coins"),
+                new Mission("daily_score_1000", "ms_daily_score_1000_title", "ms_daily_score_1000_desc", MissionCategory.Daily, 1000, 30, "coins"),
+                new Mission("daily_complete_minigame", "ms_daily_complete_minigame_title", "ms_daily_complete_minigame_desc", MissionCategory.Daily, 1, 20, "coins"),
+                new Mission("daily_play_memory", "ms_daily_play_memory_title", "ms_daily_play_memory_desc", MissionCategory.Daily, 2, 35, "coins"),
+                new Mission("daily_perfect_round", "ms_daily_perfect_round_title", "ms_daily_perfect_round_desc", MissionCategory.Daily, 1, 75, "gems"),
             };
 
             // Weekly Missions
             weeklyMissions = new List<Mission>
             {
-                new Mission("weekly_play_20", "Maratonista", "Juega 20 partidas esta semana", MissionCategory.Weekly, 20, 200, "coins"),
-                new Mission("weekly_win_10", "Campeón Semanal", "Gana 10 partidas", MissionCategory.Weekly, 10, 300, "coins"),
-                new Mission("weekly_all_games", "Versátil", "Juega todos los minijuegos", MissionCategory.Weekly, 6, 150, "gems"),
-                new Mission("weekly_streak_5", "En Racha", "Mantén racha de 5 victorias", MissionCategory.Weekly, 5, 250, "coins"),
-                new Mission("weekly_tournament", "Competidor", "Participa en un torneo", MissionCategory.Weekly, 1, 100, "gems"),
+                new Mission("weekly_play_20", "ms_weekly_play_20_title", "ms_weekly_play_20_desc", MissionCategory.Weekly, 20, 200, "coins"),
+                new Mission("weekly_win_10", "ms_weekly_win_10_title", "ms_weekly_win_10_desc", MissionCategory.Weekly, 10, 300, "coins"),
+                new Mission("weekly_all_games", "ms_weekly_all_games_title", "ms_weekly_all_games_desc", MissionCategory.Weekly, 6, 150, "gems"),
+                new Mission("weekly_streak_5", "ms_weekly_streak_5_title", "ms_weekly_streak_5_desc", MissionCategory.Weekly, 5, 250, "coins"),
+                new Mission("weekly_tournament", "ms_weekly_tournament_title", "ms_weekly_tournament_desc", MissionCategory.Weekly, 1, 100, "gems"),
             };
 
-            // Special Missions (event-based, longer term)
+            // Special Missions
             specialMissions = new List<Mission>
             {
-                new Mission("special_master", "Gran Maestro", "Alcanza nivel 10", MissionCategory.Special, 10, 500, "gems"),
-                new Mission("special_social", "Influencer", "Comparte el juego 5 veces", MissionCategory.Special, 5, 200, "gems"),
-                new Mission("special_collector", "Coleccionista", "Desbloquea 10 avatares", MissionCategory.Special, 10, 300, "gems"),
+                new Mission("special_master", "ms_special_master_title", "ms_special_master_desc", MissionCategory.Special, 10, 500, "gems"),
+                new Mission("special_social", "ms_special_social_title", "ms_special_social_desc", MissionCategory.Special, 5, 200, "gems"),
+                new Mission("special_collector", "ms_special_collector_title", "ms_special_collector_desc", MissionCategory.Special, 10, 300, "gems"),
             };
 
             LoadProgress();
@@ -129,7 +214,6 @@ namespace DigitPark.Managers
             string today = DateTime.Now.ToString("yyyy-MM-dd");
             lastRefreshDate = DateTime.Parse(PlayerPrefs.GetString("MissionsLastRefresh", today));
 
-            // Load daily progress
             foreach (var mission in dailyMissions)
             {
                 mission.currentProgress = PlayerPrefs.GetInt($"Mission_{mission.id}_progress", 0);
@@ -137,7 +221,6 @@ namespace DigitPark.Managers
                 mission.isClaimed = PlayerPrefs.GetInt($"Mission_{mission.id}_claimed", 0) == 1;
             }
 
-            // Load weekly progress
             foreach (var mission in weeklyMissions)
             {
                 mission.currentProgress = PlayerPrefs.GetInt($"Mission_{mission.id}_progress", 0);
@@ -145,7 +228,6 @@ namespace DigitPark.Managers
                 mission.isClaimed = PlayerPrefs.GetInt($"Mission_{mission.id}_claimed", 0) == 1;
             }
 
-            // Load special progress
             foreach (var mission in specialMissions)
             {
                 mission.currentProgress = PlayerPrefs.GetInt($"Mission_{mission.id}_progress", 0);
@@ -166,7 +248,6 @@ namespace DigitPark.Managers
         {
             string today = DateTime.Now.ToString("yyyy-MM-dd");
 
-            // Check daily reset
             if (lastRefreshDate.Date < DateTime.Now.Date)
             {
                 ResetDailyMissions();
@@ -174,7 +255,6 @@ namespace DigitPark.Managers
                 PlayerPrefs.Save();
             }
 
-            // Check weekly reset (Monday)
             DayOfWeek startOfWeek = DayOfWeek.Monday;
             DateTime thisWeekStart = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek + (int)startOfWeek);
             if (thisWeekStart > DateTime.Now) thisWeekStart = thisWeekStart.AddDays(-7);
@@ -198,10 +278,8 @@ namespace DigitPark.Managers
                 SaveProgress(mission);
             }
 
-            // Reset daily bonus
             PlayerPrefs.SetInt("DailyBonusClaimed", 0);
             PlayerPrefs.Save();
-
             Debug.Log("[DailyMissions] Daily missions reset");
         }
 
@@ -214,7 +292,6 @@ namespace DigitPark.Managers
                 mission.isClaimed = false;
                 SaveProgress(mission);
             }
-
             Debug.Log("[DailyMissions] Weekly missions reset");
         }
 
@@ -235,7 +312,6 @@ namespace DigitPark.Managers
             if (claimRewardButton) claimRewardButton.onClick.AddListener(ClaimMissionReward);
             if (claimBonusButton) claimBonusButton.onClick.AddListener(ClaimDailyBonus);
 
-            // Tabs
             if (dailyTab) dailyTab.onClick.AddListener(() => SwitchTab(MissionTab.Daily));
             if (weeklyTab) weeklyTab.onClick.AddListener(() => SwitchTab(MissionTab.Weekly));
             if (specialTab) specialTab.onClick.AddListener(() => SwitchTab(MissionTab.Special));
@@ -246,33 +322,25 @@ namespace DigitPark.Managers
             int totalPoints = 0;
 
             foreach (var mission in dailyMissions)
-            {
                 if (mission.isClaimed) totalPoints += mission.rewardAmount;
-            }
             foreach (var mission in weeklyMissions)
-            {
                 if (mission.isClaimed) totalPoints += mission.rewardAmount;
-            }
             foreach (var mission in specialMissions)
-            {
                 if (mission.isClaimed) totalPoints += mission.rewardAmount;
-            }
 
-            if (totalPointsText) totalPointsText.text = $"{totalPoints} pts ganados";
+            if (totalPointsText) totalPointsText.text = L("ms_points_earned", totalPoints);
         }
 
         private void UpdateRefreshTimer()
         {
-            // Calculate time until midnight (daily reset)
             DateTime tomorrow = DateTime.Now.Date.AddDays(1);
             TimeSpan timeUntilReset = tomorrow - DateTime.Now;
 
             if (refreshTimerText)
             {
-                refreshTimerText.text = $"Reinicio en: {timeUntilReset.Hours:D2}:{timeUntilReset.Minutes:D2}:{timeUntilReset.Seconds:D2}";
+                refreshTimerText.text = L("ms_refresh_in", UIPolish.FormatTimerHHMMSS(timeUntilReset.Hours, timeUntilReset.Minutes, timeUntilReset.Seconds));
             }
 
-            // Check if we need to reset
             if (DateTime.Now.Date > lastRefreshDate.Date)
             {
                 CheckAndResetMissions();
@@ -289,12 +357,16 @@ namespace DigitPark.Managers
 
         private void UpdateTabVisuals()
         {
-            Color activeColor = new Color(0f, 0.83f, 1f);
-            Color inactiveColor = new Color(0.3f, 0.3f, 0.3f);
+            Color activeColor = CYAN_NEON;
+            Color inactiveColor = new Color(0.2f, 0.2f, 0.25f);
+
+            // Weekly tab usa purple cuando esta activo
+            Color weeklyActive = currentTab == MissionTab.Weekly ? PURPLE_WEEKLY : inactiveColor;
+            Color specialActive = currentTab == MissionTab.Special ? GOLD_SPECIAL : inactiveColor;
 
             UpdateTabButton(dailyTab, currentTab == MissionTab.Daily, activeColor, inactiveColor);
-            UpdateTabButton(weeklyTab, currentTab == MissionTab.Weekly, activeColor, inactiveColor);
-            UpdateTabButton(specialTab, currentTab == MissionTab.Special, activeColor, inactiveColor);
+            UpdateTabButton(weeklyTab, currentTab == MissionTab.Weekly, weeklyActive, inactiveColor);
+            UpdateTabButton(specialTab, currentTab == MissionTab.Special, specialActive, inactiveColor);
         }
 
         private void UpdateTabButton(Button button, bool isActive, Color activeColor, Color inactiveColor)
@@ -302,15 +374,16 @@ namespace DigitPark.Managers
             if (button == null) return;
             var image = button.GetComponent<Image>();
             if (image) image.color = isActive ? activeColor : inactiveColor;
+
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text) text.color = isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f);
         }
 
         private void UpdateDailyProgress()
         {
             int completedDaily = 0;
             foreach (var mission in dailyMissions)
-            {
                 if (mission.isCompleted) completedDaily++;
-            }
 
             if (dailyProgressBar)
             {
@@ -320,12 +393,12 @@ namespace DigitPark.Managers
 
             if (dailyProgressText)
             {
-                dailyProgressText.text = $"{completedDaily}/{dailyMissionsRequired} misiones completadas";
+                dailyProgressText.text = L("ms_progress", completedDaily, dailyMissionsRequired);
             }
 
             if (bonusRewardText)
             {
-                bonusRewardText.text = $"Bonus: +{dailyBonusReward} monedas";
+                bonusRewardText.text = L("ms_bonus", dailyBonusReward);
             }
 
             bool canClaimBonus = completedDaily >= dailyMissionsRequired &&
@@ -334,6 +407,125 @@ namespace DigitPark.Managers
             if (claimBonusButton)
             {
                 claimBonusButton.gameObject.SetActive(canClaimBonus);
+            }
+
+            // Actualizar estado visual de milestone markers
+            UpdateProgressMilestoneMarkers(completedDaily);
+        }
+
+        private void UpdateProgressMilestoneMarkers(int completedCount)
+        {
+            if (dailyProgressBar == null) return;
+            var barTransform = dailyProgressBar.transform.parent;
+            if (barTransform == null) barTransform = dailyProgressBar.transform;
+
+            // Buscar markers existentes (creados por UIBuilder: Marker3, Marker5, MarkerAll)
+            string[] markerNames = { "Marker3", "Marker5", "MarkerAll" };
+            int[] markerThresholds = { 3, 5, dailyMissions.Count };
+
+            for (int i = 0; i < markerNames.Length; i++)
+            {
+                var marker = barTransform.Find(markerNames[i]);
+                if (marker == null) continue;
+
+                bool reached = completedCount >= markerThresholds[i];
+                var img = marker.GetComponent<Image>();
+                if (img != null)
+                {
+                    bool isBonus = i == markerNames.Length - 1;
+                    Color reachedColor = isBonus
+                        ? new Color(1f, 0.84f, 0f, 1f)   // GOLD
+                        : CYAN_NEON;
+                    Color unreachedColor = isBonus
+                        ? new Color(0.3f, 0.25f, 0f, 1f)  // Dark gold
+                        : new Color(0f, 0.4f, 0.5f, 1f);  // Dark cyan
+                    img.color = reached ? reachedColor : unreachedColor;
+                }
+
+                var outline = marker.GetComponent<Outline>();
+                if (outline != null)
+                {
+                    outline.effectColor = reached
+                        ? new Color(1f, 1f, 1f, 0.5f)
+                        : new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                }
+            }
+        }
+
+        private GameObject _emptyStatePanel;
+
+        private void ShowEmptyState()
+        {
+            if (_emptyStatePanel != null)
+            {
+                _emptyStatePanel.SetActive(true);
+                return;
+            }
+
+            if (emptyStateText) emptyStateText.gameObject.SetActive(false);
+
+            _emptyStatePanel = new GameObject("EmptyState");
+            _emptyStatePanel.transform.SetParent(missionsContainer, false);
+
+            var rt = _emptyStatePanel.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(350, 250);
+
+            var vlg = _emptyStatePanel.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 15;
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.padding = new RectOffset(30, 30, 40, 30);
+
+            // Icono
+            var iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(_emptyStatePanel.transform, false);
+            var iconLE = iconObj.AddComponent<LayoutElement>();
+            iconLE.preferredWidth = 64;
+            iconLE.preferredHeight = 64;
+            var iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.color = new Color(0.3f, 0.3f, 0.35f);
+
+            Sprite lockedSprite = Resources.Load<Sprite>("Icons/MissionLockedIcon");
+            if (lockedSprite != null)
+            {
+                iconImg.sprite = lockedSprite;
+                iconImg.color = Color.white;
+            }
+
+            // Titulo
+            var titleObj = new GameObject("Title");
+            titleObj.transform.SetParent(_emptyStatePanel.transform, false);
+            var titleLE = titleObj.AddComponent<LayoutElement>();
+            titleLE.preferredHeight = 28;
+            var titleText = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
+            titleText.text = L("ms_no_missions");
+            titleText.fontSize = 18;
+            titleText.fontStyle = TMPro.FontStyles.Bold;
+            titleText.color = new Color(0.6f, 0.6f, 0.65f);
+            titleText.alignment = TMPro.TextAlignmentOptions.Center;
+
+            // Subtitulo
+            var subObj = new GameObject("Subtitle");
+            subObj.transform.SetParent(_emptyStatePanel.transform, false);
+            var subLE = subObj.AddComponent<LayoutElement>();
+            subLE.preferredHeight = 22;
+            var subText = subObj.AddComponent<TMPro.TextMeshProUGUI>();
+            subText.text = L("ms_refresh_in", UIPolish.FormatTimerHHMMSS(0, 0, 0));
+            subText.fontSize = 13;
+            subText.color = new Color(0.4f, 0.4f, 0.45f);
+            subText.alignment = TMPro.TextAlignmentOptions.Center;
+
+            spawnedItems.Add(_emptyStatePanel);
+        }
+
+        private void HideEmptyState()
+        {
+            if (_emptyStatePanel != null)
+            {
+                _emptyStatePanel.SetActive(false);
             }
         }
 
@@ -345,14 +537,11 @@ namespace DigitPark.Managers
 
             if (missions.Count == 0)
             {
-                if (emptyStateText)
-                {
-                    emptyStateText.gameObject.SetActive(true);
-                    emptyStateText.text = "No hay misiones disponibles";
-                }
+                ShowEmptyState();
                 return;
             }
 
+            HideEmptyState();
             if (emptyStateText) emptyStateText.gameObject.SetActive(false);
 
             // Sort: unclaimed completed first, then in progress, then not started
@@ -406,10 +595,54 @@ namespace DigitPark.Managers
 
             spawnedItems.Add(item);
 
-            // Setup click
             var button = item.GetComponent<Button>() ?? item.AddComponent<Button>();
             var m = mission;
             button.onClick.AddListener(() => ShowDetail(m));
+        }
+
+        /// <summary>
+        /// Crea un separador visual de seccion (Daily/Weekly/Special)
+        /// </summary>
+        private void CreateSectionHeader(string locKey, Color accentColor)
+        {
+            var header = new GameObject("SectionHeader");
+            header.transform.SetParent(missionsContainer, false);
+
+            var rt = header.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(350, 40);
+
+            var bg = header.AddComponent<Image>();
+            UIPolish.ApplyRoundedCorners(bg, 8);
+            bg.color = SEPARATOR_BG;
+
+            // Linea de acento izquierda
+            var lineObj = new GameObject("AccentLine");
+            lineObj.transform.SetParent(header.transform, false);
+            var lineRT = lineObj.AddComponent<RectTransform>();
+            lineRT.anchorMin = new Vector2(0, 0.2f);
+            lineRT.anchorMax = new Vector2(0.02f, 0.8f);
+            lineRT.offsetMin = Vector2.zero;
+            lineRT.offsetMax = Vector2.zero;
+            var lineImage = lineObj.AddComponent<Image>();
+            lineImage.color = accentColor;
+
+            // Texto
+            var textObj = new GameObject("HeaderText");
+            textObj.transform.SetParent(header.transform, false);
+            var textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = new Vector2(0.04f, 0);
+            textRT.anchorMax = new Vector2(1, 1);
+            textRT.offsetMin = new Vector2(5, 0);
+            textRT.offsetMax = new Vector2(-10, 0);
+
+            var text = textObj.AddComponent<TextMeshProUGUI>();
+            text.text = L(locKey);
+            text.fontSize = 14;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Left;
+            text.color = accentColor;
+
+            spawnedItems.Add(header);
         }
 
         private GameObject CreateMissionItemFallback(Mission mission)
@@ -418,78 +651,205 @@ namespace DigitPark.Managers
             item.transform.SetParent(missionsContainer, false);
 
             var rt = item.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(350, 90);
+            rt.sizeDelta = new Vector2(350, 110);
 
             var image = item.AddComponent<Image>();
+            UIPolish.ApplyRoundedCorners(image);
 
-            // Color based on state
+            // Color basado en estado y categoria
             if (mission.isClaimed)
-                image.color = new Color(0.1f, 0.1f, 0.15f, 0.7f);
+            {
+                image.color = CARD_BG_CLAIMED;
+            }
             else if (mission.isCompleted)
-                image.color = new Color(0.1f, 0.25f, 0.1f, 0.95f);
+            {
+                image.color = CARD_BG_COMPLETED;
+            }
             else
-                image.color = new Color(0.15f, 0.15f, 0.2f, 0.95f);
+            {
+                // Tint sutil por categoria: weekly=purpura, special=dorado
+                image.color = mission.category switch
+                {
+                    MissionCategory.Weekly => new Color(
+                        CARD_BG.r + PURPLE_WEEKLY.r * 0.025f,
+                        CARD_BG.g + PURPLE_WEEKLY.g * 0.01f,
+                        CARD_BG.b + PURPLE_WEEKLY.b * 0.04f,
+                        CARD_BG.a),
+                    MissionCategory.Special => new Color(
+                        CARD_BG.r + GOLD_SPECIAL.r * 0.03f,
+                        CARD_BG.g + GOLD_SPECIAL.g * 0.025f,
+                        CARD_BG.b + GOLD_SPECIAL.b * 0.005f,
+                        CARD_BG.a),
+                    _ => CARD_BG
+                };
+            }
 
-            // Title
+            // Borde de categoria
+            Color categoryColor = mission.category switch
+            {
+                MissionCategory.Weekly => PURPLE_WEEKLY,
+                MissionCategory.Special => GOLD_SPECIAL,
+                _ => CYAN_NEON
+            };
+
+            if (!mission.isClaimed)
+            {
+                var borderObj = new GameObject("CategoryBorder");
+                borderObj.transform.SetParent(item.transform, false);
+                var borderRT = borderObj.AddComponent<RectTransform>();
+                borderRT.anchorMin = new Vector2(0, 0);
+                borderRT.anchorMax = new Vector2(0.008f, 1);
+                borderRT.offsetMin = Vector2.zero;
+                borderRT.offsetMax = Vector2.zero;
+                var borderImage = borderObj.AddComponent<Image>();
+                borderImage.color = categoryColor;
+            }
+
+            // Titulo (localizado)
             var titleObj = new GameObject("Title");
             titleObj.transform.SetParent(item.transform, false);
             var titleRT = titleObj.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 0.6f);
+            titleRT.anchorMin = new Vector2(0.03f, 0.65f);
             titleRT.anchorMax = new Vector2(0.7f, 1);
-            titleRT.offsetMin = new Vector2(15, 0);
-            titleRT.offsetMax = new Vector2(0, -10);
+            titleRT.offsetMin = new Vector2(10, 0);
+            titleRT.offsetMax = new Vector2(0, -8);
 
             var titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.text = mission.title;
-            titleText.fontSize = 16;
+            titleText.text = L(mission.title);
+            titleText.fontSize = 15;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = mission.isClaimed ? new Color(0.5f, 0.5f, 0.5f) : Color.white;
+            titleText.color = mission.isClaimed ? new Color(0.45f, 0.45f, 0.45f) : Color.white;
 
-            // Description
+            // Descripcion (localizada)
             var descObj = new GameObject("Description");
             descObj.transform.SetParent(item.transform, false);
             var descRT = descObj.AddComponent<RectTransform>();
-            descRT.anchorMin = new Vector2(0, 0.3f);
-            descRT.anchorMax = new Vector2(0.7f, 0.6f);
-            descRT.offsetMin = new Vector2(15, 0);
+            descRT.anchorMin = new Vector2(0.03f, 0.38f);
+            descRT.anchorMax = new Vector2(0.7f, 0.65f);
+            descRT.offsetMin = new Vector2(10, 0);
             descRT.offsetMax = new Vector2(0, 0);
 
             var descText = descObj.AddComponent<TextMeshProUGUI>();
-            descText.text = mission.description;
-            descText.fontSize = 12;
-            descText.color = new Color(0.7f, 0.7f, 0.7f);
+            descText.text = L(mission.description);
+            descText.fontSize = 11;
+            descText.color = new Color(0.6f, 0.6f, 0.65f);
 
-            // Progress
-            var progressObj = new GameObject("Progress");
-            progressObj.transform.SetParent(item.transform, false);
-            var progressRT = progressObj.AddComponent<RectTransform>();
-            progressRT.anchorMin = new Vector2(0, 0);
-            progressRT.anchorMax = new Vector2(0.7f, 0.3f);
-            progressRT.offsetMin = new Vector2(15, 5);
-            progressRT.offsetMax = new Vector2(0, 0);
+            // Barra de progreso visual
+            var progressBarBg = new GameObject("ProgressBarBg");
+            progressBarBg.transform.SetParent(item.transform, false);
+            var progressBgRT = progressBarBg.AddComponent<RectTransform>();
+            progressBgRT.anchorMin = new Vector2(0.03f, 0.12f);
+            progressBgRT.anchorMax = new Vector2(0.55f, 0.22f);
+            progressBgRT.offsetMin = new Vector2(10, 0);
+            progressBgRT.offsetMax = new Vector2(0, 0);
+            var progressBgImage = progressBarBg.AddComponent<Image>();
+            progressBgImage.color = new Color(0.15f, 0.15f, 0.2f);
 
-            var progressText = progressObj.AddComponent<TextMeshProUGUI>();
-            progressText.text = mission.isClaimed ? "✓ Completada" :
-                               mission.isCompleted ? "¡Lista para reclamar!" :
-                               $"{mission.currentProgress}/{mission.targetProgress}";
-            progressText.fontSize = 12;
-            progressText.color = mission.isCompleted ? new Color(0f, 1f, 0.5f) : new Color(0.6f, 0.6f, 0.6f);
+            // Barra de progreso fill
+            var progressBarFill = new GameObject("ProgressBarFill");
+            progressBarFill.transform.SetParent(progressBarBg.transform, false);
+            var progressFillRT = progressBarFill.AddComponent<RectTransform>();
+            float fillAmount = mission.targetProgress > 0
+                ? Mathf.Clamp01((float)mission.currentProgress / mission.targetProgress)
+                : 0f;
+            progressFillRT.anchorMin = Vector2.zero;
+            progressFillRT.anchorMax = new Vector2(fillAmount, 1f);
+            progressFillRT.offsetMin = Vector2.zero;
+            progressFillRT.offsetMax = Vector2.zero;
+            var progressFillImage = progressBarFill.AddComponent<Image>();
+            progressFillImage.color = mission.isCompleted ? GREEN_SUCCESS : categoryColor;
 
-            // Reward
-            var rewardObj = new GameObject("Reward");
-            rewardObj.transform.SetParent(item.transform, false);
-            var rewardRT = rewardObj.AddComponent<RectTransform>();
-            rewardRT.anchorMin = new Vector2(0.7f, 0);
-            rewardRT.anchorMax = new Vector2(1, 1);
-            rewardRT.offsetMin = new Vector2(5, 10);
-            rewardRT.offsetMax = new Vector2(-10, -10);
+            // Texto de progreso numerico sobre la barra
+            var progressTextObj = new GameObject("ProgressText");
+            progressTextObj.transform.SetParent(item.transform, false);
+            var progressTextRT = progressTextObj.AddComponent<RectTransform>();
+            progressTextRT.anchorMin = new Vector2(0.56f, 0.08f);
+            progressTextRT.anchorMax = new Vector2(0.7f, 0.25f);
+            progressTextRT.offsetMin = Vector2.zero;
+            progressTextRT.offsetMax = Vector2.zero;
 
-            var rewardText = rewardObj.AddComponent<TextMeshProUGUI>();
-            string rewardIcon = mission.rewardType == "gems" ? "💎" : "🪙";
-            rewardText.text = $"{rewardIcon}\n+{mission.rewardAmount}";
-            rewardText.fontSize = 14;
-            rewardText.alignment = TextAlignmentOptions.Center;
-            rewardText.color = mission.rewardType == "gems" ? new Color(0.5f, 0.8f, 1f) : new Color(1f, 0.84f, 0f);
+            var progressText = progressTextObj.AddComponent<TextMeshProUGUI>();
+            if (mission.isClaimed)
+            {
+                progressText.text = "✓ " + L("ms_completed");
+                progressText.color = GREEN_SUCCESS;
+            }
+            else if (mission.isCompleted)
+            {
+                progressText.text = L("ms_ready_claim");
+                progressText.color = GREEN_SUCCESS;
+            }
+            else
+            {
+                progressText.text = $"{mission.currentProgress}/{mission.targetProgress}";
+                progressText.color = new Color(0.55f, 0.55f, 0.6f);
+            }
+            progressText.fontSize = 10;
+            progressText.alignment = TextAlignmentOptions.Left;
+
+            // === REWARD SECTION (icono + cantidad) ===
+            // Icono de currency
+            var rewardIconObj = new GameObject("RewardIcon");
+            rewardIconObj.transform.SetParent(item.transform, false);
+            var rewardIconRT = rewardIconObj.AddComponent<RectTransform>();
+            rewardIconRT.anchorMin = new Vector2(0.73f, 0.45f);
+            rewardIconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            rewardIconRT.offsetMin = Vector2.zero;
+            rewardIconRT.offsetMax = Vector2.zero;
+
+            var rewardIconImage = rewardIconObj.AddComponent<Image>();
+            rewardIconImage.sprite = GetRewardTypeIcon(mission.rewardType);
+            rewardIconImage.preserveAspect = true;
+            if (mission.isClaimed) rewardIconImage.color = new Color(1f, 1f, 1f, 0.35f);
+
+            // Cantidad de reward
+            var rewardAmountObj = new GameObject("RewardAmount");
+            rewardAmountObj.transform.SetParent(item.transform, false);
+            var rewardAmountRT = rewardAmountObj.AddComponent<RectTransform>();
+            rewardAmountRT.anchorMin = new Vector2(0.73f, 0.15f);
+            rewardAmountRT.anchorMax = new Vector2(0.98f, 0.48f);
+            rewardAmountRT.offsetMin = Vector2.zero;
+            rewardAmountRT.offsetMax = Vector2.zero;
+
+            var rewardAmountText = rewardAmountObj.AddComponent<TextMeshProUGUI>();
+            rewardAmountText.text = $"+{mission.rewardAmount}";
+            rewardAmountText.fontSize = 14;
+            rewardAmountText.fontStyle = FontStyles.Bold;
+            rewardAmountText.alignment = TextAlignmentOptions.Center;
+            rewardAmountText.color = mission.isClaimed
+                ? new Color(0.4f, 0.4f, 0.4f)
+                : GetRewardTypeColor(mission.rewardType);
+
+            // Boton "Reclamar" inline para misiones completadas no reclamadas
+            if (mission.isCompleted && !mission.isClaimed)
+            {
+                var claimBtnObj = new GameObject("ClaimBtn");
+                claimBtnObj.transform.SetParent(item.transform, false);
+                var claimBtnRT = claimBtnObj.AddComponent<RectTransform>();
+                claimBtnRT.anchorMin = new Vector2(0.78f, 0.18f);
+                claimBtnRT.anchorMax = new Vector2(0.98f, 0.82f);
+                claimBtnRT.offsetMin = Vector2.zero;
+                claimBtnRT.offsetMax = Vector2.zero;
+
+                var claimBtnImage = claimBtnObj.AddComponent<Image>();
+                UIPolish.ApplyRoundedCorners(claimBtnImage, 8);
+                claimBtnImage.color = GREEN_SUCCESS;
+
+                var claimBtnTextObj = new GameObject("Text");
+                claimBtnTextObj.transform.SetParent(claimBtnObj.transform, false);
+                var claimBtnTextRT = claimBtnTextObj.AddComponent<RectTransform>();
+                claimBtnTextRT.anchorMin = Vector2.zero;
+                claimBtnTextRT.anchorMax = Vector2.one;
+                claimBtnTextRT.offsetMin = Vector2.zero;
+                claimBtnTextRT.offsetMax = Vector2.zero;
+
+                var claimBtnText = claimBtnTextObj.AddComponent<TextMeshProUGUI>();
+                claimBtnText.text = "✓";
+                claimBtnText.fontSize = 16;
+                claimBtnText.fontStyle = FontStyles.Bold;
+                claimBtnText.alignment = TextAlignmentOptions.Center;
+                claimBtnText.color = Color.white;
+            }
 
             return item;
         }
@@ -500,8 +860,8 @@ namespace DigitPark.Managers
 
             if (missionDetailPanel) missionDetailPanel.SetActive(true);
 
-            if (detailTitleText) detailTitleText.text = mission.title;
-            if (detailDescriptionText) detailDescriptionText.text = mission.description;
+            if (detailTitleText) detailTitleText.text = L(mission.title);
+            if (detailDescriptionText) detailDescriptionText.text = L(mission.description);
 
             if (detailProgressBar)
             {
@@ -516,8 +876,7 @@ namespace DigitPark.Managers
 
             if (detailRewardText)
             {
-                string rewardName = mission.rewardType == "gems" ? "gemas" : "monedas";
-                detailRewardText.text = $"+{mission.rewardAmount} {rewardName}";
+                detailRewardText.text = $"+{mission.rewardAmount} {GetRewardTypeName(mission.rewardType)}";
             }
 
             if (claimRewardButton)
@@ -545,13 +904,38 @@ namespace DigitPark.Managers
             // Show popup
             ShowRewardPopup(selectedMission.rewardType, selectedMission.rewardAmount);
 
+            // Scale punch feedback
+            if (claimRewardButton != null)
+                ScalePunch.Play(claimRewardButton.gameObject, 1.15f, 0.3f);
+
+            // Coin fly animation
+            if (claimRewardButton != null && rewardPopupIcon != null)
+            {
+                var originRT = claimRewardButton.GetComponent<RectTransform>();
+                var targetRT = rewardPopupIcon.GetComponent<RectTransform>();
+                Sprite flyIcon = GetRewardTypeIcon(selectedMission.rewardType);
+                CoinFlyAnimation.Play(originRT, targetRT, selectedMission.rewardType, 6, 0.6f, flyIcon);
+            }
+
+            // Analytics: track mission reward claimed
+            AnalyticsService.Instance?.LogMissionCompleted(
+                selectedMission.id,
+                selectedMission.rewardType,
+                selectedMission.rewardAmount
+            );
+
+            // Haptic feedback
+#if UNITY_IOS || UNITY_ANDROID
+            Handheld.Vibrate();
+#endif
+
             // Update UI
             if (claimRewardButton) claimRewardButton.gameObject.SetActive(false);
             UpdateHeaderStats();
             UpdateDailyProgress();
             LoadMissions();
 
-            Debug.Log($"[DailyMissions] Claimed reward for: {selectedMission.title}");
+            Debug.Log($"[DailyMissions] Claimed reward for: {selectedMission.id}");
         }
 
         private void ClaimDailyBonus()
@@ -564,8 +948,10 @@ namespace DigitPark.Managers
             ApplyReward("coins", dailyBonusReward);
             ShowRewardPopup("coins", dailyBonusReward);
 
-            UpdateDailyProgress();
+            // Analytics
+            AnalyticsService.Instance?.LogVirtualCurrencyEarned("coins", dailyBonusReward, "daily_missions_bonus");
 
+            UpdateDailyProgress();
             Debug.Log($"[DailyMissions] Claimed daily bonus: {dailyBonusReward} coins");
         }
 
@@ -585,6 +971,9 @@ namespace DigitPark.Managers
             }
 
             PlayerPrefs.Save();
+
+            // Analytics
+            AnalyticsService.Instance?.LogVirtualCurrencyEarned(type, amount, "mission_reward");
         }
 
         private void ShowRewardPopup(string type, int amount)
@@ -592,8 +981,8 @@ namespace DigitPark.Managers
             if (rewardPopup)
             {
                 rewardPopup.SetActive(true);
-                string rewardName = type == "gems" ? "gemas" : "monedas";
-                if (rewardPopupText) rewardPopupText.text = $"+{amount} {rewardName}";
+                if (rewardPopupText) rewardPopupText.text = $"+{amount} {GetRewardTypeName(type)}";
+                if (rewardPopupIcon) rewardPopupIcon.sprite = GetRewardTypeIcon(type);
 
                 Invoke(nameof(HideRewardPopup), 2f);
             }
@@ -617,7 +1006,15 @@ namespace DigitPark.Managers
             if (mission.currentProgress >= mission.targetProgress)
             {
                 mission.isCompleted = true;
-                Debug.Log($"[DailyMissions] Mission completed: {mission.title}");
+
+                // Analytics: mission completed
+                AnalyticsService.Instance?.LogMissionCompleted(
+                    mission.id,
+                    "progress",
+                    0
+                );
+
+                Debug.Log($"[DailyMissions] Mission completed: {mission.id}");
             }
 
             SaveProgress(mission);
