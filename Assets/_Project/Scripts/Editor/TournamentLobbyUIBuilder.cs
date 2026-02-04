@@ -556,12 +556,13 @@ namespace DigitPark.Editor
             rankLE.minWidth = 50;
             rankLE.preferredWidth = 50;
 
-            // Avatar placeholder
+            // Avatar - se llena vía data con AvatarInitialGenerator o foto real
             GameObject avatarObj = FindOrCreateChild(row, "Avatar");
             RectTransform avatarRT = GetOrAddComponent<RectTransform>(avatarObj);
             avatarRT.sizeDelta = new Vector2(40, 40);
             Image avatarImage = GetOrAddComponent<Image>(avatarObj);
-            avatarImage.color = CYAN_DARK;
+            avatarImage.color = Color.white;
+            avatarImage.preserveAspect = true;
             LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
             avatarLE.minWidth = 40;
             avatarLE.minHeight = 40;
@@ -626,14 +627,23 @@ namespace DigitPark.Editor
             LayoutElement rankLE = GetOrAddComponent<LayoutElement>(rankObj);
             rankLE.minWidth = 60;
 
-            // My Avatar
+            // My Avatar - se llena con AvatarUI component
             GameObject avatarObj = FindOrCreateChild(myPos, "MyAvatar");
             RectTransform avatarRT = GetOrAddComponent<RectTransform>(avatarObj);
             Image avatarImage = GetOrAddComponent<Image>(avatarObj);
-            avatarImage.color = TEXT_PRIMARY;
+            avatarImage.color = Color.white;
+            avatarImage.preserveAspect = true;
             LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
             avatarLE.minWidth = 50;
             avatarLE.minHeight = 50;
+
+            // Agregar AvatarUI para carga automática del avatar del usuario actual
+            var myAvatarUI = GetOrAddComponent<DigitPark.UI.Components.AvatarUI>(avatarObj);
+            SerializedObject myAvatarSO = new SerializedObject(myAvatarUI);
+            myAvatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
+            myAvatarSO.FindProperty("isEditable").boolValue = false;
+            myAvatarSO.FindProperty("avatarImage").objectReferenceValue = avatarImage;
+            myAvatarSO.ApplyModifiedProperties();
 
             // My Name
             GameObject nameObj = FindOrCreateChild(myPos, "MyName");

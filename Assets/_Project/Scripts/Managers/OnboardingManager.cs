@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DG.Tweening;
 
 namespace DigitPark.Managers
 {
@@ -72,6 +72,12 @@ namespace DigitPark.Managers
         [SerializeField] private Sprite rewardsImage;
         [SerializeField] private Sprite socialImage;
 
+        [Header("UI - Sections (for animations)")]
+        [SerializeField] private RectTransform progressBarTransform;
+        [SerializeField] private RectTransform topBarTransform;
+        [SerializeField] private RectTransform dotsTransform;
+        [SerializeField] private RectTransform navigationTransform;
+
         [Header("Avatar Options")]
         [SerializeField] private List<AvatarOption> avatarOptions = new List<AvatarOption>();
 
@@ -95,6 +101,7 @@ namespace DigitPark.Managers
             SetupUI();
             SetupListeners();
             ShowStep(0);
+            AnimateEntrance();
         }
 
         private void InitializeSteps()
@@ -156,7 +163,7 @@ namespace DigitPark.Managers
                     {
                         id = "rewards",
                         title = "Recompensas Diarias",
-                        description = "Vuelve cada día para obtener monedas, gemas, cofres y más recompensas.",
+                        description = "Vuelve cada día para obtener monedas, gemas y más recompensas.",
                         stepType = OnboardingStepType.Info,
                         requiresInteraction = false
                     },
@@ -405,6 +412,8 @@ namespace DigitPark.Managers
             if (nameInputPanel)
             {
                 nameInputPanel.SetActive(true);
+                nameInputPanel.transform.localScale = Vector3.one * 0.85f;
+                nameInputPanel.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack);
 
                 if (nameInput)
                 {
@@ -467,6 +476,8 @@ namespace DigitPark.Managers
             if (avatarSelectionPanel)
             {
                 avatarSelectionPanel.SetActive(true);
+                avatarSelectionPanel.transform.localScale = Vector3.one * 0.85f;
+                avatarSelectionPanel.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack);
                 PopulateAvatars();
             }
 
@@ -604,6 +615,8 @@ namespace DigitPark.Managers
             if (completionPanel)
             {
                 completionPanel.SetActive(true);
+                completionPanel.transform.localScale = Vector3.one * 0.85f;
+                completionPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
 
                 if (completionTitleText)
                 {
@@ -658,7 +671,7 @@ namespace DigitPark.Managers
 
             if (currentStepIndex < steps.Count - 1)
             {
-                StartCoroutine(TransitionToStep(currentStepIndex + 1));
+                TransitionToStep(currentStepIndex + 1);
             }
             else
             {
@@ -672,23 +685,118 @@ namespace DigitPark.Managers
 
             if (currentStepIndex > 0)
             {
-                StartCoroutine(TransitionToStep(currentStepIndex - 1));
+                TransitionToStep(currentStepIndex - 1);
             }
         }
 
-        private IEnumerator TransitionToStep(int newIndex)
+        private void TransitionToStep(int newIndex)
         {
             isTransitioning = true;
 
-            // Fade out current (optional animation)
-            yield return new WaitForSeconds(0.1f);
+            const float fadeOut = 0.12f;
+            const float fadeIn = 0.2f;
 
-            ShowStep(newIndex);
+            CanvasGroup imgCG = null, titleCG = null, descCG = null;
+            if (stepImage != null)
+                imgCG = stepImage.GetComponent<CanvasGroup>() ?? stepImage.gameObject.AddComponent<CanvasGroup>();
+            if (titleText != null)
+                titleCG = titleText.GetComponent<CanvasGroup>() ?? titleText.gameObject.AddComponent<CanvasGroup>();
+            if (descriptionText != null)
+                descCG = descriptionText.GetComponent<CanvasGroup>() ?? descriptionText.gameObject.AddComponent<CanvasGroup>();
 
-            yield return new WaitForSeconds(0.1f);
+            var seq = DOTween.Sequence();
 
-            isTransitioning = false;
+            // Fade out current content
+            if (imgCG != null)
+            {
+                seq.Append(imgCG.DOFade(0f, fadeOut));
+                seq.Join(stepImage.transform.DOScale(0.85f, fadeOut));
+            }
+            if (titleCG != null) seq.Join(titleCG.DOFade(0f, fadeOut));
+            if (descCG != null) seq.Join(descCG.DOFade(0f, fadeOut));
+
+            // Switch to new step
+            seq.AppendCallback(() =>
+            {
+                ShowStep(newIndex);
+                if (imgCG != null) { imgCG.alpha = 0f; stepImage.transform.localScale = Vector3.one * 0.85f; }
+                if (titleCG != null) titleCG.alpha = 0f;
+                if (descCG != null) descCG.alpha = 0f;
+            });
+
+            // Fade in new content
+            if (imgCG != null)
+            {
+                seq.Append(imgCG.DOFade(1f, fadeIn));
+                seq.Join(stepImage.transform.DOScale(1f, fadeIn).SetEase(Ease.OutBack));
+            }
+            if (titleCG != null) seq.Join(titleCG.DOFade(1f, fadeIn));
+            if (descCG != null) seq.Join(descCG.DOFade(1f, fadeIn));
+
+            seq.OnComplete(() => isTransitioning = false);
         }
+
+        #region Animations
+
+        private void AnimateEntrance()
+        {
+            // Progress bar slide from top
+            if (progressBarTransform != null)
+            {
+                Vector2 pos = progressBarTransform.anchoredPosition;
+                progressBarTransform.anchoredPosition = new Vector2(pos.x, pos.y + 100);
+                progressBarTransform.DOAnchorPos(pos, 0.3f).SetEase(Ease.OutCubic);
+            }
+
+            // Top bar slide from top
+            if (topBarTransform != null)
+            {
+                Vector2 pos = topBarTransform.anchoredPosition;
+                topBarTransform.anchoredPosition = new Vector2(pos.x, pos.y + 150);
+                topBarTransform.DOAnchorPos(pos, 0.35f).SetDelay(0.1f).SetEase(Ease.OutCubic);
+            }
+
+            // Step image scale from 0
+            if (stepImage != null)
+            {
+                stepImage.transform.localScale = Vector3.zero;
+                stepImage.transform.DOScale(1f, 0.4f).SetDelay(0.15f).SetEase(Ease.OutBack);
+            }
+
+            // Title fade in
+            if (titleText != null)
+            {
+                var cg = titleText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.35f).SetDelay(0.25f);
+            }
+
+            // Description fade in
+            if (descriptionText != null)
+            {
+                var cg = descriptionText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.35f).SetDelay(0.3f);
+            }
+
+            // Dots fade in
+            if (dotsTransform != null)
+            {
+                var cg = dotsTransform.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.3f).SetDelay(0.35f);
+            }
+
+            // Navigation slide from bottom
+            if (navigationTransform != null)
+            {
+                Vector2 pos = navigationTransform.anchoredPosition;
+                navigationTransform.anchoredPosition = new Vector2(pos.x, pos.y - 100);
+                navigationTransform.DOAnchorPos(pos, 0.35f).SetDelay(0.2f).SetEase(Ease.OutBack);
+            }
+        }
+
+        #endregion
 
         private void OnSkipClicked()
         {

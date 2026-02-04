@@ -640,7 +640,6 @@ Este documento lista todos los SerializeField de cada escena para facilitar la a
 | | milestoneBonusText | TextMeshProUGUI | Bonus milestone |
 | **Icons** | coinIcon | Sprite | Icono moneda |
 | | gemIcon | Sprite | Icono gema |
-| | chestIcon | Sprite | Icono cofre |
 | | xpIcon | Sprite | Icono XP |
 | | mysteryIcon | Sprite | Icono misterio |
 
@@ -665,85 +664,6 @@ Este documento lista todos los SerializeField de cada escena para facilitar la a
 | | bonusClaimButton | Button | Boton reclamar bonus |
 | | bonusIcon | Image | Icono bonus |
 | | bonusAmountText | TextMeshProUGUI | Cantidad bonus |
-
----
-
-### BattlePass Scene
-**Manager:** `BattlePassManager.cs`
-
-| Header | Campo | Tipo | Descripcion |
-|--------|-------|------|-------------|
-| **UI - Header** | backButton | Button | Boton volver |
-| | seasonNameText | TextMeshProUGUI | Nombre temporada |
-| | timeRemainingText | TextMeshProUGUI | Tiempo restante |
-| **UI - Level Progress** | currentLevelText | TextMeshProUGUI | Nivel actual |
-| | currentXPText | TextMeshProUGUI | XP actual |
-| | xpProgressBar | Slider | Barra XP |
-| | xpToNextLevelText | TextMeshProUGUI | XP para siguiente |
-| **UI - Premium** | premiumBadge | GameObject | Badge premium |
-| | buyPremiumButton | Button | Comprar premium |
-| | premiumPriceText | TextMeshProUGUI | Precio premium |
-| **UI - Rewards** | rewardsScrollRect | ScrollRect | ScrollRect recompensas |
-| | rewardsContainer | Transform | Contenedor |
-| | rewardTierPrefab | GameObject | Prefab tier |
-| **UI - Reward Detail** | rewardDetailPanel | GameObject | Panel detalle |
-| | rewardDetailIcon | Image | Icono detalle |
-| | rewardDetailNameText | TextMeshProUGUI | Nombre |
-| | rewardDetailDescText | TextMeshProUGUI | Descripcion |
-| | rewardDetailTypeText | TextMeshProUGUI | Tipo |
-| | claimRewardButton | Button | Reclamar |
-| | closeDetailButton | Button | Cerrar |
-| **UI - Buy Premium Modal** | buyPremiumModal | GameObject | Modal compra |
-| | premiumBenefitsText | TextMeshProUGUI | Beneficios |
-| | confirmBuyButton | Button | Confirmar |
-| | cancelBuyButton | Button | Cancelar |
-| **UI - Reward Claimed** | rewardClaimedPopup | GameObject | Popup reclamado |
-| | rewardClaimedIcon | Image | Icono |
-| | rewardClaimedText | TextMeshProUGUI | Texto |
-
----
-
-### ChestOpening Scene
-**Manager:** `ChestOpeningManager.cs`
-
-| Header | Campo | Tipo | Descripcion |
-|--------|-------|------|-------------|
-| **UI - Header** | backButton | Button | Boton volver |
-| | skipButton | Button | Saltar animacion |
-| | chestTypeText | TextMeshProUGUI | Tipo de cofre |
-| **UI - Chest Display** | chestContainer | GameObject | Contenedor cofre |
-| | chestImage | Image | Imagen cofre |
-| | chestAnimator | Animator | Animator cofre |
-| | chestParticles | ParticleSystem | Particulas cofre |
-| | openingParticles | ParticleSystem | Particulas apertura |
-| **UI - Rewards Panel** | rewardsPanel | GameObject | Panel recompensas |
-| | rewardsContainer | Transform | Contenedor items |
-| | rewardItemPrefab | GameObject | Prefab item |
-| | totalValueText | TextMeshProUGUI | Valor total |
-| | collectAllButton | Button | Recoger todo |
-| **UI - Single Reward** | singleRewardPanel | GameObject | Panel item unico |
-| | singleRewardIcon | Image | Icono |
-| | singleRewardNameText | TextMeshProUGUI | Nombre |
-| | singleRewardDescriptionText | TextMeshProUGUI | Descripcion |
-| | singleRewardRarityText | TextMeshProUGUI | Rareza |
-| | rarityParticles | ParticleSystem | Particulas rareza |
-| **UI - Prompt** | tapPrompt | GameObject | Prompt tocar |
-| | tapPromptText | TextMeshProUGUI | Texto prompt |
-| **Audio** | audioSource | AudioSource | Fuente audio |
-| | chestShakeClip | AudioClip | Sonido sacudir |
-| | chestOpenClip | AudioClip | Sonido abrir |
-| | rewardRevealClip | AudioClip | Sonido revelar |
-| | rareRewardClip | AudioClip | Sonido raro |
-| | epicRewardClip | AudioClip | Sonido epico |
-| | legendaryRewardClip | AudioClip | Sonido legendario |
-| **Chest Sprites** | commonChestSprite | Sprite | Cofre comun |
-| | rareChestSprite | Sprite | Cofre raro |
-| | epicChestSprite | Sprite | Cofre epico |
-| | legendaryChestSprite | Sprite | Cofre legendario |
-| **Rarity Colors** | commonColor | Color | Color comun |
-| | rareColor | Color | Color raro |
-| | epicColor | Color | Color epico |
-| | legendaryColor | Color | Color legendario |
 
 ---
 

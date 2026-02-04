@@ -6,1394 +6,1381 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Construye la UI PREMIUM de Daily Rewards.
-    /// Diseño inspirado en Top 10 apps iOS: Coin Master, Clash Royale, Candy Crush.
+    /// Daily Rewards Premium UI Builder - Neon Cyan + Gold accents
+    /// Layout: TopBar -> StreakPanel -> WeekLabel -> DaysGrid(3x2) -> Day7Card -> TodayPanel -> ClaimButton -> Timer
+    /// Popups: ClaimAnimationBlocker, MilestoneBlocker
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
-    /// Características Premium:
-    /// - Sistema de Racha (Streak) con multiplicadores y barra de progreso
-    /// - Día 7 como evento especial con cofre legendario 3x más grande
-    /// - Cofres con colores de rareza en lugar de iconos planos
-    /// - Path visual conectando los días
-    /// - Efectos de glow pulsante en día actual y día 7
-    /// - Botón de reclamar con shine animado
-    /// - Timer de próxima recompensa
-    /// - Popup de celebración con confeti
-    /// - Popup de racha perdida con opción de restaurar
+    /// Menu: DigitPark/UI Builders/Monetization/Daily Rewards (priority 185)
     /// </summary>
     public class DailyRewardsPremiumUIBuilder : EditorWindow
     {
-        // ==================== COLORES PREMIUM ====================
+        #region Colors
 
-        // Base Colors
-        private static readonly Color DARK_BG = new Color(0.04f, 0.09f, 0.16f, 1f);           // #0A1628
-        private static readonly Color PANEL_BG = new Color(0.06f, 0.1f, 0.18f, 0.98f);
-        private static readonly Color CARD_BG = new Color(0.08f, 0.12f, 0.2f, 1f);
-        private static readonly Color HEADER_BG = new Color(0.05f, 0.08f, 0.14f, 0.95f);
-
-        // Accent Colors
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color CYAN_DARK = new Color(0f, 0.5f, 0.5f, 1f);
+        private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.5f, 1f);
+        private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.06f);
 
-        // Gold Theme (Day 7 Special)
-        private static readonly Color GOLD_BRIGHT = new Color(1f, 0.84f, 0f, 1f);             // #FFD700
-        private static readonly Color GOLD_DARK = new Color(1f, 0.55f, 0f, 1f);               // #FF8C00
-        private static readonly Color GOLD_GLOW = new Color(1f, 0.84f, 0f, 0.4f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
+        private static readonly Color CARD_BG_LIGHT = new Color(0.08f, 0.10f, 0.14f, 1f);
 
-        // Streak Colors
-        private static readonly Color STREAK_FIRE = new Color(1f, 0.42f, 0.21f, 1f);          // #FF6B35
-        private static readonly Color STREAK_GLOW = new Color(1f, 0.42f, 0.21f, 0.5f);
+        private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
+        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.6f, 0.65f, 1f);
+        private static readonly Color TEXT_DARK = new Color(0.05f, 0.05f, 0.08f, 1f);
 
-        // Day State Colors
-        private static readonly Color DAY_CLAIMED_BG = new Color(0.1f, 0.3f, 0.23f, 1f);      // #1A4D3A
-        private static readonly Color DAY_CLAIMED_BORDER = new Color(0f, 1f, 0.53f, 1f);      // #00FF88
-        private static readonly Color DAY_CURRENT_GLOW = new Color(1f, 0.84f, 0f, 0.6f);
-        private static readonly Color DAY_LOCKED_BG = new Color(0.16f, 0.23f, 0.29f, 1f);     // #2A3A4A
-        private static readonly Color DAY_LOCKED_BORDER = new Color(0.3f, 0.35f, 0.4f, 0.5f);
+        private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
+        private static readonly Color GOLD_DARK = new Color(0.6f, 0.5f, 0f, 1f);
 
-        // Chest Rarity Colors
-        private static readonly Color CHEST_COMMON = new Color(0.6f, 0.6f, 0.65f, 1f);        // Gray
-        private static readonly Color CHEST_RARE = new Color(0.2f, 0.6f, 1f, 1f);             // Blue
-        private static readonly Color CHEST_EPIC = new Color(0.7f, 0.3f, 1f, 1f);             // Purple
-        private static readonly Color CHEST_LEGENDARY = new Color(1f, 0.84f, 0f, 1f);         // Gold
+        private static readonly Color GREEN_SUCCESS = new Color(0.2f, 0.9f, 0.4f, 1f);
+        private static readonly Color GREEN_CLAIMED = new Color(0.15f, 0.5f, 0.25f, 1f);
 
-        // Text Colors
-        private static readonly Color TEXT_PRIMARY = new Color(0.95f, 0.95f, 0.95f, 1f);
-        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.7f, 0.75f, 1f);
-        private static readonly Color TEXT_GOLD = new Color(1f, 0.9f, 0.5f, 1f);
-        private static readonly Color TEXT_DARK = new Color(0.05f, 0.08f, 0.12f, 1f);
+        private static readonly Color ORANGE_FIRE = new Color(1f, 0.5f, 0.1f, 1f);
 
-        // Button Colors
-        private static readonly Color BUTTON_CLAIM = new Color(0.2f, 0.85f, 0.4f, 1f);
-        private static readonly Color BUTTON_CLAIM_GLOW = new Color(0.2f, 1f, 0.5f, 0.5f);
+        private static readonly Color LOCKED_OVERLAY = new Color(0.03f, 0.04f, 0.07f, 0.85f);
 
-        // Currency Colors
-        private static readonly Color COIN_COLOR = new Color(1f, 0.84f, 0f, 1f);
-        private static readonly Color GEM_COLOR = new Color(0.4f, 0.7f, 1f, 1f);
-        private static readonly Color XP_COLOR = new Color(0.4f, 0.9f, 0.4f, 1f);
+        private static readonly Color COIN_COLOR = new Color(1f, 0.85f, 0.3f, 1f);
+        private static readonly Color GEM_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
+        private static readonly Color XP_COLOR = new Color(0.5f, 1f, 0.5f, 1f);
 
-        // ==================== DIMENSIONES (OPTIMIZADAS 10/10) ====================
-        private const float HEADER_HEIGHT = 90f;
-        private const float STREAK_PANEL_HEIGHT = 90f;
-        private const float WEEK_TITLE_HEIGHT = 30f;
-        private const float DAY_CARD_SIZE = 115f;  // Larger cards for better visibility
-        private const float DAY_CARD_SPACING = 12f;
-        private const float DAY7_CARD_WIDTH = 360f;  // Wider Day 7 card
-        private const float DAY7_CARD_HEIGHT = 140f;  // More compact
-        private const float TODAY_REWARD_HEIGHT = 100f;  // More compact
-        private const float CLAIM_BUTTON_HEIGHT = 60f;
-        private const float TIMER_HEIGHT = 35f;
+        #endregion
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Daily Rewards PREMIUM", false, 184)]
-        public static void BuildUI()
+        #region Layout Anchors (Y: 0=bottom, 1=top)
+
+        private const float TOPBAR_TOP = 0.988f;
+        private const float TOPBAR_BOT = 0.960f;
+
+        private const float STREAK_TOP = 0.955f;
+        private const float STREAK_BOT = 0.890f;
+
+        private const float WEEK_TOP = 0.890f;
+        private const float WEEK_BOT = 0.865f;
+
+        private const float DAYS_TOP = 0.860f;
+        private const float DAYS_BOT = 0.555f;
+
+        private const float DAY7_TOP = 0.545f;
+        private const float DAY7_BOT = 0.410f;
+
+        private const float TODAY_TOP = 0.400f;
+        private const float TODAY_BOT = 0.300f;
+
+        private const float CLAIM_TOP = 0.290f;
+        private const float CLAIM_BOT = 0.225f;
+
+        private const float TIMER_TOP = 0.225f;
+        private const float TIMER_BOT = 0.185f;
+
+        private const float SIDE_PAD = 25f;
+
+        #endregion
+
+        #region Icon Paths
+
+        private const string ICONS_BASE = "Assets/_Project/Art/Icons/";
+        private const string DAILY_ICONS = ICONS_BASE + "DailyRewards/";
+        private const string CURRENCY_ICONS = ICONS_BASE + "Currency/";
+        private const string UI_ICONS = ICONS_BASE + "UI/";
+        private const string NAV_ICONS = ICONS_BASE + "Navigation/Actions/";
+
+        #endregion
+
+        [MenuItem("DigitPark/UI Builders/Monetization/Daily Rewards", false, 185)]
+        public static void ShowWindow()
         {
-            if (!EditorUtility.DisplayDialog("Daily Rewards PREMIUM Builder",
-                "Esto construirá la UI PREMIUM de Daily Rewards.\n" +
-                "Asegúrate de tener la escena DailyRewards abierta.\n\n" +
-                "Diseño inspirado en Top 10 iOS Apps:\n\n" +
-                "✓ Sistema de Racha con multiplicadores\n" +
-                "✓ Día 7 como MEGA recompensa (3x más grande)\n" +
-                "✓ Cofres con colores de rareza\n" +
-                "✓ Efectos de glow pulsante\n" +
-                "✓ Botón con shine animado\n" +
-                "✓ Timer de próxima recompensa\n" +
-                "✓ Popup de celebración\n" +
-                "✓ Popup de racha perdida\n\n" +
-                "¿Continuar?",
-                "Sí, crear Premium UI", "Cancelar"))
-                return;
-
-            BuildPremiumDailyRewards();
+            GetWindow<DailyRewardsPremiumUIBuilder>("Daily Rewards Builder");
         }
 
-        private static void BuildPremiumDailyRewards()
+        private void OnGUI()
         {
-            Debug.Log("[DailyRewards PREMIUM] ========== INICIANDO CONSTRUCCIÓN ==========");
+            GUILayout.Label("Daily Rewards Premium UI Builder", EditorStyles.boldLabel);
+            GUILayout.Label("Neon Cyan + Gold accents - 7-day cycle", EditorStyles.miniLabel);
+            GUILayout.Space(10);
 
-            Canvas canvas = SetupCanvas();
-            if (canvas == null) return;
+            EditorGUILayout.HelpBox(
+                "Layout (de arriba a abajo):\n\n" +
+                "1. TopBar (Back + titulo + currency pills)\n" +
+                "2. Streak Panel (racha + progress bar)\n" +
+                "3. Week Label (SEMANA 1)\n" +
+                "4. Days Grid 3x2 (dias 1-6)\n" +
+                "5. Day 7 Mega Card (premio especial)\n" +
+                "6. Today Panel (recompensa de hoy)\n" +
+                "7. Claim Button (reclamar)\n" +
+                "8. Timer (proxima recompensa)\n" +
+                "9. Claim Animation Popup (hidden)\n" +
+                "10. Milestone Popup (hidden)",
+                MessageType.Info);
 
-            CleanupOldUI(canvas);
+            GUILayout.Space(15);
 
-            CreateBackground(canvas);
-            GameObject safeArea = CreateSafeArea(canvas);
+            GUI.backgroundColor = CYAN_NEON;
+            if (GUILayout.Button("RECONSTRUIR RECOMPENSAS COMPLETO", GUILayout.Height(50)))
+                RebuildDailyRewards();
+            GUI.backgroundColor = Color.white;
 
-            CreateHeader(safeArea);
-            CreateStreakPanel(safeArea);
-            CreateWeekTitle(safeArea);
-            CreateDaysGrid(safeArea);
-            CreateDay7Special(safeArea);
-            CreateTodayRewardPanel(safeArea);
-            CreateClaimButton(safeArea);
-            CreateNextRewardTimer(safeArea);
+            GUILayout.Space(10);
+            GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
 
-            CreateClaimCelebration(canvas);
-            CreateStreakLostPopup(canvas);
+            if (GUILayout.Button("1. Background + TopBar", GUILayout.Height(25)))
+            {
+                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
+            }
+            if (GUILayout.Button("2. Streak Panel", GUILayout.Height(25))) CreateStreakPanel();
+            if (GUILayout.Button("3. Week Label", GUILayout.Height(25))) CreateWeekLabel();
+            if (GUILayout.Button("4. Days Grid (1-6)", GUILayout.Height(25))) CreateDaysGrid();
+            if (GUILayout.Button("5. Day 7 Mega Card", GUILayout.Height(25))) CreateDay7Card();
+            if (GUILayout.Button("6. Today Panel", GUILayout.Height(25))) CreateTodayPanel();
+            if (GUILayout.Button("7. Claim Button", GUILayout.Height(25))) CreateClaimButton();
+            if (GUILayout.Button("8. Timer", GUILayout.Height(25))) CreateTimer();
+            if (GUILayout.Button("9. Claim Animation Popup", GUILayout.Height(25))) CreateClaimAnimationPopup();
+            if (GUILayout.Button("10. Milestone Popup", GUILayout.Height(25))) CreateMilestonePopup();
 
-            MarkSceneDirty();
-            Debug.Log("[DailyRewards PREMIUM] ========== CONSTRUCCIÓN COMPLETADA ==========");
+            GUILayout.Space(15);
 
-            EditorUtility.DisplayDialog("Daily Rewards PREMIUM Completado",
-                "UI Premium de Daily Rewards creada exitosamente.\n\n" +
-                "Elementos creados:\n" +
-                "✓ Header con monedas/gemas\n" +
-                "✓ Panel de Racha con barra de progreso\n" +
-                "✓ 6 días normales con cofres de rareza\n" +
-                "✓ Día 7 especial (MEGA COFRE)\n" +
-                "✓ Panel de recompensa de hoy\n" +
-                "✓ Botón de reclamar con glow\n" +
-                "✓ Timer de próxima recompensa\n" +
-                "✓ Popup de celebración\n" +
-                "✓ Popup de racha perdida\n\n" +
-                "Asigna el DailyRewardsManager y conecta las referencias.",
-                "OK");
+            GUI.backgroundColor = GOLD;
+            if (GUILayout.Button("ASIGNAR REFERENCIAS AL MANAGER", GUILayout.Height(35)))
+                SetupManagerReferences();
+            GUI.backgroundColor = Color.white;
         }
 
-        // ==================== CANVAS SETUP ====================
+        #region Main Rebuild
 
-        private static Canvas SetupCanvas()
+        private static void RebuildDailyRewards()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
-
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
-                GameObject canvasObj = new GameObject("Canvas");
-                canvas = canvasObj.AddComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                Debug.LogError("[DailyRewardsUI] No se encontro Canvas");
+                return;
+            }
 
-                CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0.5f;
-
-                canvasObj.AddComponent<GraphicRaycaster>();
+                scaler.matchWidthOrHeight = 0f;
             }
 
-            if (Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
-            {
-                GameObject eventSystem = new GameObject("EventSystem");
-                eventSystem.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                eventSystem.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            }
-
-            if (Camera.main == null)
-            {
-                GameObject cameraObj = new GameObject("Main Camera");
-                Camera cam = cameraObj.AddComponent<Camera>();
-                cam.tag = "MainCamera";
-                cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = DARK_BG;
-            }
-
-            return canvas;
-        }
-
-        private static void CleanupOldUI(Canvas canvas)
-        {
-            Debug.Log("[DailyRewards PREMIUM] Limpiando UI antigua...");
-
-            string[] oldElements = new string[]
-            {
-                "SafeArea", "Background", "Header", "StreakPanel", "WeekTitle",
-                "DaysGrid", "DaysContainer", "Day7Special", "TodayRewardPanel",
-                "ClaimButton", "ClaimArea", "NextRewardTimer", "ClaimCelebration",
-                "StreakLostPopup", "RewardClaimBlocker", "RewardEffects",
-                "Content", "BonusPreview", "ProgressContainer", "FireGlow"
+            // Limpiar elementos anteriores
+            string[] oldNames = {
+                "Background", "SafeArea", "StreakPanel", "WeekLabel",
+                "DaysGrid", "Day7Card", "TodayPanel", "ClaimButton",
+                "ClaimGlow", "TimerBar", "TopBar",
+                "ClaimAnimationBlocker", "MilestoneBlocker",
+                // Old names from previous version
+                "Header", "DaysContainer", "Day7Special", "TodayRewardPanel",
+                "NextRewardTimer", "ClaimCelebration", "StreakLostPopup",
+                "RewardClaimBlocker", "WeekTitle"
             };
-
-            var toDestroy = new System.Collections.Generic.List<GameObject>();
-
-            foreach (Transform child in canvas.transform)
+            foreach (var n in oldNames)
             {
-                foreach (string name in oldElements)
-                {
-                    if (child.name == name || child.name.StartsWith(name))
-                    {
-                        toDestroy.Add(child.gameObject);
-                        break;
-                    }
-                }
+                Transform t = canvas.transform.Find(n);
+                if (t != null) DestroyImmediate(t.gameObject);
             }
 
-            foreach (var obj in toDestroy)
-            {
-                Object.DestroyImmediate(obj);
-            }
+            CreateBackground(canvas.transform);
+            CreateTopBar();
+            CreateStreakPanel();
+            CreateWeekLabel();
+            CreateDaysGrid();
+            CreateDay7Card();
+            CreateTodayPanel();
+            CreateClaimButton();
+            CreateTimer();
+            CreateClaimAnimationPopup();
+            CreateMilestonePopup();
+            SetupManagerReferences();
 
-            Debug.Log("[DailyRewards PREMIUM] Limpieza completada");
+            Debug.Log("[DailyRewardsUI] Recompensas diarias RECONSTRUIDAS exitosamente!");
+            EditorUtility.SetDirty(canvas.gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
 
-        private static void CreateBackground(Canvas canvas)
+        private static void CreateBackground(Transform parent)
         {
-            GameObject bg = FindOrCreateChild(canvas.gameObject, "Background");
-            SetRectTransformStretch(bg);
-
-            Image bgImage = GetOrAddComponent<Image>(bg);
-            bgImage.color = DARK_BG;
-
-            // Ambient glow from top
-            GameObject topGlow = FindOrCreateChild(bg, "TopGlow");
-            RectTransform topGlowRT = GetOrAddComponent<RectTransform>(topGlow);
-            topGlowRT.anchorMin = new Vector2(0, 1);
-            topGlowRT.anchorMax = new Vector2(1, 1);
-            topGlowRT.pivot = new Vector2(0.5f, 1);
-            topGlowRT.anchoredPosition = Vector2.zero;
-            topGlowRT.sizeDelta = new Vector2(0, 400);
-
-            Image topGlowImg = GetOrAddComponent<Image>(topGlow);
-            topGlowImg.color = new Color(GOLD_BRIGHT.r, GOLD_BRIGHT.g, GOLD_BRIGHT.b, 0.05f);
-
+            var bg = FindOrCreate(parent, "Background");
             bg.transform.SetAsFirstSibling();
+            var rt = GetOrAdd<RectTransform>(bg);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(bg).color = DARK_BG;
         }
 
-        private static GameObject CreateSafeArea(Canvas canvas)
+        #endregion
+
+        #region 1. TopBar (0.960-0.988)
+
+        private static void CreateTopBar()
         {
-            GameObject safeArea = FindOrCreateChild(canvas.gameObject, "SafeArea");
-            SetRectTransformStretch(safeArea);
-            safeArea.transform.SetSiblingIndex(1);
-            return safeArea;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var topBar = FindOrCreate(canvas.transform, "TopBar");
+            var tbRT = GetOrAdd<RectTransform>(topBar);
+            SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
+
+            // --- BackButton (left, 50x50) ---
+            var backBtn = FindOrCreate(topBar.transform, "BackButton");
+            var bbRT = GetOrAdd<RectTransform>(backBtn);
+            bbRT.anchorMin = new Vector2(0, 0.5f);
+            bbRT.anchorMax = new Vector2(0, 0.5f);
+            bbRT.pivot = new Vector2(0, 0.5f);
+            bbRT.anchoredPosition = new Vector2(SIDE_PAD, 0);
+            bbRT.sizeDelta = new Vector2(50, 50);
+
+            var bbBg = GetOrAdd<Image>(backBtn);
+            bbBg.color = CARD_BG;
+            GetOrAdd<Button>(backBtn).targetGraphic = bbBg;
+            var bbOutline = GetOrAdd<Outline>(backBtn);
+            bbOutline.effectColor = CYAN_DARK;
+            bbOutline.effectDistance = new Vector2(1, 1);
+
+            var backText = FindOrCreate(backBtn.transform, "Text");
+            var btRT = GetOrAdd<RectTransform>(backText);
+            btRT.anchorMin = Vector2.zero;
+            btRT.anchorMax = Vector2.one;
+            btRT.offsetMin = Vector2.zero;
+            btRT.offsetMax = Vector2.zero;
+            var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
+            btTMP.text = "<";
+            btTMP.fontSize = 28;
+            btTMP.fontStyle = FontStyles.Bold;
+            btTMP.color = CYAN_NEON;
+            btTMP.alignment = TextAlignmentOptions.Center;
+
+            // --- TitleText (center) ---
+            var title = FindOrCreate(topBar.transform, "TitleText");
+            var tRT = GetOrAdd<RectTransform>(title);
+            tRT.anchorMin = new Vector2(0.15f, 0);
+            tRT.anchorMax = new Vector2(0.65f, 1);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
+            tTMP.text = "RECOMPENSAS DIARIAS";
+            tTMP.fontSize = 22;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.color = CYAN_NEON;
+            tTMP.alignment = TextAlignmentOptions.Center;
+
+            // --- Currency pills (right) ---
+            var currencyRow = FindOrCreate(topBar.transform, "CurrencyRow");
+            var crRT = GetOrAdd<RectTransform>(currencyRow);
+            crRT.anchorMin = new Vector2(1, 0.5f);
+            crRT.anchorMax = new Vector2(1, 0.5f);
+            crRT.pivot = new Vector2(1, 0.5f);
+            crRT.anchoredPosition = new Vector2(-SIDE_PAD, 0);
+            crRT.sizeDelta = new Vector2(200, 30);
+
+            var crHLG = GetOrAdd<HorizontalLayoutGroup>(currencyRow);
+            crHLG.spacing = 10;
+            crHLG.childAlignment = TextAnchor.MiddleRight;
+            crHLG.childControlWidth = false;
+            crHLG.childControlHeight = true;
+
+            // GemPill
+            CreateCurrencyPill(currencyRow.transform, "GemPill", "1.2K", GEM_COLOR,
+                CURRENCY_ICONS + "GemIconNeon.png");
+
+            // CoinPill
+            CreateCurrencyPill(currencyRow.transform, "CoinPill", "5.4K", COIN_COLOR,
+                CURRENCY_ICONS + "CoinIconNeon.png");
+
+            Debug.Log("[DailyRewardsUI] TopBar creado (BackButton + Title + CurrencyPills)");
         }
 
-        // ==================== HEADER ====================
-
-        private static void CreateHeader(GameObject parent)
+        private static void CreateCurrencyPill(Transform parent, string name, string amount, Color color, string iconPath)
         {
-            GameObject header = FindOrCreateChild(parent, "Header");
-
-            RectTransform headerRT = GetOrAddComponent<RectTransform>(header);
-            headerRT.anchorMin = new Vector2(0, 1);
-            headerRT.anchorMax = new Vector2(1, 1);
-            headerRT.pivot = new Vector2(0.5f, 1);
-            headerRT.anchoredPosition = Vector2.zero;
-            headerRT.sizeDelta = new Vector2(0, HEADER_HEIGHT);
-
-            Image headerBg = GetOrAddComponent<Image>(header);
-            headerBg.color = HEADER_BG;
-
-            CreateGlowLine(header, GOLD_BRIGHT, true);
-
-            // Back Button
-            GameObject backBtn = FindOrCreateChild(header, "BackButton");
-            RectTransform backRT = GetOrAddComponent<RectTransform>(backBtn);
-            backRT.anchorMin = new Vector2(0, 0.5f);
-            backRT.anchorMax = new Vector2(0, 0.5f);
-            backRT.pivot = new Vector2(0, 0.5f);
-            backRT.anchoredPosition = new Vector2(20, 0);
-            backRT.sizeDelta = new Vector2(50, 50);
-
-            Image backBg = GetOrAddComponent<Image>(backBtn);
-            backBg.color = new Color(0.15f, 0.2f, 0.28f, 1f);
-            AddOutline(backBtn, CYAN_DARK, 1);
-
-            Button backButton = GetOrAddComponent<Button>(backBtn);
-            SetupButtonColors(backButton);
-
-            GameObject backText = FindOrCreateChild(backBtn, "Text");
-            SetRectTransformStretch(backText);
-            TextMeshProUGUI backTmp = GetOrAddComponent<TextMeshProUGUI>(backText);
-            backTmp.text = "<";
-            backTmp.fontSize = 32;
-            backTmp.fontStyle = FontStyles.Bold;
-            backTmp.color = CYAN_NEON;
-            backTmp.alignment = TextAlignmentOptions.Center;
-
-            // Title
-            GameObject title = FindOrCreateChild(header, "Title");
-            RectTransform titleRT = GetOrAddComponent<RectTransform>(title);
-            titleRT.anchorMin = new Vector2(0.5f, 0.5f);
-            titleRT.anchorMax = new Vector2(0.5f, 0.5f);
-            titleRT.sizeDelta = new Vector2(400, 50);
-
-            TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(title);
-            titleText.text = "RECOMPENSAS DIARIAS";
-            titleText.fontSize = 28;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = GOLD_BRIGHT;
-            titleText.alignment = TextAlignmentOptions.Center;
-
-            // Currency Row
-            GameObject currencyRow = FindOrCreateChild(header, "CurrencyRow");
-            RectTransform currencyRT = GetOrAddComponent<RectTransform>(currencyRow);
-            currencyRT.anchorMin = new Vector2(1, 0.5f);
-            currencyRT.anchorMax = new Vector2(1, 0.5f);
-            currencyRT.pivot = new Vector2(1, 0.5f);
-            currencyRT.anchoredPosition = new Vector2(-20, 0);
-            currencyRT.sizeDelta = new Vector2(200, 40);
-
-            HorizontalLayoutGroup currencyHlg = GetOrAddComponent<HorizontalLayoutGroup>(currencyRow);
-            currencyHlg.spacing = 15f;
-            currencyHlg.childAlignment = TextAnchor.MiddleRight;
-            currencyHlg.childControlWidth = false;
-            currencyHlg.childControlHeight = true;
-
-            CreateCurrencyBadge(currencyRow, "Coins", "5,430", COIN_COLOR);
-            CreateCurrencyBadge(currencyRow, "Gems", "125", GEM_COLOR);
-
-            Debug.Log("[DailyRewards PREMIUM] Header creado");
-        }
-
-        private static void CreateCurrencyBadge(GameObject parent, string name, string amount, Color color)
-        {
-            GameObject badge = FindOrCreateChild(parent, name);
-
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(badge);
-            hlg.spacing = 6f;
+            var pill = FindOrCreate(parent, name);
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(pill);
+            hlg.spacing = 4;
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
 
-            LayoutElement badgeLE = GetOrAddComponent<LayoutElement>(badge);
-            badgeLE.minWidth = 90;
+            var pillLE = GetOrAdd<LayoutElement>(pill);
+            pillLE.minWidth = 80;
 
-            GameObject icon = FindOrCreateChild(badge, "Icon");
-            Image iconImg = GetOrAddComponent<Image>(icon);
-            iconImg.color = color;
+            var icon = FindOrCreate(pill.transform, "Icon");
+            var iconImg = GetOrAdd<Image>(icon);
             iconImg.preserveAspect = true;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(icon);
-            iconLE.minWidth = 24;
-            iconLE.minHeight = 24;
+            iconImg.color = Color.white;
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (sprite != null) iconImg.sprite = sprite;
+            else iconImg.color = color;
+            var iconLE = GetOrAdd<LayoutElement>(icon);
+            iconLE.minWidth = 22;
+            iconLE.minHeight = 22;
 
-            GameObject text = FindOrCreateChild(badge, "Text");
-            TextMeshProUGUI textTmp = GetOrAddComponent<TextMeshProUGUI>(text);
-            textTmp.text = amount;
-            textTmp.fontSize = 18;
-            textTmp.fontStyle = FontStyles.Bold;
-            textTmp.color = color;
-            textTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement textLE = GetOrAddComponent<LayoutElement>(text);
-            textLE.minWidth = 60;
+            var text = FindOrCreate(pill.transform, "Text");
+            var tmp = GetOrAdd<TextMeshProUGUI>(text);
+            tmp.text = amount;
+            tmp.fontSize = 14;
+            tmp.color = color;
+            tmp.alignment = TextAlignmentOptions.MidlineLeft;
+            var textLE = GetOrAdd<LayoutElement>(text);
+            textLE.minWidth = 40;
         }
 
-        // ==================== STREAK PANEL ====================
+        #endregion
 
-        private static void CreateStreakPanel(GameObject parent)
+        #region 2. Streak Panel (0.890-0.955)
+
+        private static void CreateStreakPanel()
         {
-            float yPos = -HEADER_HEIGHT - 10;
-
-            GameObject streak = FindOrCreateChild(parent, "StreakPanel");
-
-            RectTransform streakRT = GetOrAddComponent<RectTransform>(streak);
-            streakRT.anchorMin = new Vector2(0, 1);
-            streakRT.anchorMax = new Vector2(1, 1);
-            streakRT.pivot = new Vector2(0.5f, 1);
-            streakRT.anchoredPosition = new Vector2(0, yPos);
-            streakRT.sizeDelta = new Vector2(-40, STREAK_PANEL_HEIGHT);
-
-            Image streakBg = GetOrAddComponent<Image>(streak);
-            streakBg.color = PANEL_BG;
-            AddOutline(streak, STREAK_FIRE, 2);
-
-            // Title Row: [Fire] RACHA ACTUAL: 5 DÍAS (positioned manually)
-            GameObject titleRow = FindOrCreateChild(streak, "TitleRow");
-            RectTransform titleRowRT = GetOrAddComponent<RectTransform>(titleRow);
-            titleRowRT.anchorMin = new Vector2(0, 1);
-            titleRowRT.anchorMax = new Vector2(1, 1);
-            titleRowRT.pivot = new Vector2(0.5f, 1);
-            titleRowRT.anchoredPosition = new Vector2(0, -12);
-            titleRowRT.sizeDelta = new Vector2(-40, 30);
-
-            HorizontalLayoutGroup titleHlg = GetOrAddComponent<HorizontalLayoutGroup>(titleRow);
-            titleHlg.spacing = 10f;
-            titleHlg.padding = new RectOffset(10, 10, 0, 0);
-            titleHlg.childAlignment = TextAnchor.MiddleCenter;
-            titleHlg.childControlWidth = false;
-            titleHlg.childControlHeight = true;
-
-            // Fire Icon
-            GameObject fireIcon = FindOrCreateChild(titleRow, "FireIcon");
-            Image fireImg = GetOrAddComponent<Image>(fireIcon);
-            fireImg.color = STREAK_FIRE;
-            LayoutElement fireLE = GetOrAddComponent<LayoutElement>(fireIcon);
-            fireLE.minWidth = 26;
-            fireLE.minHeight = 26;
-
-            // Streak Text
-            GameObject streakText = FindOrCreateChild(titleRow, "StreakText");
-            TextMeshProUGUI streakTmp = GetOrAddComponent<TextMeshProUGUI>(streakText);
-            streakTmp.text = "RACHA ACTUAL:";
-            streakTmp.fontSize = 16;
-            streakTmp.fontStyle = FontStyles.Bold;
-            streakTmp.color = TEXT_PRIMARY;
-            streakTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement streakTextLE = GetOrAddComponent<LayoutElement>(streakText);
-            streakTextLE.minWidth = 145;
-
-            // Streak Count
-            GameObject streakCount = FindOrCreateChild(titleRow, "StreakCount");
-            TextMeshProUGUI countTmp = GetOrAddComponent<TextMeshProUGUI>(streakCount);
-            countTmp.text = "5 DÍAS";
-            countTmp.fontSize = 20;
-            countTmp.fontStyle = FontStyles.Bold;
-            countTmp.color = STREAK_FIRE;
-            countTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement countLE = GetOrAddComponent<LayoutElement>(streakCount);
-            countLE.minWidth = 90;
-
-            // Progress Bar (positioned manually)
-            GameObject progressBar = FindOrCreateChild(streak, "ProgressBar");
-            RectTransform progressRT = GetOrAddComponent<RectTransform>(progressBar);
-            progressRT.anchorMin = new Vector2(0, 1);
-            progressRT.anchorMax = new Vector2(1, 1);
-            progressRT.pivot = new Vector2(0.5f, 1);
-            progressRT.anchoredPosition = new Vector2(0, -48);
-            progressRT.sizeDelta = new Vector2(-40, 22);
-
-            Image progressBg = GetOrAddComponent<Image>(progressBar);
-            progressBg.color = new Color(0.15f, 0.18f, 0.25f, 1f);
-            AddOutline(progressBar, new Color(0.25f, 0.3f, 0.35f, 0.6f));
-
-            // Progress Fill (5/7 = ~71%)
-            GameObject progressFill = FindOrCreateChild(progressBar, "Fill");
-            RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
-            fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = new Vector2(0.71f, 1);
-            fillRT.offsetMin = Vector2.zero;
-            fillRT.offsetMax = Vector2.zero;
-
-            Image fillImg = GetOrAddComponent<Image>(progressFill);
-            fillImg.color = STREAK_FIRE;
-
-            // Progress Text (on top of bar)
-            GameObject progressText = FindOrCreateChild(progressBar, "Text");
-            SetRectTransformStretch(progressText);
-            TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressText);
-            progressTmp.text = "5/7 para BONUS";
-            progressTmp.fontSize = 11;
-            progressTmp.fontStyle = FontStyles.Bold;
-            progressTmp.color = Color.white;
-            progressTmp.alignment = TextAlignmentOptions.Center;
-
-            // Bonus Preview (positioned manually at bottom)
-            GameObject bonusText = FindOrCreateChild(streak, "BonusText");
-            RectTransform bonusRT = GetOrAddComponent<RectTransform>(bonusText);
-            bonusRT.anchorMin = new Vector2(0, 0);
-            bonusRT.anchorMax = new Vector2(1, 0);
-            bonusRT.pivot = new Vector2(0.5f, 0);
-            bonusRT.anchoredPosition = new Vector2(0, 10);
-            bonusRT.sizeDelta = new Vector2(0, 20);
-
-            TextMeshProUGUI bonusTmp = GetOrAddComponent<TextMeshProUGUI>(bonusText);
-            bonusTmp.text = "Día 7: COFRE LEGENDARIO + 50 Gemas";
-            bonusTmp.fontSize = 12;
-            bonusTmp.color = TEXT_GOLD;
-            bonusTmp.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[DailyRewards PREMIUM] StreakPanel creado");
-        }
-
-        // ==================== WEEK TITLE ====================
-
-        private static void CreateWeekTitle(GameObject parent)
-        {
-            // Position: after Header + margin + StreakPanel + margin (reduced)
-            float yPos = -HEADER_HEIGHT - 10 - STREAK_PANEL_HEIGHT - 8;
-
-            GameObject weekTitle = FindOrCreateChild(parent, "WeekTitle");
-
-            RectTransform weekRT = GetOrAddComponent<RectTransform>(weekTitle);
-            weekRT.anchorMin = new Vector2(0.5f, 1);
-            weekRT.anchorMax = new Vector2(0.5f, 1);
-            weekRT.pivot = new Vector2(0.5f, 1);
-            weekRT.anchoredPosition = new Vector2(0, yPos);
-            weekRT.sizeDelta = new Vector2(280, WEEK_TITLE_HEIGHT);
-
-            // Decorative lines
-            GameObject leftLine = FindOrCreateChild(weekTitle, "LeftLine");
-            RectTransform leftRT = GetOrAddComponent<RectTransform>(leftLine);
-            leftRT.anchorMin = new Vector2(0, 0.5f);
-            leftRT.anchorMax = new Vector2(0.25f, 0.5f);
-            leftRT.sizeDelta = new Vector2(0, 2);
-
-            Image leftImg = GetOrAddComponent<Image>(leftLine);
-            leftImg.color = GOLD_DARK;
-
-            GameObject rightLine = FindOrCreateChild(weekTitle, "RightLine");
-            RectTransform rightRT = GetOrAddComponent<RectTransform>(rightLine);
-            rightRT.anchorMin = new Vector2(0.75f, 0.5f);
-            rightRT.anchorMax = new Vector2(1f, 0.5f);
-            rightRT.sizeDelta = new Vector2(0, 2);
-
-            Image rightImg = GetOrAddComponent<Image>(rightLine);
-            rightImg.color = GOLD_DARK;
-
-            // Title
-            GameObject titleText = FindOrCreateChild(weekTitle, "Text");
-            SetRectTransformStretch(titleText);
-            TextMeshProUGUI titleTmp = GetOrAddComponent<TextMeshProUGUI>(titleText);
-            titleTmp.text = "SEMANA 1";
-            titleTmp.fontSize = 18;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = GOLD_BRIGHT;
-            titleTmp.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[DailyRewards PREMIUM] WeekTitle creado");
-        }
-
-        // ==================== DAYS GRID ====================
-
-        private static void CreateDaysGrid(GameObject parent)
-        {
-            // Position: after Header + StreakPanel + WeekTitle + margins (reduced)
-            float yPos = -HEADER_HEIGHT - 10 - STREAK_PANEL_HEIGHT - 8 - WEEK_TITLE_HEIGHT - 8;
-
-            GameObject daysContainer = FindOrCreateChild(parent, "DaysContainer");
-
-            RectTransform containerRT = GetOrAddComponent<RectTransform>(daysContainer);
-            containerRT.anchorMin = new Vector2(0, 1);
-            containerRT.anchorMax = new Vector2(1, 1);
-            containerRT.pivot = new Vector2(0.5f, 1);
-            containerRT.anchoredPosition = new Vector2(0, yPos);
-            containerRT.sizeDelta = new Vector2(-40, DAY_CARD_SIZE * 2 + DAY_CARD_SPACING + 10);
-
-            VerticalLayoutGroup containerVlg = GetOrAddComponent<VerticalLayoutGroup>(daysContainer);
-            containerVlg.spacing = DAY_CARD_SPACING;
-            containerVlg.childAlignment = TextAnchor.UpperCenter;
-            containerVlg.childControlWidth = true;
-            containerVlg.childControlHeight = true;
-            containerVlg.childForceExpandWidth = true;
-            containerVlg.childForceExpandHeight = false;
-
-            // Row 1: Days 1-3
-            GameObject row1 = FindOrCreateChild(daysContainer, "Row1");
-            HorizontalLayoutGroup row1Hlg = GetOrAddComponent<HorizontalLayoutGroup>(row1);
-            row1Hlg.spacing = DAY_CARD_SPACING;
-            row1Hlg.childAlignment = TextAnchor.MiddleCenter;
-            row1Hlg.childControlWidth = false;
-            row1Hlg.childControlHeight = false;
-            row1Hlg.childForceExpandWidth = false;
-            LayoutElement row1LE = GetOrAddComponent<LayoutElement>(row1);
-            row1LE.preferredHeight = DAY_CARD_SIZE;
-
-            // Row 2: Days 4-6
-            GameObject row2 = FindOrCreateChild(daysContainer, "Row2");
-            HorizontalLayoutGroup row2Hlg = GetOrAddComponent<HorizontalLayoutGroup>(row2);
-            row2Hlg.spacing = DAY_CARD_SPACING;
-            row2Hlg.childAlignment = TextAnchor.MiddleCenter;
-            row2Hlg.childControlWidth = false;
-            row2Hlg.childControlHeight = false;
-            row2Hlg.childForceExpandWidth = false;
-            LayoutElement row2LE = GetOrAddComponent<LayoutElement>(row2);
-            row2LE.preferredHeight = DAY_CARD_SIZE;
-
-            // Days 1-6 with chest rarities
-            var dayData = new (string day, string reward, string type, Color chest, bool claimed, bool current)[]
-            {
-                ("DÍA 1", "100", "Monedas", CHEST_COMMON, true, false),
-                ("DÍA 2", "150", "Monedas", CHEST_COMMON, true, false),
-                ("DÍA 3", "25", "Gemas", CHEST_RARE, true, false),
-                ("DÍA 4", "200", "Monedas", CHEST_COMMON, true, false),
-                ("DÍA 5", "COFRE", "Aleatorio", CHEST_EPIC, true, false),
-                ("DÍA 6", "300", "Monedas", CHEST_RARE, false, true),
-            };
-
-            // Days 1-3 in Row 1
-            for (int i = 0; i < 3; i++)
-            {
-                var d = dayData[i];
-                CreateDayCard(row1, $"Day{i + 1}", d.day, d.reward, d.type, d.chest, d.claimed, d.current);
-            }
-
-            // Days 4-6 in Row 2
-            for (int i = 3; i < 6; i++)
-            {
-                var d = dayData[i];
-                CreateDayCard(row2, $"Day{i + 1}", d.day, d.reward, d.type, d.chest, d.claimed, d.current);
-            }
-
-            Debug.Log("[DailyRewards PREMIUM] DaysContainer creado con 6 días (3x2)");
-        }
-
-        private static void CreateDayCard(GameObject parent, string name, string dayLabel, string reward,
-            string rewardType, Color chestColor, bool claimed, bool current)
-        {
-            GameObject card = FindOrCreateChild(parent, name);
-
-            // Fixed size for day card
-            LayoutElement cardLE = GetOrAddComponent<LayoutElement>(card);
-            cardLE.preferredWidth = DAY_CARD_SIZE;
-            cardLE.preferredHeight = DAY_CARD_SIZE;
-            cardLE.minWidth = DAY_CARD_SIZE;
-            cardLE.minHeight = DAY_CARD_SIZE;
-
-            Image cardBg = GetOrAddComponent<Image>(card);
-            cardBg.color = claimed ? DAY_CLAIMED_BG : (current ? CARD_BG : DAY_LOCKED_BG);
-
-            Color borderColor = claimed ? DAY_CLAIMED_BORDER : (current ? GOLD_BRIGHT : DAY_LOCKED_BORDER);
-            AddOutline(card, borderColor, claimed ? 2 : (current ? 3 : 1));
-
-            // Current day glow
-            if (current)
-            {
-                GameObject currentGlow = FindOrCreateChild(card, "CurrentGlow");
-                SetRectTransformStretch(currentGlow);
-                RectTransform glowRT = currentGlow.GetComponent<RectTransform>();
-                glowRT.offsetMin = new Vector2(-8, -8);
-                glowRT.offsetMax = new Vector2(8, 8);
-                currentGlow.transform.SetAsFirstSibling();
-
-                Image glowImg = GetOrAddComponent<Image>(currentGlow);
-                glowImg.color = DAY_CURRENT_GLOW;
-            }
-
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(card);
-            vlg.spacing = 6f;
-            vlg.padding = new RectOffset(10, 10, 12, 12);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-
-            // Day Label
-            GameObject dayLabelObj = FindOrCreateChild(card, "DayLabel");
-            TextMeshProUGUI dayTmp = GetOrAddComponent<TextMeshProUGUI>(dayLabelObj);
-            dayTmp.text = dayLabel;
-            dayTmp.fontSize = 12;
-            dayTmp.fontStyle = FontStyles.Bold;
-            dayTmp.color = claimed ? DAY_CLAIMED_BORDER : (current ? GOLD_BRIGHT : TEXT_SECONDARY);
-            dayTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement dayLE = GetOrAddComponent<LayoutElement>(dayLabelObj);
-            dayLE.minHeight = 18;
-
-            // Chest Container
-            GameObject chestContainer = FindOrCreateChild(card, "ChestContainer");
-            LayoutElement chestContainerLE = GetOrAddComponent<LayoutElement>(chestContainer);
-            chestContainerLE.minHeight = 55;
-            chestContainerLE.preferredHeight = 55;
-
-            GameObject chest = FindOrCreateChild(chestContainer, "Chest");
-            RectTransform chestRT = GetOrAddComponent<RectTransform>(chest);
-            chestRT.anchorMin = new Vector2(0.5f, 0.5f);
-            chestRT.anchorMax = new Vector2(0.5f, 0.5f);
-            chestRT.sizeDelta = new Vector2(50, 50);
-
-            Image chestImg = GetOrAddComponent<Image>(chest);
-            chestImg.color = claimed ? new Color(chestColor.r, chestColor.g, chestColor.b, 0.5f) : chestColor;
-
-            // Chest glow for current
-            if (current)
-            {
-                GameObject chestGlow = FindOrCreateChild(chest, "Glow");
-                SetRectTransformStretch(chestGlow);
-                RectTransform chestGlowRT = chestGlow.GetComponent<RectTransform>();
-                chestGlowRT.offsetMin = new Vector2(-15, -15);
-                chestGlowRT.offsetMax = new Vector2(15, 15);
-                chestGlow.transform.SetAsFirstSibling();
-
-                Image chestGlowImg = GetOrAddComponent<Image>(chestGlow);
-                chestGlowImg.color = new Color(chestColor.r, chestColor.g, chestColor.b, 0.4f);
-            }
-
-            // Reward Amount
-            GameObject rewardObj = FindOrCreateChild(card, "Reward");
-            TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardObj);
-            rewardTmp.text = reward;
-            rewardTmp.fontSize = 16;
-            rewardTmp.fontStyle = FontStyles.Bold;
-            rewardTmp.color = claimed ? new Color(1, 1, 1, 0.6f) : (rewardType == "Gemas" ? GEM_COLOR : COIN_COLOR);
-            rewardTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement rewardLE = GetOrAddComponent<LayoutElement>(rewardObj);
-            rewardLE.minHeight = 22;
-
-            // Reward Type
-            GameObject typeObj = FindOrCreateChild(card, "RewardType");
-            TextMeshProUGUI typeTmp = GetOrAddComponent<TextMeshProUGUI>(typeObj);
-            typeTmp.text = rewardType;
-            typeTmp.fontSize = 10;
-            typeTmp.color = claimed ? new Color(1, 1, 1, 0.4f) : TEXT_SECONDARY;
-            typeTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement typeLE = GetOrAddComponent<LayoutElement>(typeObj);
-            typeLE.minHeight = 14;
-
-            // Claimed checkmark
-            if (claimed)
-            {
-                GameObject checkmark = FindOrCreateChild(card, "Checkmark");
-                RectTransform checkRT = GetOrAddComponent<RectTransform>(checkmark);
-                checkRT.anchorMin = new Vector2(1, 1);
-                checkRT.anchorMax = new Vector2(1, 1);
-                checkRT.pivot = new Vector2(1, 1);
-                checkRT.anchoredPosition = new Vector2(-5, -5);
-                checkRT.sizeDelta = new Vector2(28, 28);
-
-                Image checkBg = GetOrAddComponent<Image>(checkmark);
-                checkBg.color = DAY_CLAIMED_BORDER;
-
-                GameObject checkIcon = FindOrCreateChild(checkmark, "Icon");
-                SetRectTransformStretch(checkIcon);
-                TextMeshProUGUI checkTmp = GetOrAddComponent<TextMeshProUGUI>(checkIcon);
-                checkTmp.text = "✓";
-                checkTmp.fontSize = 18;
-                checkTmp.fontStyle = FontStyles.Bold;
-                checkTmp.color = TEXT_DARK;
-                checkTmp.alignment = TextAlignmentOptions.Center;
-            }
-
-            // "HOY" badge for current (positioned INSIDE the card at top)
-            if (current)
-            {
-                GameObject todayBadge = FindOrCreateChild(card, "TodayBadge");
-                RectTransform badgeRT = GetOrAddComponent<RectTransform>(todayBadge);
-                badgeRT.anchorMin = new Vector2(0.5f, 1);
-                badgeRT.anchorMax = new Vector2(0.5f, 1);
-                badgeRT.pivot = new Vector2(0.5f, 1);
-                badgeRT.anchoredPosition = new Vector2(0, -3);  // Inside the card
-                badgeRT.sizeDelta = new Vector2(50, 18);
-
-                Image badgeBg = GetOrAddComponent<Image>(todayBadge);
-                badgeBg.color = GOLD_BRIGHT;
-
-                GameObject badgeText = FindOrCreateChild(todayBadge, "Text");
-                SetRectTransformStretch(badgeText);
-                TextMeshProUGUI badgeTmp = GetOrAddComponent<TextMeshProUGUI>(badgeText);
-                badgeTmp.text = "HOY";
-                badgeTmp.fontSize = 10;
-                badgeTmp.fontStyle = FontStyles.Bold;
-                badgeTmp.color = TEXT_DARK;
-                badgeTmp.alignment = TextAlignmentOptions.Center;
-            }
-        }
-
-        // ==================== DAY 7 SPECIAL ====================
-
-        private static void CreateDay7Special(GameObject parent)
-        {
-            // Position after: Header + StreakPanel + WeekTitle + DaysContainer + margins (reduced)
-            float daysGridHeight = DAY_CARD_SIZE * 2 + DAY_CARD_SPACING + 10;
-            float yPos = -HEADER_HEIGHT - 10 - STREAK_PANEL_HEIGHT - 8 - WEEK_TITLE_HEIGHT - 8 - daysGridHeight - 10;
-
-            GameObject day7 = FindOrCreateChild(parent, "Day7Special");
-
-            RectTransform day7RT = GetOrAddComponent<RectTransform>(day7);
-            day7RT.anchorMin = new Vector2(0.5f, 1);
-            day7RT.anchorMax = new Vector2(0.5f, 1);
-            day7RT.pivot = new Vector2(0.5f, 1);
-            day7RT.anchoredPosition = new Vector2(0, yPos);
-            day7RT.sizeDelta = new Vector2(DAY7_CARD_WIDTH, DAY7_CARD_HEIGHT);
-
-            // Main background with gold border (simplified, no outer glow)
-            Image day7Bg = GetOrAddComponent<Image>(day7);
-            day7Bg.color = new Color(0.12f, 0.1f, 0.05f, 1f);
-            AddOutline(day7, GOLD_BRIGHT, 3);
-
-            // Content using HorizontalLayout: [Chest Icon] [Info]
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(day7);
-            hlg.spacing = 20f;
-            hlg.padding = new RectOffset(25, 25, 15, 15);
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-
-            // Left: Chest Icon with glow
-            GameObject chestContainer = FindOrCreateChild(day7, "ChestContainer");
-            LayoutElement chestContainerLE = GetOrAddComponent<LayoutElement>(chestContainer);
-            chestContainerLE.minWidth = 90;
-            chestContainerLE.minHeight = 90;
-
-            GameObject chest = FindOrCreateChild(chestContainer, "Chest");
-            RectTransform chestRT = GetOrAddComponent<RectTransform>(chest);
-            chestRT.anchorMin = new Vector2(0.5f, 0.5f);
-            chestRT.anchorMax = new Vector2(0.5f, 0.5f);
-            chestRT.sizeDelta = new Vector2(70, 70);
-
-            Image chestImg = GetOrAddComponent<Image>(chest);
-            chestImg.color = CHEST_LEGENDARY;
-
-            // Chest glow
-            GameObject chestGlow = FindOrCreateChild(chest, "Glow");
-            SetRectTransformStretch(chestGlow);
-            RectTransform chestGlowRT = chestGlow.GetComponent<RectTransform>();
-            chestGlowRT.offsetMin = new Vector2(-15, -15);
-            chestGlowRT.offsetMax = new Vector2(15, 15);
-            chestGlow.transform.SetAsFirstSibling();
-            Image chestGlowImg = GetOrAddComponent<Image>(chestGlow);
-            chestGlowImg.color = GOLD_GLOW;
-
-            // Right: Info
-            GameObject info = FindOrCreateChild(day7, "Info");
-            VerticalLayoutGroup infoVlg = GetOrAddComponent<VerticalLayoutGroup>(info);
-            infoVlg.spacing = 4f;
-            infoVlg.childAlignment = TextAnchor.MiddleLeft;
-            infoVlg.childControlWidth = true;
-            infoVlg.childControlHeight = true;
-            LayoutElement infoLE = GetOrAddComponent<LayoutElement>(info);
-            infoLE.minWidth = 200;
-
-            // Day 7 Label
-            GameObject dayLabel = FindOrCreateChild(info, "DayLabel");
-            TextMeshProUGUI dayTmp = GetOrAddComponent<TextMeshProUGUI>(dayLabel);
-            dayTmp.text = "DÍA 7 - GRAN COFRE";
-            dayTmp.fontSize = 16;
-            dayTmp.fontStyle = FontStyles.Bold;
-            dayTmp.color = GOLD_BRIGHT;
-            dayTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement dayLE = GetOrAddComponent<LayoutElement>(dayLabel);
-            dayLE.minHeight = 22;
-
-            // Rewards summary
-            GameObject rewardLine1 = FindOrCreateChild(info, "Reward1");
-            TextMeshProUGUI r1Tmp = GetOrAddComponent<TextMeshProUGUI>(rewardLine1);
-            r1Tmp.text = "• 500 Monedas + 50 Gemas";
-            r1Tmp.fontSize = 13;
-            r1Tmp.color = TEXT_GOLD;
-            r1Tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement r1LE = GetOrAddComponent<LayoutElement>(rewardLine1);
-            r1LE.minHeight = 18;
-
-            GameObject rewardLine2 = FindOrCreateChild(info, "Reward2");
-            TextMeshProUGUI r2Tmp = GetOrAddComponent<TextMeshProUGUI>(rewardLine2);
-            r2Tmp.text = "• Item Exclusivo";
-            r2Tmp.fontSize = 13;
-            r2Tmp.color = CHEST_EPIC;
-            r2Tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement r2LE = GetOrAddComponent<LayoutElement>(rewardLine2);
-            r2LE.minHeight = 18;
-
-            // Locked text
-            GameObject lockedText = FindOrCreateChild(info, "Locked");
-            TextMeshProUGUI lockedTmp = GetOrAddComponent<TextMeshProUGUI>(lockedText);
-            lockedTmp.text = "🔒 Desbloquea en 1 día";
-            lockedTmp.fontSize = 11;
-            lockedTmp.color = TEXT_SECONDARY;
-            lockedTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement lockedLE = GetOrAddComponent<LayoutElement>(lockedText);
-            lockedLE.minHeight = 16;
-
-            Debug.Log("[DailyRewards PREMIUM] Day7Special creado");
-        }
-
-        // ==================== TODAY REWARD PANEL ====================
-
-        private static void CreateTodayRewardPanel(GameObject parent)
-        {
-            // Position after: Header + StreakPanel + WeekTitle + DaysContainer + Day7Special + margins (reduced)
-            float daysGridHeight = DAY_CARD_SIZE * 2 + DAY_CARD_SPACING + 10;
-            float yPos = -HEADER_HEIGHT - 10 - STREAK_PANEL_HEIGHT - 8 - WEEK_TITLE_HEIGHT - 8 - daysGridHeight - 10 - DAY7_CARD_HEIGHT - 10;
-
-            GameObject todayPanel = FindOrCreateChild(parent, "TodayRewardPanel");
-
-            RectTransform todayRT = GetOrAddComponent<RectTransform>(todayPanel);
-            todayRT.anchorMin = new Vector2(0, 1);
-            todayRT.anchorMax = new Vector2(1, 1);
-            todayRT.pivot = new Vector2(0.5f, 1);
-            todayRT.anchoredPosition = new Vector2(0, yPos);
-            todayRT.sizeDelta = new Vector2(-40, TODAY_REWARD_HEIGHT);
-
-            Image todayBg = GetOrAddComponent<Image>(todayPanel);
-            todayBg.color = PANEL_BG;
-            AddOutline(todayPanel, CYAN_DARK, 1);
-
-            // Horizontal layout: [Chest] [Info] - more compact
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(todayPanel);
-            hlg.spacing = 15f;
-            hlg.padding = new RectOffset(20, 20, 12, 12);
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-
-            // Chest Icon (larger)
-            GameObject chest = FindOrCreateChild(todayPanel, "Chest");
-            Image chestImg = GetOrAddComponent<Image>(chest);
-            chestImg.color = CHEST_RARE;
-            LayoutElement chestLE = GetOrAddComponent<LayoutElement>(chest);
-            chestLE.minWidth = 65;
-            chestLE.minHeight = 65;
-
-            // Chest Glow
-            GameObject chestGlow = FindOrCreateChild(chest, "Glow");
-            SetRectTransformStretch(chestGlow);
-            RectTransform chestGlowRT = chestGlow.GetComponent<RectTransform>();
-            chestGlowRT.offsetMin = new Vector2(-12, -12);
-            chestGlowRT.offsetMax = new Vector2(12, 12);
-            chestGlow.transform.SetAsFirstSibling();
-            Image chestGlowImg = GetOrAddComponent<Image>(chestGlow);
-            chestGlowImg.color = new Color(CHEST_RARE.r, CHEST_RARE.g, CHEST_RARE.b, 0.4f);
-
-            // Rewards Info
-            GameObject rewardsInfo = FindOrCreateChild(todayPanel, "RewardsInfo");
-            VerticalLayoutGroup infoVlg = GetOrAddComponent<VerticalLayoutGroup>(rewardsInfo);
-            infoVlg.spacing = 4f;
-            infoVlg.childAlignment = TextAnchor.MiddleLeft;
-            infoVlg.childControlWidth = true;
-            infoVlg.childControlHeight = true;
-            LayoutElement infoLE = GetOrAddComponent<LayoutElement>(rewardsInfo);
-            infoLE.minWidth = 220;
-
-            // Title + Chest Name
-            GameObject chestName = FindOrCreateChild(rewardsInfo, "ChestName");
-            TextMeshProUGUI nameTmp = GetOrAddComponent<TextMeshProUGUI>(chestName);
-            nameTmp.text = "RECOMPENSA DE HOY";
-            nameTmp.fontSize = 14;
-            nameTmp.fontStyle = FontStyles.Bold;
-            nameTmp.color = CYAN_NEON;
-            nameTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement nameLE = GetOrAddComponent<LayoutElement>(chestName);
-            nameLE.minHeight = 20;
-
-            // Rewards summary in one line
-            GameObject rewardsRow = FindOrCreateChild(rewardsInfo, "RewardsRow");
-            TextMeshProUGUI rewardsTmp = GetOrAddComponent<TextMeshProUGUI>(rewardsRow);
-            rewardsTmp.text = "300 Monedas + 25 XP";
-            rewardsTmp.fontSize = 16;
-            rewardsTmp.fontStyle = FontStyles.Bold;
-            rewardsTmp.color = COIN_COLOR;
-            rewardsTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement rewardsLE = GetOrAddComponent<LayoutElement>(rewardsRow);
-            rewardsLE.minHeight = 22;
-
-            Debug.Log("[DailyRewards PREMIUM] TodayRewardPanel creado");
-        }
-
-        // ==================== CLAIM BUTTON ====================
-
-        private static void CreateClaimButton(GameObject parent)
-        {
-            GameObject claimBtn = FindOrCreateChild(parent, "ClaimButton");
-
-            RectTransform claimRT = GetOrAddComponent<RectTransform>(claimBtn);
-            claimRT.anchorMin = new Vector2(0.5f, 0);
-            claimRT.anchorMax = new Vector2(0.5f, 0);
-            claimRT.pivot = new Vector2(0.5f, 0);
-            claimRT.anchoredPosition = new Vector2(0, TIMER_HEIGHT + 25);
-            claimRT.sizeDelta = new Vector2(400, CLAIM_BUTTON_HEIGHT);
-
-            // Outer glow (subtle, not obtrusive)
-            GameObject outerGlow = FindOrCreateChild(claimBtn, "OuterGlow");
-            RectTransform glowRT = GetOrAddComponent<RectTransform>(outerGlow);
-            glowRT.anchorMin = Vector2.zero;
-            glowRT.anchorMax = Vector2.one;
-            glowRT.sizeDelta = new Vector2(16, 16);
-            glowRT.anchoredPosition = Vector2.zero;
-            outerGlow.transform.SetAsFirstSibling();
-
-            Image glowImg = GetOrAddComponent<Image>(outerGlow);
-            glowImg.color = BUTTON_CLAIM_GLOW;
-
-            // Button background
-            Image claimBg = GetOrAddComponent<Image>(claimBtn);
-            claimBg.color = BUTTON_CLAIM;
-
-            Button button = GetOrAddComponent<Button>(claimBtn);
-            SetupButtonColors(button);
-            AddOutline(claimBtn, new Color(0.3f, 1f, 0.5f, 0.8f), 2);
-
-            // Text only (simple and clean)
-            GameObject text = FindOrCreateChild(claimBtn, "Text");
-            SetRectTransformStretch(text);
-            TextMeshProUGUI textTmp = GetOrAddComponent<TextMeshProUGUI>(text);
-            textTmp.text = "RECLAMAR RECOMPENSA";
-            textTmp.fontSize = 24;
-            textTmp.fontStyle = FontStyles.Bold;
-            textTmp.color = TEXT_DARK;
-            textTmp.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[DailyRewards PREMIUM] ClaimButton creado");
-        }
-
-        // ==================== NEXT REWARD TIMER ====================
-
-        private static void CreateNextRewardTimer(GameObject parent)
-        {
-            GameObject timer = FindOrCreateChild(parent, "NextRewardTimer");
-
-            RectTransform timerRT = GetOrAddComponent<RectTransform>(timer);
-            timerRT.anchorMin = new Vector2(0, 0);
-            timerRT.anchorMax = new Vector2(1, 0);
-            timerRT.pivot = new Vector2(0.5f, 0);
-            timerRT.anchoredPosition = new Vector2(0, 10);
-            timerRT.sizeDelta = new Vector2(0, TIMER_HEIGHT);
-
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(timer);
-            hlg.spacing = 10f;
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-
-            // Clock Icon
-            GameObject clockIcon = FindOrCreateChild(timer, "ClockIcon");
-            Image clockImg = GetOrAddComponent<Image>(clockIcon);
-            clockImg.color = TEXT_SECONDARY;
-            LayoutElement clockLE = GetOrAddComponent<LayoutElement>(clockIcon);
-            clockLE.minWidth = 22;
-            clockLE.minHeight = 22;
-
-            // Label
-            GameObject label = FindOrCreateChild(timer, "Label");
-            TextMeshProUGUI labelTmp = GetOrAddComponent<TextMeshProUGUI>(label);
-            labelTmp.text = "Próxima recompensa en:";
-            labelTmp.fontSize = 14;
-            labelTmp.color = TEXT_SECONDARY;
-            labelTmp.alignment = TextAlignmentOptions.MidlineRight;
-            LayoutElement labelLE = GetOrAddComponent<LayoutElement>(label);
-            labelLE.minWidth = 200;
-
-            // Timer Value
-            GameObject value = FindOrCreateChild(timer, "Value");
-            TextMeshProUGUI valueTmp = GetOrAddComponent<TextMeshProUGUI>(value);
-            valueTmp.text = "14h 32m 15s";
-            valueTmp.fontSize = 18;
-            valueTmp.fontStyle = FontStyles.Bold;
-            valueTmp.color = GOLD_BRIGHT;
-            valueTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement valueLE = GetOrAddComponent<LayoutElement>(value);
-            valueLE.minWidth = 150;
-
-            Debug.Log("[DailyRewards PREMIUM] NextRewardTimer creado");
-        }
-
-        // ==================== CLAIM CELEBRATION POPUP ====================
-
-        private static void CreateClaimCelebration(Canvas canvas)
-        {
-            GameObject celebration = FindOrCreateChild(canvas.gameObject, "ClaimCelebration");
-            celebration.SetActive(false);
-            SetRectTransformStretch(celebration);
-
-            Image blockerBg = GetOrAddComponent<Image>(celebration);
-            blockerBg.color = new Color(0, 0, 0, 0.9f);
-            celebration.transform.SetAsLastSibling();
-
-            // Center Content
-            GameObject center = FindOrCreateChild(celebration, "CenterContent");
-            RectTransform centerRT = GetOrAddComponent<RectTransform>(center);
-            centerRT.anchorMin = new Vector2(0.5f, 0.5f);
-            centerRT.anchorMax = new Vector2(0.5f, 0.5f);
-            centerRT.sizeDelta = new Vector2(450, 500);
-
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(center);
-            vlg.spacing = 20f;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-
-            // Chest Icon
-            GameObject chest = FindOrCreateChild(center, "Chest");
-            Image chestImg = GetOrAddComponent<Image>(chest);
-            chestImg.color = CHEST_RARE;
-            LayoutElement chestLE = GetOrAddComponent<LayoutElement>(chest);
-            chestLE.minWidth = 120;
-            chestLE.minHeight = 120;
-            chestLE.preferredWidth = 120;
-            chestLE.preferredHeight = 120;
-
-            // Chest Glow
-            GameObject chestGlow = FindOrCreateChild(chest, "Glow");
-            SetRectTransformStretch(chestGlow);
-            RectTransform chestGlowRT = chestGlow.GetComponent<RectTransform>();
-            chestGlowRT.offsetMin = new Vector2(-50, -50);
-            chestGlowRT.offsetMax = new Vector2(50, 50);
-            chestGlow.transform.SetAsFirstSibling();
-
-            Image chestGlowImg = GetOrAddComponent<Image>(chestGlow);
-            chestGlowImg.color = new Color(CHEST_RARE.r, CHEST_RARE.g, CHEST_RARE.b, 0.5f);
-
-            // Title
-            GameObject title = FindOrCreateChild(center, "Title");
-            TextMeshProUGUI titleTmp = GetOrAddComponent<TextMeshProUGUI>(title);
-            titleTmp.text = "¡RECOMPENSA OBTENIDA!";
-            titleTmp.fontSize = 28;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = GOLD_BRIGHT;
-            titleTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(title);
-            titleLE.minHeight = 40;
-
-            // Rewards Container
-            GameObject rewards = FindOrCreateChild(center, "Rewards");
-            VerticalLayoutGroup rewardsVlg = GetOrAddComponent<VerticalLayoutGroup>(rewards);
-            rewardsVlg.spacing = 15f;
-            rewardsVlg.childAlignment = TextAnchor.MiddleCenter;
-            rewardsVlg.childControlWidth = true;
-            rewardsVlg.childControlHeight = true;
-            LayoutElement rewardsLE = GetOrAddComponent<LayoutElement>(rewards);
-            rewardsLE.minHeight = 120;
-
-            CreateCelebrationRewardRow(rewards, "Coins", "+300 Monedas", COIN_COLOR);
-            CreateCelebrationRewardRow(rewards, "XP", "+25 XP", XP_COLOR);
-
-            // Streak Bonus
-            GameObject streakBonus = FindOrCreateChild(center, "StreakBonus");
-            Image streakBg = GetOrAddComponent<Image>(streakBonus);
-            streakBg.color = new Color(STREAK_FIRE.r, STREAK_FIRE.g, STREAK_FIRE.b, 0.2f);
-            AddOutline(streakBonus, STREAK_FIRE);
-            LayoutElement streakLE = GetOrAddComponent<LayoutElement>(streakBonus);
-            streakLE.minHeight = 50;
-
-            HorizontalLayoutGroup streakHlg = GetOrAddComponent<HorizontalLayoutGroup>(streakBonus);
-            streakHlg.spacing = 10f;
-            streakHlg.padding = new RectOffset(20, 20, 10, 10);
-            streakHlg.childAlignment = TextAnchor.MiddleCenter;
-            streakHlg.childControlWidth = false;
-            streakHlg.childControlHeight = true;
-
-            GameObject fireIcon = FindOrCreateChild(streakBonus, "Fire");
-            Image fireImg = GetOrAddComponent<Image>(fireIcon);
-            fireImg.color = STREAK_FIRE;
-            LayoutElement fireLE = GetOrAddComponent<LayoutElement>(fireIcon);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var streak = FindOrCreate(canvas.transform, "StreakPanel");
+            var sRT = GetOrAdd<RectTransform>(streak);
+            SetAnchors(sRT, NormX(SIDE_PAD), STREAK_BOT, NormX(1080 - SIDE_PAD), STREAK_TOP);
+
+            var sBg = GetOrAdd<Image>(streak);
+            sBg.color = CARD_BG;
+            var sOutline = GetOrAdd<Outline>(streak);
+            sOutline.effectColor = new Color(ORANGE_FIRE.r, ORANGE_FIRE.g, ORANGE_FIRE.b, 0.4f);
+            sOutline.effectDistance = new Vector2(1, 1);
+
+            // Inner container with padding
+            var inner = FindOrCreate(streak.transform, "Inner");
+            var iRT = GetOrAdd<RectTransform>(inner);
+            iRT.anchorMin = Vector2.zero;
+            iRT.anchorMax = Vector2.one;
+            iRT.offsetMin = new Vector2(15, 10);
+            iRT.offsetMax = new Vector2(-15, -10);
+
+            var iVLG = GetOrAdd<VerticalLayoutGroup>(inner);
+            iVLG.spacing = 6;
+            iVLG.childAlignment = TextAnchor.MiddleCenter;
+            iVLG.childControlWidth = true;
+            iVLG.childControlHeight = false;
+            iVLG.childForceExpandWidth = true;
+            iVLG.childForceExpandHeight = false;
+
+            // --- Top row: [FireIcon] RACHA ACTUAL: [5 DIAS] ---
+            var topRow = FindOrCreate(inner.transform, "TopRow");
+            GetOrAdd<LayoutElement>(topRow).preferredHeight = 30;
+            var trHLG = GetOrAdd<HorizontalLayoutGroup>(topRow);
+            trHLG.spacing = 8;
+            trHLG.childAlignment = TextAnchor.MiddleCenter;
+            trHLG.childControlWidth = false;
+            trHLG.childControlHeight = true;
+
+            var fireIcon = FindOrCreate(topRow.transform, "FireIcon");
+            var fireImg = GetOrAdd<Image>(fireIcon);
+            fireImg.preserveAspect = true;
+            fireImg.color = Color.white;
+            Sprite fireSprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_streak.png");
+            if (fireSprite != null) fireImg.sprite = fireSprite;
+            else fireImg.color = ORANGE_FIRE;
+            var fireLE = GetOrAdd<LayoutElement>(fireIcon);
             fireLE.minWidth = 28;
             fireLE.minHeight = 28;
 
-            GameObject streakText = FindOrCreateChild(streakBonus, "Text");
-            TextMeshProUGUI streakTmp = GetOrAddComponent<TextMeshProUGUI>(streakText);
-            streakTmp.text = "¡Racha de 6 días! +1 día para MEGA BONUS";
-            streakTmp.fontSize = 14;
-            streakTmp.fontStyle = FontStyles.Bold;
-            streakTmp.color = STREAK_FIRE;
-            streakTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement streakTextLE = GetOrAddComponent<LayoutElement>(streakText);
-            streakTextLE.minWidth = 320;
+            var streakLabel = FindOrCreate(topRow.transform, "StreakLabel");
+            var slTMP = GetOrAdd<TextMeshProUGUI>(streakLabel);
+            slTMP.text = "RACHA ACTUAL:";
+            slTMP.fontSize = 16;
+            slTMP.fontStyle = FontStyles.Bold;
+            slTMP.color = TEXT_WHITE;
+            slTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var slLE = GetOrAdd<LayoutElement>(streakLabel);
+            slLE.minWidth = 160;
 
-            // Continue Button
-            GameObject continueBtn = FindOrCreateChild(center, "ContinueButton");
-            Image continueBg = GetOrAddComponent<Image>(continueBtn);
-            continueBg.color = CYAN_NEON;
+            var streakCount = FindOrCreate(topRow.transform, "StreakCount");
+            var scTMP = GetOrAdd<TextMeshProUGUI>(streakCount);
+            scTMP.text = "5 D\u00CDAS";
+            scTMP.fontSize = 20;
+            scTMP.fontStyle = FontStyles.Bold;
+            scTMP.color = ORANGE_FIRE;
+            scTMP.alignment = TextAlignmentOptions.MidlineRight;
+            var scLE = GetOrAdd<LayoutElement>(streakCount);
+            scLE.flexibleWidth = 1;
 
-            Button button = GetOrAddComponent<Button>(continueBtn);
-            SetupButtonColors(button);
-            LayoutElement continueLE = GetOrAddComponent<LayoutElement>(continueBtn);
-            continueLE.minHeight = 60;
+            // --- Slider progress bar (height 16) ---
+            var progressBar = FindOrCreate(inner.transform, "StreakProgressBar");
+            GetOrAdd<LayoutElement>(progressBar).preferredHeight = 16;
 
-            GameObject continueText = FindOrCreateChild(continueBtn, "Text");
-            SetRectTransformStretch(continueText);
-            TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
-            continueTmp.text = "CONTINUAR";
-            continueTmp.fontSize = 22;
-            continueTmp.fontStyle = FontStyles.Bold;
-            continueTmp.color = TEXT_DARK;
-            continueTmp.alignment = TextAlignmentOptions.Center;
+            var slider = GetOrAdd<Slider>(progressBar);
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0;
+            slider.maxValue = 7;
+            slider.wholeNumbers = true;
+            slider.value = 5;
+            slider.interactable = false;
 
-            Debug.Log("[DailyRewards PREMIUM] ClaimCelebration creado");
+            // Slider Background
+            var sliderBg = FindOrCreate(progressBar.transform, "Background");
+            var sbgRT = GetOrAdd<RectTransform>(sliderBg);
+            sbgRT.anchorMin = Vector2.zero;
+            sbgRT.anchorMax = Vector2.one;
+            sbgRT.offsetMin = Vector2.zero;
+            sbgRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(sliderBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
+
+            // Fill Area
+            var fillArea = FindOrCreate(progressBar.transform, "Fill Area");
+            var faRT = GetOrAdd<RectTransform>(fillArea);
+            faRT.anchorMin = Vector2.zero;
+            faRT.anchorMax = Vector2.one;
+            faRT.offsetMin = Vector2.zero;
+            faRT.offsetMax = Vector2.zero;
+
+            var fill = FindOrCreate(fillArea.transform, "Fill");
+            var fRT = GetOrAdd<RectTransform>(fill);
+            fRT.anchorMin = Vector2.zero;
+            fRT.anchorMax = Vector2.one;
+            fRT.offsetMin = Vector2.zero;
+            fRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(fill).color = ORANGE_FIRE;
+
+            slider.fillRect = fRT;
+            slider.handleRect = null;
+            slider.targetGraphic = GetOrAdd<Image>(progressBar);
+            GetOrAdd<Image>(progressBar).color = Color.clear;
+
+            // --- Bottom: StreakBonusText ---
+            var bonusText = FindOrCreate(inner.transform, "BonusText");
+            GetOrAdd<LayoutElement>(bonusText).preferredHeight = 18;
+            var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
+            btTMP.text = "Bonus d\u00EDa 7: +100 gemas";
+            btTMP.fontSize = 13;
+            btTMP.color = GEM_COLOR;
+            btTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[DailyRewardsUI] StreakPanel creado");
         }
 
-        private static void CreateCelebrationRewardRow(GameObject parent, string name, string text, Color color)
+        #endregion
+
+        #region 3. Week Label (0.865-0.890)
+
+        private static void CreateWeekLabel()
         {
-            GameObject row = FindOrCreateChild(parent, name);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(row);
-            hlg.spacing = 15f;
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(row);
-            rowLE.minHeight = 45;
+            var weekLabel = FindOrCreate(canvas.transform, "WeekLabel");
+            var wRT = GetOrAdd<RectTransform>(weekLabel);
+            SetAnchors(wRT, 0.05f, WEEK_BOT, 0.95f, WEEK_TOP);
 
-            GameObject icon = FindOrCreateChild(row, "Icon");
-            Image iconImg = GetOrAddComponent<Image>(icon);
-            iconImg.color = color;
-            iconImg.preserveAspect = true;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(icon);
-            iconLE.minWidth = 40;
-            iconLE.minHeight = 40;
+            var wTMP = GetOrAdd<TextMeshProUGUI>(weekLabel);
+            wTMP.text = "\u2500\u2500\u2500 SEMANA 1 \u2500\u2500\u2500";
+            wTMP.fontSize = 16;
+            wTMP.fontStyle = FontStyles.Bold;
+            wTMP.color = GOLD;
+            wTMP.alignment = TextAlignmentOptions.Center;
 
-            GameObject textObj = FindOrCreateChild(row, "Text");
-            TextMeshProUGUI textTmp = GetOrAddComponent<TextMeshProUGUI>(textObj);
-            textTmp.text = text;
-            textTmp.fontSize = 32;
-            textTmp.fontStyle = FontStyles.Bold;
-            textTmp.color = color;
-            textTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement textLE = GetOrAddComponent<LayoutElement>(textObj);
-            textLE.minWidth = 250;
+            Debug.Log("[DailyRewardsUI] WeekLabel creado");
         }
 
-        // ==================== STREAK LOST POPUP ====================
+        #endregion
 
-        private static void CreateStreakLostPopup(Canvas canvas)
+        #region 4. Days Grid (0.555-0.860)
+
+        private static void CreateDaysGrid()
         {
-            GameObject popup = FindOrCreateChild(canvas.gameObject, "StreakLostPopup");
-            popup.SetActive(false);
-            SetRectTransformStretch(popup);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            Image blockerBg = GetOrAddComponent<Image>(popup);
-            blockerBg.color = new Color(0, 0, 0, 0.9f);
-            popup.transform.SetAsLastSibling();
+            var daysGrid = FindOrCreate(canvas.transform, "DaysGrid");
+            var dgRT = GetOrAdd<RectTransform>(daysGrid);
+            SetAnchors(dgRT, NormX(SIDE_PAD), DAYS_BOT, NormX(1080 - SIDE_PAD), DAYS_TOP);
 
-            // Center Panel
-            GameObject panel = FindOrCreateChild(popup, "Panel");
-            RectTransform panelRT = GetOrAddComponent<RectTransform>(panel);
-            panelRT.anchorMin = new Vector2(0.5f, 0.5f);
-            panelRT.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRT.sizeDelta = new Vector2(420, 380);
+            var grid = GetOrAdd<GridLayoutGroup>(daysGrid);
+            grid.cellSize = new Vector2(300, 155);
+            grid.spacing = new Vector2(15, 12);
+            grid.padding = new RectOffset(15, 15, 15, 15);
+            grid.childAlignment = TextAnchor.MiddleCenter;
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 3;
 
-            Image panelBg = GetOrAddComponent<Image>(panel);
-            panelBg.color = PANEL_BG;
-            AddOutline(panel, new Color(1f, 0.3f, 0.3f, 0.8f), 2);
-
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(panel);
-            vlg.spacing = 18f;
-            vlg.padding = new RectOffset(30, 30, 30, 30);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-
-            // Sad Icon
-            GameObject sadIcon = FindOrCreateChild(panel, "SadIcon");
-            Image sadImg = GetOrAddComponent<Image>(sadIcon);
-            sadImg.color = new Color(1f, 0.4f, 0.4f, 1f);
-            LayoutElement sadLE = GetOrAddComponent<LayoutElement>(sadIcon);
-            sadLE.minWidth = 70;
-            sadLE.minHeight = 70;
-            sadLE.preferredWidth = 70;
-            sadLE.preferredHeight = 70;
-
-            // Title
-            GameObject title = FindOrCreateChild(panel, "Title");
-            TextMeshProUGUI titleTmp = GetOrAddComponent<TextMeshProUGUI>(title);
-            titleTmp.text = "¡RACHA PERDIDA!";
-            titleTmp.fontSize = 26;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = new Color(1f, 0.4f, 0.4f, 1f);
-            titleTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(title);
-            titleLE.minHeight = 35;
-
-            // Description
-            GameObject desc = FindOrCreateChild(panel, "Description");
-            TextMeshProUGUI descTmp = GetOrAddComponent<TextMeshProUGUI>(desc);
-            descTmp.text = "No reclamaste tu recompensa ayer.\nTu racha de 5 días se ha reiniciado.";
-            descTmp.fontSize = 15;
-            descTmp.color = TEXT_SECONDARY;
-            descTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement descLE = GetOrAddComponent<LayoutElement>(desc);
-            descLE.minHeight = 50;
-
-            // Streak Protector Offer
-            GameObject offer = FindOrCreateChild(panel, "Offer");
-            Image offerBg = GetOrAddComponent<Image>(offer);
-            offerBg.color = new Color(GEM_COLOR.r, GEM_COLOR.g, GEM_COLOR.b, 0.15f);
-            AddOutline(offer, GEM_COLOR);
-            LayoutElement offerLE = GetOrAddComponent<LayoutElement>(offer);
-            offerLE.minHeight = 60;
-
-            HorizontalLayoutGroup offerHlg = GetOrAddComponent<HorizontalLayoutGroup>(offer);
-            offerHlg.spacing = 12f;
-            offerHlg.padding = new RectOffset(15, 15, 12, 12);
-            offerHlg.childAlignment = TextAnchor.MiddleCenter;
-            offerHlg.childControlWidth = false;
-            offerHlg.childControlHeight = true;
-
-            GameObject gemIcon = FindOrCreateChild(offer, "Gem");
-            Image gemImg = GetOrAddComponent<Image>(gemIcon);
-            gemImg.color = GEM_COLOR;
-            LayoutElement gemLE = GetOrAddComponent<LayoutElement>(gemIcon);
-            gemLE.minWidth = 35;
-            gemLE.minHeight = 35;
-
-            GameObject offerText = FindOrCreateChild(offer, "Text");
-            TextMeshProUGUI offerTmp = GetOrAddComponent<TextMeshProUGUI>(offerText);
-            offerTmp.text = "Restaurar racha por 50 gemas";
-            offerTmp.fontSize = 15;
-            offerTmp.fontStyle = FontStyles.Bold;
-            offerTmp.color = GEM_COLOR;
-            offerTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement offerTextLE = GetOrAddComponent<LayoutElement>(offerText);
-            offerTextLE.minWidth = 250;
-
-            Button offerBtn = GetOrAddComponent<Button>(offer);
-            SetupButtonColors(offerBtn);
-
-            // Start Over Button
-            GameObject startOver = FindOrCreateChild(panel, "StartOverButton");
-            Image startBg = GetOrAddComponent<Image>(startOver);
-            startBg.color = new Color(0.25f, 0.3f, 0.35f, 1f);
-
-            Button startBtn = GetOrAddComponent<Button>(startOver);
-            SetupButtonColors(startBtn);
-            LayoutElement startLE = GetOrAddComponent<LayoutElement>(startOver);
-            startLE.minHeight = 50;
-
-            GameObject startText = FindOrCreateChild(startOver, "Text");
-            SetRectTransformStretch(startText);
-            TextMeshProUGUI startTmp = GetOrAddComponent<TextMeshProUGUI>(startText);
-            startTmp.text = "EMPEZAR DE NUEVO";
-            startTmp.fontSize = 18;
-            startTmp.fontStyle = FontStyles.Bold;
-            startTmp.color = TEXT_PRIMARY;
-            startTmp.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[DailyRewards PREMIUM] StreakLostPopup creado");
-        }
-
-        // ==================== UTILITY METHODS ====================
-
-        private static void CreateGlowLine(GameObject parent, Color color, bool isBottom)
-        {
-            GameObject glow = FindOrCreateChild(parent, isBottom ? "BottomGlow" : "TopGlow");
-            RectTransform glowRT = GetOrAddComponent<RectTransform>(glow);
-
-            if (isBottom)
+            // Sample data for days 1-6
+            var dayData = new (int day, string type, int amount, string name, int state)[]
             {
-                glowRT.anchorMin = new Vector2(0, 0);
-                glowRT.anchorMax = new Vector2(1, 0);
-                glowRT.pivot = new Vector2(0.5f, 1);
+                (1, "coins", 100, "Monedas", 0),   // 0 = CLAIMED
+                (2, "coins", 150, "Monedas", 0),
+                (3, "gems",  25,  "Gemas",   0),
+                (4, "coins", 200, "Monedas", 0),
+                (5, "coins", 300, "Monedas", 1),   // 1 = CURRENT
+                (6, "xp",    25,  "XP",      2),   // 2 = LOCKED
+            };
+
+            // Clear old day cards
+            while (daysGrid.transform.childCount > 0)
+                DestroyImmediate(daysGrid.transform.GetChild(0).gameObject);
+
+            foreach (var d in dayData)
+            {
+                CreateDayCard(daysGrid.transform, d.day, d.type, d.amount, d.name, d.state);
+            }
+
+            Debug.Log("[DailyRewardsUI] DaysGrid creado con 6 dias (3x2)");
+        }
+
+        private static void CreateDayCard(Transform parent, int day, string type, int amount, string typeName, int state)
+        {
+            // state: 0=CLAIMED, 1=CURRENT, 2=LOCKED
+            bool claimed = state == 0;
+            bool current = state == 1;
+            bool locked  = state == 2;
+
+            var card = new GameObject($"Day{day}");
+            card.transform.SetParent(parent, false);
+            card.AddComponent<RectTransform>();
+
+            // Card background
+            var cardBg = card.AddComponent<Image>();
+            cardBg.color = claimed ? GREEN_CLAIMED : CARD_BG;
+
+            // Outline
+            var outline = card.AddComponent<Outline>();
+            if (claimed)
+            {
+                outline.effectColor = GREEN_SUCCESS;
+                outline.effectDistance = new Vector2(1, 1);
+            }
+            else if (current)
+            {
+                outline.effectColor = GOLD;
+                outline.effectDistance = new Vector2(2, 2);
             }
             else
             {
-                glowRT.anchorMin = new Vector2(0, 1);
-                glowRT.anchorMax = new Vector2(1, 1);
-                glowRT.pivot = new Vector2(0.5f, 0);
+                outline.effectColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
+                outline.effectDistance = new Vector2(1, 1);
             }
-            glowRT.anchoredPosition = Vector2.zero;
-            glowRT.sizeDelta = new Vector2(0, 3);
 
-            Image glowImg = GetOrAddComponent<Image>(glow);
-            glowImg.color = color;
+            // VLG for card content
+            var vlg = card.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 4;
+            vlg.padding = new RectOffset(8, 8, 8, 8);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // Day Label
+            var dayLabel = new GameObject("DayLabel");
+            dayLabel.transform.SetParent(card.transform, false);
+            dayLabel.AddComponent<RectTransform>();
+            dayLabel.AddComponent<LayoutElement>().preferredHeight = 18;
+            var dlTMP = dayLabel.AddComponent<TextMeshProUGUI>();
+            dlTMP.text = $"D\u00CDA {day}";
+            dlTMP.fontSize = 13;
+            dlTMP.fontStyle = FontStyles.Bold;
+            dlTMP.color = claimed ? GREEN_SUCCESS : (current ? GOLD : TEXT_WHITE);
+            dlTMP.alignment = TextAlignmentOptions.Center;
+
+            // Reward Icon
+            var iconContainer = new GameObject("RewardIcon");
+            iconContainer.transform.SetParent(card.transform, false);
+            iconContainer.AddComponent<RectTransform>();
+            var iconLE = iconContainer.AddComponent<LayoutElement>();
+            iconLE.preferredHeight = 50;
+            iconLE.preferredWidth = 50;
+            var iconImg = iconContainer.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.color = Color.white;
+
+            // Load day-specific icon
+            Sprite daySprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + $"icon_daily_reward_day{day}.png");
+            if (daySprite != null) iconImg.sprite = daySprite;
+            else
+            {
+                // Fallback color based on type
+                Color fallbackColor = type switch
+                {
+                    "coins" => COIN_COLOR,
+                    "gems" => GEM_COLOR,
+                    "xp" => XP_COLOR,
+                    _ => TEXT_WHITE
+                };
+                iconImg.color = claimed ? new Color(fallbackColor.r, fallbackColor.g, fallbackColor.b, 0.5f) : fallbackColor;
+            }
+
+            // Gold glow behind icon for current day
+            if (current)
+            {
+                var iconGlow = new GameObject("IconGlow");
+                iconGlow.transform.SetParent(iconContainer.transform, false);
+                iconGlow.transform.SetAsFirstSibling();
+                var igRT = iconGlow.AddComponent<RectTransform>();
+                igRT.anchorMin = Vector2.zero;
+                igRT.anchorMax = Vector2.one;
+                igRT.offsetMin = new Vector2(-10, -10);
+                igRT.offsetMax = new Vector2(10, 10);
+                iconGlow.AddComponent<Image>().color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.15f);
+            }
+
+            // Amount Text
+            var amountObj = new GameObject("AmountText");
+            amountObj.transform.SetParent(card.transform, false);
+            amountObj.AddComponent<RectTransform>();
+            amountObj.AddComponent<LayoutElement>().preferredHeight = 22;
+            var amTMP = amountObj.AddComponent<TextMeshProUGUI>();
+            amTMP.text = $"+{amount}";
+            amTMP.fontSize = 18;
+            amTMP.fontStyle = FontStyles.Bold;
+            amTMP.color = claimed ? new Color(1, 1, 1, 0.5f) : TEXT_WHITE;
+            amTMP.alignment = TextAlignmentOptions.Center;
+
+            // Type Text
+            var typeObj = new GameObject("TypeText");
+            typeObj.transform.SetParent(card.transform, false);
+            typeObj.AddComponent<RectTransform>();
+            typeObj.AddComponent<LayoutElement>().preferredHeight = 16;
+            var ttTMP = typeObj.AddComponent<TextMeshProUGUI>();
+            ttTMP.text = typeName;
+            ttTMP.fontSize = 11;
+            ttTMP.color = TEXT_SECONDARY;
+            ttTMP.alignment = TextAlignmentOptions.Center;
+
+            // Status overlays
+            if (claimed)
+            {
+                // Green check overlay
+                var check = new GameObject("CheckOverlay");
+                check.transform.SetParent(card.transform, false);
+                var chRT = check.AddComponent<RectTransform>();
+                chRT.anchorMin = new Vector2(1, 1);
+                chRT.anchorMax = new Vector2(1, 1);
+                chRT.pivot = new Vector2(1, 1);
+                chRT.anchoredPosition = new Vector2(-4, -4);
+                chRT.sizeDelta = new Vector2(26, 26);
+                check.AddComponent<Image>().color = GREEN_SUCCESS;
+
+                var checkText = new GameObject("Text");
+                checkText.transform.SetParent(check.transform, false);
+                var ctRT = checkText.AddComponent<RectTransform>();
+                ctRT.anchorMin = Vector2.zero;
+                ctRT.anchorMax = Vector2.one;
+                ctRT.offsetMin = Vector2.zero;
+                ctRT.offsetMax = Vector2.zero;
+                var ctTMP = checkText.AddComponent<TextMeshProUGUI>();
+                ctTMP.text = "\u2713";
+                ctTMP.fontSize = 16;
+                ctTMP.fontStyle = FontStyles.Bold;
+                ctTMP.color = TEXT_DARK;
+                ctTMP.alignment = TextAlignmentOptions.Center;
+            }
+            else if (current)
+            {
+                // HOY badge
+                var badge = new GameObject("TodayBadge");
+                badge.transform.SetParent(card.transform, false);
+                var bdRT = badge.AddComponent<RectTransform>();
+                bdRT.anchorMin = new Vector2(0.5f, 1);
+                bdRT.anchorMax = new Vector2(0.5f, 1);
+                bdRT.pivot = new Vector2(0.5f, 1);
+                bdRT.anchoredPosition = new Vector2(0, 2);
+                bdRT.sizeDelta = new Vector2(50, 20);
+                badge.AddComponent<Image>().color = GOLD;
+
+                var badgeText = new GameObject("Text");
+                badgeText.transform.SetParent(badge.transform, false);
+                var bttRT = badgeText.AddComponent<RectTransform>();
+                bttRT.anchorMin = Vector2.zero;
+                bttRT.anchorMax = Vector2.one;
+                bttRT.offsetMin = Vector2.zero;
+                bttRT.offsetMax = Vector2.zero;
+                var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
+                bttTMP.text = "HOY";
+                bttTMP.fontSize = 12;
+                bttTMP.fontStyle = FontStyles.Bold;
+                bttTMP.color = TEXT_DARK;
+                bttTMP.alignment = TextAlignmentOptions.Center;
+            }
+            else if (locked)
+            {
+                // Locked overlay
+                var lockOverlay = new GameObject("LockOverlay");
+                lockOverlay.transform.SetParent(card.transform, false);
+                var loRT = lockOverlay.AddComponent<RectTransform>();
+                loRT.anchorMin = Vector2.zero;
+                loRT.anchorMax = Vector2.one;
+                loRT.offsetMin = Vector2.zero;
+                loRT.offsetMax = Vector2.zero;
+                lockOverlay.AddComponent<Image>().color = LOCKED_OVERLAY;
+
+                // Lock icon
+                var lockIcon = new GameObject("LockIcon");
+                lockIcon.transform.SetParent(lockOverlay.transform, false);
+                var liRT = lockIcon.AddComponent<RectTransform>();
+                liRT.anchorMin = new Vector2(0.5f, 0.5f);
+                liRT.anchorMax = new Vector2(0.5f, 0.5f);
+                liRT.sizeDelta = new Vector2(30, 30);
+                var liImg = lockIcon.AddComponent<Image>();
+                liImg.preserveAspect = true;
+                Sprite lockSprite = AssetDatabase.LoadAssetAtPath<Sprite>(NAV_ICONS + "LockIconNeon.png");
+                if (lockSprite != null) { liImg.sprite = lockSprite; liImg.color = Color.white; }
+                else liImg.color = TEXT_SECONDARY;
+            }
         }
 
-        private static void SetRectTransformStretch(GameObject obj)
+        #endregion
+
+        #region 5. Day 7 Mega Card (0.410-0.545)
+
+        private static void CreateDay7Card()
         {
-            RectTransform rt = GetOrAddComponent<RectTransform>(obj);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-            rt.anchoredPosition = Vector2.zero;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            // GoldGlow behind card
+            var goldGlow = FindOrCreate(canvas.transform, "Day7Glow");
+            var ggRT = GetOrAdd<RectTransform>(goldGlow);
+            float glowPad = SIDE_PAD - 5;
+            SetAnchors(ggRT, NormX(glowPad), DAY7_BOT - 0.005f, NormX(1080 - glowPad), DAY7_TOP + 0.005f);
+            GetOrAdd<Image>(goldGlow).color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.08f);
+
+            var day7 = FindOrCreate(canvas.transform, "Day7Card");
+            var d7RT = GetOrAdd<RectTransform>(day7);
+            SetAnchors(d7RT, NormX(SIDE_PAD), DAY7_BOT, NormX(1080 - SIDE_PAD), DAY7_TOP);
+
+            var d7Bg = GetOrAdd<Image>(day7);
+            d7Bg.color = CARD_BG;
+            var d7Outline = GetOrAdd<Outline>(day7);
+            d7Outline.effectColor = GOLD;
+            d7Outline.effectDistance = new Vector2(2, 2);
+
+            // HLG content
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(day7);
+            hlg.spacing = 15;
+            hlg.padding = new RectOffset(20, 20, 20, 20);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+
+            // Left: Icon area
+            var iconArea = FindOrCreate(day7.transform, "IconArea");
+            var iaLE = GetOrAdd<LayoutElement>(iconArea);
+            iaLE.minWidth = 80;
+            iaLE.minHeight = 80;
+
+            // Icon glow
+            var iconGlow = FindOrCreate(iconArea.transform, "IconGlow");
+            var igRT = GetOrAdd<RectTransform>(iconGlow);
+            igRT.anchorMin = new Vector2(0.5f, 0.5f);
+            igRT.anchorMax = new Vector2(0.5f, 0.5f);
+            igRT.sizeDelta = new Vector2(70, 70);
+            GetOrAdd<Image>(iconGlow).color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.15f);
+
+            // Day7 icon
+            var day7Icon = FindOrCreate(iconArea.transform, "Day7Icon");
+            var d7iRT = GetOrAdd<RectTransform>(day7Icon);
+            d7iRT.anchorMin = new Vector2(0.5f, 0.5f);
+            d7iRT.anchorMax = new Vector2(0.5f, 0.5f);
+            d7iRT.sizeDelta = new Vector2(60, 60);
+            var d7iImg = GetOrAdd<Image>(day7Icon);
+            d7iImg.preserveAspect = true;
+            d7iImg.color = Color.white;
+            Sprite d7Sprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_reward_day7.png");
+            if (d7Sprite != null) d7iImg.sprite = d7Sprite;
+            else d7iImg.color = GOLD;
+
+            // Right: Info VLG
+            var info = FindOrCreate(day7.transform, "Info");
+            var infoVLG = GetOrAdd<VerticalLayoutGroup>(info);
+            infoVLG.spacing = 6;
+            infoVLG.childAlignment = TextAnchor.MiddleLeft;
+            infoVLG.childControlWidth = true;
+            infoVLG.childControlHeight = false;
+            infoVLG.childForceExpandWidth = true;
+            var infoLE = GetOrAdd<LayoutElement>(info);
+            infoLE.flexibleWidth = 1;
+
+            var d7Title = FindOrCreate(info.transform, "DayLabel");
+            GetOrAdd<LayoutElement>(d7Title).preferredHeight = 24;
+            var d7tTMP = GetOrAdd<TextMeshProUGUI>(d7Title);
+            d7tTMP.text = "D\u00CDA 7 - GRAN PREMIO";
+            d7tTMP.fontSize = 18;
+            d7tTMP.fontStyle = FontStyles.Bold;
+            d7tTMP.color = GOLD;
+            d7tTMP.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var d7Reward1 = FindOrCreate(info.transform, "Reward1");
+            GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 20;
+            var r1TMP = GetOrAdd<TextMeshProUGUI>(d7Reward1);
+            r1TMP.text = "500 Monedas + 50 Gemas";
+            r1TMP.fontSize = 15;
+            r1TMP.color = TEXT_WHITE;
+            r1TMP.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var d7Reward2 = FindOrCreate(info.transform, "Reward2");
+            GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 18;
+            var r2TMP = GetOrAdd<TextMeshProUGUI>(d7Reward2);
+            r2TMP.text = "+ Item Exclusivo";
+            r2TMP.fontSize = 13;
+            r2TMP.color = GOLD;
+            r2TMP.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var d7Status = FindOrCreate(info.transform, "StatusText");
+            GetOrAdd<LayoutElement>(d7Status).preferredHeight = 18;
+            var stTMP = GetOrAdd<TextMeshProUGUI>(d7Status);
+            stTMP.text = "\uD83D\uDD12 Desbloquea en 2 d\u00EDas";
+            stTMP.fontSize = 13;
+            stTMP.color = TEXT_SECONDARY;
+            stTMP.alignment = TextAlignmentOptions.MidlineLeft;
+
+            Debug.Log("[DailyRewardsUI] Day7Card creado");
         }
 
-        private static T GetOrAddComponent<T>(GameObject obj) where T : Component
+        #endregion
+
+        #region 6. Today Panel (0.300-0.400)
+
+        private static void CreateTodayPanel()
         {
-            T component = obj.GetComponent<T>();
-            if (component == null)
-                component = obj.AddComponent<T>();
-            return component;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var today = FindOrCreate(canvas.transform, "TodayPanel");
+            var tRT = GetOrAdd<RectTransform>(today);
+            SetAnchors(tRT, NormX(SIDE_PAD), TODAY_BOT, NormX(1080 - SIDE_PAD), TODAY_TOP);
+
+            var tBg = GetOrAdd<Image>(today);
+            tBg.color = CARD_BG_LIGHT;
+            var tOutline = GetOrAdd<Outline>(today);
+            tOutline.effectColor = CYAN_DARK;
+            tOutline.effectDistance = new Vector2(1, 1);
+
+            // HLG content
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(today);
+            hlg.spacing = 15;
+            hlg.padding = new RectOffset(15, 15, 15, 15);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+
+            // Left: HOY badge
+            var badge = FindOrCreate(today.transform, "TodayBadge");
+            var bdLE = GetOrAdd<LayoutElement>(badge);
+            bdLE.minWidth = 50;
+            bdLE.minHeight = 30;
+            GetOrAdd<Image>(badge).color = GOLD;
+
+            var badgeText = FindOrCreate(badge.transform, "Text");
+            var btRT = GetOrAdd<RectTransform>(badgeText);
+            btRT.anchorMin = Vector2.zero;
+            btRT.anchorMax = Vector2.one;
+            btRT.offsetMin = Vector2.zero;
+            btRT.offsetMax = Vector2.zero;
+            var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
+            btTMP.text = "HOY";
+            btTMP.fontSize = 14;
+            btTMP.fontStyle = FontStyles.Bold;
+            btTMP.color = TEXT_DARK;
+            btTMP.alignment = TextAlignmentOptions.Center;
+
+            // Center: TodayRewardIcon
+            var rewardIcon = FindOrCreate(today.transform, "TodayRewardIcon");
+            var riLE = GetOrAdd<LayoutElement>(rewardIcon);
+            riLE.minWidth = 45;
+            riLE.minHeight = 45;
+            var riImg = GetOrAdd<Image>(rewardIcon);
+            riImg.preserveAspect = true;
+            riImg.color = Color.white;
+            Sprite todaySprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_reward_day5.png");
+            if (todaySprite != null) riImg.sprite = todaySprite;
+            else riImg.color = COIN_COLOR;
+
+            // Right: Info VLG
+            var infoPanel = FindOrCreate(today.transform, "InfoPanel");
+            var ipVLG = GetOrAdd<VerticalLayoutGroup>(infoPanel);
+            ipVLG.spacing = 4;
+            ipVLG.childAlignment = TextAnchor.MiddleLeft;
+            ipVLG.childControlWidth = true;
+            ipVLG.childControlHeight = false;
+            ipVLG.childForceExpandWidth = true;
+            var ipLE = GetOrAdd<LayoutElement>(infoPanel);
+            ipLE.flexibleWidth = 1;
+
+            var rewardLabel = FindOrCreate(infoPanel.transform, "RewardLabel");
+            GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 20;
+            var rlTMP = GetOrAdd<TextMeshProUGUI>(rewardLabel);
+            rlTMP.text = "RECOMPENSA DE HOY";
+            rlTMP.fontSize = 14;
+            rlTMP.color = TEXT_SECONDARY;
+            rlTMP.alignment = TextAlignmentOptions.MidlineLeft;
+
+            var rewardAmount = FindOrCreate(infoPanel.transform, "RewardAmount");
+            GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 24;
+            var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
+            raTMP.text = "300 Monedas + 25 XP";
+            raTMP.fontSize = 18;
+            raTMP.fontStyle = FontStyles.Bold;
+            raTMP.color = COIN_COLOR;
+            raTMP.alignment = TextAlignmentOptions.MidlineLeft;
+
+            Debug.Log("[DailyRewardsUI] TodayPanel creado");
         }
 
-        private static GameObject FindOrCreateChild(GameObject parent, string childName)
+        #endregion
+
+        #region 7. Claim Button (0.225-0.290)
+
+        private static void CreateClaimButton()
         {
-            Transform child = parent.transform.Find(childName);
-            if (child != null) return child.gameObject;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            GameObject newChild = new GameObject(childName);
-            newChild.transform.SetParent(parent.transform, false);
+            float buttonPad = SIDE_PAD + 20;
 
-            if (newChild.GetComponent<RectTransform>() == null)
-                newChild.AddComponent<RectTransform>();
+            // ClaimGlow behind button
+            var claimGlow = FindOrCreate(canvas.transform, "ClaimGlow");
+            var cgRT = GetOrAdd<RectTransform>(claimGlow);
+            SetAnchors(cgRT, NormX(buttonPad - 8), CLAIM_BOT - 0.005f, NormX(1080 - buttonPad + 8), CLAIM_TOP + 0.005f);
+            GetOrAdd<Image>(claimGlow).color = new Color(GREEN_SUCCESS.r, GREEN_SUCCESS.g, GREEN_SUCCESS.b, 0.15f);
 
-            return newChild;
+            var claimBtn = FindOrCreate(canvas.transform, "ClaimButton");
+            var cbRT = GetOrAdd<RectTransform>(claimBtn);
+            SetAnchors(cbRT, NormX(buttonPad), CLAIM_BOT, NormX(1080 - buttonPad), CLAIM_TOP);
+
+            var cbBg = GetOrAdd<Image>(claimBtn);
+            cbBg.color = GREEN_SUCCESS;
+            GetOrAdd<Button>(claimBtn).targetGraphic = cbBg;
+            var cbOutline = GetOrAdd<Outline>(claimBtn);
+            cbOutline.effectColor = new Color(0.1f, 0.5f, 0.2f, 1f);
+            cbOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            var claimText = FindOrCreate(claimBtn.transform, "Text");
+            var ctRT = GetOrAdd<RectTransform>(claimText);
+            ctRT.anchorMin = Vector2.zero;
+            ctRT.anchorMax = Vector2.one;
+            ctRT.offsetMin = Vector2.zero;
+            ctRT.offsetMax = Vector2.zero;
+            var ctTMP = GetOrAdd<TextMeshProUGUI>(claimText);
+            ctTMP.text = "RECLAMAR RECOMPENSA";
+            ctTMP.fontSize = 22;
+            ctTMP.fontStyle = FontStyles.Bold;
+            ctTMP.color = TEXT_DARK;
+            ctTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[DailyRewardsUI] ClaimButton creado");
         }
 
-        private static void SetupButtonColors(Button btn)
+        #endregion
+
+        #region 8. Timer (0.185-0.225)
+
+        private static void CreateTimer()
         {
-            ColorBlock colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-            colors.selectedColor = Color.white;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            btn.colors = colors;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var timerBar = FindOrCreate(canvas.transform, "TimerBar");
+            var tbRT = GetOrAdd<RectTransform>(timerBar);
+            SetAnchors(tbRT, 0.1f, TIMER_BOT, 0.9f, TIMER_TOP);
+
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(timerBar);
+            hlg.spacing = 8;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+
+            // Timer icon
+            var timerIcon = FindOrCreate(timerBar.transform, "TimerIcon");
+            var tiImg = GetOrAdd<Image>(timerIcon);
+            tiImg.preserveAspect = true;
+            tiImg.color = Color.white;
+            Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "icon_ui_timer.png");
+            if (timerSprite != null) tiImg.sprite = timerSprite;
+            else tiImg.color = TEXT_SECONDARY;
+            var tiLE = GetOrAdd<LayoutElement>(timerIcon);
+            tiLE.minWidth = 18;
+            tiLE.minHeight = 18;
+
+            // Label
+            var label = FindOrCreate(timerBar.transform, "Label");
+            var lTMP = GetOrAdd<TextMeshProUGUI>(label);
+            lTMP.text = "Pr\u00F3xima recompensa en:";
+            lTMP.fontSize = 13;
+            lTMP.color = TEXT_SECONDARY;
+            lTMP.alignment = TextAlignmentOptions.MidlineRight;
+            var lLE = GetOrAdd<LayoutElement>(label);
+            lLE.minWidth = 190;
+
+            // Time text
+            var timeText = FindOrCreate(timerBar.transform, "TimeText");
+            var ttTMP = GetOrAdd<TextMeshProUGUI>(timeText);
+            ttTMP.text = "14h 32m 15s";
+            ttTMP.fontSize = 15;
+            ttTMP.fontStyle = FontStyles.Bold;
+            ttTMP.color = CYAN_NEON;
+            ttTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var ttLE = GetOrAdd<LayoutElement>(timeText);
+            ttLE.minWidth = 120;
+
+            Debug.Log("[DailyRewardsUI] TimerBar creado");
         }
 
-        private static void AddOutline(GameObject obj, Color color, float distance = 1)
+        #endregion
+
+        #region 9. Claim Animation Popup (hidden)
+
+        private static void CreateClaimAnimationPopup()
         {
-            Outline outline = obj.GetComponent<Outline>();
-            if (outline == null)
-                outline = obj.AddComponent<Outline>();
-            outline.effectColor = color;
-            outline.effectDistance = new Vector2(distance, distance);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            // Blocker (fullscreen)
+            var blocker = FindOrCreate(canvas.transform, "ClaimAnimationBlocker");
+            blocker.SetActive(false);
+            var blRT = GetOrAdd<RectTransform>(blocker);
+            blRT.anchorMin = Vector2.zero;
+            blRT.anchorMax = Vector2.one;
+            blRT.offsetMin = Vector2.zero;
+            blRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(blocker).color = new Color(0, 0, 0, 0.85f);
+            var blBtn = GetOrAdd<Button>(blocker);
+            var blCB = blBtn.colors;
+            blCB.normalColor = Color.white;
+            blCB.highlightedColor = Color.white;
+            blCB.pressedColor = Color.white;
+            blCB.selectedColor = Color.white;
+            blBtn.colors = blCB;
+            blBtn.transition = Selectable.Transition.None;
+            blocker.transform.SetAsLastSibling();
+
+            // ClaimPopup panel (centered)
+            var popup = FindOrCreate(blocker.transform, "ClaimPopup");
+            var ppRT = GetOrAdd<RectTransform>(popup);
+            ppRT.anchorMin = new Vector2(0.5f, 0.5f);
+            ppRT.anchorMax = new Vector2(0.5f, 0.5f);
+            ppRT.sizeDelta = new Vector2(420, 380);
+            GetOrAdd<Image>(popup).color = CARD_BG;
+            var ppOutline = GetOrAdd<Outline>(popup);
+            ppOutline.effectColor = GOLD;
+            ppOutline.effectDistance = new Vector2(2, 2);
+
+            // VLG content
+            var vlg = GetOrAdd<VerticalLayoutGroup>(popup);
+            vlg.spacing = 15;
+            vlg.padding = new RectOffset(25, 25, 25, 25);
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // Celebration Icon
+            var celebIcon = FindOrCreate(popup.transform, "CelebrationIcon");
+            var ciLE = GetOrAdd<LayoutElement>(celebIcon);
+            ciLE.preferredWidth = 70;
+            ciLE.preferredHeight = 70;
+            var ciImg = GetOrAdd<Image>(celebIcon);
+            ciImg.preserveAspect = true;
+            ciImg.color = Color.white;
+            // Try icon_ui_claim.png first, then GiftIconNeon.png
+            Sprite claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "icon_ui_claim.png");
+            if (claimSprite == null) claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "GiftIconNeon.png");
+            if (claimSprite != null) ciImg.sprite = claimSprite;
+            else ciImg.color = GOLD;
+
+            // Title
+            var celebTitle = FindOrCreate(popup.transform, "CelebTitle");
+            GetOrAdd<LayoutElement>(celebTitle).preferredHeight = 32;
+            var ctTMP = GetOrAdd<TextMeshProUGUI>(celebTitle);
+            ctTMP.text = "\u00A1Recompensa Obtenida!";
+            ctTMP.fontSize = 24;
+            ctTMP.fontStyle = FontStyles.Bold;
+            ctTMP.color = GOLD;
+            ctTMP.alignment = TextAlignmentOptions.Center;
+
+            // Claim Reward Icon
+            var claimRewardIcon = FindOrCreate(popup.transform, "ClaimRewardIcon");
+            var criLE = GetOrAdd<LayoutElement>(claimRewardIcon);
+            criLE.preferredWidth = 50;
+            criLE.preferredHeight = 50;
+            var criImg = GetOrAdd<Image>(claimRewardIcon);
+            criImg.preserveAspect = true;
+            criImg.color = COIN_COLOR;
+
+            // Claim Reward Text
+            var claimRewardText = FindOrCreate(popup.transform, "ClaimRewardText");
+            GetOrAdd<LayoutElement>(claimRewardText).preferredHeight = 35;
+            var crtTMP = GetOrAdd<TextMeshProUGUI>(claimRewardText);
+            crtTMP.text = "+300 Monedas";
+            crtTMP.fontSize = 28;
+            crtTMP.fontStyle = FontStyles.Bold;
+            crtTMP.color = COIN_COLOR;
+            crtTMP.alignment = TextAlignmentOptions.Center;
+
+            // Streak Info
+            var streakInfo = FindOrCreate(popup.transform, "StreakInfo");
+            GetOrAdd<LayoutElement>(streakInfo).preferredHeight = 22;
+            var siTMP = GetOrAdd<TextMeshProUGUI>(streakInfo);
+            siTMP.text = "Racha: 6 d\u00EDas";
+            siTMP.fontSize = 15;
+            siTMP.color = TEXT_SECONDARY;
+            siTMP.alignment = TextAlignmentOptions.Center;
+
+            // Continue Button
+            var continueBtn = FindOrCreate(popup.transform, "ContinueButton");
+            GetOrAdd<LayoutElement>(continueBtn).preferredHeight = 48;
+            var conBg = GetOrAdd<Image>(continueBtn);
+            conBg.color = CYAN_NEON;
+            GetOrAdd<Button>(continueBtn).targetGraphic = conBg;
+
+            var conText = FindOrCreate(continueBtn.transform, "Text");
+            var cnRT = GetOrAdd<RectTransform>(conText);
+            cnRT.anchorMin = Vector2.zero;
+            cnRT.anchorMax = Vector2.one;
+            cnRT.offsetMin = Vector2.zero;
+            cnRT.offsetMax = Vector2.zero;
+            var cnTMP = GetOrAdd<TextMeshProUGUI>(conText);
+            cnTMP.text = "CONTINUAR";
+            cnTMP.fontSize = 20;
+            cnTMP.fontStyle = FontStyles.Bold;
+            cnTMP.color = TEXT_DARK;
+            cnTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[DailyRewardsUI] ClaimAnimationPopup creado");
         }
 
-        private static void MarkSceneDirty()
+        #endregion
+
+        #region 10. Milestone Popup (hidden)
+
+        private static void CreateMilestonePopup()
         {
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            // MilestoneBlocker (fullscreen)
+            var blocker = FindOrCreate(canvas.transform, "MilestoneBlocker");
+            blocker.SetActive(false);
+            var blRT = GetOrAdd<RectTransform>(blocker);
+            blRT.anchorMin = Vector2.zero;
+            blRT.anchorMax = Vector2.one;
+            blRT.offsetMin = Vector2.zero;
+            blRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(blocker).color = new Color(0, 0, 0, 0.85f);
+            blocker.transform.SetAsLastSibling();
+
+            // MilestonePopup panel (centered)
+            var popup = FindOrCreate(blocker.transform, "MilestonePopup");
+            var ppRT = GetOrAdd<RectTransform>(popup);
+            ppRT.anchorMin = new Vector2(0.5f, 0.5f);
+            ppRT.anchorMax = new Vector2(0.5f, 0.5f);
+            ppRT.sizeDelta = new Vector2(400, 300);
+            GetOrAdd<Image>(popup).color = CARD_BG;
+            var ppOutline = GetOrAdd<Outline>(popup);
+            ppOutline.effectColor = GOLD;
+            ppOutline.effectDistance = new Vector2(2, 2);
+
+            // VLG content
+            var vlg = GetOrAdd<VerticalLayoutGroup>(popup);
+            vlg.spacing = 15;
+            vlg.padding = new RectOffset(25, 25, 25, 25);
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // Star icon
+            var starIcon = FindOrCreate(popup.transform, "StarIcon");
+            var siLE = GetOrAdd<LayoutElement>(starIcon);
+            siLE.preferredWidth = 60;
+            siLE.preferredHeight = 60;
+            GetOrAdd<Image>(starIcon).color = GOLD;
+
+            // Milestone Text
+            var milestoneText = FindOrCreate(popup.transform, "MilestoneText");
+            GetOrAdd<LayoutElement>(milestoneText).preferredHeight = 32;
+            var mtTMP = GetOrAdd<TextMeshProUGUI>(milestoneText);
+            mtTMP.text = "\u00A17 d\u00EDas seguidos!";
+            mtTMP.fontSize = 24;
+            mtTMP.fontStyle = FontStyles.Bold;
+            mtTMP.color = GOLD;
+            mtTMP.alignment = TextAlignmentOptions.Center;
+
+            // Milestone Bonus Text
+            var milestoneBonusText = FindOrCreate(popup.transform, "MilestoneBonusText");
+            GetOrAdd<LayoutElement>(milestoneBonusText).preferredHeight = 28;
+            var mbtTMP = GetOrAdd<TextMeshProUGUI>(milestoneBonusText);
+            mbtTMP.text = "+100 gemas de bonus";
+            mbtTMP.fontSize = 20;
+            mbtTMP.fontStyle = FontStyles.Bold;
+            mbtTMP.color = GEM_COLOR;
+            mbtTMP.alignment = TextAlignmentOptions.Center;
+
+            // Continue Button
+            var continueBtn = FindOrCreate(popup.transform, "ContinueBtn");
+            GetOrAdd<LayoutElement>(continueBtn).preferredHeight = 45;
+            var conBg = GetOrAdd<Image>(continueBtn);
+            conBg.color = CYAN_NEON;
+            GetOrAdd<Button>(continueBtn).targetGraphic = conBg;
+
+            var conText = FindOrCreate(continueBtn.transform, "Text");
+            var cnRT = GetOrAdd<RectTransform>(conText);
+            cnRT.anchorMin = Vector2.zero;
+            cnRT.anchorMax = Vector2.one;
+            cnRT.offsetMin = Vector2.zero;
+            cnRT.offsetMax = Vector2.zero;
+            var cnTMP = GetOrAdd<TextMeshProUGUI>(conText);
+            cnTMP.text = "CONTINUAR";
+            cnTMP.fontSize = 18;
+            cnTMP.fontStyle = FontStyles.Bold;
+            cnTMP.color = TEXT_DARK;
+            cnTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[DailyRewardsUI] MilestonePopup creado");
         }
+
+        #endregion
+
+        #region Manager References
+
+        private static void SetupManagerReferences()
+        {
+            var manager = Object.FindFirstObjectByType<DigitPark.Managers.DailyRewardsManager>();
+            if (manager == null)
+            {
+                Debug.LogWarning("[DailyRewardsUI] DailyRewardsManager no encontrado. Agrega el componente primero.");
+                return;
+            }
+
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var so = new SerializedObject(manager);
+            Transform r = canvas.transform;
+
+            // UI - Header
+            SetRef(so, "backButton", FindInPath<Button>(r, "TopBar/BackButton"));
+            SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "TopBar/TitleText"));
+            SetRef(so, "streakText", FindInPath<TextMeshProUGUI>(r, "StreakPanel/Inner/TopRow/StreakCount"));
+            SetRef(so, "nextResetText", FindInPath<TextMeshProUGUI>(r, "TimerBar/TimeText"));
+
+            // UI - Current Day
+            Transform todayPanel = r.Find("TodayPanel");
+            if (todayPanel != null) SetRef(so, "currentDayHighlight", todayPanel.gameObject);
+            SetRef(so, "currentDayText", FindInPath<TextMeshProUGUI>(r, "TodayPanel/TodayBadge/Text"));
+            SetRef(so, "currentDayRewardIcon", FindInPath<Image>(r, "TodayPanel/TodayRewardIcon"));
+            SetRef(so, "currentDayRewardText", FindInPath<TextMeshProUGUI>(r, "TodayPanel/InfoPanel/RewardAmount"));
+
+            // UI - Rewards Grid
+            Transform daysGrid = r.Find("DaysGrid");
+            if (daysGrid != null) SetRef(so, "rewardsContainer", daysGrid);
+
+            var daysInCycleProp = so.FindProperty("daysInCycle");
+            if (daysInCycleProp != null) daysInCycleProp.intValue = 7;
+
+            // UI - Claim Button
+            SetRef(so, "claimButton", FindInPath<Button>(r, "ClaimButton"));
+            SetRef(so, "claimButtonText", FindInPath<TextMeshProUGUI>(r, "ClaimButton/Text"));
+            Transform claimGlow = r.Find("ClaimGlow");
+            if (claimGlow != null) SetRef(so, "claimGlow", claimGlow.gameObject);
+
+            // UI - Bonus Info
+            SetRef(so, "streakProgressBar", FindInPath<Slider>(r, "StreakPanel/Inner/StreakProgressBar"));
+            SetRef(so, "streakBonusText", FindInPath<TextMeshProUGUI>(r, "StreakPanel/Inner/BonusText"));
+
+            // UI - Claim Animation
+            Transform claimBlocker = r.Find("ClaimAnimationBlocker");
+            if (claimBlocker != null) SetRef(so, "claimAnimationPanel", claimBlocker.gameObject);
+            SetRef(so, "claimRewardText", FindInPath<TextMeshProUGUI>(r, "ClaimAnimationBlocker/ClaimPopup/ClaimRewardText"));
+            SetRef(so, "claimRewardIcon", FindInPath<Image>(r, "ClaimAnimationBlocker/ClaimPopup/ClaimRewardIcon"));
+            SetRef(so, "continueButton", FindInPath<Button>(r, "ClaimAnimationBlocker/ClaimPopup/ContinueButton"));
+
+            // UI - Milestone
+            Transform milestoneBlocker = r.Find("MilestoneBlocker");
+            if (milestoneBlocker != null) SetRef(so, "milestonePanel", milestoneBlocker.gameObject);
+            SetRef(so, "milestoneText", FindInPath<TextMeshProUGUI>(r, "MilestoneBlocker/MilestonePopup/MilestoneText"));
+            SetRef(so, "milestoneBonusText", FindInPath<TextMeshProUGUI>(r, "MilestoneBlocker/MilestonePopup/MilestoneBonusText"));
+
+            // Reward Icons (Sprites loaded from assets)
+            SetSpriteRef(so, "coinIcon", CURRENCY_ICONS + "CoinIconNeon.png");
+            SetSpriteRef(so, "gemIcon", CURRENCY_ICONS + "GemIconNeon.png");
+            SetSpriteRef(so, "xpIcon", CURRENCY_ICONS + "icon_xp.png");
+            SetSpriteRef(so, "mysteryIcon", UI_ICONS + "icon_ui_gift_generic.png");
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
+            Debug.Log("[DailyRewardsUI] Referencias del manager asignadas (23+ campos)");
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private static void SetRef(SerializedObject so, string propName, Object value)
+        {
+            var prop = so.FindProperty(propName);
+            if (prop == null)
+            {
+                Debug.LogWarning($"[DailyRewardsUI] Property '{propName}' no encontrada");
+                return;
+            }
+            if (value != null) prop.objectReferenceValue = value;
+            else Debug.LogWarning($"[DailyRewardsUI] No se encontro valor para: {propName}");
+        }
+
+        private static void SetSpriteRef(SerializedObject so, string propName, string assetPath)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (sprite != null)
+            {
+                var prop = so.FindProperty(propName);
+                if (prop != null) prop.objectReferenceValue = sprite;
+                else Debug.LogWarning($"[DailyRewardsUI] Property '{propName}' no encontrada");
+            }
+            else
+            {
+                Debug.LogWarning($"[DailyRewardsUI] Sprite no encontrado: {assetPath}");
+            }
+        }
+
+        private static T FindInPath<T>(Transform root, string path) where T : Component
+        {
+            Transform t = root;
+            foreach (string part in path.Split('/'))
+            {
+                t = t.Find(part);
+                if (t == null) return null;
+            }
+            return t.GetComponent<T>();
+        }
+
+        private static GameObject FindOrCreate(Transform parent, string name)
+        {
+            Transform existing = parent.Find(name);
+            if (existing != null) return existing.gameObject;
+            var obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            return obj;
+        }
+
+        private static T GetOrAdd<T>(GameObject obj) where T : Component
+        {
+            T c = obj.GetComponent<T>();
+            if (c == null) c = obj.AddComponent<T>();
+            return c;
+        }
+
+        private static void SetAnchors(RectTransform rt, float xMin, float yMin, float xMax, float yMax)
+        {
+            rt.anchorMin = new Vector2(xMin, yMin);
+            rt.anchorMax = new Vector2(xMax, yMax);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+        }
+
+        /// <summary>
+        /// Converts a pixel X position to a normalized anchor value (0-1) for a 1080px wide canvas.
+        /// </summary>
+        private static float NormX(float pixelX)
+        {
+            return pixelX / 1080f;
+        }
+
+        #endregion
     }
 }

@@ -6,144 +6,145 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// MainMenu UI Builder - REDISEÑO COMPLETO 2026
-    /// Diseño innovador con cards, estilo Neon profesional
-    /// Resolución: Portrait 9:16 (1080x1920)
+    /// MainMenu UI Builder v3 - Rediseño 2026
+    /// Layout proporcional que llena toda la pantalla sin espacio muerto
+    /// Cash Battle DORADO prominente como card principal
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     /// </summary>
     public class MainMenuUIBuilder : EditorWindow
     {
-        #region Colors - Neon Theme
+        #region Colors
 
-        // Primary Colors
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color CYAN_GLOW = new Color(0f, 0.85f, 1f, 0.8f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.5f, 1f);
 
-        // Gold/Money Colors
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color GOLD_DARK = new Color(0.8f, 0.6f, 0.1f, 1f);
         private static readonly Color GOLD_GLOW = new Color(1f, 0.75f, 0f, 0.7f);
 
-        // Backgrounds
         private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
         private static readonly Color CARD_BG_LIGHT = new Color(0.08f, 0.1f, 0.14f, 1f);
         private static readonly Color HEADER_BG = new Color(0.04f, 0.06f, 0.1f, 0.98f);
 
-        // Text
         private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.6f, 0.65f, 1f);
         private static readonly Color TEXT_DARK = new Color(0.1f, 0.1f, 0.1f, 1f);
 
-        // Accents
         private static readonly Color GREEN_SUCCESS = new Color(0.2f, 0.9f, 0.4f, 1f);
         private static readonly Color PURPLE_ACCENT = new Color(0.6f, 0.3f, 1f, 1f);
+        private static readonly Color ORANGE_ACCENT = new Color(1f, 0.5f, 0f, 1f);
 
         #endregion
 
-        #region Layout Constants
+        #region Layout Anchors (Y: 0=bottom, 1=top)
 
-        private const float HEADER_HEIGHT = 100f;
-        private const float PLAYER_CARD_HEIGHT = 180f;
-        private const float QUICK_ACTION_HEIGHT = 90f;
-        private const float MAIN_CARD_HEIGHT = 140f;
-        private const float DAILY_REWARDS_HEIGHT = 130f;
-        private const float SECTION_SPACING = 20f;
-        private const float CARD_BORDER_WIDTH = 2f;
+        // Sections fill screen with 1% gaps, 4.5% top padding, 7% bottom padding
+        private const float HEADER_TOP = 0.955f;
+        private const float HEADER_BOT = 0.915f;
+
+        private const float PROFILE_TOP = 0.905f;
+        private const float PROFILE_BOT = 0.72f;
+
+        private const float DAILY_TOP = 0.71f;
+        private const float DAILY_BOT = 0.635f;
+
+        private const float QUICK_TOP = 0.625f;
+        private const float QUICK_BOT = 0.56f;
+
+        private const float PLAY_TOP = 0.55f;
+        private const float PLAY_BOT = 0.40f;
+
+        private const float CASH_TOP = 0.39f;
+        private const float CASH_BOT = 0.22f;
+
+        private const float EXTRA_TOP = 0.21f;
+        private const float EXTRA_BOT = 0.07f;
+
+        private const float SIDE_PAD = 20f;
 
         #endregion
 
-        #region Icon Paths - Neon Icons
+        #region Icon Paths
 
         private const string ICONS_BASE = "Assets/_Project/Art/Icons";
-
-        // Header Icons
         private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/Actions/SettingsIconNeon.png";
         private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/Actions/NotificationsNeon.png";
         private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/Actions/NotificationsActiveNeon.png";
         private const string ICON_PROFILE = ICONS_BASE + "/Social/Profile/ProfileIconNeon.png";
-
-        // Player Card Icons
         private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/Profile/AvatarDefaultNeon.png";
         private const string ICON_TROPHY = ICONS_BASE + "/Tournaments/TrophyIconNeon.png";
         private const string ICON_GEM = ICONS_BASE + "/Currency/GemIconNeon.png";
         private const string ICON_COIN = ICONS_BASE + "/Currency/CoinIconNeon.png";
-
-        // Quick Actions Icons
         private const string ICON_RANKINGS = ICONS_BASE + "/Tournaments/RankingsIconNeon.png";
         private const string ICON_SEARCH = ICONS_BASE + "/Navigation/Buttons/SearchIconNeon.png";
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIconNeon.png";
-
-        // Main Cards Icons
         private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIconNeon.png";
         private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIconNeon.png";
-
-        // Daily Rewards Icon
         private const string ICON_GIFT = ICONS_BASE + "/DailyRewards/GiftIconNeon.png";
+        private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/Monetization/AchievementsIconNeon.png";
+        private const string ICON_SHOP = ICONS_BASE + "/Monetization/ShopIconNeon.png";
+        private const string ICON_PREMIUM = ICONS_BASE + "/Premium/PremiumIconNeon.png";
 
         #endregion
 
         [MenuItem("DigitPark/UI Builders/Core/MainMenu", false, 150)]
         public static void ShowWindow()
         {
-            GetWindow<MainMenuUIBuilder>("MainMenu Builder v2");
+            GetWindow<MainMenuUIBuilder>("MainMenu Builder v3");
         }
 
         private void OnGUI()
         {
-            GUILayout.Label("MainMenu UI Builder", EditorStyles.boldLabel);
-            GUILayout.Label("REDISEÑO COMPLETO 2026 - Estilo Neon", EditorStyles.miniLabel);
+            GUILayout.Label("MainMenu UI Builder v3", EditorStyles.boldLabel);
+            GUILayout.Label("Rediseño 2026 - Sin espacio muerto, Cash Battle DORADO", EditorStyles.miniLabel);
             GUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "Nueva estructura:\n\n" +
-                "1. Header (Settings, Logo, Notifications, Profile)\n" +
-                "2. Player Card (Avatar, Username, Level, Stats)\n" +
-                "3. Quick Actions (Rankings, Buscar, Misiones)\n" +
-                "4. Main Cards (JUGAR + CASH BATTLE)\n" +
-                "5. Daily Rewards Banner\n" +
-                "6. Panels (Premium, Notifications)",
+                "Layout completo (de arriba a abajo):\n\n" +
+                "1. Header (Settings, Logo, Notificaciones, Perfil)\n" +
+                "2. Profile Card (Avatar grande + stats + nivel)\n" +
+                "3. Daily Reward (movida arriba, reclamar)\n" +
+                "4. Quick Access (Rankings, Buscar, Misiones)\n" +
+                "5. JUGAR (Card cyan neon)\n" +
+                "6. CASH BATTLE (Card DORADO prominente)\n" +
+                "7. Extra Row (Logros, Tienda, Premium)\n" +
+                "8. Paneles overlay (Premium, Notificaciones)",
                 MessageType.Info);
 
             GUILayout.Space(15);
 
             GUI.backgroundColor = CYAN_NEON;
             if (GUILayout.Button("RECONSTRUIR MAINMENU COMPLETO", GUILayout.Height(50)))
-            {
                 RebuildMainMenu();
-            }
             GUI.backgroundColor = Color.white;
 
-            GUILayout.Space(15);
-            GUILayout.Label("Componentes Individuales:", EditorStyles.boldLabel);
+            GUILayout.Space(10);
+            GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("1. Header", GUILayout.Height(28)))
-                CreateHeader();
-            if (GUILayout.Button("2. Player Card", GUILayout.Height(28)))
-                CreatePlayerCard();
-            if (GUILayout.Button("3. Quick Actions", GUILayout.Height(28)))
-                CreateQuickActions();
-            if (GUILayout.Button("4. Main Cards (Jugar + Cash)", GUILayout.Height(28)))
-                CreateMainCards();
-            if (GUILayout.Button("5. Daily Rewards", GUILayout.Height(28)))
-                CreateDailyRewards();
-            if (GUILayout.Button("6. Panels (Premium + Notif)", GUILayout.Height(28)))
-                CreatePanels();
+            if (GUILayout.Button("1. Header", GUILayout.Height(25))) CreateHeader();
+            if (GUILayout.Button("2. Profile Card", GUILayout.Height(25))) CreateProfileCard();
+            if (GUILayout.Button("3. Daily Reward", GUILayout.Height(25))) CreateDailyReward();
+            if (GUILayout.Button("4. Quick Access", GUILayout.Height(25))) CreateQuickAccess();
+            if (GUILayout.Button("5. JUGAR", GUILayout.Height(25))) CreatePlayCard();
+            if (GUILayout.Button("6. CASH BATTLE", GUILayout.Height(25))) CreateCashBattleCard();
+            if (GUILayout.Button("7. Extra Row", GUILayout.Height(25))) CreateExtraRow();
+            if (GUILayout.Button("8. Paneles", GUILayout.Height(25))) CreatePanels();
 
             GUILayout.Space(15);
 
-            GUI.backgroundColor = new Color(0.3f, 0.8f, 0.3f);
-            if (GUILayout.Button("ASIGNAR ICONOS NEON", GUILayout.Height(40)))
-            {
-                AssignNeonIcons();
-            }
+            GUI.backgroundColor = GOLD;
+            if (GUILayout.Button("ASIGNAR REFERENCIAS AL MANAGER", GUILayout.Height(35)))
+                SetupManagerReferences();
             GUI.backgroundColor = Color.white;
 
             GUILayout.Space(5);
-            EditorGUILayout.HelpBox(
-                "Los iconos deben estar en:\n" +
-                "Assets/_Project/Art/Icons/[Carpeta]/[NombreIconNeon].png",
-                MessageType.Info);
+
+            GUI.backgroundColor = new Color(0.3f, 0.8f, 0.3f);
+            if (GUILayout.Button("ASIGNAR ICONOS NEON", GUILayout.Height(35)))
+                AssignNeonIcons();
+            GUI.backgroundColor = Color.white;
         }
 
         #region Main Rebuild
@@ -153,62 +154,60 @@ namespace DigitPark.Editor
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
-                Debug.LogError("[MainMenuUI] No se encontró Canvas en la escena");
+                Debug.LogError("[MainMenuUI] No se encontró Canvas");
                 return;
             }
 
-            // Limpiar elementos viejos
-            CleanOldElements(canvas.transform);
+            // CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0f;
+            }
 
-            // Crear nueva estructura
+            // Limpiar elementos viejos
+            string[] oldNames = {
+                "Background", "Header", "PlayerCard", "ProfileCard",
+                "QuickActionsPanel", "MainCardsPanel", "DailyRewardsCard", "DailyRewardCard",
+                "PlayCard", "CashBattleCard", "ExtraRow", "PremiumPanel",
+                "NotificationsPanel", "PremiumBanner", "TitleSection", "UserSection",
+                "MainMenuPanel", "SafeArea"
+            };
+            foreach (var n in oldNames)
+            {
+                Transform t = canvas.transform.Find(n);
+                if (t != null) DestroyImmediate(t.gameObject);
+            }
+
+            // Crear estructura completa
             CreateBackground(canvas.transform);
             CreateHeader();
-            CreatePlayerCard();
-            CreateQuickActions();
-            CreateMainCards();
-            CreateDailyRewards();
+            CreateProfileCard();
+            CreateDailyReward();
+            CreateQuickAccess();
+            CreatePlayCard();
+            CreateCashBattleCard();
+            CreateExtraRow();
             CreatePanels();
+            SetupManagerReferences();
 
-            Debug.Log("[MainMenuUI] MainMenu REDISEÑADO exitosamente!");
+            Debug.Log("[MainMenuUI] ¡MainMenu v3 REDISEÑADO exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
 
-        private static void CleanOldElements(Transform canvasTransform)
-        {
-            string[] oldElements = {
-                "Background", "Header", "TitleSection", "UserSection",
-                "MainMenuPanel", "PremiumBanner", "PremiumPanel", "NotificationsPanel",
-                "PlayerCard", "QuickActionsPanel", "MainCardsPanel", "DailyRewardsCard"
-            };
-
-            foreach (string name in oldElements)
-            {
-                Transform element = canvasTransform.Find(name);
-                if (element != null)
-                {
-                    DestroyImmediate(element.gameObject);
-                }
-            }
-        }
-
-        #endregion
-
-        #region Background
-
         private static void CreateBackground(Transform parent)
         {
-            GameObject bg = new GameObject("Background");
-            bg.transform.SetParent(parent, false);
+            var bg = FindOrCreate(parent, "Background");
             bg.transform.SetAsFirstSibling();
-
-            RectTransform rt = bg.AddComponent<RectTransform>();
+            var rt = GetOrAdd<RectTransform>(bg);
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-
-            Image img = bg.AddComponent<Image>();
-            img.color = DARK_BG;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(bg).color = DARK_BG;
         }
 
         #endregion
@@ -220,90 +219,88 @@ namespace DigitPark.Editor
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject header = FindOrCreate(canvas.transform, "Header");
-            header.transform.SetSiblingIndex(1);
+            var header = FindOrCreate(canvas.transform, "Header");
+            var rt = GetOrAdd<RectTransform>(header);
+            SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
+            GetOrAdd<Image>(header).color = HEADER_BG;
 
-            RectTransform rt = GetOrAdd<RectTransform>(header);
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
+            // Settings Button (left)
+            CreateIconButton(header.transform, "SettingsButton",
+                new Vector2(0, 0.5f), new Vector2(50, 0), new Vector2(50, 50));
 
-            Image bg = GetOrAdd<Image>(header);
-            bg.color = HEADER_BG;
+            // Logo DIGIT PARK (center)
+            var logo = FindOrCreate(header.transform, "LogoText");
+            var logoRT = GetOrAdd<RectTransform>(logo);
+            logoRT.anchorMin = new Vector2(0.25f, 0);
+            logoRT.anchorMax = new Vector2(0.75f, 1);
+            logoRT.offsetMin = Vector2.zero;
+            logoRT.offsetMax = Vector2.zero;
 
-            // Settings Button (izquierda)
-            CreateHeaderIconButton(header.transform, "SettingsButton",
-                new Vector2(0, 0.5f), new Vector2(50, 0), "settings");
-
-            // Logo DIGIT PARK (centro)
-            GameObject logo = FindOrCreate(header.transform, "LogoText");
-            RectTransform logoRT = GetOrAdd<RectTransform>(logo);
-            logoRT.anchorMin = new Vector2(0.5f, 0.5f);
-            logoRT.anchorMax = new Vector2(0.5f, 0.5f);
-            logoRT.sizeDelta = new Vector2(200, 50);
-
-            TextMeshProUGUI logoTMP = GetOrAdd<TextMeshProUGUI>(logo);
+            var logoTMP = GetOrAdd<TextMeshProUGUI>(logo);
             logoTMP.text = "DIGIT PARK";
             logoTMP.fontSize = 32;
             logoTMP.color = CYAN_NEON;
             logoTMP.fontStyle = FontStyles.Bold;
             logoTMP.alignment = TextAlignmentOptions.Center;
+            logoTMP.enableVertexGradient = true;
+            logoTMP.colorGradient = new VertexGradient(CYAN_NEON, CYAN_NEON, CYAN_GLOW, CYAN_GLOW);
 
-            // Glow effect
-            Shadow logoShadow = GetOrAdd<Shadow>(logo);
-            logoShadow.effectColor = new Color(0, 1, 1, 0.5f);
-            logoShadow.effectDistance = new Vector2(2, -2);
-
-            // Notifications Button (derecha)
-            GameObject notifBtn = CreateHeaderIconButton(header.transform, "NotificationsButton",
-                new Vector2(1, 0.5f), new Vector2(-100, 0), "bell");
+            // Notifications Button (right)
+            var notifBtn = CreateIconButton(header.transform, "NotificationsButton",
+                new Vector2(1, 0.5f), new Vector2(-95, 0), new Vector2(50, 50));
 
             // Notification Badge
-            GameObject badge = FindOrCreate(notifBtn.transform, "Badge");
-            RectTransform badgeRT = GetOrAdd<RectTransform>(badge);
+            var badge = FindOrCreate(notifBtn.transform, "Badge");
+            var badgeRT = GetOrAdd<RectTransform>(badge);
             badgeRT.anchorMin = new Vector2(1, 1);
             badgeRT.anchorMax = new Vector2(1, 1);
             badgeRT.pivot = new Vector2(0.5f, 0.5f);
-            badgeRT.anchoredPosition = new Vector2(-8, -8);
+            badgeRT.anchoredPosition = new Vector2(-5, -5);
             badgeRT.sizeDelta = new Vector2(22, 22);
+            GetOrAdd<Image>(badge).color = new Color(1, 0.2f, 0.2f, 1);
 
-            Image badgeImg = GetOrAdd<Image>(badge);
-            badgeImg.color = new Color(1f, 0.2f, 0.2f, 1f);
+            var badgeText = FindOrCreate(badge.transform, "BadgeText");
+            var btRT = GetOrAdd<RectTransform>(badgeText);
+            btRT.anchorMin = Vector2.zero;
+            btRT.anchorMax = Vector2.one;
+            btRT.offsetMin = Vector2.zero;
+            btRT.offsetMax = Vector2.zero;
+            var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
+            btTMP.text = "3";
+            btTMP.fontSize = 12;
+            btTMP.color = TEXT_WHITE;
+            btTMP.fontStyle = FontStyles.Bold;
+            btTMP.alignment = TextAlignmentOptions.Center;
 
-            // Profile Button (extremo derecha)
-            CreateHeaderIconButton(header.transform, "ProfileButton",
-                new Vector2(1, 0.5f), new Vector2(-40, 0), "profile");
+            // Profile Button (far right)
+            CreateIconButton(header.transform, "ProfileButton",
+                new Vector2(1, 0.5f), new Vector2(-35, 0), new Vector2(50, 50));
 
             Debug.Log("[MainMenuUI] Header creado");
         }
 
-        private static GameObject CreateHeaderIconButton(Transform parent, string name, Vector2 anchor, Vector2 position, string iconType)
+        private static GameObject CreateIconButton(Transform parent, string name,
+            Vector2 anchor, Vector2 pos, Vector2 size)
         {
-            GameObject btn = FindOrCreate(parent, name);
-
-            RectTransform rt = GetOrAdd<RectTransform>(btn);
+            var btn = FindOrCreate(parent, name);
+            var rt = GetOrAdd<RectTransform>(btn);
             rt.anchorMin = anchor;
             rt.anchorMax = anchor;
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = position;
-            rt.sizeDelta = new Vector2(55, 55);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
 
-            Image bg = GetOrAdd<Image>(btn);
-            bg.color = new Color(1, 1, 1, 0.08f);
+            var bg = GetOrAdd<Image>(btn);
+            bg.color = new Color(1, 1, 1, 0.06f);
+            GetOrAdd<Button>(btn).targetGraphic = bg;
 
-            Button button = GetOrAdd<Button>(btn);
-            button.targetGraphic = bg;
-
-            // Icon placeholder
-            GameObject icon = FindOrCreate(btn.transform, "Icon");
-            RectTransform iconRT = GetOrAdd<RectTransform>(icon);
+            var icon = FindOrCreate(btn.transform, "Icon");
+            var iconRT = GetOrAdd<RectTransform>(icon);
             iconRT.anchorMin = new Vector2(0.15f, 0.15f);
             iconRT.anchorMax = new Vector2(0.85f, 0.85f);
-            iconRT.sizeDelta = Vector2.zero;
-
-            Image iconImg = GetOrAdd<Image>(icon);
+            iconRT.offsetMin = Vector2.zero;
+            iconRT.offsetMax = Vector2.zero;
+            var iconImg = GetOrAdd<Image>(icon);
             iconImg.color = TEXT_WHITE;
             iconImg.preserveAspect = true;
 
@@ -312,104 +309,102 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Player Card
+        #region Profile Card
 
-        private static void CreatePlayerCard()
+        private static void CreateProfileCard()
         {
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject card = FindOrCreate(canvas.transform, "PlayerCard");
+            var card = FindOrCreate(canvas.transform, "ProfileCard");
+            var rt = GetOrAdd<RectTransform>(card);
+            SetAnchorsWithPad(rt, PROFILE_BOT, PROFILE_TOP);
 
-            RectTransform rt = GetOrAdd<RectTransform>(card);
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = new Vector2(0, -HEADER_HEIGHT - 15);
-            rt.sizeDelta = new Vector2(-40, PLAYER_CARD_HEIGHT);
-
-            // Card Background
-            Image cardBg = GetOrAdd<Image>(card);
-            cardBg.color = CARD_BG;
-
-            // Cyan border
-            Outline outline = GetOrAdd<Outline>(card);
+            var bg = GetOrAdd<Image>(card);
+            bg.color = CARD_BG;
+            var outline = GetOrAdd<Outline>(card);
             outline.effectColor = CYAN_DARK;
-            outline.effectDistance = new Vector2(CARD_BORDER_WIDTH, CARD_BORDER_WIDTH);
+            outline.effectDistance = new Vector2(2, 2);
 
-            // === Avatar Section (izquierda) ===
-            GameObject avatarSection = FindOrCreate(card.transform, "AvatarSection");
-            RectTransform avatarSecRT = GetOrAdd<RectTransform>(avatarSection);
-            avatarSecRT.anchorMin = new Vector2(0, 0);
-            avatarSecRT.anchorMax = new Vector2(0, 1);
-            avatarSecRT.pivot = new Vector2(0, 0.5f);
-            avatarSecRT.anchoredPosition = new Vector2(20, 0);
-            avatarSecRT.sizeDelta = new Vector2(100, 0);
+            // Whole card is userButton
+            var btn = GetOrAdd<Button>(card);
+            btn.targetGraphic = bg;
+
+            // === Avatar Section (left 30%) ===
+            var avSec = FindOrCreate(card.transform, "AvatarSection");
+            var avSecRT = GetOrAdd<RectTransform>(avSec);
+            avSecRT.anchorMin = new Vector2(0, 0);
+            avSecRT.anchorMax = new Vector2(0.30f, 1);
+            avSecRT.offsetMin = new Vector2(10, 10);
+            avSecRT.offsetMax = new Vector2(0, -10);
 
             // Avatar Frame (cyan ring)
-            GameObject avatarFrame = FindOrCreate(avatarSection.transform, "AvatarFrame");
-            RectTransform frameRT = GetOrAdd<RectTransform>(avatarFrame);
-            frameRT.anchorMin = new Vector2(0.5f, 0.6f);
-            frameRT.anchorMax = new Vector2(0.5f, 0.6f);
-            frameRT.sizeDelta = new Vector2(85, 85);
+            var frame = FindOrCreate(avSec.transform, "AvatarFrame");
+            var frameRT = GetOrAdd<RectTransform>(frame);
+            frameRT.anchorMin = new Vector2(0.5f, 0.55f);
+            frameRT.anchorMax = new Vector2(0.5f, 0.55f);
+            frameRT.sizeDelta = new Vector2(120, 120);
+            GetOrAdd<Image>(frame).color = CYAN_NEON;
+            var fo = GetOrAdd<Outline>(frame);
+            fo.effectColor = CYAN_GLOW;
+            fo.effectDistance = new Vector2(3, 3);
 
-            Image frameImg = GetOrAdd<Image>(avatarFrame);
-            frameImg.color = CYAN_NEON;
+            // Avatar Image
+            var avImg = FindOrCreate(frame.transform, "AvatarImage");
+            var avImgRT = GetOrAdd<RectTransform>(avImg);
+            avImgRT.anchorMin = new Vector2(0.06f, 0.06f);
+            avImgRT.anchorMax = new Vector2(0.94f, 0.94f);
+            avImgRT.offsetMin = Vector2.zero;
+            avImgRT.offsetMax = Vector2.zero;
+            var avImgComp = GetOrAdd<Image>(avImg);
+            avImgComp.color = CARD_BG_LIGHT;
+            avImgComp.preserveAspect = true;
 
-            Outline frameOutline = GetOrAdd<Outline>(avatarFrame);
-            frameOutline.effectColor = CYAN_GLOW;
-            frameOutline.effectDistance = new Vector2(3, 3);
-
-            // Avatar Image (interior)
-            GameObject avatarImg = FindOrCreate(avatarFrame.transform, "AvatarImage");
-            RectTransform avImgRT = GetOrAdd<RectTransform>(avatarImg);
-            avImgRT.anchorMin = new Vector2(0.08f, 0.08f);
-            avImgRT.anchorMax = new Vector2(0.92f, 0.92f);
-            avImgRT.sizeDelta = Vector2.zero;
-
-            Image avImg = GetOrAdd<Image>(avatarImg);
-            avImg.color = CARD_BG_LIGHT;
-            avImg.preserveAspect = true;
+            // AvatarUI component
+            var avatarUI = GetOrAdd<DigitPark.UI.Components.AvatarUI>(avImg);
+            var avatarSO = new SerializedObject(avatarUI);
+            avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
+            avatarSO.FindProperty("isEditable").boolValue = false;
+            avatarSO.FindProperty("avatarImage").objectReferenceValue = avImgComp;
+            avatarSO.ApplyModifiedProperties();
 
             // Level Badge
-            GameObject levelBadge = FindOrCreate(avatarSection.transform, "LevelBadge");
-            RectTransform levelRT = GetOrAdd<RectTransform>(levelBadge);
-            levelRT.anchorMin = new Vector2(0.5f, 0.2f);
-            levelRT.anchorMax = new Vector2(0.5f, 0.2f);
-            levelRT.sizeDelta = new Vector2(60, 28);
+            var lvlBadge = FindOrCreate(avSec.transform, "LevelBadge");
+            var lvlRT = GetOrAdd<RectTransform>(lvlBadge);
+            lvlRT.anchorMin = new Vector2(0.5f, 0.15f);
+            lvlRT.anchorMax = new Vector2(0.5f, 0.15f);
+            lvlRT.sizeDelta = new Vector2(70, 28);
+            GetOrAdd<Image>(lvlBadge).color = CYAN_NEON;
 
-            Image levelBg = GetOrAdd<Image>(levelBadge);
-            levelBg.color = CYAN_NEON;
+            var lvlText = FindOrCreate(lvlBadge.transform, "Text");
+            var ltRT = GetOrAdd<RectTransform>(lvlText);
+            ltRT.anchorMin = Vector2.zero;
+            ltRT.anchorMax = Vector2.one;
+            ltRT.offsetMin = Vector2.zero;
+            ltRT.offsetMax = Vector2.zero;
+            var ltTMP = GetOrAdd<TextMeshProUGUI>(lvlText);
+            ltTMP.text = "Nv. 12";
+            ltTMP.fontSize = 16;
+            ltTMP.color = TEXT_DARK;
+            ltTMP.fontStyle = FontStyles.Bold;
+            ltTMP.alignment = TextAlignmentOptions.Center;
 
-            GameObject levelText = FindOrCreate(levelBadge.transform, "Text");
-            RectTransform lvlTxtRT = GetOrAdd<RectTransform>(levelText);
-            lvlTxtRT.anchorMin = Vector2.zero;
-            lvlTxtRT.anchorMax = Vector2.one;
-            lvlTxtRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI lvlTMP = GetOrAdd<TextMeshProUGUI>(levelText);
-            lvlTMP.text = "Nv. 12";
-            lvlTMP.fontSize = 16;
-            lvlTMP.color = TEXT_DARK;
-            lvlTMP.fontStyle = FontStyles.Bold;
-            lvlTMP.alignment = TextAlignmentOptions.Center;
-
-            // === Info Section (centro-derecha) ===
-            GameObject infoSection = FindOrCreate(card.transform, "InfoSection");
-            RectTransform infoRT = GetOrAdd<RectTransform>(infoSection);
-            infoRT.anchorMin = new Vector2(0, 0);
+            // === Info Section (right 70%) ===
+            var info = FindOrCreate(card.transform, "InfoSection");
+            var infoRT = GetOrAdd<RectTransform>(info);
+            infoRT.anchorMin = new Vector2(0.30f, 0);
             infoRT.anchorMax = new Vector2(1, 1);
-            infoRT.offsetMin = new Vector2(130, 15);
+            infoRT.offsetMin = new Vector2(10, 15);
             infoRT.offsetMax = new Vector2(-15, -15);
 
             // Username
-            GameObject username = FindOrCreate(infoSection.transform, "Username");
-            RectTransform userRT = GetOrAdd<RectTransform>(username);
-            userRT.anchorMin = new Vector2(0, 0.7f);
+            var user = FindOrCreate(info.transform, "Username");
+            var userRT = GetOrAdd<RectTransform>(user);
+            userRT.anchorMin = new Vector2(0, 0.72f);
             userRT.anchorMax = new Vector2(1, 1);
-            userRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI userTMP = GetOrAdd<TextMeshProUGUI>(username);
+            userRT.offsetMin = Vector2.zero;
+            userRT.offsetMax = Vector2.zero;
+            var userTMP = GetOrAdd<TextMeshProUGUI>(user);
             userTMP.text = "@Username";
             userTMP.fontSize = 28;
             userTMP.color = TEXT_WHITE;
@@ -417,78 +412,70 @@ namespace DigitPark.Editor
             userTMP.alignment = TextAlignmentOptions.Left;
 
             // Stats Row
-            GameObject statsRow = FindOrCreate(infoSection.transform, "StatsRow");
-            RectTransform statsRT = GetOrAdd<RectTransform>(statsRow);
-            statsRT.anchorMin = new Vector2(0, 0.35f);
-            statsRT.anchorMax = new Vector2(1, 0.65f);
-            statsRT.sizeDelta = Vector2.zero;
+            var stats = FindOrCreate(info.transform, "StatsRow");
+            var statsRT = GetOrAdd<RectTransform>(stats);
+            statsRT.anchorMin = new Vector2(0, 0.38f);
+            statsRT.anchorMax = new Vector2(1, 0.68f);
+            statsRT.offsetMin = Vector2.zero;
+            statsRT.offsetMax = Vector2.zero;
 
-            HorizontalLayoutGroup statsHLG = GetOrAdd<HorizontalLayoutGroup>(statsRow);
-            statsHLG.spacing = 25;
-            statsHLG.childAlignment = TextAnchor.MiddleLeft;
-            statsHLG.childControlWidth = false;
-            statsHLG.childControlHeight = true;
-            statsHLG.childForceExpandWidth = false;
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(stats);
+            hlg.spacing = 20;
+            hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
 
-            // Stat Items
-            CreateStatItem(statsRow.transform, "Trophies", "1,250", GOLD);
-            CreateStatItem(statsRow.transform, "Gems", "500", PURPLE_ACCENT);
-            CreateStatItem(statsRow.transform, "Coins", "2,400", CYAN_NEON);
+            // Recreate stat items
+            for (int i = stats.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(stats.transform.GetChild(i).gameObject);
+            CreateStatItem(stats.transform, "Trophies", "1,250", GOLD);
+            CreateStatItem(stats.transform, "Gems", "500", PURPLE_ACCENT);
+            CreateStatItem(stats.transform, "Coins", "2,400", CYAN_NEON);
 
-            // Win Rate / Streak
-            GameObject streakRow = FindOrCreate(infoSection.transform, "StreakRow");
-            RectTransform streakRT = GetOrAdd<RectTransform>(streakRow);
-            streakRT.anchorMin = new Vector2(0, 0);
-            streakRT.anchorMax = new Vector2(1, 0.3f);
-            streakRT.sizeDelta = Vector2.zero;
+            // Streak
+            var streak = FindOrCreate(info.transform, "StreakRow");
+            var stRT = GetOrAdd<RectTransform>(streak);
+            stRT.anchorMin = new Vector2(0, 0.05f);
+            stRT.anchorMax = new Vector2(1, 0.35f);
+            stRT.offsetMin = Vector2.zero;
+            stRT.offsetMax = Vector2.zero;
+            var stTMP = GetOrAdd<TextMeshProUGUI>(streak);
+            stTMP.text = "Racha: 5 victorias";
+            stTMP.fontSize = 16;
+            stTMP.color = GREEN_SUCCESS;
+            stTMP.alignment = TextAlignmentOptions.Left;
 
-            TextMeshProUGUI streakTMP = GetOrAdd<TextMeshProUGUI>(streakRow);
-            streakTMP.text = "Racha: 5 victorias";
-            streakTMP.fontSize = 16;
-            streakTMP.color = GREEN_SUCCESS;
-            streakTMP.fontStyle = FontStyles.Normal;
-            streakTMP.alignment = TextAlignmentOptions.Left;
-
-            Debug.Log("[MainMenuUI] Player Card creado");
+            Debug.Log("[MainMenuUI] Profile Card creado");
         }
 
         private static void CreateStatItem(Transform parent, string name, string value, Color color)
         {
-            GameObject stat = new GameObject(name);
+            var stat = new GameObject(name);
             stat.transform.SetParent(parent, false);
+            stat.AddComponent<RectTransform>().sizeDelta = new Vector2(80, 50);
+            stat.AddComponent<LayoutElement>().preferredWidth = 80;
 
-            RectTransform rt = stat.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(75, 40);
-
-            LayoutElement le = stat.AddComponent<LayoutElement>();
-            le.preferredWidth = 75;
-
-            VerticalLayoutGroup vlg = stat.AddComponent<VerticalLayoutGroup>();
+            var vlg = stat.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 2;
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            // Icon placeholder
-            GameObject icon = new GameObject("Icon");
+            var icon = new GameObject("Icon");
             icon.transform.SetParent(stat.transform, false);
-            RectTransform iconRT = icon.AddComponent<RectTransform>();
-            iconRT.sizeDelta = new Vector2(24, 24);
-            LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.preferredHeight = 24;
-
-            Image iconImg = icon.AddComponent<Image>();
+            icon.AddComponent<RectTransform>();
+            icon.AddComponent<LayoutElement>().preferredHeight = 26;
+            var iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
             iconImg.preserveAspect = true;
 
-            // Value
-            GameObject valueObj = new GameObject("Value");
-            valueObj.transform.SetParent(stat.transform, false);
-            LayoutElement valLE = valueObj.AddComponent<LayoutElement>();
-            valLE.preferredHeight = 20;
-
-            TextMeshProUGUI valTMP = valueObj.AddComponent<TextMeshProUGUI>();
+            var val = new GameObject("Value");
+            val.transform.SetParent(stat.transform, false);
+            val.AddComponent<RectTransform>();
+            val.AddComponent<LayoutElement>().preferredHeight = 20;
+            var valTMP = val.AddComponent<TextMeshProUGUI>();
             valTMP.text = value;
             valTMP.fontSize = 16;
             valTMP.color = color;
@@ -498,484 +485,536 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Quick Actions
+        #region Daily Reward
 
-        private static void CreateQuickActions()
+        private static void CreateDailyReward()
         {
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject panel = FindOrCreate(canvas.transform, "QuickActionsPanel");
+            var card = FindOrCreate(canvas.transform, "DailyRewardCard");
+            var rt = GetOrAdd<RectTransform>(card);
+            SetAnchorsWithPad(rt, DAILY_BOT, DAILY_TOP);
 
-            float topOffset = HEADER_HEIGHT + PLAYER_CARD_HEIGHT + SECTION_SPACING * 2 + 15;
+            var bg = GetOrAdd<Image>(card);
+            bg.color = new Color(0.12f, 0.06f, 0.20f, 1f);
+            GetOrAdd<Button>(card).targetGraphic = bg;
 
-            RectTransform rt = GetOrAdd<RectTransform>(panel);
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = new Vector2(0, -topOffset);
-            rt.sizeDelta = new Vector2(-40, QUICK_ACTION_HEIGHT);
+            var outline = GetOrAdd<Outline>(card);
+            outline.effectColor = PURPLE_ACCENT;
+            outline.effectDistance = new Vector2(2, 2);
 
-            HorizontalLayoutGroup hlg = GetOrAdd<HorizontalLayoutGroup>(panel);
-            hlg.spacing = 15;
+            // Gift Icon
+            var icon = FindOrCreate(card.transform, "GiftIcon");
+            var iconRT = GetOrAdd<RectTransform>(icon);
+            iconRT.anchorMin = new Vector2(0, 0.5f);
+            iconRT.anchorMax = new Vector2(0, 0.5f);
+            iconRT.pivot = new Vector2(0, 0.5f);
+            iconRT.anchoredPosition = new Vector2(20, 0);
+            iconRT.sizeDelta = new Vector2(60, 60);
+            var iconImg = GetOrAdd<Image>(icon);
+            iconImg.color = GOLD;
+            iconImg.preserveAspect = true;
+
+            // Text Container
+            var textC = FindOrCreate(card.transform, "TextContainer");
+            var tcRT = GetOrAdd<RectTransform>(textC);
+            tcRT.anchorMin = new Vector2(0, 0);
+            tcRT.anchorMax = new Vector2(0.65f, 1);
+            tcRT.offsetMin = new Vector2(90, 15);
+            tcRT.offsetMax = new Vector2(0, -15);
+
+            var title = FindOrCreate(textC.transform, "Title");
+            var tRT = GetOrAdd<RectTransform>(title);
+            tRT.anchorMin = new Vector2(0, 0.55f);
+            tRT.anchorMax = new Vector2(1, 1);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
+            tTMP.text = "RECOMPENSA DIARIA";
+            tTMP.fontSize = 18;
+            tTMP.color = GOLD;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.alignment = TextAlignmentOptions.Left;
+
+            var sub = FindOrCreate(textC.transform, "Subtitle");
+            var sRT = GetOrAdd<RectTransform>(sub);
+            sRT.anchorMin = new Vector2(0, 0);
+            sRT.anchorMax = new Vector2(1, 0.5f);
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = Vector2.zero;
+            var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
+            sTMP.text = "Dia 3 de 7 - Reclama tu premio!";
+            sTMP.fontSize = 14;
+            sTMP.color = TEXT_SECONDARY;
+            sTMP.alignment = TextAlignmentOptions.Left;
+
+            // Claim Button
+            var claimBtn = FindOrCreate(card.transform, "ClaimButton");
+            var cRT = GetOrAdd<RectTransform>(claimBtn);
+            cRT.anchorMin = new Vector2(1, 0.5f);
+            cRT.anchorMax = new Vector2(1, 0.5f);
+            cRT.pivot = new Vector2(1, 0.5f);
+            cRT.anchoredPosition = new Vector2(-15, 0);
+            cRT.sizeDelta = new Vector2(100, 42);
+            var cBg = GetOrAdd<Image>(claimBtn);
+            cBg.color = GREEN_SUCCESS;
+            GetOrAdd<Button>(claimBtn).targetGraphic = cBg;
+
+            var cText = FindOrCreate(claimBtn.transform, "Text");
+            var ctRT = GetOrAdd<RectTransform>(cText);
+            ctRT.anchorMin = Vector2.zero;
+            ctRT.anchorMax = Vector2.one;
+            ctRT.offsetMin = Vector2.zero;
+            ctRT.offsetMax = Vector2.zero;
+            var ctTMP = GetOrAdd<TextMeshProUGUI>(cText);
+            ctTMP.text = "Reclamar";
+            ctTMP.fontSize = 15;
+            ctTMP.color = TEXT_DARK;
+            ctTMP.fontStyle = FontStyles.Bold;
+            ctTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[MainMenuUI] Daily Reward creado");
+        }
+
+        #endregion
+
+        #region Quick Access
+
+        private static void CreateQuickAccess()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var panel = FindOrCreate(canvas.transform, "QuickActionsPanel");
+            var rt = GetOrAdd<RectTransform>(panel);
+            SetAnchorsWithPad(rt, QUICK_BOT, QUICK_TOP);
+
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(panel);
+            hlg.spacing = 12;
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = true;
             hlg.childForceExpandHeight = true;
 
-            // Quick Action Cards
-            CreateQuickActionCard(panel.transform, "RankingsCard", "Rankings", "trophy", GOLD);
-            CreateQuickActionCard(panel.transform, "SearchCard", "Buscar", "search", CYAN_NEON);
-            CreateQuickActionCard(panel.transform, "MissionsCard", "Misiones", "target", GREEN_SUCCESS);
+            for (int i = panel.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(panel.transform.GetChild(i).gameObject);
 
-            Debug.Log("[MainMenuUI] Quick Actions creado");
+            CreateQuickCard(panel.transform, "RankingsCard", "Rankings", GOLD);
+            CreateQuickCard(panel.transform, "SearchCard", "Buscar", CYAN_NEON);
+            CreateQuickCard(panel.transform, "MissionsCard", "Misiones", GREEN_SUCCESS);
+
+            Debug.Log("[MainMenuUI] Quick Access creado");
         }
 
-        private static void CreateQuickActionCard(Transform parent, string name, string label, string iconType, Color accentColor)
+        private static void CreateQuickCard(Transform parent, string name, string label, Color accent)
         {
-            GameObject card = new GameObject(name);
+            var card = new GameObject(name);
             card.transform.SetParent(parent, false);
 
-            Image bg = card.AddComponent<Image>();
+            var bg = card.AddComponent<Image>();
             bg.color = CARD_BG;
-
-            Button btn = card.AddComponent<Button>();
+            var btn = card.AddComponent<Button>();
             btn.targetGraphic = bg;
 
-            Outline outline = card.AddComponent<Outline>();
-            outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.5f);
+            var outline = card.AddComponent<Outline>();
+            outline.effectColor = new Color(accent.r, accent.g, accent.b, 0.4f);
             outline.effectDistance = new Vector2(1.5f, 1.5f);
 
-            // Layout
-            VerticalLayoutGroup vlg = card.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 5;
-            vlg.padding = new RectOffset(10, 10, 12, 8);
+            var vlg = card.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 4;
+            vlg.padding = new RectOffset(8, 8, 10, 6);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
             vlg.childForceExpandWidth = true;
 
-            // Icon
-            GameObject icon = new GameObject("Icon");
+            var icon = new GameObject("Icon");
             icon.transform.SetParent(card.transform, false);
-            LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.preferredHeight = 35;
-
-            Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = accentColor;
+            icon.AddComponent<RectTransform>();
+            icon.AddComponent<LayoutElement>().preferredHeight = 36;
+            var iconImg = icon.AddComponent<Image>();
+            iconImg.color = accent;
             iconImg.preserveAspect = true;
 
-            // Label
-            GameObject labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(card.transform, false);
-            LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
-            labelLE.preferredHeight = 22;
-
-            TextMeshProUGUI labelTMP = labelObj.AddComponent<TextMeshProUGUI>();
-            labelTMP.text = label;
-            labelTMP.fontSize = 16;
-            labelTMP.color = TEXT_WHITE;
-            labelTMP.fontStyle = FontStyles.Bold;
-            labelTMP.alignment = TextAlignmentOptions.Center;
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(card.transform, false);
+            labelGO.AddComponent<RectTransform>();
+            labelGO.AddComponent<LayoutElement>().preferredHeight = 22;
+            var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
+            lTMP.text = label;
+            lTMP.fontSize = 15;
+            lTMP.color = TEXT_WHITE;
+            lTMP.fontStyle = FontStyles.Bold;
+            lTMP.alignment = TextAlignmentOptions.Center;
         }
 
         #endregion
 
-        #region Main Cards
+        #region Play Card (JUGAR - Cyan)
 
-        private static void CreateMainCards()
+        private static void CreatePlayCard()
         {
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject panel = FindOrCreate(canvas.transform, "MainCardsPanel");
+            var card = FindOrCreate(canvas.transform, "PlayCard");
+            var rt = GetOrAdd<RectTransform>(card);
+            SetAnchorsWithPad(rt, PLAY_BOT, PLAY_TOP);
 
-            float topOffset = HEADER_HEIGHT + PLAYER_CARD_HEIGHT + QUICK_ACTION_HEIGHT + SECTION_SPACING * 3 + 20;
-
-            RectTransform rt = GetOrAdd<RectTransform>(panel);
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = new Vector2(0, -topOffset);
-            rt.sizeDelta = new Vector2(-40, MAIN_CARD_HEIGHT * 2 + 15);
-
-            VerticalLayoutGroup vlg = GetOrAdd<VerticalLayoutGroup>(panel);
-            vlg.spacing = 15;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = true;
-
-            // === JUGAR Card (Cyan) ===
-            CreateMainCard(panel.transform, "PlayCard", "JUGAR",
-                "Elige un juego y compite", CYAN_NEON, CYAN_GLOW, TEXT_DARK, true);
-
-            // === CASH BATTLE Card (Gold - Premium) ===
-            CreateMainCard(panel.transform, "CashBattleCard", "CASH BATTLE",
-                "Compite por dinero real", GOLD, GOLD_GLOW, TEXT_DARK, false);
-
-            Debug.Log("[MainMenuUI] Main Cards creados");
-        }
-
-        private static void CreateMainCard(Transform parent, string name, string title, string subtitle,
-            Color bgColor, Color glowColor, Color textColor, bool isCyan)
-        {
-            GameObject card = new GameObject(name);
-            card.transform.SetParent(parent, false);
-
-            LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = MAIN_CARD_HEIGHT;
-            le.minHeight = MAIN_CARD_HEIGHT;
-
-            Image bg = card.AddComponent<Image>();
-            bg.color = bgColor;
-
-            Button btn = card.AddComponent<Button>();
+            var bg = GetOrAdd<Image>(card);
+            bg.color = CYAN_NEON;
+            var btn = GetOrAdd<Button>(card);
             btn.targetGraphic = bg;
-
-            ColorBlock colors = btn.colors;
-            colors.highlightedColor = new Color(bgColor.r * 0.9f, bgColor.g * 0.9f, bgColor.b * 0.9f, 1f);
-            colors.pressedColor = new Color(bgColor.r * 0.75f, bgColor.g * 0.75f, bgColor.b * 0.75f, 1f);
+            var colors = btn.colors;
+            colors.highlightedColor = new Color(0, 0.9f, 0.9f, 1);
+            colors.pressedColor = new Color(0, 0.7f, 0.7f, 1);
             btn.colors = colors;
 
-            // Glow effect
-            Outline outline = card.AddComponent<Outline>();
-            outline.effectColor = glowColor;
+            var outline = GetOrAdd<Outline>(card);
+            outline.effectColor = CYAN_GLOW;
             outline.effectDistance = new Vector2(4, 4);
-
-            Shadow shadow = card.AddComponent<Shadow>();
-            shadow.effectColor = new Color(glowColor.r * 0.5f, glowColor.g * 0.5f, glowColor.b * 0.5f, 0.5f);
+            var shadow = GetOrAdd<Shadow>(card);
+            shadow.effectColor = new Color(0, 0.5f, 0.5f, 0.5f);
             shadow.effectDistance = new Vector2(3, -3);
 
-            // Icon (izquierda)
-            GameObject icon = FindOrCreate(card.transform, "Icon");
-            RectTransform iconRT = GetOrAdd<RectTransform>(icon);
+            // Icon
+            var icon = FindOrCreate(card.transform, "Icon");
+            var iconRT = GetOrAdd<RectTransform>(icon);
             iconRT.anchorMin = new Vector2(0, 0.5f);
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
             iconRT.anchoredPosition = new Vector2(25, 0);
-            iconRT.sizeDelta = new Vector2(60, 60);
-
-            Image iconImg = GetOrAdd<Image>(icon);
-            iconImg.color = textColor;
+            iconRT.sizeDelta = new Vector2(70, 70);
+            var iconImg = GetOrAdd<Image>(icon);
+            iconImg.color = Color.white;
             iconImg.preserveAspect = true;
 
             // Text Container
-            GameObject textContainer = FindOrCreate(card.transform, "TextContainer");
-            RectTransform textRT = GetOrAdd<RectTransform>(textContainer);
-            textRT.anchorMin = new Vector2(0, 0);
-            textRT.anchorMax = new Vector2(1, 1);
-            textRT.offsetMin = new Vector2(100, 20);
-            textRT.offsetMax = new Vector2(-20, -20);
+            var textC = FindOrCreate(card.transform, "TextContainer");
+            var tcRT = GetOrAdd<RectTransform>(textC);
+            tcRT.anchorMin = new Vector2(0, 0);
+            tcRT.anchorMax = new Vector2(1, 1);
+            tcRT.offsetMin = new Vector2(110, 25);
+            tcRT.offsetMax = new Vector2(-60, -25);
 
-            // Title
-            GameObject titleObj = FindOrCreate(textContainer.transform, "Title");
-            RectTransform titleRT = GetOrAdd<RectTransform>(titleObj);
-            titleRT.anchorMin = new Vector2(0, 0.5f);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.sizeDelta = Vector2.zero;
+            var title = FindOrCreate(textC.transform, "Title");
+            var tRT = GetOrAdd<RectTransform>(title);
+            tRT.anchorMin = new Vector2(0, 0.5f);
+            tRT.anchorMax = new Vector2(1, 1);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
+            tTMP.text = "JUGAR";
+            tTMP.fontSize = 38;
+            tTMP.color = TEXT_DARK;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.alignment = TextAlignmentOptions.Left;
 
-            TextMeshProUGUI titleTMP = GetOrAdd<TextMeshProUGUI>(titleObj);
-            titleTMP.text = title;
-            titleTMP.fontSize = 36;
-            titleTMP.color = textColor;
-            titleTMP.fontStyle = FontStyles.Bold;
-            titleTMP.alignment = TextAlignmentOptions.Left;
+            var sub = FindOrCreate(textC.transform, "Subtitle");
+            var sRT = GetOrAdd<RectTransform>(sub);
+            sRT.anchorMin = new Vector2(0, 0);
+            sRT.anchorMax = new Vector2(1, 0.45f);
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = Vector2.zero;
+            var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
+            sTMP.text = "Elige un juego y compite";
+            sTMP.fontSize = 16;
+            sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+            sTMP.alignment = TextAlignmentOptions.Left;
 
-            // Subtitle
-            GameObject subObj = FindOrCreate(textContainer.transform, "Subtitle");
-            RectTransform subRT = GetOrAdd<RectTransform>(subObj);
-            subRT.anchorMin = new Vector2(0, 0);
-            subRT.anchorMax = new Vector2(1, 0.45f);
-            subRT.sizeDelta = Vector2.zero;
+            // Arrow
+            var arrow = FindOrCreate(card.transform, "Arrow");
+            var aRT = GetOrAdd<RectTransform>(arrow);
+            aRT.anchorMin = new Vector2(1, 0.5f);
+            aRT.anchorMax = new Vector2(1, 0.5f);
+            aRT.pivot = new Vector2(1, 0.5f);
+            aRT.anchoredPosition = new Vector2(-20, 0);
+            aRT.sizeDelta = new Vector2(30, 30);
+            var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
+            aTMP.text = "\u203A";
+            aTMP.fontSize = 40;
+            aTMP.color = TEXT_DARK;
+            aTMP.fontStyle = FontStyles.Bold;
+            aTMP.alignment = TextAlignmentOptions.Center;
 
-            TextMeshProUGUI subTMP = GetOrAdd<TextMeshProUGUI>(subObj);
-            subTMP.text = subtitle;
-            subTMP.fontSize = 16;
-            subTMP.color = new Color(textColor.r, textColor.g, textColor.b, 0.8f);
-            subTMP.alignment = TextAlignmentOptions.Left;
-
-            // Arrow indicator (derecha)
-            GameObject arrow = FindOrCreate(card.transform, "Arrow");
-            RectTransform arrowRT = GetOrAdd<RectTransform>(arrow);
-            arrowRT.anchorMin = new Vector2(1, 0.5f);
-            arrowRT.anchorMax = new Vector2(1, 0.5f);
-            arrowRT.pivot = new Vector2(1, 0.5f);
-            arrowRT.anchoredPosition = new Vector2(-20, 0);
-            arrowRT.sizeDelta = new Vector2(30, 30);
-
-            TextMeshProUGUI arrowTMP = GetOrAdd<TextMeshProUGUI>(arrow);
-            arrowTMP.text = ">";
-            arrowTMP.fontSize = 32;
-            arrowTMP.color = textColor;
-            arrowTMP.fontStyle = FontStyles.Bold;
-            arrowTMP.alignment = TextAlignmentOptions.Center;
+            Debug.Log("[MainMenuUI] Play Card creado");
         }
 
         #endregion
 
-        #region Daily Rewards
+        #region Cash Battle Card (DORADO - Card Principal)
 
-        private static void CreateDailyRewards()
+        private static void CreateCashBattleCard()
         {
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject card = FindOrCreate(canvas.transform, "DailyRewardsCard");
+            var card = FindOrCreate(canvas.transform, "CashBattleCard");
+            var rt = GetOrAdd<RectTransform>(card);
+            SetAnchorsWithPad(rt, CASH_BOT, CASH_TOP);
 
-            RectTransform rt = GetOrAdd<RectTransform>(card);
-            rt.anchorMin = new Vector2(0, 0);
-            rt.anchorMax = new Vector2(1, 0);
-            rt.pivot = new Vector2(0.5f, 0);
-            rt.anchoredPosition = new Vector2(0, 25);
-            rt.sizeDelta = new Vector2(-40, DAILY_REWARDS_HEIGHT);
+            // ===== FONDO DORADO =====
+            var bg = GetOrAdd<Image>(card);
+            bg.color = GOLD;
 
-            // Background with gradient effect
-            Image bg = GetOrAdd<Image>(card);
-            bg.color = new Color(0.15f, 0.08f, 0.25f, 1f); // Purple-ish dark
-
-            Button btn = GetOrAdd<Button>(card);
+            var btn = GetOrAdd<Button>(card);
             btn.targetGraphic = bg;
+            var colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1, 0.95f, 0.85f, 1);
+            colors.pressedColor = new Color(0.9f, 0.8f, 0.6f, 1);
+            btn.colors = colors;
 
-            // Colorful border
-            Outline outline = GetOrAdd<Outline>(card);
-            outline.effectColor = PURPLE_ACCENT;
-            outline.effectDistance = new Vector2(2, 2);
+            // Doble glow dorado
+            var outline = GetOrAdd<Outline>(card);
+            outline.effectColor = GOLD_GLOW;
+            outline.effectDistance = new Vector2(5, 5);
 
-            // Gift Icon (izquierda)
-            GameObject icon = FindOrCreate(card.transform, "GiftIcon");
-            RectTransform iconRT = GetOrAdd<RectTransform>(icon);
+            var shadow = GetOrAdd<Shadow>(card);
+            shadow.effectColor = new Color(1f, 0.6f, 0f, 0.6f);
+            shadow.effectDistance = new Vector2(4, -4);
+
+            // Inner glow
+            var glow = FindOrCreate(card.transform, "InnerGlow");
+            var glowRT = GetOrAdd<RectTransform>(glow);
+            glowRT.anchorMin = Vector2.zero;
+            glowRT.anchorMax = Vector2.one;
+            glowRT.offsetMin = new Vector2(3, 3);
+            glowRT.offsetMax = new Vector2(-3, -3);
+            var glowImg = GetOrAdd<Image>(glow);
+            glowImg.color = new Color(1, 0.9f, 0.6f, 0.3f);
+            glowImg.raycastTarget = false;
+
+            // $$$ Badge (top-right)
+            var cashBadge = FindOrCreate(card.transform, "CashBadge");
+            var cbRT = GetOrAdd<RectTransform>(cashBadge);
+            cbRT.anchorMin = new Vector2(1, 1);
+            cbRT.anchorMax = new Vector2(1, 1);
+            cbRT.pivot = new Vector2(1, 1);
+            cbRT.anchoredPosition = new Vector2(-12, -12);
+            cbRT.sizeDelta = new Vector2(55, 30);
+            var cbBg = GetOrAdd<Image>(cashBadge);
+            cbBg.color = GOLD_DARK;
+            cbBg.raycastTarget = false;
+
+            var cbText = FindOrCreate(cashBadge.transform, "Text");
+            var cbtRT = GetOrAdd<RectTransform>(cbText);
+            cbtRT.anchorMin = Vector2.zero;
+            cbtRT.anchorMax = Vector2.one;
+            cbtRT.offsetMin = Vector2.zero;
+            cbtRT.offsetMax = Vector2.zero;
+            var cbtTMP = GetOrAdd<TextMeshProUGUI>(cbText);
+            cbtTMP.text = "$$$";
+            cbtTMP.fontSize = 16;
+            cbtTMP.color = TEXT_WHITE;
+            cbtTMP.fontStyle = FontStyles.Bold;
+            cbtTMP.alignment = TextAlignmentOptions.Center;
+
+            // Icon (left, bigger than JUGAR)
+            var icon = FindOrCreate(card.transform, "Icon");
+            var iconRT = GetOrAdd<RectTransform>(icon);
             iconRT.anchorMin = new Vector2(0, 0.5f);
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
-            iconRT.anchoredPosition = new Vector2(20, 0);
-            iconRT.sizeDelta = new Vector2(70, 70);
-
-            Image iconImg = GetOrAdd<Image>(icon);
-            iconImg.color = GOLD;
+            iconRT.anchoredPosition = new Vector2(25, 0);
+            iconRT.sizeDelta = new Vector2(80, 80);
+            var iconImg = GetOrAdd<Image>(icon);
+            iconImg.color = Color.white;
             iconImg.preserveAspect = true;
 
             // Text Container
-            GameObject textContainer = FindOrCreate(card.transform, "TextContainer");
-            RectTransform textRT = GetOrAdd<RectTransform>(textContainer);
-            textRT.anchorMin = new Vector2(0, 0);
-            textRT.anchorMax = new Vector2(0.65f, 1);
-            textRT.offsetMin = new Vector2(100, 20);
-            textRT.offsetMax = new Vector2(0, -20);
+            var textC = FindOrCreate(card.transform, "TextContainer");
+            var tcRT = GetOrAdd<RectTransform>(textC);
+            tcRT.anchorMin = new Vector2(0, 0);
+            tcRT.anchorMax = new Vector2(1, 1);
+            tcRT.offsetMin = new Vector2(120, 20);
+            tcRT.offsetMax = new Vector2(-60, -20);
 
             // Title
-            GameObject title = FindOrCreate(textContainer.transform, "Title");
-            RectTransform titleRT = GetOrAdd<RectTransform>(title);
-            titleRT.anchorMin = new Vector2(0, 0.55f);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.sizeDelta = Vector2.zero;
+            var title = FindOrCreate(textC.transform, "Title");
+            var tRT = GetOrAdd<RectTransform>(title);
+            tRT.anchorMin = new Vector2(0, 0.50f);
+            tRT.anchorMax = new Vector2(1, 1);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
+            tTMP.text = "CASH BATTLE";
+            tTMP.fontSize = 40;
+            tTMP.color = TEXT_DARK;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.alignment = TextAlignmentOptions.Left;
 
-            TextMeshProUGUI titleTMP = GetOrAdd<TextMeshProUGUI>(title);
-            titleTMP.text = "RECOMPENSA DIARIA";
-            titleTMP.fontSize = 20;
-            titleTMP.color = GOLD;
-            titleTMP.fontStyle = FontStyles.Bold;
-            titleTMP.alignment = TextAlignmentOptions.Left;
+            // Subtitle
+            var sub = FindOrCreate(textC.transform, "Subtitle");
+            var sRT = GetOrAdd<RectTransform>(sub);
+            sRT.anchorMin = new Vector2(0, 0.18f);
+            sRT.anchorMax = new Vector2(1, 0.45f);
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = Vector2.zero;
+            var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
+            sTMP.text = "Compite por dinero real";
+            sTMP.fontSize = 17;
+            sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+            sTMP.alignment = TextAlignmentOptions.Left;
 
-            // Subtitle (day info)
-            GameObject sub = FindOrCreate(textContainer.transform, "Subtitle");
-            RectTransform subRT = GetOrAdd<RectTransform>(sub);
-            subRT.anchorMin = new Vector2(0, 0);
-            subRT.anchorMax = new Vector2(1, 0.5f);
-            subRT.sizeDelta = Vector2.zero;
+            // 18+ badge
+            var age = FindOrCreate(textC.transform, "AgeBadge");
+            var ageRT = GetOrAdd<RectTransform>(age);
+            ageRT.anchorMin = new Vector2(0, 0);
+            ageRT.anchorMax = new Vector2(0.15f, 0.18f);
+            ageRT.offsetMin = Vector2.zero;
+            ageRT.offsetMax = Vector2.zero;
+            var ageTMP = GetOrAdd<TextMeshProUGUI>(age);
+            ageTMP.text = "18+";
+            ageTMP.fontSize = 12;
+            ageTMP.color = new Color(0.3f, 0.2f, 0f, 0.7f);
+            ageTMP.fontStyle = FontStyles.Bold;
+            ageTMP.alignment = TextAlignmentOptions.Left;
 
-            TextMeshProUGUI subTMP = GetOrAdd<TextMeshProUGUI>(sub);
-            subTMP.text = "Dia 3 de 7 - Reclama tu premio!";
-            subTMP.fontSize = 15;
-            subTMP.color = TEXT_SECONDARY;
-            subTMP.alignment = TextAlignmentOptions.Left;
+            // Arrow
+            var arrow = FindOrCreate(card.transform, "Arrow");
+            var aRT = GetOrAdd<RectTransform>(arrow);
+            aRT.anchorMin = new Vector2(1, 0.5f);
+            aRT.anchorMax = new Vector2(1, 0.5f);
+            aRT.pivot = new Vector2(1, 0.5f);
+            aRT.anchoredPosition = new Vector2(-20, 0);
+            aRT.sizeDelta = new Vector2(30, 30);
+            var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
+            aTMP.text = "\u203A";
+            aTMP.fontSize = 42;
+            aTMP.color = TEXT_DARK;
+            aTMP.fontStyle = FontStyles.Bold;
+            aTMP.alignment = TextAlignmentOptions.Center;
 
-            // Claim Button (derecha)
-            GameObject claimBtn = FindOrCreate(card.transform, "ClaimButton");
-            RectTransform claimRT = GetOrAdd<RectTransform>(claimBtn);
-            claimRT.anchorMin = new Vector2(1, 0.5f);
-            claimRT.anchorMax = new Vector2(1, 0.5f);
-            claimRT.pivot = new Vector2(1, 0.5f);
-            claimRT.anchoredPosition = new Vector2(-20, 0);
-            claimRT.sizeDelta = new Vector2(100, 50);
-
-            Image claimBg = GetOrAdd<Image>(claimBtn);
-            claimBg.color = GREEN_SUCCESS;
-
-            Button claimButton = GetOrAdd<Button>(claimBtn);
-            claimButton.targetGraphic = claimBg;
-
-            GameObject claimText = FindOrCreate(claimBtn.transform, "Text");
-            RectTransform claimTextRT = GetOrAdd<RectTransform>(claimText);
-            claimTextRT.anchorMin = Vector2.zero;
-            claimTextRT.anchorMax = Vector2.one;
-            claimTextRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI claimTMP = GetOrAdd<TextMeshProUGUI>(claimText);
-            claimTMP.text = "Reclamar";
-            claimTMP.fontSize = 16;
-            claimTMP.color = TEXT_DARK;
-            claimTMP.fontStyle = FontStyles.Bold;
-            claimTMP.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[MainMenuUI] Daily Rewards creado");
+            Debug.Log("[MainMenuUI] Cash Battle Card DORADO creado");
         }
 
         #endregion
 
-        #region Panels (Premium + Notifications)
+        #region Extra Row
+
+        private static void CreateExtraRow()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var panel = FindOrCreate(canvas.transform, "ExtraRow");
+            var rt = GetOrAdd<RectTransform>(panel);
+            SetAnchorsWithPad(rt, EXTRA_BOT, EXTRA_TOP);
+
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(panel);
+            hlg.spacing = 12;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+
+            for (int i = panel.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(panel.transform.GetChild(i).gameObject);
+
+            CreateExtraCard(panel.transform, "AchievementsCard", "Logros", ORANGE_ACCENT);
+            CreateExtraCard(panel.transform, "ShopCard", "Tienda", CYAN_NEON);
+            CreateExtraCard(panel.transform, "PremiumCard", "Premium", GOLD);
+
+            Debug.Log("[MainMenuUI] Extra Row creado");
+        }
+
+        private static void CreateExtraCard(Transform parent, string name, string label, Color accent)
+        {
+            var card = new GameObject(name);
+            card.transform.SetParent(parent, false);
+
+            var bg = card.AddComponent<Image>();
+            bg.color = CARD_BG;
+            card.AddComponent<Button>().targetGraphic = bg;
+
+            var outline = card.AddComponent<Outline>();
+            outline.effectColor = new Color(accent.r, accent.g, accent.b, 0.5f);
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            var vlg = card.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(10, 10, 15, 10);
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+
+            var icon = new GameObject("Icon");
+            icon.transform.SetParent(card.transform, false);
+            icon.AddComponent<RectTransform>();
+            icon.AddComponent<LayoutElement>().preferredHeight = 50;
+            var iconImg = icon.AddComponent<Image>();
+            iconImg.color = Color.white;
+            iconImg.preserveAspect = true;
+
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(card.transform, false);
+            labelGO.AddComponent<RectTransform>();
+            labelGO.AddComponent<LayoutElement>().preferredHeight = 24;
+            var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
+            lTMP.text = label;
+            lTMP.fontSize = 16;
+            lTMP.color = TEXT_WHITE;
+            lTMP.fontStyle = FontStyles.Bold;
+            lTMP.alignment = TextAlignmentOptions.Center;
+        }
+
+        #endregion
+
+        #region Panels (Premium + Notifications overlay)
 
         private static void CreatePanels()
         {
-            CreatePremiumPanel();
-            CreateNotificationsPanel();
+            CreateOverlayPanel("PremiumPanel", GOLD);
+            CreateOverlayPanel("NotificationsPanel", CYAN_DARK);
         }
 
-        private static void CreatePremiumPanel()
+        private static void CreateOverlayPanel(string name, Color borderColor)
         {
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            GameObject panel = FindOrCreate(canvas.transform, "PremiumPanel");
+            var panel = FindOrCreate(canvas.transform, name);
             panel.SetActive(false);
-
-            RectTransform rt = GetOrAdd<RectTransform>(panel);
+            var rt = GetOrAdd<RectTransform>(panel);
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
 
-            // Overlay
-            GameObject overlay = FindOrCreate(panel.transform, "Overlay");
-            RectTransform ovRT = GetOrAdd<RectTransform>(overlay);
+            var overlay = FindOrCreate(panel.transform, "Overlay");
+            var ovRT = GetOrAdd<RectTransform>(overlay);
             ovRT.anchorMin = Vector2.zero;
             ovRT.anchorMax = Vector2.one;
-            ovRT.sizeDelta = Vector2.zero;
-
-            Image ovImg = GetOrAdd<Image>(overlay);
+            ovRT.offsetMin = Vector2.zero;
+            ovRT.offsetMax = Vector2.zero;
+            var ovImg = GetOrAdd<Image>(overlay);
             ovImg.color = new Color(0, 0, 0, 0.85f);
+            GetOrAdd<Button>(overlay).targetGraphic = ovImg;
 
-            Button ovBtn = GetOrAdd<Button>(overlay);
-            ovBtn.targetGraphic = ovImg;
-
-            // Container
-            GameObject container = FindOrCreate(panel.transform, "Container");
-            RectTransform contRT = GetOrAdd<RectTransform>(container);
-            contRT.anchorMin = new Vector2(0.05f, 0.1f);
-            contRT.anchorMax = new Vector2(0.95f, 0.9f);
-            contRT.sizeDelta = Vector2.zero;
-
-            Image contBg = GetOrAdd<Image>(container);
-            contBg.color = CARD_BG;
-
-            Outline contOutline = GetOrAdd<Outline>(container);
-            contOutline.effectColor = GOLD;
-            contOutline.effectDistance = new Vector2(2, 2);
-
-            Debug.Log("[MainMenuUI] Premium Panel creado");
-        }
-
-        private static void CreateNotificationsPanel()
-        {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-            if (canvas == null) return;
-
-            GameObject panel = FindOrCreate(canvas.transform, "NotificationsPanel");
-            panel.SetActive(false);
-
-            RectTransform rt = GetOrAdd<RectTransform>(panel);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-
-            // Overlay
-            GameObject overlay = FindOrCreate(panel.transform, "Overlay");
-            RectTransform ovRT = GetOrAdd<RectTransform>(overlay);
-            ovRT.anchorMin = Vector2.zero;
-            ovRT.anchorMax = Vector2.one;
-            ovRT.sizeDelta = Vector2.zero;
-
-            Image ovImg = GetOrAdd<Image>(overlay);
-            ovImg.color = new Color(0, 0, 0, 0.85f);
-
-            Button ovBtn = GetOrAdd<Button>(overlay);
-            ovBtn.targetGraphic = ovImg;
-
-            // Container
-            GameObject container = FindOrCreate(panel.transform, "Container");
-            RectTransform contRT = GetOrAdd<RectTransform>(container);
-            contRT.anchorMin = new Vector2(0.05f, 0.15f);
-            contRT.anchorMax = new Vector2(0.95f, 0.85f);
-            contRT.sizeDelta = Vector2.zero;
-
-            Image contBg = GetOrAdd<Image>(container);
-            contBg.color = CARD_BG;
-
-            Outline contOutline = GetOrAdd<Outline>(container);
-            contOutline.effectColor = CYAN_DARK;
-            contOutline.effectDistance = new Vector2(2, 2);
-
-            Debug.Log("[MainMenuUI] Notifications Panel creado");
+            var container = FindOrCreate(panel.transform, "Container");
+            var cRT = GetOrAdd<RectTransform>(container);
+            cRT.anchorMin = new Vector2(0.05f, 0.1f);
+            cRT.anchorMax = new Vector2(0.95f, 0.9f);
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
+            var cBg = GetOrAdd<Image>(container);
+            cBg.color = CARD_BG;
+            var cOutline = GetOrAdd<Outline>(container);
+            cOutline.effectColor = borderColor;
+            cOutline.effectDistance = new Vector2(2, 2);
         }
 
         #endregion
 
-        #region Assign Neon Icons
+        #region Manager References
 
-        private static void AssignNeonIcons()
+        private static void SetupManagerReferences()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-            if (canvas == null)
-            {
-                Debug.LogError("[MainMenuUI] No se encontró Canvas en la escena");
-                return;
-            }
-
-            int assigned = 0;
-
-            // Header Icons
-            assigned += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
-            assigned += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
-            assigned += TryAssignIcon(canvas.transform, "Header/ProfileButton/Icon", ICON_PROFILE);
-
-            // Player Card Icons
-            assigned += TryAssignIcon(canvas.transform, "PlayerCard/AvatarSection/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
-            assigned += TryAssignIcon(canvas.transform, "PlayerCard/InfoSection/StatsRow/Trophies/Icon", ICON_TROPHY);
-            assigned += TryAssignIcon(canvas.transform, "PlayerCard/InfoSection/StatsRow/Gems/Icon", ICON_GEM);
-            assigned += TryAssignIcon(canvas.transform, "PlayerCard/InfoSection/StatsRow/Coins/Icon", ICON_COIN);
-
-            // Quick Actions Icons
-            assigned += TryAssignIcon(canvas.transform, "QuickActionsPanel/RankingsCard/Icon", ICON_RANKINGS);
-            assigned += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
-            assigned += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
-
-            // Main Cards Icons
-            assigned += TryAssignIcon(canvas.transform, "MainCardsPanel/PlayCard/Icon", ICON_PLAY);
-            assigned += TryAssignIcon(canvas.transform, "MainCardsPanel/CashBattleCard/Icon", ICON_CASH_BATTLE);
-
-            // Daily Rewards Icon
-            assigned += TryAssignIcon(canvas.transform, "DailyRewardsCard/GiftIcon", ICON_GIFT);
-
-            // Assign notification icon references to MainMenuManager
-            AssignNotificationReferences(canvas.transform);
-
-            Debug.Log($"[MainMenuUI] Iconos asignados: {assigned}/13");
-
-            if (assigned > 0)
-            {
-                EditorUtility.SetDirty(canvas.gameObject);
-                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
-            }
-
-            EditorUtility.DisplayDialog("Asignación de Iconos",
-                $"Iconos asignados: {assigned}/13\n\n" +
-                "Revisa la Console para ver detalles de iconos faltantes.",
-                "OK");
-        }
-
-        private static void AssignNotificationReferences(Transform canvasTransform)
-        {
-            // Buscar MainMenuManager en la escena
             var manager = Object.FindFirstObjectByType<DigitPark.Managers.MainMenuManager>();
             if (manager == null)
             {
@@ -983,117 +1022,131 @@ namespace DigitPark.Editor
                 return;
             }
 
-            // Cargar sprites de notificación
-            Sprite normalSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_NOTIFICATIONS);
-            Sprite activeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_NOTIFICATIONS_ACTIVE);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            if (normalSprite != null)
-            {
-                var serializedObject = new SerializedObject(manager);
-                var normalProp = serializedObject.FindProperty("notificationIconNormal");
-                if (normalProp != null)
-                {
-                    normalProp.objectReferenceValue = normalSprite;
-                    Debug.Log("[MainMenuUI] Asignado: notificationIconNormal");
-                }
-                serializedObject.ApplyModifiedProperties();
-            }
-            else
-            {
-                Debug.LogWarning($"[MainMenuUI] No se encontró sprite: {ICON_NOTIFICATIONS}");
-            }
+            var so = new SerializedObject(manager);
+            Transform r = canvas.transform;
 
-            if (activeSprite != null)
-            {
-                var serializedObject = new SerializedObject(manager);
-                var activeProp = serializedObject.FindProperty("notificationIconActive");
-                if (activeProp != null)
-                {
-                    activeProp.objectReferenceValue = activeSprite;
-                    Debug.Log("[MainMenuUI] Asignado: notificationIconActive");
-                }
-                serializedObject.ApplyModifiedProperties();
-            }
-            else
-            {
-                Debug.LogWarning($"[MainMenuUI] No se encontró sprite: {ICON_NOTIFICATIONS_ACTIVE}");
-            }
+            SetRef(so, "mainMenuPanel", r.gameObject);
+            SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "Header/LogoText"));
+            SetRef(so, "playButton", FindInPath<Button>(r, "PlayCard"));
+            SetRef(so, "scoresButton", FindInPath<Button>(r, "QuickActionsPanel/RankingsCard"));
+            SetRef(so, "cashBattleButton", FindInPath<Button>(r, "CashBattleCard"));
+            SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
+            SetRef(so, "userButton", FindInPath<Button>(r, "ProfileCard"));
+            SetRef(so, "userText", FindInPath<TextMeshProUGUI>(r, "ProfileCard/InfoSection/Username"));
+            SetRef(so, "searchButton", FindInPath<Button>(r, "QuickActionsPanel/SearchCard"));
+            SetRef(so, "notificationsButton", FindInPath<Button>(r, "Header/NotificationsButton"));
+            SetRef(so, "notificationIconImage", FindInPath<Image>(r, "Header/NotificationsButton/Icon"));
+            SetRef(so, "notificationBadgeText", FindInPath<TextMeshProUGUI>(r, "Header/NotificationsButton/Badge/BadgeText"));
+            SetRef(so, "premiumButton", FindInPath<Button>(r, "ExtraRow/PremiumCard"));
 
-            // Buscar y asignar NotificationsButton
-            Transform notifBtn = canvasTransform.Find("Header/NotificationsButton");
-            if (notifBtn != null)
-            {
-                Button btnComponent = notifBtn.GetComponent<Button>();
-                if (btnComponent != null)
-                {
-                    var serializedObject = new SerializedObject(manager);
-                    var btnProp = serializedObject.FindProperty("notificationsButton");
-                    if (btnProp != null)
-                    {
-                        btnProp.objectReferenceValue = btnComponent;
-                        Debug.Log("[MainMenuUI] Asignado: notificationsButton");
-                    }
-                    serializedObject.ApplyModifiedProperties();
-                }
+            Transform premCard = r.Find("ExtraRow/PremiumCard");
+            if (premCard != null)
+                SetRef(so, "premiumBadge", premCard.gameObject);
 
-                // Buscar y asignar el Image del icono
-                Transform iconTransform = notifBtn.Find("Icon");
-                if (iconTransform != null)
-                {
-                    Image iconImg = iconTransform.GetComponent<Image>();
-                    if (iconImg != null)
-                    {
-                        var serializedObject = new SerializedObject(manager);
-                        var imgProp = serializedObject.FindProperty("notificationIconImage");
-                        if (imgProp != null)
-                        {
-                            imgProp.objectReferenceValue = iconImg;
-                            Debug.Log("[MainMenuUI] Asignado: notificationIconImage");
-                        }
-                        serializedObject.ApplyModifiedProperties();
-                    }
-                }
-            }
-
+            so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
-            Debug.Log("[MainMenuUI] Referencias de notificación asignadas al MainMenuManager");
+            Debug.Log("[MainMenuUI] Referencias del manager asignadas");
+        }
+
+        private static void SetRef(SerializedObject so, string propName, Object value)
+        {
+            var prop = so.FindProperty(propName);
+            if (prop == null) { Debug.LogWarning($"[MainMenuUI] Property '{propName}' no encontrada"); return; }
+            if (value != null) { prop.objectReferenceValue = value; Debug.Log($"[MainMenuUI] Asignado: {propName}"); }
+            else { Debug.LogWarning($"[MainMenuUI] No se encontró valor para: {propName}"); }
+        }
+
+        private static T FindInPath<T>(Transform root, string path) where T : Component
+        {
+            Transform t = root;
+            foreach (string part in path.Split('/'))
+            {
+                t = t.Find(part);
+                if (t == null) return null;
+            }
+            return t.GetComponent<T>();
+        }
+
+        #endregion
+
+        #region Icon Assignment
+
+        private static void AssignNeonIcons()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) { Debug.LogError("[MainMenuUI] No Canvas"); return; }
+
+            int a = 0;
+            a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
+            a += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
+            a += TryAssignIcon(canvas.transform, "Header/ProfileButton/Icon", ICON_PROFILE);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarSection/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Trophies/Icon", ICON_TROPHY);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Gems/Icon", ICON_GEM);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Coins/Icon", ICON_COIN);
+            a += TryAssignIcon(canvas.transform, "QuickActionsPanel/RankingsCard/Icon", ICON_RANKINGS);
+            a += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
+            a += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
+            a += TryAssignIcon(canvas.transform, "PlayCard/Icon", ICON_PLAY);
+            a += TryAssignIcon(canvas.transform, "CashBattleCard/Icon", ICON_CASH_BATTLE);
+            a += TryAssignIcon(canvas.transform, "DailyRewardCard/GiftIcon", ICON_GIFT);
+            a += TryAssignIcon(canvas.transform, "ExtraRow/AchievementsCard/Icon", ICON_ACHIEVEMENTS);
+            a += TryAssignIcon(canvas.transform, "ExtraRow/ShopCard/Icon", ICON_SHOP);
+            a += TryAssignIcon(canvas.transform, "ExtraRow/PremiumCard/Icon", ICON_PREMIUM);
+
+            AssignNotificationSprites();
+
+            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/16");
+            EditorUtility.SetDirty(canvas.gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
+            EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/16\nVer Console para detalles.", "OK");
+        }
+
+        private static void AssignNotificationSprites()
+        {
+            var manager = Object.FindFirstObjectByType<DigitPark.Managers.MainMenuManager>();
+            if (manager == null) return;
+
+            var so = new SerializedObject(manager);
+
+            Sprite normal = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_NOTIFICATIONS);
+            if (normal != null)
+            {
+                var p = so.FindProperty("notificationIconNormal");
+                if (p != null) p.objectReferenceValue = normal;
+            }
+
+            Sprite active = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_NOTIFICATIONS_ACTIVE);
+            if (active != null)
+            {
+                var p = so.FindProperty("notificationIconActive");
+                if (p != null) p.objectReferenceValue = active;
+            }
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
         }
 
         private static int TryAssignIcon(Transform root, string path, string iconPath)
         {
-            // Buscar el elemento por path
             Transform target = root;
-            string[] parts = path.Split('/');
-
-            foreach (string part in parts)
+            foreach (string part in path.Split('/'))
             {
                 target = target.Find(part);
-                if (target == null)
-                {
-                    Debug.LogWarning($"[MainMenuUI] No se encontró: {path}");
-                    return 0;
-                }
+                if (target == null) { Debug.LogWarning($"[MainMenuUI] No encontrado: {path}"); return 0; }
             }
 
-            // Cargar el icono
             Sprite icon = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
-            if (icon == null)
-            {
-                Debug.LogWarning($"[MainMenuUI] Icono no encontrado: {iconPath}");
-                return 0;
-            }
+            if (icon == null) { Debug.LogWarning($"[MainMenuUI] Icono no encontrado: {iconPath}"); return 0; }
 
-            // Asignar al Image component
             Image img = target.GetComponent<Image>();
-            if (img == null)
-            {
-                Debug.LogWarning($"[MainMenuUI] No tiene Image component: {path}");
-                return 0;
-            }
+            if (img == null) return 0;
 
             img.sprite = icon;
             img.preserveAspect = true;
-            Debug.Log($"[MainMenuUI] Asignado: {path} = {System.IO.Path.GetFileName(iconPath)}");
             return 1;
         }
 
@@ -1105,17 +1158,32 @@ namespace DigitPark.Editor
         {
             Transform existing = parent.Find(name);
             if (existing != null) return existing.gameObject;
-
-            GameObject newObj = new GameObject(name);
-            newObj.transform.SetParent(parent, false);
-            return newObj;
+            var obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            return obj;
         }
 
         private static T GetOrAdd<T>(GameObject obj) where T : Component
         {
-            T component = obj.GetComponent<T>();
-            if (component == null) component = obj.AddComponent<T>();
-            return component;
+            T c = obj.GetComponent<T>();
+            if (c == null) c = obj.AddComponent<T>();
+            return c;
+        }
+
+        private static void SetAnchorsWithPad(RectTransform rt, float bot, float top)
+        {
+            rt.anchorMin = new Vector2(0, bot);
+            rt.anchorMax = new Vector2(1, top);
+            rt.offsetMin = new Vector2(SIDE_PAD, 0);
+            rt.offsetMax = new Vector2(-SIDE_PAD, 0);
+        }
+
+        private static void SetAnchors(RectTransform rt, float xMin, float yMin, float xMax, float yMax)
+        {
+            rt.anchorMin = new Vector2(xMin, yMin);
+            rt.anchorMax = new Vector2(xMax, yMax);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
         #endregion

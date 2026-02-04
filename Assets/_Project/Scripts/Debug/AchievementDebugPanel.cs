@@ -124,7 +124,7 @@ namespace DigitPark.DevTools
                 new DebugAchievementData("rank_legend", "Leyenda", 200, "Progression", "Logro_Leyenda"),
                 new DebugAchievementData("rank_immortal", "Inmortal", 500, "Progression", "Logro_Inmortal", true),
 
-                // COLLECTOR - Reservado para V2 (sin cofres/battlepass)
+                // COLLECTOR - Reservado para V2
 
                 // TIME
                 new DebugAchievementData("days_7", "Una Semana", 25, "Time", "Logro_Racha_7_Dias"),

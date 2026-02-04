@@ -122,12 +122,6 @@ namespace DigitPark.Progression
 
         private static readonly MissionTemplate[] SeasonMissionTemplates = new MissionTemplate[]
         {
-            // Battle Pass - REMOVED FOR V1
-            // new MissionTemplate("season_bp_25", "Medio Camino", "Alcanza nivel 25 del Pase de Batalla", MissionType.BattlePassLevel, 25,
-            //     new MissionReward(2000, 5000, 100)),
-            // new MissionTemplate("season_bp_50", "Pase Completo", "Completa el Pase de Batalla", MissionType.BattlePassLevel, 50,
-            //     new MissionReward(5000, 10000, 250)),
-
             // Wins
             new MissionTemplate("season_wins_50", "Veterano de Temporada", "Gana 50 partidas", MissionType.WinGames, 50,
                 new MissionReward(1500, 3000, 75)),
@@ -343,16 +337,6 @@ namespace DigitPark.Progression
         public void ReportXPEarned(int amount)
         {
             UpdateMissions(MissionType.EarnXP, amount);
-        }
-
-        /// <summary>
-        /// Report Battle Pass level - DISABLED FOR V1
-        /// </summary>
-        [System.Obsolete("BattlePass removed for V1")]
-        public void ReportBattlePassLevel(int level)
-        {
-            // BattlePass removed for V1 - method kept for API compatibility
-            return;
         }
 
         /// <summary>
@@ -614,7 +598,6 @@ namespace DigitPark.Progression
         PlayTournament,     // Participate in X tournaments
         WinTournament,      // Win X tournaments
         EarnXP,             // Earn X XP
-        BattlePassLevel,    // Reach level X in Battle Pass
         AddFriends,         // Add X friends
         LoginDays,          // Login X days
         PlayAllGames,       // Play all game types

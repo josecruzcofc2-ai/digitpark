@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.UI.Components;
+using DG.Tweening;
+using DigitPark.Animations;
 using System.Collections.Generic;
 
 namespace DigitPark.Managers
@@ -27,6 +30,8 @@ namespace DigitPark.Managers
         [Header("UI - Profile Info")]
         [SerializeField] private TextMeshProUGUI usernameText;
         [SerializeField] private Image avatarImage;
+        [SerializeField] private AvatarUI avatarUI;
+        [SerializeField] private Button editAvatarButton;
         [SerializeField] private TextMeshProUGUI statusText;  // "Tu perfil", "Amigo", "No es amigo"
 
         [Header("UI - General Stats")]
@@ -49,10 +54,6 @@ namespace DigitPark.Managers
 
         [Header("UI - CTA Button")]
         [SerializeField] private Button challengeButton;  // Retar (solo si es amigo)
-
-        [Header("UI - Friends Panel")]
-        [SerializeField] private FriendsListManager friendsListManager;
-        [SerializeField] private FriendRequestsManager friendRequestsManager;
 
         [Header("UI - Challenge Game Selection")]
         [SerializeField] private GameObject gameSelectionPanel;  // Panel para elegir juego
@@ -103,6 +104,9 @@ namespace DigitPark.Managers
             backButton?.onClick.AddListener(OnBackClicked);
             addFriendIconButton?.onClick.AddListener(OnAddFriendClicked);
 
+            // Avatar edit
+            editAvatarButton?.onClick.AddListener(OnEditAvatarClicked);
+
             // Action Buttons
             friendsButton?.onClick.AddListener(OnFriendsClicked);
             historyButton?.onClick.AddListener(OnHistoryClicked);
@@ -118,6 +122,12 @@ namespace DigitPark.Managers
             quickMathButton?.onClick.AddListener(() => OnGameSelected("QuickMath"));
             flashTapButton?.onClick.AddListener(() => OnGameSelected("FlashTap"));
             oddOneOutButton?.onClick.AddListener(() => OnGameSelected("OddOneOut"));
+
+            // Avatar change events
+            if (AvatarService.Instance != null)
+            {
+                AvatarService.Instance.OnAvatarChanged += OnAvatarChanged;
+            }
         }
 
         #endregion
@@ -158,6 +168,13 @@ namespace DigitPark.Managers
             if (challengeButton != null)
                 challengeButton.gameObject.SetActive(false);
 
+            // Mostrar boton editar avatar (solo en perfil propio)
+            if (editAvatarButton != null)
+                editAvatarButton.gameObject.SetActive(true);
+
+            // Cargar avatar del usuario actual
+            LoadAvatar();
+
             // Mostrar botones de accion
             if (friendsButton != null)
                 friendsButton.gameObject.SetActive(true);
@@ -176,6 +193,13 @@ namespace DigitPark.Managers
             {
                 currentPlayerData = await DatabaseService.Instance.GetPlayerDataById(playerId);
             }
+
+            // Ocultar boton editar avatar (no es nuestro perfil)
+            if (editAvatarButton != null)
+                editAvatarButton.gameObject.SetActive(false);
+
+            // Cargar avatar del otro jugador
+            LoadAvatar();
 
             // Verificar estado de amistad
             CheckFriendStatus(playerId);
@@ -287,31 +311,8 @@ namespace DigitPark.Managers
             if (usernameText != null)
                 usernameText.text = currentPlayerData.username ?? "Sin Usuario";
 
-            // Estadisticas generales
-            if (totalGamesText != null)
-                totalGamesText.text = $"{currentPlayerData.totalGamesPlayed}";
-
-            if (winsText != null)
-                winsText.text = $"{currentPlayerData.totalGamesWon}";
-
-            if (winRateText != null)
-                winRateText.text = $"{currentPlayerData.GetWinRate():F1}%";
-
-            if (bestTimeText != null)
-            {
-                string bestTimeStr = currentPlayerData.bestTime < float.MaxValue
-                    ? $"{currentPlayerData.bestTime:F2}s"
-                    : "--";
-                bestTimeText.text = bestTimeStr;
-            }
-
-            if (averageTimeText != null)
-            {
-                string avgTimeStr = currentPlayerData.averageTime > 0
-                    ? $"{currentPlayerData.averageTime:F2}s"
-                    : "--";
-                averageTimeText.text = avgTimeStr;
-            }
+            // Estadisticas generales con animación
+            AnimateGeneralStats();
 
             UpdateGameStats();
 
@@ -361,6 +362,167 @@ namespace DigitPark.Managers
             }
         }
 
+        private void AnimateGeneralStats()
+        {
+            if (currentPlayerData == null) return;
+
+            int totalGames = currentPlayerData.totalGamesPlayed;
+            int wins = currentPlayerData.totalGamesWon;
+            float winRate = currentPlayerData.GetWinRate();
+
+            // Counter animation para total de juegos
+            if (totalGamesText != null)
+            {
+                totalGamesText.text = "0";
+                UIAnimations.CounterAnimation(totalGamesText, 0, totalGames, 0.8f);
+            }
+
+            // Counter animation para victorias
+            if (winsText != null)
+            {
+                winsText.text = "0";
+                UIAnimations.CounterAnimation(winsText, 0, wins, 0.8f);
+            }
+
+            // Animación para win rate (float con decimal)
+            if (winRateText != null)
+            {
+                winRateText.text = "0.0%";
+                float val = 0f;
+                DOTween.To(() => val, x => {
+                    val = x;
+                    winRateText.text = $"{x:F1}%";
+                }, winRate, 0.8f).SetEase(Ease.OutQuad);
+            }
+
+            // Best time y average time (valores directos, sin counter)
+            if (bestTimeText != null)
+            {
+                bestTimeText.text = currentPlayerData.bestTime < float.MaxValue
+                    ? $"{currentPlayerData.bestTime:F2}s"
+                    : "--";
+            }
+
+            if (averageTimeText != null)
+            {
+                averageTimeText.text = currentPlayerData.averageTime > 0
+                    ? $"{currentPlayerData.averageTime:F2}s"
+                    : "--";
+            }
+        }
+
+        #endregion
+
+        #region Avatar
+
+        private async void LoadAvatar()
+        {
+            if (currentPlayerData == null) return;
+
+            // Si hay AvatarUI component, usarlo (ya maneja todo el flujo)
+            if (avatarUI != null)
+            {
+                if (isOwnProfile)
+                {
+                    await avatarUI.LoadCurrentUserAvatar();
+                }
+                else
+                {
+                    await avatarUI.LoadUserAvatar(
+                        currentPlayerData.userId,
+                        currentPlayerData.avatarUrl,
+                        currentPlayerData.username
+                    );
+                }
+                return;
+            }
+
+            // Fallback: cargar directamente en el Image
+            if (avatarImage != null)
+            {
+                if (AvatarService.Instance != null)
+                {
+                    try
+                    {
+                        Sprite avatar;
+                        if (isOwnProfile)
+                        {
+                            avatar = await AvatarService.Instance.LoadCurrentUserAvatar();
+                        }
+                        else
+                        {
+                            avatar = await AvatarService.Instance.LoadAvatar(
+                                currentPlayerData.userId,
+                                currentPlayerData.avatarUrl,
+                                currentPlayerData.username
+                            );
+                        }
+                        if (avatar != null)
+                        {
+                            avatarImage.sprite = avatar;
+                            avatarImage.color = Color.white;
+                        }
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[Profile] Error cargando avatar: {e.Message}");
+                        // Generar avatar con inicial como fallback
+                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
+                            currentPlayerData.username, currentPlayerData.userId);
+                        avatarImage.sprite = initialAvatar;
+                        avatarImage.color = Color.white;
+                    }
+                }
+                else
+                {
+                    // Sin AvatarService, generar avatar con inicial
+                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
+                        currentPlayerData.username, currentPlayerData.userId);
+                    avatarImage.sprite = initialAvatar;
+                    avatarImage.color = Color.white;
+                }
+            }
+        }
+
+        private void OnEditAvatarClicked()
+        {
+            if (!isOwnProfile) return;
+
+            // Si hay AvatarUI con edición, ya lo maneja
+            if (avatarUI != null && avatarUI.isActiveAndEnabled)
+            {
+                // AvatarUI ya tiene su propio editButton, pero permitimos trigger externo
+            }
+
+            // Abrir selector de galería directamente
+            if (AvatarService.Instance != null)
+            {
+                AvatarService.Instance.PickAvatarFromGallery();
+            }
+            else
+            {
+                Debug.LogWarning("[Profile] AvatarService no disponible para editar avatar");
+            }
+        }
+
+        private void OnAvatarChanged(Sprite newAvatar)
+        {
+            // Actualizar avatar si estamos viendo nuestro propio perfil
+            if (isOwnProfile && avatarImage != null && newAvatar != null)
+            {
+                avatarImage.sprite = newAvatar;
+                avatarImage.color = Color.white;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (AvatarService.Instance != null)
+            {
+                AvatarService.Instance.OnAvatarChanged -= OnAvatarChanged;
+            }
+        }
+
         #endregion
 
         #region Button Callbacks
@@ -373,29 +535,20 @@ namespace DigitPark.Managers
 
         private void OnFriendsClicked()
         {
-            Debug.Log("[Profile] Abriendo lista de amigos");
+            Debug.Log("[Profile] Navegando a escena de amigos");
 
-            if (friendsListManager != null)
-            {
-                friendsListManager.Show();
-            }
-            else
-            {
-                // Navegar a escena de amigos si no hay panel
-                PlayerPrefs.SetString("FriendsReturnScene", "Profile");
-                PlayerPrefs.Save();
-                SceneManager.LoadScene("Friends");
-            }
+            PlayerPrefs.SetString("FriendsReturnScene", "Profile");
+            PlayerPrefs.Save();
+            SceneManager.LoadScene("Friends");
         }
 
         private void OnHistoryClicked()
         {
             Debug.Log("[Profile] Abriendo historial de partidas");
 
-            // Navegar a escena de historial
-            PlayerPrefs.SetString("HistoryReturnScene", "Profile");
+            PlayerPrefs.SetString("MatchHistoryReturnScene", "Profile");
             PlayerPrefs.Save();
-            SceneManager.LoadScene("Scores");
+            SceneManager.LoadScene("MatchHistory");
         }
 
         private async void OnAddFriendClicked()

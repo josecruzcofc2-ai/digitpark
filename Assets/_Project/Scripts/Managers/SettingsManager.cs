@@ -61,6 +61,9 @@ namespace DigitPark.Managers
         [SerializeField] private ConfirmPanelUI logoutConfirmPanel;
         [SerializeField] private ErrorPanelUI errorPanel;
 
+        [Header("UI - Shop")]
+        [SerializeField] private Button shopButton;
+
         [Header("UI - Legal Section")]
         [SerializeField] private Button termsButton;
         [SerializeField] private Button privacyButton;
@@ -254,6 +257,9 @@ namespace DigitPark.Managers
             premiumFullButton?.onClick.AddListener(OnPremiumFullClicked);
             restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
+
+            // Shop
+            shopButton?.onClick.AddListener(() => SceneManager.LoadScene("Shop"));
 
             // Legal buttons
             termsButton?.onClick.AddListener(() => OpenURL(URL_TERMS));

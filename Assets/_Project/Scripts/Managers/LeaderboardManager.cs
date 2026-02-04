@@ -9,6 +9,8 @@ using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.Localization;
 using DigitPark.UI.Items;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -370,6 +372,9 @@ namespace DigitPark.Managers
                 CreateLeaderboardEntry(entry);
             }
 
+            // Animación de entrada staggered
+            AnimateLeaderboardEntrance();
+
             // Resaltar posición del jugador si está en la lista
             HighlightPlayerPosition(entries);
 
@@ -397,6 +402,23 @@ namespace DigitPark.Managers
             {
                 scrollRect.verticalNormalizedPosition = 1f;
             }
+        }
+
+        /// <summary>
+        /// Anima la entrada staggered de las filas del leaderboard
+        /// </summary>
+        private void AnimateLeaderboardEntrance()
+        {
+            if (leaderboardContainer == null || leaderboardContainer.childCount == 0) return;
+
+            int count = Mathf.Min(leaderboardContainer.childCount, 30);
+            Transform[] items = new Transform[count];
+            for (int i = 0; i < count; i++)
+            {
+                items[i] = leaderboardContainer.GetChild(i);
+            }
+
+            UIAnimations.StaggeredEntrance(items, 0.04f, UIAnimations.DURATION_NORMAL);
         }
 
         /// <summary>

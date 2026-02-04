@@ -6,902 +6,1150 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Construye la UI completa de Daily Missions (Misiones Diarias)
-    /// Incluye: SafeArea, Header, Timer, Progress, Lista de misiones, Popups
+    /// Daily Missions UI Builder - Neon Cyan theme
+    /// Layout: ProgressBar → TopBar → TimerBar → OverallProgress → ScrollView (Daily + Weekly)
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    /// NO SafeArea, NO tab bar, NO dialog confirmation
+    ///
+    /// Menu: DigitPark/UI Builders/Monetization/Daily Missions
     /// </summary>
     public class DailyMissionsUIBuilder : EditorWindow
     {
-        // ==================== COLORES DEL TEMA NEON ====================
+        #region Colors
+
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
-        private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.3f);
+        private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.5f, 1f);
+        private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.06f);
 
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
-        private static readonly Color PANEL_BG = new Color(0.08f, 0.12f, 0.18f, 0.98f);
-        private static readonly Color CARD_BG = new Color(0.06f, 0.1f, 0.15f, 1f);
-        private static readonly Color HEADER_BG = new Color(0.03f, 0.06f, 0.1f, 0.95f);
-        private static readonly Color POPUP_BG = new Color(0.05f, 0.08f, 0.12f, 0.98f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
 
-        private static readonly Color TEXT_PRIMARY = new Color(0.95f, 0.95f, 0.95f, 1f);
-        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.7f, 0.75f, 1f);
-        private static readonly Color TEXT_DARK = new Color(0.02f, 0.05f, 0.1f, 1f);
-
-        private static readonly Color BUTTON_PRIMARY = CYAN_NEON;
-        private static readonly Color BUTTON_SECONDARY = new Color(0.15f, 0.2f, 0.25f, 1f);
-        private static readonly Color BUTTON_SUCCESS = new Color(0.2f, 0.8f, 0.4f, 1f);
+        private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
+        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.6f, 0.65f, 1f);
+        private static readonly Color TEXT_DARK = new Color(0.05f, 0.05f, 0.08f, 1f);
 
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
-        private static readonly Color ORANGE_TIMER = new Color(1f, 0.5f, 0.1f, 1f);
-        private static readonly Color PURPLE_WEEKLY = new Color(0.6f, 0.3f, 0.9f, 1f);
+        private static readonly Color ORANGE_TIMER = new Color(1f, 0.5f, 0.12f, 1f);
+        private static readonly Color PURPLE_WEEKLY = new Color(0.6f, 0.2f, 1f, 1f);
+        private static readonly Color GREEN_SUCCESS = new Color(0.2f, 0.9f, 0.4f, 1f);
 
-        private static readonly Color GEM_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
         private static readonly Color COIN_COLOR = new Color(1f, 0.85f, 0.3f, 1f);
+        private static readonly Color GEM_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
         private static readonly Color XP_COLOR = new Color(0.5f, 1f, 0.5f, 1f);
 
-        private static readonly Color PROGRESS_BG = new Color(0.1f, 0.15f, 0.2f, 1f);
-        private static readonly Color PROGRESS_FILL = CYAN_NEON;
-        private static readonly Color MISSION_COMPLETE = new Color(0.2f, 0.7f, 0.3f, 1f);
+        #endregion
 
-        private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.85f);
+        #region Layout Anchors (Y: 0=bottom, 1=top)
 
-        // ==================== DIMENSIONES ====================
-        private const float HEADER_HEIGHT = 110f;
-        private const float TIMER_HEIGHT = 50f;
-        private const float OVERALL_PROGRESS_HEIGHT = 80f;
-        private const float MISSION_CARD_HEIGHT = 110f;
-        private const float CONTENT_PADDING = 20f;
+        private const float PROGRESS_TOP = 0.993f;
+        private const float PROGRESS_BOT = 0.990f;
 
-        [MenuItem("DigitPark/UI Builders/Monetization/DailyMissions", false, 184)]
-        public static void BuildUI()
+        private const float TOPBAR_TOP = 0.988f;
+        private const float TOPBAR_BOT = 0.955f;
+
+        private const float TIMER_TOP = 0.952f;
+        private const float TIMER_BOT = 0.925f;
+
+        private const float OVERALL_TOP = 0.920f;
+        private const float OVERALL_BOT = 0.860f;
+
+        private const float SCROLL_TOP = 0.855f;
+        private const float SCROLL_BOT = 0.015f;
+
+        private const float SIDE_PAD = 30f;
+
+        #endregion
+
+        #region Paths
+
+        private const string MISSIONS_ICONS_PATH = "Assets/_Project/Art/Icons/Missions/";
+        private const string UI_ICONS_PATH = "Assets/_Project/Art/Icons/UI/";
+        private const string CURRENCY_ICONS_PATH = "Assets/_Project/Art/Icons/Currency/";
+
+        #endregion
+
+        [MenuItem("DigitPark/UI Builders/Monetization/Daily Missions", false, 184)]
+        public static void ShowWindow()
         {
-            if (!EditorUtility.DisplayDialog("Daily Missions UI Builder",
-                "Esto construira la UI completa de Daily Missions.\nAsegurate de tener la escena DailyMissions abierta.\n\nContinuar?",
-                "Si", "No"))
-                return;
-
-            BuildCompleteUI();
+            GetWindow<DailyMissionsUIBuilder>("Daily Missions Builder");
         }
 
-        private static void BuildCompleteUI()
+        private void OnGUI()
         {
-            Debug.Log("[DailyMissionsUIBuilder] ========== INICIANDO CONSTRUCCION ==========");
+            GUILayout.Label("Daily Missions UI Builder", EditorStyles.boldLabel);
+            GUILayout.Label("Misiones Diarias + Semanales - Neon Cyan", EditorStyles.miniLabel);
+            GUILayout.Space(10);
 
-            Canvas canvas = SetupCanvas();
-            if (canvas == null) return;
+            EditorGUILayout.HelpBox(
+                "Layout (de arriba a abajo):\n\n" +
+                "1. Progress Bar (linea delgada cyan)\n" +
+                "2. Top Bar (Back + MISIONES + Info)\n" +
+                "3. Timer Bar (countdown reinicio)\n" +
+                "4. Overall Progress (barra con milestones)\n" +
+                "5. ScrollView (misiones diarias + semanales)\n" +
+                "6. Reward Claim Popup (oculto)\n\n" +
+                "6 misiones diarias + 3 semanales",
+                MessageType.Info);
 
-            CreateBackground(canvas);
-            GameObject safeArea = CreateSafeArea(canvas);
+            GUILayout.Space(15);
 
-            CreateHeader(safeArea);
-            CreateResetTimer(safeArea);
-            CreateOverallProgress(safeArea);
-            CreateMissionsScrollView(safeArea);
+            GUI.backgroundColor = CYAN_NEON;
+            if (GUILayout.Button("RECONSTRUIR MISIONES COMPLETO", GUILayout.Height(50)))
+                RebuildMissions();
+            GUI.backgroundColor = Color.white;
 
-            CreateRewardClaimPopup(canvas);
+            GUILayout.Space(10);
 
-            MarkSceneDirty();
-            Debug.Log("[DailyMissionsUIBuilder] ========== CONSTRUCCION COMPLETADA ==========");
+            GUI.backgroundColor = GOLD;
+            if (GUILayout.Button("ASIGNAR REFERENCIAS AL MANAGER", GUILayout.Height(35)))
+                SetupManagerReferences();
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.Space(10);
+            GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
+
+            if (GUILayout.Button("1. Background + Progress Bar", GUILayout.Height(25)))
+            {
+                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                if (c != null) { CreateBackground(c.transform); CreateProgressBar(); }
+            }
+            if (GUILayout.Button("2. Top Bar", GUILayout.Height(25))) CreateTopBar();
+            if (GUILayout.Button("3. Timer Bar", GUILayout.Height(25))) CreateTimerBar();
+            if (GUILayout.Button("4. Overall Progress", GUILayout.Height(25))) CreateOverallProgress();
+            if (GUILayout.Button("5. Missions ScrollView", GUILayout.Height(25))) CreateMissionsScrollView();
+            if (GUILayout.Button("6. Reward Claim Popup", GUILayout.Height(25))) CreateRewardClaimPopup();
         }
 
-        // ==================== CANVAS SETUP ====================
+        #region Main Rebuild
 
-        private static Canvas SetupCanvas()
+        private static void RebuildMissions()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
-
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
-                GameObject canvasObj = new GameObject("Canvas");
-                canvas = canvasObj.AddComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                Debug.LogError("[DailyMissionsUI] No se encontro Canvas");
+                return;
+            }
 
-                CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0.5f;
-
-                canvasObj.AddComponent<GraphicRaycaster>();
+                scaler.matchWidthOrHeight = 0f;
             }
 
-            if (Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            // Limpiar elementos anteriores
+            string[] oldNames = {
+                "Background", "SafeArea", "Header", "ResetTimer", "OverallProgress",
+                "MissionsScrollView", "RewardClaimBlocker", "ProgressBar", "TopBar",
+                "TimerBar", "ScrollView"
+            };
+            foreach (var n in oldNames)
             {
-                GameObject eventSystem = new GameObject("EventSystem");
-                eventSystem.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                eventSystem.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                Transform t = canvas.transform.Find(n);
+                if (t != null) Object.DestroyImmediate(t.gameObject);
             }
 
-            if (Camera.main == null)
-            {
-                GameObject cameraObj = new GameObject("Main Camera");
-                Camera cam = cameraObj.AddComponent<Camera>();
-                cam.tag = "MainCamera";
-                cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = DARK_BG;
-            }
+            CreateBackground(canvas.transform);
+            CreateProgressBar();
+            CreateTopBar();
+            CreateTimerBar();
+            CreateOverallProgress();
+            CreateMissionsScrollView();
+            CreateRewardClaimPopup();
+            SetupManagerReferences();
 
-            return canvas;
+            Debug.Log("[DailyMissionsUI] Misiones RECONSTRUIDAS exitosamente!");
+            EditorUtility.SetDirty(canvas.gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
 
-        private static void CreateBackground(Canvas canvas)
+        private static void CreateBackground(Transform parent)
         {
-            GameObject bg = FindOrCreateChild(canvas.gameObject, "Background");
-
-            RectTransform bgRT = GetOrAddComponent<RectTransform>(bg);
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
-            bgRT.sizeDelta = Vector2.zero;
-
-            Image bgImage = GetOrAddComponent<Image>(bg);
-            bgImage.color = DARK_BG;
-
+            var bg = FindOrCreate(parent, "Background");
             bg.transform.SetAsFirstSibling();
+            var rt = GetOrAdd<RectTransform>(bg);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(bg).color = DARK_BG;
         }
 
-        private static GameObject CreateSafeArea(Canvas canvas)
+        #endregion
+
+        #region Progress Bar
+
+        private static void CreateProgressBar()
         {
-            GameObject safeArea = FindOrCreateChild(canvas.gameObject, "SafeArea");
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform safeRT = GetOrAddComponent<RectTransform>(safeArea);
-            safeRT.anchorMin = Vector2.zero;
-            safeRT.anchorMax = Vector2.one;
-            safeRT.sizeDelta = Vector2.zero;
+            var progressGO = FindOrCreate(canvas.transform, "ProgressBar");
+            var pRT = GetOrAdd<RectTransform>(progressGO);
+            SetAnchors(pRT, 0, PROGRESS_BOT, 1, PROGRESS_TOP);
 
-            safeArea.transform.SetSiblingIndex(1);
-            return safeArea;
+            var slider = GetOrAdd<Slider>(progressGO);
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0;
+            slider.maxValue = 6;
+            slider.wholeNumbers = true;
+            slider.value = 4;
+            slider.interactable = false;
+
+            // Slider Background
+            var sliderBg = FindOrCreate(progressGO.transform, "Background");
+            var sbRT = GetOrAdd<RectTransform>(sliderBg);
+            sbRT.anchorMin = Vector2.zero;
+            sbRT.anchorMax = Vector2.one;
+            sbRT.offsetMin = Vector2.zero;
+            sbRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(sliderBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
+
+            // Fill Area
+            var fillArea = FindOrCreate(progressGO.transform, "Fill Area");
+            var faRT = GetOrAdd<RectTransform>(fillArea);
+            faRT.anchorMin = Vector2.zero;
+            faRT.anchorMax = Vector2.one;
+            faRT.offsetMin = Vector2.zero;
+            faRT.offsetMax = Vector2.zero;
+
+            var fill = FindOrCreate(fillArea.transform, "Fill");
+            var fRT = GetOrAdd<RectTransform>(fill);
+            fRT.anchorMin = Vector2.zero;
+            fRT.anchorMax = Vector2.one;
+            fRT.offsetMin = Vector2.zero;
+            fRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(fill).color = CYAN_NEON;
+
+            slider.fillRect = fRT;
+            slider.handleRect = null;
+            slider.targetGraphic = GetOrAdd<Image>(progressGO);
+            GetOrAdd<Image>(progressGO).color = Color.clear;
+
+            Debug.Log("[DailyMissionsUI] ProgressBar creado");
         }
 
-        // ==================== HEADER ====================
+        #endregion
 
-        private static void CreateHeader(GameObject parent)
+        #region Top Bar (Back + Title + Info)
+
+        private static void CreateTopBar()
         {
-            GameObject header = FindOrCreateChild(parent, "Header");
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform headerRT = GetOrAddComponent<RectTransform>(header);
-            headerRT.anchorMin = new Vector2(0, 1);
-            headerRT.anchorMax = new Vector2(1, 1);
-            headerRT.pivot = new Vector2(0.5f, 1);
-            headerRT.anchoredPosition = Vector2.zero;
-            headerRT.sizeDelta = new Vector2(0, HEADER_HEIGHT);
+            var topBar = FindOrCreate(canvas.transform, "TopBar");
+            var tbRT = GetOrAdd<RectTransform>(topBar);
+            SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
 
-            Image headerBg = GetOrAddComponent<Image>(header);
-            headerBg.color = HEADER_BG;
+            // Back Button (left)
+            var backBtn = FindOrCreate(topBar.transform, "BackButton");
+            var bRT = GetOrAdd<RectTransform>(backBtn);
+            bRT.anchorMin = new Vector2(0, 0.5f);
+            bRT.anchorMax = new Vector2(0, 0.5f);
+            bRT.pivot = new Vector2(0, 0.5f);
+            bRT.anchoredPosition = new Vector2(SIDE_PAD, 0);
+            bRT.sizeDelta = new Vector2(50, 50);
+            var bBg = GetOrAdd<Image>(backBtn);
+            bBg.color = CARD_BG;
+            GetOrAdd<Button>(backBtn).targetGraphic = bBg;
+            var bOutline = GetOrAdd<Outline>(backBtn);
+            bOutline.effectColor = CYAN_DARK;
+            bOutline.effectDistance = new Vector2(1, 1);
 
-            CreateBottomGlow(header);
+            var backText = FindOrCreate(backBtn.transform, "Text");
+            var btRT = GetOrAdd<RectTransform>(backText);
+            btRT.anchorMin = Vector2.zero;
+            btRT.anchorMax = Vector2.one;
+            btRT.offsetMin = Vector2.zero;
+            btRT.offsetMax = Vector2.zero;
+            var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
+            btTMP.text = "<";
+            btTMP.fontSize = 28;
+            btTMP.fontStyle = FontStyles.Bold;
+            btTMP.color = CYAN_NEON;
+            btTMP.alignment = TextAlignmentOptions.Center;
 
-            // BackButton
-            GameObject backBtn = FindOrCreateChild(header, "BackButton");
-            RectTransform backRT = GetOrAddComponent<RectTransform>(backBtn);
-            backRT.anchorMin = new Vector2(0, 0.5f);
-            backRT.anchorMax = new Vector2(0, 0.5f);
-            backRT.pivot = new Vector2(0, 0.5f);
-            backRT.anchoredPosition = new Vector2(20, 0);
-            backRT.sizeDelta = new Vector2(50, 50);
+            // Title (center)
+            var title = FindOrCreate(topBar.transform, "TitleText");
+            var tRT = GetOrAdd<RectTransform>(title);
+            tRT.anchorMin = new Vector2(0.15f, 0);
+            tRT.anchorMax = new Vector2(0.85f, 1);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
+            tTMP.text = "MISIONES";
+            tTMP.fontSize = 28;
+            tTMP.color = CYAN_NEON;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.alignment = TextAlignmentOptions.Center;
 
-            Image backBg = GetOrAddComponent<Image>(backBtn);
-            backBg.color = BUTTON_SECONDARY;
+            // Info Button (right)
+            var infoBtn = FindOrCreate(topBar.transform, "InfoButton");
+            var iRT = GetOrAdd<RectTransform>(infoBtn);
+            iRT.anchorMin = new Vector2(1, 0.5f);
+            iRT.anchorMax = new Vector2(1, 0.5f);
+            iRT.pivot = new Vector2(1, 0.5f);
+            iRT.anchoredPosition = new Vector2(-SIDE_PAD, 0);
+            iRT.sizeDelta = new Vector2(40, 40);
+            var iBg = GetOrAdd<Image>(infoBtn);
+            iBg.color = CARD_BG;
+            GetOrAdd<Button>(infoBtn).targetGraphic = iBg;
+            var iOutline = GetOrAdd<Outline>(infoBtn);
+            iOutline.effectColor = CYAN_DARK;
+            iOutline.effectDistance = new Vector2(1, 1);
 
-            Button backButton = GetOrAddComponent<Button>(backBtn);
-            SetupButtonColors(backButton, BUTTON_SECONDARY);
-            AddOutline(backBtn, CYAN_DARK);
+            var infoText = FindOrCreate(infoBtn.transform, "Text");
+            var itRT = GetOrAdd<RectTransform>(infoText);
+            itRT.anchorMin = Vector2.zero;
+            itRT.anchorMax = Vector2.one;
+            itRT.offsetMin = Vector2.zero;
+            itRT.offsetMax = Vector2.zero;
+            var itTMP = GetOrAdd<TextMeshProUGUI>(infoText);
+            itTMP.text = "?";
+            itTMP.fontSize = 22;
+            itTMP.fontStyle = FontStyles.Bold;
+            itTMP.color = CYAN_NEON;
+            itTMP.alignment = TextAlignmentOptions.Center;
 
-            GameObject backTextObj = FindOrCreateChild(backBtn, "Text");
-            TextMeshProUGUI backText = GetOrAddComponent<TextMeshProUGUI>(backTextObj);
-            backText.text = "<";
-            backText.fontSize = 32;
-            backText.fontStyle = FontStyles.Bold;
-            backText.color = CYAN_NEON;
-            backText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(backTextObj);
-
-            // Title
-            GameObject titleObj = FindOrCreateChild(header, "TitleText");
-            RectTransform titleRT = GetOrAddComponent<RectTransform>(titleObj);
-            titleRT.anchorMin = new Vector2(0, 0.5f);
-            titleRT.anchorMax = new Vector2(0, 0.5f);
-            titleRT.pivot = new Vector2(0, 0.5f);
-            titleRT.anchoredPosition = new Vector2(85, 0);
-            titleRT.sizeDelta = new Vector2(300, 50);
-
-            TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
-            titleText.text = "MISIONES DIARIAS";
-            titleText.fontSize = 32;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = CYAN_NEON;
-            titleText.alignment = TextAlignmentOptions.MidlineLeft;
-            AddOutline(titleObj, CYAN_GLOW, 2);
-
-            // Info Button
-            GameObject infoBtn = FindOrCreateChild(header, "InfoButton");
-            RectTransform infoRT = GetOrAddComponent<RectTransform>(infoBtn);
-            infoRT.anchorMin = new Vector2(1, 0.5f);
-            infoRT.anchorMax = new Vector2(1, 0.5f);
-            infoRT.pivot = new Vector2(1, 0.5f);
-            infoRT.anchoredPosition = new Vector2(-20, 0);
-            infoRT.sizeDelta = new Vector2(45, 45);
-
-            Image infoBg = GetOrAddComponent<Image>(infoBtn);
-            infoBg.color = BUTTON_SECONDARY;
-
-            Button infoButton = GetOrAddComponent<Button>(infoBtn);
-            SetupButtonColors(infoButton, BUTTON_SECONDARY);
-            AddOutline(infoBtn, CYAN_DARK);
-
-            GameObject infoTextObj = FindOrCreateChild(infoBtn, "Text");
-            TextMeshProUGUI infoText = GetOrAddComponent<TextMeshProUGUI>(infoTextObj);
-            infoText.text = "?";
-            infoText.fontSize = 26;
-            infoText.fontStyle = FontStyles.Bold;
-            infoText.color = CYAN_NEON;
-            infoText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(infoTextObj);
-
-            Debug.Log("[DailyMissionsUIBuilder] Header creado");
+            Debug.Log("[DailyMissionsUI] TopBar creado (Back + MISIONES + Info)");
         }
 
-        // ==================== RESET TIMER ====================
+        #endregion
 
-        private static void CreateResetTimer(GameObject parent)
+        #region Timer Bar
+
+        private static void CreateTimerBar()
         {
-            GameObject timer = FindOrCreateChild(parent, "ResetTimer");
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform timerRT = GetOrAddComponent<RectTransform>(timer);
-            timerRT.anchorMin = new Vector2(0, 1);
-            timerRT.anchorMax = new Vector2(1, 1);
-            timerRT.pivot = new Vector2(0.5f, 1);
-            timerRT.anchoredPosition = new Vector2(0, -HEADER_HEIGHT - 10);
-            timerRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, TIMER_HEIGHT);
+            var timerBar = FindOrCreate(canvas.transform, "TimerBar");
+            var tbRT = GetOrAdd<RectTransform>(timerBar);
+            SetAnchors(tbRT, 0, TIMER_BOT, 1, TIMER_TOP);
+            tbRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            tbRT.offsetMax = new Vector2(-SIDE_PAD, 0);
 
-            Image timerBg = GetOrAddComponent<Image>(timer);
-            timerBg.color = new Color(0.1f, 0.08f, 0.05f, 0.9f);
-            AddOutline(timer, ORANGE_TIMER * 0.6f);
+            var tbBg = GetOrAdd<Image>(timerBar);
+            tbBg.color = CARD_BG;
+            var tbOutline = GetOrAdd<Outline>(timerBar);
+            tbOutline.effectColor = new Color(ORANGE_TIMER.r * 0.4f, ORANGE_TIMER.g * 0.4f, ORANGE_TIMER.b * 0.4f, 1f);
+            tbOutline.effectDistance = new Vector2(1, 1);
 
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(timer);
-            hlg.spacing = 12;
-            hlg.padding = new RectOffset(20, 20, 8, 8);
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(timerBar);
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(15, 15, 0, 0);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
 
-            // Clock Icon
-            GameObject iconObj = FindOrCreateChild(timer, "ClockIcon");
-            Image iconImage = GetOrAddComponent<Image>(iconObj);
-            iconImage.color = ORANGE_TIMER;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
-            iconLE.minWidth = 28;
-            iconLE.minHeight = 28;
+            // Timer Icon
+            var timerIcon = FindOrCreate(timerBar.transform, "TimerIcon");
+            var iconImg = GetOrAdd<Image>(timerIcon);
+            iconImg.color = ORANGE_TIMER;
+            Sprite timerSprite = LoadIcon(UI_ICONS_PATH + "icon_ui_timer.png");
+            if (timerSprite != null) { iconImg.sprite = timerSprite; iconImg.preserveAspect = true; }
+            var iconLE = GetOrAdd<LayoutElement>(timerIcon);
+            iconLE.minWidth = 24;
+            iconLE.minHeight = 24;
+            iconLE.preferredWidth = 24;
+            iconLE.preferredHeight = 24;
 
             // Label
-            GameObject labelObj = FindOrCreateChild(timer, "Label");
-            TextMeshProUGUI labelText = GetOrAddComponent<TextMeshProUGUI>(labelObj);
-            labelText.text = "Misiones se reinician en:";
-            labelText.fontSize = 16;
-            labelText.color = TEXT_SECONDARY;
-            labelText.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement labelLE = GetOrAddComponent<LayoutElement>(labelObj);
-            labelLE.minWidth = 240;
+            var label = FindOrCreate(timerBar.transform, "Label");
+            var lTMP = GetOrAdd<TextMeshProUGUI>(label);
+            lTMP.text = "Se reinician en:";
+            lTMP.fontSize = 15;
+            lTMP.color = TEXT_SECONDARY;
+            lTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var lLE = GetOrAdd<LayoutElement>(label);
+            lLE.flexibleWidth = 1;
 
-            // Time
-            GameObject timeObj = FindOrCreateChild(timer, "TimeText");
-            TextMeshProUGUI timeText = GetOrAddComponent<TextMeshProUGUI>(timeObj);
-            timeText.text = "12:34:56";
-            timeText.fontSize = 22;
-            timeText.fontStyle = FontStyles.Bold;
-            timeText.color = ORANGE_TIMER;
-            timeText.alignment = TextAlignmentOptions.MidlineRight;
-            LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeObj);
-            timeLE.flexibleWidth = 1;
+            // Countdown
+            var countdown = FindOrCreate(timerBar.transform, "CountdownText");
+            var cdTMP = GetOrAdd<TextMeshProUGUI>(countdown);
+            cdTMP.text = "12:34:56";
+            cdTMP.fontSize = 20;
+            cdTMP.fontStyle = FontStyles.Bold;
+            cdTMP.color = ORANGE_TIMER;
+            cdTMP.alignment = TextAlignmentOptions.MidlineRight;
+            var cdLE = GetOrAdd<LayoutElement>(countdown);
+            cdLE.minWidth = 120;
 
-            Debug.Log("[DailyMissionsUIBuilder] ResetTimer creado");
+            Debug.Log("[DailyMissionsUI] TimerBar creado");
         }
 
-        // ==================== OVERALL PROGRESS ====================
+        #endregion
 
-        private static void CreateOverallProgress(GameObject parent)
+        #region Overall Progress
+
+        private static void CreateOverallProgress()
         {
-            float topOffset = HEADER_HEIGHT + TIMER_HEIGHT + 25;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            GameObject progressPanel = FindOrCreateChild(parent, "OverallProgress");
+            var panel = FindOrCreate(canvas.transform, "OverallProgress");
+            var pRT = GetOrAdd<RectTransform>(panel);
+            SetAnchors(pRT, 0, OVERALL_BOT, 1, OVERALL_TOP);
+            pRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            pRT.offsetMax = new Vector2(-SIDE_PAD, 0);
 
-            RectTransform progressRT = GetOrAddComponent<RectTransform>(progressPanel);
-            progressRT.anchorMin = new Vector2(0, 1);
-            progressRT.anchorMax = new Vector2(1, 1);
-            progressRT.pivot = new Vector2(0.5f, 1);
-            progressRT.anchoredPosition = new Vector2(0, -topOffset);
-            progressRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, OVERALL_PROGRESS_HEIGHT);
+            var pBg = GetOrAdd<Image>(panel);
+            pBg.color = CARD_BG;
+            var pOutline = GetOrAdd<Outline>(panel);
+            pOutline.effectColor = CYAN_DARK;
+            pOutline.effectDistance = new Vector2(1, 1);
 
-            Image panelBg = GetOrAddComponent<Image>(progressPanel);
-            panelBg.color = PANEL_BG;
-            AddOutline(progressPanel, CYAN_DARK);
-
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(progressPanel);
-            vlg.spacing = 10;
-            vlg.padding = new RectOffset(20, 20, 12, 12);
-            vlg.childAlignment = TextAnchor.MiddleCenter;
+            var vlg = GetOrAdd<VerticalLayoutGroup>(panel);
+            vlg.spacing = 8;
+            vlg.padding = new RectOffset(15, 15, 10, 10);
+            vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
+            vlg.childControlHeight = false;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Title Row
-            GameObject titleRow = FindOrCreateChild(progressPanel, "TitleRow");
-            HorizontalLayoutGroup titleHlg = GetOrAddComponent<HorizontalLayoutGroup>(titleRow);
-            titleHlg.spacing = 0;
-            titleHlg.childAlignment = TextAnchor.MiddleCenter;
-            titleHlg.childControlWidth = true;
-            titleHlg.childControlHeight = true;
-            titleHlg.childForceExpandWidth = true;
+            // Row 1: Title row
+            var titleRow = FindOrCreate(panel.transform, "TitleRow");
+            var trHlg = GetOrAdd<HorizontalLayoutGroup>(titleRow);
+            trHlg.spacing = 0;
+            trHlg.childAlignment = TextAnchor.MiddleCenter;
+            trHlg.childControlWidth = true;
+            trHlg.childControlHeight = true;
+            trHlg.childForceExpandWidth = true;
+            var trLE = GetOrAdd<LayoutElement>(titleRow);
+            trLE.preferredHeight = 22;
 
-            LayoutElement titleRowLE = GetOrAddComponent<LayoutElement>(titleRow);
-            titleRowLE.minHeight = 25;
+            var titleLeft = FindOrCreate(titleRow.transform, "TitleLeft");
+            var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLeft);
+            tlTMP.text = "Progreso Diario";
+            tlTMP.fontSize = 16;
+            tlTMP.fontStyle = FontStyles.Bold;
+            tlTMP.color = TEXT_WHITE;
+            tlTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
-            // Title Left
-            GameObject titleLeft = FindOrCreateChild(titleRow, "TitleLeft");
-            TextMeshProUGUI titleLeftText = GetOrAddComponent<TextMeshProUGUI>(titleLeft);
-            titleLeftText.text = "Progreso Diario";
-            titleLeftText.fontSize = 18;
-            titleLeftText.fontStyle = FontStyles.Bold;
-            titleLeftText.color = TEXT_PRIMARY;
-            titleLeftText.alignment = TextAlignmentOptions.MidlineLeft;
+            var titleRight = FindOrCreate(titleRow.transform, "TitleRight");
+            var trTMP = GetOrAdd<TextMeshProUGUI>(titleRight);
+            trTMP.text = "4/6 Misiones";
+            trTMP.fontSize = 14;
+            trTMP.color = TEXT_SECONDARY;
+            trTMP.alignment = TextAlignmentOptions.MidlineRight;
 
-            // Title Right
-            GameObject titleRight = FindOrCreateChild(titleRow, "TitleRight");
-            TextMeshProUGUI titleRightText = GetOrAddComponent<TextMeshProUGUI>(titleRight);
-            titleRightText.text = "4/6 Misiones";
-            titleRightText.fontSize = 16;
-            titleRightText.color = TEXT_SECONDARY;
-            titleRightText.alignment = TextAlignmentOptions.MidlineRight;
+            // Row 2: Progress slider
+            var progressContainer = FindOrCreate(panel.transform, "ProgressContainer");
+            var pcLE = GetOrAdd<LayoutElement>(progressContainer);
+            pcLE.preferredHeight = 28;
 
-            // Progress Bar
-            GameObject progressBar = FindOrCreateChild(progressPanel, "ProgressBar");
-            LayoutElement progressBarLE = GetOrAddComponent<LayoutElement>(progressBar);
-            progressBarLE.minHeight = 25;
-            progressBarLE.preferredHeight = 25;
+            var slider = GetOrAdd<Slider>(progressContainer);
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0;
+            slider.maxValue = 6;
+            slider.wholeNumbers = true;
+            slider.value = 4;
+            slider.interactable = false;
 
-            Image progressBarBg = GetOrAddComponent<Image>(progressBar);
-            progressBarBg.color = PROGRESS_BG;
-            AddOutline(progressBar, CYAN_DARK * 0.5f);
+            // Slider Background
+            var sliderBg = FindOrCreate(progressContainer.transform, "Background");
+            var sbRT = GetOrAdd<RectTransform>(sliderBg);
+            sbRT.anchorMin = Vector2.zero;
+            sbRT.anchorMax = Vector2.one;
+            sbRT.offsetMin = Vector2.zero;
+            sbRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(sliderBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
 
-            // Fill
-            GameObject fill = FindOrCreateChild(progressBar, "Fill");
-            RectTransform fillRT = GetOrAddComponent<RectTransform>(fill);
-            fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = new Vector2(0.67f, 1); // 4/6 = 67%
-            fillRT.sizeDelta = Vector2.zero;
+            // Fill Area
+            var fillArea = FindOrCreate(progressContainer.transform, "Fill Area");
+            var faRT = GetOrAdd<RectTransform>(fillArea);
+            faRT.anchorMin = Vector2.zero;
+            faRT.anchorMax = Vector2.one;
+            faRT.offsetMin = Vector2.zero;
+            faRT.offsetMax = Vector2.zero;
 
-            Image fillImage = GetOrAddComponent<Image>(fill);
-            fillImage.color = PROGRESS_FILL;
+            var fill = FindOrCreate(fillArea.transform, "Fill");
+            var fRT = GetOrAdd<RectTransform>(fill);
+            fRT.anchorMin = Vector2.zero;
+            fRT.anchorMax = Vector2.one;
+            fRT.offsetMin = Vector2.zero;
+            fRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(fill).color = CYAN_NEON;
 
-            // Reward Markers (at 3, 5, 6 missions)
-            CreateProgressMarker(progressBar, "Marker3", 0.5f, "50", false);
-            CreateProgressMarker(progressBar, "Marker5", 0.833f, "100", false);
-            CreateProgressMarker(progressBar, "Marker6", 1f, "200", true);
+            slider.fillRect = fRT;
+            slider.handleRect = null;
+            slider.targetGraphic = GetOrAdd<Image>(progressContainer);
+            GetOrAdd<Image>(progressContainer).color = Color.clear;
 
-            Debug.Log("[DailyMissionsUIBuilder] OverallProgress creado");
+            // Reward Markers overlaid on progress bar
+            CreateRewardMarker(progressContainer, "Marker3", 0.5f, "50", false);
+            CreateRewardMarker(progressContainer, "Marker5", 0.833f, "100", false);
+            CreateRewardMarker(progressContainer, "MarkerAll", 1.0f, "200", true);
+
+            Debug.Log("[DailyMissionsUI] OverallProgress creado");
         }
 
-        private static void CreateProgressMarker(GameObject parent, string name, float position, string reward, bool isBonus)
+        private static void CreateRewardMarker(GameObject parent, string name, float xPos, string reward, bool isBonus)
         {
-            GameObject marker = FindOrCreateChild(parent, name);
+            var marker = FindOrCreate(parent.transform, name);
+            var mRT = GetOrAdd<RectTransform>(marker);
+            mRT.anchorMin = new Vector2(xPos, 0.5f);
+            mRT.anchorMax = new Vector2(xPos, 0.5f);
+            mRT.pivot = new Vector2(0.5f, 0.5f);
+            mRT.sizeDelta = new Vector2(28, 28);
+            mRT.anchoredPosition = Vector2.zero;
 
-            RectTransform markerRT = GetOrAddComponent<RectTransform>(marker);
-            markerRT.anchorMin = new Vector2(position, 0);
-            markerRT.anchorMax = new Vector2(position, 1);
-            markerRT.pivot = new Vector2(0.5f, 0.5f);
-            markerRT.sizeDelta = new Vector2(40, 0);
+            var mImg = GetOrAdd<Image>(marker);
+            mImg.color = isBonus ? GOLD : CYAN_DARK;
+            var mOutline = GetOrAdd<Outline>(marker);
+            mOutline.effectColor = isBonus ? GOLD : CYAN_NEON;
+            mOutline.effectDistance = new Vector2(1, 1);
 
-            // Marker circle
-            GameObject circle = FindOrCreateChild(marker, "Circle");
-            RectTransform circleRT = GetOrAddComponent<RectTransform>(circle);
-            circleRT.anchorMin = new Vector2(0.5f, 0.5f);
-            circleRT.anchorMax = new Vector2(0.5f, 0.5f);
-            circleRT.sizeDelta = new Vector2(32, 32);
-
-            Image circleImage = GetOrAddComponent<Image>(circle);
-            circleImage.color = isBonus ? GOLD : CYAN_DARK;
-            AddOutline(circle, isBonus ? GOLD : CYAN_NEON);
-
-            // Reward amount
-            GameObject rewardObj = FindOrCreateChild(circle, "Reward");
-            TextMeshProUGUI rewardText = GetOrAddComponent<TextMeshProUGUI>(rewardObj);
-            rewardText.text = reward;
-            rewardText.fontSize = 10;
-            rewardText.fontStyle = FontStyles.Bold;
-            rewardText.color = TEXT_PRIMARY;
-            rewardText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(rewardObj);
+            var rewardText = FindOrCreate(marker.transform, "RewardText");
+            var rwRT = GetOrAdd<RectTransform>(rewardText);
+            rwRT.anchorMin = Vector2.zero;
+            rwRT.anchorMax = Vector2.one;
+            rwRT.offsetMin = Vector2.zero;
+            rwRT.offsetMax = Vector2.zero;
+            var rwTMP = GetOrAdd<TextMeshProUGUI>(rewardText);
+            rwTMP.text = reward;
+            rwTMP.fontSize = 10;
+            rwTMP.fontStyle = FontStyles.Bold;
+            rwTMP.color = TEXT_WHITE;
+            rwTMP.alignment = TextAlignmentOptions.Center;
         }
 
-        // ==================== MISSIONS SCROLL VIEW ====================
+        #endregion
 
-        private static void CreateMissionsScrollView(GameObject parent)
+        #region Missions ScrollView
+
+        private static void CreateMissionsScrollView()
         {
-            float topOffset = HEADER_HEIGHT + TIMER_HEIGHT + OVERALL_PROGRESS_HEIGHT + 50;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            GameObject scrollView = FindOrCreateChild(parent, "MissionsScrollView");
+            var scrollView = FindOrCreate(canvas.transform, "ScrollView");
+            var svRT = GetOrAdd<RectTransform>(scrollView);
+            SetAnchors(svRT, 0, SCROLL_BOT, 1, SCROLL_TOP);
 
-            RectTransform scrollRT = GetOrAddComponent<RectTransform>(scrollView);
-            scrollRT.anchorMin = Vector2.zero;
-            scrollRT.anchorMax = Vector2.one;
-            scrollRT.offsetMin = new Vector2(CONTENT_PADDING, CONTENT_PADDING);
-            scrollRT.offsetMax = new Vector2(-CONTENT_PADDING, -topOffset);
-
-            ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
+            var scrollRect = GetOrAdd<ScrollRect>(scrollView);
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
 
-            Image scrollBg = GetOrAddComponent<Image>(scrollView);
-            scrollBg.color = Color.clear;
+            GetOrAdd<Image>(scrollView).color = Color.clear;
 
             // Viewport
-            GameObject viewport = FindOrCreateChild(scrollView, "Viewport");
-            SetRectTransformStretch(viewport);
-            RectTransform viewportRT = viewport.GetComponent<RectTransform>();
-            GetOrAddComponent<RectMask2D>(viewport);
-            scrollRect.viewport = viewportRT;
+            var viewport = FindOrCreate(scrollView.transform, "Viewport");
+            var vpRT = GetOrAdd<RectTransform>(viewport);
+            vpRT.anchorMin = Vector2.zero;
+            vpRT.anchorMax = Vector2.one;
+            vpRT.offsetMin = Vector2.zero;
+            vpRT.offsetMax = Vector2.zero;
+            GetOrAdd<RectMask2D>(viewport);
+            scrollRect.viewport = vpRT;
 
             // Content
-            GameObject content = FindOrCreateChild(viewport, "Content");
-            RectTransform contentRT = GetOrAddComponent<RectTransform>(content);
-            contentRT.anchorMin = new Vector2(0, 1);
-            contentRT.anchorMax = new Vector2(1, 1);
-            contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.sizeDelta = new Vector2(0, 0);
-            scrollRect.content = contentRT;
+            var content = FindOrCreate(viewport.transform, "Content");
+            var cRT = GetOrAdd<RectTransform>(content);
+            cRT.anchorMin = new Vector2(0, 1);
+            cRT.anchorMax = new Vector2(1, 1);
+            cRT.pivot = new Vector2(0.5f, 1);
+            cRT.sizeDelta = Vector2.zero;
+            scrollRect.content = cRT;
 
-            ContentSizeFitter csf = GetOrAddComponent<ContentSizeFitter>(content);
+            var csf = GetOrAdd<ContentSizeFitter>(content);
             csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(content);
-            vlg.spacing = 15;
-            vlg.padding = new RectOffset(0, 0, 10, 30);
+            var vlg = GetOrAdd<VerticalLayoutGroup>(content);
+            vlg.spacing = 12;
+            vlg.padding = new RectOffset(5, 5, 10, 25);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Section: Daily Missions
+            // --- Section Header: MISIONES DIARIAS ---
             CreateSectionHeader(content, "DailyHeader", "MISIONES DIARIAS", CYAN_NEON);
 
-            // Daily Mission Cards
-            CreateMissionCard(content, "Mission1", "Juega 3 Partidas", "Participa en cualquier modo de juego", "2/3", 66, COIN_COLOR, "50", false, false);
-            CreateMissionCard(content, "Mission2", "Gana 1 Partida", "Gana en cualquier modo", "1/1", 100, COIN_COLOR, "100", true, false);
-            CreateMissionCard(content, "Mission3", "Obtén 500 Puntos", "Acumula puntos en partidas", "350/500", 70, GEM_COLOR, "25", false, false);
-            CreateMissionCard(content, "Mission4", "Juega con un Amigo", "Invita a un amigo a jugar", "0/1", 0, GEM_COLOR, "50", false, false);
-            CreateMissionCard(content, "Mission5", "Completa un Torneo", "Termina un torneo completo", "1/1", 100, COIN_COLOR, "200", true, false);
-            CreateMissionCard(content, "Mission6", "Usa 3 Power-ups", "Activa power-ups en partidas", "1/3", 33, XP_COLOR, "30 XP", false, false);
+            // --- 6 Daily Mission Cards ---
+            CreateMissionCard(content, "Mission1",
+                "Juega 3 Partidas", "Juega en cualquier modo",
+                "play_matches", 2, 3, "50", "coins", false, false);
 
-            // Section: Weekly Missions
+            CreateMissionCard(content, "Mission2",
+                "Gana 1 Partida", "Victoria en cualquier modo",
+                "win_matches", 1, 1, "100", "coins", true, false);
+
+            CreateMissionCard(content, "Mission3",
+                "Obt\u00E9n 500 Puntos", "Acumula puntos en partidas",
+                "earn_points", 350, 500, "25", "gems", false, false);
+
+            CreateMissionCard(content, "Mission4",
+                "Juega con un Amigo", "Invita a un amigo a jugar",
+                "play_matches", 0, 1, "50", "coins", false, false);
+
+            CreateMissionCard(content, "Mission5",
+                "Completa 3 Minijuegos", "Juega 3 tipos diferentes",
+                "complete_minigames", 3, 3, "200", "coins", true, false);
+
+            CreateMissionCard(content, "Mission6",
+                "Precisi\u00F3n 80%", "Completa con 80%+ precisi\u00F3n",
+                "earn_points", 1, 3, "30", "xp", false, false);
+
+            // --- Section Header: MISIONES SEMANALES ---
             CreateSectionHeader(content, "WeeklyHeader", "MISIONES SEMANALES", PURPLE_WEEKLY);
 
-            // Weekly Mission Cards
-            CreateMissionCard(content, "WeeklyMission1", "Gana 10 Partidas", "Acumula victorias esta semana", "7/10", 70, GEM_COLOR, "150", false, true);
-            CreateMissionCard(content, "WeeklyMission2", "Juega 20 Partidas", "Juega partidas en cualquier modo", "15/20", 75, COIN_COLOR, "500", false, true);
-            CreateMissionCard(content, "WeeklyMission3", "Alcanza Top 3", "Termina en podio 5 veces", "3/5", 60, GOLD, "Cofre Premium", false, true);
+            // --- 3 Weekly Mission Cards ---
+            CreateMissionCard(content, "Weekly1",
+                "Gana 10 Partidas", "Acumula victorias esta semana",
+                "win_matches", 7, 10, "150", "gems", false, true);
 
-            Debug.Log("[DailyMissionsUIBuilder] MissionsScrollView creado");
+            CreateMissionCard(content, "Weekly2",
+                "Juega 20 Partidas", "Juega en cualquier modo",
+                "play_matches", 15, 20, "500", "coins", false, true);
+
+            CreateMissionCard(content, "Weekly3",
+                "Alcanza Top 3", "Termina en podio 5 veces",
+                "earn_points", 3, 5, "Gemas Premium", "gems", false, true);
+
+            Debug.Log("[DailyMissionsUI] ScrollView creado (6 diarias + 3 semanales)");
         }
 
         private static void CreateSectionHeader(GameObject parent, string name, string title, Color color)
         {
-            GameObject header = FindOrCreateChild(parent, name);
+            var header = FindOrCreate(parent.transform, name);
 
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(header);
-            hlg.spacing = 12;
-            hlg.padding = new RectOffset(5, 5, 10, 5);
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(header);
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(5, 5, 8, 5);
             hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
 
-            LayoutElement headerLE = GetOrAddComponent<LayoutElement>(header);
-            headerLE.minHeight = 40;
+            var hLE = GetOrAdd<LayoutElement>(header);
+            hLE.preferredHeight = 45;
 
             // Icon
-            GameObject iconObj = FindOrCreateChild(header, "Icon");
-            Image iconImage = GetOrAddComponent<Image>(iconObj);
-            iconImage.color = color;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
+            var iconGO = FindOrCreate(header.transform, "Icon");
+            var iconImg = GetOrAdd<Image>(iconGO);
+            iconImg.color = color;
+            iconImg.preserveAspect = true;
+            Sprite iconSprite = LoadIcon(MISSIONS_ICONS_PATH + "MissionsIconNeon.png");
+            if (iconSprite != null) iconImg.sprite = iconSprite;
+            var iconLE = GetOrAdd<LayoutElement>(iconGO);
             iconLE.minWidth = 24;
             iconLE.minHeight = 24;
+            iconLE.preferredWidth = 24;
+            iconLE.preferredHeight = 24;
 
             // Title
-            GameObject titleObj = FindOrCreateChild(header, "Title");
-            TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
-            titleText.text = title;
-            titleText.fontSize = 20;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = color;
-            titleText.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minWidth = 300;
+            var titleGO = FindOrCreate(header.transform, "Title");
+            var tTMP = GetOrAdd<TextMeshProUGUI>(titleGO);
+            tTMP.text = title;
+            tTMP.fontSize = 18;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.color = color;
+            tTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var tLE = GetOrAdd<LayoutElement>(titleGO);
+            tLE.minWidth = 300;
         }
 
-        private static void CreateMissionCard(GameObject parent, string name, string title, string description,
-            string progressText, int progressPercent, Color rewardColor, string rewardAmount,
+        private static void CreateMissionCard(GameObject parent, string name,
+            string title, string description, string iconType,
+            int current, int target, string rewardAmount, string rewardType,
             bool isCompleted, bool isWeekly)
         {
-            GameObject card = FindOrCreateChild(parent, name);
+            Color accentColor = isWeekly ? PURPLE_WEEKLY : CYAN_NEON;
+            float progressPercent = target > 0 ? (float)current / target : 0f;
 
-            Image cardBg = GetOrAddComponent<Image>(card);
-            cardBg.color = isCompleted ? new Color(0.08f, 0.15f, 0.1f, 1f) : CARD_BG;
-            AddOutline(card, isCompleted ? MISSION_COMPLETE : (isWeekly ? PURPLE_WEEKLY * 0.5f : CYAN_DARK * 0.5f));
+            var card = FindOrCreate(parent.transform, name);
+            var cardBg = GetOrAdd<Image>(card);
+            cardBg.color = CARD_BG;
+            var cardOutline = GetOrAdd<Outline>(card);
+            cardOutline.effectColor = isCompleted ? GREEN_SUCCESS : (isWeekly ? new Color(PURPLE_WEEKLY.r * 0.5f, PURPLE_WEEKLY.g * 0.5f, PURPLE_WEEKLY.b * 0.5f, 1f) : CYAN_DARK);
+            cardOutline.effectDistance = new Vector2(1, 1);
 
-            LayoutElement cardLE = GetOrAddComponent<LayoutElement>(card);
-            cardLE.minHeight = MISSION_CARD_HEIGHT;
-            cardLE.preferredHeight = MISSION_CARD_HEIGHT;
+            var cardLE = GetOrAdd<LayoutElement>(card);
+            cardLE.preferredHeight = 100;
 
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(card);
-            hlg.spacing = 15;
-            hlg.padding = new RectOffset(15, 15, 12, 12);
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = false;
+            var cardHlg = GetOrAdd<HorizontalLayoutGroup>(card);
+            cardHlg.spacing = 12;
+            cardHlg.padding = new RectOffset(12, 12, 10, 10);
+            cardHlg.childAlignment = TextAnchor.MiddleCenter;
+            cardHlg.childControlWidth = false;
+            cardHlg.childControlHeight = true;
+            cardHlg.childForceExpandWidth = false;
+            cardHlg.childForceExpandHeight = false;
+
+            // === Left Section: Mission Icon Area ===
+            var iconContainer = FindOrCreate(card.transform, "IconContainer");
+            var icLE = GetOrAdd<LayoutElement>(iconContainer);
+            icLE.minWidth = 60;
+            icLE.minHeight = 60;
+            icLE.preferredWidth = 60;
+            icLE.preferredHeight = 60;
+
+            // Icon Glow (behind icon)
+            var iconGlow = FindOrCreate(iconContainer.transform, "IconGlow");
+            var igRT = GetOrAdd<RectTransform>(iconGlow);
+            igRT.anchorMin = Vector2.zero;
+            igRT.anchorMax = Vector2.one;
+            igRT.offsetMin = Vector2.zero;
+            igRT.offsetMax = Vector2.zero;
+            var igImg = GetOrAdd<Image>(iconGlow);
+            igImg.color = new Color(accentColor.r, accentColor.g, accentColor.b, 0.15f);
 
             // Mission Icon
-            GameObject iconObj = FindOrCreateChild(card, "Icon");
-            Image iconImage = GetOrAddComponent<Image>(iconObj);
-            iconImage.color = isWeekly ? PURPLE_WEEKLY : CYAN_NEON;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
-            iconLE.minWidth = 55;
-            iconLE.minHeight = 55;
-            iconLE.preferredWidth = 55;
-            iconLE.preferredHeight = 55;
+            var missionIcon = FindOrCreate(iconContainer.transform, "MissionIcon");
+            var miRT = GetOrAdd<RectTransform>(missionIcon);
+            miRT.anchorMin = new Vector2(0.5f, 0.5f);
+            miRT.anchorMax = new Vector2(0.5f, 0.5f);
+            miRT.sizeDelta = new Vector2(50, 50);
+            miRT.anchoredPosition = Vector2.zero;
+            var miImg = GetOrAdd<Image>(missionIcon);
+            miImg.preserveAspect = true;
+            miImg.color = Color.white;
 
+            string iconPath = MISSIONS_ICONS_PATH + "icon_mission_" + iconType + ".png";
+            Sprite missionSprite = LoadIcon(iconPath);
+            if (missionSprite != null) miImg.sprite = missionSprite;
+
+            // Completed check overlay
             if (isCompleted)
             {
-                // Checkmark overlay
-                GameObject checkObj = FindOrCreateChild(iconObj, "Check");
-                Image checkImage = GetOrAddComponent<Image>(checkObj);
-                checkImage.color = MISSION_COMPLETE;
-                SetRectTransformStretch(checkObj);
-
-                GameObject checkText = FindOrCreateChild(checkObj, "Text");
-                TextMeshProUGUI checkTmp = GetOrAddComponent<TextMeshProUGUI>(checkText);
-                checkTmp.text = "✓";
-                checkTmp.fontSize = 30;
-                checkTmp.fontStyle = FontStyles.Bold;
-                checkTmp.color = TEXT_PRIMARY;
-                checkTmp.alignment = TextAlignmentOptions.Center;
-                SetRectTransformStretch(checkText);
+                var checkOverlay = FindOrCreate(iconContainer.transform, "CheckOverlay");
+                var coRT = GetOrAdd<RectTransform>(checkOverlay);
+                coRT.anchorMin = new Vector2(0.6f, 0);
+                coRT.anchorMax = new Vector2(1, 0.4f);
+                coRT.offsetMin = Vector2.zero;
+                coRT.offsetMax = Vector2.zero;
+                var coTMP = GetOrAdd<TextMeshProUGUI>(checkOverlay);
+                coTMP.text = "\u2713";
+                coTMP.fontSize = 20;
+                coTMP.fontStyle = FontStyles.Bold;
+                coTMP.color = GREEN_SUCCESS;
+                coTMP.alignment = TextAlignmentOptions.Center;
             }
 
-            // Info Panel (Title, Description, Progress)
-            GameObject infoPanel = FindOrCreateChild(card, "InfoPanel");
-            VerticalLayoutGroup infoVlg = GetOrAddComponent<VerticalLayoutGroup>(infoPanel);
-            infoVlg.spacing = 6;
-            infoVlg.childAlignment = TextAnchor.MiddleLeft;
-            infoVlg.childControlWidth = true;
-            infoVlg.childControlHeight = true;
-            infoVlg.childForceExpandWidth = true;
-            infoVlg.childForceExpandHeight = false;
-
-            LayoutElement infoLE = GetOrAddComponent<LayoutElement>(infoPanel);
-            infoLE.flexibleWidth = 1;
+            // === Center Section: Info ===
+            var infoPanel = FindOrCreate(card.transform, "InfoPanel");
+            var ipVlg = GetOrAdd<VerticalLayoutGroup>(infoPanel);
+            ipVlg.spacing = 4;
+            ipVlg.childAlignment = TextAnchor.MiddleLeft;
+            ipVlg.childControlWidth = true;
+            ipVlg.childControlHeight = false;
+            ipVlg.childForceExpandWidth = true;
+            ipVlg.childForceExpandHeight = false;
+            var ipLE = GetOrAdd<LayoutElement>(infoPanel);
+            ipLE.flexibleWidth = 1;
 
             // Title
-            GameObject titleObj = FindOrCreateChild(infoPanel, "Title");
-            TextMeshProUGUI titleTmp = GetOrAddComponent<TextMeshProUGUI>(titleObj);
-            titleTmp.text = title;
-            titleTmp.fontSize = 18;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = isCompleted ? MISSION_COMPLETE : TEXT_PRIMARY;
-            titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minHeight = 24;
+            var titleGO = FindOrCreate(infoPanel.transform, "Title");
+            var titleTMP = GetOrAdd<TextMeshProUGUI>(titleGO);
+            titleTMP.text = title;
+            titleTMP.fontSize = 17;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.color = isCompleted ? GREEN_SUCCESS : TEXT_WHITE;
+            titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var titleLE = GetOrAdd<LayoutElement>(titleGO);
+            titleLE.preferredHeight = 22;
 
             // Description
-            GameObject descObj = FindOrCreateChild(infoPanel, "Description");
-            TextMeshProUGUI descTmp = GetOrAddComponent<TextMeshProUGUI>(descObj);
-            descTmp.text = description;
-            descTmp.fontSize = 13;
-            descTmp.color = TEXT_SECONDARY;
-            descTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement descLE = GetOrAddComponent<LayoutElement>(descObj);
-            descLE.minHeight = 18;
+            var descGO = FindOrCreate(infoPanel.transform, "Description");
+            var descTMP = GetOrAdd<TextMeshProUGUI>(descGO);
+            descTMP.text = description;
+            descTMP.fontSize = 13;
+            descTMP.color = TEXT_SECONDARY;
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.overflowMode = TextOverflowModes.Truncate;
+            var descLE = GetOrAdd<LayoutElement>(descGO);
+            descLE.preferredHeight = 18;
 
             // Progress Row
-            GameObject progressRow = FindOrCreateChild(infoPanel, "ProgressRow");
-            HorizontalLayoutGroup progressHlg = GetOrAddComponent<HorizontalLayoutGroup>(progressRow);
-            progressHlg.spacing = 10;
-            progressHlg.childAlignment = TextAnchor.MiddleLeft;
-            progressHlg.childControlWidth = false;
-            progressHlg.childControlHeight = true;
-            LayoutElement progressRowLE = GetOrAddComponent<LayoutElement>(progressRow);
-            progressRowLE.minHeight = 22;
+            var progressRow = FindOrCreate(infoPanel.transform, "ProgressRow");
+            var prHlg = GetOrAdd<HorizontalLayoutGroup>(progressRow);
+            prHlg.spacing = 8;
+            prHlg.childAlignment = TextAnchor.MiddleLeft;
+            prHlg.childControlWidth = false;
+            prHlg.childControlHeight = true;
+            prHlg.childForceExpandWidth = false;
+            prHlg.childForceExpandHeight = false;
+            var prLE = GetOrAdd<LayoutElement>(progressRow);
+            prLE.preferredHeight = 20;
 
-            // Progress Bar Mini
-            GameObject progressBar = FindOrCreateChild(progressRow, "ProgressBar");
-            Image progressBarBg = GetOrAddComponent<Image>(progressBar);
-            progressBarBg.color = PROGRESS_BG;
-            LayoutElement progressBarLE = GetOrAddComponent<LayoutElement>(progressBar);
-            progressBarLE.minWidth = 120;
-            progressBarLE.minHeight = 12;
+            // Progress bar mini
+            var progressBar = FindOrCreate(progressRow.transform, "ProgressBar");
+            var pbBg = GetOrAdd<Image>(progressBar);
+            pbBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
+            var pbLE = GetOrAdd<LayoutElement>(progressBar);
+            pbLE.minWidth = 120;
+            pbLE.minHeight = 14;
+            pbLE.preferredWidth = 120;
+            pbLE.preferredHeight = 14;
 
-            GameObject progressFill = FindOrCreateChild(progressBar, "Fill");
-            RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
-            fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = new Vector2(progressPercent / 100f, 1);
-            fillRT.sizeDelta = Vector2.zero;
+            var progressFill = FindOrCreate(progressBar.transform, "Fill");
+            var pfRT = GetOrAdd<RectTransform>(progressFill);
+            pfRT.anchorMin = Vector2.zero;
+            pfRT.anchorMax = new Vector2(progressPercent, 1);
+            pfRT.offsetMin = Vector2.zero;
+            pfRT.offsetMax = Vector2.zero;
+            var pfImg = GetOrAdd<Image>(progressFill);
+            pfImg.color = isCompleted ? GREEN_SUCCESS : accentColor;
 
-            Image fillImage = GetOrAddComponent<Image>(progressFill);
-            fillImage.color = isCompleted ? MISSION_COMPLETE : (isWeekly ? PURPLE_WEEKLY : PROGRESS_FILL);
+            // Progress text
+            var progressText = FindOrCreate(progressRow.transform, "ProgressText");
+            var ptTMP = GetOrAdd<TextMeshProUGUI>(progressText);
+            ptTMP.text = current + "/" + target;
+            ptTMP.fontSize = 13;
+            ptTMP.fontStyle = FontStyles.Bold;
+            ptTMP.color = TEXT_SECONDARY;
+            ptTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var ptLE = GetOrAdd<LayoutElement>(progressText);
+            ptLE.minWidth = 60;
 
-            // Progress Text
-            GameObject progressTextObj = FindOrCreateChild(progressRow, "ProgressText");
-            TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
-            progressTmp.text = progressText;
-            progressTmp.fontSize = 14;
-            progressTmp.fontStyle = FontStyles.Bold;
-            progressTmp.color = isCompleted ? MISSION_COMPLETE : TEXT_SECONDARY;
-            progressTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressTextObj);
-            progressTextLE.minWidth = 80;
+            // === Right Section: Reward + Action ===
+            var rewardPanel = FindOrCreate(card.transform, "RewardPanel");
+            var rpVlg = GetOrAdd<VerticalLayoutGroup>(rewardPanel);
+            rpVlg.spacing = 6;
+            rpVlg.childAlignment = TextAnchor.MiddleCenter;
+            rpVlg.childControlWidth = true;
+            rpVlg.childControlHeight = false;
+            rpVlg.childForceExpandWidth = true;
+            rpVlg.childForceExpandHeight = false;
+            var rpLE = GetOrAdd<LayoutElement>(rewardPanel);
+            rpLE.minWidth = 80;
+            rpLE.preferredWidth = 80;
 
-            // Reward Panel
-            GameObject rewardPanel = FindOrCreateChild(card, "RewardPanel");
-            VerticalLayoutGroup rewardVlg = GetOrAddComponent<VerticalLayoutGroup>(rewardPanel);
-            rewardVlg.spacing = 8;
-            rewardVlg.childAlignment = TextAnchor.MiddleCenter;
-            rewardVlg.childControlWidth = true;
-            rewardVlg.childControlHeight = true;
-            rewardVlg.childForceExpandHeight = false;
+            // Reward display (HLG)
+            var rewardDisplay = FindOrCreate(rewardPanel.transform, "RewardDisplay");
+            var rdHlg = GetOrAdd<HorizontalLayoutGroup>(rewardDisplay);
+            rdHlg.spacing = 4;
+            rdHlg.childAlignment = TextAnchor.MiddleCenter;
+            rdHlg.childControlWidth = false;
+            rdHlg.childControlHeight = true;
+            rdHlg.childForceExpandWidth = false;
+            rdHlg.childForceExpandHeight = false;
+            var rdLE = GetOrAdd<LayoutElement>(rewardDisplay);
+            rdLE.preferredHeight = 24;
 
-            LayoutElement rewardLE = GetOrAddComponent<LayoutElement>(rewardPanel);
-            rewardLE.minWidth = 85;
-            rewardLE.preferredWidth = 85;
+            // Currency icon
+            Color rewardColor;
+            string currencyIconPath;
+            switch (rewardType)
+            {
+                case "gems":
+                    rewardColor = GEM_COLOR;
+                    currencyIconPath = CURRENCY_ICONS_PATH + "GemIconNeon.png";
+                    break;
+                case "xp":
+                    rewardColor = XP_COLOR;
+                    currencyIconPath = UI_ICONS_PATH + "icon_xp.png";
+                    break;
+                default: // coins
+                    rewardColor = COIN_COLOR;
+                    currencyIconPath = CURRENCY_ICONS_PATH + "CoinIconNeon.png";
+                    break;
+            }
 
-            // Reward Display
-            GameObject rewardDisplay = FindOrCreateChild(rewardPanel, "RewardDisplay");
-            HorizontalLayoutGroup rewardHlg = GetOrAddComponent<HorizontalLayoutGroup>(rewardDisplay);
-            rewardHlg.spacing = 5;
-            rewardHlg.childAlignment = TextAnchor.MiddleCenter;
-            rewardHlg.childControlWidth = false;
-            rewardHlg.childControlHeight = true;
-            LayoutElement rewardDisplayLE = GetOrAddComponent<LayoutElement>(rewardDisplay);
-            rewardDisplayLE.minHeight = 25;
+            var currencyIcon = FindOrCreate(rewardDisplay.transform, "CurrencyIcon");
+            var ciImg = GetOrAdd<Image>(currencyIcon);
+            ciImg.color = rewardColor;
+            ciImg.preserveAspect = true;
+            Sprite currencySprite = LoadIcon(currencyIconPath);
+            if (currencySprite != null) ciImg.sprite = currencySprite;
+            var ciLE = GetOrAdd<LayoutElement>(currencyIcon);
+            ciLE.minWidth = 20;
+            ciLE.minHeight = 20;
+            ciLE.preferredWidth = 20;
+            ciLE.preferredHeight = 20;
 
-            // Reward Icon
-            GameObject rewardIcon = FindOrCreateChild(rewardDisplay, "Icon");
-            Image rewardIconImage = GetOrAddComponent<Image>(rewardIcon);
-            rewardIconImage.color = rewardColor;
-            LayoutElement rewardIconLE = GetOrAddComponent<LayoutElement>(rewardIcon);
-            rewardIconLE.minWidth = 22;
-            rewardIconLE.minHeight = 22;
+            // Amount text
+            var amountText = FindOrCreate(rewardDisplay.transform, "Amount");
+            var atTMP = GetOrAdd<TextMeshProUGUI>(amountText);
+            atTMP.text = rewardAmount;
+            atTMP.fontSize = 15;
+            atTMP.fontStyle = FontStyles.Bold;
+            atTMP.color = rewardColor;
+            atTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var atLE = GetOrAdd<LayoutElement>(amountText);
+            atLE.minWidth = 50;
 
-            // Reward Amount
-            GameObject rewardAmountObj = FindOrCreateChild(rewardDisplay, "Amount");
-            TextMeshProUGUI rewardAmountTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmountObj);
-            rewardAmountTmp.text = rewardAmount;
-            rewardAmountTmp.fontSize = 16;
-            rewardAmountTmp.fontStyle = FontStyles.Bold;
-            rewardAmountTmp.color = rewardColor;
-            rewardAmountTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement rewardAmountLE = GetOrAddComponent<LayoutElement>(rewardAmountObj);
-            rewardAmountLE.minWidth = 55;
+            // Action button
+            var actionBtn = FindOrCreate(rewardPanel.transform, "ActionButton");
+            var abBg = GetOrAdd<Image>(actionBtn);
+            var abBtn = GetOrAdd<Button>(actionBtn);
+            abBtn.targetGraphic = abBg;
+            var abLE = GetOrAdd<LayoutElement>(actionBtn);
+            abLE.preferredHeight = 32;
 
-            // Claim Button or Status
-            GameObject actionBtn = FindOrCreateChild(rewardPanel, "ActionButton");
-            Image actionBg = GetOrAddComponent<Image>(actionBtn);
-            Button actionButton = GetOrAddComponent<Button>(actionBtn);
-            LayoutElement actionLE = GetOrAddComponent<LayoutElement>(actionBtn);
-            actionLE.minHeight = 38;
-            actionLE.preferredHeight = 38;
-
-            GameObject actionTextObj = FindOrCreateChild(actionBtn, "Text");
-            TextMeshProUGUI actionText = GetOrAddComponent<TextMeshProUGUI>(actionTextObj);
-            actionText.fontSize = 14;
-            actionText.fontStyle = FontStyles.Bold;
-            actionText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(actionTextObj);
+            var actionText = FindOrCreate(actionBtn.transform, "Text");
+            var actRT = GetOrAdd<RectTransform>(actionText);
+            actRT.anchorMin = Vector2.zero;
+            actRT.anchorMax = Vector2.one;
+            actRT.offsetMin = Vector2.zero;
+            actRT.offsetMax = Vector2.zero;
+            var actTMP = GetOrAdd<TextMeshProUGUI>(actionText);
 
             if (isCompleted)
             {
-                actionBg.color = BUTTON_SUCCESS;
-                SetupButtonColors(actionButton, BUTTON_SUCCESS);
-                actionText.text = "Reclamar";
-                actionText.color = TEXT_DARK;
-                AddOutline(actionBtn, new Color(0.3f, 1f, 0.5f, 0.5f));
+                abBg.color = GREEN_SUCCESS;
+                actTMP.text = "Reclamar";
+                actTMP.fontSize = 13;
+                actTMP.fontStyle = FontStyles.Bold;
+                actTMP.color = TEXT_DARK;
+                actTMP.alignment = TextAlignmentOptions.Center;
+                var abOutline = GetOrAdd<Outline>(actionBtn);
+                abOutline.effectColor = GREEN_SUCCESS;
+                abOutline.effectDistance = new Vector2(1, 1);
             }
             else
             {
-                actionBg.color = BUTTON_SECONDARY;
-                SetupButtonColors(actionButton, BUTTON_SECONDARY);
-                actionButton.interactable = false;
-                actionText.text = "En Progreso";
-                actionText.color = TEXT_SECONDARY;
+                abBg.color = CARD_BG;
+                abBtn.interactable = false;
+                actTMP.text = "En Progreso";
+                actTMP.fontSize = 12;
+                actTMP.color = TEXT_SECONDARY;
+                actTMP.alignment = TextAlignmentOptions.Center;
             }
         }
 
-        // ==================== REWARD CLAIM POPUP ====================
+        #endregion
 
-        private static void CreateRewardClaimPopup(Canvas canvas)
+        #region Reward Claim Popup
+
+        private static void CreateRewardClaimPopup()
         {
-            GameObject blocker = FindOrCreateChild(canvas.gameObject, "RewardClaimBlocker");
-            blocker.SetActive(false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            SetRectTransformStretch(blocker);
-            Image blockerBg = GetOrAddComponent<Image>(blocker);
-            blockerBg.color = BLOCKER_BG;
-            Button blockerBtn = GetOrAddComponent<Button>(blocker);
-            blockerBtn.transition = Selectable.Transition.None;
+            // Blocker
+            var blocker = FindOrCreate(canvas.transform, "RewardClaimBlocker");
+            blocker.SetActive(false);
             blocker.transform.SetAsLastSibling();
 
-            GameObject popup = FindOrCreateChild(blocker, "RewardPopup");
-            RectTransform popupRT = GetOrAddComponent<RectTransform>(popup);
-            popupRT.anchorMin = new Vector2(0.5f, 0.5f);
-            popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRT.sizeDelta = new Vector2(420, 380);
+            var bkRT = GetOrAdd<RectTransform>(blocker);
+            bkRT.anchorMin = Vector2.zero;
+            bkRT.anchorMax = Vector2.one;
+            bkRT.offsetMin = Vector2.zero;
+            bkRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(blocker).color = new Color(0f, 0f, 0f, 0.85f);
+            var bkBtn = GetOrAdd<Button>(blocker);
+            bkBtn.transition = Selectable.Transition.None;
 
-            Image popupBg = GetOrAddComponent<Image>(popup);
-            popupBg.color = POPUP_BG;
-            AddOutline(popup, GOLD, 2);
+            // Popup
+            var popup = FindOrCreate(blocker.transform, "RewardPopup");
+            var ppRT = GetOrAdd<RectTransform>(popup);
+            ppRT.anchorMin = new Vector2(0.5f, 0.5f);
+            ppRT.anchorMax = new Vector2(0.5f, 0.5f);
+            ppRT.pivot = new Vector2(0.5f, 0.5f);
+            ppRT.sizeDelta = new Vector2(400, 350);
+            ppRT.anchoredPosition = Vector2.zero;
 
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(popup);
-            vlg.spacing = 20;
-            vlg.padding = new RectOffset(30, 30, 30, 30);
+            var ppBg = GetOrAdd<Image>(popup);
+            ppBg.color = CARD_BG;
+            var ppOutline = GetOrAdd<Outline>(popup);
+            ppOutline.effectColor = GOLD;
+            ppOutline.effectDistance = new Vector2(2, 2);
+
+            var vlg = GetOrAdd<VerticalLayoutGroup>(popup);
+            vlg.spacing = 18;
+            vlg.padding = new RectOffset(25, 25, 25, 25);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
+            vlg.childControlHeight = false;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
             // Celebration Icon
-            GameObject celebrationObj = FindOrCreateChild(popup, "CelebrationIcon");
-            Image celebrationImage = GetOrAddComponent<Image>(celebrationObj);
-            celebrationImage.color = GOLD;
-            LayoutElement celebrationLE = GetOrAddComponent<LayoutElement>(celebrationObj);
-            celebrationLE.minHeight = 70;
-            celebrationLE.minWidth = 70;
-            celebrationLE.preferredHeight = 70;
-            celebrationLE.preferredWidth = 70;
+            var celebIcon = FindOrCreate(popup.transform, "CelebrationIcon");
+            var ceImg = GetOrAdd<Image>(celebIcon);
+            ceImg.color = GOLD;
+            ceImg.preserveAspect = true;
+            Sprite claimSprite = LoadIcon(UI_ICONS_PATH + "icon_ui_claim.png");
+            if (claimSprite != null) ceImg.sprite = claimSprite;
+            var ceLE = GetOrAdd<LayoutElement>(celebIcon);
+            ceLE.preferredWidth = 60;
+            ceLE.preferredHeight = 60;
 
             // Title
-            GameObject titleObj = FindOrCreateChild(popup, "Title");
-            TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
-            titleText.text = "Mision Completada!";
-            titleText.fontSize = 28;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = GOLD;
-            titleText.alignment = TextAlignmentOptions.Center;
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minHeight = 40;
+            var popupTitle = FindOrCreate(popup.transform, "Title");
+            var ptTMP = GetOrAdd<TextMeshProUGUI>(popupTitle);
+            ptTMP.text = "\u00A1Misi\u00F3n Completada!";
+            ptTMP.fontSize = 26;
+            ptTMP.fontStyle = FontStyles.Bold;
+            ptTMP.color = GOLD;
+            ptTMP.alignment = TextAlignmentOptions.Center;
+            var ptLE = GetOrAdd<LayoutElement>(popupTitle);
+            ptLE.preferredHeight = 35;
 
             // Mission Name
-            GameObject missionNameObj = FindOrCreateChild(popup, "MissionName");
-            TextMeshProUGUI missionNameText = GetOrAddComponent<TextMeshProUGUI>(missionNameObj);
-            missionNameText.text = "Gana 1 Partida";
-            missionNameText.fontSize = 18;
-            missionNameText.color = TEXT_SECONDARY;
-            missionNameText.alignment = TextAlignmentOptions.Center;
-            LayoutElement missionNameLE = GetOrAddComponent<LayoutElement>(missionNameObj);
-            missionNameLE.minHeight = 25;
+            var missionName = FindOrCreate(popup.transform, "MissionName");
+            var mnTMP = GetOrAdd<TextMeshProUGUI>(missionName);
+            mnTMP.text = "Nombre de la misi\u00F3n";
+            mnTMP.fontSize = 17;
+            mnTMP.color = TEXT_SECONDARY;
+            mnTMP.alignment = TextAlignmentOptions.Center;
+            var mnLE = GetOrAdd<LayoutElement>(missionName);
+            mnLE.preferredHeight = 25;
 
             // Reward Display
-            GameObject rewardDisplay = FindOrCreateChild(popup, "RewardDisplay");
-            HorizontalLayoutGroup rewardHlg = GetOrAddComponent<HorizontalLayoutGroup>(rewardDisplay);
-            rewardHlg.spacing = 15;
-            rewardHlg.childAlignment = TextAnchor.MiddleCenter;
-            rewardHlg.childControlWidth = false;
-            rewardHlg.childControlHeight = true;
-            LayoutElement rewardDisplayLE = GetOrAddComponent<LayoutElement>(rewardDisplay);
-            rewardDisplayLE.minHeight = 50;
+            var rewardDisplay = FindOrCreate(popup.transform, "RewardDisplay");
+            var rdHlg = GetOrAdd<HorizontalLayoutGroup>(rewardDisplay);
+            rdHlg.spacing = 10;
+            rdHlg.childAlignment = TextAnchor.MiddleCenter;
+            rdHlg.childControlWidth = false;
+            rdHlg.childControlHeight = true;
+            rdHlg.childForceExpandWidth = false;
+            rdHlg.childForceExpandHeight = false;
+            var rdLE = GetOrAdd<LayoutElement>(rewardDisplay);
+            rdLE.preferredHeight = 50;
 
             // Reward Icon
-            GameObject rewardIconObj = FindOrCreateChild(rewardDisplay, "Icon");
-            Image rewardIconImage = GetOrAddComponent<Image>(rewardIconObj);
-            rewardIconImage.color = COIN_COLOR;
-            LayoutElement rewardIconLE = GetOrAddComponent<LayoutElement>(rewardIconObj);
-            rewardIconLE.minWidth = 45;
-            rewardIconLE.minHeight = 45;
+            var rewardIcon = FindOrCreate(rewardDisplay.transform, "Icon");
+            var riImg = GetOrAdd<Image>(rewardIcon);
+            riImg.color = COIN_COLOR;
+            riImg.preserveAspect = true;
+            Sprite coinSprite = LoadIcon(CURRENCY_ICONS_PATH + "CoinIconNeon.png");
+            if (coinSprite != null) riImg.sprite = coinSprite;
+            var riLE = GetOrAdd<LayoutElement>(rewardIcon);
+            riLE.minWidth = 40;
+            riLE.minHeight = 40;
+            riLE.preferredWidth = 40;
+            riLE.preferredHeight = 40;
 
             // Reward Amount
-            GameObject rewardAmountObj = FindOrCreateChild(rewardDisplay, "Amount");
-            TextMeshProUGUI rewardAmountText = GetOrAddComponent<TextMeshProUGUI>(rewardAmountObj);
-            rewardAmountText.text = "+100";
-            rewardAmountText.fontSize = 36;
-            rewardAmountText.fontStyle = FontStyles.Bold;
-            rewardAmountText.color = COIN_COLOR;
-            rewardAmountText.alignment = TextAlignmentOptions.MidlineLeft;
-            LayoutElement rewardAmountLE = GetOrAddComponent<LayoutElement>(rewardAmountObj);
-            rewardAmountLE.minWidth = 100;
+            var rewardAmount = FindOrCreate(rewardDisplay.transform, "Amount");
+            var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
+            raTMP.text = "+100";
+            raTMP.fontSize = 32;
+            raTMP.fontStyle = FontStyles.Bold;
+            raTMP.color = COIN_COLOR;
+            raTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var raLE = GetOrAdd<LayoutElement>(rewardAmount);
+            raLE.minWidth = 120;
 
             // Collect Button
-            GameObject collectBtn = FindOrCreateChild(popup, "CollectButton");
-            Image collectBg = GetOrAddComponent<Image>(collectBtn);
-            collectBg.color = BUTTON_SUCCESS;
-            Button collectButton = GetOrAddComponent<Button>(collectBtn);
-            SetupButtonColors(collectButton, BUTTON_SUCCESS);
-            AddOutline(collectBtn, new Color(0.3f, 1f, 0.5f, 0.5f), 2);
-            LayoutElement collectLE = GetOrAddComponent<LayoutElement>(collectBtn);
-            collectLE.minHeight = 55;
-            collectLE.preferredHeight = 55;
+            var collectBtn = FindOrCreate(popup.transform, "CollectButton");
+            var cbBg = GetOrAdd<Image>(collectBtn);
+            cbBg.color = GREEN_SUCCESS;
+            GetOrAdd<Button>(collectBtn).targetGraphic = cbBg;
+            var cbLE = GetOrAdd<LayoutElement>(collectBtn);
+            cbLE.preferredHeight = 50;
 
-            GameObject collectTextObj = FindOrCreateChild(collectBtn, "Text");
-            TextMeshProUGUI collectText = GetOrAddComponent<TextMeshProUGUI>(collectTextObj);
-            collectText.text = "Recoger";
-            collectText.fontSize = 22;
-            collectText.fontStyle = FontStyles.Bold;
-            collectText.color = TEXT_DARK;
-            collectText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(collectTextObj);
+            var collectText = FindOrCreate(collectBtn.transform, "Text");
+            var ctRT = GetOrAdd<RectTransform>(collectText);
+            ctRT.anchorMin = Vector2.zero;
+            ctRT.anchorMax = Vector2.one;
+            ctRT.offsetMin = Vector2.zero;
+            ctRT.offsetMax = Vector2.zero;
+            var ctTMP = GetOrAdd<TextMeshProUGUI>(collectText);
+            ctTMP.text = "Recoger";
+            ctTMP.fontSize = 22;
+            ctTMP.fontStyle = FontStyles.Bold;
+            ctTMP.color = TEXT_DARK;
+            ctTMP.alignment = TextAlignmentOptions.Center;
 
-            Debug.Log("[DailyMissionsUIBuilder] RewardClaimPopup creado");
+            Debug.Log("[DailyMissionsUI] RewardClaimPopup creado");
         }
 
-        // ==================== UTILITY METHODS ====================
+        #endregion
 
-        private static void CreateBottomGlow(GameObject obj)
+        #region Manager References
+
+        private static void SetupManagerReferences()
         {
-            GameObject glow = FindOrCreateChild(obj, "BottomGlow");
-            RectTransform glowRT = GetOrAddComponent<RectTransform>(glow);
-            glowRT.anchorMin = new Vector2(0, 0);
-            glowRT.anchorMax = new Vector2(1, 0);
-            glowRT.pivot = new Vector2(0.5f, 1);
-            glowRT.anchoredPosition = Vector2.zero;
-            glowRT.sizeDelta = new Vector2(0, 3);
+            var manager = Object.FindFirstObjectByType<DigitPark.Progression.MissionsManager>();
+            if (manager == null)
+            {
+                Debug.LogWarning("[DailyMissionsUI] MissionsManager no encontrado en la escena. Agrega el componente primero.");
+                return;
+            }
 
-            Image glowImage = GetOrAddComponent<Image>(glow);
-            glowImage.color = CYAN_NEON;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var so = new SerializedObject(manager);
+
+            // Configuracion de misiones (sincronizar con UI)
+            var dailyProp = so.FindProperty("dailyMissionsCount");
+            if (dailyProp != null) dailyProp.intValue = 6;
+
+            var weeklyProp = so.FindProperty("weeklyMissionsCount");
+            if (weeklyProp != null) weeklyProp.intValue = 3;
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
+
+            // Conectar BackButton a SceneNavigator
+            Transform r = canvas.transform;
+            var backBtn = FindInPath<Button>(r, "TopBar/BackButton");
+            if (backBtn != null)
+            {
+                var navigator = Object.FindFirstObjectByType<DigitPark.Monetization.SceneNavigator>();
+                if (navigator != null)
+                {
+                    backBtn.onClick.RemoveAllListeners();
+                    UnityEditor.Events.UnityEventTools.AddStringPersistentListener(
+                        backBtn.onClick,
+                        navigator.NavigateTo,
+                        DigitPark.Monetization.SceneNavigator.Scenes.MAIN_MENU
+                    );
+                    Debug.Log("[DailyMissionsUI] BackButton conectado a SceneNavigator -> MainMenu");
+                }
+            }
+
+            Debug.Log("[DailyMissionsUI] Referencias del manager asignadas (dailyMissionsCount=6, weeklyMissionsCount=3)");
         }
 
-        private static void SetRectTransformStretch(GameObject obj)
+        private static T FindInPath<T>(Transform root, string path) where T : Component
         {
-            RectTransform rt = GetOrAddComponent<RectTransform>(obj);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-            rt.anchoredPosition = Vector2.zero;
+            Transform t = root;
+            foreach (string part in path.Split('/'))
+            {
+                t = t.Find(part);
+                if (t == null) return null;
+            }
+            return t.GetComponent<T>();
         }
 
-        private static T GetOrAddComponent<T>(GameObject obj) where T : Component
+        #endregion
+
+        #region Helpers
+
+        private static GameObject FindOrCreate(Transform parent, string name)
         {
-            T component = obj.GetComponent<T>();
-            if (component == null)
-                component = obj.AddComponent<T>();
-            return component;
+            Transform existing = parent.Find(name);
+            if (existing != null) return existing.gameObject;
+            var obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            return obj;
         }
 
-        private static GameObject FindOrCreateChild(GameObject parent, string childName)
+        private static T GetOrAdd<T>(GameObject obj) where T : Component
         {
-            Transform child = parent.transform.Find(childName);
-            if (child != null) return child.gameObject;
-
-            GameObject newChild = new GameObject(childName);
-            newChild.transform.SetParent(parent.transform, false);
-
-            if (newChild.GetComponent<RectTransform>() == null)
-                newChild.AddComponent<RectTransform>();
-
-            return newChild;
+            T c = obj.GetComponent<T>();
+            if (c == null) c = obj.AddComponent<T>();
+            return c;
         }
 
-        private static void SetupButtonColors(Button btn, Color baseColor)
+        private static void SetAnchors(RectTransform rt, float xMin, float yMin, float xMax, float yMax)
         {
-            ColorBlock colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
-            colors.selectedColor = Color.white;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            btn.colors = colors;
+            rt.anchorMin = new Vector2(xMin, yMin);
+            rt.anchorMax = new Vector2(xMax, yMax);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
-        private static void AddOutline(GameObject obj, Color color, float distance = 1)
+        private static Sprite LoadIcon(string path)
         {
-            Outline outline = obj.GetComponent<Outline>();
-            if (outline == null)
-                outline = obj.AddComponent<Outline>();
-            outline.effectColor = color;
-            outline.effectDistance = new Vector2(distance, distance);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
-        private static void MarkSceneDirty()
-        {
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
-        }
+        #endregion
     }
 }

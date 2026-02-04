@@ -32,11 +32,8 @@ namespace DigitPark.Editor
         // Dimensiones
         private const float ACHIEVEMENT_ITEM_HEIGHT = 100f;
         private const float CATEGORY_HEADER_HEIGHT = 50f;
-        private const float BATTLE_PASS_TIER_WIDTH = 120f;
-        private const float BATTLE_PASS_TIER_HEIGHT = 180f;
         private const float MISSION_ITEM_HEIGHT = 90f;
         private const float REWARD_DAY_SIZE = 100f;
-        private const float CHEST_REWARD_SIZE = 110f;
         private const float STEP_DOT_SIZE = 12f;
         private const float AVATAR_OPTION_SIZE = 90f;
         private const float PRIZE_ROW_HEIGHT = 50f;
@@ -71,10 +68,8 @@ namespace DigitPark.Editor
 
             if (GUILayout.Button("AchievementItem")) CreateAchievementItemPrefab();
             if (GUILayout.Button("CategoryHeader")) CreateCategoryHeaderPrefab();
-            // RewardTierItem - Removed for V1 (BattlePass)
             if (GUILayout.Button("MissionItem")) CreateMissionItemPrefab();
             if (GUILayout.Button("RewardDayItem")) CreateRewardDayItemPrefab();
-            // ChestRewardItem - Removed for V1 (Chests)
             if (GUILayout.Button("StepDotItem")) CreateStepDotItemPrefab();
             if (GUILayout.Button("AvatarOptionItem")) CreateAvatarOptionItemPrefab();
             if (GUILayout.Button("PrizeRowItem")) CreatePrizeRowItemPrefab();
@@ -86,10 +81,8 @@ namespace DigitPark.Editor
         {
             CreateAchievementItemPrefab();
             CreateCategoryHeaderPrefab();
-            // CreateRewardTierItemPrefab(); // Removed for V1 (BattlePass)
             CreateMissionItemPrefab();
             CreateRewardDayItemPrefab();
-            // CreateChestRewardItemPrefab(); // Removed for V1 (Chests)
             CreateStepDotItemPrefab();
             CreateAvatarOptionItemPrefab();
             CreatePrizeRowItemPrefab();
@@ -247,100 +240,6 @@ namespace DigitPark.Editor
             SavePrefab(item, "Assets/_Project/Prefabs/Monetization/Achievements/CategoryHeader.prefab");
         }
 
-        #endregion
-
-        #region Battle Pass - REMOVED FOR V1
-        /*
-        // BattlePass removido para V1
-        // [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create RewardTierItem")]
-        private static void CreateRewardTierItemPrefab_DISABLED()
-        {
-            GameObject item = new GameObject("RewardTierItem");
-
-            RectTransform rt = item.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(BATTLE_PASS_TIER_WIDTH, BATTLE_PASS_TIER_HEIGHT);
-
-            LayoutElement le = item.AddComponent<LayoutElement>();
-            le.preferredWidth = BATTLE_PASS_TIER_WIDTH;
-            le.preferredHeight = BATTLE_PASS_TIER_HEIGHT;
-
-            Image bg = item.AddComponent<Image>();
-            bg.color = CARD_BG;
-
-            // Tier Number
-            CreateTextElement(item.transform, "TierNumberText", "1",
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(-20, -30), new Vector2(20, -5),
-                28, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Center);
-
-            // Current Tier Indicator
-            GameObject currentIndicator = CreateImageElement(item.transform, "CurrentTierIndicator",
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(-5, -5), new Vector2(5, 0));
-            currentIndicator.GetComponent<Image>().color = CYAN_NEON;
-            currentIndicator.SetActive(false);
-
-            // Free Reward Section
-            GameObject freeSection = CreateContainer(item.transform, "FreeRewardSection",
-                new Vector2(0, 0.35f), new Vector2(1, 0.7f),
-                new Vector2(5, 0), new Vector2(-5, 0));
-
-            GameObject freeIcon = CreateImageElement(freeSection.transform, "FreeRewardIcon",
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-20, -20), new Vector2(20, 20));
-            freeIcon.GetComponent<Image>().color = new Color(0.8f, 0.8f, 0.8f);
-
-            CreateTextElement(freeSection.transform, "FreeRewardText", "x10",
-                new Vector2(0, 0), new Vector2(1, 0.3f), 12, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
-
-            GameObject freeClaimBtn = CreateButton(freeSection.transform, "FreeClaimButton", "", GREEN, Color.white,
-                Vector2.zero, Vector2.one, new Vector2(5, 5), new Vector2(-5, -5));
-            freeClaimBtn.SetActive(false);
-
-            GameObject freeCheck = CreateTextElement(freeSection.transform, "FreeClaimedCheck", "✓",
-                Vector2.zero, Vector2.one, 30, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
-            freeCheck.SetActive(false);
-
-            GameObject freeLocked = CreateOverlay(freeSection.transform, "FreeLockedOverlay", LOCKED_BG);
-
-            // Premium Reward Section
-            GameObject premiumSection = CreateContainer(item.transform, "PremiumRewardSection",
-                new Vector2(0, 0), new Vector2(1, 0.35f),
-                new Vector2(5, 5), new Vector2(-5, 0));
-
-            Image premiumBg = premiumSection.AddComponent<Image>();
-            premiumBg.color = new Color(0.15f, 0.12f, 0.05f, 1f);
-
-            GameObject premiumBorder = CreateImageElement(premiumSection.transform, "PremiumBorder",
-                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            Outline outline = premiumBorder.AddComponent<Outline>();
-            outline.effectColor = PREMIUM_GOLD;
-            outline.effectDistance = new Vector2(2, 2);
-
-            GameObject premiumIcon = CreateImageElement(premiumSection.transform, "PremiumRewardIcon",
-                new Vector2(0.5f, 0.6f), new Vector2(0.5f, 0.6f),
-                new Vector2(-18, -18), new Vector2(18, 18));
-            premiumIcon.GetComponent<Image>().color = PREMIUM_GOLD;
-
-            CreateTextElement(premiumSection.transform, "PremiumRewardText", "x50",
-                new Vector2(0, 0), new Vector2(1, 0.35f), 12, PREMIUM_GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
-
-            GameObject premiumClaimBtn = CreateButton(premiumSection.transform, "PremiumClaimButton", "", PREMIUM_GOLD, Color.black,
-                Vector2.zero, Vector2.one, new Vector2(3, 3), new Vector2(-3, -3));
-            premiumClaimBtn.SetActive(false);
-
-            GameObject premiumCheck = CreateTextElement(premiumSection.transform, "PremiumClaimedCheck", "✓",
-                Vector2.zero, Vector2.one, 24, PREMIUM_GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
-            premiumCheck.SetActive(false);
-
-            GameObject premiumLocked = CreateOverlay(premiumSection.transform, "PremiumLockedOverlay", LOCKED_BG);
-
-            // Add UI Component
-            RewardTierItemUI ui = item.AddComponent<RewardTierItemUI>();
-
-            SavePrefab(item, "Assets/_Project/Prefabs/Monetization/BattlePass/RewardTierItem.prefab");
-        }
-        */
         #endregion
 
         #region Daily Missions - Mission Item Prefab
@@ -521,17 +420,6 @@ namespace DigitPark.Editor
             SavePrefab(item, "Assets/_Project/Prefabs/Monetization/DailyRewards/RewardDayItem.prefab");
         }
 
-        #endregion
-
-        #region Chest Opening - REMOVED FOR V1
-        /*
-        // ChestOpening removido para V1
-        // [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create ChestRewardItem")]
-        private static void CreateChestRewardItemPrefab_DISABLED()
-        {
-            // Código deshabilitado para V1
-        }
-        */
         #endregion
 
         #region Onboarding - Step Dot Item Prefab

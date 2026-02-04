@@ -99,7 +99,7 @@ namespace DigitPark.Editor
                 new AchievementTestData("rank_immortal", "Inmortal", "Alcanza rango Inmortal", "Progression", 500, "Logro_Inmortal", true),
 
                 // ==================== COLLECTOR ====================
-                // Reservado para V2 (sin cofres/battlepass)
+                // Reservado para V2
 
                 // ==================== TIME (6) ====================
                 new AchievementTestData("days_7", "Una Semana", "Juega 7 días", "Time", 25, "Logro_Racha_7_Dias"),

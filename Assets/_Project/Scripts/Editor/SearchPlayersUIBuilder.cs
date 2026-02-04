@@ -53,13 +53,6 @@ namespace DigitPark.Editor
 
             Transform canvasTransform = canvas.transform;
 
-            Transform background = canvasTransform.Find("Background");
-            if (background == null)
-            {
-                Debug.LogError("No se encontró Background");
-                return;
-            }
-
             // Limpiar elementos viejos
             CleanOldElements(canvasTransform);
 
@@ -410,12 +403,13 @@ namespace DigitPark.Editor
             avatarRect.anchoredPosition = new Vector2(55, 0);
             avatarRect.sizeDelta = new Vector2(70, 70);
             Image avatarBg = avatarContainer.AddComponent<Image>();
-            avatarBg.color = CYAN_NEON; // Cyan brillante para que sea visible
-            // Borde neón para avatar
+            avatarBg.color = CYAN_DARK; // Borde del avatar frame
+            // Borde neon para avatar
             Outline avatarOutline = avatarContainer.AddComponent<Outline>();
-            avatarOutline.effectColor = Color.white;
+            avatarOutline.effectColor = new Color(0f, 1f, 1f, 0.4f);
             avatarOutline.effectDistance = new Vector2(2, 2);
 
+            // Avatar Image - donde se mostrará el avatar con inicial o foto
             GameObject avatarImage = new GameObject("AvatarImage");
             avatarImage.transform.SetParent(avatarContainer.transform, false);
             RectTransform avatarImgRect = avatarImage.AddComponent<RectTransform>();
@@ -423,7 +417,7 @@ namespace DigitPark.Editor
             avatarImgRect.anchorMax = Vector2.one;
             avatarImgRect.sizeDelta = new Vector2(-8, -8);
             Image avatarImg = avatarImage.AddComponent<Image>();
-            avatarImg.color = CYAN_DARK; // Placeholder oscuro
+            avatarImg.color = Color.white; // Blanco para mostrar sprite correctamente
             avatarImg.preserveAspect = true;
 
             // ========== INFO SECTION ==========

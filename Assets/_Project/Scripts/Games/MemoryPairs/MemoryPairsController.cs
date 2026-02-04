@@ -18,7 +18,6 @@ namespace DigitPark.Games
 
         [Header("Memory Pairs - Grid")]
         [SerializeField] private Button[] cardButtons;
-        [SerializeField] private Image[] cardImages;
         [SerializeField] private Card3DEffect[] card3DEffects;
 
         [Header("Memory Pairs - UI")]
@@ -36,12 +35,9 @@ namespace DigitPark.Games
         [SerializeField] private UISparkleEffect sparkleEffect;
         [SerializeField] private bool enableHapticFeedback = true;
 
-        [Header("Memory Pairs - Sprites")]
-        [SerializeField] private Sprite cardBackSprite;
-        [SerializeField] private Sprite[] cardFrontSprites;
-
-        [Header("Digits para las cartas")]
-        [SerializeField] private string[] cardDigits = { "0", "1", "2", "3", "4", "5", "6", "7" };
+        [Header("Digits para las cartas (se eligen 8 aleatorios del 0-9)")]
+        [SerializeField] private string[] allDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        private string[] selectedDigits; // 8 dígitos aleatorios seleccionados para esta partida
 
         // Estado del juego
         private int[] cardValues;
@@ -172,6 +168,9 @@ namespace DigitPark.Games
 
         private void ShuffleCards()
         {
+            // Seleccionar 8 dígitos aleatorios del 0-9
+            SelectRandomDigits();
+
             List<int> cards = new List<int>();
             for (int i = 0; i < totalPairs; i++)
             {
@@ -194,21 +193,36 @@ namespace DigitPark.Games
                 if (card3DEffects != null && i < card3DEffects.Length && card3DEffects[i] != null)
                 {
                     int pairId = cards[i];
-                    string digit = (pairId < cardDigits.Length) ? cardDigits[pairId] : pairId.ToString();
+                    string digit = (pairId < selectedDigits.Length) ? selectedDigits[pairId] : pairId.ToString();
                     card3DEffects[i].SetupCard(pairId, digit);
-
-                    if (cardFrontSprites != null && pairId < cardFrontSprites.Length)
-                    {
-                        card3DEffects[i].SetCardSprite(cardFrontSprites[pairId]);
-                    }
-
                     card3DEffects[i].ResetCard();
                 }
-                else
-                {
-                    SetCardHidden(i);
-                }
             }
+        }
+
+        /// <summary>
+        /// Selecciona 8 dígitos aleatorios del array de 10 dígitos (0-9)
+        /// </summary>
+        private void SelectRandomDigits()
+        {
+            // Crear lista de todos los dígitos disponibles
+            List<string> available = new List<string>(allDigits);
+
+            // Mezclar la lista
+            for (int i = available.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (available[i], available[j]) = (available[j], available[i]);
+            }
+
+            // Tomar los primeros 8
+            selectedDigits = new string[totalPairs];
+            for (int i = 0; i < totalPairs && i < available.Count; i++)
+            {
+                selectedDigits[i] = available[i];
+            }
+
+            Debug.Log($"[MemoryPairs] Dígitos seleccionados: {string.Join(", ", selectedDigits)}");
         }
 
         private void OnCardClicked(int cardIndex)
@@ -306,12 +320,6 @@ namespace DigitPark.Games
                         card3DEffects[firstSelectedCard].ShowError();
                     if (secondSelectedCard < card3DEffects.Length && card3DEffects[secondSelectedCard] != null)
                         card3DEffects[secondSelectedCard].ShowError();
-                }
-                else
-                {
-                    yield return new WaitForSeconds(0.5f);
-                    SetCardHidden(firstSelectedCard);
-                    SetCardHidden(secondSelectedCard);
                 }
             }
 
@@ -495,14 +503,6 @@ namespace DigitPark.Games
             {
                 card3DEffects[cardIndex].FlipCard();
             }
-            else if (cardImages != null && cardIndex < cardImages.Length)
-            {
-                int spriteIndex = cardValues[cardIndex];
-                if (cardFrontSprites != null && spriteIndex < cardFrontSprites.Length)
-                {
-                    cardImages[cardIndex].sprite = cardFrontSprites[spriteIndex];
-                }
-            }
         }
 
         private void SetCardHidden(int cardIndex)
@@ -510,10 +510,6 @@ namespace DigitPark.Games
             if (card3DEffects != null && cardIndex < card3DEffects.Length && card3DEffects[cardIndex] != null)
             {
                 card3DEffects[cardIndex].FlipBack();
-            }
-            else if (cardImages != null && cardIndex < cardImages.Length && cardBackSprite != null)
-            {
-                cardImages[cardIndex].sprite = cardBackSprite;
             }
         }
 
@@ -609,10 +605,6 @@ namespace DigitPark.Games
                 if (card3DEffects != null && i < card3DEffects.Length && card3DEffects[i] != null)
                 {
                     card3DEffects[i].ResetCard();
-                }
-                else
-                {
-                    SetCardHidden(i);
                 }
             }
 

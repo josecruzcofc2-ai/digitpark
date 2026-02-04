@@ -4,6 +4,8 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.CashBattle
 {
@@ -79,6 +81,7 @@ namespace DigitPark.CashBattle
         private int currentTransactionPage = 0;
         private List<GameObject> spawnedDepositOptions = new List<GameObject>();
         private List<GameObject> spawnedTransactions = new List<GameObject>();
+        private decimal previousBalance = 0m;
 
         private enum WalletTab
         {
@@ -474,6 +477,8 @@ namespace DigitPark.CashBattle
                 balanceText.text = $"${walletData.balance:F2}";
             }
 
+            previousBalance = walletData.balance;
+
             if (bonusBalanceText)
             {
                 // Mostrar balance pendiente como "bonus" o lifetime deposits
@@ -485,7 +490,34 @@ namespace DigitPark.CashBattle
 
         private void OnBalanceChanged(decimal newBalance, decimal delta)
         {
-            RefreshUI();
+            // Animar balance text cuando hay cambio
+            if (balanceText != null && delta != 0)
+            {
+                balanceText.transform.DOKill();
+                int startVal = (int)(previousBalance * 100);
+                int endVal = (int)(newBalance * 100);
+                DOTween.To(() => startVal, x => {
+                    startVal = x;
+                    balanceText.text = $"${x / 100f:F2}";
+                }, endVal, 0.8f).SetEase(Ease.OutQuad).OnComplete(() => {
+                    balanceText.text = $"${newBalance:F2}";
+                });
+
+                // Punch scale para feedback visual
+                UIAnimations.TextPunch(balanceText.transform, 0.15f, 0.3f);
+
+                // Actualizar bonus balance sin animación
+                if (bonusBalanceText && WalletManager.Instance != null)
+                {
+                    bonusBalanceText.text = $"Pendiente: ${WalletManager.Instance.WalletData.pendingBalance:F2}";
+                }
+            }
+            else
+            {
+                RefreshUI();
+            }
+
+            previousBalance = newBalance;
             RefreshWithdrawPanel();
         }
 

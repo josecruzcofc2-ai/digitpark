@@ -35,10 +35,8 @@ namespace DigitPark.Editor
             // Monetization - Sistema de monetización
             { "Monetization", new[] { "TrophyCard" } },
             { "Monetization/Achievements", new[] { "AchievementItem", "CategoryHeader" } },
-            { "Monetization/BattlePass", new[] { "RewardTierItem" } },
             { "Monetization/DailyMissions", new[] { "MissionItem" } },
             { "Monetization/DailyRewards", new[] { "RewardDayItem" } },
-            { "Monetization/ChestOpening", new[] { "ChestRewardItem" } },
 
             // Social - Sistema social
             { "Social", new[] { "PlayerSearchItem", "LeaderboardEntry" } },

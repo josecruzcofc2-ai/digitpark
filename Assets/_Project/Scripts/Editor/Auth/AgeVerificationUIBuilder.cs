@@ -28,6 +28,9 @@ namespace DigitPark.Editor
         private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
         private const string VERIFICATION_ICON_PATH = "Assets/_Project/Art/Icons/CashBattle/UI/VerificationIcon.png";
 
+        // Prefab paths
+        private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+
         // Spacing
         private const float PADDING = 30f;
         private const float CARD_PADDING = 40f;
@@ -65,8 +68,10 @@ namespace DigitPark.Editor
 
                 // Build UI
                 BuildBackground(canvas);
+                BuildBackButton(canvas);
                 BuildLogo(canvas);
                 BuildVerificationCard(canvas);
+                BuildLoadingIndicator(canvas);
 
                 // Force layout update
                 Canvas.ForceUpdateCanvases();
@@ -192,7 +197,7 @@ namespace DigitPark.Editor
             CreateTitle(content.transform, "VERIFICACIÓN DE EDAD\nREQUERIDA");
             CreateSpacer(content.transform, 10f);
             CreateDescription(content.transform, "Las competencias con dinero real requieren que seas mayor de 18 años.");
-            CreateDescription(content.transform, "Debes verificar tu identidad para continuar.");
+            CreateStatusText(content.transform); // StatusText for verification status feedback
             CreateSpacer(content.transform, 10f);
             CreateGoldButton(content.transform, "VerifyButton", "VERIFICAR MI EDAD");
             CreateSpacer(content.transform, 10f);
@@ -318,5 +323,101 @@ namespace DigitPark.Editor
             LayoutElement layout = spacer.AddComponent<LayoutElement>();
             layout.preferredHeight = height;
         }
+
+        private static void CreateStatusText(Transform parent)
+        {
+            GameObject status = new GameObject("StatusText");
+            status.transform.SetParent(parent, false);
+
+            TextMeshProUGUI statusText = status.AddComponent<TextMeshProUGUI>();
+            statusText.font = DefaultFont;
+            statusText.text = "Toca el botón para iniciar la verificación";
+            statusText.fontSize = 16;
+            statusText.color = TextWhite;
+            statusText.alignment = TextAlignmentOptions.Center;
+            statusText.enableWordWrapping = true;
+
+            LayoutElement layout = status.AddComponent<LayoutElement>();
+            layout.preferredHeight = 40;
+        }
+
+        #region Additional Elements (BackButton, LoadingIndicator)
+
+        private static void BuildBackButton(Canvas canvas)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);
+            if (prefab != null)
+            {
+                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, canvas.transform);
+                backBtn.name = "BackButton";
+
+                RectTransform rect = backBtn.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0, 1);
+                rect.anchorMax = new Vector2(0, 1);
+                rect.pivot = new Vector2(0, 1);
+                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+
+                Debug.Log("✅ BackButtonGold instantiated from prefab");
+            }
+            else
+            {
+                // Fallback: create simple back button
+                GameObject backBtn = new GameObject("BackButton");
+                backBtn.transform.SetParent(canvas.transform, false);
+
+                RectTransform rect = backBtn.AddComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0, 1);
+                rect.anchorMax = new Vector2(0, 1);
+                rect.pivot = new Vector2(0, 1);
+                rect.sizeDelta = new Vector2(50, 50);
+                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+
+                Image bg = backBtn.AddComponent<Image>();
+                bg.sprite = WhiteSprite;
+                bg.color = new Color(0.3f, 0.2f, 0.1f, 0.9f);
+
+                Button btn = backBtn.AddComponent<Button>();
+                btn.targetGraphic = bg;
+
+                GameObject arrow = new GameObject("Arrow");
+                arrow.transform.SetParent(backBtn.transform, false);
+
+                RectTransform arrowRect = arrow.AddComponent<RectTransform>();
+                arrowRect.anchorMin = Vector2.zero;
+                arrowRect.anchorMax = Vector2.one;
+                arrowRect.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
+                arrowText.font = DefaultFont;
+                arrowText.text = "<";
+                arrowText.fontSize = 32;
+                arrowText.color = GoldPremium;
+                arrowText.alignment = TextAlignmentOptions.Center;
+
+                Debug.Log("✅ BackButton created (no prefab found)");
+            }
+        }
+
+        private static void BuildLoadingIndicator(Canvas canvas)
+        {
+            GameObject loadingIndicator = new GameObject("LoadingIndicator");
+            loadingIndicator.transform.SetParent(canvas.transform, false);
+
+            RectTransform rect = loadingIndicator.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(60, 60);
+
+            Image spinnerImage = loadingIndicator.AddComponent<Image>();
+            spinnerImage.sprite = WhiteSprite;
+            spinnerImage.color = GoldPremium;
+
+            // Start hidden
+            loadingIndicator.SetActive(false);
+
+            Debug.Log("✅ LoadingIndicator created");
+        }
+
+        #endregion
     }
 }

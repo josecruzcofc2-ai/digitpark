@@ -118,14 +118,27 @@ namespace DigitPark.UI.Components
         #region Public API
 
         /// <summary>
-        /// Carga el avatar del usuario actual
+        /// Carga el avatar del usuario actual.
+        /// Si no tiene foto, genera avatar con inicial del username.
         /// </summary>
         public async Task LoadCurrentUserAvatar()
         {
+            var playerData = GetCurrentPlayerData();
+
+            // Si AvatarService no está disponible, generar avatar con inicial
             if (AvatarService.Instance == null)
             {
-                Debug.LogWarning("[AvatarUI] AvatarService no disponible");
-                SetDefaultState();
+                Debug.LogWarning("[AvatarUI] AvatarService no disponible, usando AvatarInitialGenerator");
+                if (playerData != null)
+                {
+                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerData.username, playerData.userId);
+                    SetAvatarSprite(initialAvatar);
+                    currentLoadedUserId = playerData.userId;
+                }
+                else
+                {
+                    SetDefaultState();
+                }
                 return;
             }
 
@@ -136,7 +149,6 @@ namespace DigitPark.UI.Components
                 Sprite avatar = await AvatarService.Instance.LoadCurrentUserAvatar();
                 SetAvatarSprite(avatar);
 
-                var playerData = GetCurrentPlayerData();
                 if (playerData != null)
                 {
                     currentLoadedUserId = playerData.userId;
@@ -145,7 +157,16 @@ namespace DigitPark.UI.Components
             catch (System.Exception e)
             {
                 Debug.LogError($"[AvatarUI] Error cargando avatar: {e.Message}");
-                SetDefaultState();
+                // Fallback: generar avatar con inicial
+                if (playerData != null)
+                {
+                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerData.username, playerData.userId);
+                    SetAvatarSprite(initialAvatar);
+                }
+                else
+                {
+                    SetDefaultState();
+                }
             }
             finally
             {
@@ -154,9 +175,10 @@ namespace DigitPark.UI.Components
         }
 
         /// <summary>
-        /// Carga el avatar de un usuario específico
+        /// Carga el avatar de un usuario específico.
+        /// Si no tiene foto, genera avatar con inicial.
         /// </summary>
-        public async Task LoadUserAvatar(string userId, string avatarUrl)
+        public async Task LoadUserAvatar(string userId, string avatarUrl, string username = null)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -164,10 +186,13 @@ namespace DigitPark.UI.Components
                 return;
             }
 
+            // Si AvatarService no está disponible, generar avatar con inicial
             if (AvatarService.Instance == null)
             {
-                Debug.LogWarning("[AvatarUI] AvatarService no disponible");
-                SetDefaultState();
+                Debug.LogWarning("[AvatarUI] AvatarService no disponible, usando AvatarInitialGenerator");
+                Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(username ?? userId, userId);
+                SetAvatarSprite(initialAvatar);
+                currentLoadedUserId = userId;
                 return;
             }
 
@@ -181,14 +206,17 @@ namespace DigitPark.UI.Components
 
             try
             {
-                Sprite avatar = await AvatarService.Instance.LoadAvatar(userId, avatarUrl);
+                Sprite avatar = await AvatarService.Instance.LoadAvatar(userId, avatarUrl, username);
                 SetAvatarSprite(avatar);
                 currentLoadedUserId = userId;
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"[AvatarUI] Error cargando avatar de {userId}: {e.Message}");
-                SetDefaultState();
+                // Fallback: generar avatar con inicial
+                Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(username ?? userId, userId);
+                SetAvatarSprite(initialAvatar);
+                currentLoadedUserId = userId;
             }
             finally
             {

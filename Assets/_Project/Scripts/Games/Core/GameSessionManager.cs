@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
+using DigitPark.Data;
 
 namespace DigitPark.Games
 {
@@ -396,6 +397,94 @@ namespace DigitPark.Games
             {
                 Debug.LogError($"[GameSession] Error guardando resultados: {e.Message}");
             }
+
+            // Guardar en historial de partidas generales (Practice y Online, no CashBattle)
+            RecordToMatchHistory();
+        }
+
+        /// <summary>
+        /// Registra la sesion en el historial de partidas generales
+        /// </summary>
+        private void RecordToMatchHistory()
+        {
+            if (CurrentContext == null || CurrentContext.Results.Count == 0) return;
+
+            // Solo Practice y Online van al historial general
+            // SingleGame/Tournament/CashBattle van a CashHistory
+            if (CurrentContext.Mode != GameMode.Practice && CurrentContext.Mode != GameMode.Online)
+                return;
+
+            bool isPractice = CurrentContext.Mode == GameMode.Practice;
+            bool isSprint = CurrentContext.Games != null && CurrentContext.Games.Count > 1;
+
+            if (isSprint)
+            {
+                // Cognitive Sprint: una sola entrada con todos los juegos
+                float totalTime = 0f;
+                int totalErrors = 0;
+                float totalPenalty = 0f;
+
+                foreach (var r in CurrentContext.Results)
+                {
+                    totalTime += r.TotalTime;
+                    totalErrors += r.Errors;
+                    totalPenalty += r.PenaltyTime;
+                }
+
+                string[] gameNames = new string[CurrentContext.Games.Count];
+                for (int i = 0; i < CurrentContext.Games.Count; i++)
+                    gameNames[i] = CurrentContext.Games[i].ToString();
+
+                MatchHistoryEntry entry;
+                if (isPractice)
+                {
+                    entry = MatchHistoryEntry.CreateCognitiveSprintPractice(
+                        gameNames, totalTime, totalErrors, totalPenalty);
+                }
+                else
+                {
+                    float opponentTotal = 0f;
+                    foreach (var r in CurrentContext.OpponentResults)
+                        opponentTotal += r.FinalScore;
+
+                    entry = MatchHistoryEntry.CreateCognitiveSprintOnline(
+                        gameNames, totalTime, totalErrors, totalPenalty,
+                        CurrentContext.OpponentName, CurrentContext.OpponentId, opponentTotal);
+                }
+
+                MatchHistoryStorage.Instance.AddEntry(entry);
+            }
+            else
+            {
+                // Juego individual: una entrada por resultado
+                foreach (var r in CurrentContext.Results)
+                {
+                    string gameType = r.GameType.ToString();
+                    MatchHistoryEntry entry;
+
+                    if (isPractice)
+                    {
+                        entry = MatchHistoryEntry.CreatePractice(
+                            gameType, r.TotalTime, r.Errors, r.PenaltyTime);
+                    }
+                    else
+                    {
+                        // Buscar score del oponente para este juego
+                        float opScore = 0f;
+                        int idx = CurrentContext.Results.IndexOf(r);
+                        if (CurrentContext.OpponentResults != null && idx < CurrentContext.OpponentResults.Count)
+                            opScore = CurrentContext.OpponentResults[idx].FinalScore;
+
+                        entry = MatchHistoryEntry.CreateOnlineMatch(
+                            gameType, r.TotalTime, r.Errors, r.PenaltyTime,
+                            CurrentContext.OpponentName, CurrentContext.OpponentId, opScore);
+                    }
+
+                    MatchHistoryStorage.Instance.AddEntry(entry);
+                }
+            }
+
+            Debug.Log($"[GameSession] Partida registrada en historial general");
         }
     }
 }

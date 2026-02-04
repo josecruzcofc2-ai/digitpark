@@ -27,11 +27,9 @@ Para cada campo se indica el tipo de componente y el nombre sugerido para el obj
 18. [Shop](#18-shop)
 19. [DailyMissions](#19-dailymissions)
 20. [DailyRewards](#20-dailyrewards)
-21. [BattlePass](#21-battlepass)
-22. [ChestOpening](#22-chestopening)
-23. [Achievements](#23-achievements)
-24. [Onboarding](#24-onboarding)
-25. [AudioManager (Global)](#25-audiomanager-global)
+21. [Achievements](#21-achievements)
+22. [Onboarding](#22-onboarding)
+23. [AudioManager (Global)](#23-audiomanager-global)
 
 ---
 
@@ -934,140 +932,12 @@ Para cada campo se indica el tipo de componente y el nombre sugerido para el obj
 |-------|------|-----------------|
 | `coinIcon` | Sprite | (Asset en Resources) |
 | `gemIcon` | Sprite | (Asset en Resources) |
-| `chestIcon` | Sprite | (Asset en Resources) |
 | `xpIcon` | Sprite | (Asset en Resources) |
 | `mysteryIcon` | Sprite | (Asset en Resources) |
 
 ---
 
-## 21. BattlePass
-**Escena:** `Monetization/BattlePass.unity`
-**Manager:** `BattlePassManager`
-
-### UI - Header
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `backButton` | Button | BackButton |
-| `seasonNameText` | TextMeshProUGUI | SeasonNameText |
-| `timeRemainingText` | TextMeshProUGUI | TimeRemainingText |
-
-### UI - Level Progress
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `currentLevelText` | TextMeshProUGUI | CurrentLevelText |
-| `currentXPText` | TextMeshProUGUI | CurrentXPText |
-| `xpProgressBar` | Slider | XpProgressBar |
-| `xpToNextLevelText` | TextMeshProUGUI | XpToNextLevelText |
-
-### UI - Premium
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `premiumBadge` | GameObject | PremiumBadge |
-| `buyPremiumButton` | Button | BuyPremiumButton |
-| `premiumPriceText` | TextMeshProUGUI | PremiumPriceText |
-
-### UI - Rewards
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `rewardsScrollRect` | ScrollRect | RewardsScrollRect |
-| `rewardsContainer` | Transform | RewardsContainer |
-| `rewardTierPrefab` | GameObject | RewardTierPrefab |
-
-### UI - Reward Detail
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `rewardDetailPanel` | GameObject | RewardDetailPanel |
-| `rewardDetailIcon` | Image | RewardDetailIcon |
-| `rewardDetailNameText` | TextMeshProUGUI | RewardDetailNameText |
-| `rewardDetailDescText` | TextMeshProUGUI | RewardDetailDescText |
-| `rewardDetailTypeText` | TextMeshProUGUI | RewardDetailTypeText |
-| `claimRewardButton` | Button | ClaimRewardButton |
-| `closeDetailButton` | Button | CloseDetailButton |
-
-### UI - Buy Premium Modal
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `buyPremiumModal` | GameObject | BuyPremiumModal |
-| `premiumBenefitsText` | TextMeshProUGUI | PremiumBenefitsText |
-| `confirmBuyButton` | Button | ConfirmBuyButton |
-| `cancelBuyButton` | Button | CancelBuyButton |
-
-### UI - Reward Claimed
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `rewardClaimedPopup` | GameObject | RewardClaimedPopup |
-| `rewardClaimedIcon` | Image | RewardClaimedIcon |
-| `rewardClaimedText` | TextMeshProUGUI | RewardClaimedText |
-
----
-
-## 22. ChestOpening
-**Escena:** `Monetization/ChestOpening.unity`
-**Manager:** `ChestOpeningManager`
-
-### UI - Header
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `backButton` | Button | BackButton |
-| `skipButton` | Button | SkipButton |
-| `chestTypeText` | TextMeshProUGUI | ChestTypeText |
-
-### UI - Chest
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `chestContainer` | GameObject | ChestContainer |
-| `chestImage` | Image | ChestImage |
-| `chestAnimator` | Animator | ChestAnimator |
-| `chestParticles` | ParticleSystem | ChestParticles |
-| `openingParticles` | ParticleSystem | OpeningParticles |
-
-### UI - Rewards Panel
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `rewardsPanel` | GameObject | RewardsPanel |
-| `rewardsContainer` | Transform | RewardsContainer |
-| `rewardItemPrefab` | GameObject | RewardItemPrefab |
-| `totalValueText` | TextMeshProUGUI | TotalValueText |
-| `collectAllButton` | Button | CollectAllButton |
-
-### UI - Single Reward
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `singleRewardPanel` | GameObject | SingleRewardPanel |
-| `singleRewardIcon` | Image | SingleRewardIcon |
-| `singleRewardNameText` | TextMeshProUGUI | SingleRewardNameText |
-| `singleRewardDescriptionText` | TextMeshProUGUI | SingleRewardDescriptionText |
-| `singleRewardRarityText` | TextMeshProUGUI | SingleRewardRarityText |
-| `rarityParticles` | ParticleSystem | RarityParticles |
-
-### UI - Tap Prompt
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `tapPrompt` | GameObject | TapPrompt |
-| `tapPromptText` | TextMeshProUGUI | TapPromptText |
-
-### Audio
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `audioSource` | AudioSource | AudioSource |
-| `chestShakeClip` | AudioClip | (Asset en Resources) |
-| `chestOpenClip` | AudioClip | (Asset en Resources) |
-| `rewardRevealClip` | AudioClip | (Asset en Resources) |
-| `rareRewardClip` | AudioClip | (Asset en Resources) |
-| `epicRewardClip` | AudioClip | (Asset en Resources) |
-| `legendaryRewardClip` | AudioClip | (Asset en Resources) |
-
-### Sprites
-| Campo | Tipo | Nombre Sugerido |
-|-------|------|-----------------|
-| `commonChestSprite` | Sprite | (Asset en Resources) |
-| `rareChestSprite` | Sprite | (Asset en Resources) |
-| `epicChestSprite` | Sprite | (Asset en Resources) |
-| `legendaryChestSprite` | Sprite | (Asset en Resources) |
-
----
-
-## 23. Achievements
+## 21. Achievements
 **Escena:** `Monetization/Achievements.unity`
 **Manager:** `AchievementsManager`
 
@@ -1123,7 +993,7 @@ Para cada campo se indica el tipo de componente y el nombre sugerido para el obj
 
 ---
 
-## 24. Onboarding
+## 22. Onboarding
 **Escena:** `Monetization/Onboarding.unity`
 **Manager:** `OnboardingManager`
 
@@ -1202,7 +1072,7 @@ Para cada campo se indica el tipo de componente y el nombre sugerido para el obj
 
 ---
 
-## 25. AudioManager (Global)
+## 23. AudioManager (Global)
 **Escena:** Persistente (DontDestroyOnLoad)
 **Manager:** `AudioManager`
 

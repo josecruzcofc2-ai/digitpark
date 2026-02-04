@@ -42,7 +42,7 @@ namespace DigitPark.UI
         public enum PremiumCardType
         {
             SpecialOffer,
-            PremiumBundle, // Era BattlePass, renombrado para V1
+            PremiumBundle,
             StarterPack,
             DailyDeal,
             WeeklyBundle
@@ -223,7 +223,6 @@ namespace DigitPark.UI
             }
             else if (_cardType == PremiumCardType.PremiumBundle)
             {
-                // Navigate to shop offers (BattlePass removed for V1)
                 navigator.NavigateToShop(Monetization.ShopTab.Offers);
             }
             else

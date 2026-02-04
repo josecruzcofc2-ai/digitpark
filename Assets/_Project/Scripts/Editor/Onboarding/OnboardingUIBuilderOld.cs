@@ -324,7 +324,7 @@ namespace DigitPark.Editor
                 {
                     CreateFeatureItem(features, "Feature1", "Gemas", GEM_COLOR);
                     CreateFeatureItem(features, "Feature2", "Monedas", COIN_COLOR);
-                    CreateFeatureItem(features, "Feature3", "Cofres", PURPLE_PREMIUM);
+                    CreateFeatureItem(features, "Feature3", "Recompensas", PURPLE_PREMIUM);
                 }
             }
         }
@@ -591,7 +591,7 @@ namespace DigitPark.Editor
             // Gift items
             CreateGiftItem(rewardsGrid, "Gift1", GEM_COLOR, "100", "Gemas");
             CreateGiftItem(rewardsGrid, "Gift2", COIN_COLOR, "500", "Monedas");
-            CreateGiftItem(rewardsGrid, "Gift3", PURPLE_PREMIUM, "1", "Cofre Epico");
+            CreateGiftItem(rewardsGrid, "Gift3", PURPLE_PREMIUM, "1", "Gemas Premium");
 
             // Claim Button
             GameObject claimBtn = FindOrCreateChild(popup, "ClaimButton");

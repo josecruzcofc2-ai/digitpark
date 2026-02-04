@@ -19,12 +19,10 @@ namespace DigitPark.Games
         [Header("Odd One Out - Grid Izquierda")]
         [SerializeField] private Button[] leftGridButtons;
         [SerializeField] private TextMeshProUGUI[] leftButtonTexts;
-        [SerializeField] private Image[] leftButtonImages;
 
         [Header("Odd One Out - Grid Derecha")]
         [SerializeField] private Button[] rightGridButtons;
         [SerializeField] private TextMeshProUGUI[] rightButtonTexts;
-        [SerializeField] private Image[] rightButtonImages;
 
         [Header("Odd One Out - UI")]
         [SerializeField] private TextMeshProUGUI timerText;
@@ -44,35 +42,19 @@ namespace DigitPark.Games
         [Header("Odd One Out - Settings")]
         [SerializeField] private int totalRounds = 5;
 
+        [Header("Dígitos disponibles (0-9)")]
+        [SerializeField] private string[] availableDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
         // Estado del juego
         private int currentRound;
-        private int oddButtonIndex;
-        private bool isDifferenceOnRight;
+        private int oddButtonIndex; // La posición donde está la diferencia
         private int gridSize = 16;
+        private string[] gridDigits; // Dígitos para cada celda (compartidos por ambos grids)
+        private string differentDigit; // El dígito diferente en oddButtonIndex
 
         // Combo System
         private int currentCombo = 0;
         private int maxCombo = 0;
-
-        // Pares confusos
-        private readonly string[][] confusablePairs = new string[][]
-        {
-            new string[] { "6", "9" },
-            new string[] { "O", "0" },
-            new string[] { "I", "1" },
-            new string[] { "S", "5" },
-            new string[] { "B", "8" },
-            new string[] { "Z", "2" },
-            new string[] { "b", "d" },
-            new string[] { "p", "q" },
-            new string[] { "n", "u" },
-            new string[] { "M", "W" },
-            new string[] { "E", "F" },
-            new string[] { "C", "G" },
-            new string[] { "P", "R" },
-            new string[] { "V", "U" },
-            new string[] { "N", "Z" }
-        };
 
         protected override void Awake()
         {
@@ -130,31 +112,39 @@ namespace DigitPark.Games
 
         private void GeneratePuzzle()
         {
-            int pairIndex = Random.Range(0, confusablePairs.Length);
-            string baseChar = confusablePairs[pairIndex][0];
-            string differentChar = confusablePairs[pairIndex][1];
-
-            oddButtonIndex = Random.Range(0, gridSize);
-            isDifferenceOnRight = Random.Range(0, 2) == 1;
-
+            // Generar dígitos aleatorios del 0-9 para cada celda
+            gridDigits = new string[gridSize];
             for (int i = 0; i < gridSize; i++)
             {
-                // Grid izquierda
+                gridDigits[i] = availableDigits[Random.Range(0, availableDigits.Length)];
+            }
+
+            // Seleccionar posición de la diferencia
+            oddButtonIndex = Random.Range(0, gridSize);
+
+            // Generar un dígito DIFERENTE para esa posición en el grid derecho
+            string originalDigit = gridDigits[oddButtonIndex];
+            do
+            {
+                differentDigit = availableDigits[Random.Range(0, availableDigits.Length)];
+            } while (differentDigit == originalDigit);
+
+            // Asignar dígitos a ambos grids
+            for (int i = 0; i < gridSize; i++)
+            {
+                // Grid izquierda - todos los dígitos originales
                 if (leftButtonTexts != null && i < leftButtonTexts.Length && leftButtonTexts[i] != null)
                 {
-                    if (!isDifferenceOnRight && i == oddButtonIndex)
-                        leftButtonTexts[i].text = differentChar;
-                    else
-                        leftButtonTexts[i].text = baseChar;
+                    leftButtonTexts[i].text = gridDigits[i];
                 }
 
-                // Grid derecha
+                // Grid derecha - igual que izquierda EXCEPTO en oddButtonIndex
                 if (rightButtonTexts != null && i < rightButtonTexts.Length && rightButtonTexts[i] != null)
                 {
-                    if (isDifferenceOnRight && i == oddButtonIndex)
-                        rightButtonTexts[i].text = differentChar;
+                    if (i == oddButtonIndex)
+                        rightButtonTexts[i].text = differentDigit;
                     else
-                        rightButtonTexts[i].text = baseChar;
+                        rightButtonTexts[i].text = gridDigits[i];
                 }
 
                 // Resetear celdas 3D
@@ -236,7 +226,8 @@ namespace DigitPark.Games
         {
             if (!isPlaying || isPaused) return;
 
-            bool isCorrect = (buttonIndex == oddButtonIndex) && (isRightGrid == isDifferenceOnRight);
+            // El usuario puede presionar la celda diferente en CUALQUIERA de los dos grids
+            bool isCorrect = (buttonIndex == oddButtonIndex);
 
             if (isCorrect)
             {

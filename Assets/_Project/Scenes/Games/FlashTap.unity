@@ -1954,6 +1954,74 @@ MonoBehaviour:
   releaseSound: {fileID: 0}
   pressParticles: {fileID: 0}
   constantParticles: {fileID: 0}
+--- !u!1 &1066333778
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1066333779}
+  - component: {fileID: 1066333780}
+  m_Layer: 0
+  m_Name: FlashTapController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1066333779
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066333778}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 659.97473, y: 843.17535, z: 6.5615396}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1066333780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066333778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29ffeb65ffb356844a37ec5a1e368208, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 0}
+  backButton: {fileID: 0}
+  playAgainButton: {fileID: 0}
+  winPanelNormal: {fileID: 0}
+  losePanelNormal: {fileID: 0}
+  winPanelRealMoney: {fileID: 0}
+  losePanelRealMoney: {fileID: 0}
+  tapButton: {fileID: 1128792909}
+  button3D: {fileID: 1095136881}
+  instructionText: {fileID: 25026866}
+  reactionTimeText: {fileID: 592527726}
+  roundText: {fileID: 2133585540}
+  averageText: {fileID: 11972305}
+  bestTimeText: {fileID: 2146615956}
+  winPanel: {fileID: 0}
+  buttonUpSprite: {fileID: 0}
+  buttonDownSprite: {fileID: 0}
+  totalAttempts: 5
+  minWaitTime: 2.5
+  maxWaitTime: 6
+  restartDelayAfterError: 1.2
+  delayBetweenAttempts: 1.5
+  enableSuccessParticles: 1
+  enableHaptics: 1
 --- !u!1 &1095136880
 GameObject:
   m_ObjectHideFlags: 0
@@ -2374,6 +2442,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: BackButton
       objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -40
+      objectReference: {fileID: 0}
     - target: {fileID: 7832769091790169039, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2461,9 +2537,20 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
 --- !u!224 &1128792908 stripped
 RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8190047914990340927, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+  m_CorrespondingSourceObject: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
   m_PrefabInstance: {fileID: 1128792907}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1128792909 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7450789583660184636, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+  m_PrefabInstance: {fileID: 1128792907}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1197844562
 GameObject:
   m_ObjectHideFlags: 0
@@ -2671,7 +2758,6 @@ GameObject:
   - component: {fileID: 1356434171}
   - component: {fileID: 1356434170}
   - component: {fileID: 1356434169}
-  - component: {fileID: 1356434168}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2679,42 +2765,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1356434168
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1356434167}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29ffeb65ffb356844a37ec5a1e368208, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  config: {fileID: 0}
-  backButton: {fileID: 0}
-  playAgainButton: {fileID: 0}
-  winPanelNormal: {fileID: 0}
-  losePanelNormal: {fileID: 0}
-  winPanelRealMoney: {fileID: 0}
-  losePanelRealMoney: {fileID: 0}
-  tapButton: {fileID: 1020287091}
-  button3D: {fileID: 1095136881}
-  instructionText: {fileID: 25026866}
-  reactionTimeText: {fileID: 592527726}
-  roundText: {fileID: 2133585540}
-  averageText: {fileID: 11972305}
-  bestTimeText: {fileID: 2146615956}
-  winPanel: {fileID: 246714763}
-  buttonUpSprite: {fileID: 21300000, guid: a1b2c3d4e5f6789012345678abcdef01, type: 3}
-  buttonDownSprite: {fileID: 21300000, guid: b2c3d4e5f6789012345678abcdef0102, type: 3}
-  totalAttempts: 5
-  minWaitTime: 1.5
-  maxWaitTime: 4
-  restartDelayAfterError: 1.2
-  delayBetweenAttempts: 1.5
-  enableSuccessParticles: 1
-  enableHaptics: 1
 --- !u!114 &1356434169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3812,4 +3862,5 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 1356434172}
   - {fileID: 1197844565}
+  - {fileID: 1066333779}
   - {fileID: 1500403837}

@@ -12,7 +12,7 @@ namespace DigitPark.Monetization
         Theme,          // Tema visual
         Avatar,         // Avatar
         SpecialOffer,   // Oferta especial (bundle)
-        PremiumBundle,  // Bundle premium (era BattlePass)
+        PremiumBundle,  // Bundle premium
         StarterPack     // Paquete de inicio
     }
 

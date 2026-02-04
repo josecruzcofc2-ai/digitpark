@@ -2,882 +2,762 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
-using UnityEngine.EventSystems;
 
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Cash Battle Onboarding UI Builder - Premium GOLD theme
-    /// Emphasizes REAL MONEY gameplay, 18+ verification, and transparent rules
-    /// Flow: AgeVerification → Cash Battle Hub → Deposit → Play → Win
+    /// Cash Battle Onboarding UI Builder - Rediseño completo GOLD PREMIUM
+    /// Layout: ProgressBar → TopBar → Slides(Icon+Title+ContentCard) → Dots → Navigation → Legal
+    /// 5 slides: Bienvenida, Verificación 18+, Depósito, Juega y Apuesta, Gana y Retira
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    ///
+    /// Menu: DigitPark/UI Builders/Onboarding/Cash Battle Onboarding
     /// </summary>
-    public static class CashBattleOnboardingUIBuilder
+    public class CashBattleOnboardingUIBuilder : EditorWindow
     {
-        private const float SCREEN_WIDTH = 1080f;
-        private const float SCREEN_HEIGHT = 1920f;
+        #region Colors - Gold Premium Theme
 
-        // Colors - GOLD Premium Theme (Cash Battle)
-        private static readonly Color GoldPremium = new Color(1f, 0.843f, 0f, 1f); // #FFD700
-        private static readonly Color DarkBrown = new Color(0.039f, 0.031f, 0.02f, 1f); // #0A0805
-        private static readonly Color CardBackground = new Color(0.2f, 0.133f, 0.067f, 0.95f);
-        private static readonly Color GreenSuccess = new Color(0f, 1f, 0.5f, 1f); // Neon green for "WIN"
-        private static readonly Color TextWhite = Color.white;
-        private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
+        private static readonly Color GOLD = new Color(1f, 0.843f, 0f, 1f);
+        private static readonly Color GOLD_DARK = new Color(0.55f, 0.45f, 0f, 1f);
+        private static readonly Color GOLD_GLOW = new Color(1f, 0.843f, 0f, 0.06f);
+        private static readonly Color ORANGE_GOLD = new Color(1f, 0.647f, 0f, 1f);
 
-        // Slide accent colors (GOLD variations)
-        private static readonly Color[] SlideColors = new Color[]
+        private static readonly Color DARK_BG = new Color(0.039f, 0.031f, 0.02f, 1f);
+        private static readonly Color CARD_BG = new Color(0.10f, 0.07f, 0.03f, 0.95f);
+        private static readonly Color CARD_BG_LIGHT = new Color(0.14f, 0.10f, 0.05f, 1f);
+
+        private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
+        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.55f, 0.45f, 1f);
+        private static readonly Color TEXT_DARK = new Color(0.05f, 0.04f, 0.02f, 1f);
+
+        private static readonly Color GREEN_WIN = new Color(0f, 1f, 0.5f, 1f);
+
+        #endregion
+
+        #region Layout Anchors (Y: 0=bottom, 1=top)
+
+        private const float PROGRESS_TOP = 0.993f;
+        private const float PROGRESS_BOT = 0.990f;
+
+        private const float TOPBAR_TOP = 0.988f;
+        private const float TOPBAR_BOT = 0.955f;
+
+        private const float ICON_TOP = 0.92f;
+        private const float ICON_BOT = 0.58f;
+
+        private const float TITLE_TOP = 0.56f;
+        private const float TITLE_BOT = 0.47f;
+
+        private const float CONTENT_TOP = 0.45f;
+        private const float CONTENT_BOT = 0.12f;
+
+        private const float DOTS_TOP = 0.095f;
+        private const float DOTS_BOT = 0.065f;
+
+        private const float NAV_TOP = 0.055f;
+        private const float NAV_BOT = 0.015f;
+
+        private const float SIDE_PAD = 30f;
+
+        #endregion
+
+        #region Icon Paths
+
+        private const string ICONS_BASE = "Assets/_Project/Art/Icons/CashBattle/";
+
+        private static readonly string[] SLIDE_ICONS =
         {
-            new Color(1f, 0.843f, 0f, 1f),     // Slide 1: Pure Gold
-            new Color(1f, 0.647f, 0f, 1f),     // Slide 2: Orange Gold
-            new Color(1f, 0.549f, 0f, 1f),     // Slide 3: Dark Orange Gold
-            new Color(0.85f, 0.647f, 0.125f, 1f), // Slide 4: Dark Gold
-            new Color(0f, 1f, 0.5f, 1f)        // Slide 5: Neon Green (WIN!)
+            ICONS_BASE + "UI/CashBattleIconNeon.png",          // Slide 1: Welcome (reusa logo)
+            ICONS_BASE + "UI/VerificationIcon.png",            // Slide 2: Verificación
+            ICONS_BASE + "Wallet/DepositIcon.png",             // Slide 3: Depósito
+            ICONS_BASE + "Tournaments/TrophyPrizeIcon.png",    // Slide 4: Juega
+            ICONS_BASE + "UI/icon_cash.png"                    // Slide 5: Gana
         };
 
-        // Paths
-        private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
-        private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
-
-        // Cash Battle Icons
-        private const string VERIFICATION_ICON = "Assets/_Project/Art/Icons/CashBattle/UI/VerificationIcon.png";
-        private const string WALLET_ICON = "Assets/_Project/Art/Icons/CashBattle/Wallet/DepositIcon.png";
-        private const string TROPHY_ICON = "Assets/_Project/Art/Icons/CashBattle/UI/TrophyIcon.png";
-        private const string CASH_ICON = "Assets/_Project/Art/Icons/CashBattle/Wallet/CashIcon.png";
-
-        // Spacing
-        private const float PADDING = 30f;
-        private const float CARD_PADDING = 40f;
-        private const float ELEMENT_SPACING = 20f;
-        private const float BUTTON_HEIGHT = 70f;
-        private const float NUMBER_SIZE = 150f;
-
-        private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
-        private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
+        #endregion
 
         [MenuItem("DigitPark/UI Builders/Onboarding/Cash Battle Onboarding", false, 302)]
-        public static void RebuildCashBattleOnboarding()
+        public static void ShowWindow()
         {
-            try
+            GetWindow<CashBattleOnboardingUIBuilder>("CashBattle Onboarding Builder");
+        }
+
+        private void OnGUI()
+        {
+            GUILayout.Label("Cash Battle Onboarding Builder", EditorStyles.boldLabel);
+            GUILayout.Label("Onboarding GOLD Premium - Dinero Real - REDISEÑO", EditorStyles.miniLabel);
+            GUILayout.Space(10);
+
+            EditorGUILayout.HelpBox(
+                "Nuevo diseño (de arriba a abajo):\n\n" +
+                "1. Progress Bar (línea delgada gold)\n" +
+                "2. Top Bar (CASH BATTLE + contador + saltar)\n" +
+                "3. Slide Icon (grande centrado por slide)\n" +
+                "4. Slide Title (título gold por slide)\n" +
+                "5. Content Card (descripción + bullets por slide)\n" +
+                "6. Navigation dots (gold)\n" +
+                "7. Back / Next buttons\n" +
+                "8. Legal text\n\n" +
+                "5 slides: Bienvenida, Verificación 18+,\n" +
+                "Depósito, Juega y Apuesta, Gana y Retira",
+                MessageType.Info);
+
+            GUILayout.Space(15);
+
+            GUI.backgroundColor = GOLD;
+            if (GUILayout.Button("RECONSTRUIR CASH BATTLE ONBOARDING", GUILayout.Height(50)))
+                RebuildCashBattleOnboarding();
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.Space(10);
+            GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
+
+            if (GUILayout.Button("1. Background + Top Bar", GUILayout.Height(25)))
             {
-                if (WhiteSprite == null || DefaultFont == null)
-                {
-                    Debug.LogError("❌ Missing prerequisites! Check WhiteSquare.png and Font");
-                    return;
-                }
-
-                Debug.Log("💰 Starting Cash Battle Onboarding UI Build (GOLD PREMIUM)...");
-
-                // Clean entire scene first
-                CleanEntireScene();
-
-                // Create Canvas and EventSystem
-                Canvas canvas = CreateCanvas();
-                CreateEventSystem();
-
-                // Build UI
-                BuildBackground(canvas);
-                BuildLogo(canvas);
-                GameObject safeArea = BuildSlidesContainer(canvas);
-
-                // Add and configure the Manager component
-                SetupManager(canvas, safeArea);
-
-                Canvas.ForceUpdateCanvases();
-
-                Debug.Log("✅ Cash Battle Onboarding UI built successfully!");
-                Debug.Log("💡 Use 'DigitPark/UI Builders/Onboarding/Preview Slides' to test");
-                EditorUtility.SetDirty(canvas.gameObject);
+                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
             }
-            catch (System.Exception e)
+            if (GUILayout.Button("2. Slides Container (5 slides)", GUILayout.Height(25)))
+                CreateSlidesContainer();
+            if (GUILayout.Button("3. Navigation (Dots + Buttons)", GUILayout.Height(25)))
+                CreateNavigation();
+            if (GUILayout.Button("4. Legal Text", GUILayout.Height(25)))
+                CreateLegalText();
+
+            GUILayout.Space(15);
+
+            GUI.backgroundColor = ORANGE_GOLD;
+            if (GUILayout.Button("ASIGNAR REFERENCIAS AL MANAGER", GUILayout.Height(35)))
+                SetupManagerReferences();
+            GUI.backgroundColor = Color.white;
+        }
+
+        #region Main Rebuild
+
+        private static void RebuildCashBattleOnboarding()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null)
             {
-                Debug.LogError($"❌ Error in CashBattleOnboardingUIBuilder: {e.Message}\n{e.StackTrace}");
+                Debug.LogError("[CashBattleOnboardingUI] No se encontro Canvas");
+                return;
             }
-        }
 
-        private static void CleanEntireScene()
-        {
-            // Find all root GameObjects in the scene
-            var rootObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
-
-            foreach (var obj in rootObjects)
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
             {
-                // Keep only the Main Camera
-                if (obj.name != "Main Camera")
-                {
-                    Object.DestroyImmediate(obj);
-                }
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0f;
             }
 
-            Debug.Log("🧹 Scene cleaned completely");
+            // Limpiar elementos anteriores
+            string[] oldNames =
+            {
+                "Background", "ProgressBar", "TopBar", "Logo",
+                "SlidesContainer", "SafeArea", "NavigationPanel",
+                "DotsContainer", "LegalText", "LegalTextContainer"
+            };
+            foreach (var n in oldNames)
+            {
+                Transform t = canvas.transform.Find(n);
+                if (t != null) DestroyImmediate(t.gameObject);
+            }
+
+            CreateBackground(canvas.transform);
+            CreateTopBar();
+            CreateSlidesContainer();
+            CreateNavigation();
+            CreateLegalText();
+            SetupManagerReferences();
+
+            Debug.Log("[CashBattleOnboardingUI] Onboarding RECONSTRUIDO exitosamente!");
+            EditorUtility.SetDirty(canvas.gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
 
-        private static Canvas CreateCanvas()
+        private static void CreateBackground(Transform parent)
         {
-            GameObject canvasObj = new GameObject("Canvas");
-            Canvas canvas = canvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-            CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(SCREEN_WIDTH, SCREEN_HEIGHT);
-            scaler.matchWidthOrHeight = 0f;
-
-            canvasObj.AddComponent<GraphicRaycaster>();
-
-            Debug.Log("✅ Canvas created");
-            return canvas;
-        }
-
-        private static void CreateEventSystem()
-        {
-            GameObject eventSystemObj = new GameObject("EventSystem");
-            eventSystemObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
-            eventSystemObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-
-            Debug.Log("✅ EventSystem created");
-        }
-
-        private static void BuildBackground(Canvas canvas)
-        {
-            GameObject bg = new GameObject("Background");
-            bg.transform.SetParent(canvas.transform, false);
-
-            RectTransform rect = bg.AddComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.sizeDelta = Vector2.zero;
-
-            Image image = bg.AddComponent<Image>();
-            image.sprite = WhiteSprite;
-            image.color = DarkBrown;
-
+            var bg = FindOrCreate(parent, "Background");
             bg.transform.SetAsFirstSibling();
+            var rt = GetOrAdd<RectTransform>(bg);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(bg).color = DARK_BG;
         }
 
-        private static void BuildLogo(Canvas canvas)
+        #endregion
+
+        #region Top Bar (Progress + Title + Skip)
+
+        private static void CreateTopBar()
         {
-            GameObject logo = new GameObject("Logo");
-            logo.transform.SetParent(canvas.transform, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform rect = logo.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1);
-            rect.anchorMax = new Vector2(0.5f, 1);
-            rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(600, 150);
-            rect.anchoredPosition = new Vector2(0, -60);
+            // --- Progress Bar (thin gold line at very top) ---
+            var progressGO = FindOrCreate(canvas.transform, "ProgressBar");
+            var pRT = GetOrAdd<RectTransform>(progressGO);
+            SetAnchors(pRT, 0, PROGRESS_BOT, 1, PROGRESS_TOP);
 
-            TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = "CASH BATTLE";
-            text.fontSize = 64;
-            text.fontStyle = FontStyles.Bold;
-            text.color = GoldPremium;
-            text.alignment = TextAlignmentOptions.Center;
+            var slider = GetOrAdd<Slider>(progressGO);
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0;
+            slider.maxValue = 4;
+            slider.wholeNumbers = true;
+            slider.value = 0;
+            slider.interactable = false;
 
-            // Gold glow effect
-            Outline outline = logo.AddComponent<Outline>();
-            outline.effectColor = new Color(1f, 0.647f, 0f, 0.5f);
-            outline.effectDistance = new Vector2(2, -2);
+            // Slider Background (dark track)
+            var sliderBg = FindOrCreate(progressGO.transform, "Background");
+            var sbRT = GetOrAdd<RectTransform>(sliderBg);
+            sbRT.anchorMin = Vector2.zero;
+            sbRT.anchorMax = Vector2.one;
+            sbRT.offsetMin = Vector2.zero;
+            sbRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(sliderBg).color = new Color(0.15f, 0.12f, 0.05f, 1f);
+
+            // Fill Area
+            var fillArea = FindOrCreate(progressGO.transform, "Fill Area");
+            var faRT = GetOrAdd<RectTransform>(fillArea);
+            faRT.anchorMin = Vector2.zero;
+            faRT.anchorMax = Vector2.one;
+            faRT.offsetMin = Vector2.zero;
+            faRT.offsetMax = Vector2.zero;
+
+            var fill = FindOrCreate(fillArea.transform, "Fill");
+            var fRT = GetOrAdd<RectTransform>(fill);
+            fRT.anchorMin = Vector2.zero;
+            fRT.anchorMax = Vector2.one;
+            fRT.offsetMin = Vector2.zero;
+            fRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(fill).color = GOLD;
+
+            slider.fillRect = fRT;
+            slider.handleRect = null;
+            slider.targetGraphic = GetOrAdd<Image>(progressGO);
+            GetOrAdd<Image>(progressGO).color = Color.clear;
+
+            // --- Top Bar (CASH BATTLE + progress text + skip) ---
+            var topBar = FindOrCreate(canvas.transform, "TopBar");
+            var tbRT = GetOrAdd<RectTransform>(topBar);
+            SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
+
+            // CASH BATTLE title (left)
+            var titleLabel = FindOrCreate(topBar.transform, "TitleLabel");
+            var tlRT = GetOrAdd<RectTransform>(titleLabel);
+            tlRT.anchorMin = new Vector2(0, 0);
+            tlRT.anchorMax = new Vector2(0.45f, 1);
+            tlRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            tlRT.offsetMax = Vector2.zero;
+            var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLabel);
+            tlTMP.text = "CASH BATTLE";
+            tlTMP.fontSize = 20;
+            tlTMP.color = GOLD;
+            tlTMP.fontStyle = FontStyles.Bold;
+            tlTMP.alignment = TextAlignmentOptions.Left;
+
+            // Progress Text (center)
+            var progressText = FindOrCreate(topBar.transform, "ProgressText");
+            var ptRT = GetOrAdd<RectTransform>(progressText);
+            ptRT.anchorMin = new Vector2(0.35f, 0);
+            ptRT.anchorMax = new Vector2(0.65f, 1);
+            ptRT.offsetMin = Vector2.zero;
+            ptRT.offsetMax = Vector2.zero;
+            var ptTMP = GetOrAdd<TextMeshProUGUI>(progressText);
+            ptTMP.text = "1 / 5";
+            ptTMP.fontSize = 16;
+            ptTMP.color = TEXT_SECONDARY;
+            ptTMP.alignment = TextAlignmentOptions.Center;
+
+            // Skip Button (right)
+            var skipBtn = FindOrCreate(topBar.transform, "SkipButton");
+            var sRT = GetOrAdd<RectTransform>(skipBtn);
+            sRT.anchorMin = new Vector2(0.7f, 0.1f);
+            sRT.anchorMax = new Vector2(1, 0.9f);
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = new Vector2(-SIDE_PAD, 0);
+            var sBg = GetOrAdd<Image>(skipBtn);
+            sBg.color = new Color(1, 1, 1, 0.05f);
+            GetOrAdd<Button>(skipBtn).targetGraphic = sBg;
+
+            var skipText = FindOrCreate(skipBtn.transform, "Text");
+            var stRT = GetOrAdd<RectTransform>(skipText);
+            stRT.anchorMin = Vector2.zero;
+            stRT.anchorMax = Vector2.one;
+            stRT.offsetMin = Vector2.zero;
+            stRT.offsetMax = Vector2.zero;
+            var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
+            stTMP.text = "SALTAR";
+            stTMP.fontSize = 16;
+            stTMP.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.7f);
+            stTMP.fontStyle = FontStyles.Bold;
+            stTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[CashBattleOnboardingUI] TopBar creado (ProgressBar + Title + ProgressText + Skip)");
         }
 
-        private static GameObject BuildSlidesContainer(Canvas canvas)
+        #endregion
+
+        #region Slides Container
+
+        private static void CreateSlidesContainer()
         {
-            GameObject safeArea = new GameObject("SafeArea");
-            safeArea.transform.SetParent(canvas.transform, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform safeRect = safeArea.AddComponent<RectTransform>();
-            safeRect.anchorMin = Vector2.zero;
-            safeRect.anchorMax = Vector2.one;
-            safeRect.sizeDelta = Vector2.zero;
+            var container = FindOrCreate(canvas.transform, "SlidesContainer");
+            var cRT = GetOrAdd<RectTransform>(container);
+            cRT.anchorMin = Vector2.zero;
+            cRT.anchorMax = Vector2.one;
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
 
-            GameObject container = new GameObject("SlidesContainer");
-            container.transform.SetParent(safeArea.transform, false);
-
-            RectTransform containerRect = container.AddComponent<RectTransform>();
-            containerRect.anchorMin = Vector2.zero;
-            containerRect.anchorMax = Vector2.one;
-            containerRect.sizeDelta = Vector2.zero;
-
-            // Create 5 slides
             CreateSlide1_Welcome(container.transform);
             CreateSlide2_Verification(container.transform);
             CreateSlide3_Deposit(container.transform);
             CreateSlide4_Play(container.transform);
             CreateSlide5_Win(container.transform);
 
-            // Create navigation panel
-            CreateNavigationPanel(safeArea.transform);
-
-            return safeArea;
-        }
-
-        private static void SetupManager(Canvas canvas, GameObject safeArea)
-        {
-            // Remove old manager if exists
-            var oldManager = canvas.GetComponent<DigitPark.Managers.CashBattleOnboardingManager>();
-            if (oldManager != null)
-            {
-                Object.DestroyImmediate(oldManager);
-            }
-
-            // Add new manager
-            var manager = canvas.gameObject.AddComponent<DigitPark.Managers.CashBattleOnboardingManager>();
-
-            // Auto-wire references using SerializedObject (works in edit mode)
-            var serializedManager = new UnityEditor.SerializedObject(manager);
-
-            // Find and assign SlidesContainer
-            Transform slidesContainer = safeArea.transform.Find("SlidesContainer");
-            if (slidesContainer != null)
-            {
-                serializedManager.FindProperty("slidesContainer").objectReferenceValue = slidesContainer;
-            }
-
-            // Find and assign navigation elements
-            Transform navPanel = safeArea.transform.Find("NavigationPanel");
-            if (navPanel != null)
-            {
-                Transform buttonsContainer = navPanel.Find("Buttons");
-                if (buttonsContainer != null)
-                {
-                    Transform nextBtn = buttonsContainer.Find("NextButton");
-                    if (nextBtn != null)
-                    {
-                        serializedManager.FindProperty("nextButton").objectReferenceValue = nextBtn.GetComponent<Button>();
-                        serializedManager.FindProperty("nextButtonText").objectReferenceValue = nextBtn.GetComponentInChildren<TextMeshProUGUI>();
-                    }
-
-                    Transform backBtn = buttonsContainer.Find("BackButton");
-                    if (backBtn != null)
-                    {
-                        serializedManager.FindProperty("backButton").objectReferenceValue = backBtn.GetComponent<Button>();
-                    }
-                }
-
-                Transform skipBtn = navPanel.Find("SkipButton");
-                if (skipBtn != null)
-                {
-                    serializedManager.FindProperty("skipButton").objectReferenceValue = skipBtn.GetComponent<Button>();
-                }
-
-                Transform dotsContainer = navPanel.Find("DotsContainer");
-                if (dotsContainer != null)
-                {
-                    serializedManager.FindProperty("dotsContainer").objectReferenceValue = dotsContainer;
-                }
-            }
-
-            // Set configuration
-            serializedManager.FindProperty("totalSlides").intValue = 5;
-            serializedManager.FindProperty("allowSkip").boolValue = true;
-            serializedManager.FindProperty("transitionDuration").floatValue = 0.3f;
-
-            serializedManager.ApplyModifiedProperties();
-
-            Debug.Log("✅ CashBattleOnboardingManager added and configured!");
+            Debug.Log("[CashBattleOnboardingUI] SlidesContainer creado con 5 slides");
         }
 
         private static void CreateSlide1_Welcome(Transform parent)
         {
-            Transform content = CreateSlideBase(parent, "Slide1", 1, out GameObject slideObj);
+            var slide = CreateSlideBase(parent, "Slide1", 0, true);
 
-            // Create number divider OUTSIDE content (not in VerticalLayoutGroup)
-            CreateSlideNumberDivider(slideObj.transform, 1, SlideColors[0]);
-            CreateTitle(content, "¡BIENVENIDO A\nCASH BATTLE!", GoldPremium);
-            CreateSpacer(content, 20f);
-            CreateDescription(content, "La primera plataforma de competencias\ncon DINERO REAL en Digit Park");
-            CreateSpacer(content, 10f);
-            CreateHighlightText(content, "💰 GANA DINERO REAL JUGANDO 💰", GreenSuccess);
-            CreateSpacer(content, 10f);
-            CreateDescription(content, "• Competencias 1v1 desde $1 USD");
-            CreateDescription(content, "• Torneos con premios garantizados");
-            CreateDescription(content, "• Retiros rápidos y seguros");
+            CreateSlideTitle(slide, "\u00A1BIENVENIDO A\nCASH BATTLE!", GOLD);
+
+            var card = CreateContentCard(slide);
+            AddContentText(card, "La plataforma de competencias\ncon DINERO REAL en Digit Park", 20, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(card, 8);
+            AddContentText(card, "GANA DINERO REAL JUGANDO", 22, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentSpacer(card, 12);
+            AddContentText(card, "\u2022  Competencias 1v1 desde $1 USD", 18, TEXT_WHITE);
+            AddContentText(card, "\u2022  Torneos con premios garantizados", 18, TEXT_WHITE);
+            AddContentText(card, "\u2022  Retiros r\u00E1pidos y seguros", 18, TEXT_WHITE);
         }
 
         private static void CreateSlide2_Verification(Transform parent)
         {
-            Transform content = CreateSlideBase(parent, "Slide2", 2, out GameObject slideObj);
+            var slide = CreateSlideBase(parent, "Slide2", 1, false);
 
-            CreateSlideNumberDivider(slideObj.transform, 2, SlideColors[1]);
-            CreateTitle(content, "VERIFICA TU EDAD\n(18+ REQUERIDO)", GoldPremium);
-            CreateSpacer(content, 20f);
+            CreateSlideTitle(slide, "VERIFICA TU EDAD\n(18+ REQUERIDO)", GOLD);
 
-            // Icon
-            Sprite verificationIcon = AssetDatabase.LoadAssetAtPath<Sprite>(VERIFICATION_ICON);
-            if (verificationIcon != null)
-            {
-                CreateIcon(content, verificationIcon, 120f);
-                CreateSpacer(content, 10f);
-            }
-
-            CreateDescription(content, "Para jugar con dinero real, debes:");
-            CreateSpacer(content, 10f);
-            CreateBulletPoint(content, "✓ Ser mayor de 18 años");
-            CreateBulletPoint(content, "✓ Verificar tu identidad con Triump™");
-            CreateBulletPoint(content, "✓ Confirmar tu información bancaria");
-            CreateSpacer(content, 20f);
-            CreateHighlightText(content, "Proceso 100% seguro y confidencial", TextGray);
+            var card = CreateContentCard(slide);
+            AddContentText(card, "Para jugar con dinero real, debes:", 20, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(card, 10);
+            AddContentText(card, "\u2713  Ser mayor de 18 a\u00F1os", 18, TEXT_WHITE);
+            AddContentText(card, "\u2713  Verificar tu identidad con Triump\u2122", 18, TEXT_WHITE);
+            AddContentText(card, "\u2713  Confirmar tu informaci\u00F3n bancaria", 18, TEXT_WHITE);
+            AddContentSpacer(card, 12);
+            AddContentText(card, "Proceso 100% seguro y confidencial", 16, TEXT_SECONDARY, TextAlignmentOptions.Center);
         }
 
         private static void CreateSlide3_Deposit(Transform parent)
         {
-            Transform content = CreateSlideBase(parent, "Slide3", 3, out GameObject slideObj);
+            var slide = CreateSlideBase(parent, "Slide3", 2, false);
 
-            CreateSlideNumberDivider(slideObj.transform, 3, SlideColors[2]);
-            CreateTitle(content, "DEPOSITA FONDOS\nEN TU WALLET", GoldPremium);
-            CreateSpacer(content, 20f);
+            CreateSlideTitle(slide, "DEPOSITA FONDOS\nEN TU WALLET", GOLD);
 
-            // Icon
-            Sprite walletIcon = AssetDatabase.LoadAssetAtPath<Sprite>(WALLET_ICON);
-            if (walletIcon != null)
-            {
-                CreateIcon(content, walletIcon, 120f);
-                CreateSpacer(content, 10f);
-            }
-
-            CreateDescription(content, "Añade dinero a tu cuenta fácilmente:");
-            CreateSpacer(content, 10f);
-            CreateBulletPoint(content, "💳 Tarjeta de crédito/débito");
-            CreateBulletPoint(content, "🏦 Transferencia bancaria");
-            CreateBulletPoint(content, "📱 Métodos de pago locales");
-            CreateSpacer(content, 20f);
-            CreateHighlightText(content, "Depósito mínimo: $5 USD", GoldPremium);
-            CreateSpacer(content, 5f);
-            CreateDescription(content, "🎁 Bonos de bienvenida disponibles");
+            var card = CreateContentCard(slide);
+            AddContentText(card, "A\u00F1ade dinero a tu cuenta f\u00E1cilmente:", 20, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(card, 10);
+            AddContentText(card, "\u2022  Tarjeta de cr\u00E9dito/d\u00E9bito", 18, TEXT_WHITE);
+            AddContentText(card, "\u2022  Transferencia bancaria", 18, TEXT_WHITE);
+            AddContentText(card, "\u2022  M\u00E9todos de pago locales", 18, TEXT_WHITE);
+            AddContentSpacer(card, 12);
+            AddContentText(card, "Dep\u00F3sito m\u00EDnimo: $5 USD", 20, GOLD, TextAlignmentOptions.Center, true);
         }
 
         private static void CreateSlide4_Play(Transform parent)
         {
-            Transform content = CreateSlideBase(parent, "Slide4", 4, out GameObject slideObj);
+            var slide = CreateSlideBase(parent, "Slide4", 3, false);
 
-            CreateSlideNumberDivider(slideObj.transform, 4, SlideColors[3]);
-            CreateTitle(content, "ELIGE TU JUEGO\nY APUESTA", GoldPremium);
-            CreateSpacer(content, 20f);
+            CreateSlideTitle(slide, "ELIGE TU JUEGO\nY APUESTA", GOLD);
 
-            // Icon
-            Sprite trophyIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TROPHY_ICON);
-            if (trophyIcon != null)
-            {
-                CreateIcon(content, trophyIcon, 120f);
-                CreateSpacer(content, 10f);
-            }
-
-            CreateDescription(content, "Dos formas de competir:");
-            CreateSpacer(content, 10f);
-            CreateHighlightText(content, "⚔️ COMPETENCIAS 1v1", new Color(1f, 0.647f, 0f, 1f));
-            CreateBulletPoint(content, "• Matchmaking basado en habilidad (MMR)");
-            CreateBulletPoint(content, "• Apuestas desde $1 hasta $250 USD");
-            CreateBulletPoint(content, "• El ganador se lleva el 80%");
-            CreateSpacer(content, 10f);
-            CreateHighlightText(content, "🏆 TORNEOS", new Color(1f, 0.647f, 0f, 1f));
-            CreateBulletPoint(content, "• Hasta 256 jugadores");
-            CreateBulletPoint(content, "• Premios garantizados");
-            CreateBulletPoint(content, "• Sistema de brackets profesional");
+            var card = CreateContentCard(slide);
+            AddContentText(card, "COMPETENCIAS 1v1", 20, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Matchmaking por habilidad (MMR)", 17, TEXT_WHITE);
+            AddContentText(card, "\u2022  Apuestas desde $1 hasta $250 USD", 17, TEXT_WHITE);
+            AddContentText(card, "\u2022  El ganador se lleva el 80%", 17, TEXT_WHITE);
+            AddContentSpacer(card, 8);
+            AddContentText(card, "TORNEOS", 20, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Hasta 256 jugadores", 17, TEXT_WHITE);
+            AddContentText(card, "\u2022  Premios garantizados", 17, TEXT_WHITE);
+            AddContentText(card, "\u2022  Sistema de brackets profesional", 17, TEXT_WHITE);
         }
 
         private static void CreateSlide5_Win(Transform parent)
         {
-            Transform content = CreateSlideBase(parent, "Slide5", 5, out GameObject slideObj);
+            var slide = CreateSlideBase(parent, "Slide5", 4, false);
 
-            CreateSlideNumberDivider(slideObj.transform, 5, SlideColors[4]);
-            CreateTitle(content, "¡GANA Y RETIRA\nTU DINERO!", GreenSuccess);
-            CreateSpacer(content, 20f);
+            CreateSlideTitle(slide, "\u00A1GANA Y RETIRA\nTU DINERO!", GREEN_WIN);
 
-            // Icon
-            Sprite cashIcon = AssetDatabase.LoadAssetAtPath<Sprite>(CASH_ICON);
-            if (cashIcon != null)
-            {
-                CreateIcon(content, cashIcon, 120f);
-                CreateSpacer(content, 10f);
-            }
-
-            CreateHighlightText(content, "💸 RETIROS RÁPIDOS Y SEGUROS 💸", GreenSuccess);
-            CreateSpacer(content, 20f);
-            CreateBulletPoint(content, "✓ Retiro mínimo: $10 USD");
-            CreateBulletPoint(content, "✓ Máximo: $500 USD por retiro");
-            CreateBulletPoint(content, "✓ Procesamiento en 1-3 días hábiles");
-            CreateBulletPoint(content, "✓ Directo a tu cuenta bancaria");
-            CreateSpacer(content, 20f);
-            CreateDescription(content, "Rastrea tus ganancias en tiempo real\nen el historial de transacciones");
-            CreateSpacer(content, 10f);
-            CreateHighlightText(content, "🎮 ¡EMPIEZA A GANAR HOY! 🎮", GoldPremium);
+            var card = CreateContentCard(slide);
+            AddContentText(card, "RETIROS R\u00C1PIDOS Y SEGUROS", 20, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentSpacer(card, 10);
+            AddContentText(card, "\u2713  Retiro m\u00EDnimo: $10 USD", 18, TEXT_WHITE);
+            AddContentText(card, "\u2713  M\u00E1ximo: $500 USD por retiro", 18, TEXT_WHITE);
+            AddContentText(card, "\u2713  Procesamiento en 1-3 d\u00EDas h\u00E1biles", 18, TEXT_WHITE);
+            AddContentText(card, "\u2713  Directo a tu cuenta bancaria", 18, TEXT_WHITE);
+            AddContentSpacer(card, 12);
+            AddContentText(card, "\u00A1EMPIEZA A GANAR HOY!", 22, GOLD, TextAlignmentOptions.Center, true);
         }
 
-        private static Transform CreateSlideBase(Transform parent, string name, int index, out GameObject slideObj)
+        #endregion
+
+        #region Slide Building Helpers
+
+        private static Transform CreateSlideBase(Transform parent, string name, int iconIndex, bool active)
         {
-            GameObject slide = new GameObject(name);
-            slide.transform.SetParent(parent, false);
-            slideObj = slide; // Return slide for external access
+            var slide = FindOrCreate(parent, name);
+            var sRT = GetOrAdd<RectTransform>(slide);
+            sRT.anchorMin = Vector2.zero;
+            sRT.anchorMax = Vector2.one;
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = Vector2.zero;
+            slide.SetActive(active);
 
-            RectTransform slideRect = slide.AddComponent<RectTransform>();
-            slideRect.anchorMin = Vector2.zero;
-            slideRect.anchorMax = Vector2.one;
-            slideRect.sizeDelta = Vector2.zero;
+            // Clear old children for clean rebuild
+            while (slide.transform.childCount > 0)
+                DestroyImmediate(slide.transform.GetChild(0).gameObject);
 
-            // Card container
-            GameObject card = new GameObject("Card");
-            card.transform.SetParent(slide.transform, false);
+            // Icon Glow (subtle gold glow behind icon)
+            var glow = new GameObject("IconGlow");
+            glow.transform.SetParent(slide.transform, false);
+            var glRT = glow.AddComponent<RectTransform>();
+            glRT.anchorMin = new Vector2(0.10f, ICON_BOT - 0.03f);
+            glRT.anchorMax = new Vector2(0.90f, ICON_TOP + 0.01f);
+            glRT.offsetMin = Vector2.zero;
+            glRT.offsetMax = Vector2.zero;
+            glow.AddComponent<Image>().color = GOLD_GLOW;
 
-            RectTransform cardRect = card.AddComponent<RectTransform>();
-            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
-            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
-            cardRect.pivot = new Vector2(0.5f, 0.5f);
-            cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 0); // Centrado perfectamente
+            // Slide Icon (large centered)
+            var icon = new GameObject("SlideIcon");
+            icon.transform.SetParent(slide.transform, false);
+            var iRT = icon.AddComponent<RectTransform>();
+            iRT.anchorMin = new Vector2(0.20f, ICON_BOT);
+            iRT.anchorMax = new Vector2(0.80f, ICON_TOP);
+            iRT.offsetMin = Vector2.zero;
+            iRT.offsetMax = Vector2.zero;
+            var iImg = icon.AddComponent<Image>();
+            iImg.color = Color.white;
+            iImg.preserveAspect = true;
 
-            Image cardBg = card.AddComponent<Image>();
-            cardBg.sprite = WhiteSprite;
-            cardBg.color = CardBackground;
+            // Try load icon
+            if (iconIndex >= 0 && iconIndex < SLIDE_ICONS.Length)
+            {
+                Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(SLIDE_ICONS[iconIndex]);
+                if (sprite != null) iImg.sprite = sprite;
+            }
 
-            // Gold neon border
-            Outline outline = card.AddComponent<Outline>();
-            outline.effectColor = GoldPremium;
-            outline.effectDistance = new Vector2(3, -3);
+            return slide.transform;
+        }
 
-            // Content container with layout
-            GameObject content = new GameObject("Content");
+        private static void CreateSlideTitle(Transform slide, string text, Color color)
+        {
+            var title = new GameObject("SlideTitle");
+            title.transform.SetParent(slide, false);
+            var tRT = title.AddComponent<RectTransform>();
+            tRT.anchorMin = new Vector2(0.05f, TITLE_BOT);
+            tRT.anchorMax = new Vector2(0.95f, TITLE_TOP);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = title.AddComponent<TextMeshProUGUI>();
+            tTMP.text = text;
+            tTMP.fontSize = 32;
+            tTMP.color = color;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableWordWrapping = true;
+        }
+
+        private static Transform CreateContentCard(Transform slide)
+        {
+            var card = new GameObject("ContentCard");
+            card.transform.SetParent(slide, false);
+            var cRT = card.AddComponent<RectTransform>();
+            cRT.anchorMin = new Vector2(0.06f, CONTENT_BOT);
+            cRT.anchorMax = new Vector2(0.94f, CONTENT_TOP);
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
+
+            card.AddComponent<Image>().color = CARD_BG;
+            var outline = card.AddComponent<Outline>();
+            outline.effectColor = GOLD_DARK;
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            // Content VLG inside card
+            var content = new GameObject("Content");
             content.transform.SetParent(card.transform, false);
+            var coRT = content.AddComponent<RectTransform>();
+            coRT.anchorMin = Vector2.zero;
+            coRT.anchorMax = Vector2.one;
+            coRT.offsetMin = new Vector2(25, 15);
+            coRT.offsetMax = new Vector2(-25, -15);
 
-            RectTransform contentRect = content.AddComponent<RectTransform>();
-            contentRect.anchorMin = Vector2.zero;
-            contentRect.anchorMax = Vector2.one;
-            contentRect.sizeDelta = Vector2.zero;
+            var vlg = content.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 8;
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
 
-            VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = false;
-            layout.spacing = ELEMENT_SPACING;
-            layout.padding = new RectOffset((int)CARD_PADDING, (int)CARD_PADDING, (int)CARD_PADDING, (int)CARD_PADDING);
-
-            ContentSizeFitter fitter = card.AddComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            // Set slide active state
-            slide.SetActive(index == 1); // Only first slide active by default
-
-            // Return content transform directly
             return content.transform;
         }
 
-        private static void CreateSlideNumberDivider(Transform slideParent, int number, Color accentColor)
+        private static void AddContentText(Transform content, string text, int fontSize,
+            Color color, TextAlignmentOptions align = TextAlignmentOptions.Left, bool bold = false)
         {
-            // Container for divider + number (OUTSIDE VerticalLayoutGroup)
-            GameObject dividerContainer = new GameObject("DividerContainer");
-            dividerContainer.transform.SetParent(slideParent, false);
-
-            RectTransform containerRect = dividerContainer.AddComponent<RectTransform>();
-            containerRect.anchorMin = new Vector2(0.5f, 0.5f);
-            containerRect.anchorMax = new Vector2(0.5f, 0.5f);
-            containerRect.pivot = new Vector2(0.5f, 0.5f);
-            containerRect.sizeDelta = new Vector2(SCREEN_WIDTH, NUMBER_SIZE);
-            containerRect.anchoredPosition = new Vector2(0, 200); // Default position (user can move)
-
-            // Horizontal divider line
-            GameObject divider = new GameObject("Divider");
-            divider.transform.SetParent(dividerContainer.transform, false);
-
-            RectTransform dividerRect = divider.AddComponent<RectTransform>();
-            dividerRect.anchorMin = new Vector2(0.5f, 0.5f);
-            dividerRect.anchorMax = new Vector2(0.5f, 0.5f);
-            dividerRect.pivot = new Vector2(0.5f, 0.5f);
-            dividerRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 4), 4f);
-
-            Image dividerImage = divider.AddComponent<Image>();
-            dividerImage.sprite = WhiteSprite;
-            dividerImage.color = accentColor;
-
-            // Colored square (on top of divider)
-            GameObject square = new GameObject("Square");
-            square.transform.SetParent(dividerContainer.transform, false);
-
-            RectTransform squareRect = square.AddComponent<RectTransform>();
-            squareRect.anchorMin = new Vector2(0.5f, 0.5f);
-            squareRect.anchorMax = new Vector2(0.5f, 0.5f);
-            squareRect.pivot = new Vector2(0.5f, 0.5f);
-            squareRect.sizeDelta = new Vector2(NUMBER_SIZE, NUMBER_SIZE);
-
-            Image squareImage = square.AddComponent<Image>();
-            squareImage.sprite = WhiteSprite;
-            squareImage.color = accentColor;
-
-            // Number text
-            GameObject numberText = new GameObject("Text");
-            numberText.transform.SetParent(square.transform, false);
-
-            RectTransform textRect = numberText.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI text = numberText.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = number.ToString();
-            text.fontSize = 72;
-            text.fontStyle = FontStyles.Bold;
-            text.color = DarkBrown;
-            text.alignment = TextAlignmentOptions.Center;
+            var obj = new GameObject("Text");
+            obj.transform.SetParent(content, false);
+            obj.AddComponent<LayoutElement>().preferredHeight = fontSize + 12;
+            var tmp = obj.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = fontSize;
+            tmp.color = color;
+            tmp.alignment = align;
+            tmp.enableWordWrapping = true;
+            if (bold) tmp.fontStyle = FontStyles.Bold;
         }
 
-        private static void CreateSlideNumber(Transform parent, int number, Color accentColor)
+        private static void AddContentSpacer(Transform content, float height)
         {
-            GameObject numberContainer = new GameObject("NumberContainer");
-            numberContainer.transform.SetParent(parent, false);
-
-            LayoutElement layout = numberContainer.AddComponent<LayoutElement>();
-            layout.preferredHeight = NUMBER_SIZE;
-
-            GameObject square = new GameObject("Square");
-            square.transform.SetParent(numberContainer.transform, false);
-
-            RectTransform squareRect = square.AddComponent<RectTransform>();
-            squareRect.anchorMin = new Vector2(0.5f, 0.5f);
-            squareRect.anchorMax = new Vector2(0.5f, 0.5f);
-            squareRect.pivot = new Vector2(0.5f, 0.5f);
-            squareRect.sizeDelta = new Vector2(NUMBER_SIZE, NUMBER_SIZE);
-
-            Image squareImage = square.AddComponent<Image>();
-            squareImage.sprite = WhiteSprite;
-            squareImage.color = accentColor;
-
-            // Number text
-            GameObject numberText = new GameObject("Text");
-            numberText.transform.SetParent(square.transform, false);
-
-            RectTransform textRect = numberText.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI text = numberText.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = number.ToString();
-            text.fontSize = 72;
-            text.fontStyle = FontStyles.Bold;
-            text.color = DarkBrown;
-            text.alignment = TextAlignmentOptions.Center;
+            var spacer = new GameObject("Spacer");
+            spacer.transform.SetParent(content, false);
+            spacer.AddComponent<LayoutElement>().preferredHeight = height;
         }
 
-        private static void CreateIcon(Transform parent, Sprite icon, float size)
+        #endregion
+
+        #region Navigation (Dots + Buttons)
+
+        private static void CreateNavigation()
         {
-            GameObject iconObj = new GameObject("Icon");
-            iconObj.transform.SetParent(parent, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform rect = iconObj.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(size, size);
+            // --- Dots Container ---
+            var dots = FindOrCreate(canvas.transform, "DotsContainer");
+            var doRT = GetOrAdd<RectTransform>(dots);
+            doRT.anchorMin = new Vector2(0.15f, DOTS_BOT);
+            doRT.anchorMax = new Vector2(0.85f, DOTS_TOP);
+            doRT.offsetMin = Vector2.zero;
+            doRT.offsetMax = Vector2.zero;
 
-            Image iconImage = iconObj.AddComponent<Image>();
-            iconImage.sprite = icon;
-            iconImage.preserveAspect = true;
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(dots);
+            hlg.spacing = 12;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
 
-            LayoutElement layout = iconObj.AddComponent<LayoutElement>();
-            layout.preferredHeight = size;
+            // --- Navigation Panel ---
+            var navPanel = FindOrCreate(canvas.transform, "NavigationPanel");
+            var npRT = GetOrAdd<RectTransform>(navPanel);
+            npRT.anchorMin = new Vector2(0, NAV_BOT);
+            npRT.anchorMax = new Vector2(1, NAV_TOP);
+            npRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            npRT.offsetMax = new Vector2(-SIDE_PAD, 0);
+
+            // Back Button (left)
+            var backBtn = FindOrCreate(navPanel.transform, "BackButton");
+            var bbRT = GetOrAdd<RectTransform>(backBtn);
+            bbRT.anchorMin = new Vector2(0, 0);
+            bbRT.anchorMax = new Vector2(0.47f, 1);
+            bbRT.offsetMin = Vector2.zero;
+            bbRT.offsetMax = Vector2.zero;
+            var bbBg = GetOrAdd<Image>(backBtn);
+            bbBg.color = CARD_BG_LIGHT;
+            GetOrAdd<Button>(backBtn).targetGraphic = bbBg;
+            var bbOutline = GetOrAdd<Outline>(backBtn);
+            bbOutline.effectColor = new Color(0.3f, 0.25f, 0.15f, 0.5f);
+            bbOutline.effectDistance = new Vector2(1, 1);
+
+            var backText = FindOrCreate(backBtn.transform, "Text");
+            var btRT = GetOrAdd<RectTransform>(backText);
+            btRT.anchorMin = Vector2.zero;
+            btRT.anchorMax = Vector2.one;
+            btRT.offsetMin = Vector2.zero;
+            btRT.offsetMax = Vector2.zero;
+            var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
+            btTMP.text = "ATR\u00C1S";
+            btTMP.fontSize = 20;
+            btTMP.color = TEXT_SECONDARY;
+            btTMP.fontStyle = FontStyles.Bold;
+            btTMP.alignment = TextAlignmentOptions.Center;
+
+            // Next Button (right, gold)
+            var nextBtn = FindOrCreate(navPanel.transform, "NextButton");
+            var nbRT = GetOrAdd<RectTransform>(nextBtn);
+            nbRT.anchorMin = new Vector2(0.53f, 0);
+            nbRT.anchorMax = new Vector2(1, 1);
+            nbRT.offsetMin = Vector2.zero;
+            nbRT.offsetMax = Vector2.zero;
+            var nbBg = GetOrAdd<Image>(nextBtn);
+            nbBg.color = GOLD;
+            GetOrAdd<Button>(nextBtn).targetGraphic = nbBg;
+            var nbOutline = GetOrAdd<Outline>(nextBtn);
+            nbOutline.effectColor = GOLD_DARK;
+            nbOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            var nextText = FindOrCreate(nextBtn.transform, "Text");
+            var ntRT = GetOrAdd<RectTransform>(nextText);
+            ntRT.anchorMin = Vector2.zero;
+            ntRT.anchorMax = Vector2.one;
+            ntRT.offsetMin = Vector2.zero;
+            ntRT.offsetMax = Vector2.zero;
+            var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
+            ntTMP.text = "SIGUIENTE";
+            ntTMP.fontSize = 20;
+            ntTMP.color = TEXT_DARK;
+            ntTMP.fontStyle = FontStyles.Bold;
+            ntTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[CashBattleOnboardingUI] Navigation creado (DotsContainer + Back + Next)");
         }
 
-        private static void CreateTitle(Transform parent, string text, Color color)
+        #endregion
+
+        #region Legal Text
+
+        private static void CreateLegalText()
         {
-            GameObject title = new GameObject("Title");
-            title.transform.SetParent(parent, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.font = DefaultFont;
-            titleText.text = text;
-            titleText.fontSize = 32;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = color;
-            titleText.alignment = TextAlignmentOptions.Center;
+            var legal = FindOrCreate(canvas.transform, "LegalText");
+            var lRT = GetOrAdd<RectTransform>(legal);
+            lRT.anchorMin = new Vector2(0.05f, 0);
+            lRT.anchorMax = new Vector2(0.95f, 0.012f);
+            lRT.offsetMin = Vector2.zero;
+            lRT.offsetMax = Vector2.zero;
 
-            LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 80;
+            var lTMP = GetOrAdd<TextMeshProUGUI>(legal);
+            lTMP.text = "Powered by Triump\u2122 \u2022 Juego responsable \u2022 Solo mayores de 18 a\u00F1os";
+            lTMP.fontSize = 11;
+            lTMP.color = TEXT_SECONDARY;
+            lTMP.alignment = TextAlignmentOptions.Center;
+            lTMP.enableWordWrapping = true;
+
+            Debug.Log("[CashBattleOnboardingUI] LegalText creado");
         }
 
-        private static void CreateDescription(Transform parent, string text)
+        #endregion
+
+        #region Manager References
+
+        private static void SetupManagerReferences()
         {
-            GameObject desc = new GameObject("Description");
-            desc.transform.SetParent(parent, false);
+            var manager = Object.FindFirstObjectByType<DigitPark.Managers.CashBattleOnboardingManager>();
+            if (manager == null)
+            {
+                Debug.LogWarning("[CashBattleOnboardingUI] CashBattleOnboardingManager no encontrado. Agrega el componente primero.");
+                return;
+            }
 
-            TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
-            descText.font = DefaultFont;
-            descText.text = text;
-            descText.fontSize = 18;
-            descText.color = TextWhite;
-            descText.alignment = TextAlignmentOptions.Center;
-            descText.enableWordWrapping = true;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            LayoutElement layout = desc.AddComponent<LayoutElement>();
-            layout.preferredHeight = 30;
+            var so = new SerializedObject(manager);
+            Transform r = canvas.transform;
+
+            // Slides Container
+            Transform slidesT = r.Find("SlidesContainer");
+            if (slidesT != null) SetRef(so, "slidesContainer", slidesT);
+
+            // Navigation Buttons
+            SetRef(so, "nextButton", FindInPath<Button>(r, "NavigationPanel/NextButton"));
+            SetRef(so, "backButton", FindInPath<Button>(r, "NavigationPanel/BackButton"));
+            SetRef(so, "skipButton", FindInPath<Button>(r, "TopBar/SkipButton"));
+            SetRef(so, "nextButtonText", FindInPath<TextMeshProUGUI>(r, "NavigationPanel/NextButton/Text"));
+
+            // Navigation Dots
+            Transform dotsT = r.Find("DotsContainer");
+            if (dotsT != null) SetRef(so, "dotsContainer", dotsT);
+
+            // Progress
+            SetRef(so, "progressBar", FindInPath<Slider>(r, "ProgressBar"));
+            SetRef(so, "progressText", FindInPath<TextMeshProUGUI>(r, "TopBar/ProgressText"));
+
+            // UI - Sections (for animations)
+            Transform progressBarT = r.Find("ProgressBar");
+            if (progressBarT != null) SetRef(so, "progressBarTransform", progressBarT.GetComponent<RectTransform>());
+            Transform topBarT = r.Find("TopBar");
+            if (topBarT != null) SetRef(so, "topBarTransform", topBarT.GetComponent<RectTransform>());
+            if (dotsT != null) SetRef(so, "dotsRectTransform", dotsT.GetComponent<RectTransform>());
+            Transform navPanelT = r.Find("NavigationPanel");
+            if (navPanelT != null) SetRef(so, "navigationTransform", navPanelT.GetComponent<RectTransform>());
+
+            // Configuration
+            var totalProp = so.FindProperty("totalSlides");
+            if (totalProp != null) totalProp.intValue = 5;
+            var allowProp = so.FindProperty("allowSkip");
+            if (allowProp != null) allowProp.boolValue = true;
+            var durProp = so.FindProperty("transitionDuration");
+            if (durProp != null) durProp.floatValue = 0.3f;
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
+            Debug.Log("[CashBattleOnboardingUI] Referencias del manager asignadas (12 campos)");
         }
 
-        private static void CreateBulletPoint(Transform parent, string text)
+        #endregion
+
+        #region Helpers
+
+        private static void SetRef(SerializedObject so, string propName, Object value)
         {
-            GameObject bullet = new GameObject("BulletPoint");
-            bullet.transform.SetParent(parent, false);
-
-            TextMeshProUGUI bulletText = bullet.AddComponent<TextMeshProUGUI>();
-            bulletText.font = DefaultFont;
-            bulletText.text = text;
-            bulletText.fontSize = 16;
-            bulletText.color = TextWhite;
-            bulletText.alignment = TextAlignmentOptions.Left;
-            bulletText.enableWordWrapping = true;
-
-            LayoutElement layout = bullet.AddComponent<LayoutElement>();
-            layout.preferredHeight = 25;
+            var prop = so.FindProperty(propName);
+            if (prop == null)
+            {
+                Debug.LogWarning($"[CashBattleOnboardingUI] Property '{propName}' no encontrada");
+                return;
+            }
+            if (value != null) prop.objectReferenceValue = value;
+            else Debug.LogWarning($"[CashBattleOnboardingUI] No se encontro valor para: {propName}");
         }
 
-        private static void CreateHighlightText(Transform parent, string text, Color color)
+        private static T FindInPath<T>(Transform root, string path) where T : Component
         {
-            GameObject highlight = new GameObject("Highlight");
-            highlight.transform.SetParent(parent, false);
-
-            TextMeshProUGUI highlightText = highlight.AddComponent<TextMeshProUGUI>();
-            highlightText.font = DefaultFont;
-            highlightText.text = text;
-            highlightText.fontSize = 20;
-            highlightText.fontStyle = FontStyles.Bold;
-            highlightText.color = color;
-            highlightText.alignment = TextAlignmentOptions.Center;
-
-            LayoutElement layout = highlight.AddComponent<LayoutElement>();
-            layout.preferredHeight = 35;
+            Transform t = root;
+            foreach (string part in path.Split('/'))
+            {
+                t = t.Find(part);
+                if (t == null) return null;
+            }
+            return t.GetComponent<T>();
         }
 
-        private static void CreateLegalText(Transform parent, string text)
+        private static GameObject FindOrCreate(Transform parent, string name)
         {
-            GameObject legal = new GameObject("LegalText");
-            legal.transform.SetParent(parent, false);
-
-            TextMeshProUGUI legalText = legal.AddComponent<TextMeshProUGUI>();
-            legalText.font = DefaultFont;
-            legalText.text = text;
-            legalText.fontSize = 11;
-            legalText.color = TextGray;
-            legalText.alignment = TextAlignmentOptions.Center;
-            legalText.enableWordWrapping = true;
-
-            LayoutElement layout = legal.AddComponent<LayoutElement>();
-            layout.preferredHeight = 25;
+            Transform existing = parent.Find(name);
+            if (existing != null) return existing.gameObject;
+            var obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            return obj;
         }
 
-        private static void CreateSpacer(Transform parent, float height)
+        private static T GetOrAdd<T>(GameObject obj) where T : Component
         {
-            GameObject spacer = new GameObject("Spacer");
-            spacer.transform.SetParent(parent, false);
-
-            LayoutElement layout = spacer.AddComponent<LayoutElement>();
-            layout.preferredHeight = height;
+            T c = obj.GetComponent<T>();
+            if (c == null) c = obj.AddComponent<T>();
+            return c;
         }
 
-        private static void CreateNavigationPanel(Transform parent)
+        private static void SetAnchors(RectTransform rt, float xMin, float yMin, float xMax, float yMax)
         {
-            GameObject navPanel = new GameObject("NavigationPanel");
-            navPanel.transform.SetParent(parent, false);
-
-            RectTransform panelRect = navPanel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.5f, 0);
-            panelRect.anchorMax = new Vector2(0.5f, 0);
-            panelRect.pivot = new Vector2(0.5f, 0);
-            panelRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 220);
-            panelRect.anchoredPosition = new Vector2(0, 40);
-
-            // Navigation Dots Container
-            GameObject dotsContainer = new GameObject("DotsContainer");
-            dotsContainer.transform.SetParent(navPanel.transform, false);
-
-            RectTransform dotsRect = dotsContainer.AddComponent<RectTransform>();
-            dotsRect.anchorMin = new Vector2(0.5f, 1);
-            dotsRect.anchorMax = new Vector2(0.5f, 1);
-            dotsRect.pivot = new Vector2(0.5f, 1);
-            dotsRect.sizeDelta = new Vector2(200, 30);
-            dotsRect.anchoredPosition = new Vector2(0, -10);
-
-            HorizontalLayoutGroup dotsLayout = dotsContainer.AddComponent<HorizontalLayoutGroup>();
-            dotsLayout.childAlignment = TextAnchor.MiddleCenter;
-            dotsLayout.childControlWidth = false;
-            dotsLayout.childControlHeight = false;
-            dotsLayout.spacing = 10f;
-
-            // Buttons Container
-            GameObject buttonsContainer = new GameObject("Buttons");
-            buttonsContainer.transform.SetParent(navPanel.transform, false);
-
-            RectTransform buttonsRect = buttonsContainer.AddComponent<RectTransform>();
-            buttonsRect.anchorMin = new Vector2(0, 0);
-            buttonsRect.anchorMax = new Vector2(1, 0.7f);
-            buttonsRect.offsetMin = Vector2.zero;
-            buttonsRect.offsetMax = Vector2.zero;
-
-            HorizontalLayoutGroup hLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            hLayout.childAlignment = TextAnchor.MiddleCenter;
-            hLayout.childControlWidth = true;
-            hLayout.childControlHeight = true;
-            hLayout.spacing = 20f;
-            hLayout.padding = new RectOffset(20, 20, 20, 20);
-
-            // Back Button (will be hidden by Manager initially)
-            CreateSecondaryButton(buttonsContainer.transform, "BackButton", "ATRÁS");
-
-            // Next/Start Button (Main CTA)
-            CreateGoldButton(buttonsContainer.transform, "NextButton", "SIGUIENTE");
-
-            // Skip Button (top-right corner of panel)
-            CreateSkipButton(navPanel.transform);
-
-            // Legal Text (centered below buttons) - parent is safeArea
-            CreateGlobalLegalText(parent);
+            rt.anchorMin = new Vector2(xMin, yMin);
+            rt.anchorMax = new Vector2(xMax, yMax);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
-        private static void CreateGlobalLegalText(Transform parent)
-        {
-            GameObject legalContainer = new GameObject("LegalTextContainer");
-            legalContainer.transform.SetParent(parent, false);
-
-            RectTransform rect = legalContainer.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0);
-            rect.anchorMax = new Vector2(0.5f, 0);
-            rect.pivot = new Vector2(0.5f, 0);
-            rect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 40);
-            rect.anchoredPosition = new Vector2(0, 10); // Just above bottom
-
-            TextMeshProUGUI legalText = legalContainer.AddComponent<TextMeshProUGUI>();
-            legalText.font = DefaultFont;
-            legalText.text = "Powered by Triump™ • Juego responsable • Solo mayores de 18 años";
-            legalText.fontSize = 11;
-            legalText.color = TextGray;
-            legalText.alignment = TextAlignmentOptions.Center;
-            legalText.enableWordWrapping = true;
-        }
-
-        private static void CreateSecondaryButton(Transform parent, string name, string text)
-        {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
-
-            Image bg = btn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = new Color(0.2f, 0.2f, 0.25f, 0.9f); // Dark gray
-
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
-
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.3f, 0.3f, 0.35f, 0.9f);
-            colors.pressedColor = new Color(0.15f, 0.15f, 0.2f, 1f);
-            colors.selectedColor = new Color(0.3f, 0.3f, 0.35f, 0.9f);
-            colors.disabledColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
-
-            LayoutElement layout = btn.AddComponent<LayoutElement>();
-            layout.preferredHeight = BUTTON_HEIGHT;
-            layout.flexibleWidth = 1f;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
-
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.font = DefaultFont;
-            btnText.text = text;
-            btnText.fontSize = 20;
-            btnText.fontStyle = FontStyles.Bold;
-            btnText.color = TextWhite;
-            btnText.alignment = TextAlignmentOptions.Center;
-        }
-
-        private static void CreateSkipButton(Transform parent)
-        {
-            GameObject skipBtn = new GameObject("SkipButton");
-            skipBtn.transform.SetParent(parent, false);
-
-            RectTransform skipRect = skipBtn.AddComponent<RectTransform>();
-            skipRect.anchorMin = new Vector2(1, 1);
-            skipRect.anchorMax = new Vector2(1, 1);
-            skipRect.pivot = new Vector2(1, 1);
-            skipRect.sizeDelta = new Vector2(120, 40);
-            skipRect.anchoredPosition = new Vector2(-10, -10);
-
-            Button button = skipBtn.AddComponent<Button>();
-
-            // Transparent background
-            Image bg = skipBtn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = new Color(0, 0, 0, 0.3f);
-
-            button.targetGraphic = bg;
-
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, 1f, 1f, 0.7f);
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(skipBtn.transform, false);
-
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.font = DefaultFont;
-            btnText.text = "SALTAR";
-            btnText.fontSize = 16;
-            btnText.fontStyle = FontStyles.Bold;
-            btnText.color = TextGray;
-            btnText.alignment = TextAlignmentOptions.Center;
-        }
-
-        private static void CreateGoldButton(Transform parent, string name, string text)
-        {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
-
-            Image bg = btn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = GoldPremium;
-
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
-
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, 0.647f, 0f, 0.9f);
-            colors.pressedColor = new Color(1f, 0.549f, 0f, 1f);
-            colors.selectedColor = new Color(1f, 0.647f, 0f, 0.9f);
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
-
-            LayoutElement layout = btn.AddComponent<LayoutElement>();
-            layout.preferredHeight = BUTTON_HEIGHT;
-            layout.flexibleWidth = 1f;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
-
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.font = DefaultFont;
-            btnText.text = text;
-            btnText.fontSize = 24;
-            btnText.fontStyle = FontStyles.Bold;
-            btnText.color = DarkBrown;
-            btnText.alignment = TextAlignmentOptions.Center;
-        }
+        #endregion
     }
 }

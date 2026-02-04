@@ -7177,6 +7177,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1758251987}
   m_CullTransparentMesh: 1
+--- !u!1 &1773631453
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1773631455}
+  - component: {fileID: 1773631454}
+  m_Layer: 0
+  m_Name: DigitRushController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1773631454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1773631453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd2a0b325ac2d4640ad9e0670c777171, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridButtons:
+  - {fileID: 1007223011}
+  - {fileID: 1340612134}
+  - {fileID: 1465826431}
+  - {fileID: 1793283935}
+  - {fileID: 1020956443}
+  - {fileID: 789000015}
+  - {fileID: 836589715}
+  - {fileID: 1391022477}
+  - {fileID: 339097610}
+  timerText: {fileID: 2082253911}
+  bestTimeText: {fileID: 1342317364}
+  comboText: {fileID: 2030658939}
+  playAgainButton: {fileID: 0}
+  backButton: {fileID: 0}
+  countdownUI: {fileID: 0}
+  useCountdown: 1
+  sparkleEffect: {fileID: 0}
+  enableHapticFeedback: 1
+  winMessagePanel: {fileID: 0}
+  winMessageCanvasGroup: {fileID: 0}
+  successText: {fileID: 395979565}
+  premiumBannerContainer: {fileID: 0}
+  premiumBannerButton: {fileID: 0}
+  premiumBannerText: {fileID: 0}
+--- !u!4 &1773631455
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1773631453}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 659.97473, y: 843.17535, z: 6.5615396}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1793283930
 GameObject:
   m_ObjectHideFlags: 0
@@ -8495,4 +8564,5 @@ SceneRoots:
   - {fileID: 1538914299}
   - {fileID: 778696798}
   - {fileID: 255579622}
+  - {fileID: 1773631455}
   - {fileID: 1956946348}

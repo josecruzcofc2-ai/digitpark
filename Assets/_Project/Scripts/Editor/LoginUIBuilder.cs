@@ -29,6 +29,10 @@ namespace DigitPark.Editor
         private const string GOOGLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Google/google_logo_official.png";
         private const string APPLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Apple/apple_logo_black.png";
 
+        // Prefab paths
+        private const string ERROR_PANEL_PREFAB = "Assets/_Project/Prefabs/Common/ErrorPanel.prefab";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
+
         // Spacing
         private const float PADDING = 30f;
         private const float CARD_PADDING = 40f;
@@ -70,10 +74,13 @@ namespace DigitPark.Editor
 
                 // Build UI
                 BuildBackground(canvas);
+                BuildBackButton(canvas);
                 BuildLogo(canvas);
                 BuildLoginCard(canvas);
                 BuildFooter(canvas);
                 BuildRegisterButton(canvas); // Botón independiente, movible
+                BuildLoadingPanel(canvas);
+                BuildErrorPanel(canvas);
 
                 // Force layout update
                 Canvas.ForceUpdateCanvases();
@@ -554,5 +561,143 @@ namespace DigitPark.Editor
             buttonText.color = textColor;
             buttonText.alignment = TextAlignmentOptions.Left;
         }
+
+        #region Missing Elements (BackButton, LoadingPanel, ErrorPanel)
+
+        private static void BuildBackButton(Canvas canvas)
+        {
+            // Try to instantiate from prefab
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            if (prefab != null)
+            {
+                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, canvas.transform);
+                backBtn.name = "BackButton";
+
+                RectTransform rect = backBtn.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0, 1);
+                rect.anchorMax = new Vector2(0, 1);
+                rect.pivot = new Vector2(0, 1);
+                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+
+                Debug.Log("✅ BackButton instantiated from prefab");
+            }
+            else
+            {
+                // Create simple back button
+                GameObject backBtn = new GameObject("BackButton");
+                backBtn.transform.SetParent(canvas.transform, false);
+
+                RectTransform rect = backBtn.AddComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0, 1);
+                rect.anchorMax = new Vector2(0, 1);
+                rect.pivot = new Vector2(0, 1);
+                rect.sizeDelta = new Vector2(50, 50);
+                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+
+                Image bg = backBtn.AddComponent<Image>();
+                bg.sprite = WhiteSprite;
+                bg.color = new Color(0.2f, 0.2f, 0.3f, 0.8f);
+
+                Button btn = backBtn.AddComponent<Button>();
+                btn.targetGraphic = bg;
+
+                // Arrow text
+                GameObject arrow = new GameObject("Arrow");
+                arrow.transform.SetParent(backBtn.transform, false);
+
+                RectTransform arrowRect = arrow.AddComponent<RectTransform>();
+                arrowRect.anchorMin = Vector2.zero;
+                arrowRect.anchorMax = Vector2.one;
+                arrowRect.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
+                arrowText.font = DefaultFont;
+                arrowText.text = "<";
+                arrowText.fontSize = 32;
+                arrowText.color = CyanNeon;
+                arrowText.alignment = TextAlignmentOptions.Center;
+
+                Debug.Log("✅ BackButton created (no prefab found)");
+            }
+        }
+
+        private static void BuildLoadingPanel(Canvas canvas)
+        {
+            GameObject loadingPanel = new GameObject("LoadingPanel");
+            loadingPanel.transform.SetParent(canvas.transform, false);
+
+            RectTransform rect = loadingPanel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.sizeDelta = Vector2.zero;
+
+            // Semi-transparent dark overlay
+            Image bg = loadingPanel.AddComponent<Image>();
+            bg.sprite = WhiteSprite;
+            bg.color = new Color(0, 0, 0, 0.7f);
+
+            // Spinner container
+            GameObject spinner = new GameObject("Spinner");
+            spinner.transform.SetParent(loadingPanel.transform, false);
+
+            RectTransform spinnerRect = spinner.AddComponent<RectTransform>();
+            spinnerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            spinnerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            spinnerRect.sizeDelta = new Vector2(80, 80);
+
+            Image spinnerImage = spinner.AddComponent<Image>();
+            spinnerImage.sprite = WhiteSprite;
+            spinnerImage.color = CyanNeon;
+
+            // Loading text
+            GameObject loadingText = new GameObject("LoadingText");
+            loadingText.transform.SetParent(loadingPanel.transform, false);
+
+            RectTransform textRect = loadingText.AddComponent<RectTransform>();
+            textRect.anchorMin = new Vector2(0.5f, 0.5f);
+            textRect.anchorMax = new Vector2(0.5f, 0.5f);
+            textRect.sizeDelta = new Vector2(300, 50);
+            textRect.anchoredPosition = new Vector2(0, -80);
+
+            TextMeshProUGUI text = loadingText.AddComponent<TextMeshProUGUI>();
+            text.font = DefaultFont;
+            text.text = "Cargando...";
+            text.fontSize = 24;
+            text.color = Color.white;
+            text.alignment = TextAlignmentOptions.Center;
+
+            // Start hidden
+            loadingPanel.SetActive(false);
+
+            Debug.Log("✅ LoadingPanel created");
+        }
+
+        private static void BuildErrorPanel(Canvas canvas)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ERROR_PANEL_PREFAB);
+            if (prefab != null)
+            {
+                GameObject errorPanel = (GameObject)PrefabUtility.InstantiatePrefab(prefab, canvas.transform);
+                errorPanel.name = "ErrorPanel";
+
+                // Position at bottom center
+                RectTransform rect = errorPanel.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    rect.anchorMin = new Vector2(0.5f, 0);
+                    rect.anchorMax = new Vector2(0.5f, 0);
+                    rect.pivot = new Vector2(0.5f, 0);
+                    rect.anchoredPosition = new Vector2(0, 200);
+                }
+
+                Debug.Log("✅ ErrorPanel instantiated from prefab");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ ErrorPanel prefab not found at: " + ERROR_PANEL_PREFAB);
+            }
+        }
+
+        #endregion
     }
 }

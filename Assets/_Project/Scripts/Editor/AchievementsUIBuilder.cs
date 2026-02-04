@@ -501,7 +501,7 @@ namespace DigitPark.Editor
             CreateCategoryTab(tabsContent, "TournamentsTab", "TORNEOS", false, CAT_COMPETITION, 80);
             CreateCategoryTab(tabsContent, "SocialTab", "SOCIAL", false, new Color(0.4f, 0.6f, 1f, 1f), 70);
             CreateCategoryTab(tabsContent, "ProgressionTab", "PROGRESO", false, new Color(0.8f, 0.6f, 1f, 1f), 85);
-            // CollectorTab removido para V1 (sin cofres/battlepass)
+            // CollectorTab reservado para V2
             CreateCategoryTab(tabsContent, "TimeTab", "TIEMPO", false, new Color(0.5f, 0.8f, 0.9f, 1f), 75);
             CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 50);
 
@@ -655,7 +655,7 @@ namespace DigitPark.Editor
             CreateTrophyCard(content, "Trophy_rank_legend", "Leyenda", 0, false, false, new Color(1f, 0.6f, 0f, 1f), false, 200);
             CreateTrophyCard(content, "Trophy_rank_immortal", "Inmortal", 0, false, false, CAT_SECRET, true, 500); // SECRET
 
-            // --- COLLECTOR --- Removido para V1 (sin cofres/battlepass)
+            // --- COLLECTOR --- Reservado para V2
 
             // --- TIME (6) ---
             CreateTrophyCard(content, "Trophy_days_7", "Una Semana", 100, true, false, new Color(0.5f, 0.8f, 0.9f, 1f), false, 25);

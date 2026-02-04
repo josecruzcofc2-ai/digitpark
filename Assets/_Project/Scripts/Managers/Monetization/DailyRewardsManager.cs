@@ -55,7 +55,6 @@ namespace DigitPark.Managers
         [Header("Reward Icons")]
         [SerializeField] private Sprite coinIcon;
         [SerializeField] private Sprite gemIcon;
-        [SerializeField] private Sprite chestIcon;
         [SerializeField] private Sprite xpIcon;
         [SerializeField] private Sprite mysteryIcon;
 
@@ -95,7 +94,7 @@ namespace DigitPark.Managers
                     new DailyRewardConfig { day = 4, type = "coins", amount = 100, name = "Monedas" },
                     new DailyRewardConfig { day = 5, type = "xp", amount = 200, name = "XP" },
                     new DailyRewardConfig { day = 6, type = "coins", amount = 150, name = "Monedas" },
-                    new DailyRewardConfig { day = 7, type = "chest", amount = 1, name = "Cofre Raro", isSpecial = true },
+                    new DailyRewardConfig { day = 7, type = "gems", amount = 25, name = "Gemas", isSpecial = true },
                 };
 
                 daysInCycle = rewards.Count;
@@ -265,9 +264,7 @@ namespace DigitPark.Managers
 
                 if (currentDayRewardText)
                 {
-                    currentDayRewardText.text = todayReward.type == "chest"
-                        ? todayReward.name
-                        : $"+{todayReward.amount} {todayReward.name}";
+                    currentDayRewardText.text = $"+{todayReward.amount} {todayReward.name}";
                 }
             }
         }
@@ -352,11 +349,6 @@ namespace DigitPark.Managers
             rewardRT.offsetMax = new Vector2(-5, 0);
 
             var rewardText = rewardObj.AddComponent<TextMeshProUGUI>();
-            if (reward.type == "chest")
-            {
-                rewardText.text = "🎁\nCofre";
-            }
-            else
             {
                 string icon = reward.type switch
                 {
@@ -422,7 +414,6 @@ namespace DigitPark.Managers
             {
                 "coins" => coinIcon,
                 "gems" => gemIcon,
-                "chest" => chestIcon,
                 "xp" => xpIcon,
                 _ => mysteryIcon
             };
@@ -485,11 +476,6 @@ namespace DigitPark.Managers
                     PlayerPrefs.SetInt("PlayerXP", currentXP + reward.amount);
                     break;
 
-                case "chest":
-                    // Add chest to inventory
-                    int chests = PlayerPrefs.GetInt("PlayerChests_Rare", 0);
-                    PlayerPrefs.SetInt("PlayerChests_Rare", chests + reward.amount);
-                    break;
             }
 
             PlayerPrefs.Save();
@@ -503,9 +489,7 @@ namespace DigitPark.Managers
 
                 if (claimRewardText)
                 {
-                    claimRewardText.text = reward.type == "chest"
-                        ? $"¡{reward.name}!"
-                        : $"+{reward.amount} {reward.name}";
+                    claimRewardText.text = $"+{reward.amount} {reward.name}";
                 }
 
                 if (claimRewardIcon)

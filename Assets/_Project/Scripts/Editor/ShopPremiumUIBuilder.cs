@@ -45,11 +45,6 @@ namespace DigitPark.Editor
         private static readonly Color COIN_COLOR = new Color(1f, 0.85f, 0.3f, 1f);
         private static readonly Color COIN_DARK = new Color(0.8f, 0.6f, 0.1f, 1f);
 
-        private static readonly Color CHEST_COMMON = new Color(0.6f, 0.5f, 0.4f, 1f);
-        private static readonly Color CHEST_RARE = new Color(0.3f, 0.6f, 1f, 1f);
-        private static readonly Color CHEST_EPIC = new Color(0.7f, 0.3f, 0.9f, 1f);
-        private static readonly Color CHEST_LEGENDARY = new Color(1f, 0.8f, 0.2f, 1f);
-
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.9f);
 
         // ==================== DIMENSIONES PREMIUM ====================
@@ -70,10 +65,6 @@ namespace DigitPark.Editor
         private const float ITEM_HEIGHT = 200f;
         private const float ITEM_SPACING = 12f;
 
-        // Chest Items
-        private const float CHEST_WIDTH = 155f;
-        private const float CHEST_HEIGHT = 180f;
-
         // Premium Section
         private const float PREMIUM_HEIGHT = 140f;
 
@@ -87,7 +78,6 @@ namespace DigitPark.Editor
                 "- Daily Deals (3 items + 1 GRATIS)\n" +
                 "- Packs de Gemas (6 items)\n" +
                 "- Packs de Monedas (3 items)\n" +
-                "- Cofres (4 raridades)\n" +
                 "- Seccion Premium/VIP\n\n" +
                 "Asegurate de tener la escena Shop abierta.\n\nContinuar?",
                 "Si, Construir", "Cancelar"))
@@ -414,10 +404,7 @@ namespace DigitPark.Editor
             // 4. Coins Section
             CreateCoinsSection(content);
 
-            // 5. Chests Section
-            CreateChestsSection(content);
-
-            // 6. Premium Section
+            // 5. Premium Section
             CreatePremiumSection(content);
 
             Debug.Log("[ShopPremiumUIBuilder] Scroll content creado");
@@ -624,7 +611,7 @@ namespace DigitPark.Editor
             itemsHlg.childForceExpandWidth = true;
 
             // 3 Daily Items
-            CreateDailyItem(itemsContainer, "Daily_Chest", "Cofre Raro", "100", GEM_COLOR, CHEST_RARE, false);
+            CreateDailyItem(itemsContainer, "Daily_Bonus", "25 Gemas", "100", GEM_COLOR, new Color(0.3f, 0.6f, 1f, 1f), false);
             CreateDailyItem(itemsContainer, "Daily_Gems", "200 Gemas", "GRATIS", GEM_COLOR, GEM_COLOR, true);
             CreateDailyItem(itemsContainer, "Daily_Coins", "5,000 Monedas", "50", GEM_COLOR, COIN_COLOR, false);
 
@@ -804,115 +791,6 @@ namespace DigitPark.Editor
             Debug.Log("[ShopPremiumUIBuilder] Coins Section creado");
         }
 
-        // ==================== CHESTS SECTION ====================
-
-        private static void CreateChestsSection(GameObject parent)
-        {
-            GameObject section = CreateChild(parent, "ChestsSection");
-
-            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-
-            // Header
-            CreateSectionHeader(section, "📦 COFRES", PURPLE_PREMIUM);
-
-            // Grid
-            GameObject grid = CreateChild(section, "ChestsGrid");
-
-            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(CHEST_WIDTH, CHEST_HEIGHT);
-            glg.spacing = new Vector2(10, 10);
-            glg.childAlignment = TextAnchor.UpperCenter;
-            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            glg.constraintCount = 4;
-
-            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = CHEST_HEIGHT;
-
-            // 4 Chest types
-            CreateChestItem(grid, "Chest_Common", "Común", "50", CHEST_COMMON);
-            CreateChestItem(grid, "Chest_Rare", "Raro", "150", CHEST_RARE);
-            CreateChestItem(grid, "Chest_Epic", "Épico", "400", CHEST_EPIC);
-            CreateChestItem(grid, "Chest_Legendary", "Legendario", "1,000", CHEST_LEGENDARY);
-
-            Debug.Log("[ShopPremiumUIBuilder] Chests Section creado");
-        }
-
-        private static void CreateChestItem(GameObject parent, string name, string chestName, string price, Color color)
-        {
-            GameObject item = CreateChild(parent, name);
-
-            Image itemBg = item.AddComponent<Image>();
-            itemBg.color = CARD_BG;
-            AddOutline(item, color * 0.7f, 1);
-
-            Button btn = item.AddComponent<Button>();
-            SetupButton(btn, CARD_BG);
-
-            VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 6;
-            vlg.padding = new RectOffset(8, 8, 10, 10);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-
-            // Icon
-            GameObject icon = CreateChild(item, "Icon");
-            Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = color;
-            LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minHeight = 60;
-            iconLE.preferredHeight = 60;
-            iconLE.minWidth = 60;
-            iconLE.preferredWidth = 60;
-
-            // Name
-            GameObject nameObj = CreateChild(item, "Name");
-            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
-            nameText.text = chestName;
-            nameText.fontSize = 14;
-            nameText.fontStyle = FontStyles.Bold;
-            nameText.color = color;
-            nameText.alignment = TextAlignmentOptions.Center;
-            LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
-            nameLE.minHeight = 22;
-
-            // Price
-            GameObject priceBtn = CreateChild(item, "PriceButton");
-            Image priceBg = priceBtn.AddComponent<Image>();
-            priceBg.color = GEM_COLOR;
-            LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
-            priceLE.minHeight = 32;
-
-            HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
-            priceHlg.spacing = 4;
-            priceHlg.padding = new RectOffset(8, 8, 4, 4);
-            priceHlg.childAlignment = TextAnchor.MiddleCenter;
-            priceHlg.childControlWidth = false;
-            priceHlg.childControlHeight = true;
-
-            GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
-            Image gemImg = gemIcon.AddComponent<Image>();
-            gemImg.color = TEXT_DARK;
-            LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
-            gemLE.minWidth = 16;
-            gemLE.minHeight = 16;
-
-            GameObject priceText = CreateChild(priceBtn, "Text");
-            TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
-            pt.text = price;
-            pt.fontSize = 14;
-            pt.fontStyle = FontStyles.Bold;
-            pt.color = TEXT_DARK;
-            pt.alignment = TextAlignmentOptions.Center;
-            LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
-            ptLE.flexibleWidth = 1;
-        }
-
         // ==================== PREMIUM SECTION ====================
 
         private static void CreatePremiumSection(GameObject parent)
@@ -980,7 +858,7 @@ namespace DigitPark.Editor
             // Title
             GameObject title = CreateChild(info, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.text = "BATTLE PASS PREMIUM";
+            titleText.text = "BUNDLE PREMIUM";
             titleText.fontSize = 20;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;

@@ -107,7 +107,6 @@ public enum MissionType
     PlayTournament,     // Participar en X torneos
     WinTournament,      // Ganar X torneos
     EarnXP,             // Ganar X XP
-    BattlePassLevel,    // Alcanzar nivel X del Battle Pass
     AddFriends,         // Añadir X amigos
     LoginDays,          // Iniciar sesión X días
     PlayAllGames,       // Jugar todos los tipos de juego
@@ -149,10 +148,6 @@ public enum MissionType
 - Las misiones de rango (`season_rank_oro`, `season_rank_diamante`) verifican el MMR del jugador
 - Los Cash Battles reportan victorias/derrotas al MissionsManager
 
-### Battle Pass
-- Las misiones `season_bp_25` y `season_bp_50` verifican el nivel del Battle Pass
-- El Battle Pass reporta niveles alcanzados al MissionsManager
-
 ### Sistema Social
 - La misión `season_friends` cuenta amigos añadidos
 - Se actualiza cuando se confirma una solicitud de amistad
@@ -174,9 +169,6 @@ MissionsManager.Instance.ReportWinStreak(streakCount);
 
 // Reportar XP ganado
 MissionsManager.Instance.ReportXPEarned(amount);
-
-// Reportar nivel de Battle Pass
-MissionsManager.Instance.ReportBattlePassLevel(level);
 
 // Reportar rango alcanzado
 MissionsManager.Instance.ReportRank(rankIndex);

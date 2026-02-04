@@ -52,7 +52,6 @@ namespace DigitPark.Monetization
             public const string DAILY_REWARDS = "DailyRewards";
             public const string ACHIEVEMENTS = "Achievements";
             public const string ONBOARDING = "Onboarding";
-            // Nota: BattlePass y ChestOpening removidos para V1
 
             // Other
             public const string AGE_VERIFICATION = "AgeVerification";

@@ -8,7 +8,7 @@ namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
     /// Editor tool to assign achievement icons to achievements.
-    /// Maps 53 achievement IDs to their corresponding icon files (V1 - sin BattlePass/Cofres).
+    /// Maps 53 achievement IDs to their corresponding icon files.
     /// </summary>
     public class AchievementIconAssigner : EditorWindow
     {
@@ -20,7 +20,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private const string ICONS_PATH = "Assets/_Project/Art/Icons/Achievements";
 
-        [MenuItem("DigitPark/Auto Assigners/Icons/Achievement Icons", false, 200)]
+        [MenuItem("DigitPark/Auto Assigners/Icons/Monetization/Achievement Icons", false, 143)]
         public static void ShowWindow()
         {
             var window = GetWindow<AchievementIconAssigner>("Achievement Icon Assigner");
@@ -37,7 +37,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private void BuildIconMapping()
         {
-            // Complete mapping of 53 achievement IDs to icon file names (V1 - sin BattlePass/Cofres)
+            // Complete mapping of 53 achievement IDs to icon file names
             iconMapping = new Dictionary<string, string>
             {
                 // ==================== BEGINNER (4) ====================
@@ -100,7 +100,7 @@ namespace DigitPark.Editor.AutoAssigners
                 { "rank_immortal", "Logro_Inmortal" },         // SECRET
 
                 // ==================== COLLECTOR ====================
-                // Reservado para V2 (sin cofres/battlepass)
+                // Reservado para V2
 
                 // ==================== TIME (6) ====================
                 { "days_7", "Logro_Racha_7_Dias" },
@@ -288,7 +288,7 @@ namespace DigitPark.Editor.AutoAssigners
             if (id.StartsWith("tournament_")) return "Tournaments";
             if (id.StartsWith("friend") || id == "challenge_friend" || id == "beat_friend") return "Social";
             if (id.StartsWith("level_") || id.StartsWith("rank_")) return "Progression";
-            // Collector category reserved for V2 (no BattlePass/Chest)
+            // Collector category reserved for V2
             if (id.StartsWith("days_") || id.StartsWith("daily_")) return "Time";
             if (id == "night_owl" || id == "perfect_game" || id == "comeback_king" || id == "speed_demon") return "Secret";
             return "Other";

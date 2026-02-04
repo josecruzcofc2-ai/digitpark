@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Firebase.Storage;
 using DigitPark.Data;
+using DigitPark.UI.Components;
 
 namespace DigitPark.Services
 {
@@ -158,13 +159,13 @@ namespace DigitPark.Services
                 return defaultAvatarSprite;
             }
 
-            return await LoadAvatar(playerData.userId, playerData.avatarUrl);
+            return await LoadAvatar(playerData.userId, playerData.avatarUrl, playerData.username);
         }
 
         /// <summary>
         /// Carga el avatar de cualquier usuario
         /// </summary>
-        public async Task<Sprite> LoadAvatar(string userId, string avatarUrl)
+        public async Task<Sprite> LoadAvatar(string userId, string avatarUrl, string username = null)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -197,9 +198,27 @@ namespace DigitPark.Services
                 }
             }
 
-            // 3. Fallback a avatar por defecto
-            Debug.Log($"[AvatarService] Usando avatar por defecto para: {userId}");
-            return defaultAvatarSprite;
+            // 3. Fallback: generar avatar con inicial del username
+            string displayName = username;
+            if (string.IsNullOrEmpty(displayName))
+            {
+                // Intentar obtener username del PlayerData actual
+                var currentPlayer = GetCurrentPlayerData();
+                if (currentPlayer != null && currentPlayer.userId == userId)
+                {
+                    displayName = currentPlayer.username;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(displayName))
+            {
+                Debug.Log($"[AvatarService] Generando avatar con inicial para: {userId} ({displayName})");
+                return AvatarInitialGenerator.GenerateAvatar(displayName, userId);
+            }
+
+            // 4. Ultimo fallback: generar con userId como nombre
+            Debug.Log($"[AvatarService] Generando avatar con userId para: {userId}");
+            return AvatarInitialGenerator.GenerateAvatar(userId, userId);
         }
 
         /// <summary>

@@ -104,7 +104,7 @@ namespace DigitPark.Managers
             Tournaments,    // Tournament achievements
             Social,         // Friend-based achievements
             Progression,    // Level/rank achievements
-            Collector,      // Chest/Battle Pass achievements
+            Collector,      // Collection achievements (reserved for V2)
             Time,           // Login/dedication achievements
             Secret          // Hidden achievements
         }
@@ -122,7 +122,7 @@ namespace DigitPark.Managers
         private void InitializeAchievements()
         {
             // Define all achievements with their data
-            // Total: 53 achievements across 11 categories (V1 - sin BattlePass/Cofres)
+            // Total: 53 achievements across 11 categories
             allAchievements = new List<AchievementDefinition>
             {
                 // ==================== BEGINNER (Onboarding) ====================
@@ -184,8 +184,7 @@ namespace DigitPark.Managers
                 new AchievementDefinition("rank_legend", "Leyenda", "Alcanza rango Leyenda", AchievementCategory.Progression, 200, 8, "Logro_Leyenda"),
                 new AchievementDefinition("rank_immortal", "Inmortal", "Alcanza rango Inmortal", AchievementCategory.Progression, 500, 9, "Logro_Inmortal", true), // SECRET
 
-                // ==================== COLLECTOR ==================== (Categoría reservada para V2)
-                // Nota: Cofres y BattlePass removidos para V1
+                // ==================== COLLECTOR ==================== (Reservado para V2)
 
                 // ==================== TIME ====================
                 new AchievementDefinition("days_7", "Una Semana", "Juega 7 días", AchievementCategory.Time, 25, 7, "Logro_Racha_7_Dias"),

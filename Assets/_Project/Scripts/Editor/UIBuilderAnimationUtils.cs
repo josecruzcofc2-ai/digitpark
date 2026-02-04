@@ -286,15 +286,6 @@ namespace DigitPark.Editor
             return container.AddComponent<DigitPark.Animations.MainMenuAnimator>();
         }
 
-        // ChestOpeningAnimator - REMOVED FOR V1
-        /*
-        public static DigitPark.Animations.ChestOpeningAnimator AddChestAnimator(GameObject container)
-        {
-            // Removed for V1
-            return null;
-        }
-        */
-
         /// <summary>
         /// Add MatchmakingAnimator to a scene.
         /// </summary>
@@ -307,15 +298,6 @@ namespace DigitPark.Editor
 
             return container.AddComponent<DigitPark.Animations.MatchmakingAnimator>();
         }
-
-        // BattlePassAnimator - REMOVED FOR V1
-        /*
-        public static DigitPark.Animations.BattlePassAnimator AddBattlePassAnimator(GameObject container)
-        {
-            // Removed for V1
-            return null;
-        }
-        */
 
         /// <summary>
         /// Add RewardClaimAnimator to a scene.

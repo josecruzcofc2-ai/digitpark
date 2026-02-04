@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections;
 using DigitPark.Monetization;
+using DG.Tweening;
 
 namespace DigitPark.Managers
 {
@@ -30,6 +30,12 @@ namespace DigitPark.Managers
         [SerializeField] private Slider progressBar;
         [SerializeField] private TextMeshProUGUI progressText;
 
+        [Header("UI - Sections (for animations)")]
+        [SerializeField] private RectTransform progressBarTransform;
+        [SerializeField] private RectTransform topBarTransform;
+        [SerializeField] private RectTransform dotsRectTransform;
+        [SerializeField] private RectTransform navigationTransform;
+
         [Header("Configuration")]
         [SerializeField] private int totalSlides = 5;
         [SerializeField] private bool allowSkip = true;
@@ -50,6 +56,7 @@ namespace DigitPark.Managers
             SetupUI();
             SetupListeners();
             ShowSlide(0);
+            AnimateEntrance();
         }
 
         private void InitializeSlides()
@@ -250,12 +257,10 @@ namespace DigitPark.Managers
 
             if (currentSlideIndex < totalSlides - 1)
             {
-                // Go to next slide
-                StartCoroutine(TransitionToSlide(currentSlideIndex + 1));
+                TransitionToSlide(currentSlideIndex + 1);
             }
             else
             {
-                // Last slide - complete onboarding
                 CompleteOnboarding();
             }
         }
@@ -266,7 +271,7 @@ namespace DigitPark.Managers
 
             if (currentSlideIndex > 0)
             {
-                StartCoroutine(TransitionToSlide(currentSlideIndex - 1));
+                TransitionToSlide(currentSlideIndex - 1);
             }
         }
 
@@ -276,19 +281,112 @@ namespace DigitPark.Managers
             CompleteOnboarding(markAsComplete: true);
         }
 
-        private IEnumerator TransitionToSlide(int targetIndex)
+        private void TransitionToSlide(int targetIndex)
         {
+            if (targetIndex < 0 || targetIndex >= slides.Length) return;
             isTransitioning = true;
 
-            // Optional: Add fade/slide animation here
-            yield return new WaitForSeconds(transitionDuration * 0.5f);
+            int oldIndex = currentSlideIndex;
+            GameObject oldSlide = slides[oldIndex];
+            GameObject newSlide = slides[targetIndex];
 
-            ShowSlide(targetIndex);
+            // Prepare new slide (activate but invisible)
+            if (newSlide != null)
+            {
+                newSlide.SetActive(true);
+                var newCG = newSlide.GetComponent<CanvasGroup>() ?? newSlide.AddComponent<CanvasGroup>();
+                newCG.alpha = 0f;
+            }
 
-            yield return new WaitForSeconds(transitionDuration * 0.5f);
+            var seq = DOTween.Sequence();
 
-            isTransitioning = false;
+            // Cross-fade slides
+            if (oldSlide != null)
+            {
+                var oldCG = oldSlide.GetComponent<CanvasGroup>() ?? oldSlide.AddComponent<CanvasGroup>();
+                seq.Append(oldCG.DOFade(0f, transitionDuration * 0.6f));
+            }
+            if (newSlide != null)
+            {
+                var newCG = newSlide.GetComponent<CanvasGroup>();
+                if (newCG != null)
+                {
+                    seq.Join(newCG.DOFade(1f, transitionDuration * 0.6f));
+                    seq.Join(newSlide.transform.DOScale(1f, transitionDuration * 0.6f).SetEase(Ease.OutCubic));
+                    newSlide.transform.localScale = Vector3.one * 0.95f;
+                }
+            }
+
+            seq.OnComplete(() =>
+            {
+                // Deactivate old slide
+                if (oldSlide != null && oldIndex != targetIndex)
+                {
+                    oldSlide.SetActive(false);
+                    var oldCG = oldSlide.GetComponent<CanvasGroup>();
+                    if (oldCG != null) oldCG.alpha = 1f;
+                }
+
+                currentSlideIndex = targetIndex;
+                UpdateNavigationButtons();
+                UpdateNavigationDots();
+                UpdateProgressBar();
+                isTransitioning = false;
+
+                Debug.Log($"[CashBattleOnboarding] Showing slide {targetIndex + 1}/{totalSlides}");
+            });
         }
+
+        #region Animations
+
+        private void AnimateEntrance()
+        {
+            // Progress bar from top
+            if (progressBarTransform != null)
+            {
+                Vector2 pos = progressBarTransform.anchoredPosition;
+                progressBarTransform.anchoredPosition = new Vector2(pos.x, pos.y + 100);
+                progressBarTransform.DOAnchorPos(pos, 0.3f).SetEase(Ease.OutCubic);
+            }
+
+            // Top bar from top
+            if (topBarTransform != null)
+            {
+                Vector2 pos = topBarTransform.anchoredPosition;
+                topBarTransform.anchoredPosition = new Vector2(pos.x, pos.y + 150);
+                topBarTransform.DOAnchorPos(pos, 0.35f).SetDelay(0.1f).SetEase(Ease.OutCubic);
+            }
+
+            // First slide scale + fade in
+            if (slides != null && slides.Length > 0 && slides[0] != null)
+            {
+                slides[0].transform.localScale = Vector3.one * 0.9f;
+                var cg = slides[0].GetComponent<CanvasGroup>() ?? slides[0].AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                DOTween.Sequence()
+                    .AppendInterval(0.15f)
+                    .Append(slides[0].transform.DOScale(1f, 0.35f).SetEase(Ease.OutCubic))
+                    .Join(cg.DOFade(1f, 0.35f));
+            }
+
+            // Dots fade in
+            if (dotsRectTransform != null)
+            {
+                var cg = dotsRectTransform.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.3f).SetDelay(0.3f);
+            }
+
+            // Navigation from bottom
+            if (navigationTransform != null)
+            {
+                Vector2 pos = navigationTransform.anchoredPosition;
+                navigationTransform.anchoredPosition = new Vector2(pos.x, pos.y - 100);
+                navigationTransform.DOAnchorPos(pos, 0.35f).SetDelay(0.2f).SetEase(Ease.OutBack);
+            }
+        }
+
+        #endregion
 
         private void CompleteOnboarding(bool markAsComplete = true)
         {
@@ -352,7 +450,7 @@ namespace DigitPark.Managers
         {
             if (!isTransitioning)
             {
-                StartCoroutine(TransitionToSlide(slideIndex));
+                TransitionToSlide(slideIndex);
             }
         }
 

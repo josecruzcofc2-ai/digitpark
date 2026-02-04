@@ -4880,7 +4880,6 @@ GameObject:
   - component: {fileID: 467707915}
   - component: {fileID: 467707914}
   - component: {fileID: 467707913}
-  - component: {fileID: 467707912}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -4888,138 +4887,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &467707912
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467707911}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15897633a8a1a8940ae9689677b4534d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  config: {fileID: 0}
-  backButton: {fileID: 0}
-  playAgainButton: {fileID: 0}
-  winPanelNormal: {fileID: 0}
-  losePanelNormal: {fileID: 0}
-  winPanelRealMoney: {fileID: 0}
-  losePanelRealMoney: {fileID: 0}
-  leftGridButtons:
-  - {fileID: 195015936}
-  - {fileID: 432297149}
-  - {fileID: 1923392087}
-  - {fileID: 1794727858}
-  - {fileID: 1659236750}
-  - {fileID: 1397832379}
-  - {fileID: 173394527}
-  - {fileID: 677512828}
-  - {fileID: 788295029}
-  - {fileID: 144982629}
-  - {fileID: 865265170}
-  - {fileID: 915775425}
-  - {fileID: 1522731339}
-  - {fileID: 1700879110}
-  - {fileID: 944556188}
-  - {fileID: 1801969372}
-  leftButtonTexts:
-  - {fileID: 1495099108}
-  - {fileID: 1480191496}
-  - {fileID: 274149300}
-  - {fileID: 809614654}
-  - {fileID: 813733267}
-  - {fileID: 553651754}
-  - {fileID: 1551209534}
-  - {fileID: 954470502}
-  - {fileID: 1200759941}
-  - {fileID: 1852101358}
-  - {fileID: 610715056}
-  - {fileID: 1350934486}
-  - {fileID: 1834687283}
-  - {fileID: 2010723096}
-  - {fileID: 439202806}
-  - {fileID: 1979076322}
-  leftButtonImages:
-  - {fileID: 1510659204}
-  - {fileID: 996112604}
-  - {fileID: 1222401387}
-  - {fileID: 626782703}
-  - {fileID: 1971646029}
-  - {fileID: 646489944}
-  - {fileID: 426136337}
-  - {fileID: 1644354617}
-  - {fileID: 1803533871}
-  - {fileID: 491411071}
-  - {fileID: 1726445968}
-  - {fileID: 1086997891}
-  - {fileID: 788834577}
-  - {fileID: 4267648}
-  - {fileID: 829413056}
-  - {fileID: 1273449366}
-  rightGridButtons:
-  - {fileID: 411711025}
-  - {fileID: 653026671}
-  - {fileID: 2138589698}
-  - {fileID: 209352597}
-  - {fileID: 1879798890}
-  - {fileID: 24196058}
-  - {fileID: 872403031}
-  - {fileID: 547906693}
-  - {fileID: 1754471856}
-  - {fileID: 1386970067}
-  - {fileID: 752414051}
-  - {fileID: 1772185892}
-  - {fileID: 975660168}
-  - {fileID: 433859152}
-  - {fileID: 1098783798}
-  - {fileID: 1588878908}
-  rightButtonTexts:
-  - {fileID: 1516667262}
-  - {fileID: 715238763}
-  - {fileID: 436377810}
-  - {fileID: 215124928}
-  - {fileID: 114728793}
-  - {fileID: 747249124}
-  - {fileID: 1729767954}
-  - {fileID: 1279739329}
-  - {fileID: 990437439}
-  - {fileID: 787484820}
-  - {fileID: 1013682830}
-  - {fileID: 129300093}
-  - {fileID: 693135153}
-  - {fileID: 1104357622}
-  - {fileID: 613173297}
-  - {fileID: 1360979397}
-  rightButtonImages:
-  - {fileID: 1003968852}
-  - {fileID: 1577340511}
-  - {fileID: 1454405526}
-  - {fileID: 1445468357}
-  - {fileID: 1963013264}
-  - {fileID: 734366902}
-  - {fileID: 367088000}
-  - {fileID: 50892728}
-  - {fileID: 1830366501}
-  - {fileID: 1708233583}
-  - {fileID: 1434122779}
-  - {fileID: 2018879820}
-  - {fileID: 699564953}
-  - {fileID: 1483541043}
-  - {fileID: 400751105}
-  - {fileID: 687490839}
-  timerText: {fileID: 1386401721}
-  roundText: {fileID: 330507263}
-  errorsText: {fileID: 1096816137}
-  instructionText: {fileID: 1950636170}
-  comboText: {fileID: 0}
-  statsText: {fileID: 0}
-  winPanel: {fileID: 0}
-  winPanelCanvasGroup: {fileID: 0}
-  sparkleEffect: {fileID: 1858488854}
-  enableHapticFeedback: 1
-  totalRounds: 5
 --- !u!114 &467707913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8467,6 +8334,147 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 776774857}
   m_CullTransparentMesh: 1
+--- !u!1 &781179032
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 781179034}
+  - component: {fileID: 781179033}
+  m_Layer: 0
+  m_Name: OddOneOutController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &781179033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781179032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15897633a8a1a8940ae9689677b4534d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 0}
+  backButton: {fileID: 0}
+  playAgainButton: {fileID: 0}
+  winPanelNormal: {fileID: 0}
+  losePanelNormal: {fileID: 0}
+  winPanelRealMoney: {fileID: 0}
+  losePanelRealMoney: {fileID: 0}
+  leftGridButtons:
+  - {fileID: 195015936}
+  - {fileID: 432297149}
+  - {fileID: 1923392087}
+  - {fileID: 1794727858}
+  - {fileID: 1659236750}
+  - {fileID: 1397832379}
+  - {fileID: 173394527}
+  - {fileID: 677512828}
+  - {fileID: 788295029}
+  - {fileID: 144982629}
+  - {fileID: 865265170}
+  - {fileID: 915775425}
+  - {fileID: 1522731339}
+  - {fileID: 1700879110}
+  - {fileID: 944556188}
+  - {fileID: 1801969372}
+  leftButtonTexts:
+  - {fileID: 1495099108}
+  - {fileID: 1480191496}
+  - {fileID: 274149300}
+  - {fileID: 809614654}
+  - {fileID: 813733267}
+  - {fileID: 553651754}
+  - {fileID: 1551209534}
+  - {fileID: 954470502}
+  - {fileID: 1200759941}
+  - {fileID: 1852101358}
+  - {fileID: 610715056}
+  - {fileID: 1350934486}
+  - {fileID: 1834687283}
+  - {fileID: 2010723096}
+  - {fileID: 439202806}
+  - {fileID: 1979076322}
+  rightGridButtons:
+  - {fileID: 411711025}
+  - {fileID: 653026671}
+  - {fileID: 2138589698}
+  - {fileID: 209352597}
+  - {fileID: 1879798890}
+  - {fileID: 24196058}
+  - {fileID: 872403031}
+  - {fileID: 547906693}
+  - {fileID: 1754471856}
+  - {fileID: 1386970067}
+  - {fileID: 752414051}
+  - {fileID: 1772185892}
+  - {fileID: 975660168}
+  - {fileID: 433859152}
+  - {fileID: 1098783798}
+  - {fileID: 1588878908}
+  rightButtonTexts:
+  - {fileID: 1516667262}
+  - {fileID: 715238763}
+  - {fileID: 436377810}
+  - {fileID: 215124928}
+  - {fileID: 114728793}
+  - {fileID: 747249124}
+  - {fileID: 1729767954}
+  - {fileID: 1279739329}
+  - {fileID: 990437439}
+  - {fileID: 787484820}
+  - {fileID: 1013682830}
+  - {fileID: 129300093}
+  - {fileID: 693135153}
+  - {fileID: 1104357622}
+  - {fileID: 613173297}
+  - {fileID: 1360979397}
+  timerText: {fileID: 1386401721}
+  roundText: {fileID: 330507263}
+  errorsText: {fileID: 1096816137}
+  instructionText: {fileID: 1950636170}
+  comboText: {fileID: 1805680188}
+  statsText: {fileID: 0}
+  winPanel: {fileID: 0}
+  winPanelCanvasGroup: {fileID: 0}
+  sparkleEffect: {fileID: 0}
+  enableHapticFeedback: 1
+  totalRounds: 5
+  availableDigits:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+--- !u!4 &781179034
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781179032}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 659.97473, y: 843.17535, z: 6.5615396}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &787484816
 GameObject:
   m_ObjectHideFlags: 0
@@ -22404,4 +22412,5 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 467707916}
   - {fileID: 688680602}
+  - {fileID: 781179034}
   - {fileID: 1961344944}

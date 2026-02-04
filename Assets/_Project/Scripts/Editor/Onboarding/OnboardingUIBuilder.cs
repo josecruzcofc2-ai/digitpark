@@ -6,847 +6,851 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Modern Onboarding UI builder with premium neon design
-    /// Creates 5 slides: Welcome, Play & Win, Daily Missions, Battle Pass, Ready
+    /// Main Onboarding UI Builder - Rediseño completo
+    /// Layout: ProgressBar → TopBar → StepImage → Title → Description → Panels → Navigation
+    /// Soporta 8 steps del OnboardingManager:
+    ///   welcome, name, avatar, games, cashbattle, tournaments, rewards, complete
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    ///
+    /// Menu: DigitPark/UI Builders/Onboarding/Main Onboarding
     /// </summary>
-    public static class OnboardingUIBuilder
+    public class OnboardingUIBuilder : EditorWindow
     {
-        private const float SCREEN_WIDTH = 1080f;
-        private const float SCREEN_HEIGHT = 1920f;
+        #region Colors
 
-        // Colors
-        private static readonly Color CyanNeon = new Color(0f, 1f, 1f, 1f); // #00FFFF
-        private static readonly Color DarkNavy = new Color(0.039f, 0.055f, 0.153f, 1f); // #0A0E27
-        private static readonly Color CardBackground = new Color(0.125f, 0.188f, 0.376f, 0.95f); // #202860
-        private static readonly Color TextWhite = Color.white;
-        private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
+        private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
+        private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.5f, 1f);
+        private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.06f);
 
-        // Theme colors for each slide
-        private static readonly Color GoldPremium = new Color(1f, 0.843f, 0f, 1f); // #FFD700
-        private static readonly Color PurplePremium = new Color(0.6f, 0.3f, 0.9f, 1f);
-        private static readonly Color GreenSuccess = new Color(0.2f, 0.8f, 0.4f, 1f);
-        private static readonly Color GemColor = new Color(0.4f, 0.8f, 1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
+        private static readonly Color CARD_BG_LIGHT = new Color(0.08f, 0.10f, 0.14f, 1f);
+        private static readonly Color INPUT_BG = new Color(0.08f, 0.10f, 0.15f, 1f);
 
-        // Paths
-        private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
-        private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
+        private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
+        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.6f, 0.65f, 1f);
+        private static readonly Color TEXT_DARK = new Color(0.05f, 0.05f, 0.08f, 1f);
 
-        // Icon paths for each slide
-        private const string ICON_WELCOME_PATH = "Assets/_Project/Art/Icons/UI/icon_ui_gift_generic.png";
-        private const string ICON_PLAY_WIN_PATH = "Assets/_Project/Art/Icons/CashBattle/Stats/stat_victories.png";
-        private const string ICON_MISSIONS_PATH = "Assets/_Project/Art/Icons/DailyRewards/GiftIcon.png";
-        private const string ICON_BATTLEPASS_PATH = "Assets/_Project/Art/Icons/BattlePass/icon_battlepass_crown.png";
-        private const string ICON_READY_PATH = "Assets/_Project/Art/Icons/UI/PlayIconNeon.png";
+        private static readonly Color GREEN_SUCCESS = new Color(0.2f, 0.9f, 0.4f, 1f);
+        private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
+        private static readonly Color RED_ERROR = new Color(1f, 0.3f, 0.3f, 1f);
 
-        // Welcome gift icons
-        private const string ICON_COINS_PATH = "Assets/_Project/Art/Icons/Currency/icon_coins.png";
-        private const string ICON_GEMS_PATH = "Assets/_Project/Art/Icons/Currency/GemIcon.png";
-        private const string ICON_XP_PATH = "Assets/_Project/Art/Icons/Currency/icon_xp.png";
+        #endregion
 
-        // Spacing
-        private const float PADDING = 30f;
-        private const float CARD_PADDING = 40f;
-        private const float ELEMENT_SPACING = 20f;
-        private const float BUTTON_HEIGHT = 70f;
-        private const float ICON_SIZE = 150f;
-        private const float DOT_SIZE = 12f;
-        private const float DOT_SPACING = 15f;
+        #region Layout Anchors (Y: 0=bottom, 1=top)
 
-        private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
-        private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
+        private const float PROGRESS_TOP = 0.993f;
+        private const float PROGRESS_BOT = 0.990f;
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Main Onboarding", false, 300)]
-        public static void RebuildOnboardingScene()
+        private const float TOPBAR_TOP = 0.988f;
+        private const float TOPBAR_BOT = 0.955f;
+
+        private const float IMAGE_TOP = 0.94f;
+        private const float IMAGE_BOT = 0.58f;
+
+        private const float TITLE_TOP = 0.56f;
+        private const float TITLE_BOT = 0.47f;
+
+        private const float DESC_TOP = 0.46f;
+        private const float DESC_BOT = 0.28f;
+
+        private const float DOTS_TOP = 0.095f;
+        private const float DOTS_BOT = 0.065f;
+
+        private const float NAV_TOP = 0.055f;
+        private const float NAV_BOT = 0.015f;
+
+        private const float SIDE_PAD = 30f;
+
+        #endregion
+
+        #region Paths
+
+        private const string ICONS_PATH = "Assets/_Project/Art/Icons/Onboarding/";
+        private const string GAME_ICONS_PATH = "Assets/_Project/Art/Icons/Games/";
+
+        #endregion
+
+        [MenuItem("DigitPark/UI Builders/Onboarding/Main Onboarding", false, 180)]
+        public static void ShowWindow()
         {
-            try
-            {
-                // Verify prerequisites
-                if (WhiteSprite == null || DefaultFont == null)
-                {
-                    Debug.LogError("❌ Missing prerequisites! Check WhiteSquare.png and Font.");
-                    return;
-                }
-
-                Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-                if (canvas == null)
-                {
-                    Debug.LogError("❌ No Canvas found in scene.");
-                    return;
-                }
-
-                Debug.Log("🎨 Starting Onboarding UI Rebuild...");
-
-                // Clean existing UI (except EventSystem and managers)
-                CleanExistingUI(canvas);
-
-                // Build UI
-                BuildBackground(canvas);
-                GameObject safeArea = BuildSafeArea(canvas);
-                BuildSlidesContainer(safeArea);
-                BuildProgressDots(safeArea);
-                BuildNavigationButtons(safeArea); // Now includes Skip button
-                BuildWelcomeGiftBlocker(canvas);
-
-                // Force layout update
-                Canvas.ForceUpdateCanvases();
-
-                Debug.Log("✅ Onboarding UI rebuilt successfully!");
-                EditorUtility.SetDirty(canvas.gameObject);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"❌ Error in OnboardingUIBuilder: {e.Message}\n{e.StackTrace}");
-            }
+            GetWindow<OnboardingUIBuilder>("Onboarding Builder");
         }
 
-        private static void CleanExistingUI(Canvas canvas)
+        private void OnGUI()
         {
-            Debug.Log("🧹 Cleaning existing UI elements...");
+            GUILayout.Label("Main Onboarding UI Builder", EditorStyles.boldLabel);
+            GUILayout.Label("Tutorial nuevos usuarios - Neon Cyan - REDISEÑO", EditorStyles.miniLabel);
+            GUILayout.Space(10);
 
-            // Collect all children except EventSystem and managers
-            var children = new System.Collections.Generic.List<Transform>();
-            foreach (Transform child in canvas.transform)
+            EditorGUILayout.HelpBox(
+                "Nuevo diseño (de arriba a abajo):\n\n" +
+                "1. Progress Bar (línea delgada cyan)\n" +
+                "2. Top Bar (contador de pasos + saltar)\n" +
+                "3. Step Image (icono grande centrado)\n" +
+                "4. Title + Description (texto grande legible)\n" +
+                "5. Paneles especiales (nombre, avatar, completado)\n" +
+                "6. Navigation (dots + prev/next)\n\n" +
+                "Soporta 8 steps: welcome, name, avatar, games,\n" +
+                "cashbattle, tournaments, rewards, complete",
+                MessageType.Info);
+
+            GUILayout.Space(15);
+
+            GUI.backgroundColor = CYAN_NEON;
+            if (GUILayout.Button("RECONSTRUIR ONBOARDING COMPLETO", GUILayout.Height(50)))
+                RebuildOnboarding();
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.Space(10);
+            GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
+
+            if (GUILayout.Button("1. Background + Top Bar", GUILayout.Height(25)))
             {
-                // Keep only EventSystem and animation managers
-                if (child.name != "EventSystem" &&
-                    child.name != "---ANIMATION_MANAGERS---" &&
-                    child.name != "OnboardingManager" &&
-                    !child.name.Contains("Manager"))
-                {
-                    children.Add(child);
-                }
+                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
             }
+            if (GUILayout.Button("2. Content Area (Image + Text)", GUILayout.Height(25))) CreateContentArea();
+            if (GUILayout.Button("3. Name Input Panel", GUILayout.Height(25))) CreateNameInputPanel();
+            if (GUILayout.Button("4. Avatar Selection Panel", GUILayout.Height(25))) CreateAvatarSelectionPanel();
+            if (GUILayout.Button("5. Completion Panel", GUILayout.Height(25))) CreateCompletionPanel();
+            if (GUILayout.Button("6. Navigation (Dots + Buttons)", GUILayout.Height(25))) CreateNavigation();
 
-            // Destroy all UI elements
-            foreach (var child in children)
+            GUILayout.Space(15);
+
+            GUI.backgroundColor = GOLD;
+            if (GUILayout.Button("ASIGNAR REFERENCIAS AL MANAGER", GUILayout.Height(35)))
+                SetupManagerReferences();
+            GUI.backgroundColor = Color.white;
+        }
+
+        #region Main Rebuild
+
+        private static void RebuildOnboarding()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null)
             {
-                Debug.Log($"  Removing: {child.name}");
-                Object.DestroyImmediate(child.gameObject);
+                Debug.LogError("[OnboardingUI] No se encontro Canvas");
+                return;
             }
-
-            Debug.Log($"🧹 Removed {children.Count} UI elements");
-
-            // Configure Canvas fresh
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
             var scaler = canvas.GetComponent<CanvasScaler>();
-            if (scaler == null) scaler = canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(SCREEN_WIDTH, SCREEN_HEIGHT);
-            scaler.matchWidthOrHeight = 0f;
-
-            // Force canvas update before building
-            Canvas.ForceUpdateCanvases();
-
-            Debug.Log("✅ Canvas cleaned and configured");
-        }
-
-        private static void BuildBackground(Canvas canvas)
-        {
-            GameObject bg = new GameObject("Background");
-            bg.transform.SetParent(canvas.transform, false);
-
-            RectTransform rect = bg.AddComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.sizeDelta = Vector2.zero;
-
-            Image image = bg.AddComponent<Image>();
-            image.sprite = WhiteSprite;
-            image.color = DarkNavy;
-
-            bg.transform.SetAsFirstSibling();
-        }
-
-        private static GameObject BuildSafeArea(Canvas canvas)
-        {
-            GameObject safeArea = new GameObject("SafeArea");
-            safeArea.transform.SetParent(canvas.transform, false);
-
-            RectTransform rect = safeArea.AddComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.sizeDelta = Vector2.zero;
-
-            return safeArea;
-        }
-
-        private static void BuildSkipButton(GameObject parent)
-        {
-            GameObject skipBtn = new GameObject("SkipButton");
-            skipBtn.transform.SetParent(parent.transform, false);
-
-            RectTransform rect = skipBtn.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(1, 1);
-            rect.anchorMax = new Vector2(1, 1);
-            rect.pivot = new Vector2(1, 1);
-            rect.sizeDelta = new Vector2(100, 50);
-            rect.anchoredPosition = new Vector2(-20, -20);
-
-            Button btn = skipBtn.AddComponent<Button>();
-            btn.transition = Selectable.Transition.ColorTint;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(skipBtn.transform, false);
-
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = "Saltar";
-            text.fontSize = 18;
-            text.color = TextGray;
-            text.alignment = TextAlignmentOptions.Center;
-
-            btn.targetGraphic = text;
-        }
-
-        private static void BuildSlidesContainer(GameObject parent)
-        {
-            GameObject slidesContainer = new GameObject("SlidesContainer");
-            slidesContainer.transform.SetParent(parent.transform, false);
-
-            RectTransform rect = slidesContainer.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 0.2f);
-            rect.anchorMax = new Vector2(1, 0.9f);
-            rect.sizeDelta = Vector2.zero;
-
-            // Create 5 slides with numbers
-            CreateSlide(slidesContainer, "Slide1", "¡Bienvenido a DigitPark!",
-                "El mejor lugar para jugar, competir y ganar premios reales.",
-                CyanNeon, 1, true);
-
-            CreateSlide(slidesContainer, "Slide2", "Juega y Gana",
-                "Participa en torneos, desafía a otros jugadores y gana monedas reales.",
-                GoldPremium, 2, false);
-
-            CreateSlide(slidesContainer, "Slide3", "Misiones Diarias",
-                "Completa misiones cada día para obtener gemas, monedas y recompensas exclusivas.",
-                GemColor, 3, false);
-
-            CreateSlide(slidesContainer, "Slide4", "Pase de Batalla",
-                "Desbloquea recompensas increíbles mientras subes de nivel cada temporada.",
-                PurplePremium, 4, false);
-
-            CreateSlide(slidesContainer, "Slide5", "¡Listo para Comenzar!",
-                "Reclama tu regalo de bienvenida y empieza a jugar ahora.",
-                GreenSuccess, 5, false);
-        }
-
-        private static void CreateSlide(GameObject parent, string name, string title, string description, Color accentColor, int slideNumber, bool isActive)
-        {
-            GameObject slide = new GameObject(name);
-            slide.transform.SetParent(parent.transform, false);
-            slide.SetActive(isActive);
-
-            RectTransform slideRect = slide.AddComponent<RectTransform>();
-            slideRect.anchorMin = Vector2.zero;
-            slideRect.anchorMax = Vector2.one;
-            slideRect.sizeDelta = Vector2.zero;
-
-            // Content container
-            GameObject content = new GameObject("Content");
-            content.transform.SetParent(slide.transform, false);
-
-            RectTransform contentRect = content.AddComponent<RectTransform>();
-            contentRect.anchorMin = Vector2.zero;
-            contentRect.anchorMax = Vector2.one;
-            contentRect.sizeDelta = Vector2.zero;
-
-            VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = false;
-            layout.spacing = ELEMENT_SPACING;
-            layout.padding = new RectOffset((int)CARD_PADDING, (int)CARD_PADDING, (int)CARD_PADDING, (int)CARD_PADDING);
-
-            // Number with divider line (inside VerticalLayoutGroup)
-            CreateSlideNumber_OLD(content.transform, slideNumber, accentColor);
-
-            // Title
-            CreateSlideTitle(content.transform, title, accentColor);
-
-            // Description
-            CreateSlideDescription(content.transform, description);
-        }
-
-        private static void CreateSlideNumberDividerNeon(Transform slideParent, int number, Color accentColor)
-        {
-            // EXACT COPY from CashBattle but with CYAN colors
-            // Container for divider + number (OUTSIDE VerticalLayoutGroup)
-            GameObject dividerContainer = new GameObject("DividerContainer");
-            dividerContainer.transform.SetParent(slideParent, false);
-
-            RectTransform containerRect = dividerContainer.AddComponent<RectTransform>();
-            containerRect.anchorMin = new Vector2(0.5f, 0.5f);
-            containerRect.anchorMax = new Vector2(0.5f, 0.5f);
-            containerRect.pivot = new Vector2(0.5f, 0.5f);
-            containerRect.sizeDelta = new Vector2(SCREEN_WIDTH, ICON_SIZE);
-            containerRect.anchoredPosition = new Vector2(0, 200); // Default position (user can move)
-
-            // Horizontal divider line - EXACT same as CashBattle
-            GameObject divider = new GameObject("Divider");
-            divider.transform.SetParent(dividerContainer.transform, false);
-
-            RectTransform dividerRect = divider.AddComponent<RectTransform>();
-            dividerRect.anchorMin = new Vector2(0.5f, 0.5f);
-            dividerRect.anchorMax = new Vector2(0.5f, 0.5f);
-            dividerRect.pivot = new Vector2(0.5f, 0.5f);
-            dividerRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 4), 4f);
-
-            Image dividerImage = divider.AddComponent<Image>();
-            dividerImage.sprite = WhiteSprite;
-            dividerImage.color = accentColor; // CYAN for Onboarding
-
-            // Colored square (on top of divider) - EXACT same as CashBattle
-            GameObject square = new GameObject("Square");
-            square.transform.SetParent(dividerContainer.transform, false);
-
-            RectTransform squareRect = square.AddComponent<RectTransform>();
-            squareRect.anchorMin = new Vector2(0.5f, 0.5f);
-            squareRect.anchorMax = new Vector2(0.5f, 0.5f);
-            squareRect.pivot = new Vector2(0.5f, 0.5f);
-            squareRect.sizeDelta = new Vector2(ICON_SIZE, ICON_SIZE);
-
-            Image squareImage = square.AddComponent<Image>();
-            squareImage.sprite = WhiteSprite;
-            squareImage.color = accentColor; // CYAN for Onboarding
-
-            // NEON Outline effect on Square (like CashBattle but CYAN)
-            Outline squareOutline = square.AddComponent<Outline>();
-            squareOutline.effectColor = accentColor; // Same CYAN color for neon effect
-            squareOutline.effectDistance = new Vector2(3, -3);
-
-            // Number text - EXACT same as CashBattle
-            GameObject numberText = new GameObject("Text");
-            numberText.transform.SetParent(square.transform, false);
-
-            RectTransform textRect = numberText.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI text = numberText.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = number.ToString();
-            text.fontSize = 72;
-            text.fontStyle = FontStyles.Bold;
-            text.color = DarkNavy;
-            text.alignment = TextAlignmentOptions.Center;
-        }
-
-        // OLD METHOD - kept for reference, not used anymore
-        private static void CreateSlideNumber_OLD(Transform parent, int number, Color accentColor)
-        {
-            GameObject numberContainer = new GameObject("NumberContainer");
-            numberContainer.transform.SetParent(parent, false);
-
-            LayoutElement layout = numberContainer.AddComponent<LayoutElement>();
-            layout.preferredHeight = ICON_SIZE;
-
-            // Horizontal divider line (CYAN NEON - thick like CashBattle)
-            GameObject divider = new GameObject("Divider");
-            divider.transform.SetParent(numberContainer.transform, false);
-
-            RectTransform dividerRect = divider.AddComponent<RectTransform>();
-            dividerRect.anchorMin = new Vector2(0.5f, 0.5f);
-            dividerRect.anchorMax = new Vector2(0.5f, 0.5f);
-            dividerRect.pivot = new Vector2(0.5f, 0.5f);
-            dividerRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 4), 4f); // Thick line like CashBattle
-
-            Image dividerImage = divider.AddComponent<Image>();
-            dividerImage.sprite = WhiteSprite;
-            dividerImage.color = accentColor; // CYAN or slide accent color
-
-            // Add neon glow effect with Shadow component
-            UnityEngine.UI.Shadow glow = divider.AddComponent<UnityEngine.UI.Shadow>();
-            glow.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.5f);
-            glow.effectDistance = new Vector2(0, 0);
-            glow.useGraphicAlpha = false;
-
-            // Colored square background (on top of divider)
-            GameObject square = new GameObject("Square");
-            square.transform.SetParent(numberContainer.transform, false);
-
-            RectTransform squareRect = square.AddComponent<RectTransform>();
-            squareRect.anchorMin = new Vector2(0.5f, 0.5f);
-            squareRect.anchorMax = new Vector2(0.5f, 0.5f);
-            squareRect.pivot = new Vector2(0.5f, 0.5f);
-            squareRect.sizeDelta = new Vector2(ICON_SIZE, ICON_SIZE);
-
-            Image squareImage = square.AddComponent<Image>();
-            squareImage.sprite = WhiteSprite;
-            squareImage.color = accentColor;
-
-            // Optional: Add border/outline
-            Outline outline = square.AddComponent<Outline>();
-            outline.effectColor = new Color(accentColor.r * 0.5f, accentColor.g * 0.5f, accentColor.b * 0.5f, 1f);
-            outline.effectDistance = new Vector2(3, -3);
-
-            // Number text
-            GameObject numberText = new GameObject("Text");
-            numberText.transform.SetParent(square.transform, false);
-
-            RectTransform textRect = numberText.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI text = numberText.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = number.ToString();
-            text.fontSize = 72;
-            text.fontStyle = FontStyles.Bold;
-            text.color = DarkNavy;
-            text.alignment = TextAlignmentOptions.Center;
-        }
-
-        private static void CreateSlideTitle(Transform parent, string text, Color accentColor)
-        {
-            GameObject title = new GameObject("Title");
-            title.transform.SetParent(parent, false);
-
-            LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 80;
-
-            TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.font = DefaultFont;
-            titleText.text = text;
-            titleText.fontSize = 36;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = accentColor;
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.enableWordWrapping = true;
-        }
-
-        private static void CreateSlideDescription(Transform parent, string text)
-        {
-            GameObject desc = new GameObject("Description");
-            desc.transform.SetParent(parent, false);
-
-            LayoutElement layout = desc.AddComponent<LayoutElement>();
-            layout.preferredHeight = 100;
-
-            TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
-            descText.font = DefaultFont;
-            descText.text = text;
-            descText.fontSize = 20;
-            descText.color = TextWhite;
-            descText.alignment = TextAlignmentOptions.Center;
-            descText.enableWordWrapping = true;
-        }
-
-        private static void BuildProgressDots(GameObject parent)
-        {
-            GameObject dotsContainer = new GameObject("ProgressDots");
-            dotsContainer.transform.SetParent(parent.transform, false);
-
-            RectTransform rect = dotsContainer.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0.15f);
-            rect.anchorMax = new Vector2(0.5f, 0.15f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(5 * (DOT_SIZE + DOT_SPACING), DOT_SIZE);
-
-            HorizontalLayoutGroup layout = dotsContainer.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = DOT_SPACING;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = false;
-            layout.childControlHeight = false;
-
-            // Create 5 dots
-            for (int i = 1; i <= 5; i++)
+            if (scaler != null)
             {
-                CreateDot(dotsContainer, $"Dot{i}", i == 1);
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0f;
             }
+
+            // Limpiar elementos anteriores
+            string[] oldNames = {
+                "Background", "ProgressBar", "TopBar", "StepImage", "IconGlow",
+                "TitleText", "DescriptionText", "NameInputPanel", "AvatarSelectionPanel",
+                "CompletionPanel", "DotsContainer", "NavigationPanel",
+                "SafeArea", "SlidesContainer", "NavigationPanel", "WelcomeGiftBlocker"
+            };
+            foreach (var n in oldNames)
+            {
+                Transform t = canvas.transform.Find(n);
+                if (t != null) DestroyImmediate(t.gameObject);
+            }
+
+            CreateBackground(canvas.transform);
+            CreateTopBar();
+            CreateContentArea();
+            CreateNameInputPanel();
+            CreateAvatarSelectionPanel();
+            CreateCompletionPanel();
+            CreateNavigation();
+            SetupManagerReferences();
+
+            Debug.Log("[OnboardingUI] Onboarding RECONSTRUIDO exitosamente!");
+            EditorUtility.SetDirty(canvas.gameObject);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
 
-        private static void CreateDot(GameObject parent, string name, bool isActive)
+        private static void CreateBackground(Transform parent)
         {
-            GameObject dot = new GameObject(name);
-            dot.transform.SetParent(parent.transform, false);
-
-            RectTransform rect = dot.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(DOT_SIZE, DOT_SIZE);
-
-            Image image = dot.AddComponent<Image>();
-            image.sprite = WhiteSprite;
-            image.color = isActive ? CyanNeon : new Color(0.3f, 0.35f, 0.4f, 1f);
+            var bg = FindOrCreate(parent, "Background");
+            bg.transform.SetAsFirstSibling();
+            var rt = GetOrAdd<RectTransform>(bg);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(bg).color = DARK_BG;
         }
 
-        private static void BuildNavigationButtons(GameObject parent)
+        #endregion
+
+        #region Top Bar (Progress + StepCounter + Skip)
+
+        private static void CreateTopBar()
         {
-            // Navigation Panel
-            GameObject navPanel = new GameObject("NavigationPanel");
-            navPanel.transform.SetParent(parent.transform, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform panelRect = navPanel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.5f, 0);
-            panelRect.anchorMax = new Vector2(0.5f, 0);
-            panelRect.pivot = new Vector2(0.5f, 0);
-            panelRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 220);
-            panelRect.anchoredPosition = new Vector2(0, 40);
+            // --- Progress Bar (thin cyan line at very top) ---
+            var progressGO = FindOrCreate(canvas.transform, "ProgressBar");
+            var pRT = GetOrAdd<RectTransform>(progressGO);
+            SetAnchors(pRT, 0, PROGRESS_BOT, 1, PROGRESS_TOP);
 
-            // Dots Container (optional, can be removed if already exists)
-            GameObject dotsContainer = new GameObject("DotsContainer");
-            dotsContainer.transform.SetParent(navPanel.transform, false);
+            var slider = GetOrAdd<Slider>(progressGO);
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0;
+            slider.maxValue = 7;
+            slider.wholeNumbers = true;
+            slider.value = 0;
+            slider.interactable = false;
 
-            RectTransform dotsRect = dotsContainer.AddComponent<RectTransform>();
-            dotsRect.anchorMin = new Vector2(0.5f, 1);
-            dotsRect.anchorMax = new Vector2(0.5f, 1);
-            dotsRect.pivot = new Vector2(0.5f, 1);
-            dotsRect.sizeDelta = new Vector2(200, 30);
-            dotsRect.anchoredPosition = new Vector2(0, -10);
+            // Slider Background (dark track)
+            var sliderBg = FindOrCreate(progressGO.transform, "Background");
+            var sbRT = GetOrAdd<RectTransform>(sliderBg);
+            sbRT.anchorMin = Vector2.zero;
+            sbRT.anchorMax = Vector2.one;
+            sbRT.offsetMin = Vector2.zero;
+            sbRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(sliderBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
 
-            HorizontalLayoutGroup dotsLayout = dotsContainer.AddComponent<HorizontalLayoutGroup>();
-            dotsLayout.childAlignment = TextAnchor.MiddleCenter;
-            dotsLayout.childControlWidth = false;
-            dotsLayout.childControlHeight = false;
-            dotsLayout.spacing = 10f;
+            // Fill Area
+            var fillArea = FindOrCreate(progressGO.transform, "Fill Area");
+            var faRT = GetOrAdd<RectTransform>(fillArea);
+            faRT.anchorMin = Vector2.zero;
+            faRT.anchorMax = new Vector2(1, 1);
+            faRT.offsetMin = Vector2.zero;
+            faRT.offsetMax = Vector2.zero;
 
-            // Buttons Container
-            GameObject buttonsContainer = new GameObject("Buttons");
-            buttonsContainer.transform.SetParent(navPanel.transform, false);
+            var fill = FindOrCreate(fillArea.transform, "Fill");
+            var fRT = GetOrAdd<RectTransform>(fill);
+            fRT.anchorMin = Vector2.zero;
+            fRT.anchorMax = Vector2.one;
+            fRT.offsetMin = Vector2.zero;
+            fRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(fill).color = CYAN_NEON;
 
-            RectTransform buttonsRect = buttonsContainer.AddComponent<RectTransform>();
-            buttonsRect.anchorMin = new Vector2(0, 0);
-            buttonsRect.anchorMax = new Vector2(1, 0.7f);
-            buttonsRect.offsetMin = Vector2.zero;
-            buttonsRect.offsetMax = Vector2.zero;
+            slider.fillRect = fRT;
+            slider.handleRect = null;
+            slider.targetGraphic = GetOrAdd<Image>(progressGO);
+            GetOrAdd<Image>(progressGO).color = Color.clear;
 
-            HorizontalLayoutGroup hLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            hLayout.childAlignment = TextAnchor.MiddleCenter;
-            hLayout.childControlWidth = true;
-            hLayout.childControlHeight = true;
-            hLayout.spacing = 20f;
-            hLayout.padding = new RectOffset(20, 20, 20, 20);
+            // --- Top Bar (step counter + skip button) ---
+            var topBar = FindOrCreate(canvas.transform, "TopBar");
+            var tbRT = GetOrAdd<RectTransform>(topBar);
+            SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
 
-            // Back Button
-            CreateSecondaryButton(buttonsContainer.transform, "BackButton", "ATRÁS");
+            // Step Counter (left)
+            var counter = FindOrCreate(topBar.transform, "StepCounter");
+            var cRT = GetOrAdd<RectTransform>(counter);
+            cRT.anchorMin = new Vector2(0, 0);
+            cRT.anchorMax = new Vector2(0.3f, 1);
+            cRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            cRT.offsetMax = Vector2.zero;
+            var cTMP = GetOrAdd<TextMeshProUGUI>(counter);
+            cTMP.text = "1/8";
+            cTMP.fontSize = 18;
+            cTMP.color = TEXT_SECONDARY;
+            cTMP.alignment = TextAlignmentOptions.Left;
 
-            // Next Button
-            CreateCyanButton(buttonsContainer.transform, "NextButton", "SIGUIENTE");
+            // Skip Button (right)
+            var skipBtn = FindOrCreate(topBar.transform, "SkipButton");
+            var sRT = GetOrAdd<RectTransform>(skipBtn);
+            sRT.anchorMin = new Vector2(0.7f, 0.1f);
+            sRT.anchorMax = new Vector2(1, 0.9f);
+            sRT.offsetMin = new Vector2(0, 0);
+            sRT.offsetMax = new Vector2(-SIDE_PAD, 0);
+            var sBg = GetOrAdd<Image>(skipBtn);
+            sBg.color = new Color(1, 1, 1, 0.05f);
+            GetOrAdd<Button>(skipBtn).targetGraphic = sBg;
 
-            // Skip Button (top-right corner)
-            CreateSkipButtonInPanel(navPanel.transform);
+            var skipText = FindOrCreate(skipBtn.transform, "Text");
+            var stRT = GetOrAdd<RectTransform>(skipText);
+            stRT.anchorMin = Vector2.zero;
+            stRT.anchorMax = Vector2.one;
+            stRT.offsetMin = Vector2.zero;
+            stRT.offsetMax = Vector2.zero;
+            var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
+            stTMP.text = "SALTAR";
+            stTMP.fontSize = 16;
+            stTMP.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.7f);
+            stTMP.fontStyle = FontStyles.Bold;
+            stTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[OnboardingUI] TopBar creado (ProgressBar + StepCounter + Skip)");
         }
 
-        private static void CreateSecondaryButton(Transform parent, string name, string text)
+        #endregion
+
+        #region Content Area (StepImage + Title + Description)
+
+        private static void CreateContentArea()
         {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            Image bg = btn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = new Color(0.2f, 0.2f, 0.25f, 0.9f);
+            // --- Icon Glow (subtle glow behind step image) ---
+            var glow = FindOrCreate(canvas.transform, "IconGlow");
+            var glRT = GetOrAdd<RectTransform>(glow);
+            glRT.anchorMin = new Vector2(0.10f, IMAGE_BOT - 0.03f);
+            glRT.anchorMax = new Vector2(0.90f, IMAGE_TOP + 0.01f);
+            glRT.offsetMin = Vector2.zero;
+            glRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(glow).color = CYAN_GLOW;
 
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
+            // --- Step Image (large centered icon) ---
+            var stepImg = FindOrCreate(canvas.transform, "StepImage");
+            var siRT = GetOrAdd<RectTransform>(stepImg);
+            siRT.anchorMin = new Vector2(0.20f, IMAGE_BOT);
+            siRT.anchorMax = new Vector2(0.80f, IMAGE_TOP);
+            siRT.offsetMin = Vector2.zero;
+            siRT.offsetMax = Vector2.zero;
+            var siImg = GetOrAdd<Image>(stepImg);
+            siImg.color = Color.white;
+            siImg.preserveAspect = true;
 
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.3f, 0.3f, 0.35f, 0.9f);
-            colors.pressedColor = new Color(0.15f, 0.15f, 0.2f, 1f);
-            colors.selectedColor = new Color(0.3f, 0.3f, 0.35f, 0.9f);
-            colors.disabledColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
+            // Try load welcome icon
+            Sprite welcomeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICONS_PATH + "WelcomeIcon.png");
+            if (welcomeSprite != null) siImg.sprite = welcomeSprite;
 
-            LayoutElement layout = btn.AddComponent<LayoutElement>();
-            layout.preferredHeight = BUTTON_HEIGHT;
-            layout.flexibleWidth = 1f;
+            // --- Title Text ---
+            var title = FindOrCreate(canvas.transform, "TitleText");
+            var tRT = GetOrAdd<RectTransform>(title);
+            tRT.anchorMin = new Vector2(0.05f, TITLE_BOT);
+            tRT.anchorMax = new Vector2(0.95f, TITLE_TOP);
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
+            tTMP.text = "\u00A1Bienvenido a DigitPark!";
+            tTMP.fontSize = 34;
+            tTMP.color = CYAN_NEON;
+            tTMP.fontStyle = FontStyles.Bold;
+            tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableWordWrapping = true;
 
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
+            // --- Description Text ---
+            var desc = FindOrCreate(canvas.transform, "DescriptionText");
+            var dRT = GetOrAdd<RectTransform>(desc);
+            dRT.anchorMin = new Vector2(0.08f, DESC_BOT);
+            dRT.anchorMax = new Vector2(0.92f, DESC_TOP);
+            dRT.offsetMin = Vector2.zero;
+            dRT.offsetMax = Vector2.zero;
+            var dTMP = GetOrAdd<TextMeshProUGUI>(desc);
+            dTMP.text = "Tu destino para juegos mentales, competencias y diversi\u00F3n.";
+            dTMP.fontSize = 20;
+            dTMP.color = TEXT_WHITE;
+            dTMP.alignment = TextAlignmentOptions.Center;
+            dTMP.enableWordWrapping = true;
 
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.font = DefaultFont;
-            btnText.text = text;
-            btnText.fontSize = 20;
-            btnText.fontStyle = FontStyles.Bold;
-            btnText.color = TextWhite;
-            btnText.alignment = TextAlignmentOptions.Center;
+            Debug.Log("[OnboardingUI] ContentArea creado (IconGlow + StepImage + Title + Description)");
         }
 
-        private static void CreateCyanButton(Transform parent, string name, string text)
+        #endregion
+
+        #region Name Input Panel
+
+        private static void CreateNameInputPanel()
         {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            Image bg = btn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = CyanNeon;
+            var panel = FindOrCreate(canvas.transform, "NameInputPanel");
+            var pRT = GetOrAdd<RectTransform>(panel);
+            pRT.anchorMin = new Vector2(0.08f, 0.22f);
+            pRT.anchorMax = new Vector2(0.92f, 0.55f);
+            pRT.offsetMin = Vector2.zero;
+            pRT.offsetMax = Vector2.zero;
+            panel.SetActive(false);
 
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
+            // Card background
+            var pBg = GetOrAdd<Image>(panel);
+            pBg.color = CARD_BG;
+            var pOutline = GetOrAdd<Outline>(panel);
+            pOutline.effectColor = CYAN_DARK;
+            pOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0f, 0.8f, 0.8f, 0.9f);
-            colors.pressedColor = new Color(0f, 0.6f, 0.6f, 1f);
-            colors.selectedColor = new Color(0f, 0.8f, 0.8f, 0.9f);
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
+            // Input container (with VLG)
+            var container = FindOrCreate(panel.transform, "InputContainer");
+            var cRT = GetOrAdd<RectTransform>(container);
+            cRT.anchorMin = new Vector2(0.06f, 0.08f);
+            cRT.anchorMax = new Vector2(0.94f, 0.92f);
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
 
-            LayoutElement layout = btn.AddComponent<LayoutElement>();
-            layout.preferredHeight = BUTTON_HEIGHT;
-            layout.flexibleWidth = 1f;
+            var vlg = GetOrAdd<VerticalLayoutGroup>(container);
+            vlg.spacing = 12;
+            vlg.padding = new RectOffset(0, 0, 10, 10);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
 
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
+            // --- Name Input Field ---
+            var inputGO = FindOrCreate(container.transform, "NameInput");
+            GetOrAdd<LayoutElement>(inputGO).preferredHeight = 70;
+            var inputBg = GetOrAdd<Image>(inputGO);
+            inputBg.color = INPUT_BG;
+            var inputOutline = GetOrAdd<Outline>(inputGO);
+            inputOutline.effectColor = CYAN_DARK;
+            inputOutline.effectDistance = new Vector2(1, 1);
 
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
+            var input = GetOrAdd<TMP_InputField>(inputGO);
+            input.contentType = TMP_InputField.ContentType.Standard;
+            input.characterLimit = 20;
 
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.font = DefaultFont;
-            btnText.text = text;
-            btnText.fontSize = 24;
-            btnText.fontStyle = FontStyles.Bold;
-            btnText.color = DarkNavy;
-            btnText.alignment = TextAlignmentOptions.Center;
+            // Text Area
+            var textArea = FindOrCreate(inputGO.transform, "Text Area");
+            var taRT = GetOrAdd<RectTransform>(textArea);
+            taRT.anchorMin = Vector2.zero;
+            taRT.anchorMax = Vector2.one;
+            taRT.offsetMin = new Vector2(15, 5);
+            taRT.offsetMax = new Vector2(-15, -5);
+            GetOrAdd<RectMask2D>(textArea);
+
+            // Placeholder
+            var placeholder = FindOrCreate(textArea.transform, "Placeholder");
+            var phRT = GetOrAdd<RectTransform>(placeholder);
+            phRT.anchorMin = Vector2.zero;
+            phRT.anchorMax = Vector2.one;
+            phRT.offsetMin = Vector2.zero;
+            phRT.offsetMax = Vector2.zero;
+            var phTMP = GetOrAdd<TextMeshProUGUI>(placeholder);
+            phTMP.text = "Escribe tu nombre...";
+            phTMP.fontSize = 22;
+            phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
+            phTMP.fontStyle = FontStyles.Italic;
+            phTMP.alignment = TextAlignmentOptions.Left;
+
+            // Text
+            var text = FindOrCreate(textArea.transform, "Text");
+            var txtRT = GetOrAdd<RectTransform>(text);
+            txtRT.anchorMin = Vector2.zero;
+            txtRT.anchorMax = Vector2.one;
+            txtRT.offsetMin = Vector2.zero;
+            txtRT.offsetMax = Vector2.zero;
+            var txtTMP = GetOrAdd<TextMeshProUGUI>(text);
+            txtTMP.fontSize = 22;
+            txtTMP.color = TEXT_WHITE;
+            txtTMP.alignment = TextAlignmentOptions.Left;
+
+            // Wire TMP_InputField
+            input.textViewport = taRT;
+            input.textComponent = txtTMP;
+            input.placeholder = phTMP;
+
+            // --- Confirm Button ---
+            var confirmBtn = FindOrCreate(container.transform, "ConfirmNameButton");
+            GetOrAdd<LayoutElement>(confirmBtn).preferredHeight = 55;
+            var cbBg = GetOrAdd<Image>(confirmBtn);
+            cbBg.color = CYAN_NEON;
+            GetOrAdd<Button>(confirmBtn).targetGraphic = cbBg;
+            var cbOutline = GetOrAdd<Outline>(confirmBtn);
+            cbOutline.effectColor = CYAN_DARK;
+            cbOutline.effectDistance = new Vector2(1, 1);
+
+            var confirmText = FindOrCreate(confirmBtn.transform, "Text");
+            var ctRT = GetOrAdd<RectTransform>(confirmText);
+            ctRT.anchorMin = Vector2.zero;
+            ctRT.anchorMax = Vector2.one;
+            ctRT.offsetMin = Vector2.zero;
+            ctRT.offsetMax = Vector2.zero;
+            var ctTMP = GetOrAdd<TextMeshProUGUI>(confirmText);
+            ctTMP.text = "CONFIRMAR";
+            ctTMP.fontSize = 22;
+            ctTMP.color = TEXT_DARK;
+            ctTMP.fontStyle = FontStyles.Bold;
+            ctTMP.alignment = TextAlignmentOptions.Center;
+
+            // --- Error Text ---
+            var errorText = FindOrCreate(container.transform, "NameErrorText");
+            GetOrAdd<LayoutElement>(errorText).preferredHeight = 30;
+            var eTMP = GetOrAdd<TextMeshProUGUI>(errorText);
+            eTMP.text = "";
+            eTMP.fontSize = 16;
+            eTMP.color = RED_ERROR;
+            eTMP.alignment = TextAlignmentOptions.Center;
+            errorText.SetActive(false);
+
+            Debug.Log("[OnboardingUI] NameInputPanel creado");
         }
 
-        private static void CreateSkipButtonInPanel(Transform parent)
+        #endregion
+
+        #region Avatar Selection Panel
+
+        private static void CreateAvatarSelectionPanel()
         {
-            GameObject skipBtn = new GameObject("SkipButton");
-            skipBtn.transform.SetParent(parent, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform skipRect = skipBtn.AddComponent<RectTransform>();
-            skipRect.anchorMin = new Vector2(1, 1);
-            skipRect.anchorMax = new Vector2(1, 1);
-            skipRect.pivot = new Vector2(1, 1);
-            skipRect.sizeDelta = new Vector2(120, 40);
-            skipRect.anchoredPosition = new Vector2(-10, -10);
+            var panel = FindOrCreate(canvas.transform, "AvatarSelectionPanel");
+            var pRT = GetOrAdd<RectTransform>(panel);
+            pRT.anchorMin = new Vector2(0.05f, 0.14f);
+            pRT.anchorMax = new Vector2(0.95f, 0.55f);
+            pRT.offsetMin = Vector2.zero;
+            pRT.offsetMax = Vector2.zero;
+            panel.SetActive(false);
 
-            Button button = skipBtn.AddComponent<Button>();
+            // Avatar Grid Container
+            var grid = FindOrCreate(panel.transform, "AvatarContainer");
+            var gRT = GetOrAdd<RectTransform>(grid);
+            gRT.anchorMin = Vector2.zero;
+            gRT.anchorMax = Vector2.one;
+            gRT.offsetMin = new Vector2(10, 10);
+            gRT.offsetMax = new Vector2(-10, -10);
 
-            Image bg = skipBtn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = new Color(0, 0, 0, 0.3f);
+            var gridLayout = GetOrAdd<GridLayoutGroup>(grid);
+            gridLayout.cellSize = new Vector2(150, 180);
+            gridLayout.spacing = new Vector2(20, 15);
+            gridLayout.padding = new RectOffset(10, 10, 5, 5);
+            gridLayout.childAlignment = TextAnchor.MiddleCenter;
+            gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            gridLayout.constraintCount = 3;
 
-            button.targetGraphic = bg;
-
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, 1f, 1f, 0.7f);
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            colors.colorMultiplier = 1f;
-            colors.fadeDuration = 0.15f;
-            button.colors = colors;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(skipBtn.transform, false);
-
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.font = DefaultFont;
-            btnText.text = "SALTAR";
-            btnText.fontSize = 16;
-            btnText.fontStyle = FontStyles.Bold;
-            btnText.color = TextGray;
-            btnText.alignment = TextAlignmentOptions.Center;
+            Debug.Log("[OnboardingUI] AvatarSelectionPanel creado (grid 3 columnas)");
         }
 
-        private static void BuildWelcomeGiftBlocker(Canvas canvas)
+        #endregion
+
+        #region Completion Panel
+
+        private static void CreateCompletionPanel()
         {
-            // Blocker background
-            GameObject blocker = new GameObject("WelcomeGiftBlocker");
-            blocker.transform.SetParent(canvas.transform, false);
-            blocker.SetActive(false); // Hidden by default
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            RectTransform blockerRect = blocker.AddComponent<RectTransform>();
-            blockerRect.anchorMin = Vector2.zero;
-            blockerRect.anchorMax = Vector2.one;
-            blockerRect.sizeDelta = Vector2.zero;
+            var panel = FindOrCreate(canvas.transform, "CompletionPanel");
+            var pRT = GetOrAdd<RectTransform>(panel);
+            pRT.anchorMin = new Vector2(0.05f, 0.12f);
+            pRT.anchorMax = new Vector2(0.95f, 0.94f);
+            pRT.offsetMin = Vector2.zero;
+            pRT.offsetMax = Vector2.zero;
+            panel.SetActive(false);
 
-            Image blockerBg = blocker.AddComponent<Image>();
-            blockerBg.sprite = WhiteSprite;
-            blockerBg.color = new Color(0, 0, 0, 0.85f);
+            // VLG for stacked content
+            var vlg = GetOrAdd<VerticalLayoutGroup>(panel);
+            vlg.spacing = 15;
+            vlg.padding = new RectOffset(20, 20, 30, 20);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
 
-            // Gift card
-            GameObject giftCard = new GameObject("GiftCard");
-            giftCard.transform.SetParent(blocker.transform, false);
+            // --- Completion Icon Placeholder ---
+            var iconGO = FindOrCreate(panel.transform, "CompletionIcon");
+            GetOrAdd<LayoutElement>(iconGO).preferredHeight = 200;
+            var iconImg = GetOrAdd<Image>(iconGO);
+            iconImg.color = Color.white;
+            iconImg.preserveAspect = true;
+            Sprite completeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICONS_PATH + "CompleteIcon.png");
+            if (completeSprite != null) iconImg.sprite = completeSprite;
 
-            RectTransform cardRect = giftCard.AddComponent<RectTransform>();
-            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
-            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
-            cardRect.pivot = new Vector2(0.5f, 0.5f);
-            cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
+            // --- Completion Title ---
+            var compTitle = FindOrCreate(panel.transform, "CompletionTitle");
+            GetOrAdd<LayoutElement>(compTitle).preferredHeight = 50;
+            var ctTMP = GetOrAdd<TextMeshProUGUI>(compTitle);
+            ctTMP.text = "\u00A1Bien hecho!";
+            ctTMP.fontSize = 32;
+            ctTMP.color = CYAN_NEON;
+            ctTMP.fontStyle = FontStyles.Bold;
+            ctTMP.alignment = TextAlignmentOptions.Center;
 
-            Image cardBg = giftCard.AddComponent<Image>();
-            cardBg.sprite = WhiteSprite;
-            cardBg.color = CardBackground;
+            // --- Completion Message ---
+            var compMsg = FindOrCreate(panel.transform, "CompletionMessage");
+            GetOrAdd<LayoutElement>(compMsg).preferredHeight = 60;
+            var cmTMP = GetOrAdd<TextMeshProUGUI>(compMsg);
+            cmTMP.text = "Has completado el tutorial.\nAqu\u00ED tienes tus recompensas de bienvenida.";
+            cmTMP.fontSize = 18;
+            cmTMP.color = TEXT_WHITE;
+            cmTMP.alignment = TextAlignmentOptions.Center;
+            cmTMP.enableWordWrapping = true;
 
-            Outline outline = giftCard.AddComponent<Outline>();
-            outline.effectColor = GoldPremium;
-            outline.effectDistance = new Vector2(3, -3);
+            // --- Rewards Display Card ---
+            var rewardsCard = FindOrCreate(panel.transform, "RewardsCard");
+            GetOrAdd<LayoutElement>(rewardsCard).preferredHeight = 90;
+            var rcBg = GetOrAdd<Image>(rewardsCard);
+            rcBg.color = CARD_BG;
+            var rcOutline = GetOrAdd<Outline>(rewardsCard);
+            rcOutline.effectColor = GOLD;
+            rcOutline.effectDistance = new Vector2(2, 2);
 
-            // Content
-            GameObject content = new GameObject("Content");
-            content.transform.SetParent(giftCard.transform, false);
+            var rewardText = FindOrCreate(rewardsCard.transform, "RewardText");
+            var rwRT = GetOrAdd<RectTransform>(rewardText);
+            rwRT.anchorMin = Vector2.zero;
+            rwRT.anchorMax = Vector2.one;
+            rwRT.offsetMin = new Vector2(10, 10);
+            rwRT.offsetMax = new Vector2(-10, -10);
+            var rwTMP = GetOrAdd<TextMeshProUGUI>(rewardText);
+            rwTMP.text = "+500 Monedas  |  +50 Gemas";
+            rwTMP.fontSize = 26;
+            rwTMP.color = GOLD;
+            rwTMP.fontStyle = FontStyles.Bold;
+            rwTMP.alignment = TextAlignmentOptions.Center;
 
-            RectTransform contentRect = content.AddComponent<RectTransform>();
-            contentRect.anchorMin = Vector2.zero;
-            contentRect.anchorMax = Vector2.one;
-            contentRect.sizeDelta = Vector2.zero;
+            // --- Spacer ---
+            var spacer = FindOrCreate(panel.transform, "Spacer");
+            GetOrAdd<LayoutElement>(spacer).preferredHeight = 30;
 
-            VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = false;
-            layout.spacing = ELEMENT_SPACING;
-            layout.padding = new RectOffset((int)CARD_PADDING, (int)CARD_PADDING, (int)CARD_PADDING, (int)CARD_PADDING);
+            // --- Start Playing Button ---
+            var startBtn = FindOrCreate(panel.transform, "StartPlayingButton");
+            GetOrAdd<LayoutElement>(startBtn).preferredHeight = 65;
+            var sbBg = GetOrAdd<Image>(startBtn);
+            sbBg.color = GREEN_SUCCESS;
+            GetOrAdd<Button>(startBtn).targetGraphic = sbBg;
+            var sbOutline = GetOrAdd<Outline>(startBtn);
+            sbOutline.effectColor = new Color(0.1f, 0.5f, 0.2f, 1f);
+            sbOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
-            ContentSizeFitter fitter = giftCard.AddComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var startText = FindOrCreate(startBtn.transform, "Text");
+            var spRT = GetOrAdd<RectTransform>(startText);
+            spRT.anchorMin = Vector2.zero;
+            spRT.anchorMax = Vector2.one;
+            spRT.offsetMin = Vector2.zero;
+            spRT.offsetMax = Vector2.zero;
+            var spTMP = GetOrAdd<TextMeshProUGUI>(startText);
+            spTMP.text = "\u00A1COMENZAR A JUGAR!";
+            spTMP.fontSize = 24;
+            spTMP.color = TEXT_DARK;
+            spTMP.fontStyle = FontStyles.Bold;
+            spTMP.alignment = TextAlignmentOptions.Center;
 
-            // Title
-            CreateGiftTitle(content.transform);
-            CreateSpacer(content.transform, 10f);
-
-            // Rewards
-            CreateRewardsRow(content.transform);
-            CreateSpacer(content.transform, 10f);
-
-            // Claim button
-            CreateClaimButton(content.transform);
+            Debug.Log("[OnboardingUI] CompletionPanel creado (icon + title + msg + rewards + button)");
         }
 
-        private static void CreateGiftTitle(Transform parent)
+        #endregion
+
+        #region Navigation (Dots + Buttons)
+
+        private static void CreateNavigation()
         {
-            GameObject title = new GameObject("Title");
-            title.transform.SetParent(parent, false);
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 60;
+            // --- Dots Container ---
+            var dots = FindOrCreate(canvas.transform, "DotsContainer");
+            var doRT = GetOrAdd<RectTransform>(dots);
+            doRT.anchorMin = new Vector2(0.15f, DOTS_BOT);
+            doRT.anchorMax = new Vector2(0.85f, DOTS_TOP);
+            doRT.offsetMin = Vector2.zero;
+            doRT.offsetMax = Vector2.zero;
 
-            TextMeshProUGUI text = title.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = "¡REGALO DE BIENVENIDA!";
-            text.fontSize = 32;
-            text.fontStyle = FontStyles.Bold;
-            text.color = GoldPremium;
-            text.alignment = TextAlignmentOptions.Center;
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(dots);
+            hlg.spacing = 12;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+
+            // --- Navigation Buttons Panel ---
+            var navPanel = FindOrCreate(canvas.transform, "NavigationPanel");
+            var npRT = GetOrAdd<RectTransform>(navPanel);
+            npRT.anchorMin = new Vector2(0, NAV_BOT);
+            npRT.anchorMax = new Vector2(1, NAV_TOP);
+            npRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            npRT.offsetMax = new Vector2(-SIDE_PAD, 0);
+
+            // Prev Button (left)
+            var prevBtn = FindOrCreate(navPanel.transform, "PrevButton");
+            var pbRT = GetOrAdd<RectTransform>(prevBtn);
+            pbRT.anchorMin = new Vector2(0, 0);
+            pbRT.anchorMax = new Vector2(0.47f, 1);
+            pbRT.offsetMin = Vector2.zero;
+            pbRT.offsetMax = Vector2.zero;
+            var pbBg = GetOrAdd<Image>(prevBtn);
+            pbBg.color = CARD_BG_LIGHT;
+            GetOrAdd<Button>(prevBtn).targetGraphic = pbBg;
+            var pbOutline = GetOrAdd<Outline>(prevBtn);
+            pbOutline.effectColor = new Color(0.3f, 0.3f, 0.35f, 0.5f);
+            pbOutline.effectDistance = new Vector2(1, 1);
+
+            var prevText = FindOrCreate(prevBtn.transform, "Text");
+            var ptRT = GetOrAdd<RectTransform>(prevText);
+            ptRT.anchorMin = Vector2.zero;
+            ptRT.anchorMax = Vector2.one;
+            ptRT.offsetMin = Vector2.zero;
+            ptRT.offsetMax = Vector2.zero;
+            var ptTMP = GetOrAdd<TextMeshProUGUI>(prevText);
+            ptTMP.text = "ATR\u00C1S";
+            ptTMP.fontSize = 20;
+            ptTMP.color = TEXT_SECONDARY;
+            ptTMP.fontStyle = FontStyles.Bold;
+            ptTMP.alignment = TextAlignmentOptions.Center;
+
+            // Next Button (right, cyan)
+            var nextBtn = FindOrCreate(navPanel.transform, "NextButton");
+            var nbRT = GetOrAdd<RectTransform>(nextBtn);
+            nbRT.anchorMin = new Vector2(0.53f, 0);
+            nbRT.anchorMax = new Vector2(1, 1);
+            nbRT.offsetMin = Vector2.zero;
+            nbRT.offsetMax = Vector2.zero;
+            var nbBg = GetOrAdd<Image>(nextBtn);
+            nbBg.color = CYAN_NEON;
+            GetOrAdd<Button>(nextBtn).targetGraphic = nbBg;
+            var nbOutline = GetOrAdd<Outline>(nextBtn);
+            nbOutline.effectColor = CYAN_DARK;
+            nbOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            var nextText = FindOrCreate(nextBtn.transform, "Text");
+            var ntRT = GetOrAdd<RectTransform>(nextText);
+            ntRT.anchorMin = Vector2.zero;
+            ntRT.anchorMax = Vector2.one;
+            ntRT.offsetMin = Vector2.zero;
+            ntRT.offsetMax = Vector2.zero;
+            var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
+            ntTMP.text = "SIGUIENTE";
+            ntTMP.fontSize = 20;
+            ntTMP.color = TEXT_DARK;
+            ntTMP.fontStyle = FontStyles.Bold;
+            ntTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[OnboardingUI] Navigation creado (DotsContainer + PrevButton + NextButton)");
         }
 
-        private static void CreateRewardsRow(Transform parent)
+        #endregion
+
+        #region Manager References
+
+        private static void SetupManagerReferences()
         {
-            GameObject row = new GameObject("RewardsRow");
-            row.transform.SetParent(parent, false);
+            var manager = Object.FindFirstObjectByType<DigitPark.Managers.OnboardingManager>();
+            if (manager == null)
+            {
+                Debug.LogWarning("[OnboardingUI] OnboardingManager no encontrado. Agrega el componente primero.");
+                return;
+            }
 
-            LayoutElement rowLayout = row.AddComponent<LayoutElement>();
-            rowLayout.preferredHeight = 100;
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = 30;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = false;
-            layout.childControlHeight = true;
-            layout.childForceExpandWidth = true;
+            var so = new SerializedObject(manager);
+            Transform r = canvas.transform;
 
-            CreateRewardItem(row.transform, ICON_COINS_PATH, "+100", new Color(1f, 0.85f, 0.3f, 1f));
-            CreateRewardItem(row.transform, ICON_GEMS_PATH, "+50", new Color(0.4f, 0.8f, 1f, 1f));
-            CreateRewardItem(row.transform, ICON_XP_PATH, "+25", new Color(1f, 0.5f, 0.2f, 1f));
+            // UI - Main
+            SetRef(so, "skipButton", FindInPath<Button>(r, "TopBar/SkipButton"));
+            SetRef(so, "skipButtonText", FindInPath<TextMeshProUGUI>(r, "TopBar/SkipButton/Text"));
+
+            // UI - Step Display
+            SetRef(so, "stepImage", FindInPath<Image>(r, "StepImage"));
+            SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "TitleText"));
+            SetRef(so, "descriptionText", FindInPath<TextMeshProUGUI>(r, "DescriptionText"));
+
+            // UI - Navigation
+            SetRef(so, "nextButton", FindInPath<Button>(r, "NavigationPanel/NextButton"));
+            SetRef(so, "prevButton", FindInPath<Button>(r, "NavigationPanel/PrevButton"));
+            SetRef(so, "nextButtonText", FindInPath<TextMeshProUGUI>(r, "NavigationPanel/NextButton/Text"));
+            Transform dotsT = r.Find("DotsContainer");
+            if (dotsT != null) SetRef(so, "dotsContainer", dotsT);
+
+            // UI - Progress
+            SetRef(so, "progressBar", FindInPath<Slider>(r, "ProgressBar"));
+            SetRef(so, "stepCounterText", FindInPath<TextMeshProUGUI>(r, "TopBar/StepCounter"));
+
+            // UI - Name Input
+            Transform namePanel = r.Find("NameInputPanel");
+            if (namePanel != null) SetRef(so, "nameInputPanel", namePanel.gameObject);
+            SetRef(so, "nameInput", FindInPath<TMP_InputField>(r, "NameInputPanel/InputContainer/NameInput"));
+            SetRef(so, "confirmNameButton", FindInPath<Button>(r, "NameInputPanel/InputContainer/ConfirmNameButton"));
+            SetRef(so, "nameErrorText", FindInPath<TextMeshProUGUI>(r, "NameInputPanel/InputContainer/NameErrorText"));
+
+            // UI - Avatar Selection
+            Transform avatarPanel = r.Find("AvatarSelectionPanel");
+            if (avatarPanel != null) SetRef(so, "avatarSelectionPanel", avatarPanel.gameObject);
+            Transform avatarGrid = r.Find("AvatarSelectionPanel/AvatarContainer");
+            if (avatarGrid != null) SetRef(so, "avatarContainer", avatarGrid);
+
+            // UI - Tutorial Completion
+            Transform compPanel = r.Find("CompletionPanel");
+            if (compPanel != null) SetRef(so, "completionPanel", compPanel.gameObject);
+            SetRef(so, "completionTitleText", FindInPath<TextMeshProUGUI>(r, "CompletionPanel/CompletionTitle"));
+            SetRef(so, "completionMessageText", FindInPath<TextMeshProUGUI>(r, "CompletionPanel/CompletionMessage"));
+            SetRef(so, "rewardText", FindInPath<TextMeshProUGUI>(r, "CompletionPanel/RewardsCard/RewardText"));
+            SetRef(so, "startPlayingButton", FindInPath<Button>(r, "CompletionPanel/StartPlayingButton"));
+
+            // UI - Sections (for animations)
+            Transform progressBarT = r.Find("ProgressBar");
+            if (progressBarT != null) SetRef(so, "progressBarTransform", progressBarT.GetComponent<RectTransform>());
+            Transform topBarT = r.Find("TopBar");
+            if (topBarT != null) SetRef(so, "topBarTransform", topBarT.GetComponent<RectTransform>());
+            if (dotsT != null) SetRef(so, "dotsTransform", dotsT.GetComponent<RectTransform>());
+            Transform navPanelT = r.Find("NavigationPanel");
+            if (navPanelT != null) SetRef(so, "navigationTransform", navPanelT.GetComponent<RectTransform>());
+
+            // Step Images
+            SetSpriteRef(so, "welcomeImage", ICONS_PATH + "WelcomeIcon.png");
+            SetSpriteRef(so, "gamesImage", ICONS_PATH + "GamesIcon.png");
+            SetSpriteRef(so, "cashBattleImage", ICONS_PATH + "CashBattleIcon.png");
+            SetSpriteRef(so, "tournamentsImage", ICONS_PATH + "TournamentsIcon.png");
+            SetSpriteRef(so, "rewardsImage", ICONS_PATH + "RewardsIcon.png");
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
+            Debug.Log("[OnboardingUI] Referencias del manager asignadas");
         }
 
-        private static void CreateRewardItem(Transform parent, string iconPath, string amount, Color color)
+        #endregion
+
+        #region Helpers
+
+        private static void SetRef(SerializedObject so, string propName, Object value)
         {
-            GameObject item = new GameObject("RewardItem");
-            item.transform.SetParent(parent, false);
+            var prop = so.FindProperty(propName);
+            if (prop == null) { Debug.LogWarning($"[OnboardingUI] Property '{propName}' no encontrada"); return; }
+            if (value != null) { prop.objectReferenceValue = value; }
+            else { Debug.LogWarning($"[OnboardingUI] No se encontro valor para: {propName}"); }
+        }
 
-            RectTransform itemRect = item.AddComponent<RectTransform>();
+        private static T FindInPath<T>(Transform root, string path) where T : Component
+        {
+            Transform t = root;
+            foreach (string part in path.Split('/'))
+            {
+                t = t.Find(part);
+                if (t == null) return null;
+            }
+            return t.GetComponent<T>();
+        }
 
-            VerticalLayoutGroup layout = item.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 5;
-            layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.childControlWidth = true;
-            layout.childControlHeight = false;
+        private static GameObject FindOrCreate(Transform parent, string name)
+        {
+            Transform existing = parent.Find(name);
+            if (existing != null) return existing.gameObject;
+            var obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            return obj;
+        }
 
-            // Icon
-            GameObject icon = new GameObject("Icon");
-            icon.transform.SetParent(item.transform, false);
+        private static T GetOrAdd<T>(GameObject obj) where T : Component
+        {
+            T c = obj.GetComponent<T>();
+            if (c == null) c = obj.AddComponent<T>();
+            return c;
+        }
 
-            LayoutElement iconLayout = icon.AddComponent<LayoutElement>();
-            iconLayout.preferredWidth = 60;
-            iconLayout.preferredHeight = 60;
-
-            Image iconImage = icon.AddComponent<Image>();
-            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+        private static void SetSpriteRef(SerializedObject so, string propName, string assetPath)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
             if (sprite != null)
             {
-                iconImage.sprite = sprite;
-                iconImage.preserveAspect = true;
+                var prop = so.FindProperty(propName);
+                if (prop != null) prop.objectReferenceValue = sprite;
+                else Debug.LogWarning($"[OnboardingUI] Property '{propName}' no encontrada");
             }
-
-            // Amount
-            GameObject amountObj = new GameObject("Amount");
-            amountObj.transform.SetParent(item.transform, false);
-
-            TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
-            amountText.font = DefaultFont;
-            amountText.text = amount;
-            amountText.fontSize = 20;
-            amountText.fontStyle = FontStyles.Bold;
-            amountText.color = color;
-            amountText.alignment = TextAlignmentOptions.Center;
+            else
+            {
+                Debug.LogWarning($"[OnboardingUI] Sprite no encontrado: {assetPath}");
+            }
         }
 
-        private static void CreateClaimButton(Transform parent)
+        private static void SetAnchors(RectTransform rt, float xMin, float yMin, float xMax, float yMax)
         {
-            GameObject btn = new GameObject("ClaimButton");
-            btn.transform.SetParent(parent, false);
-
-            LayoutElement layout = btn.AddComponent<LayoutElement>();
-            layout.preferredHeight = BUTTON_HEIGHT;
-
-            Image bg = btn.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
-            bg.color = GoldPremium;
-
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = bg;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btn.transform, false);
-
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.font = DefaultFont;
-            text.text = "RECLAMAR Y JUGAR!";
-            text.fontSize = 24;
-            text.fontStyle = FontStyles.Bold;
-            text.color = DarkNavy;
-            text.alignment = TextAlignmentOptions.Center;
+            rt.anchorMin = new Vector2(xMin, yMin);
+            rt.anchorMax = new Vector2(xMax, yMax);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
-        private static void CreateSpacer(Transform parent, float height)
-        {
-            GameObject spacer = new GameObject("Spacer");
-            spacer.transform.SetParent(parent, false);
-
-            LayoutElement layout = spacer.AddComponent<LayoutElement>();
-            layout.preferredHeight = height;
-        }
+        #endregion
     }
 }
