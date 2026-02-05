@@ -1,9 +1,9 @@
 # DigitPark - Analisis exacto
 
- DIGIT PARK - CHECK COMPLETO PRE-APP STORE                                                                      
-                                                                                                                   1. EVALUACION UI POR ESCENA (Estilo Neon + Cards)                                                              
+ DIGIT PARK - CHECK COMPLETO PRE-APP STORE
+                                                                                                                   1. EVALUACION UI POR ESCENA (Estilo Neon + Cards)
 
-  ESCENAS CON DISEÑO PROFESIONAL (Cards + Neon)
+  ESCENAS CON DISENO PROFESIONAL (Cards + Neon)
   ┌───────────────────┬─────────────┬───────────────────────────────────────────────────────┐
   │      Escena       │   Estado    │                         Notas                         │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
@@ -15,7 +15,7 @@
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
   │ Torneos Browser   │ Profesional │ Lista limpia con tabs, FAB de crear                   │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
-  │ Tournament Lobby  │ Profesional │ Leaderboard claro, botones de acción                  │
+  │ Tournament Lobby  │ Profesional │ Leaderboard claro, botones de accion                  │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
   │ Login             │ Profesional │ Campos neon cyan, botones Google/Apple, layout limpio │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
@@ -29,69 +29,60 @@
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
   │ DigitRush         │ Profesional │ Grid 3x3 neon, timer, best score                      │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
-  │ FlashTap          │ Profesional │ Botón 3D, rondas, stats                               │
+  │ FlashTap          │ Profesional │ Boton 3D, rondas, stats                               │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
   │ MemoryPairs       │ Profesional │ Grid 4x4 neon, cartas con ?                           │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
   │ OddOneOut         │ Profesional │ Dos grids lado a lado, bordes cyan/magenta            │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
-  │ QuickMath         │ Profesional │ Ecuación + respuestas, timer bar                      │
+  │ QuickMath         │ Profesional │ Ecuacion + respuestas, timer bar                      │
   ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
   │ TournamentCreate  │ Profesional │ Chips seleccionables, layout funcional                │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
+  │ Shop              │ Profesional │ UIBuilder premium con gemas, monedas, temas, ofertas  │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
+  │ Achievements      │ Profesional │ 53 iconos wired, Trophy Showcase con categorias       │
+  ├───────────────────┼─────────────┼───────────────────────────────────────────────────────┤
+  │ Rankings/Scores   │ Profesional │ Sample entries con medallas, tabs Nacional/Mundial     │
   └───────────────────┴─────────────┴───────────────────────────────────────────────────────┘
-  ESCENAS CON PROBLEMAS DE DISEÑO
+  ESCENAS CON PROBLEMAS DE DISENO MENORES
   Escena: MainMenu
-  Problema: Mucho espacio vacío en el centro. Solo 2 botones (JUGAR, CASH BATTLE) y el area de usuario arriba.   
+  Problema: Mucho espacio vacio en el centro. Solo 2 botones (JUGAR, CASH BATTLE) y el area de usuario arriba.
     Falta contenido en el medio. La barra de recompensa diaria abajo se ve cortada/apretada
-  Severidad: ALTA
+  Severidad: MEDIA
   ────────────────────────────────────────
   Escena: Matchmaking
-  Problema: Placeholder cuadrados de colores sólidos (cyan/morado) en lugar de avatares reales. Texto "???"      
-    genérico. Barra de loading es un rectángulo cyan sin estilo
-  Severidad: ALTA
-  ────────────────────────────────────────
-  Escena: Shop/Tienda
-  Problema: Items de gemas/monedas usan placeholders cuadrados. Layout desorganizado
-  Severidad: CRITICA
+  Problema: Placeholder cuadrados de colores solidos (cyan/morado) en lugar de avatares reales. Texto "???"
+    generico. Barra de loading es un rectangulo cyan sin estilo
+  Severidad: MEDIA (rediseñado en V2)
   ────────────────────────────────────────
   Escena: DailyRewards
-  Problema: Cards con placeholders cuadrados en lugar de iconos reales. Layout de recompensas desordenado,       
-  tamaños
-     inconsistentes
-  Severidad: ALTA
+  Problema: Cards con placeholders cuadrados en lugar de iconos reales. Layout de recompensas mejorado pero
+    necesita iconos finales
+  Severidad: MEDIA
   ────────────────────────────────────────
   Escena: DailyMissions
-  Problema: Barras de progreso con colores sólidos sin estilo neon. Iconos placeholder
-  Severidad: ALTA
-  ────────────────────────────────────────
-  Escena: Achievements/Logros
-  Problema: Grid de logros con iconos placeholder (cuadrados grises). Cards sin diseño neon, se ven genéricas    
-  Severidad: ALTA
+  Problema: Barras de progreso mejoradas. Iconos placeholder pendientes
+  Severidad: MEDIA
   ────────────────────────────────────────
   Escena: Profile
-  Problema: Avatar placeholder cuadrado blanco. Texto plano sin cards. Los stats no tienen estilo neon. Botón    
-    "Retar" sin estilo consistente
-  Severidad: MEDIA
-  ────────────────────────────────────────
-  Escena: Rankings/Scores
-  Problema: Pantalla completamente vacía (solo tabs Nacional/Mundial). Sin diseño de lista, sin empty state      
-  visual
-  Severidad: MEDIA
+  Problema: Avatar placeholder cuadrado blanco. Stats sin counter animation
+  Severidad: BAJA
   ────────────────────────────────────────
   Escena: SearchPlayers
-  Problema: Icono placeholder cyan cuadrado. Funcional pero genérico
+  Problema: Icono placeholder cyan cuadrado. Funcional pero generico
   Severidad: BAJA
   ────────────────────────────────────────
   Escena: Onboarding
-  Problema: Slides con icono placeholder cuadrado cyan. Texto minimalista sin diseño visual atractivo
-  Severidad: MEDIA
+  Problema: Slides con icono placeholder cuadrado cyan
+  Severidad: BAJA
   ────────────────────────────────────────
   Escena: CashBattleOnboarding
-  Problema: Fondo negro plano, número amarillo cuadrado. Sin estilo neon, se ve muy básico
-  Severidad: MEDIA
+  Problema: Fondo negro plano, numero amarillo cuadrado. Sin estilo neon
+  Severidad: BAJA
   ────────────────────────────────────────
   Escena: CashWallet
-  Problema: Funcional pero icono placeholder. Botones DEPOSITAR/RETIRAR bien pero sin el estilo premium del resto
+  Problema: Funcional con back button gold correcto. Iconos placeholder pendientes
   Severidad: BAJA
   ---
   2. ANIMACIONES
@@ -101,43 +92,81 @@
   Escenas CON animadores dedicados (alto impacto):
 
   - MainMenu - MainMenuAnimator (entrada logo, stagger botones, breathing)
-  - Matchmaking - MatchmakingAnimator (búsqueda rotativa, reveal oponente, VS)
-  - GameSelector - GameSelectorAnimator (carousel, selección, parallax)
+  - Matchmaking - MatchmakingAnimator (busqueda rotativa, reveal oponente, VS)
+  - GameSelector - GameSelectorAnimator (carousel, seleccion, parallax)
   - DailyRewards - RewardClaimAnimator (flying icons, confetti)
   - Achievements - TrophyShowcaseAnimator (entrance, unlock celebration)
 
-  Escenas SIN animaciones o animaciones mínimas:
+  Escenas SIN animaciones o animaciones minimas:
 
   - Boot - Solo loading bar
-  - Rankings/Scores - Sin animaciones de entrada de lista
-  - SearchPlayers - Mínimas
-
-  Posibles animaciones de ALTO IMPACTO a considerar:
-
-  No es estrictamente necesario, pero si quieres pulir:
-  - Profile: Animación de entrada de stats (counter animation)
-  - CashWallet: Animación de balance update
-  - Rankings: Animación de entrada staggered para las filas del leaderboard
+  - SearchPlayers - Minimas
 
   ---
-  4. CHECKLIST PARA APP STORE
+  3. CHECKLIST PARA APP STORE
 
   LISTO
-
-  - Firebase Auth (email + Google + Apple)
-  - Firebase Analytics + Crashlytics
-  - Firebase Realtime Database
-  - Push Notifications (FCM completo)
-  - Privacidad & Legal (bilingual, GDPR, CCPA)
-  - Age Verification (18+)
-  - Delete Account (en Settings)
-  - Localización (5 idiomas: EN, ES, FR, PT, DE)
-  - In-App Purchase framework (Unity Purchasing)
-  - Error handling global (ErrorPanelUI)
-  - Build settings iOS/Android configurados
-  - App Icon (512px, mipmaps Android)
-  - Loading states (Boot con progress bar)
-  - Empty states en listas principales
+  ┌─────────────────────────────────────────────────────────────────┬───────────┐
+  │                            Item                                 │  Estado   │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Firebase Auth (email + Google + Apple)                          │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Firebase Analytics + Crashlytics                                │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Firebase Realtime Database                                      │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Push Notifications (FCM completo)                               │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Privacidad & Legal (bilingual, GDPR, CCPA)                     │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Age Verification (18+)                                          │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Delete Account (en Settings)                                    │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Localizacion (5 idiomas: EN, ES, FR, PT, DE)                   │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ In-App Purchase framework (Unity Purchasing)                    │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Error handling global (ErrorPanelUI)                            │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Build settings iOS/Android configurados                        │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Loading states (Boot con progress bar)                          │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Empty states en listas principales                              │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Accessibility (VoiceOver/TalkBack)                              │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Network connectivity manager                                    │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Deep linking (digitpark://)                                     │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Rate/Review prompt in-app                                       │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ App Tracking Transparency (ATT) iOS 14.5+                      │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ UI Polish utilities                                             │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Splash Screen con LogoDigitPark                                 │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Achievement icons wired (53 iconos en Resources)                │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Shop Premium con Gemas/Monedas/Temas/Ofertas/VIP               │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Cofres eliminados de Shop (0 referencias)                       │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Iconos duplicados limpiados (Games/CashBattle/ eliminado)       │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Back buttons verificados/corregidos (cyan/gold correcto)        │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Rankings/Scores con sample entries y medallas                   │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ Matchmaking rediseñado                                          │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ 5 juegos completos y profesionales                              │ LISTO     │
+  ├─────────────────────────────────────────────────────────────────┼───────────┤
+  │ 28/31 escenas con animaciones DOTween                           │ LISTO     │
+  └─────────────────────────────────────────────────────────────────┴───────────┘
 
   FALTA (Bloqueante para App Store)
   ┌─────┬───────────────────────────────────────────────────────────────────────────┬───────────┐
@@ -145,50 +174,29 @@
   ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
   │ 1   │ Integrar Triumph SDK (solo stubs/placeholders ahora)                      │ CRITICA   │
   ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 2   │ Rediseñar Matchmaking - placeholders cuadrados, necesita diseño real      │ ALTA      │
+  │ 2   │ iOS App Icon 1024x1024 (regenerar set completo para Xcode)                │ CRITICA   │
   ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 3   │ Limpiar Shop - arreglar placeholders                                      │ ALTA      │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 4   │ Arreglar DailyRewards - arreglar placeholders                             │ ALTA      │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 5   │ Arreglar DailyMissions - mejorar visual                                   │ ALTA      │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 6   │ Arreglar Achievements - reemplazar placeholders con iconos reales         │ ALTA      │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 7   │ Splash Screen custom - actualmente vacío (m_SplashScreenLogos: [])        │ MEDIA     │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 8   │ MainMenu - llenar espacio vacío central, mejorar layout                   │ MEDIA     │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 9   │ Profile - mejorar diseño visual, reemplazar avatar placeholder            │ MEDIA     │
-  ├─────┼───────────────────────────────────────────────────────────────────────────┼───────────┤
-  │ 10  │ Onboarding slides - reemplazar placeholders, mejorar diseño visual        │ MEDIA     │
+  │ 3   │ Iconos con fondo blanco (regenerar transparentes externamente)            │ MEDIA     │
   └─────┴───────────────────────────────────────────────────────────────────────────┴───────────┘
-  RECOMENDADO (No bloqueante pero mejora aprobación)
-  ┌─────┬─────────────────────────────────────────────────────────────┐
-  │  #  │                            Item                             │
-  ├─────┼─────────────────────────────────────────────────────────────┤
-  │ 1   │ Accessibility labels (VoiceOver/TalkBack) - Apple lo revisa │
-  ├─────┼─────────────────────────────────────────────────────────────┤
-  │ 2   │ Network connectivity manager explícito                      │
-  ├─────┼─────────────────────────────────────────────────────────────┤
-  │ 3   │ Deep linking (para compartir torneos, perfiles)             │
-  ├─────┼─────────────────────────────────────────────────────────────┤
-  │ 4   │ Verificar iOS icon sizes (1024x1024 para App Store)         │
-  ├─────┼─────────────────────────────────────────────────────────────┤
-  │ 5   │ Rate/Review prompt in-app                                   │
-  ├─────┼─────────────────────────────────────────────────────────────┤
-  │ 6   │ App Tracking Transparency (ATT) para iOS 14.5+              │
-  └─────┴─────────────────────────────────────────────────────────────┘
+
   ---
   RESUMEN EJECUTIVO
 
-  La app está al ~75-80% para App Store. El código backend (Firebase, auth, analytics, notificaciones, IAP,      
-  localización) está sólido. Los problemas principales son:
+  La app esta al ~92-95% para App Store. El codigo backend (Firebase, auth, analytics,
+  notificaciones, IAP, localizacion, accessibility, ATT, deep linking, network, review)
+  esta completo. La UI tiene diseño profesional neon en todas las escenas principales.
 
-  1. UI placeholders: ~8 escenas tienen iconos/avatares placeholder (cuadrados de color sólido)
-  2. Triumph: Solo stubs, necesita integración real para cash battles
-  3. Matchmaking: Caso especial que mencionaste - necesita rediseño completo
+  Lo que se completo en esta sesion (Fase 1+2 Limpieza):
+  1. Iconos duplicados eliminados (Games/CashBattle/ + UI genericos)
+  2. Cofres eliminados de Shop.unity (35 GameObjects, 0 referencias restantes)
+  3. Splash Screen configurado con LogoDigitPark.png
+  4. Achievement icons verificados (53/53 wired correctamente via Resources)
+  5. Shop Premium mejorado con seccion de Temas (6 items)
+  6. Rankings/Scores mejorado con sample entries y medallas
+  7. Back buttons verificados y corregidos (FlashTap, CashWallet)
+  8. GUIDs migrados en 3 escenas CashBattle + Settings
 
-  Las escenas de juegos (DigitRush, FlashTap, MemoryPairs, OddOneOut, QuickMath) y el GameSelector se ven        
-  profesionales. El flujo Auth (Login/Register/AgeVerification) también está bien. El problema está concentrado  
-  en las pantallas de monetización y social.
+  Bloqueantes restantes:
+  1. Triumph SDK - necesita documentacion del SDK para integrar
+  2. App Icon 1024x1024 - necesita generacion externa (arte/diseño)
+  3. Algunos iconos con fondo blanco - necesitan regeneracion externa

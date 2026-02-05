@@ -40,6 +40,7 @@ namespace DigitPark.Editor
                 "Elementos que se crearán:\n" +
                 "• Header con título RANKINGS\n" +
                 "• Tabs Nacional/Mundial mejorados\n" +
+                "• 5 sample entries con medallas (preview visual)\n" +
                 "• Estado vacío atractivo\n" +
                 "• Sección Tu Posición",
                 MessageType.Info);
@@ -174,6 +175,21 @@ namespace DigitPark.Editor
 
             // ========== EMPTY STATE ==========
             CreateEmptyState(scoresPanel.transform);
+
+            // ========== SAMPLE ENTRIES (visual preview) ==========
+            Transform scrollViewT = scoresPanel.transform.Find("LeaderboardScrollView");
+            if (scrollViewT != null)
+            {
+                Transform viewportT = scrollViewT.Find("Viewport");
+                if (viewportT != null)
+                {
+                    Transform containerT = viewportT.Find("LeaderboardContainer");
+                    if (containerT != null)
+                    {
+                        CreateSampleEntries(containerT.gameObject);
+                    }
+                }
+            }
 
             // ========== TU POSICIÓN (footer fijo) ==========
             CreatePlayerPositionPanel(scoresPanel.transform);
@@ -498,6 +514,95 @@ namespace DigitPark.Editor
 
         #endregion
 
+        #region Sample Entries
+
+        private static void CreateSampleEntries(GameObject container)
+        {
+            string[] names = { "ProGamer99", "NeonMaster", "SpeedKing", "DigitPro", "QuickMind" };
+            string[] times = { "12.45s", "13.21s", "14.03s", "15.87s", "16.42s" };
+            Color goldMedal = new Color(1f, 0.84f, 0f, 1f);
+            Color silverMedal = new Color(0.75f, 0.75f, 0.75f, 1f);
+            Color bronzeMedal = new Color(0.8f, 0.5f, 0.2f, 1f);
+            Color timeColor = new Color(0f, 1f, 0.53f, 1f);
+
+            for (int i = 0; i < 5; i++)
+            {
+                GameObject entry = FindOrCreateChild(container, $"SampleEntry_{i + 1}");
+
+                LayoutElement entryLE = GetOrAddComponent<LayoutElement>(entry);
+                entryLE.minHeight = 70;
+                entryLE.preferredHeight = 70;
+
+                Image entryBg = GetOrAddComponent<Image>(entry);
+                entryBg.color = i % 2 == 0
+                    ? new Color(0.06f, 0.1f, 0.16f, 0.95f)
+                    : new Color(0.04f, 0.08f, 0.13f, 0.95f);
+
+                HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(entry);
+                hlg.spacing = 15;
+                hlg.padding = new RectOffset(20, 20, 8, 8);
+                hlg.childAlignment = TextAnchor.MiddleLeft;
+                hlg.childControlWidth = false;
+                hlg.childControlHeight = true;
+                hlg.childForceExpandWidth = false;
+
+                // Position
+                GameObject posObj = FindOrCreateChild(entry, "Position");
+                TextMeshProUGUI posText = GetOrAddComponent<TextMeshProUGUI>(posObj);
+                posText.text = $"#{i + 1}";
+                posText.fontSize = 24;
+                posText.fontStyle = FontStyles.Bold;
+                posText.alignment = TextAlignmentOptions.Center;
+                LayoutElement posLE = GetOrAddComponent<LayoutElement>(posObj);
+                posLE.minWidth = 60;
+                posLE.preferredWidth = 60;
+
+                // Medal colors for top 3
+                if (i == 0) posText.color = goldMedal;
+                else if (i == 1) posText.color = silverMedal;
+                else if (i == 2) posText.color = bronzeMedal;
+                else posText.color = new Color(0.6f, 0.7f, 0.8f, 1f);
+
+                // Avatar placeholder
+                GameObject avatarObj = FindOrCreateChild(entry, "Avatar");
+                Image avatarImg = GetOrAddComponent<Image>(avatarObj);
+                avatarImg.color = new Color(0.15f, 0.2f, 0.28f, 1f);
+                LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
+                avatarLE.minWidth = 50;
+                avatarLE.minHeight = 50;
+                avatarLE.preferredWidth = 50;
+                avatarLE.preferredHeight = 50;
+
+                // Username
+                GameObject nameObj = FindOrCreateChild(entry, "Username");
+                TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
+                nameText.text = names[i];
+                nameText.fontSize = 20;
+                nameText.fontStyle = FontStyles.Bold;
+                nameText.color = new Color(0.95f, 0.95f, 0.95f, 1f);
+                nameText.alignment = TextAlignmentOptions.MidlineLeft;
+                LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
+                nameLE.flexibleWidth = 1;
+                nameLE.minWidth = 150;
+
+                // Time
+                GameObject timeObj = FindOrCreateChild(entry, "Time");
+                TextMeshProUGUI timeText = GetOrAddComponent<TextMeshProUGUI>(timeObj);
+                timeText.text = times[i];
+                timeText.fontSize = 20;
+                timeText.fontStyle = FontStyles.Bold;
+                timeText.color = timeColor;
+                timeText.alignment = TextAlignmentOptions.MidlineRight;
+                LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeObj);
+                timeLE.minWidth = 100;
+                timeLE.preferredWidth = 100;
+            }
+
+            Debug.Log("[ScoresUIBuilder] 5 sample entries creadas");
+        }
+
+        #endregion
+
         #region Player Position Panel
 
         private static void CreatePlayerPositionPanel(Transform parent)
@@ -608,6 +713,25 @@ namespace DigitPark.Editor
             GameObject newObj = new GameObject(name);
             newObj.transform.SetParent(parent, false);
             return newObj;
+        }
+
+        private static GameObject FindOrCreateChild(GameObject parent, string name)
+        {
+            Transform existing = parent.transform.Find(name);
+            if (existing != null)
+                return existing.gameObject;
+
+            GameObject child = new GameObject(name);
+            child.transform.SetParent(parent.transform, false);
+            RectTransform rt = child.AddComponent<RectTransform>();
+            return child;
+        }
+
+        private static T GetOrAddComponent<T>(GameObject obj) where T : Component
+        {
+            T comp = obj.GetComponent<T>();
+            if (comp == null) comp = obj.AddComponent<T>();
+            return comp;
         }
 
         private static RectTransform SetupRectTransform(GameObject obj, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPosition, Vector2 sizeDelta)

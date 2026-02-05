@@ -78,6 +78,7 @@ namespace DigitPark.Editor
                 "- Daily Deals (3 items + 1 GRATIS)\n" +
                 "- Packs de Gemas (6 items)\n" +
                 "- Packs de Monedas (3 items)\n" +
+                "- Temas/Cosmeticos (6 items)\n" +
                 "- Seccion Premium/VIP\n\n" +
                 "Asegurate de tener la escena Shop abierta.\n\nContinuar?",
                 "Si, Construir", "Cancelar"))
@@ -404,7 +405,10 @@ namespace DigitPark.Editor
             // 4. Coins Section
             CreateCoinsSection(content);
 
-            // 5. Premium Section
+            // 5. Themes Section
+            CreateThemesSection(content);
+
+            // 6. Premium Section
             CreatePremiumSection(content);
 
             Debug.Log("[ShopPremiumUIBuilder] Scroll content creado");
@@ -789,6 +793,142 @@ namespace DigitPark.Editor
             CreateShopItem(grid, "Coins_15000", "15,000", "500", "+50%", COIN_COLOR, "BEST_VALUE", true);
 
             Debug.Log("[ShopPremiumUIBuilder] Coins Section creado");
+        }
+
+        // ==================== THEMES SECTION ====================
+
+        private static void CreateThemesSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "ThemesSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 12;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            // Header
+            CreateSectionHeader(section, "\ud83c\udfa8 TEMAS", PURPLE_PREMIUM);
+
+            // Grid
+            GameObject grid = CreateChild(section, "ThemesGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(ITEM_WIDTH, ITEM_HEIGHT + 20);
+            glg.spacing = new Vector2(ITEM_SPACING, ITEM_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = 3;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = (ITEM_HEIGHT + 20) * 2 + ITEM_SPACING;
+
+            // Theme items
+            CreateThemeItem(grid, "Theme_Neon", "Neon Cyan", "EQUIPADO", CYAN_NEON, true);
+            CreateThemeItem(grid, "Theme_Gold", "Oro Real", "500", GOLD, false);
+            CreateThemeItem(grid, "Theme_Purple", "Amatista", "500", PURPLE_PREMIUM, false);
+            CreateThemeItem(grid, "Theme_Red", "Rubi", "750", new Color(1f, 0.2f, 0.3f, 1f), false);
+            CreateThemeItem(grid, "Theme_Green", "Esmeralda", "750", new Color(0.2f, 0.9f, 0.4f, 1f), false);
+            CreateThemeItem(grid, "Theme_Rainbow", "Arcoiris", "$2.99", new Color(1f, 0.5f, 0.8f, 1f), false);
+
+            Debug.Log("[ShopPremiumUIBuilder] Themes Section creado");
+        }
+
+        private static void CreateThemeItem(GameObject parent, string name, string displayName, string price, Color themeColor, bool isEquipped)
+        {
+            GameObject item = CreateChild(parent, name);
+
+            Image itemBg = item.AddComponent<Image>();
+            itemBg.color = CARD_BG;
+            AddOutline(item, isEquipped ? themeColor : themeColor * 0.4f, isEquipped ? 2 : 1);
+
+            Button btn = item.AddComponent<Button>();
+            SetupButton(btn, CARD_BG);
+
+            VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(8, 8, 10, 10);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            if (isEquipped)
+            {
+                GameObject badge = CreateChild(item, "EquippedBadge");
+                Image badgeBg = badge.AddComponent<Image>();
+                badgeBg.color = themeColor;
+                LayoutElement badgeLE = badge.AddComponent<LayoutElement>();
+                badgeLE.minHeight = 20;
+                badgeLE.preferredHeight = 20;
+
+                GameObject badgeText = CreateChild(badge, "Text");
+                SetStretch(badgeText);
+                TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
+                bt.text = "EQUIPADO";
+                bt.fontSize = 10;
+                bt.fontStyle = FontStyles.Bold;
+                bt.color = TEXT_DARK;
+                bt.alignment = TextAlignmentOptions.Center;
+            }
+
+            // Theme preview (color swatch)
+            GameObject preview = CreateChild(item, "Preview");
+            Image previewImg = preview.AddComponent<Image>();
+            previewImg.color = themeColor;
+            LayoutElement previewLE = preview.AddComponent<LayoutElement>();
+            previewLE.minHeight = 70;
+            previewLE.preferredHeight = 70;
+
+            // Create inner glow effect
+            AddOutline(preview, themeColor * 0.5f, 3);
+
+            // Name
+            GameObject nameObj = CreateChild(item, "Name");
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = displayName;
+            nameText.fontSize = 16;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.color = themeColor;
+            nameText.alignment = TextAlignmentOptions.Center;
+            LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
+            nameLE.minHeight = 24;
+
+            // Price/Action button
+            GameObject priceBtn = CreateChild(item, "PriceButton");
+            Image priceBg = priceBtn.AddComponent<Image>();
+            priceBg.color = isEquipped ? BUTTON_SECONDARY : BUTTON_SUCCESS;
+            LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
+            priceLE.minHeight = 36;
+            priceLE.preferredHeight = 36;
+
+            HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
+            priceHlg.spacing = 5;
+            priceHlg.padding = new RectOffset(10, 10, 4, 4);
+            priceHlg.childAlignment = TextAnchor.MiddleCenter;
+            priceHlg.childControlWidth = false;
+            priceHlg.childControlHeight = true;
+
+            if (!isEquipped && !price.StartsWith("$"))
+            {
+                // Gem price icon
+                GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
+                Image gemImg = gemIcon.AddComponent<Image>();
+                gemImg.color = TEXT_DARK;
+                LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
+                gemLE.minWidth = 18;
+                gemLE.minHeight = 18;
+            }
+
+            GameObject priceText = CreateChild(priceBtn, "Text");
+            TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
+            pt.text = isEquipped ? "EQUIPADO" : price;
+            pt.fontSize = isEquipped ? 12 : 15;
+            pt.fontStyle = FontStyles.Bold;
+            pt.color = isEquipped ? TEXT_SECONDARY : TEXT_DARK;
+            pt.alignment = TextAlignmentOptions.Center;
+            LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
+            ptLE.flexibleWidth = 1;
         }
 
         // ==================== PREMIUM SECTION ====================
