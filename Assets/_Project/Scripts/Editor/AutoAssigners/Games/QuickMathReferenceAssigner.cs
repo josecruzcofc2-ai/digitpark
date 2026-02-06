@@ -23,15 +23,13 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static readonly string[] REQUIRED_REFS = {
             // Equation Display
-            "problemText", "equationPanel",
-            // Note: numberAText, numberBText, operatorText, questionMarkText excluded - optional animated display
+            "problemText", "numberAText", "numberBText", "operatorText", "questionMarkText", "equationPanel",
             // UI
-            "timerText", "roundText", "errorsText", "comboText",
-            // Note: statsText, roundIndicatorText excluded - optional V2 elements
-            // Panels
-            "winPanel",
-            // Note: winPanelCanvasGroup, comboCanvasGroup, progressFill excluded - optional effects
-            // Note: sparkleEffect excluded - auto-found in code
+            "timerText", "roundText", "errorsText", "comboText", "statsText", "roundIndicatorText",
+            // Panels & Effects
+            "winPanel", "winPanelCanvasGroup", "comboCanvasGroup", "progressFill"
+            // Note: answerButtons[], answerTexts[] - arrays require manual assignment
+            // Note: sparkleEffect - auto-found in code
         };
 
         private struct ReferenceResult
@@ -158,16 +156,25 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Equation Display
             AssignReference(so, "problemText", FindTextByName("problem", "equation", "question"));
-            AssignReference(so, "equationPanel", FindByNameContains<RectTransform>("equation", "problem", "question"));
+            AssignReference(so, "numberAText", FindTextByName("numbera", "numa"));
+            AssignReference(so, "numberBText", FindTextByName("numberb", "numb"));
+            AssignReference(so, "operatorText", FindTextByName("operatortext", "operator"));
+            AssignReference(so, "questionMarkText", FindTextByName("questionmark", "question"));
+            AssignReference(so, "equationPanel", FindByNameContains<RectTransform>("equation", "problem"));
 
             // UI Elements
             AssignReference(so, "timerText", FindTextByName("timer", "time", "tiempo"));
-            AssignReference(so, "roundText", FindTextByName("round", "ronda", "question"));
+            AssignReference(so, "roundText", FindTextByName("round", "ronda"));
             AssignReference(so, "errorsText", FindTextByName("error", "mistakes", "wrong"));
             AssignReference(so, "comboText", FindTextByName("combo", "streak"));
+            AssignReference(so, "statsText", FindTextByName("stats", "estadisticas"));
+            AssignReference(so, "roundIndicatorText", FindTextByName("roundindicator", "rondaindicator"));
 
-            // Panels
+            // Panels & Effects
             AssignReference(so, "winPanel", FindByNameContains<Transform>("win", "result", "complete"));
+            AssignCanvasGroup(so, "winPanelCanvasGroup", "winpanel", "win", "result");
+            AssignCanvasGroup(so, "comboCanvasGroup", "combocontainer", "combo");
+            AssignReference(so, "progressFill", FindByNameContains<RectTransform>("progressfill", "fill"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
@@ -206,6 +213,24 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
             foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
             return null;
+        }
+
+        private static void AssignCanvasGroup(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<CanvasGroup>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

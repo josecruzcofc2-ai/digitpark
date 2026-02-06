@@ -34,12 +34,18 @@ namespace DigitPark.Editor.AutoAssigners
             "changeNameButton", "logoutButton", "deleteAccountButton", "backButton",
             // Shop
             "shopButton",
-            // Premium
-            "premiumSection", "premiumButton", "premiumBadge",
+            // Premium Section
+            "premiumSection", "removeAdsButton", "removeAdsButtonText",
             "premiumFullButton", "premiumFullButtonText", "restorePurchasesButton",
+            // Premium Quick Access
+            "premiumButton", "premiumBadge", "premiumPanel",
+            // Panels (prefab-based)
+            "changeNamePanel", "deleteConfirmPanel", "logoutConfirmPanel",
+            "errorPanel", "selfExclusionConfirmPanel",
             // Legal
             "termsButton", "privacyButton", "responsibleGamingButton",
             "triumphTermsButton", "selfExclusionButton"
+            // Note: languageStyler - assigned at runtime
         };
 
         private struct ReferenceResult
@@ -191,13 +197,25 @@ namespace DigitPark.Editor.AutoAssigners
             // Shop
             AssignReference(so, "shopButton", FindButtonByName("shop", "tienda", "store"));
 
-            // Premium
-            AssignReference(so, "premiumSection", FindByNameContains<Transform>("premiumsection", "premium"));
-            AssignReference(so, "premiumButton", FindButtonByName("premiumbutton", "pro"));
-            AssignReference(so, "premiumBadge", FindByNameContains<Transform>("premiumbadge", "badge"));
+            // Premium Section
+            AssignReference(so, "premiumSection", FindByNameContains<Transform>("premiumsection", "premiumcard"));
+            AssignReference(so, "removeAdsButton", FindButtonByName("removeads", "noads", "quitaranuncios"));
+            AssignReference(so, "removeAdsButtonText", FindTextByName("removeadsbuttontext", "removeadstext"));
             AssignReference(so, "premiumFullButton", FindButtonByName("premiumfull"));
             AssignReference(so, "premiumFullButtonText", FindTextByName("premiumfullbuttontext", "premiumfull"));
             AssignReference(so, "restorePurchasesButton", FindButtonByName("restore", "restaurar"));
+
+            // Premium Quick Access
+            AssignReference(so, "premiumButton", FindButtonByName("premiumbutton", "pro"));
+            AssignReference(so, "premiumBadge", FindByNameContains<Transform>("premiumbadge", "badge"));
+            AssignMonoBehaviour(so, "premiumPanel", "PremiumPanelUI");
+
+            // Panels (prefab-based components in hierarchy)
+            AssignMonoBehaviour(so, "changeNamePanel", "InputPanelUI");
+            AssignMonoBehaviour(so, "deleteConfirmPanel", "ConfirmPanelUI", "deleteconfirm", "confirmdelete");
+            AssignMonoBehaviour(so, "logoutConfirmPanel", "ConfirmPanelUI", "logoutconfirm", "confirmlogout");
+            AssignMonoBehaviour(so, "errorPanel", "ErrorPanelUI");
+            AssignMonoBehaviour(so, "selfExclusionConfirmPanel", "ConfirmPanelUI", "selfexclusion", "exclusion");
 
             // Legal
             AssignReference(so, "termsButton", FindButtonByName("terms", "terminos", "tos"));
@@ -250,6 +268,36 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
+        }
+
+        private static void AssignMonoBehaviour(SerializedObject so, string propertyName, string typeName, params string[] namePatterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+            {
+                if (mb.GetType().Name == typeName)
+                {
+                    if (namePatterns.Length == 0)
+                    {
+                        prop.objectReferenceValue = mb;
+                        AddResult(propertyName, "Assigned", true, mb);
+                        assignedCount++;
+                        return;
+                    }
+                    string goName = mb.gameObject.name.ToLower();
+                    foreach (var p in namePatterns)
+                        if (goName.Contains(p.ToLower()))
+                        {
+                            prop.objectReferenceValue = mb;
+                            AddResult(propertyName, "Assigned", true, mb);
+                            assignedCount++;
+                            return;
+                        }
+                }
+            }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

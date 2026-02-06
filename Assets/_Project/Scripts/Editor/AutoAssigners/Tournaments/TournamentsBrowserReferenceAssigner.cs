@@ -23,12 +23,18 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
+            // Header
             "backButton", "titleText", "createTournamentButton",
-            "allTournamentsTab", "myTournamentsTab",
-            // Note: featuredTab excluded - V2 feature
-            "tournamentsContainer", "emptyStateText",
-            // Note: loadMoreButton excluded - V2 pagination feature
-            "loadingIndicator"
+            // Filters
+            "gameTypeFilter", "entryFeeFilter", "statusFilter",
+            "searchInput", "clearFiltersButton",
+            // Tabs
+            "allTournamentsTab", "myTournamentsTab", "featuredTab",
+            // List
+            "tournamentsContainer", "scrollRect", "emptyStateText", "loadMoreButton",
+            // Loading
+            "loadingIndicator", "refreshIndicator"
+            // Note: tournamentItemPrefab requires manual prefab assignment
         };
 
         private struct ReferenceResult
@@ -156,16 +162,27 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "titleText", FindTextByName("title", "header"));
             AssignReference(so, "createTournamentButton", FindButtonByName("create", "new", "crear"));
 
+            // Filters
+            AssignReference(so, "gameTypeFilter", FindByNameContains<TMP_Dropdown>("gametype", "gamefilter", "tipo"));
+            AssignReference(so, "entryFeeFilter", FindByNameContains<TMP_Dropdown>("entryfee", "feefilter", "entrada"));
+            AssignReference(so, "statusFilter", FindByNameContains<TMP_Dropdown>("status", "estado", "statusfilter"));
+            AssignReference(so, "searchInput", FindByNameContains<TMP_InputField>("search", "buscar", "input"));
+            AssignReference(so, "clearFiltersButton", FindButtonByName("clearfilter", "clear", "limpiar"));
+
             // Tabs
-            AssignReference(so, "allTournamentsTab", FindButtonByName("alltournaments", "all", "todos", "search"));
+            AssignReference(so, "allTournamentsTab", FindButtonByName("alltournaments", "searchtournaments", "all", "todos"));
             AssignReference(so, "myTournamentsTab", FindButtonByName("mytournaments", "my", "mis"));
+            AssignReference(so, "featuredTab", FindButtonByName("featured", "destacado", "popular"));
 
             // List
-            AssignReference(so, "tournamentsContainer", FindByNameContains<Transform>("tournaments", "container", "list", "browse"));
-            AssignReference(so, "emptyStateText", FindTextByName("empty", "no", "emptystate"));
+            AssignReference(so, "tournamentsContainer", FindByNameContains<Transform>("tournamentscontent", "tournamentscontainer", "container"));
+            AssignReference(so, "scrollRect", FindByNameContains<ScrollRect>("scroll", "tournaments"));
+            AssignReference(so, "emptyStateText", FindTextByName("emptystate", "empty", "nodata"));
+            AssignReference(so, "loadMoreButton", FindButtonByName("loadmore", "more", "mas"));
 
             // Loading
-            AssignReference(so, "loadingIndicator", FindByNameContains<Transform>("loading", "spinner"));
+            AssignReference(so, "loadingIndicator", FindByNameContains<Transform>("loadingindicator", "loading", "spinner"));
+            AssignGameObject(so, "refreshIndicator", "refreshindicator", "refresh", "actualizar");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -211,6 +228,24 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o.gameObject;
+                        AddResult(propertyName, "Assigned", true, o.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

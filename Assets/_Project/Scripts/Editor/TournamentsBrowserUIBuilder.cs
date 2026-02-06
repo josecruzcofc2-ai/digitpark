@@ -76,13 +76,22 @@ namespace DigitPark.Editor
             // 7. Tournament List (ScrollView)
             CreateTournamentList(safeArea);
 
-            // 8. EmptyState
+            // 8. Filter Dropdowns Panel
+            CreateFilterPanel(safeArea);
+
+            // 9. EmptyState
             CreateEmptyState(safeArea);
 
-            // 9. LoadingIndicator
+            // 10. LoadingIndicator
             CreateLoadingIndicator(safeArea);
 
-            // 10. FAB (Create Tournament Button)
+            // 11. RefreshIndicator
+            CreateRefreshIndicator(safeArea);
+
+            // 12. LoadMore Button
+            CreateLoadMoreButton(safeArea);
+
+            // 13. FAB (Create Tournament Button)
             CreateFAB(safeArea);
 
             MarkSceneDirty();
@@ -263,6 +272,9 @@ namespace DigitPark.Editor
 
             // Tab: Mis Torneos
             CreateTab(tabsPanel, "MyTournamentsTab", "Mis Torneos", false);
+
+            // Tab: Destacados
+            CreateTab(tabsPanel, "FeaturedTab", "Destacados", false);
 
             EditorUtility.SetDirty(tabsPanel);
             Debug.Log("[TournamentsBrowserUIBuilder] Tabs creados");
@@ -549,8 +561,8 @@ namespace DigitPark.Editor
             iconLE.minWidth = 100;
             iconLE.preferredWidth = 100;
 
-            // Title
-            GameObject titleObj = FindOrCreateChild(emptyState, "Title");
+            // Title (EmptyStateText for AutoAssigner)
+            GameObject titleObj = FindOrCreateChild(emptyState, "EmptyStateText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "No hay torneos disponibles";
             titleText.fontSize = 24;
@@ -597,6 +609,161 @@ namespace DigitPark.Editor
 
             EditorUtility.SetDirty(emptyState);
             Debug.Log("[TournamentsBrowserUIBuilder] EmptyState creado");
+        }
+
+        // ==================== FILTER PANEL ====================
+
+        private static void CreateFilterPanel(GameObject parent)
+        {
+            GameObject filterPanel = FindOrCreateChild(parent, "FilterPanel");
+            filterPanel.SetActive(false); // Oculto por defecto, se abre con FilterButton
+
+            RectTransform filterRT = GetOrAddComponent<RectTransform>(filterPanel);
+            filterRT.anchorMin = new Vector2(0, 1);
+            filterRT.anchorMax = new Vector2(1, 1);
+            filterRT.pivot = new Vector2(0.5f, 1);
+            filterRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + TABS_HEIGHT + SEARCHBAR_HEIGHT + 20));
+            filterRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, 220);
+
+            Image filterBg = GetOrAddComponent<Image>(filterPanel);
+            filterBg.color = PANEL_BG;
+            AddOutline(filterPanel, CYAN_DARK);
+
+            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(filterPanel);
+            vlg.spacing = 10;
+            vlg.padding = new RectOffset(15, 15, 15, 15);
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // Game Type Filter Dropdown
+            CreateFilterDropdown(filterPanel, "GameTypeFilter", "Tipo de Juego",
+                new string[] { "Todos", "DigitRush", "FlashTap", "QuickMath", "MemoryPairs", "OddOneOut" });
+
+            // Entry Fee Filter Dropdown
+            CreateFilterDropdown(filterPanel, "EntryFeeFilter", "Entrada",
+                new string[] { "Todas", "Gratis", "$1-$5", "$5-$25", "$25+" });
+
+            // Status Filter Dropdown
+            CreateFilterDropdown(filterPanel, "StatusFilter", "Estado",
+                new string[] { "Todos", "Abierto", "En Progreso", "Finalizado" });
+
+            // Clear Filters Button
+            GameObject clearBtn = FindOrCreateChild(filterPanel, "ClearFiltersButton");
+            Image clearBg = GetOrAddComponent<Image>(clearBtn);
+            clearBg.color = BUTTON_SECONDARY;
+            Button clearButton = GetOrAddComponent<Button>(clearBtn);
+            SetupButtonColors(clearButton, BUTTON_SECONDARY);
+
+            LayoutElement clearLE = GetOrAddComponent<LayoutElement>(clearBtn);
+            clearLE.minHeight = 40;
+            clearLE.preferredHeight = 40;
+
+            GameObject clearTextObj = FindOrCreateChild(clearBtn, "Text");
+            TextMeshProUGUI clearText = GetOrAddComponent<TextMeshProUGUI>(clearTextObj);
+            clearText.text = "Limpiar Filtros";
+            clearText.fontSize = 16;
+            clearText.color = TEXT_SECONDARY;
+            clearText.alignment = TextAlignmentOptions.Center;
+            SetRectTransformStretch(clearTextObj);
+
+            EditorUtility.SetDirty(filterPanel);
+            Debug.Log("[TournamentsBrowserUIBuilder] FilterPanel creado");
+        }
+
+        private static void CreateFilterDropdown(GameObject parent, string name, string label, string[] options)
+        {
+            GameObject row = FindOrCreateChild(parent, name);
+
+            LayoutElement le = GetOrAddComponent<LayoutElement>(row);
+            le.minHeight = 40;
+            le.preferredHeight = 40;
+
+            // TMP_Dropdown
+            Image rowBg = GetOrAddComponent<Image>(row);
+            rowBg.color = INPUT_BG;
+
+            TMP_Dropdown dropdown = GetOrAddComponent<TMP_Dropdown>(row);
+            dropdown.ClearOptions();
+            var optionsList = new System.Collections.Generic.List<TMP_Dropdown.OptionData>();
+            foreach (var opt in options)
+                optionsList.Add(new TMP_Dropdown.OptionData(opt));
+            dropdown.AddOptions(optionsList);
+
+            // Caption Text
+            GameObject captionObj = FindOrCreateChild(row, "Label");
+            TextMeshProUGUI captionText = GetOrAddComponent<TextMeshProUGUI>(captionObj);
+            captionText.text = label;
+            captionText.fontSize = 16;
+            captionText.color = TEXT_PRIMARY;
+            captionText.alignment = TextAlignmentOptions.Left;
+            SetRectTransformStretch(captionObj);
+            RectTransform captionRT = captionObj.GetComponent<RectTransform>();
+            captionRT.offsetMin = new Vector2(10, 0);
+            captionRT.offsetMax = new Vector2(-30, 0);
+
+            dropdown.captionText = captionText;
+        }
+
+        // ==================== REFRESH INDICATOR ====================
+
+        private static void CreateRefreshIndicator(GameObject parent)
+        {
+            GameObject refresh = FindOrCreateChild(parent, "RefreshIndicator");
+            refresh.SetActive(false);
+
+            RectTransform refreshRT = GetOrAddComponent<RectTransform>(refresh);
+            refreshRT.anchorMin = new Vector2(0.3f, 0.5f);
+            refreshRT.anchorMax = new Vector2(0.7f, 0.5f);
+            refreshRT.sizeDelta = new Vector2(0, 40);
+            refreshRT.anchoredPosition = Vector2.zero;
+
+            Image refreshBg = GetOrAddComponent<Image>(refresh);
+            refreshBg.color = new Color(0, 0, 0, 0.5f);
+
+            GameObject textObj = FindOrCreateChild(refresh, "Text");
+            TextMeshProUGUI refreshText = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            refreshText.text = "Actualizando...";
+            refreshText.fontSize = 16;
+            refreshText.color = CYAN_NEON;
+            refreshText.alignment = TextAlignmentOptions.Center;
+            SetRectTransformStretch(textObj);
+
+            EditorUtility.SetDirty(refresh);
+            Debug.Log("[TournamentsBrowserUIBuilder] RefreshIndicator creado");
+        }
+
+        // ==================== LOAD MORE BUTTON ====================
+
+        private static void CreateLoadMoreButton(GameObject parent)
+        {
+            GameObject loadMore = FindOrCreateChild(parent, "LoadMoreButton");
+            loadMore.SetActive(false);
+
+            RectTransform loadMoreRT = GetOrAddComponent<RectTransform>(loadMore);
+            loadMoreRT.anchorMin = new Vector2(0.2f, 0);
+            loadMoreRT.anchorMax = new Vector2(0.8f, 0);
+            loadMoreRT.pivot = new Vector2(0.5f, 0);
+            loadMoreRT.anchoredPosition = new Vector2(0, 80);
+            loadMoreRT.sizeDelta = new Vector2(0, 50);
+
+            Image loadMoreBg = GetOrAddComponent<Image>(loadMore);
+            loadMoreBg.color = BUTTON_SECONDARY;
+            Button loadMoreBtn = GetOrAddComponent<Button>(loadMore);
+            SetupButtonColors(loadMoreBtn, BUTTON_SECONDARY);
+            AddOutline(loadMore, CYAN_DARK);
+
+            GameObject textObj = FindOrCreateChild(loadMore, "Text");
+            TextMeshProUGUI loadMoreText = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            loadMoreText.text = "Cargar Mas";
+            loadMoreText.fontSize = 18;
+            loadMoreText.color = TEXT_PRIMARY;
+            loadMoreText.alignment = TextAlignmentOptions.Center;
+            SetRectTransformStretch(textObj);
+
+            EditorUtility.SetDirty(loadMore);
+            Debug.Log("[TournamentsBrowserUIBuilder] LoadMoreButton creado");
         }
 
         // ==================== LOADING INDICATOR ====================

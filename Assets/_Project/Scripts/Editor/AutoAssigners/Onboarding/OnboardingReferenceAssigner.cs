@@ -23,15 +23,26 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static readonly string[] REQUIRED_REFS = {
             // Main UI
-            "skipButton", "backButton",
+            "skipButton", "skipButtonText", "backButton",
             // Step Display
             "stepImage", "titleText", "descriptionText",
             // Navigation
-            "nextButton", "prevButton", "dotsContainer"
-            // Note: nextButtonText, progressBar, stepCounterText excluded - V2 features
-            // Note: nameInputPanel, nameInput, confirmNameButton excluded - V2 name input feature
-            // Note: avatarSelectionPanel excluded - V2 (avatarContainer found via grid patterns)
-            // Note: completionPanel and related excluded - V2 completion feature
+            "nextButton", "prevButton", "nextButtonText", "dotsContainer",
+            // Progress
+            "progressBar", "stepCounterText",
+            // Name Input
+            "nameInputPanel", "nameInput", "confirmNameButton", "nameErrorText",
+            // Avatar Selection
+            "avatarSelectionPanel", "avatarContainer",
+            // Tutorial Completion
+            "completionPanel", "completionTitleText", "completionMessageText",
+            "rewardText", "startPlayingButton",
+            // Sections (for animations)
+            "progressBarTransform", "topBarTransform", "dotsTransform", "navigationTransform"
+            // Note: characterContainer, characterAnimator, highlightOverlay, highlightTarget,
+            //   highlightTooltipText, tapToContinuePrompt - not created by UIBuilder
+            // Note: dotPrefab, avatarOptionPrefab - prefabs, manual assignment
+            // Note: Step images (Sprites) - assigned via icon paths
         };
 
         private struct ReferenceResult
@@ -159,6 +170,7 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Main UI
             AssignReference(so, "skipButton", FindButtonByName("skip", "saltar", "omitir"));
+            AssignReference(so, "skipButtonText", FindTextInChild("skipbutton", "text"));
             AssignReference(so, "backButton", FindButtonByName("back", "atras", "return"));
 
             // Step Display
@@ -169,7 +181,35 @@ namespace DigitPark.Editor.AutoAssigners
             // Navigation
             AssignReference(so, "nextButton", FindButtonByName("next", "siguiente", "continue"));
             AssignReference(so, "prevButton", FindButtonByName("prev", "anterior", "back"));
+            AssignReference(so, "nextButtonText", FindTextInChild("nextbutton", "text"));
             AssignReference(so, "dotsContainer", FindByNameContains<Transform>("dots", "indicators", "pagination", "progressdots"));
+
+            // Progress
+            AssignReference(so, "progressBar", FindByNameContains<Slider>("progressbar", "progress"));
+            AssignReference(so, "stepCounterText", FindTextByName("stepcounter", "counter", "step"));
+
+            // Name Input
+            AssignGameObject(so, "nameInputPanel", "nameinputpanel", "nameinput");
+            AssignInputField(so, "nameInput", "nameinput", "name");
+            AssignReference(so, "confirmNameButton", FindButtonByName("confirmname", "confirm", "confirmar"));
+            AssignReference(so, "nameErrorText", FindTextByName("nameerror", "error"));
+
+            // Avatar Selection
+            AssignGameObject(so, "avatarSelectionPanel", "avatarselection", "avatarpanel");
+            AssignReference(so, "avatarContainer", FindByNameContains<Transform>("avatarcontainer", "avatargrid", "avatars"));
+
+            // Tutorial Completion
+            AssignGameObject(so, "completionPanel", "completionpanel", "completion", "finish");
+            AssignReference(so, "completionTitleText", FindTextByName("completiontitle", "congratulations"));
+            AssignReference(so, "completionMessageText", FindTextByName("completionmessage", "completiondesc"));
+            AssignReference(so, "rewardText", FindTextByName("rewardtext", "reward", "premio"));
+            AssignReference(so, "startPlayingButton", FindButtonByName("startplaying", "start", "comenzar"));
+
+            // Sections (for animations)
+            AssignRectTransform(so, "progressBarTransform", "progressbar", "progress");
+            AssignRectTransform(so, "topBarTransform", "topbar", "header");
+            AssignRectTransform(so, "dotsTransform", "dotscontainer", "dots");
+            AssignRectTransform(so, "navigationTransform", "navigationpanel", "navigation");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -222,6 +262,76 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Image>(true);
             foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
             return null;
+        }
+
+        private static TextMeshProUGUI FindTextInChild(string parentPattern, string childPattern)
+        {
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var t in all)
+            {
+                if (t.gameObject.name.ToLower().Contains(parentPattern.ToLower()))
+                {
+                    var texts = t.GetComponentsInChildren<TextMeshProUGUI>(true);
+                    foreach (var txt in texts)
+                        if (txt.gameObject.name.ToLower().Contains(childPattern.ToLower()))
+                            return txt;
+                }
+            }
+            return null;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o.gameObject;
+                        AddResult(propertyName, "Assigned", true, o.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignInputField(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<TMP_InputField>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignRectTransform(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<RectTransform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

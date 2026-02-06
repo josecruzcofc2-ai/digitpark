@@ -23,12 +23,20 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
+            // Header
             "backButton", "titleText", "streakText", "nextResetText",
+            // Current Day
+            "currentDayHighlight", "currentDayText", "currentDayRewardIcon", "currentDayRewardText",
+            // Rewards Grid
             "rewardsContainer",
-            "claimButton", "claimButtonText",
-            "streakProgressBar", "streakBonusText",
-            "claimAnimationPanel", "continueButton",
-            "milestonePanel"
+            // Claim Button
+            "claimButton", "claimButtonText", "claimGlow",
+            // Bonus Info
+            "bonusInfoText", "streakProgressBar", "streakBonusText",
+            // Claim Animation
+            "claimAnimationPanel", "claimRewardText", "claimRewardIcon", "claimParticles", "continueButton",
+            // Milestone
+            "milestonePanel", "milestoneText", "milestoneBonusText"
         };
 
         private struct ReferenceResult
@@ -157,23 +165,36 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "streakText", FindTextByName("streak", "racha"));
             AssignReference(so, "nextResetText", FindTextByName("reset", "timer", "next"));
 
+            // Current Day
+            AssignGameObject(so, "currentDayHighlight", "currentday", "highlight", "today");
+            AssignReference(so, "currentDayText", FindTextByName("currentdaytext", "currentday", "todayday"));
+            AssignReference(so, "currentDayRewardIcon", FindImageByName("currentrewardicon", "currentdayreward", "todayreward"));
+            AssignReference(so, "currentDayRewardText", FindTextByName("currentdayrewardtext", "currentrewardtext", "todayrewardtext"));
+
             // Rewards Grid
             AssignReference(so, "rewardsContainer", FindByNameContains<Transform>("rewards", "grid", "container"));
 
             // Claim Button
             AssignReference(so, "claimButton", FindButtonByName("claim", "reclamar", "collect"));
             AssignReference(so, "claimButtonText", FindTextByName("claimbutton", "reclamar"));
+            AssignGameObject(so, "claimGlow", "claimglow", "glow", "claimeffect");
 
-            // Progress
+            // Bonus Info
+            AssignReference(so, "bonusInfoText", FindTextByName("bonusinfo", "bonustext"));
             AssignReference(so, "streakProgressBar", FindByNameContains<Slider>("streak", "progress"));
             AssignReference(so, "streakBonusText", FindTextByName("bonus", "streakbonus"));
 
             // Claim Animation
             AssignReference(so, "claimAnimationPanel", FindByNameContains<Transform>("claimanimation", "animation", "reward"));
+            AssignReference(so, "claimRewardText", FindTextByName("claimrewardtext", "claimreward", "animationreward"));
+            AssignReference(so, "claimRewardIcon", FindImageByName("claimrewardicon", "claimreward", "animationicon"));
+            AssignReference(so, "claimParticles", FindByNameContains<ParticleSystem>("particles", "claimparticles", "confetti"));
             AssignReference(so, "continueButton", FindButtonByName("continue", "continuar", "ok"));
 
             // Milestone
             AssignReference(so, "milestonePanel", FindByNameContains<Transform>("milestone", "hito"));
+            AssignReference(so, "milestoneText", FindTextByName("milestonetext", "milestone", "milestonetitle"));
+            AssignReference(so, "milestoneBonusText", FindTextByName("milestonebonus", "bonusmilestone"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -219,6 +240,31 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
+        }
+
+        private static Image FindImageByName(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Image>(true);
+            foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
+            return null;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o.gameObject;
+                        AddResult(propertyName, "Assigned", true, o.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

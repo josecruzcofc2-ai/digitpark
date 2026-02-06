@@ -27,7 +27,10 @@ namespace DigitPark.Editor.AutoAssigners
             "leaderboardContainer", "scrollRect",
             "loadingPanel", "loadingText",
             "backButton",
-            "emptyState"
+            "emptyState", "playButton",
+            // Player Position Panel
+            "playerPositionPanel", "positionNumberText", "positionTimeText"
+            // Note: leaderboardEntryPrefab requires manual prefab assignment
         };
 
         private struct ReferenceResult
@@ -175,7 +178,13 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "backButton", FindButtonByName("back", "return"));
 
             // Empty state
-            AssignReference(so, "emptyState", FindByNameContains<Transform>("empty", "nodata"));
+            AssignReference(so, "emptyState", FindByNameContains<Transform>("emptystate", "empty", "nodata"));
+            AssignReference(so, "playButton", FindButtonByName("playbutton", "play", "jugar"));
+
+            // Player Position Panel
+            AssignGameObject(so, "playerPositionPanel", "playerposition", "positionpanel");
+            AssignReference(so, "positionNumberText", FindTextByName("positionnumber", "positionnum", "ranknum"));
+            AssignReference(so, "positionTimeText", FindTextByName("positiontime", "ranktime", "postime"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -221,6 +230,24 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o.gameObject;
+                        AddResult(propertyName, "Assigned", true, o.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

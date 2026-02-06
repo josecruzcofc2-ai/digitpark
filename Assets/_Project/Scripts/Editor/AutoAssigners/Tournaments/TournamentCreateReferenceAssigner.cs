@@ -23,13 +23,29 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
+            // Header
             "backButton", "titleText",
-            "tournamentNameInput",
-            // Note: gameTypeDropdown, entryFeeDropdown, maxPlayersDropdown excluded - V2 feature (scene uses simpler form)
-            "createButton",
-            // Note: previewButton excluded - V2 feature
-            // Note: loadingOverlay excluded - optional UI element
-            "statusText"
+            // Name Input
+            "tournamentNameInput", "nameCharCountText",
+            // Game Selection
+            "gameTypeDropdown", "selectedGameIcon",
+            // Entry Fee
+            "entryFeeDropdown", "entryFeeSlider", "customEntryFeeInput", "entryFeeDisplayText",
+            // Players
+            "maxPlayersDropdown", "estimatedPrizeText",
+            // Schedule
+            "startTimeDropdown", "startImmediatelyToggle", "scheduledTimeText",
+            // Rules
+            "roundsDropdown", "timeLimitDropdown", "allowSpectatorsToggle",
+            // Privacy
+            "privateToggle", "privateCodeInput",
+            // Preview
+            "previewPanel", "previewNameText", "previewGameText",
+            "previewEntryText", "previewPrizeText", "previewPlayersText",
+            // Actions
+            "createButton", "previewButton", "createButtonText", "creationFeeText",
+            // Status
+            "loadingOverlay", "statusText"
         };
 
         private struct ReferenceResult
@@ -156,13 +172,54 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "backButton", FindButtonByName("back", "return"));
             AssignReference(so, "titleText", FindTextByName("title", "header"));
 
-            // Form fields
-            AssignReference(so, "tournamentNameInput", FindByNameContains<TMP_InputField>("name", "tournament"));
+            // Name Input
+            AssignReference(so, "tournamentNameInput", FindByNameContains<TMP_InputField>("tournamentname", "nameinput", "name"));
+            AssignReference(so, "nameCharCountText", FindTextByName("charcount", "count", "character"));
+
+            // Game Selection
+            AssignReference(so, "gameTypeDropdown", FindByNameContains<TMP_Dropdown>("gametype", "game", "juego"));
+            AssignReference(so, "selectedGameIcon", FindImageByName("selectedgame", "gameicon"));
+
+            // Entry Fee
+            AssignReference(so, "entryFeeDropdown", FindByNameContains<TMP_Dropdown>("entryfee", "fee", "entrada"));
+            AssignReference(so, "entryFeeSlider", FindByNameContains<Slider>("entryfee", "fee"));
+            AssignReference(so, "customEntryFeeInput", FindByNameContains<TMP_InputField>("custom", "customentryfee"));
+            AssignReference(so, "entryFeeDisplayText", FindTextByName("entryfeedisplay", "feedisplay", "display"));
+
+            // Players
+            AssignReference(so, "maxPlayersDropdown", FindByNameContains<TMP_Dropdown>("maxplayers", "players", "jugadores"));
+            AssignReference(so, "estimatedPrizeText", FindTextByName("estimatedprize", "prize", "premio"));
+
+            // Schedule
+            AssignReference(so, "startTimeDropdown", FindByNameContains<TMP_Dropdown>("starttime", "schedule", "horario"));
+            AssignToggle(so, "startImmediatelyToggle", "immediate", "start", "ahora");
+            AssignReference(so, "scheduledTimeText", FindTextByName("scheduledtime", "scheduled", "horario"));
+
+            // Rules
+            AssignReference(so, "roundsDropdown", FindByNameContains<TMP_Dropdown>("rounds", "rondas"));
+            AssignReference(so, "timeLimitDropdown", FindByNameContains<TMP_Dropdown>("timelimit", "tiempo", "limit"));
+            AssignToggle(so, "allowSpectatorsToggle", "spectator", "espectador", "watch");
+
+            // Privacy
+            AssignToggle(so, "privateToggle", "private", "privado");
+            AssignReference(so, "privateCodeInput", FindByNameContains<TMP_InputField>("privatecode", "code", "codigo"));
+
+            // Preview
+            AssignGameObject(so, "previewPanel", "previewpanel", "preview");
+            AssignReference(so, "previewNameText", FindTextByName("previewname"));
+            AssignReference(so, "previewGameText", FindTextByName("previewgame"));
+            AssignReference(so, "previewEntryText", FindTextByName("previewentry"));
+            AssignReference(so, "previewPrizeText", FindTextByName("previewprize"));
+            AssignReference(so, "previewPlayersText", FindTextByName("previewplayers"));
 
             // Actions
             AssignReference(so, "createButton", FindButtonByName("create", "crear", "submit"));
+            AssignReference(so, "previewButton", FindButtonByName("preview", "vista"));
+            AssignReference(so, "createButtonText", FindTextByName("createbuttontext", "createtext"));
+            AssignReference(so, "creationFeeText", FindTextByName("creationfee", "feetext", "costo"));
 
             // Status
+            AssignGameObject(so, "loadingOverlay", "loadingoverlay", "loading");
             AssignReference(so, "statusText", FindTextByName("status", "message"));
 
             so.ApplyModifiedProperties();
@@ -209,6 +266,49 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
+        }
+
+        private static Image FindImageByName(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Image>(true);
+            foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
+            return null;
+        }
+
+        private static void AssignToggle(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Toggle>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o.gameObject;
+                        AddResult(propertyName, "Assigned", true, o.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

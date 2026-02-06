@@ -34,7 +34,10 @@ namespace DigitPark.Editor.AutoAssigners
             "notificationsButton", "notificationIconImage",
             "notificationBadgeText",
             // Premium
-            "premiumButton", "premiumBadge"
+            "premiumButton", "premiumBadge", "premiumPanel",
+            // Animation
+            "titleAnimator"
+            // Note: notificationIconNormal, notificationIconActive (Sprites) assigned via UIBuilder icon system
         };
 
         private struct ReferenceResult
@@ -246,6 +249,10 @@ namespace DigitPark.Editor.AutoAssigners
             // Premium
             AssignReference(so, "premiumButton", FindButtonByName("premiumcard", "premium"));
             AssignReference(so, "premiumBadge", FindByNameContains<Transform>("premiumcard", "premiumbadge"));
+            AssignPremiumPanel(so);
+
+            // Animation
+            AssignAnimator(so, "titleAnimator", "logotext", "title", "digitpark");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -299,6 +306,40 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Image>(true);
             foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
             return null;
+        }
+
+        private static void AssignPremiumPanel(SerializedObject so)
+        {
+            var prop = so.FindProperty("premiumPanel");
+            if (prop == null) { AddResult("premiumPanel", "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult("premiumPanel", "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "PremiumPanelUI")
+                {
+                    prop.objectReferenceValue = mb;
+                    AddResult("premiumPanel", "Assigned", true, mb);
+                    assignedCount++;
+                    return;
+                }
+            AddResult("premiumPanel", "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignAnimator(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Animator>(true);
+            foreach (var p in patterns)
+                foreach (var a in all)
+                    if (a.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = a;
+                        AddResult(propertyName, "Assigned", true, a);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         private static FieldInfo GetField(object obj, string fieldName)

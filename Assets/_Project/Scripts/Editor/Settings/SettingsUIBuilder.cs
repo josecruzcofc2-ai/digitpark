@@ -87,6 +87,9 @@ namespace DigitPark.Editor
             BuildDangerZoneCard(content);
             BuildVersionFooter(content);
 
+            // Build overlay panels (on top of canvas, not inside ScrollView)
+            BuildOverlayPanels(canvas);
+
             Canvas.ForceUpdateCanvases();
             EditorUtility.SetDirty(canvas.gameObject);
 
@@ -291,6 +294,10 @@ namespace DigitPark.Editor
             CreatePremiumProRow(card);
             CreateSeparator(card);
 
+            // Remove Ads
+            CreateSettingsRow(card, "RemoveAdsButton", "Quitar Anuncios", "$10", GOLD, true, "RemoveAdsButtonText");
+            CreateSeparator(card);
+
             // Premium Full
             CreateSettingsRow(card, "PremiumFullButton", "Premium Completo", "$20", GOLD, true, "PremiumFullButtonText");
             CreateSeparator(card);
@@ -327,6 +334,227 @@ namespace DigitPark.Editor
             CreateSeparator(card);
             // Delete Account - red button
             CreateDangerButton(card, "DeleteAccountButton", "Eliminar Cuenta", DANGER_RED, new Color(0.3f, 0.08f, 0.08f, 0.6f));
+        }
+
+        private static void BuildOverlayPanels(Canvas canvas)
+        {
+            // PremiumPanelUI overlay
+            BuildPremiumPanelOverlay(canvas.transform);
+
+            // SelfExclusion ConfirmPanelUI overlay
+            BuildConfirmPanelOverlay(canvas.transform, "SelfExclusionConfirmPanel",
+                "Auto Exclusion", "¿Estas seguro que deseas auto-excluirte? No podras jugar partidas con dinero real.",
+                "Confirmar", "Cancelar");
+        }
+
+        private static void BuildPremiumPanelOverlay(Transform parent)
+        {
+            GameObject panelRoot = new GameObject("PremiumPanel");
+            panelRoot.transform.SetParent(parent, false);
+
+            RectTransform rt = panelRoot.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // Blocker background
+            GameObject blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(panelRoot.transform, false);
+            RectTransform blockerRT = blocker.AddComponent<RectTransform>();
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            Image blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0, 0, 0, 0.7f);
+            blocker.AddComponent<Button>(); // Close on tap outside
+
+            // Panel card
+            GameObject card = new GameObject("Panel");
+            card.transform.SetParent(panelRoot.transform, false);
+            RectTransform cardRT = card.AddComponent<RectTransform>();
+            cardRT.anchorMin = new Vector2(0.05f, 0.15f);
+            cardRT.anchorMax = new Vector2(0.95f, 0.85f);
+            cardRT.offsetMin = Vector2.zero;
+            cardRT.offsetMax = Vector2.zero;
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.sprite = WhiteSprite;
+            cardBg.color = CARD_BG;
+
+            // Title
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(card.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0, 0.9f);
+            titleRT.anchorMax = Vector2.one;
+            titleRT.offsetMin = new Vector2(20, 0);
+            titleRT.offsetMax = new Vector2(-20, -10);
+            TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTxt.font = Font;
+            titleTxt.text = "PREMIUM";
+            titleTxt.fontSize = 28;
+            titleTxt.fontStyle = FontStyles.Bold;
+            titleTxt.color = GOLD;
+            titleTxt.alignment = TextAlignmentOptions.Center;
+
+            // Add PremiumPanelUI component
+            var premiumComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.PremiumPanelUI, Assembly-CSharp"));
+            if (premiumComp != null)
+            {
+                SerializedObject so = new SerializedObject(premiumComp);
+                var panelProp = so.FindProperty("panel");
+                if (panelProp != null) panelProp.objectReferenceValue = card;
+                var blockerProp = so.FindProperty("blockerPanel");
+                if (blockerProp != null) blockerProp.objectReferenceValue = blocker;
+                var titleProp = so.FindProperty("titleText");
+                if (titleProp != null) titleProp.objectReferenceValue = titleTxt;
+                so.ApplyModifiedProperties();
+            }
+
+            panelRoot.SetActive(false);
+        }
+
+        private static void BuildConfirmPanelOverlay(Transform parent, string name,
+            string title, string message, string confirmText, string cancelText)
+        {
+            GameObject panelRoot = new GameObject(name);
+            panelRoot.transform.SetParent(parent, false);
+
+            RectTransform rt = panelRoot.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // Blocker
+            GameObject blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(panelRoot.transform, false);
+            RectTransform blockerRT = blocker.AddComponent<RectTransform>();
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            Image blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0, 0, 0, 0.7f);
+
+            // Card
+            GameObject card = new GameObject("Panel");
+            card.transform.SetParent(panelRoot.transform, false);
+            RectTransform cardRT = card.AddComponent<RectTransform>();
+            cardRT.anchorMin = new Vector2(0.08f, 0.3f);
+            cardRT.anchorMax = new Vector2(0.92f, 0.7f);
+            cardRT.offsetMin = Vector2.zero;
+            cardRT.offsetMax = Vector2.zero;
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.sprite = WhiteSprite;
+            cardBg.color = CARD_BG;
+
+            // Title
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(card.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0, 0.75f);
+            titleRT.anchorMax = Vector2.one;
+            titleRT.offsetMin = new Vector2(20, 0);
+            titleRT.offsetMax = new Vector2(-20, -10);
+            TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTxt.font = Font;
+            titleTxt.text = title;
+            titleTxt.fontSize = 26;
+            titleTxt.fontStyle = FontStyles.Bold;
+            titleTxt.color = DANGER_RED;
+            titleTxt.alignment = TextAlignmentOptions.Center;
+
+            // Message
+            GameObject msgObj = new GameObject("MessageText");
+            msgObj.transform.SetParent(card.transform, false);
+            RectTransform msgRT = msgObj.AddComponent<RectTransform>();
+            msgRT.anchorMin = new Vector2(0, 0.35f);
+            msgRT.anchorMax = new Vector2(1, 0.75f);
+            msgRT.offsetMin = new Vector2(24, 0);
+            msgRT.offsetMax = new Vector2(-24, 0);
+            TextMeshProUGUI msgTxt = msgObj.AddComponent<TextMeshProUGUI>();
+            msgTxt.font = Font;
+            msgTxt.text = message;
+            msgTxt.fontSize = 20;
+            msgTxt.color = TEXT_WHITE;
+            msgTxt.alignment = TextAlignmentOptions.Center;
+
+            // Confirm Button
+            GameObject confirmObj = new GameObject("ConfirmButton");
+            confirmObj.transform.SetParent(card.transform, false);
+            RectTransform confirmRT = confirmObj.AddComponent<RectTransform>();
+            confirmRT.anchorMin = new Vector2(0.55f, 0.05f);
+            confirmRT.anchorMax = new Vector2(0.92f, 0.28f);
+            confirmRT.offsetMin = Vector2.zero;
+            confirmRT.offsetMax = Vector2.zero;
+            Image confirmBg = confirmObj.AddComponent<Image>();
+            confirmBg.sprite = WhiteSprite;
+            confirmBg.color = DANGER_RED;
+            Button confirmBtn = confirmObj.AddComponent<Button>();
+            confirmBtn.targetGraphic = confirmBg;
+
+            GameObject confirmTxtObj = new GameObject("Text");
+            confirmTxtObj.transform.SetParent(confirmObj.transform, false);
+            RectTransform confirmTxtRT = confirmTxtObj.AddComponent<RectTransform>();
+            confirmTxtRT.anchorMin = Vector2.zero;
+            confirmTxtRT.anchorMax = Vector2.one;
+            confirmTxtRT.offsetMin = Vector2.zero;
+            confirmTxtRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI confirmTxtComp = confirmTxtObj.AddComponent<TextMeshProUGUI>();
+            confirmTxtComp.font = Font;
+            confirmTxtComp.text = confirmText;
+            confirmTxtComp.fontSize = 20;
+            confirmTxtComp.fontStyle = FontStyles.Bold;
+            confirmTxtComp.color = TEXT_WHITE;
+            confirmTxtComp.alignment = TextAlignmentOptions.Center;
+
+            // Cancel Button
+            GameObject cancelObj = new GameObject("CancelButton");
+            cancelObj.transform.SetParent(card.transform, false);
+            RectTransform cancelRT = cancelObj.AddComponent<RectTransform>();
+            cancelRT.anchorMin = new Vector2(0.08f, 0.05f);
+            cancelRT.anchorMax = new Vector2(0.45f, 0.28f);
+            cancelRT.offsetMin = Vector2.zero;
+            cancelRT.offsetMax = Vector2.zero;
+            Image cancelBg = cancelObj.AddComponent<Image>();
+            cancelBg.sprite = WhiteSprite;
+            cancelBg.color = BUTTON_BG;
+            Button cancelBtn = cancelObj.AddComponent<Button>();
+            cancelBtn.targetGraphic = cancelBg;
+
+            GameObject cancelTxtObj = new GameObject("Text");
+            cancelTxtObj.transform.SetParent(cancelObj.transform, false);
+            RectTransform cancelTxtRT = cancelTxtObj.AddComponent<RectTransform>();
+            cancelTxtRT.anchorMin = Vector2.zero;
+            cancelTxtRT.anchorMax = Vector2.one;
+            cancelTxtRT.offsetMin = Vector2.zero;
+            cancelTxtRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI cancelTxtComp = cancelTxtObj.AddComponent<TextMeshProUGUI>();
+            cancelTxtComp.font = Font;
+            cancelTxtComp.text = cancelText;
+            cancelTxtComp.fontSize = 20;
+            cancelTxtComp.color = TEXT_GRAY;
+            cancelTxtComp.alignment = TextAlignmentOptions.Center;
+
+            // Add ConfirmPanelUI component
+            var confirmComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.ConfirmPanelUI, Assembly-CSharp"));
+            if (confirmComp != null)
+            {
+                SerializedObject so = new SerializedObject(confirmComp);
+                var pp = so.FindProperty("panel"); if (pp != null) pp.objectReferenceValue = card;
+                var bp = so.FindProperty("blockerPanel"); if (bp != null) bp.objectReferenceValue = blocker;
+                var tp = so.FindProperty("titleText"); if (tp != null) tp.objectReferenceValue = titleTxt;
+                var mp = so.FindProperty("messageText"); if (mp != null) mp.objectReferenceValue = msgTxt;
+                var cb = so.FindProperty("confirmButton"); if (cb != null) cb.objectReferenceValue = confirmBtn;
+                var ccb = so.FindProperty("cancelButton"); if (ccb != null) ccb.objectReferenceValue = cancelBtn;
+                var ct = so.FindProperty("confirmButtonText"); if (ct != null) ct.objectReferenceValue = confirmTxtComp;
+                var cct = so.FindProperty("cancelButtonText"); if (cct != null) cct.objectReferenceValue = cancelTxtComp;
+                so.ApplyModifiedProperties();
+            }
+
+            panelRoot.SetActive(false);
         }
 
         private static void BuildVersionFooter(Transform parent)
