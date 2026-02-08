@@ -1013,8 +1013,8 @@ namespace DigitPark.Editor
             rt.offsetMin = new Vector2(20, 20);
             rt.offsetMax = new Vector2(-20, -130);
 
-            // Add the GameSelectionPanel script
-            System.Type panelType = System.Type.GetType("DigitPark.UI.CashBattle.GameSelectionPanel, Assembly-CSharp");
+            // Add the CashBattle1v1Manager script
+            System.Type panelType = System.Type.GetType("DigitPark.UI.CashBattle.CashBattle1v1Manager, Assembly-CSharp");
             if (panelType != null)
             {
                 panel.AddComponent(panelType);

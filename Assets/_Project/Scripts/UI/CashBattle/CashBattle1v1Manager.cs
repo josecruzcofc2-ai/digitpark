@@ -8,11 +8,11 @@ using DigitPark.Games;
 namespace DigitPark.UI.CashBattle
 {
     /// <summary>
-    /// Panel for selecting game type in Cash Battle 1v1
-    /// Shows individual games and Cognitive Sprint option
+    /// Manager for CashBattle 1v1 scene.
+    /// Handles game selection, entry fees, online players, and matchmaking initiation.
     /// Supports custom entry fees up to $250 (Triumph withdrawal limit)
     /// </summary>
-    public class GameSelectionPanel : MonoBehaviour
+    public class CashBattle1v1Manager : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private TextMeshProUGUI titleText;

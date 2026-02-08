@@ -8,7 +8,7 @@ namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
     /// Reference Assigner for CashBattle1v1 scene.
-    /// Automatically finds and assigns UI references to GameSelectionPanel.
+    /// Automatically finds and assigns UI references to CashBattle1v1Manager.
     ///
     /// Menu: DigitPark/Auto Assigners/References/CashBattle/CashBattle 1v1 References
     /// </summary>
@@ -75,7 +75,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to GameSelectionPanel:\n" +
+                "Assigns UI references to CashBattle1v1Manager:\n" +
                 "- Header (title, back button)\n" +
                 "- Games container/grid\n" +
                 "- Entry fee selection and custom input\n" +
@@ -85,7 +85,7 @@ namespace DigitPark.Editor.AutoAssigners
 
             GUILayout.Space(10);
 
-            MonoBehaviour targetPanel = FindGameSelectionPanel();
+            MonoBehaviour targetPanel = FindCashBattle1v1Manager();
             if (targetPanel != null)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -152,48 +152,48 @@ namespace DigitPark.Editor.AutoAssigners
         {
             Log("=== ASSIGNING CASHBATTLE 1V1 REFERENCES ===");
 
-            var panel = FindGameSelectionPanel();
+            var panel = FindCashBattle1v1Manager();
             if (panel == null)
             {
-                Log("ERROR: GameSelectionPanel not found in scene!");
+                Log("ERROR: CashBattle1v1Manager not found in scene!");
                 failedCount = REQUIRED_REFS.Length;
                 return;
             }
 
             SerializedObject so = new SerializedObject(panel);
 
-            // Header
-            AssignReference(so, "titleText", FindTextByName("title", "header", "selecciona"));
-            AssignReference(so, "backButton", FindButtonByName("back", "return", "atras"));
+            // Header (UIBuilder: "TitleText", "BackButton")
+            AssignReference(so, "titleText", FindTextByName("titletext"));
+            AssignReference(so, "backButton", FindButtonByName("backbutton"));
 
-            // Games Grid
-            AssignReference(so, "gamesContainer", FindByNameContains<Transform>("gamescontainer", "gamesgrid", "gamescontent"));
+            // Games Grid (UIBuilder: "GamesContainer")
+            AssignReference(so, "gamesContainer", FindByNameContains<Transform>("gamescontainer"));
 
-            // Entry Fee
-            AssignReference(so, "selectedFeeText", FindTextByName("selectedfee", "entry", "fee", "apuesta"));
+            // Entry Fee (UIBuilder: "SelectedFeeText")
+            AssignReference(so, "selectedFeeText", FindTextByName("selectedfeetext"));
 
-            // Custom Entry
-            AssignReference(so, "customAmountInput", FindByNameContains<TMP_InputField>("custom", "amount", "input"));
-            AssignReference(so, "earningsText", FindTextByName("earnings", "ganas", "win", "potential"));
-            AssignReference(so, "minMaxText", FindTextByName("minmax", "limit", "max"));
+            // Custom Entry (UIBuilder: "CustomInputField", "PotentialEarningsText", "MaxLabel")
+            AssignReference(so, "customAmountInput", FindByNameContains<TMP_InputField>("custominputfield"));
+            AssignReference(so, "earningsText", FindTextByName("potentialearningstext"));
+            AssignReference(so, "minMaxText", FindTextByName("maxlabel"));
 
-            // Online Players
-            AssignReference(so, "onlinePlayersText", FindTextByName("online", "players", "jugadores"));
-            AssignReference(so, "onlineIndicator", FindImageByName("indicator", "dot", "online", "green"));
+            // Online Players (UIBuilder: "OnlinePlayersText", "GreenDot")
+            AssignReference(so, "onlinePlayersText", FindTextByName("onlineplayerstext"));
+            AssignReference(so, "onlineIndicator", FindImageByName("greendot"));
 
-            // Action Button
-            AssignReference(so, "findOpponentButton", FindButtonByName("findopponent", "buscar", "find", "opponent"));
-            AssignReference(so, "findOpponentText", FindTextByName("findopponent", "buscar", "searchtext"));
+            // Action Button (UIBuilder: "FindOpponentButton", "FindOpponentText")
+            AssignReference(so, "findOpponentButton", FindButtonByName("findopponentbutton"));
+            AssignReference(so, "findOpponentText", FindTextByName("findopponenttext"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(panel);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 
-        private static MonoBehaviour FindGameSelectionPanel()
+        private static MonoBehaviour FindCashBattle1v1Manager()
         {
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "GameSelectionPanel") return mb;
+                if (mb.GetType().Name == "CashBattle1v1Manager") return mb;
             return null;
         }
 

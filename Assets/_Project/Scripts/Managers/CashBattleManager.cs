@@ -36,7 +36,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button historyCard;
 
         [Header("UI - Sub Panels")]
-        [SerializeField] private GameSelectionPanel gameSelectionPanel;
+        [SerializeField] private CashBattle1v1Manager gameSelectionPanel;
         [SerializeField] private TournamentListPanel tournamentListPanel;
 
         [Header("UI - Age Verification")]
