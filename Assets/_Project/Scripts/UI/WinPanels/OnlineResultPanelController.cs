@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Games;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -169,13 +170,13 @@ namespace DigitPark.UI
             {
                 if (playerNameText != null) playerNameText.text = name;
                 if (playerTimeText != null) playerTimeText.text = FormatTime(time);
-                if (playerErrorsText != null) playerErrorsText.text = $"{errors} errores";
+                if (playerErrorsText != null) playerErrorsText.text = AutoLocalizer.Get("result_errors", errors);
             }
             else
             {
                 if (opponentNameText != null) opponentNameText.text = name;
                 if (opponentTimeText != null) opponentTimeText.text = FormatTime(time);
-                if (opponentErrorsText != null) opponentErrorsText.text = $"{errors} errores";
+                if (opponentErrorsText != null) opponentErrorsText.text = AutoLocalizer.Get("result_errors", errors);
             }
         }
 
@@ -186,7 +187,7 @@ namespace DigitPark.UI
             // Título de resultado
             if (resultTitleText != null)
             {
-                resultTitleText.text = isWinner ? "VICTORIA" : "DERROTA";
+                resultTitleText.text = isWinner ? AutoLocalizer.Get("result_victory") : AutoLocalizer.Get("result_defeat");
                 resultTitleText.color = isWinner ? winColor : loseColor;
 
                 // Animación de escala
@@ -199,12 +200,12 @@ namespace DigitPark.UI
             {
                 if (isWinner)
                 {
-                    resultSubtitleText.text = "Mejor tiempo que tu oponente";
+                    resultSubtitleText.text = AutoLocalizer.Get("result_victory_message");
                     resultSubtitleText.color = winColor;
                 }
                 else
                 {
-                    resultSubtitleText.text = "Tu oponente fue más rápido";
+                    resultSubtitleText.text = AutoLocalizer.Get("result_defeat_message");
                     resultSubtitleText.color = loseColor;
                 }
             }
@@ -226,7 +227,7 @@ namespace DigitPark.UI
 
             if (timeDifferenceLabel != null)
             {
-                timeDifferenceLabel.text = isWinner ? "Más rápido por" : "Más lento por";
+                timeDifferenceLabel.text = isWinner ? AutoLocalizer.Get("result_faster_by") : AutoLocalizer.Get("result_slower_by");
             }
 
             // Highlight al ganador

@@ -645,15 +645,11 @@ namespace DigitPark.Editor
             CreateTrophyCard(content, "Trophy_challenge_friend", "Retador", 0, false, false, new Color(0.4f, 0.6f, 1f, 1f), false, 20);
             CreateTrophyCard(content, "Trophy_beat_friend", "Rival", 0, false, false, new Color(0.4f, 0.6f, 1f, 1f), false, 25);
 
-            // --- PROGRESSION (8) ---
+            // --- PROGRESSION (4) ---
             CreateTrophyCard(content, "Trophy_level_10", "Nivel 10", 100, true, false, new Color(0.8f, 0.6f, 1f, 1f), false, 25);
             CreateTrophyCard(content, "Trophy_level_25", "Nivel 25", 60, false, true, new Color(0.8f, 0.6f, 1f, 1f), false, 50);
             CreateTrophyCard(content, "Trophy_level_50", "Nivel 50", 30, false, true, new Color(0.8f, 0.6f, 1f, 1f), false, 75);
             CreateTrophyCard(content, "Trophy_level_100", "Nivel 100", 0, false, false, new Color(0.8f, 0.6f, 1f, 1f), false, 150);
-            CreateTrophyCard(content, "Trophy_rank_up", "Ascenso", 100, true, false, GOLD, false, 30);
-            CreateTrophyCard(content, "Trophy_rank_elite", "Élite", 0, false, false, new Color(0.2f, 0.8f, 1f, 1f), false, 100);
-            CreateTrophyCard(content, "Trophy_rank_legend", "Leyenda", 0, false, false, new Color(1f, 0.6f, 0f, 1f), false, 200);
-            CreateTrophyCard(content, "Trophy_rank_immortal", "Inmortal", 0, false, false, CAT_SECRET, true, 500); // SECRET
 
             // --- COLLECTOR --- Reservado para V2
 
@@ -891,7 +887,7 @@ namespace DigitPark.Editor
                 GameObject checkmark = FindOrCreateChild(completedBadge, "Checkmark");
                 SetRectTransformStretch(checkmark);
                 TextMeshProUGUI checkText = GetOrAddComponent<TextMeshProUGUI>(checkmark);
-                checkText.text = "✓";
+                checkText.text = "V";
                 checkText.fontSize = 18;
                 checkText.fontStyle = FontStyles.Bold;
                 checkText.color = TEXT_DARK;
@@ -1478,7 +1474,7 @@ namespace DigitPark.Editor
             checkRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI checkTmp = checkmark.AddComponent<TextMeshProUGUI>();
-            checkTmp.text = "✓";
+            checkTmp.text = "V";
             checkTmp.fontSize = 16;
             checkTmp.fontStyle = FontStyles.Bold;
             checkTmp.color = TEXT_DARK;

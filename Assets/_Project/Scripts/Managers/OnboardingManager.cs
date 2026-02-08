@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Localization;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -114,64 +115,64 @@ namespace DigitPark.Managers
                     new OnboardingStep
                     {
                         id = "welcome",
-                        title = "¡Bienvenido a DigitPark!",
-                        description = "Tu destino para juegos mentales, competencias y diversión.",
+                        title = L("onboarding_welcome_title"),
+                        description = L("onboarding_welcome_desc"),
                         stepType = OnboardingStepType.Info,
                         requiresInteraction = false
                     },
                     new OnboardingStep
                     {
                         id = "name",
-                        title = "¿Cómo te llamas?",
-                        description = "Elige un nombre para tu perfil.",
+                        title = L("onboarding_name_title"),
+                        description = L("onboarding_name_desc"),
                         stepType = OnboardingStepType.NameInput,
                         requiresInteraction = true
                     },
                     new OnboardingStep
                     {
                         id = "avatar",
-                        title = "Elige tu Avatar",
-                        description = "Selecciona cómo quieres que te vean otros jugadores.",
+                        title = L("onboarding_avatar_title"),
+                        description = L("onboarding_avatar_desc"),
                         stepType = OnboardingStepType.AvatarSelection,
                         requiresInteraction = true
                     },
                     new OnboardingStep
                     {
                         id = "games",
-                        title = "Juegos Cognitivos",
-                        description = "Entrena tu mente con 6 minijuegos diseñados para mejorar memoria, reflejos, matemáticas y más.",
+                        title = L("onboarding_games_title"),
+                        description = L("onboarding_games_desc"),
                         stepType = OnboardingStepType.Info,
                         requiresInteraction = false
                     },
                     new OnboardingStep
                     {
                         id = "cashbattle",
-                        title = "CashBattle",
-                        description = "¿Listo para el desafío? Compite 1v1 contra otros jugadores por premios reales.",
+                        title = L("onboarding_cashbattle_title"),
+                        description = L("onboarding_cashbattle_desc"),
                         stepType = OnboardingStepType.Info,
                         requiresInteraction = false
                     },
                     new OnboardingStep
                     {
                         id = "tournaments",
-                        title = "Torneos",
-                        description = "Participa en torneos con decenas de jugadores. ¡El premio mayor está en juego!",
+                        title = L("tournament_button"),
+                        description = L("tournaments_description"),
                         stepType = OnboardingStepType.Info,
                         requiresInteraction = false
                     },
                     new OnboardingStep
                     {
                         id = "rewards",
-                        title = "Recompensas Diarias",
-                        description = "Vuelve cada día para obtener monedas, gemas y más recompensas.",
+                        title = L("dr_title"),
+                        description = L("onboarding_rewards_desc"),
                         stepType = OnboardingStepType.Info,
                         requiresInteraction = false
                     },
                     new OnboardingStep
                     {
                         id = "complete",
-                        title = "¡Estás Listo!",
-                        description = "Has completado el tutorial. ¡Es hora de jugar!",
+                        title = L("onboarding_ready_title"),
+                        description = L("onboarding_ready_desc"),
                         stepType = OnboardingStepType.Completion,
                         requiresInteraction = true
                     }
@@ -183,12 +184,12 @@ namespace DigitPark.Managers
             {
                 avatarOptions = new List<AvatarOption>
                 {
-                    new AvatarOption { id = "avatar_01", name = "Explorador" },
-                    new AvatarOption { id = "avatar_02", name = "Guerrero" },
-                    new AvatarOption { id = "avatar_03", name = "Mago" },
-                    new AvatarOption { id = "avatar_04", name = "Ninja" },
-                    new AvatarOption { id = "avatar_05", name = "Robot" },
-                    new AvatarOption { id = "avatar_06", name = "Alien" },
+                    new AvatarOption { id = "avatar_01", name = AutoLocalizer.Get("avatar_explorer") },
+                    new AvatarOption { id = "avatar_02", name = AutoLocalizer.Get("avatar_warrior") },
+                    new AvatarOption { id = "avatar_03", name = AutoLocalizer.Get("avatar_mage") },
+                    new AvatarOption { id = "avatar_04", name = AutoLocalizer.Get("avatar_ninja") },
+                    new AvatarOption { id = "avatar_05", name = AutoLocalizer.Get("avatar_robot") },
+                    new AvatarOption { id = "avatar_06", name = AutoLocalizer.Get("avatar_alien") },
                 };
             }
         }
@@ -390,19 +391,19 @@ namespace DigitPark.Managers
             {
                 if (currentStepIndex == steps.Count - 1)
                 {
-                    nextButtonText.text = "Comenzar";
+                    nextButtonText.text = AutoLocalizer.Get("onboarding_begin");
                 }
                 else if (step.stepType == OnboardingStepType.NameInput)
                 {
-                    nextButtonText.text = "Confirmar";
+                    nextButtonText.text = AutoLocalizer.Get("onboarding_confirm");
                 }
                 else if (step.stepType == OnboardingStepType.AvatarSelection)
                 {
-                    nextButtonText.text = "Seleccionar";
+                    nextButtonText.text = AutoLocalizer.Get("onboarding_select");
                 }
                 else
                 {
-                    nextButtonText.text = "Siguiente";
+                    nextButtonText.text = AutoLocalizer.Get("onboarding_next");
                 }
             }
         }
@@ -620,17 +621,17 @@ namespace DigitPark.Managers
 
                 if (completionTitleText)
                 {
-                    completionTitleText.text = $"¡Bien hecho, {playerName}!";
+                    completionTitleText.text = L("onboarding_well_done", playerName);
                 }
 
                 if (completionMessageText)
                 {
-                    completionMessageText.text = "Has completado el tutorial. Aquí tienes tus recompensas de bienvenida.";
+                    completionMessageText.text = L("onboarding_completion_msg");
                 }
 
                 if (rewardText)
                 {
-                    rewardText.text = $"+{completionRewardCoins} Monedas | +{completionRewardGems} Gemas";
+                    rewardText.text = $"+{completionRewardCoins} {L("reward_coins")} | +{completionRewardGems} {L("reward_gems")}";
                 }
             }
 
@@ -854,6 +855,13 @@ namespace DigitPark.Managers
             PlayerPrefs.DeleteKey("PlayerName");
             PlayerPrefs.DeleteKey("PlayerAvatar");
             PlayerPrefs.Save();
+        }
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
         }
     }
 

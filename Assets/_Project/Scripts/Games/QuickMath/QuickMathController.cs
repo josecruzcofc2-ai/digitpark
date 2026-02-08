@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
@@ -708,7 +709,7 @@ namespace DigitPark.Games
             // Actualizar stats
             if (statsText != null)
             {
-                statsText.text = $"Tiempo: {GetFormattedTime()}\nErrores: {errorCount}\nMax Streak: x{maxStreak}";
+                statsText.text = $"{AutoLocalizer.Get("game_time")}: {GetFormattedTime()}\n{AutoLocalizer.Get("game_errors")}: {errorCount}\nMax Streak: x{maxStreak}";
             }
 
             // Fade in
@@ -747,6 +748,15 @@ namespace DigitPark.Games
         protected override void OnErrorOccurred()
         {
             UpdateUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (questionPulseCoroutine != null)
+            {
+                StopCoroutine(questionPulseCoroutine);
+                questionPulseCoroutine = null;
+            }
         }
     }
 }

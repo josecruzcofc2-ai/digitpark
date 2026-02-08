@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Items
 {
@@ -66,7 +67,7 @@ namespace DigitPark.UI.Items
                 usernameText.text = data.username;
 
             if (levelText)
-                levelText.text = $"Nivel {data.level}";
+                levelText.text = AutoLocalizer.Get("player_level", data.level);
 
             // Country
             if (countryFlag)
@@ -85,7 +86,7 @@ namespace DigitPark.UI.Items
                 statsContainer.SetActive(data.showStats);
 
             if (winsText)
-                winsText.text = $"{data.totalWins} victorias";
+                winsText.text = AutoLocalizer.Get("player_wins", data.totalWins);
 
             if (winRateText)
                 winRateText.text = $"{data.winRate:0}%";
@@ -115,13 +116,13 @@ namespace DigitPark.UI.Items
                     switch (status)
                     {
                         case FriendStatus.None:
-                            addFriendText.text = "Agregar";
+                            addFriendText.text = AutoLocalizer.Get("player_add");
                             break;
                         case FriendStatus.Pending:
-                            addFriendText.text = "Pendiente";
+                            addFriendText.text = AutoLocalizer.Get("player_pending");
                             break;
                         case FriendStatus.Friend:
-                            addFriendText.text = "Amigos";
+                            addFriendText.text = AutoLocalizer.Get("player_friend");
                             break;
                     }
                 }
@@ -158,7 +159,7 @@ namespace DigitPark.UI.Items
             {
                 addFriendButton.interactable = false;
                 if (addFriendText)
-                    addFriendText.text = "Enviado";
+                    addFriendText.text = AutoLocalizer.Get("player_sent");
             }
 
             if (pendingBadge)

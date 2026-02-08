@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Games;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -80,7 +81,7 @@ namespace DigitPark.UI
         {
             if (titleText != null)
             {
-                titleText.text = "¡COMPLETADO!";
+                titleText.text = AutoLocalizer.Get("completed");
                 titleText.color = normalColor;
             }
 
@@ -161,7 +162,7 @@ namespace DigitPark.UI
         {
             if (titleText != null)
             {
-                titleText.text = isWinner ? "¡GANASTE!" : "¡PERDISTE!";
+                titleText.text = isWinner ? AutoLocalizer.Get("you_won") : AutoLocalizer.Get("you_lost");
                 titleText.color = isWinner ? winColor : loseColor;
             }
 
@@ -183,7 +184,7 @@ namespace DigitPark.UI
             if (wagerText != null)
             {
                 wagerText.gameObject.SetActive(true);
-                wagerText.text = $"Apuesta: ${entryFee:F2}";
+                wagerText.text = AutoLocalizer.Get("result_wager", $"{entryFee:F2}");
             }
 
             if (timeText != null)
@@ -198,10 +199,10 @@ namespace DigitPark.UI
                 vsContainer.SetActive(true);
 
                 if (playerScoreText != null)
-                    playerScoreText.text = $"Tú: {playerResult.FinalScore:F2}s";
+                    playerScoreText.text = AutoLocalizer.Get("result_your_time", $"{playerResult.FinalScore:F2}");
 
                 if (opponentScoreText != null)
-                    opponentScoreText.text = $"{opponentName}: {opponentResult.FinalScore:F2}s";
+                    opponentScoreText.text = AutoLocalizer.Get("result_opponent_time", opponentName, $"{opponentResult.FinalScore:F2}");
             }
 
             // Icono de resultado

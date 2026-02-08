@@ -245,7 +245,7 @@ namespace DigitPark.Editor
             badgeTextRT.offsetMax = Vector2.zero;
 
             TextMeshProUGUI badgeTextTMP = badgeTextObj.AddComponent<TextMeshProUGUI>();
-            badgeTextTMP.text = "✓";
+            badgeTextTMP.text = "V";
             badgeTextTMP.fontSize = 16;
             badgeTextTMP.color = Color.black;
             badgeTextTMP.alignment = TextAlignmentOptions.Center;

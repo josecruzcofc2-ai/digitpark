@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -185,7 +186,7 @@ namespace DigitPark.Managers
                 // Mostrar mensaje de no resultados
                 if (noResultsText != null)
                 {
-                    noResultsText.text = "No se encontraron jugadores";
+                    noResultsText.text = L("search_no_results");
                     noResultsText.gameObject.SetActive(true);
                 }
                 return;
@@ -264,7 +265,7 @@ namespace DigitPark.Managers
             Color statusColor = isOnline
                 ? new Color(0.2f, 1f, 0.4f, 1f)  // Verde
                 : new Color(0.5f, 0.5f, 0.5f, 1f); // Gris
-            string statusText = isOnline ? "Online" : "Offline";
+            string statusText = isOnline ? AutoLocalizer.Get("player_online") : AutoLocalizer.Get("player_offline");
 
             Transform onlineStatus = item.transform.Find("OnlineStatus");
             if (onlineStatus != null)
@@ -315,13 +316,13 @@ namespace DigitPark.Managers
                             if (hasPendingRequest)
                             {
                                 if (btnText != null)
-                                    btnText.text = sentRequest ? "Enviada" : "Responder";
+                                    btnText.text = sentRequest ? AutoLocalizer.Get("search_request_sent") : AutoLocalizer.Get("friend_requests_accept");
                                 btn.interactable = !sentRequest;
                             }
                             else
                             {
                                 if (btnText != null)
-                                    btnText.text = "Agregar";
+                                    btnText.text = AutoLocalizer.Get("search_add_friend");
                                 btn.interactable = true;
                             }
 
@@ -377,7 +378,7 @@ namespace DigitPark.Managers
             // Verificar si ya hay solicitud pendiente
             if (FriendService.Instance.HasPendingRequestWith(playerId))
             {
-                ShowMessage("Ya tienes una solicitud pendiente con este jugador");
+                ShowMessage(AutoLocalizer.Get("error_pending_request"));
                 return;
             }
 
@@ -414,7 +415,7 @@ namespace DigitPark.Managers
                             var tmpText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
                             if (requestSent && tmpText != null)
                             {
-                                tmpText.text = "Enviada";
+                                tmpText.text = AutoLocalizer.Get("search_request_sent");
                                 btn.interactable = false;
                             }
                         }
@@ -443,5 +444,12 @@ namespace DigitPark.Managers
         }
 
         #endregion
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
+        }
     }
 }

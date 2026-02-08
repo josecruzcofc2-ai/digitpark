@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
@@ -156,7 +157,7 @@ namespace DigitPark.Games
 
             if (instructionText != null)
             {
-                instructionText.text = "¡ENCUENTRA LA DIFERENCIA!";
+                instructionText.text = AutoLocalizer.Get("oddoneout_find_difference");
                 instructionText.color = new Color(1f, 0.84f, 0f, 1f);
             }
         }
@@ -279,11 +280,11 @@ namespace DigitPark.Games
             if (instructionText != null)
             {
                 if (currentCombo >= 4)
-                    instructionText.text = "¡INCREÍBLE!";
+                    instructionText.text = AutoLocalizer.Get("oddoneout_incredible");
                 else if (currentCombo >= 2)
-                    instructionText.text = "¡EXCELENTE!";
+                    instructionText.text = AutoLocalizer.Get("oddoneout_excellent");
                 else
-                    instructionText.text = "¡CORRECTO!";
+                    instructionText.text = AutoLocalizer.Get("oddoneout_correct");
 
                 instructionText.color = new Color(0.3f, 1f, 0.5f, 1f);
             }
@@ -311,7 +312,7 @@ namespace DigitPark.Games
             // Mensaje de error
             if (instructionText != null)
             {
-                instructionText.text = "¡INTENTA DE NUEVO!";
+                instructionText.text = AutoLocalizer.Get("oddoneout_try_again");
                 instructionText.color = new Color(1f, 0.3f, 0.3f, 1f);
             }
         }
@@ -604,7 +605,7 @@ namespace DigitPark.Games
             // Actualizar stats
             if (statsText != null)
             {
-                statsText.text = $"Tiempo: {GetFormattedTime()}\nErrores: {errorCount}\nMax Combo: x{maxCombo}";
+                statsText.text = AutoLocalizer.Get("oddoneout_stats", GetFormattedTime(), errorCount, maxCombo);
             }
 
             // Fade in

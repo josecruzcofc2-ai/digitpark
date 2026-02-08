@@ -275,7 +275,7 @@ namespace DigitPark.Managers
             }
 
             // Verificar si hay un usuario autenticado
-            bool isAuthenticated = AuthenticationService.Instance.IsUserAuthenticated();
+            bool isAuthenticated = AuthenticationService.Instance != null && AuthenticationService.Instance.IsUserAuthenticated();
 
             Debug.Log($"[Boot] Usuario autenticado: {isAuthenticated}");
 

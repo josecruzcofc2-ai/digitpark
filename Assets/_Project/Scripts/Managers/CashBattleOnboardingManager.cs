@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Monetization;
+using DigitPark.Localization;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -242,11 +243,11 @@ namespace DigitPark.Managers
             {
                 if (currentSlideIndex == totalSlides - 1)
                 {
-                    nextButtonText.text = "EMPEZAR AHORA";
+                    nextButtonText.text = AutoLocalizer.Get("onboarding_start_now");
                 }
                 else
                 {
-                    nextButtonText.text = "SIGUIENTE";
+                    nextButtonText.text = AutoLocalizer.Get("onboarding_next");
                 }
             }
         }

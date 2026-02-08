@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using DigitPark.Services;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.CashBattle
 {
@@ -197,7 +198,7 @@ namespace DigitPark.UI.CashBattle
             // Actualizar textos
             if (stateText != null)
             {
-                stateText.text = $"Tu ubicacion actual: {restrictedState}";
+                stateText.text = AutoLocalizer.Get("location_current_state", restrictedState);
             }
 
             if (statesListPanel != null)
@@ -233,7 +234,7 @@ namespace DigitPark.UI.CashBattle
                     var btnText = viewStatesButton.GetComponentInChildren<TextMeshProUGUI>();
                     if (btnText != null)
                     {
-                        btnText.text = statesListPanel.activeSelf ? "Ocultar estados" : "Ver estados permitidos";
+                        btnText.text = statesListPanel.activeSelf ? AutoLocalizer.Get("location_hide_states") : AutoLocalizer.Get("location_show_states");
                     }
                 }
             }
@@ -310,7 +311,7 @@ namespace DigitPark.UI.CashBattle
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
-            title.text = "UBICACION NO DISPONIBLE";
+            title.text = AutoLocalizer.Get("location_unavailable_title");
             title.fontSize = 36;
             title.color = new Color(1f, 0.4f, 0.4f);
             title.alignment = TextAlignmentOptions.Center;
@@ -323,7 +324,7 @@ namespace DigitPark.UI.CashBattle
             GameObject msgObj = new GameObject("Message");
             msgObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI msg = msgObj.AddComponent<TextMeshProUGUI>();
-            msg.text = "Las competencias con dinero real no estan disponibles en tu ubicacion actual debido a restricciones legales.";
+            msg.text = AutoLocalizer.Get("location_unavailable_message");
             msg.fontSize = 22;
             msg.color = new Color(0.8f, 0.8f, 0.8f);
             msg.alignment = TextAlignmentOptions.Center;
@@ -336,7 +337,7 @@ namespace DigitPark.UI.CashBattle
             GameObject stateObj = new GameObject("StateText");
             stateObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI stateText = stateObj.AddComponent<TextMeshProUGUI>();
-            stateText.text = "Tu ubicacion actual: Florida";
+            stateText.text = AutoLocalizer.Get("location_current_state", "Florida");
             stateText.fontSize = 20;
             stateText.color = new Color(1f, 0.84f, 0f);
             stateText.alignment = TextAlignmentOptions.Center;
@@ -345,7 +346,7 @@ namespace DigitPark.UI.CashBattle
             stateLE.preferredHeight = 35;
 
             // View States Button
-            GameObject viewBtn = CreateButton("ViewStatesButton", content.transform, "Ver estados permitidos", new Color(0f, 0.6f, 0.8f));
+            GameObject viewBtn = CreateButton("ViewStatesButton", content.transform, AutoLocalizer.Get("location_show_states"), new Color(0f, 0.6f, 0.8f));
             overlay.viewStatesButton = viewBtn.GetComponent<Button>();
 
             // States List Panel (hidden by default)
@@ -378,7 +379,7 @@ namespace DigitPark.UI.CashBattle
             overlay.statesListPanel = statesPanel;
 
             // Back Button
-            GameObject backBtn = CreateButton("BackButton", content.transform, "Volver al Menu Principal", new Color(0.8f, 0.2f, 0.2f));
+            GameObject backBtn = CreateButton("BackButton", content.transform, AutoLocalizer.Get("location_back_to_menu"), new Color(0.8f, 0.2f, 0.2f));
             overlay.backToMenuButton = backBtn.GetComponent<Button>();
         }
 

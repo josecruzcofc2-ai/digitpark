@@ -1,31 +1,41 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 using DigitPark.Themes;
 using DigitPark.Managers;
-using DigitPark.UI.Panels;
 using DigitPark.Tools;
 
 namespace DigitPark.UI.Components
 {
     /// <summary>
-    /// Controlador runtime para el dropdown de temas
-    /// Conecta el TMP_Dropdown con el ThemeManager para cambiar el tema de la app
-    /// Maneja temas premium bloqueados hasta que se compre "Estilos PRO"
+    /// Runtime controller for the theme dropdown in Settings.
+    /// Populates dynamically from ThemeManager.AvailableThemes.
+    /// Shows lock icon for premium themes that haven't been purchased.
+    /// Lock disappears when purchased OR when ThemeDebugController.UnlockAllThemes is ON.
     /// </summary>
     [RequireComponent(typeof(TMP_Dropdown))]
     public class ThemeDropdownController : MonoBehaviour
     {
+        [Header("Lock Icon")]
+        [SerializeField] private Sprite lockIconSprite;
+
         private TMP_Dropdown dropdown;
         private bool isInitialized = false;
         private int lastValidIndex = 0;
 
-        // El índice 0 (Neon Dark) es gratuito, los demás son premium
-        private const int FREE_THEME_INDEX = 0;
-        private const string LOCK_ICON = " (PRO)";
+        // Runtime lock icon references (one per dropdown item)
+        private List<Image> lockIcons = new List<Image>();
 
         private void Awake()
         {
             dropdown = GetComponent<TMP_Dropdown>();
+
+            // Auto-load lock icon if not assigned
+            if (lockIconSprite == null)
+            {
+                lockIconSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+            }
         }
 
         private void Start()
@@ -46,35 +56,88 @@ namespace DigitPark.UI.Components
         }
 
         /// <summary>
-        /// Inicializa el dropdown con los temas disponibles
-        /// NOTA: Las opciones se configuran manualmente en Unity (no se regeneran)
-        /// El orden debe ser: 0=Neon Dark, 1=Clean Light, 2=Cyberpunk, 3=Ocean, 4=Retro Arcade, 5=Volcano
+        /// Populates the dropdown with all themes from ThemeManager
         /// </summary>
         public void Initialize()
         {
-            if (dropdown == null || isInitialized) return;
+            if (dropdown == null) return;
 
-            // Verificar que ThemeManager exista
             if (ThemeManager.Instance == null)
             {
-                Debug.LogWarning("[ThemeDropdownController] ThemeManager no disponible");
+                Debug.LogWarning("[ThemeDropdown] ThemeManager not available yet");
                 return;
             }
 
-            // NO limpiamos ni regeneramos opciones - se configuran en Unity con iconos PRO
-            // Solo suscribirse al evento de cambio
+            PopulateDropdown();
+
             dropdown.onValueChanged.RemoveListener(OnThemeSelected);
             dropdown.onValueChanged.AddListener(OnThemeSelected);
 
-            // Sincronizar con el tema actual
             SyncWithCurrentTheme();
-
             isInitialized = true;
-            Debug.Log($"[ThemeDropdownController] Inicializado con {dropdown.options.Count} temas (opciones de Unity)");
         }
 
         /// <summary>
-        /// Sincroniza el valor del dropdown con el tema actual
+        /// Fills the dropdown options from ThemeManager.AvailableThemes
+        /// </summary>
+        private void PopulateDropdown()
+        {
+            var themes = ThemeManager.Instance.AvailableThemes;
+            dropdown.ClearOptions();
+
+            var options = new List<TMP_Dropdown.OptionData>();
+            foreach (var theme in themes)
+            {
+                string displayName = theme.themeName;
+
+                // Add lock suffix for premium locked themes
+                if (theme.isPremium && !IsThemeUnlocked(theme))
+                {
+                    displayName += "  \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+                }
+
+                options.Add(new TMP_Dropdown.OptionData(displayName));
+            }
+
+            dropdown.AddOptions(options);
+            Debug.Log($"[ThemeDropdown] Populated with {themes.Count} themes");
+        }
+
+        /// <summary>
+        /// Checks if a theme is unlocked (free, purchased, or debug unlocked)
+        /// </summary>
+        private bool IsThemeUnlocked(ThemeData theme)
+        {
+            if (theme == null) return false;
+            if (!theme.isPremium) return true;
+
+            // Debug controller overrides
+            if (ThemeDebugController.Instance != null && ThemeDebugController.Instance.UnlockAllThemes)
+                return true;
+
+            // PremiumDebugController (existing debug tool)
+            if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
+                return true;
+
+            // Check real purchase status
+            if (PremiumManager.Instance != null)
+                return PremiumManager.Instance.HasStylesPro;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if theme at index is unlocked
+        /// </summary>
+        private bool IsThemeUnlockedAtIndex(int index)
+        {
+            var themes = ThemeManager.Instance.AvailableThemes;
+            if (index < 0 || index >= themes.Count) return false;
+            return IsThemeUnlocked(themes[index]);
+        }
+
+        /// <summary>
+        /// Syncs the dropdown value with ThemeManager's current theme
         /// </summary>
         private void SyncWithCurrentTheme()
         {
@@ -89,71 +152,34 @@ namespace DigitPark.UI.Components
         }
 
         /// <summary>
-        /// Verifica si un tema es premium (no es el tema gratuito)
-        /// </summary>
-        private bool IsThemePremium(int index)
-        {
-            return index != FREE_THEME_INDEX;
-        }
-
-        /// <summary>
-        /// Verifica si el usuario puede usar un tema
-        /// </summary>
-        private bool CanUseTheme(int index)
-        {
-            // El tema gratuito siempre está disponible
-            if (!IsThemePremium(index)) return true;
-
-            // Si el debug controller permite cambiar temas, siempre permitir
-            if (PremiumDebugController.Instance != null &&
-                PremiumDebugController.Instance.AllowThemeChange)
-            {
-                return true;
-            }
-
-            // Los temas premium requieren StylesPro
-            return PremiumManager.Instance?.HasStylesPro ?? false;
-        }
-
-        /// <summary>
-        /// Callback cuando el usuario selecciona un tema
+        /// Called when user selects a theme from the dropdown
         /// </summary>
         private void OnThemeSelected(int index)
         {
             if (ThemeManager.Instance == null) return;
 
-            // Verificar si el tema está bloqueado
-            if (!CanUseTheme(index))
+            if (!IsThemeUnlockedAtIndex(index))
             {
-                Debug.Log($"[ThemeDropdownController] Tema premium bloqueado. Mostrando panel de compra...");
-
-                // Revertir al último tema válido
+                Debug.Log($"[ThemeDropdown] Theme locked, reverting to last valid");
                 dropdown.SetValueWithoutNotify(lastValidIndex);
-
-                // Mostrar panel de compra de estilos
-                ShowStylesProPurchasePanel();
+                ShowPurchasePrompt();
                 return;
             }
 
-            // Aplicar el tema
             lastValidIndex = index;
             ThemeManager.Instance.SetTheme(index);
-            Debug.Log($"[ThemeDropdownController] Tema seleccionado: {ThemeManager.Instance.CurrentTheme?.themeName}");
         }
 
         /// <summary>
-        /// Muestra el panel compacto para comprar Estilos PRO
+        /// Shows the StylesPro purchase panel
         /// </summary>
-        private void ShowStylesProPurchasePanel()
+        private void ShowPurchasePrompt()
         {
-            Debug.Log("[ThemeDropdownController] ShowStylesProPurchasePanel() - Mostrando panel compacto de temas");
-
-            // Usar el nuevo panel compacto específico para temas
-            StylesProPromptPanel.CreateAndShow();
+            DigitPark.UI.Panels.StylesProPromptPanel.CreateAndShow();
         }
 
         /// <summary>
-        /// Callback cuando el tema cambia externamente
+        /// Callback when theme changes externally
         /// </summary>
         private void OnThemeChangedExternally(ThemeData theme)
         {
@@ -161,21 +187,78 @@ namespace DigitPark.UI.Components
         }
 
         /// <summary>
-        /// Callback cuando cambia el estado premium
+        /// Callback when premium status changes (purchase completed or debug toggle)
         /// </summary>
         private void OnPremiumStatusChanged()
         {
-            // Refrescar el dropdown para actualizar los candados
             Refresh();
         }
 
         /// <summary>
-        /// Fuerza la reinicialización del dropdown
+        /// Refreshes the dropdown (re-populates with updated lock status)
         /// </summary>
         public void Refresh()
         {
             isInitialized = false;
             Initialize();
+        }
+
+        /// <summary>
+        /// Called by the dropdown template when it creates items.
+        /// Adds lock icon Image to premium items.
+        /// Hook this after dropdown.Show() if needed.
+        /// </summary>
+        public void UpdateLockIcons()
+        {
+            if (lockIconSprite == null || ThemeManager.Instance == null) return;
+
+            var themes = ThemeManager.Instance.AvailableThemes;
+
+            // Find all items in the dropdown list
+            Transform dropdownList = dropdown.transform.Find("Dropdown List");
+            if (dropdownList == null) return;
+
+            Transform content = dropdownList.Find("Content");
+            if (content == null) return;
+
+            for (int i = 0; i < content.childCount && i < themes.Count; i++)
+            {
+                Transform item = content.GetChild(i);
+                if (item == null) continue;
+
+                // Find or create lock icon
+                Transform lockTransform = item.Find("LockIcon");
+                Image lockImg;
+
+                if (lockTransform == null)
+                {
+                    GameObject lockObj = new GameObject("LockIcon");
+                    lockObj.transform.SetParent(item, false);
+
+                    RectTransform lockRT = lockObj.AddComponent<RectTransform>();
+                    lockRT.anchorMin = new Vector2(1, 0.5f);
+                    lockRT.anchorMax = new Vector2(1, 0.5f);
+                    lockRT.pivot = new Vector2(1, 0.5f);
+                    lockRT.sizeDelta = new Vector2(28, 28);
+                    lockRT.anchoredPosition = new Vector2(-8, 0);
+
+                    lockImg = lockObj.AddComponent<Image>();
+                    lockImg.sprite = lockIconSprite;
+                    lockImg.preserveAspect = true;
+                    lockImg.raycastTarget = false;
+                }
+                else
+                {
+                    lockImg = lockTransform.GetComponent<Image>();
+                }
+
+                // Show lock only for premium themes that are locked
+                bool showLock = themes[i].isPremium && !IsThemeUnlocked(themes[i]);
+                if (lockImg != null)
+                {
+                    lockImg.gameObject.SetActive(showLock);
+                }
+            }
         }
     }
 }

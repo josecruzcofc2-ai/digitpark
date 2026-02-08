@@ -45,6 +45,7 @@ namespace DigitPark.Editor
         private const float INPUT_HEIGHT = 52f;
         private const float TOGGLE_ROW_HEIGHT = 48f;
         private const float GLOW_LINE_HEIGHT = 2f;
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         [MenuItem("DigitPark/UI Builders/Tournaments/TournamentCreate", false, 233)]
         public static void BuildUI()
@@ -156,22 +157,27 @@ namespace DigitPark.Editor
             // Glow line
             CreateGlowLine(header, false);
 
-            // BackButton
-            GameObject backBtn = CreateChild(header, "BackButton");
+            // BackButton - Neon Cyan prefab
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = CreateChild(header, "BackButton");
+                SetImage(backBtn, BUTTON_SECONDARY);
+                backBtn.AddComponent<Button>();
+                Debug.LogWarning("[TournamentCreateUIBuilder] BackButton prefab not found, using fallback");
+            }
             RectTransform backRT = backBtn.GetComponent<RectTransform>();
             backRT.anchorMin = new Vector2(0, 0.5f);
             backRT.anchorMax = new Vector2(0, 0.5f);
             backRT.pivot = new Vector2(0, 0.5f);
             backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
-            SetImage(backBtn, BUTTON_SECONDARY);
-            Button backButton = backBtn.AddComponent<Button>();
-            SetupButtonColors(backButton, BUTTON_SECONDARY);
-            AddOutline(backBtn, CYAN_DARK);
-
-            GameObject backText = CreateChild(backBtn, "Text");
-            StretchFull(backText);
-            SetText(backText, "<", 32, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
 
             // Title
             GameObject title = CreateChild(header, "TitleText");

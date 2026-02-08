@@ -8,7 +8,7 @@ namespace DigitPark.Progression
     /// Sistema de Nivel Permanente del Jugador.
     /// - Solo sube, NUNCA baja
     /// - XP ganado en: Practice Mode, Torneos gratis, 1v1 gratis
-    /// - NO incluye Cash Battles (eso es CashBattleRankSystem)
+    /// - NO incluye Cash Battles
     /// - Desbloquea: Avatares, Títulos, Cosméticos
     /// </summary>
     public class PlayerProgressionSystem : MonoBehaviour
@@ -110,7 +110,7 @@ namespace DigitPark.Progression
         {
             if (result.isCashBattle)
             {
-                Debug.LogWarning("[PlayerProgression] Cash Battles don't give permanent XP. Use CashBattleRankSystem instead.");
+                Debug.LogWarning("[PlayerProgression] Cash Battles don't give permanent XP.");
                 return;
             }
 

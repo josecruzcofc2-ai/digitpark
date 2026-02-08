@@ -164,7 +164,9 @@ namespace DigitPark.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            GetOrAdd<Image>(bg).color = DARK_BG;
+            var img = GetOrAdd<Image>(bg);
+            img.color = DARK_BG;
+            img.raycastTarget = false;
         }
 
         #endregion
@@ -320,7 +322,7 @@ namespace DigitPark.Editor
             eiRT.offsetMin = new Vector2(6, 6);
             eiRT.offsetMax = new Vector2(-6, -6);
             var eiTMP = GetOrAdd<TextMeshProUGUI>(editIcon);
-            eiTMP.text = "\u270E";
+            eiTMP.text = "Edit";
             eiTMP.fontSize = 20;
             eiTMP.color = TEXT_DARK;
             eiTMP.fontStyle = FontStyles.Bold;

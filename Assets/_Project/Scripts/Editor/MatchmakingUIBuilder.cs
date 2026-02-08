@@ -39,7 +39,7 @@ namespace DigitPark.Editor
         private static readonly Color TEXT_MUTED = new Color(0.44f, 0.45f, 0.60f, 1f);       // #707399
 
         // Asset paths
-        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
         private const string ICON_DIGIT_RUSH = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
         private const string ICON_MEMORY_PAIRS = "Assets/_Project/Art/Icons/Games/MemoryPairsIcon.png";
         private const string ICON_QUICK_MATH = "Assets/_Project/Art/Icons/Games/QuickMathIcon.png";
@@ -163,7 +163,7 @@ namespace DigitPark.Editor
                 rt.sizeDelta = new Vector2(50, 50);
 
                 Image btnBg = backBtn.AddComponent<Image>();
-                btnBg.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.2f);
+                btnBg.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.2f);
                 backBtn.AddComponent<Button>();
 
                 GameObject arrow = CreateElement(backBtn.transform, "Arrow");
@@ -171,7 +171,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.text = "<";
                 arrowText.fontSize = 32;
-                arrowText.color = GOLD;
+                arrowText.color = CYAN_NEON;
                 arrowText.alignment = TextAlignmentOptions.Center;
                 arrowText.fontStyle = FontStyles.Bold;
             }

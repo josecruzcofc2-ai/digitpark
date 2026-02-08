@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -412,7 +413,7 @@ namespace DigitPark.CashBattle
         {
             if (_selectedDepositAmount <= 0)
             {
-                ShowError("Selecciona un monto");
+                ShowError(AutoLocalizer.Get("wallet_select_amount"));
                 return;
             }
 
@@ -425,7 +426,7 @@ namespace DigitPark.CashBattle
 
             if (!success)
             {
-                ShowError("Error al procesar el depósito");
+                ShowError(AutoLocalizer.Get("wallet_deposit_error"));
             }
         }
 
@@ -441,7 +442,7 @@ namespace DigitPark.CashBattle
             }
             else
             {
-                ShowError("Ingresa un monto válido");
+                ShowError(AutoLocalizer.Get("wallet_invalid_amount"));
             }
         }
 
@@ -503,7 +504,7 @@ namespace DigitPark.CashBattle
 
             if (!decimal.TryParse(_withdrawAmountInput.text, out decimal amount))
             {
-                ShowError("Ingresa un monto válido");
+                ShowError(AutoLocalizer.Get("wallet_invalid_amount"));
                 return;
             }
 
@@ -521,7 +522,7 @@ namespace DigitPark.CashBattle
             }
             else
             {
-                ShowError("Error al procesar el retiro");
+                ShowError(AutoLocalizer.Get("wallet_withdrawal_error"));
             }
         }
 
@@ -540,7 +541,7 @@ namespace DigitPark.CashBattle
             }
             else
             {
-                ShowError("Error en verificación");
+                ShowError(AutoLocalizer.Get("wallet_verification_error"));
             }
         }
 
@@ -564,7 +565,7 @@ namespace DigitPark.CashBattle
                 if (_noTransactionsText != null)
                 {
                     _noTransactionsText.gameObject.SetActive(true);
-                    _noTransactionsText.text = "No hay transacciones";
+                    _noTransactionsText.text = AutoLocalizer.Get("wallet_no_transactions");
                 }
                 return;
             }

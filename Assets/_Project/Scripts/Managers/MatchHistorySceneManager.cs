@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using DigitPark.Data;
+using DigitPark.Localization;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -276,10 +277,10 @@ namespace DigitPark.Managers
         private void UpdateHeader(int totalCount)
         {
             if (totalCountText != null)
-                totalCountText.text = $"{totalCount} partida{(totalCount != 1 ? "s" : "")}";
+                totalCountText.text = AutoLocalizer.Get("history_match_count", totalCount);
 
             if (titleText != null)
-                titleText.text = "HISTORIAL";
+                titleText.text = AutoLocalizer.Get("history_title");
         }
 
         #endregion

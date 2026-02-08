@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Items
 {
@@ -75,7 +76,7 @@ namespace DigitPark.UI.Items
             }
 
             if (claimButtonText)
-                claimButtonText.text = "Reclamar";
+                claimButtonText.text = AutoLocalizer.Get("claim_button");
         }
 
         private void UpdateVisualState(AchievementState state)

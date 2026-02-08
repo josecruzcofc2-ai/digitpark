@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using DigitPark.Services;
 using DigitPark.Data;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -128,7 +129,7 @@ namespace DigitPark.Managers
             {
                 if (emptyText != null)
                 {
-                    emptyText.text = "No tienes amigos aun\nBusca jugadores para agregarlos";
+                    emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
                 }
                 return;
@@ -241,7 +242,7 @@ namespace DigitPark.Managers
 
             if (friendsCountText != null)
             {
-                friendsCountText.text = $"{count} amigo{(count != 1 ? "s" : "")}";
+                friendsCountText.text = AutoLocalizer.Get("friends_count", count, count != 1 ? AutoLocalizer.Get("friends_count_plural") : "");
             }
 
             if (titleText != null && count > 0)
@@ -249,11 +250,11 @@ namespace DigitPark.Managers
                 int onlineCount = allFriends.FindAll(f => f.isOnline).Count;
                 if (onlineCount > 0)
                 {
-                    titleText.text = $"Amigos ({onlineCount} en linea)";
+                    titleText.text = AutoLocalizer.Get("friends_online_count", onlineCount);
                 }
                 else
                 {
-                    titleText.text = "Amigos";
+                    titleText.text = AutoLocalizer.Get("friends_title");
                 }
             }
         }
@@ -287,7 +288,7 @@ namespace DigitPark.Managers
             {
                 if (emptyText != null)
                 {
-                    emptyText.text = "No se encontraron amigos";
+                    emptyText.text = L("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
                 }
                 return;
@@ -351,7 +352,7 @@ namespace DigitPark.Managers
 
                 if (allFriends.Count == 0 && emptyText != null)
                 {
-                    emptyText.text = "No tienes amigos aun\nBusca jugadores para agregarlos";
+                    emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
                 }
             }
@@ -401,5 +402,12 @@ namespace DigitPark.Managers
         }
 
         #endregion
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
+        }
     }
 }

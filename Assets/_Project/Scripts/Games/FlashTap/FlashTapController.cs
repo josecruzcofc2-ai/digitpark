@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Effects;
+using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
@@ -108,7 +109,7 @@ namespace DigitPark.Games
                 button3D.SetState(FlashTapButton3D.ButtonState.Wait);
             }
 
-            if (instructionText != null) instructionText.text = "ESPERA...";
+            if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_wait");
             if (reactionTimeText != null) reactionTimeText.text = "";
 
             // Iniciar espera aleatoria (2.5 a 6 segundos para mayor impredecibilidad)
@@ -131,7 +132,7 @@ namespace DigitPark.Games
                 button3D.SetState(FlashTapButton3D.ButtonState.Ready);
             }
 
-            if (instructionText != null) instructionText.text = "TAP!";
+            if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_tap");
 
             // Haptic feedback cuando se activa
             if (enableHaptics && FeedbackManager.Instance != null)
@@ -172,7 +173,7 @@ namespace DigitPark.Games
                 button3D.SetState(FlashTapButton3D.ButtonState.Error);
             }
 
-            if (instructionText != null) instructionText.text = "MUY PRONTO!";
+            if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_too_early");
 
             // Este intento no cuenta, reiniciar fase de espera
             StartCoroutine(RestartAfterTooEarly());
@@ -206,17 +207,17 @@ namespace DigitPark.Games
                 // Agregar indicador de rendimiento
                 if (reactionTime < 200)
                 {
-                    timeText += " INCREIBLE!";
+                    timeText += $" {AutoLocalizer.Get("flashtap_incredible")}";
                     reactionTimeText.color = new Color(0f, 1f, 0.5f); // Verde brillante
                 }
                 else if (reactionTime < 300)
                 {
-                    timeText += " Genial!";
+                    timeText += $" {AutoLocalizer.Get("flashtap_great")}";
                     reactionTimeText.color = new Color(0.5f, 1f, 0.5f); // Verde
                 }
                 else if (reactionTime < 400)
                 {
-                    timeText += " Bien";
+                    timeText += $" {AutoLocalizer.Get("flashtap_good")}";
                     reactionTimeText.color = new Color(1f, 1f, 0.5f); // Amarillo
                 }
                 else
@@ -279,17 +280,17 @@ namespace DigitPark.Games
         {
             if (roundText != null)
             {
-                roundText.text = $"Ronda {Mathf.Min(currentAttempt, totalAttempts)}/{totalAttempts}";
+                roundText.text = AutoLocalizer.Get("flashtap_round", Mathf.Min(currentAttempt, totalAttempts), totalAttempts);
             }
 
             if (averageText != null && reactionTimes.Count > 0)
             {
-                averageText.text = $"Promedio: {CalculateAverage():F0}ms";
+                averageText.text = AutoLocalizer.Get("flashtap_average", $"{CalculateAverage():F0}");
             }
 
             if (bestTimeText != null && bestTime < float.MaxValue)
             {
-                bestTimeText.text = $"Mejor: {bestTime:F0}ms";
+                bestTimeText.text = AutoLocalizer.Get("flashtap_best", $"{bestTime:F0}");
             }
         }
 
@@ -334,7 +335,7 @@ namespace DigitPark.Games
             {
                 float avg = CalculateAverage();
                 string rating = GetPerformanceRating(avg);
-                averageText.text = $"Promedio Final: {avg:F0}ms\n{rating}";
+                averageText.text = AutoLocalizer.Get("flashtap_final_average", $"{avg:F0}", rating);
             }
 
             // Feedback final
@@ -346,12 +347,12 @@ namespace DigitPark.Games
 
         private string GetPerformanceRating(float avgMs)
         {
-            if (avgMs < 200) return "REFLEJOS DE RAYO!";
-            if (avgMs < 250) return "Excelente!";
-            if (avgMs < 300) return "Muy Bien!";
-            if (avgMs < 350) return "Bien";
-            if (avgMs < 400) return "Normal";
-            return "Sigue practicando";
+            if (avgMs < 200) return AutoLocalizer.Get("flashtap_rating_excellent");
+            if (avgMs < 250) return AutoLocalizer.Get("flashtap_rating_very_good");
+            if (avgMs < 300) return AutoLocalizer.Get("flashtap_rating_good");
+            if (avgMs < 350) return AutoLocalizer.Get("flashtap_rating_ok");
+            if (avgMs < 400) return AutoLocalizer.Get("flashtap_rating_average");
+            return AutoLocalizer.Get("flashtap_rating_practice");
         }
 
         protected override void OnGameReset()

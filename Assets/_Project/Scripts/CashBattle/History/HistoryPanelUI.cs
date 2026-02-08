@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -491,11 +492,11 @@ namespace DigitPark.CashBattle
             switch (_currentTab)
             {
                 case HistoryFilterTab.Matches:
-                    return "No hay partidas registradas";
+                    return AutoLocalizer.Get("history_no_matches");
                 case HistoryFilterTab.Tournaments:
-                    return "No hay torneos registrados";
+                    return AutoLocalizer.Get("history_no_tournaments");
                 default:
-                    return "No hay historial";
+                    return AutoLocalizer.Get("history_empty");
             }
         }
 
@@ -507,7 +508,7 @@ namespace DigitPark.CashBattle
             _loadMoreButton.gameObject.SetActive(hasMore);
 
             if (_loadMoreText != null)
-                _loadMoreText.text = "Cargar más...";
+                _loadMoreText.text = AutoLocalizer.Get("history_load_more");
         }
 
         // ==================== EVENTS ====================

@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -380,7 +381,7 @@ namespace DigitPark.Managers
             }
             else
             {
-                ShowStatus("Error al crear el torneo. Intenta de nuevo.", true);
+                ShowStatus(AutoLocalizer.Get("tournament_create_error"), true);
                 isCreating = false;
                 if (loadingOverlay) loadingOverlay.SetActive(false);
                 UpdateCreateButtonState();

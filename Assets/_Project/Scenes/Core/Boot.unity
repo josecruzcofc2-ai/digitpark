@@ -229,6 +229,51 @@ MonoBehaviour:
   loadingText: {fileID: 0}
   versionText: {fileID: 0}
   minimumLoadTime: 2
+--- !u!1 &459369947
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 459369949}
+  - component: {fileID: 459369948}
+  m_Layer: 0
+  m_Name: ThemeDebugController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &459369948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459369947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d4e5f6a7b8091a2b3c4d5e6f708192, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unlockAllThemes: 0
+--- !u!4 &459369949
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459369947}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 155.05827, y: 1795.3324, z: 10.592666}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &545900828
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,3 +729,4 @@ SceneRoots:
   - {fileID: 53479289}
   - {fileID: 1327254061}
   - {fileID: 1002361395}
+  - {fileID: 459369949}

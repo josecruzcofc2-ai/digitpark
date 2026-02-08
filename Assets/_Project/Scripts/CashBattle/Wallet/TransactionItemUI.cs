@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -134,7 +135,7 @@ namespace DigitPark.CashBattle
                 switch (status)
                 {
                     case TransactionStatus.Pending:
-                        _statusText.text = "Pendiente";
+                        _statusText.text = AutoLocalizer.Get("transaction_pending");
                         _statusText.color = _pendingColor;
                         break;
 
@@ -144,12 +145,12 @@ namespace DigitPark.CashBattle
                         break;
 
                     case TransactionStatus.Failed:
-                        _statusText.text = "Fallido";
+                        _statusText.text = AutoLocalizer.Get("transaction_failed");
                         _statusText.color = _failedColor;
                         break;
 
                     case TransactionStatus.Cancelled:
-                        _statusText.text = "Cancelado";
+                        _statusText.text = AutoLocalizer.Get("transaction_cancelled");
                         _statusText.color = _failedColor;
                         break;
                 }

@@ -624,7 +624,7 @@ namespace DigitPark.Editor
             checkTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
-            checkTMP.text = "✓";
+            checkTMP.text = "V";
             checkTMP.fontSize = 32;
             checkTMP.color = Color.white;
             checkTMP.alignment = TextAlignmentOptions.Center;

@@ -7,6 +7,7 @@ using TMPro;
 using DigitPark.Games;
 using DigitPark.Services;
 using DigitPark.UI.Components;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -200,7 +201,7 @@ namespace DigitPark.Managers
 
         private void SetupGameIcon()
         {
-            string gameName = isCognitiveSprint ? "COGNITIVE SPRINT" : FormatGameName(currentGameType);
+            string gameName = isCognitiveSprint ? AutoLocalizer.Get("matchmaking_cognitive_sprint") : FormatGameName(currentGameType);
 
             // 1. Try to get assigned icon first
             Sprite icon = GetGameIcon(currentGameType);
@@ -244,11 +245,11 @@ namespace DigitPark.Managers
         {
             return gameType switch
             {
-                GameType.DigitRush => "DIGIT RUSH",
-                GameType.MemoryPairs => "MEMORY PAIRS",
-                GameType.QuickMath => "QUICK MATH",
-                GameType.FlashTap => "FLASH TAP",
-                GameType.OddOneOut => "ODD ONE OUT",
+                GameType.DigitRush => AutoLocalizer.Get("game_name_digitrush"),
+                GameType.MemoryPairs => AutoLocalizer.Get("game_name_memorypairs"),
+                GameType.QuickMath => AutoLocalizer.Get("game_name_quickmath"),
+                GameType.FlashTap => AutoLocalizer.Get("game_name_flashtap"),
+                GameType.OddOneOut => AutoLocalizer.Get("game_name_oddoneout"),
                 _ => gameType.ToString().ToUpper()
             };
         }
@@ -364,10 +365,10 @@ namespace DigitPark.Managers
 
             // Update UI
             if (titleText != null)
-                titleText.text = "SEARCHING...";
+                titleText.text = AutoLocalizer.Get("matchmaking_searching_title");
 
             if (statusText != null)
-                statusText.text = "Looking for opponent...";
+                statusText.text = AutoLocalizer.Get("matchmaking_looking");
 
             if (searchingSpinner != null)
                 searchingSpinner.SetActive(true);
@@ -452,10 +453,10 @@ namespace DigitPark.Managers
             isSearching = false;
 
             if (titleText != null)
-                titleText.text = "NO MATCH FOUND";
+                titleText.text = AutoLocalizer.Get("matchmaking_no_match");
 
             if (statusText != null)
-                statusText.text = "No opponents available. Try again later.";
+                statusText.text = AutoLocalizer.Get("matchmaking_timeout");
 
             if (searchingSpinner != null)
                 searchingSpinner.SetActive(false);
@@ -483,7 +484,7 @@ namespace DigitPark.Managers
                 searchingSpinner.SetActive(false);
 
             if (titleText != null)
-                titleText.text = "MATCH FOUND!";
+                titleText.text = AutoLocalizer.Get("matchmaking_match_found");
 
             if (statusText != null)
                 statusText.text = "";
@@ -678,7 +679,7 @@ namespace DigitPark.Managers
                 countdownPanel.SetActive(true);
 
             if (getReadyText != null)
-                getReadyText.text = "GET READY!";
+                getReadyText.text = AutoLocalizer.Get("matchmaking_get_ready");
 
             for (int i = 3; i > 0; i--)
             {
@@ -697,7 +698,7 @@ namespace DigitPark.Managers
 
             if (countdownText != null)
             {
-                countdownText.text = "GO!";
+                countdownText.text = AutoLocalizer.Get("matchmaking_go");
                 countdownText.color = new Color(0.2353f, 1f, 0.4196f); // Neon green
             }
 
@@ -758,7 +759,7 @@ namespace DigitPark.Managers
             Debug.LogError($"[Matchmaking] Match failed: {error}");
 
             if (titleText != null)
-                titleText.text = "CONNECTION ERROR";
+                titleText.text = AutoLocalizer.Get("matchmaking_connection_error");
 
             if (statusText != null)
                 statusText.text = error;

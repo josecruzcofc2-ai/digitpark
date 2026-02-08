@@ -156,11 +156,6 @@ namespace DigitPark.Progression
             new MissionTemplate("season_mastery", "Polivalente", "Alcanza 10,000 puntos en cada minijuego", MissionType.MasteryAllGames, 5,
                 new MissionReward(4000, 10000, 200)),
 
-            // Rank
-            new MissionTemplate("season_rank_oro", "Rango Oro", "Alcanza rango Oro en Cash Battle", MissionType.ReachRank, 3,
-                new MissionReward(2000, 5000, 100)),
-            new MissionTemplate("season_rank_diamante", "Rango Diamante", "Alcanza rango Diamante en Cash Battle", MissionType.ReachRank, 5,
-                new MissionReward(4000, 10000, 200)),
         };
 
         private void Awake()
@@ -337,22 +332,6 @@ namespace DigitPark.Progression
         public void ReportXPEarned(int amount)
         {
             UpdateMissions(MissionType.EarnXP, amount);
-        }
-
-        /// <summary>
-        /// Report Cash Battle rank
-        /// </summary>
-        public void ReportRank(int rankIndex)
-        {
-            var allMissions = GetAllActiveMissions();
-            foreach (var mission in allMissions)
-            {
-                if (mission.Template.type == MissionType.ReachRank && rankIndex >= mission.Template.targetAmount)
-                {
-                    mission.CurrentProgress = mission.Template.targetAmount;
-                    CheckMissionCompletion(mission);
-                }
-            }
         }
 
         /// <summary>
@@ -602,7 +581,6 @@ namespace DigitPark.Progression
         LoginDays,          // Login X days
         PlayAllGames,       // Play all game types
         MasteryAllGames,    // Reach mastery in all games
-        ReachRank,          // Reach X rank in Cash Battle
     }
 
     public enum MissionPeriod

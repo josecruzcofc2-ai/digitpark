@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -194,7 +195,7 @@ namespace DigitPark.UI
             PlaySound(goSound);
 
             // Set text
-            countdownText.text = "GO!";
+            countdownText.text = AutoLocalizer.Get("countdown_go");
             countdownText.color = goColor;
 
             // Big pop animation

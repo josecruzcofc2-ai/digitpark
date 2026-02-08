@@ -221,14 +221,15 @@ namespace DigitPark.Managers
             Image buttonImage = button.GetComponent<Image>();
             if (buttonImage != null)
             {
-                if (isSelected)
-                {
-                    buttonImage.color = new Color(0f, 0.83f, 1f); // Azul eléctrico
-                }
-                else
-                {
-                    buttonImage.color = new Color(0.3f, 0.3f, 0.4f); // Gris oscuro
-                }
+                buttonImage.color = isSelected
+                    ? new Color(0f, 0.83f, 1f) // Azul eléctrico
+                    : new Color(0.3f, 0.3f, 0.4f); // Gris oscuro
+            }
+
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text != null)
+            {
+                text.color = isSelected ? Color.white : new Color(0.6f, 0.6f, 0.7f);
             }
         }
 
@@ -394,11 +395,12 @@ namespace DigitPark.Managers
 
             yield return null;
 
+            if (containerRT == null) yield break;
             UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
 
             yield return null;
 
-            if (scrollRect != null)
+            if (scrollRect != null && scrollRect.content != null)
             {
                 scrollRect.verticalNormalizedPosition = 1f;
             }

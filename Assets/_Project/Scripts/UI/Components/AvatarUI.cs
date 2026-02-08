@@ -128,7 +128,7 @@ namespace DigitPark.UI.Components
             // Si AvatarService no está disponible, generar avatar con inicial
             if (AvatarService.Instance == null)
             {
-                Debug.LogWarning("[AvatarUI] AvatarService no disponible, usando AvatarInitialGenerator");
+                Debug.Log("[AvatarUI] AvatarService no disponible, usando AvatarInitialGenerator");
                 if (playerData != null)
                 {
                     Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerData.username, playerData.userId);
@@ -189,7 +189,7 @@ namespace DigitPark.UI.Components
             // Si AvatarService no está disponible, generar avatar con inicial
             if (AvatarService.Instance == null)
             {
-                Debug.LogWarning("[AvatarUI] AvatarService no disponible, usando AvatarInitialGenerator");
+                Debug.Log("[AvatarUI] AvatarService no disponible, usando AvatarInitialGenerator");
                 Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(username ?? userId, userId);
                 SetAvatarSprite(initialAvatar);
                 currentLoadedUserId = userId;

@@ -64,6 +64,9 @@ namespace DigitPark.Managers
         [Header("UI - Shop")]
         [SerializeField] private Button shopButton;
 
+        [Header("UI - Developer")]
+        [SerializeField] private Toggle cashBattleBypassToggle;
+
         [Header("UI - Legal Section")]
         [SerializeField] private Button termsButton;
         [SerializeField] private Button privacyButton;
@@ -83,6 +86,7 @@ namespace DigitPark.Managers
         private const string EFFECTS_VOLUME_KEY = "EffectsVolume";
         private const string VIBRATION_KEY = "VibrationEnabled";
         private const string NOTIFICATIONS_KEY = "NotificationsEnabled";
+        private const string CASHBATTLE_BYPASS_AUTH_KEY = "CashBattleBypassAuth";
 
         private PlayerData currentPlayer;
 
@@ -95,6 +99,7 @@ namespace DigitPark.Managers
             SetupLanguageDropdown();
             SetupLanguageStyler();
             SetupThemeDropdown();
+            SetupCashBattleBypass();
             SetupListeners();
             HidePanels();
             UpdatePremiumUI();
@@ -362,6 +367,34 @@ namespace DigitPark.Managers
             deleteConfirmPanel?.Hide();
             logoutConfirmPanel?.Hide();
             errorPanel?.Hide();
+        }
+
+        #endregion
+
+        #region CashBattle Bypass
+
+        private void SetupCashBattleBypass()
+        {
+            if (cashBattleBypassToggle == null) return;
+
+            bool isEnabled = PlayerPrefs.GetInt(CASHBATTLE_BYPASS_AUTH_KEY, 0) == 1;
+            cashBattleBypassToggle.isOn = isEnabled;
+            cashBattleBypassToggle.onValueChanged.AddListener(OnCashBattleBypassChanged);
+        }
+
+        private void OnCashBattleBypassChanged(bool value)
+        {
+            PlayerPrefs.SetInt(CASHBATTLE_BYPASS_AUTH_KEY, value ? 1 : 0);
+            PlayerPrefs.Save();
+            Debug.Log($"[Settings] CashBattle bypass auth: {(value ? "ENABLED" : "DISABLED")}");
+        }
+
+        /// <summary>
+        /// Verifica si el bypass de autenticación de CashBattle está habilitado
+        /// </summary>
+        public static bool IsCashBattleAuthBypassed()
+        {
+            return PlayerPrefs.GetInt(CASHBATTLE_BYPASS_AUTH_KEY, 0) == 1;
         }
 
         #endregion

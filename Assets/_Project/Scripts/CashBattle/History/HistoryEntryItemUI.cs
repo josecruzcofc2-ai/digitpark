@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -120,7 +121,7 @@ namespace DigitPark.CashBattle
                 {
                     if (_entry.result == MatchResult.Pending)
                     {
-                        scoreText.text = "En curso";
+                        scoreText.text = AutoLocalizer.Get("history_in_progress");
                     }
                     else
                     {

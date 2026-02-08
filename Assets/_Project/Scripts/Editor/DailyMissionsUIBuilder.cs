@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.Managers;
+using DigitPark.Data;
 
 namespace DigitPark.Editor
 {
@@ -50,10 +52,13 @@ namespace DigitPark.Editor
         private const float TIMER_TOP = 0.952f;
         private const float TIMER_BOT = 0.925f;
 
-        private const float OVERALL_TOP = 0.920f;
-        private const float OVERALL_BOT = 0.860f;
+        private const float TABS_TOP = 0.922f;
+        private const float TABS_BOT = 0.892f;
 
-        private const float SCROLL_TOP = 0.855f;
+        private const float OVERALL_TOP = 0.888f;
+        private const float OVERALL_BOT = 0.815f;
+
+        private const float SCROLL_TOP = 0.810f;
         private const float SCROLL_BOT = 0.015f;
 
         private const float SIDE_PAD = 30f;
@@ -88,7 +93,8 @@ namespace DigitPark.Editor
                 "4. Overall Progress (barra con milestones)\n" +
                 "5. ScrollView (misiones diarias + semanales)\n" +
                 "6. Reward Claim Popup (oculto)\n\n" +
-                "6 misiones diarias + 3 semanales",
+                "6 misiones diarias + 3 semanales\n" +
+                "Sistema SO: 20 daily + 10 weekly definiciones, 2 pools, 1 prefab",
                 MessageType.Info);
 
             GUILayout.Space(15);
@@ -105,7 +111,19 @@ namespace DigitPark.Editor
                 SetupManagerReferences();
             GUI.backgroundColor = Color.white;
 
-            GUILayout.Space(10);
+            GUILayout.Space(15);
+            GUILayout.Label("Sistema de Misiones (ScriptableObjects):", EditorStyles.boldLabel);
+
+            GUI.backgroundColor = PURPLE_WEEKLY;
+            if (GUILayout.Button("Crear Definiciones SO (20 Daily + 10 Weekly)", GUILayout.Height(30)))
+                CreateMissionDefinitions();
+            if (GUILayout.Button("Crear Pools SO (Daily + Weekly)", GUILayout.Height(30)))
+                CreateMissionPools();
+            if (GUILayout.Button("Crear MissionCard Prefab", GUILayout.Height(30)))
+                MissionCardPrefabBuilder.CreateMissionCardPrefabFromScript();
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.Space(15);
             GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
 
             if (GUILayout.Button("1. Background + Progress Bar", GUILayout.Height(25)))
@@ -115,6 +133,7 @@ namespace DigitPark.Editor
             }
             if (GUILayout.Button("2. Top Bar", GUILayout.Height(25))) CreateTopBar();
             if (GUILayout.Button("3. Timer Bar", GUILayout.Height(25))) CreateTimerBar();
+            if (GUILayout.Button("3b. Tab Bar (Daily/Weekly/Special)", GUILayout.Height(25))) CreateTabBar();
             if (GUILayout.Button("4. Overall Progress", GUILayout.Height(25))) CreateOverallProgress();
             if (GUILayout.Button("5. Missions ScrollView", GUILayout.Height(25))) CreateMissionsScrollView();
             if (GUILayout.Button("6. Reward Claim Popup", GUILayout.Height(25))) CreateRewardClaimPopup();
@@ -143,7 +162,7 @@ namespace DigitPark.Editor
             string[] oldNames = {
                 "Background", "SafeArea", "Header", "ResetTimer", "OverallProgress",
                 "MissionsScrollView", "RewardClaimBlocker", "ProgressBar", "TopBar",
-                "TimerBar", "ScrollView"
+                "TimerBar", "TabBar", "ScrollView"
             };
             foreach (var n in oldNames)
             {
@@ -151,19 +170,232 @@ namespace DigitPark.Editor
                 if (t != null) Object.DestroyImmediate(t.gameObject);
             }
 
+            // Crear SO system (definiciones + pools + prefab)
+            CreateMissionDefinitions();
+            CreateMissionPools();
+            EnsureMissionCardPrefab();
+
+            // Crear UI
             CreateBackground(canvas.transform);
             CreateProgressBar();
             CreateTopBar();
             CreateTimerBar();
+            CreateTabBar();
             CreateOverallProgress();
             CreateMissionsScrollView();
             CreateRewardClaimPopup();
             SetupManagerReferences();
 
-            Debug.Log("[DailyMissionsUI] Misiones RECONSTRUIDAS exitosamente!");
+            Debug.Log("[DailyMissionsUI] Misiones RECONSTRUIDAS exitosamente (UI + SO system)!");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
+
+        #region Mission System SO Creation
+
+        private static void CreateMissionDefinitions()
+        {
+            // Delegar al MissionSystemCreator que ya tiene todas las definiciones
+            var method = typeof(MissionSystemCreator).GetMethod("ShowWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            // Crear definiciones directamente sin abrir ventana
+            EnsureMissionDirectories();
+            CreateDailyMissionSOs();
+            CreateWeeklyMissionSOs();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[DailyMissionsUI] 30 definiciones SO creadas (20 daily + 10 weekly)");
+        }
+
+        private static void CreateMissionPools()
+        {
+            EnsureMissionDirectories();
+
+            // Cargar definiciones daily
+            var dailyDefs = new System.Collections.Generic.List<MissionDefinitionSO>();
+            string[] dailyGuids = AssetDatabase.FindAssets("t:MissionDefinitionSO", new[] { "Assets/_Project/Data/Missions/Daily" });
+            foreach (string guid in dailyGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var def = AssetDatabase.LoadAssetAtPath<MissionDefinitionSO>(path);
+                if (def != null) dailyDefs.Add(def);
+            }
+
+            // Cargar definiciones weekly
+            var weeklyDefs = new System.Collections.Generic.List<MissionDefinitionSO>();
+            string[] weeklyGuids = AssetDatabase.FindAssets("t:MissionDefinitionSO", new[] { "Assets/_Project/Data/Missions/Weekly" });
+            foreach (string guid in weeklyGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var def = AssetDatabase.LoadAssetAtPath<MissionDefinitionSO>(path);
+                if (def != null) weeklyDefs.Add(def);
+            }
+
+            // Daily Pool
+            CreatePoolAsset("Assets/_Project/Data/Missions/DailyMissionPool.asset", "DailyPool",
+                DigitPark.UI.Items.MissionCategory.Daily, 6, dailyDefs);
+
+            // Weekly Pool
+            CreatePoolAsset("Assets/_Project/Data/Missions/WeeklyMissionPool.asset", "WeeklyPool",
+                DigitPark.UI.Items.MissionCategory.Weekly, 3, weeklyDefs);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"[DailyMissionsUI] Pools creados: Daily ({dailyDefs.Count} misiones), Weekly ({weeklyDefs.Count} misiones)");
+        }
+
+        private static void CreatePoolAsset(string path, string poolName, DigitPark.UI.Items.MissionCategory category,
+            int selectionCount, System.Collections.Generic.List<MissionDefinitionSO> missions)
+        {
+            var pool = AssetDatabase.LoadAssetAtPath<MissionPoolSO>(path);
+            if (pool == null)
+            {
+                pool = ScriptableObject.CreateInstance<MissionPoolSO>();
+                AssetDatabase.CreateAsset(pool, path);
+            }
+            pool.poolName = poolName;
+            pool.category = category;
+            pool.selectionCount = selectionCount;
+            pool.missions = new System.Collections.Generic.List<MissionDefinitionSO>(missions);
+            EditorUtility.SetDirty(pool);
+        }
+
+        private static void EnsureMissionCardPrefab()
+        {
+            string prefabPath = "Assets/_Project/Prefabs/Monetization/DailyMissions/MissionCard.prefab";
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) == null)
+            {
+                MissionCardPrefabBuilder.CreateMissionCardPrefabFromScript();
+            }
+        }
+
+        private static void EnsureMissionDirectories()
+        {
+            string[] dirs = {
+                "Assets/_Project/Data/Missions/Daily",
+                "Assets/_Project/Data/Missions/Weekly"
+            };
+            foreach (var dir in dirs)
+            {
+                if (!System.IO.Directory.Exists(dir))
+                {
+                    System.IO.Directory.CreateDirectory(dir);
+                    AssetDatabase.Refresh();
+                }
+            }
+        }
+
+        private static void CreateMissionSO(string folder, string id, string titleKey, string descKey,
+            MissionActionType actionType, DigitPark.Games.GameType targetGame, bool isGameSpecific, int targetAmount,
+            DigitPark.UI.Items.MissionDifficulty difficulty, DigitPark.UI.Items.MissionCategory category,
+            MissionRewardType rewardType, int rewardAmount, int sortOrder)
+        {
+            string path = folder + id + ".asset";
+            var mission = AssetDatabase.LoadAssetAtPath<MissionDefinitionSO>(path);
+            if (mission == null)
+            {
+                mission = ScriptableObject.CreateInstance<MissionDefinitionSO>();
+                AssetDatabase.CreateAsset(mission, path);
+            }
+            mission.missionId = id;
+            mission.titleLocKey = titleKey;
+            mission.descriptionLocKey = descKey;
+            mission.actionType = actionType;
+            mission.targetGame = targetGame;
+            mission.isGameSpecific = isGameSpecific;
+            mission.targetAmount = targetAmount;
+            mission.difficulty = difficulty;
+            mission.category = category;
+            mission.rewardType = rewardType;
+            mission.rewardAmount = rewardAmount;
+            mission.sortOrder = sortOrder;
+            EditorUtility.SetDirty(mission);
+        }
+
+        private static void CreateDailyMissionSOs()
+        {
+            const string P = "Assets/_Project/Data/Missions/Daily/";
+            var GT = typeof(DigitPark.Games.GameType);
+            var D = DigitPark.UI.Items.MissionDifficulty.Easy;
+            var DM = DigitPark.UI.Items.MissionDifficulty.Medium;
+            var DH = DigitPark.UI.Items.MissionDifficulty.Hard;
+            var CD = DigitPark.UI.Items.MissionCategory.Daily;
+            var C = MissionRewardType.Coins;
+            var G = MissionRewardType.Gems;
+
+            CreateMissionSO(P, "daily_play_3", "ms_daily_play_3_title", "ms_daily_play_3_desc",
+                MissionActionType.PlayGames, DigitPark.Games.GameType.DigitRush, false, 3, D, CD, C, 50, 0);
+            CreateMissionSO(P, "daily_play_5", "ms_daily_play_5_title", "ms_daily_play_5_desc",
+                MissionActionType.PlayGames, DigitPark.Games.GameType.DigitRush, false, 5, DM, CD, C, 80, 1);
+            CreateMissionSO(P, "daily_win_1", "ms_daily_win_1_title", "ms_daily_win_1_desc",
+                MissionActionType.WinGames, DigitPark.Games.GameType.DigitRush, false, 1, D, CD, C, 75, 2);
+            CreateMissionSO(P, "daily_win_3", "ms_daily_win_3_title", "ms_daily_win_3_desc",
+                MissionActionType.WinGames, DigitPark.Games.GameType.DigitRush, false, 3, DM, CD, C, 120, 3);
+            CreateMissionSO(P, "daily_digitrush_2", "ms_daily_digitrush_2_title", "ms_daily_digitrush_2_desc",
+                MissionActionType.PlaySpecificGame, DigitPark.Games.GameType.DigitRush, true, 2, D, CD, C, 60, 4);
+            CreateMissionSO(P, "daily_memory_2", "ms_daily_memory_2_title", "ms_daily_memory_2_desc",
+                MissionActionType.PlaySpecificGame, DigitPark.Games.GameType.MemoryPairs, true, 2, D, CD, C, 60, 5);
+            CreateMissionSO(P, "daily_quickmath_2", "ms_daily_quickmath_2_title", "ms_daily_quickmath_2_desc",
+                MissionActionType.PlaySpecificGame, DigitPark.Games.GameType.QuickMath, true, 2, D, CD, C, 60, 6);
+            CreateMissionSO(P, "daily_flashtap_2", "ms_daily_flashtap_2_title", "ms_daily_flashtap_2_desc",
+                MissionActionType.PlaySpecificGame, DigitPark.Games.GameType.FlashTap, true, 2, D, CD, C, 60, 7);
+            CreateMissionSO(P, "daily_oddoneout_2", "ms_daily_oddoneout_2_title", "ms_daily_oddoneout_2_desc",
+                MissionActionType.PlaySpecificGame, DigitPark.Games.GameType.OddOneOut, true, 2, D, CD, C, 60, 8);
+            CreateMissionSO(P, "daily_score_500", "ms_daily_score_500_title", "ms_daily_score_500_desc",
+                MissionActionType.ReachScore, DigitPark.Games.GameType.DigitRush, false, 500, D, CD, C, 40, 9);
+            CreateMissionSO(P, "daily_score_2000", "ms_daily_score_2000_title", "ms_daily_score_2000_desc",
+                MissionActionType.ReachScore, DigitPark.Games.GameType.DigitRush, false, 2000, DM, CD, C, 100, 10);
+            CreateMissionSO(P, "daily_score_5000", "ms_daily_score_5000_title", "ms_daily_score_5000_desc",
+                MissionActionType.ReachScore, DigitPark.Games.GameType.DigitRush, false, 5000, DH, CD, G, 25, 11);
+            CreateMissionSO(P, "daily_total_1000", "ms_daily_total_1000_title", "ms_daily_total_1000_desc",
+                MissionActionType.AccumulateScore, DigitPark.Games.GameType.DigitRush, false, 1000, D, CD, C, 50, 12);
+            CreateMissionSO(P, "daily_total_3000", "ms_daily_total_3000_title", "ms_daily_total_3000_desc",
+                MissionActionType.AccumulateScore, DigitPark.Games.GameType.DigitRush, false, 3000, DM, CD, C, 100, 13);
+            CreateMissionSO(P, "daily_precision_80", "ms_daily_precision_80_title", "ms_daily_precision_80_desc",
+                MissionActionType.PrecisionGame, DigitPark.Games.GameType.DigitRush, false, 1, DM, CD, C, 75, 14);
+            CreateMissionSO(P, "daily_win_digitrush", "ms_daily_win_digitrush_title", "ms_daily_win_digitrush_desc",
+                MissionActionType.WinSpecificGame, DigitPark.Games.GameType.DigitRush, true, 1, DM, CD, C, 80, 15);
+            CreateMissionSO(P, "daily_win_memory", "ms_daily_win_memory_title", "ms_daily_win_memory_desc",
+                MissionActionType.WinSpecificGame, DigitPark.Games.GameType.MemoryPairs, true, 1, DM, CD, C, 80, 16);
+            CreateMissionSO(P, "daily_perfect", "ms_daily_perfect_title", "ms_daily_perfect_desc",
+                MissionActionType.PrecisionGame, DigitPark.Games.GameType.DigitRush, false, 1, DH, CD, G, 30, 17);
+            CreateMissionSO(P, "daily_sprint_1", "ms_daily_sprint_1_title", "ms_daily_sprint_1_desc",
+                MissionActionType.CompleteCognitiveSprint, DigitPark.Games.GameType.DigitRush, false, 1, DM, CD, C, 100, 18);
+            CreateMissionSO(P, "daily_all_games", "ms_daily_all_games_title", "ms_daily_all_games_desc",
+                MissionActionType.PlayAllGameTypes, DigitPark.Games.GameType.DigitRush, false, 5, DH, CD, G, 40, 19);
+        }
+
+        private static void CreateWeeklyMissionSOs()
+        {
+            const string P = "Assets/_Project/Data/Missions/Weekly/";
+            var DM = DigitPark.UI.Items.MissionDifficulty.Medium;
+            var DH = DigitPark.UI.Items.MissionDifficulty.Hard;
+            var CW = DigitPark.UI.Items.MissionCategory.Weekly;
+            var C = MissionRewardType.Coins;
+            var G = MissionRewardType.Gems;
+
+            CreateMissionSO(P, "weekly_play_20", "ms_weekly_play_20_title", "ms_weekly_play_20_desc",
+                MissionActionType.PlayGames, DigitPark.Games.GameType.DigitRush, false, 20, DM, CW, C, 300, 0);
+            CreateMissionSO(P, "weekly_play_30", "ms_weekly_play_30_title", "ms_weekly_play_30_desc",
+                MissionActionType.PlayGames, DigitPark.Games.GameType.DigitRush, false, 30, DH, CW, C, 500, 1);
+            CreateMissionSO(P, "weekly_win_10", "ms_weekly_win_10_title", "ms_weekly_win_10_desc",
+                MissionActionType.WinGames, DigitPark.Games.GameType.DigitRush, false, 10, DM, CW, C, 250, 2);
+            CreateMissionSO(P, "weekly_win_20", "ms_weekly_win_20_title", "ms_weekly_win_20_desc",
+                MissionActionType.WinGames, DigitPark.Games.GameType.DigitRush, false, 20, DH, CW, G, 100, 3);
+            CreateMissionSO(P, "weekly_all_games", "ms_weekly_all_games_title", "ms_weekly_all_games_desc",
+                MissionActionType.PlayAllGameTypes, DigitPark.Games.GameType.DigitRush, false, 5, DM, CW, G, 75, 4);
+            CreateMissionSO(P, "weekly_streak_5", "ms_weekly_streak_5_title", "ms_weekly_streak_5_desc",
+                MissionActionType.WinStreak, DigitPark.Games.GameType.DigitRush, false, 5, DH, CW, G, 80, 5);
+            CreateMissionSO(P, "weekly_score_25k", "ms_weekly_score_25k_title", "ms_weekly_score_25k_desc",
+                MissionActionType.AccumulateScore, DigitPark.Games.GameType.DigitRush, false, 25000, DM, CW, C, 400, 6);
+            CreateMissionSO(P, "weekly_score_50k", "ms_weekly_score_50k_title", "ms_weekly_score_50k_desc",
+                MissionActionType.AccumulateScore, DigitPark.Games.GameType.DigitRush, false, 50000, DH, CW, G, 120, 7);
+            CreateMissionSO(P, "weekly_precision_5", "ms_weekly_precision_5_title", "ms_weekly_precision_5_desc",
+                MissionActionType.PrecisionGame, DigitPark.Games.GameType.DigitRush, false, 5, DH, CW, G, 60, 8);
+            CreateMissionSO(P, "weekly_tournament", "ms_weekly_tournament_title", "ms_weekly_tournament_desc",
+                MissionActionType.PlayTournament, DigitPark.Games.GameType.DigitRush, false, 1, DM, CW, G, 50, 9);
+        }
+
+        #endregion
 
         private static void CreateBackground(Transform parent)
         {
@@ -385,6 +617,66 @@ namespace DigitPark.Editor
 
         #endregion
 
+        #region Tab Bar (Daily / Weekly / Special)
+
+        private static void CreateTabBar()
+        {
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var tabBar = FindOrCreate(canvas.transform, "TabBar");
+            var tbRT = GetOrAdd<RectTransform>(tabBar);
+            SetAnchors(tbRT, 0, TABS_BOT, 1, TABS_TOP);
+            tbRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            tbRT.offsetMax = new Vector2(-SIDE_PAD, 0);
+
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(tabBar);
+            hlg.spacing = 8;
+            hlg.padding = new RectOffset(0, 0, 0, 0);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+
+            // Daily Tab (activo por defecto)
+            CreateTabButton(tabBar, "DailyTab", "DIARIAS", CYAN_NEON, true);
+            // Weekly Tab
+            CreateTabButton(tabBar, "WeeklyTab", "SEMANALES", PURPLE_WEEKLY, false);
+            // Special Tab
+            CreateTabButton(tabBar, "SpecialTab", "ESPECIALES", GOLD, false);
+
+            Debug.Log("[DailyMissionsUI] TabBar creado (Daily/Weekly/Special)");
+        }
+
+        private static void CreateTabButton(GameObject parent, string name, string label, Color accentColor, bool isActive)
+        {
+            var tab = FindOrCreate(parent.transform, name);
+            var tabBg = GetOrAdd<Image>(tab);
+            tabBg.color = isActive ? accentColor : CARD_BG;
+            var tabBtn = GetOrAdd<Button>(tab);
+            tabBtn.targetGraphic = tabBg;
+
+            var tabOutline = GetOrAdd<Outline>(tab);
+            tabOutline.effectColor = isActive ? accentColor : new Color(accentColor.r * 0.4f, accentColor.g * 0.4f, accentColor.b * 0.4f, 1f);
+            tabOutline.effectDistance = new Vector2(1, 1);
+
+            var tabText = FindOrCreate(tab.transform, "Text");
+            var ttRT = GetOrAdd<RectTransform>(tabText);
+            ttRT.anchorMin = Vector2.zero;
+            ttRT.anchorMax = Vector2.one;
+            ttRT.offsetMin = Vector2.zero;
+            ttRT.offsetMax = Vector2.zero;
+            var ttTMP = GetOrAdd<TextMeshProUGUI>(tabText);
+            ttTMP.text = label;
+            ttTMP.fontSize = 14;
+            ttTMP.fontStyle = FontStyles.Bold;
+            ttTMP.color = isActive ? TEXT_DARK : new Color(0.5f, 0.5f, 0.5f, 1f);
+            ttTMP.alignment = TextAlignmentOptions.Center;
+        }
+
+        #endregion
+
         #region Overall Progress
 
         private static void CreateOverallProgress()
@@ -487,7 +779,53 @@ namespace DigitPark.Editor
             CreateRewardMarker(progressContainer, "Marker5", 0.833f, "100", false);
             CreateRewardMarker(progressContainer, "MarkerAll", 1.0f, "200", true);
 
-            Debug.Log("[DailyMissionsUI] OverallProgress creado");
+            // Row 3: Bonus reward row
+            var bonusRow = FindOrCreate(panel.transform, "BonusRow");
+            var brHlg = GetOrAdd<HorizontalLayoutGroup>(bonusRow);
+            brHlg.spacing = 8;
+            brHlg.childAlignment = TextAnchor.MiddleCenter;
+            brHlg.childControlWidth = false;
+            brHlg.childControlHeight = true;
+            brHlg.childForceExpandWidth = false;
+            brHlg.childForceExpandHeight = false;
+            var brLE = GetOrAdd<LayoutElement>(bonusRow);
+            brLE.preferredHeight = 30;
+
+            // Bonus text
+            var bonusText = FindOrCreate(bonusRow.transform, "BonusRewardText");
+            var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
+            btTMP.text = "Bonus: +100 monedas";
+            btTMP.fontSize = 13;
+            btTMP.color = GOLD;
+            btTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            var btLE = GetOrAdd<LayoutElement>(bonusText);
+            btLE.flexibleWidth = 1;
+
+            // Claim bonus button
+            var claimBonusBtn = FindOrCreate(bonusRow.transform, "ClaimBonusButton");
+            var cbBg = GetOrAdd<Image>(claimBonusBtn);
+            cbBg.color = GOLD;
+            var cbBtn = GetOrAdd<Button>(claimBonusBtn);
+            cbBtn.targetGraphic = cbBg;
+            claimBonusBtn.SetActive(false); // Oculto hasta que se cumplan las misiones
+            var cbLE = GetOrAdd<LayoutElement>(claimBonusBtn);
+            cbLE.preferredWidth = 100;
+            cbLE.preferredHeight = 28;
+
+            var cbTextObj = FindOrCreate(claimBonusBtn.transform, "Text");
+            var cbTextRT = GetOrAdd<RectTransform>(cbTextObj);
+            cbTextRT.anchorMin = Vector2.zero;
+            cbTextRT.anchorMax = Vector2.one;
+            cbTextRT.offsetMin = Vector2.zero;
+            cbTextRT.offsetMax = Vector2.zero;
+            var cbTextTMP = GetOrAdd<TextMeshProUGUI>(cbTextObj);
+            cbTextTMP.text = "Reclamar";
+            cbTextTMP.fontSize = 13;
+            cbTextTMP.fontStyle = FontStyles.Bold;
+            cbTextTMP.color = TEXT_DARK;
+            cbTextTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[DailyMissionsUI] OverallProgress creado (con bonus)");
         }
 
         private static void CreateRewardMarker(GameObject parent, string name, float xPos, string reward, bool isBonus)
@@ -614,6 +952,17 @@ namespace DigitPark.Editor
             CreateMissionCard(content, "Weekly3",
                 "Alcanza Top 3", "Termina en podio 5 veces",
                 "earn_points", 3, 5, "Gemas Premium", "gems", false, true);
+
+            // Empty State Text (oculto, se muestra cuando no hay misiones)
+            var emptyState = FindOrCreate(content.transform, "EmptyStateText");
+            var esTMP = GetOrAdd<TextMeshProUGUI>(emptyState);
+            esTMP.text = "No hay misiones disponibles";
+            esTMP.fontSize = 16;
+            esTMP.color = TEXT_SECONDARY;
+            esTMP.alignment = TextAlignmentOptions.Center;
+            var esLE = GetOrAdd<LayoutElement>(emptyState);
+            esLE.preferredHeight = 60;
+            emptyState.SetActive(false);
 
             Debug.Log("[DailyMissionsUI] ScrollView creado (6 diarias + 3 semanales)");
         }
@@ -947,7 +1296,7 @@ namespace DigitPark.Editor
             ppRT.anchorMin = new Vector2(0.5f, 0.5f);
             ppRT.anchorMax = new Vector2(0.5f, 0.5f);
             ppRT.pivot = new Vector2(0.5f, 0.5f);
-            ppRT.sizeDelta = new Vector2(400, 350);
+            ppRT.sizeDelta = new Vector2(400, 450);
             ppRT.anchoredPosition = Vector2.zero;
 
             var ppBg = GetOrAdd<Image>(popup);
@@ -987,7 +1336,7 @@ namespace DigitPark.Editor
             var ptLE = GetOrAdd<LayoutElement>(popupTitle);
             ptLE.preferredHeight = 35;
 
-            // Mission Name
+            // Mission Name (detailTitleText)
             var missionName = FindOrCreate(popup.transform, "MissionName");
             var mnTMP = GetOrAdd<TextMeshProUGUI>(missionName);
             mnTMP.text = "Nombre de la misi\u00F3n";
@@ -996,6 +1345,67 @@ namespace DigitPark.Editor
             mnTMP.alignment = TextAlignmentOptions.Center;
             var mnLE = GetOrAdd<LayoutElement>(missionName);
             mnLE.preferredHeight = 25;
+
+            // Detail Description (detailDescriptionText)
+            var detailDesc = FindOrCreate(popup.transform, "DetailDescription");
+            var ddTMP = GetOrAdd<TextMeshProUGUI>(detailDesc);
+            ddTMP.text = "Descripci\u00F3n de la misi\u00F3n";
+            ddTMP.fontSize = 14;
+            ddTMP.color = TEXT_SECONDARY;
+            ddTMP.alignment = TextAlignmentOptions.Center;
+            var ddLE = GetOrAdd<LayoutElement>(detailDesc);
+            ddLE.preferredHeight = 22;
+
+            // Detail Progress Bar (detailProgressBar)
+            var detailProgressContainer = FindOrCreate(popup.transform, "DetailProgressBar");
+            var dpcLE = GetOrAdd<LayoutElement>(detailProgressContainer);
+            dpcLE.preferredHeight = 20;
+
+            var detailSlider = GetOrAdd<Slider>(detailProgressContainer);
+            detailSlider.direction = Slider.Direction.LeftToRight;
+            detailSlider.minValue = 0;
+            detailSlider.maxValue = 100;
+            detailSlider.value = 60;
+            detailSlider.interactable = false;
+
+            var dsBg = FindOrCreate(detailProgressContainer.transform, "Background");
+            var dsBgRT = GetOrAdd<RectTransform>(dsBg);
+            dsBgRT.anchorMin = Vector2.zero;
+            dsBgRT.anchorMax = Vector2.one;
+            dsBgRT.offsetMin = Vector2.zero;
+            dsBgRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(dsBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
+
+            var dsFillArea = FindOrCreate(detailProgressContainer.transform, "Fill Area");
+            var dsFaRT = GetOrAdd<RectTransform>(dsFillArea);
+            dsFaRT.anchorMin = Vector2.zero;
+            dsFaRT.anchorMax = Vector2.one;
+            dsFaRT.offsetMin = Vector2.zero;
+            dsFaRT.offsetMax = Vector2.zero;
+
+            var dsFill = FindOrCreate(dsFillArea.transform, "Fill");
+            var dsFRT = GetOrAdd<RectTransform>(dsFill);
+            dsFRT.anchorMin = Vector2.zero;
+            dsFRT.anchorMax = Vector2.one;
+            dsFRT.offsetMin = Vector2.zero;
+            dsFRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(dsFill).color = CYAN_NEON;
+
+            detailSlider.fillRect = dsFRT;
+            detailSlider.handleRect = null;
+            detailSlider.targetGraphic = GetOrAdd<Image>(detailProgressContainer);
+            GetOrAdd<Image>(detailProgressContainer).color = Color.clear;
+
+            // Detail Progress Text (detailProgressText)
+            var detailProgressText = FindOrCreate(popup.transform, "DetailProgressText");
+            var dptTMP = GetOrAdd<TextMeshProUGUI>(detailProgressText);
+            dptTMP.text = "3/5";
+            dptTMP.fontSize = 15;
+            dptTMP.fontStyle = FontStyles.Bold;
+            dptTMP.color = CYAN_NEON;
+            dptTMP.alignment = TextAlignmentOptions.Center;
+            var dptLE = GetOrAdd<LayoutElement>(detailProgressText);
+            dptLE.preferredHeight = 22;
 
             // Reward Display
             var rewardDisplay = FindOrCreate(popup.transform, "RewardDisplay");
@@ -1063,30 +1473,105 @@ namespace DigitPark.Editor
 
         private static void SetupManagerReferences()
         {
-            var manager = Object.FindFirstObjectByType<DigitPark.Progression.MissionsManager>();
-            if (manager == null)
-            {
-                Debug.LogWarning("[DailyMissionsUI] MissionsManager no encontrado en la escena. Agrega el componente primero.");
-                return;
-            }
-
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            var so = new SerializedObject(manager);
+            Transform r = canvas.transform;
 
-            // Configuracion de misiones (sincronizar con UI)
-            var dailyProp = so.FindProperty("dailyMissionsCount");
-            if (dailyProp != null) dailyProp.intValue = 6;
+            // --- DailyMissionsManager (escena principal) ---
+            var dailyManager = Object.FindFirstObjectByType<DailyMissionsManager>();
+            if (dailyManager != null)
+            {
+                var so = new SerializedObject(dailyManager);
+                int assigned = 0;
 
-            var weeklyProp = so.FindProperty("weeklyMissionsCount");
-            if (weeklyProp != null) weeklyProp.intValue = 3;
+                // UI - Header
+                assigned += SetRef(so, "backButton", FindInPath<Button>(r, "TopBar/BackButton"));
+                assigned += SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "TopBar/TitleText"));
+                assigned += SetRef(so, "refreshTimerText", FindInPath<TextMeshProUGUI>(r, "TimerBar/CountdownText"));
+                assigned += SetRef(so, "totalPointsText", FindInPath<TextMeshProUGUI>(r, "OverallProgress/TitleRow/TitleRight"));
 
-            so.ApplyModifiedProperties();
-            EditorUtility.SetDirty(manager);
+                // UI - Tabs
+                assigned += SetRef(so, "dailyTab", FindInPath<Button>(r, "TabBar/DailyTab"));
+                assigned += SetRef(so, "weeklyTab", FindInPath<Button>(r, "TabBar/WeeklyTab"));
+                assigned += SetRef(so, "specialTab", FindInPath<Button>(r, "TabBar/SpecialTab"));
+
+                // UI - Progress Summary
+                assigned += SetRef(so, "dailyProgressBar", FindInPath<Slider>(r, "OverallProgress/ProgressContainer"));
+                assigned += SetRef(so, "dailyProgressText", FindInPath<TextMeshProUGUI>(r, "OverallProgress/TitleRow/TitleRight"));
+                assigned += SetRef(so, "bonusRewardText", FindInPath<TextMeshProUGUI>(r, "OverallProgress/BonusRow/BonusRewardText"));
+                assigned += SetRef(so, "claimBonusButton", FindInPath<Button>(r, "OverallProgress/BonusRow/ClaimBonusButton"));
+
+                // UI - Missions List
+                assigned += SetRef(so, "missionsContainer", FindInPath<Transform>(r, "ScrollView/Viewport/Content"));
+                assigned += SetRef(so, "scrollRect", FindInPath<ScrollRect>(r, "ScrollView"));
+                assigned += SetRef(so, "emptyStateText", FindInPath<TextMeshProUGUI>(r, "ScrollView/Viewport/Content/EmptyStateText"));
+
+                // UI - Reward Popup
+                var blockerGO = r.Find("RewardClaimBlocker");
+                if (blockerGO != null)
+                {
+                    var rewardProp = so.FindProperty("rewardPopup");
+                    if (rewardProp != null) { rewardProp.objectReferenceValue = blockerGO.gameObject; assigned++; }
+                }
+                assigned += SetRef(so, "rewardPopupText", FindInPath<TextMeshProUGUI>(r, "RewardClaimBlocker/RewardPopup/RewardDisplay/Amount"));
+                assigned += SetRef(so, "rewardPopupIcon", FindInPath<Image>(r, "RewardClaimBlocker/RewardPopup/RewardDisplay/Icon"));
+
+                // UI - Detail Panel (reutiliza popup como detail)
+                var popupGO = r.Find("RewardClaimBlocker");
+                if (popupGO != null)
+                {
+                    var detailProp = so.FindProperty("missionDetailPanel");
+                    if (detailProp != null) { detailProp.objectReferenceValue = popupGO.gameObject; assigned++; }
+                }
+                assigned += SetRef(so, "detailTitleText", FindInPath<TextMeshProUGUI>(r, "RewardClaimBlocker/RewardPopup/MissionName"));
+                assigned += SetRef(so, "detailDescriptionText", FindInPath<TextMeshProUGUI>(r, "RewardClaimBlocker/RewardPopup/DetailDescription"));
+                assigned += SetRef(so, "detailProgressBar", FindInPath<Slider>(r, "RewardClaimBlocker/RewardPopup/DetailProgressBar"));
+                assigned += SetRef(so, "detailProgressText", FindInPath<TextMeshProUGUI>(r, "RewardClaimBlocker/RewardPopup/DetailProgressText"));
+                assigned += SetRef(so, "detailRewardText", FindInPath<TextMeshProUGUI>(r, "RewardClaimBlocker/RewardPopup/RewardDisplay/Amount"));
+                assigned += SetRef(so, "claimRewardButton", FindInPath<Button>(r, "RewardClaimBlocker/RewardPopup/CollectButton"));
+                assigned += SetRef(so, "closeDetailButton", FindInPath<Button>(r, "RewardClaimBlocker"));
+
+                // Reward Icons (cargar desde assets)
+                var coinSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "CoinIconNeon.png");
+                var gemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "GemIconNeon.png");
+                if (coinSprite != null) { var p = so.FindProperty("coinIcon"); if (p != null) { p.objectReferenceValue = coinSprite; assigned++; } }
+                if (gemSprite != null) { var p = so.FindProperty("gemIcon"); if (p != null) { p.objectReferenceValue = gemSprite; assigned++; } }
+
+                // Mission Pools (SO) - cargar desde assets conocidos
+                var dailyPool = AssetDatabase.LoadAssetAtPath<MissionPoolSO>("Assets/_Project/Data/Missions/DailyMissionPool.asset");
+                var weeklyPool = AssetDatabase.LoadAssetAtPath<MissionPoolSO>("Assets/_Project/Data/Missions/WeeklyMissionPool.asset");
+                if (dailyPool != null) { var p = so.FindProperty("dailyPool"); if (p != null) { p.objectReferenceValue = dailyPool; assigned++; } }
+                if (weeklyPool != null) { var p = so.FindProperty("weeklyPool"); if (p != null) { p.objectReferenceValue = weeklyPool; assigned++; } }
+
+                // MissionCard Prefab
+                var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Monetization/DailyMissions/MissionCard.prefab");
+                if (cardPrefab != null) { var p = so.FindProperty("missionCardPrefab"); if (p != null) { p.objectReferenceValue = cardPrefab; assigned++; } }
+
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(dailyManager);
+                Debug.Log($"[DailyMissionsUI] DailyMissionsManager: {assigned} referencias asignadas");
+            }
+            else
+            {
+                Debug.LogWarning("[DailyMissionsUI] DailyMissionsManager no encontrado en la escena. Agrega el componente primero.");
+            }
+
+            // --- MissionsManager legacy (Progression) ---
+            var progressionManager = Object.FindFirstObjectByType<DigitPark.Progression.MissionsManager>();
+            if (progressionManager != null)
+            {
+                var so = new SerializedObject(progressionManager);
+                var dailyProp = so.FindProperty("dailyMissionsCount");
+                if (dailyProp != null) dailyProp.intValue = 6;
+                var weeklyProp = so.FindProperty("weeklyMissionsCount");
+                if (weeklyProp != null) weeklyProp.intValue = 3;
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(progressionManager);
+                Debug.Log("[DailyMissionsUI] MissionsManager (Progression): configuracion sincronizada");
+            }
 
             // Conectar BackButton a SceneNavigator
-            Transform r = canvas.transform;
             var backBtn = FindInPath<Button>(r, "TopBar/BackButton");
             if (backBtn != null)
             {
@@ -1102,8 +1587,15 @@ namespace DigitPark.Editor
                     Debug.Log("[DailyMissionsUI] BackButton conectado a SceneNavigator -> MainMenu");
                 }
             }
+        }
 
-            Debug.Log("[DailyMissionsUI] Referencias del manager asignadas (dailyMissionsCount=6, weeklyMissionsCount=3)");
+        private static int SetRef<T>(SerializedObject so, string propName, T component) where T : Object
+        {
+            if (component == null) return 0;
+            var prop = so.FindProperty(propName);
+            if (prop == null) return 0;
+            prop.objectReferenceValue = component;
+            return 1;
         }
 
         private static T FindInPath<T>(Transform root, string path) where T : Component

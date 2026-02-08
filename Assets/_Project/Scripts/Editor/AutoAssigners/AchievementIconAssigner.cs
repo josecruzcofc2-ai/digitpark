@@ -94,10 +94,6 @@ namespace DigitPark.Editor.AutoAssigners
                 { "level_25", "Logro_Nivel_25" },
                 { "level_50", "Logro_Nivel50" },
                 { "level_100", "Logro_Avance_Epico" },
-                { "rank_up", "Logro_Ascenso" },
-                { "rank_elite", "Logro_Elite" },
-                { "rank_legend", "Logro_Leyenda" },
-                { "rank_immortal", "Logro_Inmortal" },         // SECRET
 
                 // ==================== COLLECTOR ====================
                 // Reservado para V2
@@ -350,9 +346,6 @@ namespace DigitPark.Editor.AutoAssigners
 
             var achievementDetails = new Dictionary<string, (string title, string description)>
             {
-                { "rank_up", ("Ascenso", "Sube de rango por primera vez") },
-                { "rank_elite", ("Élite", "Alcanza rango Diamante o superior") },
-                { "rank_immortal", ("Inmortal", "Alcanza rango Inmortal - SECRET") },
                 { "daily_streak_7", ("Racha Semanal", "Login 7 días seguidos") },
                 { "daily_streak_30", ("Racha Mensual", "Login 30 días seguidos") },
             };
@@ -371,11 +364,8 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             report += "\n=== SUGGESTED ICON CONCEPTS ===\n\n";
-            report += "1. rank_up (Ascenso): Arrow pointing up with rank stars\n";
-            report += "2. rank_elite (Élite): Diamond with crown or elite badge\n";
-            report += "3. rank_immortal (Inmortal): Immortal flame or eternal symbol\n";
-            report += "4. daily_streak_7 (Racha Semanal): Calendar with 7 checkmarks and flame\n";
-            report += "5. daily_streak_30 (Racha Mensual): Calendar with flame and 30 badge\n";
+            report += "1. daily_streak_7 (Racha Semanal): Calendar with 7 checkmarks and flame\n";
+            report += "2. daily_streak_30 (Racha Mensual): Calendar with flame and 30 badge\n";
 
             string path = "Assets/_Project/Docs/MissingAchievementIcons.txt";
             Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -455,10 +445,6 @@ namespace DigitPark.Editor.AutoAssigners
                 { "level_25", "Logro_Nivel_25" },
                 { "level_50", "Logro_Nivel50" },
                 { "level_100", "Logro_Avance_Epico" },
-                { "rank_up", "Logro_Ascenso" },
-                { "rank_elite", "Logro_Elite" },
-                { "rank_legend", "Logro_Leyenda" },
-                { "rank_immortal", "Logro_Inmortal" },
                 // COLLECTOR - Reservado para V2
                 // TIME
                 { "days_7", "Logro_Racha_7_Dias" },

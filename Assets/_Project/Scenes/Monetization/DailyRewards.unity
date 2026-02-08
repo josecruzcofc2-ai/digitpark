@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 1248713}
   - component: {fileID: 1248712}
   - component: {fileID: 1248711}
+  - component: {fileID: 1248714}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -277,6 +278,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1248714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &6606623
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,6 +316,7 @@ GameObject:
   - component: {fileID: 6606627}
   - component: {fileID: 6606626}
   - component: {fileID: 6606625}
+  - component: {fileID: 6606629}
   m_Layer: 0
   m_Name: TodayPanel
   m_TagString: Untagged
@@ -398,6 +425,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6606623}
   m_CullTransparentMesh: 1
+--- !u!114 &6606629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6606623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 4
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &39691579
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,6 +461,7 @@ GameObject:
   - component: {fileID: 39691580}
   - component: {fileID: 39691582}
   - component: {fileID: 39691581}
+  - component: {fileID: 39691583}
   m_Layer: 0
   m_Name: SlidePanel
   m_TagString: Untagged
@@ -473,6 +526,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 39691579}
   m_CullTransparentMesh: 1
+--- !u!114 &39691583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 39691579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 4
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &43001813
 GameObject:
   m_ObjectHideFlags: 0
@@ -516,6 +594,7 @@ GameObject:
   - component: {fileID: 47047003}
   - component: {fileID: 47047002}
   - component: {fileID: 47047001}
+  - component: {fileID: 47047004}
   m_Layer: 0
   m_Name: CelebTitle
   m_TagString: Untagged
@@ -659,6 +738,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &47047004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 47046999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 13
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &66829254
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,6 +809,7 @@ GameObject:
   - component: {fileID: 70140682}
   - component: {fileID: 70140681}
   - component: {fileID: 70140680}
+  - component: {fileID: 70140683}
   m_Layer: 0
   m_Name: StreakPanel
   m_TagString: Untagged
@@ -785,6 +890,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 70140678}
   m_CullTransparentMesh: 1
+--- !u!114 &70140683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 70140678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 4
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &81369148
 GameObject:
   m_ObjectHideFlags: 0
@@ -797,6 +927,7 @@ GameObject:
   - component: {fileID: 81369152}
   - component: {fileID: 81369151}
   - component: {fileID: 81369150}
+  - component: {fileID: 81369153}
   m_Layer: 0
   m_Name: AmountText
   m_TagString: Untagged
@@ -940,6 +1071,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &81369153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81369148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &93943357
 GameObject:
   m_ObjectHideFlags: 0
@@ -1123,6 +1279,7 @@ GameObject:
   - component: {fileID: 151428016}
   - component: {fileID: 151428015}
   - component: {fileID: 151428014}
+  - component: {fileID: 151428017}
   m_Layer: 0
   m_Name: TypeText
   m_TagString: Untagged
@@ -1266,6 +1423,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &151428017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151428012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &189971830
 GameObject:
   m_ObjectHideFlags: 0
@@ -1533,6 +1715,7 @@ GameObject:
   - component: {fileID: 198440304}
   - component: {fileID: 198440303}
   - component: {fileID: 198440306}
+  - component: {fileID: 198440307}
   m_Layer: 0
   m_Name: ContinueButton
   m_TagString: Untagged
@@ -1662,6 +1845,31 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &198440307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198440301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 7
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &227814319
 GameObject:
   m_ObjectHideFlags: 0
@@ -2313,6 +2521,7 @@ GameObject:
   - component: {fileID: 317209267}
   - component: {fileID: 317209266}
   - component: {fileID: 317209265}
+  - component: {fileID: 317209268}
   m_Layer: 0
   m_Name: TypeText
   m_TagString: Untagged
@@ -2456,6 +2665,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &317209268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 317209263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &333172153
 GameObject:
   m_ObjectHideFlags: 0
@@ -2747,6 +2981,7 @@ GameObject:
   - component: {fileID: 383098598}
   - component: {fileID: 383098597}
   - component: {fileID: 383098596}
+  - component: {fileID: 383098599}
   m_Layer: 0
   m_Name: Reward1
   m_TagString: Untagged
@@ -2890,6 +3125,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &383098599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 383098594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &388504877
 GameObject:
   m_ObjectHideFlags: 0
@@ -2902,6 +3162,7 @@ GameObject:
   - component: {fileID: 388504881}
   - component: {fileID: 388504880}
   - component: {fileID: 388504879}
+  - component: {fileID: 388504882}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -3045,6 +3306,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388504877}
   m_CullTransparentMesh: 1
+--- !u!114 &388504882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388504877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &432604702
 GameObject:
   m_ObjectHideFlags: 0
@@ -3058,6 +3344,7 @@ GameObject:
   - component: {fileID: 432604706}
   - component: {fileID: 432604705}
   - component: {fileID: 432604704}
+  - component: {fileID: 432604708}
   m_Layer: 0
   m_Name: ContinueBtn
   m_TagString: Untagged
@@ -3187,6 +3474,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &432604708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432604702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 7
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &439747585
 GameObject:
   m_ObjectHideFlags: 0
@@ -3359,9 +3671,9 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1189168656}
   - {fileID: 2051584146}
   - {fileID: 769528179}
+  - {fileID: 904197147}
   m_Father: {fileID: 314847203}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.96}
@@ -3504,6 +3816,7 @@ GameObject:
   - component: {fileID: 520530263}
   - component: {fileID: 520530262}
   - component: {fileID: 520530261}
+  - component: {fileID: 520530264}
   m_Layer: 0
   m_Name: AmountText
   m_TagString: Untagged
@@ -3647,6 +3960,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &520530264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 520530259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &523370270
 GameObject:
   m_ObjectHideFlags: 0
@@ -3878,6 +4216,7 @@ GameObject:
   - component: {fileID: 554557350}
   - component: {fileID: 554557349}
   - component: {fileID: 554557348}
+  - component: {fileID: 554557351}
   m_Layer: 0
   m_Name: Reward2
   m_TagString: Untagged
@@ -4021,6 +4360,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &554557351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554557346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &576178947
 GameObject:
   m_ObjectHideFlags: 0
@@ -4033,6 +4397,7 @@ GameObject:
   - component: {fileID: 576178951}
   - component: {fileID: 576178950}
   - component: {fileID: 576178949}
+  - component: {fileID: 576178952}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -4176,6 +4541,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &576178952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576178947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &601286757
 GameObject:
   m_ObjectHideFlags: 0
@@ -4283,6 +4673,7 @@ GameObject:
   - component: {fileID: 614100469}
   - component: {fileID: 614100471}
   - component: {fileID: 614100470}
+  - component: {fileID: 614100472}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -4323,7 +4714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.02, g: 0.04, b: 0.08, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -4347,6 +4738,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 614100468}
   m_CullTransparentMesh: 1
+--- !u!114 &614100472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614100468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 2
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &769528178
 GameObject:
   m_ObjectHideFlags: 0
@@ -4591,7 +5007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab5b1cf9fc8d6234286fdfb22cce859f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backButton: {fileID: 1189168660}
+  backButton: {fileID: 0}
   titleText: {fileID: 2051584148}
   streakText: {fileID: 1161832302}
   nextResetText: {fileID: 1500482165}
@@ -4773,6 +5189,7 @@ GameObject:
   - component: {fileID: 876945238}
   - component: {fileID: 876945237}
   - component: {fileID: 876945236}
+  - component: {fileID: 876945239}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -4916,6 +5333,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 876945234}
   m_CullTransparentMesh: 1
+--- !u!114 &876945239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 876945234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &894927258
 GameObject:
   m_ObjectHideFlags: 0
@@ -4927,6 +5369,7 @@ GameObject:
   - component: {fileID: 894927259}
   - component: {fileID: 894927261}
   - component: {fileID: 894927260}
+  - component: {fileID: 894927262}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -5050,6 +5493,166 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 894927258}
   m_CullTransparentMesh: 1
+--- !u!114 &894927262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894927258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
+--- !u!1001 &904197146
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 468290081}
+    m_Modifications:
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550865751253675082, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      propertyPath: m_Name
+      value: BackButton
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7550865751253675082, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 904197149}
+  m_SourcePrefab: {fileID: 100100000, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+--- !u!224 &904197147 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6507260131642175241, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+  m_PrefabInstance: {fileID: 904197146}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &904197148 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7550865751253675082, guid: c0745255ba1d45c40bca0f908b806e05, type: 3}
+  m_PrefabInstance: {fileID: 904197146}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &904197149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 904197148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 20
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &937123070
 GameObject:
   m_ObjectHideFlags: 0
@@ -5061,6 +5664,7 @@ GameObject:
   - component: {fileID: 937123071}
   - component: {fileID: 937123073}
   - component: {fileID: 937123072}
+  - component: {fileID: 937123074}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -5184,6 +5788,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 937123070}
   m_CullTransparentMesh: 1
+--- !u!114 &937123074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 937123070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &967054944
 GameObject:
   m_ObjectHideFlags: 0
@@ -5356,6 +5985,7 @@ GameObject:
   - component: {fileID: 1056566050}
   - component: {fileID: 1056566052}
   - component: {fileID: 1056566051}
+  - component: {fileID: 1056566053}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -5479,6 +6109,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1056566049}
   m_CullTransparentMesh: 1
+--- !u!114 &1056566053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1056566049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1080059390
 GameObject:
   m_ObjectHideFlags: 0
@@ -5775,6 +6430,7 @@ GameObject:
   - component: {fileID: 1161832301}
   - component: {fileID: 1161832302}
   - component: {fileID: 1161832300}
+  - component: {fileID: 1161832303}
   m_Layer: 0
   m_Name: StreakCount
   m_TagString: Untagged
@@ -5918,6 +6574,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1161832303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161832298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1164597282
 GameObject:
   m_ObjectHideFlags: 0
@@ -5967,143 +6648,6 @@ MonoBehaviour:
   globalSpeedMultiplier: 1
   screenFlashImage: {fileID: 796619958}
   mainCanvasTransform: {fileID: 0}
---- !u!1 &1189168655
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1189168656}
-  - component: {fileID: 1189168659}
-  - component: {fileID: 1189168658}
-  - component: {fileID: 1189168660}
-  - component: {fileID: 1189168657}
-  m_Layer: 0
-  m_Name: BackButton
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1189168656
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189168655}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2102500824}
-  m_Father: {fileID: 468290081}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 25, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
-  m_Pivot: {x: 0, y: 0.5}
---- !u!114 &1189168657
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189168655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0.4, b: 0.5, a: 1}
-  m_EffectDistance: {x: 1, y: 1}
-  m_UseGraphicAlpha: 1
---- !u!114 &1189168658
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189168655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.06, g: 0.08, b: 0.12, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1189168659
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189168655}
-  m_CullTransparentMesh: 1
---- !u!114 &1189168660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189168655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 1189168658}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1197706976
 GameObject:
   m_ObjectHideFlags: 0
@@ -6315,6 +6859,7 @@ GameObject:
   - component: {fileID: 1245486567}
   - component: {fileID: 1245486566}
   - component: {fileID: 1245486565}
+  - component: {fileID: 1245486569}
   m_Layer: 0
   m_Name: MilestoneBonusText
   m_TagString: Untagged
@@ -6458,6 +7003,31 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1245486569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245486564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1246730245
 GameObject:
   m_ObjectHideFlags: 0
@@ -6470,6 +7040,7 @@ GameObject:
   - component: {fileID: 1246730248}
   - component: {fileID: 1246730247}
   - component: {fileID: 1246730249}
+  - component: {fileID: 1246730250}
   m_Layer: 0
   m_Name: ClaimRewardText
   m_TagString: Untagged
@@ -6613,6 +7184,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1246730250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1246730245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1259339677
 GameObject:
   m_ObjectHideFlags: 0
@@ -6877,6 +7473,7 @@ GameObject:
   - component: {fileID: 1301947188}
   - component: {fileID: 1301947190}
   - component: {fileID: 1301947189}
+  - component: {fileID: 1301947191}
   m_Layer: 0
   m_Name: WeekLabel
   m_TagString: Untagged
@@ -7000,6 +7597,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1301947187}
   m_CullTransparentMesh: 1
+--- !u!114 &1301947191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1301947187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1310539580
 GameObject:
   m_ObjectHideFlags: 0
@@ -7012,6 +7634,7 @@ GameObject:
   - component: {fileID: 1310539584}
   - component: {fileID: 1310539583}
   - component: {fileID: 1310539582}
+  - component: {fileID: 1310539585}
   m_Layer: 0
   m_Name: TypeText
   m_TagString: Untagged
@@ -7155,6 +7778,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1310539585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1310539580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1318381841
 GameObject:
   m_ObjectHideFlags: 0
@@ -7167,6 +7815,7 @@ GameObject:
   - component: {fileID: 1318381845}
   - component: {fileID: 1318381844}
   - component: {fileID: 1318381843}
+  - component: {fileID: 1318381846}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -7310,6 +7959,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1318381846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1318381841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1319516045
 GameObject:
   m_ObjectHideFlags: 0
@@ -7322,6 +7996,7 @@ GameObject:
   - component: {fileID: 1319516048}
   - component: {fileID: 1319516047}
   - component: {fileID: 1319516049}
+  - component: {fileID: 1319516050}
   m_Layer: 0
   m_Name: MilestoneText
   m_TagString: Untagged
@@ -7465,6 +8140,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1319516050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1319516045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1320691135
 GameObject:
   m_ObjectHideFlags: 0
@@ -7477,6 +8177,7 @@ GameObject:
   - component: {fileID: 1320691139}
   - component: {fileID: 1320691138}
   - component: {fileID: 1320691137}
+  - component: {fileID: 1320691140}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -7620,6 +8321,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1320691140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1320691135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1343043032
 GameObject:
   m_ObjectHideFlags: 0
@@ -7632,6 +8358,7 @@ GameObject:
   - component: {fileID: 1343043036}
   - component: {fileID: 1343043035}
   - component: {fileID: 1343043034}
+  - component: {fileID: 1343043037}
   m_Layer: 0
   m_Name: StreakLabel
   m_TagString: Untagged
@@ -7775,6 +8502,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1343043032}
   m_CullTransparentMesh: 1
+--- !u!114 &1343043037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1343043032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1355859704
 GameObject:
   m_ObjectHideFlags: 0
@@ -7882,6 +8634,7 @@ GameObject:
   - component: {fileID: 1426464876}
   - component: {fileID: 1426464878}
   - component: {fileID: 1426464877}
+  - component: {fileID: 1426464879}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -8005,6 +8758,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1426464875}
   m_CullTransparentMesh: 1
+--- !u!114 &1426464879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426464875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1428050723
 GameObject:
   m_ObjectHideFlags: 0
@@ -8017,6 +8795,7 @@ GameObject:
   - component: {fileID: 1428050727}
   - component: {fileID: 1428050726}
   - component: {fileID: 1428050725}
+  - component: {fileID: 1428050728}
   m_Layer: 0
   m_Name: RewardLabel
   m_TagString: Untagged
@@ -8160,6 +8939,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1428050728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428050723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1440019349
 GameObject:
   m_ObjectHideFlags: 0
@@ -8306,6 +9110,7 @@ GameObject:
   - component: {fileID: 1490825731}
   - component: {fileID: 1490825730}
   - component: {fileID: 1490825729}
+  - component: {fileID: 1490825732}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -8449,6 +9254,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1490825732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490825727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1500482161
 GameObject:
   m_ObjectHideFlags: 0
@@ -8461,6 +9291,7 @@ GameObject:
   - component: {fileID: 1500482164}
   - component: {fileID: 1500482165}
   - component: {fileID: 1500482163}
+  - component: {fileID: 1500482166}
   m_Layer: 0
   m_Name: TimeText
   m_TagString: Untagged
@@ -8604,6 +9435,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1500482166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500482161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 20
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1501819310
 GameObject:
   m_ObjectHideFlags: 0
@@ -8787,6 +9643,7 @@ GameObject:
   - component: {fileID: 1527051735}
   - component: {fileID: 1527051734}
   - component: {fileID: 1527051733}
+  - component: {fileID: 1527051736}
   m_Layer: 0
   m_Name: AmountText
   m_TagString: Untagged
@@ -8930,6 +9787,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1527051736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1527051731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1540993324
 GameObject:
   m_ObjectHideFlags: 0
@@ -9114,6 +9996,7 @@ GameObject:
   - component: {fileID: 1567753634}
   - component: {fileID: 1567753633}
   - component: {fileID: 1567753632}
+  - component: {fileID: 1567753635}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -9257,6 +10140,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1567753630}
   m_CullTransparentMesh: 1
+--- !u!114 &1567753635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567753630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1580389550
 GameObject:
   m_ObjectHideFlags: 0
@@ -9268,6 +10176,7 @@ GameObject:
   - component: {fileID: 1580389551}
   - component: {fileID: 1580389553}
   - component: {fileID: 1580389552}
+  - component: {fileID: 1580389554}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -9391,6 +10300,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1580389550}
   m_CullTransparentMesh: 1
+--- !u!114 &1580389554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580389550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1594565091
 GameObject:
   m_ObjectHideFlags: 0
@@ -9478,6 +10412,7 @@ GameObject:
   - component: {fileID: 1611916854}
   - component: {fileID: 1611916853}
   - component: {fileID: 1611916852}
+  - component: {fileID: 1611916855}
   m_Layer: 0
   m_Name: TypeText
   m_TagString: Untagged
@@ -9621,6 +10556,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1611916855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611916850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1621928223
 GameObject:
   m_ObjectHideFlags: 0
@@ -9633,6 +10593,7 @@ GameObject:
   - component: {fileID: 1621928227}
   - component: {fileID: 1621928226}
   - component: {fileID: 1621928225}
+  - component: {fileID: 1621928228}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -9776,6 +10737,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1621928228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1621928223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1625426287
 GameObject:
   m_ObjectHideFlags: 0
@@ -9900,6 +10886,7 @@ GameObject:
   - component: {fileID: 1633266565}
   - component: {fileID: 1633266564}
   - component: {fileID: 1633266566}
+  - component: {fileID: 1633266567}
   m_Layer: 0
   m_Name: RewardAmount
   m_TagString: Untagged
@@ -10043,6 +11030,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1633266567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633266562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1642611813
 GameObject:
   m_ObjectHideFlags: 0
@@ -10140,6 +11152,7 @@ GameObject:
   - component: {fileID: 1643648789}
   - component: {fileID: 1643648788}
   - component: {fileID: 1643648787}
+  - component: {fileID: 1643648790}
   m_Layer: 0
   m_Name: AmountText
   m_TagString: Untagged
@@ -10283,6 +11296,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1643648790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643648785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1645176560
 GameObject:
   m_ObjectHideFlags: 0
@@ -10295,6 +11333,7 @@ GameObject:
   - component: {fileID: 1645176564}
   - component: {fileID: 1645176563}
   - component: {fileID: 1645176562}
+  - component: {fileID: 1645176565}
   m_Layer: 0
   m_Name: TypeText
   m_TagString: Untagged
@@ -10438,6 +11477,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1645176565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1645176560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1659460883
 GameObject:
   m_ObjectHideFlags: 0
@@ -10617,6 +11681,7 @@ GameObject:
   - component: {fileID: 1689447118}
   - component: {fileID: 1689447117}
   - component: {fileID: 1689447116}
+  - component: {fileID: 1689447119}
   m_Layer: 0
   m_Name: StreakInfo
   m_TagString: Untagged
@@ -10760,6 +11825,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1689447119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689447114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1703125053
 GameObject:
   m_ObjectHideFlags: 0
@@ -10772,6 +11862,7 @@ GameObject:
   - component: {fileID: 1703125057}
   - component: {fileID: 1703125056}
   - component: {fileID: 1703125055}
+  - component: {fileID: 1703125058}
   m_Layer: 0
   m_Name: TypeText
   m_TagString: Untagged
@@ -10915,6 +12006,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1703125058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1703125053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1708343957
 GameObject:
   m_ObjectHideFlags: 0
@@ -10927,6 +12043,7 @@ GameObject:
   - component: {fileID: 1708343961}
   - component: {fileID: 1708343960}
   - component: {fileID: 1708343959}
+  - component: {fileID: 1708343962}
   m_Layer: 0
   m_Name: ClaimAnimationBlocker
   m_TagString: Untagged
@@ -11036,6 +12153,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1708343957}
   m_CullTransparentMesh: 1
+--- !u!114 &1708343962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708343957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 7
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1810793287
 GameObject:
   m_ObjectHideFlags: 0
@@ -11409,6 +12551,7 @@ GameObject:
   - component: {fileID: 1916138899}
   - component: {fileID: 1916138901}
   - component: {fileID: 1916138898}
+  - component: {fileID: 1916138902}
   m_Layer: 0
   m_Name: ClaimButton
   m_TagString: Untagged
@@ -11533,6 +12676,31 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1916138902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916138896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 7
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1918282912
 GameObject:
   m_ObjectHideFlags: 0
@@ -11545,6 +12713,7 @@ GameObject:
   - component: {fileID: 1918282916}
   - component: {fileID: 1918282915}
   - component: {fileID: 1918282914}
+  - component: {fileID: 1918282917}
   m_Layer: 0
   m_Name: AmountText
   m_TagString: Untagged
@@ -11688,6 +12857,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1918282917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918282912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1926707937
 GameObject:
   m_ObjectHideFlags: 0
@@ -11946,6 +13140,7 @@ GameObject:
   - component: {fileID: 1947160743}
   - component: {fileID: 1947160742}
   - component: {fileID: 1947160744}
+  - component: {fileID: 1947160745}
   m_Layer: 0
   m_Name: BonusText
   m_TagString: Untagged
@@ -12089,6 +13284,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1947160745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947160740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &1970605287
 GameObject:
   m_ObjectHideFlags: 0
@@ -12177,6 +13397,7 @@ GameObject:
   - component: {fileID: 1984718848}
   - component: {fileID: 1984718847}
   - component: {fileID: 1984718846}
+  - component: {fileID: 1984718849}
   m_Layer: 0
   m_Name: DayLabel
   m_TagString: Untagged
@@ -12320,6 +13541,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1984718849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984718844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 11
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2008817835
 GameObject:
   m_ObjectHideFlags: 0
@@ -12332,6 +13578,7 @@ GameObject:
   - component: {fileID: 2008817839}
   - component: {fileID: 2008817838}
   - component: {fileID: 2008817837}
+  - component: {fileID: 2008817840}
   m_Layer: 0
   m_Name: StatusText
   m_TagString: Untagged
@@ -12475,6 +13722,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2008817840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008817835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2009395738
 GameObject:
   m_ObjectHideFlags: 0
@@ -12487,6 +13759,7 @@ GameObject:
   - component: {fileID: 2009395742}
   - component: {fileID: 2009395741}
   - component: {fileID: 2009395740}
+  - component: {fileID: 2009395743}
   m_Layer: 0
   m_Name: AmountText
   m_TagString: Untagged
@@ -12630,6 +13903,31 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2009395743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009395738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2027510356
 GameObject:
   m_ObjectHideFlags: 0
@@ -13048,6 +14346,7 @@ GameObject:
   - component: {fileID: 2051584146}
   - component: {fileID: 2051584147}
   - component: {fileID: 2051584148}
+  - component: {fileID: 2051584149}
   m_Layer: 0
   m_Name: TitleText
   m_TagString: Untagged
@@ -13171,6 +14470,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2051584149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051584145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 13
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2071855713
 GameObject:
   m_ObjectHideFlags: 0
@@ -13507,6 +14831,7 @@ GameObject:
   - component: {fileID: 2096718556}
   - component: {fileID: 2096718557}
   - component: {fileID: 2096718558}
+  - component: {fileID: 2096718559}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -13630,140 +14955,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &2102500823
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2102500824}
-  - component: {fileID: 2102500826}
-  - component: {fileID: 2102500825}
-  m_Layer: 0
-  m_Name: Text
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2102500824
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2102500823}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1189168656}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2102500825
+--- !u!114 &2096718559
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2102500823}
+  m_GameObject: {fileID: 2096718555}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: <
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4294967040
-  m_fontColor: {r: 0, g: 1, b: 1, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 28
-  m_fontSizeBase: 28
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 1
-  m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
-  m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 1
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &2102500826
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2102500823}
-  m_CullTransparentMesh: 1
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2102507113
 GameObject:
   m_ObjectHideFlags: 0
@@ -13775,6 +14991,7 @@ GameObject:
   - component: {fileID: 2102507114}
   - component: {fileID: 2102507116}
   - component: {fileID: 2102507115}
+  - component: {fileID: 2102507117}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -13815,7 +15032,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.1, g: 0.12, b: 0.15, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -13839,6 +15056,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2102507113}
   m_CullTransparentMesh: 1
+--- !u!114 &2102507117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2102507113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 2
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2115810787
 GameObject:
   m_ObjectHideFlags: 0
@@ -14023,6 +15265,7 @@ GameObject:
   - component: {fileID: 2145990991}
   - component: {fileID: 2145990993}
   - component: {fileID: 2145990992}
+  - component: {fileID: 2145990994}
   m_Layer: 0
   m_Name: Fill
   m_TagString: Untagged
@@ -14087,6 +15330,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2145990990}
   m_CullTransparentMesh: 1
+--- !u!114 &2145990994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145990990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 30
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

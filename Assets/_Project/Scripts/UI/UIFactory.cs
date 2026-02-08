@@ -594,7 +594,7 @@ namespace DigitPark.UI
             checkmarkRT.sizeDelta = new Vector2(30, 30);
 
             TextMeshProUGUI checkmarkText = checkmarkObj.AddComponent<TextMeshProUGUI>();
-            checkmarkText.text = "✓";
+            checkmarkText.text = "V";
             checkmarkText.fontSize = 24;
             checkmarkText.color = ElectricBlue;
             checkmarkText.alignment = TextAlignmentOptions.Center;

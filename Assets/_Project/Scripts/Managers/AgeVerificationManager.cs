@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using DigitPark.Monetization;
 using DigitPark.Services;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -40,11 +41,14 @@ namespace DigitPark.Managers
 
         private void Start()
         {
-            _kycService = ServiceLocator.KYC;
+            if (ServiceLocator.Exists)
+            {
+                _kycService = ServiceLocator.KYC;
+            }
 
             if (_kycService == null)
             {
-                Debug.LogError("[AgeVerification] ServiceLocator.KYC no disponible.");
+                Debug.Log("[AgeVerification] ServiceLocator.KYC no disponible - verificación manual requerida.");
             }
 
             SetupUI();
@@ -62,6 +66,7 @@ namespace DigitPark.Managers
 
         private void OnDisable()
         {
+            CancelInvoke();
             if (_kycService != null)
             {
                 _kycService.OnStatusChanged -= OnKYCStatusChanged;
@@ -124,7 +129,7 @@ namespace DigitPark.Managers
         {
             if (statusText)
             {
-                statusText.text = "Toca el botón para iniciar la verificación de edad";
+                statusText.text = L("age_verification_status_needed");
                 statusText.color = Color.white;
             }
             if (successIcon) successIcon.SetActive(false);
@@ -136,7 +141,7 @@ namespace DigitPark.Managers
         {
             if (statusText)
             {
-                statusText.text = "Verificación en proceso...";
+                statusText.text = L("age_verification_status_pending");
                 statusText.color = new Color(1f, 0.84f, 0f);
             }
             if (loadingIndicator) loadingIndicator.SetActive(true);
@@ -147,7 +152,7 @@ namespace DigitPark.Managers
         {
             if (statusText)
             {
-                statusText.text = "¡Verificación completa! Puedes acceder a Cash Battle.";
+                statusText.text = L("age_verification_status_complete");
                 statusText.color = new Color(0.3f, 1f, 0.5f);
             }
             if (successIcon) successIcon.SetActive(true);
@@ -163,7 +168,7 @@ namespace DigitPark.Managers
         {
             if (statusText)
             {
-                statusText.text = "Verificación rechazada. Debes ser mayor de 18 años.";
+                statusText.text = L("age_verification_status_failed");
                 statusText.color = new Color(1f, 0.4f, 0.4f);
             }
             if (successIcon) successIcon.SetActive(false);
@@ -184,7 +189,7 @@ namespace DigitPark.Managers
 
             isVerifying = true;
             if (loadingIndicator) loadingIndicator.SetActive(true);
-            if (statusText) statusText.text = "Iniciando verificación...";
+            if (statusText) statusText.text = L("age_verification_status_pending");
             if (verifyButton) verifyButton.interactable = false;
 
             Debug.Log("[AgeVerification] Iniciando verificación via Triumph SDK");
@@ -192,12 +197,15 @@ namespace DigitPark.Managers
             // Triumph SDK maneja TODO el flujo de verificación con su propia UI
             var result = await _kycService.StartIdentityVerification();
 
+            // Verificar que no se destruyó el objeto durante el await
+            if (this == null) return;
+
             isVerifying = false;
             if (loadingIndicator) loadingIndicator.SetActive(false);
 
             if (!result.Success)
             {
-                ShowError(result.Message ?? "Error en la verificación");
+                ShowError(result.Message ?? L("age_verification_error_generic"));
             }
             // Si es exitoso, OnKYCStatusChanged actualizará la UI
         }
@@ -270,6 +278,13 @@ namespace DigitPark.Managers
             PlayerPrefs.DeleteKey("AgeVerified");
             PlayerPrefs.DeleteKey("BirthDate");
             PlayerPrefs.Save();
+        }
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
         }
     }
 }

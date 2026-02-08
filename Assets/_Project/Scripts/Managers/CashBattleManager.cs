@@ -85,6 +85,7 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
+            CancelInvoke();
             LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
             UnsubscribeServiceListeners();
         }
@@ -212,12 +213,12 @@ namespace DigitPark.Managers
             {
                 matchmakingStatusText.text = status switch
                 {
-                    MatchmakingStatus.Searching => "Buscando oponente...",
-                    MatchmakingStatus.Found => "¡Oponente encontrado!",
-                    MatchmakingStatus.Confirming => "Confirmando partida...",
-                    MatchmakingStatus.Ready => "¡Listo para jugar!",
-                    MatchmakingStatus.Cancelled => "Búsqueda cancelada",
-                    MatchmakingStatus.Timeout => "Tiempo agotado",
+                    MatchmakingStatus.Searching => L("matchmaking_searching"),
+                    MatchmakingStatus.Found => L("matchmaking_found"),
+                    MatchmakingStatus.Confirming => L("matchmaking_confirming"),
+                    MatchmakingStatus.Ready => L("matchmaking_ready"),
+                    MatchmakingStatus.Cancelled => L("matchmaking_cancelled"),
+                    MatchmakingStatus.Timeout => L("matchmaking_timeout"),
                     _ => ""
                 };
             }
@@ -300,10 +301,10 @@ namespace DigitPark.Managers
                 var status = _kycService.CurrentStatus;
                 verificationStatusText.text = status switch
                 {
-                    KYCStatus.NotStarted => "Verificación requerida para continuar",
-                    KYCStatus.AgeVerified => "Completa la verificación de identidad",
-                    KYCStatus.DocumentPending => "Verificación en proceso...",
-                    KYCStatus.Rejected => "Verificación rechazada",
+                    KYCStatus.NotStarted => L("cashbattle_kyc_required"),
+                    KYCStatus.AgeVerified => L("cashbattle_kyc_complete_identity"),
+                    KYCStatus.DocumentPending => L("cashbattle_kyc_pending"),
+                    KYCStatus.Rejected => L("cashbattle_kyc_rejected"),
                     _ => ""
                 };
             }
@@ -413,9 +414,9 @@ namespace DigitPark.Managers
             titleText.text = currentState switch
             {
                 CashBattleState.Main => "Cash Battle",
-                CashBattleState.GameSelection => "Batallas 1v1",
-                CashBattleState.TournamentList => "Torneos Cash",
-                CashBattleState.Matchmaking => "Buscando Oponente...",
+                CashBattleState.GameSelection => L("cashbattle_battles_1v1"),
+                CashBattleState.TournamentList => L("cashbattle_cash_tournaments"),
+                CashBattleState.Matchmaking => L("matchmaking_searching"),
                 _ => "Cash Battle"
             };
         }
@@ -503,9 +504,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[CashBattle] Juego seleccionado: {gameType}, Entry: ${entryFee}");
 
-            if (!_walletService.HasSufficientFunds(entryFee))
+            if (_walletService == null || !_walletService.HasSufficientFunds(entryFee))
             {
-                Debug.LogWarning("[CashBattle] Balance insuficiente");
+                Debug.LogWarning("[CashBattle] Balance insuficiente o wallet no disponible");
                 ShowInsufficientBalancePopup(entryFee);
                 return;
             }
@@ -521,9 +522,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[CashBattle] Cognitive Sprint seleccionado: {games.Count} juegos, Entry: ${entryFee}");
 
-            if (!_walletService.HasSufficientFunds(entryFee))
+            if (_walletService == null || !_walletService.HasSufficientFunds(entryFee))
             {
-                Debug.LogWarning("[CashBattle] Balance insuficiente");
+                Debug.LogWarning("[CashBattle] Balance insuficiente o wallet no disponible");
                 ShowInsufficientBalancePopup(entryFee);
                 return;
             }
@@ -537,9 +538,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[CashBattle] Torneo seleccionado: {tournament.Name}, Entry: ${tournament.EntryFee}");
 
-            if (!_walletService.HasSufficientFunds(tournament.EntryFee))
+            if (_walletService == null || !_walletService.HasSufficientFunds(tournament.EntryFee))
             {
-                Debug.LogWarning("[CashBattle] Balance insuficiente");
+                Debug.LogWarning("[CashBattle] Balance insuficiente o wallet no disponible");
                 ShowInsufficientBalancePopup(tournament.EntryFee);
                 return;
             }
@@ -582,15 +583,24 @@ namespace DigitPark.Managers
 
         private async void StartMatchmakingAsync(CashGameType gameType, decimal entryFee)
         {
+            if (_walletService == null || _matchmakingService == null)
+            {
+                Debug.LogError("[CashBattle] Servicios no disponibles para matchmaking");
+                return;
+            }
+
             NavigateTo(CashBattleState.Matchmaking);
 
             if (matchmakingStatusText != null)
             {
-                matchmakingStatusText.text = "Reservando fondos...";
+                matchmakingStatusText.text = L("cashbattle_reserving_funds");
             }
 
             // Reservar fondos
             var reserveResult = await _walletService.ReserveFunds(entryFee, "pending_match");
+
+            // Verificar que no se destruyó el objeto durante el await
+            if (this == null) return;
 
             if (!reserveResult.Success)
             {
@@ -601,11 +611,14 @@ namespace DigitPark.Managers
 
             if (matchmakingStatusText != null)
             {
-                matchmakingStatusText.text = "Buscando oponente...";
+                matchmakingStatusText.text = L("matchmaking_searching");
             }
 
             // Iniciar matchmaking
             var result = await _matchmakingService.FindMatch(gameType, entryFee);
+
+            // Verificar que no se destruyó el objeto durante el await
+            if (this == null) return;
 
             if (!result.Success)
             {
@@ -618,7 +631,7 @@ namespace DigitPark.Managers
 
         private async void ConfirmAndLoadGame()
         {
-            if (_matchmakingService.CurrentMatch == null) return;
+            if (_matchmakingService == null || _matchmakingService.CurrentMatch == null) return;
 
             var result = await _matchmakingService.ConfirmMatch(_matchmakingService.CurrentMatch.MatchId);
 
@@ -658,12 +671,13 @@ namespace DigitPark.Managers
 
             CancelInvoke(nameof(ConfirmAndLoadGame));
 
-            if (_matchmakingService.IsSearching)
+            if (_matchmakingService != null && _matchmakingService.IsSearching)
             {
                 await _matchmakingService.CancelSearch();
             }
 
-            await _walletService.ReleaseFunds("pending_match");
+            if (_walletService != null)
+                await _walletService.ReleaseFunds("pending_match");
 
             NavigateTo(CashBattleState.GameSelection);
         }
@@ -720,6 +734,13 @@ namespace DigitPark.Managers
         }
 
         #endregion
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
+        }
     }
 
     /// <summary>

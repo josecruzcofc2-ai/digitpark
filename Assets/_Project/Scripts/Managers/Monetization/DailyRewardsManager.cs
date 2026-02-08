@@ -606,7 +606,7 @@ namespace DigitPark.Managers
             var statusText = statusObj.AddComponent<TextMeshProUGUI>();
             if (isClaimed)
             {
-                statusText.text = "✓";
+                statusText.text = "OK";
                 statusText.color = new Color(0.2f, 0.9f, 0.4f);
             }
             else if (isToday && canClaimToday)
@@ -709,7 +709,7 @@ namespace DigitPark.Managers
             var statusText = statusObj.AddComponent<TextMeshProUGUI>();
             if (isClaimed)
             {
-                statusText.text = "✓ " + L("ms_completed");
+                statusText.text = L("ms_completed");
                 statusText.color = new Color(0.2f, 0.9f, 0.4f);
             }
             else if (isToday)

@@ -82,6 +82,7 @@ namespace DigitPark.Editor
         private const string CURRENCY_ICONS = ICONS_BASE + "Currency/";
         private const string UI_ICONS = ICONS_BASE + "UI/";
         private const string NAV_ICONS = ICONS_BASE + "Navigation/Actions/";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         #endregion
 
@@ -223,34 +224,31 @@ namespace DigitPark.Editor
             var tbRT = GetOrAdd<RectTransform>(topBar);
             SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
 
-            // --- BackButton (left, 50x50) ---
-            var backBtn = FindOrCreate(topBar.transform, "BackButton");
+            // --- BackButton (left, 50x50) - Neon Cyan prefab ---
+            // Remove old manual BackButton if exists
+            var oldBackBtn = topBar.transform.Find("BackButton");
+            if (oldBackBtn != null) Object.DestroyImmediate(oldBackBtn.gameObject);
+
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, topBar.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = FindOrCreate(topBar.transform, "BackButton");
+                GetOrAdd<Image>(backBtn).color = CARD_BG;
+                GetOrAdd<Button>(backBtn);
+                Debug.LogWarning("[DailyRewardsUI] BackButton prefab not found, using fallback");
+            }
             var bbRT = GetOrAdd<RectTransform>(backBtn);
             bbRT.anchorMin = new Vector2(0, 0.5f);
             bbRT.anchorMax = new Vector2(0, 0.5f);
             bbRT.pivot = new Vector2(0, 0.5f);
             bbRT.anchoredPosition = new Vector2(SIDE_PAD, 0);
             bbRT.sizeDelta = new Vector2(50, 50);
-
-            var bbBg = GetOrAdd<Image>(backBtn);
-            bbBg.color = CARD_BG;
-            GetOrAdd<Button>(backBtn).targetGraphic = bbBg;
-            var bbOutline = GetOrAdd<Outline>(backBtn);
-            bbOutline.effectColor = CYAN_DARK;
-            bbOutline.effectDistance = new Vector2(1, 1);
-
-            var backText = FindOrCreate(backBtn.transform, "Text");
-            var btRT = GetOrAdd<RectTransform>(backText);
-            btRT.anchorMin = Vector2.zero;
-            btRT.anchorMax = Vector2.one;
-            btRT.offsetMin = Vector2.zero;
-            btRT.offsetMax = Vector2.zero;
-            var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
-            btTMP.text = "<";
-            btTMP.fontSize = 28;
-            btTMP.fontStyle = FontStyles.Bold;
-            btTMP.color = CYAN_NEON;
-            btTMP.alignment = TextAlignmentOptions.Center;
 
             // --- TitleText (center) ---
             var title = FindOrCreate(topBar.transform, "TitleText");

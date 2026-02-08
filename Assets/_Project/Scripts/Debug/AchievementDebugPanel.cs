@@ -19,6 +19,7 @@ namespace DigitPark.DevTools
 
         [Header("Auto-Created UI")]
         private GameObject panelRoot;
+        private GameObject floatingToggleBtn;
         private ScrollRect scrollRect;
         private Transform contentParent;
         private TextMeshProUGUI statsText;
@@ -31,15 +32,24 @@ namespace DigitPark.DevTools
 
         private void Awake()
         {
+            if (transform.parent != null)
+                transform.SetParent(null);
             DontDestroyOnLoad(gameObject);
             InitializeAchievements();
             CreateUI();
+            CreateFloatingToggle();
 
             if (startHidden)
             {
                 panelRoot.SetActive(false);
                 isVisible = false;
             }
+            else
+            {
+                isVisible = true;
+            }
+
+            UpdateFloatingToggle();
         }
 
         private void Update()
@@ -54,10 +64,90 @@ namespace DigitPark.DevTools
         {
             isVisible = !isVisible;
             panelRoot.SetActive(isVisible);
+            UpdateFloatingToggle();
 
             if (isVisible)
             {
                 RefreshStates();
+            }
+        }
+
+        /// <summary>
+        /// Creates a small floating button always visible to open/close the panel.
+        /// </summary>
+        private void CreateFloatingToggle()
+        {
+            // Canvas independiente para el botón flotante
+            GameObject toggleRoot = new GameObject("FloatingToggle");
+            toggleRoot.transform.SetParent(transform);
+
+            Canvas toggleCanvas = toggleRoot.AddComponent<Canvas>();
+            toggleCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            toggleCanvas.sortingOrder = 10001; // Por encima del panel
+
+            CanvasScaler scaler = toggleRoot.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
+
+            toggleRoot.AddComponent<GraphicRaycaster>();
+
+            // Botón flotante
+            floatingToggleBtn = new GameObject("ToggleBtn");
+            floatingToggleBtn.transform.SetParent(toggleRoot.transform, false);
+
+            RectTransform btnRT = floatingToggleBtn.AddComponent<RectTransform>();
+            btnRT.anchorMin = new Vector2(0, 0.5f);
+            btnRT.anchorMax = new Vector2(0, 0.5f);
+            btnRT.pivot = new Vector2(0, 0.5f);
+            btnRT.sizeDelta = new Vector2(50, 100);
+            btnRT.anchoredPosition = new Vector2(0, 0);
+
+            Image btnBg = floatingToggleBtn.AddComponent<Image>();
+            btnBg.color = new Color(0.1f, 0.1f, 0.15f, 0.85f);
+
+            Button btn = floatingToggleBtn.AddComponent<Button>();
+            ColorBlock colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f);
+            colors.pressedColor = new Color(0.7f, 0.7f, 0.7f);
+            btn.colors = colors;
+            btn.onClick.AddListener(TogglePanel);
+
+            // Texto del botón
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(floatingToggleBtn.transform, false);
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "DBG";
+            tmp.fontSize = 14;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(1f, 0.84f, 0f);
+            tmp.alignment = TextAlignmentOptions.Center;
+        }
+
+        private void UpdateFloatingToggle()
+        {
+            if (floatingToggleBtn == null) return;
+
+            var text = floatingToggleBtn.GetComponentInChildren<TextMeshProUGUI>();
+            var bg = floatingToggleBtn.GetComponent<Image>();
+
+            if (isVisible)
+            {
+                // Panel abierto: botón dice "X" en rojo
+                if (text != null) { text.text = "X"; text.color = new Color(1f, 0.3f, 0.3f); }
+                if (bg != null) bg.color = new Color(0.3f, 0.08f, 0.08f, 0.9f);
+            }
+            else
+            {
+                // Panel cerrado: botón dice "DBG" en dorado
+                if (text != null) { text.text = "DBG"; text.color = new Color(1f, 0.84f, 0f); }
+                if (bg != null) bg.color = new Color(0.1f, 0.1f, 0.15f, 0.85f);
             }
         }
 
@@ -119,10 +209,6 @@ namespace DigitPark.DevTools
                 new DebugAchievementData("level_25", "Nivel 25", 50, "Progression", "Logro_Nivel_25"),
                 new DebugAchievementData("level_50", "Nivel 50", 75, "Progression", "Logro_Nivel50"),
                 new DebugAchievementData("level_100", "Nivel 100", 150, "Progression", "Logro_Avance_Epico"),
-                new DebugAchievementData("rank_up", "Ascenso", 30, "Progression", "Logro_Ascenso"),
-                new DebugAchievementData("rank_elite", "Élite", 100, "Progression", "Logro_Elite"),
-                new DebugAchievementData("rank_legend", "Leyenda", 200, "Progression", "Logro_Leyenda"),
-                new DebugAchievementData("rank_immortal", "Inmortal", 500, "Progression", "Logro_Inmortal", true),
 
                 // COLLECTOR - Reservado para V2
 
@@ -191,7 +277,7 @@ namespace DigitPark.DevTools
             titleRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.text = "🏆 Achievement Tester";
+            titleText.text = "Achievement Tester";
             titleText.fontSize = 24;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = new Color(1f, 0.84f, 0f);
@@ -301,11 +387,11 @@ namespace DigitPark.DevTools
             bottomPanel.GetComponent<Image>().color = new Color(0.05f, 0.05f, 0.1f, 1f);
 
             // Random button
-            GameObject randomBtn = CreateButton(bottomPanel.transform, "RandomBtn", "🎲 Random");
+            GameObject randomBtn = CreateButton(bottomPanel.transform, "RandomBtn", "Random");
             randomBtn.GetComponent<Button>().onClick.AddListener(UnlockRandom);
 
             // Reset button
-            GameObject resetBtn = CreateButton(bottomPanel.transform, "ResetBtn", "🔄 Reset");
+            GameObject resetBtn = CreateButton(bottomPanel.transform, "ResetBtn", "Reset");
             resetBtn.GetComponent<Button>().onClick.AddListener(ResetAll);
             resetBtn.GetComponent<Image>().color = new Color(0.6f, 0.2f, 0.2f);
 
@@ -347,7 +433,7 @@ namespace DigitPark.DevTools
             textRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.text = $"━━ {category.ToUpper()} ━━";
+            text.text = $"-- {category.ToUpper()} --";
             text.fontSize = 14;
             text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
@@ -504,7 +590,7 @@ namespace DigitPark.DevTools
                 PlayerPrefs.SetInt($"Achievement_{item.data.id}_progress", 100);
                 PlayerPrefs.Save();
 
-                item.checkText.text = "✓";
+                item.checkText.text = "V";
                 item.background.color = new Color(0.15f, 0.35f, 0.2f, 0.9f);
 
                 // Trigger notification
@@ -539,7 +625,7 @@ namespace DigitPark.DevTools
             foreach (var item in debugItems)
             {
                 bool isCompleted = PlayerPrefs.GetInt($"Achievement_{item.data.id}_completed", 0) == 1;
-                item.checkText.text = isCompleted ? "✓" : "";
+                item.checkText.text = isCompleted ? "V" : "";
                 item.background.color = isCompleted
                     ? new Color(0.15f, 0.35f, 0.2f, 0.9f)
                     : new Color(0.15f, 0.15f, 0.2f, 0.8f);

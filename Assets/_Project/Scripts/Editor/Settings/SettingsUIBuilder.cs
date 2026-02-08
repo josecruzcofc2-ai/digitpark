@@ -49,6 +49,7 @@ namespace DigitPark.Editor
         // ==================== ASSETS ====================
         private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
         private const string FONT_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_PATH);
@@ -84,6 +85,7 @@ namespace DigitPark.Editor
             BuildAppearanceCard(content);
             BuildPremiumCard(content);
             BuildLegalCard(content);
+            BuildDeveloperCard(content);
             BuildDangerZoneCard(content);
             BuildVersionFooter(content);
 
@@ -133,7 +135,7 @@ namespace DigitPark.Editor
             Image img = bg.AddComponent<Image>();
             img.sprite = WhiteSprite;
             img.color = DARK_NAVY;
-            img.raycastTarget = true;
+            img.raycastTarget = false;
 
             bg.transform.SetAsFirstSibling();
         }
@@ -151,27 +153,28 @@ namespace DigitPark.Editor
             rt.pivot = new Vector2(0.5f, 1);
             rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
 
-            // Back button
-            GameObject backBtn = new GameObject("BackButton");
-            backBtn.transform.SetParent(header.transform, false);
-
-            RectTransform backRT = backBtn.AddComponent<RectTransform>();
-            backRT.anchorMin = new Vector2(0, 0);
-            backRT.anchorMax = new Vector2(0, 1);
+            // Back button - Neon Cyan prefab
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = new GameObject("BackButton");
+                backBtn.transform.SetParent(header.transform, false);
+                backBtn.AddComponent<Image>().color = new Color(0, 0, 0, 0);
+                backBtn.AddComponent<Button>();
+                Debug.LogWarning("[SettingsUIBuilder] BackButton prefab not found, using fallback");
+            }
+            RectTransform backRT = backBtn.GetComponent<RectTransform>();
+            backRT.anchorMin = new Vector2(0, 0.5f);
+            backRT.anchorMax = new Vector2(0, 0.5f);
             backRT.pivot = new Vector2(0, 0.5f);
-            backRT.sizeDelta = new Vector2(120, 0);
             backRT.anchoredPosition = new Vector2(SIDE_PADDING, 0);
-
-            Image backBg = backBtn.AddComponent<Image>();
-            backBg.sprite = WhiteSprite;
-            backBg.color = new Color(0, 0, 0, 0);
-            backBg.raycastTarget = true;
-
-            Button backButton = backBtn.AddComponent<Button>();
-            backButton.targetGraphic = backBg;
-
-            // Back text
-            TextMeshProUGUI backText = CreateTextChild(backBtn.transform, "Text", "<  Atras", 22, CYAN_NEON, TextAlignmentOptions.Left);
+            backRT.sizeDelta = new Vector2(50, 50);
 
             // Title
             GameObject titleObj = new GameObject("TitleText");
@@ -282,8 +285,125 @@ namespace DigitPark.Editor
             CreateDropdownRow(card, "LanguageDropdown", "ChangeLangLabel", "Idioma",
                 new[] { "English", "Espanol", "Francais", "Portugues", "Deutsch" }, 1);
             CreateSeparator(card);
-            CreateDropdownRow(card, "ThemeDropdown", "ChangeThemeLabel", "Tema",
-                new[] { "Neon Dark", "Light", "Classic" }, 0);
+
+            // Load theme names dynamically from Resources/Themes
+            string[] themeNames = GetThemeNamesFromResources();
+            CreateThemeDropdownRow(card, "ThemeDropdown", "ChangeThemeLabel", "Tema", themeNames, 0);
+        }
+
+        /// <summary>
+        /// Loads all theme names from Resources/Themes, ordered: NeonDark first, then alphabetical
+        /// </summary>
+        private static string[] GetThemeNamesFromResources()
+        {
+            var themes = Resources.LoadAll<DigitPark.Themes.ThemeData>("Themes");
+            if (themes == null || themes.Length == 0)
+                return new[] { "Neon Dark" };
+
+            var sorted = new List<DigitPark.Themes.ThemeData>(themes);
+            sorted.Sort((a, b) =>
+            {
+                if (a.themeId == "neon_dark") return -1;
+                if (b.themeId == "neon_dark") return 1;
+                return string.Compare(a.themeName, b.themeName, System.StringComparison.Ordinal);
+            });
+
+            string[] names = new string[sorted.Count];
+            for (int i = 0; i < sorted.Count; i++)
+                names[i] = sorted[i].themeName;
+            return names;
+        }
+
+        /// <summary>
+        /// Creates theme dropdown row with lock icon support and ThemeDropdownController
+        /// </summary>
+        private static void CreateThemeDropdownRow(Transform parent, string dropdownName, string labelName,
+            string labelText, string[] options, int defaultIndex)
+        {
+            // Use the standard dropdown builder
+            CreateDropdownRow(parent, dropdownName, labelName, labelText, options, defaultIndex);
+
+            // Find the dropdown we just created and add ThemeDropdownController + lock icon support
+            Transform container = parent.Find($"{dropdownName}Container");
+            if (container == null) return;
+
+            Transform dropdownObj = container.Find(dropdownName);
+            if (dropdownObj == null) return;
+
+            // Add ThemeDropdownController component
+            var controller = dropdownObj.gameObject.AddComponent(
+                System.Type.GetType("DigitPark.UI.Components.ThemeDropdownController, Assembly-CSharp"));
+
+            if (controller != null)
+            {
+                // Load and assign lock icon sprite
+                Sprite lockSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+                if (lockSprite != null)
+                {
+                    var so = new SerializedObject(controller);
+                    var lockProp = so.FindProperty("lockIconSprite");
+                    if (lockProp != null)
+                    {
+                        lockProp.objectReferenceValue = lockSprite;
+                        so.ApplyModifiedProperties();
+                    }
+                }
+                Debug.Log("[SettingsUIBuilder] ThemeDropdownController added with lock icon");
+            }
+
+            // Add lock icons to dropdown item template
+            AddLockIconToDropdownTemplate(dropdownObj, options);
+        }
+
+        /// <summary>
+        /// Adds a lock icon Image to the dropdown item template (right side)
+        /// </summary>
+        private static void AddLockIconToDropdownTemplate(Transform dropdownObj, string[] themeNames)
+        {
+            Transform template = dropdownObj.Find("Template");
+            if (template == null) return;
+
+            // Find the item template inside Content
+            Transform viewport = template.Find("Viewport");
+            if (viewport == null) return;
+            Transform content = viewport.Find("Content");
+            if (content == null) return;
+            Transform item = content.Find("Item");
+            if (item == null) return;
+
+            // Load lock icon
+            Sprite lockSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+            if (lockSprite == null)
+            {
+                Debug.LogWarning("[SettingsUIBuilder] Lock icon not found at Resources/UI/Icons/icon_lock_gold");
+                return;
+            }
+
+            // Add lock icon to item template (right side)
+            GameObject lockObj = new GameObject("LockIcon");
+            lockObj.transform.SetParent(item, false);
+
+            RectTransform lockRT = lockObj.AddComponent<RectTransform>();
+            lockRT.anchorMin = new Vector2(1, 0.5f);
+            lockRT.anchorMax = new Vector2(1, 0.5f);
+            lockRT.pivot = new Vector2(1, 0.5f);
+            lockRT.sizeDelta = new Vector2(28, 28);
+            lockRT.anchoredPosition = new Vector2(-8, 0);
+
+            Image lockImg = lockObj.AddComponent<Image>();
+            lockImg.sprite = lockSprite;
+            lockImg.preserveAspect = true;
+            lockImg.raycastTarget = false;
+
+            // Shrink item label to make room for lock icon
+            Transform itemLabel = item.Find("Item Label");
+            if (itemLabel != null)
+            {
+                RectTransform labelRT = itemLabel.GetComponent<RectTransform>();
+                labelRT.offsetMax = new Vector2(-40, 0);
+            }
+
+            Debug.Log("[SettingsUIBuilder] Lock icon added to theme dropdown template");
         }
 
         private static void BuildPremiumCard(Transform parent)
@@ -323,6 +443,13 @@ namespace DigitPark.Editor
             CreateSettingsRow(card, "TriumphTermsButton", "Terminos Triumph", ">", TEXT_GRAY, true);
             CreateSeparator(card);
             CreateSettingsRow(card, "SelfExclusionButton", "Auto Exclusion", ">", DANGER_RED, true);
+        }
+
+        private static void BuildDeveloperCard(Transform parent)
+        {
+            Transform card = CreateCard(parent, "DeveloperCard", "DESARROLLADOR", new Color(1f, 0.6f, 0f, 0.3f));
+
+            CreateToggleRow(card, "CashBattleBypassToggle", "Bypass Auth CashBattle", false);
         }
 
         private static void BuildDangerZoneCard(Transform parent)

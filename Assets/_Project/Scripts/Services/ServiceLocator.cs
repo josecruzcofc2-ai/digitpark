@@ -24,6 +24,20 @@ namespace DigitPark.Services
     {
         #region Singleton
         private static ServiceLocator _instance;
+
+        /// <summary>
+        /// True si existe una instancia de ServiceLocator (no lanza error)
+        /// </summary>
+        public static bool Exists
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = FindObjectOfType<ServiceLocator>();
+                return _instance != null;
+            }
+        }
+
         public static ServiceLocator Instance
         {
             get
@@ -33,7 +47,7 @@ namespace DigitPark.Services
                     _instance = FindObjectOfType<ServiceLocator>();
                     if (_instance == null)
                     {
-                        Debug.LogError("[ServiceLocator] No se encontró instancia. Asegúrate de agregar ServiceLocator a un GameObject en la escena Boot.");
+                        Debug.LogWarning("[ServiceLocator] No se encontró instancia. ServiceLocator debe estar en la escena Boot.");
                     }
                 }
                 return _instance;

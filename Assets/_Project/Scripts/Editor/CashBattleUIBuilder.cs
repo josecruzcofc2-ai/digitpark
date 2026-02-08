@@ -984,10 +984,10 @@ namespace DigitPark.Editor
         /// </summary>
         private static string GetFallbackEmoji(string iconName)
         {
-            if (iconName.Contains("Battles")) return "⚔";
-            if (iconName.Contains("Tournament")) return "🏆";
-            if (iconName.Contains("Wallet")) return "💰";
-            if (iconName.Contains("History")) return "📊";
+            if (iconName.Contains("Battles")) return "VS";
+            if (iconName.Contains("Tournament")) return "T";
+            if (iconName.Contains("Wallet")) return "$";
+            if (iconName.Contains("History")) return "H";
             return "?";
         }
 
@@ -1276,7 +1276,7 @@ namespace DigitPark.Editor
             checkTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
-            checkTMP.text = "✓";
+            checkTMP.text = "V";
             checkTMP.fontSize = 28;
             checkTMP.color = BG_DARK;
             checkTMP.alignment = TextAlignmentOptions.Center;
@@ -1376,7 +1376,7 @@ namespace DigitPark.Editor
             checkTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
-            checkTMP.text = "✓";
+            checkTMP.text = "V";
             checkTMP.fontSize = 36;
             checkTMP.color = BG_DARK; // Dark text on gold background
             checkTMP.alignment = TextAlignmentOptions.Center;
@@ -1660,7 +1660,7 @@ namespace DigitPark.Editor
             coinRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
-            coinText.text = "💰";
+            coinText.text = "$";
             coinText.fontSize = 36;
             coinText.alignment = TextAlignmentOptions.Center;
         }
@@ -2712,7 +2712,7 @@ namespace DigitPark.Editor
             iconTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI iconTMP = iconText.AddComponent<TextMeshProUGUI>();
-            iconTMP.text = gameType.Contains("Torneo") ? "🏆" : "⚔";
+            iconTMP.text = gameType.Contains("Torneo") ? "T" : "VS";
             iconTMP.fontSize = 28;
             iconTMP.color = TEXT_GOLD;
             iconTMP.alignment = TextAlignmentOptions.Center;

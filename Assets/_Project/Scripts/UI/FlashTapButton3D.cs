@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using DigitPark.Effects;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -130,7 +131,7 @@ namespace DigitPark.UI
                     TransitionToState(waitButtonColor, waitGlowColor, waitTextColor, instant);
                     SetSprite(buttonUpSprite);
                     StartBreathingAnimation();
-                    if (instructionText != null) instructionText.text = "ESPERA...";
+                    if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_wait");
                     break;
 
                 case ButtonState.Ready:
@@ -138,7 +139,7 @@ namespace DigitPark.UI
                     SetSprite(buttonUpSprite);
                     StartPulseAnimation();
                     StartGlowPulse();
-                    if (instructionText != null) instructionText.text = "TAP!";
+                    if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_tap");
                     // Haptic feedback cuando se activa
                     TriggerReadyHaptic();
                     break;
@@ -147,7 +148,7 @@ namespace DigitPark.UI
                     TransitionToState(errorButtonColor, errorGlowColor, errorTextColor, instant);
                     SetSprite(buttonUpSprite);
                     StartShakeAnimation();
-                    if (instructionText != null) instructionText.text = "MUY PRONTO!";
+                    if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_too_soon");
                     // Haptic feedback de error
                     TriggerErrorHaptic();
                     break;

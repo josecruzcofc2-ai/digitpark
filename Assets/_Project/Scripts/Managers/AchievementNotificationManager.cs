@@ -22,7 +22,7 @@ namespace DigitPark.Managers
 
         [Header("Settings")]
         [SerializeField] private bool showNotifications = true;
-        [SerializeField] private int maxQueuedNotifications = 5;
+        [SerializeField] private int maxQueuedNotifications = 20;
         [SerializeField] private float delayBetweenToasts = 0.5f;
 
         [Header("Epic Threshold")]
@@ -62,11 +62,15 @@ namespace DigitPark.Managers
 
                 if (toastPrefab == null)
                 {
-                    Debug.LogWarning("[AchievementNotification] Toast prefab not found. Attempting to load from path...");
                     // Try loading from AssetDatabase path (for development)
                     #if UNITY_EDITOR
                     toastPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Common/AchievementToast.prefab");
                     #endif
+                }
+
+                if (toastPrefab == null)
+                {
+                    Debug.Log("[AchievementNotification] Toast prefab not found, using code-generated fallback.");
                 }
             }
 
@@ -246,13 +250,6 @@ namespace DigitPark.Managers
 
         private void ShowToast(AchievementToastData data)
         {
-            if (toastPrefab == null)
-            {
-                Debug.LogError("[AchievementNotification] Toast prefab not assigned!");
-                _isShowingToast = false;
-                return;
-            }
-
             if (_notificationCanvas == null)
             {
                 CreateNotificationCanvas();
@@ -261,12 +258,26 @@ namespace DigitPark.Managers
             // Create or reuse toast instance
             if (_currentToast == null)
             {
-                GameObject toastObj = Instantiate(toastPrefab, _notificationCanvas.transform);
-                _currentToast = toastObj.GetComponent<AchievementToastUI>();
+                if (toastPrefab != null)
+                {
+                    GameObject toastObj = Instantiate(toastPrefab, _notificationCanvas.transform);
+                    _currentToast = toastObj.GetComponent<AchievementToastUI>();
+
+                    if (_currentToast == null)
+                    {
+                        _currentToast = toastObj.AddComponent<AchievementToastUI>();
+                    }
+                }
+                else
+                {
+                    // Fallback: create simple toast by code
+                    _currentToast = CreateFallbackToast();
+                }
 
                 if (_currentToast == null)
                 {
-                    _currentToast = toastObj.AddComponent<AchievementToastUI>();
+                    _isShowingToast = false;
+                    return;
                 }
 
                 // Subscribe to toast events
@@ -275,6 +286,131 @@ namespace DigitPark.Managers
 
             // Show the toast
             _currentToast.Show(data);
+        }
+
+        /// <summary>
+        /// Creates a simple toast UI by code when prefab is not available
+        /// </summary>
+        private AchievementToastUI CreateFallbackToast()
+        {
+            GameObject toastRoot = new GameObject("AchievementToast_Fallback");
+            toastRoot.transform.SetParent(_notificationCanvas.transform, false);
+
+            RectTransform rootRT = toastRoot.AddComponent<RectTransform>();
+            rootRT.anchorMin = Vector2.zero;
+            rootRT.anchorMax = Vector2.one;
+            rootRT.sizeDelta = Vector2.zero;
+
+            CanvasGroup cg = toastRoot.AddComponent<CanvasGroup>();
+            cg.alpha = 1f;
+            cg.blocksRaycasts = false;
+
+            // Toast container
+            GameObject container = new GameObject("ToastContainer");
+            container.transform.SetParent(toastRoot.transform, false);
+            RectTransform containerRT = container.AddComponent<RectTransform>();
+            containerRT.anchorMin = new Vector2(0.5f, 1f);
+            containerRT.anchorMax = new Vector2(0.5f, 1f);
+            containerRT.pivot = new Vector2(0.5f, 1f);
+            containerRT.anchoredPosition = new Vector2(0f, -60f);
+            containerRT.sizeDelta = new Vector2(420f, 120f);
+
+            // Background
+            Image bg = container.AddComponent<Image>();
+            bg.color = new Color(0.04f, 0.06f, 0.1f, 0.96f);
+            Outline outline = container.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 1f, 1f, 1f);
+            outline.effectDistance = new Vector2(2f, 2f);
+
+            // Layout
+            HorizontalLayoutGroup hlg = container.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 12f;
+            hlg.padding = new RectOffset(12, 12, 10, 10);
+            hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+
+            // Icon
+            GameObject iconObj = new GameObject("AchievementIcon");
+            iconObj.transform.SetParent(container.transform, false);
+            RectTransform iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.sizeDelta = new Vector2(72f, 72f);
+            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
+            iconLE.minWidth = 72f;
+            iconLE.minHeight = 72f;
+            Image iconImg = iconObj.AddComponent<Image>();
+            iconImg.color = Color.white;
+
+            // Info section
+            GameObject infoObj = new GameObject("InfoSection");
+            infoObj.transform.SetParent(container.transform, false);
+            LayoutElement infoLE = infoObj.AddComponent<LayoutElement>();
+            infoLE.flexibleWidth = 1f;
+            infoLE.minHeight = 90f;
+
+            VerticalLayoutGroup vlg = infoObj.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 3f;
+            vlg.childAlignment = TextAnchor.MiddleLeft;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true;
+
+            // Header
+            GameObject headerObj = new GameObject("HeaderText");
+            headerObj.transform.SetParent(infoObj.transform, false);
+            TMPro.TextMeshProUGUI headerTMP = headerObj.AddComponent<TMPro.TextMeshProUGUI>();
+            headerTMP.text = "LOGRO DESBLOQUEADO";
+            headerTMP.fontSize = 13f;
+            headerTMP.fontStyle = TMPro.FontStyles.Bold;
+            headerTMP.color = new Color(0f, 1f, 1f, 1f);
+            if (TMPro.TMP_Settings.defaultFontAsset != null) headerTMP.font = TMPro.TMP_Settings.defaultFontAsset;
+
+            // Title
+            GameObject titleObj = new GameObject("AchievementTitle");
+            titleObj.transform.SetParent(infoObj.transform, false);
+            TMPro.TextMeshProUGUI titleTMP = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
+            titleTMP.text = "Titulo";
+            titleTMP.fontSize = 18f;
+            titleTMP.fontStyle = TMPro.FontStyles.Bold;
+            titleTMP.color = new Color(1f, 0.84f, 0f, 1f);
+            if (TMPro.TMP_Settings.defaultFontAsset != null) titleTMP.font = TMPro.TMP_Settings.defaultFontAsset;
+
+            // Description
+            GameObject descObj = new GameObject("AchievementDescription");
+            descObj.transform.SetParent(infoObj.transform, false);
+            TMPro.TextMeshProUGUI descTMP = descObj.AddComponent<TMPro.TextMeshProUGUI>();
+            descTMP.text = "Desc";
+            descTMP.fontSize = 12f;
+            descTMP.color = new Color(0.7f, 0.75f, 0.8f, 1f);
+            if (TMPro.TMP_Settings.defaultFontAsset != null) descTMP.font = TMPro.TMP_Settings.defaultFontAsset;
+
+            // Points
+            GameObject pointsObj = new GameObject("PointsDisplay");
+            pointsObj.transform.SetParent(infoObj.transform, false);
+            TMPro.TextMeshProUGUI pointsTMP = pointsObj.AddComponent<TMPro.TextMeshProUGUI>();
+            pointsTMP.text = "+0 pts";
+            pointsTMP.fontSize = 13f;
+            pointsTMP.fontStyle = TMPro.FontStyles.Bold;
+            pointsTMP.color = new Color(0.2f, 0.8f, 0.4f, 1f);
+            if (TMPro.TMP_Settings.defaultFontAsset != null) pointsTMP.font = TMPro.TMP_Settings.defaultFontAsset;
+
+            // Add AchievementToastUI and wire references via reflection
+            AchievementToastUI toastUI = toastRoot.AddComponent<AchievementToastUI>();
+
+            // Wire serialized fields via reflection
+            var type = typeof(AchievementToastUI);
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+
+            type.GetField("toastContainer", flags)?.SetValue(toastUI, containerRT);
+            type.GetField("canvasGroup", flags)?.SetValue(toastUI, cg);
+            type.GetField("achievementIcon", flags)?.SetValue(toastUI, iconImg);
+            type.GetField("headerText", flags)?.SetValue(toastUI, headerTMP);
+            type.GetField("titleText", flags)?.SetValue(toastUI, titleTMP);
+            type.GetField("descriptionText", flags)?.SetValue(toastUI, descTMP);
+            type.GetField("pointsText", flags)?.SetValue(toastUI, pointsTMP);
+
+            return toastUI;
         }
 
         private void OnToastDismissed()

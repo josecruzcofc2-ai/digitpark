@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Data;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -83,6 +84,11 @@ namespace DigitPark.Managers
 
             // Auto refresh
             InvokeRepeating(nameof(RefreshTournament), refreshInterval, refreshInterval);
+        }
+
+        private void OnDisable()
+        {
+            CancelInvoke();
         }
 
         private void OnDestroy()
@@ -191,7 +197,7 @@ namespace DigitPark.Managers
 
             // Info
             if (gameTypeText) gameTypeText.text = currentTournament.category;
-            if (entryFeeText) entryFeeText.text = currentTournament.entryFee == 0 ? "GRATIS" : $"${currentTournament.entryFee}";
+            if (entryFeeText) entryFeeText.text = currentTournament.entryFee == 0 ? L("tournament_free") : $"${currentTournament.entryFee}";
             if (prizePoolText) prizePoolText.text = $"${currentTournament.totalPrizePool}";
 
             // Players
@@ -206,9 +212,9 @@ namespace DigitPark.Managers
             UpdateTimeDisplay();
 
             // Rules
-            if (roundsText) roundsText.text = "Mejor de 3";
-            if (timeLimitText) timeLimitText.text = "60 segundos";
-            if (formatText) formatText.text = "Eliminación directa";
+            if (roundsText) roundsText.text = L("tournament_best_of_3");
+            if (timeLimitText) timeLimitText.text = L("tournament_60_seconds");
+            if (formatText) formatText.text = L("tournament_elimination");
 
             // Prize distribution
             UpdatePrizeDistribution();
@@ -222,13 +228,13 @@ namespace DigitPark.Managers
             switch (status)
             {
                 case TournamentStatus.Scheduled:
-                    return "Registro Abierto";
+                    return L("tournament_status_open");
                 case TournamentStatus.Active:
-                    return "En Progreso";
+                    return L("tournament_status_active");
                 case TournamentStatus.Completed:
-                    return "Completado";
+                    return L("tournament_status_completed");
                 case TournamentStatus.Cancelled:
-                    return "Cancelado";
+                    return L("tournament_status_cancelled");
                 default:
                     return status.ToString();
             }
@@ -266,17 +272,17 @@ namespace DigitPark.Managers
             {
                 if (timeUntilStart.TotalSeconds <= 0)
                 {
-                    countdownText.text = "¡Iniciando!";
+                    countdownText.text = L("tournament_starting");
                     countdownText.color = new Color(1f, 0.84f, 0f);
                 }
                 else if (timeUntilStart.TotalMinutes < 60)
                 {
-                    countdownText.text = $"Comienza en {timeUntilStart.Minutes}m {timeUntilStart.Seconds}s";
+                    countdownText.text = L("tournament_starts_in_short", timeUntilStart.Minutes, timeUntilStart.Seconds);
                     countdownText.color = new Color(0f, 1f, 0.5f);
                 }
                 else
                 {
-                    countdownText.text = $"Comienza en {(int)timeUntilStart.TotalHours}h {timeUntilStart.Minutes}m";
+                    countdownText.text = L("tournament_starts_in_long", (int)timeUntilStart.TotalHours, timeUntilStart.Minutes);
                     countdownText.color = Color.white;
                 }
             }
@@ -313,17 +319,17 @@ namespace DigitPark.Managers
             }
 
             // Prize distribution (example: 50%, 30%, 20% for top 3)
-            var distribution = new (string place, float percent)[]
+            var distribution = new (string placeKey, float percent)[]
             {
-                ("1er Lugar", 50f),
-                ("2do Lugar", 30f),
-                ("3er Lugar", 20f)
+                ("tournament_1st_place", 50f),
+                ("tournament_2nd_place", 30f),
+                ("tournament_3rd_place", 20f)
             };
 
-            foreach (var (place, percent) in distribution)
+            foreach (var (placeKey, percent) in distribution)
             {
                 int prize = Mathf.RoundToInt(currentTournament.totalPrizePool * (percent / 100f));
-                CreatePrizeRow(place, prize, percent);
+                CreatePrizeRow(L(placeKey), prize, percent);
             }
         }
 
@@ -379,7 +385,7 @@ namespace DigitPark.Managers
 
             if (participantsHeaderText)
             {
-                participantsHeaderText.text = $"Participantes ({participants.Count})";
+                participantsHeaderText.text = L("tournament_participants_count", participants.Count);
             }
 
             foreach (var participant in participants)
@@ -403,7 +409,7 @@ namespace DigitPark.Managers
                 rt.sizeDelta = new Vector2(200, 40);
 
                 var text = item.AddComponent<TextMeshProUGUI>();
-                text.text = participant.username + (participant.isReady ? " ✓" : "");
+                text.text = participant.username + (participant.isReady ? " [OK]" : "");
                 text.fontSize = 14;
                 text.color = participant.isReady ? new Color(0f, 1f, 0.5f) : Color.white;
             }
@@ -420,8 +426,8 @@ namespace DigitPark.Managers
                 if (joinButtonText)
                 {
                     joinButtonText.text = currentTournament?.entryFee == 0
-                        ? "Unirse Gratis"
-                        : $"Unirse (${currentTournament?.entryFee})";
+                        ? L("tournament_join_free")
+                        : L("tournament_join_fee", currentTournament?.entryFee);
                 }
             }
 
@@ -430,7 +436,7 @@ namespace DigitPark.Managers
             {
                 readyButton.gameObject.SetActive(hasJoined);
                 var readyText = readyButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (readyText) readyText.text = isReady ? "Listo ✓" : "Marcar Listo";
+                if (readyText) readyText.text = isReady ? L("tournament_ready") : L("tournament_mark_ready");
             }
         }
 
@@ -453,7 +459,7 @@ namespace DigitPark.Managers
 
             isLoading = true;
             if (loadingOverlay) loadingOverlay.SetActive(true);
-            ShowStatus("Uniéndose al torneo...");
+            ShowStatus(L("tournament_joining"));
 
             // Simulate join
             Invoke(nameof(ProcessJoin), 1.5f);
@@ -464,7 +470,7 @@ namespace DigitPark.Managers
             hasJoined = true;
             isLoading = false;
             if (loadingOverlay) loadingOverlay.SetActive(false);
-            ShowStatus("¡Te has unido al torneo!");
+            ShowStatus(L("tournament_joined"));
 
             currentTournament.currentParticipants++;
             UpdateUI();
@@ -480,21 +486,21 @@ namespace DigitPark.Managers
             currentTournament.currentParticipants--;
             UpdateUI();
             UpdateActionButtons();
-            ShowStatus("Has abandonado el torneo");
+            ShowStatus(L("tournament_left"));
         }
 
         private void OnReadyClicked()
         {
             isReady = !isReady;
             UpdateActionButtons();
-            ShowStatus(isReady ? "¡Estás listo!" : "Ya no estás listo");
+            ShowStatus(isReady ? L("tournament_you_ready") : L("tournament_not_ready"));
         }
 
         private void OnShareClicked()
         {
-            string shareText = $"¡Únete a mi torneo '{currentTournament?.name}' en DigitPark!";
+            string shareText = L("tournament_share_text", currentTournament?.name);
             GUIUtility.systemCopyBuffer = shareText;
-            ShowStatus("Enlace copiado al portapapeles");
+            ShowStatus(L("tournament_link_copied"));
         }
 
         private void OnViewAllParticipants()
@@ -544,6 +550,13 @@ namespace DigitPark.Managers
         private void OnBackClicked()
         {
             SceneNavigator.Instance?.GoBack();
+        }
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
         }
     }
 

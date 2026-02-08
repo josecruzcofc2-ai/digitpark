@@ -26,6 +26,8 @@ namespace DigitPark.UI
             }
 
             instance = this;
+            if (transform.parent != null)
+                transform.SetParent(null);
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
             LogDebug("SafeAreaManager inicializado");

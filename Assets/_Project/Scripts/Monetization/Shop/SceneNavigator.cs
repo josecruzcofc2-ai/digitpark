@@ -182,7 +182,7 @@ namespace DigitPark.Monetization
             }
             else
             {
-                Debug.LogWarning("[SceneNavigator] No previous scene to go back to");
+                Debug.Log("[SceneNavigator] No previous scene, navigating to MainMenu");
                 // Default: go to main menu
                 SceneManager.LoadScene(Scenes.MAIN_MENU);
             }

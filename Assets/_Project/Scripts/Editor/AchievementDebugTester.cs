@@ -88,15 +88,11 @@ namespace DigitPark.Editor
                 new AchievementTestData("challenge_friend", "Retador", "Reta a un amigo", "Social", 20, "Logro_Versus"),
                 new AchievementTestData("beat_friend", "Rival", "Vence a un amigo", "Social", 25, "Logro_Amigo_Rival"),
 
-                // ==================== PROGRESSION (8) ====================
+                // ==================== PROGRESSION (4) ====================
                 new AchievementTestData("level_10", "Nivel 10", "Alcanza el nivel 10", "Progression", 25, "Logro_Nivel_10"),
                 new AchievementTestData("level_25", "Nivel 25", "Alcanza el nivel 25", "Progression", 50, "Logro_Nivel_25"),
                 new AchievementTestData("level_50", "Nivel 50", "Alcanza el nivel 50", "Progression", 75, "Logro_Nivel50"),
                 new AchievementTestData("level_100", "Nivel 100", "Alcanza el nivel 100", "Progression", 150, "Logro_Avance_Epico"),
-                new AchievementTestData("rank_up", "Ascenso", "Sube de rango por primera vez", "Progression", 30, "Logro_Ascenso"),
-                new AchievementTestData("rank_elite", "Élite", "Alcanza rango Diamante", "Progression", 100, "Logro_Elite"),
-                new AchievementTestData("rank_legend", "Leyenda", "Alcanza rango Leyenda", "Progression", 200, "Logro_Leyenda"),
-                new AchievementTestData("rank_immortal", "Inmortal", "Alcanza rango Inmortal", "Progression", 500, "Logro_Inmortal", true),
 
                 // ==================== COLLECTOR ====================
                 // Reservado para V2

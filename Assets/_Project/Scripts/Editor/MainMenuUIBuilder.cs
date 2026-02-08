@@ -7,7 +7,7 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// MainMenu UI Builder v3 - Rediseño 2026
-    /// Layout proporcional que llena toda la pantalla sin espacio muerto
+    /// Layout proporcional que llena toda la pantalla (2.5% top, 2% bottom)
     /// Cash Battle DORADO prominente como card principal
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     /// </summary>
@@ -40,27 +40,27 @@ namespace DigitPark.Editor
 
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
-        // Sections fill screen with 1% gaps, 4.5% top padding, 7% bottom padding
-        private const float HEADER_TOP = 0.955f;
-        private const float HEADER_BOT = 0.915f;
+        // Sections fill screen with 1% gaps, 2.5% top padding, 2% bottom padding
+        private const float HEADER_TOP = 0.975f;
+        private const float HEADER_BOT = 0.928f;
 
-        private const float PROFILE_TOP = 0.905f;
-        private const float PROFILE_BOT = 0.72f;
+        private const float PROFILE_TOP = 0.920f;
+        private const float PROFILE_BOT = 0.735f;
 
-        private const float DAILY_TOP = 0.71f;
-        private const float DAILY_BOT = 0.635f;
+        private const float DAILY_TOP = 0.725f;
+        private const float DAILY_BOT = 0.650f;
 
-        private const float QUICK_TOP = 0.625f;
-        private const float QUICK_BOT = 0.56f;
+        private const float QUICK_TOP = 0.640f;
+        private const float QUICK_BOT = 0.575f;
 
-        private const float PLAY_TOP = 0.55f;
-        private const float PLAY_BOT = 0.40f;
+        private const float PLAY_TOP = 0.565f;
+        private const float PLAY_BOT = 0.410f;
 
-        private const float CASH_TOP = 0.39f;
-        private const float CASH_BOT = 0.22f;
+        private const float CASH_TOP = 0.400f;
+        private const float CASH_BOT = 0.225f;
 
-        private const float EXTRA_TOP = 0.21f;
-        private const float EXTRA_BOT = 0.07f;
+        private const float EXTRA_TOP = 0.215f;
+        private const float EXTRA_BOT = 0.02f;
 
         private const float SIDE_PAD = 20f;
 

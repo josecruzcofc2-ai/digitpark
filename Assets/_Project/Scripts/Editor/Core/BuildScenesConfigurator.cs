@@ -56,7 +56,7 @@ namespace DigitPark.Editor
             new[] { "Social/Scores" },
             new[] { "Social/SearchPlayers" },
             new[] { "Social/Friends" },
-            new[] { "Social/FriendRequests" },
+            new[] { "FriendRequests" },
             new[] { "Social/MatchHistory" },
 
             // === 21-24: MONETIZATION ===

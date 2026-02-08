@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using DigitPark.Monetization;
 using DG.Tweening;
 using DigitPark.Animations;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -532,7 +533,7 @@ namespace DigitPark.CashBattle
             }
             else
             {
-                ShowError(message ?? "Error al procesar el depósito. Intenta de nuevo.");
+                ShowError(message ?? AutoLocalizer.Get("wallet_deposit_error"));
             }
         }
 

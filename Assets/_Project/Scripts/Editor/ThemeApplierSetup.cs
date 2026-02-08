@@ -103,25 +103,44 @@ namespace DigitPark.Editor
         {
             return new string[]
             {
-                // Escenas principales (ya tienen diseno perfecto del backup)
-                "Assets/_Project/Scenes/Boot.unity",
-                "Assets/_Project/Scenes/Login.unity",
-                "Assets/_Project/Scenes/Register.unity",
-                "Assets/_Project/Scenes/MainMenu.unity",
-                "Assets/_Project/Scenes/Scores.unity",
-                "Assets/_Project/Scenes/Settings.unity",
-                "Assets/_Project/Scenes/Tournaments.unity",
-                // Escenas nuevas (necesitan ThemeApplier)
-                "Assets/_Project/Scenes/Profile.unity",
-                "Assets/_Project/Scenes/SearchPlayers.unity",
-                // Escenas de juegos
+                // Auth
+                "Assets/_Project/Scenes/Auth/Login.unity",
+                "Assets/_Project/Scenes/Auth/Register.unity",
+                // Core
+                "Assets/_Project/Scenes/Core/Boot.unity",
+                "Assets/_Project/Scenes/Core/MainMenu.unity",
+                "Assets/_Project/Scenes/Core/Settings.unity",
+                // Games
                 "Assets/_Project/Scenes/Games/GameSelector.unity",
                 "Assets/_Project/Scenes/Games/DigitRush.unity",
                 "Assets/_Project/Scenes/Games/MemoryPairs.unity",
                 "Assets/_Project/Scenes/Games/QuickMath.unity",
                 "Assets/_Project/Scenes/Games/FlashTap.unity",
                 "Assets/_Project/Scenes/Games/OddOneOut.unity",
-                "Assets/_Project/Scenes/Games/CashBattle.unity"
+                "Assets/_Project/Scenes/Games/Matchmaking.unity",
+                // Social
+                "Assets/_Project/Scenes/Social/Profile.unity",
+                "Assets/_Project/Scenes/Social/Scores.unity",
+                "Assets/_Project/Scenes/Social/Friends.unity",
+                "Assets/_Project/Scenes/Social/MatchHistory.unity",
+                "Assets/_Project/Scenes/Social/SearchPlayers.unity",
+                // Monetization
+                "Assets/_Project/Scenes/Monetization/DailyMissions.unity",
+                "Assets/_Project/Scenes/Monetization/DailyRewards.unity",
+                // Tournaments
+                "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity",
+                "Assets/_Project/Scenes/Tournaments/TournamentCreate.unity",
+                "Assets/_Project/Scenes/Tournaments/TournamentLobby.unity",
+                // Onboarding
+                "Assets/_Project/Scenes/Onboarding/Onboarding.unity",
+                // *** EXCLUIDAS - CashBattle (estilo gold fijo) ***
+                // "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
+                // "Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",
+                // "Assets/_Project/Scenes/CashBattle/CashHistory.unity",
+                // "Assets/_Project/Scenes/CashBattle/CashTournaments.unity",
+                // "Assets/_Project/Scenes/CashBattle/CashWallet.unity",
+                // *** EXCLUIDA - AgeVerification (estilo gold fijo) ***
+                // "Assets/_Project/Scenes/Auth/AgeVerification.unity",
             };
         }
 

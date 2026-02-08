@@ -166,6 +166,18 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             PremiumManager.OnPremiumStatusChanged -= UpdatePremiumBanner;
+
+            // Limpiar coroutines de shake activas
+            for (int i = 0; i < shakeCoroutines.Length; i++)
+            {
+                if (shakeCoroutines[i] != null)
+                {
+                    StopCoroutine(shakeCoroutines[i]);
+                    shakeCoroutines[i] = null;
+                }
+            }
+
+            if (Instance == this) Instance = null;
         }
 
         private void UpdatePremiumBanner()
@@ -776,7 +788,7 @@ namespace DigitPark.Managers
 
         private async void SaveBestTime()
         {
-            if (currentPlayer == null) return;
+            if (currentPlayer == null || DatabaseService.Instance == null) return;
 
             currentPlayer.bestTime = bestTime;
             await DatabaseService.Instance.SavePlayerData(currentPlayer);

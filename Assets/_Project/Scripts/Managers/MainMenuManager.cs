@@ -35,6 +35,11 @@ namespace DigitPark.Managers
         [SerializeField] public Sprite notificationIconActive;
         [SerializeField] public TextMeshProUGUI notificationBadgeText;
 
+        [Header("UI - Monetization")]
+        [SerializeField] public Button shopButton;
+        [SerializeField] public Button achievementsButton;
+        [SerializeField] public Button dailyMissionsButton;
+
         [Header("UI - Premium")]
         [SerializeField] public Button premiumButton;
         [SerializeField] public GameObject premiumBadge;
@@ -83,6 +88,9 @@ namespace DigitPark.Managers
             cashBattleButton?.onClick.AddListener(OnCashBattleButtonClicked);
             settingsButton?.onClick.AddListener(OnSettingsButtonClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
+            shopButton?.onClick.AddListener(OnShopButtonClicked);
+            achievementsButton?.onClick.AddListener(OnAchievementsButtonClicked);
+            dailyMissionsButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
 
             // User info buttons
             userButton?.onClick.AddListener(OnUserButtonClicked);
@@ -290,7 +298,21 @@ namespace DigitPark.Managers
         {
             Debug.Log("[MainMenu] Intentando acceder a Cash Battle");
 
+            // Verificar bypass de autenticación (opción de desarrollo)
+            if (SettingsManager.IsCashBattleAuthBypassed())
+            {
+                Debug.Log("[MainMenu] Bypass de autenticación ACTIVO - navegando directo a CashBattleHub");
+                SceneManager.LoadScene("CashBattleHub");
+                return;
+            }
+
             // Verificar si el usuario esta verificado (18+)
+            if (!DigitPark.Services.ServiceLocator.Exists)
+            {
+                Debug.Log("[MainMenu] ServiceLocator no disponible - navegando a AgeVerification");
+                SceneManager.LoadScene("AgeVerification");
+                return;
+            }
             var kycService = DigitPark.Services.ServiceLocator.KYC;
             bool isVerified = kycService?.CanAccessCashBattle ?? false;
 
@@ -367,6 +389,24 @@ namespace DigitPark.Managers
         /// <summary>
         /// Muestra el panel de premium
         /// </summary>
+        private void OnShopButtonClicked()
+        {
+            Debug.Log("[MainMenu] Navegando a Shop");
+            SceneManager.LoadScene("Shop");
+        }
+
+        private void OnAchievementsButtonClicked()
+        {
+            Debug.Log("[MainMenu] Navegando a Achievements");
+            SceneManager.LoadScene("Achievements");
+        }
+
+        private void OnDailyMissionsButtonClicked()
+        {
+            Debug.Log("[MainMenu] Navegando a DailyMissions");
+            SceneManager.LoadScene("DailyMissions");
+        }
+
         private void OnPremiumButtonClicked()
         {
             Debug.Log("[MainMenu] Mostrando panel Premium");

@@ -9,6 +9,7 @@ using DigitPark.UI.Components;
 using DG.Tweening;
 using DigitPark.Animations;
 using System.Collections.Generic;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -159,7 +160,7 @@ namespace DigitPark.Managers
             }
 
             // UI para perfil propio
-            SetStatusText("Tu perfil", new Color32(0, 255, 255, 255)); // Cyan
+            SetStatusText(AutoLocalizer.Get("profile_own_profile"), new Color32(0, 255, 255, 255)); // Cyan
 
             // Ocultar botones de otros perfiles
             if (addFriendIconButton != null)
@@ -217,7 +218,7 @@ namespace DigitPark.Managers
             if (isFriend)
             {
                 // ES AMIGO
-                SetStatusText("Amigo", new Color32(0, 255, 136, 255)); // Verde
+                SetStatusText(AutoLocalizer.Get("profile_friend_status"), new Color32(0, 255, 136, 255)); // Verde
 
                 // Ocultar agregar amigo, mostrar retar
                 if (addFriendIconButton != null)
@@ -241,7 +242,7 @@ namespace DigitPark.Managers
                     // Hay solicitud pendiente
                     if (sentRequest)
                     {
-                        SetStatusText("Solicitud enviada", new Color32(255, 204, 0, 255)); // Amarillo
+                        SetStatusText(AutoLocalizer.Get("profile_request_sent"), new Color32(255, 204, 0, 255)); // Amarillo
                         if (addFriendIconButton != null)
                         {
                             addFriendIconButton.gameObject.SetActive(true);
@@ -253,7 +254,7 @@ namespace DigitPark.Managers
                     else
                     {
                         // Recibimos solicitud de este jugador
-                        SetStatusText("Te envio solicitud", new Color32(0, 255, 136, 255)); // Verde
+                        SetStatusText(AutoLocalizer.Get("profile_received_request"), new Color32(0, 255, 136, 255)); // Verde
                         if (addFriendIconButton != null)
                         {
                             addFriendIconButton.gameObject.SetActive(true);
@@ -264,7 +265,7 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    SetStatusText("No es amigo", new Color32(136, 136, 136, 255)); // Gris
+                    SetStatusText(AutoLocalizer.Get("profile_not_friend"), new Color32(136, 136, 136, 255)); // Gris
                     if (addFriendIconButton != null)
                     {
                         addFriendIconButton.gameObject.SetActive(true);
@@ -303,13 +304,13 @@ namespace DigitPark.Managers
             if (currentPlayerData == null)
             {
                 Debug.LogWarning("[Profile] No hay datos del jugador");
-                if (usernameText != null) usernameText.text = "Sin Usuario";
+                if (usernameText != null) usernameText.text = AutoLocalizer.Get("profile_no_user");
                 return;
             }
 
             // Info basica
             if (usernameText != null)
-                usernameText.text = currentPlayerData.username ?? "Sin Usuario";
+                usernameText.text = currentPlayerData.username ?? AutoLocalizer.Get("profile_no_user");
 
             // Estadisticas generales con animación
             AnimateGeneralStats();

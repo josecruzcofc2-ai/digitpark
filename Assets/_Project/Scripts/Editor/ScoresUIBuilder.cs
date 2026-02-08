@@ -151,7 +151,7 @@ namespace DigitPark.Editor
 
             Image bgImage = bg.AddComponent<Image>();
             bgImage.color = DARK_BG;
-            bgImage.raycastTarget = true;
+            bgImage.raycastTarget = false;
         }
 
         private static void CreateScoresLayout(Transform canvasTransform)

@@ -34,6 +34,8 @@ namespace DigitPark.UI
             if (Instance == null)
             {
                 Instance = this;
+                if (transform.parent != null)
+                    transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
                 CreateBannerUI();
                 HideImmediate();

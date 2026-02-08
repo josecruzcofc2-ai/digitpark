@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DigitPark.UI.Items;
 using DigitPark.Monetization;
+using DigitPark.Localization;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -179,10 +180,6 @@ namespace DigitPark.Managers
                 new AchievementDefinition("level_25", "Nivel 25", "Alcanza el nivel 25", AchievementCategory.Progression, 50, 25, "Logro_Nivel_25"),
                 new AchievementDefinition("level_50", "Nivel 50", "Alcanza el nivel 50", AchievementCategory.Progression, 75, 50, "Logro_Nivel50"),
                 new AchievementDefinition("level_100", "Nivel 100", "Alcanza el nivel 100", AchievementCategory.Progression, 150, 100, "Logro_Avance_Epico"),
-                new AchievementDefinition("rank_up", "Ascenso", "Sube de rango por primera vez", AchievementCategory.Progression, 30, 1, "Logro_Ascenso"),
-                new AchievementDefinition("rank_elite", "Élite", "Alcanza rango Diamante o superior", AchievementCategory.Progression, 100, 5, "Logro_Elite"),
-                new AchievementDefinition("rank_legend", "Leyenda", "Alcanza rango Leyenda", AchievementCategory.Progression, 200, 8, "Logro_Leyenda"),
-                new AchievementDefinition("rank_immortal", "Inmortal", "Alcanza rango Inmortal", AchievementCategory.Progression, 500, 9, "Logro_Inmortal", true), // SECRET
 
                 // ==================== COLLECTOR ==================== (Reservado para V2)
 
@@ -578,7 +575,7 @@ namespace DigitPark.Managers
             {
                 if (data.isCompleted)
                 {
-                    detailProgressText.text = "¡COMPLETADO!";
+                    detailProgressText.text = L("completed");
                     detailProgressText.color = new Color(0f, 1f, 0.5f);
                 }
                 else
@@ -819,6 +816,13 @@ namespace DigitPark.Managers
         }
 
         #endregion
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
+        }
     }
 
     /// <summary>

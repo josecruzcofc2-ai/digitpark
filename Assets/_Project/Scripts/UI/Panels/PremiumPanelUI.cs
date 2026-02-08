@@ -225,11 +225,11 @@ namespace DigitPark.UI.Panels
 
             // Features
             if (feature1Text != null)
-                feature1Text.text = "✓ " + AutoLocalizer.Get("premium_feature_no_ads");
+                feature1Text.text = "- " + AutoLocalizer.Get("premium_feature_no_ads");
             if (feature2Text != null)
-                feature2Text.text = "✓ " + AutoLocalizer.Get("premium_feature_tournaments");
+                feature2Text.text = "- " + AutoLocalizer.Get("premium_feature_tournaments");
             if (feature3Text != null)
-                feature3Text.text = "✓ " + AutoLocalizer.Get("premium_feature_badge");
+                feature3Text.text = "- " + AutoLocalizer.Get("premium_feature_badge");
 
             // Estilos PRO
             if (stylesProTitleText != null)
@@ -241,9 +241,9 @@ namespace DigitPark.UI.Panels
             if (stylesProBuyButtonText != null)
                 stylesProBuyButtonText.text = AutoLocalizer.Get("buy_button");
             if (stylesProFeature1Text != null)
-                stylesProFeature1Text.text = "✓ " + AutoLocalizer.Get("styles_pro_feature_themes");
+                stylesProFeature1Text.text = "- " + AutoLocalizer.Get("styles_pro_feature_themes");
             if (stylesProFeature2Text != null)
-                stylesProFeature2Text.text = "✓ " + AutoLocalizer.Get("styles_pro_feature_exclusive");
+                stylesProFeature2Text.text = "- " + AutoLocalizer.Get("styles_pro_feature_exclusive");
 
             // Restaurar
             if (restoreButtonText != null)

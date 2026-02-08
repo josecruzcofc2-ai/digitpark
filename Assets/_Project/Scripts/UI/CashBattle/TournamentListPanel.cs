@@ -432,7 +432,7 @@ namespace DigitPark.UI.CashBattle
                 if (noTournamentsText != null)
                 {
                     noTournamentsText.gameObject.SetActive(true);
-                    noTournamentsText.text = "No hay torneos disponibles";
+                    noTournamentsText.text = AutoLocalizer.Get("tournament_no_available");
                 }
                 return;
             }
@@ -541,7 +541,7 @@ namespace DigitPark.UI.CashBattle
             joinTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI joinText = joinTextObj.AddComponent<TextMeshProUGUI>();
-            joinText.text = "Unirse";
+            joinText.text = AutoLocalizer.Get("tournament_join");
             joinText.fontSize = 28;
             joinText.color = new Color(0.08f, 0.06f, 0.12f);
             joinText.alignment = TextAlignmentOptions.Center;

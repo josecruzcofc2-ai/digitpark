@@ -325,7 +325,7 @@ namespace DigitPark.Editor
             GameObject completedOverlay = CreateOverlay(item.transform, "CompletedOverlay", COMPLETED_BG);
             completedOverlay.SetActive(false);
 
-            GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "✓",
+            GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-55, -20), new Vector2(-15, 20),
                 36, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
@@ -394,7 +394,7 @@ namespace DigitPark.Editor
             locked.SetActive(false);
 
             // Claimed Checkmark
-            GameObject check = CreateTextElement(item.transform, "ClaimedCheckmark", "✓",
+            GameObject check = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(-25, -25), new Vector2(25, 25),
                 40, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
@@ -649,7 +649,7 @@ namespace DigitPark.Editor
                 new Vector2(0.65f, 0.15f), new Vector2(0.85f, 0.85f), 16, GREEN, FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Ready Indicator
-            GameObject ready = CreateTextElement(item.transform, "ReadyIndicator", "✓",
+            GameObject ready = CreateTextElement(item.transform, "ReadyIndicator", "V",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-40, -15), new Vector2(-10, 15),
                 24, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);

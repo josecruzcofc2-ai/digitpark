@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DigitPark.Managers;
+using DigitPark.Tools;
 
 namespace DigitPark.Themes
 {
@@ -245,6 +246,13 @@ namespace DigitPark.Themes
         {
             if (theme == null) return false;
             if (!theme.isPremium) return true;
+
+            // Debug controller overrides
+            if (ThemeDebugController.Instance != null && ThemeDebugController.Instance.UnlockAllThemes)
+                return true;
+
+            if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
+                return true;
 
             // Verificar si el usuario tiene Styles PRO comprado
             if (PremiumManager.Instance != null)

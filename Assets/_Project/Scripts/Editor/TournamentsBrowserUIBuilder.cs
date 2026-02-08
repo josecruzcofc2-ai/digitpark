@@ -153,7 +153,7 @@ namespace DigitPark.Editor
 
             Image bgImage = GetOrAddComponent<Image>(bg);
             bgImage.color = DARK_BG;
-            bgImage.raycastTarget = true;
+            bgImage.raycastTarget = false;
 
             bg.transform.SetAsFirstSibling();
             EditorUtility.SetDirty(bg);
