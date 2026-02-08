@@ -231,56 +231,95 @@ namespace DigitPark.UI
         }
 
         /// <summary>
-        /// Crea el título principal con soporte para animación
+        /// Crea el logo con Brain icon + Text logo con soporte para animación
         /// </summary>
         private void CreateAnimatedTitle()
         {
-            // Container para el logo (para animaciones)
+            Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
+
+            // Container para ambos logos (para animaciones)
             GameObject logoContainerObj = new GameObject("LogoContainer");
             logoContainerObj.transform.SetParent(canvas.transform, false);
 
             logoContainer = logoContainerObj.AddComponent<RectTransform>();
-            logoContainer.anchorMin = new Vector2(0.5f, 0.58f);
-            logoContainer.anchorMax = new Vector2(0.5f, 0.58f);
+            logoContainer.anchorMin = new Vector2(0.5f, 0.55f);
+            logoContainer.anchorMax = new Vector2(0.5f, 0.55f);
             logoContainer.pivot = new Vector2(0.5f, 0.5f);
-            logoContainer.sizeDelta = new Vector2(700, 200);
+            logoContainer.sizeDelta = new Vector2(750, 550);
             logoContainer.anchoredPosition = Vector2.zero;
 
             logoCanvasGroup = logoContainerObj.AddComponent<CanvasGroup>();
             logoCanvasGroup.alpha = 0f; // Comienza invisible para la animación
 
-            // Título principal
-            Color titleColor = GetThemeColor(t => t.textTitle, new Color(0f, 1f, 1f));
-            Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
+            // === Brain Icon (arriba, centrado) ===
+            Sprite brainSprite = Resources.Load<Sprite>("UI/LogoDigitPark_Brain");
+            if (brainSprite != null)
+            {
+                GameObject brainObj = new GameObject("BrainLogo");
+                brainObj.transform.SetParent(logoContainerObj.transform, false);
 
-            TextMeshProUGUI title = UIFactory.CreateTitle(logoContainer, "Title", "DIGIT PARK");
-            title.fontSize = 72;
-            title.color = titleColor;
-            title.outlineWidth = 0.25f;
-            title.outlineColor = accentColor;
+                RectTransform brainRT = brainObj.AddComponent<RectTransform>();
+                brainRT.anchorMin = new Vector2(0.5f, 0.55f);
+                brainRT.anchorMax = new Vector2(0.5f, 0.55f);
+                brainRT.pivot = new Vector2(0.5f, 0f);
+                brainRT.sizeDelta = new Vector2(280, 280);
+                brainRT.anchoredPosition = Vector2.zero;
 
-            // Efecto glow detrás del título
-            CreateTitleGlow(logoContainer, accentColor);
+                Image brainImg = brainObj.AddComponent<Image>();
+                brainImg.sprite = brainSprite;
+                brainImg.preserveAspect = true;
+                brainImg.raycastTarget = false;
+            }
+
+            // === DIGIT PARK Text Logo (debajo del brain) ===
+            Sprite textSprite = Resources.Load<Sprite>("UI/LogoDigitPark_Text");
+            if (textSprite != null)
+            {
+                GameObject textLogoObj = new GameObject("TextLogo");
+                textLogoObj.transform.SetParent(logoContainerObj.transform, false);
+
+                RectTransform textRT = textLogoObj.AddComponent<RectTransform>();
+                textRT.anchorMin = new Vector2(0.5f, 0.55f);
+                textRT.anchorMax = new Vector2(0.5f, 0.55f);
+                textRT.pivot = new Vector2(0.5f, 1f);
+                textRT.sizeDelta = new Vector2(650, 240);
+                textRT.anchoredPosition = new Vector2(0, -15);
+
+                Image textImg = textLogoObj.AddComponent<Image>();
+                textImg.sprite = textSprite;
+                textImg.preserveAspect = true;
+                textImg.raycastTarget = false;
+            }
+            else
+            {
+                // Fallback: texto TMP si no hay imagen
+                Color titleColor = GetThemeColor(t => t.textTitle, new Color(0f, 1f, 1f));
+                TextMeshProUGUI title = UIFactory.CreateTitle(logoContainer, "Title", "DIGIT PARK");
+                title.fontSize = 72;
+                title.color = titleColor;
+                title.outlineWidth = 0.25f;
+                title.outlineColor = accentColor;
+            }
         }
 
         /// <summary>
-        /// Crea efecto glow detrás del título
+        /// Crea efecto glow detrás del logo
         /// </summary>
         private void CreateTitleGlow(RectTransform parent, Color glowColor)
         {
             GameObject glowObj = new GameObject("TitleGlow");
             glowObj.transform.SetParent(parent, false);
-            glowObj.transform.SetAsFirstSibling(); // Detrás del título
+            glowObj.transform.SetAsFirstSibling();
 
             RectTransform rt = glowObj.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = new Vector2(100, 50);
+            rt.anchorMin = new Vector2(0.15f, 0.2f);
+            rt.anchorMax = new Vector2(0.85f, 0.85f);
+            rt.sizeDelta = Vector2.zero;
             rt.anchoredPosition = Vector2.zero;
 
             Image img = glowObj.AddComponent<Image>();
             Color glowWithAlpha = glowColor;
-            glowWithAlpha.a = 0.15f;
+            glowWithAlpha.a = 0.1f;
             img.color = glowWithAlpha;
             img.raycastTarget = false;
         }
@@ -315,8 +354,8 @@ namespace DigitPark.UI
             subtitle.fontStyle = FontStyles.Bold;
 
             RectTransform rt = subtitle.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.40f);
-            rt.anchorMax = new Vector2(0.5f, 0.40f);
+            rt.anchorMin = new Vector2(0.5f, 0.30f);
+            rt.anchorMax = new Vector2(0.5f, 0.30f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(500, 30);
@@ -336,8 +375,8 @@ namespace DigitPark.UI
             subtitle2.alpha = 0.7f;
 
             RectTransform rt2 = subtitle2.GetComponent<RectTransform>();
-            rt2.anchorMin = new Vector2(0.5f, 0.36f);
-            rt2.anchorMax = new Vector2(0.5f, 0.36f);
+            rt2.anchorMin = new Vector2(0.5f, 0.26f);
+            rt2.anchorMax = new Vector2(0.5f, 0.26f);
             rt2.pivot = new Vector2(0.5f, 0.5f);
             rt2.anchoredPosition = Vector2.zero;
             rt2.sizeDelta = new Vector2(500, 25);
@@ -357,8 +396,8 @@ namespace DigitPark.UI
             barContainer.transform.SetParent(canvas.transform, false);
 
             RectTransform containerRT = barContainer.AddComponent<RectTransform>();
-            containerRT.anchorMin = new Vector2(0.5f, 0.3f);
-            containerRT.anchorMax = new Vector2(0.5f, 0.3f);
+            containerRT.anchorMin = new Vector2(0.5f, 0.20f);
+            containerRT.anchorMax = new Vector2(0.5f, 0.20f);
             containerRT.pivot = new Vector2(0.5f, 0.5f);
             containerRT.sizeDelta = new Vector2(600, 12);
             containerRT.anchoredPosition = Vector2.zero;
@@ -421,8 +460,8 @@ namespace DigitPark.UI
             );
 
             RectTransform rt = loadingText.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.24f);
-            rt.anchorMax = new Vector2(0.5f, 0.24f);
+            rt.anchorMin = new Vector2(0.5f, 0.14f);
+            rt.anchorMax = new Vector2(0.5f, 0.14f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(700, 50);
