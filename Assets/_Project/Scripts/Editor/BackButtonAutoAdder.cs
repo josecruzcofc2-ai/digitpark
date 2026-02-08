@@ -281,69 +281,67 @@ namespace DigitPark.Editor
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("DigitPark/UI/Auto-Add/Update BackButton in Current Scene", false, 202)]
-        public static void UpdateBackButtonInCurrentScene()
+        [MenuItem("DigitPark/UI/Auto-Add/Add BackButton to Current Scene", false, 202)]
+        public static void AddBackButtonToCurrentScene()
         {
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
-                Debug.LogError("❌ No Canvas found in current scene");
+                Debug.LogError("No Canvas found in current scene");
                 return;
             }
 
-            // Get current scene name
-            string sceneName = System.IO.Path.GetFileNameWithoutExtension(
-                EditorSceneManager.GetActiveScene().path);
+            var scene = EditorSceneManager.GetActiveScene();
+            string sceneName = System.IO.Path.GetFileNameWithoutExtension(scene.path);
 
-            // Determine which prefab to use
-            GameObject prefabToUse;
-            string buttonType;
-
-            if (GOLD_SCENES.Contains(sceneName))
+            if (EXCLUDED_SCENES.Contains(sceneName))
             {
-                prefabToUse = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PATH);
-                buttonType = "GOLD";
-            }
-            else
-            {
-                prefabToUse = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_CYAN_PATH);
-                buttonType = "CYAN";
-            }
-
-            if (prefabToUse == null)
-            {
-                Debug.LogError($"❌ {buttonType} BackButton prefab not found");
+                Debug.LogWarning($"{sceneName} is in the excluded list (no back button needed)");
                 return;
             }
 
-            // Find existing BackButton
-            Transform existingBackButton = FindExistingBackButton(canvas.transform);
-            Transform header = canvas.transform.Find("Header");
+            // Auto-detect gold or cyan
+            bool isGold = GOLD_SCENES.Contains(sceneName);
+            string buttonType = isGold ? "GOLD" : "CYAN";
+            string prefabPath = isGold ? BACK_BUTTON_GOLD_PATH : BACK_BUTTON_CYAN_PATH;
 
-            if (existingBackButton != null)
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
             {
-                // Store position
-                RectTransform oldRect = existingBackButton.GetComponent<RectTransform>();
-                Vector2 oldPosition = oldRect.anchoredPosition;
-                Vector2 oldSize = oldRect.sizeDelta;
-
-                // Remove old
-                Object.DestroyImmediate(existingBackButton.gameObject);
-
-                // Add new
-                GameObject newBackButton = (GameObject)PrefabUtility.InstantiatePrefab(
-                    prefabToUse, header ?? canvas.transform);
-                RectTransform newRect = newBackButton.GetComponent<RectTransform>();
-                newRect.anchoredPosition = oldPosition;
-                newRect.sizeDelta = oldSize;
-
-                string icon = buttonType == "GOLD" ? "💎" : "🔷";
-                Debug.Log($"{icon} {buttonType} BackButton updated in current scene");
+                Debug.LogError($"{buttonType} BackButton prefab not found at {prefabPath}");
+                return;
             }
-            else
+
+            // Remove existing if any
+            Transform existing = FindExistingBackButton(canvas.transform);
+            if (existing != null)
             {
-                Debug.LogWarning("⚠️ No existing BackButton found to update");
+                Object.DestroyImmediate(existing.gameObject);
+                Debug.Log($"Removed old BackButton from {sceneName}");
             }
+
+            // Find SafeArea or use Canvas
+            Transform parent = canvas.transform.Find("SafeArea") ?? canvas.transform;
+
+            // Instantiate
+            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+            instance.name = isGold ? "BackButtonGold" : "BackButton";
+
+            RectTransform rt = instance.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                rt.anchorMin = new Vector2(0, 1);
+                rt.anchorMax = new Vector2(0, 1);
+                rt.pivot = new Vector2(0, 1);
+                rt.anchoredPosition = new Vector2(15, -15);
+                rt.sizeDelta = new Vector2(50, 50);
+            }
+
+            instance.transform.SetAsLastSibling();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+
+            Debug.Log($"[BackButton] {buttonType} BackButton added to {sceneName}");
         }
     }
 }

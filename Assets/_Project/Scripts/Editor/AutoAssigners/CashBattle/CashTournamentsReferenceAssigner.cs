@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 
@@ -156,6 +157,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             SerializedObject so = new SerializedObject(panel);
+            so.Update();
 
             // Header
             AssignReference(so, "titleText", FindTextByName("title", "header", "torneos"));
@@ -174,6 +176,8 @@ namespace DigitPark.Editor.AutoAssigners
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(panel);
+            EditorUtility.SetDirty(panel.gameObject);
+            EditorSceneManager.MarkSceneDirty(panel.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 

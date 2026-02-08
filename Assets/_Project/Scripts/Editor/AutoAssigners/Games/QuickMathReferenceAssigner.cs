@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 
@@ -153,6 +154,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             SerializedObject so = new SerializedObject(controller);
+            so.Update();
 
             // Equation Display
             AssignReference(so, "problemText", FindTextByName("problem", "equation", "question"));
@@ -178,6 +180,8 @@ namespace DigitPark.Editor.AutoAssigners
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
+            EditorUtility.SetDirty(controller.gameObject);
+            EditorSceneManager.MarkSceneDirty(controller.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 

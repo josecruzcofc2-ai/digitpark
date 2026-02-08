@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 
@@ -156,6 +157,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             SerializedObject so = new SerializedObject(controller);
+            so.Update();
 
             // UI Elements
             AssignReference(so, "timerText", FindTextByName("timer", "time", "tiempo"));
@@ -168,6 +170,8 @@ namespace DigitPark.Editor.AutoAssigners
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
+            EditorUtility.SetDirty(controller.gameObject);
+            EditorSceneManager.MarkSceneDirty(controller.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 

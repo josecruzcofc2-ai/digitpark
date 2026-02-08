@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 
@@ -35,8 +36,9 @@ namespace DigitPark.Editor.AutoAssigners
             // Online Players
             "onlinePlayersText", "onlineIndicator",
             // Action
-            "findOpponentButton", "findOpponentText"
-            // Note: cognitiveSprintButton, cognitiveSprintPanel, sprintSelectionText excluded - V2 feature
+            "findOpponentButton", "findOpponentText",
+            // Cognitive Sprint
+            "cognitiveSprintButton", "cognitiveSprintPanel", "sprintSelectionText"
         };
 
         private struct ReferenceResult
@@ -161,6 +163,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             SerializedObject so = new SerializedObject(panel);
+            so.Update();
 
             // Header (UIBuilder: "TitleText", "BackButton")
             AssignReference(so, "titleText", FindTextByName("titletext"));
@@ -185,8 +188,15 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "findOpponentButton", FindButtonByName("findopponentbutton"));
             AssignReference(so, "findOpponentText", FindTextByName("findopponenttext"));
 
+            // Cognitive Sprint (la card GameCard_CognitiveSprint ES el boton)
+            AssignReference(so, "cognitiveSprintButton", FindButtonByName("gamecard_cognitivesprint"));
+            AssignGameObject(so, "cognitiveSprintPanel", "CognitiveSprintPanel");
+            AssignReference(so, "sprintSelectionText", FindTextByName("sprintselectiontext"));
+
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(panel);
+            EditorUtility.SetDirty(panel.gameObject);
+            EditorSceneManager.MarkSceneDirty(panel.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 
@@ -236,6 +246,24 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Image>(true);
             foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
             return null;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var t in all)
+                    if (t.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = t.gameObject;
+                        AddResult(propertyName, "Assigned", true, t.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
         }
 
         #endregion

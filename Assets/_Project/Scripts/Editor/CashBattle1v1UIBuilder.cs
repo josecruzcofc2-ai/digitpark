@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 namespace DigitPark.Editor
 {
@@ -12,6 +13,21 @@ namespace DigitPark.Editor
     /// </summary>
     public class CashBattle1v1UIBuilder : EditorWindow
     {
+        // Reference Assigner state
+        private Vector2 scrollPosition;
+        private static int assignedCount = 0;
+        private static int failedCount = 0;
+        private static int alreadySetCount = 0;
+        private static List<AssignResult> assignResults = new List<AssignResult>();
+
+        private struct AssignResult
+        {
+            public string fieldName;
+            public string status;
+            public bool success;
+            public Object assignedObject;
+        }
+
         // Premium Color Palette
         private static readonly Color GOLD_PRIMARY = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color GOLD_DARK = new Color(0.85f, 0.65f, 0.13f, 1f);
@@ -37,20 +53,18 @@ namespace DigitPark.Editor
 
         private void OnGUI()
         {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
+            // ========== SECCION 1: UI BUILDER ==========
             GUILayout.Label("CashBattle 1v1 UI Builder", EditorStyles.boldLabel);
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(5);
 
             EditorGUILayout.HelpBox(
-                "Construye la UI para la escena CashBattle1v1:\n\n" +
-                "- Header con balance y jugadores online\n" +
-                "- Grid de seleccion de juegos (iconos premium)\n" +
-                "- Selector de apuestas ($1-$250)\n" +
-                "- Input personalizado con max $250\n" +
-                "- Feedback de ganancias potenciales\n" +
-                "- Boton 'Buscar Rival' con contador",
+                "Construye la UI para la escena CashBattle1v1:\n" +
+                "- Header, Grid de juegos, Apuestas, Buscar Rival, Cognitive Sprint",
                 MessageType.Info);
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(5);
 
             GUI.backgroundColor = GOLD_PRIMARY;
             if (GUILayout.Button("CONSTRUIR UI COMPLETA", GUILayout.Height(40)))
@@ -59,28 +73,60 @@ namespace DigitPark.Editor
             }
             GUI.backgroundColor = Color.white;
 
-            EditorGUILayout.Space(15);
+            EditorGUILayout.Space(10);
             GUILayout.Label("Construccion por Secciones:", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("Solo Header + Online Indicator", GUILayout.Height(28)))
-            {
+            if (GUILayout.Button("Solo Header + Online Indicator", GUILayout.Height(26)))
                 BuildHeaderOnly();
-            }
-
-            if (GUILayout.Button("Solo Game Cards Grid", GUILayout.Height(28)))
-            {
+            if (GUILayout.Button("Solo Game Cards Grid", GUILayout.Height(26)))
                 BuildGameCardsOnly();
-            }
-
-            if (GUILayout.Button("Solo Entry Fee Section", GUILayout.Height(28)))
-            {
+            if (GUILayout.Button("Solo Entry Fee Section", GUILayout.Height(26)))
                 BuildEntryFeeSectionOnly();
+            if (GUILayout.Button("Solo Find Opponent Button", GUILayout.Height(26)))
+                BuildFindOpponentOnly();
+
+            // ========== SEPARADOR ==========
+            EditorGUILayout.Space(15);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            // ========== SECCION 2: REFERENCE ASSIGNER ==========
+            GUILayout.Label("Asignar Referencias", EditorStyles.boldLabel);
+            EditorGUILayout.Space(5);
+
+            string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (currentScene != "CashBattle1v1")
+            {
+                EditorGUILayout.HelpBox($"Escena actual: {currentScene}\nAbre CashBattle1v1 primero.", MessageType.Warning);
             }
 
-            if (GUILayout.Button("Solo Find Opponent Button", GUILayout.Height(28)))
+            MonoBehaviour targetManager = FindCashBattle1v1Manager();
+            if (targetManager != null)
             {
-                BuildFindOpponentOnly();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Manager:", GUILayout.Width(60));
+                EditorGUILayout.ObjectField(targetManager, typeof(MonoBehaviour), true);
+                EditorGUILayout.EndHorizontal();
             }
+            else
+            {
+                EditorGUILayout.HelpBox("CashBattle1v1Manager no encontrado en escena.", MessageType.Warning);
+            }
+
+            EditorGUILayout.Space(5);
+
+            GUI.backgroundColor = new Color(0.5f, 1f, 0.5f);
+            if (GUILayout.Button("ASIGNAR TODAS LAS REFERENCIAS", GUILayout.Height(36)))
+            {
+                ResetAssignState();
+                RunAssignAllReferences();
+                Repaint();
+            }
+            GUI.backgroundColor = Color.white;
+
+            // Mostrar resultados
+            DrawAssignResults();
+
+            EditorGUILayout.EndScrollView();
         }
 
         #region Main Build Methods
@@ -130,6 +176,9 @@ namespace DigitPark.Editor
             // 4. Main Content Panel
             CreateMainContentPanel(safeArea.transform);
 
+            // 5. Cognitive Sprint Section (below title, hidden by default)
+            CreateCognitiveSprintSection(safeArea.transform);
+
             Debug.Log("[CashBattle1v1Builder] UI construida exitosamente!");
         }
 
@@ -137,7 +186,8 @@ namespace DigitPark.Editor
         {
             string[] toDestroy = {
                 "Background", "SafeArea", "MainContentPanel", "Header",
-                "GameSelectionPanel", "EntryFeeSection", "FindOpponentContainer"
+                "GameSelectionPanel", "EntryFeeSection", "FindOpponentContainer",
+                "CognitiveSprintPanel"
             };
 
             foreach (string name in toDestroy)
@@ -482,12 +532,11 @@ namespace DigitPark.Editor
             scrollView.transform.SetParent(parent, false);
 
             RectTransform scrollRT = scrollView.AddComponent<RectTransform>();
-            // Ocupa desde debajo del online indicator hasta arriba del entry fee section
-            scrollRT.anchorMin = new Vector2(0, 0.38f); // Mas espacio para entry fee
+            scrollRT.anchorMin = new Vector2(0, 0.38f);
             scrollRT.anchorMax = new Vector2(1, 0.95f);
             scrollRT.sizeDelta = Vector2.zero;
-            scrollRT.offsetMin = new Vector2(5, 8); // Padding
-            scrollRT.offsetMax = new Vector2(-5, -75); // Espacio para titulo + online indicator
+            scrollRT.offsetMin = new Vector2(0, 8);
+            scrollRT.offsetMax = new Vector2(0, -75);
 
             ScrollRect scrollRect = scrollView.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
@@ -523,8 +572,7 @@ namespace DigitPark.Editor
             gamesRT.anchorMax = new Vector2(1, 1);
             gamesRT.pivot = new Vector2(0.5f, 1);
             gamesRT.anchoredPosition = Vector2.zero;
-            // 3 filas x (290 + 40 spacing) + padding = ~1050px
-            gamesRT.sizeDelta = new Vector2(0, 1100);
+            gamesRT.sizeDelta = new Vector2(0, 1000);
 
             ContentSizeFitter sizeFitter = gamesContainer.AddComponent<ContentSizeFitter>();
             sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -532,16 +580,16 @@ namespace DigitPark.Editor
 
             scrollRect.content = gamesRT;
 
-            // Grid Layout - Cards optimizados para que quepan 6 con separacion visible
+            // Grid Layout - Grande y centrado, cards que abarquen la pantalla
             GridLayoutGroup gridLayout = gamesContainer.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(290, 290); // Tamaño que permite ver separacion
-            gridLayout.spacing = new Vector2(40, 40); // MUCHO MAS ESPACIADO para separacion visible
+            gridLayout.cellSize = new Vector2(310, 310);
+            gridLayout.spacing = new Vector2(25, 25);
             gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayout.childAlignment = TextAnchor.UpperCenter;
             gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             gridLayout.constraintCount = 2;
-            gridLayout.padding = new RectOffset(55, 55, 20, 25); // Mas padding
+            gridLayout.padding = new RectOffset(10, 10, 10, 15);
 
             // ========== CREATE GAME CARDS (6 juegos) ==========
             CreateGameCard(gamesContainer.transform, "DigitRush", "DigitRushIcon");
@@ -549,9 +597,9 @@ namespace DigitPark.Editor
             CreateGameCard(gamesContainer.transform, "QuickMath", "QuickMathIcon");
             CreateGameCard(gamesContainer.transform, "FlashTap", "FlashTapIcon");
             CreateGameCard(gamesContainer.transform, "OddOneOut", "OddOneOutIcon");
-            CreateGameCard(gamesContainer.transform, "CognitiveSprint", "CognitiveSprintIcon", true); // PRO badge
+            CreateGameCard(gamesContainer.transform, "CognitiveSprint", "CognitiveSprintIcon", true);
 
-            Debug.Log("[CashBattle1v1] Games Grid creado con 6 cards");
+            Debug.Log("[CashBattle1v1] Games Grid creado con 6 cards (centrado)");
         }
 
         private static void CreateGameCard(Transform parent, string gameId, string iconName, bool isPro = false)
@@ -559,49 +607,86 @@ namespace DigitPark.Editor
             GameObject card = new GameObject($"GameCard_{gameId}");
             card.transform.SetParent(parent, false);
 
+            // Card container con fondo oscuro premium
             Image cardBg = card.AddComponent<Image>();
-            cardBg.color = Color.white;
-            cardBg.preserveAspect = true;
+            cardBg.color = CARD_BG;
 
-            // Cargar icono desde la carpeta CashBattle (iconos con glow pre-renderizado)
-            // Esto elimina la necesidad de multiples Outline components y mejora el rendimiento
-            string iconPath = $"Assets/_Project/Art/Icons/Games/CashBattle/{iconName}.png";
+            // Borde dorado sutil
+            Outline cardOutline = card.AddComponent<Outline>();
+            cardOutline.effectColor = CARD_BORDER;
+            cardOutline.effectDistance = new Vector2(2, -2);
+
+            // Icono del juego (llena toda la card)
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(card.transform, false);
+
+            RectTransform iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = Vector2.zero;
+            iconRT.anchorMax = Vector2.one;
+            iconRT.sizeDelta = Vector2.zero;
+
+            Image iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+
+            // Cargar icono desde Assets/_Project/Art/Icons/Games/
+            string iconPath = $"Assets/_Project/Art/Icons/Games/{iconName}.png";
             Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
             if (iconSprite != null)
             {
-                cardBg.sprite = iconSprite;
+                iconImg.sprite = iconSprite;
+                iconImg.color = Color.white;
             }
             else
             {
-                // Fallback a la carpeta original si no existe en CashBattle
-                string fallbackPath = $"Assets/_Project/Art/Icons/Games/{iconName}.png";
-                iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(fallbackPath);
-                if (iconSprite != null)
-                {
-                    cardBg.sprite = iconSprite;
-                    Debug.LogWarning($"[CashBattle1v1] Using fallback icon (no glow): {fallbackPath}");
-                }
-                else
-                {
-                    cardBg.color = CARD_BG;
-                    Debug.LogWarning($"[CashBattle1v1] Icon not found: {iconPath}");
-                }
+                iconImg.color = new Color(0.4f, 0.4f, 0.4f, 0.5f);
+                Debug.LogWarning($"[CashBattle1v1] Icon not found: {iconPath}");
             }
-
-            // SIN OUTLINE COMPONENTS - El glow dorado ya esta pre-renderizado en los iconos
-            // Esto mejora drasticamente el rendimiento del editor y del juego
 
             // Button con transiciones suaves
             Button btn = card.AddComponent<Button>();
             ColorBlock colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
-            colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
-            colors.selectedColor = new Color(1.05f, 1.05f, 1.05f, 1f);
+            colors.normalColor = CARD_BG;
+            colors.highlightedColor = new Color(0.18f, 0.15f, 0.22f, 1f);
+            colors.pressedColor = new Color(0.25f, 0.2f, 0.12f, 1f);
+            colors.selectedColor = new Color(0.2f, 0.17f, 0.1f, 1f);
             btn.colors = colors;
             btn.targetGraphic = cardBg;
 
-            // Checkmark para indicar seleccion (oculto por defecto)
+            // PRO badge (solo CognitiveSprint)
+            if (isPro)
+            {
+                GameObject proBadge = new GameObject("ProBadge");
+                proBadge.transform.SetParent(card.transform, false);
+
+                RectTransform proRT = proBadge.AddComponent<RectTransform>();
+                proRT.anchorMin = new Vector2(0, 1);
+                proRT.anchorMax = new Vector2(0, 1);
+                proRT.pivot = new Vector2(0, 1);
+                proRT.sizeDelta = new Vector2(60, 28);
+                proRT.anchoredPosition = new Vector2(8, -8);
+
+                Image proBg = proBadge.AddComponent<Image>();
+                proBg.color = new Color(0.6f, 0.3f, 1f, 0.95f);
+
+                GameObject proTextObj = new GameObject("ProText");
+                proTextObj.transform.SetParent(proBadge.transform, false);
+
+                RectTransform proTextRT = proTextObj.AddComponent<RectTransform>();
+                proTextRT.anchorMin = Vector2.zero;
+                proTextRT.anchorMax = Vector2.one;
+                proTextRT.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI proText = proTextObj.AddComponent<TextMeshProUGUI>();
+                proText.text = "PRO";
+                proText.fontSize = 16;
+                proText.color = Color.white;
+                proText.fontStyle = FontStyles.Bold;
+                proText.alignment = TextAlignmentOptions.Center;
+                proText.raycastTarget = false;
+            }
+
+            // Checkmark para seleccion (oculto por defecto)
             GameObject checkmark = new GameObject("Checkmark");
             checkmark.transform.SetParent(card.transform, false);
 
@@ -609,11 +694,11 @@ namespace DigitPark.Editor
             checkRT.anchorMin = new Vector2(1, 1);
             checkRT.anchorMax = new Vector2(1, 1);
             checkRT.pivot = new Vector2(1, 1);
-            checkRT.sizeDelta = new Vector2(50, 50);
+            checkRT.sizeDelta = new Vector2(45, 45);
             checkRT.anchoredPosition = new Vector2(-8, -8);
 
             Image checkBg = checkmark.AddComponent<Image>();
-            checkBg.color = new Color(0.2f, 0.95f, 0.4f, 1f); // Verde brillante
+            checkBg.color = new Color(0.2f, 0.95f, 0.4f, 1f);
 
             GameObject checkText = new GameObject("CheckText");
             checkText.transform.SetParent(checkmark.transform, false);
@@ -625,7 +710,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
             checkTMP.text = "V";
-            checkTMP.fontSize = 32;
+            checkTMP.fontSize = 28;
             checkTMP.color = Color.white;
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
@@ -633,6 +718,7 @@ namespace DigitPark.Editor
 
             checkmark.SetActive(false);
         }
+
 
         private static void BuildGameCardsOnly()
         {
@@ -1145,6 +1231,461 @@ namespace DigitPark.Editor
 
             CreateFindOpponentButton(panel);
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        }
+
+        #endregion
+
+        #region Cognitive Sprint
+
+        private static void CreateCognitiveSprintSection(Transform parent)
+        {
+            // === Overlay blocker (semi-transparente, se ve la escena detras) ===
+            GameObject sprintPanel = new GameObject("CognitiveSprintPanel");
+            sprintPanel.transform.SetParent(parent, false);
+
+            RectTransform blockerRT = sprintPanel.AddComponent<RectTransform>();
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.sizeDelta = Vector2.zero;
+
+            Image blockerBg = sprintPanel.AddComponent<Image>();
+            blockerBg.color = new Color(0f, 0f, 0f, 0.75f); // Semi-transparente
+
+            // === Card central (popup) ===
+            GameObject card = new GameObject("SprintCard");
+            card.transform.SetParent(sprintPanel.transform, false);
+
+            RectTransform cardRT = card.AddComponent<RectTransform>();
+            cardRT.anchorMin = new Vector2(0.05f, 0.5f);
+            cardRT.anchorMax = new Vector2(0.95f, 0.5f);
+            cardRT.pivot = new Vector2(0.5f, 0.5f);
+            cardRT.sizeDelta = new Vector2(0, 0); // alto lo controla ContentSizeFitter
+
+            ContentSizeFitter csf = card.AddComponent<ContentSizeFitter>();
+            csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.color = new Color(0.08f, 0.06f, 0.11f, 0.97f);
+
+            Outline cardOutline = card.AddComponent<Outline>();
+            cardOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.4f);
+            cardOutline.effectDistance = new Vector2(2, -2);
+
+            // VerticalLayout para todo el contenido del popup
+            VerticalLayoutGroup cardLayout = card.AddComponent<VerticalLayoutGroup>();
+            cardLayout.spacing = 8;
+            cardLayout.padding = new RectOffset(20, 20, 25, 20);
+            cardLayout.childAlignment = TextAnchor.UpperCenter;
+            cardLayout.childForceExpandWidth = true;
+            cardLayout.childForceExpandHeight = false;
+            cardLayout.childControlWidth = true;
+            cardLayout.childControlHeight = false;
+
+            // === Titulo ===
+            GameObject titleObj = CreateLayoutText(card.transform, "SprintTitle",
+                "COGNITIVE SPRINT", 40, TEXT_GOLD, FontStyles.Bold, 55);
+
+            // === Subtitulo ===
+            GameObject subtitleObj = CreateLayoutText(card.transform, "SprintSubtitle",
+                "Selecciona de 2 a 5 juegos", 20, TEXT_SECONDARY, FontStyles.Normal, 30);
+
+            // === Separador ===
+            GameObject sep = new GameObject("Separator");
+            sep.transform.SetParent(card.transform, false);
+            LayoutElement sepLE = sep.AddComponent<LayoutElement>();
+            sepLE.preferredHeight = 2;
+            Image sepImg = sep.AddComponent<Image>();
+            sepImg.color = new Color(0.85f, 0.65f, 0.13f, 0.3f);
+
+            // === 5 Game Cards ===
+            string[] sprintGames = { "DigitRush", "MemoryPairs", "QuickMath", "FlashTap", "OddOneOut" };
+            string[] sprintIcons = { "DigitRushIcon", "MemoryPairsIcon", "QuickMathIcon", "FlashTapIcon", "OddOneOutIcon" };
+            string[] sprintNames = { "Digit Rush", "Memory Pairs", "Quick Math", "Flash Tap", "Odd One Out" };
+
+            for (int i = 0; i < sprintGames.Length; i++)
+            {
+                CreateSprintGameCard(card.transform, sprintGames[i], sprintIcons[i], sprintNames[i]);
+            }
+
+            // === Selection Text (justo debajo de cards) ===
+            GameObject selTextObj = CreateLayoutText(card.transform, "SprintSelectionText",
+                "Seleccionados: 0/5 (min: 2)", 24, Color.yellow, FontStyles.Bold, 40);
+
+            // === Botones (justo debajo del texto) ===
+            GameObject buttonsRow = new GameObject("SprintButtons");
+            buttonsRow.transform.SetParent(card.transform, false);
+
+            LayoutElement btnRowLE = buttonsRow.AddComponent<LayoutElement>();
+            btnRowLE.preferredHeight = 65;
+
+            HorizontalLayoutGroup btnLayout = buttonsRow.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.spacing = 15;
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.childForceExpandWidth = true;
+            btnLayout.childForceExpandHeight = true;
+            btnLayout.childControlWidth = true;
+            btnLayout.childControlHeight = true;
+            btnLayout.padding = new RectOffset(0, 0, 0, 0);
+
+            // Cancelar
+            CreateSprintActionButton(buttonsRow.transform, "SprintCancelButton", "CANCELAR",
+                new Color(0.15f, 0.12f, 0.2f, 1f), new Color(0.5f, 0.45f, 0.6f, 1f),
+                TEXT_SECONDARY, 1f);
+
+            // Aceptar
+            CreateSprintActionButton(buttonsRow.transform, "SprintAcceptButton", "ACEPTAR",
+                BUTTON_GOLD, new Color(1f, 0.75f, 0.2f, 0.6f),
+                BG_DARK, 1f);
+
+            // Visible para verificar en Editor
+            // sprintPanel.SetActive(false);
+
+            Debug.Log("[CashBattle1v1] Cognitive Sprint popup creado");
+        }
+
+        private static GameObject CreateLayoutText(Transform parent, string name,
+            string content, float fontSize, Color color, FontStyles style, float height)
+        {
+            GameObject obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+
+            LayoutElement le = obj.AddComponent<LayoutElement>();
+            le.preferredHeight = height;
+
+            TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
+            tmp.text = content;
+            tmp.fontSize = fontSize;
+            tmp.color = color;
+            tmp.fontStyle = style;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableWordWrapping = false;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.raycastTarget = false;
+
+            return obj;
+        }
+
+        private static void CreateSprintGameCard(Transform parent, string gameId, string iconName, string displayName)
+        {
+            GameObject card = new GameObject($"SprintCard_{gameId}");
+            card.transform.SetParent(parent, false);
+
+            LayoutElement le = card.AddComponent<LayoutElement>();
+            le.preferredHeight = 110;
+            le.flexibleWidth = 1;
+
+            // Fondo de la card
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.color = new Color(0.09f, 0.07f, 0.13f, 1f);
+
+            // Borde sutil
+            Outline cardOutline = card.AddComponent<Outline>();
+            cardOutline.effectColor = new Color(0.4f, 0.3f, 0.55f, 0.35f);
+            cardOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            // Button - toda la card es presionable
+            Button btn = card.AddComponent<Button>();
+            ColorBlock colors = btn.colors;
+            colors.normalColor = new Color(0.09f, 0.07f, 0.13f, 1f);
+            colors.highlightedColor = new Color(0.14f, 0.11f, 0.2f, 1f);
+            colors.pressedColor = new Color(0.2f, 0.15f, 0.08f, 1f);
+            colors.selectedColor = new Color(0.12f, 0.1f, 0.06f, 1f);
+            btn.colors = colors;
+            btn.targetGraphic = cardBg;
+
+            // HorizontalLayoutGroup para distribuir icon | name | circle
+            HorizontalLayoutGroup hlg = card.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(8, 8, 8, 8);
+            hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = false;
+
+            // === Icono (lado izquierdo) ===
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(card.transform, false);
+
+            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
+            iconLE.preferredWidth = 85;
+            iconLE.preferredHeight = 85;
+            iconLE.flexibleWidth = 0;
+
+            Image iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+
+            string iconPath = $"Assets/_Project/Art/Icons/Games/{iconName}.png";
+            Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+                iconImg.color = Color.white;
+            }
+
+            // === Nombre del juego (centro, llena el espacio restante) ===
+            GameObject nameObj = new GameObject("Name");
+            nameObj.transform.SetParent(card.transform, false);
+
+            LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
+            nameLE.flexibleWidth = 1;
+            nameLE.preferredHeight = 85;
+
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = displayName;
+            nameText.fontSize = 28;
+            nameText.color = TEXT_PRIMARY;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.Left;
+            nameText.enableWordWrapping = false;
+            nameText.overflowMode = TextOverflowModes.Ellipsis;
+            nameText.raycastTarget = false;
+
+            // === Circulo de seleccion (derecha) ===
+            GameObject circleObj = new GameObject("SelectCircle");
+            circleObj.transform.SetParent(card.transform, false);
+
+            LayoutElement circleLE = circleObj.AddComponent<LayoutElement>();
+            circleLE.preferredWidth = 44;
+            circleLE.preferredHeight = 44;
+            circleLE.flexibleWidth = 0;
+
+            Image circleBg = circleObj.AddComponent<Image>();
+            circleBg.color = new Color(0.2f, 0.17f, 0.28f, 1f);
+
+            // === Checkmark (dentro del circulo, oculto hasta seleccionar) ===
+            GameObject checkObj = new GameObject("Checkmark");
+            checkObj.transform.SetParent(circleObj.transform, false);
+
+            RectTransform checkRT = checkObj.AddComponent<RectTransform>();
+            checkRT.anchorMin = Vector2.zero;
+            checkRT.anchorMax = Vector2.one;
+            checkRT.sizeDelta = Vector2.zero;
+
+            Image checkBg = checkObj.AddComponent<Image>();
+            checkBg.color = new Color(0.2f, 0.9f, 0.4f, 1f);
+
+            GameObject checkTextObj = new GameObject("CheckText");
+            checkTextObj.transform.SetParent(checkObj.transform, false);
+
+            RectTransform checkTextRT = checkTextObj.AddComponent<RectTransform>();
+            checkTextRT.anchorMin = Vector2.zero;
+            checkTextRT.anchorMax = Vector2.one;
+            checkTextRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI checkText = checkTextObj.AddComponent<TextMeshProUGUI>();
+            checkText.text = "\u2713";
+            checkText.fontSize = 26;
+            checkText.color = Color.white;
+            checkText.fontStyle = FontStyles.Bold;
+            checkText.alignment = TextAlignmentOptions.Center;
+            checkText.raycastTarget = false;
+
+            checkObj.SetActive(false);
+        }
+
+        private static void CreateSprintActionButton(Transform parent, string name, string label,
+            Color bgColor, Color outlineColor, Color textColor, float flexWeight)
+        {
+            GameObject btnObj = new GameObject(name);
+            btnObj.transform.SetParent(parent, false);
+
+            LayoutElement le = btnObj.AddComponent<LayoutElement>();
+            le.flexibleWidth = flexWeight;
+            le.preferredHeight = 60;
+
+            Image bg = btnObj.AddComponent<Image>();
+            bg.color = bgColor;
+
+            Outline outline = btnObj.AddComponent<Outline>();
+            outline.effectColor = outlineColor;
+            outline.effectDistance = new Vector2(2, -2);
+
+            Button btn = btnObj.AddComponent<Button>();
+            ColorBlock colors = btn.colors;
+            colors.normalColor = bgColor;
+            colors.highlightedColor = new Color(
+                Mathf.Min(bgColor.r * 1.2f, 1f),
+                Mathf.Min(bgColor.g * 1.2f, 1f),
+                Mathf.Min(bgColor.b * 1.2f, 1f), 1f);
+            colors.pressedColor = new Color(bgColor.r * 0.8f, bgColor.g * 0.8f, bgColor.b * 0.8f, 1f);
+            btn.colors = colors;
+            btn.targetGraphic = bg;
+
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
+            text.text = label;
+            text.fontSize = 26;
+            text.color = textColor;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Center;
+            text.enableWordWrapping = false;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+        }
+
+        #endregion
+
+        #region Reference Assigner
+
+        private static MonoBehaviour FindCashBattle1v1Manager()
+        {
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "CashBattle1v1Manager") return mb;
+            return null;
+        }
+
+        private static void ResetAssignState()
+        {
+            assignedCount = 0; failedCount = 0; alreadySetCount = 0;
+            assignResults.Clear();
+        }
+
+        private static void RunAssignAllReferences()
+        {
+            var manager = FindCashBattle1v1Manager();
+            if (manager == null)
+            {
+                Debug.LogError("[CashBattle1v1] CashBattle1v1Manager no encontrado!");
+                return;
+            }
+
+            SerializedObject so = new SerializedObject(manager);
+            so.Update();
+
+            // Header
+            AssignRef(so, "titleText", FindText("titletext"));
+            AssignRef(so, "backButton", FindBtn("backbutton"));
+
+            // Games Grid
+            AssignRef(so, "gamesContainer", FindComp<Transform>("gamescontainer"));
+
+            // Entry Fee
+            AssignRef(so, "selectedFeeText", FindText("selectedfeetext"));
+
+            // Custom Entry
+            AssignRef(so, "customAmountInput", FindComp<TMP_InputField>("custominputfield"));
+            AssignRef(so, "earningsText", FindText("potentialearningstext"));
+            AssignRef(so, "minMaxText", FindText("maxlabel"));
+
+            // Online Players
+            AssignRef(so, "onlinePlayersText", FindText("onlineplayerstext"));
+            AssignRef(so, "onlineIndicator", FindImg("greendot"));
+
+            // Action Button
+            AssignRef(so, "findOpponentButton", FindBtn("findopponentbutton"));
+            AssignRef(so, "findOpponentText", FindText("findopponenttext"));
+
+            // Cognitive Sprint
+            AssignRef(so, "cognitiveSprintButton", FindBtn("gamecard_cognitivesprint"));
+            AssignGO(so, "cognitiveSprintPanel", "CognitiveSprintPanel");
+            AssignRef(so, "sprintSelectionText", FindText("sprintselectiontext"));
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
+            EditorUtility.SetDirty(manager.gameObject);
+            EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
+
+            Debug.Log($"[CashBattle1v1] Referencias: {assignedCount} asignadas, {alreadySetCount} ya puestas, {failedCount} fallidas");
+        }
+
+        private static void AssignRef(SerializedObject so, string prop, Object value)
+        {
+            var p = so.FindProperty(prop);
+            if (p == null) { AddAR(prop, "Propiedad no existe", false, null); failedCount++; return; }
+            if (p.objectReferenceValue != null) { AddAR(prop, "Ya asignada", true, p.objectReferenceValue); alreadySetCount++; return; }
+            if (value != null) { p.objectReferenceValue = value; AddAR(prop, "Asignada", true, value); assignedCount++; }
+            else { AddAR(prop, "No encontrada", false, null); failedCount++; }
+        }
+
+        private static void AssignGO(SerializedObject so, string prop, params string[] patterns)
+        {
+            var p = so.FindProperty(prop);
+            if (p == null) { AddAR(prop, "Propiedad no existe", false, null); failedCount++; return; }
+            if (p.objectReferenceValue != null) { AddAR(prop, "Ya asignada", true, p.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var pat in patterns)
+                foreach (var t in all)
+                    if (t.gameObject.name.ToLower().Contains(pat.ToLower()))
+                    {
+                        p.objectReferenceValue = t.gameObject;
+                        AddAR(prop, "Asignada", true, t.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddAR(prop, "No encontrada", false, null); failedCount++;
+        }
+
+        private static T FindComp<T>(params string[] patterns) where T : Component
+        {
+            var all = Object.FindObjectsOfType<T>(true);
+            foreach (var pat in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(pat.ToLower())) return o;
+            return null;
+        }
+
+        private static TextMeshProUGUI FindText(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
+            foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
+            return null;
+        }
+
+        private static Button FindBtn(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Button>(true);
+            foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            return null;
+        }
+
+        private static Image FindImg(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Image>(true);
+            foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
+            return null;
+        }
+
+        private static void AddAR(string f, string s, bool ok, Object o)
+        {
+            assignResults.Add(new AssignResult { fieldName = f, status = s, success = ok, assignedObject = o });
+        }
+
+        private void DrawAssignResults()
+        {
+            if (assignResults.Count == 0) return;
+
+            EditorGUILayout.Space(10);
+            int total = assignResults.Count;
+            int successTotal = assignedCount + alreadySetCount;
+            float rate = (float)successTotal / total;
+
+            GUI.color = rate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
+                        rate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
+            GUILayout.Label(rate == 1f ? "TODAS LAS REFERENCIAS ASIGNADAS" : "Algunas referencias faltan", EditorStyles.boldLabel);
+            GUI.color = Color.white;
+
+            GUILayout.Label($"Asignadas: {assignedCount} | Ya puestas: {alreadySetCount} | Fallidas: {failedCount}");
+            EditorGUILayout.Space(5);
+
+            foreach (var r in assignResults)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = r.success ? (r.status == "Ya asignada" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
+                GUILayout.Label(r.success ? (r.status == "Ya asignada" ? "o" : "+") : "x", GUILayout.Width(16));
+                GUI.color = Color.white;
+                GUILayout.Label(r.fieldName, GUILayout.Width(180));
+                GUILayout.Label(r.status, GUILayout.Width(110));
+                if (r.assignedObject != null)
+                    EditorGUILayout.ObjectField(r.assignedObject, typeof(Object), true, GUILayout.Width(140));
+                EditorGUILayout.EndHorizontal();
+            }
         }
 
         #endregion

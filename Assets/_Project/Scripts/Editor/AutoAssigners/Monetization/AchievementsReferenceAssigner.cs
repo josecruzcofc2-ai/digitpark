@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 using System.Reflection;
@@ -165,6 +166,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             SerializedObject so = new SerializedObject(manager);
+            so.Update();
 
             // Header
             AssignReference(so, "backButton", FindButtonByName("back", "return"));
@@ -225,6 +227,8 @@ namespace DigitPark.Editor.AutoAssigners
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
+            EditorUtility.SetDirty(manager.gameObject);
+            EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 
