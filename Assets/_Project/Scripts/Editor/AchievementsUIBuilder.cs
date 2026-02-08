@@ -501,7 +501,7 @@ namespace DigitPark.Editor
             CreateCategoryTab(tabsContent, "TournamentsTab", "TORNEOS", false, CAT_COMPETITION, 80);
             CreateCategoryTab(tabsContent, "SocialTab", "SOCIAL", false, new Color(0.4f, 0.6f, 1f, 1f), 70);
             CreateCategoryTab(tabsContent, "ProgressionTab", "PROGRESO", false, new Color(0.8f, 0.6f, 1f, 1f), 85);
-            // CollectorTab reservado para V2
+            CreateCategoryTab(tabsContent, "CollectorTab", "COLECCION", false, new Color(0.9f, 0.7f, 0.3f, 1f), 95);
             CreateCategoryTab(tabsContent, "TimeTab", "TIEMPO", false, new Color(0.5f, 0.8f, 0.9f, 1f), 75);
             CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 50);
 
@@ -1015,6 +1015,16 @@ namespace DigitPark.Editor
             LayoutElement descLE = GetOrAddComponent<LayoutElement>(descObj);
             descLE.minHeight = 45;
 
+            // Category Text
+            GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
+            TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
+            categoryText.text = "Categoria: Principiante";
+            categoryText.fontSize = 14;
+            categoryText.color = CYAN_NEON;
+            categoryText.alignment = TextAlignmentOptions.Center;
+            LayoutElement categoryLE = GetOrAddComponent<LayoutElement>(categoryObj);
+            categoryLE.minHeight = 22;
+
             // Progress Section
             GameObject progressSection = FindOrCreateChild(panel, "DetailProgressSection");
             VerticalLayoutGroup progVlg = GetOrAddComponent<VerticalLayoutGroup>(progressSection);
@@ -1069,6 +1079,17 @@ namespace DigitPark.Editor
             LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressTextObj);
             progressTextLE.minHeight = 20;
 
+            // Points Text
+            GameObject pointsObj = FindOrCreateChild(panel, "DetailPointsText");
+            TextMeshProUGUI pointsTmp2 = GetOrAddComponent<TextMeshProUGUI>(pointsObj);
+            pointsTmp2.text = "+50 pts";
+            pointsTmp2.fontSize = 16;
+            pointsTmp2.fontStyle = FontStyles.Bold;
+            pointsTmp2.color = GOLD;
+            pointsTmp2.alignment = TextAlignmentOptions.Center;
+            LayoutElement pointsLE2 = GetOrAddComponent<LayoutElement>(pointsObj);
+            pointsLE2.minHeight = 22;
+
             // Reward Section
             GameObject rewardSection = FindOrCreateChild(panel, "DetailRewardSection");
             Image rewardBg = GetOrAddComponent<Image>(rewardSection);
@@ -1110,7 +1131,7 @@ namespace DigitPark.Editor
             LayoutElement claimLE = GetOrAddComponent<LayoutElement>(claimBtn);
             claimLE.minHeight = 55;
 
-            GameObject claimText = FindOrCreateChild(claimBtn, "Text");
+            GameObject claimText = FindOrCreateChild(claimBtn, "ClaimButtonText");
             TextMeshProUGUI claimTmp = GetOrAddComponent<TextMeshProUGUI>(claimText);
             claimTmp.text = "RECLAMAR RECOMPENSA";
             claimTmp.fontSize = 18;
@@ -1158,13 +1179,13 @@ namespace DigitPark.Editor
             trophyLE.preferredWidth = 120;
             trophyLE.preferredHeight = 120;
 
-            // Glow behind trophy
-            GameObject glowObj = FindOrCreateChild(trophyObj, "Glow");
-            SetRectTransformStretch(glowObj);
-            RectTransform glowRT = glowObj.GetComponent<RectTransform>();
-            glowRT.offsetMin = new Vector2(-40, -40);
-            glowRT.offsetMax = new Vector2(40, 40);
-            glowObj.transform.SetAsFirstSibling();
+            // Glow behind trophy (separate child of celebration for manager reference)
+            GameObject glowObj = FindOrCreateChild(celebration, "CelebrationGlow");
+            RectTransform glowRT = GetOrAddComponent<RectTransform>(glowObj);
+            glowRT.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRT.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRT.sizeDelta = new Vector2(200, 200);
+            glowObj.transform.SetSiblingIndex(1); // Behind content
 
             Image glowImage = GetOrAddComponent<Image>(glowObj);
             glowImage.color = new Color(1f, 0.9f, 0.5f, 0.4f);

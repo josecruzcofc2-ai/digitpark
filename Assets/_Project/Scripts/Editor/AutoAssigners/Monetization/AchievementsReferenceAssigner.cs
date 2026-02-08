@@ -27,18 +27,21 @@ namespace DigitPark.Editor.AutoAssigners
             "backButton", "titleText", "totalPointsText", "completionText", "overallProgressBar",
             // Tabs Container
             "tabsContainer", "tabsScrollRect",
-            // Category Tabs (11)
+            // Category Tabs (12)
             "allTab", "beginnerTab", "masteryTab", "victoriesTab", "streaksTab",
             "cashBattleTab", "tournamentsTab", "socialTab", "progressionTab", "collectorTab", "timeTab", "secretTab",
             // Showcase
             "showcaseContainer", "scrollRect",
             // Empty State
-            "emptyStateContainer", "emptyStateText",
-            // Detail Panel
-            "detailPanel", "detailTitleText", "detailDescriptionText", "detailProgressBar",
-            "detailProgressText", "claimRewardButton", "closeDetailButton",
+            "emptyStateContainer", "emptyStateText", "emptyStateIcon",
+            // Detail Panel Structure
+            "detailPanel", "detailPanelCanvasGroup", "detailBlocker", "detailCard",
+            // Detail Panel Content
+            "detailTrophyIcon", "detailTitleText", "detailDescriptionText",
+            "detailCategoryText", "detailProgressBar", "detailProgressText", "detailPointsText",
+            "claimRewardButton", "claimButtonText", "closeDetailButton",
             // Reward Celebration
-            "rewardCelebration", "rewardAmountText"
+            "rewardCelebration", "rewardAmountText", "celebrationGlow"
         };
 
         private struct ReferenceResult
@@ -193,21 +196,32 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "scrollRect", FindByNameContains<ScrollRect>("scroll", "showcase"));
 
             // Empty State
-            AssignReference(so, "emptyStateContainer", FindByNameContains<Transform>("emptystate", "empty", "nodata"));
-            AssignReference(so, "emptyStateText", FindTextByName("emptystate", "empty", "no"));
+            AssignReference(so, "emptyStateContainer", FindByNameContains<Transform>("emptystatecontainer", "emptystate"));
+            AssignReference(so, "emptyStateText", FindTextByName("emptystatetext"));
+            AssignReference(so, "emptyStateIcon", FindImageByName("emptystateicon"));
 
-            // Detail Panel
-            AssignReference(so, "detailPanel", FindByNameContains<Transform>("detailpanel", "detail", "detalle"));
-            AssignReference(so, "detailTitleText", FindTextByName("detailtitle", "achievementtitle"));
-            AssignReference(so, "detailDescriptionText", FindTextByName("detaildescription", "description", "descripcion"));
-            AssignReference(so, "detailProgressBar", FindByNameContains<Slider>("detailprogress", "achievementprogress"));
-            AssignReference(so, "detailProgressText", FindTextByName("detailprogresstext", "progressvalue"));
-            AssignReference(so, "claimRewardButton", FindButtonByName("claimreward", "claim", "reclamar"));
-            AssignReference(so, "closeDetailButton", FindButtonByName("closedetail", "close", "cerrar"));
+            // Detail Panel Structure
+            AssignReference(so, "detailPanel", FindByNameContains<Transform>("detailpanel"));
+            AssignReference(so, "detailPanelCanvasGroup", FindByNameContains<CanvasGroup>("detailpanel"));
+            AssignReference(so, "detailBlocker", FindImageByName("detailpanelblocker"));
+            AssignReference(so, "detailCard", FindByNameContains<RectTransform>("detailpanel"));
+
+            // Detail Panel Content
+            AssignReference(so, "detailTrophyIcon", FindImageByName("detailtrophyicon"));
+            AssignReference(so, "detailTitleText", FindTextByName("detailtitle"));
+            AssignReference(so, "detailDescriptionText", FindTextByName("detaildescription"));
+            AssignReference(so, "detailCategoryText", FindTextByName("detailcategorytext"));
+            AssignReference(so, "detailProgressBar", FindByNameContains<Slider>("detailprogressbar"));
+            AssignReference(so, "detailProgressText", FindTextByName("detailprogresstext"));
+            AssignReference(so, "detailPointsText", FindTextByName("detailpointstext"));
+            AssignReference(so, "claimRewardButton", FindButtonByName("claimrewardbutton", "claimreward"));
+            AssignReference(so, "claimButtonText", FindTextByName("claimbuttontext"));
+            AssignReference(so, "closeDetailButton", FindButtonByName("closebutton", "closedetail"));
 
             // Reward Celebration
-            AssignReference(so, "rewardCelebration", FindByNameContains<Transform>("celebration", "reward", "celebracion"));
-            AssignReference(so, "rewardAmountText", FindTextByName("rewardamount", "amount", "cantidad"));
+            AssignReference(so, "rewardCelebration", FindByNameContains<Transform>("rewardcelebration"));
+            AssignReference(so, "rewardAmountText", FindTextByName("amount"));
+            AssignReference(so, "celebrationGlow", FindImageByName("celebrationglow"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -252,6 +266,13 @@ namespace DigitPark.Editor.AutoAssigners
         {
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            return null;
+        }
+
+        private static Image FindImageByName(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Image>(true);
+            foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
             return null;
         }
 

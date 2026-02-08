@@ -680,6 +680,9 @@ namespace DigitPark.Editor
             // Title
             CreateFeeTitle(feeSection.transform);
 
+            // Selected Fee display
+            CreateSelectedFeeText(feeSection.transform);
+
             // Preset buttons
             CreatePresetButtons(feeSection.transform);
 
@@ -708,6 +711,26 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
+        }
+
+        private static void CreateSelectedFeeText(Transform parent)
+        {
+            GameObject obj = new GameObject("SelectedFeeText");
+            obj.transform.SetParent(parent, false);
+
+            RectTransform rt = obj.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.55f, 0.82f);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.sizeDelta = Vector2.zero;
+            rt.offsetMin = new Vector2(0, 0);
+            rt.offsetMax = new Vector2(-15, -5);
+
+            TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
+            text.text = "$5.00";
+            text.fontSize = 28;
+            text.color = TEXT_PRIMARY;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Right;
         }
 
         private static void CreatePresetButtons(Transform parent)
@@ -1070,7 +1093,7 @@ namespace DigitPark.Editor
             btnOutline.effectDistance = new Vector2(3, -3);
 
             // Main text - MAS GRANDE
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("FindOpponentText");
             textObj.transform.SetParent(btnObj.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();

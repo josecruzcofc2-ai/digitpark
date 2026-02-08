@@ -135,19 +135,14 @@ namespace DigitPark.Editor
             // 3. Header with Back button and Balance
             CreateHeader(safeArea.transform);
 
-            // 4. Main Panel with Cards (navega a otras escenas)
-            // NOTA: AgeVerification tiene su propia escena (AgeVerification.unity)
-            // Si el usuario no esta verificado, el Manager navega a esa escena
+            // 4. Main Panel with Cards
             CreateMainPanel(safeArea.transform);
 
-            // NOTA: Los siguientes paneles YA NO se crean aqui porque cada uno
-            // tiene su propia escena separada:
-            // - CashBattle1v1.unity → Seleccion de juego y matchmaking
-            // - CashTournaments.unity → Lista de torneos
-            // - CashWallet.unity → Wallet y transacciones
-            // - CashHistory.unity → Historial de partidas
-            //
-            // Los botones del MainPanel navegan a estas escenas usando SceneManager.LoadScene()
+            // 5. Age Verification Panel (overlay, hidden by default)
+            CreateAgeVerificationPanel(safeArea.transform);
+
+            // 6. Matchmaking Panel (overlay, hidden by default)
+            CreateMatchmakingPanel(safeArea.transform);
 
             Debug.Log("[CashBattleUIBuilder] CashBattleHub UI built successfully!");
         }
