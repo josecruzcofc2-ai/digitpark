@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.UI;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -26,10 +27,12 @@ namespace DigitPark.Editor.AutoAssigners
             // UI
             "tapButton", "instructionText", "reactionTimeText",
             "roundText", "averageText", "bestTimeText",
+            // Navigation (MinigameBase)
+            "playAgainButton", "backButton",
             // Panels
-            "winPanel"
-            // Note: button3D excluded - specialized component, manual assignment
-            // Note: buttonUpSprite, buttonDownSprite excluded - sprites require manual assignment
+            "winPanel", "winPanelCanvasGroup",
+            // Win/Lose Panels (Cash Battle)
+            "winPanelRealMoney", "losePanelRealMoney"
         };
 
         private struct ReferenceResult
@@ -138,6 +141,15 @@ namespace DigitPark.Editor.AutoAssigners
 
         #endregion
 
+        /// <summary>
+        /// Ejecuta la asignación de referencias. Llamable desde otros Editor scripts.
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #region Assignment Logic
 
         private static void AssignAllReferences()
@@ -163,8 +175,17 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "averageText", FindTextByName("average", "promedio", "avg"));
             AssignReference(so, "bestTimeText", FindTextByName("best", "mejor", "record"));
 
+            // Navigation (MinigameBase) - buttons inside winPanel
+            AssignReference(so, "playAgainButton", FindButtonByName("playagain"));
+            AssignReference(so, "backButton", FindButtonByName("exit", "back", "salir"));
+
             // Panels
             AssignReference(so, "winPanel", FindByNameContains<Transform>("win", "result", "complete"));
+            AssignCanvasGroup(so, "winPanelCanvasGroup", "winpanel", "win", "result");
+
+            // Win/Lose Panels (Cash Battle)
+            AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
+            AssignReference(so, "losePanelRealMoney", FindWinPanelController("LosePanel_RealMoney"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
@@ -211,6 +232,31 @@ namespace DigitPark.Editor.AutoAssigners
         {
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            return null;
+        }
+
+        private static void AssignCanvasGroup(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<CanvasGroup>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static WinPanelController FindWinPanelController(string name)
+        {
+            var all = Object.FindObjectsOfType<WinPanelController>(true);
+            foreach (var w in all) if (w.gameObject.name == name) return w;
             return null;
         }
 

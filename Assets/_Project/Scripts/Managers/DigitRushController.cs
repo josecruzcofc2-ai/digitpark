@@ -8,6 +8,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI;
+using DigitPark.Games;
 
 namespace DigitPark.Managers
 {
@@ -42,6 +43,19 @@ namespace DigitPark.Managers
         [SerializeField] public GameObject winMessagePanel;
         [SerializeField] public CanvasGroup winMessageCanvasGroup;
         [SerializeField] public TextMeshProUGUI successText;
+
+        [Header("Result Panel (Practice - new)")]
+        [SerializeField] public GameObject resultPanel;
+        [SerializeField] public CanvasGroup resultPanelCanvasGroup;
+        [SerializeField] public TextMeshProUGUI resultTitleText;
+        [SerializeField] public TextMeshProUGUI resultTimeText;
+        [SerializeField] public TextMeshProUGUI resultMessageText;
+        [SerializeField] public Button resultPlayAgainButton;
+        [SerializeField] public Button resultExitButton;
+
+        [Header("Win/Lose Panels (Cash Battle)")]
+        [SerializeField] public WinPanelController winPanelRealMoney;
+        [SerializeField] public WinPanelController losePanelRealMoney;
 
         [Header("Premium Banner (Result Screen)")]
         [SerializeField] public GameObject premiumBannerContainer;
@@ -146,6 +160,18 @@ namespace DigitPark.Managers
             }
         }
 
+        private bool IsPracticeMode()
+        {
+            if (GameSessionManager.Instance == null || !GameSessionManager.Instance.HasActiveSession)
+                return true;
+            return GameSessionManager.Instance.CurrentContext?.Mode == GameMode.Practice;
+        }
+
+        private bool IsOnlineMode()
+        {
+            return OnlineResultManager.IsOnlineMatch();
+        }
+
         private void SetupListeners()
         {
             for (int i = 0; i < gridButtons.Length; i++)
@@ -158,6 +184,8 @@ namespace DigitPark.Managers
             playAgainButton?.onClick.AddListener(StartNewGame);
             backButton?.onClick.AddListener(OnBackButtonClicked);
             premiumBannerButton?.onClick.AddListener(OnPremiumBannerClicked);
+            resultPlayAgainButton?.onClick.AddListener(StartNewGame);
+            resultExitButton?.onClick.AddListener(BackToMenu);
 
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumBanner;
             UpdatePremiumBanner();
@@ -223,7 +251,13 @@ namespace DigitPark.Managers
             if (winMessagePanel != null)
             {
                 winMessagePanel.SetActive(false);
-                winMessageCanvasGroup.alpha = 0;
+                if (winMessageCanvasGroup != null) winMessageCanvasGroup.alpha = 0;
+            }
+
+            if (resultPanel != null)
+            {
+                resultPanel.SetActive(false);
+                if (resultPanelCanvasGroup != null) resultPanelCanvasGroup.alpha = 0;
             }
 
             UpdateTimerDisplay();
@@ -658,14 +692,30 @@ namespace DigitPark.Managers
 
             SaveScoreToDatabase();
 
+            // Registrar resultado en GameSessionManager
+            var result = new MinigameResult
+            {
+                GameType = GameType.DigitRush,
+                TotalTime = currentTime,
+                Errors = 0,
+                PenaltyTime = 0,
+                Completed = true,
+                CompletedAt = System.DateTime.UtcNow
+            };
+
+            if (GameSessionManager.Instance != null && GameSessionManager.Instance.HasActiveSession)
+            {
+                GameSessionManager.Instance.RegisterGameResult(result);
+            }
+
             // Vibración de victoria
             TriggerHaptic(HapticType.Heavy);
 
-            // Secuencia de victoria
-            StartCoroutine(PlayVictorySequence());
+            // Secuencia de victoria con panel según modo
+            StartCoroutine(PlayVictorySequence(result, isNewRecord));
         }
 
-        private IEnumerator PlayVictorySequence()
+        private IEnumerator PlayVictorySequence(MinigameResult result, bool isNewRecord)
         {
             yield return new WaitForSeconds(0.1f);
             TriggerHaptic(HapticType.Heavy);
@@ -700,8 +750,19 @@ namespace DigitPark.Managers
 
             yield return new WaitForSeconds(0.5f);
 
-            // Mostrar mensaje de victoria
-            StartCoroutine(ShowWinMessage());
+            // Mostrar panel según modo de juego
+            if (IsOnlineMode())
+            {
+                HandleOnlineResult(result);
+            }
+            else if (!IsPracticeMode())
+            {
+                ShowRealMoneyResult(result);
+            }
+            else
+            {
+                ShowPracticeResult(isNewRecord);
+            }
         }
 
         private string GetSuccessMessage(float time)
@@ -735,51 +796,112 @@ namespace DigitPark.Managers
             return selectedKey;
         }
 
-        private IEnumerator ShowWinMessage()
+        private void ShowPracticeResult(bool isNewRecord)
         {
-            Debug.Log($"[Game] ShowWinMessage - winMessagePanel: {winMessagePanel != null}");
-
-            if (winMessagePanel == null || winMessageCanvasGroup == null)
+            // Usar resultPanel (nuevo) si está disponible, sino fallback a winMessagePanel (original)
+            if (resultPanel != null)
             {
-                Debug.LogError("[Game] winMessagePanel o winMessageCanvasGroup es NULL!");
-                yield break;
-            }
+                if (resultTitleText != null)
+                    resultTitleText.text = AutoLocalizer.Get("digitrush_result_title");
 
-            if (successText != null)
+                if (resultTimeText != null)
+                    resultTimeText.text = AutoLocalizer.Get("result_panel_time", $"{currentTime:F3}");
+
+                if (resultMessageText != null)
+                {
+                    string message = GetSuccessMessage(currentTime);
+                    if (isNewRecord)
+                        message += $"\n{AutoLocalizer.Get("result_panel_new_record")}";
+                    resultMessageText.text = message;
+                }
+
+                resultPanel.SetActive(true);
+                StartCoroutine(FadeInResultPanel());
+            }
+            else if (winMessagePanel != null)
             {
-                string message = GetSuccessMessage(currentTime);
-                successText.text = message;
-                Debug.Log($"[Game] SuccessText establecido: '{message}'");
+                // Fallback: usar winMessagePanel original (stays visible with buttons)
+                if (successText != null)
+                {
+                    string timeFormatted = $"{currentTime:F3}{AutoLocalizer.Get("seconds_abbr")}";
+                    string message = GetSuccessMessage(currentTime);
+                    if (isNewRecord)
+                        message += $"\n{AutoLocalizer.Get("result_panel_new_record")}";
+                    successText.text = $"{timeFormatted}\n{message}";
+                }
+
+                winMessagePanel.SetActive(true);
+                if (winMessageCanvasGroup != null)
+                    StartCoroutine(FadeInWinMessage());
             }
+        }
 
-            winMessagePanel.SetActive(true);
+        private IEnumerator FadeInWinMessage()
+        {
+            winMessageCanvasGroup.alpha = 0f;
+            float duration = 0.5f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                winMessageCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+                yield return null;
+            }
+            winMessageCanvasGroup.alpha = 1f;
+        }
 
+        private IEnumerator FadeInResultPanel()
+        {
+            if (resultPanelCanvasGroup == null) yield break;
+
+            resultPanelCanvasGroup.alpha = 0f;
             float duration = 0.5f;
             float elapsed = 0f;
 
             while (elapsed < duration)
             {
-                float alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
-                winMessageCanvasGroup.alpha = alpha;
                 elapsed += Time.deltaTime;
+                resultPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
                 yield return null;
             }
 
-            winMessageCanvasGroup.alpha = 1f;
+            resultPanelCanvasGroup.alpha = 1f;
+        }
 
-            yield return new WaitForSeconds(1f);
+        private void ShowRealMoneyResult(MinigameResult result)
+        {
+            var context = GameSessionManager.Instance?.CurrentContext;
+            decimal entryFee = context?.EntryFee ?? 0;
 
-            elapsed = 0f;
-            while (elapsed < duration)
+            // TODO: Obtener resultado real del oponente del servidor
+            bool playerWon = result.Completed;
+
+            if (playerWon && winPanelRealMoney != null)
             {
-                float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
-                winMessageCanvasGroup.alpha = alpha;
-                elapsed += Time.deltaTime;
-                yield return null;
+                winPanelRealMoney.ShowRealMoneyResult(result, null, entryFee, true, context?.OpponentName ?? "Opponent");
             }
+            else if (!playerWon && losePanelRealMoney != null)
+            {
+                losePanelRealMoney.ShowRealMoneyResult(result, null, entryFee, false, context?.OpponentName ?? "Opponent");
+            }
+        }
 
-            winMessageCanvasGroup.alpha = 0f;
-            winMessagePanel.SetActive(false);
+        private void HandleOnlineResult(MinigameResult result)
+        {
+            string matchId = OnlineResultManager.GetCurrentMatchId();
+            string playerName = PlayerPrefs.GetString("PlayerName", "Jugador");
+
+            Debug.Log($"[DigitRush] Partida online terminada. MatchId: {matchId}, Tiempo: {result.TotalTime:F3}s");
+
+            OnlineResultManager.Instance.SubmitAndWaitForResult(
+                matchId,
+                result,
+                playerName,
+                (playerWon) =>
+                {
+                    Debug.Log($"[DigitRush] Resultado online: {(playerWon ? "VICTORIA" : "DERROTA")}");
+                }
+            );
         }
 
         #endregion
@@ -868,8 +990,16 @@ namespace DigitPark.Managers
 
         public void BackToMenu()
         {
-            Debug.Log("[Game] Volviendo al menú principal");
-            SceneManager.LoadScene("MainMenu");
+            if (GameSessionManager.Instance != null && GameSessionManager.Instance.HasActiveSession)
+            {
+                Debug.Log("[Game] Volviendo al selector de juegos");
+                SceneManager.LoadScene("GameSelector");
+            }
+            else
+            {
+                Debug.Log("[Game] Volviendo al menú principal");
+                SceneManager.LoadScene("MainMenu");
+            }
         }
 
         #endregion

@@ -141,7 +141,10 @@ namespace DigitPark.Editor
             // 5. Age Verification Panel (overlay, hidden by default)
             CreateAgeVerificationPanel(safeArea.transform);
 
-            // 6. Matchmaking Panel (overlay, hidden by default)
+            // 6. Bet Confirmation Panel (overlay, hidden by default)
+            CreateBetConfirmationPanel(safeArea.transform);
+
+            // 7. Matchmaking Panel (overlay, hidden by default)
             CreateMatchmakingPanel(safeArea.transform);
 
             Debug.Log("[CashBattleUIBuilder] CashBattleHub UI built successfully!");
@@ -152,7 +155,7 @@ namespace DigitPark.Editor
             // Destroy specific known elements
             string[] toDestroy = {
                 "Background", "SafeArea", "MainPanel", "AgeVerificationPanel", "Header",
-                "GameSelectionPanel", "TournamentListPanel", "MatchmakingPanel",
+                "GameSelectionPanel", "TournamentListPanel", "ConfirmBetPanel", "MatchmakingPanel",
                 "WalletPanel", "HistoryPanel"
             };
 
@@ -2118,6 +2121,128 @@ namespace DigitPark.Editor
             joinTMP.color = BG_DARK;
             joinTMP.fontStyle = FontStyles.Bold;
             joinTMP.alignment = TextAlignmentOptions.Center;
+        }
+
+        #endregion
+
+        #region Bet Confirmation Panel
+
+        private static void CreateBetConfirmationPanel(Transform parent)
+        {
+            GameObject panel = new GameObject("ConfirmBetPanel");
+            panel.transform.SetParent(parent, false);
+
+            RectTransform rt = panel.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+            rt.offsetMin = new Vector2(0, 0);
+            rt.offsetMax = new Vector2(0, -120);
+
+            Image overlay = panel.AddComponent<Image>();
+            overlay.color = new Color(0, 0, 0, 0.7f);
+
+            // Content box
+            GameObject content = new GameObject("Content");
+            content.transform.SetParent(panel.transform, false);
+
+            RectTransform contentRT = content.AddComponent<RectTransform>();
+            contentRT.anchorMin = new Vector2(0.5f, 0.5f);
+            contentRT.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRT.sizeDelta = new Vector2(480, 300);
+
+            Image contentBg = content.AddComponent<Image>();
+            contentBg.color = CARD_BG;
+
+            Outline contentOutline = content.AddComponent<Outline>();
+            contentOutline.effectColor = GOLD_PRIMARY;
+            contentOutline.effectDistance = new Vector2(3, -3);
+
+            // Confirm text
+            GameObject textObj = new GameObject("ConfirmBetText");
+            textObj.transform.SetParent(content.transform, false);
+
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = new Vector2(0.05f, 0.45f);
+            textRT.anchorMax = new Vector2(0.95f, 0.9f);
+            textRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+            textTMP.text = "Apostar $0.00 en DigitRush?";
+            textTMP.fontSize = 32;
+            textTMP.color = TEXT_GOLD;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.alignment = TextAlignmentOptions.Center;
+
+            // Confirm button
+            GameObject confirmBtn = new GameObject("ConfirmBetButton");
+            confirmBtn.transform.SetParent(content.transform, false);
+
+            RectTransform confirmRT = confirmBtn.AddComponent<RectTransform>();
+            confirmRT.anchorMin = new Vector2(0.55f, 0.08f);
+            confirmRT.anchorMax = new Vector2(0.95f, 0.35f);
+            confirmRT.sizeDelta = Vector2.zero;
+
+            Image confirmBg = confirmBtn.AddComponent<Image>();
+            confirmBg.color = BUTTON_GOLD;
+
+            Button confirmButton = confirmBtn.AddComponent<Button>();
+            ColorBlock confirmColors = confirmButton.colors;
+            confirmColors.normalColor = BUTTON_GOLD;
+            confirmColors.highlightedColor = GOLD_LIGHT;
+            confirmColors.pressedColor = GOLD_DARK;
+            confirmButton.colors = confirmColors;
+
+            GameObject confirmText = new GameObject("Text");
+            confirmText.transform.SetParent(confirmBtn.transform, false);
+
+            RectTransform confirmTextRT = confirmText.AddComponent<RectTransform>();
+            confirmTextRT.anchorMin = Vector2.zero;
+            confirmTextRT.anchorMax = Vector2.one;
+            confirmTextRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI confirmTMP = confirmText.AddComponent<TextMeshProUGUI>();
+            confirmTMP.text = "Confirmar";
+            confirmTMP.fontSize = 28;
+            confirmTMP.color = BG_DARK;
+            confirmTMP.fontStyle = FontStyles.Bold;
+            confirmTMP.alignment = TextAlignmentOptions.Center;
+
+            // Cancel button
+            GameObject cancelBtn = new GameObject("CancelBetButton");
+            cancelBtn.transform.SetParent(content.transform, false);
+
+            RectTransform cancelRT = cancelBtn.AddComponent<RectTransform>();
+            cancelRT.anchorMin = new Vector2(0.05f, 0.08f);
+            cancelRT.anchorMax = new Vector2(0.45f, 0.35f);
+            cancelRT.sizeDelta = Vector2.zero;
+
+            Image cancelBg = cancelBtn.AddComponent<Image>();
+            cancelBg.color = BUTTON_DANGER;
+
+            Button cancelButton = cancelBtn.AddComponent<Button>();
+            ColorBlock cancelColors = cancelButton.colors;
+            cancelColors.normalColor = BUTTON_DANGER;
+            cancelColors.highlightedColor = new Color(1f, 0.4f, 0.4f);
+            cancelColors.pressedColor = new Color(0.6f, 0.15f, 0.15f);
+            cancelButton.colors = cancelColors;
+
+            GameObject cancelText = new GameObject("Text");
+            cancelText.transform.SetParent(cancelBtn.transform, false);
+
+            RectTransform cancelTextRT = cancelText.AddComponent<RectTransform>();
+            cancelTextRT.anchorMin = Vector2.zero;
+            cancelTextRT.anchorMax = Vector2.one;
+            cancelTextRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI cancelTMP = cancelText.AddComponent<TextMeshProUGUI>();
+            cancelTMP.text = "Cancelar";
+            cancelTMP.fontSize = 28;
+            cancelTMP.color = TEXT_PRIMARY;
+            cancelTMP.fontStyle = FontStyles.Bold;
+            cancelTMP.alignment = TextAlignmentOptions.Center;
+
+            panel.SetActive(false);
         }
 
         #endregion

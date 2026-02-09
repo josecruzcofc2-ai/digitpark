@@ -4,6 +4,7 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Games;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
@@ -52,6 +53,14 @@ namespace DigitPark.Editor
             {
                 RebuildOddOneOutUI();
             }
+
+            GUILayout.Space(15);
+            GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
+            if (GUILayout.Button("Auto-Asignar Referencias", GUILayout.Height(30)))
+            {
+                OddOneOutReferenceAssigner.RunAutoAssign();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static void RebuildOddOneOutUI()
@@ -82,7 +91,10 @@ namespace DigitPark.Editor
 
         private static void CleanOldElements(Transform canvasTransform)
         {
-            string[] keepElements = { "Main Camera", "EventSystem", "Background" };
+            string[] keepElements = {
+                "Main Camera", "EventSystem",
+                "Directional Light", "SceneTransition"
+            };
 
             for (int i = canvasTransform.childCount - 1; i >= 0; i--)
             {
@@ -97,6 +109,10 @@ namespace DigitPark.Editor
                         break;
                     }
                 }
+
+                // Never destroy objects with Animator or Animation components
+                if (!shouldKeep && (child.GetComponent<Animator>() != null || child.GetComponent<Animation>() != null))
+                    shouldKeep = true;
 
                 if (!shouldKeep)
                 {
@@ -133,6 +149,9 @@ namespace DigitPark.Editor
 
             // ========== WIN PANEL ==========
             CreateWinPanel(safeArea.transform);
+
+            // ========== REAL MONEY PANELS (Cash Battle) ==========
+            WinPanelInlineBuilder.CreateRealMoneyPanels(safeArea.transform);
 
             // ========== PARTICLE EFFECTS ==========
             CreateParticleEffects(safeArea.transform);
@@ -572,6 +591,11 @@ namespace DigitPark.Editor
                 if (playBtnProp != null)
                     playBtnProp.objectReferenceValue = playAgainBtn.GetComponent<Button>();
             }
+
+            // Real Money Panels
+            WinPanelInlineBuilder.AssignWinPanelRefs(so,
+                GameObject.Find("WinPanel_RealMoney"),
+                GameObject.Find("LosePanel_RealMoney"));
 
             so.ApplyModifiedProperties();
             Debug.Log("[OddOneOutUIBuilder] Referencias asignadas al Controller");

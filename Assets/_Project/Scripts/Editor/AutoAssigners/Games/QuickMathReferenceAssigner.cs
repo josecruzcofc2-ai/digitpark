@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.UI;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -27,8 +28,12 @@ namespace DigitPark.Editor.AutoAssigners
             "problemText", "numberAText", "numberBText", "operatorText", "questionMarkText", "equationPanel",
             // UI
             "timerText", "roundText", "errorsText", "comboText", "statsText", "roundIndicatorText",
+            // Navigation (MinigameBase) - buttons inside winPanel
+            "playAgainButton", "backButton",
             // Panels & Effects
-            "winPanel", "winPanelCanvasGroup", "comboCanvasGroup", "progressFill"
+            "winPanel", "winPanelCanvasGroup", "comboCanvasGroup", "progressFill",
+            // Win/Lose Panels (Cash Battle)
+            "winPanelRealMoney", "losePanelRealMoney"
             // Note: answerButtons[], answerTexts[] - arrays require manual assignment
             // Note: sparkleEffect - auto-found in code
         };
@@ -139,6 +144,15 @@ namespace DigitPark.Editor.AutoAssigners
 
         #endregion
 
+        /// <summary>
+        /// Ejecuta la asignación de referencias. Llamable desde otros Editor scripts.
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #region Assignment Logic
 
         private static void AssignAllReferences()
@@ -172,11 +186,19 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "statsText", FindTextByName("stats", "estadisticas"));
             AssignReference(so, "roundIndicatorText", FindTextByName("roundindicator", "rondaindicator"));
 
+            // Navigation (MinigameBase) - buttons inside winPanel
+            AssignReference(so, "playAgainButton", FindButtonByName("playagain"));
+            AssignReference(so, "backButton", FindButtonByName("exit", "back", "salir"));
+
             // Panels & Effects
             AssignReference(so, "winPanel", FindByNameContains<Transform>("win", "result", "complete"));
             AssignCanvasGroup(so, "winPanelCanvasGroup", "winpanel", "win", "result");
             AssignCanvasGroup(so, "comboCanvasGroup", "combocontainer", "combo");
             AssignReference(so, "progressFill", FindByNameContains<RectTransform>("progressfill", "fill"));
+
+            // Win/Lose Panels (Cash Battle)
+            AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
+            AssignReference(so, "losePanelRealMoney", FindWinPanelController("LosePanel_RealMoney"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
@@ -219,6 +241,13 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
+        private static Button FindButtonByName(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Button>(true);
+            foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            return null;
+        }
+
         private static void AssignCanvasGroup(SerializedObject so, string propertyName, params string[] patterns)
         {
             var prop = so.FindProperty(propertyName);
@@ -235,6 +264,13 @@ namespace DigitPark.Editor.AutoAssigners
                         return;
                     }
             AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static WinPanelController FindWinPanelController(string name)
+        {
+            var all = Object.FindObjectsOfType<WinPanelController>(true);
+            foreach (var w in all) if (w.gameObject.name == name) return w;
+            return null;
         }
 
         #endregion

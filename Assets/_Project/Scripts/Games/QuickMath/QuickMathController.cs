@@ -694,7 +694,8 @@ namespace DigitPark.Games
             if (questionPulseCoroutine != null)
                 StopCoroutine(questionPulseCoroutine);
 
-            if (winPanel != null)
+            // Solo mostrar panel propio en modo práctica
+            if (IsPracticeMode() && winPanel != null)
             {
                 winPanel.SetActive(true);
                 StartCoroutine(ShowWinPanel());

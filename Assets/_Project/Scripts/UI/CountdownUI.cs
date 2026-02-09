@@ -47,11 +47,9 @@ namespace DigitPark.UI
                 originalScale = countdownTextRT.localScale;
             }
 
-            // Hide panel initially
-            if (countdownPanel != null)
-            {
-                countdownPanel.SetActive(false);
-            }
+            // Panel visibility is managed by CountdownSequence (show at start, hide at end).
+            // The UIBuilder/scene already sets it inactive — no need to hide here,
+            // and doing so would break StartCountdown() when it activates the GameObject.
         }
 
         /// <summary>
@@ -60,6 +58,11 @@ namespace DigitPark.UI
         public void StartCountdown()
         {
             if (isCountingDown) return;
+
+            // Ensure GameObject is active so coroutines can run
+            // (CountdownPanel starts as SetActive(false) in the scene)
+            if (!gameObject.activeInHierarchy)
+                gameObject.SetActive(true);
 
             StartCoroutine(CountdownSequence());
         }
@@ -86,6 +89,7 @@ namespace DigitPark.UI
             // Fade in overlay
             if (backgroundOverlay != null)
             {
+                backgroundOverlay.raycastTarget = true;
                 yield return StartCoroutine(FadeOverlay(0f, overlayColor.a, 0.2f));
             }
 
@@ -101,22 +105,25 @@ namespace DigitPark.UI
             // GO!
             yield return StartCoroutine(ShowGo());
 
-            // Fade out overlay
+            // Fade out overlay and disable its raycast so it doesn't block clicks
             if (backgroundOverlay != null)
             {
                 yield return StartCoroutine(FadeOverlay(overlayColor.a, 0f, 0.2f));
-            }
-
-            // Hide panel
-            if (countdownPanel != null)
-            {
-                countdownPanel.SetActive(false);
+                backgroundOverlay.raycastTarget = false;
             }
 
             isCountingDown = false;
 
-            // Trigger event
+            // Trigger event BEFORE hiding the panel.
+            // If CountdownUI lives on the countdownPanel itself,
+            // SetActive(false) would kill the coroutine before the callback fires.
             OnCountdownComplete?.Invoke();
+
+            // Hide panel (safe to do last — callback already fired)
+            if (countdownPanel != null)
+            {
+                countdownPanel.SetActive(false);
+            }
         }
 
         private IEnumerator ShowNumber(string number, Color color)

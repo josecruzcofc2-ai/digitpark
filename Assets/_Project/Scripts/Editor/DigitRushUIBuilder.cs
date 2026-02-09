@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
@@ -51,6 +53,14 @@ namespace DigitPark.Editor
             {
                 UpdateStyles();
             }
+
+            GUILayout.Space(15);
+            GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
+            if (GUILayout.Button("Auto-Asignar Referencias", GUILayout.Height(30)))
+            {
+                DigitRushReferenceAssigner.RunAutoAssign();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static void RebuildDigitRushUI()
@@ -63,6 +73,22 @@ namespace DigitPark.Editor
             }
 
             Transform canvasTransform = canvas.transform;
+
+            // Ensure Canvas has a GraphicRaycaster (required for UI clicks)
+            if (canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null)
+            {
+                canvas.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                Debug.Log("[DigitRushUIBuilder] GraphicRaycaster añadido al Canvas");
+            }
+
+            // Ensure EventSystem exists in the scene
+            if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                var eventSystemGO = new GameObject("EventSystem");
+                eventSystemGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                eventSystemGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                Debug.Log("[DigitRushUIBuilder] EventSystem creado en la escena");
+            }
 
             // Limpiar elementos viejos (mantener Camera y EventSystem)
             CleanOldElements(canvasTransform);
@@ -94,7 +120,13 @@ namespace DigitPark.Editor
 
         private static void CleanOldElements(Transform canvasTransform)
         {
-            string[] keepElements = { "Main Camera", "EventSystem" };
+            // Only keep objects the builder does NOT create.
+            // Everything else (SafeArea, GridContainer, Cell_, Background, etc.)
+            // gets destroyed so the builder can recreate them fresh without duplicates.
+            string[] keepElements = {
+                "Main Camera", "EventSystem", "DigitRushController",
+                "Directional Light", "SceneTransition"
+            };
 
             for (int i = canvasTransform.childCount - 1; i >= 0; i--)
             {
@@ -109,6 +141,10 @@ namespace DigitPark.Editor
                         break;
                     }
                 }
+
+                // Never destroy objects with Animator or Animation components
+                if (!shouldKeep && (child.GetComponent<Animator>() != null || child.GetComponent<Animation>() != null))
+                    shouldKeep = true;
 
                 if (!shouldKeep)
                 {
@@ -148,8 +184,11 @@ namespace DigitPark.Editor
             // ========== ACTION BUTTONS ==========
             CreateActionButtons(safeArea.transform);
 
-            // ========== WIN MESSAGE PANEL ==========
-            CreateWinMessagePanel(safeArea.transform);
+            // ========== RESULT PANEL (Practice) ==========
+            CreateResultPanel(safeArea.transform);
+
+            // ========== REAL MONEY PANELS (Cash Battle) ==========
+            CreateRealMoneyPanels(safeArea.transform);
 
             // ========== COUNTDOWN PANEL ==========
             CreateCountdownPanel(safeArea.transform);
@@ -387,36 +426,97 @@ namespace DigitPark.Editor
                 new Vector2(0, 150), new Vector2(600, 120));
         }
 
-        private static void CreateWinMessagePanel(Transform parent)
+        private static void CreateResultPanel(Transform parent)
         {
-            GameObject winPanel = CreateElement(parent, "WinMessagePanel");
-            SetupRectTransform(winPanel,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(800, 300));
+            GameObject resultPanel = CreateElement(parent, "ResultPanel");
+            SetupRectTransform(resultPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            // Background with glow
-            Image panelBg = winPanel.AddComponent<Image>();
-            panelBg.color = new Color(0.05f, 0.15f, 0.1f, 0.95f);
+            // Full-screen overlay
+            Image overlay = resultPanel.AddComponent<Image>();
+            overlay.color = new Color(0, 0, 0, 0.85f);
+            overlay.raycastTarget = true;
 
-            Outline panelOutline = winPanel.AddComponent<Outline>();
-            panelOutline.effectColor = GREEN_NEON;
-            panelOutline.effectDistance = new Vector2(4, -4);
-
-            // Add CanvasGroup for fade animation
-            CanvasGroup cg = winPanel.AddComponent<CanvasGroup>();
+            CanvasGroup cg = resultPanel.AddComponent<CanvasGroup>();
             cg.alpha = 0;
 
-            // Success Text
-            GameObject successText = CreateElement(winPanel.transform, "SuccessText");
-            SetupRectTransform(successText,
+            // Content container
+            GameObject content = CreateElement(resultPanel.transform, "Content");
+            SetupRectTransform(content,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(700, 150));
-            TextMeshProUGUI successTmp = SetupText(successText, "¡EXCELENTE!", 48, GREEN_NEON, FontStyles.Bold);
-            successTmp.alignment = TextAlignmentOptions.Center;
-            successTmp.enableWordWrapping = true;
+                Vector2.zero, new Vector2(700, 500));
+
+            Image contentBg = content.AddComponent<Image>();
+            contentBg.color = new Color(0.05f, 0.1f, 0.15f, 0.95f);
+
+            Outline contentOutline = content.AddComponent<Outline>();
+            contentOutline.effectColor = GREEN_NEON;
+            contentOutline.effectDistance = new Vector2(3, -3);
+
+            // Title
+            GameObject titleText = CreateElement(content.transform, "ResultTitleText");
+            SetupRectTransform(titleText,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -50), new Vector2(0, 60));
+            SetupText(titleText, "COMPLETED!", 46, GREEN_NEON, FontStyles.Bold);
+
+            // Time display
+            GameObject timeText = CreateElement(content.transform, "ResultTimeText");
+            SetupRectTransform(timeText,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -130), new Vector2(0, 60));
+            SetupText(timeText, "Time: 0.000s", 38, CYAN_NEON, FontStyles.Bold);
+
+            // Message
+            GameObject messageText = CreateElement(content.transform, "ResultMessageText");
+            SetupRectTransform(messageText,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, -10), new Vector2(600, 120));
+            TextMeshProUGUI msgTmp = SetupText(messageText, "Great job!", 32, Color.white, FontStyles.Normal);
+            msgTmp.enableWordWrapping = true;
+
+            // Buttons container
+            GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
+            SetupRectTransform(buttonsContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 60), new Vector2(-40, 100));
+
+            HorizontalLayoutGroup btnLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.spacing = 30;
+            btnLayout.childForceExpandWidth = false;
+            btnLayout.childControlWidth = false;
+
+            // Play Again button
+            CreateActionButton(buttonsContainer.transform, "ResultPlayAgainButton", "PLAY AGAIN", CYAN_NEON, 230, 70);
+
+            // Exit button
+            CreateActionButton(buttonsContainer.transform, "ResultExitButton", "EXIT", new Color(0.6f, 0.6f, 0.6f), 160, 70);
 
             // Hide by default
-            winPanel.SetActive(false);
+            resultPanel.SetActive(false);
+        }
+
+        private static void CreateActionButton(Transform parent, string name, string text, Color color, float width, float height)
+        {
+            GameObject btn = CreateElement(parent, name);
+            LayoutElement layout = btn.AddComponent<LayoutElement>();
+            layout.preferredWidth = width;
+            layout.preferredHeight = height;
+
+            Image faceImg = btn.AddComponent<Image>();
+            faceImg.color = color;
+
+            GameObject textObj = CreateElement(btn.transform, "Text");
+            SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
+            SetupText(textObj, text, 24, DARK_BG, FontStyles.Bold);
+
+            Button button = btn.AddComponent<Button>();
+            button.targetGraphic = faceImg;
+        }
+
+        private static void CreateRealMoneyPanels(Transform parent)
+        {
+            WinPanelInlineBuilder.CreateRealMoneyPanels(parent);
         }
 
         private static void CreateCountdownPanel(Transform parent)
@@ -518,10 +618,13 @@ namespace DigitPark.Editor
                 return;
             }
 
+            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : null;
+
             SerializedObject serializedManager = new SerializedObject(gameManager);
 
-            // Find and assign grid buttons
-            Transform gridContainer = GameObject.Find("GridContainer")?.transform;
+            // Find and assign grid buttons (search including inactive)
+            Transform gridContainer = FindDeep(root, "GridContainer");
             if (gridContainer != null)
             {
                 SerializedProperty gridButtonsProp = serializedManager.FindProperty("gridButtons");
@@ -541,99 +644,100 @@ namespace DigitPark.Editor
             }
 
             // Timer Text
-            AssignReference(serializedManager, "timerText", "TimerText");
+            AssignTMPReference(serializedManager, root, "timerText", "TimerText");
 
             // Best Time Text
-            AssignReference(serializedManager, "bestTimeText", "BestTimeText");
+            AssignTMPReference(serializedManager, root, "bestTimeText", "BestTimeText");
 
-            // Note: PlayAgainButton removed - handled by WinPanel
-
-            // Win Message Panel
-            AssignGameObjectReference(serializedManager, "winMessagePanel", "WinMessagePanel");
-
-            // Win Message Canvas Group
-            GameObject winPanel = GameObject.Find("WinMessagePanel");
-            if (winPanel != null)
+            // Result Panel (Practice) - starts inactive!
+            Transform resultPanelT = FindDeep(root, "ResultPanel");
+            if (resultPanelT != null)
             {
-                SerializedProperty cgProp = serializedManager.FindProperty("winMessageCanvasGroup");
-                if (cgProp != null)
-                {
-                    cgProp.objectReferenceValue = winPanel.GetComponent<CanvasGroup>();
-                }
+                SerializedProperty rpProp = serializedManager.FindProperty("resultPanel");
+                if (rpProp != null) rpProp.objectReferenceValue = resultPanelT.gameObject;
+
+                SerializedProperty cgProp = serializedManager.FindProperty("resultPanelCanvasGroup");
+                if (cgProp != null) cgProp.objectReferenceValue = resultPanelT.GetComponent<CanvasGroup>();
             }
 
-            // Success Text
-            AssignReference(serializedManager, "successText", "SuccessText");
+            // Result texts
+            AssignTMPReference(serializedManager, root, "resultTitleText", "ResultTitleText");
+            AssignTMPReference(serializedManager, root, "resultTimeText", "ResultTimeText");
+            AssignTMPReference(serializedManager, root, "resultMessageText", "ResultMessageText");
 
-            // Countdown UI
-            GameObject countdownPanel = GameObject.Find("CountdownPanel");
-            if (countdownPanel != null)
+            // Result buttons
+            AssignButtonByName(serializedManager, root, "resultPlayAgainButton", "ResultPlayAgainButton");
+            AssignButtonByName(serializedManager, root, "resultExitButton", "ResultExitButton");
+
+            // Real Money Panels - start inactive!
+            Transform winPanelRM = FindDeep(root, "WinPanel_RealMoney");
+            if (winPanelRM != null)
+            {
+                SerializedProperty winRMProp = serializedManager.FindProperty("winPanelRealMoney");
+                if (winRMProp != null)
+                    winRMProp.objectReferenceValue = winPanelRM.GetComponent<WinPanelController>();
+            }
+
+            Transform losePanelRM = FindDeep(root, "LosePanel_RealMoney");
+            if (losePanelRM != null)
+            {
+                SerializedProperty loseRMProp = serializedManager.FindProperty("losePanelRealMoney");
+                if (loseRMProp != null)
+                    loseRMProp.objectReferenceValue = losePanelRM.GetComponent<WinPanelController>();
+            }
+
+            // Countdown UI - starts inactive!
+            Transform countdownPanelT = FindDeep(root, "CountdownPanel");
+            if (countdownPanelT != null)
             {
                 SerializedProperty countdownProp = serializedManager.FindProperty("countdownUI");
                 if (countdownProp != null)
-                {
-                    countdownProp.objectReferenceValue = countdownPanel.GetComponent<DigitPark.UI.CountdownUI>();
-                }
+                    countdownProp.objectReferenceValue = countdownPanelT.GetComponent<DigitPark.UI.CountdownUI>();
             }
 
-            // Premium Banner removed - will be added in v3+
-
             // Combo Text
-            AssignReference(serializedManager, "comboText", "ComboText");
+            AssignTMPReference(serializedManager, root, "comboText", "ComboText");
 
             // Sparkle Effect
-            GameObject particleEffects = GameObject.Find("ParticleEffects");
+            Transform particleEffects = FindDeep(root, "ParticleEffects");
             if (particleEffects != null)
             {
                 SerializedProperty sparkleProp = serializedManager.FindProperty("sparkleEffect");
                 if (sparkleProp != null)
-                {
                     sparkleProp.objectReferenceValue = particleEffects.GetComponent<DigitPark.UI.UISparkleEffect>();
-                }
             }
 
             serializedManager.ApplyModifiedProperties();
             Debug.Log("[DigitRushUIBuilder] Referencias asignadas al DigitRushController");
         }
 
-        private static void AssignReference(SerializedObject so, string propertyName, string objectName)
+        /// <summary>
+        /// Assigns a TMP text reference by searching the hierarchy (works with inactive objects)
+        /// </summary>
+        private static void AssignTMPReference(SerializedObject so, Transform root, string propertyName, string objectName)
         {
             SerializedProperty prop = so.FindProperty(propertyName);
-            if (prop != null)
-            {
-                GameObject obj = GameObject.Find(objectName);
-                if (obj != null)
-                {
-                    prop.objectReferenceValue = obj.GetComponent<TextMeshProUGUI>();
-                }
-            }
+            if (prop == null) return;
+
+            Transform t = FindDeep(root, objectName);
+            if (t != null)
+                prop.objectReferenceValue = t.GetComponent<TextMeshProUGUI>();
         }
 
-        private static void AssignButtonReference(SerializedObject so, string propertyName, string objectName)
+        /// <summary>
+        /// Assigns a Button reference by searching the hierarchy (works with inactive objects)
+        /// </summary>
+        private static void AssignButtonByName(SerializedObject so, Transform root, string propertyName, string objectName)
         {
             SerializedProperty prop = so.FindProperty(propertyName);
-            if (prop != null)
-            {
-                GameObject obj = GameObject.Find(objectName);
-                if (obj != null)
-                {
-                    prop.objectReferenceValue = obj.GetComponent<Button>();
-                }
-            }
+            if (prop == null) return;
+
+            Transform t = FindDeep(root, objectName);
+            if (t != null)
+                prop.objectReferenceValue = t.GetComponent<Button>();
         }
 
-        private static void AssignGameObjectReference(SerializedObject so, string propertyName, string objectName)
-        {
-            SerializedProperty prop = so.FindProperty(propertyName);
-            if (prop != null)
-            {
-                GameObject obj = GameObject.Find(objectName);
-                if (obj != null)
-                {
-                    prop.objectReferenceValue = obj;
-                }
-            }
-        }
+        // Old GameObject.Find-based methods removed — replaced by FindDeep-based methods above
 
         private static void UpdateAllTextStyles(Transform root)
         {

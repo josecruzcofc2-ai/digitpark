@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using DigitPark.Managers;
+using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
@@ -59,63 +60,14 @@ namespace DigitPark.Games
         private const string PREFS_PREFIX = "DigitPark_ShowRules_";
 
         // Diccionario de reglas para cada juego
-        private static readonly Dictionary<GameType, GameRulesData> gameRules = new Dictionary<GameType, GameRulesData>
+        // Mapeo GameType → claves de localización para título y reglas
+        private static readonly Dictionary<GameType, (string titleKey, string rulesKey)> gameRulesKeys = new Dictionary<GameType, (string, string)>
         {
-            {
-                GameType.DigitRush,
-                new GameRulesData(
-                    "DIGIT RUSH",
-                    "• Toca los números del 1 al 9 en orden\n\n" +
-                    "• Los números aparecen desordenados en pantalla\n\n" +
-                    "• Completa la secuencia lo más rápido posible\n\n" +
-                    "• Cada error suma +1 segundo de penalización\n\n" +
-                    "• Tu puntuación es el tiempo total"
-                )
-            },
-            {
-                GameType.MemoryPairs,
-                new GameRulesData(
-                    "MEMORY PAIRS",
-                    "• Encuentra los 8 pares de cartas iguales\n\n" +
-                    "• Toca 2 cartas para voltearlas\n\n" +
-                    "• Si coinciden, se quedan reveladas\n\n" +
-                    "• Si no coinciden, se ocultan de nuevo\n\n" +
-                    "• Cada error suma +1 segundo de penalización"
-                )
-            },
-            {
-                GameType.QuickMath,
-                new GameRulesData(
-                    "QUICK MATH",
-                    "• Resuelve 10 operaciones matemáticas\n\n" +
-                    "• Operaciones de suma y resta\n\n" +
-                    "• Selecciona la respuesta correcta entre 3 opciones\n\n" +
-                    "• Cada error suma +1 segundo de penalización\n\n" +
-                    "• Completa todas las rondas lo más rápido posible"
-                )
-            },
-            {
-                GameType.FlashTap,
-                new GameRulesData(
-                    "FLASH TAP",
-                    "• Reacciona a la señal visual lo más rápido posible\n\n" +
-                    "• Espera a que el botón cambie de GRIS a VERDE\n\n" +
-                    "• Toca inmediatamente cuando aparezca VERDE\n\n" +
-                    "• Si tocas antes (en gris) = error y reinicio\n\n" +
-                    "• Tu puntuación es el promedio de 5 intentos"
-                )
-            },
-            {
-                GameType.OddOneOut,
-                new GameRulesData(
-                    "ODD ONE OUT",
-                    "• Encuentra el dígito diferente entre 2 cuadrículas\n\n" +
-                    "• Compara las dos cuadrículas de 4x4\n\n" +
-                    "• Una tiene UN número diferente (ej: 6 vs 9)\n\n" +
-                    "• Toca el número diferente para avanzar\n\n" +
-                    "• Cada error suma +1 segundo de penalización"
-                )
-            }
+            { GameType.DigitRush, ("rules_digitrush_title", "rules_digitrush_content") },
+            { GameType.MemoryPairs, ("rules_memorypairs_title", "rules_memorypairs_content") },
+            { GameType.QuickMath, ("rules_quickmath_title", "rules_quickmath_content") },
+            { GameType.FlashTap, ("rules_flashtap_title", "rules_flashtap_content") },
+            { GameType.OddOneOut, ("rules_oddoneout_title", "rules_oddoneout_content") }
         };
 
         private void Start()
@@ -227,14 +179,14 @@ namespace DigitPark.Games
 
             currentRulesGame = gameType;
 
-            // Obtener datos de reglas
-            if (gameRules.TryGetValue(gameType, out GameRulesData rules))
+            // Obtener datos de reglas localizadas
+            if (gameRulesKeys.TryGetValue(gameType, out var keys))
             {
                 if (rulesTitleText != null)
-                    rulesTitleText.text = rules.Title;
+                    rulesTitleText.text = AutoLocalizer.Get(keys.titleKey);
 
                 if (rulesContentText != null)
-                    rulesContentText.text = rules.Content;
+                    rulesContentText.text = AutoLocalizer.Get(keys.rulesKey);
             }
 
             // Resetear toggle
@@ -520,15 +472,4 @@ namespace DigitPark.Games
     /// <summary>
     /// Datos de reglas para un juego
     /// </summary>
-    public class GameRulesData
-    {
-        public string Title { get; private set; }
-        public string Content { get; private set; }
-
-        public GameRulesData(string title, string content)
-        {
-            Title = title;
-            Content = content;
-        }
-    }
 }

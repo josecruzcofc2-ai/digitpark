@@ -27,6 +27,7 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI averageText;
         [SerializeField] private TextMeshProUGUI bestTimeText;
         [SerializeField] private GameObject winPanel;
+        [SerializeField] private CanvasGroup winPanelCanvasGroup;
 
         [Header("Flash Tap - 3D Button Sprites")]
         [SerializeField] private Sprite buttonUpSprite;
@@ -312,6 +313,7 @@ namespace DigitPark.Games
         protected override void OnGameStarted()
         {
             if (winPanel != null) winPanel.SetActive(false);
+            if (winPanelCanvasGroup != null) winPanelCanvasGroup.alpha = 0;
             if (tapButton != null) tapButton.interactable = true;
         }
 
@@ -327,7 +329,12 @@ namespace DigitPark.Games
 
         protected override void OnGameEnded()
         {
-            if (winPanel != null) winPanel.SetActive(true);
+            // Solo mostrar panel propio en modo práctica
+            if (IsPracticeMode() && winPanel != null)
+            {
+                winPanel.SetActive(true);
+                StartCoroutine(ShowWinPanel());
+            }
             if (tapButton != null) tapButton.interactable = false;
 
             // Mostrar resultado final
@@ -343,6 +350,24 @@ namespace DigitPark.Games
             {
                 FeedbackManager.Instance.PlayImportantFeedback(transform.position);
             }
+        }
+
+        private IEnumerator ShowWinPanel()
+        {
+            if (winPanelCanvasGroup == null) yield break;
+
+            winPanelCanvasGroup.alpha = 0f;
+            float duration = 0.4f;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                winPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+                yield return null;
+            }
+
+            winPanelCanvasGroup.alpha = 1f;
         }
 
         private string GetPerformanceRating(float avgMs)
@@ -364,6 +389,7 @@ namespace DigitPark.Games
             isSignalActive = false;
 
             if (winPanel != null) winPanel.SetActive(false);
+            if (winPanelCanvasGroup != null) winPanelCanvasGroup.alpha = 0;
             if (tapButton != null) tapButton.interactable = true;
 
             if (button3D != null)

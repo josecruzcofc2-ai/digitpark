@@ -46,6 +46,12 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI verificationTitleText;
         [SerializeField] private TextMeshProUGUI verificationDescText;
 
+        [Header("UI - Bet Confirmation")]
+        [SerializeField] private GameObject confirmBetPanel;
+        [SerializeField] private TextMeshProUGUI confirmBetText;
+        [SerializeField] private Button confirmBetButton;
+        [SerializeField] private Button cancelBetButton;
+
         [Header("UI - Matchmaking")]
         [SerializeField] private GameObject matchmakingPanel;
         [SerializeField] private TextMeshProUGUI matchmakingStatusText;
@@ -65,6 +71,11 @@ namespace DigitPark.Managers
         private bool isKYCVerified = false;
         private CashBattleState currentState = CashBattleState.Main;
         private float matchmakingTimer = 0f;
+
+        // Pending bet confirmation
+        private CashGameType _pendingGameType;
+        private decimal _pendingEntryFee;
+        private List<GameType> _pendingSprintGames;
 
         // Propiedad para obtener balance
         private decimal CurrentBalance => _walletService?.CurrentBalance ?? 0m;
@@ -182,6 +193,9 @@ namespace DigitPark.Managers
             }
 
             cancelMatchmakingButton?.onClick.AddListener(CancelMatchmaking);
+
+            confirmBetButton?.onClick.AddListener(OnConfirmBet);
+            cancelBetButton?.onClick.AddListener(OnCancelBet);
         }
 
         #endregion
@@ -511,11 +525,10 @@ namespace DigitPark.Managers
                 return;
             }
 
-            // Convertir GameType a CashGameType
-            CashGameType cashGameType = ConvertToCashGameType(gameType);
-
-            // Iniciar matchmaking usando el servicio
-            StartMatchmakingAsync(cashGameType, entryFee);
+            _pendingGameType = ConvertToCashGameType(gameType);
+            _pendingEntryFee = entryFee;
+            _pendingSprintGames = null;
+            ShowBetConfirmation(gameType.ToString(), entryFee);
         }
 
         private void OnCognitiveSprintSelected(List<GameType> games, decimal entryFee)
@@ -529,9 +542,10 @@ namespace DigitPark.Managers
                 return;
             }
 
-            // Por ahora usar el primer juego para matchmaking
-            CashGameType cashGameType = ConvertToCashGameType(games[0]);
-            StartMatchmakingAsync(cashGameType, entryFee);
+            _pendingGameType = ConvertToCashGameType(games[0]);
+            _pendingEntryFee = entryFee;
+            _pendingSprintGames = games;
+            ShowBetConfirmation("Cognitive Sprint", entryFee);
         }
 
         private void OnTournamentSelected(UITournamentInfo tournament)
@@ -559,6 +573,40 @@ namespace DigitPark.Managers
                 GameType.QuickMath => CashGameType.QuickMath,
                 _ => CashGameType.DigitRush
             };
+        }
+
+        private void ShowBetConfirmation(string gameName, decimal entryFee)
+        {
+            if (confirmBetPanel == null)
+            {
+                // Sin panel de confirmación, ir directo a matchmaking
+                OnConfirmBet();
+                return;
+            }
+
+            if (confirmBetText != null)
+            {
+                confirmBetText.text = AutoLocalizer.Get("cashbattle_confirm_bet", gameName, entryFee.ToString("F2"));
+            }
+
+            confirmBetPanel.SetActive(true);
+        }
+
+        private void OnConfirmBet()
+        {
+            if (confirmBetPanel != null)
+                confirmBetPanel.SetActive(false);
+
+            StartMatchmakingAsync(_pendingGameType, _pendingEntryFee);
+        }
+
+        private void OnCancelBet()
+        {
+            if (confirmBetPanel != null)
+                confirmBetPanel.SetActive(false);
+
+            _pendingEntryFee = 0;
+            _pendingSprintGames = null;
         }
 
         private void ShowInsufficientBalancePopup(decimal requiredAmount)
@@ -648,21 +696,28 @@ namespace DigitPark.Managers
 
             Debug.Log($"[CashBattle] Cargando juego: {match.GameType}");
 
-            // TODO: Cargar escena del juego correspondiente con contexto de Cash Battle
-            string sceneName = match.GameType switch
+            // Mapear CashGameType a GameType
+            GameType gameType = match.GameType switch
             {
-                CashGameType.DigitRush => "DigitRush",
-                CashGameType.FlashTap => "FlashTap",
-                CashGameType.MemoryPairs => "MemoryPairs",
-                CashGameType.OddOneOut => "OddOneOut",
-                CashGameType.QuickMath => "QuickMath",
-                _ => "DigitRush"
+                CashGameType.DigitRush => GameType.DigitRush,
+                CashGameType.FlashTap => GameType.FlashTap,
+                CashGameType.MemoryPairs => GameType.MemoryPairs,
+                CashGameType.OddOneOut => GameType.OddOneOut,
+                CashGameType.QuickMath => GameType.QuickMath,
+                _ => GameType.DigitRush
             };
 
-            // TODO: Pasar contexto de Cash Battle al juego
-            // GameContext.SetCashBattleMode(match);
+            // Pasar contexto de Cash Battle al juego via GameSessionManager
+            string opponentId = match.Opponent?.UserId ?? "";
+            string opponentName = match.Opponent?.DisplayName ?? "Opponent";
 
-            SceneManager.LoadScene(sceneName);
+            GameSessionManager.Instance.StartSingleGameSession(
+                gameType,
+                opponentId,
+                opponentName,
+                match.EntryFee,
+                match.MatchId
+            );
         }
 
         private async void CancelMatchmaking()

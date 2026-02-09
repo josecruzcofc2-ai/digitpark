@@ -193,9 +193,15 @@ namespace DigitPark.Games
                 return;
             }
 
-            // Check if we're in a real money session
-            bool isRealMoneyMode = GameSessionManager.Instance?.HasActiveSession == true &&
-                                   GameSessionManager.Instance.CurrentContext?.Mode != GameMode.Practice;
+            // Check if we're in a real money session (SingleGame or Tournament with entry fee)
+            var ctx = GameSessionManager.Instance?.CurrentContext;
+            bool isRealMoneyMode = ctx != null &&
+                                   ctx.EntryFee > 0 &&
+                                   (ctx.Mode == GameMode.SingleGame || ctx.Mode == GameMode.Tournament);
+
+            // CognitiveSprint: show normal panel per game, real money only at final result
+            if (ctx?.Mode == GameMode.CognitiveSprint && ctx.HasMoreGames)
+                isRealMoneyMode = false;
 
             if (isRealMoneyMode)
             {
@@ -288,10 +294,20 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Callback cuando se acepta el resultado (vuelve al selector)
+        /// Callback cuando se acepta el resultado (vuelve al selector o avanza en CognitiveSprint)
         /// </summary>
         private void OnPanelAcceptClicked()
         {
+            var session = GameSessionManager.Instance;
+            if (session?.HasActiveSession == true &&
+                session.CurrentContext?.Mode == GameMode.CognitiveSprint &&
+                session.CurrentContext.HasMoreGames)
+            {
+                Debug.Log($"[{GameType}] Accept clicked - advancing to next game in Cognitive Sprint");
+                session.ProceedToNextGame();
+                return;
+            }
+
             Debug.Log($"[{GameType}] Accept clicked - returning to selector");
             SceneManager.LoadScene("GameSelector");
         }
@@ -365,6 +381,16 @@ namespace DigitPark.Games
             if (minutes > 0)
                 return $"{minutes}:{seconds:00}.{milliseconds:00}";
             return $"{seconds}.{milliseconds:00}";
+        }
+
+        /// <summary>
+        /// Indica si el juego está en modo práctica (sin sesión activa o modo Practice)
+        /// </summary>
+        protected bool IsPracticeMode()
+        {
+            if (GameSessionManager.Instance == null || !GameSessionManager.Instance.HasActiveSession)
+                return true;
+            return GameSessionManager.Instance.CurrentContext?.Mode == GameMode.Practice;
         }
 
         // Metodos abstractos que cada juego debe implementar

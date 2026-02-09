@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
@@ -26,6 +27,8 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI errorsText;
         [SerializeField] private TextMeshProUGUI comboText;
         [SerializeField] private GameObject winPanel;
+        [SerializeField] private CanvasGroup winPanelCanvasGroup;
+        [SerializeField] private TextMeshProUGUI statsText;
 
         [Header("Countdown")]
         [SerializeField] private CountdownUI countdownUI;
@@ -586,7 +589,37 @@ namespace DigitPark.Games
 
         protected override void OnGameEnded()
         {
-            if (winPanel != null) winPanel.SetActive(true);
+            // Solo mostrar panel propio en modo práctica
+            if (IsPracticeMode() && winPanel != null)
+            {
+                winPanel.SetActive(true);
+                StartCoroutine(ShowWinPanel());
+            }
+        }
+
+        private IEnumerator ShowWinPanel()
+        {
+            // Actualizar stats
+            if (statsText != null)
+            {
+                statsText.text = $"{AutoLocalizer.Get("game_time")}: {GetFormattedTime()}\n{AutoLocalizer.Get("game_errors")}: {errorCount}\n{AutoLocalizer.Get("memorypairs_pairs_found")}: {pairsFound}/{totalPairs}\nMax Combo: x{maxCombo}";
+            }
+
+            // Fade in
+            if (winPanelCanvasGroup == null) yield break;
+
+            winPanelCanvasGroup.alpha = 0f;
+            float duration = 0.4f;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                winPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+                yield return null;
+            }
+
+            winPanelCanvasGroup.alpha = 1f;
         }
 
         protected override void OnGameReset()
@@ -614,6 +647,7 @@ namespace DigitPark.Games
             }
 
             if (winPanel != null) winPanel.SetActive(false);
+            if (winPanelCanvasGroup != null) winPanelCanvasGroup.alpha = 0;
         }
 
         protected override void OnErrorOccurred()

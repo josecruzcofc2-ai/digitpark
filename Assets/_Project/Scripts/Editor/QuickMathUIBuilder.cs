@@ -4,6 +4,7 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Games;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
@@ -55,6 +56,14 @@ namespace DigitPark.Editor
             {
                 RebuildQuickMathUI();
             }
+
+            GUILayout.Space(15);
+            GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
+            if (GUILayout.Button("Auto-Asignar Referencias", GUILayout.Height(30)))
+            {
+                QuickMathReferenceAssigner.RunAutoAssign();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static void RebuildQuickMathUI()
@@ -85,7 +94,10 @@ namespace DigitPark.Editor
 
         private static void CleanOldElements(Transform canvasTransform)
         {
-            string[] keepElements = { "Main Camera", "EventSystem", "Background" };
+            string[] keepElements = {
+                "Main Camera", "EventSystem",
+                "Directional Light", "SceneTransition"
+            };
 
             for (int i = canvasTransform.childCount - 1; i >= 0; i--)
             {
@@ -100,6 +112,10 @@ namespace DigitPark.Editor
                         break;
                     }
                 }
+
+                // Never destroy objects with Animator or Animation components
+                if (!shouldKeep && (child.GetComponent<Animator>() != null || child.GetComponent<Animation>() != null))
+                    shouldKeep = true;
 
                 if (!shouldKeep)
                 {
@@ -124,9 +140,6 @@ namespace DigitPark.Editor
             // ========== COMBO/STREAK DISPLAY ==========
             CreateComboDisplay(safeArea.transform);
 
-            // ========== GAME ZONE GLOW (contenedor con borde) ==========
-            CreateGameZoneGlow(safeArea.transform);
-
             // ========== ECUACIÓN GIGANTE ==========
             CreateEquationPanel(safeArea.transform);
 
@@ -138,6 +151,9 @@ namespace DigitPark.Editor
 
             // ========== WIN PANEL ==========
             CreateWinPanel(safeArea.transform);
+
+            // ========== REAL MONEY PANELS (Cash Battle) ==========
+            WinPanelInlineBuilder.CreateRealMoneyPanels(safeArea.transform);
 
             // ========== PARTICLE EFFECTS ==========
             CreateParticleEffects(safeArea.transform);
@@ -152,27 +168,6 @@ namespace DigitPark.Editor
 
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0f, 0f, 0f, 0.3f);
-
-            // Back Button (esquina izquierda)
-            GameObject backButton = CreateElement(header.transform, "BackButton");
-            SetupRectTransform(backButton,
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(50, 0), new Vector2(80, 60));
-
-            Image backBtnImg = backButton.AddComponent<Image>();
-            backBtnImg.color = new Color(0.1f, 0.15f, 0.2f, 0.9f);
-
-            Outline backBtnOutline = backButton.AddComponent<Outline>();
-            backBtnOutline.effectColor = CYAN_NEON;
-            backBtnOutline.effectDistance = new Vector2(2, -2);
-
-            Button backBtn = backButton.AddComponent<Button>();
-            backBtn.targetGraphic = backBtnImg;
-
-            // Back button text (flecha)
-            GameObject backBtnText = CreateElement(backButton.transform, "BackButtonText");
-            SetupRectTransform(backBtnText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(backBtnText, "<", 32, CYAN_NEON, FontStyles.Bold);
 
             // Title con efecto glow
             GameObject title = CreateElement(header.transform, "TitleText");
@@ -274,29 +269,6 @@ namespace DigitPark.Editor
             comboContainer.SetActive(false);
         }
 
-        private static void CreateGameZoneGlow(Transform parent)
-        {
-            // Container con glow que envuelve ecuación + botones
-            // El usuario ajustará el tamaño manualmente para que cubra ambos elementos
-            GameObject gameZone = CreateElement(parent, "GameZoneGlow");
-            SetupRectTransform(gameZone,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -40), new Vector2(880, 320)); // Tamaño inicial, ajustar manualmente
-
-            // Fondo semi-transparente opcional
-            Image zoneBg = gameZone.AddComponent<Image>();
-            zoneBg.color = new Color(0.02f, 0.05f, 0.08f, 0.3f);
-            zoneBg.raycastTarget = false;
-
-            // Borde glow
-            Outline zoneOutline = gameZone.AddComponent<Outline>();
-            zoneOutline.effectColor = new Color(0f, 1f, 1f, 0.5f); // Cyan sutil
-            zoneOutline.effectDistance = new Vector2(2, -2);
-
-            // Agregar glow pulsante
-            GridGlowPulse zoneGlow = gameZone.AddComponent<GridGlowPulse>();
-        }
-
         private static void CreateEquationPanel(Transform parent)
         {
             // Panel contenedor de la ecuación - GIGANTE con efecto 3D
@@ -368,18 +340,6 @@ namespace DigitPark.Editor
             TextMeshProUGUI numBTmp = SetupText(numberB, "7", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
             numBTmp.alignment = TextAlignmentOptions.Center;
 
-            // Igual
-            GameObject equalsText = CreateElement(equationContainer.transform, "EqualsText");
-            AddLayoutElement(equalsText, 60, 150);
-            TextMeshProUGUI eqTmp = SetupText(equalsText, "=", EQUATION_FONT_SIZE, CYAN_NEON, FontStyles.Bold);
-            eqTmp.alignment = TextAlignmentOptions.Center;
-
-            // Signo de interrogación - más compacto
-            GameObject questionMark = CreateElement(equationContainer.transform, "QuestionMark");
-            AddLayoutElement(questionMark, 80, 150);
-            TextMeshProUGUI qTmp = SetupText(questionMark, "?", EQUATION_FONT_SIZE - 10, GOLD, FontStyles.Bold);
-            qTmp.alignment = TextAlignmentOptions.Center;
-
             // También crear ProblemText oculto para compatibilidad con controller
             GameObject problemText = CreateElement(equationPanel.transform, "ProblemText");
             SetupRectTransform(problemText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -401,8 +361,8 @@ namespace DigitPark.Editor
             answersLayout.padding = new RectOffset(10, 10, 0, 0);
             answersLayout.childForceExpandWidth = false;
             answersLayout.childForceExpandHeight = false;
-            answersLayout.childControlWidth = false;
-            answersLayout.childControlHeight = false;
+            answersLayout.childControlWidth = true;
+            answersLayout.childControlHeight = true;
 
             // Crear 3 botones de respuesta rectangulares con efecto 3D
             for (int i = 0; i < 3; i++)
@@ -656,16 +616,6 @@ namespace DigitPark.Editor
                 Debug.Log($"[QuickMathUIBuilder] Config asignado correctamente");
             }
 
-            // ========== NAVIGATION BUTTONS ==========
-            // Back Button
-            GameObject backButton = GameObject.Find("BackButton");
-            if (backButton != null)
-            {
-                SerializedProperty backBtnProp = so.FindProperty("backButton");
-                if (backBtnProp != null)
-                    backBtnProp.objectReferenceValue = backButton.GetComponent<Button>();
-            }
-
             // Problem text (hidden, for data)
             AssignTMPReference(so, "problemText", "ProblemText");
 
@@ -673,7 +623,6 @@ namespace DigitPark.Editor
             AssignTMPReference(so, "numberAText", "NumberA");
             AssignTMPReference(so, "numberBText", "NumberB");
             AssignTMPReference(so, "operatorText", "OperatorText");
-            AssignTMPReference(so, "questionMarkText", "QuestionMark");
 
             // Answer buttons
             GameObject answersContainer = GameObject.Find("AnswersContainer");
@@ -769,6 +718,11 @@ namespace DigitPark.Editor
                 if (eqPanelProp != null)
                     eqPanelProp.objectReferenceValue = equationPanel.GetComponent<RectTransform>();
             }
+
+            // Real Money Panels
+            WinPanelInlineBuilder.AssignWinPanelRefs(so,
+                GameObject.Find("WinPanel_RealMoney"),
+                GameObject.Find("LosePanel_RealMoney"));
 
             so.ApplyModifiedProperties();
             Debug.Log("[QuickMathUIBuilder] Referencias asignadas al Controller");

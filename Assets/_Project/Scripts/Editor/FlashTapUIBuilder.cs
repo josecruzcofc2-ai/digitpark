@@ -4,6 +4,7 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Games;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
@@ -71,6 +72,14 @@ namespace DigitPark.Editor
                     "en Assets/_Project/Art/Icons/Games/",
                     MessageType.Warning);
             }
+
+            GUILayout.Space(15);
+            GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
+            if (GUILayout.Button("Auto-Asignar Referencias", GUILayout.Height(30)))
+            {
+                FlashTapReferenceAssigner.RunAutoAssign();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static void RebuildFlashTapUI()
@@ -182,6 +191,9 @@ namespace DigitPark.Editor
 
             // ========== WIN PANEL ==========
             CreateWinPanel(canvasTransform);
+
+            // ========== REAL MONEY PANELS (Cash Battle) ==========
+            WinPanelInlineBuilder.CreateRealMoneyPanels(canvasTransform);
         }
 
         private static void Create3DButton(Transform canvasTransform)
@@ -440,6 +452,11 @@ namespace DigitPark.Editor
 
             if (winPanel != null)
                 so.FindProperty("winPanel").objectReferenceValue = winPanel.gameObject;
+
+            // Real Money Panels
+            WinPanelInlineBuilder.AssignWinPanelRefs(so,
+                GameObject.Find("WinPanel_RealMoney"),
+                GameObject.Find("LosePanel_RealMoney"));
 
             so.ApplyModifiedProperties();
 

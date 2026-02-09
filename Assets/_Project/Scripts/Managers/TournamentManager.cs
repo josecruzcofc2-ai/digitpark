@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DigitPark.Games;
 using DigitPark.UI.Panels;
 using DigitPark.UI.Items;
 
@@ -1040,6 +1041,10 @@ namespace DigitPark.Managers
             PlayerPrefs.SetString("CurrentTournamentId", tournament.tournamentId);
             PlayerPrefs.SetString("TournamentReturnScene", "Tournaments");
             PlayerPrefs.Save();
+
+            // Configurar modo competitivo (no práctica) antes de ir al selector
+            GameSelectorManager.SetPracticeMode(false);
+            GameSelectorManager.SetOnlineMatchMode(false);
 
             // Ir al selector de juegos
             SceneManager.LoadScene("GameSelector");

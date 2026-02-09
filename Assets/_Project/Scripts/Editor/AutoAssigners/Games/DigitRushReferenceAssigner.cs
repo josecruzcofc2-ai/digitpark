@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.UI;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -23,16 +24,19 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
+            // Grid
+            "gridButtons",
             // UI
             "timerText", "bestTimeText", "comboText",
-            // Panels
-            "winMessagePanel", "successText"
-            // Note: playAgainButton, backButton excluded - handled by exit/replay panel
-            // Note: gridButtons[] excluded - array requires manual assignment
-            // Note: countdownUI excluded - specialized component
-            // Note: sparkleEffect excluded - auto-found in code
-            // Note: winMessageCanvasGroup excluded - optional effect
-            // Note: premiumBannerContainer, premiumBannerButton, premiumBannerText excluded - optional premium feature
+            // Countdown & Effects
+            "countdownUI", "sparkleEffect",
+            // Win Message (original)
+            "winMessagePanel",
+            // Result Panel (Practice - new)
+            "resultPanel", "resultTitleText", "resultTimeText", "resultMessageText",
+            "resultPlayAgainButton", "resultExitButton",
+            // Win/Lose Panels (Cash Battle)
+            "winPanelRealMoney", "losePanelRealMoney"
         };
 
         private struct ReferenceResult
@@ -72,11 +76,11 @@ namespace DigitPark.Editor.AutoAssigners
 
             EditorGUILayout.HelpBox(
                 "Assigns UI references to DigitRushController:\n" +
+                "- Grid buttons (9 cells)\n" +
                 "- Timer and best time texts\n" +
                 "- Combo display\n" +
-                "- Play again and back buttons\n" +
-                "- Win message panel\n\n" +
-                "Note: Grid buttons array requires manual assignment",
+                "- Countdown UI and sparkle effect\n" +
+                "- Result panel and win/lose panels",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -142,6 +146,15 @@ namespace DigitPark.Editor.AutoAssigners
 
         #endregion
 
+        /// <summary>
+        /// Ejecuta la asignación de referencias. Llamable desde otros Editor scripts.
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #region Assignment Logic
 
         private static void AssignAllReferences()
@@ -159,14 +172,53 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(controller);
             so.Update();
 
+            // Grid Buttons (9 cells inside GridContainer)
+            AssignGridButtons(so);
+
             // UI Elements
             AssignReference(so, "timerText", FindTextByName("timer", "time", "tiempo"));
             AssignReference(so, "bestTimeText", FindTextByName("best", "mejor", "record"));
             AssignReference(so, "comboText", FindTextByName("combo", "streak"));
 
-            // Panels
-            AssignReference(so, "winMessagePanel", FindByNameContains<Transform>("win", "message", "success", "complete"));
-            AssignReference(so, "successText", FindTextByName("success", "message", "win"));
+            // Win Message (original panel)
+            AssignReference(so, "winMessagePanel", FindByNameContains<Transform>("winmessage", "winpanel"));
+            var winMsgObj = FindByNameContains<Transform>("winmessage", "winpanel");
+            if (winMsgObj != null)
+            {
+                var wmCgProp = so.FindProperty("winMessageCanvasGroup");
+                if (wmCgProp != null && wmCgProp.objectReferenceValue == null)
+                    wmCgProp.objectReferenceValue = winMsgObj.GetComponent<CanvasGroup>();
+            }
+            AssignReference(so, "successText", FindTextByName("success", "wintext", "mensaje"));
+
+            // Result Panel (Practice - new)
+            AssignReference(so, "resultPanel", FindByExactName<Transform>("ResultPanel"));
+            AssignReference(so, "resultTitleText", FindTextByExactName("ResultTitleText"));
+            AssignReference(so, "resultTimeText", FindTextByExactName("ResultTimeText"));
+            AssignReference(so, "resultMessageText", FindTextByExactName("ResultMessageText"));
+            AssignReference(so, "resultPlayAgainButton", FindButtonByName("resultplayagain"));
+            AssignReference(so, "resultExitButton", FindButtonByName("resultexit"));
+
+            // Result Panel CanvasGroup
+            var resultPanelObj = FindByExactName<Transform>("ResultPanel");
+            if (resultPanelObj != null)
+            {
+                var cgProp = so.FindProperty("resultPanelCanvasGroup");
+                if (cgProp != null)
+                    cgProp.objectReferenceValue = resultPanelObj.GetComponent<CanvasGroup>();
+            }
+
+            // Win/Lose Panels (Cash Battle)
+            AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
+            AssignReference(so, "losePanelRealMoney", FindWinPanelController("LosePanel_RealMoney"));
+
+            // Countdown UI
+            var countdownUI = Object.FindFirstObjectByType<DigitPark.UI.CountdownUI>(FindObjectsInactive.Include);
+            AssignReference(so, "countdownUI", countdownUI);
+
+            // Sparkle Effect
+            var sparkleEffect = Object.FindFirstObjectByType<DigitPark.UI.UISparkleEffect>(FindObjectsInactive.Include);
+            AssignReference(so, "sparkleEffect", sparkleEffect);
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
@@ -195,10 +247,68 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Finders
 
+        private static void AssignGridButtons(SerializedObject so)
+        {
+            var prop = so.FindProperty("gridButtons");
+            if (prop == null) { AddResult("gridButtons", "Property not found", false, null); failedCount++; return; }
+
+            // Find GridContainer by searching all transforms
+            Transform gridContainer = null;
+            foreach (var t in Object.FindObjectsOfType<UnityEngine.UI.GridLayoutGroup>(true))
+            {
+                if (t.gameObject.name == "GridContainer")
+                {
+                    gridContainer = t.transform;
+                    break;
+                }
+            }
+
+            if (gridContainer == null)
+            {
+                AddResult("gridButtons", "GridContainer not found", false, null);
+                failedCount++;
+                return;
+            }
+
+            prop.arraySize = 9;
+            int found = 0;
+            for (int i = 0; i < 9; i++)
+            {
+                Transform cell = gridContainer.Find($"Cell_{i + 1}");
+                if (cell != null)
+                {
+                    Button btn = cell.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        prop.GetArrayElementAtIndex(i).objectReferenceValue = btn;
+                        found++;
+                    }
+                }
+            }
+
+            if (found == 9)
+            {
+                AddResult("gridButtons", $"Assigned ({found}/9)", true, gridContainer);
+                assignedCount++;
+            }
+            else
+            {
+                AddResult("gridButtons", $"Partial ({found}/9)", found > 0, gridContainer);
+                if (found > 0) assignedCount++; else failedCount++;
+            }
+        }
+
         private static T FindByNameContains<T>(params string[] patterns) where T : Component
         {
             var all = Object.FindObjectsOfType<T>(true);
             foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            return null;
+        }
+
+        private static T FindByExactName<T>(string name) where T : Component
+        {
+            var all = Object.FindObjectsOfType<T>(true);
+            foreach (var o in all) if (o.gameObject.name == name) return o;
             return null;
         }
 
@@ -209,10 +319,24 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
+        private static TextMeshProUGUI FindTextByExactName(string name)
+        {
+            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
+            foreach (var t in all) if (t.gameObject.name == name) return t;
+            return null;
+        }
+
         private static Button FindButtonByName(params string[] patterns)
         {
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            return null;
+        }
+
+        private static WinPanelController FindWinPanelController(string name)
+        {
+            var all = Object.FindObjectsOfType<WinPanelController>(true);
+            foreach (var w in all) if (w.gameObject.name == name) return w;
             return null;
         }
 

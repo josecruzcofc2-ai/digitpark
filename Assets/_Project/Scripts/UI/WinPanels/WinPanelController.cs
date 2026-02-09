@@ -79,9 +79,22 @@ namespace DigitPark.UI
         /// </summary>
         public void ShowNormalResult(MinigameResult result)
         {
+            var session = GameSessionManager.Instance;
+            bool isSprint = session?.HasActiveSession == true &&
+                            session.CurrentContext?.Mode == GameMode.CognitiveSprint;
+
             if (titleText != null)
             {
-                titleText.text = AutoLocalizer.Get("completed");
+                if (isSprint)
+                {
+                    int current = session.CurrentContext.CurrentGameIndex + 1;
+                    int total = session.CurrentContext.Games.Count;
+                    titleText.text = AutoLocalizer.Get("sprint_game_progress", current.ToString(), total.ToString());
+                }
+                else
+                {
+                    titleText.text = AutoLocalizer.Get("completed");
+                }
                 titleText.color = normalColor;
             }
 
@@ -96,8 +109,22 @@ namespace DigitPark.UI
             if (wagerText != null) wagerText.gameObject.SetActive(false);
             if (vsContainer != null) vsContainer.SetActive(false);
 
-            // Mostrar botón de jugar de nuevo en práctica
-            if (playAgainButton != null) playAgainButton.gameObject.SetActive(true);
+            // En CognitiveSprint, ocultar Play Again y cambiar texto del botón Accept
+            if (isSprint && session.CurrentContext.HasMoreGames)
+            {
+                if (playAgainButton != null) playAgainButton.gameObject.SetActive(false);
+                // El texto del botón Accept se actualiza si tiene un TextMeshProUGUI hijo
+                if (acceptButton != null)
+                {
+                    var btnText = acceptButton.GetComponentInChildren<TextMeshProUGUI>();
+                    if (btnText != null)
+                        btnText.text = AutoLocalizer.Get("sprint_next_game");
+                }
+            }
+            else
+            {
+                if (playAgainButton != null) playAgainButton.gameObject.SetActive(true);
+            }
 
             Show();
         }

@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
@@ -52,6 +54,14 @@ namespace DigitPark.Editor
             {
                 RebuildMemoryPairsUI();
             }
+
+            GUILayout.Space(15);
+            GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
+            if (GUILayout.Button("Auto-Asignar Referencias", GUILayout.Height(30)))
+            {
+                MemoryPairsReferenceAssigner.RunAutoAssign();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static void RebuildMemoryPairsUI()
@@ -82,7 +92,10 @@ namespace DigitPark.Editor
 
         private static void CleanOldElements(Transform canvasTransform)
         {
-            string[] keepElements = { "Main Camera", "EventSystem" };
+            string[] keepElements = {
+                "Main Camera", "EventSystem",
+                "Directional Light", "SceneTransition"
+            };
 
             for (int i = canvasTransform.childCount - 1; i >= 0; i--)
             {
@@ -97,6 +110,10 @@ namespace DigitPark.Editor
                         break;
                     }
                 }
+
+                // Never destroy objects with Animator or Animation components
+                if (!shouldKeep && (child.GetComponent<Animator>() != null || child.GetComponent<Animation>() != null))
+                    shouldKeep = true;
 
                 if (!shouldKeep)
                 {
@@ -135,6 +152,9 @@ namespace DigitPark.Editor
 
             // ========== WIN PANEL ==========
             CreateWinPanel(safeArea.transform);
+
+            // ========== REAL MONEY PANELS (Cash Battle) ==========
+            WinPanelInlineBuilder.CreateRealMoneyPanels(safeArea.transform);
 
             // ========== COUNTDOWN PANEL ==========
             CreateCountdownPanel(safeArea.transform);
@@ -646,6 +666,11 @@ namespace DigitPark.Editor
                 if (sparkleProp != null)
                     sparkleProp.objectReferenceValue = particleEffects.GetComponent<DigitPark.UI.UISparkleEffect>();
             }
+
+            // Real Money Panels
+            WinPanelInlineBuilder.AssignWinPanelRefs(so,
+                GameObject.Find("WinPanel_RealMoney"),
+                GameObject.Find("LosePanel_RealMoney"));
 
             so.ApplyModifiedProperties();
             Debug.Log("[MemoryPairsUIBuilder] Referencias asignadas al MemoryPairsController");

@@ -27,6 +27,7 @@ namespace DigitPark.Editor.AutoAssigners
             "titleText", "balanceText", "backButton",
             "mainPanel", "battles1v1Card", "cashTournamentsCard", "walletCard", "historyCard",
             "ageVerificationPanel", "verifyAgeButton", "verificationStatusText",
+            "confirmBetPanel", "confirmBetText", "confirmBetButton", "cancelBetButton",
             "matchmakingPanel", "matchmakingStatusText", "cancelMatchmakingButton"
         };
 
@@ -275,6 +276,12 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "ageVerificationPanel", FindByNameContains<Transform>("ageverification", "verification", "age"));
             AssignReference(so, "verifyAgeButton", FindButtonByName("verify", "verificar", "age"));
             AssignReference(so, "verificationStatusText", FindTextByName("verificationstatus", "status"));
+
+            // Bet Confirmation
+            AssignReference(so, "confirmBetPanel", FindByNameContains<Transform>("confirmbet", "betconfirm"));
+            AssignReference(so, "confirmBetText", FindTextByName("confirmbet"));
+            AssignReference(so, "confirmBetButton", FindButtonByName("confirmbet"));
+            AssignReference(so, "cancelBetButton", FindButtonByName("cancelbet"));
 
             // Matchmaking
             AssignReference(so, "matchmakingPanel", FindByNameContains<Transform>("matchmaking", "searching", "finding"));
