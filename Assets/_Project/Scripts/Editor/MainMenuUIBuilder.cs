@@ -1039,6 +1039,9 @@ namespace DigitPark.Editor
             SetRef(so, "searchButton", FindInPath<Button>(r, "QuickActionsPanel/SearchCard"));
             SetRef(so, "notificationsButton", FindInPath<Button>(r, "Header/NotificationsButton"));
             SetRef(so, "notificationIconImage", FindInPath<Image>(r, "Header/NotificationsButton/Icon"));
+            Transform badgeContainer = r.Find("Header/NotificationsButton/Badge");
+            if (badgeContainer != null)
+                SetRef(so, "notificationBadge", badgeContainer.gameObject);
             SetRef(so, "notificationBadgeText", FindInPath<TextMeshProUGUI>(r, "Header/NotificationsButton/Badge/BadgeText"));
             SetRef(so, "premiumButton", FindInPath<Button>(r, "ExtraRow/PremiumCard"));
 

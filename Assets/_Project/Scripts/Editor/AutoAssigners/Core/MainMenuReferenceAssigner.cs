@@ -33,7 +33,7 @@ namespace DigitPark.Editor.AutoAssigners
             "userButton", "userText", "searchButton",
             // Notifications
             "notificationsButton", "notificationIconImage",
-            "notificationBadgeText",
+            "notificationBadge", "notificationBadgeText",
             // Premium
             "premiumButton", "premiumBadge", "premiumPanel",
             // Animation
@@ -246,6 +246,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Notifications
             AssignReference(so, "notificationsButton", FindButtonByName("notificationsbutton", "notification"));
             AssignReference(so, "notificationIconImage", FindImageByName("notificationsbutton/icon", "notificon"));
+            AssignNotificationBadge(so);
             AssignReference(so, "notificationBadgeText", FindTextByName("badgetext", "notifbadge"));
 
             // Premium
@@ -310,6 +311,23 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<Image>(true);
             foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
             return null;
+        }
+
+        private static void AssignNotificationBadge(SerializedObject so)
+        {
+            var prop = so.FindProperty("notificationBadge");
+            if (prop == null) { AddResult("notificationBadge", "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult("notificationBadge", "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var t in all)
+                if (t.gameObject.name == "Badge" && t.parent != null && t.parent.gameObject.name.ToLower().Contains("notification"))
+                {
+                    prop.objectReferenceValue = t.gameObject;
+                    AddResult("notificationBadge", "Assigned", true, t.gameObject);
+                    assignedCount++;
+                    return;
+                }
+            AddResult("notificationBadge", "Not found", false, null); failedCount++;
         }
 
         private static void AssignPremiumPanel(SerializedObject so)

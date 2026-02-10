@@ -8,6 +8,8 @@ using Firebase;
 using Firebase.Messaging;
 #endif
 using DigitPark.Data;
+using DigitPark.Managers;
+using DigitPark.Services;
 
 namespace DigitPark.Services.Firebase
 {
@@ -343,6 +345,9 @@ namespace DigitPark.Services.Firebase
         {
             LogDebug($"Notificación en foreground: {notification.Type} - {notification.Title}");
 
+            // Persistir en almacenamiento local
+            StoreNotification(notification);
+
             // Mostrar UI de notificación in-app
             ShowInAppNotification(notification);
         }
@@ -350,6 +355,9 @@ namespace DigitPark.Services.Firebase
         private void HandleNotificationOpen(NotificationData notification)
         {
             LogDebug($"Notificación abierta: {notification.Type} - {notification.Action}");
+
+            // Persistir en almacenamiento local
+            StoreNotification(notification);
 
             // Navegar según el tipo de notificación
             switch (notification.Type)
@@ -388,9 +396,48 @@ namespace DigitPark.Services.Firebase
 
         private void ShowInAppNotification(NotificationData notification)
         {
-            // TODO: Implementar UI toast notification
-            // Por ahora solo log
             Debug.Log($"[Notifications] IN-APP: {notification.Title} - {notification.Body}");
+
+            // Mostrar toast in-app via InAppNotificationManager
+            var toastManager = InAppNotificationManager.Instance;
+            if (toastManager != null)
+            {
+                toastManager.ShowFromNotificationData(
+                    notification.Title,
+                    notification.Body,
+                    notification.Type,
+                    notification.SenderId,
+                    notification.SenderName,
+                    notification.Action,
+                    notification.TargetId
+                );
+            }
+        }
+
+        /// <summary>
+        /// Persiste la notificación en el almacenamiento local
+        /// </summary>
+        private void StoreNotification(NotificationData notification)
+        {
+            if (notification == null) return;
+
+            var storage = NotificationStorageService.Instance;
+            if (storage == null)
+            {
+                LogDebug("NotificationStorageService no disponible, notificación no persistida");
+                return;
+            }
+
+            storage.AddNotification(
+                title: notification.Title,
+                body: notification.Body,
+                type: notification.Type,
+                senderId: notification.SenderId,
+                senderName: notification.SenderName,
+                action: notification.Action,
+                targetId: notification.TargetId,
+                extraData: notification.ExtraData
+            );
         }
 
         #endregion
@@ -399,14 +446,16 @@ namespace DigitPark.Services.Firebase
 
         private void NavigateToFriendRequests()
         {
-            PlayerPrefs.SetString("OpenPanel", "FriendRequests");
-            SceneManager.LoadScene("Profile");
+            // Navegar a Notifications con filtro social
+            PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
+            SceneManager.LoadScene("Notifications");
         }
 
         private void NavigateToFriends()
         {
-            PlayerPrefs.SetString("OpenPanel", "Friends");
-            SceneManager.LoadScene("Profile");
+            // Navegar a Notifications con filtro social
+            PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
+            SceneManager.LoadScene("Notifications");
         }
 
         private void NavigateToChallenge(string challengeId)

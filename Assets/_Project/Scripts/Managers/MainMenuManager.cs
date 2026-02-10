@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Common;
@@ -33,6 +34,7 @@ namespace DigitPark.Managers
         [SerializeField] public Image notificationIconImage;
         [SerializeField] public Sprite notificationIconNormal;
         [SerializeField] public Sprite notificationIconActive;
+        [SerializeField] public GameObject notificationBadge;
         [SerializeField] public TextMeshProUGUI notificationBadgeText;
 
         [Header("UI - Monetization")]
@@ -105,6 +107,14 @@ namespace DigitPark.Managers
             {
                 NotificationService.Instance.OnNotificationReceived += OnNotificationReceived;
             }
+
+            // Suscribirse a cambios en el almacenamiento de notificaciones
+            if (NotificationStorageService.Instance != null)
+            {
+                NotificationStorageService.Instance.OnUnreadCountChanged += OnUnreadCountChanged;
+                // Sincronizar badge con el conteo real persistido
+                SetNotificationCount(NotificationStorageService.Instance.GetUnreadCount());
+            }
         }
 
         private void OnDestroy()
@@ -116,6 +126,16 @@ namespace DigitPark.Managers
             {
                 NotificationService.Instance.OnNotificationReceived -= OnNotificationReceived;
             }
+
+            if (NotificationStorageService.Instance != null)
+            {
+                NotificationStorageService.Instance.OnUnreadCountChanged -= OnUnreadCountChanged;
+            }
+        }
+
+        private void OnUnreadCountChanged(int count)
+        {
+            SetNotificationCount(count);
         }
 
         /// <summary>
@@ -231,16 +251,18 @@ namespace DigitPark.Managers
                     : notificationIconNormal;
             }
 
-            // Actualizar badge de texto (opcional)
-            if (notificationBadgeText != null)
+            // Mostrar/ocultar badge rojo completo (círculo + texto)
+            if (notificationBadge != null)
             {
-                notificationBadgeText.gameObject.SetActive(hasNotifications);
-                if (hasNotifications)
-                {
-                    notificationBadgeText.text = pendingNotificationsCount > 99
-                        ? "99+"
-                        : pendingNotificationsCount.ToString();
-                }
+                notificationBadge.SetActive(hasNotifications);
+            }
+
+            // Actualizar texto del badge
+            if (notificationBadgeText != null && hasNotifications)
+            {
+                notificationBadgeText.text = pendingNotificationsCount > 99
+                    ? "99+"
+                    : pendingNotificationsCount.ToString();
             }
         }
 
@@ -375,15 +397,12 @@ namespace DigitPark.Managers
         {
             Debug.Log("[MainMenu] Abriendo notificaciones");
 
-            // AudioManager.Instance?.PlaySFX("ButtonClick");
-
-            // Limpiar contador al ver notificaciones
+            // Limpiar contador visual al ver notificaciones
             ClearNotifications();
 
-            // TODO: Abrir panel de notificaciones o navegar a escena
-            // Por ahora, navegar a Profile con panel de notificaciones
-            PlayerPrefs.SetString("OpenPanel", "Notifications");
-            SceneManager.LoadScene("Profile");
+            // Navegar a la escena de Notificaciones
+            PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
+            SceneManager.LoadScene("Notifications");
         }
 
         /// <summary>
