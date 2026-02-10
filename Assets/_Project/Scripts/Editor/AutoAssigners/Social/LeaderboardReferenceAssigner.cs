@@ -11,6 +11,7 @@ namespace DigitPark.Editor.AutoAssigners
     /// <summary>
     /// Reference Assigner for Scores/Leaderboard scene.
     /// Automatically finds and assigns UI references to LeaderboardManager.
+    /// Includes Game Selector buttons (5 juegos, sin CognitiveSprint).
     ///
     /// Menu: DigitPark/Auto Assigners/References/Social/Leaderboard References
     /// </summary>
@@ -23,11 +24,23 @@ namespace DigitPark.Editor.AutoAssigners
         private static int alreadySetCount = 0;
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
+        // 5 juegos con ranking (sin CognitiveSprint)
+        private static readonly string[] GAME_IDS = {
+            "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath"
+        };
+
         private static readonly string[] REQUIRED_REFS = {
+            // Game Selector
+            "gameButtons", "gameButtonBackgrounds", "gameButtonIcons",
+            // Tabs
             "nacionalTab", "mundialTab",
+            // Leaderboard
             "leaderboardContainer", "scrollRect",
+            // Loading
             "loadingPanel", "loadingText",
+            // Navigation
             "backButton",
+            // Empty State
             "emptyState", "playButton",
             // Player Position Panel
             "playerPositionPanel", "positionNumberText", "positionTimeText"
@@ -72,9 +85,11 @@ namespace DigitPark.Editor.AutoAssigners
 
             EditorGUILayout.HelpBox(
                 "Assigns UI references to LeaderboardManager:\n" +
+                "• Game Selector (5 game buttons with icons)\n" +
                 "• Tabs (nacional, mundial)\n" +
                 "• Leaderboard container and scroll\n" +
                 "• Loading panel\n" +
+                "• Player Position panel\n" +
                 "• Back button",
                 MessageType.Info);
 
@@ -109,7 +124,10 @@ namespace DigitPark.Editor.AutoAssigners
             GUI.backgroundColor = Color.white;
 
             GUILayout.Space(10);
+
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
             DrawResultsSummary();
+            EditorGUILayout.EndScrollView();
         }
 
         private void DrawResultsSummary()
@@ -124,7 +142,7 @@ namespace DigitPark.Editor.AutoAssigners
             float successRate = (float)successTotal / total;
             GUI.color = successRate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
                         successRate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
-            GUILayout.Label(successRate == 1f ? "✓ ALL REFERENCES SET" : "⚠ Some references missing", EditorStyles.boldLabel);
+            GUILayout.Label(successRate == 1f ? "ALL REFERENCES SET" : "Some references missing", EditorStyles.boldLabel);
             GUI.color = Color.white;
 
             GUILayout.Label($"Assigned: {assignedCount} | Already Set: {alreadySetCount} | Failed: {failedCount}");
@@ -133,9 +151,9 @@ namespace DigitPark.Editor.AutoAssigners
             {
                 EditorGUILayout.BeginHorizontal();
                 GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
-                GUILayout.Label(result.success ? (result.status == "Already Set" ? "●" : "✓") : "✗", GUILayout.Width(20));
+                GUILayout.Label(result.success ? (result.status == "Already Set" ? "o" : "+") : "x", GUILayout.Width(20));
                 GUI.color = Color.white;
-                GUILayout.Label(result.fieldName, GUILayout.Width(150));
+                GUILayout.Label(result.fieldName, GUILayout.Width(200));
                 GUILayout.Label(result.status, GUILayout.Width(120));
                 if (result.assignedObject != null)
                     EditorGUILayout.ObjectField(result.assignedObject, typeof(Object), true, GUILayout.Width(150));
@@ -146,6 +164,15 @@ namespace DigitPark.Editor.AutoAssigners
         }
 
         #endregion
+
+        /// <summary>
+        /// Método estático para ejecutar desde otros scripts (ej. ScoresUIBuilder)
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
 
         #region Assignment Logic
 
@@ -164,26 +191,29 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(manager);
             so.Update();
 
-            // Tabs
-            AssignReference(so, "nacionalTab", FindButtonByName("nacional", "local", "country"));
-            AssignReference(so, "mundialTab", FindButtonByName("mundial", "global", "world"));
+            // ====== GAME SELECTOR (arrays de 5 elementos) ======
+            AssignGameSelectorArrays(so);
 
-            // Leaderboard
-            AssignReference(so, "leaderboardContainer", FindByNameContains<Transform>("leaderboard", "entries", "container"));
-            AssignReference(so, "scrollRect", FindByNameContains<ScrollRect>("scroll"));
+            // ====== TABS ======
+            AssignReference(so, "nacionalTab", FindButtonByName("nacionaltab", "nacional", "local", "country"));
+            AssignReference(so, "mundialTab", FindButtonByName("mundialtab", "mundial", "global", "world"));
 
-            // Loading
-            AssignReference(so, "loadingPanel", FindByNameContains<Transform>("loading", "panel"));
-            AssignReference(so, "loadingText", FindTextByName("loading", "cargando"));
+            // ====== LEADERBOARD ======
+            AssignReference(so, "leaderboardContainer", FindByNameContains<Transform>("leaderboardcontainer", "leaderboard", "entries", "container"));
+            AssignReference(so, "scrollRect", FindByNameContains<ScrollRect>("scroll", "leaderboardscroll"));
 
-            // Navigation
-            AssignReference(so, "backButton", FindButtonByName("back", "return"));
+            // ====== LOADING ======
+            AssignReference(so, "loadingPanel", FindByNameContains<Transform>("loadingpanel", "loading"));
+            AssignReference(so, "loadingText", FindTextByName("loadingtext", "loading", "cargando"));
 
-            // Empty state
+            // ====== NAVIGATION ======
+            AssignReference(so, "backButton", FindButtonByName("back", "return", "backbutton"));
+
+            // ====== EMPTY STATE ======
             AssignReference(so, "emptyState", FindByNameContains<Transform>("emptystate", "empty", "nodata"));
             AssignReference(so, "playButton", FindButtonByName("playbutton", "play", "jugar"));
 
-            // Player Position Panel
+            // ====== PLAYER POSITION PANEL ======
             AssignGameObject(so, "playerPositionPanel", "playerposition", "positionpanel");
             AssignReference(so, "positionNumberText", FindTextByName("positionnumber", "positionnum", "ranknum"));
             AssignReference(so, "positionTimeText", FindTextByName("positiontime", "ranktime", "postime"));
@@ -193,6 +223,81 @@ namespace DigitPark.Editor.AutoAssigners
             EditorUtility.SetDirty(manager.gameObject);
             EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
+        }
+
+        /// <summary>
+        /// Busca GameButton_DigitRush, GameButton_FlashTap, etc. y asigna los arrays
+        /// gameButtons (Button[]), gameButtonBackgrounds (Image[]), gameButtonIcons (Image[])
+        /// </summary>
+        private static void AssignGameSelectorArrays(SerializedObject so)
+        {
+            var buttonsProp = so.FindProperty("gameButtons");
+            var bgsProp = so.FindProperty("gameButtonBackgrounds");
+            var iconsProp = so.FindProperty("gameButtonIcons");
+
+            if (buttonsProp == null) { AddResult("gameButtons", "Property not found", false, null); failedCount++; return; }
+            if (bgsProp == null) { AddResult("gameButtonBackgrounds", "Property not found", false, null); failedCount++; return; }
+            if (iconsProp == null) { AddResult("gameButtonIcons", "Property not found", false, null); failedCount++; return; }
+
+            // Resize arrays to 5
+            buttonsProp.arraySize = GAME_IDS.Length;
+            bgsProp.arraySize = GAME_IDS.Length;
+            iconsProp.arraySize = GAME_IDS.Length;
+
+            int foundButtons = 0;
+            int foundBgs = 0;
+            int foundIcons = 0;
+
+            for (int i = 0; i < GAME_IDS.Length; i++)
+            {
+                string searchName = $"GameButton_{GAME_IDS[i]}";
+
+                // Buscar el GameObject del botón
+                Transform btnTransform = FindTransformByExactName(searchName);
+                if (btnTransform != null)
+                {
+                    // Button component
+                    Button btn = btnTransform.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        buttonsProp.GetArrayElementAtIndex(i).objectReferenceValue = btn;
+                        foundButtons++;
+                    }
+
+                    // Background Image (es el Image del propio botón)
+                    Image bg = btnTransform.GetComponent<Image>();
+                    if (bg != null)
+                    {
+                        bgsProp.GetArrayElementAtIndex(i).objectReferenceValue = bg;
+                        foundBgs++;
+                    }
+
+                    // Icon Image (hijo llamado "Icon")
+                    Transform iconT = btnTransform.Find("Icon");
+                    if (iconT != null)
+                    {
+                        Image iconImg = iconT.GetComponent<Image>();
+                        if (iconImg != null)
+                        {
+                            iconsProp.GetArrayElementAtIndex(i).objectReferenceValue = iconImg;
+                            foundIcons++;
+                        }
+                    }
+                }
+                else
+                {
+                    Log($"WARNING: {searchName} not found in scene");
+                }
+            }
+
+            AddResult("gameButtons", foundButtons == GAME_IDS.Length ? $"Assigned ({foundButtons})" : $"Partial ({foundButtons}/{GAME_IDS.Length})", foundButtons > 0, null);
+            if (foundButtons > 0) assignedCount++; else failedCount++;
+
+            AddResult("gameButtonBackgrounds", foundBgs == GAME_IDS.Length ? $"Assigned ({foundBgs})" : $"Partial ({foundBgs}/{GAME_IDS.Length})", foundBgs > 0, null);
+            if (foundBgs > 0) assignedCount++; else failedCount++;
+
+            AddResult("gameButtonIcons", foundIcons == GAME_IDS.Length ? $"Assigned ({foundIcons})" : $"Partial ({foundIcons}/{GAME_IDS.Length})", foundIcons > 0, null);
+            if (foundIcons > 0) assignedCount++; else failedCount++;
         }
 
         private static MonoBehaviour FindLeaderboardManager()
@@ -214,6 +319,14 @@ namespace DigitPark.Editor.AutoAssigners
         #endregion
 
         #region Finders
+
+        private static Transform FindTransformByExactName(string name)
+        {
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var t in all)
+                if (t.gameObject.name == name) return t;
+            return null;
+        }
 
         private static T FindByNameContains<T>(params string[] patterns) where T : Component
         {

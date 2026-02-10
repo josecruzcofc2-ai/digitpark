@@ -26,10 +26,23 @@ namespace DigitPark.Managers
 
         [Header("Game UI")]
         [SerializeField] public TextMeshProUGUI timerText;
-        [SerializeField] public TextMeshProUGUI bestTimeText;
         [SerializeField] public TextMeshProUGUI comboText;
         [SerializeField] public Button playAgainButton;
         [SerializeField] public Button backButton;
+
+        [Header("Stats Bar")]
+        [SerializeField] public TextMeshProUGUI roundText;
+        [SerializeField] public TextMeshProUGUI errorsText;
+        [SerializeField] public RectTransform progressFill;
+        [SerializeField] public TextMeshProUGUI roundIndicatorText;
+
+        [Header("Settings Panel")]
+        [SerializeField] public GameObject settingsPanel;
+        [SerializeField] public Toggle toggleRounds1;
+        [SerializeField] public Toggle toggleRounds3;
+        [SerializeField] public Toggle toggleRounds5;
+        [SerializeField] public Toggle toggleRounds10;
+        [SerializeField] public Button startGameButton;
 
         [Header("Countdown")]
         [SerializeField] private CountdownUI countdownUI;
@@ -70,6 +83,12 @@ namespace DigitPark.Managers
         // Timer
         private float currentTime = 0f;
         private float bestTime = float.MaxValue;
+
+        // Round System
+        private int currentRound = 1;
+        private int totalRounds = 1;
+        private int totalErrors = 0;
+        private float cumulativeTime = 0f;
 
         // Combo System
         private int currentCombo = 0;
@@ -134,6 +153,79 @@ namespace DigitPark.Managers
             Debug.Log("[Game] DigitRushController iniciado");
             LoadPlayerData();
             SetupListeners();
+            SetupSettingsPanel();
+
+            if (IsPracticeMode() && settingsPanel != null)
+            {
+                settingsPanel.SetActive(true);
+            }
+            else
+            {
+                StartNewGame();
+            }
+        }
+
+        private void SetupSettingsPanel()
+        {
+            if (toggleRounds1 != null)
+                toggleRounds1.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds1, v); if (v) SetRadio(toggleRounds1); });
+            if (toggleRounds3 != null)
+                toggleRounds3.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds3, v); if (v) SetRadio(toggleRounds3); });
+            if (toggleRounds5 != null)
+                toggleRounds5.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds5, v); if (v) SetRadio(toggleRounds5); });
+            if (toggleRounds10 != null)
+                toggleRounds10.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds10, v); if (v) SetRadio(toggleRounds10); });
+
+            if (startGameButton != null)
+                startGameButton.onClick.AddListener(OnStartGameClicked);
+
+            SetToggleDefault(toggleRounds1, true);
+            SetToggleDefault(toggleRounds3, false);
+            SetToggleDefault(toggleRounds5, false);
+            SetToggleDefault(toggleRounds10, false);
+        }
+
+        private void SetRadio(Toggle active)
+        {
+            Toggle[] all = { toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10 };
+            foreach (var t in all)
+            {
+                if (t != null && t != active) { t.isOn = false; UpdateToggleVisual(t, false); }
+            }
+            UpdateToggleVisual(active, true);
+        }
+
+        private void UpdateToggleVisual(Toggle toggle, bool isOn)
+        {
+            if (toggle == null) return;
+            var bg = toggle.GetComponent<Image>();
+            if (bg != null)
+                bg.color = isOn ? new Color(0f, 1f, 1f, 1f) : new Color(0.08f, 0.12f, 0.18f, 1f);
+
+            var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+                label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+        }
+
+        private void SetToggleDefault(Toggle toggle, bool value)
+        {
+            if (toggle == null) return;
+            toggle.isOn = value;
+            UpdateToggleVisual(toggle, value);
+        }
+
+        private void OnStartGameClicked()
+        {
+            if (toggleRounds1 != null && toggleRounds1.isOn) totalRounds = 1;
+            else if (toggleRounds3 != null && toggleRounds3.isOn) totalRounds = 3;
+            else if (toggleRounds5 != null && toggleRounds5.isOn) totalRounds = 5;
+            else if (toggleRounds10 != null && toggleRounds10.isOn) totalRounds = 10;
+            else totalRounds = 1;
+
+            currentRound = 1;
+            totalErrors = 0;
+            cumulativeTime = 0f;
+            if (settingsPanel != null) settingsPanel.SetActive(false);
             StartNewGame();
         }
 
@@ -155,7 +247,6 @@ namespace DigitPark.Managers
                 if (currentPlayer != null)
                 {
                     bestTime = currentPlayer.bestTime;
-                    UpdateBestTimeDisplay();
                 }
             }
         }
@@ -181,10 +272,10 @@ namespace DigitPark.Managers
                 shakeCoroutines[i] = null;
             }
 
-            playAgainButton?.onClick.AddListener(StartNewGame);
+            playAgainButton?.onClick.AddListener(OnPlayAgainClicked);
             backButton?.onClick.AddListener(OnBackButtonClicked);
             premiumBannerButton?.onClick.AddListener(OnPremiumBannerClicked);
-            resultPlayAgainButton?.onClick.AddListener(StartNewGame);
+            resultPlayAgainButton?.onClick.AddListener(OnPlayAgainClicked);
             resultExitButton?.onClick.AddListener(BackToMenu);
 
             PremiumManager.OnPremiumStatusChanged += UpdatePremiumBanner;
@@ -261,7 +352,7 @@ namespace DigitPark.Managers
             }
 
             UpdateTimerDisplay();
-            UpdateBestTimeDisplay();
+            UpdateRoundUI();
 
             if (useCountdown && countdownUI != null)
             {
@@ -488,7 +579,9 @@ namespace DigitPark.Managers
 
             // Resetear combo
             currentCombo = 0;
+            totalErrors++;
             UpdateComboDisplay();
+            UpdateRoundUI();
 
             // Vibración de error
             TriggerHaptic(HapticType.Error);
@@ -676,19 +769,62 @@ namespace DigitPark.Managers
 
         private void OnGameComplete()
         {
-            Debug.Log($"[Game] ¡JUEGO COMPLETADO! Tiempo: {currentTime:F3}s | Max Combo: {maxCombo}");
+            Debug.Log($"[Game] ¡RONDA COMPLETADA! Tiempo: {currentTime:F3}s | Max Combo: {maxCombo}");
 
             isGameActive = false;
             isTimerStarted = false;
+            cumulativeTime += currentTime;
 
-            bool isNewRecord = currentTime < bestTime;
+            currentRound++;
+            UpdateRoundUI();
+
+            if (currentRound > totalRounds)
+            {
+                // Victoria final
+                FinalEndGame();
+            }
+            else
+            {
+                // Siguiente ronda
+                StartCoroutine(NextRoundSequence());
+            }
+        }
+
+        private IEnumerator NextRoundSequence()
+        {
+            yield return new WaitForSeconds(0.8f);
+
+            currentTargetNumber = 1;
+            currentTime = 0f;
+            currentCombo = 0;
+
+            GenerateRandomNumbers();
+            ResetButtonVisuals();
+            SetGridButtonsInteractable(false);
+            HideNumbers();
+            UpdateComboDisplay();
+            UpdateTimerDisplay();
+            UpdateRoundUI();
+
+            // Start round directly without countdown
+            AssignNumbersToButtons();
+            AnimateButtonsPopUp();
+            StartCoroutine(ActivateGameAfterDelay(0.3f));
+        }
+
+        private void FinalEndGame()
+        {
+            bool isNewRecord = cumulativeTime < bestTime;
 
             if (isNewRecord)
             {
-                bestTime = currentTime;
+                bestTime = cumulativeTime;
                 Debug.Log($"[Game] ¡NUEVO RÉCORD! {bestTime:F3}s");
                 SaveBestTime();
             }
+
+            // Use cumulative time for final score
+            float finalTime = cumulativeTime;
 
             SaveScoreToDatabase();
 
@@ -696,8 +832,8 @@ namespace DigitPark.Managers
             var result = new MinigameResult
             {
                 GameType = GameType.DigitRush,
-                TotalTime = currentTime,
-                Errors = 0,
+                TotalTime = finalTime,
+                Errors = totalErrors,
                 PenaltyTime = 0,
                 Completed = true,
                 CompletedAt = System.DateTime.UtcNow
@@ -805,11 +941,11 @@ namespace DigitPark.Managers
                     resultTitleText.text = AutoLocalizer.Get("digitrush_result_title");
 
                 if (resultTimeText != null)
-                    resultTimeText.text = AutoLocalizer.Get("result_panel_time", $"{currentTime:F3}");
+                    resultTimeText.text = AutoLocalizer.Get("result_panel_time", $"{cumulativeTime:F3}");
 
                 if (resultMessageText != null)
                 {
-                    string message = GetSuccessMessage(currentTime);
+                    string message = GetSuccessMessage(cumulativeTime);
                     if (isNewRecord)
                         message += $"\n{AutoLocalizer.Get("result_panel_new_record")}";
                     resultMessageText.text = message;
@@ -835,8 +971,8 @@ namespace DigitPark.Managers
                 // Fallback: usar winMessagePanel original (stays visible with buttons)
                 if (successText != null)
                 {
-                    string timeFormatted = $"{currentTime:F3}{AutoLocalizer.Get("seconds_abbr")}";
-                    string message = GetSuccessMessage(currentTime);
+                    string timeFormatted = $"{cumulativeTime:F3}{AutoLocalizer.Get("seconds_abbr")}";
+                    string message = GetSuccessMessage(cumulativeTime);
                     if (isNewRecord)
                         message += $"\n{AutoLocalizer.Get("result_panel_new_record")}";
                     successText.text = $"{timeFormatted}\n{message}";
@@ -927,44 +1063,14 @@ namespace DigitPark.Managers
             currentPlayer.bestTime = bestTime;
             await DatabaseService.Instance.SavePlayerData(currentPlayer);
 
-            UpdateBestTimeDisplay();
-
             Debug.Log($"[Game] Mejor tiempo guardado: {bestTime:F3}s");
         }
 
-        private async void SaveScoreToDatabase()
+        private void SaveScoreToDatabase()
         {
-            if (currentPlayer == null)
-            {
-                Debug.LogWarning("[Game] No se puede guardar score - jugador no encontrado");
-                return;
-            }
-
-            if (DatabaseService.Instance == null)
-            {
-                Debug.LogWarning("[Game] DatabaseService no disponible");
-                return;
-            }
-
-            currentPlayer.AddScore(currentTime);
-            currentPlayer.totalGamesPlayed++;
-            currentPlayer.totalGamesWon++;
-
-            await DatabaseService.Instance.SavePlayerData(currentPlayer);
-
-            await DatabaseService.Instance.SaveScore(
-                currentPlayer.userId,
-                currentPlayer.username,
-                currentTime,
-                currentPlayer.countryCode
-            );
-
-            await DatabaseService.Instance.UpdateScoreInAllActiveTournaments(
-                currentPlayer.userId,
-                currentTime
-            );
-
-            Debug.Log($"[Game] Score guardado: {currentTime:F3}s");
+            // Score saving is now handled by GameSessionManager.RegisterGameResult()
+            // which correctly passes gameId. Only log here for debugging.
+            Debug.Log($"[Game] Score {cumulativeTime:F3}s será guardado por GameSessionManager");
         }
 
         #endregion
@@ -979,19 +1085,36 @@ namespace DigitPark.Managers
             }
         }
 
-        private void UpdateBestTimeDisplay()
+        private void UpdateRoundUI()
         {
-            if (bestTimeText != null)
+            if (roundText != null)
+                roundText.text = $"{Mathf.Min(currentRound, totalRounds)}/{totalRounds}";
+
+            if (errorsText != null)
+                errorsText.text = totalErrors.ToString();
+
+            if (roundIndicatorText != null)
+                roundIndicatorText.text = $"{Mathf.Min(currentRound, totalRounds)}/{totalRounds}";
+
+            if (progressFill != null)
             {
-                if (bestTime < float.MaxValue)
-                {
-                    string label = AutoLocalizer.Get("best_label");
-                    bestTimeText.text = $"{label} {bestTime:F3}{AutoLocalizer.Get("seconds_abbr")}";
-                }
-                else
-                {
-                    bestTimeText.text = AutoLocalizer.Get("no_best_time");
-                }
+                progressFill.transform.parent.parent.gameObject.SetActive(totalRounds > 1);
+                float progress = (float)(currentRound - 1) / totalRounds;
+                progressFill.anchorMax = new Vector2(progress, 1f);
+            }
+        }
+
+        private void OnPlayAgainClicked()
+        {
+            if (IsPracticeMode() && settingsPanel != null)
+            {
+                if (resultPanel != null) resultPanel.SetActive(false);
+                if (winMessagePanel != null) winMessagePanel.SetActive(false);
+                settingsPanel.SetActive(true);
+            }
+            else
+            {
+                StartNewGame();
             }
         }
 

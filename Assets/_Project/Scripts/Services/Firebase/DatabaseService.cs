@@ -312,7 +312,12 @@ namespace DigitPark.Services.Firebase
 
         public async Task SaveScore(string userId, string username, float time, string countryCode)
         {
-            Debug.Log($"[Database] Guardando score: {username} - {time}s");
+            await SaveScore(userId, username, time, countryCode, "");
+        }
+
+        public async Task SaveScore(string userId, string username, float time, string countryCode, string gameId)
+        {
+            Debug.Log($"[Database] Guardando score: {username} - {time}s (gameId: {gameId})");
 
             var entry = new LeaderboardEntry
             {
@@ -320,15 +325,25 @@ namespace DigitPark.Services.Firebase
                 username = username,
                 time = time,
                 countryCode = countryCode,
+                gameId = gameId,
                 timestamp = DateTime.UtcNow.ToString("o")
             };
+
+            // Determinar paths según si hay gameId
+            bool hasGameId = !string.IsNullOrEmpty(gameId);
+            string globalPath = hasGameId
+                ? $"{LEADERBOARD_PATH}/{gameId}/{userId}"
+                : $"{LEADERBOARD_PATH}/{userId}";
+            string countryPath = hasGameId
+                ? $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}/{gameId}/{userId}"
+                : $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}/{userId}";
 
             if (_isInitialized && _databaseRef != null)
             {
                 try
                 {
                     // Verificar si ya existe un score para este usuario
-                    var existingSnapshot = await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).GetValueAsync();
+                    var existingSnapshot = await _databaseRef.Child(globalPath).GetValueAsync();
 
                     bool shouldUpdate = true;
                     if (existingSnapshot.Exists)
@@ -350,20 +365,21 @@ namespace DigitPark.Services.Firebase
                             { "username", username },
                             { "time", time },
                             { "countryCode", countryCode },
+                            { "gameId", gameId },
                             { "timestamp", DateTime.UtcNow.ToString("o") }
                         };
 
-                        await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).SetValueAsync(entryData);
+                        await _databaseRef.Child(globalPath).SetValueAsync(entryData);
 
                         // Guardar en leaderboard por país
-                        await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(countryCode).Child(userId).SetValueAsync(entryData);
+                        await _databaseRef.Child(countryPath).SetValueAsync(entryData);
 
                         // Guardar en historial de scores
                         string scoreId = _databaseRef.Child(SCORES_PATH).Child(userId).Push().Key;
                         entryData["scoreId"] = scoreId;
                         await _databaseRef.Child(SCORES_PATH).Child(userId).Child(scoreId).SetValueAsync(entryData);
 
-                        Debug.Log($"[Database] Score guardado en Firebase: {time}s");
+                        Debug.Log($"[Database] Score guardado en Firebase: {time}s (gameId: {gameId})");
 
                         // Recargar leaderboard
                         await LoadLeaderboardFromFirebase();
@@ -411,13 +427,21 @@ namespace DigitPark.Services.Firebase
 
         public async Task<List<LeaderboardEntry>> GetGlobalLeaderboard(int topCount = 200)
         {
-            Debug.Log($"[Database] Obteniendo top {topCount} global");
+            return await GetGlobalLeaderboard("", topCount);
+        }
+
+        public async Task<List<LeaderboardEntry>> GetGlobalLeaderboard(string gameId, int topCount = 200)
+        {
+            Debug.Log($"[Database] Obteniendo top {topCount} global (gameId: {gameId})");
+
+            bool hasGameId = !string.IsNullOrEmpty(gameId);
+            string path = hasGameId ? $"{LEADERBOARD_PATH}/{gameId}" : LEADERBOARD_PATH;
 
             if (_isInitialized && _databaseRef != null)
             {
                 try
                 {
-                    var snapshot = await _databaseRef.Child(LEADERBOARD_PATH)
+                    var snapshot = await _databaseRef.Child(path)
                         .OrderByChild("time")
                         .LimitToFirst(topCount)
                         .GetValueAsync();
@@ -433,6 +457,8 @@ namespace DigitPark.Services.Firebase
                             username = child.Child("username").Value?.ToString() ?? "Player",
                             time = float.Parse(child.Child("time").Value?.ToString() ?? "999"),
                             countryCode = child.Child("countryCode").Value?.ToString() ?? "US",
+                            avatarUrl = child.Child("avatarUrl").Value?.ToString() ?? "",
+                            gameId = child.Child("gameId").Value?.ToString() ?? gameId,
                             position = position++
                         });
                     }
@@ -448,23 +474,36 @@ namespace DigitPark.Services.Firebase
 
             // Fallback a datos locales
             var localResult = new List<LeaderboardEntry>();
-            int count = Math.Min(topCount, globalLeaderboard.Count);
+            var source = hasGameId
+                ? globalLeaderboard.FindAll(e => e.gameId == gameId)
+                : globalLeaderboard;
+            int count = Math.Min(topCount, source.Count);
             for (int i = 0; i < count; i++)
             {
-                localResult.Add(globalLeaderboard[i]);
+                localResult.Add(source[i]);
             }
             return localResult;
         }
 
         public async Task<List<LeaderboardEntry>> GetCountryLeaderboard(string countryCode, int topCount = 100)
         {
-            Debug.Log($"[Database] Obteniendo leaderboard de {countryCode}");
+            return await GetCountryLeaderboard(countryCode, "", topCount);
+        }
+
+        public async Task<List<LeaderboardEntry>> GetCountryLeaderboard(string countryCode, string gameId, int topCount = 100)
+        {
+            Debug.Log($"[Database] Obteniendo leaderboard de {countryCode} (gameId: {gameId})");
+
+            bool hasGameId = !string.IsNullOrEmpty(gameId);
+            string path = hasGameId
+                ? $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}/{gameId}"
+                : $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}";
 
             if (_isInitialized && _databaseRef != null)
             {
                 try
                 {
-                    var snapshot = await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(countryCode)
+                    var snapshot = await _databaseRef.Child(path)
                         .OrderByChild("time")
                         .LimitToFirst(topCount)
                         .GetValueAsync();
@@ -480,6 +519,8 @@ namespace DigitPark.Services.Firebase
                             username = child.Child("username").Value?.ToString() ?? "Player",
                             time = float.Parse(child.Child("time").Value?.ToString() ?? "999"),
                             countryCode = countryCode,
+                            avatarUrl = child.Child("avatarUrl").Value?.ToString() ?? "",
+                            gameId = child.Child("gameId").Value?.ToString() ?? gameId,
                             position = position++
                         });
                     }
@@ -493,7 +534,8 @@ namespace DigitPark.Services.Firebase
             }
 
             // Fallback a datos locales
-            var filtered = globalLeaderboard.FindAll(e => e.countryCode == countryCode);
+            var filtered = globalLeaderboard.FindAll(e =>
+                e.countryCode == countryCode && (!hasGameId || e.gameId == gameId));
             int count = Math.Min(topCount, filtered.Count);
             return count > 0 ? filtered.GetRange(0, count) : new List<LeaderboardEntry>();
         }
@@ -891,6 +933,7 @@ namespace DigitPark.Services.Firebase
         public float time;
         public string countryCode;
         public string avatarUrl;
+        public string gameId;
         public int position;
         public string timestamp;
     }

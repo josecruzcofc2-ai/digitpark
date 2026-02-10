@@ -16,10 +16,16 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager de la escena de Scores/Rankings
-    /// Muestra tablas de clasificación: Nacional (país) y Mundial (global)
+    /// Muestra tablas de clasificación por juego: Nacional (país) y Mundial (global)
+    /// Con selector de juego (5 juegos, sin CognitiveSprint)
     /// </summary>
     public class LeaderboardManager : MonoBehaviour
     {
+        [Header("Game Selector")]
+        [SerializeField] public Button[] gameButtons;
+        [SerializeField] public Image[] gameButtonBackgrounds;
+        [SerializeField] public Image[] gameButtonIcons;
+
         [Header("Tabs")]
         [SerializeField] public Button nacionalTab;
         [SerializeField] public Button mundialTab;
@@ -45,8 +51,15 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI positionNumberText;
         [SerializeField] private TextMeshProUGUI positionTimeText;
 
+        // Juegos disponibles para ranking (sin CognitiveSprint)
+        private static readonly string[] GAME_IDS = {
+            "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath"
+        };
+
         // Estado
         private LeaderboardTab currentTab = LeaderboardTab.Local;
+        private string currentGameId = "DigitRush";
+        private int currentGameIndex = 0;
         private PlayerData currentPlayer;
 
         // Datos
@@ -57,22 +70,14 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Leaderboard] LeaderboardManager iniciado");
 
-            // Verificar e inicializar servicios si no existen (para testing directo)
             EnsureServicesExist();
-
-            // Configurar listeners primero
             SetupListeners();
-
-            // Obtener datos del jugador (async)
             await LoadPlayerDataAsync();
 
-            // Cargar leaderboard inicial (Nacional por defecto)
-            LoadLeaderboard(LeaderboardTab.Local);
+            // Seleccionar DigitRush por defecto y cargar
+            SelectGame(0);
         }
 
-        /// <summary>
-        /// Asegura que los servicios existan (para testing directo de escena)
-        /// </summary>
         private void EnsureServicesExist()
         {
             if (AuthenticationService.Instance == null)
@@ -92,9 +97,6 @@ namespace DigitPark.Managers
 
         #region Initialization
 
-        /// <summary>
-        /// Carga los datos del jugador de forma asíncrona
-        /// </summary>
         private async System.Threading.Tasks.Task LoadPlayerDataAsync()
         {
             if (AuthenticationService.Instance != null)
@@ -110,7 +112,6 @@ namespace DigitPark.Managers
 
                 Debug.Log($"[Leaderboard] Datos del jugador: {currentPlayer.username}");
 
-                // Recargar datos desde Firebase para tener el historial más actualizado
                 if (DatabaseService.Instance != null)
                 {
                     var freshData = await DatabaseService.Instance.LoadPlayerData(currentPlayer.userId);
@@ -123,21 +124,28 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Configura los listeners de los botones
-        /// </summary>
         private void SetupListeners()
         {
+            // Game selector buttons
+            if (gameButtons != null)
+            {
+                for (int i = 0; i < gameButtons.Length && i < GAME_IDS.Length; i++)
+                {
+                    if (gameButtons[i] != null)
+                    {
+                        int index = i;
+                        gameButtons[i].onClick.RemoveAllListeners();
+                        gameButtons[i].onClick.AddListener(() => OnGameSelected(index));
+                    }
+                }
+            }
+
+            // Tabs
             if (nacionalTab != null)
             {
                 nacionalTab.onClick.RemoveAllListeners();
                 nacionalTab.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Local));
                 nacionalTab.interactable = true;
-                Debug.Log($"[Leaderboard] Listener de NACIONAL configurado");
-            }
-            else
-            {
-                Debug.LogError("[Leaderboard] nacionalTab es NULL!");
             }
 
             if (mundialTab != null)
@@ -145,11 +153,6 @@ namespace DigitPark.Managers
                 mundialTab.onClick.RemoveAllListeners();
                 mundialTab.onClick.AddListener(() => OnTabSelected(LeaderboardTab.Global));
                 mundialTab.interactable = true;
-                Debug.Log($"[Leaderboard] Listener de MUNDIAL configurado");
-            }
-            else
-            {
-                Debug.LogError("[Leaderboard] mundialTab es NULL!");
             }
 
             if (backButton != null)
@@ -157,14 +160,8 @@ namespace DigitPark.Managers
                 backButton.onClick.RemoveAllListeners();
                 backButton.onClick.AddListener(OnBackButtonClicked);
                 backButton.interactable = true;
-                Debug.Log($"[Leaderboard] Listener de VOLVER configurado");
-            }
-            else
-            {
-                Debug.LogError("[Leaderboard] backButton es NULL!");
             }
 
-            // Play Button (en EmptyState)
             if (playButton != null)
             {
                 playButton.onClick.RemoveAllListeners();
@@ -172,9 +169,6 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Navega a GameSelector para jugar
-        /// </summary>
         private void OnPlayButtonClicked()
         {
             Debug.Log("[Leaderboard] Navegando a GameSelector");
@@ -183,37 +177,108 @@ namespace DigitPark.Managers
 
         #endregion
 
+        #region Game Selector
+
+        private void OnGameSelected(int index)
+        {
+            if (index < 0 || index >= GAME_IDS.Length) return;
+            if (index == currentGameIndex) return;
+
+            Debug.Log($"[Leaderboard] Juego seleccionado: {GAME_IDS[index]}");
+            SelectGame(index);
+        }
+
+        private void SelectGame(int index)
+        {
+            currentGameIndex = index;
+            currentGameId = GAME_IDS[index];
+            UpdateGameSelectorVisuals();
+            UpdateTabVisuals();
+            LoadLeaderboard(currentTab);
+        }
+
+        private void UpdateGameSelectorVisuals()
+        {
+            Color selectedBg = new Color(0f, 0.83f, 1f, 0.3f);
+            Color normalBg = new Color(0.08f, 0.12f, 0.18f, 0.9f);
+            Color selectedOutline = new Color(0f, 1f, 1f, 1f);
+            Color normalOutline = new Color(0.3f, 0.3f, 0.4f, 0.3f);
+
+            if (gameButtonBackgrounds != null)
+            {
+                for (int i = 0; i < gameButtonBackgrounds.Length && i < GAME_IDS.Length; i++)
+                {
+                    if (gameButtonBackgrounds[i] != null)
+                    {
+                        bool selected = i == currentGameIndex;
+                        gameButtonBackgrounds[i].color = selected ? selectedBg : normalBg;
+
+                        // Update outline
+                        Outline outline = gameButtonBackgrounds[i].GetComponent<Outline>();
+                        if (outline != null)
+                        {
+                            outline.effectColor = selected ? selectedOutline : normalOutline;
+                        }
+                    }
+                }
+            }
+
+            // Update icon tints
+            if (gameButtonIcons != null)
+            {
+                for (int i = 0; i < gameButtonIcons.Length && i < GAME_IDS.Length; i++)
+                {
+                    if (gameButtonIcons[i] != null)
+                    {
+                        gameButtonIcons[i].color = i == currentGameIndex
+                            ? Color.white
+                            : new Color(0.6f, 0.6f, 0.7f, 1f);
+                    }
+                }
+            }
+
+            // Update label colors
+            if (gameButtons != null)
+            {
+                for (int i = 0; i < gameButtons.Length && i < GAME_IDS.Length; i++)
+                {
+                    if (gameButtons[i] == null) continue;
+                    Transform labelT = gameButtons[i].transform.Find("Label");
+                    if (labelT != null)
+                    {
+                        var labelTMP = labelT.GetComponent<TextMeshProUGUI>();
+                        if (labelTMP != null)
+                        {
+                            labelTMP.color = i == currentGameIndex
+                                ? Color.white
+                                : new Color(0.5f, 0.5f, 0.6f, 1f);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         #region Tab Navigation
 
-        /// <summary>
-        /// Cuando se selecciona una tab
-        /// </summary>
         private void OnTabSelected(LeaderboardTab tab)
         {
             Debug.Log($"[Leaderboard] OnTabSelected - Tab: {tab}");
 
-            if (currentTab == tab)
-            {
-                return;
-            }
+            if (currentTab == tab) return;
 
             currentTab = tab;
             UpdateTabVisuals();
             LoadLeaderboard(tab);
         }
 
-        /// <summary>
-        /// Actualiza los visuales de las tabs
-        /// </summary>
         private void UpdateTabVisuals()
         {
             SetTabButtonState(nacionalTab, currentTab == LeaderboardTab.Local);
             SetTabButtonState(mundialTab, currentTab == LeaderboardTab.Global);
         }
 
-        /// <summary>
-        /// Establece el estado visual de un botón de tab
-        /// </summary>
         private void SetTabButtonState(Button button, bool isSelected)
         {
             if (button == null) return;
@@ -222,14 +287,16 @@ namespace DigitPark.Managers
             if (buttonImage != null)
             {
                 buttonImage.color = isSelected
-                    ? new Color(0f, 0.83f, 1f) // Azul eléctrico
-                    : new Color(0.3f, 0.3f, 0.4f); // Gris oscuro
+                    ? new Color(0f, 0.83f, 1f)
+                    : new Color(0.15f, 0.2f, 0.25f);
             }
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
             if (text != null)
             {
-                text.color = isSelected ? Color.white : new Color(0.6f, 0.6f, 0.7f);
+                text.color = isSelected
+                    ? new Color(0.02f, 0.05f, 0.1f)
+                    : Color.white;
             }
         }
 
@@ -237,14 +304,9 @@ namespace DigitPark.Managers
 
         #region Load Leaderboards
 
-        /// <summary>
-        /// Carga el leaderboard según la tab seleccionada
-        /// </summary>
         private async void LoadLeaderboard(LeaderboardTab tab)
         {
             ShowLoading(true, AutoLocalizer.Get("loading_rankings"));
-
-            // Limpiar leaderboard actual
             ClearLeaderboard();
 
             List<LeaderboardEntry> entries = null;
@@ -282,19 +344,15 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Carga las puntuaciones locales (país)
-        /// </summary>
         private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadLocalScores()
         {
-            Debug.Log("[Leaderboard] Cargando puntuaciones nacionales...");
+            Debug.Log($"[Leaderboard] Cargando puntuaciones nacionales para {currentGameId}...");
 
             if (currentPlayer == null) return new List<LeaderboardEntry>();
 
-            // Obtener leaderboard del país desde Firebase
-            localScores = await DatabaseService.Instance.GetCountryLeaderboard(currentPlayer.countryCode, 100);
+            localScores = await DatabaseService.Instance.GetCountryLeaderboard(
+                currentPlayer.countryCode, currentGameId, 100);
 
-            // Asignar posiciones
             for (int i = 0; i < localScores.Count; i++)
             {
                 localScores[i].position = i + 1;
@@ -303,17 +361,12 @@ namespace DigitPark.Managers
             return localScores;
         }
 
-        /// <summary>
-        /// Carga las puntuaciones globales
-        /// </summary>
         private async System.Threading.Tasks.Task<List<LeaderboardEntry>> LoadGlobalScores()
         {
-            Debug.Log("[Leaderboard] Cargando puntuaciones mundiales...");
+            Debug.Log($"[Leaderboard] Cargando puntuaciones mundiales para {currentGameId}...");
 
-            // Obtener leaderboard global desde Firebase
-            globalScores = await DatabaseService.Instance.GetGlobalLeaderboard(200);
+            globalScores = await DatabaseService.Instance.GetGlobalLeaderboard(currentGameId, 200);
 
-            // Asignar posiciones
             for (int i = 0; i < globalScores.Count; i++)
             {
                 globalScores[i].position = i + 1;
@@ -326,17 +379,12 @@ namespace DigitPark.Managers
 
         #region Display Leaderboard
 
-        /// <summary>
-        /// Muestra el leaderboard en la UI
-        /// </summary>
         private void DisplayLeaderboard(List<LeaderboardEntry> entries)
         {
-            Debug.Log($"[Leaderboard] Mostrando {entries.Count} entradas");
+            Debug.Log($"[Leaderboard] Mostrando {entries.Count} entradas para {currentGameId}");
 
-            // Ocultar estado vacío
             HideEmptyState();
 
-            // Configurar el RectTransform del container
             RectTransform containerRT = leaderboardContainer as RectTransform;
             if (containerRT != null)
             {
@@ -353,19 +401,18 @@ namespace DigitPark.Managers
                 }
             }
 
-            // Obtener o crear VerticalLayoutGroup
-            var layoutGroup = leaderboardContainer.GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
+            var layoutGroup = leaderboardContainer.GetComponent<VerticalLayoutGroup>();
             if (layoutGroup == null)
             {
-                layoutGroup = leaderboardContainer.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+                layoutGroup = leaderboardContainer.gameObject.AddComponent<VerticalLayoutGroup>();
             }
 
-            layoutGroup.spacing = 5f;
-            layoutGroup.padding = new RectOffset(10, 10, 10, 10);
+            layoutGroup.spacing = 6f;
+            layoutGroup.padding = new RectOffset(0, 0, 8, 8);
             layoutGroup.childAlignment = TextAnchor.UpperCenter;
             layoutGroup.childControlWidth = true;
             layoutGroup.childControlHeight = true;
-            layoutGroup.childForceExpandWidth = false;
+            layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
 
             foreach (var entry in entries)
@@ -373,30 +420,22 @@ namespace DigitPark.Managers
                 CreateLeaderboardEntry(entry);
             }
 
-            // Animación de entrada staggered
             AnimateLeaderboardEntrance();
-
-            // Resaltar posición del jugador si está en la lista
             HighlightPlayerPosition(entries);
-
-            // Forzar reconstrucción del layout
             StartCoroutine(ForceLayoutRebuild(containerRT));
         }
 
-        /// <summary>
-        /// Fuerza la reconstrucción del layout
-        /// </summary>
         private System.Collections.IEnumerator ForceLayoutRebuild(RectTransform containerRT)
         {
             if (containerRT == null) yield break;
 
-            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
-            UnityEngine.Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+            Canvas.ForceUpdateCanvases();
 
             yield return null;
 
             if (containerRT == null) yield break;
-            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(containerRT);
 
             yield return null;
 
@@ -406,9 +445,6 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Anima la entrada staggered de las filas del leaderboard
-        /// </summary>
         private void AnimateLeaderboardEntrance()
         {
             if (leaderboardContainer == null || leaderboardContainer.childCount == 0) return;
@@ -423,19 +459,14 @@ namespace DigitPark.Managers
             UIAnimations.StaggeredEntrance(items, 0.04f, UIAnimations.DURATION_NORMAL);
         }
 
-        /// <summary>
-        /// Crea una entrada visual en el leaderboard usando prefab
-        /// </summary>
         private void CreateLeaderboardEntry(LeaderboardEntry entry)
         {
             if (leaderboardContainer == null) return;
 
             bool isCurrentPlayer = currentPlayer != null && entry.userId == currentPlayer.userId;
 
-            // Verificar si hay prefab asignado
             if (leaderboardEntryPrefab != null)
             {
-                // USAR PREFAB
                 GameObject entryObj = Instantiate(leaderboardEntryPrefab, leaderboardContainer);
                 entryObj.name = $"Entry_{entry.position}";
 
@@ -455,13 +486,12 @@ namespace DigitPark.Managers
             }
             else
             {
-                // FALLBACK: Crear por codigo si no hay prefab
                 CreateLeaderboardEntryFallback(entry, isCurrentPlayer);
             }
         }
 
         /// <summary>
-        /// Fallback: Crea entrada por codigo si no hay prefab
+        /// Fallback: Crea entrada por codigo con nuevo diseño (Pos + Avatar + Username + Tiempo)
         /// </summary>
         private void CreateLeaderboardEntryFallback(LeaderboardEntry entry, bool isCurrentPlayer)
         {
@@ -475,49 +505,100 @@ namespace DigitPark.Managers
             entryRT.anchoredPosition = Vector2.zero;
             entryRT.sizeDelta = new Vector2(0, 70);
 
-            var layoutElement = entryObj.AddComponent<UnityEngine.UI.LayoutElement>();
+            var layoutElement = entryObj.AddComponent<LayoutElement>();
             layoutElement.preferredHeight = 70;
             layoutElement.minHeight = 70;
 
+            // Fondo alternante, cyan highlight si es jugador actual
             Image bg = entryObj.AddComponent<Image>();
-            bg.color = isCurrentPlayer ? new Color(0f, 0.83f, 1f, 0.95f) : new Color(0.15f, 0.15f, 0.2f, 0.95f);
+            if (isCurrentPlayer)
+            {
+                bg.color = new Color(0f, 0.83f, 1f, 0.25f);
+            }
+            else
+            {
+                bg.color = entry.position % 2 == 0
+                    ? new Color(0.04f, 0.08f, 0.13f, 0.95f)
+                    : new Color(0.06f, 0.1f, 0.16f, 0.95f);
+            }
 
-            // Posicion (0% - 15%)
-            Color positionColor = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(1f, 0.84f, 0f);
-            TextMeshProUGUI posText = CreateEntryText(entryObj.transform, "PositionText", $"{entry.position}", 28, positionColor);
-            RectTransform posRT = posText.GetComponent<RectTransform>();
-            posRT.anchorMin = new Vector2(0, 0);
-            posRT.anchorMax = new Vector2(0.15f, 1);
-            posRT.offsetMin = Vector2.zero;
-            posRT.offsetMax = Vector2.zero;
-            posText.alignment = TMPro.TextAlignmentOptions.Center;
-            posText.fontStyle = TMPro.FontStyles.Bold;
+            // Top 3 borde de medalla
+            if (entry.position <= 3)
+            {
+                Outline medalOutline = entryObj.AddComponent<Outline>();
+                Color medalColor = GetMedalColor(entry.position);
+                medalOutline.effectColor = new Color(medalColor.r, medalColor.g, medalColor.b, 0.4f);
+                medalOutline.effectDistance = new Vector2(1, 1);
+            }
 
-            // Divisor 1
-            CreateVerticalDividerAnchored(entryObj.transform, 0.15f);
+            // HorizontalLayoutGroup
+            HorizontalLayoutGroup hlg = entryObj.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 12;
+            hlg.padding = new RectOffset(15, 15, 8, 8);
+            hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
 
-            // Username (15% - 70%)
-            TextMeshProUGUI nameText = CreateEntryText(entryObj.transform, "UsernameText", entry.username, 22, Color.white);
-            RectTransform nameRT = nameText.GetComponent<RectTransform>();
-            nameRT.anchorMin = new Vector2(0.15f, 0);
-            nameRT.anchorMax = new Vector2(0.70f, 1);
-            nameRT.offsetMin = new Vector2(10, 0);
-            nameRT.offsetMax = new Vector2(-10, 0);
-            nameText.alignment = TMPro.TextAlignmentOptions.Center;
+            // 1. Posición (55px)
+            GameObject posObj = new GameObject("PositionText");
+            posObj.transform.SetParent(entryObj.transform, false);
+            posObj.AddComponent<RectTransform>();
+            TextMeshProUGUI posText = posObj.AddComponent<TextMeshProUGUI>();
+            posText.text = entry.position <= 3 ? $"{entry.position}" : $"#{entry.position}";
+            posText.fontSize = entry.position <= 3 ? 28 : 22;
+            posText.color = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(0.5f, 0.55f, 0.65f);
+            posText.fontStyle = FontStyles.Bold;
+            posText.alignment = TextAlignmentOptions.Center;
+            posText.raycastTarget = false;
+            LayoutElement posLE = posObj.AddComponent<LayoutElement>();
+            posLE.minWidth = 55;
+            posLE.preferredWidth = 55;
 
-            // Divisor 2
-            CreateVerticalDividerAnchored(entryObj.transform, 0.70f);
+            // 2. Avatar placeholder (50x50)
+            GameObject avatarObj = new GameObject("AvatarImage");
+            avatarObj.transform.SetParent(entryObj.transform, false);
+            avatarObj.AddComponent<RectTransform>();
+            Image avatarImg = avatarObj.AddComponent<Image>();
+            avatarImg.color = new Color(0.2f, 0.25f, 0.35f);
+            avatarImg.raycastTarget = false;
+            LayoutElement avatarLE = avatarObj.AddComponent<LayoutElement>();
+            avatarLE.minWidth = 50;
+            avatarLE.minHeight = 50;
+            avatarLE.preferredWidth = 50;
+            avatarLE.preferredHeight = 50;
 
-            // Tiempo (70% - 100%)
-            TextMeshProUGUI timeText = CreateEntryText(entryObj.transform, "TimeText", $"{entry.time:F3}s", 22, new Color(0f, 1f, 0.53f));
-            RectTransform timeRT = timeText.GetComponent<RectTransform>();
-            timeRT.anchorMin = new Vector2(0.70f, 0);
-            timeRT.anchorMax = new Vector2(1f, 1);
-            timeRT.offsetMin = new Vector2(10, 0);
-            timeRT.offsetMax = new Vector2(-10, 0);
-            timeText.alignment = TMPro.TextAlignmentOptions.Center;
+            // 3. Username (flex)
+            GameObject nameObj = new GameObject("UsernameText");
+            nameObj.transform.SetParent(entryObj.transform, false);
+            nameObj.AddComponent<RectTransform>();
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = entry.username;
+            nameText.fontSize = 20;
+            nameText.color = isCurrentPlayer ? new Color(0f, 1f, 1f) : Color.white;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
+            nameText.enableWordWrapping = false;
+            nameText.overflowMode = TextOverflowModes.Ellipsis;
+            nameText.raycastTarget = false;
+            LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
+            nameLE.flexibleWidth = 1;
+            nameLE.minWidth = 120;
 
-            CreateHorizontalDivider(entryObj.transform);
+            // 4. Tiempo (100px)
+            GameObject timeObj = new GameObject("TimeText");
+            timeObj.transform.SetParent(entryObj.transform, false);
+            timeObj.AddComponent<RectTransform>();
+            TextMeshProUGUI timeText = timeObj.AddComponent<TextMeshProUGUI>();
+            timeText.text = $"{entry.time:F3}s";
+            timeText.fontSize = 20;
+            timeText.color = new Color(0f, 1f, 0.53f);
+            timeText.fontStyle = FontStyles.Bold;
+            timeText.alignment = TextAlignmentOptions.MidlineRight;
+            timeText.raycastTarget = false;
+            LayoutElement timeLE = timeObj.AddComponent<LayoutElement>();
+            timeLE.minWidth = 100;
+            timeLE.preferredWidth = 100;
 
             // Agregar componente UI
             LeaderboardEntryUI entryUI = entryObj.AddComponent<LeaderboardEntryUI>();
@@ -526,113 +607,17 @@ namespace DigitPark.Managers
             entryObj.SetActive(true);
         }
 
-        /// <summary>
-        /// Crea divisor vertical usando anclas (para fallback)
-        /// </summary>
-        private void CreateVerticalDividerAnchored(Transform parent, float anchorX)
-        {
-            GameObject divider = new GameObject("VerticalDivider");
-            divider.transform.SetParent(parent, false);
-
-            RectTransform divRT = divider.AddComponent<RectTransform>();
-            divRT.anchorMin = new Vector2(anchorX, 0.1f);
-            divRT.anchorMax = new Vector2(anchorX, 0.9f);
-            divRT.pivot = new Vector2(0.5f, 0.5f);
-            divRT.sizeDelta = new Vector2(2f, 0);
-
-            Image divImage = divider.AddComponent<Image>();
-            divImage.color = new Color(0.5f, 0.5f, 0.6f, 0.8f);
-            divImage.raycastTarget = false;
-        }
-
-        /// <summary>
-        /// Crea un divisor vertical sutil
-        /// </summary>
-        private void CreateVerticalDivider(Transform parent, float xPosition)
-        {
-            GameObject divider = new GameObject("VerticalDivider");
-            divider.transform.SetParent(parent, false);
-
-            RectTransform divRT = divider.AddComponent<RectTransform>();
-            divRT.anchorMin = new Vector2(0, 0);
-            divRT.anchorMax = new Vector2(0, 1);
-            divRT.pivot = new Vector2(0.5f, 0.5f);
-            divRT.anchoredPosition = new Vector2(xPosition, 0);
-            divRT.sizeDelta = new Vector2(1f, -20);
-
-            Image divImage = divider.AddComponent<Image>();
-            divImage.color = new Color(0.3f, 0.3f, 0.4f, 0.5f);
-        }
-
-        /// <summary>
-        /// Crea un divisor horizontal sutil
-        /// </summary>
-        private void CreateHorizontalDivider(Transform parent)
-        {
-            GameObject divider = new GameObject("HorizontalDivider");
-            divider.transform.SetParent(parent, false);
-
-            RectTransform divRT = divider.AddComponent<RectTransform>();
-            divRT.anchorMin = new Vector2(0, 0);
-            divRT.anchorMax = new Vector2(1, 0);
-            divRT.pivot = new Vector2(0.5f, 0);
-            divRT.anchoredPosition = Vector2.zero;
-            divRT.sizeDelta = new Vector2(-40, 1f);
-
-            Image divImage = divider.AddComponent<Image>();
-            divImage.color = new Color(0.3f, 0.3f, 0.4f, 0.3f);
-        }
-
-        /// <summary>
-        /// Crea un texto para una entrada del leaderboard
-        /// </summary>
-        private TextMeshProUGUI CreateEntryText(Transform parent, string name, string text, int fontSize, Color color)
-        {
-            GameObject textObj = new GameObject(name);
-            textObj.transform.SetParent(parent, false);
-
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = Vector2.zero;
-            textRT.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-
-            if (TMPro.TMP_Settings.defaultFontAsset != null)
-            {
-                tmp.font = TMPro.TMP_Settings.defaultFontAsset;
-            }
-
-            tmp.text = text;
-            tmp.fontSize = fontSize;
-            tmp.color = color;
-            tmp.alignment = TMPro.TextAlignmentOptions.Center;
-            tmp.fontStyle = TMPro.FontStyles.Normal;
-            tmp.enableWordWrapping = false;
-            tmp.overflowMode = TMPro.TextOverflowModes.Ellipsis;
-            tmp.raycastTarget = false;
-
-            return tmp;
-        }
-
-        /// <summary>
-        /// Obtiene el color de medalla según la posición
-        /// </summary>
         private Color GetMedalColor(int position)
         {
             switch (position)
             {
-                case 1: return new Color(1f, 0.84f, 0f); // Oro
-                case 2: return new Color(0.75f, 0.75f, 0.75f); // Plata
-                case 3: return new Color(0.8f, 0.5f, 0.2f); // Bronce
+                case 1: return new Color(1f, 0.84f, 0f);
+                case 2: return new Color(0.75f, 0.75f, 0.75f);
+                case 3: return new Color(0.8f, 0.5f, 0.2f);
                 default: return Color.white;
             }
         }
 
-        /// <summary>
-        /// Resalta la posición del jugador actual y actualiza el panel inferior
-        /// </summary>
         private void HighlightPlayerPosition(List<LeaderboardEntry> entries)
         {
             if (currentPlayer == null) return;
@@ -645,14 +630,10 @@ namespace DigitPark.Managers
             }
             else
             {
-                // El jugador no está en el ranking
                 UpdatePlayerPositionPanel(-1, 0);
             }
         }
 
-        /// <summary>
-        /// Actualiza el panel inferior con la posición del jugador
-        /// </summary>
         private void UpdatePlayerPositionPanel(int position, float time)
         {
             if (playerPositionPanel == null) return;
@@ -664,12 +645,12 @@ namespace DigitPark.Managers
                 if (position > 0)
                 {
                     positionNumberText.text = $"#{position}";
-                    positionNumberText.color = new Color(1f, 0.84f, 0f); // Gold
+                    positionNumberText.color = new Color(1f, 0.84f, 0f);
                 }
                 else
                 {
                     positionNumberText.text = AutoLocalizer.Get("not_ranked");
-                    positionNumberText.color = new Color(0.5f, 0.5f, 0.5f); // Gray
+                    positionNumberText.color = new Color(0.5f, 0.5f, 0.5f);
                 }
             }
 
@@ -686,9 +667,6 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Limpia el leaderboard actual
-        /// </summary>
         private void ClearLeaderboard()
         {
             if (leaderboardContainer == null) return;
@@ -703,9 +681,6 @@ namespace DigitPark.Managers
 
         #region UI Helpers
 
-        /// <summary>
-        /// Muestra u oculta el panel de carga
-        /// </summary>
         private void ShowLoading(bool show, string message = "Cargando...")
         {
             if (loadingPanel != null)
@@ -719,29 +694,21 @@ namespace DigitPark.Managers
             }
         }
 
-        /// <summary>
-        /// Muestra el estado vacío cuando no hay datos
-        /// </summary>
         private void ShowEmptyMessage()
         {
             Debug.Log("[Leaderboard] No hay datos para mostrar");
 
-            // Mostrar EmptyState si existe
             if (emptyState != null)
             {
                 emptyState.SetActive(true);
             }
 
-            // Ocultar panel de posición del jugador
             if (playerPositionPanel != null)
             {
                 playerPositionPanel.SetActive(false);
             }
         }
 
-        /// <summary>
-        /// Oculta el estado vacío
-        /// </summary>
         private void HideEmptyState()
         {
             if (emptyState != null)
@@ -749,16 +716,12 @@ namespace DigitPark.Managers
                 emptyState.SetActive(false);
             }
 
-            // Mostrar panel de posición
             if (playerPositionPanel != null)
             {
                 playerPositionPanel.SetActive(true);
             }
         }
 
-        /// <summary>
-        /// Muestra mensaje de error
-        /// </summary>
         private void ShowErrorMessage(string message)
         {
             Debug.LogError($"[Leaderboard] {message}");
@@ -774,10 +737,10 @@ namespace DigitPark.Managers
             rt.sizeDelta = new Vector2(800, 100);
 
             TextMeshProUGUI text = errorMsg.AddComponent<TextMeshProUGUI>();
-            if (TMPro.TMP_Settings.defaultFontAsset != null)
-                text.font = TMPro.TMP_Settings.defaultFontAsset;
+            if (TMP_Settings.defaultFontAsset != null)
+                text.font = TMP_Settings.defaultFontAsset;
             text.text = message;
-            text.alignment = TMPro.TextAlignmentOptions.Center;
+            text.alignment = TextAlignmentOptions.Center;
             text.fontSize = 24;
             text.color = Color.red;
         }
@@ -786,9 +749,6 @@ namespace DigitPark.Managers
 
         #region Navigation
 
-        /// <summary>
-        /// Vuelve al menú principal
-        /// </summary>
         private void OnBackButtonClicked()
         {
             Debug.Log("[Leaderboard] Volviendo al menú principal");

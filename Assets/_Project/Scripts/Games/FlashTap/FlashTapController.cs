@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -25,8 +26,9 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI instructionText;
         [SerializeField] private TextMeshProUGUI reactionTimeText;
         [SerializeField] private TextMeshProUGUI roundText;
-        [SerializeField] private TextMeshProUGUI averageText;
-        [SerializeField] private TextMeshProUGUI bestTimeText;
+        [SerializeField] private TextMeshProUGUI errorsText;
+        [SerializeField] private TextMeshProUGUI roundIndicatorText;
+        [SerializeField] private RectTransform progressFill;
 
         [Header("Flash Tap - Countdown")]
         [SerializeField] private CountdownUI countdownUI;
@@ -34,6 +36,7 @@ namespace DigitPark.Games
 
         [Header("Flash Tap - Settings Panel")]
         [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
         [SerializeField] private Toggle toggleRounds10;
@@ -110,6 +113,8 @@ namespace DigitPark.Games
 
         private void SetupSettingsPanel()
         {
+            if (toggleRounds1 != null)
+                toggleRounds1.onValueChanged.AddListener(v => { if (v) SetRadio(toggleRounds1); });
             if (toggleRounds3 != null)
                 toggleRounds3.onValueChanged.AddListener(v => { if (v) SetRadio(toggleRounds3); });
             if (toggleRounds5 != null)
@@ -126,6 +131,7 @@ namespace DigitPark.Games
 
         private void SetRadio(Toggle active)
         {
+            if (active != toggleRounds1 && toggleRounds1 != null) { toggleRounds1.isOn = false; UpdateToggleVisual(toggleRounds1, false); }
             if (active != toggleRounds3 && toggleRounds3 != null) { toggleRounds3.isOn = false; UpdateToggleVisual(toggleRounds3, false); }
             if (active != toggleRounds5 && toggleRounds5 != null) { toggleRounds5.isOn = false; UpdateToggleVisual(toggleRounds5, false); }
             if (active != toggleRounds10 && toggleRounds10 != null) { toggleRounds10.isOn = false; UpdateToggleVisual(toggleRounds10, false); }
@@ -161,7 +167,8 @@ namespace DigitPark.Games
         private void OnStartGameClicked()
         {
             // Leer rondas del toggle activo
-            if (toggleRounds3 != null && toggleRounds3.isOn) totalAttempts = 3;
+            if (toggleRounds1 != null && toggleRounds1.isOn) totalAttempts = 1;
+            else if (toggleRounds3 != null && toggleRounds3.isOn) totalAttempts = 3;
             else if (toggleRounds10 != null && toggleRounds10.isOn) totalAttempts = 10;
             else totalAttempts = 5;
 
@@ -479,13 +486,20 @@ namespace DigitPark.Games
         private void UpdateUI()
         {
             if (roundText != null)
-                roundText.text = AutoLocalizer.Get("flashtap_round", Mathf.Min(currentAttempt, totalAttempts), totalAttempts);
+                roundText.text = $"{Mathf.Min(currentAttempt, totalAttempts)}/{totalAttempts}";
 
-            if (averageText != null && reactionTimes.Count > 0)
-                averageText.text = AutoLocalizer.Get("flashtap_average", $"{CalculateAverage():F0}");
+            if (errorsText != null)
+                errorsText.text = errorCount.ToString();
 
-            if (bestTimeText != null && bestTime < float.MaxValue)
-                bestTimeText.text = AutoLocalizer.Get("flashtap_best", $"{bestTime:F0}");
+            if (roundIndicatorText != null)
+                roundIndicatorText.text = $"{Mathf.Min(currentAttempt, totalAttempts)}/{totalAttempts}";
+
+            if (progressFill != null)
+            {
+                progressFill.transform.parent.parent.gameObject.SetActive(totalAttempts > 1);
+                float progress = (float)(currentAttempt - 1) / totalAttempts;
+                progressFill.anchorMax = new Vector2(progress, 1f);
+            }
         }
 
         private string GetPerformanceRating(float avgMs)
@@ -510,8 +524,10 @@ namespace DigitPark.Games
 
         public override void EndGame()
         {
-            float avgReaction = CalculateAverage();
-            currentResult.TotalTime = avgReaction / 1000f;
+            // Usar mejor ronda individual (mínimo), no promedio.
+            // Si el jugador hace 10 rondas y una sale en 180ms, ese 180ms compite en el ranking.
+            float bestReaction = reactionTimes.Count > 0 ? reactionTimes.Min() : 0f;
+            currentResult.TotalTime = bestReaction / 1000f;
             currentResult.PenaltyTime = penaltyTime;
             currentResult.ExtraData = string.Join(",", reactionTimes);
 
@@ -542,13 +558,6 @@ namespace DigitPark.Games
         protected override void OnGameEnded()
         {
             SetButtonInteractable(false);
-
-            if (averageText != null)
-            {
-                float avg = CalculateAverage();
-                string rating = GetPerformanceRating(avg);
-                averageText.text = AutoLocalizer.Get("flashtap_final_average", $"{avg:F0}", rating);
-            }
 
             if (enableSuccessParticles && FeedbackManager.Instance != null)
             {
@@ -623,8 +632,6 @@ namespace DigitPark.Games
             if (button3D != null)
                 button3D.SetState(FlashTapButton3D.ButtonState.Wait, true);
 
-            if (averageText != null) averageText.text = "";
-            if (bestTimeText != null) bestTimeText.text = "";
             if (reactionTimeText != null) reactionTimeText.text = "";
 
             // Volver a settings en practice mode

@@ -233,11 +233,13 @@ namespace DigitPark.Games
                 try
                 {
                     await DatabaseService.Instance?.SavePlayerData(playerData);
+                    string gameId = result.GameType.ToString();
                     await DatabaseService.Instance?.SaveScore(
                         playerData.userId,
                         playerData.username,
                         result.TotalTime,
-                        playerData.countryCode
+                        playerData.countryCode,
+                        gameId
                     );
 
                     // Si es torneo, actualizar score en el torneo
