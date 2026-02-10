@@ -486,11 +486,11 @@ namespace DigitPark.Editor
             btnLayout.childForceExpandWidth = false;
             btnLayout.childControlWidth = false;
 
-            // Play Again button
-            CreateActionButton(buttonsContainer.transform, "ResultPlayAgainButton", "PLAY AGAIN", CYAN_NEON, 230, 70);
+            // Play Again button (wider for localized text like "JUGAR DE NUEVO", "JOGAR NOVAMENTE")
+            CreateActionButton(buttonsContainer.transform, "ResultPlayAgainButton", "PLAY AGAIN", CYAN_NEON, 320, 80);
 
-            // Exit button
-            CreateActionButton(buttonsContainer.transform, "ResultExitButton", "EXIT", new Color(0.6f, 0.6f, 0.6f), 160, 70);
+            // Exit button (wider for localized text like "QUITTER", "BEENDEN")
+            CreateActionButton(buttonsContainer.transform, "ResultExitButton", "EXIT", new Color(0.6f, 0.6f, 0.6f), 220, 80);
 
             // Hide by default
             resultPanel.SetActive(false);

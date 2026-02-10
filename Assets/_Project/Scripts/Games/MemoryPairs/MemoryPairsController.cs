@@ -34,12 +34,16 @@ namespace DigitPark.Games
         [SerializeField] private CountdownUI countdownUI;
         [SerializeField] private bool useCountdown = true;
 
+        [Header("Feedback")]
+        [SerializeField] private GameObject feedbackPanel;
+        [SerializeField] private TextMeshProUGUI feedbackText;
+
         [Header("Effects")]
         [SerializeField] private UISparkleEffect sparkleEffect;
         [SerializeField] private bool enableHapticFeedback = true;
 
-        [Header("Digits para las cartas (se eligen 8 aleatorios del 0-9)")]
-        [SerializeField] private string[] allDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        [Header("Digits para las cartas (se eligen 8 aleatorios del 1-9)")]
+        [SerializeField] private string[] allDigits = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
         private string[] selectedDigits; // 8 dígitos aleatorios seleccionados para esta partida
 
         // Estado del juego
@@ -76,6 +80,7 @@ namespace DigitPark.Games
         {
             base.Start();
             SetupCards();
+            StartGame();
         }
 
         private void SetupCards()
@@ -146,26 +151,41 @@ namespace DigitPark.Games
             }
         }
 
+        [Header("Preview Settings")]
+        [SerializeField] private float previewDuration = 2f;
+
         private void OnCountdownComplete()
         {
-            AnimateCardsPopUp();
-            StartCoroutine(ActivateGameAfterDelay(0.5f));
+            StartCoroutine(PreviewAndStartSequence());
         }
 
-        private void AnimateCardsPopUp()
+        private IEnumerator PreviewAndStartSequence()
         {
+            // 1. Pop up animation for all cards
             for (int i = 0; i < card3DEffects.Length; i++)
             {
                 if (card3DEffects[i] != null)
-                {
                     card3DEffects[i].AnimateGameStart();
-                }
             }
-        }
+            yield return new WaitForSeconds(0.8f);
 
-        private IEnumerator ActivateGameAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
+            // 2. Reveal all cards (show numbers) for preview
+            for (int i = 0; i < card3DEffects.Length; i++)
+            {
+                if (card3DEffects[i] != null)
+                    card3DEffects[i].FlipCard();
+            }
+            yield return new WaitForSeconds(previewDuration);
+
+            // 3. Flip all cards back (hide numbers)
+            for (int i = 0; i < card3DEffects.Length; i++)
+            {
+                if (card3DEffects[i] != null)
+                    card3DEffects[i].FlipBack();
+            }
+            yield return new WaitForSeconds(0.5f);
+
+            // 4. Start the game timer
             base.StartGame();
         }
 
@@ -236,7 +256,6 @@ namespace DigitPark.Games
 
             if (card3DEffects != null && cardIndex < card3DEffects.Length && card3DEffects[cardIndex] != null)
             {
-                if (card3DEffects[cardIndex].IsAnimating) return;
                 if (card3DEffects[cardIndex].IsFaceUp) return;
             }
 
@@ -296,6 +315,9 @@ namespace DigitPark.Games
                 // Partículas de match
                 PlayMatchParticles(firstSelectedCard, secondSelectedCard);
 
+                // Toast feedback
+                ShowFeedback(AutoLocalizer.Get("memorypairs_correct"), new Color(0.3f, 1f, 0.5f, 1f));
+
                 yield return new WaitForSeconds(0.3f);
 
                 if (pairsFound >= totalPairs)
@@ -316,6 +338,9 @@ namespace DigitPark.Games
 
                 // Partículas de error
                 PlayErrorParticles(firstSelectedCard, secondSelectedCard);
+
+                // Toast feedback
+                ShowFeedback(AutoLocalizer.Get("memorypairs_incorrect"), new Color(1f, 0.3f, 0.3f, 1f));
 
                 if (card3DEffects != null)
                 {
@@ -554,6 +579,76 @@ namespace DigitPark.Games
             }
         }
 
+        private Coroutine feedbackCoroutine;
+
+        private void ShowFeedback(string message, Color color)
+        {
+            if (feedbackText == null) return;
+
+            if (feedbackCoroutine != null)
+                StopCoroutine(feedbackCoroutine);
+
+            feedbackCoroutine = StartCoroutine(AnimateFeedback(message, color));
+        }
+
+        private IEnumerator AnimateFeedback(string message, Color color)
+        {
+            feedbackText.text = message;
+            feedbackText.color = color;
+
+            // Update panel outline to match feedback color
+            if (feedbackPanel != null)
+            {
+                feedbackPanel.SetActive(true);
+                var outline = feedbackPanel.GetComponent<UnityEngine.UI.Outline>();
+                if (outline != null)
+                    outline.effectColor = new Color(color.r, color.g, color.b, 0.8f);
+            }
+            else
+            {
+                feedbackText.gameObject.SetActive(true);
+            }
+
+            // Scale pop-in on the panel (or text if no panel)
+            Transform t = feedbackPanel != null ? feedbackPanel.transform : feedbackText.transform;
+            t.localScale = Vector3.zero;
+
+            float popDuration = 0.2f;
+            float elapsed = 0f;
+            while (elapsed < popDuration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = elapsed / popDuration;
+                float scale = 1f + 0.3f * Mathf.Sin(progress * Mathf.PI);
+                t.localScale = Vector3.one * Mathf.Min(scale, 1.3f) * progress;
+                yield return null;
+            }
+            t.localScale = Vector3.one;
+
+            // Hold
+            yield return new WaitForSeconds(0.8f);
+
+            // Fade out
+            float fadeDuration = 0.3f;
+            elapsed = 0f;
+            Color startColor = feedbackText.color;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = 1f - (elapsed / fadeDuration);
+                feedbackText.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+                t.localScale = Vector3.one * (0.8f + 0.2f * alpha);
+                yield return null;
+            }
+
+            if (feedbackPanel != null)
+                feedbackPanel.SetActive(false);
+            else
+                feedbackText.gameObject.SetActive(false);
+
+            feedbackCoroutine = null;
+        }
+
         protected override void UpdateTimer()
         {
             if (timerText != null)
@@ -589,11 +684,10 @@ namespace DigitPark.Games
 
         protected override void OnGameEnded()
         {
-            // Solo mostrar panel propio en modo práctica
-            if (IsPracticeMode() && winPanel != null)
+            // Disable card interaction - base class ShowResultPanel handles panel display
+            foreach (var btn in cardButtons)
             {
-                winPanel.SetActive(true);
-                StartCoroutine(ShowWinPanel());
+                if (btn != null) btn.interactable = false;
             }
         }
 

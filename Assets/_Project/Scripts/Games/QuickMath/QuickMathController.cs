@@ -7,16 +7,27 @@ using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
+    public enum QuickMathDifficulty { Easy, Normal, Hard }
+
+    [System.Flags]
+    public enum QuickMathOperations
+    {
+        Addition       = 1 << 0,
+        Subtraction    = 1 << 1,
+        Multiplication = 1 << 2,
+        Division       = 1 << 3
+    }
+
     /// <summary>
-    /// Controller para el juego Quick Math - REDISEÑO IMPACTANTE
-    /// Ecuación gigante, combo system, partículas, haptics
+    /// Controller para el juego Quick Math
+    /// Settings panel, division, feedback, difficulty system
     /// </summary>
     public class QuickMathController : MinigameBase
     {
         public override GameType GameType => GameType.QuickMath;
 
         [Header("QuickMath - Equation Display")]
-        [SerializeField] private TextMeshProUGUI problemText; // Para compatibilidad
+        [SerializeField] private TextMeshProUGUI problemText;
         [SerializeField] private TextMeshProUGUI numberAText;
         [SerializeField] private TextMeshProUGUI numberBText;
         [SerializeField] private TextMeshProUGUI operatorText;
@@ -32,28 +43,45 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI roundText;
         [SerializeField] private TextMeshProUGUI errorsText;
         [SerializeField] private TextMeshProUGUI comboText;
-        [SerializeField] private TextMeshProUGUI statsText;
         [SerializeField] private TextMeshProUGUI roundIndicatorText;
-        [SerializeField] private GameObject winPanel;
-        [SerializeField] private CanvasGroup winPanelCanvasGroup;
         [SerializeField] private CanvasGroup comboCanvasGroup;
         [SerializeField] private RectTransform progressFill;
+
+        [Header("QuickMath - Settings Panel")]
+        [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Toggle toggleAddition;
+        [SerializeField] private Toggle toggleSubtraction;
+        [SerializeField] private Toggle toggleMultiplication;
+        [SerializeField] private Toggle toggleDivision;
+        [SerializeField] private Toggle toggleEasy;
+        [SerializeField] private Toggle toggleNormal;
+        [SerializeField] private Toggle toggleHard;
+        [SerializeField] private Toggle toggleRounds3;
+        [SerializeField] private Toggle toggleRounds5;
+        [SerializeField] private Toggle toggleRounds10;
+        [SerializeField] private Button startGameButton;
+        [SerializeField] private TextMeshProUGUI difficultyDescText;
+
+        [Header("Feedback")]
+        [SerializeField] private GameObject feedbackPanel;
+        [SerializeField] private TextMeshProUGUI feedbackText;
 
         [Header("Effects")]
         [SerializeField] private UISparkleEffect sparkleEffect;
         [SerializeField] private bool enableHapticFeedback = true;
 
-        [Header("QuickMath - Settings")]
-        [SerializeField] private int totalRounds = 10;
-        [SerializeField] private int maxNumber = 20;
-        [SerializeField] private bool includeMultiplication = false;
+        // Settings state
+        private QuickMathDifficulty currentDifficulty = QuickMathDifficulty.Normal;
+        private QuickMathOperations enabledOperations = QuickMathOperations.Addition | QuickMathOperations.Subtraction;
+        private int totalRounds = 10;
 
-        // Estado del juego
+        // Game state
         private int currentRound;
         private int correctAnswer;
         private int[] answers = new int[3];
         private int numberA, numberB;
         private string currentOperator;
+        private float penaltyTime;
 
         // Streak/Combo System
         private int currentStreak = 0;
@@ -61,6 +89,50 @@ namespace DigitPark.Games
 
         // Animation state
         private Coroutine questionPulseCoroutine;
+        private Coroutine feedbackCoroutine;
+
+        // Computed properties based on difficulty
+        private int MaxNumber
+        {
+            get
+            {
+                switch (currentDifficulty)
+                {
+                    case QuickMathDifficulty.Easy: return 10;
+                    case QuickMathDifficulty.Normal: return 25;
+                    case QuickMathDifficulty.Hard: return 50;
+                    default: return 25;
+                }
+            }
+        }
+
+        private int MaxMultiplicationOperand
+        {
+            get
+            {
+                switch (currentDifficulty)
+                {
+                    case QuickMathDifficulty.Easy: return 5;
+                    case QuickMathDifficulty.Normal: return 10;
+                    case QuickMathDifficulty.Hard: return 12;
+                    default: return 10;
+                }
+            }
+        }
+
+        private int MaxDivisor
+        {
+            get
+            {
+                switch (currentDifficulty)
+                {
+                    case QuickMathDifficulty.Easy: return 5;
+                    case QuickMathDifficulty.Normal: return 10;
+                    case QuickMathDifficulty.Hard: return 12;
+                    default: return 10;
+                }
+            }
+        }
 
         protected override void Awake()
         {
@@ -77,22 +149,223 @@ namespace DigitPark.Games
         {
             base.Start();
             SetupButtons();
+
+            if (IsPracticeMode())
+            {
+                SetupSettingsPanel();
+                ShowSettingsPanel();
+            }
         }
 
         private void SetupButtons()
         {
-            if (answerButtons == null || answerButtons.Length != 3)
+            if (answerButtons == null || answerButtons.Length == 0)
             {
-                Debug.LogError("[QuickMath] Requiere exactamente 3 botones de respuesta");
+                Debug.LogError("[QuickMath] Requiere botones de respuesta asignados");
                 return;
             }
 
             for (int i = 0; i < answerButtons.Length; i++)
             {
+                if (answerButtons[i] == null) continue;
                 int index = i;
                 answerButtons[i].onClick.AddListener(() => OnAnswerClicked(index));
             }
         }
+
+        #region Settings Panel
+
+        private void SetupSettingsPanel()
+        {
+            if (settingsPanel == null) return;
+
+            // Wire difficulty toggles with radio enforcement
+            if (toggleEasy != null)
+                toggleEasy.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleEasy, on);
+                    if (on) { OnDifficultyChanged(QuickMathDifficulty.Easy); SetRadio(toggleEasy, toggleNormal, toggleHard); }
+                });
+            if (toggleNormal != null)
+                toggleNormal.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleNormal, on);
+                    if (on) { OnDifficultyChanged(QuickMathDifficulty.Normal); SetRadio(toggleNormal, toggleEasy, toggleHard); }
+                });
+            if (toggleHard != null)
+                toggleHard.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleHard, on);
+                    if (on) { OnDifficultyChanged(QuickMathDifficulty.Hard); SetRadio(toggleHard, toggleEasy, toggleNormal); }
+                });
+
+            // Wire rounds toggles with radio enforcement
+            if (toggleRounds3 != null)
+                toggleRounds3.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds3, on);
+                    if (on) SetRadio(toggleRounds3, toggleRounds5, toggleRounds10);
+                });
+            if (toggleRounds5 != null)
+                toggleRounds5.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds5, on);
+                    if (on) SetRadio(toggleRounds5, toggleRounds3, toggleRounds10);
+                });
+            if (toggleRounds10 != null)
+                toggleRounds10.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds10, on);
+                    if (on) SetRadio(toggleRounds10, toggleRounds3, toggleRounds5);
+                });
+
+            // Wire operation toggles with visual updates
+            if (toggleAddition != null)
+                toggleAddition.onValueChanged.AddListener(on => { ValidateOperations(); UpdateToggleVisual(toggleAddition, on); });
+            if (toggleSubtraction != null)
+                toggleSubtraction.onValueChanged.AddListener(on => { ValidateOperations(); UpdateToggleVisual(toggleSubtraction, on); });
+            if (toggleMultiplication != null)
+                toggleMultiplication.onValueChanged.AddListener(on => { ValidateOperations(); UpdateToggleVisual(toggleMultiplication, on); });
+            if (toggleDivision != null)
+                toggleDivision.onValueChanged.AddListener(on => { ValidateOperations(); UpdateToggleVisual(toggleDivision, on); });
+
+            // Wire start button
+            if (startGameButton != null)
+                startGameButton.onClick.AddListener(OnStartGameClicked);
+
+            // Set defaults without triggering listener chaos
+            SetToggleDefault(toggleAddition, true);
+            SetToggleDefault(toggleSubtraction, true);
+            SetToggleDefault(toggleMultiplication, false);
+            SetToggleDefault(toggleDivision, false);
+            SetToggleDefault(toggleEasy, false);
+            SetToggleDefault(toggleNormal, true);
+            SetToggleDefault(toggleHard, false);
+            SetToggleDefault(toggleRounds3, false);
+            SetToggleDefault(toggleRounds5, false);
+            SetToggleDefault(toggleRounds10, true);
+
+            // Apply initial difficulty
+            OnDifficultyChanged(QuickMathDifficulty.Normal);
+        }
+
+        private void ShowSettingsPanel()
+        {
+            if (settingsPanel != null)
+                settingsPanel.SetActive(true);
+            EnableAllButtons(false);
+        }
+
+        private void OnDifficultyChanged(QuickMathDifficulty difficulty)
+        {
+            currentDifficulty = difficulty;
+
+            // Easy: disable multiplication and division toggles
+            bool allowAdvanced = difficulty != QuickMathDifficulty.Easy;
+            if (toggleMultiplication != null)
+            {
+                toggleMultiplication.interactable = allowAdvanced;
+                if (!allowAdvanced) toggleMultiplication.isOn = false;
+            }
+            if (toggleDivision != null)
+            {
+                toggleDivision.interactable = allowAdvanced;
+                if (!allowAdvanced) toggleDivision.isOn = false;
+            }
+
+            // Update description text
+            if (difficultyDescText != null)
+            {
+                switch (difficulty)
+                {
+                    case QuickMathDifficulty.Easy:
+                        difficultyDescText.text = AutoLocalizer.Get("quickmath_difficulty_easy_desc");
+                        break;
+                    case QuickMathDifficulty.Normal:
+                        difficultyDescText.text = AutoLocalizer.Get("quickmath_difficulty_normal_desc");
+                        break;
+                    case QuickMathDifficulty.Hard:
+                        difficultyDescText.text = AutoLocalizer.Get("quickmath_difficulty_hard_desc");
+                        break;
+                }
+            }
+        }
+
+        private void ValidateOperations()
+        {
+            // Count enabled operations
+            int count = 0;
+            if (toggleAddition != null && toggleAddition.isOn) count++;
+            if (toggleSubtraction != null && toggleSubtraction.isOn) count++;
+            if (toggleMultiplication != null && toggleMultiplication.isOn) count++;
+            if (toggleDivision != null && toggleDivision.isOn) count++;
+
+            // If none selected, force addition on
+            if (count == 0 && toggleAddition != null)
+            {
+                toggleAddition.isOn = true;
+            }
+        }
+
+        private void SetRadio(Toggle selected, params Toggle[] others)
+        {
+            foreach (var t in others)
+            {
+                if (t != null && t.isOn)
+                {
+                    t.SetIsOnWithoutNotify(false);
+                    UpdateToggleVisual(t, false);
+                }
+            }
+        }
+
+        private void UpdateToggleVisual(Toggle toggle, bool isOn)
+        {
+            if (toggle == null) return;
+            var bg = toggle.GetComponent<Image>();
+            var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
+            Color onColor = new Color(0f, 1f, 1f, 1f);
+            Color offColor = new Color(0.08f, 0.12f, 0.18f, 1f);
+            if (bg != null) bg.color = isOn ? onColor : offColor;
+            if (label != null) label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+        }
+
+        private void SetToggleDefault(Toggle toggle, bool value)
+        {
+            if (toggle == null) return;
+            toggle.SetIsOnWithoutNotify(value);
+            UpdateToggleVisual(toggle, value);
+        }
+
+        private void ReadSettingsFromUI()
+        {
+            // Read operations
+            enabledOperations = 0;
+            if (toggleAddition != null && toggleAddition.isOn)
+                enabledOperations |= QuickMathOperations.Addition;
+            if (toggleSubtraction != null && toggleSubtraction.isOn)
+                enabledOperations |= QuickMathOperations.Subtraction;
+            if (toggleMultiplication != null && toggleMultiplication.isOn)
+                enabledOperations |= QuickMathOperations.Multiplication;
+            if (toggleDivision != null && toggleDivision.isOn)
+                enabledOperations |= QuickMathOperations.Division;
+
+            // Read difficulty (already set via OnDifficultyChanged)
+
+            // Read rounds
+            if (toggleRounds3 != null && toggleRounds3.isOn)
+                totalRounds = 3;
+            else if (toggleRounds5 != null && toggleRounds5.isOn)
+                totalRounds = 5;
+            else
+                totalRounds = 10;
+        }
+
+        private void OnStartGameClicked()
+        {
+            ReadSettingsFromUI();
+
+            if (settingsPanel != null)
+                settingsPanel.SetActive(false);
+
+            StartGame();
+        }
+
+        #endregion
 
         public override void StartGame()
         {
@@ -100,6 +373,7 @@ namespace DigitPark.Games
             currentRound = 1;
             currentStreak = 0;
             maxStreak = 0;
+            penaltyTime = 0f;
             UpdateComboDisplay();
             GenerateProblem();
             UpdateUI();
@@ -108,53 +382,69 @@ namespace DigitPark.Games
 
         private void GenerateProblem()
         {
-            int operation = includeMultiplication ? Random.Range(0, 3) : Random.Range(0, 2);
+            // Build list of enabled operations
+            var ops = new System.Collections.Generic.List<int>();
+            if ((enabledOperations & QuickMathOperations.Addition) != 0) ops.Add(0);
+            if ((enabledOperations & QuickMathOperations.Subtraction) != 0) ops.Add(1);
+            if ((enabledOperations & QuickMathOperations.Multiplication) != 0) ops.Add(2);
+            if ((enabledOperations & QuickMathOperations.Division) != 0) ops.Add(3);
+
+            if (ops.Count == 0) ops.Add(0); // fallback to addition
+
+            int operation = ops[Random.Range(0, ops.Count)];
 
             switch (operation)
             {
-                case 0: // Suma
-                    numberA = Random.Range(1, maxNumber);
-                    numberB = Random.Range(1, maxNumber);
+                case 0: // Addition
+                    numberA = Random.Range(1, MaxNumber + 1);
+                    numberB = Random.Range(1, MaxNumber + 1);
                     correctAnswer = numberA + numberB;
                     currentOperator = "+";
                     break;
-                case 1: // Resta
-                    numberA = Random.Range(1, maxNumber);
-                    numberB = Random.Range(1, numberA + 1);
+
+                case 1: // Subtraction (no negatives)
+                    numberA = Random.Range(2, MaxNumber + 1);
+                    numberB = Random.Range(1, numberA);
                     correctAnswer = numberA - numberB;
                     currentOperator = "-";
                     break;
-                case 2: // Multiplicación
-                    numberA = Random.Range(1, 10);
-                    numberB = Random.Range(1, 10);
+
+                case 2: // Multiplication
+                    numberA = Random.Range(1, MaxMultiplicationOperand + 1);
+                    numberB = Random.Range(1, MaxMultiplicationOperand + 1);
                     correctAnswer = numberA * numberB;
-                    currentOperator = "×";
+                    currentOperator = "\u00D7";
                     break;
+
+                case 3: // Division (integer results, divisor >= 2)
+                    int divisor = Random.Range(2, MaxDivisor + 1);
+                    int maxQuotient = Mathf.Max(1, MaxNumber / divisor);
+                    int quotient = Random.Range(1, maxQuotient + 1);
+                    numberA = divisor * quotient;
+                    numberB = divisor;
+                    correctAnswer = quotient;
+                    currentOperator = "\u00F7";
+                    break;
+
                 default:
                     numberA = 1; numberB = 1; correctAnswer = 2; currentOperator = "+";
                     break;
             }
 
-            // Actualizar displays
             UpdateEquationDisplay();
-
-            // Generar respuestas
             GenerateAnswers();
         }
 
         private void UpdateEquationDisplay()
         {
-            // Textos individuales para animación
             if (numberAText != null) numberAText.text = numberA.ToString();
             if (numberBText != null) numberBText.text = numberB.ToString();
             if (operatorText != null) operatorText.text = currentOperator;
             if (questionMarkText != null) questionMarkText.text = "?";
 
-            // Texto completo para compatibilidad
             if (problemText != null)
                 problemText.text = $"{numberA} {currentOperator} {numberB} = ?";
 
-            // Iniciar animación del signo de interrogación
             if (questionPulseCoroutine != null)
                 StopCoroutine(questionPulseCoroutine);
             questionPulseCoroutine = StartCoroutine(AnimateQuestionMark());
@@ -164,7 +454,7 @@ namespace DigitPark.Games
         {
             if (questionMarkText == null) yield break;
 
-            Color baseColor = new Color(1f, 0.84f, 0f, 1f); // Dorado
+            Color baseColor = new Color(1f, 0.84f, 0f, 1f);
             float pulseSpeed = 2f;
             float time = 0f;
 
@@ -173,10 +463,8 @@ namespace DigitPark.Games
                 time += Time.deltaTime * pulseSpeed;
                 float pulse = (Mathf.Sin(time) + 1f) * 0.5f;
 
-                // Pulso de escala
                 questionMarkText.transform.localScale = Vector3.one * (1f + pulse * 0.1f);
 
-                // Pulso de brillo
                 Color currentColor = Color.Lerp(baseColor, Color.white, pulse * 0.3f);
                 questionMarkText.color = currentColor;
 
@@ -189,6 +477,16 @@ namespace DigitPark.Games
             int correctIndex = Random.Range(0, 3);
             answers[correctIndex] = correctAnswer;
 
+            // Offset range based on difficulty
+            int maxOffset;
+            switch (currentDifficulty)
+            {
+                case QuickMathDifficulty.Easy: maxOffset = 2; break;
+                case QuickMathDifficulty.Normal: maxOffset = 3; break;
+                case QuickMathDifficulty.Hard: maxOffset = 2; break; // tighter = harder
+                default: maxOffset = 3; break;
+            }
+
             for (int i = 0; i < 3; i++)
             {
                 if (i == correctIndex) continue;
@@ -197,18 +495,23 @@ namespace DigitPark.Games
                 int attempts = 0;
                 do
                 {
-                    int offset = Random.Range(-5, 6);
-                    if (offset == 0) offset = Random.Range(0, 2) == 0 ? -1 : 1;
+                    int offset = Random.Range(1, maxOffset + 1);
+                    if (Random.value < 0.5f) offset = -offset;
+
                     wrongAnswer = correctAnswer + offset;
                     attempts++;
                 }
                 while ((wrongAnswer == correctAnswer || wrongAnswer < 0 ||
-                        System.Array.IndexOf(answers, wrongAnswer) != -1) && attempts < 20);
+                        System.Array.IndexOf(answers, wrongAnswer) != -1) && attempts < 30);
+
+                // Fallback if couldn't find unique answer
+                if (wrongAnswer == correctAnswer || wrongAnswer < 0)
+                    wrongAnswer = correctAnswer + (i == 0 ? 1 : -1);
 
                 answers[i] = wrongAnswer;
             }
 
-            // Actualizar textos de botones
+            // Update button displays
             for (int i = 0; i < 3; i++)
             {
                 if (answerTexts != null && i < answerTexts.Length && answerTexts[i] != null)
@@ -216,7 +519,6 @@ namespace DigitPark.Games
                     answerTexts[i].text = answers[i].ToString();
                 }
 
-                // También actualizar via Cell3D
                 if (answerButtons != null && i < answerButtons.Length && answerButtons[i] != null)
                 {
                     QuickMathCell3D cell = answerButtons[i].GetComponent<QuickMathCell3D>();
@@ -245,13 +547,11 @@ namespace DigitPark.Games
 
         private void OnCorrectAnswer(int buttonIndex)
         {
-            Debug.Log($"[QuickMath] ¡Correcto! Ronda {currentRound}");
+            Debug.Log($"[QuickMath] Correcto! Ronda {currentRound}");
 
-            // Incrementar streak
             currentStreak++;
             if (currentStreak > maxStreak) maxStreak = currentStreak;
 
-            // Vibración según streak
             if (currentStreak >= 7)
                 TriggerHaptic(HapticType.Heavy);
             else if (currentStreak >= 4)
@@ -259,16 +559,13 @@ namespace DigitPark.Games
             else
                 TriggerHaptic(HapticType.Light);
 
-            // Partículas
             PlayCorrectParticles(buttonIndex);
-
-            // Animar botón correcto
             AnimateCorrectButton(buttonIndex);
-
-            // Actualizar combo display
             UpdateComboDisplay();
 
-            // Siguiente ronda
+            // Show green feedback
+            ShowFeedback(AutoLocalizer.Get("quickmath_correct"), new Color(0.3f, 1f, 0.5f, 1f));
+
             currentRound++;
 
             if (currentRound > totalRounds)
@@ -283,23 +580,94 @@ namespace DigitPark.Games
 
         private void OnWrongAnswer(int buttonIndex)
         {
-            Debug.Log($"[QuickMath] Incorrecto en botón {buttonIndex}");
+            Debug.Log($"[QuickMath] Incorrecto en boton {buttonIndex}");
 
             RegisterError();
 
-            // Resetear streak
+            // Track penalty time (+1s per error)
+            penaltyTime += 1f;
+
             currentStreak = 0;
             UpdateComboDisplay();
 
-            // Vibración de error
             TriggerHaptic(HapticType.Error);
-
-            // Partículas de error
             PlayErrorParticles(buttonIndex);
-
-            // Animar botón error
             AnimateErrorButton(buttonIndex);
+
+            // Show red feedback with penalty
+            ShowFeedback(AutoLocalizer.Get("quickmath_incorrect"), new Color(1f, 0.3f, 0.3f, 1f));
         }
+
+        #region Feedback
+
+        private void ShowFeedback(string message, Color color)
+        {
+            if (feedbackText == null) return;
+
+            if (feedbackCoroutine != null)
+                StopCoroutine(feedbackCoroutine);
+
+            feedbackCoroutine = StartCoroutine(AnimateFeedback(message, color));
+        }
+
+        private IEnumerator AnimateFeedback(string message, Color color)
+        {
+            feedbackText.text = message;
+            feedbackText.color = color;
+
+            if (feedbackPanel != null)
+            {
+                feedbackPanel.SetActive(true);
+                var outline = feedbackPanel.GetComponent<Outline>();
+                if (outline != null)
+                    outline.effectColor = new Color(color.r, color.g, color.b, 0.8f);
+            }
+            else
+            {
+                feedbackText.gameObject.SetActive(true);
+            }
+
+            Transform t = feedbackPanel != null ? feedbackPanel.transform : feedbackText.transform;
+            t.localScale = Vector3.zero;
+
+            // Pop-in (0.2s)
+            float popDuration = 0.2f;
+            float elapsed = 0f;
+            while (elapsed < popDuration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = elapsed / popDuration;
+                float scale = 1f + 0.3f * Mathf.Sin(progress * Mathf.PI);
+                t.localScale = Vector3.one * Mathf.Min(scale, 1.3f) * progress;
+                yield return null;
+            }
+            t.localScale = Vector3.one;
+
+            // Hold (0.6s - faster than MemoryPairs)
+            yield return new WaitForSeconds(0.6f);
+
+            // Fade out (0.2s)
+            float fadeDuration = 0.2f;
+            elapsed = 0f;
+            Color startColor = feedbackText.color;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = 1f - (elapsed / fadeDuration);
+                feedbackText.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+                t.localScale = Vector3.one * (0.8f + 0.2f * alpha);
+                yield return null;
+            }
+
+            if (feedbackPanel != null)
+                feedbackPanel.SetActive(false);
+            else
+                feedbackText.gameObject.SetActive(false);
+
+            feedbackCoroutine = null;
+        }
+
+        #endregion
 
         private void AnimateCorrectButton(int buttonIndex)
         {
@@ -327,7 +695,6 @@ namespace DigitPark.Games
 
         private void AnimateNewQuestion()
         {
-            // Animar botones de respuesta con pop-in
             for (int i = 0; i < answerButtons.Length; i++)
             {
                 if (answerButtons[i] != null)
@@ -340,7 +707,6 @@ namespace DigitPark.Games
                 }
             }
 
-            // Animar ecuación
             if (equationPanel != null)
             {
                 StartCoroutine(AnimateEquationIn());
@@ -349,7 +715,7 @@ namespace DigitPark.Games
 
         private IEnumerator AnimateEquationIn()
         {
-            Vector3 originalScale = equationPanel.localScale;
+            Vector3 originalScale = Vector3.one;
             equationPanel.localScale = Vector3.zero;
 
             float duration = 0.3f;
@@ -360,7 +726,6 @@ namespace DigitPark.Games
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
-                // Ease out back
                 float overshoot = 1.2f;
                 float s = t - 1f;
                 float scale = 1f + s * s * ((overshoot + 1f) * s + overshoot);
@@ -375,20 +740,15 @@ namespace DigitPark.Games
 
         private IEnumerator NextQuestionSequence()
         {
-            // Breve pausa
             yield return new WaitForSeconds(0.4f);
 
-            // Animar ecuación saliendo
             if (equationPanel != null)
             {
                 yield return StartCoroutine(AnimateEquationOut());
             }
 
-            // Generar nueva pregunta
             GenerateProblem();
             UpdateUI();
-
-            // Animar entrada
             AnimateNewQuestion();
         }
 
@@ -534,17 +894,15 @@ namespace DigitPark.Games
                     comboCanvasGroup.gameObject.SetActive(true);
                     comboText.text = $"x{currentStreak} STREAK!";
 
-                    // Color basado en streak
                     if (currentStreak >= 8)
-                        comboText.color = new Color(1f, 0.85f, 0.2f); // Dorado
+                        comboText.color = new Color(1f, 0.85f, 0.2f);
                     else if (currentStreak >= 6)
-                        comboText.color = new Color(1f, 0.5f, 0.2f); // Naranja
+                        comboText.color = new Color(1f, 0.5f, 0.2f);
                     else if (currentStreak >= 4)
-                        comboText.color = new Color(0.3f, 1f, 0.5f); // Verde
+                        comboText.color = new Color(0.3f, 1f, 0.5f);
                     else
-                        comboText.color = new Color(1f, 0.6f, 0.2f); // Naranja claro
+                        comboText.color = new Color(1f, 0.6f, 0.2f);
 
-                    // Animar entrada
                     StartCoroutine(AnimateComboIn());
                 }
                 else
@@ -599,15 +957,12 @@ namespace DigitPark.Games
 
         private IEnumerator EndGameSequence()
         {
-            // Deshabilitar botones
             EnableAllButtons(false);
 
-            // Vibración de victoria
             TriggerHaptic(HapticType.Heavy);
 
             yield return new WaitForSeconds(0.3f);
 
-            // Animación de victoria en botones
             for (int i = 0; i < answerButtons.Length; i++)
             {
                 if (answerButtons[i] != null)
@@ -620,7 +975,6 @@ namespace DigitPark.Games
                 }
             }
 
-            // Confeti
             if (sparkleEffect != null)
             {
                 sparkleEffect.PlayVictoryConfetti();
@@ -634,6 +988,16 @@ namespace DigitPark.Games
         }
 
         #endregion
+
+        public override void EndGame()
+        {
+            // Pre-set penalty on currentResult so base.EndGame() uses our tracked value
+            // (base would calculate errorCount * config.errorPenalty, we want our penaltyTime)
+            currentResult.PenaltyTime = penaltyTime;
+            base.EndGame();
+            // Fix penalty that base.EndGame() overwrote
+            currentResult.PenaltyTime = penaltyTime;
+        }
 
         private void EnableAllButtons(bool enable)
         {
@@ -663,7 +1027,6 @@ namespace DigitPark.Games
                 errorsText.text = errorCount.ToString();
             }
 
-            // Actualizar barra de progreso
             if (progressFill != null)
             {
                 float progress = (float)(currentRound - 1) / totalRounds;
@@ -681,7 +1044,6 @@ namespace DigitPark.Games
 
         protected override void OnGameStarted()
         {
-            if (winPanel != null) winPanel.SetActive(false);
             EnableAllButtons(true);
         }
 
@@ -694,37 +1056,45 @@ namespace DigitPark.Games
             if (questionPulseCoroutine != null)
                 StopCoroutine(questionPulseCoroutine);
 
-            // Solo mostrar panel propio en modo práctica
-            if (IsPracticeMode() && winPanel != null)
-            {
-                winPanel.SetActive(true);
-                StartCoroutine(ShowWinPanel());
-            }
+            // Only disable buttons - base class ShowResultPanel handles panel display
             EnableAllButtons(false);
         }
 
-        private IEnumerator ShowWinPanel()
+        protected override void ShowResultPanel(MinigameResult result)
         {
-            if (winPanelCanvasGroup == null) yield break;
+            base.ShowResultPanel(result);
+            PopulateExtraStats(winPanelNormal);
+            PopulateExtraStats(losePanelNormal);
+        }
 
-            // Actualizar stats
-            if (statsText != null)
+        private void PopulateExtraStats(WinPanelController panel)
+        {
+            if (panel == null || !panel.gameObject.activeSelf) return;
+
+            Transform root = panel.transform;
+
+            // Try both win and lose panel naming conventions
+            var streakVal = FindChildTMP(root, "MaxStreakValue") ?? FindChildTMP(root, "LoseMaxStreakValue");
+            if (streakVal != null) streakVal.text = maxStreak.ToString();
+
+            var penaltyVal = FindChildTMP(root, "PenaltyValue") ?? FindChildTMP(root, "LosePenaltyValue");
+            if (penaltyVal != null)
+                penaltyVal.text = penaltyTime > 0 ? $"+{penaltyTime:F1}s" : "-";
+
+            var roundsVal = FindChildTMP(root, "RoundsValue") ?? FindChildTMP(root, "LoseRoundsValue");
+            if (roundsVal != null)
+                roundsVal.text = $"{totalRounds}/{totalRounds}";
+        }
+
+        private TextMeshProUGUI FindChildTMP(Transform parent, string name)
+        {
+            if (parent.name == name) return parent.GetComponent<TextMeshProUGUI>();
+            foreach (Transform child in parent)
             {
-                statsText.text = $"{AutoLocalizer.Get("game_time")}: {GetFormattedTime()}\n{AutoLocalizer.Get("game_errors")}: {errorCount}\nMax Streak: x{maxStreak}";
+                var found = FindChildTMP(child, name);
+                if (found != null) return found;
             }
-
-            // Fade in
-            float duration = 0.4f;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                winPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
-                yield return null;
-            }
-
-            winPanelCanvasGroup.alpha = 1f;
+            return null;
         }
 
         protected override void OnGameReset()
@@ -732,17 +1102,20 @@ namespace DigitPark.Games
             currentRound = 1;
             currentStreak = 0;
             maxStreak = 0;
-
-            if (winPanel != null) winPanel.SetActive(false);
-            if (winPanelCanvasGroup != null) winPanelCanvasGroup.alpha = 0;
+            penaltyTime = 0f;
 
             EnableAllButtons(true);
             UpdateComboDisplay();
 
-            // Reset progress bar
             if (progressFill != null)
             {
                 progressFill.anchorMax = new Vector2(0f, 1f);
+            }
+
+            // In practice mode, show settings panel again
+            if (IsPracticeMode() && settingsPanel != null)
+            {
+                ShowSettingsPanel();
             }
         }
 
@@ -757,6 +1130,11 @@ namespace DigitPark.Games
             {
                 StopCoroutine(questionPulseCoroutine);
                 questionPulseCoroutine = null;
+            }
+            if (feedbackCoroutine != null)
+            {
+                StopCoroutine(feedbackCoroutine);
+                feedbackCoroutine = null;
             }
         }
     }

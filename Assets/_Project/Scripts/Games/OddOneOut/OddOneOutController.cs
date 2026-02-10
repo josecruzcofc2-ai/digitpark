@@ -11,7 +11,8 @@ namespace DigitPark.Games
     /// <summary>
     /// Controller para el juego Odd One Out
     /// El jugador debe encontrar la diferencia entre DOS cuadriculas 4x4
-    /// Con sistema de combos, partículas y vibración háptica
+    /// Con sistema de combos, particulas y vibracion haptica
+    /// Settings panel, countdown, feedback, WinPanelController
     /// </summary>
     public class OddOneOutController : MinigameBase
     {
@@ -31,10 +32,21 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI errorsText;
         [SerializeField] private TextMeshProUGUI instructionText;
         [SerializeField] private TextMeshProUGUI comboText;
-        [SerializeField] private TextMeshProUGUI statsText;
-        [SerializeField] private GameObject winPanel;
-        [SerializeField] private CanvasGroup winPanelCanvasGroup;
-        // playAgainButton ya está definido en MinigameBase
+
+        [Header("Countdown")]
+        [SerializeField] private CountdownUI countdownUI;
+        [SerializeField] private bool useCountdown = true;
+
+        [Header("Settings Panel")]
+        [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Toggle toggleRounds3;
+        [SerializeField] private Toggle toggleRounds5;
+        [SerializeField] private Toggle toggleRounds10;
+        [SerializeField] private Button startGameButton;
+
+        [Header("Feedback")]
+        [SerializeField] private GameObject feedbackPanel;
+        [SerializeField] private TextMeshProUGUI feedbackText;
 
         [Header("Effects")]
         [SerializeField] private UISparkleEffect sparkleEffect;
@@ -43,19 +55,22 @@ namespace DigitPark.Games
         [Header("Odd One Out - Settings")]
         [SerializeField] private int totalRounds = 5;
 
-        [Header("Dígitos disponibles (0-9)")]
-        [SerializeField] private string[] availableDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-
         // Estado del juego
         private int currentRound;
-        private int oddButtonIndex; // La posición donde está la diferencia
+        private int oddButtonIndex;
         private int gridSize = 16;
-        private string[] gridDigits; // Dígitos para cada celda (compartidos por ambos grids)
-        private string differentDigit; // El dígito diferente en oddButtonIndex
+        private string[] gridDigits;
+        private string differentDigit;
 
         // Combo System
         private int currentCombo = 0;
         private int maxCombo = 0;
+
+        // Penalty
+        private float penaltyTime;
+
+        // Animation state
+        private Coroutine feedbackCoroutine;
 
         protected override void Awake()
         {
@@ -63,7 +78,6 @@ namespace DigitPark.Games
             totalRounds = config?.rounds ?? 5;
             gridSize = config?.TotalGridElements ?? 16;
 
-            // Buscar UISparkleEffect si no está asignado
             if (sparkleEffect == null)
             {
                 sparkleEffect = FindFirstObjectByType<UISparkleEffect>();
@@ -74,7 +88,16 @@ namespace DigitPark.Games
         {
             base.Start();
             SetupButtons();
-            // playAgainButton listener ya se configura en MinigameBase
+
+            if (IsPracticeMode())
+            {
+                SetupSettingsPanel();
+                ShowSettingsPanel();
+            }
+            else
+            {
+                StartGameWithCountdown();
+            }
         }
 
         private void SetupButtons()
@@ -100,12 +123,135 @@ namespace DigitPark.Games
             }
         }
 
+        #region Settings Panel
+
+        private void SetupSettingsPanel()
+        {
+            if (settingsPanel == null) return;
+
+            // Wire rounds toggles with radio enforcement
+            if (toggleRounds3 != null)
+                toggleRounds3.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds3, on);
+                    if (on) SetRadio(toggleRounds3, toggleRounds5, toggleRounds10);
+                });
+            if (toggleRounds5 != null)
+                toggleRounds5.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds5, on);
+                    if (on) SetRadio(toggleRounds5, toggleRounds3, toggleRounds10);
+                });
+            if (toggleRounds10 != null)
+                toggleRounds10.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds10, on);
+                    if (on) SetRadio(toggleRounds10, toggleRounds3, toggleRounds5);
+                });
+
+            // Wire start button
+            if (startGameButton != null)
+                startGameButton.onClick.AddListener(OnStartGameClicked);
+
+            // Set defaults without triggering listener chaos
+            SetToggleDefault(toggleRounds3, false);
+            SetToggleDefault(toggleRounds5, true);
+            SetToggleDefault(toggleRounds10, false);
+        }
+
+        private void ShowSettingsPanel()
+        {
+            if (settingsPanel != null)
+                settingsPanel.SetActive(true);
+            EnableAllButtons(false);
+        }
+
+        private void OnStartGameClicked()
+        {
+            // Read rounds from toggle
+            if (toggleRounds3 != null && toggleRounds3.isOn)
+                totalRounds = 3;
+            else if (toggleRounds10 != null && toggleRounds10.isOn)
+                totalRounds = 10;
+            else
+                totalRounds = 5;
+
+            if (settingsPanel != null)
+                settingsPanel.SetActive(false);
+
+            StartGameWithCountdown();
+        }
+
+        private void SetRadio(Toggle selected, params Toggle[] others)
+        {
+            foreach (var t in others)
+            {
+                if (t != null && t.isOn)
+                {
+                    t.SetIsOnWithoutNotify(false);
+                    UpdateToggleVisual(t, false);
+                }
+            }
+        }
+
+        private void UpdateToggleVisual(Toggle toggle, bool isOn)
+        {
+            if (toggle == null) return;
+            var bg = toggle.GetComponent<Image>();
+            var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
+            Color onColor = new Color(0f, 1f, 1f, 1f);
+            Color offColor = new Color(0.08f, 0.12f, 0.18f, 1f);
+            if (bg != null) bg.color = isOn ? onColor : offColor;
+            if (label != null) label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+        }
+
+        private void SetToggleDefault(Toggle toggle, bool value)
+        {
+            if (toggle == null) return;
+            toggle.SetIsOnWithoutNotify(value);
+            UpdateToggleVisual(toggle, value);
+        }
+
+        #endregion
+
+        #region Countdown
+
+        private void StartGameWithCountdown()
+        {
+            if (useCountdown && countdownUI != null)
+            {
+                ShowQuestionMarks();
+                EnableAllButtons(false);
+                countdownUI.StartCountdown(OnCountdownComplete);
+            }
+            else
+            {
+                StartGame();
+            }
+        }
+
+        private void OnCountdownComplete()
+        {
+            StartGame();
+        }
+
+        private void ShowQuestionMarks()
+        {
+            for (int i = 0; i < gridSize; i++)
+            {
+                if (leftButtonTexts != null && i < leftButtonTexts.Length && leftButtonTexts[i] != null)
+                    leftButtonTexts[i].text = "?";
+                if (rightButtonTexts != null && i < rightButtonTexts.Length && rightButtonTexts[i] != null)
+                    rightButtonTexts[i].text = "?";
+            }
+        }
+
+        #endregion
+
         public override void StartGame()
         {
             base.StartGame();
             currentRound = 1;
             currentCombo = 0;
             maxCombo = 0;
+            penaltyTime = 0f;
             GeneratePuzzle();
             UpdateUI();
             AnimateRoundStart();
@@ -113,27 +259,27 @@ namespace DigitPark.Games
 
         private void GeneratePuzzle()
         {
-            // Generar dígitos aleatorios del 0-9 para cada celda
+            // Generar digitos aleatorios del 1-9 para cada celda (1-9 mas diferenciables)
             gridDigits = new string[gridSize];
             for (int i = 0; i < gridSize; i++)
             {
-                gridDigits[i] = availableDigits[Random.Range(0, availableDigits.Length)];
+                gridDigits[i] = Random.Range(1, 10).ToString();
             }
 
-            // Seleccionar posición de la diferencia
+            // Seleccionar posicion de la diferencia
             oddButtonIndex = Random.Range(0, gridSize);
 
-            // Generar un dígito DIFERENTE para esa posición en el grid derecho
+            // Generar un digito DIFERENTE para esa posicion en el grid derecho
             string originalDigit = gridDigits[oddButtonIndex];
             do
             {
-                differentDigit = availableDigits[Random.Range(0, availableDigits.Length)];
+                differentDigit = Random.Range(1, 10).ToString();
             } while (differentDigit == originalDigit);
 
-            // Asignar dígitos a ambos grids
+            // Asignar digitos a ambos grids
             for (int i = 0; i < gridSize; i++)
             {
-                // Grid izquierda - todos los dígitos originales
+                // Grid izquierda - todos los digitos originales
                 if (leftButtonTexts != null && i < leftButtonTexts.Length && leftButtonTexts[i] != null)
                 {
                     leftButtonTexts[i].text = gridDigits[i];
@@ -177,7 +323,6 @@ namespace DigitPark.Games
 
         private void AnimateRoundStart()
         {
-            // Animar celdas con pop-up escalonado
             for (int row = 0; row < 4; row++)
             {
                 for (int col = 0; col < 4; col++)
@@ -227,7 +372,6 @@ namespace DigitPark.Games
         {
             if (!isPlaying || isPaused) return;
 
-            // El usuario puede presionar la celda diferente en CUALQUIERA de los dos grids
             bool isCorrect = (buttonIndex == oddButtonIndex);
 
             if (isCorrect)
@@ -253,13 +397,13 @@ namespace DigitPark.Games
 
         private void OnCorrectAnswer(int buttonIndex, bool isRightGrid)
         {
-            Debug.Log($"[OddOneOut] ¡Correcto! Ronda {currentRound}");
+            Debug.Log($"[OddOneOut] Correcto! Ronda {currentRound}");
 
             // Incrementar combo
             currentCombo++;
             if (currentCombo > maxCombo) maxCombo = currentCombo;
 
-            // Vibración según combo
+            // Vibracion segun combo
             if (currentCombo >= 4)
                 TriggerHaptic(HapticType.Heavy);
             else if (currentCombo >= 2)
@@ -267,7 +411,7 @@ namespace DigitPark.Games
             else
                 TriggerHaptic(HapticType.Light);
 
-            // Partículas de acierto
+            // Particulas de acierto
             PlayCorrectParticles(buttonIndex, isRightGrid);
 
             // Animar celda correcta
@@ -276,7 +420,7 @@ namespace DigitPark.Games
             // Actualizar combo display
             UpdateComboDisplay();
 
-            // Mensaje de éxito
+            // Mensaje de exito
             if (instructionText != null)
             {
                 if (currentCombo >= 4)
@@ -288,22 +432,28 @@ namespace DigitPark.Games
 
                 instructionText.color = new Color(0.3f, 1f, 0.5f, 1f);
             }
+
+            // Show green feedback
+            ShowFeedback(AutoLocalizer.Get("oddoneout_correct"), new Color(0.3f, 1f, 0.5f, 1f));
         }
 
         private void OnWrongAnswer(int buttonIndex, bool isRightGrid)
         {
-            Debug.Log($"[OddOneOut] Incorrecto en posición {buttonIndex}");
+            Debug.Log($"[OddOneOut] Incorrecto en posicion {buttonIndex}");
 
             RegisterError();
+
+            // Penalty time +1s
+            penaltyTime += 1f;
 
             // Resetear combo
             currentCombo = 0;
             UpdateComboDisplay();
 
-            // Vibración de error
+            // Vibracion de error
             TriggerHaptic(HapticType.Error);
 
-            // Partículas de error
+            // Particulas de error
             PlayErrorParticles(buttonIndex, isRightGrid);
 
             // Animar celda error
@@ -315,7 +465,81 @@ namespace DigitPark.Games
                 instructionText.text = AutoLocalizer.Get("oddoneout_try_again");
                 instructionText.color = new Color(1f, 0.3f, 0.3f, 1f);
             }
+
+            // Show red feedback with penalty
+            ShowFeedback(AutoLocalizer.Get("oddoneout_incorrect_penalty"), new Color(1f, 0.3f, 0.3f, 1f));
         }
+
+        #region Feedback
+
+        private void ShowFeedback(string message, Color color)
+        {
+            if (feedbackText == null) return;
+
+            if (feedbackCoroutine != null)
+                StopCoroutine(feedbackCoroutine);
+
+            feedbackCoroutine = StartCoroutine(AnimateFeedback(message, color));
+        }
+
+        private IEnumerator AnimateFeedback(string message, Color color)
+        {
+            feedbackText.text = message;
+            feedbackText.color = color;
+
+            if (feedbackPanel != null)
+            {
+                feedbackPanel.SetActive(true);
+                var outline = feedbackPanel.GetComponent<Outline>();
+                if (outline != null)
+                    outline.effectColor = new Color(color.r, color.g, color.b, 0.8f);
+            }
+            else
+            {
+                feedbackText.gameObject.SetActive(true);
+            }
+
+            Transform t = feedbackPanel != null ? feedbackPanel.transform : feedbackText.transform;
+            t.localScale = Vector3.zero;
+
+            // Pop-in (0.15s)
+            float popDuration = 0.15f;
+            float elapsed = 0f;
+            while (elapsed < popDuration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = elapsed / popDuration;
+                float scale = 1f + 0.3f * Mathf.Sin(progress * Mathf.PI);
+                t.localScale = Vector3.one * Mathf.Min(scale, 1.3f) * progress;
+                yield return null;
+            }
+            t.localScale = Vector3.one;
+
+            // Hold (0.6s)
+            yield return new WaitForSeconds(0.6f);
+
+            // Fade out (0.25s)
+            float fadeDuration = 0.25f;
+            elapsed = 0f;
+            Color startColor = feedbackText.color;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = 1f - (elapsed / fadeDuration);
+                feedbackText.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+                t.localScale = Vector3.one * (0.8f + 0.2f * alpha);
+                yield return null;
+            }
+
+            if (feedbackPanel != null)
+                feedbackPanel.SetActive(false);
+            else
+                feedbackText.gameObject.SetActive(false);
+
+            feedbackCoroutine = null;
+        }
+
+        #endregion
 
         private void AnimateCellCorrect(int buttonIndex, bool isRightGrid)
         {
@@ -465,7 +689,6 @@ namespace DigitPark.Games
                 comboText.gameObject.SetActive(true);
                 comboText.text = $"x{currentCombo}";
 
-                // Color basado en combo
                 if (currentCombo >= 5)
                     comboText.color = new Color(1f, 0.85f, 0.2f); // Dorado
                 else if (currentCombo >= 4)
@@ -499,16 +722,13 @@ namespace DigitPark.Games
             EnableAllButtons(false);
             yield return new WaitForSeconds(0.3f);
 
-            // Vibración de victoria
             TriggerHaptic(HapticType.Heavy);
 
-            // Animación de victoria en ambos grids
             StartCoroutine(PlayVictorySequence());
         }
 
         private IEnumerator PlayVictorySequence()
         {
-            // Animación de ola en ambos grids
             float waveDelay = 0.05f;
 
             for (int row = 0; row < 4; row++)
@@ -518,7 +738,6 @@ namespace DigitPark.Games
                     int index = row * 4 + col;
                     float delay = (row + col) * waveDelay;
 
-                    // Grid izquierda
                     if (leftGridButtons != null && index < leftGridButtons.Length && leftGridButtons[index] != null)
                     {
                         OddOneOutCell3D cell3D = leftGridButtons[index].GetComponent<OddOneOutCell3D>();
@@ -528,7 +747,6 @@ namespace DigitPark.Games
                         }
                     }
 
-                    // Grid derecha
                     if (rightGridButtons != null && index < rightGridButtons.Length && rightGridButtons[index] != null)
                     {
                         OddOneOutCell3D cell3D = rightGridButtons[index].GetComponent<OddOneOutCell3D>();
@@ -540,7 +758,6 @@ namespace DigitPark.Games
                 }
             }
 
-            // Confeti
             if (sparkleEffect != null)
             {
                 sparkleEffect.PlayVictoryConfetti();
@@ -555,6 +772,13 @@ namespace DigitPark.Games
         }
 
         #endregion
+
+        public override void EndGame()
+        {
+            currentResult.PenaltyTime = penaltyTime;
+            base.EndGame();
+            currentResult.PenaltyTime = penaltyTime;
+        }
 
         private void UpdateUI()
         {
@@ -579,7 +803,6 @@ namespace DigitPark.Games
 
         protected override void OnGameStarted()
         {
-            if (winPanel != null) winPanel.SetActive(false);
             EnableAllButtons(true);
             UpdateComboDisplay();
         }
@@ -590,37 +813,40 @@ namespace DigitPark.Games
 
         protected override void OnGameEnded()
         {
-            // Solo mostrar panel propio en modo práctica
-            if (IsPracticeMode() && winPanel != null)
-            {
-                winPanel.SetActive(true);
-                StartCoroutine(ShowWinPanel());
-            }
+            // Only disable buttons - base class ShowResultPanel handles panel display
             EnableAllButtons(false);
         }
 
-        private IEnumerator ShowWinPanel()
+        protected override void ShowResultPanel(MinigameResult result)
         {
-            if (winPanelCanvasGroup == null) yield break;
+            base.ShowResultPanel(result);
+            PopulateExtraStats(winPanelNormal);
+            PopulateExtraStats(losePanelNormal);
+        }
 
-            // Actualizar stats
-            if (statsText != null)
+        private void PopulateExtraStats(WinPanelController panel)
+        {
+            if (panel == null || !panel.gameObject.activeSelf) return;
+
+            Transform root = panel.transform;
+
+            var comboVal = FindChildTMP(root, "MaxComboValue") ?? FindChildTMP(root, "LoseMaxComboValue");
+            if (comboVal != null) comboVal.text = maxCombo.ToString();
+
+            var penaltyVal = FindChildTMP(root, "PenaltyValue") ?? FindChildTMP(root, "LosePenaltyValue");
+            if (penaltyVal != null)
+                penaltyVal.text = penaltyTime > 0 ? $"+{penaltyTime:F1}s" : "-";
+        }
+
+        private TextMeshProUGUI FindChildTMP(Transform parent, string name)
+        {
+            if (parent.name == name) return parent.GetComponent<TextMeshProUGUI>();
+            foreach (Transform child in parent)
             {
-                statsText.text = AutoLocalizer.Get("oddoneout_stats", GetFormattedTime(), errorCount, maxCombo);
+                var found = FindChildTMP(child, name);
+                if (found != null) return found;
             }
-
-            // Fade in
-            float duration = 0.4f;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                winPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
-                yield return null;
-            }
-
-            winPanelCanvasGroup.alpha = 1f;
+            return null;
         }
 
         protected override void OnGameReset()
@@ -628,10 +854,15 @@ namespace DigitPark.Games
             currentRound = 1;
             currentCombo = 0;
             maxCombo = 0;
-            if (winPanel != null) winPanel.SetActive(false);
-            if (winPanelCanvasGroup != null) winPanelCanvasGroup.alpha = 0;
+            penaltyTime = 0f;
             EnableAllButtons(true);
             UpdateComboDisplay();
+
+            // In practice mode, show settings panel again
+            if (IsPracticeMode() && settingsPanel != null)
+            {
+                ShowSettingsPanel();
+            }
         }
 
         protected override void OnErrorOccurred()
@@ -639,6 +870,13 @@ namespace DigitPark.Games
             UpdateUI();
         }
 
-        // RestartGame se maneja en MinigameBase.OnPlayAgainClicked()
+        private void OnDestroy()
+        {
+            if (feedbackCoroutine != null)
+            {
+                StopCoroutine(feedbackCoroutine);
+                feedbackCoroutine = null;
+            }
+        }
     }
 }

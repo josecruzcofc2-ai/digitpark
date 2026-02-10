@@ -815,6 +815,18 @@ namespace DigitPark.Managers
                     resultMessageText.text = message;
                 }
 
+                // Localizar textos de botones
+                if (resultPlayAgainButton != null)
+                {
+                    var btnText = resultPlayAgainButton.GetComponentInChildren<TextMeshProUGUI>();
+                    if (btnText != null) btnText.text = AutoLocalizer.Get("digitrush_play_again");
+                }
+                if (resultExitButton != null)
+                {
+                    var btnText = resultExitButton.GetComponentInChildren<TextMeshProUGUI>();
+                    if (btnText != null) btnText.text = AutoLocalizer.Get("digitrush_exit");
+                }
+
                 resultPanel.SetActive(true);
                 StartCoroutine(FadeInResultPanel());
             }

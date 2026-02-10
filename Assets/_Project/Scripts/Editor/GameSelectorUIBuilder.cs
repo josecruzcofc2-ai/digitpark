@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Themes;
 using System.Collections.Generic;
 
 namespace DigitPark.Editor
@@ -174,6 +175,22 @@ namespace DigitPark.Editor
             for (int i = existingOutlines.Length - 1; i >= 0; i--)
             {
                 DestroyImmediate(existingOutlines[i]);
+            }
+
+            // Limpiar ThemeApplier (causa tinte azul al aplicar cardBackground del tema)
+            ThemeApplier themeApplier = card.GetComponent<ThemeApplier>();
+            if (themeApplier != null)
+            {
+                Debug.Log($"Eliminando ThemeApplier de {buttonName} (causaba tinte azul)");
+                DestroyImmediate(themeApplier);
+            }
+
+            // Limpiar CanvasGroup (GameSelectorAnimator lo agrega con alpha 0.6)
+            CanvasGroup canvasGroup = card.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+            {
+                Debug.Log($"Eliminando CanvasGroup de {buttonName} (causaba transparencia)");
+                DestroyImmediate(canvasGroup);
             }
 
             // Configurar Button
@@ -427,11 +444,11 @@ namespace DigitPark.Editor
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
             // ========== CONTENEDOR DE REGLAS ==========
-            // Valores ajustados: Left 40, Top 120, Right 40, Bottom 200
+            // Padding: Left 40, Top 120, Right 40, Bottom 200
             GameObject rulesContainer = CreateOrFind(innerPanel.transform, "RulesContainer");
             SetupRectTransform(rulesContainer,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(40, 200), new Vector2(-40, -120));
+                new Vector2(0, 40), new Vector2(-80, -320));
 
             // Texto de reglas (se cambia dinámicamente)
             GameObject rulesText = CreateOrFind(rulesContainer.transform, "RulesText");

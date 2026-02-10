@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using DigitPark.Themes;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -165,6 +166,9 @@ namespace DigitPark.Editor
 
         private static void ApplyThemeToApplier(ThemeApplier applier, ThemeData theme)
         {
+            // Excluir game cards (tienen GameCardEffect) - sus iconos deben ser blancos sin tinte
+            if (applier.GetComponent<GameCardEffect>() != null) return;
+
             var so = new SerializedObject(applier);
             var elementTypeProp = so.FindProperty("elementType");
             ThemeApplier.ElementType elementType = (ThemeApplier.ElementType)elementTypeProp.enumValueIndex;
@@ -210,6 +214,9 @@ namespace DigitPark.Editor
             foreach (var img in images)
             {
                 if (img.GetComponent<ThemeApplier>() != null) continue;
+
+                // Excluir game cards (tienen GameCardEffect) - sus iconos deben ser blancos sin tinte
+                if (img.GetComponent<GameCardEffect>() != null) continue;
 
                 string name = img.gameObject.name.ToLower();
 
@@ -401,6 +408,9 @@ namespace DigitPark.Editor
                 // Saltar imágenes de botones (se manejan en ProcessButtons)
                 if (img.GetComponent<Button>() != null) continue;
 
+                // Excluir game cards (tienen GameCardEffect) - sus iconos deben ser blancos sin tinte
+                if (img.GetComponent<GameCardEffect>() != null) continue;
+
                 string name = img.gameObject.name.ToLower();
                 ThemeApplier.ElementType elementType = ThemeApplier.ElementType.None;
 
@@ -493,6 +503,9 @@ namespace DigitPark.Editor
             foreach (var btn in buttons)
             {
                 if (btn.GetComponent<ThemeApplier>() != null) continue;
+
+                // Excluir game cards (tienen GameCardEffect) - sus iconos deben ser blancos sin tinte
+                if (btn.GetComponent<GameCardEffect>() != null) continue;
 
                 string name = btn.gameObject.name.ToLower();
                 ThemeApplier.ElementType elementType = ThemeApplier.ElementType.ButtonSecondary;

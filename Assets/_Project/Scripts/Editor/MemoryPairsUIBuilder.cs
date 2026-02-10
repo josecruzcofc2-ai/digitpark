@@ -147,11 +147,15 @@ namespace DigitPark.Editor
             // ========== CARDS GRID (Centro - Elemento principal) ==========
             CreateCardsGrid(safeArea.transform);
 
+            // ========== FEEDBACK PANEL (Below grid - Correcto/Incorrecto toast) ==========
+            CreateFeedbackPanel(safeArea.transform);
+
             // ========== ACTION BUTTON ==========
             CreateActionButton(safeArea.transform);
 
-            // ========== WIN PANEL ==========
-            CreateWinPanel(safeArea.transform);
+            // ========== WIN/LOSE PANELS (Normal - WinPanelController) ==========
+            CreateNormalWinPanel(safeArea.transform);
+            CreateNormalLosePanel(safeArea.transform);
 
             // ========== REAL MONEY PANELS (Cash Battle) ==========
             WinPanelInlineBuilder.CreateRealMoneyPanels(safeArea.transform);
@@ -178,6 +182,33 @@ namespace DigitPark.Editor
             comboOutline.effectDistance = new Vector2(3, -3);
 
             comboObj.SetActive(false); // Hidden by default
+        }
+
+        private static void CreateFeedbackPanel(Transform parent)
+        {
+            // Panel positioned below the card grid with DigitRush-style neon design
+            GameObject feedbackPanel = CreateElement(parent, "FeedbackPanel");
+            SetupRectTransform(feedbackPanel,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, -520), new Vector2(700, 80));
+
+            // Dark background (same as DigitRush timer panel)
+            Image bg = feedbackPanel.AddComponent<Image>();
+            bg.color = PANEL_BG;
+
+            // Cyan neon outline (changes to green/red at runtime based on result)
+            Outline panelOutline = feedbackPanel.AddComponent<Outline>();
+            panelOutline.effectColor = CYAN_NEON;
+            panelOutline.effectDistance = new Vector2(2, -2);
+
+            // Text inside panel
+            GameObject feedbackText = CreateElement(feedbackPanel.transform, "FeedbackText");
+            SetupRectTransform(feedbackText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI feedbackTmp = SetupText(feedbackText, "", 42, GREEN_NEON, FontStyles.Bold);
+            feedbackTmp.alignment = TextAlignmentOptions.Center;
+            feedbackTmp.enableWordWrapping = false;
+
+            feedbackPanel.SetActive(false); // Hidden by default, shown by controller
         }
 
         private static void CreateParticleEffects(Transform parent)
@@ -409,6 +440,30 @@ namespace DigitPark.Editor
             so.FindProperty("faceImage").objectReferenceValue = faceImg;
             so.FindProperty("cardImage").objectReferenceValue = cardImage;
             so.FindProperty("symbolText").objectReferenceValue = qText;
+
+            // Explicitly set all color properties to enforce cyan neon theme
+            // This prevents old scene-serialized values from overriding script defaults
+            so.FindProperty("faceDownColor").colorValue = new Color(0.04f, 0.08f, 0.12f, 1f);
+            so.FindProperty("faceDownSideColor").colorValue = new Color(0.02f, 0.05f, 0.08f, 1f);
+            so.FindProperty("faceDownGlowColor").colorValue = new Color(0f, 0.6f, 0.6f, 0.3f);
+            so.FindProperty("faceDownPatternColor").colorValue = new Color(0f, 0.8f, 0.8f, 0.15f);
+            so.FindProperty("faceUpColor").colorValue = new Color(0.06f, 0.12f, 0.18f, 1f);
+            so.FindProperty("faceUpSideColor").colorValue = new Color(0.04f, 0.08f, 0.12f, 1f);
+            so.FindProperty("faceUpGlowColor").colorValue = new Color(0f, 1f, 1f, 1f); // Cyan neon
+            so.FindProperty("symbolColor").colorValue = Color.white;
+            so.FindProperty("matchedFaceColor").colorValue = new Color(0.05f, 0.25f, 0.1f, 1f);
+            so.FindProperty("matchedSideColor").colorValue = new Color(0.03f, 0.15f, 0.05f, 1f);
+            so.FindProperty("matchedGlowColor").colorValue = new Color(0.2f, 1f, 0.4f, 1f);
+            so.FindProperty("matchedSymbolColor").colorValue = new Color(0.5f, 1f, 0.6f, 1f);
+            so.FindProperty("matchFlashColor").colorValue = new Color(0.4f, 1f, 0.6f, 1f);
+            so.FindProperty("comboGlowColor").colorValue = new Color(1f, 0.85f, 0.2f, 1f);
+            so.FindProperty("comboFlashColor").colorValue = new Color(1f, 0.95f, 0.5f, 1f);
+            so.FindProperty("errorFaceColor").colorValue = new Color(0.35f, 0.05f, 0.05f, 1f);
+            so.FindProperty("errorSideColor").colorValue = new Color(0.25f, 0.03f, 0.03f, 1f);
+            so.FindProperty("errorGlowColor").colorValue = new Color(1f, 0.2f, 0.2f, 1f);
+            so.FindProperty("errorSymbolColor").colorValue = new Color(1f, 0.5f, 0.5f, 1f);
+            so.FindProperty("hoverGlowColor").colorValue = new Color(0.4f, 1f, 1f, 0.8f);
+
             so.ApplyModifiedProperties();
         }
 
@@ -442,17 +497,21 @@ namespace DigitPark.Editor
             playAgainBtn.SetActive(false);
         }
 
-        private static void CreateWinPanel(Transform parent)
+        private static void CreateNormalWinPanel(Transform parent)
         {
-            GameObject winPanel = CreateElement(parent, "WinPanel");
-            SetupRectTransform(winPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            // Full-screen overlay panel using WinPanelController (matches base class pattern)
+            GameObject panel = CreateElement(parent, "WinPanel_Normal");
+            SetupRectTransform(panel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            // Overlay
-            Image overlay = winPanel.AddComponent<Image>();
+            Image overlay = panel.AddComponent<Image>();
             overlay.color = new Color(0f, 0f, 0f, 0.85f);
+            overlay.raycastTarget = true;
 
-            // Content
-            GameObject content = CreateElement(winPanel.transform, "Content");
+            CanvasGroup cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0;
+
+            // Content container
+            GameObject content = CreateElement(panel.transform, "Content");
             SetupRectTransform(content,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(700, 500));
@@ -462,39 +521,163 @@ namespace DigitPark.Editor
 
             Outline contentOutline = content.AddComponent<Outline>();
             contentOutline.effectColor = GREEN_NEON;
-            contentOutline.effectDistance = new Vector2(4, -4);
+            contentOutline.effectDistance = new Vector2(3, -3);
 
-            // Win Title
-            GameObject winTitle = CreateElement(content.transform, "WinTitle");
-            SetupRectTransform(winTitle,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -60), new Vector2(500, 80));
-            SetupText(winTitle, "COMPLETADO!", 52, GREEN_NEON, FontStyles.Bold);
+            // Title
+            GameObject titleObj = CreateElement(content.transform, "TitleText");
+            SetupRectTransform(titleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -50), new Vector2(0, 60));
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", 46, GREEN_NEON, FontStyles.Bold);
 
-            // Stats
-            GameObject statsText = CreateElement(content.transform, "StatsText");
-            SetupRectTransform(statsText,
+            // Time
+            GameObject timeObj = CreateElement(content.transform, "TimeText");
+            SetupRectTransform(timeObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -130), new Vector2(0, 60));
+            TextMeshProUGUI timeTmp = SetupText(timeObj, "Time: 0:00.00", 36, CYAN_NEON, FontStyles.Bold);
+
+            // Errors
+            GameObject errorsObj = CreateElement(content.transform, "PanelErrorsText");
+            SetupRectTransform(errorsObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -190), new Vector2(0, 50));
+            TextMeshProUGUI errorsTmp = SetupText(errorsObj, "Errors: 0", 30, Color.white, FontStyles.Normal);
+
+            // Buttons container
+            GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
+            SetupRectTransform(buttonsContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 60), new Vector2(-40, 100));
+
+            HorizontalLayoutGroup btnLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.spacing = 30;
+            btnLayout.childForceExpandWidth = false;
+            btnLayout.childControlWidth = false;
+
+            // Accept (Exit) button
+            GameObject acceptBtnObj = CreatePanelButton(buttonsContainer.transform, "AcceptButton", "EXIT", new Color(0.6f, 0.6f, 0.6f), 220, 80);
+
+            // Play Again button
+            GameObject playAgainBtnObj = CreatePanelButton(buttonsContainer.transform, "PlayAgainButton", "PLAY AGAIN", CYAN_NEON, 300, 80);
+
+            // Add WinPanelController component
+            DigitPark.UI.WinPanelController wpc = panel.AddComponent<DigitPark.UI.WinPanelController>();
+            SerializedObject wpcSo = new SerializedObject(wpc);
+            wpcSo.FindProperty("isRealMoneyPanel").boolValue = false;
+            wpcSo.FindProperty("canvasGroup").objectReferenceValue = cg;
+            wpcSo.FindProperty("content").objectReferenceValue = content;
+            wpcSo.FindProperty("titleText").objectReferenceValue = titleTmp;
+            wpcSo.FindProperty("timeText").objectReferenceValue = timeTmp;
+            wpcSo.FindProperty("errorsText").objectReferenceValue = errorsTmp;
+            wpcSo.FindProperty("acceptButton").objectReferenceValue = acceptBtnObj.GetComponent<Button>();
+            wpcSo.FindProperty("playAgainButton").objectReferenceValue = playAgainBtnObj.GetComponent<Button>();
+            wpcSo.ApplyModifiedProperties();
+
+            panel.SetActive(false);
+        }
+
+        private static void CreateNormalLosePanel(Transform parent)
+        {
+            // Full-screen overlay panel for lose/timeout scenarios
+            GameObject panel = CreateElement(parent, "LosePanel_Normal");
+            SetupRectTransform(panel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            Image overlay = panel.AddComponent<Image>();
+            overlay.color = new Color(0f, 0f, 0f, 0.85f);
+            overlay.raycastTarget = true;
+
+            CanvasGroup cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0;
+
+            // Content container
+            GameObject content = CreateElement(panel.transform, "Content");
+            SetupRectTransform(content,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 20), new Vector2(500, 150));
-            TextMeshProUGUI statsTmp = SetupText(statsText, "Tiempo: 00:00\nErrores: 0", 32, Color.white, FontStyles.Normal);
-            statsTmp.alignment = TextAlignmentOptions.Center;
+                Vector2.zero, new Vector2(700, 500));
 
-            // Play again button in win panel
-            GameObject winPlayBtn = CreateElement(content.transform, "WinPlayAgainButton");
-            SetupRectTransform(winPlayBtn,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 80), new Vector2(350, 80));
+            Image contentBg = content.AddComponent<Image>();
+            contentBg.color = PANEL_BG;
 
-            Image winBtnBg = winPlayBtn.AddComponent<Image>();
-            winBtnBg.color = GREEN_NEON;
+            Outline contentOutline = content.AddComponent<Outline>();
+            contentOutline.effectColor = ERROR_RED;
+            contentOutline.effectDistance = new Vector2(3, -3);
 
-            Button winBtn = winPlayBtn.AddComponent<Button>();
+            // Title
+            GameObject titleObj = CreateElement(content.transform, "TitleText");
+            SetupRectTransform(titleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -50), new Vector2(0, 60));
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", 46, ERROR_RED, FontStyles.Bold);
 
-            GameObject winBtnText = CreateElement(winPlayBtn.transform, "Text");
-            SetupRectTransform(winBtnText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(winBtnText, "JUGAR DE NUEVO", 28, DARK_BG, FontStyles.Bold);
+            // Time
+            GameObject timeObj = CreateElement(content.transform, "TimeText");
+            SetupRectTransform(timeObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -130), new Vector2(0, 60));
+            TextMeshProUGUI timeTmp = SetupText(timeObj, "Time: 0:00.00", 36, CYAN_NEON, FontStyles.Bold);
 
-            winPanel.SetActive(false);
+            // Errors
+            GameObject errorsObj = CreateElement(content.transform, "LosePanelErrorsText");
+            SetupRectTransform(errorsObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -190), new Vector2(0, 50));
+            TextMeshProUGUI errorsTmp = SetupText(errorsObj, "Errors: 0", 30, Color.white, FontStyles.Normal);
+
+            // Buttons container
+            GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
+            SetupRectTransform(buttonsContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 60), new Vector2(-40, 100));
+
+            HorizontalLayoutGroup btnLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.spacing = 30;
+            btnLayout.childForceExpandWidth = false;
+            btnLayout.childControlWidth = false;
+
+            // Accept (Exit) button
+            GameObject acceptBtnObj = CreatePanelButton(buttonsContainer.transform, "AcceptButton", "EXIT", new Color(0.6f, 0.6f, 0.6f), 220, 80);
+
+            // Try Again button
+            GameObject playAgainBtnObj = CreatePanelButton(buttonsContainer.transform, "PlayAgainButton", "TRY AGAIN", CYAN_NEON, 300, 80);
+
+            // Add WinPanelController component
+            DigitPark.UI.WinPanelController wpc = panel.AddComponent<DigitPark.UI.WinPanelController>();
+            SerializedObject wpcSo = new SerializedObject(wpc);
+            wpcSo.FindProperty("isRealMoneyPanel").boolValue = false;
+            wpcSo.FindProperty("canvasGroup").objectReferenceValue = cg;
+            wpcSo.FindProperty("content").objectReferenceValue = content;
+            wpcSo.FindProperty("titleText").objectReferenceValue = titleTmp;
+            wpcSo.FindProperty("timeText").objectReferenceValue = timeTmp;
+            wpcSo.FindProperty("errorsText").objectReferenceValue = errorsTmp;
+            wpcSo.FindProperty("acceptButton").objectReferenceValue = acceptBtnObj.GetComponent<Button>();
+            wpcSo.FindProperty("playAgainButton").objectReferenceValue = playAgainBtnObj.GetComponent<Button>();
+            wpcSo.ApplyModifiedProperties();
+
+            panel.SetActive(false);
+        }
+
+        private static GameObject CreatePanelButton(Transform parent, string name, string text, Color color, float width, float height)
+        {
+            GameObject btn = CreateElement(parent, name);
+
+            LayoutElement le = btn.AddComponent<LayoutElement>();
+            le.preferredWidth = width;
+            le.preferredHeight = height;
+
+            Image faceImg = btn.AddComponent<Image>();
+            faceImg.color = color;
+
+            GameObject textObj = CreateElement(btn.transform, "Text");
+            SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
+            SetupText(textObj, text, 24, DARK_BG, FontStyles.Bold);
+
+            Button button = btn.AddComponent<Button>();
+            button.targetGraphic = faceImg;
+
+            return btn;
         }
 
         private static void CreateCountdownPanel(Transform parent)
@@ -549,10 +732,14 @@ namespace DigitPark.Editor
                 return;
             }
 
+            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : null;
+            if (root == null) return;
+
             SerializedObject so = new SerializedObject(controller);
 
             // Card buttons, images y Card3DEffects
-            Transform cardsGrid = GameObject.Find("CardsGrid")?.transform;
+            Transform cardsGrid = FindDeep(root, "CardsGrid");
             if (cardsGrid != null)
             {
                 SerializedProperty cardButtonsProp = so.FindProperty("cardButtons");
@@ -605,75 +792,114 @@ namespace DigitPark.Editor
             }
 
             // Timer Text
-            GameObject timerText = GameObject.Find("TimerText");
-            if (timerText != null)
-            {
-                SerializedProperty timerProp = so.FindProperty("timerText");
-                if (timerProp != null)
-                    timerProp.objectReferenceValue = timerText.GetComponent<TextMeshProUGUI>();
-            }
+            AssignTMPReference(so, root, "timerText", "TimerText");
 
             // Pairs Found Text
-            GameObject pairsText = GameObject.Find("PairsFoundText");
-            if (pairsText != null)
-            {
-                SerializedProperty pairsProp = so.FindProperty("pairsFoundText");
-                if (pairsProp != null)
-                    pairsProp.objectReferenceValue = pairsText.GetComponent<TextMeshProUGUI>();
-            }
+            AssignTMPReference(so, root, "pairsFoundText", "PairsFoundText");
 
-            // Errors Text
-            GameObject errorsText = GameObject.Find("ErrorsText");
-            if (errorsText != null)
-            {
-                SerializedProperty errorsProp = so.FindProperty("errorsText");
-                if (errorsProp != null)
-                    errorsProp.objectReferenceValue = errorsText.GetComponent<TextMeshProUGUI>();
-            }
+            // Errors Text (stats bar)
+            AssignTMPReference(so, root, "errorsText", "ErrorsText");
 
-            // Win Panel
-            GameObject winPanel = GameObject.Find("WinPanel");
-            if (winPanel != null)
-            {
-                SerializedProperty winProp = so.FindProperty("winPanel");
-                if (winProp != null)
-                    winProp.objectReferenceValue = winPanel;
-            }
-
-            // Countdown UI
-            GameObject countdownPanel = GameObject.Find("CountdownPanel");
-            if (countdownPanel != null)
+            // Countdown UI (inactive - FindDeep works with inactive objects)
+            Transform countdownPanelT = FindDeep(root, "CountdownPanel");
+            if (countdownPanelT != null)
             {
                 SerializedProperty countdownProp = so.FindProperty("countdownUI");
                 if (countdownProp != null)
-                    countdownProp.objectReferenceValue = countdownPanel.GetComponent<DigitPark.UI.CountdownUI>();
+                    countdownProp.objectReferenceValue = countdownPanelT.GetComponent<DigitPark.UI.CountdownUI>();
             }
 
             // Combo Text
-            GameObject comboText = GameObject.Find("ComboText");
-            if (comboText != null)
+            AssignTMPReference(so, root, "comboText", "ComboText");
+
+            // Feedback Panel + Text (inactive - FindDeep required)
+            Transform feedbackPanelT = FindDeep(root, "FeedbackPanel");
+            if (feedbackPanelT != null)
             {
-                SerializedProperty comboProp = so.FindProperty("comboText");
-                if (comboProp != null)
-                    comboProp.objectReferenceValue = comboText.GetComponent<TextMeshProUGUI>();
+                SerializedProperty feedbackPanelProp = so.FindProperty("feedbackPanel");
+                if (feedbackPanelProp != null)
+                    feedbackPanelProp.objectReferenceValue = feedbackPanelT.gameObject;
+
+                Transform feedbackTextT = FindDeep(feedbackPanelT, "FeedbackText");
+                if (feedbackTextT != null)
+                {
+                    SerializedProperty feedbackTextProp = so.FindProperty("feedbackText");
+                    if (feedbackTextProp != null)
+                        feedbackTextProp.objectReferenceValue = feedbackTextT.GetComponent<TextMeshProUGUI>();
+                }
             }
 
             // Sparkle Effect
-            GameObject particleEffects = GameObject.Find("ParticleEffects");
-            if (particleEffects != null)
+            Transform particleEffectsT = FindDeep(root, "ParticleEffects");
+            if (particleEffectsT != null)
             {
                 SerializedProperty sparkleProp = so.FindProperty("sparkleEffect");
                 if (sparkleProp != null)
-                    sparkleProp.objectReferenceValue = particleEffects.GetComponent<DigitPark.UI.UISparkleEffect>();
+                    sparkleProp.objectReferenceValue = particleEffectsT.GetComponent<DigitPark.UI.UISparkleEffect>();
             }
 
-            // Real Money Panels
-            WinPanelInlineBuilder.AssignWinPanelRefs(so,
-                GameObject.Find("WinPanel_RealMoney"),
-                GameObject.Find("LosePanel_RealMoney"));
+            // Normal Win/Lose Panels (WinPanelController - base class fields)
+            Transform winPanelNormalT = FindDeep(root, "WinPanel_Normal");
+            if (winPanelNormalT != null)
+            {
+                SerializedProperty winNormalProp = so.FindProperty("winPanelNormal");
+                if (winNormalProp != null)
+                    winNormalProp.objectReferenceValue = winPanelNormalT.GetComponent<DigitPark.UI.WinPanelController>();
+            }
+
+            Transform losePanelNormalT = FindDeep(root, "LosePanel_Normal");
+            if (losePanelNormalT != null)
+            {
+                SerializedProperty loseNormalProp = so.FindProperty("losePanelNormal");
+                if (loseNormalProp != null)
+                    loseNormalProp.objectReferenceValue = losePanelNormalT.GetComponent<DigitPark.UI.WinPanelController>();
+            }
+
+            // Real Money Panels (WinPanelController - base class fields)
+            Transform winPanelRM = FindDeep(root, "WinPanel_RealMoney");
+            Transform losePanelRM = FindDeep(root, "LosePanel_RealMoney");
+            if (winPanelRM != null)
+            {
+                SerializedProperty winRMProp = so.FindProperty("winPanelRealMoney");
+                if (winRMProp != null)
+                    winRMProp.objectReferenceValue = winPanelRM.GetComponent<DigitPark.UI.WinPanelController>();
+            }
+            if (losePanelRM != null)
+            {
+                SerializedProperty loseRMProp = so.FindProperty("losePanelRealMoney");
+                if (loseRMProp != null)
+                    loseRMProp.objectReferenceValue = losePanelRM.GetComponent<DigitPark.UI.WinPanelController>();
+            }
 
             so.ApplyModifiedProperties();
             Debug.Log("[MemoryPairsUIBuilder] Referencias asignadas al MemoryPairsController");
+        }
+
+        /// <summary>
+        /// Assigns a TMP text reference by traversing hierarchy (works with inactive objects)
+        /// </summary>
+        private static void AssignTMPReference(SerializedObject so, Transform root, string propertyName, string objectName)
+        {
+            SerializedProperty prop = so.FindProperty(propertyName);
+            if (prop == null) return;
+
+            Transform t = FindDeep(root, objectName);
+            if (t != null)
+                prop.objectReferenceValue = t.GetComponent<TextMeshProUGUI>();
+        }
+
+        /// <summary>
+        /// Recursively finds a child Transform by name (works with inactive objects)
+        /// </summary>
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         #region Helper Methods

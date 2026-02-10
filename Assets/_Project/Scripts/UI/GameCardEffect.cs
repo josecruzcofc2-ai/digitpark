@@ -64,6 +64,17 @@ namespace DigitPark.UI
                 if (innerBg != null)
                     backgroundImage = innerBg.GetComponent<Image>();
             }
+
+            // Forzar Image.color a blanco para mostrar iconos sin tinte
+            // (previene que ThemeApplier u otros scripts cambien el color)
+            Image cardImage = GetComponent<Image>();
+            if (cardImage != null)
+                cardImage.color = Color.white;
+
+            // Remover CanvasGroup si existe (GameSelectorAnimator lo agrega con alpha reducido)
+            CanvasGroup cg = GetComponent<CanvasGroup>();
+            if (cg != null)
+                cg.alpha = 1f;
         }
 
         private void OnEnable()

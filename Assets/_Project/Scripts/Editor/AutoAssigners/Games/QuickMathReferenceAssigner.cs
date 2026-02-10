@@ -27,11 +27,17 @@ namespace DigitPark.Editor.AutoAssigners
             // Equation Display
             "problemText", "numberAText", "numberBText", "operatorText", "questionMarkText", "equationPanel",
             // UI
-            "timerText", "roundText", "errorsText", "comboText", "statsText", "roundIndicatorText",
-            // Navigation (MinigameBase) - buttons inside winPanel
-            "playAgainButton", "backButton",
+            "timerText", "roundText", "errorsText", "comboText", "roundIndicatorText",
+            // Settings Panel
+            "settingsPanel", "toggleAddition", "toggleSubtraction", "toggleMultiplication", "toggleDivision",
+            "toggleEasy", "toggleNormal", "toggleHard", "toggleRounds3", "toggleRounds5", "toggleRounds10",
+            "startGameButton", "difficultyDescText",
+            // Feedback
+            "feedbackPanel", "feedbackText",
             // Panels & Effects
-            "winPanel", "winPanelCanvasGroup", "comboCanvasGroup", "progressFill",
+            "comboCanvasGroup", "progressFill",
+            // Win/Lose Panels (Normal)
+            "winPanelNormal", "losePanelNormal",
             // Win/Lose Panels (Cash Battle)
             "winPanelRealMoney", "losePanelRealMoney"
             // Note: answerButtons[], answerTexts[] - arrays require manual assignment
@@ -77,7 +83,9 @@ namespace DigitPark.Editor.AutoAssigners
                 "Assigns UI references to QuickMathController:\n" +
                 "- Equation display (problem text, panel)\n" +
                 "- Timer, round, errors, combo texts\n" +
-                "- Win panel\n\n" +
+                "- Settings panel (toggles, start button)\n" +
+                "- Feedback panel\n" +
+                "- Win/Lose panels (Normal + Real Money)\n\n" +
                 "Note: Answer buttons array requires manual assignment",
                 MessageType.Info);
 
@@ -131,7 +139,7 @@ namespace DigitPark.Editor.AutoAssigners
                 GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
                 GUILayout.Label(result.success ? (result.status == "Already Set" ? "o" : "+") : "x", GUILayout.Width(20));
                 GUI.color = Color.white;
-                GUILayout.Label(result.fieldName, GUILayout.Width(180));
+                GUILayout.Label(result.fieldName, GUILayout.Width(200));
                 GUILayout.Label(result.status, GUILayout.Width(120));
                 if (result.assignedObject != null)
                     EditorGUILayout.ObjectField(result.assignedObject, typeof(Object), true, GUILayout.Width(150));
@@ -145,7 +153,7 @@ namespace DigitPark.Editor.AutoAssigners
         #endregion
 
         /// <summary>
-        /// Ejecuta la asignación de referencias. Llamable desde otros Editor scripts.
+        /// Ejecuta la asignacion de referencias. Llamable desde otros Editor scripts.
         /// </summary>
         public static void RunAutoAssign()
         {
@@ -170,33 +178,54 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(controller);
             so.Update();
 
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : controller.transform.root;
+
             // Equation Display
-            AssignReference(so, "problemText", FindTextByName("problem", "equation", "question"));
-            AssignReference(so, "numberAText", FindTextByName("numbera", "numa"));
-            AssignReference(so, "numberBText", FindTextByName("numberb", "numb"));
-            AssignReference(so, "operatorText", FindTextByName("operatortext", "operator"));
+            AssignReference(so, "problemText", FindDeepComponent<TextMeshProUGUI>(root, "ProblemText"));
+            AssignReference(so, "numberAText", FindDeepComponent<TextMeshProUGUI>(root, "NumberA"));
+            AssignReference(so, "numberBText", FindDeepComponent<TextMeshProUGUI>(root, "NumberB"));
+            AssignReference(so, "operatorText", FindDeepComponent<TextMeshProUGUI>(root, "OperatorText"));
             AssignReference(so, "questionMarkText", FindTextByName("questionmark", "question"));
-            AssignReference(so, "equationPanel", FindByNameContains<RectTransform>("equation", "problem"));
+            AssignReference(so, "equationPanel", FindDeepComponent<RectTransform>(root, "EquationPanel"));
 
             // UI Elements
-            AssignReference(so, "timerText", FindTextByName("timer", "time", "tiempo"));
-            AssignReference(so, "roundText", FindTextByName("round", "ronda"));
-            AssignReference(so, "errorsText", FindTextByName("error", "mistakes", "wrong"));
-            AssignReference(so, "comboText", FindTextByName("combo", "streak"));
-            AssignReference(so, "statsText", FindTextByName("stats", "estadisticas"));
-            AssignReference(so, "roundIndicatorText", FindTextByName("roundindicator", "rondaindicator"));
+            AssignReference(so, "timerText", FindDeepComponent<TextMeshProUGUI>(root, "TimerText"));
+            AssignReference(so, "roundText", FindDeepComponent<TextMeshProUGUI>(root, "RoundText"));
+            AssignReference(so, "errorsText", FindDeepComponent<TextMeshProUGUI>(root, "ErrorsText"));
+            AssignReference(so, "comboText", FindDeepComponent<TextMeshProUGUI>(root, "ComboText"));
+            AssignReference(so, "roundIndicatorText", FindDeepComponent<TextMeshProUGUI>(root, "RoundIndicator"));
 
-            // Navigation (MinigameBase) - buttons inside winPanel
-            AssignReference(so, "playAgainButton", FindButtonByName("playagain"));
-            AssignReference(so, "backButton", FindButtonByName("exit", "back", "salir"));
+            // Settings Panel
+            Transform settingsPanel = FindDeep(root, "SettingsPanel");
+            AssignReference(so, "settingsPanel", settingsPanel != null ? settingsPanel.gameObject : null);
+            AssignToggleReference(so, "toggleAddition", root, "ToggleAddition");
+            AssignToggleReference(so, "toggleSubtraction", root, "ToggleSubtraction");
+            AssignToggleReference(so, "toggleMultiplication", root, "ToggleMultiplication");
+            AssignToggleReference(so, "toggleDivision", root, "ToggleDivision");
+            AssignToggleReference(so, "toggleEasy", root, "ToggleEasy");
+            AssignToggleReference(so, "toggleNormal", root, "ToggleNormal");
+            AssignToggleReference(so, "toggleHard", root, "ToggleHard");
+            AssignToggleReference(so, "toggleRounds3", root, "ToggleRounds3");
+            AssignToggleReference(so, "toggleRounds5", root, "ToggleRounds5");
+            AssignToggleReference(so, "toggleRounds10", root, "ToggleRounds10");
+            AssignReference(so, "startGameButton", FindDeepComponent<Button>(root, "StartGameButton"));
+            AssignReference(so, "difficultyDescText", FindDeepComponent<TextMeshProUGUI>(root, "DifficultyDescText"));
+
+            // Feedback
+            Transform feedbackPanel = FindDeep(root, "FeedbackPanel");
+            AssignReference(so, "feedbackPanel", feedbackPanel != null ? feedbackPanel.gameObject : null);
+            AssignReference(so, "feedbackText", FindDeepComponent<TextMeshProUGUI>(root, "FeedbackText"));
 
             // Panels & Effects
-            AssignReference(so, "winPanel", FindByNameContains<Transform>("win", "result", "complete"));
-            AssignCanvasGroup(so, "winPanelCanvasGroup", "winpanel", "win", "result");
-            AssignCanvasGroup(so, "comboCanvasGroup", "combocontainer", "combo");
-            AssignReference(so, "progressFill", FindByNameContains<RectTransform>("progressfill", "fill"));
+            AssignCanvasGroup(so, "comboCanvasGroup", "ComboContainer");
+            AssignReference(so, "progressFill", FindDeepComponent<RectTransform>(root, "ProgressFill"));
 
-            // Win/Lose Panels (Cash Battle)
+            // Win/Lose Panels (Normal - base class fields)
+            AssignReference(so, "winPanelNormal", FindWinPanelController("WinPanel_Normal"));
+            AssignReference(so, "losePanelNormal", FindWinPanelController("LosePanel_Normal"));
+
+            // Win/Lose Panels (Cash Battle - base class fields)
             AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
             AssignReference(so, "losePanelRealMoney", FindWinPanelController("LosePanel_RealMoney"));
 
@@ -223,9 +252,33 @@ namespace DigitPark.Editor.AutoAssigners
             else { AddResult(propertyName, "Not found", false, null); failedCount++; }
         }
 
+        private static void AssignToggleReference(SerializedObject so, string propertyName, Transform root, string objectName)
+        {
+            Transform t = FindDeep(root, objectName);
+            Toggle toggle = t != null ? t.GetComponent<Toggle>() : null;
+            AssignReference(so, propertyName, toggle);
+        }
+
         #endregion
 
         #region Finders
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private static T FindDeepComponent<T>(Transform root, string name) where T : Component
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<T>() : null;
+        }
 
         private static T FindByNameContains<T>(params string[] patterns) where T : Component
         {

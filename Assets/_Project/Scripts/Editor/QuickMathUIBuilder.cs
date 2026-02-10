@@ -9,12 +9,12 @@ using DigitPark.Editor.AutoAssigners;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Editor script para reconstruir la UI de QuickMath con diseño IMPACTANTE
-    /// Ecuación gigante, botones 3D, combo system, partículas
+    /// Editor script para reconstruir la UI de QuickMath
+    /// Settings panel, feedback, win/lose panels (WinPanelController)
     /// </summary>
     public class QuickMathUIBuilder : EditorWindow
     {
-        // Colores del tema neón
+        // Colores del tema neon
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color MAGENTA_NEON = new Color(1f, 0f, 0.8f, 1f);
         private static readonly Color GREEN_NEON = new Color(0.3f, 1f, 0.5f, 1f);
@@ -25,7 +25,7 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
 
-        // Tamaños optimizados - Botones rectangulares anchos
+        // Tamanos optimizados
         private const float ANSWER_BUTTON_WIDTH = 260f;
         private const float ANSWER_BUTTON_HEIGHT = 110f;
         private const float EQUATION_PANEL_WIDTH = 850f;
@@ -43,11 +43,11 @@ namespace DigitPark.Editor
             GUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "REDISEÑO IMPACTANTE de QuickMath:\n" +
-                "- Ecuación GIGANTE al centro\n" +
-                "- Botones 3D de 140px\n" +
-                "- Sistema de Combo/Streak\n" +
-                "- Partículas y efectos",
+                "QuickMath con:\n" +
+                "- Settings panel (operaciones, dificultad, rondas)\n" +
+                "- Division support\n" +
+                "- Feedback correcto/incorrecto\n" +
+                "- Win/Lose panels (WinPanelController)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -71,22 +71,17 @@ namespace DigitPark.Editor
             Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
-                Debug.LogError("[QuickMathUIBuilder] No se encontró Canvas en la escena");
+                Debug.LogError("[QuickMathUIBuilder] No se encontro Canvas en la escena");
                 return;
             }
 
             Transform canvasTransform = canvas.transform;
 
-            // Limpiar elementos viejos
             CleanOldElements(canvasTransform);
-
-            // Crear nueva estructura
             CreateQuickMathLayout(canvasTransform);
-
-            // Asignar referencias
             AssignControllerReferences();
 
-            Debug.Log("[QuickMathUIBuilder] QuickMath UI reconstruida con diseño IMPACTANTE!");
+            Debug.Log("[QuickMathUIBuilder] QuickMath UI reconstruida!");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
@@ -96,7 +91,8 @@ namespace DigitPark.Editor
         {
             string[] keepElements = {
                 "Main Camera", "EventSystem",
-                "Directional Light", "SceneTransition"
+                "Directional Light", "SceneTransition",
+                "Background"
             };
 
             for (int i = canvasTransform.childCount - 1; i >= 0; i--)
@@ -113,7 +109,6 @@ namespace DigitPark.Editor
                     }
                 }
 
-                // Never destroy objects with Animator or Animation components
                 if (!shouldKeep && (child.GetComponent<Animator>() != null || child.GetComponent<Animation>() != null))
                     shouldKeep = true;
 
@@ -126,12 +121,19 @@ namespace DigitPark.Editor
 
         private static void CreateQuickMathLayout(Transform canvasTransform)
         {
+            // ========== BACKGROUND ==========
+            GameObject background = CreateElement(canvasTransform, "Background");
+            SetupRectTransform(background, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            Image bgImage = background.AddComponent<Image>();
+            bgImage.color = DARK_BG;
+            background.transform.SetAsFirstSibling();
+
             // ========== SAFE AREA ==========
             GameObject safeArea = CreateElement(canvasTransform, "SafeArea");
             SetupRectTransform(safeArea, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             SafeAreaHandler safeHandler = safeArea.AddComponent<SafeAreaHandler>();
 
-            // ========== HEADER COMPACTO ==========
+            // ========== HEADER ==========
             CreateHeader(safeArea.transform);
 
             // ========== STATS BAR ==========
@@ -140,23 +142,30 @@ namespace DigitPark.Editor
             // ========== COMBO/STREAK DISPLAY ==========
             CreateComboDisplay(safeArea.transform);
 
-            // ========== ECUACIÓN GIGANTE ==========
+            // ========== ECUACION GIGANTE ==========
             CreateEquationPanel(safeArea.transform);
 
             // ========== BOTONES DE RESPUESTA 3D ==========
             CreateAnswerButtons(safeArea.transform);
 
+            // ========== FEEDBACK PANEL ==========
+            CreateFeedbackPanel(safeArea.transform);
+
             // ========== BARRA DE PROGRESO ==========
             CreateProgressBar(safeArea.transform);
 
-            // ========== WIN PANEL ==========
-            CreateWinPanel(safeArea.transform);
+            // ========== NORMAL WIN/LOSE PANELS ==========
+            CreateNormalWinPanel(safeArea.transform);
+            CreateNormalLosePanel(safeArea.transform);
 
             // ========== REAL MONEY PANELS (Cash Battle) ==========
             WinPanelInlineBuilder.CreateRealMoneyPanels(safeArea.transform);
 
             // ========== PARTICLE EFFECTS ==========
             CreateParticleEffects(safeArea.transform);
+
+            // ========== SETTINGS PANEL (last so it renders on top) ==========
+            CreateSettingsPanel(safeArea.transform);
         }
 
         private static void CreateHeader(Transform parent)
@@ -169,14 +178,12 @@ namespace DigitPark.Editor
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0f, 0f, 0f, 0.3f);
 
-            // Title con efecto glow
             GameObject title = CreateElement(header.transform, "TitleText");
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(400, 50));
             TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", 36, CYAN_NEON, FontStyles.Bold);
 
-            // Glow effect
             Outline titleGlow = title.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
             titleGlow.effectDistance = new Vector2(2, -2);
@@ -212,7 +219,7 @@ namespace DigitPark.Editor
             AddLayoutElement(roundText, 80, 30);
             SetupText(roundText, "1/10", 24, CYAN_NEON, FontStyles.Bold);
 
-            // Errors con icono Image
+            // Errors
             GameObject errorsContainer = CreateElement(statsBar.transform, "ErrorsContainer");
             AddLayoutElement(errorsContainer, 70, 30);
 
@@ -224,7 +231,6 @@ namespace DigitPark.Editor
             AddLayoutElement(errorsIcon, 20, 20);
             Image errorIconImg = errorsIcon.AddComponent<Image>();
             errorIconImg.color = ERROR_COLOR;
-            // Asignar sprite en Inspector
 
             GameObject errorsText = CreateElement(errorsContainer.transform, "ErrorsText");
             AddLayoutElement(errorsText, 35, 30);
@@ -233,7 +239,6 @@ namespace DigitPark.Editor
 
         private static void CreateComboDisplay(Transform parent)
         {
-            // Combo container - prominente arriba de la ecuación
             GameObject comboContainer = CreateElement(parent, "ComboContainer");
             SetupRectTransform(comboContainer,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
@@ -247,18 +252,15 @@ namespace DigitPark.Editor
             comboOutline.effectDistance = new Vector2(2, -2);
 
             CanvasGroup comboCg = comboContainer.AddComponent<CanvasGroup>();
-            comboCg.alpha = 0; // Oculto inicialmente
+            comboCg.alpha = 0;
 
-            // Streak icon (fuego)
             GameObject streakIcon = CreateElement(comboContainer.transform, "StreakIcon");
             SetupRectTransform(streakIcon,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
                 new Vector2(25, 0), new Vector2(40, 40));
             Image streakImg = streakIcon.AddComponent<Image>();
             streakImg.color = ORANGE_NEON;
-            // Asignar sprite de fuego en Inspector
 
-            // Combo text
             GameObject comboText = CreateElement(comboContainer.transform, "ComboText");
             SetupRectTransform(comboText,
                 new Vector2(0, 0), new Vector2(1, 1),
@@ -271,13 +273,12 @@ namespace DigitPark.Editor
 
         private static void CreateEquationPanel(Transform parent)
         {
-            // Panel contenedor de la ecuación - GIGANTE con efecto 3D
             GameObject equationPanel = CreateElement(parent, "EquationPanel");
             SetupRectTransform(equationPanel,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 100), new Vector2(850, 180));
 
-            // Sombra profunda para efecto 3D
+            // Shadow
             GameObject panelShadow = CreateElement(equationPanel.transform, "PanelShadow");
             SetupRectTransform(panelShadow,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -286,7 +287,7 @@ namespace DigitPark.Editor
             shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
             shadowImg.raycastTarget = false;
 
-            // Side (profundidad)
+            // Side
             GameObject panelSide = CreateElement(equationPanel.transform, "PanelSide");
             SetupRectTransform(panelSide,
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0),
@@ -295,7 +296,7 @@ namespace DigitPark.Editor
             sideImg.color = new Color(0f, 0.3f, 0.35f, 1f);
             sideImg.raycastTarget = false;
 
-            // Face principal
+            // Face
             GameObject panelFace = CreateElement(equationPanel.transform, "PanelFace");
             SetupRectTransform(panelFace,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -303,15 +304,13 @@ namespace DigitPark.Editor
             Image panelBg = panelFace.AddComponent<Image>();
             panelBg.color = new Color(0.04f, 0.08f, 0.15f, 0.98f);
 
-            // Borde neón brillante
             Outline panelOutline = panelFace.AddComponent<Outline>();
             panelOutline.effectColor = CYAN_NEON;
             panelOutline.effectDistance = new Vector2(3, -3);
 
-            // Agregar glow pulsante al panel
             GridGlowPulse panelGlow = panelFace.AddComponent<GridGlowPulse>();
 
-            // Container para los números de la ecuación (dentro del face)
+            // Equation container
             GameObject equationContainer = CreateElement(panelFace.transform, "EquationContainer");
             SetupRectTransform(equationContainer, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
@@ -322,34 +321,33 @@ namespace DigitPark.Editor
             eqLayout.childForceExpandWidth = false;
             eqLayout.childForceExpandHeight = true;
 
-            // Número A (izquierda)
+            // Number A
             GameObject numberA = CreateElement(equationContainer.transform, "NumberA");
             AddLayoutElement(numberA, 120, 150);
-            TextMeshProUGUI numATmp = SetupText(numberA, "5", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
+            TextMeshProUGUI numATmp = SetupText(numberA, "?", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
             numATmp.alignment = TextAlignmentOptions.Center;
 
-            // Operador
+            // Operator
             GameObject operatorText = CreateElement(equationContainer.transform, "OperatorText");
             AddLayoutElement(operatorText, 60, 150);
             TextMeshProUGUI opTmp = SetupText(operatorText, "+", EQUATION_FONT_SIZE, CYAN_NEON, FontStyles.Bold);
             opTmp.alignment = TextAlignmentOptions.Center;
 
-            // Número B (derecha)
+            // Number B
             GameObject numberB = CreateElement(equationContainer.transform, "NumberB");
             AddLayoutElement(numberB, 120, 150);
-            TextMeshProUGUI numBTmp = SetupText(numberB, "7", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
+            TextMeshProUGUI numBTmp = SetupText(numberB, "?", EQUATION_FONT_SIZE, Color.white, FontStyles.Bold);
             numBTmp.alignment = TextAlignmentOptions.Center;
 
-            // También crear ProblemText oculto para compatibilidad con controller
+            // ProblemText (hidden, for compatibility)
             GameObject problemText = CreateElement(equationPanel.transform, "ProblemText");
             SetupRectTransform(problemText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI probTmp = SetupText(problemText, "5 + 7 = ?", 1, Color.clear, FontStyles.Normal);
-            probTmp.enabled = false; // Solo para datos, no visible
+            TextMeshProUGUI probTmp = SetupText(problemText, "? ? ? = ?", 1, Color.clear, FontStyles.Normal);
+            probTmp.enabled = false;
         }
 
         private static void CreateAnswerButtons(Transform parent)
         {
-            // Container para botones - mismo ancho que EquationPanel, más separación vertical
             GameObject answersContainer = CreateElement(parent, "AnswersContainer");
             SetupRectTransform(answersContainer,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -364,7 +362,6 @@ namespace DigitPark.Editor
             answersLayout.childControlWidth = true;
             answersLayout.childControlHeight = true;
 
-            // Crear 3 botones de respuesta rectangulares con efecto 3D
             for (int i = 0; i < 3; i++)
             {
                 CreateAnswerButton3D(answersContainer.transform, i);
@@ -373,10 +370,8 @@ namespace DigitPark.Editor
 
         private static void CreateAnswerButton3D(Transform parent, int index)
         {
-            // Cell container - SIN Image para evitar bordes
             GameObject cell = CreateElement(parent, $"AnswerButton_{index}");
             AddLayoutElement(cell, ANSWER_BUTTON_WIDTH, ANSWER_BUTTON_HEIGHT);
-            // NO agregar Image al cell - causa borde visible
 
             // Shadow
             GameObject shadow = CreateElement(cell.transform, "Shadow");
@@ -386,7 +381,7 @@ namespace DigitPark.Editor
             Image shadowImg = shadow.AddComponent<Image>();
             shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
 
-            // Side (depth)
+            // Side
             GameObject side = CreateElement(cell.transform, "Side");
             SetupRectTransform(side,
                 new Vector2(0.5f, 0), new Vector2(0.5f, 0),
@@ -394,7 +389,7 @@ namespace DigitPark.Editor
             Image sideImg = side.AddComponent<Image>();
             sideImg.color = new Color(0f, 0.3f, 0.35f, 1f);
 
-            // Face (top) - rectangular
+            // Face
             GameObject face = CreateElement(cell.transform, "Face");
             SetupRectTransform(face,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -406,18 +401,17 @@ namespace DigitPark.Editor
             faceOutline.effectColor = CYAN_NEON;
             faceOutline.effectDistance = new Vector2(3, -3);
 
-            // Answer text - tamaño ajustado para botones rectangulares
+            // Answer text
             GameObject answerText = CreateElement(face.transform, $"AnswerText_{index}");
             SetupRectTransform(answerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI answerTmp = SetupText(answerText, "12", 48, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI answerTmp = SetupText(answerText, "?", 48, CYAN_NEON, FontStyles.Bold);
             answerTmp.alignment = TextAlignmentOptions.Center;
 
-            // Glow en el texto para mejor visibilidad
             Outline textGlow = answerText.AddComponent<Outline>();
             textGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.5f);
             textGlow.effectDistance = new Vector2(1.5f, -1.5f);
 
-            // Button component
+            // Button
             Button button = cell.AddComponent<Button>();
             button.targetGraphic = faceImg;
 
@@ -428,10 +422,9 @@ namespace DigitPark.Editor
             colors.fadeDuration = 0.05f;
             button.colors = colors;
 
-            // Add QuickMathCell3D component
+            // QuickMathCell3D
             QuickMathCell3D cell3D = cell.AddComponent<QuickMathCell3D>();
 
-            // Assign references via SerializedObject
             SerializedObject so = new SerializedObject(cell3D);
             so.FindProperty("buttonFace").objectReferenceValue = face.GetComponent<RectTransform>();
             so.FindProperty("shadowImage").objectReferenceValue = shadowImg;
@@ -442,22 +435,44 @@ namespace DigitPark.Editor
             so.ApplyModifiedProperties();
         }
 
+        private static void CreateFeedbackPanel(Transform parent)
+        {
+            GameObject feedbackPanel = CreateElement(parent, "FeedbackPanel");
+            SetupRectTransform(feedbackPanel,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, -320), new Vector2(700, 80));
+
+            Image bg = feedbackPanel.AddComponent<Image>();
+            bg.color = PANEL_BG;
+
+            Outline panelOutline = feedbackPanel.AddComponent<Outline>();
+            panelOutline.effectColor = CYAN_NEON;
+            panelOutline.effectDistance = new Vector2(2, -2);
+
+            GameObject feedbackText = CreateElement(feedbackPanel.transform, "FeedbackText");
+            SetupRectTransform(feedbackText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI feedbackTmp = SetupText(feedbackText, "", 42, GREEN_NEON, FontStyles.Bold);
+            feedbackTmp.alignment = TextAlignmentOptions.Center;
+            feedbackTmp.enableWordWrapping = false;
+
+            feedbackPanel.SetActive(false);
+        }
+
         private static void CreateProgressBar(Transform parent)
         {
-            // Container de progreso
             GameObject progressContainer = CreateElement(parent, "ProgressContainer");
             SetupRectTransform(progressContainer,
                 new Vector2(0, 0), new Vector2(1, 0),
                 new Vector2(0, 100), new Vector2(-80, 50));
 
-            // Round indicator text
+            // Round indicator
             GameObject roundIndicator = CreateElement(progressContainer.transform, "RoundIndicator");
             SetupRectTransform(roundIndicator,
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-50, 0), new Vector2(80, 30));
             SetupText(roundIndicator, "8/15", 20, Color.white, FontStyles.Bold);
 
-            // Progress bar background
+            // Progress bar bg
             GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
             SetupRectTransform(progressBar,
                 new Vector2(0, 0.5f), new Vector2(1, 0.5f),
@@ -470,81 +485,418 @@ namespace DigitPark.Editor
             progressOutline.effectColor = CYAN_NEON;
             progressOutline.effectDistance = new Vector2(1, -1);
 
-            // Progress fill
+            // Fill
             GameObject progressFill = CreateElement(progressBar.transform, "ProgressFill");
             SetupRectTransform(progressFill,
-                new Vector2(0, 0), new Vector2(0.5f, 1), // 50% como ejemplo
+                new Vector2(0, 0), new Vector2(0.5f, 1),
                 Vector2.zero, Vector2.zero);
 
             Image fillImg = progressFill.AddComponent<Image>();
             fillImg.color = CYAN_NEON;
 
-            // Glow en el fill
             Shadow fillGlow = progressFill.AddComponent<Shadow>();
             fillGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
             fillGlow.effectDistance = new Vector2(0, -2);
         }
 
-        private static void CreateWinPanel(Transform parent)
+        private static void CreateNormalWinPanel(Transform parent)
         {
-            GameObject winPanel = CreateElement(parent, "WinPanel");
-            SetupRectTransform(winPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            GameObject panel = CreateElement(parent, "WinPanel_Normal");
+            SetupRectTransform(panel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            Image overlayImg = winPanel.AddComponent<Image>();
-            overlayImg.color = new Color(0, 0, 0, 0.9f);
+            Image overlay = panel.AddComponent<Image>();
+            overlay.color = new Color(0f, 0f, 0f, 0.85f);
+            overlay.raycastTarget = true;
 
-            CanvasGroup winCg = winPanel.AddComponent<CanvasGroup>();
-            winCg.alpha = 0;
+            CanvasGroup cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0;
 
-            // Content
-            GameObject content = CreateElement(winPanel.transform, "Content");
+            // Content card - taller for more stats
+            GameObject content = CreateElement(panel.transform, "Content");
             SetupRectTransform(content,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(550, 420));
+                Vector2.zero, new Vector2(700, 620));
 
             Image contentBg = content.AddComponent<Image>();
-            contentBg.color = PANEL_BG;
+            contentBg.color = new Color(0.04f, 0.08f, 0.14f, 0.98f);
 
             Outline contentOutline = content.AddComponent<Outline>();
             contentOutline.effectColor = GREEN_NEON;
             contentOutline.effectDistance = new Vector2(3, -3);
 
             // Title
-            GameObject winTitle = CreateElement(content.transform, "WinTitle");
-            SetupRectTransform(winTitle,
+            GameObject titleObj = CreateElement(content.transform, "TitleText");
+            SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -45), new Vector2(0, 70));
-            SetupText(winTitle, "¡COMPLETADO!", 44, GREEN_NEON, FontStyles.Bold);
+                new Vector2(0, -40), new Vector2(0, 55));
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", 44, GREEN_NEON, FontStyles.Bold);
 
-            // Stats
-            GameObject statsText = CreateElement(content.transform, "StatsText");
-            SetupRectTransform(statsText,
+            // Divider after title
+            CreateDivider(content.transform, -80);
+
+            // Stats rows
+            float statsY = -105f;
+            float rowH = 42f;
+
+            TextMeshProUGUI timeTmp = CreateStatRow(content.transform, "Time", "TimeText", "0:00.00", CYAN_NEON, statsY);
+            statsY -= rowH;
+            TextMeshProUGUI errorsTmp = CreateStatRow(content.transform, "Errors", "PanelErrorsText", "0", ERROR_COLOR, statsY);
+            statsY -= rowH;
+            CreateStatRow(content.transform, "Max Streak", "MaxStreakValue", "0", ORANGE_NEON, statsY);
+            statsY -= rowH;
+            CreateStatRow(content.transform, "Penalty", "PenaltyValue", "-", ERROR_COLOR, statsY);
+            statsY -= rowH;
+            CreateStatRow(content.transform, "Rounds", "RoundsValue", "0/0", CYAN_NEON, statsY);
+
+            // Divider before buttons
+            CreateDivider(content.transform, statsY - 18);
+
+            // Buttons
+            GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
+            SetupRectTransform(buttonsContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 50), new Vector2(-40, 80));
+
+            HorizontalLayoutGroup btnLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.spacing = 30;
+            btnLayout.childForceExpandWidth = false;
+            btnLayout.childControlWidth = false;
+
+            GameObject acceptBtnObj = CreatePanelButton(buttonsContainer.transform, "AcceptButton", "EXIT", new Color(0.5f, 0.5f, 0.5f), 200, 65);
+            GameObject playAgainBtnObj = CreatePanelButton(buttonsContainer.transform, "PlayAgainButton", "PLAY AGAIN", CYAN_NEON, 260, 65);
+
+            // WinPanelController
+            WinPanelController wpc = panel.AddComponent<WinPanelController>();
+            SerializedObject wpcSo = new SerializedObject(wpc);
+            wpcSo.FindProperty("isRealMoneyPanel").boolValue = false;
+            wpcSo.FindProperty("canvasGroup").objectReferenceValue = cg;
+            wpcSo.FindProperty("content").objectReferenceValue = content;
+            wpcSo.FindProperty("titleText").objectReferenceValue = titleTmp;
+            wpcSo.FindProperty("timeText").objectReferenceValue = timeTmp;
+            wpcSo.FindProperty("errorsText").objectReferenceValue = errorsTmp;
+            wpcSo.FindProperty("acceptButton").objectReferenceValue = acceptBtnObj.GetComponent<Button>();
+            wpcSo.FindProperty("playAgainButton").objectReferenceValue = playAgainBtnObj.GetComponent<Button>();
+            wpcSo.ApplyModifiedProperties();
+
+            panel.SetActive(false);
+        }
+
+        private static void CreateNormalLosePanel(Transform parent)
+        {
+            GameObject panel = CreateElement(parent, "LosePanel_Normal");
+            SetupRectTransform(panel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            Image overlay = panel.AddComponent<Image>();
+            overlay.color = new Color(0f, 0f, 0f, 0.85f);
+            overlay.raycastTarget = true;
+
+            CanvasGroup cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0;
+
+            // Content card - taller for more stats
+            GameObject content = CreateElement(panel.transform, "Content");
+            SetupRectTransform(content,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 20), new Vector2(400, 130));
-            TextMeshProUGUI statsTmp = SetupText(statsText, "Tiempo: 00:00\nErrores: 0\nMax Streak: x1", 26, Color.white, FontStyles.Normal);
-            statsTmp.lineSpacing = 15;
+                Vector2.zero, new Vector2(700, 620));
 
-            // Play again button
-            GameObject playAgainBtn = CreateElement(content.transform, "PlayAgainButton");
-            SetupRectTransform(playAgainBtn,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 60), new Vector2(300, 65));
+            Image contentBg = content.AddComponent<Image>();
+            contentBg.color = new Color(0.04f, 0.08f, 0.14f, 0.98f);
 
-            Image playBtnImg = playAgainBtn.AddComponent<Image>();
-            playBtnImg.color = GREEN_NEON;
+            Outline contentOutline = content.AddComponent<Outline>();
+            contentOutline.effectColor = ERROR_COLOR;
+            contentOutline.effectDistance = new Vector2(3, -3);
 
-            Outline btnOutline = playAgainBtn.AddComponent<Outline>();
-            btnOutline.effectColor = new Color(0.1f, 0.4f, 0.2f, 1f);
-            btnOutline.effectDistance = new Vector2(2, -2);
+            // Title
+            GameObject titleObj = CreateElement(content.transform, "TitleText");
+            SetupRectTransform(titleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -40), new Vector2(0, 55));
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", 44, ERROR_COLOR, FontStyles.Bold);
 
-            Button playBtn = playAgainBtn.AddComponent<Button>();
-            playBtn.targetGraphic = playBtnImg;
+            // Divider after title
+            CreateDivider(content.transform, -80);
 
-            GameObject playBtnText = CreateElement(playAgainBtn.transform, "PlayAgainButtonText");
-            SetupRectTransform(playBtnText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(playBtnText, "JUGAR DE NUEVO", 28, DARK_BG, FontStyles.Bold);
+            // Stats rows
+            float statsY = -105f;
+            float rowH = 42f;
 
-            winPanel.SetActive(false);
+            TextMeshProUGUI timeTmp = CreateStatRow(content.transform, "Time", "LoseTimeText", "0:00.00", CYAN_NEON, statsY);
+            statsY -= rowH;
+            TextMeshProUGUI errorsTmp = CreateStatRow(content.transform, "Errors", "LosePanelErrorsText", "0", ERROR_COLOR, statsY);
+            statsY -= rowH;
+            CreateStatRow(content.transform, "Max Streak", "LoseMaxStreakValue", "0", ORANGE_NEON, statsY);
+            statsY -= rowH;
+            CreateStatRow(content.transform, "Penalty", "LosePenaltyValue", "-", ERROR_COLOR, statsY);
+            statsY -= rowH;
+            CreateStatRow(content.transform, "Rounds", "LoseRoundsValue", "0/0", CYAN_NEON, statsY);
+
+            // Divider before buttons
+            CreateDivider(content.transform, statsY - 18);
+
+            // Buttons
+            GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
+            SetupRectTransform(buttonsContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 50), new Vector2(-40, 80));
+
+            HorizontalLayoutGroup btnLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
+            btnLayout.childAlignment = TextAnchor.MiddleCenter;
+            btnLayout.spacing = 30;
+            btnLayout.childForceExpandWidth = false;
+            btnLayout.childControlWidth = false;
+
+            GameObject acceptBtnObj = CreatePanelButton(buttonsContainer.transform, "AcceptButton", "EXIT", new Color(0.5f, 0.5f, 0.5f), 200, 65);
+            GameObject playAgainBtnObj = CreatePanelButton(buttonsContainer.transform, "PlayAgainButton", "TRY AGAIN", CYAN_NEON, 260, 65);
+
+            // WinPanelController
+            WinPanelController wpc = panel.AddComponent<WinPanelController>();
+            SerializedObject wpcSo = new SerializedObject(wpc);
+            wpcSo.FindProperty("isRealMoneyPanel").boolValue = false;
+            wpcSo.FindProperty("canvasGroup").objectReferenceValue = cg;
+            wpcSo.FindProperty("content").objectReferenceValue = content;
+            wpcSo.FindProperty("titleText").objectReferenceValue = titleTmp;
+            wpcSo.FindProperty("timeText").objectReferenceValue = timeTmp;
+            wpcSo.FindProperty("errorsText").objectReferenceValue = errorsTmp;
+            wpcSo.FindProperty("acceptButton").objectReferenceValue = acceptBtnObj.GetComponent<Button>();
+            wpcSo.FindProperty("playAgainButton").objectReferenceValue = playAgainBtnObj.GetComponent<Button>();
+            wpcSo.ApplyModifiedProperties();
+
+            panel.SetActive(false);
+        }
+
+        private static void CreateSettingsPanel(Transform parent)
+        {
+            // Full-screen overlay
+            GameObject settingsPanel = CreateElement(parent, "SettingsPanel");
+            SetupRectTransform(settingsPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            Image overlay = settingsPanel.AddComponent<Image>();
+            overlay.color = new Color(0f, 0f, 0f, 0.9f);
+            overlay.raycastTarget = true;
+
+            // Central card - taller for better spacing
+            GameObject card = CreateElement(settingsPanel.transform, "SettingsCard");
+            SetupRectTransform(card,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, 20), new Vector2(700, 820));
+
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.color = new Color(0.04f, 0.08f, 0.14f, 0.98f);
+
+            Outline cardOutline = card.AddComponent<Outline>();
+            cardOutline.effectColor = CYAN_NEON;
+            cardOutline.effectDistance = new Vector2(3, -3);
+
+            // ====== TITLE AREA ======
+            GameObject titleObj = CreateElement(card.transform, "SettingsTitle");
+            SetupRectTransform(titleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -32), new Vector2(0, 50));
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "QUICK MATH", 44, CYAN_NEON, FontStyles.Bold);
+
+            Outline titleGlow = titleObj.AddComponent<Outline>();
+            titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
+            titleGlow.effectDistance = new Vector2(2, -2);
+
+            GameObject subtitleObj = CreateElement(card.transform, "SettingsSubtitle");
+            SetupRectTransform(subtitleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -70), new Vector2(0, 24));
+            SetupText(subtitleObj, "Configure your game", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+
+            // Divider after title
+            CreateDivider(card.transform, -95);
+
+            // ====== OPERATIONS SECTION ======
+            float yPos = -115f;
+
+            GameObject opsHeader = CreateElement(card.transform, "OperationsHeader");
+            SetupRectTransform(opsHeader,
+                new Vector2(0.05f, 1), new Vector2(0.95f, 1),
+                new Vector2(0, yPos), new Vector2(0, 34));
+            Image opsHeaderBg = opsHeader.AddComponent<Image>();
+            opsHeaderBg.color = new Color(0f, 0.15f, 0.2f, 0.5f);
+            GameObject opsHeaderText = CreateElement(opsHeader.transform, "OperationsHeaderText");
+            SetupRectTransform(opsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(opsHeaderText, "OPERATIONS", 21, new Color(0.7f, 0.9f, 1f), FontStyles.Bold);
+
+            yPos -= 58f;
+
+            GameObject opsContainer = CreateElement(card.transform, "OperationsContainer");
+            SetupRectTransform(opsContainer,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(620, 58));
+
+            HorizontalLayoutGroup opsLayout = opsContainer.AddComponent<HorizontalLayoutGroup>();
+            opsLayout.childAlignment = TextAnchor.MiddleCenter;
+            opsLayout.spacing = 15;
+            opsLayout.childForceExpandWidth = true;
+            opsLayout.childForceExpandHeight = true;
+
+            CreateSettingsToggle(opsContainer.transform, "ToggleAddition", "+", true);
+            CreateSettingsToggle(opsContainer.transform, "ToggleSubtraction", "-", true);
+            CreateSettingsToggle(opsContainer.transform, "ToggleMultiplication", "\u00D7", false);
+            CreateSettingsToggle(opsContainer.transform, "ToggleDivision", "\u00F7", false);
+
+            // Divider
+            yPos -= 38f;
+            CreateDivider(card.transform, yPos);
+
+            // ====== DIFFICULTY SECTION ======
+            yPos -= 22f;
+
+            GameObject diffHeader = CreateElement(card.transform, "DifficultyHeader");
+            SetupRectTransform(diffHeader,
+                new Vector2(0.05f, 1), new Vector2(0.95f, 1),
+                new Vector2(0, yPos), new Vector2(0, 34));
+            Image diffHeaderBg = diffHeader.AddComponent<Image>();
+            diffHeaderBg.color = new Color(0.15f, 0.1f, 0f, 0.5f);
+            GameObject diffHeaderText = CreateElement(diffHeader.transform, "DifficultyHeaderText");
+            SetupRectTransform(diffHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(diffHeaderText, "DIFFICULTY", 21, new Color(1f, 0.9f, 0.7f), FontStyles.Bold);
+
+            yPos -= 58f;
+
+            GameObject diffContainer = CreateElement(card.transform, "DifficultyContainer");
+            SetupRectTransform(diffContainer,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(580, 58));
+
+            HorizontalLayoutGroup diffLayout = diffContainer.AddComponent<HorizontalLayoutGroup>();
+            diffLayout.childAlignment = TextAnchor.MiddleCenter;
+            diffLayout.spacing = 15;
+            diffLayout.childForceExpandWidth = true;
+            diffLayout.childForceExpandHeight = true;
+
+            ToggleGroup diffGroup = diffContainer.AddComponent<ToggleGroup>();
+            diffGroup.allowSwitchOff = false;
+
+            CreateSettingsToggle(diffContainer.transform, "ToggleEasy", "EASY", false, diffGroup);
+            CreateSettingsToggle(diffContainer.transform, "ToggleNormal", "NORMAL", true, diffGroup);
+            CreateSettingsToggle(diffContainer.transform, "ToggleHard", "HARD", false, diffGroup);
+
+            // Difficulty description
+            yPos -= 42f;
+
+            GameObject diffDesc = CreateElement(card.transform, "DifficultyDescText");
+            SetupRectTransform(diffDesc,
+                new Vector2(0.05f, 1), new Vector2(0.95f, 1),
+                new Vector2(0, yPos), new Vector2(0, 32));
+            TextMeshProUGUI descTmp = SetupText(diffDesc, "Numbers 1-25, all operations available", 17, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+            descTmp.enableWordWrapping = true;
+
+            // Divider
+            yPos -= 28f;
+            CreateDivider(card.transform, yPos);
+
+            // ====== ROUNDS SECTION ======
+            yPos -= 22f;
+
+            GameObject roundsHeader = CreateElement(card.transform, "RoundsHeader");
+            SetupRectTransform(roundsHeader,
+                new Vector2(0.05f, 1), new Vector2(0.95f, 1),
+                new Vector2(0, yPos), new Vector2(0, 34));
+            Image roundsHeaderBg = roundsHeader.AddComponent<Image>();
+            roundsHeaderBg.color = new Color(0f, 0.12f, 0.08f, 0.5f);
+            GameObject roundsHeaderText = CreateElement(roundsHeader.transform, "RoundsHeaderText");
+            SetupRectTransform(roundsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(roundsHeaderText, "ROUNDS", 21, new Color(0.7f, 1f, 0.8f), FontStyles.Bold);
+
+            yPos -= 58f;
+
+            GameObject roundsContainer = CreateElement(card.transform, "RoundsContainer");
+            SetupRectTransform(roundsContainer,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(450, 58));
+
+            HorizontalLayoutGroup roundsLayout = roundsContainer.AddComponent<HorizontalLayoutGroup>();
+            roundsLayout.childAlignment = TextAnchor.MiddleCenter;
+            roundsLayout.spacing = 15;
+            roundsLayout.childForceExpandWidth = true;
+            roundsLayout.childForceExpandHeight = true;
+
+            ToggleGroup roundsGroup = roundsContainer.AddComponent<ToggleGroup>();
+            roundsGroup.allowSwitchOff = false;
+
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds3", "3", false, roundsGroup);
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", false, roundsGroup);
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds10", "10", true, roundsGroup);
+
+            // ====== START BUTTON ======
+            yPos -= 78f;
+
+            GameObject startBtn = CreateElement(card.transform, "StartGameButton");
+            SetupRectTransform(startBtn,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(500, 68));
+
+            // Button shadow
+            GameObject startShadow = CreateElement(startBtn.transform, "Shadow");
+            SetupRectTransform(startShadow,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(3, -6), new Vector2(500, 68));
+            Image startShadowImg = startShadow.AddComponent<Image>();
+            startShadowImg.color = new Color(0f, 0.3f, 0.15f, 0.6f);
+            startShadowImg.raycastTarget = false;
+
+            // Button face
+            Image startBtnImg = startBtn.AddComponent<Image>();
+            startBtnImg.color = GREEN_NEON;
+
+            Outline startOutline = startBtn.AddComponent<Outline>();
+            startOutline.effectColor = new Color(0.1f, 0.5f, 0.25f, 1f);
+            startOutline.effectDistance = new Vector2(2, -2);
+
+            Button startButton = startBtn.AddComponent<Button>();
+            startButton.targetGraphic = startBtnImg;
+
+            ColorBlock startColors = startButton.colors;
+            startColors.normalColor = Color.white;
+            startColors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
+            startColors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            startButton.colors = startColors;
+
+            GameObject startText = CreateElement(startBtn.transform, "StartText");
+            SetupRectTransform(startText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(startText, "START", 34, DARK_BG, FontStyles.Bold);
+
+            settingsPanel.SetActive(false);
+        }
+
+        private static void CreateSettingsToggle(Transform parent, string name, string label, bool isOn, ToggleGroup group = null)
+        {
+            GameObject toggleObj = CreateElement(parent, name);
+
+            Image toggleBg = toggleObj.AddComponent<Image>();
+            toggleBg.color = isOn ? CYAN_NEON : BUTTON_BG;
+
+            Outline toggleOutline = toggleObj.AddComponent<Outline>();
+            toggleOutline.effectColor = new Color(0f, 0.7f, 0.7f, 0.5f);
+            toggleOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            Toggle toggle = toggleObj.AddComponent<Toggle>();
+            toggle.targetGraphic = toggleBg;
+            toggle.toggleTransition = Toggle.ToggleTransition.None;
+            toggle.graphic = null; // Visual updates handled by controller at runtime
+
+            // Set group BEFORE isOn so ToggleGroup registers properly
+            if (group != null)
+            {
+                toggle.group = group;
+                // Also serialize via SerializedObject for scene persistence
+                SerializedObject toggleSo = new SerializedObject(toggle);
+                toggleSo.FindProperty("m_Group").objectReferenceValue = group;
+                toggleSo.ApplyModifiedProperties();
+            }
+
+            toggle.isOn = isOn;
+
+            // Label
+            GameObject labelObj = CreateElement(toggleObj.transform, "Label");
+            SetupRectTransform(labelObj, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI labelTmp = SetupText(labelObj, label, 28, isOn ? DARK_BG : Color.white, FontStyles.Bold);
+            labelTmp.raycastTarget = false;
         }
 
         private static void CreateParticleEffects(Transform parent)
@@ -562,18 +914,18 @@ namespace DigitPark.Editor
             var controller = FindFirstObjectByType<QuickMathController>();
             if (controller == null)
             {
-                Debug.LogWarning("[QuickMathUIBuilder] No se encontró QuickMathController en la escena");
+                Debug.LogWarning("[QuickMathUIBuilder] No se encontro QuickMathController en la escena");
                 return;
             }
 
             SerializedObject so = new SerializedObject(controller);
+            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
             // ========== CONFIG ==========
-            // Buscar cualquier MinigameConfig existente
             string[] configGuids = AssetDatabase.FindAssets("t:MinigameConfig");
             MinigameConfig foundConfig = null;
 
-            // Primero buscar uno que contenga "QuickMath" en el nombre
             foreach (string guid in configGuids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -584,10 +936,8 @@ namespace DigitPark.Editor
                 }
             }
 
-            // Si no hay uno específico, crear uno nuevo
             if (foundConfig == null)
             {
-                // Crear carpeta si no existe
                 if (!AssetDatabase.IsValidFolder("Assets/_Project/Resources/Configs"))
                 {
                     if (!AssetDatabase.IsValidFolder("Assets/_Project/Resources"))
@@ -595,13 +945,12 @@ namespace DigitPark.Editor
                     AssetDatabase.CreateFolder("Assets/_Project/Resources", "Configs");
                 }
 
-                // Crear nuevo MinigameConfig para QuickMath
                 foundConfig = ScriptableObject.CreateInstance<MinigameConfig>();
                 foundConfig.gameType = GameType.QuickMath;
                 foundConfig.displayName = "Quick Math";
-                foundConfig.description = "Resuelve operaciones matemáticas rápidamente";
+                foundConfig.description = "Resuelve operaciones matematicas rapidamente";
                 foundConfig.rounds = 10;
-                foundConfig.timeLimit = 0; // Sin límite
+                foundConfig.timeLimit = 0;
                 foundConfig.difficultyLevel = 2;
 
                 AssetDatabase.CreateAsset(foundConfig, "Assets/_Project/Resources/Configs/QuickMathConfig.asset");
@@ -613,19 +962,23 @@ namespace DigitPark.Editor
             if (configProp != null && foundConfig != null)
             {
                 configProp.objectReferenceValue = foundConfig;
-                Debug.Log($"[QuickMathUIBuilder] Config asignado correctamente");
             }
 
-            // Problem text (hidden, for data)
-            AssignTMPReference(so, "problemText", "ProblemText");
+            // ========== EQUATION DISPLAY ==========
+            AssignTMPByFindDeep(so, "problemText", root, "ProblemText");
+            AssignTMPByFindDeep(so, "numberAText", root, "NumberA");
+            AssignTMPByFindDeep(so, "numberBText", root, "NumberB");
+            AssignTMPByFindDeep(so, "operatorText", root, "OperatorText");
 
-            // Equation parts
-            AssignTMPReference(so, "numberAText", "NumberA");
-            AssignTMPReference(so, "numberBText", "NumberB");
-            AssignTMPReference(so, "operatorText", "OperatorText");
+            Transform eqPanel = FindDeep(root, "EquationPanel");
+            if (eqPanel != null)
+            {
+                SerializedProperty eqProp = so.FindProperty("equationPanel");
+                if (eqProp != null) eqProp.objectReferenceValue = eqPanel.GetComponent<RectTransform>();
+            }
 
-            // Answer buttons
-            GameObject answersContainer = GameObject.Find("AnswersContainer");
+            // ========== ANSWER BUTTONS ==========
+            Transform answersContainer = FindDeep(root, "AnswersContainer");
             if (answersContainer != null)
             {
                 SerializedProperty answerButtonsProp = so.FindProperty("answerButtons");
@@ -636,13 +989,13 @@ namespace DigitPark.Editor
 
                 for (int i = 0; i < 3; i++)
                 {
-                    Transform btn = answersContainer.transform.Find($"AnswerButton_{i}");
+                    Transform btn = FindDeep(answersContainer, $"AnswerButton_{i}");
                     if (btn != null)
                     {
                         if (answerButtonsProp != null)
                             answerButtonsProp.GetArrayElementAtIndex(i).objectReferenceValue = btn.GetComponent<Button>();
 
-                        Transform face = btn.Find("Face");
+                        Transform face = FindDeep(btn, "Face");
                         if (face != null && answerTextsProp != null)
                         {
                             TextMeshProUGUI txt = face.GetComponentInChildren<TextMeshProUGUI>();
@@ -653,38 +1006,15 @@ namespace DigitPark.Editor
                 }
             }
 
-            // UI elements
-            AssignTMPReference(so, "timerText", "TimerText");
-            AssignTMPReference(so, "roundText", "RoundText");
-            AssignTMPReference(so, "errorsText", "ErrorsText");
-            AssignTMPReference(so, "comboText", "ComboText");
-            AssignTMPReference(so, "statsText", "StatsText");
-            AssignTMPReference(so, "roundIndicatorText", "RoundIndicator");
+            // ========== UI ELEMENTS ==========
+            AssignTMPByFindDeep(so, "timerText", root, "TimerText");
+            AssignTMPByFindDeep(so, "roundText", root, "RoundText");
+            AssignTMPByFindDeep(so, "errorsText", root, "ErrorsText");
+            AssignTMPByFindDeep(so, "comboText", root, "ComboText");
+            AssignTMPByFindDeep(so, "roundIndicatorText", root, "RoundIndicator");
 
-            // Win panel
-            GameObject winPanel = GameObject.Find("WinPanel");
-            if (winPanel != null)
-            {
-                SerializedProperty winPanelProp = so.FindProperty("winPanel");
-                if (winPanelProp != null)
-                    winPanelProp.objectReferenceValue = winPanel;
-
-                SerializedProperty winCgProp = so.FindProperty("winPanelCanvasGroup");
-                if (winCgProp != null)
-                    winCgProp.objectReferenceValue = winPanel.GetComponent<CanvasGroup>();
-
-                // Play Again Button (dentro del WinPanel)
-                Transform playAgainBtn = winPanel.transform.Find("Content/PlayAgainButton");
-                if (playAgainBtn != null)
-                {
-                    SerializedProperty playAgainProp = so.FindProperty("playAgainButton");
-                    if (playAgainProp != null)
-                        playAgainProp.objectReferenceValue = playAgainBtn.GetComponent<Button>();
-                }
-            }
-
-            // Combo container
-            GameObject comboContainer = GameObject.Find("ComboContainer");
+            // Combo CanvasGroup
+            Transform comboContainer = FindDeep(root, "ComboContainer");
             if (comboContainer != null)
             {
                 SerializedProperty comboCgProp = so.FindProperty("comboCanvasGroup");
@@ -693,7 +1023,7 @@ namespace DigitPark.Editor
             }
 
             // Progress fill
-            GameObject progressFill = GameObject.Find("ProgressFill");
+            Transform progressFill = FindDeep(root, "ProgressFill");
             if (progressFill != null)
             {
                 SerializedProperty progressProp = so.FindProperty("progressFill");
@@ -701,8 +1031,84 @@ namespace DigitPark.Editor
                     progressProp.objectReferenceValue = progressFill.GetComponent<RectTransform>();
             }
 
-            // Sparkle effect
-            GameObject particleEffects = GameObject.Find("ParticleEffects");
+            // ========== SETTINGS PANEL ==========
+            Transform settingsPanelT = FindDeep(root, "SettingsPanel");
+            if (settingsPanelT != null)
+            {
+                AssignGameObject(so, "settingsPanel", settingsPanelT.gameObject);
+
+                AssignToggle(so, "toggleAddition", FindDeep(settingsPanelT, "ToggleAddition"));
+                AssignToggle(so, "toggleSubtraction", FindDeep(settingsPanelT, "ToggleSubtraction"));
+                AssignToggle(so, "toggleMultiplication", FindDeep(settingsPanelT, "ToggleMultiplication"));
+                AssignToggle(so, "toggleDivision", FindDeep(settingsPanelT, "ToggleDivision"));
+                AssignToggle(so, "toggleEasy", FindDeep(settingsPanelT, "ToggleEasy"));
+                AssignToggle(so, "toggleNormal", FindDeep(settingsPanelT, "ToggleNormal"));
+                AssignToggle(so, "toggleHard", FindDeep(settingsPanelT, "ToggleHard"));
+                AssignToggle(so, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
+                AssignToggle(so, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
+                AssignToggle(so, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));
+
+                Transform startBtn = FindDeep(settingsPanelT, "StartGameButton");
+                if (startBtn != null)
+                {
+                    SerializedProperty startProp = so.FindProperty("startGameButton");
+                    if (startProp != null)
+                        startProp.objectReferenceValue = startBtn.GetComponent<Button>();
+                }
+
+                AssignTMPByFindDeep(so, "difficultyDescText", settingsPanelT, "DifficultyDescText");
+            }
+
+            // ========== FEEDBACK ==========
+            Transform feedbackPanelT = FindDeep(root, "FeedbackPanel");
+            if (feedbackPanelT != null)
+            {
+                AssignGameObject(so, "feedbackPanel", feedbackPanelT.gameObject);
+
+                Transform feedbackTextT = FindDeep(feedbackPanelT, "FeedbackText");
+                if (feedbackTextT != null)
+                {
+                    SerializedProperty ftProp = so.FindProperty("feedbackText");
+                    if (ftProp != null)
+                        ftProp.objectReferenceValue = feedbackTextT.GetComponent<TextMeshProUGUI>();
+                }
+            }
+
+            // ========== NORMAL WIN/LOSE PANELS ==========
+            Transform winPanelNormalT = FindDeep(root, "WinPanel_Normal");
+            if (winPanelNormalT != null)
+            {
+                SerializedProperty winNormalProp = so.FindProperty("winPanelNormal");
+                if (winNormalProp != null)
+                    winNormalProp.objectReferenceValue = winPanelNormalT.GetComponent<WinPanelController>();
+            }
+
+            Transform losePanelNormalT = FindDeep(root, "LosePanel_Normal");
+            if (losePanelNormalT != null)
+            {
+                SerializedProperty loseNormalProp = so.FindProperty("losePanelNormal");
+                if (loseNormalProp != null)
+                    loseNormalProp.objectReferenceValue = losePanelNormalT.GetComponent<WinPanelController>();
+            }
+
+            // ========== REAL MONEY PANELS ==========
+            Transform winPanelRM = FindDeep(root, "WinPanel_RealMoney");
+            Transform losePanelRM = FindDeep(root, "LosePanel_RealMoney");
+            if (winPanelRM != null)
+            {
+                SerializedProperty winRMProp = so.FindProperty("winPanelRealMoney");
+                if (winRMProp != null)
+                    winRMProp.objectReferenceValue = winPanelRM.GetComponent<WinPanelController>();
+            }
+            if (losePanelRM != null)
+            {
+                SerializedProperty loseRMProp = so.FindProperty("losePanelRealMoney");
+                if (loseRMProp != null)
+                    loseRMProp.objectReferenceValue = losePanelRM.GetComponent<WinPanelController>();
+            }
+
+            // ========== SPARKLE ==========
+            Transform particleEffects = FindDeep(root, "ParticleEffects");
             if (particleEffects != null)
             {
                 SerializedProperty sparkleProp = so.FindProperty("sparkleEffect");
@@ -710,38 +1116,102 @@ namespace DigitPark.Editor
                     sparkleProp.objectReferenceValue = particleEffects.GetComponent<UISparkleEffect>();
             }
 
-            // Equation panel for animations
-            GameObject equationPanel = GameObject.Find("EquationPanel");
-            if (equationPanel != null)
-            {
-                SerializedProperty eqPanelProp = so.FindProperty("equationPanel");
-                if (eqPanelProp != null)
-                    eqPanelProp.objectReferenceValue = equationPanel.GetComponent<RectTransform>();
-            }
-
-            // Real Money Panels
-            WinPanelInlineBuilder.AssignWinPanelRefs(so,
-                GameObject.Find("WinPanel_RealMoney"),
-                GameObject.Find("LosePanel_RealMoney"));
-
             so.ApplyModifiedProperties();
             Debug.Log("[QuickMathUIBuilder] Referencias asignadas al Controller");
         }
 
-        private static void AssignTMPReference(SerializedObject so, string propertyName, string objectName)
+        // ========== HELPERS ==========
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private static void AssignTMPByFindDeep(SerializedObject so, string propertyName, Transform root, string objectName)
         {
             SerializedProperty prop = so.FindProperty(propertyName);
-            if (prop != null)
+            if (prop == null) return;
+
+            Transform t = FindDeep(root, objectName);
+            if (t != null)
             {
-                GameObject obj = GameObject.Find(objectName);
-                if (obj != null)
-                {
-                    prop.objectReferenceValue = obj.GetComponent<TextMeshProUGUI>();
-                }
+                prop.objectReferenceValue = t.GetComponent<TextMeshProUGUI>();
             }
         }
 
-        // ========== UTILITIES ==========
+        private static void AssignToggle(SerializedObject so, string propertyName, Transform toggleTransform)
+        {
+            if (toggleTransform == null) return;
+            SerializedProperty prop = so.FindProperty(propertyName);
+            if (prop != null)
+                prop.objectReferenceValue = toggleTransform.GetComponent<Toggle>();
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, GameObject obj)
+        {
+            SerializedProperty prop = so.FindProperty(propertyName);
+            if (prop != null)
+                prop.objectReferenceValue = obj;
+        }
+
+        private static GameObject CreatePanelButton(Transform parent, string name, string text, Color color, float width, float height)
+        {
+            GameObject btn = CreateElement(parent, name);
+
+            LayoutElement le = btn.AddComponent<LayoutElement>();
+            le.preferredWidth = width;
+            le.preferredHeight = height;
+
+            Image faceImg = btn.AddComponent<Image>();
+            faceImg.color = color;
+
+            GameObject textObj = CreateElement(btn.transform, "Text");
+            SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
+            SetupText(textObj, text, 24, DARK_BG, FontStyles.Bold);
+
+            Button button = btn.AddComponent<Button>();
+            button.targetGraphic = faceImg;
+
+            return btn;
+        }
+
+        private static void CreateDivider(Transform parent, float yPos)
+        {
+            GameObject divider = CreateElement(parent, "Divider");
+            SetupRectTransform(divider,
+                new Vector2(0.08f, 1), new Vector2(0.92f, 1),
+                new Vector2(0, yPos), new Vector2(0, 2));
+            Image divImg = divider.AddComponent<Image>();
+            divImg.color = new Color(1f, 1f, 1f, 0.1f);
+            divImg.raycastTarget = false;
+        }
+
+        private static TextMeshProUGUI CreateStatRow(Transform parent, string label, string valueName, string defaultValue, Color valueColor, float yPos)
+        {
+            // Label (left-aligned)
+            GameObject labelObj = CreateElement(parent, valueName + "_Label");
+            SetupRectTransform(labelObj,
+                new Vector2(0.05f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(0, 38));
+            TextMeshProUGUI labelTmp = SetupText(labelObj, label, 24, new Color(0.6f, 0.65f, 0.75f), FontStyles.Normal);
+            labelTmp.alignment = TextAlignmentOptions.Left;
+
+            // Value (right-aligned)
+            GameObject valueObj = CreateElement(parent, valueName);
+            SetupRectTransform(valueObj,
+                new Vector2(0.5f, 1), new Vector2(0.95f, 1),
+                new Vector2(0, yPos), new Vector2(0, 38));
+            TextMeshProUGUI valueTmp = SetupText(valueObj, defaultValue, 28, valueColor, FontStyles.Bold);
+            valueTmp.alignment = TextAlignmentOptions.Right;
+
+            return valueTmp;
+        }
 
         private static GameObject CreateElement(Transform parent, string name)
         {

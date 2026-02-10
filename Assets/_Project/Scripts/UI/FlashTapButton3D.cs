@@ -9,15 +9,22 @@ using DigitPark.Localization;
 namespace DigitPark.UI
 {
     /// <summary>
-    /// Componente para el boton 3D de FlashTap con sprites Up/Down
-    /// Maneja estados: Wait (gris), Ready (rojo), Pressed (sprite down)
-    /// Mantiene su estilo propio independiente de los temas de la app
+    /// Componente para el boton 3D de FlashTap con sprites por estado
+    /// Wait (naranja), Ready (rojo), Error (rojo+shake), Success (verde)
+    /// Cada estado tiene su propio sprite Up/Down pre-coloreado
     /// </summary>
     public class FlashTapButton3D : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
-        [Header("Sprites")]
-        [SerializeField] private Sprite buttonUpSprite;
-        [SerializeField] private Sprite buttonDownSprite;
+        [Header("Sprites - Wait State (Orange)")]
+        [SerializeField] private Sprite waitUpSprite;
+        [SerializeField] private Sprite waitDownSprite;
+
+        [Header("Sprites - Ready State (Red)")]
+        [SerializeField] private Sprite readyUpSprite;
+        [SerializeField] private Sprite readyDownSprite;
+
+        [Header("Sprites - Success State (Green)")]
+        [SerializeField] private Sprite successUpSprite;
 
         [Header("References")]
         [SerializeField] private Image buttonImage;
@@ -25,30 +32,26 @@ namespace DigitPark.UI
         [SerializeField] private TMP_Text instructionText;
         [SerializeField] private RectTransform buttonTransform;
 
-        [Header("Colors - Wait State (No tocar)")]
-        [SerializeField] private Color waitButtonColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-        [SerializeField] private Color waitGlowColor = new Color(0.3f, 0.3f, 0.3f, 0.3f);
-        [SerializeField] private Color waitTextColor = new Color(0.6f, 0.6f, 0.6f, 1f);
-
-        [Header("Colors - Ready State (Toca ahora!)")]
-        [SerializeField] private Color readyButtonColor = new Color(1f, 0.2f, 0.2f, 1f);
+        [Header("Glow Colors")]
+        [SerializeField] private Color waitGlowColor = new Color(1f, 0.6f, 0f, 0.3f);
         [SerializeField] private Color readyGlowColor = new Color(1f, 0.2f, 0.2f, 0.6f);
-        [SerializeField] private Color readyTextColor = new Color(1f, 1f, 1f, 1f);
+        [SerializeField] private Color successGlowColor = new Color(0.2f, 1f, 0.4f, 0.6f);
+        [SerializeField] private Color errorGlowColor = new Color(1f, 0.2f, 0.2f, 0.6f);
 
-        [Header("Colors - Error State (Muy pronto)")]
-        [SerializeField] private Color errorButtonColor = new Color(1f, 0.5f, 0f, 1f);
-        [SerializeField] private Color errorGlowColor = new Color(1f, 0.5f, 0f, 0.6f);
-        [SerializeField] private Color errorTextColor = new Color(1f, 0.5f, 0f, 1f);
+        [Header("Text Colors")]
+        [SerializeField] private Color waitTextColor = new Color(1f, 0.7f, 0.3f, 1f);
+        [SerializeField] private Color readyTextColor = new Color(1f, 1f, 1f, 1f);
+        [SerializeField] private Color successTextColor = new Color(0.2f, 1f, 0.4f, 1f);
+        [SerializeField] private Color errorTextColor = new Color(1f, 0.3f, 0.3f, 1f);
 
         [Header("Animation Settings")]
         [SerializeField] private float breathingSpeed = 1.5f;
         [SerializeField] private float breathingMinScale = 0.98f;
         [SerializeField] private float breathingMaxScale = 1.02f;
         [SerializeField] private float pulseSpeed = 3f;
-        [SerializeField] private float pulseMinScale = 0.95f;
+        [SerializeField] private float pulseMinScale = 1.0f;
         [SerializeField] private float pulseMaxScale = 1.08f;
-        [SerializeField] private float pressAnimDuration = 0.08f;
-        [SerializeField] private float colorTransitionDuration = 0.15f;
+        [SerializeField] private float pressAnimDuration = 0.12f;
 
         [Header("Glow Ring Animation")]
         [SerializeField] private float glowPulseSpeed = 2f;
@@ -57,16 +60,15 @@ namespace DigitPark.UI
         [SerializeField] private float glowMinScale = 1f;
         [SerializeField] private float glowMaxScale = 1.15f;
 
-        public enum ButtonState { Wait, Ready, Error, Pressed }
+        public enum ButtonState { Wait, Ready, Error, Pressed, Success }
 
         private ButtonState currentState = ButtonState.Wait;
         private Vector3 originalScale;
         private Coroutine animationCoroutine;
-        private Coroutine colorCoroutine;
         private Coroutine glowCoroutine;
         private bool isPressed;
+        private bool inputEnabled = true;
 
-        // Evento para cuando se presiona el boton
         public System.Action OnButtonPressed;
 
         private void Awake()
@@ -77,6 +79,7 @@ namespace DigitPark.UI
             originalScale = buttonTransform != null ? buttonTransform.localScale : Vector3.one;
 
             AutoFindReferences();
+            EnsureRaycastTarget();
         }
 
         private void OnEnable()
@@ -95,6 +98,7 @@ namespace DigitPark.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!inputEnabled) return;
             if (currentState == ButtonState.Wait || currentState == ButtonState.Ready)
             {
                 isPressed = true;
@@ -116,61 +120,76 @@ namespace DigitPark.UI
 
         #region Public Methods
 
-        /// <summary>
-        /// Cambia el estado visual del boton
-        /// </summary>
         public void SetState(ButtonState state, bool instant = false)
         {
             currentState = state;
-
             StopAllAnimations();
 
             switch (state)
             {
                 case ButtonState.Wait:
-                    TransitionToState(waitButtonColor, waitGlowColor, waitTextColor, instant);
-                    SetSprite(buttonUpSprite);
+                    SetSpriteUp(waitUpSprite);
+                    ApplyGlowAndText(waitGlowColor, waitTextColor, instant);
                     StartBreathingAnimation();
                     if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_wait");
                     break;
 
                 case ButtonState.Ready:
-                    TransitionToState(readyButtonColor, readyGlowColor, readyTextColor, instant);
-                    SetSprite(buttonUpSprite);
+                    SetSpriteUp(readyUpSprite);
+                    ApplyGlowAndText(readyGlowColor, readyTextColor, instant);
                     StartPulseAnimation();
                     StartGlowPulse();
                     if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_tap");
-                    // Haptic feedback cuando se activa
                     TriggerReadyHaptic();
                     break;
 
                 case ButtonState.Error:
-                    TransitionToState(errorButtonColor, errorGlowColor, errorTextColor, instant);
-                    SetSprite(buttonUpSprite);
+                    SetSpriteUp(readyUpSprite); // Red sprite for error
+                    ApplyGlowAndText(errorGlowColor, errorTextColor, instant);
                     StartShakeAnimation();
-                    if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_too_soon");
-                    // Haptic feedback de error
+                    if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_too_early");
                     TriggerErrorHaptic();
                     break;
 
+                case ButtonState.Success:
+                    SetSpriteUp(successUpSprite);
+                    ApplyGlowAndText(successGlowColor, successTextColor, instant);
+                    if (instructionText != null) instructionText.text = AutoLocalizer.Get("flashtap_correct");
+                    TriggerSuccessHaptic();
+                    break;
+
                 case ButtonState.Pressed:
-                    SetSprite(buttonDownSprite);
+                    // Handled by press/release animations
                     break;
             }
         }
 
-        /// <summary>
-        /// Obtiene el estado actual del boton
-        /// </summary>
         public ButtonState GetCurrentState() => currentState;
 
+        public void SetInputEnabled(bool enabled)
+        {
+            inputEnabled = enabled;
+        }
+
         /// <summary>
-        /// Asigna los sprites del boton
+        /// Legacy compatibility - sets wait sprites only
         /// </summary>
         public void SetSprites(Sprite upSprite, Sprite downSprite)
         {
-            buttonUpSprite = upSprite;
-            buttonDownSprite = downSprite;
+            waitUpSprite = upSprite;
+            waitDownSprite = downSprite;
+        }
+
+        /// <summary>
+        /// Sets all state sprites at once
+        /// </summary>
+        public void SetAllStateSprites(Sprite wUp, Sprite wDown, Sprite rUp, Sprite rDown, Sprite sUp)
+        {
+            waitUpSprite = wUp;
+            waitDownSprite = wDown;
+            readyUpSprite = rUp;
+            readyDownSprite = rDown;
+            successUpSprite = sUp;
         }
 
         #endregion
@@ -203,15 +222,15 @@ namespace DigitPark.UI
 
         private IEnumerator PulseLoop()
         {
+            // Never shrink below original size - pulse only grows
+            float effectiveMin = Mathf.Max(pulseMinScale, 1f);
             while (true)
             {
                 if (!isPressed)
                 {
-                    // Pulse mas agresivo para estado Ready
                     float t = (Mathf.Sin(Time.time * pulseSpeed * Mathf.PI) + 1f) / 2f;
-                    // Curva de ease para que el pulse sea mas "punchy"
                     t = EaseOutBack(t);
-                    float scale = Mathf.Lerp(pulseMinScale, pulseMaxScale, t);
+                    float scale = Mathf.Lerp(effectiveMin, pulseMaxScale, t);
                     buttonTransform.localScale = originalScale * scale;
                 }
                 yield return null;
@@ -235,12 +254,10 @@ namespace DigitPark.UI
             {
                 float t = (Mathf.Sin(Time.time * glowPulseSpeed * Mathf.PI) + 1f) / 2f;
 
-                // Pulsar alpha
                 Color c = glowRing.color;
                 c.a = Mathf.Lerp(glowMinAlpha, glowMaxAlpha, t);
                 glowRing.color = c;
 
-                // Pulsar escala del glow
                 if (glowTransform != null)
                 {
                     float scale = Mathf.Lerp(glowMinScale, glowMaxScale, t);
@@ -279,25 +296,29 @@ namespace DigitPark.UI
 
         private void PlayPressAnimation()
         {
-            StopCoroutine(animationCoroutine);
+            if (animationCoroutine != null)
+            {
+                StopCoroutine(animationCoroutine);
+                animationCoroutine = null;
+            }
             StartCoroutine(PressEffect());
         }
 
         private IEnumerator PressEffect()
         {
-            // Cambiar a sprite presionado
-            SetSprite(buttonDownSprite);
+            // Use the down sprite for current state
+            Sprite downSprite = GetCurrentDownSprite();
+            if (downSprite != null && buttonImage != null)
+                buttonImage.sprite = downSprite;
 
-            // Animar escala hacia abajo
-            Vector3 targetScale = originalScale * 0.92f;
+            Vector3 targetScale = originalScale * 0.85f;
             Vector3 startScale = buttonTransform.localScale;
             float elapsed = 0f;
 
             while (elapsed < pressAnimDuration)
             {
                 elapsed += Time.deltaTime;
-                float t = elapsed / pressAnimDuration;
-                t = EaseOutQuad(t);
+                float t = EaseOutQuad(elapsed / pressAnimDuration);
                 buttonTransform.localScale = Vector3.Lerp(startScale, targetScale, t);
                 yield return null;
             }
@@ -312,27 +333,27 @@ namespace DigitPark.UI
 
         private IEnumerator ReleaseEffect()
         {
-            // Volver a sprite normal
-            SetSprite(buttonUpSprite);
+            // Restore up sprite
+            Sprite upSprite = GetCurrentUpSprite();
+            if (upSprite != null && buttonImage != null)
+                buttonImage.sprite = upSprite;
 
-            // Animar escala con bounce
             Vector3 targetScale = originalScale;
             Vector3 overshootScale = originalScale * 1.05f;
             Vector3 startScale = buttonTransform.localScale;
             float elapsed = 0f;
             float bounceDuration = pressAnimDuration * 1.5f;
 
-            // Fase 1: Overshoot
+            // Phase 1: Overshoot
             while (elapsed < bounceDuration * 0.6f)
             {
                 elapsed += Time.deltaTime;
-                float t = elapsed / (bounceDuration * 0.6f);
-                t = EaseOutQuad(t);
+                float t = EaseOutQuad(elapsed / (bounceDuration * 0.6f));
                 buttonTransform.localScale = Vector3.Lerp(startScale, overshootScale, t);
                 yield return null;
             }
 
-            // Fase 2: Settle
+            // Phase 2: Settle
             elapsed = 0f;
             startScale = buttonTransform.localScale;
             while (elapsed < bounceDuration * 0.4f)
@@ -345,67 +366,10 @@ namespace DigitPark.UI
 
             buttonTransform.localScale = targetScale;
 
-            // Reanudar animacion segun estado
             if (currentState == ButtonState.Ready)
-            {
                 StartPulseAnimation();
-            }
             else if (currentState == ButtonState.Wait)
-            {
                 StartBreathingAnimation();
-            }
-        }
-
-        #endregion
-
-        #region Color Transitions
-
-        private void TransitionToState(Color buttonColor, Color glowColor, Color textColor, bool instant)
-        {
-            if (instant)
-            {
-                ApplyColors(buttonColor, glowColor, textColor);
-            }
-            else
-            {
-                colorCoroutine = StartCoroutine(ColorTransition(buttonColor, glowColor, textColor));
-            }
-        }
-
-        private IEnumerator ColorTransition(Color targetButtonColor, Color targetGlowColor, Color targetTextColor)
-        {
-            Color startButtonColor = buttonImage != null ? buttonImage.color : targetButtonColor;
-            Color startGlowColor = glowRing != null ? glowRing.color : targetGlowColor;
-            Color startTextColor = instructionText != null ? instructionText.color : targetTextColor;
-
-            float elapsed = 0f;
-
-            while (elapsed < colorTransitionDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = elapsed / colorTransitionDuration;
-                t = EaseOutQuad(t);
-
-                if (buttonImage != null)
-                    buttonImage.color = Color.Lerp(startButtonColor, targetButtonColor, t);
-
-                if (glowRing != null)
-                    glowRing.color = Color.Lerp(startGlowColor, targetGlowColor, t);
-
-                if (instructionText != null)
-                    instructionText.color = Color.Lerp(startTextColor, targetTextColor, t);
-
-                yield return null;
-            }
-
-            ApplyColors(targetButtonColor, targetGlowColor, targetTextColor);
-        }
-
-        private void ApplyColors(Color buttonColor, Color glowColor, Color textColor)
-        {
-            if (buttonImage != null) buttonImage.color = buttonColor;
-            if (glowRing != null) glowRing.color = glowColor;
-            if (instructionText != null) instructionText.color = textColor;
         }
 
         #endregion
@@ -415,9 +379,7 @@ namespace DigitPark.UI
         private void TriggerReadyHaptic()
         {
             if (FeedbackManager.Instance != null)
-            {
                 FeedbackManager.Instance.PlayHaptic(FeedbackManager.HapticType.Medium);
-            }
         }
 
         private void TriggerErrorHaptic()
@@ -429,16 +391,52 @@ namespace DigitPark.UI
             }
         }
 
+        private void TriggerSuccessHaptic()
+        {
+            if (FeedbackManager.Instance != null)
+                FeedbackManager.Instance.PlayHaptic(FeedbackManager.HapticType.Light);
+        }
+
         #endregion
 
         #region Helpers
 
-        private void SetSprite(Sprite sprite)
+        private Sprite GetCurrentUpSprite()
+        {
+            switch (currentState)
+            {
+                case ButtonState.Wait: return waitUpSprite;
+                case ButtonState.Ready: return readyUpSprite;
+                case ButtonState.Error: return readyUpSprite;
+                case ButtonState.Success: return successUpSprite;
+                default: return waitUpSprite;
+            }
+        }
+
+        private Sprite GetCurrentDownSprite()
+        {
+            switch (currentState)
+            {
+                case ButtonState.Wait: return waitDownSprite;
+                case ButtonState.Ready: return readyDownSprite;
+                case ButtonState.Error: return readyDownSprite;
+                default: return waitDownSprite;
+            }
+        }
+
+        private void SetSpriteUp(Sprite sprite)
         {
             if (buttonImage != null && sprite != null)
             {
                 buttonImage.sprite = sprite;
+                buttonImage.color = Color.white; // No tinting - sprites are pre-colored
             }
+        }
+
+        private void ApplyGlowAndText(Color glowColor, Color textColor, bool instant)
+        {
+            if (glowRing != null) glowRing.color = glowColor;
+            if (instructionText != null) instructionText.color = textColor;
         }
 
         private void StopAllAnimations()
@@ -447,12 +445,6 @@ namespace DigitPark.UI
             {
                 StopCoroutine(animationCoroutine);
                 animationCoroutine = null;
-            }
-
-            if (colorCoroutine != null)
-            {
-                StopCoroutine(colorCoroutine);
-                colorCoroutine = null;
             }
 
             if (glowCoroutine != null)
@@ -465,16 +457,35 @@ namespace DigitPark.UI
         private void AutoFindReferences()
         {
             if (buttonImage == null)
-                buttonImage = GetComponent<Image>();
+                buttonImage = transform.Find("ButtonImage")?.GetComponent<Image>();
 
             if (buttonImage == null)
-                buttonImage = transform.Find("ButtonImage")?.GetComponent<Image>();
+                buttonImage = GetComponentInChildren<Image>();
 
             if (glowRing == null)
                 glowRing = transform.Find("GlowRing")?.GetComponent<Image>();
 
             if (instructionText == null)
                 instructionText = transform.parent?.Find("InstructionText")?.GetComponent<TMP_Text>();
+        }
+
+        /// <summary>
+        /// Asegura que este GameObject tenga un Image transparente para recibir pointer events
+        /// y desactiva el raycast del hijo ButtonImage para que no intercepte
+        /// </summary>
+        private void EnsureRaycastTarget()
+        {
+            // Add transparent Image if we don't have a Graphic for IPointerDownHandler
+            if (GetComponent<Graphic>() == null)
+            {
+                var img = gameObject.AddComponent<Image>();
+                img.color = new Color(0, 0, 0, 0);
+                img.raycastTarget = true;
+            }
+
+            // Disable child buttonImage's raycast so pointer events reach us
+            if (buttonImage != null)
+                buttonImage.raycastTarget = false;
         }
 
         private float EaseOutQuad(float t)
@@ -500,6 +511,9 @@ namespace DigitPark.UI
 
         [ContextMenu("Test Error State")]
         private void TestErrorState() => SetState(ButtonState.Error);
+
+        [ContextMenu("Test Success State")]
+        private void TestSuccessState() => SetState(ButtonState.Success);
 #endif
     }
 }

@@ -27,7 +27,7 @@ namespace DigitPark.Animations
         [SerializeField] private float selectedScale = 1.15f;
         [SerializeField] private float unselectedScale = 0.85f;
         [SerializeField] private float selectedAlpha = 1f;
-        [SerializeField] private float unselectedAlpha = 0.6f;
+        [SerializeField] private float unselectedAlpha = 1f;
         [SerializeField] private float cardSpacing = 250f;
 
         [Header("Animation Settings")]

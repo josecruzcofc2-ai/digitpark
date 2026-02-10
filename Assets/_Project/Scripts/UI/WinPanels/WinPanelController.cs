@@ -54,6 +54,7 @@ namespace DigitPark.UI
         private AudioSource audioSource;
         private bool isWinner;
         private decimal moneyWon;
+        private bool hasInitialized;
 
         private void Awake()
         {
@@ -62,7 +63,7 @@ namespace DigitPark.UI
                 audioSource = gameObject.AddComponent<AudioSource>();
 
             SetupButtons();
-            Hide();
+            hasInitialized = true;
         }
 
         private void SetupButtons()
@@ -276,15 +277,31 @@ namespace DigitPark.UI
 
         public void Show()
         {
+            StopAllCoroutines(); // Cancel any pending FadeOut
             gameObject.SetActive(true);
+
+            // If Awake hasn't run yet (first activation), initialize now
+            if (!hasInitialized)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                SetupButtons();
+                hasInitialized = true;
+            }
+
             if (canvasGroup != null)
             {
+                canvasGroup.alpha = 0f;
                 StartCoroutine(FadeIn());
             }
         }
 
         public void Hide()
         {
+            if (!gameObject.activeSelf) return;
+
+            StopAllCoroutines(); // Cancel any pending FadeIn
             if (canvasGroup != null)
             {
                 StartCoroutine(FadeOut());

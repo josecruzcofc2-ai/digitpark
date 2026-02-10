@@ -25,12 +25,17 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static readonly string[] REQUIRED_REFS = {
             // UI
-            "tapButton", "instructionText", "reactionTimeText",
+            "tapButton", "button3D", "instructionText", "reactionTimeText",
             "roundText", "averageText", "bestTimeText",
-            // Navigation (MinigameBase)
-            "playAgainButton", "backButton",
-            // Panels
-            "winPanel", "winPanelCanvasGroup",
+            // Countdown
+            "countdownUI",
+            // Settings Panel
+            "settingsPanel", "toggleRounds3", "toggleRounds5", "toggleRounds10",
+            "startGameButton",
+            // Feedback
+            "feedbackPanel", "feedbackText",
+            // Win/Lose Panels (Normal)
+            "winPanelNormal", "losePanelNormal",
             // Win/Lose Panels (Cash Battle)
             "winPanelRealMoney", "losePanelRealMoney"
         };
@@ -72,10 +77,10 @@ namespace DigitPark.Editor.AutoAssigners
 
             EditorGUILayout.HelpBox(
                 "Assigns UI references to FlashTapController:\n" +
-                "- Tap button and instruction text\n" +
-                "- Reaction time display\n" +
-                "- Round, average, and best time texts\n" +
-                "- Win panel",
+                "- Tap button 3D and instruction text\n" +
+                "- Reaction time, round, average, best texts\n" +
+                "- Countdown, settings panel, feedback\n" +
+                "- Win/Lose panels (Normal + RealMoney)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -167,21 +172,77 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(controller);
             so.Update();
 
-            // UI Elements
-            AssignReference(so, "tapButton", FindButtonByName("tap", "button", "flash"));
-            AssignReference(so, "instructionText", FindTextByName("instruction", "wait", "tap"));
-            AssignReference(so, "reactionTimeText", FindTextByName("reaction", "time", "ms"));
-            AssignReference(so, "roundText", FindTextByName("round", "attempt", "ronda"));
-            AssignReference(so, "averageText", FindTextByName("average", "promedio", "avg"));
-            AssignReference(so, "bestTimeText", FindTextByName("best", "mejor", "record"));
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
-            // Navigation (MinigameBase) - buttons inside winPanel
-            AssignReference(so, "playAgainButton", FindButtonByName("playagain"));
-            AssignReference(so, "backButton", FindButtonByName("exit", "back", "salir"));
+            // TapButton3D
+            Transform tapButton3D = FindDeep(root, "TapButton3D");
+            if (tapButton3D != null)
+            {
+                AssignReference(so, "tapButton", tapButton3D.GetComponentInChildren<Button>());
+                AssignReference(so, "button3D", tapButton3D.GetComponent<FlashTapButton3D>());
+            }
+            else
+            {
+                AssignReference(so, "tapButton", (Object)null);
+                AssignReference(so, "button3D", (Object)null);
+            }
 
-            // Panels
-            AssignReference(so, "winPanel", FindByNameContains<Transform>("win", "result", "complete"));
-            AssignCanvasGroup(so, "winPanelCanvasGroup", "winpanel", "win", "result");
+            // UI Texts
+            AssignReference(so, "instructionText", FindTextByDeep(root, "InstructionText"));
+            AssignReference(so, "reactionTimeText", FindTextByDeep(root, "ReactionTimeText"));
+            AssignReference(so, "roundText", FindTextByDeep(root, "RoundText"));
+            AssignReference(so, "averageText", FindTextByDeep(root, "AverageText"));
+            AssignReference(so, "bestTimeText", FindTextByDeep(root, "BestTimeText"));
+
+            // Countdown
+            Transform countdownPanel = FindDeep(root, "CountdownPanel");
+            if (countdownPanel != null)
+                AssignReference(so, "countdownUI", countdownPanel.GetComponent<CountdownUI>());
+            else
+                AssignReference(so, "countdownUI", (Object)null);
+
+            // Settings Panel
+            Transform settingsPanel = FindDeep(root, "SettingsPanel");
+            if (settingsPanel != null)
+            {
+                AssignReference(so, "settingsPanel", settingsPanel.gameObject);
+                AssignToggleReference(so, "toggleRounds3", FindDeep(root, "ToggleRounds3"));
+                AssignToggleReference(so, "toggleRounds5", FindDeep(root, "ToggleRounds5"));
+                AssignToggleReference(so, "toggleRounds10", FindDeep(root, "ToggleRounds10"));
+
+                Transform startBtn = FindDeep(settingsPanel, "StartGameButton");
+                AssignReference(so, "startGameButton", startBtn != null ? startBtn.GetComponent<Button>() : null);
+            }
+            else
+            {
+                AssignReference(so, "settingsPanel", (Object)null);
+                AssignReference(so, "toggleRounds3", (Object)null);
+                AssignReference(so, "toggleRounds5", (Object)null);
+                AssignReference(so, "toggleRounds10", (Object)null);
+                AssignReference(so, "startGameButton", (Object)null);
+            }
+
+            // Feedback
+            Transform feedbackPanel = FindDeep(root, "FeedbackPanel");
+            if (feedbackPanel != null)
+            {
+                AssignReference(so, "feedbackPanel", feedbackPanel.gameObject);
+                Transform feedbackText = FindDeep(feedbackPanel, "FeedbackText");
+                AssignReference(so, "feedbackText", feedbackText != null ? feedbackText.GetComponent<TextMeshProUGUI>() : null);
+            }
+            else
+            {
+                AssignReference(so, "feedbackPanel", (Object)null);
+                AssignReference(so, "feedbackText", (Object)null);
+            }
+
+            // Win/Lose Panels (Normal)
+            Transform winNormal = FindDeep(root, "WinPanel_Normal");
+            AssignReference(so, "winPanelNormal", winNormal != null ? winNormal.GetComponent<WinPanelController>() : null);
+
+            Transform loseNormal = FindDeep(root, "LosePanel_Normal");
+            AssignReference(so, "losePanelNormal", loseNormal != null ? loseNormal.GetComponent<WinPanelController>() : null);
 
             // Win/Lose Panels (Cash Battle)
             AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
@@ -210,47 +271,34 @@ namespace DigitPark.Editor.AutoAssigners
             else { AddResult(propertyName, "Not found", false, null); failedCount++; }
         }
 
+        private static void AssignToggleReference(SerializedObject so, string propertyName, Transform toggleTransform)
+        {
+            if (toggleTransform != null)
+                AssignReference(so, propertyName, toggleTransform.GetComponent<Toggle>());
+            else
+                AssignReference(so, propertyName, (Object)null);
+        }
+
         #endregion
 
         #region Finders
 
-        private static T FindByNameContains<T>(params string[] patterns) where T : Component
+        private static Transform FindDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
             return null;
         }
 
-        private static TextMeshProUGUI FindTextByName(params string[] patterns)
+        private static TextMeshProUGUI FindTextByDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
-            foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
-            return null;
-        }
-
-        private static Button FindButtonByName(params string[] patterns)
-        {
-            var all = Object.FindObjectsOfType<Button>(true);
-            foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
-            return null;
-        }
-
-        private static void AssignCanvasGroup(SerializedObject so, string propertyName, params string[] patterns)
-        {
-            var prop = so.FindProperty(propertyName);
-            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
-            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
-            var all = Object.FindObjectsOfType<CanvasGroup>(true);
-            foreach (var p in patterns)
-                foreach (var o in all)
-                    if (o.gameObject.name.ToLower().Contains(p.ToLower()))
-                    {
-                        prop.objectReferenceValue = o;
-                        AddResult(propertyName, "Assigned", true, o);
-                        assignedCount++;
-                        return;
-                    }
-            AddResult(propertyName, "Not found", false, null); failedCount++;
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
         }
 
         private static WinPanelController FindWinPanelController(string name)

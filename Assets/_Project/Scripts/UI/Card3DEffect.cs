@@ -29,15 +29,15 @@ namespace DigitPark.UI
         [SerializeField] private Image cardBackPattern;
 
         [Header("Colors - Face Down (Oculta)")]
-        [SerializeField] private Color faceDownColor = new Color(0.06f, 0.04f, 0.1f, 1f);
-        [SerializeField] private Color faceDownSideColor = new Color(0.04f, 0.02f, 0.06f, 1f);
-        [SerializeField] private Color faceDownGlowColor = new Color(0.6f, 0.1f, 0.6f, 0.3f);
-        [SerializeField] private Color faceDownPatternColor = new Color(0.8f, 0.2f, 0.8f, 0.15f);
+        [SerializeField] private Color faceDownColor = new Color(0.04f, 0.08f, 0.12f, 1f);
+        [SerializeField] private Color faceDownSideColor = new Color(0.02f, 0.05f, 0.08f, 1f);
+        [SerializeField] private Color faceDownGlowColor = new Color(0f, 0.6f, 0.6f, 0.3f);
+        [SerializeField] private Color faceDownPatternColor = new Color(0f, 0.8f, 0.8f, 0.15f);
 
         [Header("Colors - Face Up (Revelada)")]
-        [SerializeField] private Color faceUpColor = new Color(0.12f, 0.06f, 0.18f, 1f);
-        [SerializeField] private Color faceUpSideColor = new Color(0.08f, 0.04f, 0.12f, 1f);
-        [SerializeField] private Color faceUpGlowColor = new Color(1f, 0.4f, 1f, 1f);
+        [SerializeField] private Color faceUpColor = new Color(0.06f, 0.12f, 0.18f, 1f);
+        [SerializeField] private Color faceUpSideColor = new Color(0.04f, 0.08f, 0.12f, 1f);
+        [SerializeField] private Color faceUpGlowColor = new Color(0f, 1f, 1f, 1f);
         [SerializeField] private Color symbolColor = Color.white;
 
         [Header("Colors - Match (Verde Éxito)")]
@@ -58,7 +58,7 @@ namespace DigitPark.UI
         [SerializeField] private Color errorSymbolColor = new Color(1f, 0.5f, 0.5f, 1f);
 
         [Header("Colors - Hover")]
-        [SerializeField] private Color hoverGlowColor = new Color(1f, 0.6f, 1f, 0.8f);
+        [SerializeField] private Color hoverGlowColor = new Color(0.4f, 1f, 1f, 0.8f);
 
         [Header("Shadow")]
         [SerializeField] private Color shadowColor = new Color(0f, 0f, 0f, 0.5f);
@@ -115,6 +115,21 @@ namespace DigitPark.UI
         private void Start()
         {
             SetFaceDown(false);
+            // Re-assert colors after one frame to override any ThemeApplier changes
+            StartCoroutine(EnforceColorsNextFrame());
+        }
+
+        /// <summary>
+        /// Re-applies card colors after one frame to prevent ThemeApplier from overriding card-specific colors.
+        /// Cards manage their own neon cyan/green/red states and should not be themed.
+        /// </summary>
+        private IEnumerator EnforceColorsNextFrame()
+        {
+            yield return null;
+            if (!isFaceUp && !isMatched)
+            {
+                SetFaceDown(false);
+            }
         }
 
         #region Public Methods
@@ -244,10 +259,10 @@ namespace DigitPark.UI
                 shadowImage.color = shadowReducedColor;
 
             if (faceImage != null)
-                faceImage.color = new Color(0.02f, 0.01f, 0.04f, 1f);
+                faceImage.color = new Color(0.01f, 0.03f, 0.05f, 1f);
 
             if (glowOutline != null)
-                glowOutline.effectColor = new Color(0.3f, 0.05f, 0.3f, 0.15f);
+                glowOutline.effectColor = new Color(0f, 0.3f, 0.3f, 0.15f);
         }
 
         #endregion
@@ -266,9 +281,11 @@ namespace DigitPark.UI
         {
             if (!button.interactable || isMatched || isAnimating) return;
 
-            if (!isFaceUp)
+            // Restore card to normal position after press (flip is handled by controller via onClick)
+            if (!isFaceUp && cardFace != null)
             {
-                FlipCard();
+                StopAllCardCoroutines();
+                currentAnimation = StartCoroutine(AnimateHoverExit());
             }
         }
 
@@ -319,7 +336,7 @@ namespace DigitPark.UI
             if (symbolText != null)
             {
                 symbolText.text = "?";
-                symbolText.color = new Color(1f, 0f, 0.8f, 0.25f);
+                symbolText.color = new Color(0f, 1f, 1f, 0.25f);
                 symbolText.fontSize = 72;
             }
 
@@ -850,7 +867,7 @@ namespace DigitPark.UI
                 shadowImage.color = new Color(0f, 0f, 0f, 0.1f);
 
             if (faceImage != null)
-                faceImage.color = new Color(0.02f, 0.01f, 0.03f, 1f);
+                faceImage.color = new Color(0.01f, 0.03f, 0.05f, 1f);
 
             // Delay aleatorio para efecto de ola
             yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.2f));
@@ -883,11 +900,11 @@ namespace DigitPark.UI
                 // Colores
                 float colorT = EaseOutQuad(t);
                 if (faceImage != null)
-                    faceImage.color = Color.Lerp(new Color(0.02f, 0.01f, 0.03f, 1f), faceDownColor, colorT);
+                    faceImage.color = Color.Lerp(new Color(0.01f, 0.03f, 0.05f, 1f), faceDownColor, colorT);
                 if (shadowImage != null)
                     shadowImage.color = Color.Lerp(new Color(0f, 0f, 0f, 0.1f), shadowColor, colorT);
                 if (glowOutline != null)
-                    glowOutline.effectColor = Color.Lerp(new Color(0.2f, 0.05f, 0.2f, 0.1f), faceDownGlowColor, colorT);
+                    glowOutline.effectColor = Color.Lerp(new Color(0f, 0.2f, 0.2f, 0.1f), faceDownGlowColor, colorT);
 
                 yield return null;
             }

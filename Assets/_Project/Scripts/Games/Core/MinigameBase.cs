@@ -170,7 +170,7 @@ namespace DigitPark.Games
             OnGameCompleted?.Invoke(currentResult);
 
             // Registrar en sesion si hay una activa
-            if (GameSessionManager.Instance.HasActiveSession)
+            if (GameSessionManager.Instance != null && GameSessionManager.Instance.HasActiveSession)
             {
                 GameSessionManager.Instance.RegisterGameResult(currentResult);
             }
