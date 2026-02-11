@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 namespace DigitPark.Editor
 {
@@ -12,6 +13,21 @@ namespace DigitPark.Editor
     /// </summary>
     public class CashTournamentsUIBuilder : EditorWindow
     {
+        // Reference Assigner state
+        private Vector2 scrollPosition;
+        private static int assignedCount = 0;
+        private static int failedCount = 0;
+        private static int alreadySetCount = 0;
+        private static List<AssignResult> assignResults = new List<AssignResult>();
+
+        private struct AssignResult
+        {
+            public string fieldName;
+            public string status;
+            public bool success;
+            public Object assignedObject;
+        }
+
         #region Colors - Premium Theme
 
         private static readonly Color BG_DARK = new Color(0.06f, 0.07f, 0.1f, 1f);
@@ -33,6 +49,7 @@ namespace DigitPark.Editor
         private const string PREFAB_PATH = "Assets/_Project/Prefabs/CashBattle/TournamentCardUI.prefab";
         private const string TOURNAMENT_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Tournaments/";
         private const string NAVIGATION_ICONS_PATH = "Assets/_Project/Art/Icons/Navigation/Buttons/";
+        private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
 
         #endregion
 
@@ -44,6 +61,9 @@ namespace DigitPark.Editor
 
         private void OnGUI()
         {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
+            // ========== SECCION 1: UI BUILDER ==========
             GUILayout.Label("Cash Tournaments UI Builder", EditorStyles.boldLabel);
             GUILayout.Label("Torneos Premium con Iconos Profesionales", EditorStyles.miniLabel);
             EditorGUILayout.Space(10);
@@ -82,11 +102,53 @@ namespace DigitPark.Editor
             {
                 CleanScene();
             }
+
+            // ========== SEPARADOR ==========
+            EditorGUILayout.Space(15);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            // ========== SECCION 2: REFERENCE ASSIGNER ==========
+            GUILayout.Label("Asignar Referencias", EditorStyles.boldLabel);
+            EditorGUILayout.Space(5);
+
+            string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (currentScene != "CashTournaments")
+            {
+                EditorGUILayout.HelpBox($"Escena actual: {currentScene}\nAbre CashTournaments primero.", MessageType.Warning);
+            }
+
+            MonoBehaviour targetController = FindTournamentController();
+            if (targetController != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Controller:", GUILayout.Width(70));
+                EditorGUILayout.ObjectField(targetController, typeof(MonoBehaviour), true);
+                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("TournamentListPanel no encontrado.", MessageType.Warning);
+            }
+
+            EditorGUILayout.Space(5);
+
+            GUI.backgroundColor = new Color(0.5f, 1f, 0.5f);
+            if (GUILayout.Button("ASIGNAR TODAS LAS REFERENCIAS", GUILayout.Height(36)))
+            {
+                ResetAssignState();
+                RunAssignAllReferences();
+                Repaint();
+            }
+            GUI.backgroundColor = Color.white;
+
+            DrawAssignResults();
+
+            EditorGUILayout.EndScrollView();
         }
 
         private static void BuildCashTournamentsUI()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No se encontró Canvas. Abre la escena CashTournaments primero.", "OK");
@@ -105,7 +167,7 @@ namespace DigitPark.Editor
 
         private static void CleanScene()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = FindMainCanvas();
             if (canvas == null) return;
 
             CleanupOldElements(canvas.transform);
@@ -133,11 +195,16 @@ namespace DigitPark.Editor
 
             // Tournaments List
             CreateTournamentsList(safeArea.transform);
+
+            // Missing elements expected by TournamentListPanel controller
+            CreateMissingElements(safeArea.transform);
         }
 
         private static void CleanupOldElements(Transform parent)
         {
-            string[] toDestroy = { "Background", "SafeArea", "Header", "TournamentsList", "FilterBar" };
+            string[] toDestroy = { "Background", "SafeArea", "Header", "TournamentsList", "FilterBar",
+                "NoTournamentsText", "LoadingIndicator", "RefreshButton",
+                "GameFilterDropdown", "FeeFilterDropdown", "CreateTournamentPanel" };
             foreach (string name in toDestroy)
             {
                 Transform existing = parent.Find(name);
@@ -202,48 +269,65 @@ namespace DigitPark.Editor
 
         private static void CreateBackButton(Transform parent)
         {
-            GameObject backBtn = new GameObject("BackButton");
-            backBtn.transform.SetParent(parent, false);
-
-            RectTransform rt = backBtn.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.5f);
-            rt.anchorMax = new Vector2(0, 0.5f);
-            rt.pivot = new Vector2(0, 0.5f);
-            rt.sizeDelta = new Vector2(50, 50);
-            rt.anchoredPosition = new Vector2(15, 0);
-
-            Image img = backBtn.AddComponent<Image>();
-            img.color = new Color(1, 1, 1, 0.1f);
-
-            Button btn = backBtn.AddComponent<Button>();
-            btn.targetGraphic = img;
-
-            // Arrow icon
-            Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>(NAVIGATION_ICONS_PATH + "arrowWhite.png");
-
-            GameObject arrow = new GameObject("Icon");
-            arrow.transform.SetParent(backBtn.transform, false);
-
-            RectTransform arrowRT = arrow.AddComponent<RectTransform>();
-            arrowRT.anchorMin = Vector2.zero;
-            arrowRT.anchorMax = Vector2.one;
-            arrowRT.offsetMin = new Vector2(10, 10);
-            arrowRT.offsetMax = new Vector2(-10, -10);
-
-            if (arrowSprite != null)
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);
+            if (prefab != null)
             {
-                Image arrowImg = arrow.AddComponent<Image>();
-                arrowImg.sprite = arrowSprite;
-                arrowImg.preserveAspect = true;
-                arrowImg.color = TEXT_WHITE;
+                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+                backBtn.name = "BackButton";
+                RectTransform rect = backBtn.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0, 0.5f);
+                rect.anchorMax = new Vector2(0, 0.5f);
+                rect.pivot = new Vector2(0, 0.5f);
+                rect.sizeDelta = new Vector2(50, 50);
+                rect.anchoredPosition = new Vector2(15, 0);
             }
             else
             {
-                TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
-                arrowText.text = "<";
-                arrowText.fontSize = 32;
-                arrowText.color = TEXT_WHITE;
-                arrowText.alignment = TextAlignmentOptions.Center;
+                Debug.LogWarning("[CashTournaments] BackButtonGold prefab not found, using fallback");
+
+                GameObject backBtn = new GameObject("BackButton");
+                backBtn.transform.SetParent(parent, false);
+
+                RectTransform rt = backBtn.AddComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(0, 0.5f);
+                rt.pivot = new Vector2(0, 0.5f);
+                rt.sizeDelta = new Vector2(50, 50);
+                rt.anchoredPosition = new Vector2(15, 0);
+
+                Image img = backBtn.AddComponent<Image>();
+                img.color = new Color(1, 1, 1, 0.1f);
+
+                Button btn = backBtn.AddComponent<Button>();
+                btn.targetGraphic = img;
+
+                // Arrow icon
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>(NAVIGATION_ICONS_PATH + "arrowWhite.png");
+
+                GameObject arrow = new GameObject("Icon");
+                arrow.transform.SetParent(backBtn.transform, false);
+
+                RectTransform arrowRT = arrow.AddComponent<RectTransform>();
+                arrowRT.anchorMin = Vector2.zero;
+                arrowRT.anchorMax = Vector2.one;
+                arrowRT.offsetMin = new Vector2(10, 10);
+                arrowRT.offsetMax = new Vector2(-10, -10);
+
+                if (arrowSprite != null)
+                {
+                    Image arrowImg = arrow.AddComponent<Image>();
+                    arrowImg.sprite = arrowSprite;
+                    arrowImg.preserveAspect = true;
+                    arrowImg.color = TEXT_WHITE;
+                }
+                else
+                {
+                    TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
+                    arrowText.text = "<";
+                    arrowText.fontSize = 32;
+                    arrowText.color = TEXT_WHITE;
+                    arrowText.alignment = TextAlignmentOptions.Center;
+                }
             }
         }
 
@@ -256,49 +340,25 @@ namespace DigitPark.Editor
             tcRT.anchorMin = new Vector2(0, 0.5f);
             tcRT.anchorMax = new Vector2(0.6f, 0.5f);
             tcRT.pivot = new Vector2(0, 0.5f);
-            tcRT.sizeDelta = new Vector2(0, 50);
+            tcRT.sizeDelta = new Vector2(0, 80);
             tcRT.anchoredPosition = new Vector2(75, 0);
 
-            // Bracket Icon
-            GameObject bracketIcon = new GameObject("BracketIcon");
-            bracketIcon.transform.SetParent(titleContainer.transform, false);
-
-            RectTransform biRT = bracketIcon.AddComponent<RectTransform>();
-            biRT.anchorMin = new Vector2(0, 0.5f);
-            biRT.anchorMax = new Vector2(0, 0.5f);
-            biRT.pivot = new Vector2(0, 0.5f);
-            biRT.sizeDelta = new Vector2(40, 40);
-            biRT.anchoredPosition = Vector2.zero;
-
-            Image biImg = bracketIcon.AddComponent<Image>();
-            biImg.preserveAspect = true;
-            Sprite bracketSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "TournamentBracketIcon.png");
-            if (bracketSprite != null)
-            {
-                biImg.sprite = bracketSprite;
-                biImg.color = Color.white;
-            }
-            else
-            {
-                biImg.color = GOLD;
-            }
-
-            // Title Text
+            // Title Text (centered, no icon)
             GameObject title = new GameObject("TitleText");
             title.transform.SetParent(titleContainer.transform, false);
 
             RectTransform titleRT = title.AddComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0, 0);
             titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.offsetMin = new Vector2(48, 0);
+            titleRT.offsetMin = Vector2.zero;
             titleRT.offsetMax = Vector2.zero;
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Torneos";
-            titleText.fontSize = 26;
+            titleText.fontSize = 78;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
-            titleText.alignment = TextAlignmentOptions.Left;
+            titleText.alignment = TextAlignmentOptions.Center;
         }
 
         private static void CreateBalanceDisplay(Transform parent)
@@ -310,26 +370,49 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = new Vector2(110, 38);
+            rt.sizeDelta = new Vector2(180, 65);
             rt.anchoredPosition = new Vector2(-15, 0);
 
             Image bg = balance.AddComponent<Image>();
-            bg.color = new Color(0, 0, 0, 0.5f);
+            bg.color = new Color(0.05f, 0.06f, 0.08f, 0.9f);
 
-            GameObject text = new GameObject("Text");
-            text.transform.SetParent(balance.transform, false);
+            // CoinIcon showing "$"
+            GameObject coinIcon = new GameObject("CoinIcon");
+            coinIcon.transform.SetParent(balance.transform, false);
 
-            RectTransform textRT = text.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.sizeDelta = Vector2.zero;
+            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
+            coinRT.anchorMin = new Vector2(0, 0.5f);
+            coinRT.anchorMax = new Vector2(0, 0.5f);
+            coinRT.pivot = new Vector2(0, 0.5f);
+            coinRT.sizeDelta = new Vector2(50, 50);
+            coinRT.anchoredPosition = new Vector2(8, 0);
 
-            TextMeshProUGUI textTMP = text.AddComponent<TextMeshProUGUI>();
-            textTMP.text = "$ 125.50";
-            textTMP.fontSize = 18;
-            textTMP.fontStyle = FontStyles.Bold;
-            textTMP.color = GREEN;
-            textTMP.alignment = TextAlignmentOptions.Center;
+            TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
+            coinText.text = "$";
+            coinText.fontSize = 52;
+            coinText.fontStyle = FontStyles.Bold;
+            coinText.color = GREEN;
+            coinText.alignment = TextAlignmentOptions.Center;
+
+            // BalanceText
+            GameObject balanceText = new GameObject("BalanceText");
+            balanceText.transform.SetParent(balance.transform, false);
+
+            RectTransform btRT = balanceText.AddComponent<RectTransform>();
+            btRT.anchorMin = new Vector2(0, 0);
+            btRT.anchorMax = new Vector2(1, 1);
+            btRT.offsetMin = new Vector2(55, 0);
+            btRT.offsetMax = new Vector2(-5, 0);
+
+            TextMeshProUGUI btTMP = balanceText.AddComponent<TextMeshProUGUI>();
+            btTMP.text = "125.50";
+            btTMP.fontSize = 52;
+            btTMP.fontStyle = FontStyles.Bold;
+            btTMP.color = GREEN;
+            btTMP.alignment = TextAlignmentOptions.Left;
+            btTMP.enableAutoSizing = true;
+            btTMP.fontSizeMin = 28;
+            btTMP.fontSizeMax = 52;
         }
 
         private static void CreateNewTournamentButton(Transform parent)
@@ -341,8 +424,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = new Vector2(50, 38);
-            rt.anchoredPosition = new Vector2(-135, 0);
+            rt.sizeDelta = new Vector2(260, 60);
+            rt.anchoredPosition = new Vector2(-200, 0);
 
             Image bg = createBtn.AddComponent<Image>();
             bg.color = GOLD_DARK;
@@ -350,42 +433,24 @@ namespace DigitPark.Editor
             Button btn = createBtn.AddComponent<Button>();
             btn.targetGraphic = bg;
 
-            // Plus Icon
-            GameObject icon = new GameObject("Icon");
-            icon.transform.SetParent(createBtn.transform, false);
+            // Text label (no icon)
+            GameObject label = new GameObject("Label");
+            label.transform.SetParent(createBtn.transform, false);
 
-            RectTransform iconRT = icon.AddComponent<RectTransform>();
-            iconRT.anchorMin = Vector2.zero;
-            iconRT.anchorMax = Vector2.one;
-            iconRT.offsetMin = new Vector2(8, 8);
-            iconRT.offsetMax = new Vector2(-8, -8);
+            RectTransform labelRT = label.AddComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.sizeDelta = Vector2.zero;
 
-            Image iconImg = icon.AddComponent<Image>();
-            iconImg.preserveAspect = true;
-            Sprite createSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "CreateTournamentIcon.png");
-            if (createSprite != null)
-            {
-                iconImg.sprite = createSprite;
-                iconImg.color = Color.white;
-            }
-            else
-            {
-                DestroyImmediate(icon);
-                GameObject plusText = new GameObject("PlusText");
-                plusText.transform.SetParent(createBtn.transform, false);
-
-                RectTransform ptRT = plusText.AddComponent<RectTransform>();
-                ptRT.anchorMin = Vector2.zero;
-                ptRT.anchorMax = Vector2.one;
-                ptRT.sizeDelta = Vector2.zero;
-
-                TextMeshProUGUI pt = plusText.AddComponent<TextMeshProUGUI>();
-                pt.text = "+";
-                pt.fontSize = 28;
-                pt.fontStyle = FontStyles.Bold;
-                pt.color = Color.white;
-                pt.alignment = TextAlignmentOptions.Center;
-            }
+            TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
+            labelTMP.text = "Crear Torneo";
+            labelTMP.fontSize = 52;
+            labelTMP.fontStyle = FontStyles.Bold;
+            labelTMP.color = Color.white;
+            labelTMP.alignment = TextAlignmentOptions.Center;
+            labelTMP.enableAutoSizing = true;
+            labelTMP.fontSizeMin = 28;
+            labelTMP.fontSizeMax = 52;
         }
 
         private static void CreateFilterBar(Transform parent)
@@ -397,7 +462,7 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(0, 50);
+            rt.sizeDelta = new Vector2(0, 60);
             rt.anchoredPosition = new Vector2(0, -100);
 
             Image bg = filterBar.AddComponent<Image>();
@@ -425,12 +490,12 @@ namespace DigitPark.Editor
             btn.transform.SetParent(parent, false);
 
             RectTransform rt = btn.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 34);
+            rt.sizeDelta = new Vector2(0, 60);
 
             LayoutElement le = btn.AddComponent<LayoutElement>();
             le.flexibleWidth = 1;  // Distribuir espacio equitativamente
             le.minWidth = 70;
-            le.preferredHeight = 34;
+            le.preferredHeight = 60;
 
             Image bg = btn.AddComponent<Image>();
             bg.color = isActive ? CYAN : new Color(1, 1, 1, 0.15f);
@@ -452,10 +517,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 14;
-            tmp.fontStyle = isActive ? FontStyles.Bold : FontStyles.Normal;
+            tmp.fontSize = 52;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.color = isActive ? BG_DARK : TEXT_WHITE;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 20;
+            tmp.fontSizeMax = 52;
         }
 
         private static void CreateTournamentsList(Transform parent)
@@ -500,8 +568,8 @@ namespace DigitPark.Editor
             contentRT.sizeDelta = new Vector2(0, 0);
 
             VerticalLayoutGroup vlg = content.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
-            vlg.padding = new RectOffset(5, 5, 5, 20);
+            vlg.spacing = 24;
+            vlg.padding = new RectOffset(10, 10, 10, 40);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
@@ -599,14 +667,15 @@ namespace DigitPark.Editor
                 liveBadge.gameObject.SetActive(isLive);
             }
 
-            // Game Icon - Cargar el icono apropiado
+            // Game Icon - Cargar el icono apropiado (sprite está en child "Sprite")
             Transform gameIcon = card.transform.Find("GameIcon");
             if (gameIcon != null)
             {
-                Image iconImg = gameIcon.GetComponent<Image>();
+                Transform spriteChild = gameIcon.Find("Sprite");
+                Image iconImg = spriteChild != null ? spriteChild.GetComponent<Image>() : gameIcon.GetComponent<Image>();
                 if (iconImg != null)
                 {
-                    string iconPath = $"Assets/_Project/Art/Icons/Games/CashBattle/{game}Icon.png";
+                    string iconPath = $"Assets/_Project/Art/Icons/Games/{game}Icon.png";
                     Sprite gameSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
                     if (gameSprite != null)
                     {
@@ -616,16 +685,410 @@ namespace DigitPark.Editor
             }
         }
 
+        private static void CreateMissingElements(Transform parent)
+        {
+            // A. NoTournamentsText - hidden, shown when no tournaments available
+            GameObject noTournamentsObj = new GameObject("NoTournamentsText");
+            noTournamentsObj.transform.SetParent(parent, false);
+            noTournamentsObj.SetActive(false);
+
+            RectTransform ntRT = noTournamentsObj.AddComponent<RectTransform>();
+            ntRT.anchorMin = new Vector2(0.1f, 0.3f);
+            ntRT.anchorMax = new Vector2(0.9f, 0.7f);
+            ntRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI ntTMP = noTournamentsObj.AddComponent<TextMeshProUGUI>();
+            ntTMP.text = "No hay torneos disponibles";
+            ntTMP.fontSize = 28;
+            ntTMP.color = TEXT_SECONDARY;
+            ntTMP.alignment = TextAlignmentOptions.Center;
+
+            // B. LoadingIndicator - hidden, shown while loading
+            GameObject loadingObj = new GameObject("LoadingIndicator");
+            loadingObj.transform.SetParent(parent, false);
+            loadingObj.SetActive(false);
+
+            RectTransform liRT = loadingObj.AddComponent<RectTransform>();
+            liRT.anchorMin = new Vector2(0.2f, 0.4f);
+            liRT.anchorMax = new Vector2(0.8f, 0.6f);
+            liRT.sizeDelta = Vector2.zero;
+
+            GameObject loadingTextObj = new GameObject("LoadingText");
+            loadingTextObj.transform.SetParent(loadingObj.transform, false);
+
+            RectTransform ltRT = loadingTextObj.AddComponent<RectTransform>();
+            ltRT.anchorMin = Vector2.zero;
+            ltRT.anchorMax = Vector2.one;
+            ltRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI ltTMP = loadingTextObj.AddComponent<TextMeshProUGUI>();
+            ltTMP.text = "Cargando...";
+            ltTMP.fontSize = 28;
+            ltTMP.color = TEXT_WHITE;
+            ltTMP.alignment = TextAlignmentOptions.Center;
+
+            // C. RefreshButton - hidden refresh button
+            GameObject refreshBtnObj = new GameObject("RefreshButton");
+            refreshBtnObj.transform.SetParent(parent, false);
+
+            RectTransform rbRT = refreshBtnObj.AddComponent<RectTransform>();
+            rbRT.anchorMin = new Vector2(1, 1);
+            rbRT.anchorMax = new Vector2(1, 1);
+            rbRT.pivot = new Vector2(1, 1);
+            rbRT.sizeDelta = new Vector2(160, 50);
+            rbRT.anchoredPosition = new Vector2(-15, -105);
+
+            Image rbBg = refreshBtnObj.AddComponent<Image>();
+            rbBg.color = CYAN;
+
+            Button rbBtn = refreshBtnObj.AddComponent<Button>();
+            rbBtn.targetGraphic = rbBg;
+
+            GameObject rbTextObj = new GameObject("Text");
+            rbTextObj.transform.SetParent(refreshBtnObj.transform, false);
+
+            RectTransform rbtRT = rbTextObj.AddComponent<RectTransform>();
+            rbtRT.anchorMin = Vector2.zero;
+            rbtRT.anchorMax = Vector2.one;
+            rbtRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI rbTMP = rbTextObj.AddComponent<TextMeshProUGUI>();
+            rbTMP.text = "Actualizar";
+            rbTMP.fontSize = 28;
+            rbTMP.color = BG_DARK;
+            rbTMP.fontStyle = FontStyles.Bold;
+            rbTMP.alignment = TextAlignmentOptions.Center;
+
+            // D. GameFilterDropdown
+            CreateTMPDropdown(parent, "GameFilterDropdown",
+                new List<string> { "Todos", "QuickMath", "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut" },
+                new Vector2(-210, -105), new Vector2(200, 50));
+
+            // D. FeeFilterDropdown
+            CreateTMPDropdown(parent, "FeeFilterDropdown",
+                new List<string> { "Todas", "$1", "$5", "$10", "$25" },
+                new Vector2(-420, -105), new Vector2(200, 50));
+
+            // E. CreateTournamentPanel - hidden overlay
+            CreateCreateTournamentPanel(parent);
+        }
+
+        private static void CreateTMPDropdown(Transform parent, string name, List<string> options, Vector2 anchoredPos, Vector2 size)
+        {
+            GameObject ddObj = new GameObject(name);
+            ddObj.transform.SetParent(parent, false);
+
+            RectTransform ddRT = ddObj.AddComponent<RectTransform>();
+            ddRT.anchorMin = new Vector2(1, 1);
+            ddRT.anchorMax = new Vector2(1, 1);
+            ddRT.pivot = new Vector2(1, 1);
+            ddRT.sizeDelta = size;
+            ddRT.anchoredPosition = anchoredPos;
+
+            Image ddBg = ddObj.AddComponent<Image>();
+            ddBg.color = new Color(0.15f, 0.17f, 0.22f, 1f);
+
+            TMP_Dropdown dd = ddObj.AddComponent<TMP_Dropdown>();
+
+            // Caption label
+            GameObject captionObj = new GameObject("Label");
+            captionObj.transform.SetParent(ddObj.transform, false);
+
+            RectTransform capRT = captionObj.AddComponent<RectTransform>();
+            capRT.anchorMin = Vector2.zero;
+            capRT.anchorMax = Vector2.one;
+            capRT.offsetMin = new Vector2(10, 0);
+            capRT.offsetMax = new Vector2(-30, 0);
+
+            TextMeshProUGUI capTMP = captionObj.AddComponent<TextMeshProUGUI>();
+            capTMP.fontSize = 28;
+            capTMP.color = TEXT_WHITE;
+            capTMP.alignment = TextAlignmentOptions.Left;
+
+            dd.captionText = capTMP;
+
+            // Add options
+            dd.ClearOptions();
+            dd.AddOptions(options);
+        }
+
+        private static void CreateCreateTournamentPanel(Transform parent)
+        {
+            // Overlay panel - hidden by default
+            GameObject panel = new GameObject("CreateTournamentPanel");
+            panel.transform.SetParent(parent, false);
+            panel.SetActive(false);
+
+            RectTransform pRT = panel.AddComponent<RectTransform>();
+            pRT.anchorMin = Vector2.zero;
+            pRT.anchorMax = Vector2.one;
+            pRT.sizeDelta = Vector2.zero;
+
+            Image pBg = panel.AddComponent<Image>();
+            pBg.color = new Color(0f, 0f, 0f, 0.85f);
+
+            // Content container with vertical layout
+            GameObject contentContainer = new GameObject("PanelContent");
+            contentContainer.transform.SetParent(panel.transform, false);
+
+            RectTransform ccRT = contentContainer.AddComponent<RectTransform>();
+            ccRT.anchorMin = new Vector2(0.1f, 0.15f);
+            ccRT.anchorMax = new Vector2(0.9f, 0.85f);
+            ccRT.sizeDelta = Vector2.zero;
+
+            Image ccBg = contentContainer.AddComponent<Image>();
+            ccBg.color = CARD_BG;
+
+            VerticalLayoutGroup vlg = contentContainer.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 20;
+            vlg.padding = new RectOffset(20, 20, 20, 20);
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+
+            // Panel Title
+            GameObject titleObj = new GameObject("PanelTitle");
+            titleObj.transform.SetParent(contentContainer.transform, false);
+
+            RectTransform ttRT = titleObj.AddComponent<RectTransform>();
+            ttRT.sizeDelta = new Vector2(0, 50);
+
+            LayoutElement ttLE = titleObj.AddComponent<LayoutElement>();
+            ttLE.preferredHeight = 50;
+
+            TextMeshProUGUI ttTMP = titleObj.AddComponent<TextMeshProUGUI>();
+            ttTMP.text = "Crear Torneo";
+            ttTMP.fontSize = 36;
+            ttTMP.fontStyle = FontStyles.Bold;
+            ttTMP.color = GOLD;
+            ttTMP.alignment = TextAlignmentOptions.Center;
+
+            // MaxPlayersSlider
+            CreateSliderWithLabel(contentContainer.transform, "MaxPlayersSlider", "MaxPlayersText", "Max Jugadores: 10");
+
+            // EntryFeeSlider
+            CreateSliderWithLabel(contentContainer.transform, "EntryFeeSlider", "EntryFeeText", "Entry Fee: $5");
+
+            // DurationSlider
+            CreateSliderWithLabel(contentContainer.transform, "DurationSlider", "DurationText", "Duración: 30 min");
+
+            // GameTypeDropdown
+            CreateTMPDropdownInLayout(contentContainer.transform, "GameTypeDropdown",
+                new List<string> { "QuickMath", "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut" });
+
+            // Buttons row
+            GameObject buttonsRow = new GameObject("ButtonsRow");
+            buttonsRow.transform.SetParent(contentContainer.transform, false);
+
+            RectTransform brRT = buttonsRow.AddComponent<RectTransform>();
+            brRT.sizeDelta = new Vector2(0, 60);
+
+            LayoutElement brLE = buttonsRow.AddComponent<LayoutElement>();
+            brLE.preferredHeight = 60;
+
+            HorizontalLayoutGroup hlg = buttonsRow.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 20;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+
+            // ConfirmCreateButton
+            CreatePanelButton(buttonsRow.transform, "ConfirmCreateButton", "Crear Torneo", GREEN, BG_DARK);
+
+            // CancelCreateButton
+            CreatePanelButton(buttonsRow.transform, "CancelCreateButton", "Cancelar", new Color(0.6f, 0.2f, 0.2f, 1f), TEXT_WHITE);
+        }
+
+        private static void CreateSliderWithLabel(Transform parent, string sliderName, string textName, string defaultText)
+        {
+            // Container for slider row
+            GameObject row = new GameObject(sliderName + "Row");
+            row.transform.SetParent(parent, false);
+
+            RectTransform rowRT = row.AddComponent<RectTransform>();
+            rowRT.sizeDelta = new Vector2(0, 60);
+
+            LayoutElement rowLE = row.AddComponent<LayoutElement>();
+            rowLE.preferredHeight = 60;
+
+            // Label text
+            GameObject textObj = new GameObject(textName);
+            textObj.transform.SetParent(row.transform, false);
+
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = new Vector2(0, 0.5f);
+            textRT.anchorMax = new Vector2(0.4f, 1);
+            textRT.offsetMin = Vector2.zero;
+            textRT.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+            textTMP.text = defaultText;
+            textTMP.fontSize = 24;
+            textTMP.color = TEXT_WHITE;
+            textTMP.alignment = TextAlignmentOptions.Left;
+
+            // Slider
+            GameObject sliderObj = new GameObject(sliderName);
+            sliderObj.transform.SetParent(row.transform, false);
+
+            RectTransform sliderRT = sliderObj.AddComponent<RectTransform>();
+            sliderRT.anchorMin = new Vector2(0.42f, 0.15f);
+            sliderRT.anchorMax = new Vector2(1, 0.85f);
+            sliderRT.offsetMin = Vector2.zero;
+            sliderRT.offsetMax = Vector2.zero;
+
+            Slider slider = sliderObj.AddComponent<Slider>();
+
+            // Background
+            GameObject bg = new GameObject("Background");
+            bg.transform.SetParent(sliderObj.transform, false);
+
+            Image bgImg = bg.AddComponent<Image>();
+            bgImg.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+
+            RectTransform bgRT = bg.GetComponent<RectTransform>();
+            bgRT.anchorMin = Vector2.zero;
+            bgRT.anchorMax = Vector2.one;
+            bgRT.sizeDelta = Vector2.zero;
+
+            // Fill Area
+            GameObject fillArea = new GameObject("Fill Area");
+            fillArea.transform.SetParent(sliderObj.transform, false);
+
+            RectTransform faRT = fillArea.AddComponent<RectTransform>();
+            faRT.anchorMin = Vector2.zero;
+            faRT.anchorMax = new Vector2(1, 1);
+            faRT.sizeDelta = Vector2.zero;
+
+            GameObject fill = new GameObject("Fill");
+            fill.transform.SetParent(fillArea.transform, false);
+
+            Image fillImg = fill.AddComponent<Image>();
+            fillImg.color = CYAN;
+
+            RectTransform fillRT = fill.GetComponent<RectTransform>();
+            fillRT.sizeDelta = Vector2.zero;
+
+            slider.fillRect = fillRT;
+
+            // Handle Slide Area
+            GameObject handleArea = new GameObject("Handle Slide Area");
+            handleArea.transform.SetParent(sliderObj.transform, false);
+
+            RectTransform haRT = handleArea.AddComponent<RectTransform>();
+            haRT.anchorMin = Vector2.zero;
+            haRT.anchorMax = Vector2.one;
+            haRT.sizeDelta = Vector2.zero;
+
+            GameObject handle = new GameObject("Handle");
+            handle.transform.SetParent(handleArea.transform, false);
+
+            Image handleImg = handle.AddComponent<Image>();
+            handleImg.color = Color.white;
+
+            RectTransform handleRT = handle.GetComponent<RectTransform>();
+            handleRT.sizeDelta = new Vector2(30, 30);
+
+            slider.handleRect = handleRT;
+        }
+
+        private static void CreateTMPDropdownInLayout(Transform parent, string name, List<string> options)
+        {
+            GameObject ddObj = new GameObject(name);
+            ddObj.transform.SetParent(parent, false);
+
+            RectTransform ddRT = ddObj.AddComponent<RectTransform>();
+            ddRT.sizeDelta = new Vector2(0, 60);
+
+            LayoutElement ddLE = ddObj.AddComponent<LayoutElement>();
+            ddLE.preferredHeight = 60;
+
+            Image ddBg = ddObj.AddComponent<Image>();
+            ddBg.color = new Color(0.15f, 0.17f, 0.22f, 1f);
+
+            TMP_Dropdown dd = ddObj.AddComponent<TMP_Dropdown>();
+
+            // Caption label
+            GameObject captionObj = new GameObject("Label");
+            captionObj.transform.SetParent(ddObj.transform, false);
+
+            RectTransform capRT = captionObj.AddComponent<RectTransform>();
+            capRT.anchorMin = Vector2.zero;
+            capRT.anchorMax = Vector2.one;
+            capRT.offsetMin = new Vector2(10, 0);
+            capRT.offsetMax = new Vector2(-30, 0);
+
+            TextMeshProUGUI capTMP = captionObj.AddComponent<TextMeshProUGUI>();
+            capTMP.fontSize = 28;
+            capTMP.color = TEXT_WHITE;
+            capTMP.alignment = TextAlignmentOptions.Left;
+
+            dd.captionText = capTMP;
+
+            // Add options
+            dd.ClearOptions();
+            dd.AddOptions(options);
+        }
+
+        private static void CreatePanelButton(Transform parent, string name, string text, Color bgColor, Color textColor)
+        {
+            GameObject btnObj = new GameObject(name);
+            btnObj.transform.SetParent(parent, false);
+
+            RectTransform btnRT = btnObj.AddComponent<RectTransform>();
+            btnRT.sizeDelta = new Vector2(0, 55);
+
+            Image btnBg = btnObj.AddComponent<Image>();
+            btnBg.color = bgColor;
+
+            Button btn = btnObj.AddComponent<Button>();
+            btn.targetGraphic = btnBg;
+
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform tRT = textObj.AddComponent<RectTransform>();
+            tRT.anchorMin = Vector2.zero;
+            tRT.anchorMax = Vector2.one;
+            tRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = 28;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = textColor;
+            tmp.alignment = TextAlignmentOptions.Center;
+        }
+
+        private static Canvas FindMainCanvas()
+        {
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name == "Canvas")
+                    return c;
+            }
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name != "TransitionCanvas")
+                    return c;
+            }
+            return Object.FindFirstObjectByType<Canvas>();
+        }
+
         private static void CreateFallbackCard(Transform parent, string name, int prize, int entry, string players)
         {
             GameObject card = new GameObject("TournamentCard_Fallback");
             card.transform.SetParent(parent, false);
 
             RectTransform rt = card.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 100);
+            rt.sizeDelta = new Vector2(0, 200);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 100;
+            le.preferredHeight = 200;
 
             Image bg = card.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -637,12 +1100,12 @@ namespace DigitPark.Editor
             RectTransform nameRT = nameObj.AddComponent<RectTransform>();
             nameRT.anchorMin = new Vector2(0, 0.5f);
             nameRT.anchorMax = new Vector2(0.6f, 1);
-            nameRT.offsetMin = new Vector2(15, 5);
-            nameRT.offsetMax = new Vector2(0, -5);
+            nameRT.offsetMin = new Vector2(30, 10);
+            nameRT.offsetMax = new Vector2(0, -10);
 
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = name;
-            nameText.fontSize = 18;
+            nameText.fontSize = 36;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = GOLD;
             nameText.alignment = TextAlignmentOptions.Left;
@@ -654,12 +1117,13 @@ namespace DigitPark.Editor
             RectTransform prizeRT = prizeObj.AddComponent<RectTransform>();
             prizeRT.anchorMin = new Vector2(0, 0);
             prizeRT.anchorMax = new Vector2(0.4f, 0.5f);
-            prizeRT.offsetMin = new Vector2(15, 5);
+            prizeRT.offsetMin = new Vector2(30, 10);
             prizeRT.offsetMax = new Vector2(0, 0);
 
             TextMeshProUGUI prizeText = prizeObj.AddComponent<TextMeshProUGUI>();
             prizeText.text = $"Premio: ${prize}";
-            prizeText.fontSize = 16;
+            prizeText.fontSize = 32;
+            prizeText.fontStyle = FontStyles.Bold;
             prizeText.color = GREEN;
             prizeText.alignment = TextAlignmentOptions.Left;
 
@@ -670,12 +1134,13 @@ namespace DigitPark.Editor
             RectTransform infoRT = infoObj.AddComponent<RectTransform>();
             infoRT.anchorMin = new Vector2(0.4f, 0);
             infoRT.anchorMax = new Vector2(0.7f, 0.5f);
-            infoRT.offsetMin = new Vector2(0, 5);
+            infoRT.offsetMin = new Vector2(0, 10);
             infoRT.offsetMax = new Vector2(0, 0);
 
             TextMeshProUGUI infoText = infoObj.AddComponent<TextMeshProUGUI>();
             infoText.text = $"${entry} | {players}";
-            infoText.fontSize = 14;
+            infoText.fontSize = 28;
+            infoText.fontStyle = FontStyles.Bold;
             infoText.color = TEXT_SECONDARY;
             infoText.alignment = TextAlignmentOptions.Center;
 
@@ -704,10 +1169,192 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI jt = joinText.AddComponent<TextMeshProUGUI>();
             jt.text = "Unirse";
-            jt.fontSize = 16;
+            jt.fontSize = 32;
             jt.fontStyle = FontStyles.Bold;
             jt.color = Color.white;
             jt.alignment = TextAlignmentOptions.Center;
         }
+
+        #region Reference Assigner
+
+        private static MonoBehaviour FindTournamentController()
+        {
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "TournamentListPanel") return mb;
+            return null;
+        }
+
+        private static void ResetAssignState()
+        {
+            assignedCount = 0; failedCount = 0; alreadySetCount = 0;
+            assignResults.Clear();
+        }
+
+        private static void RunAssignAllReferences()
+        {
+            var panel = FindTournamentController();
+            if (panel == null)
+            {
+                Debug.LogError("[CashTournamentsUIBuilder] TournamentListPanel no encontrado!");
+                return;
+            }
+
+            SerializedObject so = new SerializedObject(panel);
+            so.Update();
+
+            Canvas canvas = FindMainCanvas();
+            Transform root = canvas != null ? canvas.transform : panel.transform.root;
+
+            // Header
+            AssignRef(so, "titleText", FindTextDeep(root, "TitleText"));
+
+            Transform backBtnT = FindDeep(root, "BackButton");
+            AssignRef(so, "backButton", backBtnT != null ? backBtnT.GetComponent<Button>() : null);
+
+            // Tournament List - "Content" is the scroll content container
+            AssignRef(so, "tournamentsContainer", FindDeep(root, "Content"));
+
+            // Note: tournamentCardPrefab skipped - prefab requires manual assignment
+
+            // No Tournaments Text
+            AssignRef(so, "noTournamentsText", FindTextDeep(root, "NoTournamentsText"));
+
+            // Filters (TMP_Dropdown)
+            AssignRef(so, "gameFilterDropdown", FindDropdownDeep(root, "GameFilterDropdown"));
+            AssignRef(so, "feeFilterDropdown", FindDropdownDeep(root, "FeeFilterDropdown"));
+
+            // Actions
+            AssignRef(so, "refreshButton", FindBtnDeep(root, "RefreshButton"));
+
+            Transform loadingT = FindDeep(root, "LoadingIndicator");
+            AssignGORef(so, "loadingIndicator", loadingT);
+
+            // Create Tournament Button
+            Transform createBtnT = FindDeep(root, "CreateTournamentBtn");
+            if (createBtnT == null) createBtnT = FindDeep(root, "CreateTournamentButton");
+            AssignRef(so, "createTournamentButton", createBtnT != null ? createBtnT.GetComponent<Button>() : null);
+
+            // Create Tournament Panel (GameObject)
+            Transform createPanelT = FindDeep(root, "CreateTournamentPanel");
+            AssignGORef(so, "createTournamentPanel", createPanelT);
+
+            // Sliders (Slider components)
+            AssignRef(so, "maxPlayersSlider", FindSliderDeep(root, "MaxPlayersSlider"));
+            AssignRef(so, "maxPlayersText", FindTextDeep(root, "MaxPlayersText"));
+            AssignRef(so, "entryFeeSlider", FindSliderDeep(root, "EntryFeeSlider"));
+            AssignRef(so, "entryFeeText", FindTextDeep(root, "EntryFeeText"));
+            AssignRef(so, "durationSlider", FindSliderDeep(root, "DurationSlider"));
+            AssignRef(so, "durationText", FindTextDeep(root, "DurationText"));
+
+            // Game Type Dropdown (TMP_Dropdown)
+            AssignRef(so, "gameTypeDropdown", FindDropdownDeep(root, "GameTypeDropdown"));
+
+            // Confirm / Cancel Create (Buttons)
+            AssignRef(so, "confirmCreateButton", FindBtnDeep(root, "ConfirmCreateButton"));
+            AssignRef(so, "cancelCreateButton", FindBtnDeep(root, "CancelCreateButton"));
+
+            // Premium Required Panel (find by type ConfirmPanelUI)
+            MonoBehaviour confirmPanel = null;
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+            {
+                if (mb.GetType().Name == "ConfirmPanelUI") { confirmPanel = mb; break; }
+            }
+            AssignRef(so, "premiumRequiredPanel", confirmPanel);
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(panel);
+            EditorUtility.SetDirty(panel.gameObject);
+            EditorSceneManager.MarkSceneDirty(panel.gameObject.scene);
+
+            Debug.Log($"[CashTournamentsUIBuilder] Referencias: {assignedCount} asignadas, {alreadySetCount} ya puestas, {failedCount} fallidas");
+        }
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private static TextMeshProUGUI FindTextDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
+        }
+
+        private static Button FindBtnDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<Button>() : null;
+        }
+
+        private static Slider FindSliderDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<Slider>() : null;
+        }
+
+        private static TMP_Dropdown FindDropdownDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TMP_Dropdown>() : null;
+        }
+
+        private static void AssignRef(SerializedObject so, string prop, Object value)
+        {
+            var p = so.FindProperty(prop);
+            if (p == null) { AddAR(prop, "Propiedad no existe", false, null); failedCount++; return; }
+            if (p.objectReferenceValue != null) { AddAR(prop, "Ya asignada", true, p.objectReferenceValue); alreadySetCount++; return; }
+            if (value != null) { p.objectReferenceValue = value; AddAR(prop, "Asignada", true, value); assignedCount++; }
+            else { AddAR(prop, "No encontrada", false, null); failedCount++; }
+        }
+
+        private static void AssignGORef(SerializedObject so, string prop, Transform t)
+        {
+            AssignRef(so, prop, t != null ? t.gameObject : null);
+        }
+
+        private static void AddAR(string f, string s, bool ok, Object o)
+        {
+            assignResults.Add(new AssignResult { fieldName = f, status = s, success = ok, assignedObject = o });
+        }
+
+        private void DrawAssignResults()
+        {
+            if (assignResults.Count == 0) return;
+
+            EditorGUILayout.Space(10);
+            int total = assignResults.Count;
+            int successTotal = assignedCount + alreadySetCount;
+            float rate = (float)successTotal / total;
+
+            GUI.color = rate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
+                        rate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
+            GUILayout.Label(rate == 1f ? "TODAS LAS REFERENCIAS ASIGNADAS" : "Algunas referencias faltan", EditorStyles.boldLabel);
+            GUI.color = Color.white;
+
+            GUILayout.Label($"Asignadas: {assignedCount} | Ya puestas: {alreadySetCount} | Fallidas: {failedCount}");
+            EditorGUILayout.Space(5);
+
+            foreach (var r in assignResults)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = r.success ? (r.status == "Ya asignada" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
+                GUILayout.Label(r.success ? (r.status == "Ya asignada" ? "o" : "+") : "x", GUILayout.Width(16));
+                GUI.color = Color.white;
+                GUILayout.Label(r.fieldName, GUILayout.Width(180));
+                GUILayout.Label(r.status, GUILayout.Width(110));
+                if (r.assignedObject != null)
+                    EditorGUILayout.ObjectField(r.assignedObject, typeof(Object), true, GUILayout.Width(140));
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
+        #endregion
     }
 }

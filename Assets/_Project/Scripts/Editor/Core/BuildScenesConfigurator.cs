@@ -52,25 +52,26 @@ namespace DigitPark.Editor
             new[] { "Games/OddOneOut" },
             new[] { "Games/QuickMath" },
 
-            // === 16-20: SOCIAL ===
+            // === 16-21: SOCIAL ===
             new[] { "Social/Scores" },
             new[] { "Social/SearchPlayers" },
             new[] { "Social/Friends" },
             new[] { "FriendRequests" },
             new[] { "Social/MatchHistory" },
+            new[] { "Social/Notifications" },
 
-            // === 21-24: MONETIZATION ===
+            // === 22-25: MONETIZATION ===
             new[] { "Monetization/Shop" },
             new[] { "Monetization/DailyMissions" },
             new[] { "Monetization/DailyRewards" },
             new[] { "Monetization/Achievements" },
 
-            // === 25-27: TOURNAMENTS ===
+            // === 26-28: TOURNAMENTS ===
             new[] { "Tournaments/TournamentsBrowser" },
             new[] { "Tournaments/TournamentCreate" },
             new[] { "Tournaments/TournamentLobby" },
 
-            // === 28-33: CASH BATTLE ===
+            // === 29-34: CASH BATTLE ===
             new[] { "CashBattle/CashBattleHub" },
             new[] { "CashBattle/CashBattle1v1" },
             new[] { "CashBattle/CashTournaments" },
@@ -118,7 +119,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Configura el orden de escenas en Build Settings.\n" +
                 "Indice 0 = Boot (entry point). Orden por flujo de navegacion.\n" +
-                "34 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
+                "35 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -278,10 +279,10 @@ namespace DigitPark.Editor
                 "[4] Onboarding\n" +
                 "[5-7] Core (MainMenu, Settings, Profile)\n" +
                 "[8-15] Games\n" +
-                "[16-20] Social\n" +
-                "[21-24] Monetization\n" +
-                "[25-27] Tournaments\n" +
-                "[28-33] Cash Battle",
+                "[16-21] Social\n" +
+                "[22-25] Monetization\n" +
+                "[26-28] Tournaments\n" +
+                "[29-34] Cash Battle",
                 "OK");
         }
     }

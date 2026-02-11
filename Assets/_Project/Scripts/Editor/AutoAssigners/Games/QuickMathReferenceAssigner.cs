@@ -30,7 +30,7 @@ namespace DigitPark.Editor.AutoAssigners
             "timerText", "roundText", "errorsText", "comboText", "roundIndicatorText",
             // Settings Panel
             "settingsPanel", "toggleAddition", "toggleSubtraction", "toggleMultiplication", "toggleDivision",
-            "toggleEasy", "toggleNormal", "toggleHard", "toggleRounds3", "toggleRounds5", "toggleRounds10",
+            "toggleEasy", "toggleNormal", "toggleHard", "toggleRounds1", "toggleRounds3", "toggleRounds5", "toggleRounds10",
             "startGameButton", "difficultyDescText",
             // Feedback
             "feedbackPanel", "feedbackText",
@@ -206,6 +206,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignToggleReference(so, "toggleEasy", root, "ToggleEasy");
             AssignToggleReference(so, "toggleNormal", root, "ToggleNormal");
             AssignToggleReference(so, "toggleHard", root, "ToggleHard");
+            AssignToggleReference(so, "toggleRounds1", root, "ToggleRounds1");
             AssignToggleReference(so, "toggleRounds3", root, "ToggleRounds3");
             AssignToggleReference(so, "toggleRounds5", root, "ToggleRounds5");
             AssignToggleReference(so, "toggleRounds10", root, "ToggleRounds10");

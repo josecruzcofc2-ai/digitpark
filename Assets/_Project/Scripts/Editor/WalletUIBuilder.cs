@@ -34,15 +34,31 @@ namespace DigitPark.Editor
 
         private static readonly string WALLET_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Wallet/";
         private static readonly string PREFABS_PATH = "Assets/_Project/Prefabs/CashBattle/Wallet/";
+        private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
 
         #endregion
 
         // Layout constants (from top)
         private const float HEADER_HEIGHT = 80f;
         private const float BALANCE_CARD_HEIGHT = 380f;  // Aumentado para incluir botones
-        private const float TABS_HEIGHT = 55f;
+        private const float TABS_HEIGHT = 60f;
         private const float SECTION_SPACING = 15f;
         private const float SIDE_PADDING = 20f;
+
+        // Reference Assigner state
+        private Vector2 scrollPosition;
+        private static int assignedCount = 0;
+        private static int failedCount = 0;
+        private static int alreadySetCount = 0;
+        private static List<AssignResult> assignResults = new List<AssignResult>();
+
+        private struct AssignResult
+        {
+            public string fieldName;
+            public string status;
+            public bool success;
+            public Object assignedObject;
+        }
 
         [MenuItem("DigitPark/UI Builders/CashBattle/Cash Wallet", false, 254)]
         public static void ShowWindow()
@@ -52,6 +68,9 @@ namespace DigitPark.Editor
 
         private void OnGUI()
         {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
+            // ========== BUILD SECTION ==========
             GUILayout.Label("Cash Wallet UI Builder", EditorStyles.boldLabel);
             EditorGUILayout.Space(10);
 
@@ -71,11 +90,68 @@ namespace DigitPark.Editor
                 BuildWalletUI();
             }
             GUI.backgroundColor = Color.white;
+
+            // ========== SEPARADOR ==========
+            EditorGUILayout.Space(15);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            // ========== REFERENCE ASSIGNER ==========
+            GUILayout.Label("Asignar Referencias", EditorStyles.boldLabel);
+            EditorGUILayout.Space(5);
+
+            string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (currentScene != "CashWallet")
+            {
+                EditorGUILayout.HelpBox($"Escena actual: {currentScene}\nAbre CashWallet primero.", MessageType.Warning);
+            }
+
+            MonoBehaviour targetController = FindWalletController();
+            if (targetController != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Controller:", GUILayout.Width(70));
+                EditorGUILayout.ObjectField(targetController, typeof(MonoBehaviour), true);
+                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("CashWalletSceneController no encontrado.", MessageType.Warning);
+            }
+
+            EditorGUILayout.Space(5);
+
+            GUI.backgroundColor = new Color(0.5f, 1f, 0.5f);
+            if (GUILayout.Button("ASIGNAR TODAS LAS REFERENCIAS", GUILayout.Height(36)))
+            {
+                ResetAssignState();
+                RunAssignAllReferences();
+                Repaint();
+            }
+            GUI.backgroundColor = Color.white;
+
+            DrawAssignResults();
+
+            EditorGUILayout.EndScrollView();
+        }
+
+        private static Canvas FindMainCanvas()
+        {
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name == "Canvas")
+                    return c;
+            }
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name != "TransitionCanvas")
+                    return c;
+            }
+            return Object.FindFirstObjectByType<Canvas>();
         }
 
         private static void BuildWalletUI()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No se encontró Canvas. Abre la escena CashWallet.", "OK");
@@ -105,6 +181,7 @@ namespace DigitPark.Editor
             CreateBalanceCard(root.transform);
             CreateFilterTabs(root.transform);
             CreateTransactionsList(root.transform);
+            CreateMissingPanels(root.transform);
 
             ConnectToController(canvas, root);
 
@@ -147,39 +224,57 @@ namespace DigitPark.Editor
             rt.offsetMin = new Vector2(0, -HEADER_HEIGHT);
             rt.offsetMax = Vector2.zero;
 
-            // Back Button
-            GameObject backBtn = new GameObject("BackButton");
-            backBtn.transform.SetParent(header.transform, false);
+            // Back Button - try prefab first
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);
+            if (prefab != null)
+            {
+                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, header.transform);
+                backBtn.name = "BackButton";
+                RectTransform backRT = backBtn.GetComponent<RectTransform>();
+                backRT.anchorMin = new Vector2(0, 0.5f);
+                backRT.anchorMax = new Vector2(0, 0.5f);
+                backRT.pivot = new Vector2(0, 0.5f);
+                backRT.sizeDelta = new Vector2(55, 55);
+                backRT.anchoredPosition = new Vector2(SIDE_PADDING, 0);
+            }
+            else
+            {
+                Debug.LogWarning("[CashWallet] BackButtonGold prefab not found, using fallback");
 
-            RectTransform backRT = backBtn.AddComponent<RectTransform>();
-            backRT.anchorMin = new Vector2(0, 0.5f);
-            backRT.anchorMax = new Vector2(0, 0.5f);
-            backRT.pivot = new Vector2(0, 0.5f);
-            backRT.sizeDelta = new Vector2(55, 55);
-            backRT.anchoredPosition = new Vector2(SIDE_PADDING, 0);
+                GameObject backBtn = new GameObject("BackButton");
+                backBtn.transform.SetParent(header.transform, false);
 
-            Image backBg = backBtn.AddComponent<Image>();
-            backBg.color = CARD_BG;
+                RectTransform backRT = backBtn.AddComponent<RectTransform>();
+                backRT.anchorMin = new Vector2(0, 0.5f);
+                backRT.anchorMax = new Vector2(0, 0.5f);
+                backRT.pivot = new Vector2(0, 0.5f);
+                backRT.sizeDelta = new Vector2(55, 55);
+                backRT.anchoredPosition = new Vector2(SIDE_PADDING, 0);
 
-            Button backButton = backBtn.AddComponent<Button>();
-            backButton.targetGraphic = backBg;
+                Image backBg = backBtn.AddComponent<Image>();
+                backBg.color = CARD_BG;
 
-            // Back arrow
-            GameObject backArrow = new GameObject("Arrow");
-            backArrow.transform.SetParent(backBtn.transform, false);
-            RectTransform arrowRT = backArrow.AddComponent<RectTransform>();
-            arrowRT.anchorMin = Vector2.zero;
-            arrowRT.anchorMax = Vector2.one;
-            arrowRT.offsetMin = Vector2.zero;
-            arrowRT.offsetMax = Vector2.zero;
+                Button backButton = backBtn.AddComponent<Button>();
+                backButton.targetGraphic = backBg;
 
-            TextMeshProUGUI arrowTMP = backArrow.AddComponent<TextMeshProUGUI>();
-            arrowTMP.text = "‹";
-            arrowTMP.fontSize = 42;
-            arrowTMP.color = TEXT_WHITE;
-            arrowTMP.alignment = TextAlignmentOptions.Center;
+                // Back arrow
+                GameObject backArrow = new GameObject("Arrow");
+                backArrow.transform.SetParent(backBtn.transform, false);
+                RectTransform arrowRT = backArrow.AddComponent<RectTransform>();
+                arrowRT.anchorMin = Vector2.zero;
+                arrowRT.anchorMax = Vector2.one;
+                arrowRT.offsetMin = Vector2.zero;
+                arrowRT.offsetMax = Vector2.zero;
 
-            // Title
+                TextMeshProUGUI arrowTMP = backArrow.AddComponent<TextMeshProUGUI>();
+                arrowTMP.text = "\u2039";
+                arrowTMP.fontSize = 42;
+                arrowTMP.color = TEXT_WHITE;
+                arrowTMP.fontStyle = FontStyles.Bold;
+                arrowTMP.alignment = TextAlignmentOptions.Center;
+            }
+
+            // Title - centered
             GameObject title = new GameObject("Title");
             title.transform.SetParent(header.transform, false);
 
@@ -187,34 +282,72 @@ namespace DigitPark.Editor
             titleRT.anchorMin = new Vector2(0, 0);
             titleRT.anchorMax = new Vector2(1, 1);
             titleRT.offsetMin = new Vector2(85, 0);
-            titleRT.offsetMax = new Vector2(-130, 0);
+            titleRT.offsetMax = new Vector2(-200, 0);
 
             TextMeshProUGUI titleTMP = title.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Mi Wallet";
-            titleTMP.fontSize = 32;
+            titleTMP.fontSize = 79;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
-            titleTMP.alignment = TextAlignmentOptions.Left;
+            titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.verticalAlignment = VerticalAlignmentOptions.Middle;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = 32;
+            titleTMP.fontSizeMax = 79;
 
-            // Balance in header
-            GameObject balanceHeader = new GameObject("HeaderBalance");
-            balanceHeader.transform.SetParent(header.transform, false);
+            // BalanceWidget (CashBattleHub style)
+            GameObject balanceWidget = new GameObject("BalanceWidget");
+            balanceWidget.transform.SetParent(header.transform, false);
 
-            RectTransform balHRT = balanceHeader.AddComponent<RectTransform>();
-            balHRT.anchorMin = new Vector2(1, 0);
-            balHRT.anchorMax = new Vector2(1, 1);
-            balHRT.pivot = new Vector2(1, 0.5f);
-            balHRT.sizeDelta = new Vector2(120, 0);
-            balHRT.anchoredPosition = new Vector2(-SIDE_PADDING, 0);
+            RectTransform bwRT = balanceWidget.AddComponent<RectTransform>();
+            bwRT.anchorMin = new Vector2(1, 0.5f);
+            bwRT.anchorMax = new Vector2(1, 0.5f);
+            bwRT.pivot = new Vector2(1, 0.5f);
+            bwRT.sizeDelta = new Vector2(180, 65);
+            bwRT.anchoredPosition = new Vector2(-SIDE_PADDING, 0);
 
-            TextMeshProUGUI balHTMP = balanceHeader.AddComponent<TextMeshProUGUI>();
-            balHTMP.text = "$0.00";
-            balHTMP.fontSize = 28;
-            balHTMP.color = GREEN;
-            balHTMP.fontStyle = FontStyles.Bold;
-            balHTMP.alignment = TextAlignmentOptions.Right;
-            balHTMP.verticalAlignment = VerticalAlignmentOptions.Middle;
+            Image bwBg = balanceWidget.AddComponent<Image>();
+            bwBg.color = new Color(0.05f, 0.05f, 0.07f, 1f);
+
+            HorizontalLayoutGroup bwHlg = balanceWidget.AddComponent<HorizontalLayoutGroup>();
+            bwHlg.padding = new RectOffset(10, 10, 5, 5);
+            bwHlg.spacing = 6;
+            bwHlg.childAlignment = TextAnchor.MiddleCenter;
+            bwHlg.childForceExpandWidth = false;
+            bwHlg.childControlWidth = false;
+            bwHlg.childForceExpandHeight = true;
+
+            // CoinIcon "$"
+            GameObject coinIcon = new GameObject("CoinIcon");
+            coinIcon.transform.SetParent(balanceWidget.transform, false);
+            LayoutElement coinLE = coinIcon.AddComponent<LayoutElement>();
+            coinLE.preferredWidth = 40;
+
+            TextMeshProUGUI coinTMP = coinIcon.AddComponent<TextMeshProUGUI>();
+            coinTMP.text = "$";
+            coinTMP.fontSize = 52;
+            coinTMP.color = GOLD;
+            coinTMP.fontStyle = FontStyles.Bold;
+            coinTMP.alignment = TextAlignmentOptions.Center;
+            coinTMP.enableAutoSizing = true;
+            coinTMP.fontSizeMin = 24;
+            coinTMP.fontSizeMax = 52;
+
+            // BalanceText
+            GameObject balText = new GameObject("BalanceText");
+            balText.transform.SetParent(balanceWidget.transform, false);
+            LayoutElement balLE = balText.AddComponent<LayoutElement>();
+            balLE.flexibleWidth = 1;
+
+            TextMeshProUGUI balTMP = balText.AddComponent<TextMeshProUGUI>();
+            balTMP.text = "0.00";
+            balTMP.fontSize = 52;
+            balTMP.color = GREEN;
+            balTMP.fontStyle = FontStyles.Bold;
+            balTMP.alignment = TextAlignmentOptions.Left;
+            balTMP.enableAutoSizing = true;
+            balTMP.fontSizeMin = 24;
+            balTMP.fontSizeMax = 52;
         }
 
         #endregion
@@ -250,37 +383,26 @@ namespace DigitPark.Editor
             Image borderImg = border.AddComponent<Image>();
             borderImg.color = GREEN;
 
-            // Icon
-            GameObject icon = new GameObject("WalletIcon");
-            icon.transform.SetParent(card.transform, false);
-            RectTransform iconRT = icon.AddComponent<RectTransform>();
-            iconRT.anchorMin = new Vector2(0, 1);
-            iconRT.anchorMax = new Vector2(0, 1);
-            iconRT.pivot = new Vector2(0, 1);
-            iconRT.sizeDelta = new Vector2(45, 45);
-            iconRT.anchoredPosition = new Vector2(25, -20);
-            Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = GOLD;
-            iconImg.preserveAspect = true;
-            Sprite walletSprite = AssetDatabase.LoadAssetAtPath<Sprite>(WALLET_ICONS_PATH + "WalletIcon.png");
-            if (walletSprite != null) iconImg.sprite = walletSprite;
-
-            // Label "Balance Disponible"
+            // Label "Balance Disponible" (no icon, text fills full width)
             GameObject label = new GameObject("BalanceLabel");
             label.transform.SetParent(card.transform, false);
             RectTransform labelRT = label.AddComponent<RectTransform>();
             labelRT.anchorMin = new Vector2(0, 1);
             labelRT.anchorMax = new Vector2(1, 1);
             labelRT.pivot = new Vector2(0, 1);
-            labelRT.sizeDelta = new Vector2(0, 35);
-            labelRT.anchoredPosition = new Vector2(80, -25);
-            labelRT.offsetMax = new Vector2(-25, -25);
+            labelRT.sizeDelta = new Vector2(0, 50);
+            labelRT.anchoredPosition = new Vector2(25, -20);
+            labelRT.offsetMax = new Vector2(-25, -20);
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Balance Disponible";
-            labelTMP.fontSize = 22;
+            labelTMP.fontSize = 62;
             labelTMP.color = TEXT_SECONDARY;
+            labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.alignment = TextAlignmentOptions.Left;
+            labelTMP.enableAutoSizing = true;
+            labelTMP.fontSizeMin = 22;
+            labelTMP.fontSizeMax = 62;
 
             // Big Balance Amount
             GameObject amount = new GameObject("BalanceAmount");
@@ -299,6 +421,7 @@ namespace DigitPark.Editor
             amountTMP.color = GREEN;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Left;
+            amountTMP.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             // Weekly limit section
             CreateWeeklyLimit(card.transform);
@@ -331,9 +454,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Límite semanal";
-            labelTMP.fontSize = 20;
+            labelTMP.fontSize = 42;
             labelTMP.color = TEXT_SECONDARY;
+            labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.alignment = TextAlignmentOptions.Left;
+            labelTMP.enableAutoSizing = true;
+            labelTMP.fontSizeMin = 18;
+            labelTMP.fontSizeMax = 42;
 
             // Value
             GameObject value = new GameObject("Value");
@@ -346,10 +473,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI valueTMP = value.AddComponent<TextMeshProUGUI>();
             valueTMP.text = "$0 / $150";
-            valueTMP.fontSize = 20;
+            valueTMP.fontSize = 42;
             valueTMP.color = CYAN;
             valueTMP.fontStyle = FontStyles.Bold;
             valueTMP.alignment = TextAlignmentOptions.Right;
+            valueTMP.enableAutoSizing = true;
+            valueTMP.fontSizeMin = 18;
+            valueTMP.fontSizeMax = 42;
 
             // Progress bar background
             GameObject barBg = new GameObject("ProgressBarBg");
@@ -411,6 +541,9 @@ namespace DigitPark.Editor
             Image bg = btn.AddComponent<Image>();
             bg.color = bgColor;
 
+            LayoutElement btnLE = btn.AddComponent<LayoutElement>();
+            btnLE.preferredWidth = 350;
+
             Button button = btn.AddComponent<Button>();
             button.targetGraphic = bg;
 
@@ -451,10 +584,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = text;
-            textTMP.fontSize = 26;
+            textTMP.fontSize = 52;
             textTMP.color = accent;
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.enableAutoSizing = true;
+            textTMP.fontSizeMin = 24;
+            textTMP.fontSizeMax = 52;
         }
 
         #endregion
@@ -509,10 +645,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = text;
-            textTMP.fontSize = 20;
+            textTMP.fontSize = 52;
             textTMP.color = active ? TEXT_WHITE : TEXT_SECONDARY;
-            textTMP.fontStyle = active ? FontStyles.Bold : FontStyles.Normal;
+            textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.enableAutoSizing = true;
+            textTMP.fontSizeMin = 18;
+            textTMP.fontSizeMax = 52;
         }
 
         #endregion
@@ -544,8 +683,8 @@ namespace DigitPark.Editor
             titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleTMP = title.AddComponent<TextMeshProUGUI>();
-            titleTMP.text = "Historial de Transacciones";
-            titleTMP.fontSize = 30;
+            titleTMP.text = "Historial de partidas";
+            titleTMP.fontSize = 42;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Center;
@@ -620,9 +759,318 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI emptyTMP = empty.AddComponent<TextMeshProUGUI>();
             emptyTMP.text = "No hay transacciones\n\nTus depósitos y retiros\naparecerán aquí";
-            emptyTMP.fontSize = 22;
+            emptyTMP.fontSize = 38;
             emptyTMP.color = TEXT_SECONDARY;
+            emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
+        }
+
+        #endregion
+
+        #region Missing Panels
+
+        private static void CreateMissingPanels(Transform parent)
+        {
+            // A. BonusBalanceText - near balance display, hidden initially
+            GameObject bonusText = new GameObject("BonusBalanceText");
+            bonusText.transform.SetParent(parent, false);
+            RectTransform bonusRT = bonusText.AddComponent<RectTransform>();
+            bonusRT.anchorMin = new Vector2(0, 1);
+            bonusRT.anchorMax = new Vector2(1, 1);
+            bonusRT.pivot = new Vector2(0.5f, 1);
+            bonusRT.sizeDelta = new Vector2(0, 40);
+            bonusRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + SECTION_SPACING + 140));
+            TextMeshProUGUI bonusTMP = bonusText.AddComponent<TextMeshProUGUI>();
+            bonusTMP.text = "+$0.00 bonus";
+            bonusTMP.fontSize = 24;
+            bonusTMP.color = new Color(0.2f, 0.95f, 0.4f, 1f);
+            bonusTMP.alignment = TextAlignmentOptions.Center;
+            bonusText.SetActive(false);
+
+            // B. HistoryTabButton - third tab button, hidden
+            GameObject historyTab = new GameObject("HistoryTabButton");
+            historyTab.transform.SetParent(parent, false);
+            RectTransform histRT = historyTab.AddComponent<RectTransform>();
+            histRT.anchorMin = new Vector2(0, 1);
+            histRT.anchorMax = new Vector2(0, 1);
+            histRT.pivot = new Vector2(0, 1);
+            histRT.sizeDelta = new Vector2(200, 50);
+            histRT.anchoredPosition = new Vector2(SIDE_PADDING, -(HEADER_HEIGHT + SECTION_SPACING + BALANCE_CARD_HEIGHT + SECTION_SPACING + TABS_HEIGHT + 10));
+            Image histBg = historyTab.AddComponent<Image>();
+            histBg.color = TAB_INACTIVE;
+            Button histBtn = historyTab.AddComponent<Button>();
+            histBtn.targetGraphic = histBg;
+            GameObject histText = new GameObject("Text");
+            histText.transform.SetParent(historyTab.transform, false);
+            RectTransform histTextRT = histText.AddComponent<RectTransform>();
+            histTextRT.anchorMin = Vector2.zero;
+            histTextRT.anchorMax = Vector2.one;
+            histTextRT.offsetMin = Vector2.zero;
+            histTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI histTextTMP = histText.AddComponent<TextMeshProUGUI>();
+            histTextTMP.text = "Historial";
+            histTextTMP.fontSize = 28;
+            histTextTMP.color = TEXT_SECONDARY;
+            histTextTMP.fontStyle = FontStyles.Bold;
+            histTextTMP.alignment = TextAlignmentOptions.Center;
+            historyTab.SetActive(false);
+
+            // C. DepositPanel (hidden overlay)
+            GameObject depositPanel = new GameObject("DepositPanel");
+            depositPanel.transform.SetParent(parent, false);
+            RectTransform dpRT = depositPanel.AddComponent<RectTransform>();
+            dpRT.anchorMin = Vector2.zero;
+            dpRT.anchorMax = Vector2.one;
+            dpRT.offsetMin = Vector2.zero;
+            dpRT.offsetMax = Vector2.zero;
+            Image dpBg = depositPanel.AddComponent<Image>();
+            dpBg.color = DARK_BG;
+            VerticalLayoutGroup dpVlg = depositPanel.AddComponent<VerticalLayoutGroup>();
+            dpVlg.padding = new RectOffset(20, 20, 20, 20);
+            dpVlg.spacing = 10;
+            dpVlg.childForceExpandWidth = true;
+            dpVlg.childForceExpandHeight = false;
+            dpVlg.childControlWidth = true;
+            dpVlg.childControlHeight = false;
+
+            GameObject depositOptions = new GameObject("DepositOptionsContainer");
+            depositOptions.transform.SetParent(depositPanel.transform, false);
+            depositOptions.AddComponent<RectTransform>();
+
+            GameObject paymentMethods = new GameObject("PaymentMethodsContainer");
+            paymentMethods.transform.SetParent(depositPanel.transform, false);
+            paymentMethods.AddComponent<RectTransform>();
+
+            depositPanel.SetActive(false);
+
+            // D. WithdrawPanel (hidden overlay)
+            GameObject withdrawPanel = new GameObject("WithdrawPanel");
+            withdrawPanel.transform.SetParent(parent, false);
+            RectTransform wpRT = withdrawPanel.AddComponent<RectTransform>();
+            wpRT.anchorMin = Vector2.zero;
+            wpRT.anchorMax = Vector2.one;
+            wpRT.offsetMin = Vector2.zero;
+            wpRT.offsetMax = Vector2.zero;
+            Image wpBg = withdrawPanel.AddComponent<Image>();
+            wpBg.color = DARK_BG;
+            VerticalLayoutGroup wpVlg = withdrawPanel.AddComponent<VerticalLayoutGroup>();
+            wpVlg.padding = new RectOffset(20, 20, 20, 20);
+            wpVlg.spacing = 10;
+            wpVlg.childForceExpandWidth = true;
+            wpVlg.childForceExpandHeight = false;
+            wpVlg.childControlWidth = true;
+            wpVlg.childControlHeight = false;
+
+            // WithdrawAmountInput (TMP_InputField)
+            GameObject inputObj = new GameObject("WithdrawAmountInput");
+            inputObj.transform.SetParent(withdrawPanel.transform, false);
+            RectTransform inputRT = inputObj.AddComponent<RectTransform>();
+            inputRT.sizeDelta = new Vector2(400, 70);
+            Image inputBg = inputObj.AddComponent<Image>();
+            inputBg.color = new Color(0.15f, 0.17f, 0.22f, 1f);
+
+            // Text Area
+            GameObject textArea = new GameObject("Text Area");
+            textArea.transform.SetParent(inputObj.transform, false);
+            RectTransform taRT = textArea.AddComponent<RectTransform>();
+            taRT.anchorMin = Vector2.zero;
+            taRT.anchorMax = Vector2.one;
+            taRT.offsetMin = new Vector2(10, 0);
+            taRT.offsetMax = new Vector2(-10, 0);
+
+            // Input text
+            GameObject inputText = new GameObject("Text");
+            inputText.transform.SetParent(textArea.transform, false);
+            RectTransform itRT = inputText.AddComponent<RectTransform>();
+            itRT.anchorMin = Vector2.zero;
+            itRT.anchorMax = Vector2.one;
+            itRT.sizeDelta = Vector2.zero;
+            TextMeshProUGUI itTMP = inputText.AddComponent<TextMeshProUGUI>();
+            itTMP.fontSize = 28;
+
+            // Placeholder
+            GameObject placeholder = new GameObject("Placeholder");
+            placeholder.transform.SetParent(textArea.transform, false);
+            RectTransform phRT = placeholder.AddComponent<RectTransform>();
+            phRT.anchorMin = Vector2.zero;
+            phRT.anchorMax = Vector2.one;
+            phRT.sizeDelta = Vector2.zero;
+            TextMeshProUGUI phTMP = placeholder.AddComponent<TextMeshProUGUI>();
+            phTMP.text = "Ingrese monto...";
+            phTMP.fontSize = 28;
+            phTMP.fontStyle = FontStyles.Italic;
+            phTMP.color = new Color(0.5f, 0.5f, 0.55f, 0.5f);
+
+            TMP_InputField inputField = inputObj.AddComponent<TMP_InputField>();
+            inputField.textComponent = itTMP;
+            inputField.placeholder = phTMP;
+            inputField.contentType = TMP_InputField.ContentType.DecimalNumber;
+
+            // WithdrawableAmountText
+            GameObject withdrawableAmt = new GameObject("WithdrawableAmountText");
+            withdrawableAmt.transform.SetParent(withdrawPanel.transform, false);
+            RectTransform waRT = withdrawableAmt.AddComponent<RectTransform>();
+            waRT.sizeDelta = new Vector2(400, 40);
+            TextMeshProUGUI waTMP = withdrawableAmt.AddComponent<TextMeshProUGUI>();
+            waTMP.text = "$0.00 disponible";
+            waTMP.fontSize = 24;
+            waTMP.color = TEXT_WHITE;
+            waTMP.alignment = TextAlignmentOptions.Left;
+
+            // WithdrawMinText
+            GameObject withdrawMin = new GameObject("WithdrawMinText");
+            withdrawMin.transform.SetParent(withdrawPanel.transform, false);
+            RectTransform wmRT = withdrawMin.AddComponent<RectTransform>();
+            wmRT.sizeDelta = new Vector2(400, 35);
+            TextMeshProUGUI wmTMP = withdrawMin.AddComponent<TextMeshProUGUI>();
+            wmTMP.text = "M\u00ednimo: $10.00";
+            wmTMP.fontSize = 20;
+            wmTMP.color = TEXT_SECONDARY;
+            wmTMP.alignment = TextAlignmentOptions.Left;
+
+            // WithdrawFeeText
+            GameObject withdrawFee = new GameObject("WithdrawFeeText");
+            withdrawFee.transform.SetParent(withdrawPanel.transform, false);
+            RectTransform wfRT = withdrawFee.AddComponent<RectTransform>();
+            wfRT.sizeDelta = new Vector2(400, 35);
+            TextMeshProUGUI wfTMP = withdrawFee.AddComponent<TextMeshProUGUI>();
+            wfTMP.text = "Comisi\u00f3n: $0.00";
+            wfTMP.fontSize = 20;
+            wfTMP.color = TEXT_SECONDARY;
+            wfTMP.alignment = TextAlignmentOptions.Left;
+
+            withdrawPanel.SetActive(false);
+
+            // E. TransactionHistoryPanel (hidden container)
+            GameObject txHistPanel = new GameObject("TransactionHistoryPanel");
+            txHistPanel.transform.SetParent(parent, false);
+            RectTransform thpRT = txHistPanel.AddComponent<RectTransform>();
+            thpRT.anchorMin = Vector2.zero;
+            thpRT.anchorMax = Vector2.one;
+            thpRT.offsetMin = Vector2.zero;
+            thpRT.offsetMax = Vector2.zero;
+            txHistPanel.SetActive(false);
+
+            // F. KycRequiredPanel (hidden)
+            GameObject kycPanel = new GameObject("KycRequiredPanel");
+            kycPanel.transform.SetParent(parent, false);
+            RectTransform kycRT = kycPanel.AddComponent<RectTransform>();
+            kycRT.anchorMin = Vector2.zero;
+            kycRT.anchorMax = Vector2.one;
+            kycRT.offsetMin = Vector2.zero;
+            kycRT.offsetMax = Vector2.zero;
+            Image kycBg = kycPanel.AddComponent<Image>();
+            kycBg.color = DARK_BG;
+
+            GameObject verifyBtn = new GameObject("VerifyKycButton");
+            verifyBtn.transform.SetParent(kycPanel.transform, false);
+            RectTransform vkRT = verifyBtn.AddComponent<RectTransform>();
+            vkRT.sizeDelta = new Vector2(350, 70);
+            Image vkBg = verifyBtn.AddComponent<Image>();
+            vkBg.color = GREEN_DARK;
+            Button vkButton = verifyBtn.AddComponent<Button>();
+            vkButton.targetGraphic = vkBg;
+            Outline vkOutline = verifyBtn.AddComponent<Outline>();
+            vkOutline.effectColor = GREEN;
+            vkOutline.effectDistance = new Vector2(2f, -2f);
+
+            GameObject vkText = new GameObject("Text");
+            vkText.transform.SetParent(verifyBtn.transform, false);
+            RectTransform vkTextRT = vkText.AddComponent<RectTransform>();
+            vkTextRT.anchorMin = Vector2.zero;
+            vkTextRT.anchorMax = Vector2.one;
+            vkTextRT.offsetMin = Vector2.zero;
+            vkTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI vkTextTMP = vkText.AddComponent<TextMeshProUGUI>();
+            vkTextTMP.text = "Verificar Identidad";
+            vkTextTMP.fontSize = 28;
+            vkTextTMP.color = GREEN;
+            vkTextTMP.fontStyle = FontStyles.Bold;
+            vkTextTMP.alignment = TextAlignmentOptions.Center;
+
+            kycPanel.SetActive(false);
+
+            // G. Overlay panels (all hidden)
+            // LoadingOverlay
+            GameObject loadingOverlay = CreateOverlayPanel(parent, "LoadingOverlay");
+            GameObject loadingText = new GameObject("LoadingText");
+            loadingText.transform.SetParent(loadingOverlay.transform, false);
+            RectTransform ltRT = loadingText.AddComponent<RectTransform>();
+            ltRT.sizeDelta = new Vector2(400, 60);
+            TextMeshProUGUI ltTMP = loadingText.AddComponent<TextMeshProUGUI>();
+            ltTMP.text = "Procesando...";
+            ltTMP.fontSize = 32;
+            ltTMP.color = TEXT_WHITE;
+            ltTMP.fontStyle = FontStyles.Bold;
+            ltTMP.alignment = TextAlignmentOptions.Center;
+            loadingOverlay.SetActive(false);
+
+            // SuccessOverlay
+            GameObject successOverlay = CreateOverlayPanel(parent, "SuccessOverlay");
+            GameObject successText = new GameObject("SuccessText");
+            successText.transform.SetParent(successOverlay.transform, false);
+            RectTransform stRT = successText.AddComponent<RectTransform>();
+            stRT.sizeDelta = new Vector2(400, 60);
+            TextMeshProUGUI stTMP = successText.AddComponent<TextMeshProUGUI>();
+            stTMP.text = "\u00a1Operaci\u00f3n exitosa!";
+            stTMP.fontSize = 32;
+            stTMP.color = GREEN;
+            stTMP.fontStyle = FontStyles.Bold;
+            stTMP.alignment = TextAlignmentOptions.Center;
+            successOverlay.SetActive(false);
+
+            // ErrorOverlay
+            GameObject errorOverlay = CreateOverlayPanel(parent, "ErrorOverlay");
+            GameObject errorText = new GameObject("ErrorMessageText");
+            errorText.transform.SetParent(errorOverlay.transform, false);
+            RectTransform etRT = errorText.AddComponent<RectTransform>();
+            etRT.sizeDelta = new Vector2(400, 60);
+            TextMeshProUGUI etTMP = errorText.AddComponent<TextMeshProUGUI>();
+            etTMP.text = "";
+            etTMP.fontSize = 28;
+            etTMP.color = RED;
+            etTMP.fontStyle = FontStyles.Bold;
+            etTMP.alignment = TextAlignmentOptions.Center;
+            errorOverlay.SetActive(false);
+
+            // H. LoadMoreButton (hidden)
+            GameObject loadMoreBtn = new GameObject("LoadMoreButton");
+            loadMoreBtn.transform.SetParent(parent, false);
+            RectTransform lmRT = loadMoreBtn.AddComponent<RectTransform>();
+            lmRT.sizeDelta = new Vector2(300, 60);
+            Image lmBg = loadMoreBtn.AddComponent<Image>();
+            lmBg.color = TAB_INACTIVE;
+            Button lmButton = loadMoreBtn.AddComponent<Button>();
+            lmButton.targetGraphic = lmBg;
+
+            GameObject lmText = new GameObject("Text");
+            lmText.transform.SetParent(loadMoreBtn.transform, false);
+            RectTransform lmTextRT = lmText.AddComponent<RectTransform>();
+            lmTextRT.anchorMin = Vector2.zero;
+            lmTextRT.anchorMax = Vector2.one;
+            lmTextRT.offsetMin = Vector2.zero;
+            lmTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI lmTextTMP = lmText.AddComponent<TextMeshProUGUI>();
+            lmTextTMP.text = "Cargar m\u00e1s";
+            lmTextTMP.fontSize = 28;
+            lmTextTMP.color = TEXT_WHITE;
+            lmTextTMP.fontStyle = FontStyles.Bold;
+            lmTextTMP.alignment = TextAlignmentOptions.Center;
+            loadMoreBtn.SetActive(false);
+        }
+
+        private static GameObject CreateOverlayPanel(Transform parent, string name)
+        {
+            GameObject overlay = new GameObject(name);
+            overlay.transform.SetParent(parent, false);
+            RectTransform rt = overlay.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            Image bg = overlay.AddComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.85f);
+            return overlay;
         }
 
         #endregion
@@ -631,7 +1079,7 @@ namespace DigitPark.Editor
 
         private static void ConnectToController(Canvas canvas, GameObject walletUI)
         {
-            var controller = FindFirstObjectByType<CashBattle.CashWalletSceneController>();
+            var controller = Object.FindFirstObjectByType<CashBattle.CashWalletSceneController>();
             if (controller == null)
             {
                 Debug.LogWarning("[WalletUIBuilder] CashWalletSceneController no encontrado.");
@@ -705,6 +1153,206 @@ namespace DigitPark.Editor
 
             so.ApplyModifiedProperties();
             Debug.Log("[WalletUIBuilder] Referencias conectadas!");
+        }
+
+        #endregion
+
+        #region Reference Assigner
+
+        private static MonoBehaviour FindWalletController()
+        {
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "CashWalletSceneController") return mb;
+            return null;
+        }
+
+        private static void ResetAssignState()
+        {
+            assignedCount = 0;
+            failedCount = 0;
+            alreadySetCount = 0;
+            assignResults.Clear();
+        }
+
+        private static void RunAssignAllReferences()
+        {
+            var controller = FindWalletController();
+            if (controller == null)
+            {
+                Debug.LogWarning("[WalletUIBuilder] CashWalletSceneController no encontrado.");
+                return;
+            }
+
+            SerializedObject so = new SerializedObject(controller);
+            so.Update();
+
+            Canvas canvas = FindMainCanvas();
+            Transform root = canvas != null ? canvas.transform : controller.transform.root;
+
+            // ==================== HEADER ====================
+            AssignRef(so, "backButton", FindBtnDeep(root, "BackButton"));
+            AssignRef(so, "balanceText", FindTextDeep(root, "BalanceText"));
+            AssignRef(so, "bonusBalanceText", FindTextDeep(root, "BonusBalanceText"));
+
+            // ==================== TAB BUTTONS ====================
+            AssignRef(so, "depositTabButton", FindBtnDeep(root, "TabDeposits"));
+
+            AssignRef(so, "withdrawTabButton", FindBtnDeep(root, "TabWithdrawals"));
+
+            AssignRef(so, "historyTabButton", FindBtnDeep(root, "HistoryTabButton"));
+
+            // ==================== TAB PANELS ====================
+            AssignGORef(so, "depositPanel", FindDeep(root, "DepositPanel"));
+            AssignGORef(so, "withdrawPanel", FindDeep(root, "WithdrawPanel"));
+
+            AssignGORef(so, "transactionHistoryPanel", FindDeep(root, "TransactionHistoryPanel"));
+
+            // ==================== DEPOSIT SECTION ====================
+            AssignTransformRef(so, "depositOptionsContainer", FindDeep(root, "DepositOptionsContainer"));
+            AssignGORef(so, "paymentMethodsContainer", FindDeep(root, "PaymentMethodsContainer"));
+
+            // ==================== WITHDRAW SECTION ====================
+            // Special handling for TMP_InputField
+            Transform withdrawInputT = FindDeep(root, "WithdrawAmountInput");
+            if (withdrawInputT != null)
+            {
+                var input = withdrawInputT.GetComponent<TMP_InputField>();
+                if (input != null) { AssignRef(so, "withdrawAmountInput", input); }
+                else { AddAR("withdrawAmountInput", "InputField component missing", false, null); failedCount++; }
+            }
+            else { AddAR("withdrawAmountInput", "Not found", false, null); failedCount++; }
+            AssignRef(so, "withdrawButton", FindBtnDeep(root, "WithdrawButton"));
+            AssignRef(so, "withdrawableAmountText", FindTextDeep(root, "WithdrawableAmountText"));
+            AssignRef(so, "withdrawMinText", FindTextDeep(root, "WithdrawMinText"));
+            AssignRef(so, "withdrawFeeText", FindTextDeep(root, "WithdrawFeeText"));
+            AssignGORef(so, "kycRequiredPanel", FindDeep(root, "KycRequiredPanel"));
+            AssignRef(so, "verifyKycButton", FindBtnDeep(root, "VerifyKycButton"));
+
+            // ==================== TRANSACTION HISTORY ====================
+            // Content lives inside TransactionsList/ScrollView/Viewport/Content
+            Transform txList = FindDeep(root, "TransactionsList");
+            Transform txContent = txList != null ? FindDeep(txList, "Content") : FindDeep(root, "Content");
+            AssignTransformRef(so, "transactionsContainer", txContent);
+
+            AssignRef(so, "emptyHistoryText", FindTextDeep(root, "EmptyText"));
+
+            AssignRef(so, "loadMoreButton", FindBtnDeep(root, "LoadMoreButton"));
+
+            // ==================== OVERLAYS ====================
+            AssignGORef(so, "loadingOverlay", FindDeep(root, "LoadingOverlay"));
+            AssignGORef(so, "successOverlay", FindDeep(root, "SuccessOverlay"));
+            AssignGORef(so, "errorOverlay", FindDeep(root, "ErrorOverlay"));
+            AssignRef(so, "errorMessageText", FindTextDeep(root, "ErrorMessageText"));
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(controller);
+            EditorUtility.SetDirty(controller.gameObject);
+            EditorSceneManager.MarkSceneDirty(controller.gameObject.scene);
+            Debug.Log($"[WalletUIBuilder] Referencias asignadas: {assignedCount} | Ya puestas: {alreadySetCount} | Fallidas: {failedCount}");
+        }
+
+        #endregion
+
+        #region Assigner Finders
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private static TextMeshProUGUI FindTextDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
+        }
+
+        private static Button FindBtnDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<Button>() : null;
+        }
+
+        private static TMP_InputField FindInputFieldDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TMP_InputField>() : null;
+        }
+
+        #endregion
+
+        #region Assigner Helpers
+
+        private static void AssignRef(SerializedObject so, string propertyName, Object value)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddAR(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddAR(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            if (value != null) { prop.objectReferenceValue = value; AddAR(propertyName, "Assigned", true, value); assignedCount++; }
+            else { AddAR(propertyName, "Not found", false, null); failedCount++; }
+        }
+
+        private static void AssignGORef(SerializedObject so, string propertyName, Transform t)
+        {
+            AssignRef(so, propertyName, t != null ? t.gameObject : null);
+        }
+
+        private static void AssignTransformRef(SerializedObject so, string propertyName, Transform t)
+        {
+            AssignRef(so, propertyName, t);
+        }
+
+        private static void AddAR(string fieldName, string status, bool success, Object assignedObject)
+        {
+            assignResults.Add(new AssignResult
+            {
+                fieldName = fieldName,
+                status = status,
+                success = success,
+                assignedObject = assignedObject
+            });
+        }
+
+        private void DrawAssignResults()
+        {
+            if (assignResults.Count == 0) return;
+
+            EditorGUILayout.Space(10);
+
+            int total = assignResults.Count;
+            int successTotal = assignedCount + alreadySetCount;
+
+            EditorGUILayout.BeginVertical("box");
+
+            float successRate = (float)successTotal / total;
+            GUI.color = successRate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
+                        successRate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
+            GUILayout.Label(successRate == 1f ? "TODAS LAS REFERENCIAS ASIGNADAS" : "Faltan algunas referencias", EditorStyles.boldLabel);
+            GUI.color = Color.white;
+
+            GUILayout.Label($"Asignadas: {assignedCount} | Ya puestas: {alreadySetCount} | Fallidas: {failedCount}");
+            EditorGUILayout.Space(5);
+
+            foreach (var result in assignResults)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
+                GUILayout.Label(result.success ? (result.status == "Already Set" ? "o" : "+") : "x", GUILayout.Width(20));
+                GUI.color = Color.white;
+                GUILayout.Label(result.fieldName, GUILayout.Width(200));
+                GUILayout.Label(result.status, GUILayout.Width(120));
+                if (result.assignedObject != null)
+                    EditorGUILayout.ObjectField(result.assignedObject, typeof(Object), true, GUILayout.Width(150));
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.EndVertical();
         }
 
         #endregion

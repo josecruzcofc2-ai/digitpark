@@ -25,15 +25,21 @@ namespace DigitPark.Editor.AutoAssigners
         private static readonly string[] REQUIRED_REFS = {
             // Header
             "titleText", "backButton",
-            // List
+            // Tournament List
             "tournamentsContainer", "noTournamentsText",
             // Note: tournamentCardPrefab excluded - prefab requires manual assignment
-            // Refresh
+            // Filters
+            "gameFilterDropdown", "feeFilterDropdown",
+            // Actions
             "refreshButton", "loadingIndicator",
             // Create Tournament
-            "createTournamentButton"
-            // Note: createTournamentPanel, sliders, dropdowns excluded - V2 premium features
-            // Note: premiumRequiredPanel excluded - specialized panel
+            "createTournamentButton", "createTournamentPanel",
+            "maxPlayersSlider", "maxPlayersText",
+            "entryFeeSlider", "entryFeeText",
+            "durationSlider", "durationText",
+            "gameTypeDropdown", "confirmCreateButton", "cancelCreateButton",
+            // Premium
+            "premiumRequiredPanel"
         };
 
         private struct ReferenceResult
@@ -46,7 +52,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashTournaments References", false, 253)]
+        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashTournaments References", false, 242)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashTournamentsReferenceAssigner>("CashTournaments Reference Assigner");
@@ -75,8 +81,10 @@ namespace DigitPark.Editor.AutoAssigners
                 "Assigns UI references to TournamentListPanel:\n" +
                 "- Header (title, back button)\n" +
                 "- Tournaments container and empty text\n" +
+                "- Filter dropdowns (game, fee)\n" +
                 "- Refresh button and loading indicator\n" +
-                "- Create tournament button",
+                "- Create tournament panel (sliders, dropdowns, buttons)\n" +
+                "- Premium required panel (ConfirmPanelUI)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -142,6 +150,15 @@ namespace DigitPark.Editor.AutoAssigners
 
         #endregion
 
+        /// <summary>
+        /// Ejecuta la asignacion de referencias. Llamable desde otros Editor scripts.
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #region Assignment Logic
 
         private static void AssignAllReferences()
@@ -159,20 +176,77 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(panel);
             so.Update();
 
+            Canvas canvas = FindMainCanvas();
+            Transform root = canvas != null ? canvas.transform : panel.transform.root;
+
             // Header
-            AssignReference(so, "titleText", FindTextByName("title", "header", "torneos"));
-            AssignReference(so, "backButton", FindButtonByName("back", "return", "atras"));
+            AssignReference(so, "titleText", FindTextByDeep(root, "TitleText"));
 
-            // List
-            AssignReference(so, "tournamentsContainer", FindByNameContains<Transform>("tournamentscontainer", "content", "list"));
-            AssignReference(so, "noTournamentsText", FindTextByName("notournaments", "empty", "no hay"));
+            Transform backBtnT = FindDeep(root, "BackButton");
+            AssignReference(so, "backButton", backBtnT != null ? backBtnT.GetComponent<Button>() : null);
 
-            // Refresh
-            AssignReference(so, "refreshButton", FindButtonByName("refresh", "reload", "actualizar"));
-            AssignReference(so, "loadingIndicator", FindByNameContains<Transform>("loading", "indicator", "spinner"));
+            // Tournament List
+            Transform containerT = FindDeep(root, "TournamentsContainer");
+            if (containerT == null) containerT = FindDeep(root, "Content");
+            AssignReference(so, "tournamentsContainer", containerT);
+
+            // Note: tournamentCardPrefab skipped - prefab requires manual assignment
+
+            TextMeshProUGUI noTournamentsT = FindTextByDeep(root, "NoTournamentsText");
+            if (noTournamentsT == null) noTournamentsT = FindTextByDeep(root, "EmptyStateText");
+            AssignReference(so, "noTournamentsText", noTournamentsT);
+
+            // Filters
+            Transform gameFilterT = FindDeep(root, "GameFilterDropdown");
+            AssignReference(so, "gameFilterDropdown", gameFilterT != null ? gameFilterT.GetComponent<TMP_Dropdown>() : null);
+
+            Transform feeFilterT = FindDeep(root, "FeeFilterDropdown");
+            AssignReference(so, "feeFilterDropdown", feeFilterT != null ? feeFilterT.GetComponent<TMP_Dropdown>() : null);
+
+            // Actions
+            Transform refreshBtnT = FindDeep(root, "RefreshButton");
+            AssignReference(so, "refreshButton", refreshBtnT != null ? refreshBtnT.GetComponent<Button>() : null);
+
+            Transform loadingT = FindDeep(root, "LoadingIndicator");
+            AssignReference(so, "loadingIndicator", loadingT != null ? loadingT.gameObject : null);
 
             // Create Tournament
-            AssignReference(so, "createTournamentButton", FindButtonByName("createtournament", "create", "crear", "new"));
+            Transform createBtnT = FindDeep(root, "CreateTournamentBtn");
+            if (createBtnT == null) createBtnT = FindDeep(root, "CreateTournamentButton");
+            AssignReference(so, "createTournamentButton", createBtnT != null ? createBtnT.GetComponent<Button>() : null);
+
+            Transform createPanelT = FindDeep(root, "CreateTournamentPanel");
+            AssignReference(so, "createTournamentPanel", createPanelT != null ? createPanelT.gameObject : null);
+
+            // Sliders
+            Transform maxPlayersSliderT = FindDeep(root, "MaxPlayersSlider");
+            AssignReference(so, "maxPlayersSlider", maxPlayersSliderT != null ? maxPlayersSliderT.GetComponent<Slider>() : null);
+
+            AssignReference(so, "maxPlayersText", FindTextByDeep(root, "MaxPlayersText"));
+
+            Transform entryFeeSliderT = FindDeep(root, "EntryFeeSlider");
+            AssignReference(so, "entryFeeSlider", entryFeeSliderT != null ? entryFeeSliderT.GetComponent<Slider>() : null);
+
+            AssignReference(so, "entryFeeText", FindTextByDeep(root, "EntryFeeText"));
+
+            Transform durationSliderT = FindDeep(root, "DurationSlider");
+            AssignReference(so, "durationSlider", durationSliderT != null ? durationSliderT.GetComponent<Slider>() : null);
+
+            AssignReference(so, "durationText", FindTextByDeep(root, "DurationText"));
+
+            // Game Type Dropdown
+            Transform gameTypeT = FindDeep(root, "GameTypeDropdown");
+            AssignReference(so, "gameTypeDropdown", gameTypeT != null ? gameTypeT.GetComponent<TMP_Dropdown>() : null);
+
+            // Confirm / Cancel Create
+            Transform confirmCreateT = FindDeep(root, "ConfirmCreateButton");
+            AssignReference(so, "confirmCreateButton", confirmCreateT != null ? confirmCreateT.GetComponent<Button>() : null);
+
+            Transform cancelCreateT = FindDeep(root, "CancelCreateButton");
+            AssignReference(so, "cancelCreateButton", cancelCreateT != null ? cancelCreateT.GetComponent<Button>() : null);
+
+            // Premium Required Panel (find by type ConfirmPanelUI)
+            AssignReference(so, "premiumRequiredPanel", FindMonoBehaviourByType("ConfirmPanelUI"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(panel);
@@ -201,24 +275,46 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Finders
 
-        private static T FindByNameContains<T>(params string[] patterns) where T : Component
+        private static Canvas FindMainCanvas()
         {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name == "Canvas")
+                    return c;
+            }
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name != "TransitionCanvas")
+                    return c;
+            }
+            return Object.FindFirstObjectByType<Canvas>();
+        }
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
             return null;
         }
 
-        private static TextMeshProUGUI FindTextByName(params string[] patterns)
+        private static TextMeshProUGUI FindTextByDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
-            foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
-            return null;
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
         }
 
-        private static Button FindButtonByName(params string[] patterns)
+        private static MonoBehaviour FindMonoBehaviourByType(string typeName)
         {
-            var all = Object.FindObjectsOfType<Button>(true);
-            foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+            {
+                if (mb.GetType().Name == typeName)
+                    return mb;
+            }
             return null;
         }
 

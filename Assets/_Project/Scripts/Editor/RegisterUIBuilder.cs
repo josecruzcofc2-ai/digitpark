@@ -35,8 +35,8 @@ namespace DigitPark.Editor
         private const float PADDING = 30f;
         private const float CARD_PADDING = 40f;
         private const float ELEMENT_SPACING = 20f;
-        private const float INPUT_HEIGHT = 60f;
-        private const float BUTTON_HEIGHT = 60f;
+        private const float INPUT_HEIGHT = 90f;
+        private const float BUTTON_HEIGHT = 120f;
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
@@ -140,13 +140,13 @@ namespace DigitPark.Editor
             rect.anchorMin = new Vector2(0.5f, 1);
             rect.anchorMax = new Vector2(0.5f, 1);
             rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(400, 120);
+            rect.sizeDelta = new Vector2(600, 120);
             rect.anchoredPosition = new Vector2(0, -80);
 
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = 56;
+            text.fontSize = 122;
             text.fontStyle = FontStyles.Bold;
             text.color = CyanNeon;
             text.alignment = TextAlignmentOptions.Center;
@@ -163,7 +163,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 0); // Centrado verticalmente
+            cardRect.anchoredPosition = new Vector2(0, -30); // Ligeramente abajo del centro
 
             // Card background with neon border
             Image cardBg = card.AddComponent<Image>();
@@ -211,13 +211,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = 32;
+            titleText.fontSize = 72;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CyanNeon;
             titleText.alignment = TextAlignmentOptions.Center;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 60;
+            layout.preferredHeight = 120;
         }
 
         private static void CreateInputField(Transform parent, string name, string placeholder, bool isPassword)
@@ -249,7 +249,7 @@ namespace DigitPark.Editor
             textAreaRect.anchorMin = Vector2.zero;
             textAreaRect.anchorMax = Vector2.one;
             textAreaRect.offsetMin = new Vector2(20, 0);
-            textAreaRect.offsetMax = new Vector2(isPassword ? -60 : -20, 0);
+            textAreaRect.offsetMax = new Vector2(isPassword ? -100 : -20, 0);
 
             // Placeholder
             GameObject placeholderObj = new GameObject("Placeholder");
@@ -263,7 +263,8 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.font = DefaultFont;
             placeholderText.text = placeholder;
-            placeholderText.fontSize = 18;
+            placeholderText.fontSize = 52;
+            placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.color = TextGray;
             placeholderText.alignment = TextAlignmentOptions.Left;
 
@@ -278,7 +279,8 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
             inputText.font = DefaultFont;
-            inputText.fontSize = 20;
+            inputText.fontSize = 52;
+            inputText.fontStyle = FontStyles.Bold;
             inputText.color = TextWhite;
             inputText.alignment = TextAlignmentOptions.Left;
 
@@ -302,7 +304,7 @@ namespace DigitPark.Editor
             rect.anchorMin = new Vector2(1, 0.5f);
             rect.anchorMax = new Vector2(1, 0.5f);
             rect.pivot = new Vector2(1, 0.5f);
-            rect.sizeDelta = new Vector2(40, 40);
+            rect.sizeDelta = new Vector2(80, 80);
             rect.anchoredPosition = new Vector2(-10, 0);
 
             Button btn = eyeBtn.AddComponent<Button>();
@@ -341,7 +343,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = text;
-            btnText.fontSize = 22;
+            btnText.fontSize = 72;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkNavy;
             btnText.alignment = TextAlignmentOptions.Center;

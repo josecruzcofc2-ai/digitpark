@@ -26,11 +26,11 @@ namespace DigitPark.Editor.AutoAssigners
         private static readonly string[] REQUIRED_REFS = {
             // UI
             "tapButton", "button3D", "instructionText", "reactionTimeText",
-            "roundText", "averageText", "bestTimeText",
+            "roundText", "errorsText", "roundIndicatorText", "progressFill",
             // Countdown
             "countdownUI",
             // Settings Panel
-            "settingsPanel", "toggleRounds3", "toggleRounds5", "toggleRounds10",
+            "settingsPanel", "toggleRounds1", "toggleRounds3", "toggleRounds5", "toggleRounds10",
             "startGameButton",
             // Feedback
             "feedbackPanel", "feedbackText",
@@ -78,7 +78,7 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to FlashTapController:\n" +
                 "- Tap button 3D and instruction text\n" +
-                "- Reaction time, round, average, best texts\n" +
+                "- Reaction time, round, errors texts\n" +
                 "- Countdown, settings panel, feedback\n" +
                 "- Win/Lose panels (Normal + RealMoney)",
                 MessageType.Info);
@@ -192,8 +192,12 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "instructionText", FindTextByDeep(root, "InstructionText"));
             AssignReference(so, "reactionTimeText", FindTextByDeep(root, "ReactionTimeText"));
             AssignReference(so, "roundText", FindTextByDeep(root, "RoundText"));
-            AssignReference(so, "averageText", FindTextByDeep(root, "AverageText"));
-            AssignReference(so, "bestTimeText", FindTextByDeep(root, "BestTimeText"));
+            AssignReference(so, "errorsText", FindTextByDeep(root, "ErrorsText"));
+            AssignReference(so, "roundIndicatorText", FindTextByDeep(root, "RoundIndicator"));
+
+            // Progress Fill
+            Transform progressFillT = FindDeep(root, "ProgressFill");
+            AssignReference(so, "progressFill", progressFillT != null ? progressFillT.GetComponent<RectTransform>() : null);
 
             // Countdown
             Transform countdownPanel = FindDeep(root, "CountdownPanel");
@@ -207,6 +211,7 @@ namespace DigitPark.Editor.AutoAssigners
             if (settingsPanel != null)
             {
                 AssignReference(so, "settingsPanel", settingsPanel.gameObject);
+                AssignToggleReference(so, "toggleRounds1", FindDeep(root, "ToggleRounds1"));
                 AssignToggleReference(so, "toggleRounds3", FindDeep(root, "ToggleRounds3"));
                 AssignToggleReference(so, "toggleRounds5", FindDeep(root, "ToggleRounds5"));
                 AssignToggleReference(so, "toggleRounds10", FindDeep(root, "ToggleRounds10"));
@@ -217,6 +222,7 @@ namespace DigitPark.Editor.AutoAssigners
             else
             {
                 AssignReference(so, "settingsPanel", (Object)null);
+                AssignReference(so, "toggleRounds1", (Object)null);
                 AssignReference(so, "toggleRounds3", (Object)null);
                 AssignReference(so, "toggleRounds5", (Object)null);
                 AssignReference(so, "toggleRounds10", (Object)null);

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 namespace DigitPark.Editor
 {
@@ -13,6 +14,8 @@ namespace DigitPark.Editor
     /// </summary>
     public class CashBattleUIBuilder : EditorWindow
     {
+        private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+
         // Premium Color Palette
         private static readonly Color GOLD_PRIMARY = new Color(1f, 0.84f, 0f, 1f);           // #FFD700 Gold
         private static readonly Color GOLD_DARK = new Color(0.85f, 0.65f, 0.13f, 1f);        // #D4A520 Dark Gold
@@ -35,6 +38,21 @@ namespace DigitPark.Editor
 
         private static readonly Color CYAN_ACCENT = new Color(0f, 0.9f, 1f, 1f);             // Keep some cyan for contrast
 
+        // Reference Assigner state
+        private Vector2 scrollPosition;
+        private static int assignedCount = 0;
+        private static int failedCount = 0;
+        private static int alreadySetCount = 0;
+        private static List<AssignResult> assignResults = new List<AssignResult>();
+
+        private struct AssignResult
+        {
+            public string fieldName;
+            public string status;
+            public bool success;
+            public Object assignedObject;
+        }
+
         [MenuItem("DigitPark/UI Builders/CashBattle/CashBattleHub (Menu Principal)", false, 250)]
         public static void ShowWindow()
         {
@@ -43,6 +61,9 @@ namespace DigitPark.Editor
 
         private void OnGUI()
         {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
+            // === EXISTING BUILD SECTION ===
             GUILayout.Label("CashBattleHub UI Builder", EditorStyles.boldLabel);
             GUILayout.Label("Menu Principal de Cash Battle", EditorStyles.miniLabel);
             EditorGUILayout.Space(10);
@@ -73,12 +94,54 @@ namespace DigitPark.Editor
             {
                 RebuildBackground();
             }
+
+            // ========== SEPARADOR ==========
+            EditorGUILayout.Space(15);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            // ========== SECCION: REFERENCE ASSIGNER ==========
+            GUILayout.Label("Asignar Referencias", EditorStyles.boldLabel);
+            EditorGUILayout.Space(5);
+
+            string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (currentScene != "CashBattleHub")
+            {
+                EditorGUILayout.HelpBox($"Escena actual: {currentScene}\nAbre CashBattleHub primero.", MessageType.Warning);
+            }
+
+            MonoBehaviour targetManager = FindCashBattleManager();
+            if (targetManager != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Manager:", GUILayout.Width(60));
+                EditorGUILayout.ObjectField(targetManager, typeof(MonoBehaviour), true);
+                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("CashBattleManager no encontrado en escena.", MessageType.Warning);
+            }
+
+            EditorGUILayout.Space(5);
+
+            GUI.backgroundColor = new Color(0.5f, 1f, 0.5f);
+            if (GUILayout.Button("ASIGNAR TODAS LAS REFERENCIAS", GUILayout.Height(36)))
+            {
+                ResetAssignState();
+                RunAssignAllReferences();
+                Repaint();
+            }
+            GUI.backgroundColor = Color.white;
+
+            DrawAssignResults();
+
+            EditorGUILayout.EndScrollView();
         }
 
         private static void BuildPremiumUI()
         {
             // Find or create Canvas
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No Canvas found. Open CashBattle scene first.", "OK");
@@ -105,7 +168,7 @@ namespace DigitPark.Editor
 
         private static void RebuildBackground()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = FindMainCanvas();
             if (canvas == null) return;
 
             // Find and destroy old background
@@ -340,41 +403,59 @@ namespace DigitPark.Editor
 
         private static void CreateBackButton(Transform parent)
         {
-            GameObject backBtn = new GameObject("BackButton");
-            backBtn.transform.SetParent(parent, false);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);
+            if (prefab != null)
+            {
+                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+                backBtn.name = "BackButton";
 
-            RectTransform rt = backBtn.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.5f);
-            rt.anchorMax = new Vector2(0, 0.5f);
-            rt.pivot = new Vector2(0, 0.5f);
-            rt.sizeDelta = new Vector2(100, 80);
-            rt.anchoredPosition = new Vector2(20, 0);
+                RectTransform rect = backBtn.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0, 0.5f);
+                rect.anchorMax = new Vector2(0, 0.5f);
+                rect.pivot = new Vector2(0, 0.5f);
+                rect.anchoredPosition = new Vector2(20, 0);
+            }
+            else
+            {
+                // Fallback: manual back button creation
+                GameObject backBtn = new GameObject("BackButton");
+                backBtn.transform.SetParent(parent, false);
 
-            Image img = backBtn.AddComponent<Image>();
-            img.color = Color.clear; // Transparent
+                RectTransform rt = backBtn.AddComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(0, 0.5f);
+                rt.pivot = new Vector2(0, 0.5f);
+                rt.sizeDelta = new Vector2(100, 80);
+                rt.anchoredPosition = new Vector2(20, 0);
 
-            Button btn = backBtn.AddComponent<Button>();
-            ColorBlock colors = btn.colors;
-            colors.normalColor = Color.clear;
-            colors.highlightedColor = new Color(1, 1, 1, 0.1f);
-            colors.pressedColor = new Color(1, 1, 1, 0.2f);
-            btn.colors = colors;
+                Image img = backBtn.AddComponent<Image>();
+                img.color = Color.clear; // Transparent
 
-            // Arrow text
-            GameObject arrowObj = new GameObject("Arrow");
-            arrowObj.transform.SetParent(backBtn.transform, false);
+                Button btn = backBtn.AddComponent<Button>();
+                ColorBlock colors = btn.colors;
+                colors.normalColor = Color.clear;
+                colors.highlightedColor = new Color(1, 1, 1, 0.1f);
+                colors.pressedColor = new Color(1, 1, 1, 0.2f);
+                btn.colors = colors;
 
-            RectTransform arrowRT = arrowObj.AddComponent<RectTransform>();
-            arrowRT.anchorMin = Vector2.zero;
-            arrowRT.anchorMax = Vector2.one;
-            arrowRT.sizeDelta = Vector2.zero;
+                // Arrow text
+                GameObject arrowObj = new GameObject("Arrow");
+                arrowObj.transform.SetParent(backBtn.transform, false);
 
-            TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
-            arrow.text = "<";
-            arrow.fontSize = 48;
-            arrow.color = TEXT_GOLD;
-            arrow.alignment = TextAlignmentOptions.Center;
-            arrow.fontStyle = FontStyles.Bold;
+                RectTransform arrowRT = arrowObj.AddComponent<RectTransform>();
+                arrowRT.anchorMin = Vector2.zero;
+                arrowRT.anchorMax = Vector2.one;
+                arrowRT.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
+                arrow.text = "<";
+                arrow.fontSize = 48;
+                arrow.color = TEXT_GOLD;
+                arrow.alignment = TextAlignmentOptions.Center;
+                arrow.fontStyle = FontStyles.Bold;
+
+                Debug.LogWarning("[CashBattleHub] BackButtonGold prefab not found, using fallback");
+            }
         }
 
         private static void CreateHeaderTitle(Transform parent)
@@ -390,7 +471,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.text = "Cash Battle";
-            title.fontSize = 52; // Bigger
+            title.fontSize = 78; // Bigger
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;
             title.fontStyle = FontStyles.Bold;
@@ -409,7 +490,7 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = new Vector2(180, 50);
+            rt.sizeDelta = new Vector2(180, 65);
             rt.anchoredPosition = new Vector2(-20, 0);
 
             // Background
@@ -434,7 +515,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
             coinText.text = "$";
-            coinText.fontSize = 28;
+            coinText.fontSize = 52;
             coinText.color = TEXT_GOLD;
             coinText.alignment = TextAlignmentOptions.Center;
             coinText.fontStyle = FontStyles.Bold;
@@ -452,7 +533,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
             balanceText.text = "0.00";
-            balanceText.fontSize = 26;
+            balanceText.fontSize = 52;
             balanceText.color = TEXT_PRIMARY;
             balanceText.alignment = TextAlignmentOptions.Left;
             balanceText.fontStyle = FontStyles.Bold;
@@ -803,7 +884,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = isLargeCard ? 48 : 34;  // AUMENTADO: 42→48, 28→34
+            titleText.fontSize = 68;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontStyle = FontStyles.Bold;
@@ -830,9 +911,10 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subText.text = subtitle;
-            subText.fontSize = isLargeCard ? 28 : 22;  // AUMENTADO: 24→28, 18→22
+            subText.fontSize = 52;
             subText.color = TEXT_SECONDARY;
             subText.alignment = TextAlignmentOptions.Left;
+            subText.fontStyle = FontStyles.Bold;
 
             // === DETALLE (rango de precio) - BADGE PROMINENTE ===
             if (!string.IsNullOrEmpty(detail))
@@ -2329,6 +2411,42 @@ namespace DigitPark.Editor
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Center;
 
+            // Timer text (shows elapsed matchmaking time)
+            GameObject timerObj = new GameObject("MatchmakingTimerText");
+            timerObj.transform.SetParent(content.transform, false);
+
+            RectTransform timerRT = timerObj.AddComponent<RectTransform>();
+            timerRT.anchorMin = new Vector2(0, 0.22f);
+            timerRT.anchorMax = new Vector2(1, 0.32f);
+            timerRT.sizeDelta = Vector2.zero;
+            timerRT.offsetMin = new Vector2(20, 0);
+            timerRT.offsetMax = new Vector2(-20, 0);
+
+            TextMeshProUGUI timerTMP = timerObj.AddComponent<TextMeshProUGUI>();
+            timerTMP.text = "00:00";
+            timerTMP.fontSize = 42;
+            timerTMP.color = CYAN_ACCENT;
+            timerTMP.fontStyle = FontStyles.Bold;
+            timerTMP.alignment = TextAlignmentOptions.Center;
+
+            // Opponent name text
+            GameObject opponentObj = new GameObject("OpponentNameText");
+            opponentObj.transform.SetParent(content.transform, false);
+
+            RectTransform opponentRT = opponentObj.AddComponent<RectTransform>();
+            opponentRT.anchorMin = new Vector2(0, 0.14f);
+            opponentRT.anchorMax = new Vector2(1, 0.24f);
+            opponentRT.sizeDelta = Vector2.zero;
+            opponentRT.offsetMin = new Vector2(20, 0);
+            opponentRT.offsetMax = new Vector2(-20, 0);
+
+            TextMeshProUGUI opponentTMP = opponentObj.AddComponent<TextMeshProUGUI>();
+            opponentTMP.text = "Buscando...";
+            opponentTMP.fontSize = 36;
+            opponentTMP.color = TEXT_PRIMARY;
+            opponentTMP.fontStyle = FontStyles.Bold;
+            opponentTMP.alignment = TextAlignmentOptions.Center;
+
             // Cancel button
             GameObject cancelBtn = new GameObject("CancelMatchmakingButton");
             cancelBtn.transform.SetParent(content.transform, false);
@@ -2930,6 +3048,175 @@ namespace DigitPark.Editor
             scoreTMP.fontSize = 16;
             scoreTMP.color = TEXT_SECONDARY;
             scoreTMP.alignment = TextAlignmentOptions.Right;
+        }
+
+        #endregion
+
+        private static Canvas FindMainCanvas()
+        {
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name == "Canvas")
+                    return c;
+            }
+            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name != "TransitionCanvas")
+                    return c;
+            }
+            return Object.FindFirstObjectByType<Canvas>();
+        }
+
+        #region Reference Assigner
+
+        private static MonoBehaviour FindCashBattleManager()
+        {
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "CashBattleManager") return mb;
+            return null;
+        }
+
+        private static void ResetAssignState()
+        {
+            assignedCount = 0; failedCount = 0; alreadySetCount = 0;
+            assignResults.Clear();
+        }
+
+        private static void RunAssignAllReferences()
+        {
+            var manager = FindCashBattleManager();
+            if (manager == null)
+            {
+                Debug.LogError("[CashBattleHub] CashBattleManager no encontrado!");
+                return;
+            }
+
+            SerializedObject so = new SerializedObject(manager);
+            so.Update();
+
+            Canvas canvas = FindMainCanvas();
+            Transform root = canvas != null ? canvas.transform : manager.transform.root;
+
+            // Header
+            AssignRef(so, "titleText", FindTextDeep(root, "TitleText"));
+            AssignRef(so, "balanceText", FindTextDeep(root, "BalanceText"));
+            AssignRef(so, "backButton", FindBtnDeep(root, "BackButton"));
+
+            // Menu Cards
+            Transform mainPanelT = FindDeep(root, "MainPanel");
+            AssignGORef(so, "mainPanel", mainPanelT);
+            AssignRef(so, "battles1v1Card", FindBtnDeep(root, "Battles1v1Card"));
+            AssignRef(so, "cashTournamentsCard", FindBtnDeep(root, "CashTournamentsCard"));
+            AssignRef(so, "walletCard", FindBtnDeep(root, "WalletCard"));
+            AssignRef(so, "historyCard", FindBtnDeep(root, "HistoryCard"));
+
+            // Sub-panels by type
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+            {
+                if (mb.GetType().Name == "CashBattle1v1Manager")
+                    AssignRef(so, "gameSelectionPanel", mb);
+                if (mb.GetType().Name == "TournamentListPanel")
+                    AssignRef(so, "tournamentListPanel", mb);
+            }
+
+            // Age Verification
+            AssignGORef(so, "ageVerificationPanel", FindDeep(root, "AgeVerificationPanel"));
+            AssignRef(so, "verifyAgeButton", FindBtnDeep(root, "VerifyAgeButton"));
+            AssignRef(so, "verificationStatusText", FindTextDeep(root, "VerificationStatusText"));
+            AssignRef(so, "verificationTitleText", FindTextDeep(root, "VerificationTitle"));
+            AssignRef(so, "verificationDescText", FindTextDeep(root, "VerificationDescription"));
+
+            // Confirm Bet
+            AssignGORef(so, "confirmBetPanel", FindDeep(root, "ConfirmBetPanel"));
+            AssignRef(so, "confirmBetText", FindTextDeep(root, "ConfirmBetText"));
+            AssignRef(so, "confirmBetButton", FindBtnDeep(root, "ConfirmBetButton"));
+            AssignRef(so, "cancelBetButton", FindBtnDeep(root, "CancelBetButton"));
+
+            // Matchmaking
+            AssignGORef(so, "matchmakingPanel", FindDeep(root, "MatchmakingPanel"));
+            AssignRef(so, "matchmakingStatusText", FindTextDeep(root, "MatchmakingStatusText"));
+            AssignRef(so, "matchmakingTimerText", FindTextDeep(root, "MatchmakingTimerText"));
+            AssignRef(so, "opponentNameText", FindTextDeep(root, "OpponentNameText"));
+            AssignRef(so, "cancelMatchmakingButton", FindBtnDeep(root, "CancelMatchmakingButton"));
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(manager);
+            EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
+        }
+
+        // FindDeep - recursive search by exact name
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private static TextMeshProUGUI FindTextDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
+        }
+
+        private static Button FindBtnDeep(Transform root, string name)
+        {
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<Button>() : null;
+        }
+
+        private static void AssignRef(SerializedObject so, string prop, Object value)
+        {
+            var p = so.FindProperty(prop);
+            if (p == null) { AddAR(prop, "Propiedad no existe", false, null); failedCount++; return; }
+            if (p.objectReferenceValue != null) { AddAR(prop, "Ya asignada", true, p.objectReferenceValue); alreadySetCount++; return; }
+            if (value != null) { p.objectReferenceValue = value; AddAR(prop, "Asignada", true, value); assignedCount++; }
+            else { AddAR(prop, "No encontrada", false, null); failedCount++; }
+        }
+
+        private static void AssignGORef(SerializedObject so, string prop, Transform t)
+        {
+            AssignRef(so, prop, t != null ? (Object)t.gameObject : null);
+        }
+
+        private static void AddAR(string f, string s, bool ok, Object o)
+        {
+            assignResults.Add(new AssignResult { fieldName = f, status = s, success = ok, assignedObject = o });
+        }
+
+        private void DrawAssignResults()
+        {
+            if (assignResults.Count == 0) return;
+
+            EditorGUILayout.Space(10);
+            int total = assignResults.Count;
+            int successTotal = assignedCount + alreadySetCount;
+            float rate = (float)successTotal / total;
+
+            GUI.color = rate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
+                        rate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
+            GUILayout.Label(rate == 1f ? "TODAS LAS REFERENCIAS ASIGNADAS" : "Algunas referencias faltan", EditorStyles.boldLabel);
+            GUI.color = Color.white;
+
+            GUILayout.Label($"Asignadas: {assignedCount} | Ya puestas: {alreadySetCount} | Fallidas: {failedCount}");
+            EditorGUILayout.Space(5);
+
+            foreach (var r in assignResults)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = r.success ? (r.status == "Ya asignada" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
+                GUILayout.Label(r.success ? (r.status == "Ya asignada" ? "o" : "+") : "x", GUILayout.Width(16));
+                GUI.color = Color.white;
+                GUILayout.Label(r.fieldName, GUILayout.Width(180));
+                GUILayout.Label(r.status, GUILayout.Width(110));
+                if (r.assignedObject != null)
+                    EditorGUILayout.ObjectField(r.assignedObject, typeof(Object), true, GUILayout.Width(140));
+                EditorGUILayout.EndHorizontal();
+            }
         }
 
         #endregion

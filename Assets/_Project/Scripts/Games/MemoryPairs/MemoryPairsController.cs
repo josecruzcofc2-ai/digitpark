@@ -26,9 +26,20 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI pairsFoundText;
         [SerializeField] private TextMeshProUGUI errorsText;
         [SerializeField] private TextMeshProUGUI comboText;
+        [SerializeField] private TextMeshProUGUI roundText;
+        [SerializeField] private TextMeshProUGUI roundIndicatorText;
+        [SerializeField] private RectTransform progressFill;
         [SerializeField] private GameObject winPanel;
         [SerializeField] private CanvasGroup winPanelCanvasGroup;
         [SerializeField] private TextMeshProUGUI statsText;
+
+        [Header("Settings Panel")]
+        [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Toggle toggleRounds1;
+        [SerializeField] private Toggle toggleRounds3;
+        [SerializeField] private Toggle toggleRounds5;
+        [SerializeField] private Toggle toggleRounds10;
+        [SerializeField] private Button startGameButton;
 
         [Header("Countdown")]
         [SerializeField] private CountdownUI countdownUI;
@@ -55,6 +66,10 @@ namespace DigitPark.Games
         private int pairsFound;
         private int totalPairs = 8;
 
+        // Round system
+        private int currentRound = 1;
+        private int totalRounds = 1;
+
         // Sistema de combo
         private int currentCombo = 0;
         private int maxCombo = 0;
@@ -80,6 +95,77 @@ namespace DigitPark.Games
         {
             base.Start();
             SetupCards();
+            SetupSettingsPanel();
+
+            if (IsPracticeMode() && settingsPanel != null)
+            {
+                settingsPanel.SetActive(true);
+            }
+            else
+            {
+                StartGame();
+            }
+        }
+
+        private void SetupSettingsPanel()
+        {
+            if (toggleRounds1 != null)
+                toggleRounds1.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds1, v); if (v) SetRadio(toggleRounds1); });
+            if (toggleRounds3 != null)
+                toggleRounds3.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds3, v); if (v) SetRadio(toggleRounds3); });
+            if (toggleRounds5 != null)
+                toggleRounds5.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds5, v); if (v) SetRadio(toggleRounds5); });
+            if (toggleRounds10 != null)
+                toggleRounds10.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds10, v); if (v) SetRadio(toggleRounds10); });
+
+            if (startGameButton != null)
+                startGameButton.onClick.AddListener(OnStartGameClicked);
+
+            SetToggleDefault(toggleRounds1, true);
+            SetToggleDefault(toggleRounds3, false);
+            SetToggleDefault(toggleRounds5, false);
+            SetToggleDefault(toggleRounds10, false);
+        }
+
+        private void SetRadio(Toggle active)
+        {
+            Toggle[] all = { toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10 };
+            foreach (var t in all)
+            {
+                if (t != null && t != active) { t.isOn = false; UpdateToggleVisual(t, false); }
+            }
+            UpdateToggleVisual(active, true);
+        }
+
+        private void UpdateToggleVisual(Toggle toggle, bool isOn)
+        {
+            if (toggle == null) return;
+            var bg = toggle.GetComponent<UnityEngine.UI.Image>();
+            if (bg != null)
+                bg.color = isOn ? new Color(0f, 1f, 1f, 1f) : new Color(0.08f, 0.12f, 0.18f, 1f);
+
+            var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+                label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+        }
+
+        private void SetToggleDefault(Toggle toggle, bool value)
+        {
+            if (toggle == null) return;
+            toggle.isOn = value;
+            UpdateToggleVisual(toggle, value);
+        }
+
+        private void OnStartGameClicked()
+        {
+            if (toggleRounds1 != null && toggleRounds1.isOn) totalRounds = 1;
+            else if (toggleRounds3 != null && toggleRounds3.isOn) totalRounds = 3;
+            else if (toggleRounds5 != null && toggleRounds5.isOn) totalRounds = 5;
+            else if (toggleRounds10 != null && toggleRounds10.isOn) totalRounds = 10;
+            else totalRounds = 1;
+
+            currentRound = 1;
+            if (settingsPanel != null) settingsPanel.SetActive(false);
             StartGame();
         }
 
@@ -322,9 +408,19 @@ namespace DigitPark.Games
 
                 if (pairsFound >= totalPairs)
                 {
-                    // ===== VICTORIA =====
-                    yield return StartCoroutine(PlayVictorySequence());
-                    EndGame();
+                    currentRound++;
+                    if (currentRound > totalRounds)
+                    {
+                        // ===== VICTORIA FINAL =====
+                        yield return StartCoroutine(PlayVictorySequence());
+                        EndGame();
+                    }
+                    else
+                    {
+                        // ===== SIGUIENTE RONDA =====
+                        yield return new WaitForSeconds(0.8f);
+                        ResetForNextRound();
+                    }
                 }
             }
             else
@@ -543,6 +639,25 @@ namespace DigitPark.Games
 
         #endregion
 
+        private void ResetForNextRound()
+        {
+            pairsFound = 0;
+            firstSelectedCard = -1;
+            secondSelectedCard = -1;
+            isProcessingPair = false;
+
+            for (int i = 0; i < cardRevealed.Length; i++)
+            {
+                cardRevealed[i] = false;
+                if (card3DEffects != null && i < card3DEffects.Length && card3DEffects[i] != null)
+                    card3DEffects[i].ResetCard();
+            }
+
+            ShuffleCards();
+            StartCoroutine(PreviewAndStartSequence());
+            UpdateUI();
+        }
+
         #region UI Updates
 
         private void UpdateUI()
@@ -555,6 +670,23 @@ namespace DigitPark.Games
             if (errorsText != null)
             {
                 errorsText.text = errorCount.ToString();
+            }
+
+            if (roundText != null)
+            {
+                roundText.text = $"{Mathf.Min(currentRound, totalRounds)}/{totalRounds}";
+            }
+
+            if (roundIndicatorText != null)
+            {
+                roundIndicatorText.text = $"{Mathf.Min(currentRound, totalRounds)}/{totalRounds}";
+            }
+
+            if (progressFill != null)
+            {
+                progressFill.transform.parent.parent.gameObject.SetActive(totalRounds > 1);
+                float progress = (float)(currentRound - 1) / totalRounds;
+                progressFill.anchorMax = new Vector2(progress, 1f);
             }
 
             if (comboText != null)
@@ -724,6 +856,7 @@ namespace DigitPark.Games
             isProcessingPair = false;
             currentCombo = 0;
             maxCombo = 0;
+            currentRound = 1;
 
             for (int i = 0; i < cardRevealed.Length; i++)
             {
@@ -742,6 +875,9 @@ namespace DigitPark.Games
 
             if (winPanel != null) winPanel.SetActive(false);
             if (winPanelCanvasGroup != null) winPanelCanvasGroup.alpha = 0;
+
+            if (IsPracticeMode() && settingsPanel != null)
+                settingsPanel.SetActive(true);
         }
 
         protected override void OnErrorOccurred()

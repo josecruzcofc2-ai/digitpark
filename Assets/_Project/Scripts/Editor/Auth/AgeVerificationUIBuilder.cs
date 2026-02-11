@@ -35,8 +35,8 @@ namespace DigitPark.Editor
         private const float PADDING = 30f;
         private const float CARD_PADDING = 40f;
         private const float ELEMENT_SPACING = 20f;
-        private const float BUTTON_HEIGHT = 70f;
-        private const float ICON_SIZE = 150f;
+        private const float BUTTON_HEIGHT = 120f;
+        private const float ICON_SIZE = 300f;
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
@@ -138,15 +138,15 @@ namespace DigitPark.Editor
             rect.anchorMin = new Vector2(0.5f, 1);
             rect.anchorMax = new Vector2(0.5f, 1);
             rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(400, 120);
+            rect.sizeDelta = new Vector2(600, 120);
             rect.anchoredPosition = new Vector2(0, -80);
 
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = 56;
+            text.fontSize = 122;
             text.fontStyle = FontStyles.Bold;
-            text.color = CyanNeon;
+            text.color = GoldPremium;
             text.alignment = TextAlignmentOptions.Center;
         }
 
@@ -161,7 +161,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 0); // Centrado verticalmente
+            cardRect.anchoredPosition = new Vector2(0, -50); // Ligeramente abajo del centro
 
             // Card background with GOLD neon border
             Image cardBg = card.AddComponent<Image>();
@@ -229,13 +229,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = 28;
+            titleText.fontSize = 72;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GoldPremium;
             titleText.alignment = TextAlignmentOptions.Center;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 80;
+            layout.preferredHeight = 160;
         }
 
         private static void CreateDescription(Transform parent, string text)
@@ -246,13 +246,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.font = DefaultFont;
             descText.text = text;
-            descText.fontSize = 18;
+            descText.fontSize = 54;
+            descText.fontStyle = FontStyles.Bold;
             descText.color = TextWhite;
             descText.alignment = TextAlignmentOptions.Center;
             descText.enableWordWrapping = true;
 
             LayoutElement layout = desc.AddComponent<LayoutElement>();
-            layout.preferredHeight = 50;
+            layout.preferredHeight = 200;
         }
 
         private static void CreateGoldButton(Transform parent, string name, string text)
@@ -292,7 +293,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = text;
-            btnText.fontSize = 24;
+            btnText.fontSize = 64;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkBrown;
             btnText.alignment = TextAlignmentOptions.Center;
@@ -306,13 +307,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI legalText = legal.AddComponent<TextMeshProUGUI>();
             legalText.font = DefaultFont;
             legalText.text = text;
-            legalText.fontSize = 12;
+            legalText.fontSize = 32;
+            legalText.fontStyle = FontStyles.Bold;
             legalText.color = TextGray;
             legalText.alignment = TextAlignmentOptions.Center;
             legalText.enableWordWrapping = true;
 
             LayoutElement layout = legal.AddComponent<LayoutElement>();
-            layout.preferredHeight = 30;
+            layout.preferredHeight = 90;
         }
 
         private static void CreateSpacer(Transform parent, float height)
@@ -332,13 +334,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI statusText = status.AddComponent<TextMeshProUGUI>();
             statusText.font = DefaultFont;
             statusText.text = "Toca el botón para iniciar la verificación";
-            statusText.fontSize = 16;
+            statusText.fontSize = 54;
+            statusText.fontStyle = FontStyles.Bold;
             statusText.color = TextWhite;
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.enableWordWrapping = true;
 
             LayoutElement layout = status.AddComponent<LayoutElement>();
-            layout.preferredHeight = 40;
+            layout.preferredHeight = 150;
         }
 
         #region Additional Elements (BackButton, LoadingIndicator)

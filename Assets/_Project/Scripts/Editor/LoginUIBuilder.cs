@@ -37,8 +37,8 @@ namespace DigitPark.Editor
         private const float PADDING = 30f;
         private const float CARD_PADDING = 40f;
         private const float ELEMENT_SPACING = 20f;
-        private const float INPUT_HEIGHT = 60f;
-        private const float BUTTON_HEIGHT = 60f;
+        private const float INPUT_HEIGHT = 90f;
+        private const float BUTTON_HEIGHT = 120f;
         private const float SOCIAL_BUTTON_HEIGHT = 70f; // Más grandes según guidelines
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
@@ -147,13 +147,13 @@ namespace DigitPark.Editor
             rect.anchorMin = new Vector2(0.5f, 1);
             rect.anchorMax = new Vector2(0.5f, 1);
             rect.pivot = new Vector2(0.5f, 1);
-            rect.sizeDelta = new Vector2(400, 120);
+            rect.sizeDelta = new Vector2(600, 120);
             rect.anchoredPosition = new Vector2(0, -80);
 
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = 56;
+            text.fontSize = 122;
             text.fontStyle = FontStyles.Bold;
             text.color = CyanNeon;
             text.alignment = TextAlignmentOptions.Center;
@@ -170,7 +170,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 0); // Centrado verticalmente
+            cardRect.anchoredPosition = new Vector2(0, 100); // Subido para dejar espacio al footer
 
             // Card background with neon border
             Image cardBg = card.AddComponent<Image>();
@@ -222,14 +222,15 @@ namespace DigitPark.Editor
             rect.anchorMin = new Vector2(0.5f, 0);
             rect.anchorMax = new Vector2(0.5f, 0);
             rect.pivot = new Vector2(0.5f, 0);
-            rect.sizeDelta = new Vector2(400, 30);
-            rect.anchoredPosition = new Vector2(0, 140); // Arriba del botón "Crear cuenta"
+            rect.sizeDelta = new Vector2(400, 50);
+            rect.anchoredPosition = new Vector2(0, 190); // Arriba del botón "Crear cuenta"
 
             // "¿No tienes cuenta?"
             TextMeshProUGUI question = footer.AddComponent<TextMeshProUGUI>();
             question.font = DefaultFont;
             question.text = "¿No tienes cuenta?";
-            question.fontSize = 16;
+            question.fontSize = 32;
+            question.fontStyle = FontStyles.Bold;
             question.color = TextGray;
             question.alignment = TextAlignmentOptions.Center;
         }
@@ -265,7 +266,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = "Crear una cuenta";
-            btnText.fontSize = 22;
+            btnText.fontSize = 72;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkNavy;
             btnText.alignment = TextAlignmentOptions.Center;
@@ -281,13 +282,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = 32;
+            titleText.fontSize = 72;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CyanNeon;
             titleText.alignment = TextAlignmentOptions.Center;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
-            layout.preferredHeight = 60;
+            layout.preferredHeight = 120;
         }
 
         private static void CreateInputField(Transform parent, string name, string placeholder, bool isPassword)
@@ -319,7 +320,7 @@ namespace DigitPark.Editor
             textAreaRect.anchorMin = Vector2.zero;
             textAreaRect.anchorMax = Vector2.one;
             textAreaRect.offsetMin = new Vector2(20, 0);
-            textAreaRect.offsetMax = new Vector2(isPassword ? -60 : -20, 0);
+            textAreaRect.offsetMax = new Vector2(isPassword ? -100 : -20, 0);
 
             // Placeholder
             GameObject placeholderObj = new GameObject("Placeholder");
@@ -333,7 +334,8 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.font = DefaultFont;
             placeholderText.text = placeholder;
-            placeholderText.fontSize = 18;
+            placeholderText.fontSize = 52;
+            placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.color = TextGray;
             placeholderText.alignment = TextAlignmentOptions.Left;
 
@@ -348,7 +350,8 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
             inputText.font = DefaultFont;
-            inputText.fontSize = 20;
+            inputText.fontSize = 52;
+            inputText.fontStyle = FontStyles.Bold;
             inputText.color = TextWhite;
             inputText.alignment = TextAlignmentOptions.Left;
 
@@ -372,7 +375,7 @@ namespace DigitPark.Editor
             rect.anchorMin = new Vector2(1, 0.5f);
             rect.anchorMax = new Vector2(1, 0.5f);
             rect.pivot = new Vector2(1, 0.5f);
-            rect.sizeDelta = new Vector2(40, 40);
+            rect.sizeDelta = new Vector2(80, 80);
             rect.anchoredPosition = new Vector2(-10, 0);
 
             Button btn = eyeBtn.AddComponent<Button>();
@@ -395,14 +398,15 @@ namespace DigitPark.Editor
             TextMeshProUGUI linkText = linkBtn.AddComponent<TextMeshProUGUI>();
             linkText.font = DefaultFont;
             linkText.text = text;
-            linkText.fontSize = 14;
+            linkText.fontSize = 38;
+            linkText.fontStyle = FontStyles.Bold;
             linkText.color = CyanNeon;
             linkText.alignment = TextAlignmentOptions.Center;
 
             btn.targetGraphic = linkText;
 
             LayoutElement layout = linkBtn.AddComponent<LayoutElement>();
-            layout.preferredHeight = 30;
+            layout.preferredHeight = 60;
         }
 
         private static void CreateCenteredCheckbox(Transform parent)
@@ -415,7 +419,7 @@ namespace DigitPark.Editor
             layout.spacing = 10f;
 
             LayoutElement rowLayout = row.AddComponent<LayoutElement>();
-            rowLayout.preferredHeight = 40;
+            rowLayout.preferredHeight = 70;
 
             // Checkbox
             GameObject checkbox = new GameObject("RememberCheckbox");
@@ -425,7 +429,7 @@ namespace DigitPark.Editor
             toggle.isOn = false;
 
             RectTransform checkRect = checkbox.GetComponent<RectTransform>();
-            checkRect.sizeDelta = new Vector2(30, 30);
+            checkRect.sizeDelta = new Vector2(50, 50);
 
             // Background
             GameObject bg = new GameObject("Background");
@@ -467,8 +471,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelText = label.AddComponent<TextMeshProUGUI>();
             labelText.font = DefaultFont;
             labelText.text = "Recordarme";
-            labelText.fontSize = 16;
+            labelText.fontSize = 48;
+            labelText.fontStyle = FontStyles.Bold;
             labelText.color = TextWhite;
+
+            LayoutElement labelLayout = label.AddComponent<LayoutElement>();
+            labelLayout.preferredWidth = 500;
+            labelLayout.preferredHeight = 60;
         }
 
         private static void CreateSpacer(Transform parent, float height)
@@ -506,7 +515,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
             buttonText.font = DefaultFont;
             buttonText.text = text;
-            buttonText.fontSize = 22;
+            buttonText.fontSize = 72;
             buttonText.fontStyle = FontStyles.Bold;
             buttonText.color = DarkNavy;
             buttonText.alignment = TextAlignmentOptions.Center;

@@ -172,14 +172,14 @@ namespace DigitPark.Editor
             // ========== HEADER ==========
             CreateHeader(safeArea.transform);
 
-            // ========== TIMER SECTION ==========
-            CreateTimerSection(safeArea.transform);
+            // ========== STATS BAR ==========
+            CreateStatsBar(safeArea.transform);
 
             // ========== GAME PANEL (GRID) ==========
             CreateGamePanel(safeArea.transform);
 
-            // ========== BEST TIME DISPLAY ==========
-            CreateBestTimeSection(safeArea.transform);
+            // ========== BARRA DE PROGRESO ==========
+            CreateProgressBar(safeArea.transform);
 
             // ========== ACTION BUTTONS ==========
             CreateActionButtons(safeArea.transform);
@@ -189,6 +189,9 @@ namespace DigitPark.Editor
 
             // ========== REAL MONEY PANELS (Cash Battle) ==========
             CreateRealMoneyPanels(safeArea.transform);
+
+            // ========== SETTINGS PANEL ==========
+            CreateSettingsPanel(safeArea.transform);
 
             // ========== COUNTDOWN PANEL ==========
             CreateCountdownPanel(safeArea.transform);
@@ -220,47 +223,62 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(600, 80));
-            SetupText(title, "DIGIT RUSH", 52, CYAN_NEON, FontStyles.Bold);
-
-            // Subtitle
-            GameObject subtitle = CreateElement(header.transform, "SubtitleText");
-            SetupRectTransform(subtitle,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 15), new Vector2(400, 30));
-            SetupText(subtitle, "Toca 1-9 en orden", 20, Color.white, FontStyles.Italic);
+            SetupText(title, "DIGIT RUSH", 40, CYAN_NEON, FontStyles.Bold);
         }
 
-        private static void CreateTimerSection(Transform parent)
+        private static void CreateStatsBar(Transform parent)
         {
-            GameObject timerSection = CreateElement(parent, "TimerSection");
-            SetupRectTransform(timerSection,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -200), new Vector2(500, 150));
+            GameObject statsBar = CreateElement(parent, "StatsBar");
+            SetupRectTransform(statsBar,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -140), new Vector2(-40, 42));
 
-            // Timer background panel
-            Image timerBg = timerSection.AddComponent<Image>();
-            timerBg.color = PANEL_BG;
+            Image statsBg = statsBar.AddComponent<Image>();
+            statsBg.color = PANEL_BG;
 
-            // Add rounded corners outline
-            Outline outline = timerSection.AddComponent<Outline>();
-            outline.effectColor = CYAN_NEON;
-            outline.effectDistance = new Vector2(2, -2);
+            HorizontalLayoutGroup statsLayout = statsBar.AddComponent<HorizontalLayoutGroup>();
+            statsLayout.childAlignment = TextAnchor.MiddleCenter;
+            statsLayout.spacing = 50;
+            statsLayout.childForceExpandWidth = true;
+            statsLayout.childForceExpandHeight = true;
+            statsLayout.padding = new RectOffset(20, 20, 0, 0);
 
-            // Timer icon - Using Image component (drag your clock icon here)
-            GameObject timerIcon = CreateElement(timerSection.transform, "TimerIcon");
-            SetupRectTransform(timerIcon,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -18), new Vector2(40, 40));
-            Image timerIconImg = timerIcon.AddComponent<Image>();
-            timerIconImg.color = CYAN_NEON;
-            // Note: Assign clock/stopwatch sprite in Inspector
-
-            // Timer text (large)
+            // Timer
+            GameObject timerSection = CreateElement(statsBar.transform, "TimerSection");
             GameObject timerText = CreateElement(timerSection.transform, "TimerText");
-            SetupRectTransform(timerText,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -10), new Vector2(400, 80));
-            SetupText(timerText, "0.000s", 64, Color.white, FontStyles.Bold);
+            SetupRectTransform(timerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI timerTmp = SetupText(timerText, "0.000s", 22, Color.white, FontStyles.Bold);
+            timerTmp.alignment = TextAlignmentOptions.Center;
+
+            // Round
+            GameObject roundSection = CreateElement(statsBar.transform, "RoundSection");
+            GameObject roundText = CreateElement(roundSection.transform, "RoundText");
+            SetupRectTransform(roundText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI roundTmp = SetupText(roundText, "1/1", 24, CYAN_NEON, FontStyles.Bold);
+            roundTmp.alignment = TextAlignmentOptions.Center;
+
+            // Errors
+            GameObject errorsSection = CreateElement(statsBar.transform, "ErrorsSection");
+            HorizontalLayoutGroup errLayout = errorsSection.AddComponent<HorizontalLayoutGroup>();
+            errLayout.childAlignment = TextAnchor.MiddleCenter;
+            errLayout.spacing = 4;
+            errLayout.childForceExpandWidth = false;
+            errLayout.childForceExpandHeight = true;
+
+            Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
+
+            GameObject errIcon = CreateElement(errorsSection.transform, "ErrorIcon");
+            LayoutElement errIconLe = errIcon.AddComponent<LayoutElement>();
+            errIconLe.preferredWidth = 22;
+            errIconLe.preferredHeight = 22;
+            Image errIconImg = errIcon.AddComponent<Image>();
+            errIconImg.color = ERROR_COLOR;
+
+            GameObject errorsText = CreateElement(errorsSection.transform, "ErrorsText");
+            LayoutElement errTextLe = errorsText.AddComponent<LayoutElement>();
+            errTextLe.preferredWidth = 40;
+            TextMeshProUGUI errorsTmp = SetupText(errorsText, "0", 22, ERROR_COLOR, FontStyles.Bold);
+            errorsTmp.alignment = TextAlignmentOptions.Left;
         }
 
         private static void CreateGamePanel(Transform parent)
@@ -380,38 +398,182 @@ namespace DigitPark.Editor
             so.ApplyModifiedProperties();
         }
 
-        private static void CreateBestTimeSection(Transform parent)
+        private static void CreateProgressBar(Transform parent)
         {
-            GameObject bestTimeSection = CreateElement(parent, "BestTimeSection");
-            SetupRectTransform(bestTimeSection,
+            GameObject progressContainer = CreateElement(parent, "ProgressContainer");
+            SetupRectTransform(progressContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 100), new Vector2(-80, 50));
+
+            // Round indicator
+            GameObject roundIndicator = CreateElement(progressContainer.transform, "RoundIndicator");
+            SetupRectTransform(roundIndicator,
+                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(-50, 0), new Vector2(80, 30));
+            SetupText(roundIndicator, "1/1", 20, Color.white, FontStyles.Bold);
+
+            // Progress bar bg
+            GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
+            SetupRectTransform(progressBar,
+                new Vector2(0, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(0, 0), new Vector2(-100, 16));
+
+            Image progressBg = progressBar.AddComponent<Image>();
+            progressBg.color = new Color(0f, 0.2f, 0.25f, 0.8f);
+
+            Outline progressOutline = progressBar.AddComponent<Outline>();
+            progressOutline.effectColor = CYAN_NEON;
+            progressOutline.effectDistance = new Vector2(1, -1);
+
+            // Fill
+            GameObject progressFill = CreateElement(progressBar.transform, "ProgressFill");
+            SetupRectTransform(progressFill,
+                new Vector2(0, 0), new Vector2(0.5f, 1),
+                Vector2.zero, Vector2.zero);
+
+            Image fillImg = progressFill.AddComponent<Image>();
+            fillImg.color = CYAN_NEON;
+
+            Shadow fillGlow = progressFill.AddComponent<Shadow>();
+            fillGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
+            fillGlow.effectDistance = new Vector2(0, -2);
+        }
+
+        private static void CreateSettingsPanel(Transform parent)
+        {
+            GameObject settingsPanel = CreateElement(parent, "SettingsPanel");
+            SetupRectTransform(settingsPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+
+            Image overlay = settingsPanel.AddComponent<Image>();
+            overlay.color = new Color(0f, 0f, 0f, 0.9f);
+            overlay.raycastTarget = true;
+
+            // Card
+            GameObject card = CreateElement(settingsPanel.transform, "SettingsCard");
+            SetupRectTransform(card,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -530), new Vector2(500, 60));
+                new Vector2(0, 20), new Vector2(600, 450));
 
-            // Background
-            Image bg = bestTimeSection.AddComponent<Image>();
-            bg.color = new Color(0.1f, 0.08f, 0.15f, 0.8f);
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.color = new Color(0.04f, 0.08f, 0.14f, 0.98f);
 
-            // Outline
-            Outline outline = bestTimeSection.AddComponent<Outline>();
-            outline.effectColor = GOLD;
-            outline.effectDistance = new Vector2(1, -1);
+            Outline cardOutline = card.AddComponent<Outline>();
+            cardOutline.effectColor = CYAN_NEON;
+            cardOutline.effectDistance = new Vector2(3, -3);
 
-            // Trophy icon - Using Image component (drag your icon here)
-            GameObject trophyIcon = CreateElement(bestTimeSection.transform, "TrophyIcon");
-            SetupRectTransform(trophyIcon,
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(25, 0), new Vector2(36, 36));
-            Image trophyImg = trophyIcon.AddComponent<Image>();
-            trophyImg.color = GOLD;
-            // Note: Assign trophy sprite in Inspector or via code
+            // Title
+            GameObject titleObj = CreateElement(card.transform, "SettingsTitle");
+            SetupRectTransform(titleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -32), new Vector2(0, 50));
+            SetupText(titleObj, "DIGIT RUSH", 44, CYAN_NEON, FontStyles.Bold);
 
-            // Best time text
-            GameObject bestTimeText = CreateElement(bestTimeSection.transform, "BestTimeText");
-            SetupRectTransform(bestTimeText,
-                new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(70, 0), new Vector2(-20, 0));
-            TextMeshProUGUI bestTmp = SetupText(bestTimeText, "Mejor: --", 28, GOLD, FontStyles.Bold);
-            bestTmp.alignment = TextAlignmentOptions.Left;
+            Outline titleGlow = titleObj.AddComponent<Outline>();
+            titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
+            titleGlow.effectDistance = new Vector2(2, -2);
+
+            // Subtitle
+            GameObject subtitleObj = CreateElement(card.transform, "SettingsSubtitle");
+            SetupRectTransform(subtitleObj,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -70), new Vector2(0, 24));
+            SetupText(subtitleObj, "Tap 1-9 in order", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+
+            // Divider
+            GameObject divider = CreateElement(card.transform, "Divider");
+            SetupRectTransform(divider,
+                new Vector2(0.08f, 1), new Vector2(0.92f, 1),
+                new Vector2(0, -95), new Vector2(0, 2));
+            Image divImg = divider.AddComponent<Image>();
+            divImg.color = new Color(1f, 1f, 1f, 0.1f);
+            divImg.raycastTarget = false;
+
+            // Rounds header
+            float yPos = -115f;
+
+            GameObject roundsHeader = CreateElement(card.transform, "RoundsHeader");
+            SetupRectTransform(roundsHeader,
+                new Vector2(0.05f, 1), new Vector2(0.95f, 1),
+                new Vector2(0, yPos), new Vector2(0, 34));
+            Image roundsHeaderBg = roundsHeader.AddComponent<Image>();
+            roundsHeaderBg.color = new Color(0f, 0.12f, 0.08f, 0.5f);
+            GameObject roundsHeaderText = CreateElement(roundsHeader.transform, "RoundsHeaderText");
+            SetupRectTransform(roundsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(roundsHeaderText, "ROUNDS", 21, new Color(0.7f, 1f, 0.8f), FontStyles.Bold);
+
+            yPos -= 58f;
+
+            GameObject roundsContainer = CreateElement(card.transform, "RoundsContainer");
+            SetupRectTransform(roundsContainer,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(450, 58));
+
+            HorizontalLayoutGroup roundsLayout = roundsContainer.AddComponent<HorizontalLayoutGroup>();
+            roundsLayout.childAlignment = TextAnchor.MiddleCenter;
+            roundsLayout.spacing = 15;
+            roundsLayout.childForceExpandWidth = true;
+            roundsLayout.childForceExpandHeight = true;
+
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds1", "1", true);
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds3", "3", false);
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", false);
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds10", "10", false);
+
+            // Start button
+            yPos -= 78f;
+
+            GameObject startBtn = CreateElement(card.transform, "StartGameButton");
+            SetupRectTransform(startBtn,
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, yPos), new Vector2(500, 68));
+
+            // Shadow
+            GameObject startShadow = CreateElement(startBtn.transform, "Shadow");
+            SetupRectTransform(startShadow,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(3, -6), new Vector2(500, 68));
+            Image shadowImg = startShadow.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0.3f, 0.15f, 0.6f);
+            shadowImg.raycastTarget = false;
+
+            Image startBtnImg = startBtn.AddComponent<Image>();
+            startBtnImg.color = GREEN_NEON;
+
+            Outline startOutline = startBtn.AddComponent<Outline>();
+            startOutline.effectColor = new Color(0.1f, 0.5f, 0.25f, 1f);
+            startOutline.effectDistance = new Vector2(2, -2);
+
+            Button startButton = startBtn.AddComponent<Button>();
+            startButton.targetGraphic = startBtnImg;
+
+            GameObject startText = CreateElement(startBtn.transform, "StartText");
+            SetupRectTransform(startText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            SetupText(startText, "START", 34, DARK_BG, FontStyles.Bold);
+
+            settingsPanel.SetActive(false);
+        }
+
+        private static void CreateSettingsToggle(Transform parent, string name, string label, bool isOn)
+        {
+            GameObject toggleObj = CreateElement(parent, name);
+
+            Image toggleBg = toggleObj.AddComponent<Image>();
+            toggleBg.color = isOn ? CYAN_NEON : new Color(0.08f, 0.12f, 0.18f, 1f);
+
+            Outline toggleOutline = toggleObj.AddComponent<Outline>();
+            toggleOutline.effectColor = new Color(0f, 0.7f, 0.7f, 0.5f);
+            toggleOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            Toggle toggle = toggleObj.AddComponent<Toggle>();
+            toggle.targetGraphic = toggleBg;
+            toggle.toggleTransition = Toggle.ToggleTransition.None;
+            toggle.graphic = null;
+            toggle.isOn = isOn;
+
+            GameObject labelObj = CreateElement(toggleObj.transform, "Label");
+            SetupRectTransform(labelObj, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI labelTmp = SetupText(labelObj, label, 28, isOn ? DARK_BG : Color.white, FontStyles.Bold);
+            labelTmp.raycastTarget = false;
         }
 
         private static void CreateActionButtons(Transform parent)
@@ -646,8 +808,41 @@ namespace DigitPark.Editor
             // Timer Text
             AssignTMPReference(serializedManager, root, "timerText", "TimerText");
 
-            // Best Time Text
-            AssignTMPReference(serializedManager, root, "bestTimeText", "BestTimeText");
+            // Round + Errors texts
+            AssignTMPReference(serializedManager, root, "roundText", "RoundText");
+            AssignTMPReference(serializedManager, root, "errorsText", "ErrorsText");
+            AssignTMPReference(serializedManager, root, "roundIndicatorText", "RoundIndicator");
+
+            // Progress Fill
+            Transform progressFillT = FindDeep(root, "ProgressFill");
+            if (progressFillT != null)
+            {
+                SerializedProperty progressProp = serializedManager.FindProperty("progressFill");
+                if (progressProp != null)
+                    progressProp.objectReferenceValue = progressFillT.GetComponent<RectTransform>();
+            }
+
+            // Settings Panel
+            Transform settingsPanelT = FindDeep(root, "SettingsPanel");
+            if (settingsPanelT != null)
+            {
+                SerializedProperty settingsProp = serializedManager.FindProperty("settingsPanel");
+                if (settingsProp != null)
+                    settingsProp.objectReferenceValue = settingsPanelT.gameObject;
+
+                AssignToggle(serializedManager, "toggleRounds1", FindDeep(settingsPanelT, "ToggleRounds1"));
+                AssignToggle(serializedManager, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
+                AssignToggle(serializedManager, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
+                AssignToggle(serializedManager, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));
+
+                Transform startBtnT = FindDeep(settingsPanelT, "StartGameButton");
+                if (startBtnT != null)
+                {
+                    SerializedProperty startBtnProp = serializedManager.FindProperty("startGameButton");
+                    if (startBtnProp != null)
+                        startBtnProp.objectReferenceValue = startBtnT.GetComponent<Button>();
+                }
+            }
 
             // Result Panel (Practice) - starts inactive!
             Transform resultPanelT = FindDeep(root, "ResultPanel");
@@ -709,6 +904,14 @@ namespace DigitPark.Editor
 
             serializedManager.ApplyModifiedProperties();
             Debug.Log("[DigitRushUIBuilder] Referencias asignadas al DigitRushController");
+        }
+
+        private static void AssignToggle(SerializedObject so, string propertyName, Transform toggleTransform)
+        {
+            if (toggleTransform == null) return;
+            SerializedProperty prop = so.FindProperty(propertyName);
+            if (prop != null)
+                prop.objectReferenceValue = toggleTransform.GetComponent<Toggle>();
         }
 
         /// <summary>

@@ -4,7 +4,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -24,11 +23,18 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
+            // Header
             "titleText", "balanceText", "backButton",
+            // Menu Cards
             "mainPanel", "battles1v1Card", "cashTournamentsCard", "walletCard", "historyCard",
-            "ageVerificationPanel", "verifyAgeButton", "verificationStatusText",
+            // Sub-panels
+            "gameSelectionPanel", "tournamentListPanel",
+            // Age Verification
+            "ageVerificationPanel", "verifyAgeButton", "verificationStatusText", "verificationTitleText", "verificationDescText",
+            // Confirm Bet
             "confirmBetPanel", "confirmBetText", "confirmBetButton", "cancelBetButton",
-            "matchmakingPanel", "matchmakingStatusText", "cancelMatchmakingButton"
+            // Matchmaking
+            "matchmakingPanel", "matchmakingStatusText", "matchmakingTimerText", "opponentNameText", "cancelMatchmakingButton"
         };
 
         private struct ReferenceResult
@@ -41,11 +47,11 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashBattleHub References", false, 211)]
+        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashBattleHub References", false, 240)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashBattleHubReferenceAssigner>("CashBattleHub Reference Assigner");
-            window.minSize = new Vector2(600, 550);
+            window.minSize = new Vector2(600, 500);
         }
 
         #endregion
@@ -61,52 +67,29 @@ namespace DigitPark.Editor.AutoAssigners
             if (currentScene != "CashBattleHub")
             {
                 EditorGUILayout.HelpBox(
-                    $"Current scene: {currentScene}\n" +
-                    "Please open the CashBattleHub scene first!",
+                    $"Escena actual: {currentScene}\nAbre la escena CashBattleHub primero!",
                     MessageType.Warning);
-                GUILayout.Space(10);
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to CashBattleManager:\n" +
-                "• Header (title, balance, back)\n" +
-                "• Main cards (1v1, tournaments, wallet, history)\n" +
-                "• Age verification panel\n" +
-                "• Matchmaking panel",
+                "Asigna referencias UI a CashBattleManager:\n" +
+                "- Header (titulo, balance, back button)\n" +
+                "- Tarjetas del menu principal\n" +
+                "- Paneles de verificacion, apuesta, matchmaking",
                 MessageType.Info);
 
             GUILayout.Space(10);
 
-            MonoBehaviour targetManager = FindCashBattleManager();
-
-            if (targetManager == null)
-            {
-                EditorGUILayout.HelpBox(
-                    "CashBattleManager not found in scene!\n" +
-                    "Add a CashBattleManager component to assign references.",
-                    MessageType.Error);
-                GUILayout.Space(10);
-            }
-            else
+            MonoBehaviour target = FindController();
+            if (target != null)
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Target:", GUILayout.Width(50));
-                EditorGUILayout.ObjectField(targetManager, typeof(MonoBehaviour), true);
+                EditorGUILayout.ObjectField(target, typeof(MonoBehaviour), true);
                 EditorGUILayout.EndHorizontal();
             }
 
             GUILayout.Space(10);
-
-            GUI.backgroundColor = new Color(0.7f, 0.85f, 1f);
-            if (GUILayout.Button("Scan Current References", GUILayout.Height(30)))
-            {
-                ResetLog();
-                ScanCurrentReferences();
-                Repaint();
-            }
-            GUI.backgroundColor = Color.white;
-
-            GUILayout.Space(5);
 
             GUI.backgroundColor = new Color(0.5f, 1f, 0.5f);
             if (GUILayout.Button("Auto-Assign All References", GUILayout.Height(40)))
@@ -118,13 +101,7 @@ namespace DigitPark.Editor.AutoAssigners
             GUI.backgroundColor = Color.white;
 
             GUILayout.Space(10);
-
             DrawResultsSummary();
-
-            GUILayout.Label("Detailed Log:", EditorStyles.boldLabel);
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(150));
-            EditorGUILayout.TextArea(log, GUILayout.ExpandHeight(true));
-            EditorGUILayout.EndScrollView();
         }
 
         private void DrawResultsSummary()
@@ -134,295 +111,199 @@ namespace DigitPark.Editor.AutoAssigners
             int total = results.Count;
             int successTotal = assignedCount + alreadySetCount;
 
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(300));
             EditorGUILayout.BeginVertical("box");
 
             float successRate = (float)successTotal / total;
-            Color summaryColor;
-            string summaryText;
-
-            if (successRate == 1f)
-            {
-                summaryColor = new Color(0.2f, 0.8f, 0.2f);
-                summaryText = "✓ ALL REFERENCES SET";
-            }
-            else if (successRate >= 0.7f)
-            {
-                summaryColor = new Color(1f, 0.8f, 0.2f);
-                summaryText = "⚠ PARTIAL - Some references missing";
-            }
-            else
-            {
-                summaryColor = new Color(1f, 0.4f, 0.4f);
-                summaryText = "✗ INCOMPLETE - Many references missing";
-            }
-
-            GUI.color = summaryColor;
-            GUILayout.Label(summaryText, EditorStyles.boldLabel);
+            GUI.color = successRate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
+                        successRate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
+            GUILayout.Label(successRate == 1f ? "ALL REFERENCES SET" : "Some references missing", EditorStyles.boldLabel);
             GUI.color = Color.white;
 
             GUILayout.Label($"Assigned: {assignedCount} | Already Set: {alreadySetCount} | Failed: {failedCount}");
 
-            GUILayout.Space(5);
-
             foreach (var result in results)
             {
                 EditorGUILayout.BeginHorizontal();
-
-                if (result.success)
-                {
-                    if (result.status == "Already Set")
-                    {
-                        GUI.color = new Color(0.5f, 0.8f, 1f);
-                        GUILayout.Label("●", GUILayout.Width(20));
-                    }
-                    else
-                    {
-                        GUI.color = Color.green;
-                        GUILayout.Label("✓", GUILayout.Width(20));
-                    }
-                }
-                else
-                {
-                    GUI.color = Color.red;
-                    GUILayout.Label("✗", GUILayout.Width(20));
-                }
+                GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
+                GUILayout.Label(result.success ? (result.status == "Already Set" ? "o" : "+") : "x", GUILayout.Width(20));
                 GUI.color = Color.white;
-
                 GUILayout.Label(result.fieldName, GUILayout.Width(180));
                 GUILayout.Label(result.status, GUILayout.Width(120));
-
                 if (result.assignedObject != null)
-                {
                     EditorGUILayout.ObjectField(result.assignedObject, typeof(Object), true, GUILayout.Width(150));
-                }
-
                 EditorGUILayout.EndHorizontal();
             }
 
             EditorGUILayout.EndVertical();
+            EditorGUILayout.EndScrollView();
         }
 
         #endregion
 
-        #region Assignment Logic
-
-        private static void ScanCurrentReferences()
+        /// <summary>
+        /// Ejecuta la asignacion de referencias. Llamable desde otros Editor scripts.
+        /// </summary>
+        public static void RunAutoAssign()
         {
-            Log("=== SCANNING CASHBATTLEHUB REFERENCES ===");
-
-            var manager = FindCashBattleManager();
-            if (manager == null)
-            {
-                Log("ERROR: CashBattleManager not found in scene!");
-                failedCount = REQUIRED_REFS.Length;
-                return;
-            }
-
-            foreach (var fieldName in REQUIRED_REFS)
-            {
-                var field = GetField(manager, fieldName);
-                if (field != null)
-                {
-                    var value = field.GetValue(manager);
-                    if (value != null && !(value is Object obj && obj == null))
-                    {
-                        AddResult(fieldName, "Already Set", true, value as Object);
-                        alreadySetCount++;
-                    }
-                    else
-                    {
-                        AddResult(fieldName, "Not Set", false, null);
-                        failedCount++;
-                    }
-                }
-                else
-                {
-                    AddResult(fieldName, "Field not found", false, null);
-                    failedCount++;
-                }
-            }
-
-            Log("=== SCAN COMPLETE ===");
+            ResetLog();
+            AssignAllReferences();
         }
+
+        #region Assignment Logic
 
         private static void AssignAllReferences()
         {
             Log("=== ASSIGNING CASHBATTLEHUB REFERENCES ===");
 
-            var manager = FindCashBattleManager();
-            if (manager == null)
+            var controller = FindController();
+            if (controller == null)
             {
                 Log("ERROR: CashBattleManager not found in scene!");
                 failedCount = REQUIRED_REFS.Length;
                 return;
             }
 
-            SerializedObject so = new SerializedObject(manager);
+            SerializedObject so = new SerializedObject(controller);
             so.Update();
 
-            // Header
-            AssignReference(so, "titleText", FindTextByName("title", "header", "cashbattle"));
-            AssignReference(so, "balanceText", FindTextByName("balance", "wallet", "money"));
-            AssignReference(so, "backButton", FindButtonByName("back", "return", "close"));
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
-            // Main Panel Cards
-            AssignReference(so, "mainPanel", FindByNameContains<Transform>("mainpanel", "main", "content"));
-            AssignReference(so, "battles1v1Card", FindButtonByName("1v1", "battles", "versus"));
-            AssignReference(so, "cashTournamentsCard", FindButtonByName("tournament", "torneos"));
-            AssignReference(so, "walletCard", FindButtonByName("wallet", "billetera", "deposit"));
-            AssignReference(so, "historyCard", FindButtonByName("history", "historial", "record"));
+            // === Header ===
+            AssignReference(so, "titleText", FindTextByDeep(root, "TitleText"));
+            AssignReference(so, "balanceText", FindTextByDeep(root, "BalanceText"));
 
-            // Age Verification
-            AssignReference(so, "ageVerificationPanel", FindByNameContains<Transform>("ageverification", "verification", "age"));
-            AssignReference(so, "verifyAgeButton", FindButtonByName("verify", "verificar", "age"));
-            AssignReference(so, "verificationStatusText", FindTextByName("verificationstatus", "status"));
+            Transform backBtnT = FindDeep(root, "BackButton");
+            AssignReference(so, "backButton", backBtnT != null ? backBtnT.GetComponent<Button>() : null);
 
-            // Bet Confirmation
-            AssignReference(so, "confirmBetPanel", FindByNameContains<Transform>("confirmbet", "betconfirm"));
-            AssignReference(so, "confirmBetText", FindTextByName("confirmbet"));
-            AssignReference(so, "confirmBetButton", FindButtonByName("confirmbet"));
-            AssignReference(so, "cancelBetButton", FindButtonByName("cancelbet"));
+            // === Menu Cards ===
+            Transform mainPanelT = FindDeep(root, "CardsContainer") ?? FindDeep(root, "MainPanel");
+            if (mainPanelT != null)
+                AssignReference(so, "mainPanel", mainPanelT.gameObject);
+            else
+                AssignReference(so, "mainPanel", (Object)null);
 
-            // Matchmaking
-            AssignReference(so, "matchmakingPanel", FindByNameContains<Transform>("matchmaking", "searching", "finding"));
-            AssignReference(so, "matchmakingStatusText", FindTextByName("matchmakingstatus", "searchstatus"));
-            AssignReference(so, "cancelMatchmakingButton", FindButtonByName("cancel", "cancelar", "stop"));
+            Transform battles1v1T = FindDeep(root, "Battles1v1Card");
+            AssignReference(so, "battles1v1Card", battles1v1T != null ? battles1v1T.GetComponent<Button>() : null);
+
+            Transform cashTournamentsT = FindDeep(root, "CashTournamentsCard");
+            AssignReference(so, "cashTournamentsCard", cashTournamentsT != null ? cashTournamentsT.GetComponent<Button>() : null);
+
+            Transform walletT = FindDeep(root, "WalletCard");
+            AssignReference(so, "walletCard", walletT != null ? walletT.GetComponent<Button>() : null);
+
+            Transform historyT = FindDeep(root, "HistoryCard");
+            AssignReference(so, "historyCard", historyT != null ? historyT.GetComponent<Button>() : null);
+
+            // === Sub-panels (find by type) ===
+            // gameSelectionPanel - find by type CashBattle1v1Manager
+            MonoBehaviour gameSelectionMB = null;
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "CashBattle1v1Manager") { gameSelectionMB = mb; break; }
+            AssignReference(so, "gameSelectionPanel", gameSelectionMB);
+
+            // tournamentListPanel - find by type TournamentListPanel
+            MonoBehaviour tournamentListMB = null;
+            foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
+                if (mb.GetType().Name == "TournamentListPanel") { tournamentListMB = mb; break; }
+            AssignReference(so, "tournamentListPanel", tournamentListMB);
+
+            // === Age Verification ===
+            Transform ageVerifT = FindDeep(root, "AgeVerificationPanel");
+            if (ageVerifT != null)
+                AssignReference(so, "ageVerificationPanel", ageVerifT.gameObject);
+            else
+                AssignReference(so, "ageVerificationPanel", (Object)null);
+
+            Transform verifyAgeBtnT = FindDeep(root, "VerifyAgeButton");
+            AssignReference(so, "verifyAgeButton", verifyAgeBtnT != null ? verifyAgeBtnT.GetComponent<Button>() : null);
+
+            AssignReference(so, "verificationStatusText", FindTextByDeep(root, "VerificationStatusText"));
+            AssignReference(so, "verificationTitleText", FindTextByDeep(root, "VerificationTitleText"));
+            AssignReference(so, "verificationDescText", FindTextByDeep(root, "VerificationDescText"));
+
+            // === Confirm Bet ===
+            Transform confirmBetPanelT = FindDeep(root, "ConfirmBetPanel");
+            if (confirmBetPanelT != null)
+                AssignReference(so, "confirmBetPanel", confirmBetPanelT.gameObject);
+            else
+                AssignReference(so, "confirmBetPanel", (Object)null);
+
+            AssignReference(so, "confirmBetText", FindTextByDeep(root, "ConfirmBetText"));
+
+            Transform confirmBetBtnT = FindDeep(root, "ConfirmBetButton");
+            AssignReference(so, "confirmBetButton", confirmBetBtnT != null ? confirmBetBtnT.GetComponent<Button>() : null);
+
+            Transform cancelBetBtnT = FindDeep(root, "CancelBetButton");
+            AssignReference(so, "cancelBetButton", cancelBetBtnT != null ? cancelBetBtnT.GetComponent<Button>() : null);
+
+            // === Matchmaking ===
+            Transform matchmakingPanelT = FindDeep(root, "MatchmakingPanel");
+            if (matchmakingPanelT != null)
+                AssignReference(so, "matchmakingPanel", matchmakingPanelT.gameObject);
+            else
+                AssignReference(so, "matchmakingPanel", (Object)null);
+
+            AssignReference(so, "matchmakingStatusText", FindTextByDeep(root, "MatchmakingStatusText"));
+            AssignReference(so, "matchmakingTimerText", FindTextByDeep(root, "MatchmakingTimerText"));
+            AssignReference(so, "opponentNameText", FindTextByDeep(root, "OpponentNameText"));
+
+            Transform cancelMatchBtnT = FindDeep(root, "CancelMatchmakingButton");
+            AssignReference(so, "cancelMatchmakingButton", cancelMatchBtnT != null ? cancelMatchBtnT.GetComponent<Button>() : null);
 
             so.ApplyModifiedProperties();
-            EditorUtility.SetDirty(manager);
-            EditorUtility.SetDirty(manager.gameObject);
-            EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
-
+            EditorUtility.SetDirty(controller);
+            EditorUtility.SetDirty(controller.gameObject);
+            EditorSceneManager.MarkSceneDirty(controller.gameObject.scene);
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 
-        private static MonoBehaviour FindCashBattleManager()
+        private static MonoBehaviour FindController()
         {
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-            {
-                if (mb.GetType().Name == "CashBattleManager")
-                    return mb;
-            }
+                if (mb.GetType().Name == "CashBattleManager") return mb;
             return null;
         }
 
         private static void AssignReference(SerializedObject so, string propertyName, Object value)
         {
             var prop = so.FindProperty(propertyName);
-            if (prop == null)
-            {
-                AddResult(propertyName, "Property not found", false, null);
-                Log($"? Property not found: {propertyName}");
-                failedCount++;
-                return;
-            }
-
-            if (prop.objectReferenceValue != null)
-            {
-                AddResult(propertyName, "Already Set", true, prop.objectReferenceValue);
-                Log($"● {propertyName}: Already set to {prop.objectReferenceValue.name}");
-                alreadySetCount++;
-                return;
-            }
-
-            if (value != null)
-            {
-                prop.objectReferenceValue = value;
-                AddResult(propertyName, "Assigned", true, value);
-                Log($"+ {propertyName}: Assigned {value.name}");
-                assignedCount++;
-            }
-            else
-            {
-                AddResult(propertyName, "Not found in scene", false, null);
-                Log($"✗ {propertyName}: Not found in scene");
-                failedCount++;
-            }
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            if (value != null) { prop.objectReferenceValue = value; AddResult(propertyName, "Assigned", true, value); assignedCount++; }
+            else { AddResult(propertyName, "Not found", false, null); failedCount++; }
         }
 
         #endregion
 
         #region Finders
 
-        private static T FindByNameContains<T>(params string[] patterns) where T : Component
+        private static Transform FindDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var pattern in patterns)
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
             {
-                foreach (var obj in all)
-                {
-                    if (obj.gameObject.name.ToLower().Contains(pattern.ToLower()))
-                        return obj;
-                }
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
             }
             return null;
         }
 
-        private static TextMeshProUGUI FindTextByName(params string[] patterns)
+        private static TextMeshProUGUI FindTextByDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
-            foreach (var pattern in patterns)
-            {
-                foreach (var text in all)
-                {
-                    if (text.gameObject.name.ToLower().Contains(pattern.ToLower()))
-                        return text;
-                }
-            }
-            return null;
-        }
-
-        private static Button FindButtonByName(params string[] patterns)
-        {
-            var all = Object.FindObjectsOfType<Button>(true);
-            foreach (var pattern in patterns)
-            {
-                foreach (var btn in all)
-                {
-                    if (btn.gameObject.name.ToLower().Contains(pattern.ToLower()))
-                        return btn;
-                }
-            }
-            return null;
-        }
-
-        private static FieldInfo GetField(object obj, string fieldName)
-        {
-            var type = obj.GetType();
-            return type.GetField(fieldName,
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
         }
 
         #endregion
 
         #region Helpers
 
-        private static void ResetLog()
-        {
-            log = "";
-            assignedCount = 0;
-            failedCount = 0;
-            alreadySetCount = 0;
-            results.Clear();
-        }
-
-        private static void Log(string message)
-        {
-            log += message + "\n";
-            Debug.Log($"[CashBattleHubReferenceAssigner] {message}");
-        }
-
-        private static void AddResult(string field, string status, bool success, Object obj)
-        {
-            results.Add(new ReferenceResult
-            {
-                fieldName = field,
-                status = status,
-                success = success,
-                assignedObject = obj
-            });
-        }
+        private static void ResetLog() { log = ""; assignedCount = 0; failedCount = 0; alreadySetCount = 0; results.Clear(); }
+        private static void Log(string msg) { log += msg + "\n"; Debug.Log($"[CashBattleHubReferenceAssigner] {msg}"); }
+        private static void AddResult(string f, string s, bool ok, Object o) { results.Add(new ReferenceResult { fieldName = f, status = s, success = ok, assignedObject = o }); }
 
         #endregion
     }

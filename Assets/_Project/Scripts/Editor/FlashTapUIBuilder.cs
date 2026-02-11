@@ -144,28 +144,14 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(400, 60));
-            TextMeshProUGUI titleTmp = SetupText(title, "FLASH TAP", 48, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(title, "FLASH TAP", 40, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = title.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 0.4f, 0.4f, 0.6f);
             titleGlow.effectDistance = new Vector2(2, -2);
 
-            // ========== ROUND BADGE ==========
-            GameObject roundBadge = CreateElement(safeArea.transform, "RoundBadge");
-            SetupRectTransform(roundBadge,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -160), new Vector2(280, 70));
-
-            Image badgeBg = roundBadge.AddComponent<Image>();
-            badgeBg.color = PANEL_BG;
-
-            Outline badgeOutline = roundBadge.AddComponent<Outline>();
-            badgeOutline.effectColor = CYAN_NEON;
-            badgeOutline.effectDistance = new Vector2(2, -2);
-
-            GameObject roundText = CreateElement(roundBadge.transform, "RoundText");
-            SetupRectTransform(roundText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(roundText, "Ronda 1/5", 36, Color.white, FontStyles.Bold);
+            // ========== STATS BAR ==========
+            CreateStatsBar(safeArea.transform);
 
             // ========== INSTRUCTION TEXT ==========
             GameObject instrText = CreateElement(safeArea.transform, "InstructionText");
@@ -177,8 +163,8 @@ namespace DigitPark.Editor
             // ========== TAP BUTTON 3D ==========
             Create3DButton(safeArea.transform);
 
-            // ========== STATS PANEL ==========
-            CreateStatsPanel(safeArea.transform);
+            // ========== BARRA DE PROGRESO ==========
+            CreateProgressBar(safeArea.transform);
 
             // ========== FEEDBACK PANEL ==========
             CreateFeedbackPanel(safeArea.transform);
@@ -212,15 +198,6 @@ namespace DigitPark.Editor
             Image tapButtonImg = tapButton.AddComponent<Image>();
             tapButtonImg.color = new Color(0, 0, 0, 0);
             tapButtonImg.raycastTarget = true;
-
-            // Glow Ring
-            GameObject glowRing = CreateElement(tapButton.transform, "GlowRing");
-            SetupRectTransform(glowRing,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(550, 550));
-            Image glowImg = glowRing.AddComponent<Image>();
-            glowImg.color = new Color(1f, 0.6f, 0f, 0.3f); // Orange glow
-            glowImg.raycastTarget = false;
 
             // Imagen principal del boton
             GameObject buttonImage = CreateElement(tapButton.transform, "ButtonImage");
@@ -258,63 +235,112 @@ namespace DigitPark.Editor
             so.FindProperty("readyDownSprite").objectReferenceValue = redDown;
             so.FindProperty("successUpSprite").objectReferenceValue = greenUp;
             so.FindProperty("buttonImage").objectReferenceValue = btnImg;
-            so.FindProperty("glowRing").objectReferenceValue = glowImg;
             so.FindProperty("buttonTransform").objectReferenceValue = tapButton.GetComponent<RectTransform>();
             so.ApplyModifiedProperties();
 
-            glowRing.transform.SetAsFirstSibling();
             buttonImage.transform.SetAsLastSibling();
         }
 
         #endregion
 
-        #region Stats Panel
+        #region Stats Bar
 
-        private static void CreateStatsPanel(Transform parent)
+        private static void CreateStatsBar(Transform parent)
         {
-            GameObject statsPanel = CreateElement(parent, "StatsPanel");
-            SetupRectTransform(statsPanel,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 320), new Vector2(500, 200));
+            GameObject statsBar = CreateElement(parent, "StatsBar");
+            SetupRectTransform(statsBar,
+                new Vector2(0, 1), new Vector2(1, 1),
+                new Vector2(0, -140), new Vector2(-40, 42));
 
-            Image statsBg = statsPanel.AddComponent<Image>();
+            Image statsBg = statsBar.AddComponent<Image>();
             statsBg.color = PANEL_BG;
 
-            Outline statsOutline = statsPanel.AddComponent<Outline>();
-            statsOutline.effectColor = new Color(0f, 0.3f, 0.3f, 1f);
-            statsOutline.effectDistance = new Vector2(2, -2);
+            HorizontalLayoutGroup statsLayout = statsBar.AddComponent<HorizontalLayoutGroup>();
+            statsLayout.childAlignment = TextAnchor.MiddleCenter;
+            statsLayout.spacing = 50;
+            statsLayout.childForceExpandWidth = true;
+            statsLayout.childForceExpandHeight = true;
+            statsLayout.padding = new RectOffset(20, 20, 0, 0);
 
-            // Reaction time
-            GameObject reactionTimeText = CreateElement(statsPanel.transform, "ReactionTimeText");
-            SetupRectTransform(reactionTimeText,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -35), new Vector2(-40, 60));
-            TextMeshProUGUI reactionTmp = SetupText(reactionTimeText, "", 36, CYAN_NEON, FontStyles.Bold);
-            reactionTmp.alignment = TextAlignmentOptions.Center;
+            // Timer (reaction time)
+            GameObject timerSection = CreateElement(statsBar.transform, "TimerSection");
+            GameObject reactionTimeText = CreateElement(timerSection.transform, "ReactionTimeText");
+            SetupRectTransform(reactionTimeText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI timerTmp = SetupText(reactionTimeText, "0ms", 22, Color.white, FontStyles.Bold);
+            timerTmp.alignment = TextAlignmentOptions.Center;
 
-            // Divider
-            GameObject divider = CreateElement(statsPanel.transform, "Divider");
-            SetupRectTransform(divider,
-                new Vector2(0.1f, 0.5f), new Vector2(0.9f, 0.5f),
-                Vector2.zero, new Vector2(0, 2));
-            Image dividerImg = divider.AddComponent<Image>();
-            dividerImg.color = new Color(0f, 0.3f, 0.3f, 1f);
+            // Round
+            GameObject roundSection = CreateElement(statsBar.transform, "RoundSection");
+            GameObject roundText = CreateElement(roundSection.transform, "RoundText");
+            SetupRectTransform(roundText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            TextMeshProUGUI roundTmp = SetupText(roundText, "1/5", 24, CYAN_NEON, FontStyles.Bold);
+            roundTmp.alignment = TextAlignmentOptions.Center;
 
-            // Average
-            GameObject averageText = CreateElement(statsPanel.transform, "AverageText");
-            SetupRectTransform(averageText,
-                new Vector2(0, 0), new Vector2(0.5f, 0.5f),
-                new Vector2(20, 10), new Vector2(-20, 50));
-            TextMeshProUGUI avgTmp = SetupText(averageText, "Promedio: ---", 32, Color.white, FontStyles.Normal);
-            avgTmp.alignment = TextAlignmentOptions.Left;
+            // Errors
+            GameObject errorsSection = CreateElement(statsBar.transform, "ErrorsSection");
+            HorizontalLayoutGroup errLayout = errorsSection.AddComponent<HorizontalLayoutGroup>();
+            errLayout.childAlignment = TextAnchor.MiddleCenter;
+            errLayout.spacing = 4;
+            errLayout.childForceExpandWidth = false;
+            errLayout.childForceExpandHeight = true;
 
-            // Best
-            GameObject bestTimeText = CreateElement(statsPanel.transform, "BestTimeText");
-            SetupRectTransform(bestTimeText,
-                new Vector2(0.5f, 0), new Vector2(1f, 0.5f),
-                new Vector2(-20, 10), new Vector2(-20, 50));
-            TextMeshProUGUI bestTmp = SetupText(bestTimeText, "Mejor: ---", 32, GREEN_NEON, FontStyles.Normal);
-            bestTmp.alignment = TextAlignmentOptions.Right;
+            GameObject errIcon = CreateElement(errorsSection.transform, "ErrorIcon");
+            LayoutElement errIconLe = errIcon.AddComponent<LayoutElement>();
+            errIconLe.preferredWidth = 22;
+            errIconLe.preferredHeight = 22;
+            Image errIconImg = errIcon.AddComponent<Image>();
+            errIconImg.color = ERROR_COLOR;
+
+            GameObject errorsText = CreateElement(errorsSection.transform, "ErrorsText");
+            LayoutElement errTextLe = errorsText.AddComponent<LayoutElement>();
+            errTextLe.preferredWidth = 40;
+            TextMeshProUGUI errorsTmp = SetupText(errorsText, "0", 22, ERROR_COLOR, FontStyles.Bold);
+            errorsTmp.alignment = TextAlignmentOptions.Left;
+        }
+
+        #endregion
+
+        #region Progress Bar
+
+        private static void CreateProgressBar(Transform parent)
+        {
+            GameObject progressContainer = CreateElement(parent, "ProgressContainer");
+            SetupRectTransform(progressContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 100), new Vector2(-80, 50));
+
+            // Round indicator
+            GameObject roundIndicator = CreateElement(progressContainer.transform, "RoundIndicator");
+            SetupRectTransform(roundIndicator,
+                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(-50, 0), new Vector2(80, 30));
+            SetupText(roundIndicator, "1/5", 20, Color.white, FontStyles.Bold);
+
+            // Progress bar bg
+            GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
+            SetupRectTransform(progressBar,
+                new Vector2(0, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(0, 0), new Vector2(-100, 16));
+
+            Image progressBg = progressBar.AddComponent<Image>();
+            progressBg.color = new Color(0f, 0.2f, 0.25f, 0.8f);
+
+            Outline progressOutline = progressBar.AddComponent<Outline>();
+            progressOutline.effectColor = CYAN_NEON;
+            progressOutline.effectDistance = new Vector2(1, -1);
+
+            // Fill
+            GameObject progressFill = CreateElement(progressBar.transform, "ProgressFill");
+            SetupRectTransform(progressFill,
+                new Vector2(0, 0), new Vector2(0.5f, 1),
+                Vector2.zero, Vector2.zero);
+
+            Image fillImg = progressFill.AddComponent<Image>();
+            fillImg.color = CYAN_NEON;
+
+            Shadow fillGlow = progressFill.AddComponent<Shadow>();
+            fillGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
+            fillGlow.effectDistance = new Vector2(0, -2);
         }
 
         #endregion
@@ -622,6 +648,7 @@ namespace DigitPark.Editor
             roundsLayout.childForceExpandWidth = true;
             roundsLayout.childForceExpandHeight = true;
 
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds1", "1", false);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds3", "3", false);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", true);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds10", "10", false);
@@ -686,8 +713,17 @@ namespace DigitPark.Editor
             AssignTMPByFindDeep(so, "instructionText", root, "InstructionText");
             AssignTMPByFindDeep(so, "reactionTimeText", root, "ReactionTimeText");
             AssignTMPByFindDeep(so, "roundText", root, "RoundText");
-            AssignTMPByFindDeep(so, "averageText", root, "AverageText");
-            AssignTMPByFindDeep(so, "bestTimeText", root, "BestTimeText");
+            AssignTMPByFindDeep(so, "errorsText", root, "ErrorsText");
+            AssignTMPByFindDeep(so, "roundIndicatorText", root, "RoundIndicator");
+
+            // Progress fill
+            Transform progressFill = FindDeep(root, "ProgressFill");
+            if (progressFill != null)
+            {
+                SerializedProperty progressProp = so.FindProperty("progressFill");
+                if (progressProp != null)
+                    progressProp.objectReferenceValue = progressFill.GetComponent<RectTransform>();
+            }
 
             // Countdown
             Transform countdownPanel = FindDeep(root, "CountdownPanel");
@@ -696,6 +732,7 @@ namespace DigitPark.Editor
 
             // Settings Panel
             AssignGameObject(so, "settingsPanel", FindDeep(root, "SettingsPanel")?.gameObject);
+            AssignToggle(so, "toggleRounds1", FindDeep(root, "ToggleRounds1"));
             AssignToggle(so, "toggleRounds3", FindDeep(root, "ToggleRounds3"));
             AssignToggle(so, "toggleRounds5", FindDeep(root, "ToggleRounds5"));
             AssignToggle(so, "toggleRounds10", FindDeep(root, "ToggleRounds10"));

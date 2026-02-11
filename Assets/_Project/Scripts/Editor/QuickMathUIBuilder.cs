@@ -182,7 +182,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(400, 50));
-            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", 36, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", 40, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = title.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
@@ -819,6 +819,7 @@ namespace DigitPark.Editor
             ToggleGroup roundsGroup = roundsContainer.AddComponent<ToggleGroup>();
             roundsGroup.allowSwitchOff = false;
 
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds1", "1", false, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds3", "3", false, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", false, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds10", "10", true, roundsGroup);
@@ -1044,6 +1045,7 @@ namespace DigitPark.Editor
                 AssignToggle(so, "toggleEasy", FindDeep(settingsPanelT, "ToggleEasy"));
                 AssignToggle(so, "toggleNormal", FindDeep(settingsPanelT, "ToggleNormal"));
                 AssignToggle(so, "toggleHard", FindDeep(settingsPanelT, "ToggleHard"));
+                AssignToggle(so, "toggleRounds1", FindDeep(settingsPanelT, "ToggleRounds1"));
                 AssignToggle(so, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
                 AssignToggle(so, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
                 AssignToggle(so, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));

@@ -30,8 +30,9 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI timerText;
         [SerializeField] private TextMeshProUGUI roundText;
         [SerializeField] private TextMeshProUGUI errorsText;
-        [SerializeField] private TextMeshProUGUI instructionText;
         [SerializeField] private TextMeshProUGUI comboText;
+        [SerializeField] private TextMeshProUGUI roundIndicatorText;
+        [SerializeField] private RectTransform progressFill;
 
         [Header("Countdown")]
         [SerializeField] private CountdownUI countdownUI;
@@ -39,6 +40,7 @@ namespace DigitPark.Games
 
         [Header("Settings Panel")]
         [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
         [SerializeField] private Toggle toggleRounds10;
@@ -130,20 +132,25 @@ namespace DigitPark.Games
             if (settingsPanel == null) return;
 
             // Wire rounds toggles with radio enforcement
+            if (toggleRounds1 != null)
+                toggleRounds1.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds1, on);
+                    if (on) SetRadio(toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10);
+                });
             if (toggleRounds3 != null)
                 toggleRounds3.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds3, on);
-                    if (on) SetRadio(toggleRounds3, toggleRounds5, toggleRounds10);
+                    if (on) SetRadio(toggleRounds3, toggleRounds1, toggleRounds5, toggleRounds10);
                 });
             if (toggleRounds5 != null)
                 toggleRounds5.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds5, on);
-                    if (on) SetRadio(toggleRounds5, toggleRounds3, toggleRounds10);
+                    if (on) SetRadio(toggleRounds5, toggleRounds1, toggleRounds3, toggleRounds10);
                 });
             if (toggleRounds10 != null)
                 toggleRounds10.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds10, on);
-                    if (on) SetRadio(toggleRounds10, toggleRounds3, toggleRounds5);
+                    if (on) SetRadio(toggleRounds10, toggleRounds1, toggleRounds3, toggleRounds5);
                 });
 
             // Wire start button
@@ -151,6 +158,7 @@ namespace DigitPark.Games
                 startGameButton.onClick.AddListener(OnStartGameClicked);
 
             // Set defaults without triggering listener chaos
+            SetToggleDefault(toggleRounds1, false);
             SetToggleDefault(toggleRounds3, false);
             SetToggleDefault(toggleRounds5, true);
             SetToggleDefault(toggleRounds10, false);
@@ -166,7 +174,9 @@ namespace DigitPark.Games
         private void OnStartGameClicked()
         {
             // Read rounds from toggle
-            if (toggleRounds3 != null && toggleRounds3.isOn)
+            if (toggleRounds1 != null && toggleRounds1.isOn)
+                totalRounds = 1;
+            else if (toggleRounds3 != null && toggleRounds3.isOn)
                 totalRounds = 3;
             else if (toggleRounds10 != null && toggleRounds10.isOn)
                 totalRounds = 10;
@@ -300,12 +310,6 @@ namespace DigitPark.Games
             }
 
             EnableAllButtons(true);
-
-            if (instructionText != null)
-            {
-                instructionText.text = AutoLocalizer.Get("oddoneout_find_difference");
-                instructionText.color = new Color(1f, 0.84f, 0f, 1f);
-            }
         }
 
         private void ResetCell(int index, bool isRight)
@@ -420,19 +424,6 @@ namespace DigitPark.Games
             // Actualizar combo display
             UpdateComboDisplay();
 
-            // Mensaje de exito
-            if (instructionText != null)
-            {
-                if (currentCombo >= 4)
-                    instructionText.text = AutoLocalizer.Get("oddoneout_incredible");
-                else if (currentCombo >= 2)
-                    instructionText.text = AutoLocalizer.Get("oddoneout_excellent");
-                else
-                    instructionText.text = AutoLocalizer.Get("oddoneout_correct");
-
-                instructionText.color = new Color(0.3f, 1f, 0.5f, 1f);
-            }
-
             // Show green feedback
             ShowFeedback(AutoLocalizer.Get("oddoneout_correct"), new Color(0.3f, 1f, 0.5f, 1f));
         }
@@ -458,13 +449,6 @@ namespace DigitPark.Games
 
             // Animar celda error
             AnimateCellError(buttonIndex, isRightGrid);
-
-            // Mensaje de error
-            if (instructionText != null)
-            {
-                instructionText.text = AutoLocalizer.Get("oddoneout_try_again");
-                instructionText.color = new Color(1f, 0.3f, 0.3f, 1f);
-            }
 
             // Show red feedback with penalty
             ShowFeedback(AutoLocalizer.Get("oddoneout_incorrect_penalty"), new Color(1f, 0.3f, 0.3f, 1f));
@@ -790,6 +774,18 @@ namespace DigitPark.Games
             if (errorsText != null)
             {
                 errorsText.text = errorCount.ToString();
+            }
+
+            if (roundIndicatorText != null)
+            {
+                roundIndicatorText.text = $"{Mathf.Min(currentRound, totalRounds)}/{totalRounds}";
+            }
+
+            if (progressFill != null)
+            {
+                progressFill.transform.parent.parent.gameObject.SetActive(totalRounds > 1);
+                float progress = (float)(currentRound - 1) / totalRounds;
+                progressFill.anchorMax = new Vector2(progress, 1f);
             }
         }
 

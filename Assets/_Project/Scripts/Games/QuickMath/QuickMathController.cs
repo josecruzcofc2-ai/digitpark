@@ -56,6 +56,7 @@ namespace DigitPark.Games
         [SerializeField] private Toggle toggleEasy;
         [SerializeField] private Toggle toggleNormal;
         [SerializeField] private Toggle toggleHard;
+        [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
         [SerializeField] private Toggle toggleRounds10;
@@ -197,20 +198,25 @@ namespace DigitPark.Games
                 });
 
             // Wire rounds toggles with radio enforcement
+            if (toggleRounds1 != null)
+                toggleRounds1.onValueChanged.AddListener(on => {
+                    UpdateToggleVisual(toggleRounds1, on);
+                    if (on) SetRadio(toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10);
+                });
             if (toggleRounds3 != null)
                 toggleRounds3.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds3, on);
-                    if (on) SetRadio(toggleRounds3, toggleRounds5, toggleRounds10);
+                    if (on) SetRadio(toggleRounds3, toggleRounds1, toggleRounds5, toggleRounds10);
                 });
             if (toggleRounds5 != null)
                 toggleRounds5.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds5, on);
-                    if (on) SetRadio(toggleRounds5, toggleRounds3, toggleRounds10);
+                    if (on) SetRadio(toggleRounds5, toggleRounds1, toggleRounds3, toggleRounds10);
                 });
             if (toggleRounds10 != null)
                 toggleRounds10.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds10, on);
-                    if (on) SetRadio(toggleRounds10, toggleRounds3, toggleRounds5);
+                    if (on) SetRadio(toggleRounds10, toggleRounds1, toggleRounds3, toggleRounds5);
                 });
 
             // Wire operation toggles with visual updates
@@ -235,6 +241,7 @@ namespace DigitPark.Games
             SetToggleDefault(toggleEasy, false);
             SetToggleDefault(toggleNormal, true);
             SetToggleDefault(toggleHard, false);
+            SetToggleDefault(toggleRounds1, false);
             SetToggleDefault(toggleRounds3, false);
             SetToggleDefault(toggleRounds5, false);
             SetToggleDefault(toggleRounds10, true);
@@ -347,7 +354,9 @@ namespace DigitPark.Games
             // Read difficulty (already set via OnDifficultyChanged)
 
             // Read rounds
-            if (toggleRounds3 != null && toggleRounds3.isOn)
+            if (toggleRounds1 != null && toggleRounds1.isOn)
+                totalRounds = 1;
+            else if (toggleRounds3 != null && toggleRounds3.isOn)
                 totalRounds = 3;
             else if (toggleRounds5 != null && toggleRounds5.isOn)
                 totalRounds = 5;
@@ -1029,6 +1038,7 @@ namespace DigitPark.Games
 
             if (progressFill != null)
             {
+                progressFill.transform.parent.parent.gameObject.SetActive(totalRounds > 1);
                 float progress = (float)(currentRound - 1) / totalRounds;
                 progressFill.anchorMax = new Vector2(progress, 1f);
             }

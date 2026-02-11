@@ -27,7 +27,12 @@ namespace DigitPark.Editor.AutoAssigners
             // Grid
             "gridButtons",
             // UI
-            "timerText", "bestTimeText", "comboText",
+            "timerText", "comboText",
+            // Stats Bar
+            "roundText", "errorsText", "progressFill", "roundIndicatorText",
+            // Settings Panel
+            "settingsPanel", "toggleRounds1", "toggleRounds3", "toggleRounds5", "toggleRounds10",
+            "startGameButton",
             // Countdown & Effects
             "countdownUI", "sparkleEffect",
             // Win Message (original)
@@ -77,8 +82,8 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to DigitRushController:\n" +
                 "- Grid buttons (9 cells)\n" +
-                "- Timer and best time texts\n" +
-                "- Combo display\n" +
+                "- Timer, round, errors texts\n" +
+                "- Settings panel, progress bar\n" +
                 "- Countdown UI and sparkle effect\n" +
                 "- Result panel and win/lose panels",
                 MessageType.Info);
@@ -175,50 +180,93 @@ namespace DigitPark.Editor.AutoAssigners
             // Grid Buttons (9 cells inside GridContainer)
             AssignGridButtons(so);
 
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Transform root = canvas != null ? canvas.transform : controller.transform.root;
+
             // UI Elements
-            AssignReference(so, "timerText", FindTextByName("timer", "time", "tiempo"));
-            AssignReference(so, "bestTimeText", FindTextByName("best", "mejor", "record"));
-            AssignReference(so, "comboText", FindTextByName("combo", "streak"));
+            AssignReference(so, "timerText", FindTextByDeep(root, "TimerText"));
+            AssignReference(so, "comboText", FindTextByDeep(root, "ComboText"));
+
+            // Stats Bar
+            AssignReference(so, "roundText", FindTextByDeep(root, "RoundText"));
+            AssignReference(so, "errorsText", FindTextByDeep(root, "ErrorsText"));
+            AssignReference(so, "roundIndicatorText", FindTextByDeep(root, "RoundIndicator"));
+
+            Transform progressFillT = FindDeep(root, "ProgressFill");
+            AssignReference(so, "progressFill", progressFillT != null ? progressFillT.GetComponent<RectTransform>() : null);
+
+            // Settings Panel
+            Transform settingsPanelT = FindDeep(root, "SettingsPanel");
+            if (settingsPanelT != null)
+            {
+                AssignReference(so, "settingsPanel", settingsPanelT.gameObject);
+                AssignToggleReference(so, "toggleRounds1", FindDeep(settingsPanelT, "ToggleRounds1"));
+                AssignToggleReference(so, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
+                AssignToggleReference(so, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
+                AssignToggleReference(so, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));
+
+                Transform startBtn = FindDeep(settingsPanelT, "StartGameButton");
+                AssignReference(so, "startGameButton", startBtn != null ? startBtn.GetComponent<Button>() : null);
+            }
+            else
+            {
+                AssignReference(so, "settingsPanel", (Object)null);
+                AssignReference(so, "toggleRounds1", (Object)null);
+                AssignReference(so, "toggleRounds3", (Object)null);
+                AssignReference(so, "toggleRounds5", (Object)null);
+                AssignReference(so, "toggleRounds10", (Object)null);
+                AssignReference(so, "startGameButton", (Object)null);
+            }
 
             // Win Message (original panel)
-            AssignReference(so, "winMessagePanel", FindByNameContains<Transform>("winmessage", "winpanel"));
-            var winMsgObj = FindByNameContains<Transform>("winmessage", "winpanel");
+            Transform winMsgObj = FindDeep(root, "WinMessagePanel");
             if (winMsgObj != null)
             {
+                AssignReference(so, "winMessagePanel", winMsgObj.gameObject);
                 var wmCgProp = so.FindProperty("winMessageCanvasGroup");
                 if (wmCgProp != null && wmCgProp.objectReferenceValue == null)
                     wmCgProp.objectReferenceValue = winMsgObj.GetComponent<CanvasGroup>();
             }
-            AssignReference(so, "successText", FindTextByName("success", "wintext", "mensaje"));
+            else
+            {
+                AssignReference(so, "winMessagePanel", (Object)null);
+            }
+            AssignReference(so, "successText", FindTextByDeep(root, "SuccessText"));
 
             // Result Panel (Practice - new)
-            AssignReference(so, "resultPanel", FindByExactName<Transform>("ResultPanel"));
-            AssignReference(so, "resultTitleText", FindTextByExactName("ResultTitleText"));
-            AssignReference(so, "resultTimeText", FindTextByExactName("ResultTimeText"));
-            AssignReference(so, "resultMessageText", FindTextByExactName("ResultMessageText"));
-            AssignReference(so, "resultPlayAgainButton", FindButtonByName("resultplayagain"));
-            AssignReference(so, "resultExitButton", FindButtonByName("resultexit"));
-
-            // Result Panel CanvasGroup
-            var resultPanelObj = FindByExactName<Transform>("ResultPanel");
-            if (resultPanelObj != null)
+            Transform resultPanelT = FindDeep(root, "ResultPanel");
+            if (resultPanelT != null)
             {
+                AssignReference(so, "resultPanel", resultPanelT.gameObject);
                 var cgProp = so.FindProperty("resultPanelCanvasGroup");
                 if (cgProp != null)
-                    cgProp.objectReferenceValue = resultPanelObj.GetComponent<CanvasGroup>();
+                    cgProp.objectReferenceValue = resultPanelT.GetComponent<CanvasGroup>();
             }
+            else
+            {
+                AssignReference(so, "resultPanel", (Object)null);
+            }
+            AssignReference(so, "resultTitleText", FindTextByDeep(root, "ResultTitleText"));
+            AssignReference(so, "resultTimeText", FindTextByDeep(root, "ResultTimeText"));
+            AssignReference(so, "resultMessageText", FindTextByDeep(root, "ResultMessageText"));
+
+            Transform resultPlayAgainT = FindDeep(root, "ResultPlayAgainButton");
+            AssignReference(so, "resultPlayAgainButton", resultPlayAgainT != null ? resultPlayAgainT.GetComponent<Button>() : null);
+
+            Transform resultExitT = FindDeep(root, "ResultExitButton");
+            AssignReference(so, "resultExitButton", resultExitT != null ? resultExitT.GetComponent<Button>() : null);
 
             // Win/Lose Panels (Cash Battle)
             AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
             AssignReference(so, "losePanelRealMoney", FindWinPanelController("LosePanel_RealMoney"));
 
             // Countdown UI
-            var countdownUI = Object.FindFirstObjectByType<DigitPark.UI.CountdownUI>(FindObjectsInactive.Include);
-            AssignReference(so, "countdownUI", countdownUI);
+            Transform countdownPanelT = FindDeep(root, "CountdownPanel");
+            AssignReference(so, "countdownUI", countdownPanelT != null ? countdownPanelT.GetComponent<CountdownUI>() : null);
 
             // Sparkle Effect
-            var sparkleEffect = Object.FindFirstObjectByType<DigitPark.UI.UISparkleEffect>(FindObjectsInactive.Include);
-            AssignReference(so, "sparkleEffect", sparkleEffect);
+            Transform particleEffectsT = FindDeep(root, "ParticleEffects");
+            AssignReference(so, "sparkleEffect", particleEffectsT != null ? particleEffectsT.GetComponent<UISparkleEffect>() : null);
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(controller);
@@ -241,6 +289,14 @@ namespace DigitPark.Editor.AutoAssigners
             if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
             if (value != null) { prop.objectReferenceValue = value; AddResult(propertyName, "Assigned", true, value); assignedCount++; }
             else { AddResult(propertyName, "Not found", false, null); failedCount++; }
+        }
+
+        private static void AssignToggleReference(SerializedObject so, string propertyName, Transform toggleTransform)
+        {
+            if (toggleTransform != null)
+                AssignReference(so, propertyName, toggleTransform.GetComponent<Toggle>());
+            else
+                AssignReference(so, propertyName, (Object)null);
         }
 
         #endregion
@@ -298,39 +354,22 @@ namespace DigitPark.Editor.AutoAssigners
             }
         }
 
-        private static T FindByNameContains<T>(params string[] patterns) where T : Component
+        private static Transform FindDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
             return null;
         }
 
-        private static T FindByExactName<T>(string name) where T : Component
+        private static TextMeshProUGUI FindTextByDeep(Transform root, string name)
         {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var o in all) if (o.gameObject.name == name) return o;
-            return null;
-        }
-
-        private static TextMeshProUGUI FindTextByName(params string[] patterns)
-        {
-            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
-            foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
-            return null;
-        }
-
-        private static TextMeshProUGUI FindTextByExactName(string name)
-        {
-            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
-            foreach (var t in all) if (t.gameObject.name == name) return t;
-            return null;
-        }
-
-        private static Button FindButtonByName(params string[] patterns)
-        {
-            var all = Object.FindObjectsOfType<Button>(true);
-            foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
-            return null;
+            Transform t = FindDeep(root, name);
+            return t != null ? t.GetComponent<TextMeshProUGUI>() : null;
         }
 
         private static WinPanelController FindWinPanelController(string name)

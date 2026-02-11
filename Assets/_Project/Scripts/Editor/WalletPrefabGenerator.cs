@@ -114,7 +114,7 @@ namespace DigitPark.Editor
             GameObject root = new GameObject("TransactionItemUI");
 
             RectTransform rootRT = root.AddComponent<RectTransform>();
-            rootRT.sizeDelta = new Vector2(0, 75);
+            rootRT.sizeDelta = new Vector2(0, 150);
 
             // Background
             Image bg = root.AddComponent<Image>();
@@ -122,8 +122,8 @@ namespace DigitPark.Editor
 
             // Layout Element
             LayoutElement le = root.AddComponent<LayoutElement>();
-            le.preferredHeight = 75;
-            le.minHeight = 70;
+            le.preferredHeight = 150;
+            le.minHeight = 140;
             le.flexibleWidth = 1;
 
             // Add the script component
@@ -135,7 +135,7 @@ namespace DigitPark.Editor
             indicatorRT.anchorMin = new Vector2(0, 0);
             indicatorRT.anchorMax = new Vector2(0, 1);
             indicatorRT.pivot = new Vector2(0, 0.5f);
-            indicatorRT.sizeDelta = new Vector2(4, 0);
+            indicatorRT.sizeDelta = new Vector2(8, 0);
             indicatorRT.anchoredPosition = Vector2.zero;
 
             Image indicatorImg = statusIndicator.AddComponent<Image>();
@@ -147,8 +147,8 @@ namespace DigitPark.Editor
             iconRT.anchorMin = new Vector2(0, 0.5f);
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
-            iconRT.sizeDelta = new Vector2(45, 45);
-            iconRT.anchoredPosition = new Vector2(16, 0);
+            iconRT.sizeDelta = new Vector2(90, 90);
+            iconRT.anchoredPosition = new Vector2(32, 0);
 
             Image iconImg = typeIcon.AddComponent<Image>();
             iconImg.color = GREEN;
@@ -164,12 +164,12 @@ namespace DigitPark.Editor
             descRT.anchorMin = new Vector2(0, 0.5f);
             descRT.anchorMax = new Vector2(1, 1);
             descRT.pivot = new Vector2(0, 1);
-            descRT.offsetMin = new Vector2(72, 0);
-            descRT.offsetMax = new Vector2(-100, -12);
+            descRT.offsetMin = new Vector2(144, 0);
+            descRT.offsetMax = new Vector2(-100, -24);
 
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Descripción";
-            descTMP.fontSize = 16;
+            descTMP.fontSize = 32;
             descTMP.color = TEXT_WHITE;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
@@ -181,13 +181,14 @@ namespace DigitPark.Editor
             dateRT.anchorMin = new Vector2(0, 0);
             dateRT.anchorMax = new Vector2(1, 0.5f);
             dateRT.pivot = new Vector2(0, 0);
-            dateRT.offsetMin = new Vector2(72, 12);
+            dateRT.offsetMin = new Vector2(144, 24);
             dateRT.offsetMax = new Vector2(-100, 0);
 
             TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
             dateTMP.text = "Fecha";
-            dateTMP.fontSize = 13;
+            dateTMP.fontSize = 26;
             dateTMP.color = TEXT_SECONDARY;
+            dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.alignment = TextAlignmentOptions.Left;
 
             // === Amount ===
@@ -197,11 +198,11 @@ namespace DigitPark.Editor
             amountRT.anchorMax = new Vector2(1, 1);
             amountRT.pivot = new Vector2(1, 1);
             amountRT.sizeDelta = new Vector2(90, 0);
-            amountRT.anchoredPosition = new Vector2(-12, -10);
+            amountRT.anchoredPosition = new Vector2(-24, -20);
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$0.00";
-            amountTMP.fontSize = 18;
+            amountTMP.fontSize = 36;
             amountTMP.color = GREEN;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Right;
@@ -213,12 +214,13 @@ namespace DigitPark.Editor
             statusRT.anchorMax = new Vector2(1, 0.5f);
             statusRT.pivot = new Vector2(1, 0);
             statusRT.sizeDelta = new Vector2(90, 0);
-            statusRT.anchoredPosition = new Vector2(-12, 10);
+            statusRT.anchoredPosition = new Vector2(-24, 20);
 
             TextMeshProUGUI statusTMP = statusObj.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "";
-            statusTMP.fontSize = 12;
+            statusTMP.fontSize = 24;
             statusTMP.color = TEXT_SECONDARY;
+            statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Right;
 
             // Connect references to script using SerializedObject

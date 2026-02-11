@@ -140,13 +140,6 @@ namespace DigitPark.Editor
             // ========== STATS BAR ==========
             CreateStatsBar(safeArea.transform);
 
-            // ========== INSTRUCTION TEXT ==========
-            GameObject instructionText = CreateElement(safeArea.transform, "InstructionText");
-            SetupRectTransform(instructionText,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -185), new Vector2(600, 40));
-            SetupText(instructionText, "¡ENCUENTRA LA DIFERENCIA!", 24, GOLD, FontStyles.Bold);
-
             // ========== COMBO TEXT ==========
             CreateComboText(safeArea.transform);
 
@@ -155,6 +148,9 @@ namespace DigitPark.Editor
 
             // ========== FEEDBACK PANEL ==========
             CreateFeedbackPanel(safeArea.transform);
+
+            // ========== BARRA DE PROGRESO ==========
+            CreateProgressBar(safeArea.transform);
 
             // ========== NORMAL WIN/LOSE PANELS ==========
             CreateNormalWinPanel(safeArea.transform);
@@ -187,7 +183,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(500, 50));
-            SetupText(title, "ODD ONE OUT", 34, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "ODD ONE OUT", 40, CYAN_NEON, FontStyles.Bold);
         }
 
         private static void CreateStatsBar(Transform parent)
@@ -710,6 +706,7 @@ namespace DigitPark.Editor
             ToggleGroup roundsGroup = roundsContainer.AddComponent<ToggleGroup>();
             roundsGroup.allowSwitchOff = false;
 
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds1", "1", false, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds3", "3", false, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", true, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds10", "10", false, roundsGroup);
@@ -753,6 +750,47 @@ namespace DigitPark.Editor
             SetupText(startText, "START", 34, DARK_BG, FontStyles.Bold);
 
             settingsPanel.SetActive(false);
+        }
+
+        private static void CreateProgressBar(Transform parent)
+        {
+            GameObject progressContainer = CreateElement(parent, "ProgressContainer");
+            SetupRectTransform(progressContainer,
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(0, 100), new Vector2(-80, 50));
+
+            // Round indicator
+            GameObject roundIndicator = CreateElement(progressContainer.transform, "RoundIndicator");
+            SetupRectTransform(roundIndicator,
+                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(-50, 0), new Vector2(80, 30));
+            SetupText(roundIndicator, "1/5", 20, Color.white, FontStyles.Bold);
+
+            // Progress bar bg
+            GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
+            SetupRectTransform(progressBar,
+                new Vector2(0, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(0, 0), new Vector2(-100, 16));
+
+            Image progressBg = progressBar.AddComponent<Image>();
+            progressBg.color = new Color(0f, 0.2f, 0.25f, 0.8f);
+
+            Outline progressOutline = progressBar.AddComponent<Outline>();
+            progressOutline.effectColor = CYAN_NEON;
+            progressOutline.effectDistance = new Vector2(1, -1);
+
+            // Fill
+            GameObject progressFill = CreateElement(progressBar.transform, "ProgressFill");
+            SetupRectTransform(progressFill,
+                new Vector2(0, 0), new Vector2(0.5f, 1),
+                Vector2.zero, Vector2.zero);
+
+            Image fillImg = progressFill.AddComponent<Image>();
+            fillImg.color = CYAN_NEON;
+
+            Shadow fillGlow = progressFill.AddComponent<Shadow>();
+            fillGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
+            fillGlow.effectDistance = new Vector2(0, -2);
         }
 
         private static void CreateParticleEffects(Transform parent)
@@ -840,8 +878,17 @@ namespace DigitPark.Editor
             AssignTMPByFindDeep(so, "timerText", root, "TimerText");
             AssignTMPByFindDeep(so, "roundText", root, "RoundText");
             AssignTMPByFindDeep(so, "errorsText", root, "ErrorsText");
-            AssignTMPByFindDeep(so, "instructionText", root, "InstructionText");
             AssignTMPByFindDeep(so, "comboText", root, "ComboText");
+            AssignTMPByFindDeep(so, "roundIndicatorText", root, "RoundIndicator");
+
+            // Progress fill
+            Transform progressFill = FindDeep(root, "ProgressFill");
+            if (progressFill != null)
+            {
+                SerializedProperty progressProp = so.FindProperty("progressFill");
+                if (progressProp != null)
+                    progressProp.objectReferenceValue = progressFill.GetComponent<RectTransform>();
+            }
 
             // ========== COUNTDOWN ==========
             Transform countdownPanelT = FindDeep(root, "CountdownPanel");
@@ -858,6 +905,7 @@ namespace DigitPark.Editor
             {
                 AssignGameObject(so, "settingsPanel", settingsPanelT.gameObject);
 
+                AssignToggle(so, "toggleRounds1", FindDeep(settingsPanelT, "ToggleRounds1"));
                 AssignToggle(so, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
                 AssignToggle(so, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
                 AssignToggle(so, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));
