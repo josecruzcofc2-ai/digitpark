@@ -317,10 +317,10 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(0, 100);
+            rt.sizeDelta = new Vector2(0, 120);
 
             Image bg = header.AddComponent<Image>();
-            bg.color = new Color(0, 0, 0, 0.4f);
+            bg.color = new Color(0, 0, 0, 0.3f);
 
             // Back button - try prefab first, fallback to manual creation
             GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);
@@ -367,13 +367,13 @@ namespace DigitPark.Editor
             }
 
             // Title
-            GameObject title = new GameObject("Title");
+            GameObject title = new GameObject("TitleText");
             title.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = title.AddComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0.5f, 0.5f);
             titleRT.anchorMax = new Vector2(0.5f, 0.5f);
-            titleRT.sizeDelta = new Vector2(900, 80);
+            titleRT.sizeDelta = new Vector2(500, 80);
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "CashHistory";
@@ -381,6 +381,71 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
+
+            // Gold outline effect
+            titleText.outlineWidth = 0.2f;
+            titleText.outlineColor = new Color(0.5f, 0.35f, 0f, 0.6f);
+
+            // Balance Widget (idéntico a CashBattleHub)
+            CreateBalanceWidget(header.transform);
+        }
+
+        private static void CreateBalanceWidget(Transform parent)
+        {
+            GameObject balanceWidget = new GameObject("BalanceWidget");
+            balanceWidget.transform.SetParent(parent, false);
+
+            RectTransform rt = balanceWidget.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(1, 0.5f);
+            rt.anchorMax = new Vector2(1, 0.5f);
+            rt.pivot = new Vector2(1, 0.5f);
+            rt.sizeDelta = new Vector2(180, 65);
+            rt.anchoredPosition = new Vector2(-20, 0);
+
+            // Background
+            Image bg = balanceWidget.AddComponent<Image>();
+            bg.color = new Color(0.1f, 0.08f, 0.05f, 0.8f);
+
+            // Gold border
+            Outline outline = balanceWidget.AddComponent<Outline>();
+            outline.effectColor = CARD_BORDER;
+            outline.effectDistance = new Vector2(1, -1);
+
+            // Coin icon
+            GameObject coinIcon = new GameObject("CoinIcon");
+            coinIcon.transform.SetParent(balanceWidget.transform, false);
+
+            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
+            coinRT.anchorMin = new Vector2(0, 0);
+            coinRT.anchorMax = new Vector2(0, 1);
+            coinRT.pivot = new Vector2(0, 0.5f);
+            coinRT.sizeDelta = new Vector2(40, 0);
+            coinRT.anchoredPosition = new Vector2(8, 0);
+
+            TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
+            coinText.text = "$";
+            coinText.fontSize = 52;
+            coinText.color = TEXT_GOLD;
+            coinText.alignment = TextAlignmentOptions.Center;
+            coinText.fontStyle = FontStyles.Bold;
+
+            // Balance text
+            GameObject balanceObj = new GameObject("BalanceText");
+            balanceObj.transform.SetParent(balanceWidget.transform, false);
+
+            RectTransform balanceRT = balanceObj.AddComponent<RectTransform>();
+            balanceRT.anchorMin = new Vector2(0, 0);
+            balanceRT.anchorMax = new Vector2(1, 1);
+            balanceRT.sizeDelta = Vector2.zero;
+            balanceRT.offsetMin = new Vector2(45, 0);
+            balanceRT.offsetMax = new Vector2(-10, 0);
+
+            TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
+            balanceText.text = "0.00";
+            balanceText.fontSize = 52;
+            balanceText.color = TEXT_PRIMARY;
+            balanceText.alignment = TextAlignmentOptions.Left;
+            balanceText.fontStyle = FontStyles.Bold;
         }
 
         #endregion

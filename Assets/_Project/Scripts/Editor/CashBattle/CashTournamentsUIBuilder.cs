@@ -41,12 +41,15 @@ namespace DigitPark.Editor
 
         private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TEXT_SECONDARY = new Color(0.5f, 0.5f, 0.55f, 1f);
+        private static readonly Color TEXT_GOLD = new Color(1f, 0.84f, 0f, 1f);
+        private static readonly Color TEXT_PRIMARY = new Color(1f, 1f, 1f, 1f);
+        private static readonly Color CARD_BORDER = new Color(0.85f, 0.65f, 0.13f, 0.6f);
 
         #endregion
 
         #region Paths
 
-        private const string PREFAB_PATH = "Assets/_Project/Prefabs/CashBattle/TournamentCardUI.prefab";
+        private const string PREFAB_PATH = "Assets/_Project/Prefabs/CashBattle/Tournaments/TournamentCardUI.prefab";
         private const string TOURNAMENT_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Tournaments/";
         private const string NAVIGATION_ICONS_PATH = "Assets/_Project/Art/Icons/Navigation/Buttons/";
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
@@ -202,14 +205,25 @@ namespace DigitPark.Editor
 
         private static void CleanupOldElements(Transform parent)
         {
-            string[] toDestroy = { "Background", "SafeArea", "Header", "TournamentsList", "FilterBar",
-                "NoTournamentsText", "LoadingIndicator", "RefreshButton",
-                "GameFilterDropdown", "FeeFilterDropdown", "CreateTournamentPanel" };
-            foreach (string name in toDestroy)
+            // Limpieza agresiva: eliminar TODOS los hijos del Canvas
+            // excepto TransitionCanvas y EventSystem para borrar capas antiguas acumuladas
+            List<GameObject> toDestroy = new List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                Transform existing = parent.Find(name);
-                if (existing != null) DestroyImmediate(existing.gameObject);
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                // Preservar solo TransitionCanvas y EventSystem
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
             }
+
+            foreach (var go in toDestroy)
+            {
+                DestroyImmediate(go);
+            }
+
+            Debug.Log($"[CashTournamentsUIBuilder] Limpiados {toDestroy.Count} objetos antiguos del Canvas");
         }
 
         private static void CreateBackground(Transform parent)
@@ -257,14 +271,11 @@ namespace DigitPark.Editor
             // Back Button
             CreateBackButton(header.transform);
 
-            // Title con icono
+            // Title centrado (sin icono bracket)
             CreateHeaderTitle(header.transform);
 
-            // Balance Display
-            CreateBalanceDisplay(header.transform);
-
-            // Create Tournament Button
-            CreateNewTournamentButton(header.transform);
+            // Balance Widget (idéntico a CashBattleHub)
+            CreateBalanceWidget(header.transform);
         }
 
         private static void CreateBackButton(Transform parent)
@@ -333,86 +344,83 @@ namespace DigitPark.Editor
 
         private static void CreateHeaderTitle(Transform parent)
         {
-            GameObject titleContainer = new GameObject("TitleContainer");
-            titleContainer.transform.SetParent(parent, false);
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(parent, false);
 
-            RectTransform tcRT = titleContainer.AddComponent<RectTransform>();
-            tcRT.anchorMin = new Vector2(0, 0.5f);
-            tcRT.anchorMax = new Vector2(0.6f, 0.5f);
-            tcRT.pivot = new Vector2(0, 0.5f);
-            tcRT.sizeDelta = new Vector2(0, 80);
-            tcRT.anchoredPosition = new Vector2(75, 0);
+            RectTransform rt = titleObj.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(500, 80);
+            rt.anchoredPosition = Vector2.zero;
 
-            // Title Text (centered, no icon)
-            GameObject title = new GameObject("TitleText");
-            title.transform.SetParent(titleContainer.transform, false);
+            TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
+            title.text = "Torneos";
+            title.fontSize = 78;
+            title.color = TEXT_GOLD;
+            title.alignment = TextAlignmentOptions.Center;
+            title.fontStyle = FontStyles.Bold;
 
-            RectTransform titleRT = title.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 0);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.offsetMin = Vector2.zero;
-            titleRT.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.text = "Torneos";
-            titleText.fontSize = 78;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = GOLD;
-            titleText.alignment = TextAlignmentOptions.Center;
+            // Gold outline effect
+            title.outlineWidth = 0.2f;
+            title.outlineColor = new Color(0.5f, 0.35f, 0f, 0.6f);
         }
 
-        private static void CreateBalanceDisplay(Transform parent)
+        private static void CreateBalanceWidget(Transform parent)
         {
-            GameObject balance = new GameObject("BalanceDisplay");
-            balance.transform.SetParent(parent, false);
+            GameObject balanceWidget = new GameObject("BalanceWidget");
+            balanceWidget.transform.SetParent(parent, false);
 
-            RectTransform rt = balance.AddComponent<RectTransform>();
+            RectTransform rt = balanceWidget.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
             rt.sizeDelta = new Vector2(180, 65);
-            rt.anchoredPosition = new Vector2(-15, 0);
+            rt.anchoredPosition = new Vector2(-20, 0);
 
-            Image bg = balance.AddComponent<Image>();
-            bg.color = new Color(0.05f, 0.06f, 0.08f, 0.9f);
+            // Background
+            Image bg = balanceWidget.AddComponent<Image>();
+            bg.color = new Color(0.1f, 0.08f, 0.05f, 0.8f);
 
-            // CoinIcon showing "$"
+            // Gold border
+            Outline outline = balanceWidget.AddComponent<Outline>();
+            outline.effectColor = CARD_BORDER;
+            outline.effectDistance = new Vector2(1, -1);
+
+            // Coin icon
             GameObject coinIcon = new GameObject("CoinIcon");
-            coinIcon.transform.SetParent(balance.transform, false);
+            coinIcon.transform.SetParent(balanceWidget.transform, false);
 
             RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
-            coinRT.anchorMin = new Vector2(0, 0.5f);
-            coinRT.anchorMax = new Vector2(0, 0.5f);
+            coinRT.anchorMin = new Vector2(0, 0);
+            coinRT.anchorMax = new Vector2(0, 1);
             coinRT.pivot = new Vector2(0, 0.5f);
-            coinRT.sizeDelta = new Vector2(50, 50);
+            coinRT.sizeDelta = new Vector2(40, 0);
             coinRT.anchoredPosition = new Vector2(8, 0);
 
             TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
             coinText.text = "$";
             coinText.fontSize = 52;
-            coinText.fontStyle = FontStyles.Bold;
-            coinText.color = GREEN;
+            coinText.color = TEXT_GOLD;
             coinText.alignment = TextAlignmentOptions.Center;
+            coinText.fontStyle = FontStyles.Bold;
 
-            // BalanceText
-            GameObject balanceText = new GameObject("BalanceText");
-            balanceText.transform.SetParent(balance.transform, false);
+            // Balance text
+            GameObject balanceObj = new GameObject("BalanceText");
+            balanceObj.transform.SetParent(balanceWidget.transform, false);
 
-            RectTransform btRT = balanceText.AddComponent<RectTransform>();
-            btRT.anchorMin = new Vector2(0, 0);
-            btRT.anchorMax = new Vector2(1, 1);
-            btRT.offsetMin = new Vector2(55, 0);
-            btRT.offsetMax = new Vector2(-5, 0);
+            RectTransform balanceRT = balanceObj.AddComponent<RectTransform>();
+            balanceRT.anchorMin = new Vector2(0, 0);
+            balanceRT.anchorMax = new Vector2(1, 1);
+            balanceRT.sizeDelta = Vector2.zero;
+            balanceRT.offsetMin = new Vector2(45, 0);
+            balanceRT.offsetMax = new Vector2(-10, 0);
 
-            TextMeshProUGUI btTMP = balanceText.AddComponent<TextMeshProUGUI>();
-            btTMP.text = "125.50";
-            btTMP.fontSize = 52;
-            btTMP.fontStyle = FontStyles.Bold;
-            btTMP.color = GREEN;
-            btTMP.alignment = TextAlignmentOptions.Left;
-            btTMP.enableAutoSizing = true;
-            btTMP.fontSizeMin = 28;
-            btTMP.fontSizeMax = 52;
+            TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
+            balanceText.text = "0.00";
+            balanceText.fontSize = 52;
+            balanceText.color = TEXT_PRIMARY;
+            balanceText.alignment = TextAlignmentOptions.Left;
+            balanceText.fontStyle = FontStyles.Bold;
         }
 
         private static void CreateNewTournamentButton(Transform parent)
@@ -462,7 +470,7 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(0, 60);
+            rt.sizeDelta = new Vector2(0, 68);
             rt.anchoredPosition = new Vector2(0, -100);
 
             Image bg = filterBar.AddComponent<Image>();
@@ -470,7 +478,7 @@ namespace DigitPark.Editor
 
             HorizontalLayoutGroup hlg = filterBar.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 8;
-            hlg.padding = new RectOffset(15, 15, 8, 8);
+            hlg.padding = new RectOffset(15, 15, 4, 4);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childForceExpandWidth = true;  // Expandir para llenar el ancho
             hlg.childForceExpandHeight = true;

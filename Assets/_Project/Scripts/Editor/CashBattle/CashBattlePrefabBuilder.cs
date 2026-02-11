@@ -245,14 +245,14 @@ namespace DigitPark.Editor
         {
             EnsurePrefabDirectory();
 
-            // === Card 340px - espacio suficiente para icon 160 + contenido sin solaparse ===
+            // === Card compacto estilo CashHistory (150px) con barra dorada ===
             GameObject root = new GameObject("TournamentCardUI");
             RectTransform rootRT = root.AddComponent<RectTransform>();
-            rootRT.sizeDelta = new Vector2(0, 340);
+            rootRT.sizeDelta = new Vector2(0, 150);
 
             LayoutElement rootLE = root.AddComponent<LayoutElement>();
-            rootLE.preferredHeight = 340;
-            rootLE.minHeight = 340;
+            rootLE.preferredHeight = 150;
+            rootLE.minHeight = 150;
 
             Image rootBg = root.AddComponent<Image>();
             rootBg.color = CARD_BG;
@@ -263,19 +263,19 @@ namespace DigitPark.Editor
             colors.highlightedColor = CARD_BG * 1.3f;
             rootBtn.colors = colors;
 
-            // Border dorado inferior (igual que CashHistory ColorBar)
+            // === Barra dorada inferior (identidad CashTournaments) ===
             GameObject colorBar = new GameObject("ColorBar");
             colorBar.transform.SetParent(root.transform, false);
             RectTransform barRT = colorBar.AddComponent<RectTransform>();
             barRT.anchorMin = new Vector2(0, 0);
             barRT.anchorMax = new Vector2(1, 0);
             barRT.pivot = new Vector2(0.5f, 0);
-            barRT.sizeDelta = new Vector2(0, 8);
+            barRT.sizeDelta = new Vector2(0, 5);
             barRT.anchoredPosition = Vector2.zero;
             Image barImg = colorBar.AddComponent<Image>();
             barImg.color = GOLD;
 
-            // === LIVE Badge (arriba derecha) - proporción CashHistory ModeBadge ===
+            // === LIVE Badge (arriba derecha, estilo CashHistory ModeBadge) ===
             GameObject liveBadge = new GameObject("LiveBadge");
             liveBadge.transform.SetParent(root.transform, false);
             liveBadge.SetActive(false);
@@ -284,8 +284,8 @@ namespace DigitPark.Editor
             liveRT.anchorMin = new Vector2(1, 1);
             liveRT.anchorMax = new Vector2(1, 1);
             liveRT.pivot = new Vector2(1, 1);
-            liveRT.sizeDelta = new Vector2(120, 46);
-            liveRT.anchoredPosition = new Vector2(-20, -15);
+            liveRT.sizeDelta = new Vector2(80, 28);
+            liveRT.anchoredPosition = new Vector2(-10, -8);
 
             Image liveBg = liveBadge.AddComponent<Image>();
             liveBg.color = new Color(1f, 0.3f, 0.2f, 1f);
@@ -296,8 +296,8 @@ namespace DigitPark.Editor
             liRT.anchorMin = new Vector2(0, 0.5f);
             liRT.anchorMax = new Vector2(0, 0.5f);
             liRT.pivot = new Vector2(0, 0.5f);
-            liRT.sizeDelta = new Vector2(30, 30);
-            liRT.anchoredPosition = new Vector2(8, 0);
+            liRT.sizeDelta = new Vector2(18, 18);
+            liRT.anchoredPosition = new Vector2(6, 0);
             Image liImg = liveIcon.AddComponent<Image>();
             liImg.preserveAspect = true;
             Sprite liveSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "TournamentLiveIcon.png");
@@ -309,16 +309,16 @@ namespace DigitPark.Editor
             RectTransform ltRT = liveText.AddComponent<RectTransform>();
             ltRT.anchorMin = new Vector2(0, 0);
             ltRT.anchorMax = new Vector2(1, 1);
-            ltRT.offsetMin = new Vector2(38, 0);
-            ltRT.offsetMax = new Vector2(-5, 0);
+            ltRT.offsetMin = new Vector2(26, 0);
+            ltRT.offsetMax = new Vector2(-4, 0);
             TextMeshProUGUI ltTMP = liveText.AddComponent<TextMeshProUGUI>();
             ltTMP.text = "LIVE";
-            ltTMP.fontSize = 22;
+            ltTMP.fontSize = 16;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.color = Color.white;
             ltTMP.alignment = TextAlignmentOptions.Center;
 
-            // === Game Icon (izquierda) - 160x160 centrado en card 340px ===
+            // === Game Icon (izquierda, estilo CashHistory) ===
             GameObject gameIcon = new GameObject("GameIcon");
             gameIcon.transform.SetParent(root.transform, false);
 
@@ -326,8 +326,8 @@ namespace DigitPark.Editor
             giRT.anchorMin = new Vector2(0, 0.5f);
             giRT.anchorMax = new Vector2(0, 0.5f);
             giRT.pivot = new Vector2(0, 0.5f);
-            giRT.sizeDelta = new Vector2(160, 160);
-            giRT.anchoredPosition = new Vector2(25, 0);
+            giRT.sizeDelta = new Vector2(100, 100);
+            giRT.anchoredPosition = new Vector2(15, 0);
 
             Image giBg = gameIcon.AddComponent<Image>();
             giBg.color = new Color(0.05f, 0.05f, 0.08f, 1f);
@@ -338,7 +338,7 @@ namespace DigitPark.Editor
             RectTransform isRT = iconSprite.AddComponent<RectTransform>();
             isRT.anchorMin = Vector2.zero;
             isRT.anchorMax = Vector2.one;
-            isRT.sizeDelta = new Vector2(-20, -20);
+            isRT.sizeDelta = new Vector2(-10, -10);
             isRT.anchoredPosition = Vector2.zero;
             Image isImg = iconSprite.AddComponent<Image>();
             isImg.preserveAspect = true;
@@ -346,35 +346,35 @@ namespace DigitPark.Editor
             if (gameSprite != null) isImg.sprite = gameSprite;
             isImg.color = Color.white;
 
-            // === Tournament Name - fila superior del lado derecho ===
+            // === Tournament Name (arriba, a la derecha del icono) ===
             GameObject nameObj = new GameObject("TournamentName");
             nameObj.transform.SetParent(root.transform, false);
 
             RectTransform nameRT = nameObj.AddComponent<RectTransform>();
-            nameRT.anchorMin = new Vector2(0, 1);
-            nameRT.anchorMax = new Vector2(0.58f, 1);
-            nameRT.pivot = new Vector2(0, 1);
-            nameRT.anchoredPosition = new Vector2(210, -25);
-            nameRT.sizeDelta = new Vector2(0, 60);
+            nameRT.anchorMin = new Vector2(0, 0.55f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(130, 0);
+            nameRT.offsetMax = new Vector2(-200, -8);
 
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = "Quick Math Championship";
-            nameText.fontSize = 44;
+            nameText.fontSize = 32;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_WHITE;
             nameText.alignment = TextAlignmentOptions.Left;
             nameText.overflowMode = TextOverflowModes.Ellipsis;
 
-            // === Prize Row - segunda fila, debajo del nombre ===
+            // === Info Row (abajo del nombre): Prize + Players + Timer ===
+            // Prize
             GameObject prizeRow = new GameObject("PrizeRow");
             prizeRow.transform.SetParent(root.transform, false);
-
             RectTransform prRT = prizeRow.AddComponent<RectTransform>();
-            prRT.anchorMin = new Vector2(0, 1);
-            prRT.anchorMax = new Vector2(0, 1);
-            prRT.pivot = new Vector2(0, 1);
-            prRT.sizeDelta = new Vector2(300, 50);
-            prRT.anchoredPosition = new Vector2(210, -95);
+            prRT.anchorMin = new Vector2(0, 0);
+            prRT.anchorMax = new Vector2(0, 0.55f);
+            prRT.pivot = new Vector2(0, 0.5f);
+            prRT.offsetMin = new Vector2(130, 10);
+            prRT.offsetMax = new Vector2(130, 0);
+            prRT.sizeDelta = new Vector2(120, 0);
 
             GameObject prizeIcon = new GameObject("Icon");
             prizeIcon.transform.SetParent(prizeRow.transform, false);
@@ -382,7 +382,7 @@ namespace DigitPark.Editor
             piRT.anchorMin = new Vector2(0, 0.5f);
             piRT.anchorMax = new Vector2(0, 0.5f);
             piRT.pivot = new Vector2(0, 0.5f);
-            piRT.sizeDelta = new Vector2(40, 40);
+            piRT.sizeDelta = new Vector2(28, 28);
             piRT.anchoredPosition = Vector2.zero;
             Image piImg = prizeIcon.AddComponent<Image>();
             piImg.preserveAspect = true;
@@ -395,25 +395,25 @@ namespace DigitPark.Editor
             RectTransform ptRT = prizeText.AddComponent<RectTransform>();
             ptRT.anchorMin = new Vector2(0, 0);
             ptRT.anchorMax = new Vector2(1, 1);
-            ptRT.offsetMin = new Vector2(48, 0);
+            ptRT.offsetMin = new Vector2(34, 0);
             ptRT.offsetMax = Vector2.zero;
             TextMeshProUGUI ptTMP = prizeText.AddComponent<TextMeshProUGUI>();
             ptTMP.text = "$500";
-            ptTMP.fontSize = 36;
+            ptTMP.fontSize = 26;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GREEN;
             ptTMP.alignment = TextAlignmentOptions.Left;
 
-            // === Players + Timer Row (abajo izquierda del contenido) ===
+            // Players
             GameObject playersRow = new GameObject("PlayersRow");
             playersRow.transform.SetParent(root.transform, false);
-
             RectTransform plRT = playersRow.AddComponent<RectTransform>();
             plRT.anchorMin = new Vector2(0, 0);
-            plRT.anchorMax = new Vector2(0, 0);
-            plRT.pivot = new Vector2(0, 0);
-            plRT.sizeDelta = new Vector2(180, 48);
-            plRT.anchoredPosition = new Vector2(210, 25);
+            plRT.anchorMax = new Vector2(0, 0.55f);
+            plRT.pivot = new Vector2(0, 0.5f);
+            plRT.offsetMin = new Vector2(270, 10);
+            plRT.offsetMax = new Vector2(270, 0);
+            plRT.sizeDelta = new Vector2(120, 0);
 
             GameObject playersIcon = new GameObject("Icon");
             playersIcon.transform.SetParent(playersRow.transform, false);
@@ -421,7 +421,7 @@ namespace DigitPark.Editor
             pliRT.anchorMin = new Vector2(0, 0.5f);
             pliRT.anchorMax = new Vector2(0, 0.5f);
             pliRT.pivot = new Vector2(0, 0.5f);
-            pliRT.sizeDelta = new Vector2(36, 36);
+            pliRT.sizeDelta = new Vector2(28, 28);
             pliRT.anchoredPosition = Vector2.zero;
             Image pliImg = playersIcon.AddComponent<Image>();
             pliImg.preserveAspect = true;
@@ -434,24 +434,24 @@ namespace DigitPark.Editor
             RectTransform pltRT = playersText.AddComponent<RectTransform>();
             pltRT.anchorMin = new Vector2(0, 0);
             pltRT.anchorMax = new Vector2(1, 1);
-            pltRT.offsetMin = new Vector2(42, 0);
+            pltRT.offsetMin = new Vector2(34, 0);
             pltRT.offsetMax = Vector2.zero;
             TextMeshProUGUI pltTMP = playersText.AddComponent<TextMeshProUGUI>();
             pltTMP.text = "15/20";
-            pltTMP.fontSize = 32;
+            pltTMP.fontSize = 24;
             pltTMP.color = TEXT_SECONDARY;
             pltTMP.alignment = TextAlignmentOptions.Left;
 
-            // Timer al lado de players
+            // Timer
             GameObject timerRow = new GameObject("TimerRow");
             timerRow.transform.SetParent(root.transform, false);
-
             RectTransform trRT = timerRow.AddComponent<RectTransform>();
             trRT.anchorMin = new Vector2(0, 0);
-            trRT.anchorMax = new Vector2(0, 0);
-            trRT.pivot = new Vector2(0, 0);
-            trRT.sizeDelta = new Vector2(220, 48);
-            trRT.anchoredPosition = new Vector2(410, 25);
+            trRT.anchorMax = new Vector2(0, 0.55f);
+            trRT.pivot = new Vector2(0, 0.5f);
+            trRT.offsetMin = new Vector2(410, 10);
+            trRT.offsetMax = new Vector2(410, 0);
+            trRT.sizeDelta = new Vector2(180, 0);
 
             GameObject timerIcon = new GameObject("Icon");
             timerIcon.transform.SetParent(timerRow.transform, false);
@@ -459,7 +459,7 @@ namespace DigitPark.Editor
             tiRT.anchorMin = new Vector2(0, 0.5f);
             tiRT.anchorMax = new Vector2(0, 0.5f);
             tiRT.pivot = new Vector2(0, 0.5f);
-            tiRT.sizeDelta = new Vector2(36, 36);
+            tiRT.sizeDelta = new Vector2(28, 28);
             tiRT.anchoredPosition = Vector2.zero;
             Image tiImg = timerIcon.AddComponent<Image>();
             tiImg.preserveAspect = true;
@@ -472,24 +472,25 @@ namespace DigitPark.Editor
             RectTransform ttRT = timerText.AddComponent<RectTransform>();
             ttRT.anchorMin = new Vector2(0, 0);
             ttRT.anchorMax = new Vector2(1, 1);
-            ttRT.offsetMin = new Vector2(42, 0);
+            ttRT.offsetMin = new Vector2(34, 0);
             ttRT.offsetMax = Vector2.zero;
             TextMeshProUGUI ttTMP = timerText.AddComponent<TextMeshProUGUI>();
             ttTMP.text = "02:45:00";
-            ttTMP.fontSize = 32;
+            ttTMP.fontSize = 24;
             ttTMP.color = CYAN;
             ttTMP.alignment = TextAlignmentOptions.Left;
 
-            // === Entry Fee (arriba derecha, debajo del LiveBadge) ===
+            // === Entry Fee (derecha superior) ===
             GameObject entryBadge = new GameObject("EntryFeeBadge");
             entryBadge.transform.SetParent(root.transform, false);
 
             RectTransform ebRT = entryBadge.AddComponent<RectTransform>();
-            ebRT.anchorMin = new Vector2(1, 1);
+            ebRT.anchorMin = new Vector2(1, 0.5f);
             ebRT.anchorMax = new Vector2(1, 1);
             ebRT.pivot = new Vector2(1, 1);
-            ebRT.sizeDelta = new Vector2(180, 80);
-            ebRT.anchoredPosition = new Vector2(-20, -70);
+            ebRT.sizeDelta = new Vector2(150, 0);
+            ebRT.offsetMin = new Vector2(-150, 5);
+            ebRT.offsetMax = new Vector2(-10, -8);
 
             Image ebBg = entryBadge.AddComponent<Image>();
             ebBg.color = new Color(0, 0, 0, 0.4f);
@@ -500,11 +501,11 @@ namespace DigitPark.Editor
             elRT.anchorMin = new Vector2(0, 0.5f);
             elRT.anchorMax = new Vector2(1, 1);
             elRT.sizeDelta = Vector2.zero;
-            elRT.offsetMin = new Vector2(8, 0);
-            elRT.offsetMax = new Vector2(-8, -4);
+            elRT.offsetMin = new Vector2(5, 0);
+            elRT.offsetMax = new Vector2(-5, -2);
             TextMeshProUGUI elTMP = entryLabel.AddComponent<TextMeshProUGUI>();
             elTMP.text = "Entrada";
-            elTMP.fontSize = 24;
+            elTMP.fontSize = 18;
             elTMP.color = TEXT_SECONDARY;
             elTMP.alignment = TextAlignmentOptions.Center;
 
@@ -514,25 +515,26 @@ namespace DigitPark.Editor
             evRT.anchorMin = new Vector2(0, 0);
             evRT.anchorMax = new Vector2(1, 0.5f);
             evRT.sizeDelta = Vector2.zero;
-            evRT.offsetMin = new Vector2(8, 4);
-            evRT.offsetMax = new Vector2(-8, 0);
+            evRT.offsetMin = new Vector2(5, 2);
+            evRT.offsetMax = new Vector2(-5, 0);
             TextMeshProUGUI evTMP = entryValue.AddComponent<TextMeshProUGUI>();
             evTMP.text = "$5";
-            evTMP.fontSize = 36;
+            evTMP.fontSize = 28;
             evTMP.fontStyle = FontStyles.Bold;
             evTMP.color = GOLD;
             evTMP.alignment = TextAlignmentOptions.Center;
 
-            // === Join Button (abajo derecha) ===
+            // === Join Button (derecha inferior) ===
             GameObject joinBtn = new GameObject("JoinButton");
             joinBtn.transform.SetParent(root.transform, false);
 
             RectTransform jbRT = joinBtn.AddComponent<RectTransform>();
             jbRT.anchorMin = new Vector2(1, 0);
-            jbRT.anchorMax = new Vector2(1, 0);
+            jbRT.anchorMax = new Vector2(1, 0.5f);
             jbRT.pivot = new Vector2(1, 0);
-            jbRT.sizeDelta = new Vector2(180, 58);
-            jbRT.anchoredPosition = new Vector2(-20, 20);
+            jbRT.sizeDelta = new Vector2(150, 0);
+            jbRT.offsetMin = new Vector2(-150, 10);
+            jbRT.offsetMax = new Vector2(-10, -5);
 
             Image jbBg = joinBtn.AddComponent<Image>();
             jbBg.color = GREEN;
@@ -548,7 +550,7 @@ namespace DigitPark.Editor
             jtRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI jtTMP = joinText.AddComponent<TextMeshProUGUI>();
             jtTMP.text = "Unirse";
-            jtTMP.fontSize = 30;
+            jtTMP.fontSize = 26;
             jtTMP.fontStyle = FontStyles.Bold;
             jtTMP.color = Color.white;
             jtTMP.alignment = TextAlignmentOptions.Center;

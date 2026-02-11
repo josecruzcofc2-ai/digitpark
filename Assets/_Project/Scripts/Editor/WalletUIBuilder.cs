@@ -25,6 +25,9 @@ namespace DigitPark.Editor
         private static readonly Color RED = new Color(1f, 0.35f, 0.35f, 1f);
         private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TEXT_SECONDARY = new Color(0.55f, 0.55f, 0.6f, 1f);
+        private static readonly Color TEXT_GOLD = new Color(1f, 0.84f, 0f, 1f);
+        private static readonly Color TEXT_PRIMARY = new Color(1f, 1f, 1f, 1f);
+        private static readonly Color CARD_BORDER = new Color(0.85f, 0.65f, 0.13f, 0.6f);
         private static readonly Color TAB_INACTIVE = new Color(0.15f, 0.16f, 0.2f, 1f);
         private static readonly Color TAB_ACTIVE = new Color(0.2f, 0.6f, 0.4f, 1f);
 
@@ -39,7 +42,7 @@ namespace DigitPark.Editor
         #endregion
 
         // Layout constants (from top)
-        private const float HEADER_HEIGHT = 80f;
+        private const float HEADER_HEIGHT = 120f;
         private const float BALANCE_CARD_HEIGHT = 380f;  // Aumentado para incluir botones
         private const float TABS_HEIGHT = 60f;
         private const float SECTION_SPACING = 15f;
@@ -274,80 +277,87 @@ namespace DigitPark.Editor
                 arrowTMP.alignment = TextAlignmentOptions.Center;
             }
 
-            // Title - centered
-            GameObject title = new GameObject("Title");
+            // Title - centered, gold color
+            GameObject title = new GameObject("TitleText");
             title.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = title.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 0);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.offsetMin = new Vector2(85, 0);
-            titleRT.offsetMax = new Vector2(-200, 0);
+            titleRT.anchorMin = new Vector2(0.5f, 0.5f);
+            titleRT.anchorMax = new Vector2(0.5f, 0.5f);
+            titleRT.sizeDelta = new Vector2(500, 80);
+            titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleTMP = title.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Mi Wallet";
-            titleTMP.fontSize = 79;
-            titleTMP.color = TEXT_WHITE;
+            titleTMP.fontSize = 78;
+            titleTMP.color = TEXT_GOLD;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Center;
-            titleTMP.verticalAlignment = VerticalAlignmentOptions.Middle;
-            titleTMP.enableAutoSizing = true;
-            titleTMP.fontSizeMin = 32;
-            titleTMP.fontSizeMax = 79;
 
-            // BalanceWidget (CashBattleHub style)
+            // Gold outline effect
+            titleTMP.outlineWidth = 0.2f;
+            titleTMP.outlineColor = new Color(0.5f, 0.35f, 0f, 0.6f);
+
+            // BalanceWidget (idéntico a CashBattleHub)
+            CreateBalanceWidget(header.transform);
+        }
+
+        private static void CreateBalanceWidget(Transform parent)
+        {
             GameObject balanceWidget = new GameObject("BalanceWidget");
-            balanceWidget.transform.SetParent(header.transform, false);
+            balanceWidget.transform.SetParent(parent, false);
 
-            RectTransform bwRT = balanceWidget.AddComponent<RectTransform>();
-            bwRT.anchorMin = new Vector2(1, 0.5f);
-            bwRT.anchorMax = new Vector2(1, 0.5f);
-            bwRT.pivot = new Vector2(1, 0.5f);
-            bwRT.sizeDelta = new Vector2(180, 65);
-            bwRT.anchoredPosition = new Vector2(-SIDE_PADDING, 0);
+            RectTransform rt = balanceWidget.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(1, 0.5f);
+            rt.anchorMax = new Vector2(1, 0.5f);
+            rt.pivot = new Vector2(1, 0.5f);
+            rt.sizeDelta = new Vector2(180, 65);
+            rt.anchoredPosition = new Vector2(-20, 0);
 
-            Image bwBg = balanceWidget.AddComponent<Image>();
-            bwBg.color = new Color(0.05f, 0.05f, 0.07f, 1f);
+            // Background
+            Image bg = balanceWidget.AddComponent<Image>();
+            bg.color = new Color(0.1f, 0.08f, 0.05f, 0.8f);
 
-            HorizontalLayoutGroup bwHlg = balanceWidget.AddComponent<HorizontalLayoutGroup>();
-            bwHlg.padding = new RectOffset(10, 10, 5, 5);
-            bwHlg.spacing = 6;
-            bwHlg.childAlignment = TextAnchor.MiddleCenter;
-            bwHlg.childForceExpandWidth = false;
-            bwHlg.childControlWidth = false;
-            bwHlg.childForceExpandHeight = true;
+            // Gold border
+            Outline outline = balanceWidget.AddComponent<Outline>();
+            outline.effectColor = CARD_BORDER;
+            outline.effectDistance = new Vector2(1, -1);
 
-            // CoinIcon "$"
+            // Coin icon
             GameObject coinIcon = new GameObject("CoinIcon");
             coinIcon.transform.SetParent(balanceWidget.transform, false);
-            LayoutElement coinLE = coinIcon.AddComponent<LayoutElement>();
-            coinLE.preferredWidth = 40;
 
-            TextMeshProUGUI coinTMP = coinIcon.AddComponent<TextMeshProUGUI>();
-            coinTMP.text = "$";
-            coinTMP.fontSize = 52;
-            coinTMP.color = GOLD;
-            coinTMP.fontStyle = FontStyles.Bold;
-            coinTMP.alignment = TextAlignmentOptions.Center;
-            coinTMP.enableAutoSizing = true;
-            coinTMP.fontSizeMin = 24;
-            coinTMP.fontSizeMax = 52;
+            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
+            coinRT.anchorMin = new Vector2(0, 0);
+            coinRT.anchorMax = new Vector2(0, 1);
+            coinRT.pivot = new Vector2(0, 0.5f);
+            coinRT.sizeDelta = new Vector2(40, 0);
+            coinRT.anchoredPosition = new Vector2(8, 0);
 
-            // BalanceText
-            GameObject balText = new GameObject("BalanceText");
-            balText.transform.SetParent(balanceWidget.transform, false);
-            LayoutElement balLE = balText.AddComponent<LayoutElement>();
-            balLE.flexibleWidth = 1;
+            TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
+            coinText.text = "$";
+            coinText.fontSize = 52;
+            coinText.color = TEXT_GOLD;
+            coinText.alignment = TextAlignmentOptions.Center;
+            coinText.fontStyle = FontStyles.Bold;
 
-            TextMeshProUGUI balTMP = balText.AddComponent<TextMeshProUGUI>();
-            balTMP.text = "0.00";
-            balTMP.fontSize = 52;
-            balTMP.color = GREEN;
-            balTMP.fontStyle = FontStyles.Bold;
-            balTMP.alignment = TextAlignmentOptions.Left;
-            balTMP.enableAutoSizing = true;
-            balTMP.fontSizeMin = 24;
-            balTMP.fontSizeMax = 52;
+            // Balance text
+            GameObject balanceObj = new GameObject("BalanceText");
+            balanceObj.transform.SetParent(balanceWidget.transform, false);
+
+            RectTransform balanceRT = balanceObj.AddComponent<RectTransform>();
+            balanceRT.anchorMin = new Vector2(0, 0);
+            balanceRT.anchorMax = new Vector2(1, 1);
+            balanceRT.sizeDelta = Vector2.zero;
+            balanceRT.offsetMin = new Vector2(45, 0);
+            balanceRT.offsetMax = new Vector2(-10, 0);
+
+            TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
+            balanceText.text = "0.00";
+            balanceText.fontSize = 52;
+            balanceText.color = TEXT_PRIMARY;
+            balanceText.alignment = TextAlignmentOptions.Left;
+            balanceText.fontStyle = FontStyles.Bold;
         }
 
         #endregion
