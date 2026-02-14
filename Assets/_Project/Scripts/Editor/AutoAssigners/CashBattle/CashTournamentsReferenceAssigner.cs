@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.Editor;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -287,7 +288,7 @@ namespace DigitPark.Editor.AutoAssigners
                 if (c.gameObject.name != "TransitionCanvas")
                     return c;
             }
-            return Object.FindFirstObjectByType<Canvas>();
+            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static Transform FindDeep(Transform root, string name)

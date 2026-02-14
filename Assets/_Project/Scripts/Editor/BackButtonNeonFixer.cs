@@ -97,7 +97,7 @@ namespace DigitPark.Editor
             {
                 var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
 
-                Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                 if (canvas == null)
                 {
                     Debug.LogError($"[BackButtonNeonFixer] {config.displayName}: No Canvas found");

@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.Editor;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -167,7 +168,7 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(controller);
             so.Update();
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
             // === Header ===

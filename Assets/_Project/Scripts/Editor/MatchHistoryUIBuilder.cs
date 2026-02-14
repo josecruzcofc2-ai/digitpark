@@ -62,6 +62,7 @@ namespace DigitPark.Editor
 
         private const string ICONS_PATH = "Assets/_Project/Art/Icons/Games/";
         private const string MATCH_ENTRY_PREFAB_PATH = "Assets/_Project/Prefabs/Social/MatchHistoryEntry.prefab";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         #endregion
 
@@ -112,7 +113,8 @@ namespace DigitPark.Editor
 
         private static void RebuildMatchHistory()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[MatchHistoryUI] No se encontro Canvas");
@@ -167,7 +169,7 @@ namespace DigitPark.Editor
 
         private static void CreateHeader()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var header = FindOrCreate(canvas.transform, "Header");
@@ -175,30 +177,29 @@ namespace DigitPark.Editor
             SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
-            // Back Button
-            var backBtn = FindOrCreate(header.transform, "BackButton");
-            var bRT = GetOrAdd<RectTransform>(backBtn);
+            // Back Button - Neon Cyan prefab
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtnObj;
+            if (backBtnPrefab != null)
+            {
+                Transform oldBtn = header.transform.Find("BackButton");
+                if (oldBtn != null) DestroyImmediate(oldBtn.gameObject);
+                backBtnObj = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtnObj.name = "BackButton";
+            }
+            else
+            {
+                backBtnObj = FindOrCreate(header.transform, "BackButton");
+                GetOrAdd<Image>(backBtnObj).color = new Color(0, 0, 0, 0);
+                GetOrAdd<Button>(backBtnObj);
+                Debug.LogWarning("[MatchHistoryUI] BackButton prefab not found, using fallback");
+            }
+            var bRT = GetOrAdd<RectTransform>(backBtnObj);
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
             bRT.anchoredPosition = new Vector2(15, 0);
             bRT.sizeDelta = new Vector2(50, 50);
-            var bBg = GetOrAdd<Image>(backBtn);
-            bBg.color = new Color(1, 1, 1, 0.06f);
-            GetOrAdd<Button>(backBtn).targetGraphic = bBg;
-
-            var backIcon = FindOrCreate(backBtn.transform, "Icon");
-            var biRT = GetOrAdd<RectTransform>(backIcon);
-            biRT.anchorMin = Vector2.zero;
-            biRT.anchorMax = Vector2.one;
-            biRT.offsetMin = new Vector2(8, 8);
-            biRT.offsetMax = new Vector2(-8, -8);
-            var biTMP = GetOrAdd<TextMeshProUGUI>(backIcon);
-            biTMP.text = "\u2039";
-            biTMP.fontSize = 36;
-            biTMP.color = CYAN_NEON;
-            biTMP.fontStyle = FontStyles.Bold;
-            biTMP.alignment = TextAlignmentOptions.Center;
 
             // Title
             var title = FindOrCreate(header.transform, "TitleText");
@@ -209,7 +210,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "HISTORIAL";
-            tTMP.fontSize = 28;
+            tTMP.fontSize = 78;
             tTMP.color = TEXT_WHITE;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -223,7 +224,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 partidas";
-            cTMP.fontSize = 15;
+            cTMP.fontSize = 38;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -236,7 +237,7 @@ namespace DigitPark.Editor
 
         private static void CreateGameFilters()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var filters = FindOrCreate(canvas.transform, "GameFilters");
@@ -247,7 +248,7 @@ namespace DigitPark.Editor
             barImg.color = Color.clear;
 
             var hlg = GetOrAdd<HorizontalLayoutGroup>(filters);
-            hlg.spacing = 10;
+            hlg.spacing = 25;
             hlg.padding = new RectOffset(5, 5, 5, 5);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = false;
@@ -273,7 +274,7 @@ namespace DigitPark.Editor
         {
             var chip = FindOrCreate(parent, name);
             var le = GetOrAdd<LayoutElement>(chip);
-            le.preferredWidth = 100;
+            le.preferredWidth = 250;
 
             var bg = GetOrAdd<Image>(chip);
             bg.color = active ? accentColor : CHIP_INACTIVE;
@@ -292,7 +293,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = GetOrAdd<TextMeshProUGUI>(text);
             tTMP.text = label;
-            tTMP.fontSize = 18;
+            tTMP.fontSize = 45;
             tTMP.color = active ? TEXT_DARK : TEXT_SECONDARY;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -302,7 +303,7 @@ namespace DigitPark.Editor
         {
             var chip = FindOrCreate(parent, name);
             var le = GetOrAdd<LayoutElement>(chip);
-            le.preferredWidth = 75;
+            le.preferredWidth = 188;
 
             var bg = GetOrAdd<Image>(chip);
             bg.color = CHIP_INACTIVE;
@@ -338,7 +339,7 @@ namespace DigitPark.Editor
                 // Fallback: poner letra
                 var fallback = GetOrAdd<TextMeshProUGUI>(iconGO);
                 fallback.text = name.Replace("Filter", "").Substring(0, 2);
-                fallback.fontSize = 16;
+                fallback.fontSize = 40;
                 fallback.color = gameColor;
                 fallback.alignment = TextAlignmentOptions.Center;
             }
@@ -350,7 +351,7 @@ namespace DigitPark.Editor
 
         private static void CreateScrollView()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var scrollView = FindOrCreate(canvas.transform, "ScrollView");
@@ -411,7 +412,7 @@ namespace DigitPark.Editor
             eTMP.fontSize = 18;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
-            eTMP.fontStyle = FontStyles.Italic;
+            eTMP.fontStyle = FontStyles.Bold;
 
             // Loading Indicator
             var loading = FindOrCreate(content.transform, "LoadingIndicator");
@@ -462,7 +463,7 @@ namespace DigitPark.Editor
 
         private static void CreateMatchEntryPrefab()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform content = canvas.transform.Find("ScrollView/Viewport/Content");
@@ -607,7 +608,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var so = new SerializedObject(manager);
@@ -676,6 +677,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject FindOrCreate(Transform parent, string name)
         {

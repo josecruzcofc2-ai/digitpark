@@ -117,7 +117,7 @@ namespace DigitPark.Editor
         private static bool AddBackgroundToCurrentScene(string sceneName)
         {
             // Buscar Canvas
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogWarning($"[Background] No se encontró Canvas en: {sceneName}");
@@ -233,7 +233,7 @@ namespace DigitPark.Editor
                 var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
                 string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
 
-                Canvas canvas = Object.FindObjectOfType<Canvas>();
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                 if (canvas == null)
                 {
                     report += $"⚠ {sceneName}: Sin Canvas\n";

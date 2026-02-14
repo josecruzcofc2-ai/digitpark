@@ -91,6 +91,8 @@ namespace DigitPark.Editor
         {
             Debug.Log("[ShopPremiumUIBuilder] ========== INICIANDO CONSTRUCCION PREMIUM ==========");
 
+            CleanupOldUI();
+
             Canvas canvas = SetupCanvas();
             if (canvas == null) return;
 
@@ -127,7 +129,7 @@ namespace DigitPark.Editor
 
         private static Canvas SetupCanvas()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
 
             if (canvas == null)
             {
@@ -1440,6 +1442,20 @@ namespace DigitPark.Editor
         }
 
         // ==================== UTILITIES ====================
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject CreateChild(GameObject parent, string name)
         {

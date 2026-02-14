@@ -230,7 +230,7 @@ namespace DigitPark.Editor
 
         private void FindCashBattleElements()
         {
-            Canvas c = Object.FindFirstObjectByType<Canvas>();
+            Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
             if (c == null) return;
 
             // New structure: Canvas -> SlidesContainer
@@ -298,7 +298,7 @@ namespace DigitPark.Editor
 
         private void FindMainOnboardingElements()
         {
-            canvas = Object.FindFirstObjectByType<Canvas>();
+            canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform r = canvas.transform;

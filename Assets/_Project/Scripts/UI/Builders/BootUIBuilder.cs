@@ -166,7 +166,7 @@ namespace DigitPark.UI
             main.loop = true;
             main.startLifetime = 4f;
             main.startSpeed = 20f;
-            main.startSize = new ParticleSystem.MinMaxCurve(5f, 15f);
+            main.startSize = new ParticleSystem.MinMaxCurve(15f, 45f);
             main.maxParticles = 50;
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
             main.playOnAwake = false;
@@ -245,7 +245,7 @@ namespace DigitPark.UI
             logoContainer.anchorMin = new Vector2(0.5f, 0.55f);
             logoContainer.anchorMax = new Vector2(0.5f, 0.55f);
             logoContainer.pivot = new Vector2(0.5f, 0.5f);
-            logoContainer.sizeDelta = new Vector2(750, 550);
+            logoContainer.sizeDelta = new Vector2(2250, 1650);
             logoContainer.anchoredPosition = Vector2.zero;
 
             logoCanvasGroup = logoContainerObj.AddComponent<CanvasGroup>();
@@ -262,7 +262,7 @@ namespace DigitPark.UI
                 brainRT.anchorMin = new Vector2(0.5f, 0.55f);
                 brainRT.anchorMax = new Vector2(0.5f, 0.55f);
                 brainRT.pivot = new Vector2(0.5f, 0f);
-                brainRT.sizeDelta = new Vector2(280, 280);
+                brainRT.sizeDelta = new Vector2(840, 840);
                 brainRT.anchoredPosition = Vector2.zero;
 
                 Image brainImg = brainObj.AddComponent<Image>();
@@ -282,7 +282,7 @@ namespace DigitPark.UI
                 textRT.anchorMin = new Vector2(0.5f, 0.55f);
                 textRT.anchorMax = new Vector2(0.5f, 0.55f);
                 textRT.pivot = new Vector2(0.5f, 1f);
-                textRT.sizeDelta = new Vector2(650, 240);
+                textRT.sizeDelta = new Vector2(1950, 720);
                 textRT.anchoredPosition = new Vector2(0, -15);
 
                 Image textImg = textLogoObj.AddComponent<Image>();
@@ -295,7 +295,7 @@ namespace DigitPark.UI
                 // Fallback: texto TMP si no hay imagen
                 Color titleColor = GetThemeColor(t => t.textTitle, new Color(0f, 1f, 1f));
                 TextMeshProUGUI title = UIFactory.CreateTitle(logoContainer, "Title", "DIGIT PARK");
-                title.fontSize = 72;
+                title.fontSize = 288;
                 title.color = titleColor;
                 title.outlineWidth = 0.25f;
                 title.outlineColor = accentColor;
@@ -345,7 +345,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "Subtitle",
                 subtitleText,
-                16,
+                64,
                 textSecondary,
                 TextAlignmentOptions.Center
             );
@@ -358,20 +358,20 @@ namespace DigitPark.UI
             rt.anchorMax = new Vector2(0.5f, 0.30f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(500, 30);
+            rt.sizeDelta = new Vector2(1500, 90);
 
             // Subtítulo 2: Habilidad Mental (localizado)
             TextMeshProUGUI subtitle2 = UIFactory.CreateText(
                 canvas.transform,
                 "Subtitle2",
                 subtitle2Text,
-                14,
+                56,
                 accentColor,
                 TextAlignmentOptions.Center
             );
 
             subtitle2.characterSpacing = 4f;
-            subtitle2.fontStyle = FontStyles.Italic;
+            subtitle2.fontStyle = FontStyles.Bold;
             subtitle2.alpha = 0.7f;
 
             RectTransform rt2 = subtitle2.GetComponent<RectTransform>();
@@ -379,7 +379,7 @@ namespace DigitPark.UI
             rt2.anchorMax = new Vector2(0.5f, 0.26f);
             rt2.pivot = new Vector2(0.5f, 0.5f);
             rt2.anchoredPosition = Vector2.zero;
-            rt2.sizeDelta = new Vector2(500, 25);
+            rt2.sizeDelta = new Vector2(1500, 75);
         }
 
         /// <summary>
@@ -454,7 +454,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "LoadingText",
                 "",
-                22,
+                88,
                 textColor,
                 TextAlignmentOptions.Center
             );
@@ -464,7 +464,7 @@ namespace DigitPark.UI
             rt.anchorMax = new Vector2(0.5f, 0.14f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(700, 50);
+            rt.sizeDelta = new Vector2(2100, 150);
 
             bootManager.loadingText = loadingText;
         }
@@ -480,7 +480,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "VersionText",
                 $"v{Application.version}",
-                16,
+                64,
                 textDisabled,
                 TextAlignmentOptions.BottomRight
             );
@@ -490,7 +490,7 @@ namespace DigitPark.UI
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot = new Vector2(1f, 0f);
             rt.anchoredPosition = new Vector2(-20, 20);
-            rt.sizeDelta = new Vector2(200, 40);
+            rt.sizeDelta = new Vector2(600, 120);
 
             bootManager.versionText = versionText;
         }

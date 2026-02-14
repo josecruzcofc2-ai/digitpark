@@ -84,7 +84,7 @@ namespace DigitPark.Editor
             }
 
             // Buscar Canvas para poner el botón fuera del layout
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[PremiumUISetup] No se encontró Canvas en la escena MainMenu");
@@ -310,7 +310,7 @@ namespace DigitPark.Editor
                 // Buscar en el Canvas
                 if (resultPanel == null)
                 {
-                    Canvas canvas = Object.FindObjectOfType<Canvas>();
+                    Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                     if (canvas != null)
                     {
                         foreach (Transform child in canvas.transform)
@@ -478,7 +478,7 @@ namespace DigitPark.Editor
             }
 
             // Buscar el Canvas para obtener referencias
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[PremiumUISetup] No se encontró Canvas en la escena Settings");
@@ -695,7 +695,7 @@ namespace DigitPark.Editor
             var scene = EditorSceneManager.OpenScene("Assets/_Project/Scenes/Tournaments.unity", OpenSceneMode.Single);
 
             // Buscar el Canvas
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[PremiumUISetup] No se encontró Canvas en la escena Tournaments");

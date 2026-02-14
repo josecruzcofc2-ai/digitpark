@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
@@ -17,6 +18,8 @@ namespace DigitPark.Editor
         private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.95f);
         private static readonly Color INPUT_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color PLACEHOLDER_COLOR = new Color(0.4f, 0.4f, 0.4f, 1f);
+
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         [MenuItem("DigitPark/UI Builders/Social/SearchPlayers", false, 221)]
         public static void ShowWindow()
@@ -40,11 +43,20 @@ namespace DigitPark.Editor
             {
                 RebuildSearchPlayersUI();
             }
+
+            GUILayout.Space(15);
+            GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
+            if (GUILayout.Button("Auto-Asignar Referencias", GUILayout.Height(30)))
+            {
+                SearchPlayersReferenceAssigner.RunAutoAssign();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static void RebuildSearchPlayersUI()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("No se encontró Canvas en la escena");
@@ -61,6 +73,9 @@ namespace DigitPark.Editor
 
             Debug.Log("SearchPlayers UI reconstruida exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
+
+            // Auto-asignar referencias al Manager
+            SearchPlayersReferenceAssigner.RunAutoAssign();
         }
 
         private static void CleanOldElements(Transform canvasTransform)
@@ -100,18 +115,49 @@ namespace DigitPark.Editor
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 140));
 
+            Image headerBg = header.GetComponent<Image>();
+            if (headerBg == null) headerBg = header.AddComponent<Image>();
+            headerBg.color = new Color(0.04f, 0.06f, 0.1f, 0.98f);
+
+            // Back Button - Neon Cyan prefab
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                Transform oldBtn = header.transform.Find("BackButton");
+                if (oldBtn != null) DestroyImmediate(oldBtn.gameObject);
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = CreateOrFind(header.transform, "BackButton");
+                Image fallbackBg = backBtn.GetComponent<Image>();
+                if (fallbackBg == null) fallbackBg = backBtn.AddComponent<Image>();
+                fallbackBg.color = new Color(0, 0, 0, 0);
+                if (backBtn.GetComponent<Button>() == null) backBtn.AddComponent<Button>();
+                Debug.LogWarning("[SearchPlayersUI] BackButton prefab not found, using fallback");
+            }
+            RectTransform backRT = backBtn.GetComponent<RectTransform>();
+            if (backRT == null) backRT = backBtn.AddComponent<RectTransform>();
+            backRT.anchorMin = new Vector2(0, 0.5f);
+            backRT.anchorMax = new Vector2(0, 0.5f);
+            backRT.pivot = new Vector2(0, 0.5f);
+            backRT.anchoredPosition = new Vector2(15, 0);
+            backRT.sizeDelta = new Vector2(50, 50);
+
             GameObject title = CreateOrFind(header.transform, "TitleText");
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(500, 60));
-            SetupText(title, "BUSCAR JUGADORES", 38, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "BUSCAR JUGADORES", 78, CYAN_NEON, FontStyles.Bold);
 
             // ========== SEARCH BAR INTEGRADO (Diseño Moderno) ==========
             // Un único campo de búsqueda con lupa y Clear integrados
             GameObject searchBar = CreateOrFind(canvasTransform, "SearchBar");
             SetupRectTransform(searchBar,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -175), new Vector2(-80, 64));
+                new Vector2(0, -175), new Vector2(-80, 128));
 
             // Fondo del SearchBar con bordes redondeados simulados
             Image searchBarBg = searchBar.GetComponent<Image>();
@@ -128,19 +174,25 @@ namespace DigitPark.Editor
             GameObject searchIcon = CreateOrFind(searchBar.transform, "SearchIcon");
             RectTransform searchIconRect = SetupRectTransform(searchIcon,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(28, 0), new Vector2(32, 32));
+                new Vector2(56, 0), new Vector2(64, 64));
             Image searchIconImg = searchIcon.GetComponent<Image>();
             if (searchIconImg == null) searchIconImg = searchIcon.AddComponent<Image>();
             searchIconImg.color = PLACEHOLDER_COLOR;
             searchIconImg.preserveAspect = true;
             searchIconImg.raycastTarget = false;
-            // ARRASTRA TU SPRITE DE LUPA AQUI en el Inspector
+            // Cargar icono de lupa neon
+            Sprite searchSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/Buttons/SearchIconNeon.png");
+            if (searchSprite != null)
+            {
+                searchIconImg.sprite = searchSprite;
+                Debug.Log("[SearchPlayersUI] SearchIconNeon asignado");
+            }
 
             // Input Field (ocupa el espacio central)
             GameObject inputField = CreateOrFind(searchBar.transform, "SearchInputField");
             SetupRectTransform(inputField,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(30, 0), new Vector2(-140, 0)); // Espacio para lupa y botón Clear
+                new Vector2(60, 0), new Vector2(-200, 0)); // Espacio para lupa y botón Clear
 
             TMP_InputField tmpInput = inputField.GetComponent<TMP_InputField>();
             if (tmpInput == null) tmpInput = inputField.AddComponent<TMP_InputField>();
@@ -155,9 +207,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderTmp = placeholder.GetComponent<TextMeshProUGUI>();
             if (placeholderTmp == null) placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "Buscar por nombre de usuario...";
-            placeholderTmp.fontSize = 20;
+            placeholderTmp.fontSize = 40;
             placeholderTmp.color = PLACEHOLDER_COLOR;
-            placeholderTmp.fontStyle = FontStyles.Italic;
+            placeholderTmp.fontStyle = FontStyles.Bold;
             placeholderTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
             // Text
@@ -166,7 +218,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTmp = inputText.GetComponent<TextMeshProUGUI>();
             if (inputTmp == null) inputTmp = inputText.AddComponent<TextMeshProUGUI>();
             inputTmp.text = "";
-            inputTmp.fontSize = 20;
+            inputTmp.fontSize = 40;
             inputTmp.color = Color.white;
             inputTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -175,13 +227,13 @@ namespace DigitPark.Editor
             tmpInput.textComponent = inputTmp;
             tmpInput.placeholder = placeholderTmp;
             tmpInput.fontAsset = inputTmp.font;
-            tmpInput.pointSize = 20;
+            tmpInput.pointSize = 40;
 
             // Clear Button - Botón estilo neón con texto "Clear"
             GameObject clearButton = CreateOrFind(searchBar.transform, "ClearButton");
             RectTransform clearBtnRect = SetupRectTransform(clearButton,
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-50, 0), new Vector2(80, 40));
+                new Vector2(-90, 0), new Vector2(160, 80));
 
             Image clearBtnBg = clearButton.GetComponent<Image>();
             if (clearBtnBg == null) clearBtnBg = clearButton.AddComponent<Image>();
@@ -207,7 +259,7 @@ namespace DigitPark.Editor
             // Texto "Clear"
             GameObject clearText = CreateOrFind(clearButton.transform, "Text");
             SetupRectTransform(clearText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(clearText, "Clear", 16, DARK_BG, FontStyles.Bold);
+            SetupText(clearText, "Clear", 32, DARK_BG, FontStyles.Bold);
 
             // SearchButton oculto (mantener referencia para el Manager pero no visible)
             // La búsqueda es en tiempo real, no necesita botón
@@ -222,7 +274,7 @@ namespace DigitPark.Editor
             GameObject resultsPanel = CreateOrFind(canvasTransform, "ResultsPanel");
             SetupRectTransform(resultsPanel,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(0, -80), new Vector2(-80, -280));
+                new Vector2(0, -80), new Vector2(-80, -350));
 
             Image resultsBg = resultsPanel.GetComponent<Image>();
             if (resultsBg == null) resultsBg = resultsPanel.AddComponent<Image>();
@@ -316,7 +368,7 @@ namespace DigitPark.Editor
             GameObject emptyState = CreateOrFind(resultsPanel.transform, "EmptyState");
             SetupRectTransform(emptyState,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 40), new Vector2(400, 350)); // Subido un poco para mejor centrado
+                new Vector2(0, 40), new Vector2(800, 700)); // Subido un poco para mejor centrado
             // Mostrar EmptyState por defecto (se oculta cuando hay resultados)
             emptyState.SetActive(true);
 
@@ -324,33 +376,39 @@ namespace DigitPark.Editor
             GameObject emptyIcon = CreateOrFind(emptyState.transform, "EmptyIcon");
             SetupRectTransform(emptyIcon,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -20), new Vector2(120, 120)); // Agrandado a 120x120
+                new Vector2(0, -20), new Vector2(240, 240)); // Agrandado a 240x240
             Image emptyIconImg = emptyIcon.GetComponent<Image>();
             if (emptyIconImg == null) emptyIconImg = emptyIcon.AddComponent<Image>();
             emptyIconImg.color = CYAN_NEON; // Cyan brillante para que destaque
             emptyIconImg.preserveAspect = true;
-            // ARRASTRA TU SPRITE DE PERSONAS AQUI en el Inspector
+            // Cargar icono de TabBar para empty state
+            Sprite tabBarSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/TabBar/icon_profile.png");
+            if (tabBarSprite != null)
+            {
+                emptyIconImg.sprite = tabBarSprite;
+                Debug.Log("[SearchPlayersUI] TabBar icon asignado al EmptyIcon");
+            }
 
             // Empty Title - Más grande y prominente
             GameObject emptyTitle = CreateOrFind(emptyState.transform, "Title");
             SetupRectTransform(emptyTitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 20), new Vector2(350, 50));
-            SetupText(emptyTitle, "Busca jugadores", 32, Color.white, FontStyles.Bold);
+                new Vector2(0, 20), new Vector2(700, 100));
+            SetupText(emptyTitle, "Busca jugadores", 64, Color.white, FontStyles.Bold);
 
             // Empty Description - Texto más visible
             GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -40), new Vector2(380, 80));
-            SetupText(emptyDesc, "Encuentra jugadores para\nagregar como amigos o retar", 20, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Normal);
+                new Vector2(0, -40), new Vector2(760, 160));
+            SetupText(emptyDesc, "Encuentra jugadores para\nagregar como amigos o retar", 40, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
 
             // No Results Text (se mostrará cuando no haya resultados)
             GameObject noResultsText = CreateOrFind(resultsPanel.transform, "NoResultsText");
             SetupRectTransform(noResultsText,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(400, 60));
-            SetupText(noResultsText, "No se encontraron jugadores", 24, PLACEHOLDER_COLOR, FontStyles.Normal);
+            SetupText(noResultsText, "No se encontraron jugadores", 24, PLACEHOLDER_COLOR, FontStyles.Bold);
             noResultsText.SetActive(false);
 
             // Loading Indicator
@@ -361,7 +419,7 @@ namespace DigitPark.Editor
 
             GameObject loadingText = CreateOrFind(loadingIndicator.transform, "Text");
             SetupRectTransform(loadingText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(loadingText, "Buscando...", 24, CYAN_NEON, FontStyles.Normal);
+            SetupText(loadingText, "Buscando...", 24, CYAN_NEON, FontStyles.Bold);
             loadingIndicator.SetActive(false);
 
             // ========== CREAR PREFAB DE PLAYER CARD ==========
@@ -645,6 +703,20 @@ namespace DigitPark.Editor
         }
 
         // ========== UTILIDADES ==========
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject CreateOrFind(Transform parent, string name)
         {

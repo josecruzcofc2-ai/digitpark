@@ -213,7 +213,7 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Effects/Create Background Particles", false, 320)]
         public static void CreateBackgroundParticles()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No se encontró Canvas.", "OK");

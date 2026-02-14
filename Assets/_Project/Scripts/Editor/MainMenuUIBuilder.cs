@@ -41,7 +41,7 @@ namespace DigitPark.Editor
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
         // Sections fill screen with 1% gaps, 2.5% top padding, 2% bottom padding
-        private const float HEADER_TOP = 0.975f;
+        private const float HEADER_TOP = 1.0f;
         private const float HEADER_BOT = 0.928f;
 
         private const float PROFILE_TOP = 0.920f;
@@ -151,7 +151,9 @@ namespace DigitPark.Editor
 
         private static void RebuildMainMenu()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            CleanupOldUI();
+
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[MainMenuUI] No se encontró Canvas");
@@ -216,7 +218,7 @@ namespace DigitPark.Editor
 
         private static void CreateHeader()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var header = FindOrCreate(canvas.transform, "Header");
@@ -226,7 +228,7 @@ namespace DigitPark.Editor
 
             // Settings Button (left)
             CreateIconButton(header.transform, "SettingsButton",
-                new Vector2(0, 0.5f), new Vector2(50, 0), new Vector2(50, 50));
+                new Vector2(0, 0.5f), new Vector2(50, 0), new Vector2(100, 100));
 
             // Logo DIGIT PARK (center)
             var logo = FindOrCreate(header.transform, "LogoText");
@@ -238,7 +240,7 @@ namespace DigitPark.Editor
 
             var logoTMP = GetOrAdd<TextMeshProUGUI>(logo);
             logoTMP.text = "DIGIT PARK";
-            logoTMP.fontSize = 32;
+            logoTMP.fontSize = 78;
             logoTMP.color = CYAN_NEON;
             logoTMP.fontStyle = FontStyles.Bold;
             logoTMP.alignment = TextAlignmentOptions.Center;
@@ -247,7 +249,7 @@ namespace DigitPark.Editor
 
             // Notifications Button (right)
             var notifBtn = CreateIconButton(header.transform, "NotificationsButton",
-                new Vector2(1, 0.5f), new Vector2(-95, 0), new Vector2(50, 50));
+                new Vector2(1, 0.5f), new Vector2(-160, 0), new Vector2(100, 100));
 
             // Notification Badge
             var badge = FindOrCreate(notifBtn.transform, "Badge");
@@ -256,7 +258,7 @@ namespace DigitPark.Editor
             badgeRT.anchorMax = new Vector2(1, 1);
             badgeRT.pivot = new Vector2(0.5f, 0.5f);
             badgeRT.anchoredPosition = new Vector2(-5, -5);
-            badgeRT.sizeDelta = new Vector2(22, 22);
+            badgeRT.sizeDelta = new Vector2(44, 44);
             GetOrAdd<Image>(badge).color = new Color(1, 0.2f, 0.2f, 1);
 
             var badgeText = FindOrCreate(badge.transform, "BadgeText");
@@ -267,14 +269,14 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = 12;
+            btTMP.fontSize = 24;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
 
             // Profile Button (far right)
             CreateIconButton(header.transform, "ProfileButton",
-                new Vector2(1, 0.5f), new Vector2(-35, 0), new Vector2(50, 50));
+                new Vector2(1, 0.5f), new Vector2(-50, 0), new Vector2(100, 100));
 
             Debug.Log("[MainMenuUI] Header creado");
         }
@@ -313,7 +315,7 @@ namespace DigitPark.Editor
 
         private static void CreateProfileCard()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var card = FindOrCreate(canvas.transform, "ProfileCard");
@@ -343,7 +345,7 @@ namespace DigitPark.Editor
             var frameRT = GetOrAdd<RectTransform>(frame);
             frameRT.anchorMin = new Vector2(0.5f, 0.55f);
             frameRT.anchorMax = new Vector2(0.5f, 0.55f);
-            frameRT.sizeDelta = new Vector2(120, 120);
+            frameRT.sizeDelta = new Vector2(240, 240);
             GetOrAdd<Image>(frame).color = CYAN_NEON;
             var fo = GetOrAdd<Outline>(frame);
             fo.effectColor = CYAN_GLOW;
@@ -373,7 +375,7 @@ namespace DigitPark.Editor
             var lvlRT = GetOrAdd<RectTransform>(lvlBadge);
             lvlRT.anchorMin = new Vector2(0.5f, 0.15f);
             lvlRT.anchorMax = new Vector2(0.5f, 0.15f);
-            lvlRT.sizeDelta = new Vector2(70, 28);
+            lvlRT.sizeDelta = new Vector2(140, 56);
             GetOrAdd<Image>(lvlBadge).color = CYAN_NEON;
 
             var lvlText = FindOrCreate(lvlBadge.transform, "Text");
@@ -384,7 +386,7 @@ namespace DigitPark.Editor
             ltRT.offsetMax = Vector2.zero;
             var ltTMP = GetOrAdd<TextMeshProUGUI>(lvlText);
             ltTMP.text = "Nv. 12";
-            ltTMP.fontSize = 16;
+            ltTMP.fontSize = 32;
             ltTMP.color = TEXT_DARK;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.alignment = TextAlignmentOptions.Center;
@@ -406,7 +408,7 @@ namespace DigitPark.Editor
             userRT.offsetMax = Vector2.zero;
             var userTMP = GetOrAdd<TextMeshProUGUI>(user);
             userTMP.text = "@Username";
-            userTMP.fontSize = 28;
+            userTMP.fontSize = 56;
             userTMP.color = TEXT_WHITE;
             userTMP.fontStyle = FontStyles.Bold;
             userTMP.alignment = TextAlignmentOptions.Left;
@@ -420,7 +422,7 @@ namespace DigitPark.Editor
             statsRT.offsetMax = Vector2.zero;
 
             var hlg = GetOrAdd<HorizontalLayoutGroup>(stats);
-            hlg.spacing = 20;
+            hlg.spacing = 40;
             hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
@@ -442,7 +444,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(streak);
             stTMP.text = "Racha: 5 victorias";
-            stTMP.fontSize = 16;
+            stTMP.fontSize = 32;
             stTMP.color = GREEN_SUCCESS;
             stTMP.alignment = TextAlignmentOptions.Left;
 
@@ -453,8 +455,8 @@ namespace DigitPark.Editor
         {
             var stat = new GameObject(name);
             stat.transform.SetParent(parent, false);
-            stat.AddComponent<RectTransform>().sizeDelta = new Vector2(80, 50);
-            stat.AddComponent<LayoutElement>().preferredWidth = 80;
+            stat.AddComponent<RectTransform>().sizeDelta = new Vector2(160, 100);
+            stat.AddComponent<LayoutElement>().preferredWidth = 160;
 
             var vlg = stat.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 2;
@@ -466,7 +468,7 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(stat.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 26;
+            icon.AddComponent<LayoutElement>().preferredHeight = 52;
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
             iconImg.preserveAspect = true;
@@ -474,10 +476,10 @@ namespace DigitPark.Editor
             var val = new GameObject("Value");
             val.transform.SetParent(stat.transform, false);
             val.AddComponent<RectTransform>();
-            val.AddComponent<LayoutElement>().preferredHeight = 20;
+            val.AddComponent<LayoutElement>().preferredHeight = 40;
             var valTMP = val.AddComponent<TextMeshProUGUI>();
             valTMP.text = value;
-            valTMP.fontSize = 16;
+            valTMP.fontSize = 32;
             valTMP.color = color;
             valTMP.fontStyle = FontStyles.Bold;
             valTMP.alignment = TextAlignmentOptions.Center;
@@ -489,7 +491,7 @@ namespace DigitPark.Editor
 
         private static void CreateDailyReward()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var card = FindOrCreate(canvas.transform, "DailyRewardCard");
@@ -511,7 +513,7 @@ namespace DigitPark.Editor
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
             iconRT.anchoredPosition = new Vector2(20, 0);
-            iconRT.sizeDelta = new Vector2(60, 60);
+            iconRT.sizeDelta = new Vector2(120, 120);
             var iconImg = GetOrAdd<Image>(icon);
             iconImg.color = GOLD;
             iconImg.preserveAspect = true;
@@ -521,7 +523,7 @@ namespace DigitPark.Editor
             var tcRT = GetOrAdd<RectTransform>(textC);
             tcRT.anchorMin = new Vector2(0, 0);
             tcRT.anchorMax = new Vector2(0.65f, 1);
-            tcRT.offsetMin = new Vector2(90, 15);
+            tcRT.offsetMin = new Vector2(155, 15);
             tcRT.offsetMax = new Vector2(0, -15);
 
             var title = FindOrCreate(textC.transform, "Title");
@@ -532,7 +534,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "RECOMPENSA DIARIA";
-            tTMP.fontSize = 18;
+            tTMP.fontSize = 36;
             tTMP.color = GOLD;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -545,7 +547,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Dia 3 de 7 - Reclama tu premio!";
-            sTMP.fontSize = 14;
+            sTMP.fontSize = 28;
             sTMP.color = TEXT_SECONDARY;
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -556,7 +558,7 @@ namespace DigitPark.Editor
             cRT.anchorMax = new Vector2(1, 0.5f);
             cRT.pivot = new Vector2(1, 0.5f);
             cRT.anchoredPosition = new Vector2(-15, 0);
-            cRT.sizeDelta = new Vector2(100, 42);
+            cRT.sizeDelta = new Vector2(200, 84);
             var cBg = GetOrAdd<Image>(claimBtn);
             cBg.color = GREEN_SUCCESS;
             GetOrAdd<Button>(claimBtn).targetGraphic = cBg;
@@ -569,7 +571,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(cText);
             ctTMP.text = "Reclamar";
-            ctTMP.fontSize = 15;
+            ctTMP.fontSize = 30;
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -583,7 +585,7 @@ namespace DigitPark.Editor
 
         private static void CreateQuickAccess()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, "QuickActionsPanel");
@@ -641,10 +643,10 @@ namespace DigitPark.Editor
             var labelGO = new GameObject("Label");
             labelGO.transform.SetParent(card.transform, false);
             labelGO.AddComponent<RectTransform>();
-            labelGO.AddComponent<LayoutElement>().preferredHeight = 22;
+            labelGO.AddComponent<LayoutElement>().preferredHeight = 44;
             var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
             lTMP.text = label;
-            lTMP.fontSize = 15;
+            lTMP.fontSize = 30;
             lTMP.color = TEXT_WHITE;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
@@ -656,7 +658,7 @@ namespace DigitPark.Editor
 
         private static void CreatePlayCard()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var card = FindOrCreate(canvas.transform, "PlayCard");
@@ -686,7 +688,7 @@ namespace DigitPark.Editor
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
             iconRT.anchoredPosition = new Vector2(25, 0);
-            iconRT.sizeDelta = new Vector2(70, 70);
+            iconRT.sizeDelta = new Vector2(210, 210);
             var iconImg = GetOrAdd<Image>(icon);
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
@@ -696,7 +698,7 @@ namespace DigitPark.Editor
             var tcRT = GetOrAdd<RectTransform>(textC);
             tcRT.anchorMin = new Vector2(0, 0);
             tcRT.anchorMax = new Vector2(1, 1);
-            tcRT.offsetMin = new Vector2(110, 25);
+            tcRT.offsetMin = new Vector2(250, 25);
             tcRT.offsetMax = new Vector2(-60, -25);
 
             var title = FindOrCreate(textC.transform, "Title");
@@ -707,7 +709,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "JUGAR";
-            tTMP.fontSize = 38;
+            tTMP.fontSize = 52;
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -720,7 +722,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Elige un juego y compite";
-            sTMP.fontSize = 16;
+            sTMP.fontSize = 48;
             sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -731,10 +733,10 @@ namespace DigitPark.Editor
             aRT.anchorMax = new Vector2(1, 0.5f);
             aRT.pivot = new Vector2(1, 0.5f);
             aRT.anchoredPosition = new Vector2(-20, 0);
-            aRT.sizeDelta = new Vector2(30, 30);
+            aRT.sizeDelta = new Vector2(90, 90);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = 40;
+            aTMP.fontSize = 120;
             aTMP.color = TEXT_DARK;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -748,7 +750,7 @@ namespace DigitPark.Editor
 
         private static void CreateCashBattleCard()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var card = FindOrCreate(canvas.transform, "CashBattleCard");
@@ -794,7 +796,7 @@ namespace DigitPark.Editor
             cbRT.anchorMax = new Vector2(1, 1);
             cbRT.pivot = new Vector2(1, 1);
             cbRT.anchoredPosition = new Vector2(-12, -12);
-            cbRT.sizeDelta = new Vector2(55, 30);
+            cbRT.sizeDelta = new Vector2(165, 90);
             var cbBg = GetOrAdd<Image>(cashBadge);
             cbBg.color = GOLD_DARK;
             cbBg.raycastTarget = false;
@@ -807,7 +809,7 @@ namespace DigitPark.Editor
             cbtRT.offsetMax = Vector2.zero;
             var cbtTMP = GetOrAdd<TextMeshProUGUI>(cbText);
             cbtTMP.text = "$$$";
-            cbtTMP.fontSize = 16;
+            cbtTMP.fontSize = 48;
             cbtTMP.color = TEXT_WHITE;
             cbtTMP.fontStyle = FontStyles.Bold;
             cbtTMP.alignment = TextAlignmentOptions.Center;
@@ -819,7 +821,7 @@ namespace DigitPark.Editor
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
             iconRT.anchoredPosition = new Vector2(25, 0);
-            iconRT.sizeDelta = new Vector2(80, 80);
+            iconRT.sizeDelta = new Vector2(240, 240);
             var iconImg = GetOrAdd<Image>(icon);
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
@@ -829,7 +831,7 @@ namespace DigitPark.Editor
             var tcRT = GetOrAdd<RectTransform>(textC);
             tcRT.anchorMin = new Vector2(0, 0);
             tcRT.anchorMax = new Vector2(1, 1);
-            tcRT.offsetMin = new Vector2(120, 20);
+            tcRT.offsetMin = new Vector2(280, 20);
             tcRT.offsetMax = new Vector2(-60, -20);
 
             // Title
@@ -841,7 +843,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "CASH BATTLE";
-            tTMP.fontSize = 40;
+            tTMP.fontSize = 52;
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -855,7 +857,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Compite por dinero real";
-            sTMP.fontSize = 17;
+            sTMP.fontSize = 51;
             sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -868,7 +870,7 @@ namespace DigitPark.Editor
             ageRT.offsetMax = Vector2.zero;
             var ageTMP = GetOrAdd<TextMeshProUGUI>(age);
             ageTMP.text = "18+";
-            ageTMP.fontSize = 12;
+            ageTMP.fontSize = 36;
             ageTMP.color = new Color(0.3f, 0.2f, 0f, 0.7f);
             ageTMP.fontStyle = FontStyles.Bold;
             ageTMP.alignment = TextAlignmentOptions.Left;
@@ -880,10 +882,10 @@ namespace DigitPark.Editor
             aRT.anchorMax = new Vector2(1, 0.5f);
             aRT.pivot = new Vector2(1, 0.5f);
             aRT.anchoredPosition = new Vector2(-20, 0);
-            aRT.sizeDelta = new Vector2(30, 30);
+            aRT.sizeDelta = new Vector2(90, 90);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = 42;
+            aTMP.fontSize = 126;
             aTMP.color = TEXT_DARK;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -897,7 +899,7 @@ namespace DigitPark.Editor
 
         private static void CreateExtraRow()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, "ExtraRow");
@@ -946,7 +948,7 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(card.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 50;
+            icon.AddComponent<LayoutElement>().preferredHeight = 125;
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
@@ -954,10 +956,10 @@ namespace DigitPark.Editor
             var labelGO = new GameObject("Label");
             labelGO.transform.SetParent(card.transform, false);
             labelGO.AddComponent<RectTransform>();
-            labelGO.AddComponent<LayoutElement>().preferredHeight = 24;
+            labelGO.AddComponent<LayoutElement>().preferredHeight = 72;
             var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
             lTMP.text = label;
-            lTMP.fontSize = 16;
+            lTMP.fontSize = 48;
             lTMP.color = TEXT_WHITE;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
@@ -975,7 +977,7 @@ namespace DigitPark.Editor
 
         private static void CreateOverlayPanel(string name, Color borderColor)
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, name);
@@ -1022,7 +1024,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var so = new SerializedObject(manager);
@@ -1079,7 +1081,7 @@ namespace DigitPark.Editor
 
         private static void AssignNeonIcons()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) { Debug.LogError("[MainMenuUI] No Canvas"); return; }
 
             int a = 0;
@@ -1156,6 +1158,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject FindOrCreate(Transform parent, string name)
         {

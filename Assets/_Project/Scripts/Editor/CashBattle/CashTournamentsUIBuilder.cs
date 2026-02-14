@@ -151,6 +151,8 @@ namespace DigitPark.Editor
 
         private static void BuildCashTournamentsUI()
         {
+            CleanupOldUI();
+
             Canvas canvas = FindMainCanvas();
             if (canvas == null)
             {
@@ -193,8 +195,11 @@ namespace DigitPark.Editor
             // Header Premium
             CreatePremiumHeader(safeArea.transform);
 
-            // Filter Bar
+            // Filter Bar (Row 1)
             CreateFilterBar(safeArea.transform);
+
+            // Controls Bar (Row 2: Dropdowns + Refresh)
+            CreateControlsBar(safeArea.transform);
 
             // Tournaments List
             CreateTournamentsList(safeArea.transform);
@@ -534,6 +539,222 @@ namespace DigitPark.Editor
             tmp.fontSizeMax = 52;
         }
 
+        private static void CreateControlsBar(Transform parent)
+        {
+            // Row 2: Dropdowns + Refresh debajo del FilterBar
+            GameObject controlsBar = new GameObject("ControlsBar");
+            controlsBar.transform.SetParent(parent, false);
+
+            RectTransform rt = controlsBar.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.sizeDelta = new Vector2(0, 60);
+            rt.anchoredPosition = new Vector2(0, -170);  // Debajo del FilterBar (100 + 68 + 2 spacing)
+
+            Image bg = controlsBar.AddComponent<Image>();
+            bg.color = new Color(0, 0, 0, 0.2f);
+
+            HorizontalLayoutGroup hlg = controlsBar.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(15, 15, 5, 5);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = true;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+
+            // Game Filter Dropdown
+            CreateInlineDropdown(controlsBar.transform, "GameFilterDropdown",
+                new List<string> { "Todos", "QuickMath", "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut" });
+
+            // Fee Filter Dropdown
+            CreateInlineDropdown(controlsBar.transform, "FeeFilterDropdown",
+                new List<string> { "Todas", "$1", "$5", "$10", "$25" });
+
+            // Refresh Button
+            GameObject refreshBtn = new GameObject("RefreshButton");
+            refreshBtn.transform.SetParent(controlsBar.transform, false);
+
+            LayoutElement refreshLE = refreshBtn.AddComponent<LayoutElement>();
+            refreshLE.flexibleWidth = 0.8f;
+            refreshLE.minWidth = 120;
+            refreshLE.preferredHeight = 50;
+
+            Image refreshBg = refreshBtn.AddComponent<Image>();
+            refreshBg.color = CYAN;
+
+            Button refreshButton = refreshBtn.AddComponent<Button>();
+            refreshButton.targetGraphic = refreshBg;
+
+            GameObject refreshTextObj = new GameObject("Text");
+            refreshTextObj.transform.SetParent(refreshBtn.transform, false);
+
+            RectTransform rbtRT = refreshTextObj.AddComponent<RectTransform>();
+            rbtRT.anchorMin = Vector2.zero;
+            rbtRT.anchorMax = Vector2.one;
+            rbtRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI refreshTMP = refreshTextObj.AddComponent<TextMeshProUGUI>();
+            refreshTMP.text = "Actualizar";
+            refreshTMP.fontSize = 28;
+            refreshTMP.color = BG_DARK;
+            refreshTMP.fontStyle = FontStyles.Bold;
+            refreshTMP.alignment = TextAlignmentOptions.Center;
+            refreshTMP.enableAutoSizing = true;
+            refreshTMP.fontSizeMin = 18;
+            refreshTMP.fontSizeMax = 28;
+        }
+
+        private static void CreateInlineDropdown(Transform parent, string name, List<string> options)
+        {
+            GameObject ddObj = new GameObject(name);
+            ddObj.transform.SetParent(parent, false);
+
+            LayoutElement le = ddObj.AddComponent<LayoutElement>();
+            le.flexibleWidth = 1;
+            le.minWidth = 140;
+            le.preferredHeight = 50;
+
+            Image ddBg = ddObj.AddComponent<Image>();
+            ddBg.color = new Color(0.15f, 0.17f, 0.22f, 1f);
+
+            TMP_Dropdown dd = ddObj.AddComponent<TMP_Dropdown>();
+
+            // Caption
+            GameObject caption = new GameObject("Label");
+            caption.transform.SetParent(ddObj.transform, false);
+
+            RectTransform capRT = caption.AddComponent<RectTransform>();
+            capRT.anchorMin = Vector2.zero;
+            capRT.anchorMax = Vector2.one;
+            capRT.offsetMin = new Vector2(10, 0);
+            capRT.offsetMax = new Vector2(-30, 0);
+
+            TextMeshProUGUI capTMP = caption.AddComponent<TextMeshProUGUI>();
+            capTMP.text = options.Count > 0 ? options[0] : name;
+            capTMP.fontSize = 24;
+            capTMP.color = TEXT_WHITE;
+            capTMP.alignment = TextAlignmentOptions.Left;
+            capTMP.enableAutoSizing = true;
+            capTMP.fontSizeMin = 16;
+            capTMP.fontSizeMax = 24;
+
+            dd.captionText = capTMP;
+
+            // Arrow
+            GameObject arrow = new GameObject("Arrow");
+            arrow.transform.SetParent(ddObj.transform, false);
+            RectTransform arrowRT = arrow.AddComponent<RectTransform>();
+            arrowRT.anchorMin = new Vector2(1, 0.5f);
+            arrowRT.anchorMax = new Vector2(1, 0.5f);
+            arrowRT.pivot = new Vector2(1, 0.5f);
+            arrowRT.sizeDelta = new Vector2(24, 24);
+            arrowRT.anchoredPosition = new Vector2(-6, 0);
+
+            TextMeshProUGUI arrowTMP = arrow.AddComponent<TextMeshProUGUI>();
+            arrowTMP.text = "\u25BC";
+            arrowTMP.fontSize = 18;
+            arrowTMP.color = TEXT_WHITE;
+            arrowTMP.alignment = TextAlignmentOptions.Center;
+
+            // Template (hidden dropdown list)
+            GameObject template = new GameObject("Template");
+            template.transform.SetParent(ddObj.transform, false);
+            template.SetActive(false);
+
+            RectTransform tmplRT = template.AddComponent<RectTransform>();
+            tmplRT.anchorMin = new Vector2(0, 0);
+            tmplRT.anchorMax = new Vector2(1, 0);
+            tmplRT.pivot = new Vector2(0.5f, 1);
+            tmplRT.sizeDelta = new Vector2(0, 200);
+
+            Image tmplBg = template.AddComponent<Image>();
+            tmplBg.color = new Color(0.12f, 0.14f, 0.18f, 1f);
+
+            ScrollRect tmplScroll = template.AddComponent<ScrollRect>();
+            tmplScroll.horizontal = false;
+
+            // Viewport
+            GameObject tmplViewport = new GameObject("Viewport");
+            tmplViewport.transform.SetParent(template.transform, false);
+            RectTransform tvRT = tmplViewport.AddComponent<RectTransform>();
+            tvRT.anchorMin = Vector2.zero;
+            tvRT.anchorMax = Vector2.one;
+            tvRT.sizeDelta = Vector2.zero;
+            tmplViewport.AddComponent<Image>().color = new Color(0, 0, 0, 0);
+            tmplViewport.AddComponent<RectMask2D>();
+            tmplScroll.viewport = tvRT;
+
+            // Content
+            GameObject tmplContent = new GameObject("Content");
+            tmplContent.transform.SetParent(tmplViewport.transform, false);
+            RectTransform tcRT = tmplContent.AddComponent<RectTransform>();
+            tcRT.anchorMin = new Vector2(0, 1);
+            tcRT.anchorMax = new Vector2(1, 1);
+            tcRT.pivot = new Vector2(0.5f, 1);
+            tcRT.sizeDelta = new Vector2(0, 50);
+            tmplScroll.content = tcRT;
+
+            // Item template
+            GameObject item = new GameObject("Item");
+            item.transform.SetParent(tmplContent.transform, false);
+            RectTransform itemRT = item.AddComponent<RectTransform>();
+            itemRT.anchorMin = new Vector2(0, 0.5f);
+            itemRT.anchorMax = new Vector2(1, 0.5f);
+            itemRT.sizeDelta = new Vector2(0, 44);
+
+            Toggle itemToggle = item.AddComponent<Toggle>();
+
+            // Item background
+            GameObject itemBg = new GameObject("Item Background");
+            itemBg.transform.SetParent(item.transform, false);
+            RectTransform ibRT = itemBg.AddComponent<RectTransform>();
+            ibRT.anchorMin = Vector2.zero;
+            ibRT.anchorMax = Vector2.one;
+            ibRT.sizeDelta = Vector2.zero;
+            Image ibImg = itemBg.AddComponent<Image>();
+            ibImg.color = new Color(0.15f, 0.17f, 0.22f, 1f);
+
+            // Item checkmark
+            GameObject itemCheck = new GameObject("Item Checkmark");
+            itemCheck.transform.SetParent(item.transform, false);
+            RectTransform icRT = itemCheck.AddComponent<RectTransform>();
+            icRT.anchorMin = new Vector2(0, 0.5f);
+            icRT.anchorMax = new Vector2(0, 0.5f);
+            icRT.sizeDelta = new Vector2(20, 20);
+            icRT.anchoredPosition = new Vector2(10, 0);
+            Image icImg = itemCheck.AddComponent<Image>();
+            icImg.color = CYAN;
+
+            // Item label
+            GameObject itemLabel = new GameObject("Item Label");
+            itemLabel.transform.SetParent(item.transform, false);
+            RectTransform ilRT = itemLabel.AddComponent<RectTransform>();
+            ilRT.anchorMin = Vector2.zero;
+            ilRT.anchorMax = Vector2.one;
+            ilRT.offsetMin = new Vector2(35, 0);
+            ilRT.offsetMax = new Vector2(-10, 0);
+
+            TextMeshProUGUI ilTMP = itemLabel.AddComponent<TextMeshProUGUI>();
+            ilTMP.text = "Option";
+            ilTMP.fontSize = 22;
+            ilTMP.color = TEXT_WHITE;
+            ilTMP.alignment = TextAlignmentOptions.Left;
+
+            // Wire toggle
+            itemToggle.targetGraphic = ibImg;
+            itemToggle.graphic = icImg;
+
+            // Wire dropdown
+            dd.template = tmplRT;
+            dd.itemText = ilTMP;
+
+            // Add options
+            dd.ClearOptions();
+            dd.AddOptions(options);
+        }
+
         private static void CreateTournamentsList(Transform parent)
         {
             GameObject scrollView = new GameObject("TournamentsList");
@@ -543,7 +764,7 @@ namespace DigitPark.Editor
             svRT.anchorMin = Vector2.zero;
             svRT.anchorMax = Vector2.one;
             svRT.offsetMin = new Vector2(15, 15);
-            svRT.offsetMax = new Vector2(-15, -155);
+            svRT.offsetMax = new Vector2(-15, -235);  // Debajo de Header(100) + FilterBar(68) + ControlsBar(60) + spacing
 
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
@@ -582,7 +803,7 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
+            vlg.childControlHeight = true;  // true para que use LayoutElement.preferredHeight (300px cards)
 
             ContentSizeFitter csf = content.AddComponent<ContentSizeFitter>();
             csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -735,49 +956,7 @@ namespace DigitPark.Editor
             ltTMP.color = TEXT_WHITE;
             ltTMP.alignment = TextAlignmentOptions.Center;
 
-            // C. RefreshButton - hidden refresh button
-            GameObject refreshBtnObj = new GameObject("RefreshButton");
-            refreshBtnObj.transform.SetParent(parent, false);
-
-            RectTransform rbRT = refreshBtnObj.AddComponent<RectTransform>();
-            rbRT.anchorMin = new Vector2(1, 1);
-            rbRT.anchorMax = new Vector2(1, 1);
-            rbRT.pivot = new Vector2(1, 1);
-            rbRT.sizeDelta = new Vector2(160, 50);
-            rbRT.anchoredPosition = new Vector2(-15, -105);
-
-            Image rbBg = refreshBtnObj.AddComponent<Image>();
-            rbBg.color = CYAN;
-
-            Button rbBtn = refreshBtnObj.AddComponent<Button>();
-            rbBtn.targetGraphic = rbBg;
-
-            GameObject rbTextObj = new GameObject("Text");
-            rbTextObj.transform.SetParent(refreshBtnObj.transform, false);
-
-            RectTransform rbtRT = rbTextObj.AddComponent<RectTransform>();
-            rbtRT.anchorMin = Vector2.zero;
-            rbtRT.anchorMax = Vector2.one;
-            rbtRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI rbTMP = rbTextObj.AddComponent<TextMeshProUGUI>();
-            rbTMP.text = "Actualizar";
-            rbTMP.fontSize = 28;
-            rbTMP.color = BG_DARK;
-            rbTMP.fontStyle = FontStyles.Bold;
-            rbTMP.alignment = TextAlignmentOptions.Center;
-
-            // D. GameFilterDropdown
-            CreateTMPDropdown(parent, "GameFilterDropdown",
-                new List<string> { "Todos", "QuickMath", "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut" },
-                new Vector2(-210, -105), new Vector2(200, 50));
-
-            // D. FeeFilterDropdown
-            CreateTMPDropdown(parent, "FeeFilterDropdown",
-                new List<string> { "Todas", "$1", "$5", "$10", "$25" },
-                new Vector2(-420, -105), new Vector2(200, 50));
-
-            // E. CreateTournamentPanel - hidden overlay
+            // C. CreateTournamentPanel - hidden overlay
             CreateCreateTournamentPanel(parent);
         }
 
@@ -1072,6 +1251,20 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
         }
 
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
+
         private static Canvas FindMainCanvas()
         {
             foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
@@ -1084,7 +1277,7 @@ namespace DigitPark.Editor
                 if (c.gameObject.name != "TransitionCanvas")
                     return c;
             }
-            return Object.FindFirstObjectByType<Canvas>();
+            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static void CreateFallbackCard(Transform parent, string name, int prize, int entry, string players)

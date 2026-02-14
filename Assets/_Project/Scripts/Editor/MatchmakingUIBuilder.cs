@@ -52,11 +52,13 @@ namespace DigitPark.Editor
         //  MAIN BUILD
         // ═══════════════════════════════════════════════════════════════
 
-        [MenuItem("DigitPark/UI Builders/Core/Matchmaking (Premium)", false, 151)]
+        [MenuItem("DigitPark/UI Builders/Games/Matchmaking (Premium)", false, 151)]
         public static void BuildUI()
         {
+            CleanupOldUI();
+
             // --- Canvas ---
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 GameObject canvasGO = new GameObject("Canvas");
@@ -170,7 +172,7 @@ namespace DigitPark.Editor
                 SetFullStretch(arrow.GetComponent<RectTransform>());
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.text = "<";
-                arrowText.fontSize = 32;
+                arrowText.fontSize = 64;
                 arrowText.color = CYAN_NEON;
                 arrowText.alignment = TextAlignmentOptions.Center;
                 arrowText.fontStyle = FontStyles.Bold;
@@ -227,7 +229,7 @@ namespace DigitPark.Editor
             SetFullStretch(placeholder.GetComponent<RectTransform>());
             TextMeshProUGUI placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "?";
-            placeholderTmp.fontSize = 36;
+            placeholderTmp.fontSize = 72;
             placeholderTmp.color = CYAN_NEON;
             placeholderTmp.alignment = TextAlignmentOptions.Center;
             placeholderTmp.fontStyle = FontStyles.Bold;
@@ -241,7 +243,7 @@ namespace DigitPark.Editor
             gameNameRect.offsetMax = Vector2.zero;
             TextMeshProUGUI gameNameTmp = gameName.AddComponent<TextMeshProUGUI>();
             gameNameTmp.text = "DIGIT RUSH";
-            gameNameTmp.fontSize = 26;
+            gameNameTmp.fontSize = 52;
             gameNameTmp.color = TEXT_SECONDARY;
             gameNameTmp.alignment = TextAlignmentOptions.Center;
             gameNameTmp.fontStyle = FontStyles.Bold;
@@ -262,7 +264,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTmp = title.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "SEARCHING...";
-            titleTmp.fontSize = 36;
+            titleTmp.fontSize = 72;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.fontStyle = FontStyles.Bold;
@@ -431,13 +433,13 @@ namespace DigitPark.Editor
             nameRect.offsetMax = Vector2.zero;
             TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nameTmp.text = isPlayer ? "Player" : "???";
-            nameTmp.fontSize = 34;
+            nameTmp.fontSize = 68;
             nameTmp.color = TEXT_WHITE;
             nameTmp.alignment = TextAlignmentOptions.Left;
             nameTmp.fontStyle = FontStyles.Bold;
             nameTmp.enableAutoSizing = true;
-            nameTmp.fontSizeMin = 22;
-            nameTmp.fontSizeMax = 34;
+            nameTmp.fontSizeMin = 44;
+            nameTmp.fontSizeMax = 68;
 
             // Level/Rank
             string levelObjName = isPlayer ? "PlayerLevel" : "OpponentLevel";
@@ -462,7 +464,7 @@ namespace DigitPark.Editor
             SetFullStretch(levelText.GetComponent<RectTransform>());
             TextMeshProUGUI levelTmp = levelText.AddComponent<TextMeshProUGUI>();
             levelTmp.text = isPlayer ? "Lv. 1" : "---";
-            levelTmp.fontSize = 22;
+            levelTmp.fontSize = 44;
             levelTmp.color = isPlayer ? CYAN_NEON : TEXT_MUTED;
             levelTmp.alignment = TextAlignmentOptions.Center;
             levelTmp.fontStyle = FontStyles.Bold;
@@ -488,7 +490,7 @@ namespace DigitPark.Editor
                 SetFullStretch(youText.GetComponent<RectTransform>());
                 TextMeshProUGUI youTmp = youText.AddComponent<TextMeshProUGUI>();
                 youTmp.text = "YOU";
-                youTmp.fontSize = 16;
+                youTmp.fontSize = 32;
                 youTmp.color = CYAN_NEON;
                 youTmp.alignment = TextAlignmentOptions.Center;
                 youTmp.fontStyle = FontStyles.Bold;
@@ -534,7 +536,7 @@ namespace DigitPark.Editor
             SetFullStretch(vsText.GetComponent<RectTransform>());
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
-            vsTmp.fontSize = 1;
+            vsTmp.fontSize = 2;
             vsTmp.color = new Color(1, 1, 1, 0); // Invisible
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.raycastTarget = false;
@@ -603,7 +605,7 @@ namespace DigitPark.Editor
             statusRect.offsetMax = Vector2.zero;
             TextMeshProUGUI statusTmp = statusText.AddComponent<TextMeshProUGUI>();
             statusTmp.text = "Looking for opponent...";
-            statusTmp.fontSize = 24;
+            statusTmp.fontSize = 48;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
 
@@ -616,7 +618,7 @@ namespace DigitPark.Editor
             timerRect.offsetMax = Vector2.zero;
             TextMeshProUGUI timerTmp = timerText.AddComponent<TextMeshProUGUI>();
             timerTmp.text = "0:00";
-            timerTmp.fontSize = 30;
+            timerTmp.fontSize = 60;
             timerTmp.color = CYAN_NEON;
             timerTmp.alignment = TextAlignmentOptions.Center;
             timerTmp.fontStyle = FontStyles.Bold;
@@ -659,7 +661,7 @@ namespace DigitPark.Editor
             SetFullStretch(btnText.GetComponent<RectTransform>());
             TextMeshProUGUI textTmp = btnText.AddComponent<TextMeshProUGUI>();
             textTmp.text = "CANCEL";
-            textTmp.fontSize = 30;
+            textTmp.fontSize = 60;
             textTmp.color = RED_NEON;
             textTmp.alignment = TextAlignmentOptions.Center;
             textTmp.fontStyle = FontStyles.Bold;
@@ -687,7 +689,7 @@ namespace DigitPark.Editor
             readyRect.offsetMax = Vector2.zero;
             TextMeshProUGUI readyTmp = readyText.AddComponent<TextMeshProUGUI>();
             readyTmp.text = "GET READY!";
-            readyTmp.fontSize = 40;
+            readyTmp.fontSize = 80;
             readyTmp.color = TEXT_WHITE;
             readyTmp.alignment = TextAlignmentOptions.Center;
             readyTmp.fontStyle = FontStyles.Bold;
@@ -701,7 +703,7 @@ namespace DigitPark.Editor
             countdownRect.offsetMax = Vector2.zero;
             TextMeshProUGUI countdownTmp = countdownText.AddComponent<TextMeshProUGUI>();
             countdownTmp.text = "3";
-            countdownTmp.fontSize = 200;
+            countdownTmp.fontSize = 400;
             countdownTmp.color = GREEN_NEON;
             countdownTmp.alignment = TextAlignmentOptions.Center;
             countdownTmp.fontStyle = FontStyles.Bold;
@@ -852,6 +854,20 @@ namespace DigitPark.Editor
                 System.Reflection.BindingFlags.NonPublic |
                 System.Reflection.BindingFlags.Instance);
             return field?.FieldType ?? typeof(GameObject);
+        }
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
         }
 
         private static GameObject CreateElement(Transform parent, string name)

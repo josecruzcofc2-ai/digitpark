@@ -157,7 +157,7 @@ namespace DigitPark.Editor
                 var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
 
                 // Find Canvas
-                Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                 if (canvas == null)
                 {
                     Debug.LogWarning($"⚠️ {sceneName}: No Canvas found, skipping");
@@ -260,7 +260,7 @@ namespace DigitPark.Editor
                 string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
 
                 var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-                Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
 
                 if (canvas != null)
                 {
@@ -284,7 +284,7 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/UI/Auto-Add/Add BackButton to Current Scene", false, 202)]
         public static void AddBackButtonToCurrentScene()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("No Canvas found in current scene");

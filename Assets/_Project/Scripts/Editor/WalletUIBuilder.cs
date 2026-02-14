@@ -149,7 +149,7 @@ namespace DigitPark.Editor
                 if (c.gameObject.name != "TransitionCanvas")
                     return c;
             }
-            return Object.FindFirstObjectByType<Canvas>();
+            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static void BuildWalletUI()
@@ -167,6 +167,8 @@ namespace DigitPark.Editor
             {
                 return;
             }
+
+            CleanupOldUI();
 
             // Cleanup
             var toDelete = new List<GameObject>();
@@ -1262,6 +1264,20 @@ namespace DigitPark.Editor
         }
 
         #endregion
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         #region Assigner Finders
 

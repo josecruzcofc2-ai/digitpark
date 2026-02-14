@@ -60,7 +60,7 @@ namespace DigitPark.Editor
                     return;
                 }
 
-                Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                 if (canvas == null)
                 {
                     Debug.LogError("❌ No Canvas found in scene.");
@@ -68,6 +68,8 @@ namespace DigitPark.Editor
                 }
 
                 Debug.Log("🎨 Starting Login UI Rebuild...");
+
+                CleanupOldUI();
 
                 // Clean existing UI
                 CleanExistingUI(canvas);
@@ -91,6 +93,20 @@ namespace DigitPark.Editor
             catch (System.Exception e)
             {
                 Debug.LogError($"❌ Error in LoginUIBuilder: {e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
             }
         }
 

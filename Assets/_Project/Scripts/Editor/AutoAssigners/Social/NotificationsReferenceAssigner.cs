@@ -5,6 +5,7 @@ using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 using System.Reflection;
+using DigitPark.Editor;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -283,7 +284,7 @@ namespace DigitPark.Editor.AutoAssigners
             if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
             if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) { AddResult(propertyName, "Canvas not found", false, null); failedCount++; return; }
 
             Transform t = canvas.transform.Find(path);
@@ -333,7 +334,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static TextMeshProUGUI FindTextByPath(string path)
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return null;
             Transform t = canvas.transform;
             foreach (string part in path.Split('/'))
@@ -353,7 +354,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static Image FindImageByPath(string path)
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return null;
             Transform t = canvas.transform;
             foreach (string part in path.Split('/'))
@@ -366,7 +367,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static RectTransform FindRectByName(params string[] patterns)
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return null;
             foreach (var p in patterns)
             {

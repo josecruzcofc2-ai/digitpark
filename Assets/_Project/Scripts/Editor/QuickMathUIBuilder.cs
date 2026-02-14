@@ -25,6 +25,11 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
 
+        // Stats Bar icon paths
+        private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";
+        private const string ROUND_ICON_PATH = "Assets/_Project/Art/Icons/UI/RoundIcon.png";
+        private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/UI/ErrorIcon.png";
+
         // Tamanos optimizados
         private const float ANSWER_BUTTON_WIDTH = 260f;
         private const float ANSWER_BUTTON_HEIGHT = 110f;
@@ -68,7 +73,8 @@ namespace DigitPark.Editor
 
         private static void RebuildQuickMathUI()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[QuickMathUIBuilder] No se encontro Canvas en la escena");
@@ -85,6 +91,20 @@ namespace DigitPark.Editor
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+        }
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
         }
 
         private static void CleanOldElements(Transform canvasTransform)
@@ -173,7 +193,7 @@ namespace DigitPark.Editor
             GameObject header = CreateElement(parent, "Header");
             SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -45), new Vector2(0, 90));
+                new Vector2(0, -50), new Vector2(0, 100));
 
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0f, 0f, 0f, 0.3f);
@@ -182,7 +202,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(400, 50));
-            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", 40, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", 78, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = title.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
@@ -193,48 +213,70 @@ namespace DigitPark.Editor
         {
             GameObject statsBar = CreateElement(parent, "StatsBar");
             SetupRectTransform(statsBar,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -110), new Vector2(-40, 40));
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, -160), new Vector2(1020, 105));
 
             Image statsBg = statsBar.AddComponent<Image>();
             statsBg.color = PANEL_BG;
 
-            HorizontalLayoutGroup statsLayout = statsBar.AddComponent<HorizontalLayoutGroup>();
-            statsLayout.childAlignment = TextAnchor.MiddleCenter;
-            statsLayout.spacing = 40;
-            statsLayout.padding = new RectOffset(20, 20, 5, 5);
-            statsLayout.childForceExpandWidth = false;
-            statsLayout.childForceExpandHeight = true;
+            Outline statsOutline = statsBar.AddComponent<Outline>();
+            statsOutline.effectColor = CYAN_NEON;
+            statsOutline.effectDistance = new Vector2(2, -2);
+
+            HorizontalLayoutGroup layout = statsBar.AddComponent<HorizontalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 90;
+            layout.padding = new RectOffset(60, 60, 15, 15);
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            // Load icon sprites
+            Sprite timerIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TIMER_ICON_PATH);
+            Sprite roundIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ROUND_ICON_PATH);
+            Sprite errorIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ERROR_ICON_PATH);
 
             // Timer
-            GameObject timerContainer = CreateElement(statsBar.transform, "TimerContainer");
-            AddLayoutElement(timerContainer, 110, 30);
-            GameObject timerText = CreateElement(timerContainer.transform, "TimerText");
-            SetupRectTransform(timerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI timerTmp = SetupText(timerText, "00:00", 22, Color.white, FontStyles.Bold);
-            timerTmp.alignment = TextAlignmentOptions.Center;
+            CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
+                "00:00", Color.white, 240, timerIcon, 33);
 
             // Round counter
-            GameObject roundText = CreateElement(statsBar.transform, "RoundText");
-            AddLayoutElement(roundText, 80, 30);
-            SetupText(roundText, "1/10", 24, CYAN_NEON, FontStyles.Bold);
+            CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
+                "1/10", CYAN_NEON, 180, roundIcon, 36);
 
             // Errors
-            GameObject errorsContainer = CreateElement(statsBar.transform, "ErrorsContainer");
-            AddLayoutElement(errorsContainer, 70, 30);
+            CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
+                "0", ERROR_COLOR, 120, errorIcon, 33);
+        }
 
-            HorizontalLayoutGroup errLayout = errorsContainer.AddComponent<HorizontalLayoutGroup>();
-            errLayout.childAlignment = TextAnchor.MiddleCenter;
-            errLayout.spacing = 6;
+        private static void CreateStatItem(Transform parent, string containerName, string iconName,
+            string textName, string defaultText, Color color, float width, Sprite iconSprite = null, int fontSize = 22)
+        {
+            GameObject container = CreateElement(parent, containerName);
 
-            GameObject errorsIcon = CreateElement(errorsContainer.transform, "ErrorIcon");
-            AddLayoutElement(errorsIcon, 20, 20);
-            Image errorIconImg = errorsIcon.AddComponent<Image>();
-            errorIconImg.color = ERROR_COLOR;
+            LayoutElement le = container.AddComponent<LayoutElement>();
+            le.preferredWidth = width;
+            le.preferredHeight = 75;
 
-            GameObject errorsText = CreateElement(errorsContainer.transform, "ErrorsText");
-            AddLayoutElement(errorsText, 35, 30);
-            SetupText(errorsText, "0", 22, ERROR_COLOR, FontStyles.Bold);
+            // Icon (colored square indicator)
+            GameObject icon = CreateElement(container.transform, iconName);
+            SetupRectTransform(icon,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(22, 0), new Vector2(54, 54));
+            Image iconImg = icon.AddComponent<Image>();
+            iconImg.color = color;
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+                iconImg.preserveAspect = true;
+            }
+
+            // Text
+            GameObject text = CreateElement(container.transform, textName);
+            SetupRectTransform(text,
+                new Vector2(0, 0), new Vector2(1, 1),
+                new Vector2(45, 0), new Vector2(-10, 0));
+            TextMeshProUGUI tmp = SetupText(text, defaultText, fontSize, color, FontStyles.Bold);
+            tmp.alignment = TextAlignmentOptions.Left;
         }
 
         private static void CreateComboDisplay(Transform parent)
@@ -342,7 +384,7 @@ namespace DigitPark.Editor
             // ProblemText (hidden, for compatibility)
             GameObject problemText = CreateElement(equationPanel.transform, "ProblemText");
             SetupRectTransform(problemText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI probTmp = SetupText(problemText, "? ? ? = ?", 1, Color.clear, FontStyles.Normal);
+            TextMeshProUGUI probTmp = SetupText(problemText, "? ? ? = ?", 1, Color.clear, FontStyles.Bold);
             probTmp.enabled = false;
         }
 
@@ -703,7 +745,7 @@ namespace DigitPark.Editor
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));
-            SetupText(subtitleObj, "Configure your game", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+            SetupText(subtitleObj, "Configure your game", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Bold);
 
             // Divider after title
             CreateDivider(card.transform, -95);
@@ -783,7 +825,7 @@ namespace DigitPark.Editor
             SetupRectTransform(diffDesc,
                 new Vector2(0.05f, 1), new Vector2(0.95f, 1),
                 new Vector2(0, yPos), new Vector2(0, 32));
-            TextMeshProUGUI descTmp = SetupText(diffDesc, "Numbers 1-25, all operations available", 17, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+            TextMeshProUGUI descTmp = SetupText(diffDesc, "Numbers 1-25, all operations available", 17, new Color(0.5f, 0.5f, 0.6f), FontStyles.Bold);
             descTmp.enableWordWrapping = true;
 
             // Divider
@@ -920,7 +962,7 @@ namespace DigitPark.Editor
             }
 
             SerializedObject so = new SerializedObject(controller);
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
             // ========== CONFIG ==========
@@ -1201,7 +1243,7 @@ namespace DigitPark.Editor
             SetupRectTransform(labelObj,
                 new Vector2(0.05f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, yPos), new Vector2(0, 38));
-            TextMeshProUGUI labelTmp = SetupText(labelObj, label, 24, new Color(0.6f, 0.65f, 0.75f), FontStyles.Normal);
+            TextMeshProUGUI labelTmp = SetupText(labelObj, label, 24, new Color(0.6f, 0.65f, 0.75f), FontStyles.Bold);
             labelTmp.alignment = TextAlignmentOptions.Left;
 
             // Value (right-aligned)

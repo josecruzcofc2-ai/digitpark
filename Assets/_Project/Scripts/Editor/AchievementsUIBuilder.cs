@@ -121,7 +121,7 @@ namespace DigitPark.Editor
 
         private static Canvas SetupCanvas()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
 
             if (canvas == null)
             {

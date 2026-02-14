@@ -61,6 +61,7 @@ namespace DigitPark.Editor
         #region Prefab
 
         private const string FRIEND_CARD_PREFAB_PATH = "Assets/_Project/Prefabs/Social/FriendCard.prefab";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         #endregion
 
@@ -113,7 +114,8 @@ namespace DigitPark.Editor
 
         private static void RebuildFriends()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[FriendsUI] No se encontro Canvas");
@@ -169,7 +171,7 @@ namespace DigitPark.Editor
 
         private static void CreateHeader()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var header = FindOrCreate(canvas.transform, "Header");
@@ -177,30 +179,29 @@ namespace DigitPark.Editor
             SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
-            // Back Button
-            var backBtn = FindOrCreate(header.transform, "BackButton");
-            var bRT = GetOrAdd<RectTransform>(backBtn);
+            // Back Button - Neon Cyan prefab
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtnObj;
+            if (backBtnPrefab != null)
+            {
+                Transform oldBtn = header.transform.Find("BackButton");
+                if (oldBtn != null) DestroyImmediate(oldBtn.gameObject);
+                backBtnObj = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtnObj.name = "BackButton";
+            }
+            else
+            {
+                backBtnObj = FindOrCreate(header.transform, "BackButton");
+                GetOrAdd<Image>(backBtnObj).color = new Color(0, 0, 0, 0);
+                GetOrAdd<Button>(backBtnObj);
+                Debug.LogWarning("[FriendsUI] BackButton prefab not found, using fallback");
+            }
+            var bRT = GetOrAdd<RectTransform>(backBtnObj);
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
             bRT.anchoredPosition = new Vector2(15, 0);
             bRT.sizeDelta = new Vector2(50, 50);
-            var bBg = GetOrAdd<Image>(backBtn);
-            bBg.color = new Color(1, 1, 1, 0.06f);
-            GetOrAdd<Button>(backBtn).targetGraphic = bBg;
-
-            var backIcon = FindOrCreate(backBtn.transform, "Icon");
-            var biRT = GetOrAdd<RectTransform>(backIcon);
-            biRT.anchorMin = Vector2.zero;
-            biRT.anchorMax = Vector2.one;
-            biRT.offsetMin = new Vector2(8, 8);
-            biRT.offsetMax = new Vector2(-8, -8);
-            var biTMP = GetOrAdd<TextMeshProUGUI>(backIcon);
-            biTMP.text = "\u2039";
-            biTMP.fontSize = 36;
-            biTMP.color = CYAN_NEON;
-            biTMP.fontStyle = FontStyles.Bold;
-            biTMP.alignment = TextAlignmentOptions.Center;
 
             // Title
             var title = FindOrCreate(header.transform, "TitleText");
@@ -211,7 +212,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "AMIGOS";
-            tTMP.fontSize = 28;
+            tTMP.fontSize = 78;
             tTMP.color = TEXT_WHITE;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -225,7 +226,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 amigos";
-            cTMP.fontSize = 16;
+            cTMP.fontSize = 40;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -238,7 +239,7 @@ namespace DigitPark.Editor
 
         private static void CreateSearchBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var bar = FindOrCreate(canvas.transform, "SearchBar");
@@ -281,9 +282,9 @@ namespace DigitPark.Editor
             phRT.offsetMax = Vector2.zero;
             var phTMP = GetOrAdd<TextMeshProUGUI>(placeholder);
             phTMP.text = "Buscar amigos...";
-            phTMP.fontSize = 18;
+            phTMP.fontSize = 45;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
-            phTMP.fontStyle = FontStyles.Italic;
+            phTMP.fontStyle = FontStyles.Bold;
             phTMP.alignment = TextAlignmentOptions.Left;
 
             // Text
@@ -294,7 +295,7 @@ namespace DigitPark.Editor
             txtRT.offsetMin = Vector2.zero;
             txtRT.offsetMax = Vector2.zero;
             var txtTMP = GetOrAdd<TextMeshProUGUI>(text);
-            txtTMP.fontSize = 18;
+            txtTMP.fontSize = 45;
             txtTMP.color = TEXT_WHITE;
             txtTMP.alignment = TextAlignmentOptions.Left;
 
@@ -312,7 +313,7 @@ namespace DigitPark.Editor
 
         private static void CreateRequestsNav()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var nav = FindOrCreate(canvas.transform, "RequestsNav");
@@ -337,7 +338,7 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Solicitudes de amistad";
-            lTMP.fontSize = 18;
+            lTMP.fontSize = 45;
             lTMP.color = PURPLE_ACCENT;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Left;
@@ -349,7 +350,7 @@ namespace DigitPark.Editor
             badgeRT.anchorMax = new Vector2(1, 0.5f);
             badgeRT.pivot = new Vector2(1, 0.5f);
             badgeRT.anchoredPosition = new Vector2(-50, 0);
-            badgeRT.sizeDelta = new Vector2(30, 30);
+            badgeRT.sizeDelta = new Vector2(75, 75);
             var badgeBg = GetOrAdd<Image>(badge);
             badgeBg.color = RED_BADGE;
 
@@ -361,7 +362,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = 14;
+            btTMP.fontSize = 35;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -373,10 +374,10 @@ namespace DigitPark.Editor
             aRT.anchorMax = new Vector2(1, 0.5f);
             aRT.pivot = new Vector2(1, 0.5f);
             aRT.anchoredPosition = new Vector2(-15, 0);
-            aRT.sizeDelta = new Vector2(25, 25);
+            aRT.sizeDelta = new Vector2(63, 63);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = 30;
+            aTMP.fontSize = 75;
             aTMP.color = PURPLE_ACCENT;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -390,7 +391,7 @@ namespace DigitPark.Editor
 
         private static void CreateScrollView()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var scrollView = FindOrCreate(canvas.transform, "ScrollView");
@@ -448,10 +449,10 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "No tienes amigos aun\nBusca jugadores para agregarlos";
-            eTMP.fontSize = 18;
+            eTMP.fontSize = 45;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
-            eTMP.fontStyle = FontStyles.Italic;
+            eTMP.fontStyle = FontStyles.Bold;
 
             // Loading Indicator
             var loading = FindOrCreate(content.transform, "LoadingIndicator");
@@ -460,7 +461,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Cargando...";
-            ldTMP.fontSize = 18;
+            ldTMP.fontSize = 45;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -475,7 +476,7 @@ namespace DigitPark.Editor
         private static void CreateFriendCardPrefab()
         {
             // Create template card in scene for preview
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // Find scroll content
@@ -558,7 +559,7 @@ namespace DigitPark.Editor
             unRT.offsetMax = Vector2.zero;
             var unTMP = username.AddComponent<TextMeshProUGUI>();
             unTMP.text = "Username";
-            unTMP.fontSize = 20;
+            unTMP.fontSize = 50;
             unTMP.color = TEXT_WHITE;
             unTMP.fontStyle = FontStyles.Bold;
             unTMP.alignment = TextAlignmentOptions.Left;
@@ -573,7 +574,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = stats.AddComponent<TextMeshProUGUI>();
             stTMP.text = "65% WR \u00B7 Digit Rush";
-            stTMP.fontSize = 14;
+            stTMP.fontSize = 35;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
 
@@ -587,7 +588,7 @@ namespace DigitPark.Editor
             statusRT.offsetMax = Vector2.zero;
             var statusTMP = status.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "Online";
-            statusTMP.fontSize = 13;
+            statusTMP.fontSize = 33;
             statusTMP.color = GREEN_SUCCESS;
             statusTMP.alignment = TextAlignmentOptions.Left;
 
@@ -657,7 +658,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 14;
+            tTMP.fontSize = 35;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -678,7 +679,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var so = new SerializedObject(manager);
@@ -747,6 +748,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject FindOrCreate(Transform parent, string name)
         {

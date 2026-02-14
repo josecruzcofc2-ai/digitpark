@@ -23,6 +23,11 @@ namespace DigitPark.Editor
         private static readonly Color CELL_BG = new Color(0.08f, 0.12f, 0.2f, 1f);
         private static readonly Color CELL_PRESSED = new Color(0.2f, 0.7f, 0.3f, 0.5f);
 
+        // Stats Bar icon paths
+        private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";
+        private const string ROUND_ICON_PATH = "Assets/_Project/Art/Icons/UI/RoundIcon.png";
+        private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/UI/ErrorIcon.png";
+
         [MenuItem("DigitPark/UI Builders/Games/DigitRush", false, 110)]
         public static void ShowWindow()
         {
@@ -65,7 +70,8 @@ namespace DigitPark.Editor
 
         private static void RebuildDigitRushUI()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[DigitRushUIBuilder] No se encontró Canvas en la escena");
@@ -107,7 +113,7 @@ namespace DigitPark.Editor
 
         private static void UpdateStyles()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // Update existing elements with new styles
@@ -116,6 +122,20 @@ namespace DigitPark.Editor
 
             Debug.Log("[DigitRushUIBuilder] Estilos actualizados!");
             EditorUtility.SetDirty(canvas.gameObject);
+        }
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
         }
 
         private static void CleanOldElements(Transform canvasTransform)
@@ -210,7 +230,7 @@ namespace DigitPark.Editor
             GameObject header = CreateElement(parent, "Header");
             SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -60), new Vector2(0, 120));
+                new Vector2(0, -50), new Vector2(0, 100));
 
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0f, 0f, 0f, 0.3f);
@@ -223,62 +243,78 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(600, 80));
-            SetupText(title, "DIGIT RUSH", 40, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "DIGIT RUSH", 78, CYAN_NEON, FontStyles.Bold);
         }
 
         private static void CreateStatsBar(Transform parent)
         {
             GameObject statsBar = CreateElement(parent, "StatsBar");
             SetupRectTransform(statsBar,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -140), new Vector2(-40, 42));
+                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
+                new Vector2(0, -160), new Vector2(1020, 105));
 
             Image statsBg = statsBar.AddComponent<Image>();
             statsBg.color = PANEL_BG;
 
-            HorizontalLayoutGroup statsLayout = statsBar.AddComponent<HorizontalLayoutGroup>();
-            statsLayout.childAlignment = TextAnchor.MiddleCenter;
-            statsLayout.spacing = 50;
-            statsLayout.childForceExpandWidth = true;
-            statsLayout.childForceExpandHeight = true;
-            statsLayout.padding = new RectOffset(20, 20, 0, 0);
+            Outline statsOutline = statsBar.AddComponent<Outline>();
+            statsOutline.effectColor = CYAN_NEON;
+            statsOutline.effectDistance = new Vector2(2, -2);
+
+            HorizontalLayoutGroup layout = statsBar.AddComponent<HorizontalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.spacing = 90;
+            layout.padding = new RectOffset(60, 60, 15, 15);
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            // Load icon sprites
+            Sprite timerIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TIMER_ICON_PATH);
+            Sprite roundIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ROUND_ICON_PATH);
+            Sprite errorIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ERROR_ICON_PATH);
 
             // Timer
-            GameObject timerSection = CreateElement(statsBar.transform, "TimerSection");
-            GameObject timerText = CreateElement(timerSection.transform, "TimerText");
-            SetupRectTransform(timerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI timerTmp = SetupText(timerText, "0.000s", 22, Color.white, FontStyles.Bold);
-            timerTmp.alignment = TextAlignmentOptions.Center;
+            CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
+                "0.000s", Color.white, 240, timerIcon, 33);
 
             // Round
-            GameObject roundSection = CreateElement(statsBar.transform, "RoundSection");
-            GameObject roundText = CreateElement(roundSection.transform, "RoundText");
-            SetupRectTransform(roundText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI roundTmp = SetupText(roundText, "1/1", 24, CYAN_NEON, FontStyles.Bold);
-            roundTmp.alignment = TextAlignmentOptions.Center;
+            CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
+                "1/1", CYAN_NEON, 180, roundIcon, 36);
 
             // Errors
-            GameObject errorsSection = CreateElement(statsBar.transform, "ErrorsSection");
-            HorizontalLayoutGroup errLayout = errorsSection.AddComponent<HorizontalLayoutGroup>();
-            errLayout.childAlignment = TextAnchor.MiddleCenter;
-            errLayout.spacing = 4;
-            errLayout.childForceExpandWidth = false;
-            errLayout.childForceExpandHeight = true;
+            Color ERROR_STAT = new Color(1f, 0.3f, 0.3f, 1f);
+            CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
+                "0", ERROR_STAT, 120, errorIcon, 33);
+        }
 
-            Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
+        private static void CreateStatItem(Transform parent, string containerName, string iconName,
+            string textName, string defaultText, Color color, float width, Sprite iconSprite = null, int fontSize = 22)
+        {
+            GameObject container = CreateElement(parent, containerName);
 
-            GameObject errIcon = CreateElement(errorsSection.transform, "ErrorIcon");
-            LayoutElement errIconLe = errIcon.AddComponent<LayoutElement>();
-            errIconLe.preferredWidth = 22;
-            errIconLe.preferredHeight = 22;
-            Image errIconImg = errIcon.AddComponent<Image>();
-            errIconImg.color = ERROR_COLOR;
+            LayoutElement le = container.AddComponent<LayoutElement>();
+            le.preferredWidth = width;
+            le.preferredHeight = 75;
 
-            GameObject errorsText = CreateElement(errorsSection.transform, "ErrorsText");
-            LayoutElement errTextLe = errorsText.AddComponent<LayoutElement>();
-            errTextLe.preferredWidth = 40;
-            TextMeshProUGUI errorsTmp = SetupText(errorsText, "0", 22, ERROR_COLOR, FontStyles.Bold);
-            errorsTmp.alignment = TextAlignmentOptions.Left;
+            // Icon (colored square indicator)
+            GameObject icon = CreateElement(container.transform, iconName);
+            SetupRectTransform(icon,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(22, 0), new Vector2(54, 54));
+            Image iconImg = icon.AddComponent<Image>();
+            iconImg.color = color;
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+                iconImg.preserveAspect = true;
+            }
+
+            // Text
+            GameObject text = CreateElement(container.transform, textName);
+            SetupRectTransform(text,
+                new Vector2(0, 0), new Vector2(1, 1),
+                new Vector2(45, 0), new Vector2(-10, 0));
+            TextMeshProUGUI tmp = SetupText(text, defaultText, fontSize, color, FontStyles.Bold);
+            tmp.alignment = TextAlignmentOptions.Left;
         }
 
         private static void CreateGamePanel(Transform parent)
@@ -477,7 +513,7 @@ namespace DigitPark.Editor
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));
-            SetupText(subtitleObj, "Tap 1-9 in order", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+            SetupText(subtitleObj, "Tap 1-9 in order", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Bold);
 
             // Divider
             GameObject divider = CreateElement(card.transform, "Divider");
@@ -633,7 +669,7 @@ namespace DigitPark.Editor
             SetupRectTransform(messageText,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -10), new Vector2(600, 120));
-            TextMeshProUGUI msgTmp = SetupText(messageText, "Great job!", 32, Color.white, FontStyles.Normal);
+            TextMeshProUGUI msgTmp = SetupText(messageText, "Great job!", 32, Color.white, FontStyles.Bold);
             msgTmp.enableWordWrapping = true;
 
             // Buttons container
@@ -780,7 +816,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : null;
 
             SerializedObject serializedManager = new SerializedObject(gameManager);

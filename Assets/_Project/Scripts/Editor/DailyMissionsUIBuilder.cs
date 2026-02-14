@@ -128,7 +128,7 @@ namespace DigitPark.Editor
 
             if (GUILayout.Button("1. Background + Progress Bar", GUILayout.Height(25)))
             {
-                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
                 if (c != null) { CreateBackground(c.transform); CreateProgressBar(); }
             }
             if (GUILayout.Button("2. Top Bar", GUILayout.Height(25))) CreateTopBar();
@@ -143,12 +143,14 @@ namespace DigitPark.Editor
 
         private static void RebuildMissions()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[DailyMissionsUI] No se encontro Canvas");
                 return;
             }
+
+            CleanupOldUI();
 
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
@@ -415,7 +417,7 @@ namespace DigitPark.Editor
 
         private static void CreateProgressBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var progressGO = FindOrCreate(canvas.transform, "ProgressBar");
@@ -469,7 +471,7 @@ namespace DigitPark.Editor
 
         private static void CreateTopBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var topBar = FindOrCreate(canvas.transform, "TopBar");
@@ -555,7 +557,7 @@ namespace DigitPark.Editor
 
         private static void CreateTimerBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var timerBar = FindOrCreate(canvas.transform, "TimerBar");
@@ -621,7 +623,7 @@ namespace DigitPark.Editor
 
         private static void CreateTabBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var tabBar = FindOrCreate(canvas.transform, "TabBar");
@@ -681,7 +683,7 @@ namespace DigitPark.Editor
 
         private static void CreateOverallProgress()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, "OverallProgress");
@@ -864,7 +866,7 @@ namespace DigitPark.Editor
 
         private static void CreateMissionsScrollView()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var scrollView = FindOrCreate(canvas.transform, "ScrollView");
@@ -1273,7 +1275,7 @@ namespace DigitPark.Editor
 
         private static void CreateRewardClaimPopup()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // Blocker
@@ -1473,7 +1475,7 @@ namespace DigitPark.Editor
 
         private static void SetupManagerReferences()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform r = canvas.transform;
@@ -1612,6 +1614,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject FindOrCreate(Transform parent, string name)
         {

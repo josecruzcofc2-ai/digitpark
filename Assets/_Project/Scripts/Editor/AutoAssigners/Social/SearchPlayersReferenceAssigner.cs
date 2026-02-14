@@ -142,6 +142,15 @@ namespace DigitPark.Editor.AutoAssigners
 
         #endregion
 
+        /// <summary>
+        /// Método estático para ejecutar desde otros scripts (ej. SearchPlayersUIBuilder)
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #region Assignment Logic
 
         private static void AssignAllReferences()

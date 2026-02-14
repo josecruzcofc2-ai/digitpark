@@ -133,6 +133,8 @@ namespace DigitPark.Editor
 
         private static void BuildCashBattle1v1UI()
         {
+            CleanupOldUI();
+
             Canvas canvas = FindMainCanvas();
             if (canvas == null)
             {
@@ -157,6 +159,20 @@ namespace DigitPark.Editor
             }
         }
 
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
+
         private static Canvas FindMainCanvas()
         {
             // Buscar Canvas principal por nombre, evitando TransitionCanvas
@@ -171,7 +187,7 @@ namespace DigitPark.Editor
                 if (c.gameObject.name != "TransitionCanvas")
                     return c;
             }
-            return Object.FindFirstObjectByType<Canvas>();
+            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static void BuildAllElements(Canvas canvas)

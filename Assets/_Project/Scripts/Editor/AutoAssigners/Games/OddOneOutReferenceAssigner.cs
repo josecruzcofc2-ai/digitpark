@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.Editor;
 using DigitPark.UI;
 
 namespace DigitPark.Editor.AutoAssigners
@@ -181,7 +182,7 @@ namespace DigitPark.Editor.AutoAssigners
             so.Update();
 
             // Find root for deep search
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
             // UI Elements

@@ -21,7 +21,12 @@ namespace DigitPark.Editor
         private static readonly Color CARD_BG = new Color(0.04f, 0.08f, 0.12f, 0.98f);
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.65f, 0.7f, 1f);
 
-        [MenuItem("DigitPark/UI Builders/Core/PlayModeSelection", false, 152)]
+        // Icon paths
+        private const string SOLO_ICON_PATH = "Assets/_Project/Art/Icons/PlayModeSelectionIcons/PlayModeSelectionSoloIcon.png";
+        private const string ONE_VS_ONE_ICON_PATH = "Assets/_Project/Art/Icons/PlayModeSelectionIcons/PlayModeSelection1v1Icon.png";
+        private const string TOURNAMENTS_ICON_PATH = "Assets/_Project/Art/Icons/PlayModeSelectionIcons/PlayModeSelectionTorunamentIcon.png";
+
+        [MenuItem("DigitPark/UI Builders/Games/PlayModeSelection", false, 152)]
         public static void ShowWindow()
         {
             GetWindow<PlayModeSelectionUIBuilder>("PlayModeSelection UI");
@@ -48,12 +53,34 @@ namespace DigitPark.Editor
 
         private static void BuildPlayModeSelectionUI()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            // Find the main Canvas (skip TransitionCanvas and other special canvases)
+            Canvas canvas = null;
+            foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (c.gameObject.name == "Canvas")
+                {
+                    canvas = c;
+                    break;
+                }
+            }
+            if (canvas == null)
+            {
+                // Fallback: use any root canvas that isn't TransitionCanvas
+                foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+                {
+                    if (c.transform.parent == null && c.gameObject.name != "TransitionCanvas")
+                    {
+                        canvas = c;
+                        break;
+                    }
+                }
+            }
             if (canvas == null)
             {
                 Debug.LogError("[PlayModeSelectionUIBuilder] No se encontró Canvas en la escena");
                 return;
             }
+            Debug.Log($"[PlayModeSelectionUIBuilder] Usando Canvas: {canvas.gameObject.name}");
 
             Transform canvasTransform = canvas.transform;
 
@@ -191,7 +218,7 @@ namespace DigitPark.Editor
                 new Vector2(0, -10), new Vector2(700, 60));
             TextMeshProUGUI titleTmp = title.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "SELECT MODE";
-            titleTmp.fontSize = 52;
+            titleTmp.fontSize = 78;
             titleTmp.color = CYAN_NEON;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -208,7 +235,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 20), new Vector2(500, 35));
             TextMeshProUGUI subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Choose how you want to play";
-            subtitleTmp.fontSize = 20;
+            subtitleTmp.fontSize = 36;
             subtitleTmp.color = TEXT_SECONDARY;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
         }
@@ -216,40 +243,47 @@ namespace DigitPark.Editor
         private static void CreateModeCardsSection(Transform parent)
         {
             GameObject cardsSection = CreateElement(parent, "CardsSection");
-            SetupRectTransform(cardsSection,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -80), new Vector2(900, 800));
+            RectTransform cardsRT = cardsSection.GetComponent<RectTransform>();
+            cardsRT.anchorMin = new Vector2(0.02f, 0.05f);
+            cardsRT.anchorMax = new Vector2(0.98f, 0.82f);
+            cardsRT.offsetMin = Vector2.zero;
+            cardsRT.offsetMax = Vector2.zero;
 
             // Vertical Layout
             VerticalLayoutGroup vlg = cardsSection.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 30;
-            vlg.padding = new RectOffset(40, 40, 0, 0);
-            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.spacing = 40;
+            vlg.padding = new RectOffset(15, 15, 20, 20);
+            vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
+
+            // Load icon sprites
+            Sprite soloIcon = AssetDatabase.LoadAssetAtPath<Sprite>(SOLO_ICON_PATH);
+            Sprite oneVsOneIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ONE_VS_ONE_ICON_PATH);
+            Sprite tournamentsIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENTS_ICON_PATH);
 
             // Create 3 mode cards - ALL with consistent CYAN NEON style
             // All modes are FREE - no real money involved
             CreateNeonModeCard(cardsSection.transform, "SoloCard",
                 "SOLO",
                 "Train your brain at your own pace.\nNo competition, just practice.",
-                CYAN_NEON, 180);
+                CYAN_NEON, 280, soloIcon);
 
             CreateNeonModeCard(cardsSection.transform, "OneVsOneCard",
                 "1 VS 1",
                 "Challenge other players in real-time.\nTest your skills head-to-head.",
-                CYAN_NEON, 180);
+                CYAN_NEON, 280, oneVsOneIcon);
 
             CreateNeonModeCard(cardsSection.transform, "TournamentsCard",
                 "TOURNAMENTS",
                 "Join free tournaments for rankings.\nClimb the leaderboard!",
-                CYAN_NEON, 180);
+                CYAN_NEON, 280, tournamentsIcon);
         }
 
         private static void CreateNeonModeCard(Transform parent, string name, string title,
-            string description, Color accentColor, float height)
+            string description, Color accentColor, float height, Sprite iconSprite = null)
         {
             Color sideColor = new Color(accentColor.r * 0.3f, accentColor.g * 0.3f, accentColor.b * 0.3f, 1f);
 
@@ -265,7 +299,7 @@ namespace DigitPark.Editor
             // ========== SHADOW ==========
             GameObject shadow = CreateElement(card, "Shadow");
             SetupRectTransform(shadow, Vector2.zero, Vector2.one,
-                new Vector2(5, -8), Vector2.zero);
+                new Vector2(10, -16), Vector2.zero);
             Image shadowImg = shadow.AddComponent<Image>();
             shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
 
@@ -273,51 +307,56 @@ namespace DigitPark.Editor
             GameObject side = CreateElement(card, "Side");
             SetupRectTransform(side,
                 new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, -6), new Vector2(0, 12));
+                new Vector2(0, -12), new Vector2(0, 24));
             Image sideImg = side.AddComponent<Image>();
             sideImg.color = sideColor;
 
             // ========== FACE ==========
             GameObject face = CreateElement(card, "Face");
             SetupRectTransform(face, Vector2.zero, Vector2.one,
-                Vector2.zero, new Vector2(0, -6));
+                Vector2.zero, new Vector2(0, -12));
             Image faceImg = face.AddComponent<Image>();
             faceImg.color = CARD_BG;
 
             // Neon outline
             Outline faceOutline = face.AddComponent<Outline>();
             faceOutline.effectColor = accentColor;
-            faceOutline.effectDistance = new Vector2(2, -2);
+            faceOutline.effectDistance = new Vector2(4, -4);
 
             // ========== CONTENT - Properly Centered Layout ==========
             // Icon on left
             GameObject iconContainer = CreateElement(face, "IconContainer");
             SetupRectTransform(iconContainer,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(60, 0), new Vector2(70, 70));
+                new Vector2(120, 0), new Vector2(140, 140));
 
             Image iconBg = iconContainer.AddComponent<Image>();
             iconBg.color = new Color(0.05f, 0.08f, 0.12f, 0.95f);
 
             Outline iconOutline = iconContainer.AddComponent<Outline>();
             iconOutline.effectColor = accentColor;
-            iconOutline.effectDistance = new Vector2(1.5f, -1.5f);
+            iconOutline.effectDistance = new Vector2(3f, -3f);
 
             // Icon image inside - WHITE color to preserve original icon colors
             GameObject icon = CreateElement(iconContainer, "Icon");
             SetupRectTransform(icon, Vector2.zero, Vector2.one,
-                Vector2.zero, new Vector2(-8, -8));
+                Vector2.zero, new Vector2(-16, -16));
             Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = Color.white; // White to preserve original icon colors
+            iconImg.color = Color.white;
+            iconImg.preserveAspect = true;
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+            }
 
             // Arrow indicator on right
             GameObject arrowObj = CreateElement(face, "Arrow");
             SetupRectTransform(arrowObj,
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-25, 0), new Vector2(30, 30));
+                new Vector2(-75, 0), new Vector2(90, 90));
             TextMeshProUGUI arrowTmp = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowTmp.text = ">";
-            arrowTmp.fontSize = 28;
+            arrowTmp.fontSize = 84;
             arrowTmp.color = accentColor;
             arrowTmp.fontStyle = FontStyles.Bold;
             arrowTmp.alignment = TextAlignmentOptions.Center;
@@ -327,10 +366,10 @@ namespace DigitPark.Editor
             GameObject titleObj = CreateElement(face, "TitleText");
             SetupRectTransform(titleObj,
                 new Vector2(0, 0.55f), new Vector2(1, 1),
-                Vector2.zero, new Vector2(-150, -8));
+                Vector2.zero, new Vector2(-300, -16));
             TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = title;
-            titleTmp.fontSize = 32;
+            titleTmp.fontSize = 64;
             titleTmp.color = accentColor;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -341,10 +380,10 @@ namespace DigitPark.Editor
             GameObject descObj = CreateElement(face, "DescText");
             SetupRectTransform(descObj,
                 new Vector2(0, 0.05f), new Vector2(1, 0.55f),
-                Vector2.zero, new Vector2(-150, 0));
+                Vector2.zero, new Vector2(-300, 0));
             TextMeshProUGUI descTmp = descObj.AddComponent<TextMeshProUGUI>();
             descTmp.text = description;
-            descTmp.fontSize = 13;
+            descTmp.fontSize = 26;
             descTmp.color = TEXT_SECONDARY;
             descTmp.alignment = TextAlignmentOptions.Center;
             descTmp.enableWordWrapping = true;

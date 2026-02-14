@@ -28,6 +28,8 @@ namespace DigitPark.Editor
         private static readonly Color GAME_BTN_NORMAL = new Color(0.08f, 0.12f, 0.18f, 0.9f);
         private static readonly Color GAME_BTN_SELECTED = new Color(0f, 0.83f, 1f, 0.3f);
 
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
+
         // 5 juegos (sin CognitiveSprint)
         private static readonly string[] GAME_IDS = { "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath" };
         private static readonly string[] GAME_LABELS = { "Digit\nRush", "Flash\nTap", "Memory\nPairs", "Odd One\nOut", "Quick\nMath" };
@@ -82,7 +84,8 @@ namespace DigitPark.Editor
 
         private static void RebuildScoresUI()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[ScoresUI] No se encontró Canvas en la escena");
@@ -106,11 +109,14 @@ namespace DigitPark.Editor
 
             Debug.Log("[ScoresUI] Scores UI reconstruida exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
+
+            // Auto-asignar referencias al Manager
+            LeaderboardReferenceAssigner.RunAutoAssign();
         }
 
         private static void CreateEmptyStateOnly()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[ScoresUI] No se encontró Canvas en la escena");
@@ -248,31 +254,39 @@ namespace DigitPark.Editor
             lineShadow.effectColor = new Color(0f, 1f, 1f, 0.5f);
             lineShadow.effectDistance = new Vector2(0, -3);
 
-            // Back Button
-            GameObject backBtn = CreateOrFind(header.transform, "BackButton");
-            RectTransform backRT = SetupRectTransform(backBtn,
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(60, 0), new Vector2(80, 80));
-
-            Image backBg = backBtn.GetComponent<Image>();
-            if (backBg == null) backBg = backBtn.AddComponent<Image>();
-            backBg.color = new Color(0, 0, 0, 0);
-
-            Button backButton = backBtn.GetComponent<Button>();
-            if (backButton == null) backButton = backBtn.AddComponent<Button>();
-            backButton.targetGraphic = backBg;
-
-            GameObject backText = CreateOrFind(backBtn.transform, "BackArrow");
-            SetupRectTransform(backText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI backTMP = SetupText(backText, "<", 48, CYAN_NEON, FontStyles.Bold);
-            backTMP.alignment = TextAlignmentOptions.Center;
+            // Back Button - Neon Cyan prefab
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                Transform oldBtn = header.transform.Find("BackButton");
+                if (oldBtn != null) DestroyImmediate(oldBtn.gameObject);
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = CreateOrFind(header.transform, "BackButton");
+                Image fallbackBg = backBtn.GetComponent<Image>();
+                if (fallbackBg == null) fallbackBg = backBtn.AddComponent<Image>();
+                fallbackBg.color = new Color(0, 0, 0, 0);
+                if (backBtn.GetComponent<Button>() == null) backBtn.AddComponent<Button>();
+                Debug.LogWarning("[ScoresUI] BackButton prefab not found, using fallback");
+            }
+            RectTransform backRT = backBtn.GetComponent<RectTransform>();
+            if (backRT == null) backRT = backBtn.AddComponent<RectTransform>();
+            backRT.anchorMin = new Vector2(0, 0.5f);
+            backRT.anchorMax = new Vector2(0, 0.5f);
+            backRT.pivot = new Vector2(0.5f, 0.5f);
+            backRT.anchoredPosition = new Vector2(60, 0);
+            backRT.sizeDelta = new Vector2(80, 80);
 
             // Título RANKINGS
             GameObject title = CreateOrFind(header.transform, "TitleText");
             RectTransform titleRT = SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 0), new Vector2(400, 60));
-            TextMeshProUGUI titleTMP = SetupText(title, "RANKINGS", 42, CYAN_NEON, FontStyles.Bold);
+                new Vector2(0, 0), new Vector2(500, 100));
+            TextMeshProUGUI titleTMP = SetupText(title, "RANKINGS", 78, CYAN_NEON, FontStyles.Bold);
             titleTMP.alignment = TextAlignmentOptions.Center;
 
             AddTextGlow(title, CYAN_NEON);
@@ -287,12 +301,12 @@ namespace DigitPark.Editor
             GameObject selectorPanel = CreateOrFind(parent, "GameSelectorPanel");
             RectTransform selectorRT = SetupRectTransform(selectorPanel,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -60), new Vector2(-20, 120));
+                new Vector2(0, -120), new Vector2(-20, 240));
 
             // HorizontalLayoutGroup para los 5 botones
             HorizontalLayoutGroup hlg = selectorPanel.GetComponent<HorizontalLayoutGroup>();
             if (hlg == null) hlg = selectorPanel.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 12;
+            hlg.spacing = 24;
             hlg.padding = new RectOffset(15, 15, 5, 5);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
@@ -328,8 +342,8 @@ namespace DigitPark.Editor
 
             LayoutElement le = btn.AddComponent<LayoutElement>();
             le.flexibleWidth = 1;
-            le.minWidth = 80;
-            le.minHeight = 100;
+            le.minWidth = 160;
+            le.minHeight = 200;
 
             // Fondo del botón
             Image btnBg = btn.AddComponent<Image>();
@@ -372,10 +386,10 @@ namespace DigitPark.Editor
             }
 
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 50;
-            iconLE.minHeight = 50;
-            iconLE.preferredWidth = 50;
-            iconLE.preferredHeight = 50;
+            iconLE.minWidth = 100;
+            iconLE.minHeight = 100;
+            iconLE.preferredWidth = 100;
+            iconLE.preferredHeight = 100;
 
             // Nombre del juego debajo
             GameObject nameObj = new GameObject("Label");
@@ -383,7 +397,7 @@ namespace DigitPark.Editor
             RectTransform nameRT = nameObj.AddComponent<RectTransform>();
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
             nameTMP.text = label;
-            nameTMP.fontSize = 11;
+            nameTMP.fontSize = 22;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.color = isSelected ? Color.white : new Color(0.5f, 0.5f, 0.6f, 1f);
             nameTMP.alignment = TextAlignmentOptions.Center;
@@ -391,10 +405,10 @@ namespace DigitPark.Editor
             nameTMP.raycastTarget = false;
 
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
-            nameLE.minWidth = 70;
-            nameLE.minHeight = 28;
-            nameLE.preferredWidth = 70;
-            nameLE.preferredHeight = 28;
+            nameLE.minWidth = 140;
+            nameLE.minHeight = 56;
+            nameLE.preferredWidth = 140;
+            nameLE.preferredHeight = 56;
         }
 
         #endregion
@@ -407,7 +421,7 @@ namespace DigitPark.Editor
             // Positioned below GameSelector: 120 (game selector) + some spacing
             RectTransform tabsRT = SetupRectTransform(tabsContainer,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -155), new Vector2(-40, 55));
+                new Vector2(0, -335), new Vector2(-40, 55));
 
             Image tabsBg = tabsContainer.GetComponent<Image>();
             if (tabsBg == null) tabsBg = tabsContainer.AddComponent<Image>();
@@ -510,8 +524,8 @@ namespace DigitPark.Editor
                 Vector2.zero, Vector2.zero);
             // Top: GameSelector(120) + Tabs(55) + spacing = ~195
             // Bottom: PlayerPosition(80) + spacing = ~100
-            scrollRT.offsetMin = new Vector2(10, 100);
-            scrollRT.offsetMax = new Vector2(-10, -195);
+            scrollRT.offsetMin = new Vector2(10, 180);
+            scrollRT.offsetMax = new Vector2(-10, -375);
 
             Mask scrollMask = scrollView.GetComponent<Mask>();
             if (scrollMask != null) DestroyImmediate(scrollMask);
@@ -578,7 +592,7 @@ namespace DigitPark.Editor
             SetupRectTransform(icon,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -30), new Vector2(150, 150));
-            TextMeshProUGUI iconTMP = SetupText(icon, "ranking_icon", 100, GOLD, FontStyles.Normal);
+            TextMeshProUGUI iconTMP = SetupText(icon, "ranking_icon", 100, GOLD, FontStyles.Bold);
             iconTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject title = CreateOrFind(emptyState.transform, "EmptyTitle");
@@ -592,7 +606,7 @@ namespace DigitPark.Editor
             SetupRectTransform(subtitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -30), new Vector2(450, 50));
-            TextMeshProUGUI subTMP = SetupText(subtitle, "empty_leaderboard_subtitle", 22, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
+            TextMeshProUGUI subTMP = SetupText(subtitle, "empty_leaderboard_subtitle", 22, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
             subTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject playBtn = CreateOrFind(emptyState.transform, "PlayButton");
@@ -641,8 +655,8 @@ namespace DigitPark.Editor
                 GameObject entry = FindOrCreateChild(container, $"SampleEntry_{i + 1}");
 
                 LayoutElement entryLE = GetOrAddComponent<LayoutElement>(entry);
-                entryLE.minHeight = 70;
-                entryLE.preferredHeight = 70;
+                entryLE.minHeight = 140;
+                entryLE.preferredHeight = 140;
 
                 Image entryBg = GetOrAddComponent<Image>(entry);
                 entryBg.color = i % 2 == 0
@@ -659,10 +673,10 @@ namespace DigitPark.Editor
                 }
 
                 HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(entry);
-                hlg.spacing = 12;
-                hlg.padding = new RectOffset(15, 15, 8, 8);
+                hlg.spacing = 24;
+                hlg.padding = new RectOffset(30, 30, 16, 16);
                 hlg.childAlignment = TextAnchor.MiddleLeft;
-                hlg.childControlWidth = false;
+                hlg.childControlWidth = true;
                 hlg.childControlHeight = true;
                 hlg.childForceExpandWidth = false;
 
@@ -670,12 +684,12 @@ namespace DigitPark.Editor
                 GameObject posObj = FindOrCreateChild(entry, "PositionText");
                 TextMeshProUGUI posText = GetOrAddComponent<TextMeshProUGUI>(posObj);
                 posText.text = i < 3 ? $"{i + 1}" : $"#{i + 1}";
-                posText.fontSize = i < 3 ? 28 : 22;
+                posText.fontSize = i < 3 ? 56 : 44;
                 posText.fontStyle = FontStyles.Bold;
                 posText.alignment = TextAlignmentOptions.Center;
                 LayoutElement posLE = GetOrAddComponent<LayoutElement>(posObj);
-                posLE.minWidth = 55;
-                posLE.preferredWidth = 55;
+                posLE.minWidth = 110;
+                posLE.preferredWidth = 110;
 
                 if (i == 0) posText.color = GOLD;
                 else if (i == 1) posText.color = SILVER;
@@ -688,16 +702,16 @@ namespace DigitPark.Editor
                 avatarImg.color = new Color(0.2f, 0.25f, 0.35f, 1f);
                 avatarImg.raycastTarget = false;
                 LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
-                avatarLE.minWidth = 50;
-                avatarLE.minHeight = 50;
-                avatarLE.preferredWidth = 50;
-                avatarLE.preferredHeight = 50;
+                avatarLE.minWidth = 100;
+                avatarLE.minHeight = 100;
+                avatarLE.preferredWidth = 100;
+                avatarLE.preferredHeight = 100;
 
                 // Username (flex)
                 GameObject nameObj = FindOrCreateChild(entry, "UsernameText");
                 TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
                 nameText.text = names[i];
-                nameText.fontSize = 20;
+                nameText.fontSize = 40;
                 nameText.fontStyle = FontStyles.Bold;
                 nameText.color = Color.white;
                 nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -705,19 +719,19 @@ namespace DigitPark.Editor
                 nameText.overflowMode = TextOverflowModes.Ellipsis;
                 LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
                 nameLE.flexibleWidth = 1;
-                nameLE.minWidth = 120;
+                nameLE.minWidth = 240;
 
                 // Time (100px)
                 GameObject timeObj = FindOrCreateChild(entry, "TimeText");
                 TextMeshProUGUI timeText = GetOrAddComponent<TextMeshProUGUI>(timeObj);
                 timeText.text = times[i];
-                timeText.fontSize = 20;
+                timeText.fontSize = 40;
                 timeText.fontStyle = FontStyles.Bold;
                 timeText.color = TIME_COLOR;
                 timeText.alignment = TextAlignmentOptions.MidlineRight;
                 LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeObj);
-                timeLE.minWidth = 100;
-                timeLE.preferredWidth = 100;
+                timeLE.minWidth = 200;
+                timeLE.preferredWidth = 200;
             }
 
             Debug.Log("[ScoresUIBuilder] 5 sample entries creadas con avatar");
@@ -732,7 +746,7 @@ namespace DigitPark.Editor
             GameObject posPanel = CreateOrFind(parent, "PlayerPositionPanel");
             RectTransform posRT = SetupRectTransform(posPanel,
                 new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 50), new Vector2(-20, 80));
+                new Vector2(0, 50), new Vector2(-20, 160));
 
             Image posBg = posPanel.GetComponent<Image>();
             if (posBg == null) posBg = posPanel.AddComponent<Image>();
@@ -748,40 +762,40 @@ namespace DigitPark.Editor
 
             HorizontalLayoutGroup hlg = posPanel.GetComponent<HorizontalLayoutGroup>();
             if (hlg == null) hlg = posPanel.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 20;
-            hlg.padding = new RectOffset(30, 30, 15, 15);
+            hlg.spacing = 30;
+            hlg.padding = new RectOffset(40, 40, 20, 20);
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
 
             // Etiqueta "TU POSICIÓN"
             GameObject label = CreateOrFind(posPanel.transform, "PositionLabel");
-            TextMeshProUGUI labelTMP = SetupText(label, "TU POSICIÓN", 18, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
+            TextMeshProUGUI labelTMP = SetupText(label, "TU POSICIÓN", 36, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
             labelTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement labelLE = label.GetComponent<LayoutElement>();
             if (labelLE == null) labelLE = label.AddComponent<LayoutElement>();
-            labelLE.preferredWidth = 200;
+            labelLE.preferredWidth = 300;
 
             // Número de posición
             GameObject posNumber = CreateOrFind(posPanel.transform, "PositionNumber");
-            TextMeshProUGUI numTMP = SetupText(posNumber, "#--", 36, GOLD, FontStyles.Bold);
+            TextMeshProUGUI numTMP = SetupText(posNumber, "#--", 72, GOLD, FontStyles.Bold);
             numTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement numLE = posNumber.GetComponent<LayoutElement>();
             if (numLE == null) numLE = posNumber.AddComponent<LayoutElement>();
             numLE.flexibleWidth = 1;
-            numLE.preferredWidth = 150;
+            numLE.preferredWidth = 300;
 
             AddTextGlow(posNumber, GOLD);
 
             // Tiempo del jugador
             GameObject posTime = CreateOrFind(posPanel.transform, "PositionTime");
-            TextMeshProUGUI timeTMP = SetupText(posTime, "--", 22, TIME_COLOR, FontStyles.Normal);
+            TextMeshProUGUI timeTMP = SetupText(posTime, "--", 44, TIME_COLOR, FontStyles.Bold);
             timeTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement timeLE = posTime.GetComponent<LayoutElement>();
             if (timeLE == null) timeLE = posTime.AddComponent<LayoutElement>();
-            timeLE.preferredWidth = 150;
+            timeLE.preferredWidth = 200;
         }
 
         #endregion
@@ -806,7 +820,7 @@ namespace DigitPark.Editor
 
             GameObject loadingText = CreateOrFind(loadingPanel.transform, "LoadingText");
             SetupRectTransform(loadingText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI loadingTMP = SetupText(loadingText, "loading_rankings", 24, CYAN_NEON, FontStyles.Normal);
+            TextMeshProUGUI loadingTMP = SetupText(loadingText, "loading_rankings", 24, CYAN_NEON, FontStyles.Bold);
             loadingTMP.alignment = TextAlignmentOptions.Center;
 
             loadingPanel.SetActive(false);
@@ -815,6 +829,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static GameObject CreateOrFind(Transform parent, string name)
         {

@@ -114,7 +114,7 @@ namespace DigitPark.Editor
 
             if (GUILayout.Button("1. Background + Top Bar", GUILayout.Height(25)))
             {
-                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
                 if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
             }
             if (GUILayout.Button("2. Slides Container (5 slides)", GUILayout.Height(25)))
@@ -136,12 +136,14 @@ namespace DigitPark.Editor
 
         private static void RebuildCashBattleOnboarding()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[CashBattleOnboardingUI] No se encontro Canvas");
                 return;
             }
+
+            CleanupOldUI();
 
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
@@ -194,7 +196,7 @@ namespace DigitPark.Editor
 
         private static void CreateTopBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // --- Progress Bar (thin gold line at very top) ---
@@ -305,7 +307,7 @@ namespace DigitPark.Editor
 
         private static void CreateSlidesContainer()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var container = FindOrCreate(canvas.transform, "SlidesContainer");
@@ -538,7 +540,7 @@ namespace DigitPark.Editor
 
         private static void CreateNavigation()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // --- Dots Container ---
@@ -628,7 +630,7 @@ namespace DigitPark.Editor
 
         private static void CreateLegalText()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var legal = FindOrCreate(canvas.transform, "LegalText");
@@ -661,7 +663,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var so = new SerializedObject(manager);
@@ -710,6 +712,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static void SetRef(SerializedObject so, string propName, Object value)
         {

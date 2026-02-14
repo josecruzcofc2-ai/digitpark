@@ -140,6 +140,8 @@ namespace DigitPark.Editor
 
         private static void BuildPremiumUI()
         {
+            CleanupOldUI();
+
             // Find or create Canvas
             Canvas canvas = FindMainCanvas();
             if (canvas == null)
@@ -201,10 +203,7 @@ namespace DigitPark.Editor
             // 4. Main Panel with Cards
             CreateMainPanel(safeArea.transform);
 
-            // 5. Age Verification Panel (overlay, hidden by default)
-            CreateAgeVerificationPanel(safeArea.transform);
-
-            // 6. Bet Confirmation Panel (overlay, hidden by default)
+            // 5. Bet Confirmation Panel (overlay, hidden by default)
             CreateBetConfirmationPanel(safeArea.transform);
 
             // 7. Matchmaking Panel (overlay, hidden by default)
@@ -541,199 +540,6 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Age Verification Panel
-
-        private static void CreateAgeVerificationPanel(Transform parent)
-        {
-            GameObject panel = new GameObject("AgeVerificationPanel");
-            panel.transform.SetParent(parent, false);
-
-            RectTransform rt = panel.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-            rt.offsetMin = new Vector2(0, 0);
-            rt.offsetMax = new Vector2(0, -120); // Below header
-
-            // Semi-transparent overlay
-            Image overlay = panel.AddComponent<Image>();
-            overlay.color = new Color(0, 0, 0, 0.5f);
-
-            // Content container - LARGER
-            GameObject content = new GameObject("Content");
-            content.transform.SetParent(panel.transform, false);
-
-            RectTransform contentRT = content.AddComponent<RectTransform>();
-            contentRT.anchorMin = new Vector2(0.5f, 0.5f);
-            contentRT.anchorMax = new Vector2(0.5f, 0.5f);
-            contentRT.sizeDelta = new Vector2(700, 620);
-            contentRT.anchoredPosition = new Vector2(0, 30);
-
-            // Card background
-            Image cardBg = content.AddComponent<Image>();
-            cardBg.color = CARD_BG;
-
-            Outline cardOutline = content.AddComponent<Outline>();
-            cardOutline.effectColor = CARD_BORDER;
-            cardOutline.effectDistance = new Vector2(2, -2);
-
-            // Warning Icon
-            CreateWarningIcon(content.transform);
-
-            // Title
-            CreateVerificationTitle(content.transform);
-
-            // Description
-            CreateVerificationDescription(content.transform);
-
-            // Status text
-            CreateVerificationStatus(content.transform);
-
-            // Verify Button
-            CreateVerifyButton(content.transform);
-        }
-
-        private static void CreateWarningIcon(Transform parent)
-        {
-            GameObject iconObj = new GameObject("WarningIcon");
-            iconObj.transform.SetParent(parent, false);
-
-            RectTransform rt = iconObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1);
-            rt.anchorMax = new Vector2(0.5f, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(120, 120); // Bigger icon
-            rt.anchoredPosition = new Vector2(0, -30);
-
-            // Triangle warning background
-            Image bg = iconObj.AddComponent<Image>();
-            bg.color = AMBER;
-
-            // Exclamation mark
-            GameObject exclamation = new GameObject("Exclamation");
-            exclamation.transform.SetParent(iconObj.transform, false);
-
-            RectTransform excRT = exclamation.AddComponent<RectTransform>();
-            excRT.anchorMin = Vector2.zero;
-            excRT.anchorMax = Vector2.one;
-            excRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI excText = exclamation.AddComponent<TextMeshProUGUI>();
-            excText.text = "!";
-            excText.fontSize = 72; // Bigger
-            excText.color = BG_DARK;
-            excText.alignment = TextAlignmentOptions.Center;
-            excText.fontStyle = FontStyles.Bold;
-        }
-
-        private static void CreateVerificationTitle(Transform parent)
-        {
-            GameObject titleObj = new GameObject("VerificationTitle");
-            titleObj.transform.SetParent(parent, false);
-
-            RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1);
-            rt.anchorMax = new Vector2(0.5f, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(650, 70);
-            rt.anchoredPosition = new Vector2(0, -170);
-
-            TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
-            title.text = "Verificacion de Edad Requerida";
-            title.fontSize = 40; // Bigger and bold
-            title.color = AMBER;
-            title.alignment = TextAlignmentOptions.Center;
-            title.fontStyle = FontStyles.Bold;
-        }
-
-        private static void CreateVerificationDescription(Transform parent)
-        {
-            GameObject descObj = new GameObject("VerificationDescription");
-            descObj.transform.SetParent(parent, false);
-
-            RectTransform rt = descObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1);
-            rt.anchorMax = new Vector2(0.5f, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(620, 150);
-            rt.anchoredPosition = new Vector2(0, -260);
-
-            TextMeshProUGUI desc = descObj.AddComponent<TextMeshProUGUI>();
-            desc.text = "Las competencias con dinero real requieren que seas mayor de 18 anos. Deberas verificar tu identidad para continuar.";
-            desc.fontSize = 28; // Bigger
-            desc.color = TEXT_SECONDARY;
-            desc.alignment = TextAlignmentOptions.Center;
-            desc.enableWordWrapping = true;
-            desc.fontStyle = FontStyles.Bold; // Bold
-        }
-
-        private static void CreateVerificationStatus(Transform parent)
-        {
-            GameObject statusObj = new GameObject("VerificationStatusText");
-            statusObj.transform.SetParent(parent, false);
-
-            RectTransform rt = statusObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1);
-            rt.anchorMax = new Vector2(0.5f, 1);
-            rt.pivot = new Vector2(0.5f, 1);
-            rt.sizeDelta = new Vector2(600, 50);
-            rt.anchoredPosition = new Vector2(0, -430);
-
-            TextMeshProUGUI status = statusObj.AddComponent<TextMeshProUGUI>();
-            status.text = "";
-            status.fontSize = 26; // Bigger
-            status.color = TEXT_GOLD;
-            status.alignment = TextAlignmentOptions.Center;
-            status.fontStyle = FontStyles.Bold;
-        }
-
-        private static void CreateVerifyButton(Transform parent)
-        {
-            GameObject btnObj = new GameObject("VerifyAgeButton");
-            btnObj.transform.SetParent(parent, false);
-
-            RectTransform rt = btnObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0);
-            rt.anchorMax = new Vector2(0.5f, 0);
-            rt.pivot = new Vector2(0.5f, 0);
-            rt.sizeDelta = new Vector2(450, 90); // Bigger button
-            rt.anchoredPosition = new Vector2(0, 50);
-
-            Image bg = btnObj.AddComponent<Image>();
-            bg.color = BUTTON_GOLD;
-
-            Button btn = btnObj.AddComponent<Button>();
-            ColorBlock colors = btn.colors;
-            colors.normalColor = BUTTON_GOLD;
-            colors.highlightedColor = GOLD_LIGHT;
-            colors.pressedColor = GOLD_DARK;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-            btn.colors = colors;
-
-            // Button glow
-            Outline glow = btnObj.AddComponent<Outline>();
-            glow.effectColor = new Color(1f, 0.8f, 0.3f, 0.5f);
-            glow.effectDistance = new Vector2(3, -3);
-
-            // Button text
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(btnObj.transform, false);
-
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
-            btnText.text = "Verificar mi Edad";
-            btnText.fontSize = 36; // Bigger
-            btnText.color = BG_DARK;
-            btnText.alignment = TextAlignmentOptions.Center;
-            btnText.fontStyle = FontStyles.Bold;
-        }
-
-        #endregion
-
         #region Main Panel
 
         private static void CreateMainPanel(Transform parent)
@@ -776,7 +582,7 @@ namespace DigitPark.Editor
             GameObject card = CreatePremiumCard(parent, "Battles1v1Card",
                 "BATALLAS 1v1",
                 "Enfrenta a otros jugadores",
-                "$1 - $100",
+                "",
                 new Vector2(0, 0.57f),      // anchorMin
                 new Vector2(1, 1f));        // anchorMax
 
@@ -789,7 +595,7 @@ namespace DigitPark.Editor
             GameObject card = CreatePremiumCard(parent, "CashTournamentsCard",
                 "TORNEOS",
                 "Grandes premios",
-                "$5 - $500",
+                "",
                 new Vector2(0, 0.22f),       // anchorMin
                 new Vector2(0.49f, 0.55f));  // anchorMax
 
@@ -867,19 +673,19 @@ namespace DigitPark.Editor
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
             if (isLargeCard)
             {
-                // Card grande - titulo arriba a la derecha del icono (130px + margen)
+                // Card grande - titulo arriba a la derecha del icono (150px + margen)
                 titleRT.anchorMin = new Vector2(0, 0.55f);
                 titleRT.anchorMax = new Vector2(1, 0.95f);
-                titleRT.offsetMin = new Vector2(150, 0);  // Ajustado para icono 130px
-                titleRT.offsetMax = new Vector2(-55, -10);  // Espacio para flecha
+                titleRT.offsetMin = new Vector2(175, 0);  // Ajustado para icono 150px
+                titleRT.offsetMax = new Vector2(-160, -10);  // Espacio para flecha x3
             }
             else
             {
-                // Card pequeño (icono 80-85px + margen)
+                // Card pequeño (icono 150px + margen)
                 titleRT.anchorMin = new Vector2(0, 0.5f);
                 titleRT.anchorMax = new Vector2(1, 1);
-                titleRT.offsetMin = new Vector2(isWideCard ? 110 : 100, 5);  // Ajustado
-                titleRT.offsetMax = new Vector2(-45, -8);  // Espacio para flecha
+                titleRT.offsetMin = new Vector2(175, 5);  // Ajustado para icono 150px
+                titleRT.offsetMax = new Vector2(-115, -8);  // Espacio para flecha x3
             }
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
@@ -898,15 +704,15 @@ namespace DigitPark.Editor
             {
                 subRT.anchorMin = new Vector2(0, 0.30f);
                 subRT.anchorMax = new Vector2(1, 0.55f);
-                subRT.offsetMin = new Vector2(150, 0);   // Igual que título
-                subRT.offsetMax = new Vector2(-55, 0);   // Espacio para flecha
+                subRT.offsetMin = new Vector2(175, 0);   // Ajustado para icono 150px
+                subRT.offsetMax = new Vector2(-160, 0);   // Espacio para flecha x3
             }
             else
             {
                 subRT.anchorMin = new Vector2(0, 0);
                 subRT.anchorMax = new Vector2(1, 0.5f);
-                subRT.offsetMin = new Vector2(isWideCard ? 110 : 100, 8);  // Igual que título
-                subRT.offsetMax = new Vector2(-45, -5);  // Espacio para flecha
+                subRT.offsetMin = new Vector2(175, 8);  // Ajustado para icono 150px
+                subRT.offsetMax = new Vector2(-115, -5);  // Espacio para flecha x3
             }
 
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
@@ -976,12 +782,12 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = isLargeCard ? new Vector2(50, 50) : new Vector2(35, 35);
+            rt.sizeDelta = isLargeCard ? new Vector2(150, 150) : new Vector2(105, 105);
             rt.anchoredPosition = new Vector2(-10, 0);
 
             TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
             arrowText.text = ">";
-            arrowText.fontSize = isLargeCard ? 42 : 30;
+            arrowText.fontSize = isLargeCard ? 126 : 90;
             arrowText.color = new Color(1f, 0.84f, 0f, 0.6f);  // Dorado semi-transparente
             arrowText.alignment = TextAlignmentOptions.Center;
             arrowText.fontStyle = FontStyles.Bold;
@@ -998,30 +804,14 @@ namespace DigitPark.Editor
             GameObject iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(cardTransform, false);
 
-            // Detectar si es card grande basado en el nombre
-            bool isLargeCard = cardTransform.name.Contains("Battles1v1");
-            bool isWideCard = cardTransform.name.Contains("History");
-
             RectTransform rt = iconObj.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 0.5f);
             rt.anchorMax = new Vector2(0, 0.5f);
             rt.pivot = new Vector2(0, 0.5f);
 
-            if (isLargeCard)
-            {
-                rt.sizeDelta = new Vector2(130, 130);  // AUMENTADO: 110→130
-                rt.anchoredPosition = new Vector2(12, 0);
-            }
-            else if (isWideCard)
-            {
-                rt.sizeDelta = new Vector2(85, 85);   // AUMENTADO: 70→85
-                rt.anchoredPosition = new Vector2(18, 0);
-            }
-            else
-            {
-                rt.sizeDelta = new Vector2(80, 80);   // AUMENTADO: 70→80
-                rt.anchoredPosition = new Vector2(10, 0);
-            }
+            // Todos los iconos a 150x150
+            rt.sizeDelta = new Vector2(150, 150);
+            rt.anchoredPosition = new Vector2(12, 0);
 
             // Imagen del icono
             Image iconImg = iconObj.AddComponent<Image>();
@@ -1053,7 +843,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
                 text.text = GetFallbackEmoji(iconName);
-                text.fontSize = isLargeCard ? 50 : 32;
+                text.fontSize = 60;  // Icono 150x150 para todos
                 text.color = TEXT_GOLD;
                 text.alignment = TextAlignmentOptions.Center;
             }
@@ -3052,6 +2842,20 @@ namespace DigitPark.Editor
 
         #endregion
 
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
+
         private static Canvas FindMainCanvas()
         {
             foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
@@ -3064,7 +2868,7 @@ namespace DigitPark.Editor
                 if (c.gameObject.name != "TransitionCanvas")
                     return c;
             }
-            return Object.FindFirstObjectByType<Canvas>();
+            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         #region Reference Assigner
@@ -3118,13 +2922,6 @@ namespace DigitPark.Editor
                 if (mb.GetType().Name == "TournamentListPanel")
                     AssignRef(so, "tournamentListPanel", mb);
             }
-
-            // Age Verification
-            AssignGORef(so, "ageVerificationPanel", FindDeep(root, "AgeVerificationPanel"));
-            AssignRef(so, "verifyAgeButton", FindBtnDeep(root, "VerifyAgeButton"));
-            AssignRef(so, "verificationStatusText", FindTextDeep(root, "VerificationStatusText"));
-            AssignRef(so, "verificationTitleText", FindTextDeep(root, "VerificationTitle"));
-            AssignRef(so, "verificationDescText", FindTextDeep(root, "VerificationDescription"));
 
             // Confirm Bet
             AssignGORef(so, "confirmBetPanel", FindDeep(root, "ConfirmBetPanel"));

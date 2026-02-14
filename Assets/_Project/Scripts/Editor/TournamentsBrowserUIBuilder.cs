@@ -32,10 +32,12 @@ namespace DigitPark.Editor
         private static readonly Color TAB_ACTIVE = CYAN_NEON;
         private static readonly Color TAB_INACTIVE = new Color(0.12f, 0.16f, 0.2f, 1f);
 
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
+
         // ==================== DIMENSIONES ====================
         private const float HEADER_HEIGHT = 100f;
         private const float TABS_HEIGHT = 55f;
-        private const float SEARCHBAR_HEIGHT = 60f;
+        private const float SEARCHBAR_HEIGHT = 80f;
         private const float CONTENT_PADDING = 20f;
         private const float FAB_SIZE = 70f;
 
@@ -53,6 +55,9 @@ namespace DigitPark.Editor
         private static void BuildCompleteUI()
         {
             Debug.Log("[TournamentsBrowserUIBuilder] ========== INICIANDO CONSTRUCCION ==========");
+
+            // Limpiar UI vieja de TODOS los Canvas (especialmente TransitionCanvas)
+            CleanupOldUI();
 
             // 1. Setup base (Canvas, EventSystem, Camera)
             Canvas canvas = SetupCanvas();
@@ -102,7 +107,7 @@ namespace DigitPark.Editor
 
         private static Canvas SetupCanvas()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
 
             if (canvas == null)
             {
@@ -137,6 +142,52 @@ namespace DigitPark.Editor
             }
 
             return canvas;
+        }
+
+        /// <summary>
+        /// Limpia UI creada por el builder de TODOS los Canvas raíz.
+        /// En TransitionCanvas: elimina TODO excepto elementos de transición.
+        /// En Canvas principal: elimina Background y SafeArea.
+        /// </summary>
+        private static void CleanupOldUI()
+        {
+            string[] transitionElements = { "FadeImage", "CircleWipeImage", "SlidePanel" };
+
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+
+                if (canvas.gameObject.name.Contains("Transition"))
+                {
+                    for (int i = canvas.transform.childCount - 1; i >= 0; i--)
+                    {
+                        Transform child = canvas.transform.GetChild(i);
+                        bool isTransitionElement = false;
+                        foreach (string te in transitionElements)
+                        {
+                            if (child.gameObject.name == te) { isTransitionElement = true; break; }
+                        }
+                        if (!isTransitionElement)
+                        {
+                            Debug.Log($"[TournamentsBrowserUIBuilder] Limpiando '{child.gameObject.name}' de TransitionCanvas");
+                            Object.DestroyImmediate(child.gameObject);
+                        }
+                    }
+                }
+                else
+                {
+                    string[] toClean = { "Background", "SafeArea" };
+                    foreach (string name in toClean)
+                    {
+                        Transform t = canvas.transform.Find(name);
+                        if (t != null)
+                        {
+                            Debug.Log($"[TournamentsBrowserUIBuilder] Limpiando '{name}' de {canvas.gameObject.name}");
+                            Object.DestroyImmediate(t.gameObject);
+                        }
+                    }
+                }
+            }
         }
 
         // ==================== BACKGROUND ====================
@@ -197,7 +248,23 @@ namespace DigitPark.Editor
             CreateBottomGlow(header);
 
             // BackButton
-            GameObject backBtn = FindOrCreateChild(header, "BackButton");
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                Transform oldBtn = header.transform.Find("BackButton");
+                if (oldBtn != null) DestroyImmediate(oldBtn.gameObject);
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = FindOrCreateChild(header, "BackButton");
+                var fallbackBg = backBtn.GetComponent<Image>(); if (fallbackBg == null) fallbackBg = backBtn.AddComponent<Image>();
+                fallbackBg.color = new Color(0, 0, 0, 0);
+                if (backBtn.GetComponent<Button>() == null) backBtn.AddComponent<Button>();
+                Debug.LogWarning("[TournamentsBrowserUI] BackButton prefab not found, using fallback");
+            }
             RectTransform backRT = GetOrAddComponent<RectTransform>(backBtn);
             backRT.anchorMin = new Vector2(0, 0.5f);
             backRT.anchorMax = new Vector2(0, 0.5f);
@@ -205,34 +272,17 @@ namespace DigitPark.Editor
             backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
 
-            Image backBg = GetOrAddComponent<Image>(backBtn);
-            backBg.color = BUTTON_SECONDARY;
-
-            Button backButton = GetOrAddComponent<Button>(backBtn);
-            SetupButtonColors(backButton, BUTTON_SECONDARY);
-            AddOutline(backBtn, CYAN_DARK);
-
-            GameObject backTextObj = FindOrCreateChild(backBtn, "Text");
-            TextMeshProUGUI backText = GetOrAddComponent<TextMeshProUGUI>(backTextObj);
-            backText.text = "<";
-            backText.fontSize = 32;
-            backText.fontStyle = FontStyles.Bold;
-            backText.color = CYAN_NEON;
-            backText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(backTextObj);
-
             // Title
             GameObject titleObj = FindOrCreateChild(header, "TitleText");
             RectTransform titleRT = GetOrAddComponent<RectTransform>(titleObj);
-            titleRT.anchorMin = new Vector2(0.5f, 0.5f);
-            titleRT.anchorMax = new Vector2(0.5f, 0.5f);
-            titleRT.pivot = new Vector2(0.5f, 0.5f);
-            titleRT.anchoredPosition = Vector2.zero;
-            titleRT.sizeDelta = new Vector2(400, 60);
+            titleRT.anchorMin = new Vector2(0.1f, 0f);
+            titleRT.anchorMax = new Vector2(0.95f, 1f);
+            titleRT.offsetMin = Vector2.zero;
+            titleRT.offsetMax = Vector2.zero;
 
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "TORNEOS";
-            titleText.fontSize = 42;
+            titleText.fontSize = 78;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -294,7 +344,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = 16;
+            tabText.fontSize = 40;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
@@ -326,7 +376,7 @@ namespace DigitPark.Editor
             hlg.spacing = 10;
             hlg.padding = new RectOffset(15, 15, 10, 10);
             hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
@@ -354,7 +404,7 @@ namespace DigitPark.Editor
             // Filter Button
             GameObject filterBtn = FindOrCreateChild(searchBar, "FilterButton");
             RectTransform filterRT = GetOrAddComponent<RectTransform>(filterBtn);
-            filterRT.sizeDelta = new Vector2(90, 40);
+            filterRT.sizeDelta = new Vector2(160, 50);
 
             Image filterBg = GetOrAddComponent<Image>(filterBtn);
             filterBg.color = BUTTON_SECONDARY;
@@ -363,18 +413,18 @@ namespace DigitPark.Editor
             SetupButtonColors(filterButton, BUTTON_SECONDARY);
             AddOutline(filterBtn, CYAN_DARK);
 
+            LayoutElement filterLE = GetOrAddComponent<LayoutElement>(filterBtn);
+            filterLE.minWidth = 160;
+            filterLE.preferredWidth = 160;
+
             GameObject filterTextObj = FindOrCreateChild(filterBtn, "Text");
             TextMeshProUGUI filterText = GetOrAddComponent<TextMeshProUGUI>(filterTextObj);
             filterText.text = "Filtros";
-            filterText.fontSize = 14;
+            filterText.fontSize = 35;
             filterText.fontStyle = FontStyles.Bold;
             filterText.color = TEXT_PRIMARY;
             filterText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(filterTextObj);
-
-            LayoutElement filterLE = GetOrAddComponent<LayoutElement>(filterBtn);
-            filterLE.minWidth = 90;
-            filterLE.preferredWidth = 90;
 
             EditorUtility.SetDirty(searchBar);
             Debug.Log("[TournamentsBrowserUIBuilder] SearchBar creado");
@@ -398,6 +448,7 @@ namespace DigitPark.Editor
             ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
+            scrollRect.scrollSensitivity = 50f;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
             scrollRect.elasticity = 0.1f;
 
@@ -454,7 +505,7 @@ namespace DigitPark.Editor
             GameObject item = FindOrCreateChild(parent, $"TournamentItem_{index}");
 
             RectTransform itemRT = GetOrAddComponent<RectTransform>(item);
-            itemRT.sizeDelta = new Vector2(0, 120);
+            itemRT.sizeDelta = new Vector2(0, 200);
 
             Image itemBg = GetOrAddComponent<Image>(item);
             itemBg.color = PANEL_BG;
@@ -464,8 +515,8 @@ namespace DigitPark.Editor
             SetupButtonColors(itemButton, PANEL_BG);
 
             LayoutElement le = GetOrAddComponent<LayoutElement>(item);
-            le.minHeight = 120;
-            le.preferredHeight = 120;
+            le.minHeight = 200;
+            le.preferredHeight = 200;
 
             // Tournament Name
             GameObject nameObj = FindOrCreateChild(item, "TournamentName");
@@ -477,7 +528,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = $"Torneo de Ejemplo {index + 1}";
-            nameText.fontSize = 20;
+            nameText.fontSize = 50;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -492,7 +543,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI infoText = GetOrAddComponent<TextMeshProUGUI>(infoObj);
             infoText.text = "Digit Rush  |  8/16 jugadores";
-            infoText.fontSize = 14;
+            infoText.fontSize = 35;
             infoText.color = TEXT_SECONDARY;
             infoText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -506,7 +557,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI feeText = GetOrAddComponent<TextMeshProUGUI>(feeObj);
             feeText.text = "GRATIS";
-            feeText.fontSize = 18;
+            feeText.fontSize = 45;
             feeText.fontStyle = FontStyles.Bold;
             feeText.color = CYAN_NEON;
             feeText.alignment = TextAlignmentOptions.MidlineRight;
@@ -521,7 +572,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusText = GetOrAddComponent<TextMeshProUGUI>(statusObj);
             statusText.text = "Esperando...";
-            statusText.fontSize = 12;
+            statusText.fontSize = 30;
             statusText.color = TEXT_MUTED;
             statusText.alignment = TextAlignmentOptions.MidlineRight;
         }
@@ -565,7 +616,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(emptyState, "EmptyStateText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "No hay torneos disponibles";
-            titleText.fontSize = 24;
+            titleText.fontSize = 60;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -577,7 +628,7 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(emptyState, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Se el primero en crear uno\no vuelve mas tarde";
-            subtitleText.fontSize = 16;
+            subtitleText.fontSize = 40;
             subtitleText.color = TEXT_SECONDARY;
             subtitleText.alignment = TextAlignmentOptions.Center;
 
@@ -601,7 +652,7 @@ namespace DigitPark.Editor
             GameObject createTextObj = FindOrCreateChild(createBtn, "Text");
             TextMeshProUGUI createText = GetOrAddComponent<TextMeshProUGUI>(createTextObj);
             createText.text = "Crear Torneo";
-            createText.fontSize = 20;
+            createText.fontSize = 50;
             createText.fontStyle = FontStyles.Bold;
             createText.color = TEXT_DARK;
             createText.alignment = TextAlignmentOptions.Center;
@@ -663,7 +714,7 @@ namespace DigitPark.Editor
             GameObject clearTextObj = FindOrCreateChild(clearBtn, "Text");
             TextMeshProUGUI clearText = GetOrAddComponent<TextMeshProUGUI>(clearTextObj);
             clearText.text = "Limpiar Filtros";
-            clearText.fontSize = 16;
+            clearText.fontSize = 40;
             clearText.color = TEXT_SECONDARY;
             clearText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(clearTextObj);
@@ -695,7 +746,7 @@ namespace DigitPark.Editor
             GameObject captionObj = FindOrCreateChild(row, "Label");
             TextMeshProUGUI captionText = GetOrAddComponent<TextMeshProUGUI>(captionObj);
             captionText.text = label;
-            captionText.fontSize = 16;
+            captionText.fontSize = 40;
             captionText.color = TEXT_PRIMARY;
             captionText.alignment = TextAlignmentOptions.Left;
             SetRectTransformStretch(captionObj);
@@ -725,7 +776,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(refresh, "Text");
             TextMeshProUGUI refreshText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             refreshText.text = "Actualizando...";
-            refreshText.fontSize = 16;
+            refreshText.fontSize = 40;
             refreshText.color = CYAN_NEON;
             refreshText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -757,7 +808,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(loadMore, "Text");
             TextMeshProUGUI loadMoreText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadMoreText.text = "Cargar Mas";
-            loadMoreText.fontSize = 18;
+            loadMoreText.fontSize = 45;
             loadMoreText.color = TEXT_PRIMARY;
             loadMoreText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -799,7 +850,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI loadingText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadingText.text = "Cargando...";
-            loadingText.fontSize = 18;
+            loadingText.fontSize = 45;
             loadingText.color = TEXT_SECONDARY;
             loadingText.alignment = TextAlignmentOptions.Center;
 
@@ -831,7 +882,7 @@ namespace DigitPark.Editor
             GameObject plusObj = FindOrCreateChild(fab, "PlusIcon");
             TextMeshProUGUI plusText = GetOrAddComponent<TextMeshProUGUI>(plusObj);
             plusText.text = "+";
-            plusText.fontSize = 48;
+            plusText.fontSize = 78;
             plusText.fontStyle = FontStyles.Bold;
             plusText.color = TEXT_DARK;
             plusText.alignment = TextAlignmentOptions.Center;
@@ -874,15 +925,15 @@ namespace DigitPark.Editor
                 GameObject placeholderObj = FindOrCreateChild(textArea, "Placeholder");
                 TextMeshProUGUI placeholderText = GetOrAddComponent<TextMeshProUGUI>(placeholderObj);
                 placeholderText.text = placeholder;
-                placeholderText.fontSize = 16;
-                placeholderText.fontStyle = FontStyles.Italic;
+                placeholderText.fontSize = 40;
+                placeholderText.fontStyle = FontStyles.Bold;
                 placeholderText.color = TEXT_MUTED;
                 placeholderText.alignment = TextAlignmentOptions.MidlineLeft;
                 SetRectTransformStretch(placeholderObj);
 
                 GameObject textObj = FindOrCreateChild(textArea, "Text");
                 TextMeshProUGUI textComponent = GetOrAddComponent<TextMeshProUGUI>(textObj);
-                textComponent.fontSize = 16;
+                textComponent.fontSize = 40;
                 textComponent.color = TEXT_PRIMARY;
                 textComponent.alignment = TextAlignmentOptions.MidlineLeft;
                 SetRectTransformStretch(textObj);

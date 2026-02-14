@@ -158,7 +158,7 @@ namespace DigitPark.Editor
         {
             if (GameObject.Find("BackgroundParticles") != null) return;
 
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             GameObject bgParticles = new GameObject("BackgroundParticles");

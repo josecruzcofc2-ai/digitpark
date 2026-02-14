@@ -27,9 +27,9 @@ namespace DigitPark.Editor
         private static readonly Color CARD_FOUND = new Color(0.1f, 0.3f, 0.15f, 1f);
 
         // Rutas de iconos para Stats Bar
-        private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/TimerIcon.png";
-        private const string PAIRS_ICON_PATH = "Assets/_Project/Art/Icons/PairsIcon.png";
-        private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/ErrorIcon.png";
+        private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";
+        private const string PAIRS_ICON_PATH = "Assets/_Project/Art/Icons/UI/PairsIcon.png";
+        private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/UI/ErrorIcon.png";
 
         [MenuItem("DigitPark/UI Builders/Games/MemoryPairs", false, 112)]
         public static void ShowWindow()
@@ -66,7 +66,8 @@ namespace DigitPark.Editor
 
         private static void RebuildMemoryPairsUI()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            CleanupOldUI();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[MemoryPairsUIBuilder] No se encontró Canvas en la escena");
@@ -88,6 +89,20 @@ namespace DigitPark.Editor
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+        }
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
         }
 
         private static void CleanOldElements(Transform canvasTransform)
@@ -241,7 +256,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(600, 70));
-            SetupText(title, "MEMORY PAIRS", 40, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "MEMORY PAIRS", 78, CYAN_NEON, FontStyles.Bold);
         }
 
         private static void CreateStatsBar(Transform parent)
@@ -249,7 +264,7 @@ namespace DigitPark.Editor
             GameObject statsBar = CreateElement(parent, "StatsBar");
             SetupRectTransform(statsBar,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -160), new Vector2(900, 70));
+                new Vector2(0, -160), new Vector2(1020, 105));
 
             Image statsBg = statsBar.AddComponent<Image>();
             statsBg.color = PANEL_BG;
@@ -260,8 +275,8 @@ namespace DigitPark.Editor
 
             HorizontalLayoutGroup layout = statsBar.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 60;
-            layout.padding = new RectOffset(40, 40, 10, 10);
+            layout.spacing = 90;
+            layout.padding = new RectOffset(60, 60, 15, 15);
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
@@ -272,19 +287,19 @@ namespace DigitPark.Editor
 
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "00:00", Color.white, 160, timerIcon, 22);
+                "00:00", Color.white, 240, timerIcon, 33);
 
             // Round
             CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
-                "1/1", CYAN_NEON, 120, null, 24);
+                "1/1", CYAN_NEON, 180, null, 36);
 
             // Pairs Found
             CreateStatItem(statsBar.transform, "PairsContainer", "PairsIcon", "PairsFoundText",
-                "0/8", GREEN_NEON, 130, pairsIcon, 22);
+                "0/8", GREEN_NEON, 195, pairsIcon, 33);
 
             // Errors
             CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
-                "0", ERROR_RED, 80, errorIcon, 22);
+                "0", ERROR_RED, 120, errorIcon, 33);
         }
 
         private static void CreateStatItem(Transform parent, string containerName, string iconName,
@@ -294,13 +309,13 @@ namespace DigitPark.Editor
 
             LayoutElement le = container.AddComponent<LayoutElement>();
             le.preferredWidth = width;
-            le.preferredHeight = 50;
+            le.preferredHeight = 75;
 
             // Icon (Image component for custom icon)
             GameObject icon = CreateElement(container.transform, iconName);
             SetupRectTransform(icon,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(15, 0), new Vector2(36, 36)); // Slightly larger icons
+                new Vector2(22, 0), new Vector2(54, 54)); // Slightly larger icons
             Image iconImg = icon.AddComponent<Image>();
 
             if (iconSprite != null)
@@ -319,7 +334,7 @@ namespace DigitPark.Editor
             GameObject text = CreateElement(container.transform, textName);
             SetupRectTransform(text,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(30, 0), new Vector2(-30, 0)); // Adjusted for larger icon
+                new Vector2(45, 0), new Vector2(-10, 0)); // Adjusted for larger icon
             TextMeshProUGUI tmp = SetupText(text, defaultText, fontSize, color, FontStyles.Bold);
             tmp.alignment = TextAlignmentOptions.Left;
         }
@@ -545,7 +560,7 @@ namespace DigitPark.Editor
             SetupRectTransform(errorsObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -190), new Vector2(0, 50));
-            TextMeshProUGUI errorsTmp = SetupText(errorsObj, "Errors: 0", 30, Color.white, FontStyles.Normal);
+            TextMeshProUGUI errorsTmp = SetupText(errorsObj, "Errors: 0", 30, Color.white, FontStyles.Bold);
 
             // Buttons container
             GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
@@ -626,7 +641,7 @@ namespace DigitPark.Editor
             SetupRectTransform(errorsObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -190), new Vector2(0, 50));
-            TextMeshProUGUI errorsTmp = SetupText(errorsObj, "Errors: 0", 30, Color.white, FontStyles.Normal);
+            TextMeshProUGUI errorsTmp = SetupText(errorsObj, "Errors: 0", 30, Color.white, FontStyles.Bold);
 
             // Buttons container
             GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
@@ -764,7 +779,7 @@ namespace DigitPark.Editor
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));
-            SetupText(subtitleObj, "Find all matching pairs", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Italic);
+            SetupText(subtitleObj, "Find all matching pairs", 18, new Color(0.5f, 0.5f, 0.6f), FontStyles.Bold);
 
             // Divider
             CreateDivider(card.transform, -95);
@@ -918,7 +933,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : null;
             if (root == null) return;
 

@@ -107,7 +107,7 @@ namespace DigitPark.Editor
 
             if (GUILayout.Button("1. Background + Top Bar", GUILayout.Height(25)))
             {
-                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
                 if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
             }
             if (GUILayout.Button("2. Content Area (Image + Text)", GUILayout.Height(25))) CreateContentArea();
@@ -128,12 +128,14 @@ namespace DigitPark.Editor
 
         private static void RebuildOnboarding()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[OnboardingUI] No se encontro Canvas");
                 return;
             }
+
+            CleanupOldUI();
 
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
@@ -188,7 +190,7 @@ namespace DigitPark.Editor
 
         private static void CreateTopBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // --- Progress Bar (thin cyan line at very top) ---
@@ -285,7 +287,7 @@ namespace DigitPark.Editor
 
         private static void CreateContentArea()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // --- Icon Glow (subtle glow behind step image) ---
@@ -350,7 +352,7 @@ namespace DigitPark.Editor
 
         private static void CreateNameInputPanel()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, "NameInputPanel");
@@ -480,7 +482,7 @@ namespace DigitPark.Editor
 
         private static void CreateAvatarSelectionPanel()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, "AvatarSelectionPanel");
@@ -516,7 +518,7 @@ namespace DigitPark.Editor
 
         private static void CreateCompletionPanel()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var panel = FindOrCreate(canvas.transform, "CompletionPanel");
@@ -624,7 +626,7 @@ namespace DigitPark.Editor
 
         private static void CreateNavigation()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // --- Dots Container ---
@@ -721,7 +723,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var so = new SerializedObject(manager);
@@ -792,6 +794,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static void SetRef(SerializedObject so, string propName, Object value)
         {

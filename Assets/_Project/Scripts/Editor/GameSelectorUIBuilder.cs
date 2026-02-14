@@ -53,8 +53,10 @@ namespace DigitPark.Editor
 
         private static void RebuildGameSelectorUI()
         {
+            CleanupOldUI();
+
             // Buscar el Canvas existente
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("No se encontró Canvas en la escena");
@@ -677,7 +679,7 @@ namespace DigitPark.Editor
 
         private static void CreateGameCardsOnly()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("No se encontró Canvas");
@@ -735,10 +737,24 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = obj.GetComponent<TextMeshProUGUI>();
             if (tmp == null) tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 38; // Tamaño con presencia pero no excesivo
+            tmp.fontSize = 78;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = CYAN_NEON;
             tmp.alignment = TextAlignmentOptions.Center;
+        }
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
         }
 
         // ========== UTILIDADES ==========

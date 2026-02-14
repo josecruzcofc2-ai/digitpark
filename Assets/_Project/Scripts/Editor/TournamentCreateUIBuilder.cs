@@ -36,14 +36,14 @@ namespace DigitPark.Editor
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.85f);
 
         // ==================== DIMENSIONES ====================
-        private const float HEADER_HEIGHT = 100f;
+        private const float HEADER_HEIGHT = 140f;
         private const float CONTENT_PADDING = 20f;
-        private const float SECTION_SPACING = 18f;
-        private const float CARD_PADDING = 18f;
-        private const float CARD_INNER_SPACING = 12f;
-        private const float DROPDOWN_HEIGHT = 50f;
-        private const float INPUT_HEIGHT = 52f;
-        private const float TOGGLE_ROW_HEIGHT = 48f;
+        private const float SECTION_SPACING = 30f;
+        private const float CARD_PADDING = 30f;
+        private const float CARD_INNER_SPACING = 20f;
+        private const float DROPDOWN_HEIGHT = 90f;
+        private const float INPUT_HEIGHT = 90f;
+        private const float TOGGLE_ROW_HEIGHT = 85f;
         private const float GLOW_LINE_HEIGHT = 2f;
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
@@ -61,6 +61,9 @@ namespace DigitPark.Editor
         private static void BuildCompleteUI()
         {
             Debug.Log("[TournamentCreateUIBuilder] ========== INICIANDO CONSTRUCCION V2 ==========");
+
+            // Limpiar UI vieja de TODOS los Canvas (especialmente TransitionCanvas)
+            CleanupAllCanvases();
 
             Canvas canvas = SetupCanvas();
             if (canvas == null) return;
@@ -84,7 +87,7 @@ namespace DigitPark.Editor
 
         private static Canvas SetupCanvas()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 GameObject canvasObj = new GameObject("Canvas");
@@ -114,6 +117,47 @@ namespace DigitPark.Editor
             }
 
             return canvas;
+        }
+
+        private static void CleanupAllCanvases()
+        {
+            string[] transitionElements = { "FadeImage", "CircleWipeImage", "SlidePanel" };
+
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+
+                if (canvas.gameObject.name.Contains("Transition"))
+                {
+                    for (int i = canvas.transform.childCount - 1; i >= 0; i--)
+                    {
+                        Transform child = canvas.transform.GetChild(i);
+                        bool isTransitionElement = false;
+                        foreach (string te in transitionElements)
+                        {
+                            if (child.gameObject.name == te) { isTransitionElement = true; break; }
+                        }
+                        if (!isTransitionElement)
+                        {
+                            Debug.Log($"[TournamentCreateUIBuilder] Limpiando '{child.gameObject.name}' de TransitionCanvas");
+                            Object.DestroyImmediate(child.gameObject);
+                        }
+                    }
+                }
+                else
+                {
+                    string[] toClean = { "Background", "SafeArea", "LoadingOverlay", "ConfirmPopup" };
+                    foreach (string name in toClean)
+                    {
+                        Transform t = canvas.transform.Find(name);
+                        if (t != null)
+                        {
+                            Debug.Log($"[TournamentCreateUIBuilder] Limpiando '{name}' de {canvas.gameObject.name}");
+                            Object.DestroyImmediate(t.gameObject);
+                        }
+                    }
+                }
+            }
         }
 
         private static void CleanCanvas(Canvas canvas)
@@ -162,6 +206,8 @@ namespace DigitPark.Editor
             GameObject backBtn;
             if (backBtnPrefab != null)
             {
+                Transform oldBtn = header.transform.Find("BackButton");
+                if (oldBtn != null) Object.DestroyImmediate(oldBtn.gameObject);
                 backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
                 backBtn.name = "BackButton";
             }
@@ -179,13 +225,14 @@ namespace DigitPark.Editor
             backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
 
-            // Title
+            // Title - stretch to fill header width (minus back button area)
             GameObject title = CreateChild(header, "TitleText");
             RectTransform titleRT = title.GetComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0.5f, 0.5f);
-            titleRT.anchorMax = new Vector2(0.5f, 0.5f);
-            titleRT.sizeDelta = new Vector2(500, 60);
-            SetText(title, "CREAR TORNEO", 36, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
+            titleRT.anchorMin = new Vector2(0.1f, 0f);
+            titleRT.anchorMax = new Vector2(0.95f, 1f);
+            titleRT.offsetMin = Vector2.zero;
+            titleRT.offsetMax = Vector2.zero;
+            SetText(title, "CREAR TORNEO", 78, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
             AddOutline(title, CYAN_GLOW, 2);
 
             Debug.Log("[TournamentCreateUIBuilder] Header creado");
@@ -206,6 +253,7 @@ namespace DigitPark.Editor
             sr.horizontal = false;
             sr.vertical = true;
             sr.movementType = ScrollRect.MovementType.Elastic;
+            sr.scrollSensitivity = 50f;
             SetImage(scrollView, Color.clear);
 
             // Viewport
@@ -228,7 +276,7 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = content.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = SECTION_SPACING;
-            vlg.padding = new RectOffset((int)CONTENT_PADDING, (int)CONTENT_PADDING, 20, 120);
+            vlg.padding = new RectOffset((int)CONTENT_PADDING, (int)CONTENT_PADDING, 20, 180);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
@@ -266,8 +314,8 @@ namespace DigitPark.Editor
 
             // Char counter
             GameObject counter = CreateChild(card, "NameCharCountText");
-            SetText(counter, "0/50", 14, FontStyles.Normal, TEXT_MUTED, TextAlignmentOptions.Right);
-            SetLayoutElement(counter, 20);
+            SetText(counter, "0/50", 35, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.Right);
+            SetLayoutElement(counter, 40);
         }
 
         // ==================== CARD: TIPO DE JUEGO ====================
@@ -281,8 +329,8 @@ namespace DigitPark.Editor
             // Row: Dropdown + Icon
             GameObject row = CreateChild(card, "GameRow");
             HorizontalLayoutGroup hlg = row.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 12;
-            hlg.childControlWidth = false;
+            hlg.spacing = 16;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
@@ -323,7 +371,7 @@ namespace DigitPark.Editor
 
             // EntryFeeSlider
             GameObject sliderSection = CreateChild(card, "SliderRow");
-            SetLayoutElement(sliderSection, 35);
+            SetLayoutElement(sliderSection, 65);
             HorizontalLayoutGroup sliderHLG = sliderSection.AddComponent<HorizontalLayoutGroup>();
             sliderHLG.spacing = 10;
             sliderHLG.childControlWidth = true;
@@ -332,7 +380,7 @@ namespace DigitPark.Editor
             sliderHLG.childForceExpandHeight = true;
 
             GameObject sliderLabel = CreateChild(sliderSection, "SliderLabel");
-            SetText(sliderLabel, "Ajustar:", 14, FontStyles.Normal, TEXT_SECONDARY, TextAlignmentOptions.Left);
+            SetText(sliderLabel, "Ajustar:", 35, FontStyles.Bold, TEXT_SECONDARY, TextAlignmentOptions.Left);
             LayoutElement sliderLabelLE = sliderLabel.AddComponent<LayoutElement>();
             sliderLabelLE.minWidth = 80;
 
@@ -350,13 +398,13 @@ namespace DigitPark.Editor
             SetImage(customObj, INPUT_BG);
             AddOutline(customObj, CYAN_DARK);
             CreateInputField(customObj, "Monto personalizado...");
-            SetLayoutElement(customObj, 48);
+            SetLayoutElement(customObj, 90);
             customObj.SetActive(false);
 
             // EntryFeeDisplayText
             GameObject displayObj = CreateChild(card, "EntryFeeDisplayText");
-            SetText(displayObj, "GRATIS", 26, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
-            SetLayoutElement(displayObj, 35);
+            SetText(displayObj, "GRATIS", 65, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
+            SetLayoutElement(displayObj, 70);
         }
 
         // ==================== CARD: JUGADORES & PREMIO ====================
@@ -375,8 +423,8 @@ namespace DigitPark.Editor
 
             // EstimatedPrizeText
             GameObject prizeObj = CreateChild(card, "EstimatedPrizeText");
-            SetText(prizeObj, "Premio estimado: $0.00", 18, FontStyles.Bold, GREEN_ACCENT, TextAlignmentOptions.Center);
-            SetLayoutElement(prizeObj, 30);
+            SetText(prizeObj, "Premio estimado: $0.00", 45, FontStyles.Bold, GREEN_ACCENT, TextAlignmentOptions.Center);
+            SetLayoutElement(prizeObj, 55);
         }
 
         // ==================== CARD: HORARIO ====================
@@ -399,8 +447,8 @@ namespace DigitPark.Editor
 
             // ScheduledTimeText
             GameObject timeObj = CreateChild(card, "ScheduledTimeText");
-            SetText(timeObj, "Inicia inmediatamente al llenarse", 14, FontStyles.Italic, TEXT_MUTED, TextAlignmentOptions.Center);
-            SetLayoutElement(timeObj, 22);
+            SetText(timeObj, "Inicia inmediatamente al llenarse", 35, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.Center);
+            SetLayoutElement(timeObj, 45);
         }
 
         // ==================== CARD: REGLAS ====================
@@ -443,7 +491,7 @@ namespace DigitPark.Editor
             SetImage(codeObj, INPUT_BG);
             AddOutline(codeObj, CYAN_DARK);
             CreateInputField(codeObj, "Codigo de acceso...");
-            SetLayoutElement(codeObj, 48);
+            SetLayoutElement(codeObj, 90);
             codeObj.SetActive(false);
         }
 
@@ -477,11 +525,11 @@ namespace DigitPark.Editor
                 hlg.childControlHeight = true;
                 hlg.childForceExpandWidth = true;
                 hlg.childForceExpandHeight = true;
-                SetLayoutElement(row, 30);
+                SetLayoutElement(row, 55);
 
                 // Text child (named for AutoAssigner matching)
                 GameObject textObj = CreateChild(row, fieldNames[i]);
-                SetText(textObj, fieldLabels[i], 16, FontStyles.Normal, TEXT_PRIMARY, TextAlignmentOptions.Left);
+                SetText(textObj, fieldLabels[i], 16, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Left);
             }
         }
 
@@ -496,7 +544,7 @@ namespace DigitPark.Editor
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
-            SetLayoutElement(section, 200);
+            SetLayoutElement(section, 350);
 
             // Preview Button (secondary)
             GameObject previewBtn = CreateChild(section, "PreviewButton");
@@ -504,16 +552,16 @@ namespace DigitPark.Editor
             Button prevButton = previewBtn.AddComponent<Button>();
             SetupButtonColors(prevButton, BUTTON_SECONDARY);
             AddOutline(previewBtn, CYAN_DARK);
-            SetLayoutElement(previewBtn, 52);
+            SetLayoutElement(previewBtn, 90);
 
             GameObject prevText = CreateChild(previewBtn, "Text");
             StretchFull(prevText);
-            SetText(prevText, "Vista Previa", 18, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Center);
+            SetText(prevText, "Vista Previa", 45, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Center);
 
             // Creation Fee Text
             GameObject feeObj = CreateChild(section, "CreationFeeText");
-            SetText(feeObj, "Costo de creacion: $5.00", 14, FontStyles.Normal, TEXT_MUTED, TextAlignmentOptions.Center);
-            SetLayoutElement(feeObj, 22);
+            SetText(feeObj, "Costo de creacion: $5.00", 35, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.Center);
+            SetLayoutElement(feeObj, 45);
 
             // Main Create Button
             GameObject createBtn = CreateChild(section, "CreateTournamentButton");
@@ -521,21 +569,21 @@ namespace DigitPark.Editor
             Button createButton = createBtn.AddComponent<Button>();
             SetupButtonColors(createButton, BUTTON_PRIMARY);
             AddOutline(createBtn, CYAN_GLOW, 3);
-            SetLayoutElement(createBtn, 65);
+            SetLayoutElement(createBtn, 100);
 
             // Glow behind button
             GameObject btnGlow = CreateChild(section, "CreateButtonGlow");
             SetImage(btnGlow, new Color(0f, 1f, 1f, 0.06f));
-            SetLayoutElement(btnGlow, 4);
+            SetLayoutElement(btnGlow, 6);
 
             GameObject createText = CreateChild(createBtn, "Text");
             StretchFull(createText);
-            SetText(createText, "CREAR TORNEO", 24, FontStyles.Bold, TEXT_DARK, TextAlignmentOptions.Center);
+            SetText(createText, "CREAR TORNEO", 60, FontStyles.Bold, TEXT_DARK, TextAlignmentOptions.Center);
 
             // CreateButtonText (info below)
             GameObject createInfoObj = CreateChild(section, "CreateButtonText");
-            SetText(createInfoObj, "Se requiere nombre de al menos 3 caracteres", 13, FontStyles.Italic, TEXT_MUTED, TextAlignmentOptions.Center);
-            SetLayoutElement(createInfoObj, 20);
+            SetText(createInfoObj, "Se requiere nombre de al menos 3 caracteres", 33, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.Center);
+            SetLayoutElement(createInfoObj, 45);
         }
 
         // ==================== LOADING OVERLAY ====================
@@ -575,7 +623,7 @@ namespace DigitPark.Editor
 
             // StatusText
             GameObject textObj = CreateChild(center, "StatusText");
-            SetText(textObj, "Creando torneo...", 20, FontStyles.Normal, TEXT_PRIMARY, TextAlignmentOptions.Center);
+            SetText(textObj, "Creando torneo...", 50, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Center);
             LayoutElement textLE = textObj.AddComponent<LayoutElement>();
             textLE.minHeight = 30;
 
@@ -618,13 +666,13 @@ namespace DigitPark.Editor
 
             // Title
             GameObject titleObj = CreateChild(popup, "Title");
-            SetText(titleObj, "Confirmar Creacion", 26, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
-            SetLayoutElement(titleObj, 40);
+            SetText(titleObj, "Confirmar Creacion", 65, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
+            SetLayoutElement(titleObj, 75);
 
             // Message
             GameObject msgObj = CreateChild(popup, "Message");
-            SetText(msgObj, "¿Estas seguro de que quieres\ncrear este torneo?", 18, FontStyles.Normal, TEXT_PRIMARY, TextAlignmentOptions.Center);
-            SetLayoutElement(msgObj, 60);
+            SetText(msgObj, "¿Estas seguro de que quieres\ncrear este torneo?", 45, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Center);
+            SetLayoutElement(msgObj, 100);
 
             // Buttons row
             GameObject buttons = CreateChild(popup, "Buttons");
@@ -634,7 +682,7 @@ namespace DigitPark.Editor
             btnHlg.childControlHeight = true;
             btnHlg.childForceExpandWidth = true;
             btnHlg.childForceExpandHeight = true;
-            SetLayoutElement(buttons, 55);
+            SetLayoutElement(buttons, 90);
 
             // Cancel
             GameObject cancelObj = CreateChild(buttons, "CancelButton");
@@ -644,7 +692,7 @@ namespace DigitPark.Editor
             AddOutline(cancelObj, CYAN_DARK);
             GameObject cancelText = CreateChild(cancelObj, "Text");
             StretchFull(cancelText);
-            SetText(cancelText, "Cancelar", 18, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Center);
+            SetText(cancelText, "Cancelar", 45, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Center);
 
             // Confirm
             GameObject confirmObj = CreateChild(buttons, "ConfirmButton");
@@ -654,7 +702,7 @@ namespace DigitPark.Editor
             AddOutline(confirmObj, CYAN_GLOW, 2);
             GameObject confirmText = CreateChild(confirmObj, "Text");
             StretchFull(confirmText);
-            SetText(confirmText, "Confirmar", 18, FontStyles.Bold, TEXT_DARK, TextAlignmentOptions.Center);
+            SetText(confirmText, "Confirmar", 45, FontStyles.Bold, TEXT_DARK, TextAlignmentOptions.Center);
 
             Debug.Log("[TournamentCreateUIBuilder] ConfirmPopup creado");
         }
@@ -685,18 +733,18 @@ namespace DigitPark.Editor
             GameObject headerRow = CreateChild(card, "SectionHeader");
             HorizontalLayoutGroup hlg = headerRow.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 10;
-            hlg.childControlWidth = false;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
-            SetLayoutElement(headerRow, 28);
+            SetLayoutElement(headerRow, 60);
 
             // Label
             GameObject labelObj = CreateChild(headerRow, "Label");
-            SetText(labelObj, label, 17, FontStyles.Bold, TEXT_SECONDARY, TextAlignmentOptions.Left);
+            SetText(labelObj, label, 43, FontStyles.Bold, TEXT_SECONDARY, TextAlignmentOptions.Left);
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
-            labelLE.minWidth = 200;
-            labelLE.preferredWidth = 200;
+            labelLE.minWidth = 500;
+            labelLE.preferredWidth = 700;
 
             // Separator line
             GameObject line = CreateChild(headerRow, "Line");
@@ -727,7 +775,7 @@ namespace DigitPark.Editor
             RectTransform capRT = capObj.GetComponent<RectTransform>();
             capRT.offsetMin = new Vector2(14, 0);
             capRT.offsetMax = new Vector2(-35, 0);
-            TextMeshProUGUI capText = SetText(capObj, caption, 16, FontStyles.Normal, TEXT_PRIMARY, TextAlignmentOptions.Left);
+            TextMeshProUGUI capText = SetText(capObj, caption, 40, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Left);
             dropdown.captionText = capText;
 
             // Arrow indicator
@@ -738,7 +786,7 @@ namespace DigitPark.Editor
             arrowRT.pivot = new Vector2(1, 0.5f);
             arrowRT.anchoredPosition = new Vector2(-12, 0);
             arrowRT.sizeDelta = new Vector2(20, 20);
-            SetText(arrow, "▼", 12, FontStyles.Normal, TEXT_MUTED, TextAlignmentOptions.Center);
+            SetText(arrow, "▼", 30, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.Center);
         }
 
         private static void CreateStyledToggleRow(GameObject parent, string name, string label, bool defaultValue)
@@ -749,9 +797,9 @@ namespace DigitPark.Editor
             SetLayoutElement(row, TOGGLE_ROW_HEIGHT);
 
             HorizontalLayoutGroup hlg = row.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 12;
-            hlg.padding = new RectOffset(14, 14, 8, 8);
-            hlg.childControlWidth = false;
+            hlg.spacing = 16;
+            hlg.padding = new RectOffset(24, 24, 14, 14);
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
@@ -765,15 +813,15 @@ namespace DigitPark.Editor
             SetImage(checkBg, new Color(0.03f, 0.05f, 0.08f, 1f));
             AddOutline(checkBg, CYAN_DARK);
             LayoutElement checkLE = checkBg.AddComponent<LayoutElement>();
-            checkLE.minWidth = 32;
-            checkLE.preferredWidth = 32;
-            checkLE.minHeight = 32;
+            checkLE.minWidth = 56;
+            checkLE.preferredWidth = 56;
+            checkLE.minHeight = 56;
 
             GameObject checkmark = CreateChild(checkBg, "Checkmark");
             StretchFull(checkmark);
             RectTransform cmRT = checkmark.GetComponent<RectTransform>();
-            cmRT.offsetMin = new Vector2(4, 4);
-            cmRT.offsetMax = new Vector2(-4, -4);
+            cmRT.offsetMin = new Vector2(6, 6);
+            cmRT.offsetMax = new Vector2(-6, -6);
             Image cmImage = SetImage(checkmark, CYAN_NEON);
 
             toggle.graphic = cmImage;
@@ -781,7 +829,7 @@ namespace DigitPark.Editor
 
             // Label
             GameObject labelObj = CreateChild(row, "Label");
-            SetText(labelObj, label, 16, FontStyles.Normal, TEXT_PRIMARY, TextAlignmentOptions.Left);
+            SetText(labelObj, label, 40, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.Left);
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
             labelLE.flexibleWidth = 1;
         }
@@ -801,11 +849,11 @@ namespace DigitPark.Editor
             textArea.AddComponent<RectMask2D>();
 
             GameObject placeholderObj = CreateChild(textArea, "Placeholder");
-            TextMeshProUGUI phText = SetText(placeholderObj, placeholder, 17, FontStyles.Italic, TEXT_MUTED, TextAlignmentOptions.MidlineLeft);
+            TextMeshProUGUI phText = SetText(placeholderObj, placeholder, 43, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.MidlineLeft);
             StretchFull(placeholderObj);
 
             GameObject textObj = CreateChild(textArea, "Text");
-            TextMeshProUGUI inputText = SetText(textObj, "", 17, FontStyles.Normal, TEXT_PRIMARY, TextAlignmentOptions.MidlineLeft);
+            TextMeshProUGUI inputText = SetText(textObj, "", 43, FontStyles.Bold, TEXT_PRIMARY, TextAlignmentOptions.MidlineLeft);
             StretchFull(textObj);
 
             inputField.textViewport = textAreaRT;

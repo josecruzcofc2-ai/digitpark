@@ -124,7 +124,7 @@ namespace DigitPark.Editor
 
             if (GUILayout.Button("1. Background + TopBar", GUILayout.Height(25)))
             {
-                Canvas c = Object.FindFirstObjectByType<Canvas>();
+                Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
                 if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
             }
             if (GUILayout.Button("2. Streak Panel", GUILayout.Height(25))) CreateStreakPanel();
@@ -149,12 +149,14 @@ namespace DigitPark.Editor
 
         private static void RebuildDailyRewards()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[DailyRewardsUI] No se encontro Canvas");
                 return;
             }
+
+            CleanupOldUI();
 
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
@@ -217,7 +219,7 @@ namespace DigitPark.Editor
 
         private static void CreateTopBar()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var topBar = FindOrCreate(canvas.transform, "TopBar");
@@ -329,7 +331,7 @@ namespace DigitPark.Editor
 
         private static void CreateStreakPanel()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var streak = FindOrCreate(canvas.transform, "StreakPanel");
@@ -458,7 +460,7 @@ namespace DigitPark.Editor
 
         private static void CreateWeekLabel()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var weekLabel = FindOrCreate(canvas.transform, "WeekLabel");
@@ -481,7 +483,7 @@ namespace DigitPark.Editor
 
         private static void CreateDaysGrid()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var daysGrid = FindOrCreate(canvas.transform, "DaysGrid");
@@ -726,7 +728,7 @@ namespace DigitPark.Editor
 
         private static void CreateDay7Card()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // GoldGlow behind card
@@ -834,7 +836,7 @@ namespace DigitPark.Editor
 
         private static void CreateTodayPanel()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var today = FindOrCreate(canvas.transform, "TodayPanel");
@@ -924,7 +926,7 @@ namespace DigitPark.Editor
 
         private static void CreateClaimButton()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             float buttonPad = SIDE_PAD + 20;
@@ -968,7 +970,7 @@ namespace DigitPark.Editor
 
         private static void CreateTimer()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var timerBar = FindOrCreate(canvas.transform, "TimerBar");
@@ -1023,7 +1025,7 @@ namespace DigitPark.Editor
 
         private static void CreateClaimAnimationPopup()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // Blocker (fullscreen)
@@ -1147,7 +1149,7 @@ namespace DigitPark.Editor
 
         private static void CreateMilestonePopup()
         {
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // MilestoneBlocker (fullscreen)
@@ -1245,7 +1247,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var so = new SerializedObject(manager);
@@ -1308,6 +1310,20 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static void SetRef(SerializedObject so, string propName, Object value)
         {

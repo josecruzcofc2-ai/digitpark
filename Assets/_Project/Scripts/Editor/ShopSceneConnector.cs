@@ -33,7 +33,7 @@ namespace DigitPark.Editor
             if (manager == null)
             {
                 // Find Canvas
-                Canvas canvas = Object.FindObjectOfType<Canvas>();
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                 if (canvas == null)
                 {
                     Debug.LogError("[ShopConnector] No se encontro Canvas en la escena");
@@ -178,7 +178,7 @@ namespace DigitPark.Editor
         {
             SerializedObject serializedManager = new SerializedObject(manager);
 
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // Find SafeArea
@@ -426,7 +426,7 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Shop/Add ShopItemUI to Items", false, 703)]
         public static void AddShopItemUIToItems()
         {
-            Canvas canvas = Object.FindObjectOfType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[ShopConnector] No Canvas found");

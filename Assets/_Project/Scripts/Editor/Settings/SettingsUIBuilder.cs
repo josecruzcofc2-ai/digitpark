@@ -65,7 +65,7 @@ namespace DigitPark.Editor
                 return;
             }
 
-            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[SettingsUIBuilder] No Canvas found in scene.");
@@ -73,6 +73,8 @@ namespace DigitPark.Editor
             }
 
             Debug.Log("[SettingsUIBuilder] Building Settings UI...");
+
+            CleanupOldUI();
 
             CleanExistingUI(canvas);
             BuildBackground(canvas);
@@ -99,6 +101,20 @@ namespace DigitPark.Editor
         }
 
         // ==================== CLEAN ====================
+
+        private static void CleanupOldUI()
+        {
+            string[] toClean = { "Background", "SafeArea" };
+            foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
+            {
+                if (canvas.transform.parent != null) continue;
+                foreach (string name in toClean)
+                {
+                    Transform t = canvas.transform.Find(name);
+                    if (t != null) Object.DestroyImmediate(t.gameObject);
+                }
+            }
+        }
 
         private static void CleanExistingUI(Canvas canvas)
         {
@@ -188,7 +204,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.font = Font;
             titleText.text = "AJUSTES";
-            titleText.fontSize = 36;
+            titleText.fontSize = 78;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_WHITE;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -520,7 +536,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
             titleTxt.font = Font;
             titleTxt.text = "PREMIUM";
-            titleTxt.fontSize = 28;
+            titleTxt.fontSize = 84;
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = GOLD;
             titleTxt.alignment = TextAlignmentOptions.Center;
@@ -588,7 +604,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
             titleTxt.font = Font;
             titleTxt.text = title;
-            titleTxt.fontSize = 26;
+            titleTxt.fontSize = 78;
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = DANGER_RED;
             titleTxt.alignment = TextAlignmentOptions.Center;
@@ -604,7 +620,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI msgTxt = msgObj.AddComponent<TextMeshProUGUI>();
             msgTxt.font = Font;
             msgTxt.text = message;
-            msgTxt.fontSize = 20;
+            msgTxt.fontSize = 60;
             msgTxt.color = TEXT_WHITE;
             msgTxt.alignment = TextAlignmentOptions.Center;
 
@@ -632,7 +648,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI confirmTxtComp = confirmTxtObj.AddComponent<TextMeshProUGUI>();
             confirmTxtComp.font = Font;
             confirmTxtComp.text = confirmText;
-            confirmTxtComp.fontSize = 20;
+            confirmTxtComp.fontSize = 60;
             confirmTxtComp.fontStyle = FontStyles.Bold;
             confirmTxtComp.color = TEXT_WHITE;
             confirmTxtComp.alignment = TextAlignmentOptions.Center;
@@ -661,7 +677,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI cancelTxtComp = cancelTxtObj.AddComponent<TextMeshProUGUI>();
             cancelTxtComp.font = Font;
             cancelTxtComp.text = cancelText;
-            cancelTxtComp.fontSize = 20;
+            cancelTxtComp.fontSize = 60;
             cancelTxtComp.color = TEXT_GRAY;
             cancelTxtComp.alignment = TextAlignmentOptions.Center;
 
@@ -695,7 +711,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = versionObj.AddComponent<TextMeshProUGUI>();
             text.font = Font;
             text.text = "v1.0.0 - Digit Park";
-            text.fontSize = 16;
+            text.fontSize = 48;
             text.color = TEXT_GRAY;
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
@@ -749,7 +765,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.font = Font;
             title.text = text;
-            title.fontSize = 18;
+            title.fontSize = 54;
             title.fontStyle = FontStyles.Bold;
             title.color = color;
             title.alignment = TextAlignmentOptions.Left;
@@ -802,7 +818,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.font = Font;
             label.text = labelText;
-            label.fontSize = 20;
+            label.fontSize = 60;
             label.color = TEXT_WHITE;
             label.alignment = TextAlignmentOptions.Left;
             label.raycastTarget = false;
@@ -823,7 +839,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI right = rightObj.AddComponent<TextMeshProUGUI>();
                 right.font = Font;
                 right.text = rightText;
-                right.fontSize = 18;
+                right.fontSize = 54;
                 right.color = rightColor;
                 right.alignment = TextAlignmentOptions.Right;
                 right.raycastTarget = false;
@@ -852,7 +868,7 @@ namespace DigitPark.Editor
             outline.effectColor = textColor * 0.5f;
             outline.effectDistance = new Vector2(1, -1);
 
-            TextMeshProUGUI label = CreateTextChild(row.transform, "Text", text, 22, textColor, TextAlignmentOptions.Center);
+            TextMeshProUGUI label = CreateTextChild(row.transform, "Text", text, 66, textColor, TextAlignmentOptions.Center);
             label.fontStyle = FontStyles.Bold;
         }
 
@@ -879,7 +895,7 @@ namespace DigitPark.Editor
             outline.effectDistance = new Vector2(1, -1);
 
             // Star + PRO text
-            TextMeshProUGUI label = CreateTextChild(row.transform, "Text", "PRO", 24, GOLD, TextAlignmentOptions.Left);
+            TextMeshProUGUI label = CreateTextChild(row.transform, "Text", "PRO", 72, GOLD, TextAlignmentOptions.Left);
             label.fontStyle = FontStyles.Bold;
             RectTransform labelRT = label.GetComponent<RectTransform>();
             labelRT.offsetMin = new Vector2(16, 0);
@@ -899,7 +915,7 @@ namespace DigitPark.Editor
             badgeBg.sprite = WhiteSprite;
             badgeBg.color = GOLD;
 
-            TextMeshProUGUI badgeText = CreateTextChild(badge.transform, "BadgeText", "ACTIVO", 13, DARK_NAVY, TextAlignmentOptions.Center);
+            TextMeshProUGUI badgeText = CreateTextChild(badge.transform, "BadgeText", "ACTIVO", 39, DARK_NAVY, TextAlignmentOptions.Center);
             badgeText.fontStyle = FontStyles.Bold;
 
             badge.SetActive(false); // Hidden by default, shown when premium is active
@@ -934,7 +950,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.font = Font;
             labelText.text = "ID:";
-            labelText.fontSize = 18;
+            labelText.fontSize = 54;
             labelText.color = TEXT_GRAY;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
@@ -952,7 +968,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI idText = idObj.AddComponent<TextMeshProUGUI>();
             idText.font = Font;
             idText.text = "#ABC123XYZ";
-            idText.fontSize = 16;
+            idText.fontSize = 48;
             idText.color = TEXT_WHITE;
             idText.alignment = TextAlignmentOptions.Center;
             idText.raycastTarget = false;
@@ -974,7 +990,7 @@ namespace DigitPark.Editor
             Button copyButton = copyBtn.AddComponent<Button>();
             copyButton.targetGraphic = copyBg;
 
-            TextMeshProUGUI copyText = CreateTextChild(copyBtn.transform, "Text", "Copiar", 15, DARK_NAVY, TextAlignmentOptions.Center);
+            TextMeshProUGUI copyText = CreateTextChild(copyBtn.transform, "Text", "Copiar", 45, DARK_NAVY, TextAlignmentOptions.Center);
             copyText.fontStyle = FontStyles.Bold;
         }
 
@@ -1006,7 +1022,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.font = Font;
             labelText.text = label;
-            labelText.fontSize = 20;
+            labelText.fontSize = 60;
             labelText.color = TEXT_WHITE;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
@@ -1024,7 +1040,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.font = Font;
             valueText.text = $"{Mathf.RoundToInt(defaultValue * 100)}%";
-            valueText.fontSize = 18;
+            valueText.fontSize = 54;
             valueText.color = CYAN_NEON;
             valueText.alignment = TextAlignmentOptions.Right;
             valueText.raycastTarget = false;
@@ -1133,7 +1149,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.font = Font;
             labelText.text = label;
-            labelText.fontSize = 20;
+            labelText.fontSize = 60;
             labelText.color = TEXT_WHITE;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
@@ -1169,7 +1185,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI checkText = checkmark.AddComponent<TextMeshProUGUI>();
             checkText.font = Font;
             checkText.text = defaultValue ? "ON" : "OFF";
-            checkText.fontSize = 16;
+            checkText.fontSize = 48;
             checkText.fontStyle = FontStyles.Bold;
             checkText.color = defaultValue ? DARK_NAVY : TEXT_GRAY;
             checkText.alignment = TextAlignmentOptions.Center;
@@ -1207,7 +1223,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.font = Font;
             label.text = labelText;
-            label.fontSize = 20;
+            label.fontSize = 60;
             label.color = TEXT_WHITE;
             label.alignment = TextAlignmentOptions.Left;
             label.raycastTarget = false;
@@ -1240,7 +1256,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI captionText = captionObj.AddComponent<TextMeshProUGUI>();
             captionText.font = Font;
-            captionText.fontSize = 18;
+            captionText.fontSize = 54;
             captionText.color = CYAN_NEON;
             captionText.alignment = TextAlignmentOptions.Left;
             captionText.raycastTarget = false;
@@ -1261,7 +1277,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI arrowText = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowText.font = Font;
             arrowText.text = "v";
-            arrowText.fontSize = 16;
+            arrowText.fontSize = 48;
             arrowText.color = CYAN_NEON;
             arrowText.alignment = TextAlignmentOptions.Center;
             arrowText.raycastTarget = false;
@@ -1379,7 +1395,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
             itemLabelText.font = Font;
-            itemLabelText.fontSize = 18;
+            itemLabelText.fontSize = 54;
             itemLabelText.color = TEXT_WHITE;
             itemLabelText.alignment = TextAlignmentOptions.Left;
 
