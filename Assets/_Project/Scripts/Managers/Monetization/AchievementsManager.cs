@@ -517,6 +517,24 @@ namespace DigitPark.Managers
                         _ => AutoLocalizer.Get("ach_category_empty")
                     };
                 }
+
+                // Animated fade-in for empty state
+                var cg = emptyStateContainer.GetComponent<CanvasGroup>();
+                if (cg == null) cg = emptyStateContainer.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+
+                // Float icon if present
+                var icon = emptyStateContainer.transform.Find("Icon");
+                if (icon != null)
+                {
+                    icon.localScale = Vector3.zero;
+                    icon.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
+                    icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
+                        .SetEase(Ease.InOutSine)
+                        .SetLoops(-1, LoopType.Yoyo)
+                        .SetDelay(0.4f);
+                }
             }
         }
 
@@ -524,6 +542,10 @@ namespace DigitPark.Managers
         {
             if (emptyStateContainer)
             {
+                // Kill any running tweens on the icon to prevent leaks
+                var icon = emptyStateContainer.transform.Find("Icon");
+                if (icon != null) icon.DOKill();
+
                 emptyStateContainer.SetActive(false);
             }
         }

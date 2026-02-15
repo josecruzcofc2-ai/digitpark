@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
 
@@ -62,6 +63,7 @@ namespace DigitPark.UI
 
         private AudioSource audioSource;
         private bool isWinner;
+        private Sequence _revealSequence;
 
         private void Awake()
         {
@@ -71,6 +73,11 @@ namespace DigitPark.UI
 
             SetupButtons();
             Hide();
+        }
+
+        private void OnDestroy()
+        {
+            _revealSequence?.Kill();
         }
 
         private void SetupButtons()
@@ -151,23 +158,10 @@ namespace DigitPark.UI
                 playerNameText.color = playerColor;
             }
 
-            if (playerTimeText != null)
-                playerTimeText.text = FormatTime(playerResult.TotalTime);
-            if (playerErrorsText != null)
-                playerErrorsText.text = AutoLocalizer.Get("result_errors", playerResult.Errors);
-
             if (opponentNameText != null)
             {
                 opponentNameText.text = opponentName ?? "Opponent";
                 opponentNameText.color = opponentColor;
-            }
-
-            if (opponentResult != null)
-            {
-                if (opponentTimeText != null)
-                    opponentTimeText.text = FormatTime(opponentResult.TotalTime);
-                if (opponentErrorsText != null)
-                    opponentErrorsText.text = AutoLocalizer.Get("result_errors", opponentResult.Errors);
             }
 
             // Highlight ganador
@@ -175,35 +169,146 @@ namespace DigitPark.UI
                 playerHighlight.SetActive(playerWon);
             if (opponentHighlight != null)
                 opponentHighlight.SetActive(!playerWon);
+
+            // Animated reveal for VS stats
+            _revealSequence?.Kill();
+            _revealSequence = DOTween.Sequence().SetLink(gameObject).SetUpdate(true);
+            int statIndex = 0;
+
+            // Animate player time
+            if (playerTimeText != null)
+            {
+                var cg = playerTimeText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = playerTimeText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                playerTimeText.transform.localScale = Vector3.one * 0.9f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    playerTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                float displayPTime = 0f;
+                playerTimeText.text = FormatTime(0f);
+                _revealSequence.Insert(statIndex * 0.25f + 0.55f,
+                    DOTween.To(() => displayPTime, x => { displayPTime = x; playerTimeText.text = FormatTime(x); },
+                        playerResult.TotalTime, 1.2f).SetEase(Ease.OutQuad)
+                    .OnComplete(() => playerTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                statIndex++;
+            }
+
+            // Animate player errors
+            if (playerErrorsText != null)
+            {
+                var cg = playerErrorsText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = playerErrorsText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                playerErrorsText.transform.localScale = Vector3.one * 0.9f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    playerErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                playerErrorsText.text = AutoLocalizer.Get("result_errors", playerResult.Errors);
+                statIndex++;
+            }
+
+            // Animate opponent time
+            if (opponentResult != null)
+            {
+                if (opponentTimeText != null)
+                {
+                    var cg = opponentTimeText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = opponentTimeText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    opponentTimeText.transform.localScale = Vector3.one * 0.9f;
+                    _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                    _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                        opponentTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                    float displayOTime = 0f;
+                    opponentTimeText.text = FormatTime(0f);
+                    _revealSequence.Insert(statIndex * 0.25f + 0.55f,
+                        DOTween.To(() => displayOTime, x => { displayOTime = x; opponentTimeText.text = FormatTime(x); },
+                            opponentResult.TotalTime, 1.2f).SetEase(Ease.OutQuad)
+                        .OnComplete(() => opponentTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    statIndex++;
+                }
+
+                if (opponentErrorsText != null)
+                {
+                    var cg = opponentErrorsText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = opponentErrorsText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    opponentErrorsText.transform.localScale = Vector3.one * 0.9f;
+                    _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                    _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                        opponentErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                    opponentErrorsText.text = AutoLocalizer.Get("result_errors", opponentResult.Errors);
+                }
+            }
         }
 
         private void PopulateMoneySection(decimal entryFee, bool playerWon)
         {
             decimal prize = playerWon ? entryFee * 1.8m : 0;
 
+            // Animate money result with counter
             if (moneyResultText != null)
             {
-                if (playerWon)
-                {
-                    moneyResultText.text = $"+${prize:F2}";
-                    moneyResultText.color = winColor;
-                }
-                else
-                {
-                    moneyResultText.text = $"-${entryFee:F2}";
-                    moneyResultText.color = loseColor;
-                }
+                moneyResultText.color = playerWon ? winColor : loseColor;
+                var cg = moneyResultText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = moneyResultText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                moneyResultText.transform.localScale = Vector3.one * 0.9f;
+
+                float displayMoney = 0f;
+                float targetMoney = playerWon ? (float)prize : (float)entryFee;
+                string moneyPrefix = playerWon ? "+$" : "-$";
+                moneyResultText.text = $"{moneyPrefix}0.00";
+
+                DOTween.Sequence()
+                    .AppendInterval(1.8f)
+                    .Append(cg.DOFade(1f, 0.25f))
+                    .Join(moneyResultText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                    .Append(DOTween.To(() => displayMoney, x => { displayMoney = x; moneyResultText.text = $"{moneyPrefix}{x:F2}"; },
+                        targetMoney, 1.2f).SetEase(Ease.OutQuad))
+                    .AppendCallback(() => moneyResultText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                    .SetLink(gameObject)
+                    .SetUpdate(true);
             }
 
+            // Animate entry fee text
             if (entryFeeText != null)
+            {
                 entryFeeText.text = AutoLocalizer.Get("cash_entry_fee", $"{entryFee:F2}");
+                var cg = entryFeeText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = entryFeeText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                entryFeeText.transform.localScale = Vector3.one * 0.9f;
+                DOTween.Sequence()
+                    .AppendInterval(2.0f)
+                    .Append(cg.DOFade(1f, 0.25f))
+                    .Join(entryFeeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                    .SetLink(gameObject)
+                    .SetUpdate(true);
+            }
 
+            // Animate winner share text
             if (winnerShareText != null)
             {
                 if (playerWon)
+                {
                     winnerShareText.text = AutoLocalizer.Get("cash_winner_share");
+                    var cg = winnerShareText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = winnerShareText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    winnerShareText.transform.localScale = Vector3.one * 0.9f;
+                    DOTween.Sequence()
+                        .AppendInterval(2.2f)
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(winnerShareText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .SetLink(gameObject)
+                        .SetUpdate(true);
+                }
                 else
+                {
                     winnerShareText.gameObject.SetActive(false);
+                }
             }
         }
 

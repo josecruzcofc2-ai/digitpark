@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 
 namespace DigitPark.Monetization
 {
@@ -160,21 +161,45 @@ namespace DigitPark.Monetization
             // Badges
             if (_popularBadge != null)
             {
-                _popularBadge.SetActive(_itemData.isPopular);
+                if (_itemData.isPopular)
+                {
+                    _popularBadge.SetActive(true);
+                    _popularBadge.transform.localScale = Vector3.zero;
+                    _popularBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    _popularBadge.SetActive(false);
+                }
             }
 
             if (_bestValueBadge != null)
             {
-                _bestValueBadge.SetActive(_itemData.isBestValue);
+                if (_itemData.isBestValue)
+                {
+                    _bestValueBadge.SetActive(true);
+                    _bestValueBadge.transform.localScale = Vector3.zero;
+                    _bestValueBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    _bestValueBadge.SetActive(false);
+                }
             }
 
             if (_bonusBadge != null && _bonusText != null)
             {
                 bool showBonus = _itemData.showBonusBadge && _itemData.bonusPercent > 0;
-                _bonusBadge.SetActive(showBonus);
                 if (showBonus)
                 {
+                    _bonusBadge.SetActive(true);
+                    _bonusBadge.transform.localScale = Vector3.zero;
+                    _bonusBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
                     _bonusText.text = $"{_itemData.GetBonusText()} BONUS";
+                }
+                else
+                {
+                    _bonusBadge.SetActive(false);
                 }
             }
 

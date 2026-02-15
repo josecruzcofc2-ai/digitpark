@@ -101,15 +101,13 @@ namespace DigitPark.Managers
         {
             ClearCards();
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (emptyText != null)
                 emptyText.gameObject.SetActive(false);
 
             allFriends = await FriendService.Instance.GetFriendsList();
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             UpdateFriendsCount();
 
@@ -119,6 +117,7 @@ namespace DigitPark.Managers
                 {
                     emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
                 return;
             }
@@ -295,6 +294,7 @@ namespace DigitPark.Managers
                 {
                     emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
                 return;
             }
@@ -365,6 +365,7 @@ namespace DigitPark.Managers
                 {
                     emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
             }
         }
@@ -378,7 +379,19 @@ namespace DigitPark.Managers
             int count = FriendService.Instance?.GetPendingRequestsCount() ?? 0;
 
             if (requestsBadge != null)
-                requestsBadge.SetActive(count > 0);
+            {
+                if (count > 0)
+                {
+                    requestsBadge.SetActive(true);
+                    requestsBadge.transform.localScale = Vector3.zero;
+                    requestsBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    requestsBadge.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
+                        .OnComplete(() => requestsBadge.SetActive(false));
+                }
+            }
 
             if (requestsBadgeText != null)
                 requestsBadgeText.text = count > 99 ? "99+" : count.ToString();
@@ -387,6 +400,15 @@ namespace DigitPark.Managers
         #endregion
 
         #region Animations
+
+        private void AnimateEmptyText()
+        {
+            if (emptyText == null) return;
+            var cg = emptyText.GetComponent<CanvasGroup>();
+            if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+        }
 
         private void AnimateEntrance()
         {
@@ -432,6 +454,32 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.3f)
                     .Append(cg.DOFade(1f, 0.4f));
+            }
+        }
+
+        #endregion
+
+        #region Loading Helper
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
             }
         }
 

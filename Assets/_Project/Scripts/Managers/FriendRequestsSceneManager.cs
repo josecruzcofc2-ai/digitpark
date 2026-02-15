@@ -124,8 +124,7 @@ namespace DigitPark.Managers
         {
             ClearItems();
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (emptyText != null)
                 emptyText.gameObject.SetActive(false);
 
@@ -140,8 +139,7 @@ namespace DigitPark.Managers
                 requests = await FriendService.Instance.GetPendingSentRequests();
             }
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             UpdatePendingCount();
 
@@ -153,6 +151,7 @@ namespace DigitPark.Managers
                         ? "No tienes solicitudes pendientes"
                         : "No has enviado solicitudes";
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
                 return;
             }
@@ -393,12 +392,22 @@ namespace DigitPark.Managers
                     ? "No tienes solicitudes pendientes"
                     : "No has enviado solicitudes";
                 emptyText.gameObject.SetActive(true);
+                AnimateEmptyText();
             }
         }
 
         #endregion
 
         #region Animations
+
+        private void AnimateEmptyText()
+        {
+            if (emptyText == null) return;
+            var cg = emptyText.GetComponent<CanvasGroup>();
+            if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+        }
 
         private void AnimateEntrance()
         {
@@ -431,6 +440,32 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
                     .Append(cg.DOFade(1f, 0.4f));
+            }
+        }
+
+        #endregion
+
+        #region Loading Helper
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
             }
         }
 

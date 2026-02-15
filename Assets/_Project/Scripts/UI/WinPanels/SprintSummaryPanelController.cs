@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
 
@@ -74,6 +75,7 @@ namespace DigitPark.UI
         public event Action OnNewMatchClicked;
 
         private AudioSource audioSource;
+        private Sequence _revealSequence;
 
         private void Awake()
         {
@@ -83,6 +85,11 @@ namespace DigitPark.UI
 
             SetupButtons();
             Hide();
+        }
+
+        private void OnDestroy()
+        {
+            _revealSequence?.Kill();
         }
 
         private void SetupButtons()
@@ -200,27 +207,49 @@ namespace DigitPark.UI
                 PopulateVSSection(ctx, winner);
             }
 
-            // Money section
+            // Money section with animated counter
             if (moneySection != null)
             {
                 moneySection.SetActive(true);
 
                 if (moneyResultText != null)
                 {
-                    if (playerWon)
-                    {
-                        moneyResultText.text = $"+${prize:F2}";
-                        moneyResultText.color = winColor;
-                    }
-                    else
-                    {
-                        moneyResultText.text = $"-${entryFee:F2}";
-                        moneyResultText.color = loseColor;
-                    }
+                    moneyResultText.color = playerWon ? winColor : loseColor;
+                    var cg = moneyResultText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = moneyResultText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    moneyResultText.transform.localScale = Vector3.one * 0.9f;
+
+                    float displayMoney = 0f;
+                    float targetMoney = playerWon ? (float)prize : (float)entryFee;
+                    string moneyPrefix = playerWon ? "+$" : "-$";
+                    moneyResultText.text = $"{moneyPrefix}0.00";
+
+                    DOTween.Sequence()
+                        .AppendInterval(0.5f)
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(moneyResultText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .Append(DOTween.To(() => displayMoney, x => { displayMoney = x; moneyResultText.text = $"{moneyPrefix}{x:F2}"; },
+                            targetMoney, 1.2f).SetEase(Ease.OutQuad))
+                        .AppendCallback(() => moneyResultText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .SetLink(gameObject)
+                        .SetUpdate(true);
                 }
 
                 if (entryFeeText != null)
+                {
                     entryFeeText.text = AutoLocalizer.Get("cash_entry_fee", $"{entryFee:F2}");
+                    var cg = entryFeeText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = entryFeeText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    entryFeeText.transform.localScale = Vector3.one * 0.9f;
+                    DOTween.Sequence()
+                        .AppendInterval(0.8f)
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(entryFeeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .SetLink(gameObject)
+                        .SetUpdate(true);
+                }
             }
 
             // Botones cash
@@ -292,6 +321,19 @@ namespace DigitPark.UI
                         texts[3].color = playerBetter ? loseColor : winColor;
                     }
                 }
+
+                // Staggered reveal animation for each row
+                var cg = row.GetComponent<CanvasGroup>();
+                if (cg == null) cg = row.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                row.transform.localScale = Vector3.one * 0.9f;
+
+                DOTween.Sequence()
+                    .AppendInterval(i * 0.25f + 0.3f)
+                    .Append(cg.DOFade(1f, 0.25f))
+                    .Join(row.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                    .SetLink(row)
+                    .SetUpdate(true);
             }
         }
 
@@ -334,15 +376,73 @@ namespace DigitPark.UI
                 totalErrors += r.Errors;
             }
 
+            // Animated reveal for totals - starts after game rows finish revealing
+            float totalsDelay = results.Count * 0.25f + 0.8f;
+
+            _revealSequence?.Kill();
+            _revealSequence = DOTween.Sequence().SetLink(gameObject).SetUpdate(true);
+            int statIndex = 0;
+
+            // Animate total time counter
             if (totalTimeText != null)
-                totalTimeText.text = FormatTime(totalTime);
+            {
+                var cg = totalTimeText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = totalTimeText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                totalTimeText.transform.localScale = Vector3.one * 0.9f;
+                totalTimeText.text = FormatTime(0f);
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f,
+                    totalTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                float displayTotalTime = 0f;
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f + 0.25f,
+                    DOTween.To(() => displayTotalTime, x => { displayTotalTime = x; totalTimeText.text = FormatTime(x); },
+                        totalTime, 1.2f).SetEase(Ease.OutQuad)
+                    .OnComplete(() => totalTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                statIndex++;
+            }
+
+            // Animate total errors counter
             if (totalErrorsText != null)
-                totalErrorsText.text = totalErrors.ToString();
+            {
+                var cg = totalErrorsText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = totalErrorsText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                totalErrorsText.transform.localScale = Vector3.one * 0.9f;
+                totalErrorsText.text = "0";
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f,
+                    totalErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                if (totalErrors > 0)
+                {
+                    int displayTotalErrors = 0;
+                    _revealSequence.Insert(totalsDelay + statIndex * 0.25f + 0.25f,
+                        DOTween.To(() => displayTotalErrors, x => { displayTotalErrors = x; totalErrorsText.text = x.ToString(); },
+                            totalErrors, 0.8f).SetEase(Ease.OutQuad)
+                        .OnComplete(() => totalErrorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                }
+                statIndex++;
+            }
+
+            // Animate total score counter
             if (totalScoreText != null)
             {
                 float totalScore = 0;
                 foreach (var r in results) totalScore += r.FinalScore;
-                totalScoreText.text = FormatTime(totalScore);
+
+                var cg = totalScoreText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = totalScoreText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                totalScoreText.transform.localScale = Vector3.one * 0.9f;
+                totalScoreText.text = FormatTime(0f);
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f,
+                    totalScoreText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                float displayTotalScore = 0f;
+                _revealSequence.Insert(totalsDelay + statIndex * 0.25f + 0.25f,
+                    DOTween.To(() => displayTotalScore, x => { displayTotalScore = x; totalScoreText.text = FormatTime(x); },
+                        totalScore, 1.2f).SetEase(Ease.OutQuad)
+                    .OnComplete(() => totalScoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
             }
         }
 
@@ -378,6 +478,11 @@ namespace DigitPark.UI
             {
                 overallResultText.text = $"{playerWins} - {opponentWins}";
                 overallResultText.color = winner > 0 ? winColor : winner < 0 ? loseColor : drawColor;
+
+                // Punch scale on the overall result
+                overallResultText.transform.localScale = Vector3.one * 1.4f;
+                overallResultText.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack)
+                    .SetLink(gameObject).SetUpdate(true);
             }
         }
 

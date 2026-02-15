@@ -196,7 +196,18 @@ namespace DigitPark.Managers
             // Unread indicator
             var unreadDot = card.transform.Find("UnreadDot");
             if (unreadDot != null)
-                unreadDot.gameObject.SetActive(!notification.isRead);
+            {
+                if (!notification.isRead)
+                {
+                    unreadDot.gameObject.SetActive(true);
+                    unreadDot.localScale = Vector3.zero;
+                    unreadDot.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    unreadDot.gameObject.SetActive(false);
+                }
+            }
 
             // Type icon color
             var typeIcon = card.transform.Find("TypeIcon")?.GetComponent<TextMeshProUGUI>();
@@ -332,6 +343,12 @@ namespace DigitPark.Managers
             {
                 emptyText.text = message;
                 emptyText.gameObject.SetActive(true);
+
+                // Animated fade-in for empty state
+                var cg = emptyText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
             }
         }
 
@@ -386,7 +403,13 @@ namespace DigitPark.Managers
         private void SetTabState(Image indicator, bool active, Color color)
         {
             if (indicator == null) return;
-            indicator.color = active ? color : Color.clear;
+            indicator.DOColor(active ? color : Color.clear, 0.2f);
+
+            // Scale animation for parent tab button
+            if (indicator.transform.parent != null)
+            {
+                indicator.transform.parent.DOScale(active ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
+            }
         }
 
         #endregion

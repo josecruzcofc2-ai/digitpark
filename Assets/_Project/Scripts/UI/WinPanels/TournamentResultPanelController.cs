@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
 
@@ -64,6 +65,7 @@ namespace DigitPark.UI
         public event Action OnExitClicked;
 
         private AudioSource audioSource;
+        private Sequence _revealSequence;
 
         private void Awake()
         {
@@ -73,6 +75,11 @@ namespace DigitPark.UI
 
             SetupButtons();
             Hide();
+        }
+
+        private void OnDestroy()
+        {
+            _revealSequence?.Kill();
         }
 
         private void SetupButtons()
@@ -147,20 +154,80 @@ namespace DigitPark.UI
 
         private void PopulateStats(MinigameResult result)
         {
+            // Build animated reveal sequence for all stat elements
+            _revealSequence?.Kill();
+            _revealSequence = DOTween.Sequence().SetLink(gameObject).SetUpdate(true);
+            int statIndex = 0;
+
+            // Animate time
             if (timeText != null)
-                timeText.text = FormatTime(result.TotalTime);
+            {
+                var cg = timeText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = timeText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                timeText.transform.localScale = Vector3.one * 0.9f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    timeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                float displayTime = 0f;
+                timeText.text = FormatTime(0f);
+                _revealSequence.Insert(statIndex * 0.25f + 0.55f,
+                    DOTween.To(() => displayTime, x => { displayTime = x; timeText.text = FormatTime(x); },
+                        result.TotalTime, 1.2f).SetEase(Ease.OutQuad)
+                    .OnComplete(() => timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                statIndex++;
+            }
+
+            // Animate errors
             if (errorsText != null)
-                errorsText.text = result.Errors.ToString();
+            {
+                var cg = errorsText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = errorsText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                errorsText.transform.localScale = Vector3.one * 0.9f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    errorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                int displayErrors = 0;
+                errorsText.text = "0";
+                if (result.Errors > 0)
+                {
+                    _revealSequence.Insert(statIndex * 0.25f + 0.55f,
+                        DOTween.To(() => displayErrors, x => { displayErrors = x; errorsText.text = x.ToString(); },
+                            result.Errors, 0.8f).SetEase(Ease.OutQuad)
+                        .OnComplete(() => errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                }
+                statIndex++;
+            }
+
+            // Animate score
             if (scoreText != null)
-                scoreText.text = FormatTime(result.FinalScore);
+            {
+                var cg = scoreText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = scoreText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                scoreText.transform.localScale = Vector3.one * 0.9f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    scoreText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                float displayScore = 0f;
+                scoreText.text = FormatTime(0f);
+                _revealSequence.Insert(statIndex * 0.25f + 0.55f,
+                    DOTween.To(() => displayScore, x => { displayScore = x; scoreText.text = FormatTime(x); },
+                        result.FinalScore, 1.2f).SetEase(Ease.OutQuad)
+                    .OnComplete(() => scoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+            }
         }
 
         private void PopulateTournamentInfo(int position, int attemptsUsed, int maxAttempts, float bestTime)
         {
+            // Position with animated entrance
             if (positionText != null)
             {
                 positionText.text = $"#{position}";
                 positionText.color = GetPositionColor(position);
+                positionText.transform.localScale = Vector3.one * 1.5f;
+                positionText.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack).SetLink(gameObject);
             }
 
             if (positionLabel != null)
@@ -192,8 +259,27 @@ namespace DigitPark.UI
 
                 if (hasPrize && prizeText != null)
                 {
-                    prizeText.text = $"${prize:F2}";
                     prizeText.color = GetPositionColor(position);
+
+                    // Animate prize counter
+                    var cg = prizeText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = prizeText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    prizeText.transform.localScale = Vector3.one * 0.9f;
+
+                    float displayPrize = 0f;
+                    float targetPrize = (float)prize;
+                    prizeText.text = "$0.00";
+
+                    DOTween.Sequence()
+                        .AppendInterval(1.5f)
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(prizeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .Append(DOTween.To(() => displayPrize, x => { displayPrize = x; prizeText.text = $"${x:F2}"; },
+                            targetPrize, 1.2f).SetEase(Ease.OutQuad))
+                        .AppendCallback(() => prizeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .SetLink(gameObject)
+                        .SetUpdate(true);
                 }
 
                 if (hasPrize && prizeLabel != null)

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 using DigitPark.Localization;
 
 namespace DigitPark.UI.Common
@@ -251,6 +252,18 @@ namespace DigitPark.UI.Common
             HideMessage();
 
             gameObject.SetActive(true);
+
+            // Animate entrance
+            var cg = GetComponent<CanvasGroup>();
+            if (cg == null) cg = gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            if (popupPanel != null)
+                popupPanel.transform.localScale = Vector3.one * 0.85f;
+            DOTween.Sequence()
+                .Join(cg.DOFade(1f, 0.25f))
+                .Join(popupPanel != null ? popupPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack) : null)
+                .SetUpdate(true);
+
             emailInput.Select();
         }
 
@@ -259,7 +272,24 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void Hide()
         {
-            gameObject.SetActive(false);
+            var cg = GetComponent<CanvasGroup>();
+            if (cg != null)
+            {
+                DOTween.Sequence()
+                    .Join(cg.DOFade(0f, 0.2f))
+                    .Join(popupPanel != null ? popupPanel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad) : null)
+                    .OnComplete(() =>
+                    {
+                        gameObject.SetActive(false);
+                        if (popupPanel != null) popupPanel.transform.localScale = Vector3.one;
+                        cg.alpha = 1f;
+                    })
+                    .SetUpdate(true);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         /// <summary>

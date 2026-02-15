@@ -8,6 +8,8 @@ using DigitPark.Localization;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.UI;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -502,6 +504,31 @@ namespace DigitPark.Managers
                 {
                     CreateDayItem(i, rewards[i]);
                 }
+            }
+
+            // Animate rewards grid entrance
+            AnimateRewardsGridEntrance();
+        }
+
+        /// <summary>
+        /// Anima la entrada de los items del grid de recompensas con efecto staggered
+        /// </summary>
+        private void AnimateRewardsGridEntrance()
+        {
+            if (rewardsContainer == null || rewardsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < rewardsContainer.childCount; i++)
+            {
+                var child = rewardsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
             }
         }
 

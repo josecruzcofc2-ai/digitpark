@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using System.Collections.Generic;
+using DG.Tweening;
 
 namespace DigitPark.Monetization
 {
@@ -56,10 +57,14 @@ namespace DigitPark.Monetization
         [SerializeField] private List<ShopItemUI> _shopItems = new List<ShopItemUI>();
 
         private ShopTab _currentTab = ShopTab.Gems;
+        private ShopTab _previousTab = ShopTab.Gems;
+        private bool _isTabTransitioning;
+        private Sequence _tabTransitionSequence;
         private Dictionary<ShopTab, Button> _tabButtons;
         private Dictionary<ShopTab, GameObject> _tabContents;
         private Dictionary<ShopTab, Image> _tabImages;
         private Dictionary<ShopTab, TextMeshProUGUI> _tabTexts;
+        private Dictionary<ShopTab, Vector2> _tabContentOriginalPositions = new Dictionary<ShopTab, Vector2>();
 
         // Current item being purchased
         private ShopItemUI _currentPurchaseItem;
@@ -86,6 +91,7 @@ namespace DigitPark.Monetization
 
         private void OnDestroy()
         {
+            _tabTransitionSequence?.Kill();
             RemoveCurrencyListeners();
         }
 
@@ -224,6 +230,17 @@ namespace DigitPark.Monetization
                     _tabTexts[kvp.Key] = kvp.Value.GetComponentInChildren<TextMeshProUGUI>();
                 }
             }
+
+            // Cache original positions for tab content panels
+            foreach (var kvp in _tabContents)
+            {
+                if (kvp.Value != null)
+                {
+                    var rt = kvp.Value.GetComponent<RectTransform>();
+                    if (rt != null)
+                        _tabContentOriginalPositions[kvp.Key] = rt.anchoredPosition;
+                }
+            }
         }
 
         private void SetupButtons()
@@ -279,38 +296,100 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Cambia a una tab especifica
+        /// Cambia a una tab especifica con animacion DOTween
         /// </summary>
         public void SwitchToTab(ShopTab tab)
         {
+            if (_isTabTransitioning) return;
+            if (_currentTab == tab && _tabContents.TryGetValue(tab, out var currentPanel) && currentPanel != null && currentPanel.activeSelf) return;
+
+            _previousTab = _currentTab;
             _currentTab = tab;
 
-            // Update tab visuals
+            // Update tab button visuals with DOTween
             foreach (var kvp in _tabButtons)
             {
                 bool isActive = kvp.Key == tab;
 
-                // Update button image color
                 if (_tabImages.TryGetValue(kvp.Key, out Image image) && image != null)
                 {
-                    image.color = isActive ? GetTabColor(kvp.Key) : _inactiveTabColor;
+                    image.DOColor(isActive ? GetTabColor(kvp.Key) : _inactiveTabColor, 0.2f);
                 }
 
-                // Update text color
                 if (_tabTexts.TryGetValue(kvp.Key, out TextMeshProUGUI text) && text != null)
                 {
-                    text.color = isActive ? _activeTextColor : _inactiveTextColor;
+                    text.DOColor(isActive ? _activeTextColor : _inactiveTextColor, 0.2f);
+                }
+
+                // Scale animation for active tab
+                if (kvp.Value != null)
+                {
+                    kvp.Value.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
                 }
             }
 
-            // Show/hide content
+            // Determine slide direction
+            bool goingRight = (int)tab > (int)_previousTab;
+
+            // Animate content panels
+            _tabTransitionSequence?.Kill();
+            _tabTransitionSequence = DOTween.Sequence();
+            _isTabTransitioning = true;
+
+            // Fade out + slide old content
+            if (_tabContents.TryGetValue(_previousTab, out var oldContent) && oldContent != null && oldContent.activeSelf && _previousTab != tab)
+            {
+                var oldCG = oldContent.GetComponent<CanvasGroup>();
+                if (oldCG == null) oldCG = oldContent.AddComponent<CanvasGroup>();
+                var oldRT = oldContent.GetComponent<RectTransform>();
+                Vector2 oldOrigPos = _tabContentOriginalPositions.ContainsKey(_previousTab) ? _tabContentOriginalPositions[_previousTab] : Vector2.zero;
+                float exitDir = goingRight ? -30f : 30f;
+                var capturedOldContent = oldContent;
+                var capturedOldRT = oldRT;
+                var capturedOldCG = oldCG;
+                var capturedOldOrigPos = oldOrigPos;
+
+                _tabTransitionSequence
+                    .Join(capturedOldCG.DOFade(0f, 0.15f))
+                    .Join(capturedOldRT.DOAnchorPosX(capturedOldOrigPos.x + exitDir, 0.15f));
+
+                _tabTransitionSequence.InsertCallback(0.15f, () =>
+                {
+                    capturedOldContent.SetActive(false);
+                    capturedOldRT.anchoredPosition = capturedOldOrigPos;
+                    capturedOldCG.alpha = 1f;
+                });
+            }
+
+            // Fade in + slide new content
+            if (_tabContents.TryGetValue(tab, out var newContent) && newContent != null)
+            {
+                var newCG = newContent.GetComponent<CanvasGroup>();
+                if (newCG == null) newCG = newContent.AddComponent<CanvasGroup>();
+                var newRT = newContent.GetComponent<RectTransform>();
+                Vector2 newOrigPos = _tabContentOriginalPositions.ContainsKey(tab) ? _tabContentOriginalPositions[tab] : Vector2.zero;
+                float enterDir = goingRight ? 30f : -30f;
+
+                newCG.alpha = 0f;
+                newContent.SetActive(true);
+                newRT.anchoredPosition = newOrigPos + new Vector2(enterDir, 0);
+
+                float enterDelay = (_previousTab != tab && oldContent != null && oldContent != newContent) ? 0.1f : 0f;
+
+                _tabTransitionSequence.Insert(enterDelay, newCG.DOFade(1f, 0.2f));
+                _tabTransitionSequence.Insert(enterDelay, newRT.DOAnchorPos(newOrigPos, 0.2f).SetEase(Ease.OutQuad));
+            }
+
+            // Hide all other content panels immediately (safety)
             foreach (var kvp in _tabContents)
             {
-                if (kvp.Value != null)
+                if (kvp.Key != tab && kvp.Key != _previousTab && kvp.Value != null)
                 {
-                    kvp.Value.SetActive(kvp.Key == tab);
+                    kvp.Value.SetActive(false);
                 }
             }
+
+            _tabTransitionSequence.OnComplete(() => _isTabTransitioning = false);
 
             OnTabChanged?.Invoke(tab);
             Debug.Log($"[ShopManager] Switched to tab: {tab}");

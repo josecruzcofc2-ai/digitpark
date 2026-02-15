@@ -9,6 +9,7 @@ using DigitPark.Games;
 using DigitPark.CashBattle;
 using DigitPark.Monetization;
 using DigitPark.Services;
+using DG.Tweening;
 
 // Alias para resolver conflictos de nombres entre namespaces
 using ServiceMatchResult = DigitPark.Services.MatchResult;
@@ -329,9 +330,12 @@ namespace DigitPark.Managers
         private void ShowMainPanel()
         {
             if (ageVerificationPanel != null)
-                ageVerificationPanel.SetActive(false);
+                AnimatePanelOut(ageVerificationPanel.transform, () => ageVerificationPanel.SetActive(false));
             if (mainPanel != null)
+            {
                 mainPanel.SetActive(true);
+                AnimatePanelIn(mainPanel.transform);
+            }
 
             Debug.Log("[CashBattle] Mostrando panel principal");
         }
@@ -387,7 +391,7 @@ namespace DigitPark.Managers
             switch (currentState)
             {
                 case CashBattleState.Main:
-                    if (mainPanel != null) mainPanel.SetActive(false);
+                    if (mainPanel != null) AnimatePanelOut(mainPanel.transform, () => mainPanel.SetActive(false));
                     break;
                 case CashBattleState.GameSelection:
                     if (gameSelectionPanel != null) gameSelectionPanel.Hide();
@@ -396,7 +400,7 @@ namespace DigitPark.Managers
                     if (tournamentListPanel != null) tournamentListPanel.Hide();
                     break;
                 case CashBattleState.Matchmaking:
-                    if (matchmakingPanel != null) matchmakingPanel.SetActive(false);
+                    if (matchmakingPanel != null) AnimatePanelOut(matchmakingPanel.transform, () => matchmakingPanel.SetActive(false));
                     break;
             }
         }
@@ -406,7 +410,11 @@ namespace DigitPark.Managers
             switch (currentState)
             {
                 case CashBattleState.Main:
-                    if (mainPanel != null) mainPanel.SetActive(true);
+                    if (mainPanel != null)
+                    {
+                        mainPanel.SetActive(true);
+                        AnimatePanelIn(mainPanel.transform);
+                    }
                     break;
                 case CashBattleState.GameSelection:
                     if (gameSelectionPanel != null) gameSelectionPanel.Show();
@@ -415,7 +423,11 @@ namespace DigitPark.Managers
                     if (tournamentListPanel != null) tournamentListPanel.Show();
                     break;
                 case CashBattleState.Matchmaking:
-                    if (matchmakingPanel != null) matchmakingPanel.SetActive(true);
+                    if (matchmakingPanel != null)
+                    {
+                        matchmakingPanel.SetActive(true);
+                        AnimatePanelIn(matchmakingPanel.transform);
+                    }
                     matchmakingTimer = 0f;
                     break;
             }
@@ -590,12 +602,13 @@ namespace DigitPark.Managers
             }
 
             confirmBetPanel.SetActive(true);
+            AnimatePanelIn(confirmBetPanel.transform);
         }
 
         private void OnConfirmBet()
         {
             if (confirmBetPanel != null)
-                confirmBetPanel.SetActive(false);
+                AnimatePanelOut(confirmBetPanel.transform, () => confirmBetPanel.SetActive(false));
 
             StartMatchmakingAsync(_pendingGameType, _pendingEntryFee);
         }
@@ -603,7 +616,7 @@ namespace DigitPark.Managers
         private void OnCancelBet()
         {
             if (confirmBetPanel != null)
-                confirmBetPanel.SetActive(false);
+                AnimatePanelOut(confirmBetPanel.transform, () => confirmBetPanel.SetActive(false));
 
             _pendingEntryFee = 0;
             _pendingSprintGames = null;
@@ -795,6 +808,29 @@ namespace DigitPark.Managers
             if (LocalizationManager.Instance == null) return key;
             string text = LocalizationManager.Instance.GetText(key);
             return args.Length > 0 ? string.Format(text, args) : text;
+        }
+
+        private void AnimatePanelIn(Transform t)
+        {
+            t.localScale = Vector3.one * 0.85f;
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            DG.Tweening.DOTween.Sequence()
+                .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f))
+                .SetUpdate(true);
+        }
+
+        private void AnimatePanelOut(Transform t, System.Action onComplete)
+        {
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
+            DG.Tweening.DOTween.Sequence()
+                .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f))
+                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true);
         }
     }
 

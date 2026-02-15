@@ -164,16 +164,14 @@ namespace DigitPark.Managers
                 currentOffset = 0;
             }
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (emptyText != null)
                 emptyText.gameObject.SetActive(false);
 
             var entries = MatchHistoryStorage.Instance.GetEntries(currentFilter, PAGE_SIZE, currentOffset);
             int totalCount = MatchHistoryStorage.Instance.GetTotalCount(currentFilter);
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             UpdateHeader(totalCount);
 
@@ -185,6 +183,12 @@ namespace DigitPark.Managers
                         ? $"No hay partidas de {GetGameDisplayName(currentFilter)}"
                         : "No has jugado partidas aun\nJuega para ver tu historial";
                     emptyText.gameObject.SetActive(true);
+
+                    // Animated fade-in for empty state
+                    var cg = emptyText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
                 }
                 if (loadMoreButton != null)
                     loadMoreButton.gameObject.SetActive(false);
@@ -333,6 +337,32 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
                     .Append(cg.DOFade(1f, 0.4f));
+            }
+        }
+
+        #endregion
+
+        #region Loading Helper
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
             }
         }
 

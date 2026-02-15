@@ -5,6 +5,7 @@ using System;
 using DigitPark.Monetization;
 using DigitPark.Services;
 using DigitPark.Localization;
+using DG.Tweening;
 
 namespace DigitPark.Managers
 {
@@ -75,7 +76,7 @@ namespace DigitPark.Managers
 
         private void SetupUI()
         {
-            if (loadingIndicator) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
             if (successIcon) successIcon.SetActive(false);
             if (errorIcon) errorIcon.SetActive(false);
             if (statusText) statusText.text = "";
@@ -144,7 +145,7 @@ namespace DigitPark.Managers
                 statusText.text = L("age_verification_status_pending");
                 statusText.color = new Color(1f, 0.84f, 0f);
             }
-            if (loadingIndicator) loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (verifyButton) verifyButton.interactable = false;
         }
 
@@ -157,7 +158,7 @@ namespace DigitPark.Managers
             }
             if (successIcon) successIcon.SetActive(true);
             if (errorIcon) errorIcon.SetActive(false);
-            if (loadingIndicator) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
             if (verifyButton) verifyButton.gameObject.SetActive(false);
 
             OnVerificationComplete?.Invoke(true);
@@ -173,7 +174,7 @@ namespace DigitPark.Managers
             }
             if (successIcon) successIcon.SetActive(false);
             if (errorIcon) errorIcon.SetActive(true);
-            if (loadingIndicator) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
             if (verifyButton) verifyButton.interactable = true;
 
             OnVerificationComplete?.Invoke(false);
@@ -188,7 +189,7 @@ namespace DigitPark.Managers
             if (isVerifying || _kycService == null) return;
 
             isVerifying = true;
-            if (loadingIndicator) loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (statusText) statusText.text = L("age_verification_status_pending");
             if (verifyButton) verifyButton.interactable = false;
 
@@ -201,7 +202,7 @@ namespace DigitPark.Managers
             if (this == null) return;
 
             isVerifying = false;
-            if (loadingIndicator) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             if (!result.Success)
             {
@@ -278,6 +279,28 @@ namespace DigitPark.Managers
             PlayerPrefs.DeleteKey("AgeVerified");
             PlayerPrefs.DeleteKey("BirthDate");
             PlayerPrefs.Save();
+        }
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
+            }
         }
 
         private string L(string key, params object[] args)

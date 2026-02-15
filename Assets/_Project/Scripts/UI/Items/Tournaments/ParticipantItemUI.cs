@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 
 namespace DigitPark.UI.Items
 {
@@ -103,7 +104,19 @@ namespace DigitPark.UI.Items
         public void UpdateReadyStatus(bool isReady)
         {
             if (readyIndicator)
-                readyIndicator.SetActive(isReady);
+            {
+                if (isReady)
+                {
+                    readyIndicator.SetActive(true);
+                    readyIndicator.transform.localScale = Vector3.zero;
+                    readyIndicator.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    readyIndicator.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
+                        .OnComplete(() => readyIndicator.SetActive(false));
+                }
+            }
 
             if (statusText)
             {

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 namespace DigitPark.UI.Panels
 {
@@ -104,6 +105,7 @@ namespace DigitPark.UI.Panels
             {
                 panel.SetActive(true);
                 panel.transform.SetAsLastSibling();
+                AnimateIn(panel.transform);
             }
 
             SetButtonsInteractable(true);
@@ -156,13 +158,36 @@ namespace DigitPark.UI.Panels
         public void Hide()
         {
             if (panel != null)
-                panel.SetActive(false);
+                AnimateOut(panel.transform, () => panel.SetActive(false));
 
             if (inputField != null)
                 inputField.text = "";
 
             onConfirm = null;
             onCancel = null;
+        }
+
+        private void AnimateIn(Transform t)
+        {
+            t.localScale = Vector3.one * 0.85f;
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            DOTween.Sequence()
+                .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f))
+                .SetUpdate(true);
+        }
+
+        private void AnimateOut(Transform t, Action onComplete)
+        {
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
+            DOTween.Sequence()
+                .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f))
+                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true);
         }
 
         /// <summary>

@@ -9,6 +9,8 @@ using DigitPark.Localization;
 using DigitPark.Games;
 using DigitPark.UI.Panels;
 using DigitPark.UI.Items;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -371,7 +373,7 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Establece el estado visual de un botón de tab
+        /// Establece el estado visual de un botón de tab con animación DOTween
         /// </summary>
         private void SetTabButtonState(Button button, bool isSelected)
         {
@@ -380,6 +382,22 @@ namespace DigitPark.Managers
             ColorBlock colors = button.colors;
             colors.normalColor = isSelected ? new Color(0f, 0.83f, 1f) : Color.gray;
             button.colors = colors;
+
+            // DOTween tab animations
+            var image = button.GetComponent<Image>();
+            if (image != null)
+            {
+                image.DOColor(isSelected ? new Color(0f, 0.83f, 1f) : Color.gray, 0.2f);
+            }
+
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text != null)
+            {
+                text.DOColor(isSelected ? Color.white : new Color(0.6f, 0.6f, 0.6f), 0.2f);
+            }
+
+            // Scale animation for active tab
+            button.transform.DOScale(isSelected ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         #endregion
@@ -394,10 +412,19 @@ namespace DigitPark.Managers
             Debug.Log("[Tournament] Mostrando opciones de búsqueda");
 
             if (blockerPanel != null)
+            {
                 blockerPanel.SetActive(true);
+                var cg = blockerPanel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = blockerPanel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
 
             if (searchOptionsPanel != null)
+            {
                 searchOptionsPanel.SetActive(true);
+                AnimatePanelIn(searchOptionsPanel.transform);
+            }
         }
 
         /// <summary>
@@ -408,10 +435,14 @@ namespace DigitPark.Managers
             Debug.Log("[Tournament] Ocultando opciones de búsqueda");
 
             if (searchOptionsPanel != null)
-                searchOptionsPanel.SetActive(false);
+                AnimatePanelOut(searchOptionsPanel.transform, () => searchOptionsPanel.SetActive(false));
 
             if (blockerPanel != null)
-                blockerPanel.SetActive(false);
+            {
+                var cg = blockerPanel.GetComponent<CanvasGroup>();
+                if (cg == null) { blockerPanel.SetActive(false); }
+                else { cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => blockerPanel.SetActive(false)); }
+            }
         }
 
         /// <summary>
@@ -652,8 +683,33 @@ namespace DigitPark.Managers
                 CreateTournamentCard(tournament);
             }
 
+            // Animate list items entrance
+            AnimateTournamentListEntrance();
+
             // Forzar rebuild del layout
             StartCoroutine(ForceLayoutAndScrollToTop(containerRT));
+        }
+
+        /// <summary>
+        /// Anima la entrada de los items de la lista de torneos con efecto staggered
+        /// </summary>
+        private void AnimateTournamentListEntrance()
+        {
+            if (tournamentsContainer == null || tournamentsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < tournamentsContainer.childCount; i++)
+            {
+                var child = tournamentsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
+            }
         }
 
         // Listas para actualizar tiempo en tiempo real (usando componentes UI)
@@ -1156,9 +1212,24 @@ namespace DigitPark.Managers
             ClearTournamentsList();
 
             // Mostrar blocker y create block
-            if (blockerPanel != null) blockerPanel.SetActive(true);
-            if (createTournamentBlock != null) createTournamentBlock.SetActive(true);
-            if (createTournamentPanel != null) createTournamentPanel.SetActive(true);
+            if (blockerPanel != null)
+            {
+                blockerPanel.SetActive(true);
+                var cg = blockerPanel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = blockerPanel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            if (createTournamentBlock != null)
+            {
+                createTournamentBlock.SetActive(true);
+                AnimatePanelIn(createTournamentBlock.transform);
+            }
+            if (createTournamentPanel != null)
+            {
+                createTournamentPanel.SetActive(true);
+                AnimatePanelIn(createTournamentPanel.transform);
+            }
 
             // Resetear sliders
             if (maxPlayersSlider != null)
@@ -1184,9 +1255,16 @@ namespace DigitPark.Managers
         private void HideCreatePanel()
         {
             Debug.Log("[Tournament] Ocultando panel de creación");
-            if (blockerPanel != null) blockerPanel.SetActive(false);
-            if (createTournamentBlock != null) createTournamentBlock.SetActive(false);
-            if (createTournamentPanel != null) createTournamentPanel.SetActive(false);
+            if (blockerPanel != null)
+            {
+                var cg = blockerPanel.GetComponent<CanvasGroup>();
+                if (cg == null) { blockerPanel.SetActive(false); }
+                else { cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => blockerPanel.SetActive(false)); }
+            }
+            if (createTournamentBlock != null)
+                AnimatePanelOut(createTournamentBlock.transform, () => createTournamentBlock.SetActive(false));
+            if (createTournamentPanel != null)
+                AnimatePanelOut(createTournamentPanel.transform, () => createTournamentPanel.SetActive(false));
 
             // Volver a Search
             ShowView(TournamentView.Search);
@@ -1283,9 +1361,16 @@ namespace DigitPark.Managers
 
             // Mostrar blocker y popup
             if (blockerPanel != null)
+            {
                 blockerPanel.SetActive(true);
+                var cg = blockerPanel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = blockerPanel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
 
             confirmPopup.SetActive(true);
+            AnimatePanelIn(confirmPopup.transform);
         }
 
         /// <summary>
@@ -1294,10 +1379,14 @@ namespace DigitPark.Managers
         private void HideConfirmPopup()
         {
             if (confirmPopup != null)
-                confirmPopup.SetActive(false);
+                AnimatePanelOut(confirmPopup.transform, () => confirmPopup.SetActive(false));
 
             if (blockerPanel != null)
-                blockerPanel.SetActive(false);
+            {
+                var cg = blockerPanel.GetComponent<CanvasGroup>();
+                if (cg == null) { blockerPanel.SetActive(false); }
+                else { cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => blockerPanel.SetActive(false)); }
+            }
         }
 
         /// <summary>
@@ -1489,6 +1578,11 @@ namespace DigitPark.Managers
             text.alignment = TextAnchor.MiddleCenter;
             text.fontSize = 24;
             text.color = Color.gray;
+
+            // Animated fade-in for empty state
+            var cg = emptyMsg.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
         }
 
 
@@ -1499,7 +1593,20 @@ namespace DigitPark.Managers
         {
             if (loadingPanel != null)
             {
-                loadingPanel.SetActive(show);
+                if (show)
+                {
+                    loadingPanel.SetActive(true);
+                    var cg = loadingPanel.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = loadingPanel.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.2f).SetUpdate(true);
+                }
+                else
+                {
+                    var cg = loadingPanel.GetComponent<CanvasGroup>();
+                    if (cg == null) { loadingPanel.SetActive(false); }
+                    else { cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingPanel.SetActive(false)); }
+                }
             }
         }
 
@@ -1604,6 +1711,9 @@ namespace DigitPark.Managers
                 CreateLeaderboardItem(position, participant);
                 position++;
             }
+
+            // Animate leaderboard items entrance
+            AnimateTournamentListEntrance();
 
             // Forzar rebuild del layout y scroll al top
             StartCoroutine(ForceLayoutAndScrollToTop(containerRT));
@@ -1999,6 +2109,33 @@ namespace DigitPark.Managers
                 // Asegurar que no tenga transición de color
                 image.type = Image.Type.Sliced;
             }
+        }
+
+        #endregion
+
+        #region DOTween Animations
+
+        private void AnimatePanelIn(Transform t)
+        {
+            t.localScale = Vector3.one * 0.85f;
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            DG.Tweening.DOTween.Sequence()
+                .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f))
+                .SetUpdate(true);
+        }
+
+        private void AnimatePanelOut(Transform t, System.Action onComplete)
+        {
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
+            DG.Tweening.DOTween.Sequence()
+                .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f))
+                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true);
         }
 
         #endregion

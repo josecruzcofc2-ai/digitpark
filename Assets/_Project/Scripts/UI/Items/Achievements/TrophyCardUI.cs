@@ -262,7 +262,16 @@ namespace DigitPark.UI.Items
             // Completed badge
             if (completedBadge)
             {
-                completedBadge.gameObject.SetActive(_isUnlocked);
+                if (_isUnlocked)
+                {
+                    completedBadge.gameObject.SetActive(true);
+                    completedBadge.transform.localScale = Vector3.zero;
+                    completedBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    completedBadge.gameObject.SetActive(false);
+                }
             }
 
             // Glow color

@@ -4,6 +4,7 @@ using TMPro;
 using DigitPark.Data;
 using DigitPark.Services.Firebase;
 using System;
+using DG.Tweening;
 
 namespace DigitPark.UI.Items
 {
@@ -67,11 +68,17 @@ namespace DigitPark.UI.Items
             // Medal indicator para top 3
             if (medalIndicator != null)
             {
-                medalIndicator.gameObject.SetActive(entry.position <= 3);
                 if (entry.position <= 3)
                 {
+                    medalIndicator.gameObject.SetActive(true);
+                    medalIndicator.transform.localScale = Vector3.zero;
+                    medalIndicator.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
                     Color medalColor = GetPositionColor(entry.position);
                     medalIndicator.color = new Color(medalColor.r, medalColor.g, medalColor.b, 0.4f);
+                }
+                else
+                {
+                    medalIndicator.gameObject.SetActive(false);
                 }
             }
 

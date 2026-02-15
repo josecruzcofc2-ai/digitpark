@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Localization;
+using DG.Tweening;
 
 namespace DigitPark.Managers
 {
@@ -89,7 +90,7 @@ namespace DigitPark.Managers
 
         private void SetupUI()
         {
-            if (loadingOverlay) loadingOverlay.SetActive(false);
+            ShowLoadingOverlay(false);
             if (previewPanel) previewPanel.SetActive(false);
             if (privateCodeInput) privateCodeInput.gameObject.SetActive(false);
 
@@ -358,7 +359,7 @@ namespace DigitPark.Managers
         private void StartCreation()
         {
             isCreating = true;
-            if (loadingOverlay) loadingOverlay.SetActive(true);
+            ShowLoadingOverlay(true);
             ShowStatus("Creando torneo...", false);
             UpdateCreateButtonState();
 
@@ -383,7 +384,7 @@ namespace DigitPark.Managers
             {
                 ShowStatus(AutoLocalizer.Get("tournament_create_error"), true);
                 isCreating = false;
-                if (loadingOverlay) loadingOverlay.SetActive(false);
+                ShowLoadingOverlay(false);
                 UpdateCreateButtonState();
             }
         }
@@ -409,6 +410,28 @@ namespace DigitPark.Managers
         private void OnBackClicked()
         {
             SceneNavigator.Instance?.GoBack();
+        }
+
+        private void ShowLoadingOverlay(bool show)
+        {
+            if (loadingOverlay == null) return;
+
+            if (show)
+            {
+                loadingOverlay.SetActive(true);
+                var cg = loadingOverlay.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingOverlay.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingOverlay.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingOverlay.SetActive(false));
+                else
+                    loadingOverlay.SetActive(false);
+            }
         }
     }
 

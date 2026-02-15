@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 
 namespace DigitPark.CashBattle
 {
@@ -71,7 +72,16 @@ namespace DigitPark.CashBattle
             // Popular badge
             if (_popularBadge != null)
             {
-                _popularBadge.SetActive(option.isPopular);
+                if (option.isPopular)
+                {
+                    _popularBadge.SetActive(true);
+                    _popularBadge.transform.localScale = Vector3.zero;
+                    _popularBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    _popularBadge.SetActive(false);
+                }
             }
 
             // Background color

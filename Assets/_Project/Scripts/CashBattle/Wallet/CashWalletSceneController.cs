@@ -78,6 +78,10 @@ namespace DigitPark.CashBattle
 
         // ==================== STATE ====================
         private WalletTab currentTab = WalletTab.Deposit;
+        private WalletTab previousTab = WalletTab.Deposit;
+        private bool isTabTransitioning;
+        private Sequence tabTransitionSequence;
+        private Dictionary<WalletTab, Vector2> panelOriginalPositions = new Dictionary<WalletTab, Vector2>();
         private PaymentMethod selectedPaymentMethod = PaymentMethod.CreditCard;
         private int currentTransactionPage = 0;
         private List<GameObject> spawnedDepositOptions = new List<GameObject>();
@@ -117,11 +121,17 @@ namespace DigitPark.CashBattle
 
         private void OnDestroy()
         {
+            tabTransitionSequence?.Kill();
             UnsubscribeFromEvents();
         }
 
         private void InitializeUI()
         {
+            // Cache original positions of content panels
+            CacheOriginalPosition(WalletTab.Deposit, depositPanel);
+            CacheOriginalPosition(WalletTab.Withdraw, withdrawPanel);
+            CacheOriginalPosition(WalletTab.History, transactionHistoryPanel);
+
             // Setup deposit options
             PopulateDepositOptions();
 
@@ -132,6 +142,16 @@ namespace DigitPark.CashBattle
             if (loadingOverlay) loadingOverlay.SetActive(false);
             if (successOverlay) successOverlay.SetActive(false);
             if (errorOverlay) errorOverlay.SetActive(false);
+        }
+
+        private void CacheOriginalPosition(WalletTab tab, GameObject panel)
+        {
+            if (panel != null)
+            {
+                var rt = panel.GetComponent<RectTransform>();
+                if (rt != null)
+                    panelOriginalPositions[tab] = rt.anchoredPosition;
+            }
         }
 
         private void SetupButtonListeners()
@@ -216,25 +236,111 @@ namespace DigitPark.CashBattle
 
         private void ShowTab(WalletTab tab)
         {
+            if (isTabTransitioning) return;
+
+            previousTab = currentTab;
             currentTab = tab;
 
-            // Update panels
-            if (depositPanel) depositPanel.SetActive(tab == WalletTab.Deposit);
-            if (withdrawPanel) withdrawPanel.SetActive(tab == WalletTab.Withdraw);
-            if (transactionHistoryPanel) transactionHistoryPanel.SetActive(tab == WalletTab.History);
-
-            // Update tab colors
+            // Update tab colors with animation
             UpdateTabColors();
 
-            // Load content for tab
+            // Determine slide direction
+            bool goingRight = (int)tab > (int)previousTab;
+
+            // Get panel references
+            GameObject oldPanel = GetPanelForTab(previousTab);
+            GameObject newPanel = GetPanelForTab(tab);
+
+            // Animate transition
+            tabTransitionSequence?.Kill();
+            tabTransitionSequence = DOTween.Sequence();
+            isTabTransitioning = true;
+
+            // Fade out + slide old content
+            if (oldPanel != null && oldPanel.activeSelf && previousTab != tab)
+            {
+                var oldCG = oldPanel.GetComponent<CanvasGroup>();
+                if (oldCG == null) oldCG = oldPanel.AddComponent<CanvasGroup>();
+                var oldRT = oldPanel.GetComponent<RectTransform>();
+                Vector2 oldOrigPos = panelOriginalPositions.ContainsKey(previousTab) ? panelOriginalPositions[previousTab] : Vector2.zero;
+                float exitDir = goingRight ? -30f : 30f;
+                var capturedOldPanel = oldPanel;
+                var capturedOldRT = oldRT;
+                var capturedOldCG = oldCG;
+                var capturedOldOrigPos = oldOrigPos;
+
+                tabTransitionSequence
+                    .Join(capturedOldCG.DOFade(0f, 0.15f))
+                    .Join(capturedOldRT.DOAnchorPosX(capturedOldOrigPos.x + exitDir, 0.15f));
+
+                tabTransitionSequence.InsertCallback(0.15f, () =>
+                {
+                    capturedOldPanel.SetActive(false);
+                    capturedOldRT.anchoredPosition = capturedOldOrigPos;
+                    capturedOldCG.alpha = 1f;
+                });
+            }
+
+            // Fade in + slide new content
+            if (newPanel != null)
+            {
+                var newCG = newPanel.GetComponent<CanvasGroup>();
+                if (newCG == null) newCG = newPanel.AddComponent<CanvasGroup>();
+                var newRT = newPanel.GetComponent<RectTransform>();
+                Vector2 newOrigPos = panelOriginalPositions.ContainsKey(tab) ? panelOriginalPositions[tab] : Vector2.zero;
+                float enterDir = goingRight ? 30f : -30f;
+
+                newCG.alpha = 0f;
+                newPanel.SetActive(true);
+                newRT.anchoredPosition = newOrigPos + new Vector2(enterDir, 0);
+
+                float enterDelay = (previousTab != tab && oldPanel != null && oldPanel != newPanel) ? 0.1f : 0f;
+
+                tabTransitionSequence.Insert(enterDelay, newCG.DOFade(1f, 0.2f));
+                tabTransitionSequence.Insert(enterDelay, newRT.DOAnchorPos(newOrigPos, 0.2f).SetEase(Ease.OutQuad));
+            }
+
+            // Hide other panels
+            HideOtherPanels(tab, previousTab);
+
+            tabTransitionSequence.OnComplete(() =>
+            {
+                isTabTransitioning = false;
+
+                // Load content for tab after animation
+                switch (tab)
+                {
+                    case WalletTab.Withdraw:
+                        RefreshWithdrawPanel();
+                        break;
+                    case WalletTab.History:
+                        LoadTransactionHistory(reset: true);
+                        break;
+                }
+            });
+        }
+
+        private GameObject GetPanelForTab(WalletTab tab)
+        {
             switch (tab)
             {
-                case WalletTab.Withdraw:
-                    RefreshWithdrawPanel();
-                    break;
-                case WalletTab.History:
-                    LoadTransactionHistory(reset: true);
-                    break;
+                case WalletTab.Deposit: return depositPanel;
+                case WalletTab.Withdraw: return withdrawPanel;
+                case WalletTab.History: return transactionHistoryPanel;
+                default: return null;
+            }
+        }
+
+        private void HideOtherPanels(WalletTab activeTab, WalletTab animatingTab)
+        {
+            WalletTab[] allTabs = { WalletTab.Deposit, WalletTab.Withdraw, WalletTab.History };
+            foreach (var t in allTabs)
+            {
+                if (t != activeTab && t != animatingTab)
+                {
+                    var panel = GetPanelForTab(t);
+                    if (panel != null) panel.SetActive(false);
+                }
             }
         }
 
@@ -250,10 +356,13 @@ namespace DigitPark.CashBattle
             if (button == null) return;
 
             var image = button.GetComponent<Image>();
-            if (image) image.color = isActive ? activeTabColor : inactiveTabColor;
+            if (image) image.DOColor(isActive ? activeTabColor : inactiveTabColor, 0.2f);
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
-            if (text) text.color = isActive ? Color.white : new Color(0.7f, 0.7f, 0.7f);
+            if (text) text.DOColor(isActive ? Color.white : new Color(0.7f, 0.7f, 0.7f), 0.2f);
+
+            // Scale animation for active tab
+            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         // ==================== DEPOSIT ====================
@@ -552,7 +661,22 @@ namespace DigitPark.CashBattle
         {
             if (loadingOverlay)
             {
-                loadingOverlay.SetActive(show);
+                if (show)
+                {
+                    loadingOverlay.SetActive(true);
+                    var cg = loadingOverlay.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = loadingOverlay.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.2f).SetUpdate(true);
+                }
+                else
+                {
+                    var cg = loadingOverlay.GetComponent<CanvasGroup>();
+                    if (cg != null)
+                        cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingOverlay.SetActive(false));
+                    else
+                        loadingOverlay.SetActive(false);
+                }
             }
         }
 

@@ -4,6 +4,7 @@ using TMPro;
 using DigitPark.Data;
 using DigitPark.Localization;
 using System;
+using DG.Tweening;
 
 namespace DigitPark.UI.Items
 {
@@ -81,12 +82,31 @@ namespace DigitPark.UI.Items
             // Indicadores
             if (fullIndicator != null)
             {
-                fullIndicator.SetActive(isFull);
+                if (isFull)
+                {
+                    fullIndicator.SetActive(true);
+                    fullIndicator.transform.localScale = Vector3.zero;
+                    fullIndicator.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    fullIndicator.SetActive(false);
+                }
             }
 
             if (privateIndicator != null)
             {
-                privateIndicator.SetActive(tournament.region == TournamentRegion.Private);
+                bool isPrivate = tournament.region == TournamentRegion.Private;
+                if (isPrivate)
+                {
+                    privateIndicator.SetActive(true);
+                    privateIndicator.transform.localScale = Vector3.zero;
+                    privateIndicator.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    privateIndicator.SetActive(false);
+                }
             }
 
             // Flecha (ocultar si está lleno)

@@ -8,6 +8,7 @@ using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI.Panels;
 using DigitPark.UI.Common;
+using DG.Tweening;
 
 namespace DigitPark.Managers
 {
@@ -458,7 +459,22 @@ namespace DigitPark.Managers
         {
             if (loadingPanel != null)
             {
-                loadingPanel.SetActive(show);
+                if (show)
+                {
+                    loadingPanel.SetActive(true);
+                    var cg = loadingPanel.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = loadingPanel.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.2f).SetUpdate(true);
+                }
+                else
+                {
+                    var cg = loadingPanel.GetComponent<CanvasGroup>();
+                    if (cg != null)
+                        cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingPanel.SetActive(false));
+                    else
+                        loadingPanel.SetActive(false);
+                }
             }
 
             // Deshabilitar botones mientras carga

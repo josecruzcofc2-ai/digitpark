@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -98,7 +100,7 @@ namespace DigitPark.Managers
 
         private void SetupUI()
         {
-            if (loadingOverlay) loadingOverlay.SetActive(false);
+            ShowLoadingOverlay(false);
             if (startingOverlay) startingOverlay.SetActive(false);
             if (leaveButton) leaveButton.gameObject.SetActive(false);
             if (readyButton) readyButton.gameObject.SetActive(false);
@@ -150,7 +152,7 @@ namespace DigitPark.Managers
         private void LoadTournamentById(string id)
         {
             isLoading = true;
-            if (loadingOverlay) loadingOverlay.SetActive(true);
+            ShowLoadingOverlay(true);
 
             // Simulate API call
             Invoke(nameof(SimulateLoadTournament), 1f);
@@ -160,7 +162,7 @@ namespace DigitPark.Managers
         {
             currentTournament = CreateMockTournament();
             isLoading = false;
-            if (loadingOverlay) loadingOverlay.SetActive(false);
+            ShowLoadingOverlay(false);
             UpdateUI();
             LoadParticipants();
         }
@@ -392,6 +394,31 @@ namespace DigitPark.Managers
             {
                 CreateParticipantItem(participant);
             }
+
+            // Animate participants list entrance
+            AnimateParticipantsListEntrance();
+        }
+
+        /// <summary>
+        /// Anima la entrada de los items de participantes con efecto staggered
+        /// </summary>
+        private void AnimateParticipantsListEntrance()
+        {
+            if (participantsContainer == null || participantsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < participantsContainer.childCount; i++)
+            {
+                var child = participantsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
+            }
         }
 
         private void CreateParticipantItem(ParticipantData participant)
@@ -458,7 +485,7 @@ namespace DigitPark.Managers
             if (isLoading || hasJoined) return;
 
             isLoading = true;
-            if (loadingOverlay) loadingOverlay.SetActive(true);
+            ShowLoadingOverlay(true);
             ShowStatus(L("tournament_joining"));
 
             // Simulate join
@@ -469,7 +496,7 @@ namespace DigitPark.Managers
         {
             hasJoined = true;
             isLoading = false;
-            if (loadingOverlay) loadingOverlay.SetActive(false);
+            ShowLoadingOverlay(false);
             ShowStatus(L("tournament_joined"));
 
             currentTournament.currentParticipants++;
@@ -550,6 +577,28 @@ namespace DigitPark.Managers
         private void OnBackClicked()
         {
             SceneNavigator.Instance?.GoBack();
+        }
+
+        private void ShowLoadingOverlay(bool show)
+        {
+            if (loadingOverlay == null) return;
+
+            if (show)
+            {
+                loadingOverlay.SetActive(true);
+                var cg = loadingOverlay.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingOverlay.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingOverlay.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingOverlay.SetActive(false));
+                else
+                    loadingOverlay.SetActive(false);
+            }
         }
 
         private string L(string key, params object[] args)

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Localization;
 
 namespace DigitPark.UI.Common
@@ -34,8 +35,17 @@ namespace DigitPark.UI.Common
             if (panel != null)
             {
                 panel.SetActive(true);
-                // Mover al final de la jerarquía para estar encima de todo
                 panel.transform.SetAsLastSibling();
+
+                // Animate entrance
+                var cg = panel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                panel.transform.localScale = Vector3.one * 0.85f;
+                DOTween.Sequence()
+                    .Join(panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                    .Join(cg.DOFade(1f, 0.25f))
+                    .SetUpdate(true);
             }
 
             if (titleText != null)
@@ -85,7 +95,21 @@ namespace DigitPark.UI.Common
         public void Hide()
         {
             if (panel != null)
-                panel.SetActive(false);
+            {
+                var cg = panel.GetComponent<CanvasGroup>();
+                if (cg != null)
+                {
+                    DOTween.Sequence()
+                        .Join(panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                        .Join(cg.DOFade(0f, 0.2f))
+                        .OnComplete(() => { panel.transform.localScale = Vector3.one; cg.alpha = 1f; panel.SetActive(false); })
+                        .SetUpdate(true);
+                }
+                else
+                {
+                    panel.SetActive(false);
+                }
+            }
 
             onConfirm = null;
             onCancel = null;

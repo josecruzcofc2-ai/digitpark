@@ -4,6 +4,8 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.CashBattle
 {
@@ -265,10 +267,13 @@ namespace DigitPark.CashBattle
             if (button == null) return;
 
             var image = button.GetComponent<Image>();
-            if (image) image.color = isActive ? activeTabColor : inactiveTabColor;
+            if (image) image.DOColor(isActive ? activeTabColor : inactiveTabColor, 0.2f);
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
-            if (text) text.color = isActive ? Color.white : new Color(0.7f, 0.7f, 0.7f);
+            if (text) text.DOColor(isActive ? Color.white : new Color(0.7f, 0.7f, 0.7f), 0.2f);
+
+            // Scale animation for active tab
+            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         // ==================== FILTERS ====================
@@ -368,6 +373,15 @@ namespace DigitPark.CashBattle
             {
                 emptyStateText.gameObject.SetActive(isEmpty);
                 emptyStateText.text = GetEmptyStateText();
+
+                if (isEmpty)
+                {
+                    // Animated fade-in for empty state
+                    var cg = emptyStateText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = emptyStateText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+                }
             }
 
             // Populate entries
@@ -407,6 +421,31 @@ namespace DigitPark.CashBattle
                 {
                     entryUI.Setup(entry, OnEntryClicked);
                 }
+            }
+
+            // Animate history entries entrance
+            AnimateHistoryEntriesEntrance();
+        }
+
+        /// <summary>
+        /// Anima la entrada de las entradas de historial con efecto staggered
+        /// </summary>
+        private void AnimateHistoryEntriesEntrance()
+        {
+            if (entriesContainer == null || entriesContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < entriesContainer.childCount; i++)
+            {
+                var child = entriesContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
             }
         }
 
@@ -583,7 +622,22 @@ namespace DigitPark.CashBattle
         {
             if (loadingIndicator)
             {
-                loadingIndicator.SetActive(show);
+                if (show)
+                {
+                    loadingIndicator.SetActive(true);
+                    var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.2f).SetUpdate(true);
+                }
+                else
+                {
+                    var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                    if (cg != null)
+                        cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                    else
+                        loadingIndicator.SetActive(false);
+                }
             }
         }
 

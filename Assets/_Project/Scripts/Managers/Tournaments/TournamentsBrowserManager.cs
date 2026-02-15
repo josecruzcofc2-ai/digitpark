@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Data;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -87,7 +89,7 @@ namespace DigitPark.Managers
 
         private void SetupUI()
         {
-            if (loadingIndicator) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
             if (refreshIndicator) refreshIndicator.SetActive(false);
             if (emptyStateText) emptyStateText.gameObject.SetActive(false);
 
@@ -180,7 +182,13 @@ namespace DigitPark.Managers
             if (button == null) return;
 
             var image = button.GetComponent<Image>();
-            if (image) image.color = isActive ? activeColor : inactiveColor;
+            if (image) image.DOColor(isActive ? activeColor : inactiveColor, 0.2f);
+
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (text) text.DOColor(isActive ? Color.white : new Color(0.6f, 0.6f, 0.6f), 0.2f);
+
+            // Scale animation for active tab
+            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         private void OnFilterChanged()
@@ -227,7 +235,7 @@ namespace DigitPark.Managers
             }
 
             isLoading = true;
-            if (loadingIndicator) loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
 
             // Simulate API call
             Invoke(nameof(SimulateLoadTournaments), 0.5f);
@@ -242,13 +250,23 @@ namespace DigitPark.Managers
             PopulateTournaments(tournaments);
 
             isLoading = false;
-            if (loadingIndicator) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             // Update empty state
             if (emptyStateText)
             {
-                emptyStateText.gameObject.SetActive(loadedTournaments.Count == 0);
+                bool showEmpty = loadedTournaments.Count == 0;
+                emptyStateText.gameObject.SetActive(showEmpty);
                 emptyStateText.text = GetEmptyStateMessage();
+
+                if (showEmpty)
+                {
+                    // Animated fade-in for empty state
+                    var cg = emptyStateText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = emptyStateText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+                }
             }
 
             // Update load more button
@@ -315,6 +333,31 @@ namespace DigitPark.Managers
                     var t = tournament;
                     button.onClick.AddListener(() => OnTournamentClicked(t));
                 }
+            }
+
+            // Animate tournament items entrance
+            AnimateBrowserListEntrance();
+        }
+
+        /// <summary>
+        /// Anima la entrada de los items del browser de torneos con efecto staggered
+        /// </summary>
+        private void AnimateBrowserListEntrance()
+        {
+            if (tournamentsContainer == null || tournamentsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < tournamentsContainer.childCount; i++)
+            {
+                var child = tournamentsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
             }
         }
 
@@ -404,6 +447,28 @@ namespace DigitPark.Managers
         private void OnBackClicked()
         {
             SceneNavigator.Instance?.GoBack();
+        }
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
+            }
         }
     }
 }

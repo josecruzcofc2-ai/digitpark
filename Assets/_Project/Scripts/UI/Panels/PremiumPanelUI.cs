@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Managers;
 using DigitPark.Localization;
 
@@ -173,6 +174,15 @@ namespace DigitPark.UI.Panels
             {
                 panel.SetActive(true);
                 panel.transform.SetAsLastSibling();
+                AnimateIn(panel.transform);
+            }
+
+            if (blockerPanel != null)
+            {
+                var blockerCG = blockerPanel.GetComponent<CanvasGroup>();
+                if (blockerCG == null) blockerCG = blockerPanel.AddComponent<CanvasGroup>();
+                blockerCG.alpha = 0f;
+                blockerCG.DOFade(1f, 0.2f).SetUpdate(true);
             }
 
             Debug.Log("[PremiumPanelUI] Panel mostrado");
@@ -349,10 +359,16 @@ namespace DigitPark.UI.Panels
             Debug.Log("[PremiumPanelUI] Hide() llamado");
 
             if (panel != null)
-                panel.SetActive(false);
+                AnimateOut(panel.transform, () => panel.SetActive(false));
 
             if (blockerPanel != null)
-                blockerPanel.SetActive(false);
+            {
+                var blockerCG = blockerPanel.GetComponent<CanvasGroup>();
+                if (blockerCG != null)
+                    blockerCG.DOFade(0f, 0.2f).OnComplete(() => blockerPanel.SetActive(false)).SetUpdate(true);
+                else
+                    blockerPanel.SetActive(false);
+            }
 
             onNoAdsPurchase = null;
             onPremiumPurchase = null;
@@ -376,6 +392,29 @@ namespace DigitPark.UI.Panels
         /// Indica si el panel está visible
         /// </summary>
         public bool IsVisible => panel != null && panel.activeSelf;
+
+        private void AnimateIn(Transform t)
+        {
+            t.localScale = Vector3.one * 0.85f;
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            DOTween.Sequence()
+                .Join(t.DOScale(1f, 0.35f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.3f))
+                .SetUpdate(true);
+        }
+
+        private void AnimateOut(Transform t, Action onComplete)
+        {
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
+            DOTween.Sequence()
+                .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f))
+                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true);
+        }
 
         #region Button Handlers
 

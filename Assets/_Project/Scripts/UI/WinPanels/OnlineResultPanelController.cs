@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
 
@@ -74,6 +75,7 @@ namespace DigitPark.UI
 
         private AudioSource audioSource;
         private bool isWinner;
+        private Sequence _revealSequence;
 
         private void Awake()
         {
@@ -83,6 +85,11 @@ namespace DigitPark.UI
 
             SetupButtons();
             Hide();
+        }
+
+        private void OnDestroy()
+        {
+            _revealSequence?.Kill();
         }
 
         private void SetupButtons()
@@ -169,14 +176,76 @@ namespace DigitPark.UI
             if (isPlayer)
             {
                 if (playerNameText != null) playerNameText.text = name;
-                if (playerTimeText != null) playerTimeText.text = FormatTime(time);
-                if (playerErrorsText != null) playerErrorsText.text = AutoLocalizer.Get("result_errors", errors);
+
+                // Animated time counter for player
+                if (playerTimeText != null)
+                {
+                    var cg = playerTimeText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = playerTimeText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    playerTimeText.transform.localScale = Vector3.one * 0.9f;
+                    playerTimeText.text = FormatTime(0f);
+                    float displayTime = 0f;
+                    DOTween.Sequence()
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(playerTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .Append(DOTween.To(() => displayTime, x => { displayTime = x; playerTimeText.text = FormatTime(x); },
+                            time, 1.2f).SetEase(Ease.OutQuad))
+                        .AppendCallback(() => playerTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .SetLink(gameObject).SetUpdate(true);
+                }
+
+                // Animated errors reveal for player
+                if (playerErrorsText != null)
+                {
+                    var cg = playerErrorsText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = playerErrorsText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    playerErrorsText.transform.localScale = Vector3.one * 0.9f;
+                    playerErrorsText.text = AutoLocalizer.Get("result_errors", errors);
+                    DOTween.Sequence()
+                        .AppendInterval(0.25f)
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(playerErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .SetLink(gameObject).SetUpdate(true);
+                }
             }
             else
             {
                 if (opponentNameText != null) opponentNameText.text = name;
-                if (opponentTimeText != null) opponentTimeText.text = FormatTime(time);
-                if (opponentErrorsText != null) opponentErrorsText.text = AutoLocalizer.Get("result_errors", errors);
+
+                // Animated time counter for opponent
+                if (opponentTimeText != null)
+                {
+                    var cg = opponentTimeText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = opponentTimeText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    opponentTimeText.transform.localScale = Vector3.one * 0.9f;
+                    opponentTimeText.text = FormatTime(0f);
+                    float displayTime = 0f;
+                    DOTween.Sequence()
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(opponentTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .Append(DOTween.To(() => displayTime, x => { displayTime = x; opponentTimeText.text = FormatTime(x); },
+                            time, 1.2f).SetEase(Ease.OutQuad))
+                        .AppendCallback(() => opponentTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .SetLink(gameObject).SetUpdate(true);
+                }
+
+                // Animated errors reveal for opponent
+                if (opponentErrorsText != null)
+                {
+                    var cg = opponentErrorsText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = opponentErrorsText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    opponentErrorsText.transform.localScale = Vector3.one * 0.9f;
+                    opponentErrorsText.text = AutoLocalizer.Get("result_errors", errors);
+                    DOTween.Sequence()
+                        .AppendInterval(0.25f)
+                        .Append(cg.DOFade(1f, 0.25f))
+                        .Join(opponentErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                        .SetLink(gameObject).SetUpdate(true);
+                }
             }
         }
 
@@ -184,30 +253,36 @@ namespace DigitPark.UI
         {
             float timeDiff = Mathf.Abs(playerTime - opponentTime);
 
-            // Título de resultado
+            _revealSequence?.Kill();
+            _revealSequence = DOTween.Sequence().SetLink(gameObject).SetUpdate(true);
+            int statIndex = 0;
+
+            // Titulo de resultado con animacion DOTween
             if (resultTitleText != null)
             {
                 resultTitleText.text = isWinner ? AutoLocalizer.Get("result_victory") : AutoLocalizer.Get("result_defeat");
                 resultTitleText.color = isWinner ? winColor : loseColor;
-
-                // Animación de escala
                 resultTitleText.transform.localScale = Vector3.one * 1.5f;
-                StartCoroutine(AnimateScale(resultTitleText.transform, Vector3.one, 0.3f));
+                _revealSequence.Append(resultTitleText.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+                statIndex++;
             }
 
-            // Subtítulo
+            // Subtitulo
             if (resultSubtitleText != null)
             {
-                if (isWinner)
-                {
-                    resultSubtitleText.text = AutoLocalizer.Get("result_victory_message");
-                    resultSubtitleText.color = winColor;
-                }
-                else
-                {
-                    resultSubtitleText.text = AutoLocalizer.Get("result_defeat_message");
-                    resultSubtitleText.color = loseColor;
-                }
+                resultSubtitleText.text = isWinner
+                    ? AutoLocalizer.Get("result_victory_message")
+                    : AutoLocalizer.Get("result_defeat_message");
+                resultSubtitleText.color = isWinner ? winColor : loseColor;
+
+                var cg = resultSubtitleText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = resultSubtitleText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                resultSubtitleText.transform.localScale = Vector3.one * 0.9f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    resultSubtitleText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                statIndex++;
             }
 
             // Icono de resultado
@@ -215,19 +290,40 @@ namespace DigitPark.UI
             {
                 resultIcon.sprite = isWinner ? winSprite : loseSprite;
                 resultIcon.color = isWinner ? winColor : loseColor;
+                resultIcon.transform.localScale = Vector3.zero;
+                _revealSequence.Insert(0.2f, resultIcon.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack));
             }
 
-            // Diferencia de tiempo
+            // Diferencia de tiempo con counter animation
             if (timeDifferenceText != null)
             {
                 string sign = isWinner ? "-" : "+";
-                timeDifferenceText.text = $"{sign}{FormatTime(timeDiff)}";
                 timeDifferenceText.color = isWinner ? winColor : loseColor;
+
+                var cg = timeDifferenceText.GetComponent<CanvasGroup>();
+                if (cg == null) cg = timeDifferenceText.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                timeDifferenceText.transform.localScale = Vector3.one * 0.9f;
+                timeDifferenceText.text = $"{sign}{FormatTime(0f)}";
+
+                float displayDiff = 0f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f,
+                    timeDifferenceText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                _revealSequence.Insert(statIndex * 0.25f + 0.55f,
+                    DOTween.To(() => displayDiff, x => { displayDiff = x; timeDifferenceText.text = $"{sign}{FormatTime(x)}"; },
+                        timeDiff, 1.0f).SetEase(Ease.OutQuad)
+                    .OnComplete(() => timeDifferenceText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                statIndex++;
             }
 
             if (timeDifferenceLabel != null)
             {
                 timeDifferenceLabel.text = isWinner ? AutoLocalizer.Get("result_faster_by") : AutoLocalizer.Get("result_slower_by");
+                var cg = timeDifferenceLabel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = timeDifferenceLabel.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                _revealSequence.Insert(statIndex * 0.25f + 0.3f, cg.DOFade(1f, 0.25f));
             }
 
             // Highlight al ganador

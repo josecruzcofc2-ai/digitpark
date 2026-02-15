@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DigitPark.Localization;
+using DG.Tweening;
 
 namespace DigitPark.CashBattle
 {
@@ -703,6 +704,10 @@ namespace DigitPark.CashBattle
             if (_loadingOverlay != null)
             {
                 _loadingOverlay.SetActive(true);
+                var cg = _loadingOverlay.GetComponent<CanvasGroup>();
+                if (cg == null) cg = _loadingOverlay.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
                 if (_loadingText != null)
                     _loadingText.text = message;
             }
@@ -712,7 +717,11 @@ namespace DigitPark.CashBattle
         {
             if (_loadingOverlay != null)
             {
-                _loadingOverlay.SetActive(false);
+                var cg = _loadingOverlay.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => _loadingOverlay.SetActive(false));
+                else
+                    _loadingOverlay.SetActive(false);
             }
         }
 

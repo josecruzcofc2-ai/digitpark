@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using DigitPark.Themes;
 using DigitPark.Localization;
 using DigitPark.Managers;
+using DG.Tweening;
 
 namespace DigitPark.UI.Components
 {
@@ -552,7 +553,18 @@ namespace DigitPark.UI.Components
 
             // Mostrar badge premium (siempre visible para temas premium)
             if (premiumBadge != null)
-                premiumBadge.gameObject.SetActive(theme.isPremium);
+            {
+                if (theme.isPremium)
+                {
+                    premiumBadge.gameObject.SetActive(true);
+                    premiumBadge.transform.localScale = Vector3.zero;
+                    premiumBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    premiumBadge.gameObject.SetActive(false);
+                }
+            }
 
             // Configurar click
             if (button != null)
@@ -588,7 +600,19 @@ namespace DigitPark.UI.Components
         public void SetSelected(bool selected)
         {
             if (selectedIndicator != null)
-                selectedIndicator.SetActive(selected);
+            {
+                if (selected)
+                {
+                    selectedIndicator.SetActive(true);
+                    selectedIndicator.transform.localScale = Vector3.zero;
+                    selectedIndicator.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    selectedIndicator.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
+                        .OnComplete(() => selectedIndicator.SetActive(false));
+                }
+            }
 
             if (background != null)
             {

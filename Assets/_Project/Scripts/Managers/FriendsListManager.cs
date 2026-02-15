@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using DigitPark.Services;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -112,15 +114,13 @@ namespace DigitPark.Managers
         {
             ClearItems();
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (emptyText != null)
                 emptyText.gameObject.SetActive(false);
 
             allFriends = await FriendService.Instance.GetFriendsList();
 
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             // Actualizar contador
             UpdateFriendsCount();
@@ -131,6 +131,7 @@ namespace DigitPark.Managers
                 {
                     emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
                 return;
             }
@@ -146,6 +147,31 @@ namespace DigitPark.Managers
             foreach (var friend in allFriends)
             {
                 CreateFriendItem(friend);
+            }
+
+            // Animate friends list entrance
+            AnimateFriendsListEntrance();
+        }
+
+        /// <summary>
+        /// Anima la entrada de los items de amigos con efecto staggered
+        /// </summary>
+        private void AnimateFriendsListEntrance()
+        {
+            if (contentContainer == null || contentContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < contentContainer.childCount; i++)
+            {
+                var child = contentContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
             }
         }
 
@@ -290,6 +316,7 @@ namespace DigitPark.Managers
                 {
                     emptyText.text = L("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
                 return;
             }
@@ -301,6 +328,9 @@ namespace DigitPark.Managers
             {
                 CreateFriendItem(friend);
             }
+
+            // Animate refreshed list entrance
+            AnimateFriendsListEntrance();
         }
 
         #endregion
@@ -354,6 +384,7 @@ namespace DigitPark.Managers
                 {
                     emptyText.text = AutoLocalizer.Get("friends_no_friends");
                     emptyText.gameObject.SetActive(true);
+                    AnimateEmptyText();
                 }
             }
             else
@@ -367,6 +398,45 @@ namespace DigitPark.Managers
             if (requestsManager != null)
             {
                 requestsManager.Show();
+            }
+        }
+
+        #endregion
+
+        #region Animations
+
+        private void AnimateEmptyText()
+        {
+            if (emptyText == null) return;
+            var cg = emptyText.GetComponent<CanvasGroup>();
+            if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+        }
+
+        #endregion
+
+        #region Loading Helper
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
             }
         }
 
@@ -392,7 +462,17 @@ namespace DigitPark.Managers
 
             if (requestsBadge != null)
             {
-                requestsBadge.SetActive(count > 0);
+                if (count > 0)
+                {
+                    requestsBadge.SetActive(true);
+                    requestsBadge.transform.localScale = Vector3.zero;
+                    requestsBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    requestsBadge.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
+                        .OnComplete(() => requestsBadge.SetActive(false));
+                }
             }
 
             if (requestsBadgeText != null)

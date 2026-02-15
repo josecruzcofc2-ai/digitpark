@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Managers;
 using DigitPark.UI.Panels;
@@ -280,14 +281,14 @@ namespace DigitPark.UI.CashBattle
 
         private void LoadTournaments()
         {
-            if (loadingIndicator != null) loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (noTournamentsText != null) noTournamentsText.gameObject.SetActive(false);
 
             // TODO: Load from Triumph API
             // For now, create mock data
             LoadMockTournaments();
 
-            if (loadingIndicator != null) loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             ApplyFilters();
         }
@@ -433,6 +434,12 @@ namespace DigitPark.UI.CashBattle
                 {
                     noTournamentsText.gameObject.SetActive(true);
                     noTournamentsText.text = AutoLocalizer.Get("tournament_no_available");
+
+                    // Animated fade-in for empty state
+                    var cg = noTournamentsText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = noTournamentsText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
                 }
                 return;
             }
@@ -613,6 +620,28 @@ namespace DigitPark.UI.CashBattle
         public void Hide()
         {
             gameObject.SetActive(false);
+        }
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
+            }
         }
     }
 

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DigitPark.Localization;
+using DG.Tweening;
 
 namespace DigitPark.UI.Items
 {
@@ -101,10 +102,32 @@ namespace DigitPark.UI.Items
         private void UpdateFriendStatus(FriendStatus status)
         {
             if (friendBadge)
-                friendBadge.SetActive(status == FriendStatus.Friend);
+            {
+                if (status == FriendStatus.Friend)
+                {
+                    friendBadge.SetActive(true);
+                    friendBadge.transform.localScale = Vector3.zero;
+                    friendBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    friendBadge.SetActive(false);
+                }
+            }
 
             if (pendingBadge)
-                pendingBadge.SetActive(status == FriendStatus.Pending);
+            {
+                if (status == FriendStatus.Pending)
+                {
+                    pendingBadge.SetActive(true);
+                    pendingBadge.transform.localScale = Vector3.zero;
+                    pendingBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    pendingBadge.SetActive(false);
+                }
+            }
 
             if (addFriendButton)
             {
@@ -165,7 +188,8 @@ namespace DigitPark.UI.Items
             if (pendingBadge)
             {
                 pendingBadge.SetActive(true);
-                pendingBadge.transform.localScale = Vector3.one;
+                pendingBadge.transform.localScale = Vector3.zero;
+                pendingBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
             }
         }
 

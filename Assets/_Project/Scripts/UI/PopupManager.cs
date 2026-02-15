@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 using DigitPark.Localization;
 
 namespace DigitPark.UI
@@ -112,6 +113,7 @@ namespace DigitPark.UI
             if (errorPanel != null)
             {
                 errorPanel.SetActive(true);
+                AnimatePanelIn(errorPanel.transform);
             }
         }
 
@@ -124,7 +126,7 @@ namespace DigitPark.UI
 
             if (errorPanel != null)
             {
-                errorPanel.SetActive(false);
+                AnimatePanelOut(errorPanel.transform, () => errorPanel.SetActive(false));
             }
         }
 
@@ -170,6 +172,7 @@ namespace DigitPark.UI
             if (confirmPanel != null)
             {
                 confirmPanel.SetActive(true);
+                AnimatePanelIn(confirmPanel.transform);
             }
         }
 
@@ -220,7 +223,7 @@ namespace DigitPark.UI
 
             if (confirmPanel != null)
             {
-                confirmPanel.SetActive(false);
+                AnimatePanelOut(confirmPanel.transform, () => confirmPanel.SetActive(false));
             }
 
             onConfirmCallback = null;
@@ -238,6 +241,36 @@ namespace DigitPark.UI
                 return LocalizationManager.Instance.GetText(key);
             }
             return key;
+        }
+
+        private void AnimatePanelIn(Transform panel)
+        {
+            panel.localScale = Vector3.one * 0.85f;
+            var cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+
+            DOTween.Sequence()
+                .Join(panel.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f).SetEase(Ease.OutQuad))
+                .SetUpdate(true);
+        }
+
+        private void AnimatePanelOut(Transform panel, Action onComplete)
+        {
+            var cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.gameObject.AddComponent<CanvasGroup>();
+
+            DOTween.Sequence()
+                .Join(panel.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f).SetEase(Ease.InQuad))
+                .OnComplete(() =>
+                {
+                    panel.localScale = Vector3.one;
+                    cg.alpha = 1f;
+                    onComplete?.Invoke();
+                })
+                .SetUpdate(true);
         }
 
         /// <summary>

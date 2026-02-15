@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
@@ -75,9 +76,15 @@ namespace DigitPark.Managers
                 titleAnimator.SetTrigger("Show");
             }
 
-            // Mostrar panel principal
+            // Mostrar panel principal con fade in
             if (mainMenuPanel != null)
+            {
                 mainMenuPanel.SetActive(true);
+                var cg = mainMenuPanel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = mainMenuPanel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+            }
         }
 
         /// <summary>
@@ -208,9 +215,21 @@ namespace DigitPark.Managers
 
             bool isPremium = PremiumManager.Instance.IsPremium;
 
-            // Mostrar/ocultar badge de premium
+            // Mostrar/ocultar badge de premium con animación
             if (premiumBadge != null)
-                premiumBadge.SetActive(isPremium);
+            {
+                if (isPremium && !premiumBadge.activeSelf)
+                {
+                    premiumBadge.SetActive(true);
+                    premiumBadge.transform.localScale = Vector3.zero;
+                    premiumBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else if (!isPremium && premiumBadge.activeSelf)
+                {
+                    premiumBadge.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
+                        .OnComplete(() => premiumBadge.SetActive(false));
+                }
+            }
 
             // Cambiar apariencia del botón si ya es premium
             if (premiumButton != null)
@@ -251,10 +270,25 @@ namespace DigitPark.Managers
                     : notificationIconNormal;
             }
 
-            // Mostrar/ocultar badge rojo completo (círculo + texto)
+            // Mostrar/ocultar badge rojo completo con animación
             if (notificationBadge != null)
             {
-                notificationBadge.SetActive(hasNotifications);
+                if (hasNotifications && !notificationBadge.activeSelf)
+                {
+                    notificationBadge.SetActive(true);
+                    notificationBadge.transform.localScale = Vector3.zero;
+                    notificationBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else if (!hasNotifications && notificationBadge.activeSelf)
+                {
+                    notificationBadge.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
+                        .OnComplete(() => notificationBadge.SetActive(false));
+                }
+                else if (hasNotifications && notificationBadge.activeSelf)
+                {
+                    // Punch when count updates
+                    notificationBadge.transform.DOPunchScale(Vector3.one * 0.2f, 0.25f, 6, 0.5f);
+                }
             }
 
             // Actualizar texto del badge

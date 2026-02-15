@@ -10,6 +10,8 @@ using DigitPark.UI;
 using DigitPark.UI.Items;
 using DigitPark.Data;
 using DigitPark.Games;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -476,10 +478,13 @@ namespace DigitPark.Managers
         {
             if (button == null) return;
             var image = button.GetComponent<Image>();
-            if (image) image.color = isActive ? activeColor : inactiveColor;
+            if (image) image.DOColor(isActive ? activeColor : inactiveColor, 0.2f);
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
-            if (text) text.color = isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+            if (text) text.DOColor(isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f), 0.2f);
+
+            // Scale animation for active tab
+            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         #endregion
@@ -563,11 +568,35 @@ namespace DigitPark.Managers
 
         private GameObject _emptyStatePanel;
 
+        private void AnimateEmptyStateEntrance(GameObject panel)
+        {
+            if (panel == null) return;
+
+            // Fade in the whole panel
+            var cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+
+            // Float icon if present
+            var icon = panel.transform.Find("Icon");
+            if (icon != null)
+            {
+                icon.localScale = Vector3.zero;
+                icon.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
+                icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
+                    .SetEase(Ease.InOutSine)
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetDelay(0.4f);
+            }
+        }
+
         private void ShowEmptyState()
         {
             if (_emptyStatePanel != null)
             {
                 _emptyStatePanel.SetActive(true);
+                AnimateEmptyStateEntrance(_emptyStatePanel);
                 return;
             }
 
@@ -625,12 +654,17 @@ namespace DigitPark.Managers
             subText.alignment = TMPro.TextAlignmentOptions.Center;
 
             spawnedItems.Add(_emptyStatePanel);
+            AnimateEmptyStateEntrance(_emptyStatePanel);
         }
 
         private void HideEmptyState()
         {
             if (_emptyStatePanel != null)
             {
+                // Kill any running tweens on the icon to prevent leaks
+                var icon = _emptyStatePanel.transform.Find("Icon");
+                if (icon != null) icon.DOKill();
+
                 _emptyStatePanel.SetActive(false);
             }
         }
@@ -663,6 +697,31 @@ namespace DigitPark.Managers
             foreach (var mission in missions)
             {
                 CreateMissionCard(mission);
+            }
+
+            // Animate mission cards entrance
+            AnimateMissionListEntrance();
+        }
+
+        /// <summary>
+        /// Anima la entrada de las tarjetas de misión con efecto staggered
+        /// </summary>
+        private void AnimateMissionListEntrance()
+        {
+            if (missionsContainer == null || missionsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < missionsContainer.childCount; i++)
+            {
+                var child = missionsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
             }
         }
 

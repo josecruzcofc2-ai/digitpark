@@ -286,18 +286,21 @@ namespace DigitPark.Managers
             Image buttonImage = button.GetComponent<Image>();
             if (buttonImage != null)
             {
-                buttonImage.color = isSelected
+                buttonImage.DOColor(isSelected
                     ? new Color(0f, 0.83f, 1f)
-                    : new Color(0.15f, 0.2f, 0.25f);
+                    : new Color(0.15f, 0.2f, 0.25f), 0.2f);
             }
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
             if (text != null)
             {
-                text.color = isSelected
+                text.DOColor(isSelected
                     ? new Color(0.02f, 0.05f, 0.1f)
-                    : Color.white;
+                    : Color.white, 0.2f);
             }
+
+            // Scale animation for active tab
+            button.transform.DOScale(isSelected ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         #endregion
@@ -639,6 +642,7 @@ namespace DigitPark.Managers
             if (playerPositionPanel == null) return;
 
             playerPositionPanel.SetActive(true);
+            AnimatePanelIn(playerPositionPanel.transform);
 
             if (positionNumberText != null)
             {
@@ -685,7 +689,30 @@ namespace DigitPark.Managers
         {
             if (loadingPanel != null)
             {
-                loadingPanel.SetActive(show);
+                if (show)
+                {
+                    loadingPanel.SetActive(true);
+                    var cg = loadingPanel.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = loadingPanel.AddComponent<CanvasGroup>();
+                    cg.alpha = 0f;
+                    cg.DOFade(1f, 0.25f).SetUpdate(true);
+                }
+                else
+                {
+                    var cg = loadingPanel.GetComponent<CanvasGroup>();
+                    if (cg != null)
+                    {
+                        cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() =>
+                        {
+                            loadingPanel.SetActive(false);
+                            cg.alpha = 1f;
+                        });
+                    }
+                    else
+                    {
+                        loadingPanel.SetActive(false);
+                    }
+                }
             }
 
             if (loadingText != null && show)
@@ -701,11 +728,12 @@ namespace DigitPark.Managers
             if (emptyState != null)
             {
                 emptyState.SetActive(true);
+                AnimatePanelIn(emptyState.transform);
             }
 
             if (playerPositionPanel != null)
             {
-                playerPositionPanel.SetActive(false);
+                AnimatePanelOut(playerPositionPanel.transform, () => playerPositionPanel.SetActive(false));
             }
         }
 
@@ -713,12 +741,13 @@ namespace DigitPark.Managers
         {
             if (emptyState != null)
             {
-                emptyState.SetActive(false);
+                AnimatePanelOut(emptyState.transform, () => emptyState.SetActive(false));
             }
 
             if (playerPositionPanel != null)
             {
                 playerPositionPanel.SetActive(true);
+                AnimatePanelIn(playerPositionPanel.transform);
             }
         }
 
@@ -753,6 +782,33 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Leaderboard] Volviendo al menú principal");
             SceneManager.LoadScene("MainMenu");
+        }
+
+        #endregion
+
+        #region Panel Animations
+
+        private void AnimatePanelIn(Transform t)
+        {
+            t.localScale = Vector3.one * 0.85f;
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            DOTween.Sequence()
+                .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f))
+                .SetUpdate(true);
+        }
+
+        private void AnimatePanelOut(Transform t, System.Action onComplete)
+        {
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
+            DOTween.Sequence()
+                .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f))
+                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true);
         }
 
         #endregion

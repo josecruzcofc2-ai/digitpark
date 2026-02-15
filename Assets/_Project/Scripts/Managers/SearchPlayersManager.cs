@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Localization;
+using DG.Tweening;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -136,8 +138,7 @@ namespace DigitPark.Managers
             Debug.Log($"[SearchPlayers] Buscando: {query}");
 
             // Mostrar indicador de carga
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(true);
+            ShowLoadingIndicator(true);
             if (noResultsText != null)
                 noResultsText.gameObject.SetActive(false);
 
@@ -175,8 +176,7 @@ namespace DigitPark.Managers
             isSearching = false;
 
             // Ocultar indicador de carga
-            if (loadingIndicator != null)
-                loadingIndicator.SetActive(false);
+            ShowLoadingIndicator(false);
 
             // Limpiar resultados anteriores
             ClearResults();
@@ -198,7 +198,32 @@ namespace DigitPark.Managers
                 CreatePlayerItem(result);
             }
 
+            // Animate search results entrance
+            AnimateSearchResultsEntrance();
+
             Debug.Log($"[SearchPlayers] Encontrados {results.Count} jugadores");
+        }
+
+        /// <summary>
+        /// Anima la entrada de los resultados de búsqueda con efecto staggered
+        /// </summary>
+        private void AnimateSearchResultsEntrance()
+        {
+            if (resultsContainer == null || resultsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < resultsContainer.childCount; i++)
+            {
+                var child = resultsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
+            }
         }
 
         private void CreatePlayerItem(PlayerSearchResult result)
@@ -444,6 +469,28 @@ namespace DigitPark.Managers
         }
 
         #endregion
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
+            }
+        }
 
         private string L(string key, params object[] args)
         {

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 namespace DigitPark.UI
 {
@@ -175,7 +176,18 @@ namespace DigitPark.UI
                 _priceText.text = price;
 
             if (_discountBadge != null)
-                _discountBadge.SetActive(showDiscount && !string.IsNullOrEmpty(discount));
+            {
+                if (showDiscount && !string.IsNullOrEmpty(discount))
+                {
+                    _discountBadge.SetActive(true);
+                    _discountBadge.transform.localScale = Vector3.zero;
+                    _discountBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                }
+                else
+                {
+                    _discountBadge.SetActive(false);
+                }
+            }
 
             if (_discountText != null)
                 _discountText.text = $"{discount} OFF";

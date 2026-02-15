@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Localization;
@@ -105,7 +106,13 @@ namespace DigitPark.Managers
             UpdatePremiumUI();
 
             if (settingsPanel != null)
+            {
                 settingsPanel.SetActive(true);
+                var cg = settingsPanel.GetComponent<CanvasGroup>();
+                if (cg == null) cg = settingsPanel.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.35f).SetEase(Ease.OutQuad);
+            }
         }
 
         #region Initialization
@@ -912,7 +919,16 @@ namespace DigitPark.Managers
                             PremiumManager.Instance.HasNoAds &&
                             PremiumManager.Instance.CanCreateTournaments;
 
-            premiumBadge.SetActive(isPremium);
+            if (isPremium && !premiumBadge.activeSelf)
+            {
+                premiumBadge.SetActive(true);
+                premiumBadge.transform.localScale = Vector3.zero;
+                premiumBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+            }
+            else if (!isPremium)
+            {
+                premiumBadge.SetActive(false);
+            }
 
             // Cambiar apariencia del botón si ya es premium
             if (premiumButton != null)
