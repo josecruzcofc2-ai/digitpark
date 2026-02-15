@@ -272,13 +272,6 @@ namespace DigitPark.Editor
             int percent = total > 0 ? (unlocked * 100 / total) : 0;
             EditorGUILayout.LabelField($"Progreso: {unlocked}/{total} ({percent}%)", EditorStyles.boldLabel);
 
-            if (IsServiceAvailable)
-            {
-                int points = cachedService.GetTotalPoints();
-                int maxPoints = cachedService.GetMaxPoints();
-                EditorGUILayout.LabelField($"Puntos: {points}/{maxPoints}", EditorStyles.miniLabel);
-            }
-
             EditorGUILayout.Space(5);
 
             // Scrollable list
@@ -380,8 +373,7 @@ namespace DigitPark.Editor
 
             EditorGUILayout.BeginHorizontal();
             string secretTag = achievement.isSecret ? " [SECRET]" : "";
-            EditorGUILayout.LabelField($"{achievement.title}{secretTag}", EditorStyles.boldLabel, GUILayout.Width(200));
-            EditorGUILayout.LabelField($"{achievement.points} pts", GUILayout.Width(50));
+            EditorGUILayout.LabelField($"{achievement.title}{secretTag}", EditorStyles.boldLabel, GUILayout.Width(250));
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.LabelField(achievement.description, EditorStyles.miniLabel);

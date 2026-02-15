@@ -70,6 +70,7 @@ namespace DigitPark.Editor
         private const string MISSIONS_ICONS_PATH = "Assets/_Project/Art/Icons/Missions/";
         private const string UI_ICONS_PATH = "Assets/_Project/Art/Icons/UI/";
         private const string CURRENCY_ICONS_PATH = "Assets/_Project/Art/Icons/Currency/";
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         #endregion
 
@@ -478,33 +479,30 @@ namespace DigitPark.Editor
             var tbRT = GetOrAdd<RectTransform>(topBar);
             SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
 
-            // Back Button (left)
-            var backBtn = FindOrCreate(topBar.transform, "BackButton");
+            // BackButton - Neon Cyan prefab
+            var oldBackBtn = topBar.transform.Find("BackButton");
+            if (oldBackBtn != null) Object.DestroyImmediate(oldBackBtn.gameObject);
+
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, topBar.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = FindOrCreate(topBar.transform, "BackButton");
+                GetOrAdd<Image>(backBtn).color = CARD_BG;
+                GetOrAdd<Button>(backBtn);
+                Debug.LogWarning("[DailyMissionsUI] BackButton prefab not found, using fallback");
+            }
             var bRT = GetOrAdd<RectTransform>(backBtn);
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
             bRT.anchoredPosition = new Vector2(SIDE_PAD, 0);
             bRT.sizeDelta = new Vector2(50, 50);
-            var bBg = GetOrAdd<Image>(backBtn);
-            bBg.color = CARD_BG;
-            GetOrAdd<Button>(backBtn).targetGraphic = bBg;
-            var bOutline = GetOrAdd<Outline>(backBtn);
-            bOutline.effectColor = CYAN_DARK;
-            bOutline.effectDistance = new Vector2(1, 1);
-
-            var backText = FindOrCreate(backBtn.transform, "Text");
-            var btRT = GetOrAdd<RectTransform>(backText);
-            btRT.anchorMin = Vector2.zero;
-            btRT.anchorMax = Vector2.one;
-            btRT.offsetMin = Vector2.zero;
-            btRT.offsetMax = Vector2.zero;
-            var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
-            btTMP.text = "<";
-            btTMP.fontSize = 36;
-            btTMP.fontStyle = FontStyles.Bold;
-            btTMP.color = CYAN_NEON;
-            btTMP.alignment = TextAlignmentOptions.Center;
 
             // Title (center)
             var title = FindOrCreate(topBar.transform, "TitleText");
@@ -828,7 +826,7 @@ namespace DigitPark.Editor
             cbTextRT.offsetMax = Vector2.zero;
             var cbTextTMP = GetOrAdd<TextMeshProUGUI>(cbTextObj);
             cbTextTMP.text = "Reclamar";
-            cbTextTMP.fontSize = 20;
+            cbTextTMP.fontSize = 24;
             cbTextTMP.fontStyle = FontStyles.Bold;
             cbTextTMP.color = TEXT_DARK;
             cbTextTMP.alignment = TextAlignmentOptions.Center;
@@ -1033,13 +1031,13 @@ namespace DigitPark.Editor
             cardOutline.effectDistance = new Vector2(1, 1);
 
             var cardLE = GetOrAdd<LayoutElement>(card);
-            cardLE.preferredHeight = 120;
+            cardLE.preferredHeight = 130;
 
             var cardHlg = GetOrAdd<HorizontalLayoutGroup>(card);
             cardHlg.spacing = 12;
             cardHlg.padding = new RectOffset(12, 12, 10, 10);
             cardHlg.childAlignment = TextAnchor.MiddleCenter;
-            cardHlg.childControlWidth = false;
+            cardHlg.childControlWidth = true;
             cardHlg.childControlHeight = true;
             cardHlg.childForceExpandWidth = false;
             cardHlg.childForceExpandHeight = false;
@@ -1114,8 +1112,9 @@ namespace DigitPark.Editor
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.color = isCompleted ? GREEN_SUCCESS : TEXT_WHITE;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            titleTMP.overflowMode = TextOverflowModes.Ellipsis;
             var titleLE = GetOrAdd<LayoutElement>(titleGO);
-            titleLE.preferredHeight = 28;
+            titleLE.preferredHeight = 32;
 
             // Description
             var descGO = FindOrCreate(infoPanel.transform, "Description");
@@ -1125,9 +1124,9 @@ namespace DigitPark.Editor
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            descTMP.overflowMode = TextOverflowModes.Truncate;
+            descTMP.overflowMode = TextOverflowModes.Ellipsis;
             var descLE = GetOrAdd<LayoutElement>(descGO);
-            descLE.preferredHeight = 24;
+            descLE.preferredHeight = 26;
 
             // Progress Row
             var progressRow = FindOrCreate(infoPanel.transform, "ProgressRow");
@@ -1258,7 +1257,7 @@ namespace DigitPark.Editor
             {
                 abBg.color = GREEN_SUCCESS;
                 actTMP.text = "Reclamar";
-                actTMP.fontSize = 20;
+                actTMP.fontSize = 22;
                 actTMP.fontStyle = FontStyles.Bold;
                 actTMP.color = TEXT_DARK;
                 actTMP.alignment = TextAlignmentOptions.Center;
@@ -1271,7 +1270,7 @@ namespace DigitPark.Editor
                 abBg.color = CARD_BG;
                 abBtn.interactable = false;
                 actTMP.text = "En Progreso";
-                actTMP.fontSize = 18;
+                actTMP.fontSize = 20;
                 actTMP.fontStyle = FontStyles.Bold;
                 actTMP.color = TEXT_SECONDARY;
                 actTMP.alignment = TextAlignmentOptions.Center;
@@ -1340,12 +1339,12 @@ namespace DigitPark.Editor
             var popupTitle = FindOrCreate(popup.transform, "Title");
             var ptTMP = GetOrAdd<TextMeshProUGUI>(popupTitle);
             ptTMP.text = "\u00A1Misi\u00F3n Completada!";
-            ptTMP.fontSize = 42;
+            ptTMP.fontSize = 48;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GOLD;
             ptTMP.alignment = TextAlignmentOptions.Center;
             var ptLE = GetOrAdd<LayoutElement>(popupTitle);
-            ptLE.preferredHeight = 42;
+            ptLE.preferredHeight = 48;
 
             // Mission Name (detailTitleText)
             var missionName = FindOrCreate(popup.transform, "MissionName");
@@ -1472,7 +1471,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(collectText);
             ctTMP.text = "Recoger";
-            ctTMP.fontSize = 34;
+            ctTMP.fontSize = 36;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = TEXT_DARK;
             ctTMP.alignment = TextAlignmentOptions.Center;

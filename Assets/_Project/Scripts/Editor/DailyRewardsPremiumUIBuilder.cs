@@ -448,13 +448,17 @@ namespace DigitPark.Editor
 
             // --- Bottom: StreakBonusText ---
             var bonusText = FindOrCreate(inner.transform, "BonusText");
-            GetOrAdd<LayoutElement>(bonusText).preferredHeight = 26;
+            GetOrAdd<LayoutElement>(bonusText).preferredHeight = 30;
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
             btTMP.text = "Bonus d\u00EDa 7: +100 gemas";
             btTMP.fontSize = 26;
+            btTMP.enableAutoSizing = true;
+            btTMP.fontSizeMin = 18;
+            btTMP.fontSizeMax = 26;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = GEM_COLOR;
             btTMP.alignment = TextAlignmentOptions.Center;
+            btTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[DailyRewardsUI] StreakPanel creado");
         }
@@ -577,7 +581,7 @@ namespace DigitPark.Editor
             var dayLabel = new GameObject("DayLabel");
             dayLabel.transform.SetParent(card.transform, false);
             dayLabel.AddComponent<RectTransform>();
-            dayLabel.AddComponent<LayoutElement>().preferredHeight = 24;
+            dayLabel.AddComponent<LayoutElement>().preferredHeight = 28;
             var dlTMP = dayLabel.AddComponent<TextMeshProUGUI>();
             dlTMP.text = $"D\u00CDA {day}";
             dlTMP.fontSize = 26;
@@ -630,25 +634,27 @@ namespace DigitPark.Editor
             var amountObj = new GameObject("AmountText");
             amountObj.transform.SetParent(card.transform, false);
             amountObj.AddComponent<RectTransform>();
-            amountObj.AddComponent<LayoutElement>().preferredHeight = 28;
+            amountObj.AddComponent<LayoutElement>().preferredHeight = 38;
             var amTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amTMP.text = $"+{amount}";
             amTMP.fontSize = 36;
             amTMP.fontStyle = FontStyles.Bold;
             amTMP.color = claimed ? new Color(1, 1, 1, 0.5f) : TEXT_WHITE;
             amTMP.alignment = TextAlignmentOptions.Center;
+            amTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Type Text
             var typeObj = new GameObject("TypeText");
             typeObj.transform.SetParent(card.transform, false);
             typeObj.AddComponent<RectTransform>();
-            typeObj.AddComponent<LayoutElement>().preferredHeight = 20;
+            typeObj.AddComponent<LayoutElement>().preferredHeight = 26;
             var ttTMP = typeObj.AddComponent<TextMeshProUGUI>();
             ttTMP.text = typeName;
             ttTMP.fontSize = 24;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = TEXT_SECONDARY;
             ttTMP.alignment = TextAlignmentOptions.Center;
+            ttTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Status overlays
             if (claimed)
@@ -761,15 +767,17 @@ namespace DigitPark.Editor
             // HLG content
             var hlg = GetOrAdd<HorizontalLayoutGroup>(day7);
             hlg.spacing = 15;
-            hlg.padding = new RectOffset(20, 20, 20, 20);
+            hlg.padding = new RectOffset(20, 20, 15, 15);
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
 
             // Left: Icon area
             var iconArea = FindOrCreate(day7.transform, "IconArea");
             var iaLE = GetOrAdd<LayoutElement>(iconArea);
             iaLE.minWidth = 80;
+            iaLE.preferredWidth = 80;
             iaLE.minHeight = 80;
 
             // Icon glow
@@ -805,7 +813,7 @@ namespace DigitPark.Editor
             infoLE.flexibleWidth = 1;
 
             var d7Title = FindOrCreate(info.transform, "DayLabel");
-            GetOrAdd<LayoutElement>(d7Title).preferredHeight = 34;
+            GetOrAdd<LayoutElement>(d7Title).preferredHeight = 38;
             var d7tTMP = GetOrAdd<TextMeshProUGUI>(d7Title);
             d7tTMP.text = "D\u00CDA 7 - GRAN PREMIO";
             d7tTMP.fontSize = 36;
@@ -815,9 +823,10 @@ namespace DigitPark.Editor
             d7tTMP.fontStyle = FontStyles.Bold;
             d7tTMP.color = GOLD;
             d7tTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            d7tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             var d7Reward1 = FindOrCreate(info.transform, "Reward1");
-            GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 28;
+            GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 34;
             var r1TMP = GetOrAdd<TextMeshProUGUI>(d7Reward1);
             r1TMP.text = "500 Monedas + 50 Gemas";
             r1TMP.fontSize = 32;
@@ -827,24 +836,27 @@ namespace DigitPark.Editor
             r1TMP.fontStyle = FontStyles.Bold;
             r1TMP.color = TEXT_WHITE;
             r1TMP.alignment = TextAlignmentOptions.MidlineLeft;
+            r1TMP.overflowMode = TextOverflowModes.Ellipsis;
 
             var d7Reward2 = FindOrCreate(info.transform, "Reward2");
-            GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 24;
+            GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 30;
             var r2TMP = GetOrAdd<TextMeshProUGUI>(d7Reward2);
             r2TMP.text = "+ Item Exclusivo";
             r2TMP.fontSize = 28;
             r2TMP.fontStyle = FontStyles.Bold;
             r2TMP.color = GOLD;
             r2TMP.alignment = TextAlignmentOptions.MidlineLeft;
+            r2TMP.overflowMode = TextOverflowModes.Ellipsis;
 
             var d7Status = FindOrCreate(info.transform, "StatusText");
-            GetOrAdd<LayoutElement>(d7Status).preferredHeight = 24;
+            GetOrAdd<LayoutElement>(d7Status).preferredHeight = 28;
             var stTMP = GetOrAdd<TextMeshProUGUI>(d7Status);
             stTMP.text = "Desbloquea en 2 d\u00EDas";
             stTMP.fontSize = 26;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            stTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[DailyRewardsUI] Day7Card creado");
         }
@@ -871,15 +883,17 @@ namespace DigitPark.Editor
             // HLG content
             var hlg = GetOrAdd<HorizontalLayoutGroup>(today);
             hlg.spacing = 15;
-            hlg.padding = new RectOffset(15, 15, 15, 15);
+            hlg.padding = new RectOffset(15, 15, 12, 12);
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
 
             // Left: HOY badge
             var badge = FindOrCreate(today.transform, "TodayBadge");
             var bdLE = GetOrAdd<LayoutElement>(badge);
-            bdLE.minWidth = 50;
+            bdLE.minWidth = 55;
+            bdLE.preferredWidth = 55;
             bdLE.minHeight = 30;
             GetOrAdd<Image>(badge).color = GOLD;
 
@@ -900,6 +914,7 @@ namespace DigitPark.Editor
             var rewardIcon = FindOrCreate(today.transform, "TodayRewardIcon");
             var riLE = GetOrAdd<LayoutElement>(rewardIcon);
             riLE.minWidth = 45;
+            riLE.preferredWidth = 45;
             riLE.minHeight = 45;
             var riImg = GetOrAdd<Image>(rewardIcon);
             riImg.preserveAspect = true;
@@ -920,7 +935,7 @@ namespace DigitPark.Editor
             ipLE.flexibleWidth = 1;
 
             var rewardLabel = FindOrCreate(infoPanel.transform, "RewardLabel");
-            GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 28;
+            GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 30;
             var rlTMP = GetOrAdd<TextMeshProUGUI>(rewardLabel);
             rlTMP.text = "RECOMPENSA DE HOY";
             rlTMP.fontSize = 28;
@@ -930,15 +945,20 @@ namespace DigitPark.Editor
             rlTMP.fontStyle = FontStyles.Bold;
             rlTMP.color = TEXT_SECONDARY;
             rlTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            rlTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             var rewardAmount = FindOrCreate(infoPanel.transform, "RewardAmount");
-            GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 32;
+            GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 38;
             var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
             raTMP.text = "300 Monedas + 25 XP";
             raTMP.fontSize = 36;
+            raTMP.enableAutoSizing = true;
+            raTMP.fontSizeMin = 22;
+            raTMP.fontSizeMax = 36;
             raTMP.fontStyle = FontStyles.Bold;
             raTMP.color = COIN_COLOR;
             raTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            raTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[DailyRewardsUI] TodayPanel creado");
         }
@@ -1003,8 +1023,9 @@ namespace DigitPark.Editor
             var hlg = GetOrAdd<HorizontalLayoutGroup>(timerBar);
             hlg.spacing = 8;
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
 
             // Timer icon
             var timerIcon = FindOrCreate(timerBar.transform, "TimerIcon");
@@ -1015,19 +1036,24 @@ namespace DigitPark.Editor
             if (timerSprite != null) tiImg.sprite = timerSprite;
             else tiImg.color = TEXT_SECONDARY;
             var tiLE = GetOrAdd<LayoutElement>(timerIcon);
-            tiLE.minWidth = 18;
-            tiLE.minHeight = 18;
+            tiLE.minWidth = 20;
+            tiLE.preferredWidth = 20;
+            tiLE.minHeight = 20;
 
             // Label
             var label = FindOrCreate(timerBar.transform, "Label");
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Pr\u00F3xima recompensa en:";
-            lTMP.fontSize = 28;
+            lTMP.fontSize = 26;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = 18;
+            lTMP.fontSizeMax = 26;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.MidlineRight;
+            lTMP.overflowMode = TextOverflowModes.Ellipsis;
             var lLE = GetOrAdd<LayoutElement>(label);
-            lLE.minWidth = 250;
+            lLE.flexibleWidth = 1;
 
             // Time text
             var timeText = FindOrCreate(timerBar.transform, "TimeText");
@@ -1038,7 +1064,8 @@ namespace DigitPark.Editor
             ttTMP.color = CYAN_NEON;
             ttTMP.alignment = TextAlignmentOptions.MidlineLeft;
             var ttLE = GetOrAdd<LayoutElement>(timeText);
-            ttLE.minWidth = 120;
+            ttLE.minWidth = 160;
+            ttLE.preferredWidth = 160;
 
             Debug.Log("[DailyRewardsUI] TimerBar creado");
         }

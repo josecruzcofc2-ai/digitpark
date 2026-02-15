@@ -25,9 +25,6 @@ namespace DigitPark.Managers
         [SerializeField] private int maxQueuedNotifications = 20;
         [SerializeField] private float delayBetweenToasts = 0.5f;
 
-        [Header("Epic Threshold")]
-        [SerializeField] private int epicPointsThreshold = 100;
-
         // Runtime
         private Canvas _notificationCanvas;
         private AchievementToastUI _currentToast;
@@ -179,10 +176,8 @@ namespace DigitPark.Managers
                 achievementId = achievement.id,
                 title = GetLocalizedTitle(achievement.titleKey),
                 description = GetLocalizedDescription(achievement.descriptionKey),
-                points = achievement.rewardCoins,
                 icon = achievement.icon,
-                isSecret = achievement.isHidden,
-                isEpic = achievement.rewardCoins >= epicPointsThreshold
+                isSecret = achievement.isHidden
             };
 
             // Queue or show immediately
@@ -385,16 +380,6 @@ namespace DigitPark.Managers
             descTMP.color = new Color(0.7f, 0.75f, 0.8f, 1f);
             if (TMPro.TMP_Settings.defaultFontAsset != null) descTMP.font = TMPro.TMP_Settings.defaultFontAsset;
 
-            // Points
-            GameObject pointsObj = new GameObject("PointsDisplay");
-            pointsObj.transform.SetParent(infoObj.transform, false);
-            TMPro.TextMeshProUGUI pointsTMP = pointsObj.AddComponent<TMPro.TextMeshProUGUI>();
-            pointsTMP.text = "+0 pts";
-            pointsTMP.fontSize = 13f;
-            pointsTMP.fontStyle = TMPro.FontStyles.Bold;
-            pointsTMP.color = new Color(0.2f, 0.8f, 0.4f, 1f);
-            if (TMPro.TMP_Settings.defaultFontAsset != null) pointsTMP.font = TMPro.TMP_Settings.defaultFontAsset;
-
             // Add AchievementToastUI and wire references via reflection
             AchievementToastUI toastUI = toastRoot.AddComponent<AchievementToastUI>();
 
@@ -408,7 +393,6 @@ namespace DigitPark.Managers
             type.GetField("headerText", flags)?.SetValue(toastUI, headerTMP);
             type.GetField("titleText", flags)?.SetValue(toastUI, titleTMP);
             type.GetField("descriptionText", flags)?.SetValue(toastUI, descTMP);
-            type.GetField("pointsText", flags)?.SetValue(toastUI, pointsTMP);
 
             return toastUI;
         }
@@ -433,7 +417,7 @@ namespace DigitPark.Managers
         /// <summary>
         /// Show a custom achievement notification
         /// </summary>
-        public void ShowNotification(string title, string description, int points, Sprite icon = null, bool isSecret = false)
+        public void ShowNotification(string title, string description, Sprite icon = null, bool isSecret = false)
         {
             if (!showNotifications) return;
 
@@ -442,10 +426,8 @@ namespace DigitPark.Managers
                 achievementId = "",
                 title = title,
                 description = description,
-                points = points,
                 icon = icon,
-                isSecret = isSecret,
-                isEpic = points >= epicPointsThreshold
+                isSecret = isSecret
             };
 
             QueueNotification(data);
@@ -467,10 +449,8 @@ namespace DigitPark.Managers
                 achievementId = achievement.id,
                 title = achievement.title,
                 description = achievement.description,
-                points = achievement.points,
                 icon = icon,
-                isSecret = achievement.isSecret,
-                isEpic = achievement.points >= epicPointsThreshold
+                isSecret = achievement.isSecret
             };
 
             QueueNotification(data);
@@ -529,27 +509,27 @@ namespace DigitPark.Managers
         [ContextMenu("Test Normal Achievement")]
         public void TestNormalAchievement()
         {
-            ShowNotification("Primera Victoria", "Gana tu primera partida", 50);
+            ShowNotification("Primera Victoria", "Gana tu primera partida");
         }
 
         [ContextMenu("Test Epic Achievement")]
         public void TestEpicAchievement()
         {
-            ShowNotification("Leyenda Suprema", "Alcanza el rango máximo", 200, null, false);
+            ShowNotification("Leyenda Suprema", "Alcanza el rango máximo");
         }
 
         [ContextMenu("Test Secret Achievement")]
         public void TestSecretAchievement()
         {
-            ShowNotification("Búho Nocturno", "Juega a las 3:00 AM", 75, null, true);
+            ShowNotification("Búho Nocturno", "Juega a las 3:00 AM", null, true);
         }
 
         [ContextMenu("Test Queue (3 achievements)")]
         public void TestQueue()
         {
-            ShowNotification("Logro 1", "Descripción del logro 1", 25);
-            ShowNotification("Logro 2", "Descripción del logro 2", 50);
-            ShowNotification("Logro 3", "Descripción del logro 3", 100);
+            ShowNotification("Logro 1", "Descripción del logro 1");
+            ShowNotification("Logro 2", "Descripción del logro 2");
+            ShowNotification("Logro 3", "Descripción del logro 3");
         }
 
         #endregion

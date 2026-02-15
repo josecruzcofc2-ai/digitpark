@@ -24,13 +24,13 @@ namespace DigitPark.Editor
 
         private const string PREFAB_PATH = "Assets/_Project/Prefabs/Games/WinPanels";
 
-        [MenuItem("DigitPark/UI Builders/Games/Online Win Panel", false, 117)]
+        [MenuItem("DigitPark/Prefabs/Games/Online Win Panel", false, 197)]
         public static void BuildWinPanel()
         {
             BuildPanelPrefab(true);
         }
 
-        [MenuItem("DigitPark/UI Builders/Games/Online Lose Panel", false, 118)]
+        [MenuItem("DigitPark/Prefabs/Games/Online Lose Panel", false, 198)]
         public static void BuildLosePanel()
         {
             BuildPanelPrefab(false);

@@ -1111,28 +1111,15 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Total de puntos ganados (de logros completados)
+        /// Total de logros completados
         /// </summary>
-        public int GetTotalPoints()
+        public int GetCompletedCount()
         {
             int total = 0;
             foreach (var achievement in achievements)
             {
                 if (IsUnlocked(achievement.id))
-                    total += achievement.points;
-            }
-            return total;
-        }
-
-        /// <summary>
-        /// Total de puntos posibles
-        /// </summary>
-        public int GetMaxPoints()
-        {
-            int total = 0;
-            foreach (var achievement in achievements)
-            {
-                total += achievement.points;
+                    total++;
             }
             return total;
         }

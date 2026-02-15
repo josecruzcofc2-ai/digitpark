@@ -25,7 +25,6 @@ namespace DigitPark.Animations
 
         [Header("Header Elements")]
         [SerializeField] private RectTransform headerTrophyIcon;
-        [SerializeField] private TextMeshProUGUI totalPointsText;
         [SerializeField] private Image overallProgressFill;
 
         [Header("Detail Panel")]
@@ -351,26 +350,8 @@ namespace DigitPark.Animations
 
         private IEnumerator AnimatePointsIncrease(int pointsToAdd)
         {
-            if (totalPointsText == null) yield break;
-
-            // Parse current value
-            string currentText = totalPointsText.text.Replace(",", "");
-            int currentPoints = 0;
-            int.TryParse(currentText, out currentPoints);
-
-            int targetPoints = currentPoints + pointsToAdd;
-
-            // Animate counter
-            DOTween.To(() => currentPoints, x =>
-            {
-                currentPoints = x;
-                totalPointsText.text = currentPoints.ToString("N0");
-            }, targetPoints, 0.8f).SetEase(Ease.OutQuad);
-
-            // Punch scale
-            totalPointsText.transform.DOPunchScale(Vector3.one * 0.3f, 0.5f, 5);
-
-            yield return new WaitForSeconds(0.8f);
+            // Points system removed - no animation needed
+            yield break;
         }
 
         // ==================== CARD UNLOCK ANIMATION ====================

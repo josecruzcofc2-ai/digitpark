@@ -33,7 +33,6 @@ namespace DigitPark.UI.Items
 
         [Header("Info")]
         [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI pointsText;
         [SerializeField] private Image completedBadge;
 
         [Header("Effects")]
@@ -174,13 +173,6 @@ namespace DigitPark.UI.Items
                     titleText = titleTransform.GetComponent<TextMeshProUGUI>();
             }
 
-            if (pointsText == null)
-            {
-                var pointsTransform = transform.Find("CardContainer/PointsText");
-                if (pointsTransform != null)
-                    pointsText = pointsTransform.GetComponent<TextMeshProUGUI>();
-            }
-
             if (completedBadge == null)
             {
                 var badgeTransform = transform.Find("CardContainer/CompletedBadge");
@@ -203,13 +195,6 @@ namespace DigitPark.UI.Items
             {
                 titleText.text = _isSecret ? "???" : _data.title;
                 titleText.color = _isUnlocked ? Color.white : new Color(0.6f, 0.6f, 0.6f);
-            }
-
-            // Points
-            if (pointsText)
-            {
-                pointsText.text = $"{_data.points} pts";
-                pointsText.gameObject.SetActive(!_isSecret);
             }
 
             // Trophy Icon

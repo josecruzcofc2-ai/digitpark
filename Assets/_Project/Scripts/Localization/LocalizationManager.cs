@@ -1148,8 +1148,8 @@ namespace DigitPark.Localization
                 "MISSIONS", "MISIONES", "MISSIONS", "MISSOES", "MISSIONEN");
             AddTranslation("ms_refresh_in",
                 "Resets in: {0}", "Reinicio en: {0}", "Reinitialisation dans: {0}", "Reinicia em: {0}", "Neustart in: {0}");
-            AddTranslation("ms_points_earned",
-                "{0} pts earned", "{0} pts ganados", "{0} pts gagnes", "{0} pts ganhos", "{0} Pkt. verdient");
+            AddTranslation("ms_rewards_earned",
+                "{0} rewards earned", "{0} recompensas ganadas", "{0} recompenses gagnees", "{0} recompensas ganhas", "{0} Belohnungen verdient");
             AddTranslation("ms_progress",
                 "{0}/{1} missions completed", "{0}/{1} misiones completadas", "{0}/{1} missions terminees", "{0}/{1} missoes completas", "{0}/{1} Missionen abgeschlossen");
             AddTranslation("ms_bonus",

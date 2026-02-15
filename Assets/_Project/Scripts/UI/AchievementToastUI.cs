@@ -31,7 +31,6 @@ namespace DigitPark.UI
 
         [Header("Text")]
         [SerializeField] private TextMeshProUGUI headerText;
-        [SerializeField] private TextMeshProUGUI pointsText;
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI descriptionText;
         [SerializeField] private TextMeshProUGUI completionText;
@@ -169,11 +168,6 @@ namespace DigitPark.UI
             if (descriptionText != null)
             {
                 descriptionText.text = data.description;
-            }
-
-            if (pointsText != null)
-            {
-                pointsText.text = $"+{data.points} pts";
             }
 
             if (completionText != null)

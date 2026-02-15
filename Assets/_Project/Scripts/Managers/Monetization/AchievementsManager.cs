@@ -24,7 +24,6 @@ namespace DigitPark.Managers
         [Header("Header")]
         [SerializeField] private Button backButton;
         [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI totalPointsText;
         [SerializeField] private TextMeshProUGUI completionText;
         [SerializeField] private Slider overallProgressBar;
 
@@ -68,7 +67,6 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI detailCategoryText;
         [SerializeField] private Slider detailProgressBar;
         [SerializeField] private TextMeshProUGUI detailProgressText;
-        [SerializeField] private TextMeshProUGUI detailPointsText;
         [SerializeField] private Button claimRewardButton;
         [SerializeField] private TextMeshProUGUI claimButtonText;
         [SerializeField] private Button closeDetailButton;
@@ -287,24 +285,15 @@ namespace DigitPark.Managers
 
         private void UpdateHeaderStats()
         {
-            int totalPoints = 0;
-            int earnedPoints = 0;
             int completed = 0;
             int total = allAchievements.Count;
 
             foreach (var achievement in allAchievements)
             {
-                totalPoints += achievement.points;
                 if (achievement.isCompleted)
                 {
-                    earnedPoints += achievement.points;
                     completed++;
                 }
-            }
-
-            if (totalPointsText)
-            {
-                totalPointsText.text = $"{earnedPoints:N0}";
             }
 
             if (completionText)
@@ -600,11 +589,6 @@ namespace DigitPark.Managers
                 }
             }
 
-            if (detailPointsText)
-            {
-                detailPointsText.text = $"+{data.points} pts";
-            }
-
             // Claim button
             if (claimRewardButton)
             {
@@ -759,11 +743,11 @@ namespace DigitPark.Managers
         #region Public API
 
         /// <summary>
-        /// Get total earned points
+        /// Get total completed achievements
         /// </summary>
-        public int GetTotalPoints()
+        public int GetCompletedCount()
         {
-            return allAchievements.Where(a => a.isCompleted).Sum(a => a.points);
+            return allAchievements.Count(a => a.isCompleted);
         }
 
         #endregion

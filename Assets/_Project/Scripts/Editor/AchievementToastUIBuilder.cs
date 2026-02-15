@@ -343,18 +343,6 @@ namespace DigitPark.Editor
             LayoutElement headerTextLE = headerText.AddComponent<LayoutElement>();
             headerTextLE.flexibleWidth = 1f;
 
-            // Points display
-            GameObject pointsDisplay = CreateChild(headerRow, "PointsDisplay");
-            LayoutElement pointsLE = pointsDisplay.AddComponent<LayoutElement>();
-            pointsLE.minWidth = 70f;
-
-            TextMeshProUGUI pointsTMP = pointsDisplay.AddComponent<TextMeshProUGUI>();
-            pointsTMP.text = "+50 pts";
-            pointsTMP.fontSize = 14f;
-            pointsTMP.fontStyle = FontStyles.Bold;
-            pointsTMP.color = GOLD;
-            pointsTMP.alignment = TextAlignmentOptions.MidlineRight;
-
             // Achievement Title
             GameObject titleObj = CreateChild(infoSection, "AchievementTitle");
             TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
@@ -523,7 +511,6 @@ namespace DigitPark.Editor
 
             // Text elements
             SetReference(serializedObject, "headerText", FindChildRecursive(root, "HeaderText"));
-            SetReference(serializedObject, "pointsText", FindChildRecursive(root, "PointsDisplay"));
             SetReference(serializedObject, "titleText", FindChildRecursive(root, "AchievementTitle"));
             SetReference(serializedObject, "descriptionText", FindChildRecursive(root, "AchievementDescription"));
             SetReference(serializedObject, "completionText", FindChildRecursive(root, "CompletionText"));

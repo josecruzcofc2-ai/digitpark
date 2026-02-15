@@ -50,9 +50,12 @@ namespace DigitPark.Editor
         private static readonly Color GLASS_OVERLAY = new Color(1f, 1f, 1f, 0.08f);
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.9f);
 
+        // ==================== PREFABS ====================
+        private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
+
         // ==================== DIMENSIONES ====================
         private const float HEADER_HEIGHT = 130f;
-        private const float TABS_HEIGHT = 60f;
+        private const float TABS_HEIGHT = 65f;
         // 3 columns for mobile (1080px): (1080 - 40 padding - 30 spacing) / 3 = 336
         private const float TROPHY_CARD_WIDTH = 320f;
         private const float TROPHY_CARD_HEIGHT = 380f;
@@ -271,30 +274,30 @@ namespace DigitPark.Editor
 
             CreateBottomGlow(header, GOLD);
 
-            // BackButton
-            GameObject backBtn = FindOrCreateChild(header, "BackButton");
+            // BackButton - Neon Cyan prefab
+            Transform oldBackBtn = header.transform.Find("BackButton");
+            if (oldBackBtn != null) Object.DestroyImmediate(oldBackBtn.gameObject);
+
+            GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
+            GameObject backBtn;
+            if (backBtnPrefab != null)
+            {
+                backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backBtnPrefab, header.transform);
+                backBtn.name = "BackButton";
+            }
+            else
+            {
+                backBtn = FindOrCreateChild(header, "BackButton");
+                GetOrAddComponent<Image>(backBtn).color = new Color(0, 0, 0, 0);
+                GetOrAddComponent<Button>(backBtn);
+                Debug.LogWarning("[TrophyShowcase] BackButton prefab not found, using fallback");
+            }
             RectTransform backRT = GetOrAddComponent<RectTransform>(backBtn);
-            backRT.anchorMin = new Vector2(0, 1);
-            backRT.anchorMax = new Vector2(0, 1);
-            backRT.pivot = new Vector2(0, 1);
-            backRT.anchoredPosition = new Vector2(20, -15);
+            backRT.anchorMin = new Vector2(0, 0.5f);
+            backRT.anchorMax = new Vector2(0, 0.5f);
+            backRT.pivot = new Vector2(0, 0.5f);
+            backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
-
-            Image backBg = GetOrAddComponent<Image>(backBtn);
-            backBg.color = BUTTON_SECONDARY;
-
-            Button backButton = GetOrAddComponent<Button>(backBtn);
-            SetupButtonColors(backButton, BUTTON_SECONDARY);
-            AddOutline(backBtn, CYAN_DARK);
-
-            GameObject backTextObj = FindOrCreateChild(backBtn, "Text");
-            TextMeshProUGUI backText = GetOrAddComponent<TextMeshProUGUI>(backTextObj);
-            backText.text = "<";
-            backText.fontSize = 32;
-            backText.fontStyle = FontStyles.Bold;
-            backText.color = CYAN_NEON;
-            backText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(backTextObj);
 
             // Title Row - Trophy icon AFTER text to not overlap
             GameObject titleRow = FindOrCreateChild(header, "TitleRow");
@@ -302,8 +305,8 @@ namespace DigitPark.Editor
             titleRowRT.anchorMin = new Vector2(0.5f, 1);
             titleRowRT.anchorMax = new Vector2(0.5f, 1);
             titleRowRT.pivot = new Vector2(0.5f, 1);
-            titleRowRT.anchoredPosition = new Vector2(0, -15);
-            titleRowRT.sizeDelta = new Vector2(300, 50);
+            titleRowRT.anchoredPosition = new Vector2(0, -10);
+            titleRowRT.sizeDelta = new Vector2(500, 60);
 
             HorizontalLayoutGroup titleHlg = GetOrAddComponent<HorizontalLayoutGroup>(titleRow);
             titleHlg.spacing = 12;
@@ -331,11 +334,13 @@ namespace DigitPark.Editor
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
-            AddOutline(titleObj, GOLD_DARK, 2);
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 36;
+            titleText.fontSizeMax = 78;
 
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minWidth = 200;
-            titleLE.minHeight = 50;
+            titleLE.minWidth = 250;
+            titleLE.minHeight = 60;
 
             // Completion Counter (instead of points)
             GameObject completionDisplay = FindOrCreateChild(header, "CompletionDisplay");
@@ -348,7 +353,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI completionText = GetOrAddComponent<TextMeshProUGUI>(completionDisplay);
             completionText.text = "5/17";
-            completionText.fontSize = 36;
+            completionText.fontSize = 42;
             completionText.fontStyle = FontStyles.Bold;
             completionText.color = CYAN_NEON;
             completionText.alignment = TextAlignmentOptions.MidlineRight;
@@ -382,7 +387,7 @@ namespace DigitPark.Editor
             GameObject progressLabelLeft = FindOrCreateChild(progressLabelRow, "Left");
             TextMeshProUGUI progressLeftText = GetOrAddComponent<TextMeshProUGUI>(progressLabelLeft);
             progressLeftText.text = "Progreso Total";
-            progressLeftText.fontSize = 22;
+            progressLeftText.fontSize = 24;
             progressLeftText.fontStyle = FontStyles.Bold;
             progressLeftText.color = TEXT_SECONDARY;
             progressLeftText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -390,7 +395,7 @@ namespace DigitPark.Editor
             GameObject progressLabelRight = FindOrCreateChild(progressLabelRow, "Right");
             TextMeshProUGUI progressRightText = GetOrAddComponent<TextMeshProUGUI>(progressLabelRight);
             progressRightText.text = "27/50 (54%)";
-            progressRightText.fontSize = 22;
+            progressRightText.fontSize = 24;
             progressRightText.fontStyle = FontStyles.Bold;
             progressRightText.color = CYAN_NEON;
             progressRightText.alignment = TextAlignmentOptions.MidlineRight;
@@ -496,19 +501,19 @@ namespace DigitPark.Editor
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
 
-            // Create all 11 category tabs
-            CreateCategoryTab(tabsContent, "AllTab", "TODOS", true, CYAN_NEON, 70);
-            CreateCategoryTab(tabsContent, "BeginnerTab", "INICIO", false, CAT_BEGINNER, 70);
-            CreateCategoryTab(tabsContent, "MasteryTab", "MAESTRÍA", false, CAT_GAMES, 85);
-            CreateCategoryTab(tabsContent, "VictoriesTab", "VICTORIAS", false, new Color(0.2f, 0.8f, 0.4f, 1f), 90);
-            CreateCategoryTab(tabsContent, "StreaksTab", "RACHAS", false, new Color(1f, 0.5f, 0.2f, 1f), 75);
-            CreateCategoryTab(tabsContent, "CashBattleTab", "CASH", false, new Color(0.4f, 0.8f, 0.2f, 1f), 60);
-            CreateCategoryTab(tabsContent, "TournamentsTab", "TORNEOS", false, CAT_COMPETITION, 80);
-            CreateCategoryTab(tabsContent, "SocialTab", "SOCIAL", false, new Color(0.4f, 0.6f, 1f, 1f), 70);
-            CreateCategoryTab(tabsContent, "ProgressionTab", "PROGRESO", false, new Color(0.8f, 0.6f, 1f, 1f), 85);
-            CreateCategoryTab(tabsContent, "CollectorTab", "COLECCION", false, new Color(0.9f, 0.7f, 0.3f, 1f), 95);
-            CreateCategoryTab(tabsContent, "TimeTab", "TIEMPO", false, new Color(0.5f, 0.8f, 0.9f, 1f), 75);
-            CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 50);
+            // Create all 12 category tabs (widths sized for 24pt bold + 32px padding)
+            CreateCategoryTab(tabsContent, "AllTab", "TODOS", true, CYAN_NEON, 120);
+            CreateCategoryTab(tabsContent, "BeginnerTab", "INICIO", false, CAT_BEGINNER, 120);
+            CreateCategoryTab(tabsContent, "MasteryTab", "MAESTRÍA", false, CAT_GAMES, 155);
+            CreateCategoryTab(tabsContent, "VictoriesTab", "VICTORIAS", false, new Color(0.2f, 0.8f, 0.4f, 1f), 165);
+            CreateCategoryTab(tabsContent, "StreaksTab", "RACHAS", false, new Color(1f, 0.5f, 0.2f, 1f), 130);
+            CreateCategoryTab(tabsContent, "CashBattleTab", "CASH", false, new Color(0.4f, 0.8f, 0.2f, 1f), 110);
+            CreateCategoryTab(tabsContent, "TournamentsTab", "TORNEOS", false, CAT_COMPETITION, 145);
+            CreateCategoryTab(tabsContent, "SocialTab", "SOCIAL", false, new Color(0.4f, 0.6f, 1f, 1f), 125);
+            CreateCategoryTab(tabsContent, "ProgressionTab", "PROGRESO", false, new Color(0.8f, 0.6f, 1f, 1f), 155);
+            CreateCategoryTab(tabsContent, "CollectorTab", "COLECCION", false, new Color(0.9f, 0.7f, 0.3f, 1f), 170);
+            CreateCategoryTab(tabsContent, "TimeTab", "TIEMPO", false, new Color(0.5f, 0.8f, 0.9f, 1f), 130);
+            CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 80);
 
             Debug.Log("[TrophyShowcase] CategoryTabs creado con 10 categorías (V1)");
         }
@@ -527,14 +532,18 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = 20;
+            tabText.fontSize = 24;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
+            tabText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(textObj);
+            RectTransform textRT = textObj.GetComponent<RectTransform>();
+            textRT.offsetMin = new Vector2(8, 0);
+            textRT.offsetMax = new Vector2(-8, 0);
 
             LayoutElement le = GetOrAddComponent<LayoutElement>(tab);
-            le.minHeight = 44;
+            le.minHeight = 48;
             if (width > 0)
             {
                 le.minWidth = width;
@@ -602,75 +611,75 @@ namespace DigitPark.Editor
             // ==================== CREATE ALL 53 ACHIEVEMENT CARDS (V1) ====================
 
             // --- BEGINNER (4) ---
-            CreateTrophyCard(content, "Trophy_first_game", "Primer Paso", 0, false, false, CAT_BEGINNER, false, 10);
-            CreateTrophyCard(content, "Trophy_tutorial_complete", "Aprendiz", 0, false, false, CAT_BEGINNER, false, 10);
-            CreateTrophyCard(content, "Trophy_first_win", "Primera Victoria", 100, true, false, GOLD, false, 15);
-            CreateTrophyCard(content, "Trophy_profile_complete", "Identidad", 0, false, false, CAT_BEGINNER, false, 10);
+            CreateTrophyCard(content, "Trophy_first_game", "Primer Paso", 0, false, false, CAT_BEGINNER);
+            CreateTrophyCard(content, "Trophy_tutorial_complete", "Aprendiz", 0, false, false, CAT_BEGINNER);
+            CreateTrophyCard(content, "Trophy_first_win", "Primera Victoria", 100, true, false, GOLD);
+            CreateTrophyCard(content, "Trophy_profile_complete", "Identidad", 0, false, false, CAT_BEGINNER);
 
             // --- MASTERY (5) ---
-            CreateTrophyCard(content, "Trophy_digitrush_master", "Maestro de Dígitos", 45, false, true, CAT_GAMES, false, 50);
-            CreateTrophyCard(content, "Trophy_flashtap_master", "Reflejos de Luz", 30, false, true, CAT_GAMES, false, 50);
-            CreateTrophyCard(content, "Trophy_memorypairs_master", "Memoria Fotográfica", 0, false, false, CAT_GAMES, false, 50);
-            CreateTrophyCard(content, "Trophy_quickmath_master", "Calculadora Humana", 20, false, true, CAT_GAMES, false, 50);
-            CreateTrophyCard(content, "Trophy_oddoneout_master", "Ojo de Águila", 65, false, true, CAT_GAMES, false, 50);
+            CreateTrophyCard(content, "Trophy_digitrush_master", "Maestro de Dígitos", 45, false, true, CAT_GAMES);
+            CreateTrophyCard(content, "Trophy_flashtap_master", "Reflejos de Luz", 30, false, true, CAT_GAMES);
+            CreateTrophyCard(content, "Trophy_memorypairs_master", "Memoria Fotográfica", 0, false, false, CAT_GAMES);
+            CreateTrophyCard(content, "Trophy_quickmath_master", "Calculadora Humana", 20, false, true, CAT_GAMES);
+            CreateTrophyCard(content, "Trophy_oddoneout_master", "Ojo de Águila", 65, false, true, CAT_GAMES);
 
             // --- VICTORIES (5) ---
-            CreateTrophyCard(content, "Trophy_wins_10", "Competidor", 80, false, true, new Color(0.2f, 0.8f, 0.4f, 1f), false, 20);
-            CreateTrophyCard(content, "Trophy_wins_50", "Veterano", 40, false, true, new Color(0.2f, 0.8f, 0.4f, 1f), false, 40);
-            CreateTrophyCard(content, "Trophy_wins_100", "Centurión", 15, false, true, new Color(0.2f, 0.8f, 0.4f, 1f), false, 60);
-            CreateTrophyCard(content, "Trophy_wins_500", "Leyenda", 5, false, true, new Color(0.2f, 0.8f, 0.4f, 1f), false, 100);
-            CreateTrophyCard(content, "Trophy_wins_1000", "Inmortal", 0, false, false, new Color(0.2f, 0.8f, 0.4f, 1f), false, 200);
+            CreateTrophyCard(content, "Trophy_wins_10", "Competidor", 80, false, true, new Color(0.2f, 0.8f, 0.4f, 1f));
+            CreateTrophyCard(content, "Trophy_wins_50", "Veterano", 40, false, true, new Color(0.2f, 0.8f, 0.4f, 1f));
+            CreateTrophyCard(content, "Trophy_wins_100", "Centurión", 15, false, true, new Color(0.2f, 0.8f, 0.4f, 1f));
+            CreateTrophyCard(content, "Trophy_wins_500", "Leyenda", 5, false, true, new Color(0.2f, 0.8f, 0.4f, 1f));
+            CreateTrophyCard(content, "Trophy_wins_1000", "Inmortal", 0, false, false, new Color(0.2f, 0.8f, 0.4f, 1f));
 
             // --- STREAKS (4) ---
-            CreateTrophyCard(content, "Trophy_streak_3", "En Racha", 100, true, false, new Color(1f, 0.5f, 0.2f, 1f), false, 25);
-            CreateTrophyCard(content, "Trophy_streak_5", "Imparable", 60, false, true, new Color(1f, 0.5f, 0.2f, 1f), false, 40);
-            CreateTrophyCard(content, "Trophy_streak_10", "Dominación", 0, false, false, new Color(1f, 0.5f, 0.2f, 1f), false, 75);
-            CreateTrophyCard(content, "Trophy_streak_20", "Invencible", 0, false, false, CAT_SECRET, true, 150); // SECRET
+            CreateTrophyCard(content, "Trophy_streak_3", "En Racha", 100, true, false, new Color(1f, 0.5f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_streak_5", "Imparable", 60, false, true, new Color(1f, 0.5f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_streak_10", "Dominación", 0, false, false, new Color(1f, 0.5f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_streak_20", "Invencible", 0, false, false, CAT_SECRET, true); // SECRET
 
             // --- CASH BATTLE (7) ---
-            CreateTrophyCard(content, "Trophy_cash_first", "Apostador", 100, true, false, new Color(0.4f, 0.8f, 0.2f, 1f), false, 25);
-            CreateTrophyCard(content, "Trophy_cash_first_win", "Ganador Real", 100, true, false, GOLD, false, 35);
-            CreateTrophyCard(content, "Trophy_cash_10_wins", "Jugador Serio", 50, false, true, new Color(0.4f, 0.8f, 0.2f, 1f), false, 50);
-            CreateTrophyCard(content, "Trophy_cash_50_wins", "High Roller", 20, false, true, new Color(0.4f, 0.8f, 0.2f, 1f), false, 100);
-            CreateTrophyCard(content, "Trophy_cash_100_wins", "Tiburón", 5, false, true, new Color(0.4f, 0.8f, 0.2f, 1f), false, 200);
-            CreateTrophyCard(content, "Trophy_cash_earnings_100", "Primeros $100", 35, false, true, GOLD, false, 75);
-            CreateTrophyCard(content, "Trophy_cash_earnings_1000", "Club de los Mil", 0, false, false, CAT_SECRET, true, 250); // SECRET
+            CreateTrophyCard(content, "Trophy_cash_first", "Apostador", 100, true, false, new Color(0.4f, 0.8f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_cash_first_win", "Ganador Real", 100, true, false, GOLD);
+            CreateTrophyCard(content, "Trophy_cash_10_wins", "Jugador Serio", 50, false, true, new Color(0.4f, 0.8f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_cash_50_wins", "High Roller", 20, false, true, new Color(0.4f, 0.8f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_cash_100_wins", "Tiburón", 5, false, true, new Color(0.4f, 0.8f, 0.2f, 1f));
+            CreateTrophyCard(content, "Trophy_cash_earnings_100", "Primeros $100", 35, false, true, GOLD);
+            CreateTrophyCard(content, "Trophy_cash_earnings_1000", "Club de los Mil", 0, false, false, CAT_SECRET, true); // SECRET
 
             // --- TOURNAMENTS (5) ---
-            CreateTrophyCard(content, "Trophy_tournament_first", "Participante", 100, true, false, CAT_COMPETITION, false, 20);
-            CreateTrophyCard(content, "Trophy_tournament_top3", "Podio", 0, false, false, CAT_COMPETITION, false, 50);
-            CreateTrophyCard(content, "Trophy_tournament_win", "Campeón", 0, false, false, GOLD, false, 100);
-            CreateTrophyCard(content, "Trophy_tournament_5_wins", "Multicampeón", 0, false, false, CAT_COMPETITION, false, 200);
-            CreateTrophyCard(content, "Trophy_tournament_create", "Organizador", 0, false, false, CAT_COMPETITION, false, 30);
+            CreateTrophyCard(content, "Trophy_tournament_first", "Participante", 100, true, false, CAT_COMPETITION);
+            CreateTrophyCard(content, "Trophy_tournament_top3", "Podio", 0, false, false, CAT_COMPETITION);
+            CreateTrophyCard(content, "Trophy_tournament_win", "Campeón", 0, false, false, GOLD);
+            CreateTrophyCard(content, "Trophy_tournament_5_wins", "Multicampeón", 0, false, false, CAT_COMPETITION);
+            CreateTrophyCard(content, "Trophy_tournament_create", "Organizador", 0, false, false, CAT_COMPETITION);
 
             // --- SOCIAL (5) ---
-            CreateTrophyCard(content, "Trophy_friend_first", "Primer Amigo", 100, true, false, new Color(0.4f, 0.6f, 1f, 1f), false, 15);
-            CreateTrophyCard(content, "Trophy_friends_10", "Popular", 70, false, true, new Color(0.4f, 0.6f, 1f, 1f), false, 30);
-            CreateTrophyCard(content, "Trophy_friends_50", "Influencer", 10, false, true, new Color(0.4f, 0.6f, 1f, 1f), false, 75);
-            CreateTrophyCard(content, "Trophy_challenge_friend", "Retador", 0, false, false, new Color(0.4f, 0.6f, 1f, 1f), false, 20);
-            CreateTrophyCard(content, "Trophy_beat_friend", "Rival", 0, false, false, new Color(0.4f, 0.6f, 1f, 1f), false, 25);
+            CreateTrophyCard(content, "Trophy_friend_first", "Primer Amigo", 100, true, false, new Color(0.4f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_friends_10", "Popular", 70, false, true, new Color(0.4f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_friends_50", "Influencer", 10, false, true, new Color(0.4f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_challenge_friend", "Retador", 0, false, false, new Color(0.4f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_beat_friend", "Rival", 0, false, false, new Color(0.4f, 0.6f, 1f, 1f));
 
             // --- PROGRESSION (4) ---
-            CreateTrophyCard(content, "Trophy_level_10", "Nivel 10", 100, true, false, new Color(0.8f, 0.6f, 1f, 1f), false, 25);
-            CreateTrophyCard(content, "Trophy_level_25", "Nivel 25", 60, false, true, new Color(0.8f, 0.6f, 1f, 1f), false, 50);
-            CreateTrophyCard(content, "Trophy_level_50", "Nivel 50", 30, false, true, new Color(0.8f, 0.6f, 1f, 1f), false, 75);
-            CreateTrophyCard(content, "Trophy_level_100", "Nivel 100", 0, false, false, new Color(0.8f, 0.6f, 1f, 1f), false, 150);
+            CreateTrophyCard(content, "Trophy_level_10", "Nivel 10", 100, true, false, new Color(0.8f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_level_25", "Nivel 25", 60, false, true, new Color(0.8f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_level_50", "Nivel 50", 30, false, true, new Color(0.8f, 0.6f, 1f, 1f));
+            CreateTrophyCard(content, "Trophy_level_100", "Nivel 100", 0, false, false, new Color(0.8f, 0.6f, 1f, 1f));
 
             // --- COLLECTOR --- Reservado para V2
 
             // --- TIME (6) ---
-            CreateTrophyCard(content, "Trophy_days_7", "Una Semana", 100, true, false, new Color(0.5f, 0.8f, 0.9f, 1f), false, 25);
-            CreateTrophyCard(content, "Trophy_days_30", "Un Mes", 50, false, true, new Color(0.5f, 0.8f, 0.9f, 1f), false, 50);
-            CreateTrophyCard(content, "Trophy_days_100", "100 Días", 15, false, true, new Color(0.5f, 0.8f, 0.9f, 1f), false, 100);
-            CreateTrophyCard(content, "Trophy_days_365", "Un Año", 0, false, false, CAT_SECRET, true, 300); // SECRET
-            CreateTrophyCard(content, "Trophy_daily_streak_7", "Racha Semanal", 100, true, false, new Color(0.5f, 0.8f, 0.9f, 1f), false, 30);
-            CreateTrophyCard(content, "Trophy_daily_streak_30", "Racha Mensual", 25, false, true, new Color(0.5f, 0.8f, 0.9f, 1f), false, 75);
+            CreateTrophyCard(content, "Trophy_days_7", "Una Semana", 100, true, false, new Color(0.5f, 0.8f, 0.9f, 1f));
+            CreateTrophyCard(content, "Trophy_days_30", "Un Mes", 50, false, true, new Color(0.5f, 0.8f, 0.9f, 1f));
+            CreateTrophyCard(content, "Trophy_days_100", "100 Días", 15, false, true, new Color(0.5f, 0.8f, 0.9f, 1f));
+            CreateTrophyCard(content, "Trophy_days_365", "Un Año", 0, false, false, CAT_SECRET, true); // SECRET
+            CreateTrophyCard(content, "Trophy_daily_streak_7", "Racha Semanal", 100, true, false, new Color(0.5f, 0.8f, 0.9f, 1f));
+            CreateTrophyCard(content, "Trophy_daily_streak_30", "Racha Mensual", 25, false, true, new Color(0.5f, 0.8f, 0.9f, 1f));
 
             // --- SECRET (4) ---
-            CreateTrophyCard(content, "Trophy_night_owl", "Búho Nocturno", 0, false, false, CAT_SECRET, true, 50);
-            CreateTrophyCard(content, "Trophy_perfect_game", "Perfección", 0, false, false, CAT_SECRET, true, 100);
-            CreateTrophyCard(content, "Trophy_comeback_king", "Rey del Comeback", 0, false, false, CAT_SECRET, true, 75);
-            CreateTrophyCard(content, "Trophy_speed_demon", "Demonio de Velocidad", 0, false, false, CAT_SECRET, true, 100);
+            CreateTrophyCard(content, "Trophy_night_owl", "Búho Nocturno", 0, false, false, CAT_SECRET, true);
+            CreateTrophyCard(content, "Trophy_perfect_game", "Perfección", 0, false, false, CAT_SECRET, true);
+            CreateTrophyCard(content, "Trophy_comeback_king", "Rey del Comeback", 0, false, false, CAT_SECRET, true);
+            CreateTrophyCard(content, "Trophy_speed_demon", "Demonio de Velocidad", 0, false, false, CAT_SECRET, true);
 
             Debug.Log("[TrophyShowcase] TrophyShowcaseGrid creado con 53 logros (V1)");
         }
@@ -718,7 +727,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(centerContent, "EmptyStateText");
             TextMeshProUGUI emptyText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             emptyText.text = "No hay logros en esta categoría";
-            emptyText.fontSize = 28;
+            emptyText.fontSize = 32;
             emptyText.fontStyle = FontStyles.Bold;
             emptyText.color = TEXT_SECONDARY;
             emptyText.alignment = TextAlignmentOptions.Center;
@@ -729,7 +738,7 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(centerContent, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Sigue jugando para desbloquear más logros";
-            subtitleText.fontSize = 22;
+            subtitleText.fontSize = 24;
             subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.color = new Color(TEXT_SECONDARY.r, TEXT_SECONDARY.g, TEXT_SECONDARY.b, 0.7f);
             subtitleText.alignment = TextAlignmentOptions.Center;
@@ -740,7 +749,7 @@ namespace DigitPark.Editor
         }
 
         private static void CreateTrophyCard(GameObject parent, string name, string title, int progressPercent,
-            bool isUnlocked, bool hasProgress, Color accentColor, bool isSecret = false, int points = 50)
+            bool isUnlocked, bool hasProgress, Color accentColor, bool isSecret = false)
         {
             GameObject card = FindOrCreateChild(parent, name);
 
@@ -840,12 +849,15 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(infoSection, "Title");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = title;
-            titleText.fontSize = 22;
+            titleText.fontSize = 26;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = isUnlocked ? TEXT_PRIMARY : (isSecret ? CAT_SECRET : TEXT_SECONDARY);
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 18;
+            titleText.fontSizeMax = 26;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minHeight = 20;
+            titleLE.minHeight = 24;
 
             // Progress Bar (if in progress)
             if (hasProgress && !isUnlocked)
@@ -870,7 +882,7 @@ namespace DigitPark.Editor
                 GameObject progressText = FindOrCreateChild(infoSection, "ProgressText");
                 TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressText);
                 progressTmp.text = $"{progressPercent}%";
-                progressTmp.fontSize = 16;
+                progressTmp.fontSize = 20;
                 progressTmp.fontStyle = FontStyles.Bold;
                 progressTmp.color = TEXT_SECONDARY;
                 progressTmp.alignment = TextAlignmentOptions.Center;
@@ -900,30 +912,6 @@ namespace DigitPark.Editor
                 checkText.fontStyle = FontStyles.Bold;
                 checkText.color = TEXT_DARK;
                 checkText.alignment = TextAlignmentOptions.Center;
-            }
-
-            // Points Badge
-            if (!isSecret)
-            {
-                GameObject pointsBadge = FindOrCreateChild(cardContainer, "PointsBadge");
-                RectTransform pointsBadgeRT = GetOrAddComponent<RectTransform>(pointsBadge);
-                pointsBadgeRT.anchorMin = new Vector2(0, 1);
-                pointsBadgeRT.anchorMax = new Vector2(0, 1);
-                pointsBadgeRT.pivot = new Vector2(0, 1);
-                pointsBadgeRT.anchoredPosition = new Vector2(8, -8);
-                pointsBadgeRT.sizeDelta = new Vector2(50, 22);
-
-                Image pointsBadgeBg = GetOrAddComponent<Image>(pointsBadge);
-                pointsBadgeBg.color = new Color(0f, 0f, 0f, 0.6f);
-
-                GameObject pointsText = FindOrCreateChild(pointsBadge, "Text");
-                SetRectTransformStretch(pointsText);
-                TextMeshProUGUI pointsTmp = GetOrAddComponent<TextMeshProUGUI>(pointsText);
-                pointsTmp.text = $"{points} pts";
-                pointsTmp.fontSize = 16;
-                pointsTmp.fontStyle = FontStyles.Bold;
-                pointsTmp.color = GOLD;
-                pointsTmp.alignment = TextAlignmentOptions.Center;
             }
 
             // Make card clickable
@@ -986,7 +974,7 @@ namespace DigitPark.Editor
             GameObject closeText = FindOrCreateChild(closeBtn, "Text");
             TextMeshProUGUI closeTmp = GetOrAddComponent<TextMeshProUGUI>(closeText);
             closeTmp.text = "X";
-            closeTmp.fontSize = 28;
+            closeTmp.fontSize = 32;
             closeTmp.fontStyle = FontStyles.Bold;
             closeTmp.color = TEXT_PRIMARY;
             closeTmp.alignment = TextAlignmentOptions.Center;
@@ -1006,18 +994,18 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(panel, "DetailTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Primera Victoria";
-            titleText.fontSize = 42;
+            titleText.fontSize = 48;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minHeight = 35;
+            titleLE.minHeight = 40;
 
             // Description
             GameObject descObj = FindOrCreateChild(panel, "DetailDescription");
             TextMeshProUGUI descText = GetOrAddComponent<TextMeshProUGUI>(descObj);
             descText.text = "Gana tu primera partida en cualquier modo de juego.";
-            descText.fontSize = 24;
+            descText.fontSize = 26;
             descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             descText.alignment = TextAlignmentOptions.Center;
@@ -1028,7 +1016,7 @@ namespace DigitPark.Editor
             GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
             TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
             categoryText.text = "Categoria: Principiante";
-            categoryText.fontSize = 22;
+            categoryText.fontSize = 24;
             categoryText.fontStyle = FontStyles.Bold;
             categoryText.color = CYAN_NEON;
             categoryText.alignment = TextAlignmentOptions.Center;
@@ -1082,23 +1070,12 @@ namespace DigitPark.Editor
             GameObject progressTextObj = FindOrCreateChild(progressSection, "DetailProgressText");
             TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
             progressTmp.text = "1/1 Completado";
-            progressTmp.fontSize = 22;
+            progressTmp.fontSize = 24;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = BUTTON_SUCCESS;
             progressTmp.alignment = TextAlignmentOptions.Center;
             LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressTextObj);
             progressTextLE.minHeight = 20;
-
-            // Points Text
-            GameObject pointsObj = FindOrCreateChild(panel, "DetailPointsText");
-            TextMeshProUGUI pointsTmp2 = GetOrAddComponent<TextMeshProUGUI>(pointsObj);
-            pointsTmp2.text = "+50 pts";
-            pointsTmp2.fontSize = 24;
-            pointsTmp2.fontStyle = FontStyles.Bold;
-            pointsTmp2.color = GOLD;
-            pointsTmp2.alignment = TextAlignmentOptions.Center;
-            LayoutElement pointsLE2 = GetOrAddComponent<LayoutElement>(pointsObj);
-            pointsLE2.minHeight = 22;
 
             // Reward Section
             GameObject rewardSection = FindOrCreateChild(panel, "DetailRewardSection");
@@ -1125,7 +1102,7 @@ namespace DigitPark.Editor
             GameObject rewardAmount = FindOrCreateChild(rewardSection, "RewardAmount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "50 Gemas";
-            rewardTmp.fontSize = 32;
+            rewardTmp.fontSize = 36;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1144,7 +1121,7 @@ namespace DigitPark.Editor
             GameObject claimText = FindOrCreateChild(claimBtn, "ClaimButtonText");
             TextMeshProUGUI claimTmp = GetOrAddComponent<TextMeshProUGUI>(claimText);
             claimTmp.text = "RECLAMAR RECOMPENSA";
-            claimTmp.fontSize = 30;
+            claimTmp.fontSize = 36;
             claimTmp.fontStyle = FontStyles.Bold;
             claimTmp.color = TEXT_DARK;
             claimTmp.alignment = TextAlignmentOptions.Center;
@@ -1204,7 +1181,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(centerContent, "CelebrationTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "LOGRO DESBLOQUEADO!";
-            titleText.fontSize = 48;
+            titleText.fontSize = 52;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1215,7 +1192,7 @@ namespace DigitPark.Editor
             GameObject nameObj = FindOrCreateChild(centerContent, "CelebrationAchievementName");
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = "Primera Victoria";
-            nameText.fontSize = 36;
+            nameText.fontSize = 42;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Center;
@@ -1249,17 +1226,6 @@ namespace DigitPark.Editor
             LayoutElement amountLE = GetOrAddComponent<LayoutElement>(rewardAmount);
             amountLE.minWidth = 100;
 
-            // Points Earned
-            GameObject pointsEarned = FindOrCreateChild(centerContent, "PointsEarned");
-            TextMeshProUGUI pointsTmp = GetOrAddComponent<TextMeshProUGUI>(pointsEarned);
-            pointsTmp.text = "+50 Puntos";
-            pointsTmp.fontSize = 28;
-            pointsTmp.fontStyle = FontStyles.Bold;
-            pointsTmp.color = GOLD;
-            pointsTmp.alignment = TextAlignmentOptions.Center;
-            LayoutElement pointsLE = GetOrAddComponent<LayoutElement>(pointsEarned);
-            pointsLE.minHeight = 25;
-
             // Continue Button
             GameObject continueBtn = FindOrCreateChild(centerContent, "ContinueButton");
             Image continueBg = GetOrAddComponent<Image>(continueBtn);
@@ -1273,7 +1239,7 @@ namespace DigitPark.Editor
             GameObject continueText = FindOrCreateChild(continueBtn, "Text");
             TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
             continueTmp.text = "CONTINUAR";
-            continueTmp.fontSize = 34;
+            continueTmp.fontSize = 40;
             continueTmp.fontStyle = FontStyles.Bold;
             continueTmp.color = TEXT_DARK;
             continueTmp.alignment = TextAlignmentOptions.Center;
@@ -1465,27 +1431,10 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTmp = titleText.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Logro";
-            titleTmp.fontSize = 22;
+            titleTmp.fontSize = 26;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = TEXT_SECONDARY;
             titleTmp.alignment = TextAlignmentOptions.Center;
-
-            // Points Text
-            GameObject pointsText = new GameObject("PointsText");
-            pointsText.transform.SetParent(cardContainer.transform, false);
-            RectTransform pointsRT = pointsText.AddComponent<RectTransform>();
-            pointsRT.anchorMin = new Vector2(0, 0);
-            pointsRT.anchorMax = new Vector2(1, 0);
-            pointsRT.pivot = new Vector2(0.5f, 0);
-            pointsRT.anchoredPosition = new Vector2(0, 12);
-            pointsRT.sizeDelta = new Vector2(-20, 18);
-
-            TextMeshProUGUI pointsTmp = pointsText.AddComponent<TextMeshProUGUI>();
-            pointsTmp.text = "50 pts";
-            pointsTmp.fontSize = 16;
-            pointsTmp.fontStyle = FontStyles.Bold;
-            pointsTmp.color = GOLD;
-            pointsTmp.alignment = TextAlignmentOptions.Center;
 
             // Completed Badge
             GameObject completedBadge = new GameObject("CompletedBadge");

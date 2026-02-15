@@ -25,7 +25,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static readonly string[] REQUIRED_REFS = {
             // Header
-            "backButton", "titleText", "totalPointsText", "completionText", "overallProgressBar",
+            "backButton", "titleText", "completionText", "overallProgressBar",
             // Tabs Container
             "tabsContainer", "tabsScrollRect",
             // Category Tabs (12)
@@ -39,7 +39,7 @@ namespace DigitPark.Editor.AutoAssigners
             "detailPanel", "detailPanelCanvasGroup", "detailBlocker", "detailCard",
             // Detail Panel Content
             "detailTrophyIcon", "detailTitleText", "detailDescriptionText",
-            "detailCategoryText", "detailProgressBar", "detailProgressText", "detailPointsText",
+            "detailCategoryText", "detailProgressBar", "detailProgressText",
             "claimRewardButton", "claimButtonText", "closeDetailButton",
             // Reward Celebration
             "rewardCelebration", "rewardAmountText", "celebrationGlow"
@@ -171,7 +171,6 @@ namespace DigitPark.Editor.AutoAssigners
             // Header
             AssignReference(so, "backButton", FindButtonByName("back", "return"));
             AssignReference(so, "titleText", FindTextByName("title", "header", "logros"));
-            AssignReference(so, "totalPointsText", FindTextByName("totalpoints", "points", "puntos"));
             AssignReference(so, "completionText", FindTextByName("completion", "completados", "progress"));
             AssignReference(so, "overallProgressBar", FindByNameContains<Slider>("overall", "progress", "total"));
 
@@ -215,7 +214,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "detailCategoryText", FindTextByName("detailcategorytext"));
             AssignReference(so, "detailProgressBar", FindByNameContains<Slider>("detailprogressbar"));
             AssignReference(so, "detailProgressText", FindTextByName("detailprogresstext"));
-            AssignReference(so, "detailPointsText", FindTextByName("detailpointstext"));
             AssignReference(so, "claimRewardButton", FindButtonByName("claimrewardbutton", "claimreward"));
             AssignReference(so, "claimButtonText", FindTextByName("claimbuttontext"));
             AssignReference(so, "closeDetailButton", FindButtonByName("closebutton", "closedetail"));

@@ -431,7 +431,7 @@ namespace DigitPark.Managers
                 if (mission.isClaimed && mission.definition != null)
                     totalPoints += mission.definition.rewardAmount;
 
-            if (totalPointsText) totalPointsText.text = L("ms_points_earned", totalPoints);
+            if (totalPointsText) totalPointsText.text = L("ms_rewards_earned", totalPoints);
         }
 
         private void UpdateRefreshTimer()

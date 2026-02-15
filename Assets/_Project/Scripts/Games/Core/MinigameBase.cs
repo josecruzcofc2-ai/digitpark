@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using DigitPark.UI;
 using DigitPark.Managers;
+using DigitPark.Services;
 
 namespace DigitPark.Games
 {
@@ -183,74 +184,184 @@ namespace DigitPark.Games
 
         /// <summary>
         /// Muestra el panel de resultado apropiado según el modo de juego
+        /// Routing:
+        ///   E1 (Practice single) → Normal panel
+        ///   E2 mid-sprint → Normal panel (transición), E2 final → SprintSummary practice
+        ///   E3 (Online 1v1) → OnlineResult (existente)
+        ///   E4 mid-sprint → Normal panel, E4 final → SprintSummary online
+        ///   E5/E6 (Tournament) → TournamentResult
+        ///   E7 (Cash 1v1 single) → CashBattleResult
+        ///   E8 mid-sprint → Normal panel, E8 final → SprintSummary cash
         /// </summary>
         protected virtual void ShowResultPanel(MinigameResult result)
         {
-            // Verificar si es una partida online 1v1
-            if (OnlineResultManager.IsOnlineMatch())
+            var ctx = GameSessionManager.Instance?.CurrentContext;
+
+            // 1. Online free 1v1 (no sprint)
+            if (OnlineResultManager.IsOnlineMatch() && ctx?.Mode != GameMode.CognitiveSprint)
             {
                 HandleOnlineResult(result);
                 return;
             }
 
-            // Check if we're in a real money session (SingleGame or Tournament with entry fee)
-            var ctx = GameSessionManager.Instance?.CurrentContext;
-            bool isRealMoneyMode = ctx != null &&
-                                   ctx.EntryFee > 0 &&
-                                   (ctx.Mode == GameMode.SingleGame || ctx.Mode == GameMode.Tournament);
-
-            // CognitiveSprint: show normal panel per game, real money only at final result
-            if (ctx?.Mode == GameMode.CognitiveSprint && ctx.HasMoreGames)
-                isRealMoneyMode = false;
-
-            if (isRealMoneyMode)
+            // 2. Online 1v1 in sprint - submit and let OnlineResultManager handle
+            if (OnlineResultManager.IsOnlineMatch() && ctx?.Mode == GameMode.CognitiveSprint)
             {
-                // Real money mode - need to wait for opponent result
-                // For now, just show the panel (in future, compare with opponent)
-                var context = GameSessionManager.Instance.CurrentContext;
-
-                // TODO: Get opponent result from server
-                // For now, simulate - player always wins if completed
-                bool playerWon = result.Completed;
-                decimal entryFee = context?.EntryFee ?? 0;
-
-                if (playerWon)
+                if (!ctx.HasMoreGames)
                 {
-                    if (winPanelRealMoney != null)
-                    {
-                        winPanelRealMoney.ShowRealMoneyResult(result, null, entryFee, true, "Opponent");
-                        SetupPanelCallbacks(winPanelRealMoney);
-                    }
+                    // Último juego del sprint online → esperar oponente, luego SprintSummary
+                    OnlineResultManager.Instance.SubmitSprintAndWaitForResult(ctx);
+                    return;
                 }
-                else
+                // Mid-sprint online: enviar resultado pero mostrar panel normal de transición
+                HandleOnlineResult(result);
+                return;
+            }
+
+            // 3. Tournament
+            if (ctx?.Mode == GameMode.Tournament)
+            {
+                HandleTournamentResult(result, ctx);
+                return;
+            }
+
+            // 4. CashBattle single game (not sprint)
+            if (ctx != null && ctx.EntryFee > 0 && ctx.Mode == GameMode.SingleGame)
+            {
+                HandleCashBattleResult(result, ctx);
+                return;
+            }
+
+            // 5. CognitiveSprint - último juego (practice o cash)
+            if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
+            {
+                ResultPanelManager.Instance.ShowSprintSummary(ctx);
+                return;
+            }
+
+            // 6. CognitiveSprint - más juegos (cualquier modo) → panel normal de transición
+            // 7. Practice single → panel normal
+            ShowNormalResultPanel(result);
+        }
+
+        /// <summary>
+        /// Muestra panel normal (práctica o transición mid-sprint)
+        /// </summary>
+        private void ShowNormalResultPanel(MinigameResult result)
+        {
+            if (result.Completed)
+            {
+                if (winPanelNormal != null)
                 {
-                    if (losePanelRealMoney != null)
-                    {
-                        losePanelRealMoney.ShowRealMoneyResult(result, null, entryFee, false, "Opponent");
-                        SetupPanelCallbacks(losePanelRealMoney);
-                    }
+                    winPanelNormal.ShowNormalResult(result);
+                    SetupPanelCallbacks(winPanelNormal);
                 }
             }
             else
             {
-                // Practice mode - show normal result panel
-                if (result.Completed)
+                if (losePanelNormal != null)
                 {
-                    if (winPanelNormal != null)
-                    {
-                        winPanelNormal.ShowNormalResult(result);
-                        SetupPanelCallbacks(winPanelNormal);
-                    }
+                    losePanelNormal.ShowNormalResult(result);
+                    SetupPanelCallbacks(losePanelNormal);
                 }
-                else
+            }
+        }
+
+        /// <summary>
+        /// Maneja resultado de torneo consultando ITournamentService via ServiceLocator
+        /// </summary>
+        private void HandleTournamentResult(MinigameResult result, GameContext ctx)
+        {
+            var tournamentService = ServiceLocator.Tournament;
+
+            if (tournamentService != null && tournamentService.ActiveTournament != null)
+            {
+                var tournament = tournamentService.ActiveTournament;
+                int position = tournament.MyPosition ?? 1;
+                decimal prize = tournament.PrizePool;
+
+                // Enviar score al torneo y obtener posición actualizada
+                tournamentService.SubmitTournamentScore(ctx.TournamentId, (int)(result.FinalScore * 100f))
+                    .ContinueWith(task =>
+                    {
+                        // Actualizar posición después de enviar score
+                        if (task.Result?.Success == true && task.Result.Tournament != null)
+                        {
+                            position = task.Result.Tournament.MyPosition ?? position;
+                            prize = task.Result.Tournament.PrizePool;
+                        }
+                    });
+
+                // Obtener datos del jugador en el torneo
+                int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
+                int maxAttempts = 3; // Configurado por torneo
+                float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
+
+                // Actualizar mejor tiempo si mejoró
+                if (result.FinalScore < bestTime)
                 {
-                    // Game ended without completion (timeout, quit, etc)
-                    if (losePanelNormal != null)
-                    {
-                        losePanelNormal.ShowNormalResult(result);
-                        SetupPanelCallbacks(losePanelNormal);
-                    }
+                    bestTime = result.FinalScore;
+                    PlayerPrefs.SetFloat($"tournament_{ctx.TournamentId}_best", bestTime);
                 }
+                PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
+                PlayerPrefs.Save();
+
+                ResultPanelManager.Instance.ShowTournamentResult(
+                    result, position, attemptsUsed, maxAttempts, bestTime, prize);
+            }
+            else
+            {
+                // Fallback: sin servicio de torneo, usar datos del contexto
+                int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
+                float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
+                decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
+
+                ResultPanelManager.Instance.ShowTournamentResult(
+                    result, 1, attemptsUsed, 3, bestTime, prize);
+            }
+        }
+
+        /// <summary>
+        /// Maneja resultado de cash battle 1v1 via MatchmakingService (Firebase)
+        /// Envía resultado y espera al oponente para comparar
+        /// </summary>
+        private void HandleCashBattleResult(MinigameResult result, GameContext ctx)
+        {
+            string matchId = ctx.MatchId ?? OnlineResultManager.GetCurrentMatchId();
+            string opponentName = ctx.OpponentName ?? OnlineResultManager.GetCurrentOpponentName();
+
+            if (MatchmakingService.Instance != null && !string.IsNullOrEmpty(matchId))
+            {
+                // Enviar resultado a Firebase
+                MatchmakingService.Instance.SubmitMatchResult(
+                    matchId, result.FinalScore, result.TotalTime, result.Errors);
+
+                // Escuchar resultado del oponente
+                MatchmakingService.Instance.ListenForOpponentResult(matchId,
+                    (opponentScore, opponentTime) =>
+                    {
+                        var opponentResult = new MinigameResult
+                        {
+                            TotalTime = opponentTime,
+                            PenaltyTime = opponentScore - opponentTime,
+                            Errors = 0,
+                            Completed = true
+                        };
+
+                        bool playerWon = result.FinalScore < opponentScore;
+
+                        ResultPanelManager.Instance.ShowCashBattleResult(
+                            result, opponentResult, ctx.EntryFee, playerWon, opponentName);
+                    });
+            }
+            else
+            {
+                // Fallback: sin matchmaking, mostrar resultado local
+                Debug.LogWarning("[MinigameBase] MatchmakingService not available for cash battle result");
+                bool playerWon = result.Completed;
+
+                ResultPanelManager.Instance.ShowCashBattleResult(
+                    result, null, ctx.EntryFee, playerWon, opponentName);
             }
         }
 
