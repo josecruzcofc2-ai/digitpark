@@ -139,16 +139,6 @@ namespace DigitPark.Editor
 
         private static Canvas FindMainCanvas()
         {
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                    return c;
-            }
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name != "TransitionCanvas")
-                    return c;
-            }
             return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
@@ -1271,6 +1261,9 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);

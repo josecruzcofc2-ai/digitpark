@@ -143,7 +143,7 @@ namespace DigitPark.Editor
             CleanupOldUI();
 
             // Find or create Canvas
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No Canvas found. Open CashBattle scene first.", "OK");
@@ -170,7 +170,7 @@ namespace DigitPark.Editor
 
         private static void RebuildBackground()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             // Find and destroy old background
@@ -2848,27 +2848,15 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
-        }
-
-        private static Canvas FindMainCanvas()
-        {
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                    return c;
-            }
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name != "TransitionCanvas")
-                    return c;
-            }
-            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         #region Reference Assigner
@@ -2898,7 +2886,7 @@ namespace DigitPark.Editor
             SerializedObject so = new SerializedObject(manager);
             so.Update();
 
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : manager.transform.root;
 
             // Header

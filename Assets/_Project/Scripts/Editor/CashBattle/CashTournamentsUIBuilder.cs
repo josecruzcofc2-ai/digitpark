@@ -153,7 +153,7 @@ namespace DigitPark.Editor
         {
             CleanupOldUI();
 
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No se encontró Canvas. Abre la escena CashTournaments primero.", "OK");
@@ -172,7 +172,7 @@ namespace DigitPark.Editor
 
         private static void CleanScene()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             CleanupOldElements(canvas.transform);
@@ -1257,27 +1257,15 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
-        }
-
-        private static Canvas FindMainCanvas()
-        {
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                    return c;
-            }
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name != "TransitionCanvas")
-                    return c;
-            }
-            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static void CreateFallbackCard(Transform parent, string name, int prize, int entry, string players)
@@ -1403,7 +1391,7 @@ namespace DigitPark.Editor
             SerializedObject so = new SerializedObject(panel);
             so.Update();
 
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : panel.transform.root;
 
             // Header

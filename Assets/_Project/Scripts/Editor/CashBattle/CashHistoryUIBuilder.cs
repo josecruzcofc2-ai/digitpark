@@ -164,7 +164,7 @@ namespace DigitPark.Editor
         {
             CleanupOldUI();
 
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No se encontró Canvas. Abre la escena CashHistory primero.", "OK");
@@ -183,7 +183,7 @@ namespace DigitPark.Editor
 
         private static void BuildStatsPanelOnly()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform safeArea = canvas.transform.Find("SafeArea");
@@ -202,7 +202,7 @@ namespace DigitPark.Editor
 
         private static void BuildFiltersOnly()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform safeArea = canvas.transform.Find("SafeArea");
@@ -221,7 +221,7 @@ namespace DigitPark.Editor
 
         private static void BuildMatchItemPrefab()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             GameObject prefab = CreateMatchHistoryItem(canvas.transform, "QuickMath", "@Opponent", true, 5f, 10f, "Hoy, 14:30", "5-3", "1v1");
@@ -1128,27 +1128,15 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
-        }
-
-        private static Canvas FindMainCanvas()
-        {
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                    return c;
-            }
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name != "TransitionCanvas")
-                    return c;
-            }
-            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         #endregion
@@ -1186,7 +1174,7 @@ namespace DigitPark.Editor
             SerializedObject so = new SerializedObject(controller);
             so.Update();
 
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : controller.transform.root;
 
             // ==================== HEADER ====================

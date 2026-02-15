@@ -11,26 +11,23 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager para la escena de onboarding/tutorial.
-    /// Guía a nuevos usuarios a través de la introducción de la aplicación.
+    /// Arquitectura slide-based: cada step es un slide independiente dentro de SlidesContainer.
     /// </summary>
     public class OnboardingManager : MonoBehaviour
     {
         [Header("UI - Main")]
         [SerializeField] private Button skipButton;
         [SerializeField] private TextMeshProUGUI skipButtonText;
-        [SerializeField] private Button backButton;
 
-        [Header("UI - Step Display")]
-        [SerializeField] private Image stepImage;
-        [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI descriptionText;
-        [SerializeField] private GameObject characterContainer;
-        [SerializeField] private Animator characterAnimator;
+        [Header("Slides Container")]
+        [SerializeField] private Transform slidesContainer;
+        private GameObject[] slideObjects;
 
         [Header("UI - Navigation")]
         [SerializeField] private Button nextButton;
         [SerializeField] private Button prevButton;
         [SerializeField] private TextMeshProUGUI nextButtonText;
+        [SerializeField] private TextMeshProUGUI prevButtonText;
         [SerializeField] private Transform dotsContainer;
         [SerializeField] private GameObject dotPrefab;
 
@@ -38,24 +35,18 @@ namespace DigitPark.Managers
         [SerializeField] private Slider progressBar;
         [SerializeField] private TextMeshProUGUI stepCounterText;
 
-        [Header("UI - Interactive Elements")]
-        [SerializeField] private GameObject highlightOverlay;
-        [SerializeField] private RectTransform highlightTarget;
-        [SerializeField] private TextMeshProUGUI highlightTooltipText;
-        [SerializeField] private GameObject tapToContinuePrompt;
-
-        [Header("UI - Name Input (Welcome Step)")]
+        [Header("UI - Name Input (Slide 2)")]
         [SerializeField] private GameObject nameInputPanel;
         [SerializeField] private TMP_InputField nameInput;
         [SerializeField] private Button confirmNameButton;
         [SerializeField] private TextMeshProUGUI nameErrorText;
 
-        [Header("UI - Avatar Selection")]
+        [Header("UI - Avatar Selection (Slide 3)")]
         [SerializeField] private GameObject avatarSelectionPanel;
         [SerializeField] private Transform avatarContainer;
         [SerializeField] private GameObject avatarOptionPrefab;
 
-        [Header("UI - Tutorial Completion")]
+        [Header("UI - Tutorial Completion (Slide 8)")]
         [SerializeField] private GameObject completionPanel;
         [SerializeField] private TextMeshProUGUI completionTitleText;
         [SerializeField] private TextMeshProUGUI completionMessageText;
@@ -64,14 +55,6 @@ namespace DigitPark.Managers
 
         [Header("Onboarding Steps")]
         [SerializeField] private List<OnboardingStep> steps = new List<OnboardingStep>();
-
-        [Header("Step Images")]
-        [SerializeField] private Sprite welcomeImage;
-        [SerializeField] private Sprite gamesImage;
-        [SerializeField] private Sprite cashBattleImage;
-        [SerializeField] private Sprite tournamentsImage;
-        [SerializeField] private Sprite rewardsImage;
-        [SerializeField] private Sprite socialImage;
 
         [Header("UI - Sections (for animations)")]
         [SerializeField] private RectTransform progressBarTransform;
@@ -87,6 +70,7 @@ namespace DigitPark.Managers
         [SerializeField] private int completionRewardGems = 50;
         [SerializeField] private float autoAdvanceDelay = 0f;
         [SerializeField] private bool allowSkip = true;
+        [SerializeField] private float transitionDuration = 0.35f;
 
         // State
         private int currentStepIndex = 0;
@@ -98,16 +82,30 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            InitializeSlideObjects();
             InitializeSteps();
+            LocalizeSlideTexts();
             SetupUI();
             SetupListeners();
             ShowStep(0);
             AnimateEntrance();
         }
 
+        private void InitializeSlideObjects()
+        {
+            if (slidesContainer == null) return;
+
+            slideObjects = new GameObject[8];
+            for (int i = 0; i < 8; i++)
+            {
+                Transform slide = slidesContainer.Find($"Slide{i + 1}");
+                if (slide != null)
+                    slideObjects[i] = slide.gameObject;
+            }
+        }
+
         private void InitializeSteps()
         {
-            // Default steps if not set in inspector
             if (steps.Count == 0)
             {
                 steps = new List<OnboardingStep>
@@ -179,7 +177,6 @@ namespace DigitPark.Managers
                 };
             }
 
-            // Initialize avatar options if not set
             if (avatarOptions.Count == 0)
             {
                 avatarOptions = new List<AvatarOption>
@@ -194,20 +191,140 @@ namespace DigitPark.Managers
             }
         }
 
+        private void LocalizeSlideTexts()
+        {
+            if (slideObjects == null) return;
+
+            // Slide titles
+            LocalizeSlideTitle(0, "onboarding_welcome_title");
+            LocalizeSlideTitle(1, "onboarding_name_title");
+            LocalizeSlideTitle(2, "onboarding_avatar_title");
+            LocalizeSlideTitle(3, "onboarding_games_title");
+            LocalizeSlideTitle(4, "onboarding_cashbattle_title");
+            LocalizeSlideTitle(5, "tournament_button");
+            LocalizeSlideTitle(6, "dr_title");
+
+            // Slide 1 - Welcome content
+            LocalizeContentTexts(0, new[]
+            {
+                ("onboarding_welcome_desc", false),
+                ("onboarding_welcome_highlight", true),
+                ("onboarding_welcome_b1", false),
+                ("onboarding_welcome_b2", false),
+                ("onboarding_welcome_b3", false)
+            });
+
+            // Slide 4 - Games content
+            LocalizeContentTexts(3, new[]
+            {
+                ("onboarding_games_desc", false),
+                ("onboarding_games_highlight", true),
+                ("onboarding_games_b1", false),
+                ("onboarding_games_b2", false),
+                ("onboarding_games_b3", false),
+                ("onboarding_games_b4", false),
+                ("onboarding_games_b5", false)
+            });
+
+            // Slide 5 - CashBattle content
+            LocalizeContentTexts(4, new[]
+            {
+                ("onboarding_cashbattle_desc", false),
+                ("onboarding_cashbattle_highlight", true),
+                ("onboarding_cashbattle_b1", false),
+                ("onboarding_cashbattle_b2", false),
+                ("onboarding_cashbattle_b3", false)
+            });
+
+            // Slide 6 - Tournaments content
+            LocalizeContentTexts(5, new[]
+            {
+                ("onboarding_tournaments_desc", false),
+                ("onboarding_tournaments_highlight", true),
+                ("onboarding_tournaments_b1", false),
+                ("onboarding_tournaments_b2", false),
+                ("onboarding_tournaments_b3", false)
+            });
+
+            // Slide 7 - Rewards content
+            LocalizeContentTexts(6, new[]
+            {
+                ("onboarding_rewards_desc", false),
+                ("onboarding_rewards_highlight", true),
+                ("onboarding_rewards_b1", false),
+                ("onboarding_rewards_b2", false),
+                ("onboarding_rewards_b3", false)
+            });
+
+            // Slide 2 - Name Input placeholder
+            if (slideObjects[1] != null)
+            {
+                var placeholder = slideObjects[1].transform.Find("NameInputPanel/InputContainer/NameInput/Text Area/Placeholder");
+                if (placeholder != null)
+                {
+                    var tmp = placeholder.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null) tmp.text = AutoLocalizer.Get("onboarding_name_placeholder");
+                }
+            }
+
+            // Navigation buttons
+            if (prevButtonText != null) prevButtonText.text = AutoLocalizer.Get("onboarding_back");
+            if (skipButtonText != null) skipButtonText.text = AutoLocalizer.Get("onboarding_skip");
+        }
+
+        private void LocalizeSlideTitle(int slideIndex, string key)
+        {
+            if (slideIndex < 0 || slideIndex >= slideObjects.Length || slideObjects[slideIndex] == null) return;
+            var titleT = slideObjects[slideIndex].transform.Find("SlideTitle");
+            if (titleT != null)
+            {
+                var tmp = titleT.GetComponent<TextMeshProUGUI>();
+                if (tmp != null) tmp.text = AutoLocalizer.Get(key);
+            }
+        }
+
+        private void LocalizeContentTexts(int slideIndex, (string key, bool isBulletSkip)[] keys)
+        {
+            if (slideIndex < 0 || slideIndex >= slideObjects.Length || slideObjects[slideIndex] == null) return;
+
+            var contentT = slideObjects[slideIndex].transform.Find("ContentCard/Content");
+            if (contentT == null) return;
+
+            // Gather all Text children (skip Spacer objects)
+            var textComponents = new List<TextMeshProUGUI>();
+            for (int i = 0; i < contentT.childCount; i++)
+            {
+                var child = contentT.GetChild(i);
+                var tmp = child.GetComponent<TextMeshProUGUI>();
+                if (tmp != null) textComponents.Add(tmp);
+            }
+
+            int textIdx = 0;
+            for (int i = 0; i < keys.Length && textIdx < textComponents.Count; i++)
+            {
+                string localized = AutoLocalizer.Get(keys[i].key);
+                // Preserve bullet prefix if text already has one
+                if (textComponents[textIdx].text.StartsWith("\u2022 "))
+                    textComponents[textIdx].text = "\u2022 " + localized;
+                else
+                    textComponents[textIdx].text = localized;
+                textIdx++;
+            }
+        }
+
         private void SetupUI()
         {
-            // Hide all special panels
-            if (nameInputPanel) nameInputPanel.SetActive(false);
-            if (avatarSelectionPanel) avatarSelectionPanel.SetActive(false);
-            if (completionPanel) completionPanel.SetActive(false);
-            if (highlightOverlay) highlightOverlay.SetActive(false);
-            if (tapToContinuePrompt) tapToContinuePrompt.SetActive(false);
+            // Deactivate all slides except first
+            if (slideObjects != null)
+            {
+                for (int i = 0; i < slideObjects.Length; i++)
+                    if (slideObjects[i] != null)
+                        slideObjects[i].SetActive(i == 0);
+            }
 
             if (skipButton) skipButton.gameObject.SetActive(allowSkip);
-            if (backButton) backButton.gameObject.SetActive(false);
             if (prevButton) prevButton.gameObject.SetActive(false);
 
-            // Create navigation dots
             CreateNavigationDots();
             UpdateProgressBar();
         }
@@ -215,7 +332,6 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             if (skipButton) skipButton.onClick.AddListener(OnSkipClicked);
-            if (backButton) backButton.onClick.AddListener(OnBackClicked);
             if (nextButton) nextButton.onClick.AddListener(OnNextClicked);
             if (prevButton) prevButton.onClick.AddListener(OnPrevClicked);
 
@@ -229,14 +345,12 @@ namespace DigitPark.Managers
         {
             if (dotsContainer == null) return;
 
-            // Clear existing
             foreach (var dot in spawnedDots)
             {
                 if (dot) Destroy(dot);
             }
             spawnedDots.Clear();
 
-            // Create new dots
             for (int i = 0; i < steps.Count; i++)
             {
                 GameObject dot;
@@ -278,7 +392,6 @@ namespace DigitPark.Managers
                     else
                         image.color = new Color(0.3f, 0.3f, 0.3f);
 
-                    // Scale active dot
                     dot.transform.localScale = isActive ? Vector3.one * 1.3f : Vector3.one;
                 }
             }
@@ -305,20 +418,12 @@ namespace DigitPark.Managers
             currentStepIndex = index;
             var step = steps[index];
 
-            // Hide all special panels first
-            if (nameInputPanel) nameInputPanel.SetActive(false);
-            if (avatarSelectionPanel) avatarSelectionPanel.SetActive(false);
-            if (completionPanel) completionPanel.SetActive(false);
-
-            // Update text
-            if (titleText) titleText.text = step.title;
-            if (descriptionText) descriptionText.text = step.description;
-
-            // Update image
-            if (stepImage)
+            // Activate only the current slide
+            if (slideObjects != null)
             {
-                stepImage.sprite = GetStepImage(step.id);
-                stepImage.gameObject.SetActive(stepImage.sprite != null);
+                for (int i = 0; i < slideObjects.Length; i++)
+                    if (slideObjects[i] != null)
+                        slideObjects[i].SetActive(i == index);
             }
 
             // Update navigation
@@ -342,16 +447,6 @@ namespace DigitPark.Managers
                 case OnboardingStepType.Completion:
                     ShowCompletion();
                     break;
-
-                case OnboardingStepType.Interactive:
-                    ShowInteractiveHighlight(step);
-                    break;
-            }
-
-            // Character animation
-            if (characterAnimator)
-            {
-                characterAnimator.SetTrigger("Talk");
             }
 
             // Auto advance for info steps
@@ -362,20 +457,6 @@ namespace DigitPark.Managers
             }
 
             Debug.Log($"[Onboarding] Showing step {index + 1}: {step.id}");
-        }
-
-        private Sprite GetStepImage(string stepId)
-        {
-            return stepId switch
-            {
-                "welcome" => welcomeImage,
-                "games" => gamesImage,
-                "cashbattle" => cashBattleImage,
-                "tournaments" => tournamentsImage,
-                "rewards" => rewardsImage,
-                "social" => socialImage,
-                _ => null
-            };
         }
 
         private void UpdateNextButton(OnboardingStep step)
@@ -434,22 +515,21 @@ namespace DigitPark.Managers
 
             string name = nameInput.text.Trim();
 
-            // Validate
             if (string.IsNullOrWhiteSpace(name))
             {
-                ShowNameError("Por favor ingresa un nombre");
+                ShowNameError(AutoLocalizer.Get("onboarding_name_error_empty"));
                 return;
             }
 
             if (name.Length < 3)
             {
-                ShowNameError("El nombre debe tener al menos 3 caracteres");
+                ShowNameError(AutoLocalizer.Get("onboarding_name_error_short"));
                 return;
             }
 
             if (name.Length > 20)
             {
-                ShowNameError("El nombre no puede tener más de 20 caracteres");
+                ShowNameError(AutoLocalizer.Get("onboarding_name_error_long"));
                 return;
             }
 
@@ -489,14 +569,12 @@ namespace DigitPark.Managers
         {
             if (avatarContainer == null) return;
 
-            // Clear existing
             foreach (var avatar in spawnedAvatars)
             {
                 if (avatar) Destroy(avatar);
             }
             spawnedAvatars.Clear();
 
-            // Create avatar options
             foreach (var option in avatarOptions)
             {
                 CreateAvatarOption(option);
@@ -518,7 +596,6 @@ namespace DigitPark.Managers
 
             spawnedAvatars.Add(item);
 
-            // Setup click
             var button = item.GetComponent<Button>() ?? item.AddComponent<Button>();
             var opt = option;
             button.onClick.AddListener(() => OnAvatarSelected(opt.id, item));
@@ -537,7 +614,6 @@ namespace DigitPark.Managers
                 ? new Color(0f, 0.5f, 0.8f, 0.9f)
                 : new Color(0.2f, 0.2f, 0.25f, 0.9f);
 
-            // Avatar placeholder
             var avatarObj = new GameObject("AvatarImage");
             avatarObj.transform.SetParent(item.transform, false);
             var avatarRT = avatarObj.AddComponent<RectTransform>();
@@ -550,7 +626,6 @@ namespace DigitPark.Managers
             avatarImg.color = new Color(0.4f, 0.4f, 0.4f);
             if (option.sprite != null) avatarImg.sprite = option.sprite;
 
-            // Name
             var nameObj = new GameObject("Name");
             nameObj.transform.SetParent(item.transform, false);
             var nameRT = nameObj.AddComponent<RectTransform>();
@@ -572,7 +647,6 @@ namespace DigitPark.Managers
         {
             selectedAvatarId = avatarId;
 
-            // Update visual selection
             foreach (var avatar in spawnedAvatars)
             {
                 if (avatar == null) continue;
@@ -591,24 +665,6 @@ namespace DigitPark.Managers
             if (nextButton) nextButton.interactable = true;
 
             Debug.Log($"[Onboarding] Avatar selected: {avatarId}");
-        }
-
-        private void ShowInteractiveHighlight(OnboardingStep step)
-        {
-            if (highlightOverlay)
-            {
-                highlightOverlay.SetActive(true);
-
-                if (highlightTooltipText)
-                {
-                    highlightTooltipText.text = step.highlightTooltip;
-                }
-            }
-
-            if (tapToContinuePrompt)
-            {
-                tapToContinuePrompt.SetActive(true);
-            }
         }
 
         private void ShowCompletion()
@@ -653,12 +709,11 @@ namespace DigitPark.Managers
 
             var currentStep = steps[currentStepIndex];
 
-            // Validate required input
             if (currentStep.stepType == OnboardingStepType.NameInput)
             {
                 if (string.IsNullOrWhiteSpace(playerName))
                 {
-                    ShowNameError("Por favor ingresa un nombre");
+                    ShowNameError(AutoLocalizer.Get("onboarding_name_error_empty"));
                     return;
                 }
             }
@@ -692,49 +747,57 @@ namespace DigitPark.Managers
 
         private void TransitionToStep(int newIndex)
         {
+            if (slideObjects == null) return;
             isTransitioning = true;
 
-            const float fadeOut = 0.12f;
-            const float fadeIn = 0.2f;
+            GameObject oldSlide = (currentStepIndex >= 0 && currentStepIndex < slideObjects.Length)
+                ? slideObjects[currentStepIndex] : null;
+            GameObject newSlide = (newIndex >= 0 && newIndex < slideObjects.Length)
+                ? slideObjects[newIndex] : null;
 
-            CanvasGroup imgCG = null, titleCG = null, descCG = null;
-            if (stepImage != null)
-                imgCG = stepImage.GetComponent<CanvasGroup>() ?? stepImage.gameObject.AddComponent<CanvasGroup>();
-            if (titleText != null)
-                titleCG = titleText.GetComponent<CanvasGroup>() ?? titleText.gameObject.AddComponent<CanvasGroup>();
-            if (descriptionText != null)
-                descCG = descriptionText.GetComponent<CanvasGroup>() ?? descriptionText.gameObject.AddComponent<CanvasGroup>();
+            // Activate new slide (invisible initially)
+            if (newSlide != null)
+            {
+                newSlide.SetActive(true);
+                var newCG = newSlide.GetComponent<CanvasGroup>() ?? newSlide.AddComponent<CanvasGroup>();
+                newCG.alpha = 0f;
+                newSlide.transform.localScale = Vector3.one * 0.95f;
+            }
 
             var seq = DOTween.Sequence();
+            float fadeDuration = transitionDuration * 0.6f;
 
-            // Fade out current content
-            if (imgCG != null)
+            // Fade out old slide
+            if (oldSlide != null)
             {
-                seq.Append(imgCG.DOFade(0f, fadeOut));
-                seq.Join(stepImage.transform.DOScale(0.85f, fadeOut));
+                var oldCG = oldSlide.GetComponent<CanvasGroup>() ?? oldSlide.AddComponent<CanvasGroup>();
+                seq.Append(oldCG.DOFade(0f, fadeDuration));
             }
-            if (titleCG != null) seq.Join(titleCG.DOFade(0f, fadeOut));
-            if (descCG != null) seq.Join(descCG.DOFade(0f, fadeOut));
 
-            // Switch to new step
-            seq.AppendCallback(() =>
+            // Fade in new slide
+            if (newSlide != null)
             {
+                var newCG = newSlide.GetComponent<CanvasGroup>();
+                if (newCG != null)
+                {
+                    seq.Join(newCG.DOFade(1f, fadeDuration));
+                    seq.Join(newSlide.transform.DOScale(1f, fadeDuration).SetEase(Ease.OutCubic));
+                }
+            }
+
+            seq.OnComplete(() =>
+            {
+                // Deactivate old slide
+                if (oldSlide != null)
+                {
+                    oldSlide.SetActive(false);
+                    var oldCG = oldSlide.GetComponent<CanvasGroup>();
+                    if (oldCG != null) oldCG.alpha = 1f;
+                }
+
                 ShowStep(newIndex);
-                if (imgCG != null) { imgCG.alpha = 0f; stepImage.transform.localScale = Vector3.one * 0.85f; }
-                if (titleCG != null) titleCG.alpha = 0f;
-                if (descCG != null) descCG.alpha = 0f;
+                isTransitioning = false;
             });
-
-            // Fade in new content
-            if (imgCG != null)
-            {
-                seq.Append(imgCG.DOFade(1f, fadeIn));
-                seq.Join(stepImage.transform.DOScale(1f, fadeIn).SetEase(Ease.OutBack));
-            }
-            if (titleCG != null) seq.Join(titleCG.DOFade(1f, fadeIn));
-            if (descCG != null) seq.Join(descCG.DOFade(1f, fadeIn));
-
-            seq.OnComplete(() => isTransitioning = false);
         }
 
         #region Animations
@@ -757,27 +820,11 @@ namespace DigitPark.Managers
                 topBarTransform.DOAnchorPos(pos, 0.35f).SetDelay(0.1f).SetEase(Ease.OutCubic);
             }
 
-            // Step image scale from 0
-            if (stepImage != null)
+            // First slide scale from 0
+            if (slideObjects != null && slideObjects[0] != null)
             {
-                stepImage.transform.localScale = Vector3.zero;
-                stepImage.transform.DOScale(1f, 0.4f).SetDelay(0.15f).SetEase(Ease.OutBack);
-            }
-
-            // Title fade in
-            if (titleText != null)
-            {
-                var cg = titleText.gameObject.AddComponent<CanvasGroup>();
-                cg.alpha = 0f;
-                cg.DOFade(1f, 0.35f).SetDelay(0.25f);
-            }
-
-            // Description fade in
-            if (descriptionText != null)
-            {
-                var cg = descriptionText.gameObject.AddComponent<CanvasGroup>();
-                cg.alpha = 0f;
-                cg.DOFade(1f, 0.35f).SetDelay(0.3f);
+                slideObjects[0].transform.localScale = Vector3.zero;
+                slideObjects[0].transform.DOScale(1f, 0.4f).SetDelay(0.15f).SetEase(Ease.OutBack);
             }
 
             // Dots fade in
@@ -801,13 +848,7 @@ namespace DigitPark.Managers
 
         private void OnSkipClicked()
         {
-            // Mark as completed without rewards
             CompleteOnboarding(giveRewards: false);
-        }
-
-        private void OnBackClicked()
-        {
-            OnPrevClicked();
         }
 
         private void OnStartPlaying()
@@ -817,12 +858,10 @@ namespace DigitPark.Managers
 
         private void CompleteOnboarding(bool giveRewards = true)
         {
-            // Mark onboarding as complete
             PlayerPrefs.SetInt("OnboardingComplete", 1);
 
             if (giveRewards)
             {
-                // Give completion rewards
                 int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
                 PlayerPrefs.SetInt("PlayerCoins", currentCoins + completionRewardCoins);
 
@@ -834,21 +873,14 @@ namespace DigitPark.Managers
 
             Debug.Log($"[Onboarding] Completed. Rewards given: {giveRewards}");
 
-            // Navigate to main menu
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.MAIN_MENU);
         }
 
-        /// <summary>
-        /// Check if onboarding has been completed
-        /// </summary>
         public static bool IsOnboardingComplete()
         {
             return PlayerPrefs.GetInt("OnboardingComplete", 0) == 1;
         }
 
-        /// <summary>
-        /// Reset onboarding (for testing)
-        /// </summary>
         public static void ResetOnboarding()
         {
             PlayerPrefs.DeleteKey("OnboardingComplete");

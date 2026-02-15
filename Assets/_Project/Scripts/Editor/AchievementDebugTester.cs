@@ -7,7 +7,8 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// Editor window for testing achievements.
-    /// Allows unlocking any achievement and triggers the toast notification.
+    /// In Play mode: uses AchievementService as single source of truth (unlock triggers toast automatically).
+    /// In Edit mode: uses PlayerPrefs fallback with hardcoded definitions.
     /// Access via: DigitPark > Tools > Achievement Debug Tester
     /// </summary>
     public class AchievementDebugTester : EditorWindow
@@ -21,12 +22,47 @@ namespace DigitPark.Editor
         // Achievement data structure for the tester
         private List<AchievementTestData> allAchievements;
 
+        // Cached reference to Service (Play mode only)
+        private Services.AchievementService cachedService;
+
+        private bool IsServiceAvailable
+        {
+            get
+            {
+                if (!Application.isPlaying) return false;
+                if (cachedService == null)
+                    cachedService = Services.AchievementService.Instance;
+                return cachedService != null && cachedService.AllAchievements.Count > 0;
+            }
+        }
+
         [MenuItem("DigitPark/Tools/Achievement Debug Tester")]
         public static void ShowWindow()
         {
             var window = GetWindow<AchievementDebugTester>("Achievement Tester");
             window.minSize = new Vector2(450, 600);
             window.Initialize();
+        }
+
+        private void OnEnable()
+        {
+            EditorApplication.playModeStateChanged += OnPlayModeChanged;
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+        }
+
+        private void OnPlayModeChanged(PlayModeStateChange state)
+        {
+            cachedService = null;
+            if (state == PlayModeStateChange.EnteredPlayMode ||
+                state == PlayModeStateChange.EnteredEditMode)
+            {
+                Initialize();
+                Repaint();
+            }
         }
 
         private void Initialize()
@@ -37,6 +73,35 @@ namespace DigitPark.Editor
 
         private void LoadAchievementDefinitions()
         {
+            if (IsServiceAvailable)
+            {
+                // Play mode: read from Service (single source of truth)
+                allAchievements = new List<AchievementTestData>();
+                foreach (var ach in cachedService.AllAchievements)
+                {
+                    // Try to get localized title
+                    string title = ach.titleKey;
+                    if (Localization.LocalizationManager.Instance != null)
+                        title = Localization.LocalizationManager.Instance.GetText(ach.titleKey);
+
+                    string desc = ach.descriptionKey;
+                    if (Localization.LocalizationManager.Instance != null)
+                        desc = Localization.LocalizationManager.Instance.GetText(ach.descriptionKey);
+
+                    allAchievements.Add(new AchievementTestData(
+                        ach.id,
+                        title,
+                        desc,
+                        ach.category.ToString(),
+                        ach.points,
+                        ach.iconName,
+                        ach.isHidden
+                    ));
+                }
+                return;
+            }
+
+            // Edit mode fallback: hardcoded definitions
             allAchievements = new List<AchievementTestData>
             {
                 // ==================== BEGINNER (4) ====================
@@ -94,9 +159,6 @@ namespace DigitPark.Editor
                 new AchievementTestData("level_50", "Nivel 50", "Alcanza el nivel 50", "Progression", 75, "Logro_Nivel50"),
                 new AchievementTestData("level_100", "Nivel 100", "Alcanza el nivel 100", "Progression", 150, "Logro_Avance_Epico"),
 
-                // ==================== COLLECTOR ====================
-                // Reservado para V2
-
                 // ==================== TIME (6) ====================
                 new AchievementTestData("days_7", "Una Semana", "Juega 7 días", "Time", 25, "Logro_Racha_7_Dias"),
                 new AchievementTestData("days_30", "Un Mes", "Juega 30 días", "Time", 50, "Logro_Racha_30_Dias"),
@@ -116,10 +178,21 @@ namespace DigitPark.Editor
         private void LoadSavedStates()
         {
             achievementStates.Clear();
+            if (allAchievements == null) return;
+
             foreach (var achievement in allAchievements)
             {
-                bool isCompleted = PlayerPrefs.GetInt($"Achievement_{achievement.id}_completed", 0) == 1;
-                achievementStates[achievement.id] = isCompleted;
+                if (IsServiceAvailable)
+                {
+                    // Play mode: read from Service
+                    achievementStates[achievement.id] = cachedService.IsUnlocked(achievement.id);
+                }
+                else
+                {
+                    // Edit mode: read from PlayerPrefs (legacy)
+                    bool isCompleted = PlayerPrefs.GetInt($"Achievement_{achievement.id}_completed", 0) == 1;
+                    achievementStates[achievement.id] = isCompleted;
+                }
             }
         }
 
@@ -132,14 +205,36 @@ namespace DigitPark.Editor
 
             // Header
             EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("🏆 Achievement Debug Tester", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Marca un logro para desbloquearlo y ver la notificación", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Achievement Debug Tester", EditorStyles.boldLabel);
+
+            if (IsServiceAvailable)
+            {
+                EditorGUILayout.LabelField("Modo: AchievementService (Play Mode)", EditorStyles.miniLabel);
+            }
+            else if (Application.isPlaying)
+            {
+                EditorGUILayout.LabelField("Modo: Play Mode (Service no disponible aun...)", EditorStyles.miniLabel);
+            }
+            else
+            {
+                EditorGUILayout.LabelField("Modo: Edit Mode (PlayerPrefs fallback)", EditorStyles.miniLabel);
+            }
+
             EditorGUILayout.Space(5);
 
             // Runtime warning
             if (!Application.isPlaying)
             {
-                EditorGUILayout.HelpBox("⚠️ Debes estar en PLAY MODE para ver las notificaciones toast.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Debes estar en PLAY MODE para ver las notificaciones toast y usar AchievementService.", MessageType.Warning);
+            }
+            else if (!IsServiceAvailable)
+            {
+                EditorGUILayout.HelpBox("AchievementService aun no esta listo. Espera a que termine el Boot.", MessageType.Info);
+                if (GUILayout.Button("Reintentar conexion con Service"))
+                {
+                    cachedService = null;
+                    Initialize();
+                }
             }
 
             EditorGUILayout.Space(5);
@@ -162,7 +257,7 @@ namespace DigitPark.Editor
             if (GUILayout.Button("Reset ALL", GUILayout.Width(80)))
             {
                 if (EditorUtility.DisplayDialog("Reset Achievements",
-                    "¿Resetear TODOS los logros?\nEsto borrará todo el progreso guardado.", "Sí", "No"))
+                    "Resetear TODOS los logros?\nEsto borrara todo el progreso guardado.", "Si", "No"))
                 {
                     ResetAllAchievements();
                 }
@@ -174,7 +269,15 @@ namespace DigitPark.Editor
             // Stats
             int unlocked = achievementStates.Count(x => x.Value);
             int total = allAchievements.Count;
-            EditorGUILayout.LabelField($"Progreso: {unlocked}/{total} ({(unlocked * 100 / total)}%)", EditorStyles.boldLabel);
+            int percent = total > 0 ? (unlocked * 100 / total) : 0;
+            EditorGUILayout.LabelField($"Progreso: {unlocked}/{total} ({percent}%)", EditorStyles.boldLabel);
+
+            if (IsServiceAvailable)
+            {
+                int points = cachedService.GetTotalPoints();
+                int maxPoints = cachedService.GetMaxPoints();
+                EditorGUILayout.LabelField($"Puntos: {points}/{maxPoints}", EditorStyles.miniLabel);
+            }
 
             EditorGUILayout.Space(5);
 
@@ -208,7 +311,7 @@ namespace DigitPark.Editor
                     EditorGUILayout.BeginVertical("box");
                     GUI.backgroundColor = Color.white;
 
-                    EditorGUILayout.LabelField($"━━━ {currentCategory.ToUpper()} ━━━", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField($"--- {currentCategory.ToUpper()} ---", EditorStyles.boldLabel);
                     EditorGUILayout.EndVertical();
                 }
 
@@ -222,17 +325,18 @@ namespace DigitPark.Editor
 
             // Quick actions
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("🎯 Unlock Random", GUILayout.Height(30)))
+            if (GUILayout.Button("Unlock Random", GUILayout.Height(30)))
             {
                 UnlockRandomAchievement();
             }
-            if (GUILayout.Button("📦 Unlock All Beginner", GUILayout.Height(30)))
+            if (GUILayout.Button("Unlock All Beginner", GUILayout.Height(30)))
             {
                 UnlockCategory("Beginner");
             }
-            if (GUILayout.Button("🔄 Refresh", GUILayout.Height(30)))
+            if (GUILayout.Button("Refresh", GUILayout.Height(30)))
             {
-                LoadSavedStates();
+                cachedService = null;
+                Initialize();
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -289,55 +393,43 @@ namespace DigitPark.Editor
 
         private void UnlockAchievement(AchievementTestData achievement)
         {
-            // Save to PlayerPrefs
-            PlayerPrefs.SetInt($"Achievement_{achievement.id}_completed", 1);
-            PlayerPrefs.SetInt($"Achievement_{achievement.id}_progress", 100);
-            PlayerPrefs.Save();
+            if (IsServiceAvailable)
+            {
+                // Play mode: unlock via Service (triggers toast automatically via event chain)
+                cachedService.UnlockAchievement(achievement.id);
+                Debug.Log($"[AchievementTester] Unlocked via Service: {achievement.title} ({achievement.id})");
+            }
+            else
+            {
+                // Edit mode: PlayerPrefs fallback
+                PlayerPrefs.SetInt($"Achievement_{achievement.id}_completed", 1);
+                PlayerPrefs.SetInt($"Achievement_{achievement.id}_progress", 100);
+                PlayerPrefs.Save();
+                Debug.Log($"[AchievementTester] Unlocked via PlayerPrefs (edit mode): {achievement.title}");
+            }
 
             achievementStates[achievement.id] = true;
-
-            Debug.Log($"[AchievementTester] Unlocked: {achievement.title}");
-
-            // Trigger notification if in play mode
-            if (Application.isPlaying)
-            {
-                TriggerNotification(achievement);
-            }
         }
 
         private void LockAchievement(AchievementTestData achievement)
         {
+            if (IsServiceAvailable)
+            {
+                // Service doesn't support individual lock - inform user
+                Debug.Log($"[AchievementTester] No se puede bloquear individualmente con Service activo. Usa 'Reset ALL'.");
+                // Revert toggle state
+                achievementStates[achievement.id] = true;
+                return;
+            }
+
+            // Edit mode: PlayerPrefs fallback
             PlayerPrefs.SetInt($"Achievement_{achievement.id}_completed", 0);
             PlayerPrefs.SetInt($"Achievement_{achievement.id}_progress", 0);
             PlayerPrefs.SetInt($"Achievement_{achievement.id}_claimed", 0);
             PlayerPrefs.Save();
 
             achievementStates[achievement.id] = false;
-
-            Debug.Log($"[AchievementTester] Locked: {achievement.title}");
-        }
-
-        private void TriggerNotification(AchievementTestData achievement)
-        {
-            // Try to find the notification manager
-            var notificationManager = Object.FindObjectOfType<Managers.AchievementNotificationManager>();
-
-            if (notificationManager != null)
-            {
-                Sprite icon = LoadIconSprite(achievement.iconName);
-                notificationManager.ShowNotification(
-                    achievement.title,
-                    achievement.description,
-                    achievement.points,
-                    icon,
-                    achievement.isSecret
-                );
-                Debug.Log($"[AchievementTester] Notification triggered for: {achievement.title}");
-            }
-            else
-            {
-                Debug.LogWarning("[AchievementTester] AchievementNotificationManager not found! Make sure it's initialized.");
-            }
+            Debug.Log($"[AchievementTester] Locked via PlayerPrefs (edit mode): {achievement.title}");
         }
 
         private Sprite LoadIconSprite(string iconName)
@@ -362,15 +454,26 @@ namespace DigitPark.Editor
 
         private void ResetAllAchievements()
         {
-            foreach (var achievement in allAchievements)
+            if (IsServiceAvailable)
             {
-                PlayerPrefs.DeleteKey($"Achievement_{achievement.id}_completed");
-                PlayerPrefs.DeleteKey($"Achievement_{achievement.id}_progress");
-                PlayerPrefs.DeleteKey($"Achievement_{achievement.id}_claimed");
+                // Play mode: reset via Service
+                cachedService.ResetAllAchievements();
+                Debug.Log("[AchievementTester] All achievements reset via Service");
             }
-            PlayerPrefs.Save();
+            else
+            {
+                // Edit mode: clear PlayerPrefs
+                foreach (var achievement in allAchievements)
+                {
+                    PlayerPrefs.DeleteKey($"Achievement_{achievement.id}_completed");
+                    PlayerPrefs.DeleteKey($"Achievement_{achievement.id}_progress");
+                    PlayerPrefs.DeleteKey($"Achievement_{achievement.id}_claimed");
+                }
+                PlayerPrefs.Save();
+                Debug.Log("[AchievementTester] All achievements reset via PlayerPrefs (edit mode)");
+            }
+
             LoadSavedStates();
-            Debug.Log("[AchievementTester] All achievements reset!");
         }
 
         private void UnlockRandomAchievement()

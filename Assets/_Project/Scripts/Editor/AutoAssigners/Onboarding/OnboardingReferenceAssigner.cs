@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
-    /// Reference Assigner for Onboarding scene.
+    /// Reference Assigner for Onboarding scene (slide-based architecture).
     /// Automatically finds and assigns UI references to OnboardingManager.
     ///
     /// Menu: DigitPark/Auto Assigners/References/Onboarding/Onboarding References
@@ -24,26 +24,22 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static readonly string[] REQUIRED_REFS = {
             // Main UI
-            "skipButton", "skipButtonText", "backButton",
-            // Step Display
-            "stepImage", "titleText", "descriptionText",
+            "skipButton", "skipButtonText",
+            // Slides Container
+            "slidesContainer",
             // Navigation
-            "nextButton", "prevButton", "nextButtonText", "dotsContainer",
+            "nextButton", "prevButton", "nextButtonText", "prevButtonText", "dotsContainer",
             // Progress
             "progressBar", "stepCounterText",
-            // Name Input
+            // Name Input (Slide 2)
             "nameInputPanel", "nameInput", "confirmNameButton", "nameErrorText",
-            // Avatar Selection
+            // Avatar Selection (Slide 3)
             "avatarSelectionPanel", "avatarContainer",
-            // Tutorial Completion
+            // Tutorial Completion (Slide 8)
             "completionPanel", "completionTitleText", "completionMessageText",
             "rewardText", "startPlayingButton",
             // Sections (for animations)
             "progressBarTransform", "topBarTransform", "dotsTransform", "navigationTransform"
-            // Note: characterContainer, characterAnimator, highlightOverlay, highlightTarget,
-            //   highlightTooltipText, tapToContinuePrompt - not created by UIBuilder
-            // Note: dotPrefab, avatarOptionPrefab - prefabs, manual assignment
-            // Note: Step images (Sprites) - assigned via icon paths
         };
 
         private struct ReferenceResult
@@ -82,12 +78,12 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to OnboardingManager:\n" +
-                "• Main (skip, back buttons)\n" +
-                "• Step display (image, title, description)\n" +
+                "Assigns UI references to OnboardingManager (slide-based):\n" +
+                "• Main (skip button)\n" +
+                "• SlidesContainer (Slide1-Slide8)\n" +
                 "• Navigation (next, prev, dots, progress)\n" +
-                "• Name input and Avatar selection panels\n" +
-                "• Completion panel",
+                "• Name input (Slide2) and Avatar selection (Slide3)\n" +
+                "• Completion panel (Slide8)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -129,7 +125,7 @@ namespace DigitPark.Editor.AutoAssigners
             float successRate = (float)successTotal / total;
             GUI.color = successRate == 1f ? new Color(0.2f, 0.8f, 0.2f) :
                         successRate >= 0.7f ? new Color(1f, 0.8f, 0.2f) : new Color(1f, 0.4f, 0.4f);
-            GUILayout.Label(successRate == 1f ? "✓ ALL REFERENCES SET" : "⚠ Some references missing", EditorStyles.boldLabel);
+            GUILayout.Label(successRate == 1f ? "ALL REFERENCES SET" : "Some references missing", EditorStyles.boldLabel);
             GUI.color = Color.white;
 
             GUILayout.Label($"Assigned: {assignedCount} | Already Set: {alreadySetCount} | Failed: {failedCount}");
@@ -138,7 +134,7 @@ namespace DigitPark.Editor.AutoAssigners
             {
                 EditorGUILayout.BeginHorizontal();
                 GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
-                GUILayout.Label(result.success ? (result.status == "Already Set" ? "●" : "✓") : "✗", GUILayout.Width(20));
+                GUILayout.Label(result.success ? (result.status == "Already Set" ? "=" : "+") : "X", GUILayout.Width(20));
                 GUI.color = Color.white;
                 GUILayout.Label(result.fieldName, GUILayout.Width(200));
                 GUILayout.Label(result.status, GUILayout.Width(120));
@@ -157,7 +153,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static void AssignAllReferences()
         {
-            Log("=== ASSIGNING ONBOARDING REFERENCES ===");
+            Log("=== ASSIGNING ONBOARDING REFERENCES (SLIDE-BASED) ===");
 
             var manager = FindOnboardingManager();
             if (manager == null)
@@ -173,34 +169,32 @@ namespace DigitPark.Editor.AutoAssigners
             // Main UI
             AssignReference(so, "skipButton", FindButtonByName("skip", "saltar", "omitir"));
             AssignReference(so, "skipButtonText", FindTextInChild("skipbutton", "text"));
-            AssignReference(so, "backButton", FindButtonByName("back", "atras", "return"));
 
-            // Step Display
-            AssignReference(so, "stepImage", FindImageByName("step", "slide", "illustration"));
-            AssignReference(so, "titleText", FindTextByName("title", "titulo", "header"));
-            AssignReference(so, "descriptionText", FindTextByName("description", "desc", "body"));
+            // Slides Container
+            AssignReference(so, "slidesContainer", FindByNameContains<Transform>("slidescontainer"));
 
             // Navigation
             AssignReference(so, "nextButton", FindButtonByName("next", "siguiente", "continue"));
             AssignReference(so, "prevButton", FindButtonByName("prev", "anterior", "back"));
             AssignReference(so, "nextButtonText", FindTextInChild("nextbutton", "text"));
+            AssignReference(so, "prevButtonText", FindTextInChild("prevbutton", "text"));
             AssignReference(so, "dotsContainer", FindByNameContains<Transform>("dots", "indicators", "pagination", "progressdots"));
 
             // Progress
             AssignReference(so, "progressBar", FindByNameContains<Slider>("progressbar", "progress"));
             AssignReference(so, "stepCounterText", FindTextByName("stepcounter", "counter", "step"));
 
-            // Name Input
+            // Name Input (Slide 2)
             AssignGameObject(so, "nameInputPanel", "nameinputpanel", "nameinput");
             AssignInputField(so, "nameInput", "nameinput", "name");
             AssignReference(so, "confirmNameButton", FindButtonByName("confirmname", "confirm", "confirmar"));
             AssignReference(so, "nameErrorText", FindTextByName("nameerror", "error"));
 
-            // Avatar Selection
+            // Avatar Selection (Slide 3)
             AssignGameObject(so, "avatarSelectionPanel", "avatarselection", "avatarpanel");
             AssignReference(so, "avatarContainer", FindByNameContains<Transform>("avatarcontainer", "avatargrid", "avatars"));
 
-            // Tutorial Completion
+            // Tutorial Completion (Slide 8)
             AssignGameObject(so, "completionPanel", "completionpanel", "completion", "finish");
             AssignReference(so, "completionTitleText", FindTextByName("completiontitle", "congratulations"));
             AssignReference(so, "completionMessageText", FindTextByName("completionmessage", "completiondesc"));
@@ -258,13 +252,6 @@ namespace DigitPark.Editor.AutoAssigners
         {
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
-            return null;
-        }
-
-        private static Image FindImageByName(params string[] patterns)
-        {
-            var all = Object.FindObjectsOfType<Image>(true);
-            foreach (var p in patterns) foreach (var i in all) if (i.gameObject.name.ToLower().Contains(p.ToLower())) return i;
             return null;
         }
 

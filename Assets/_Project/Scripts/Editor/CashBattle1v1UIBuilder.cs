@@ -135,7 +135,7 @@ namespace DigitPark.Editor
         {
             CleanupOldUI();
 
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 EditorUtility.DisplayDialog("Error", "No se encontro Canvas. Abre la escena CashBattle1v1 primero.", "OK");
@@ -165,29 +165,15 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
-        }
-
-        private static Canvas FindMainCanvas()
-        {
-            // Buscar Canvas principal por nombre, evitando TransitionCanvas
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                    return c;
-            }
-            // Fallback: primer Canvas que no sea TransitionCanvas
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name != "TransitionCanvas")
-                    return c;
-            }
-            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static void BuildAllElements(Canvas canvas)
@@ -440,7 +426,7 @@ namespace DigitPark.Editor
 
         private static void BuildHeaderOnly()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform safeArea = canvas.transform.Find("SafeArea");
@@ -687,7 +673,7 @@ namespace DigitPark.Editor
 
         private static void BuildGameCardsOnly()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform panel = canvas.transform.Find("SafeArea/MainContentPanel");
@@ -1089,7 +1075,7 @@ namespace DigitPark.Editor
 
         private static void BuildEntryFeeSectionOnly()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform panel = canvas.transform.Find("SafeArea/MainContentPanel");
@@ -1166,7 +1152,7 @@ namespace DigitPark.Editor
 
         private static void BuildFindOpponentOnly()
         {
-            Canvas canvas = FindMainCanvas();
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             Transform panel = canvas.transform.Find("SafeArea/MainContentPanel");

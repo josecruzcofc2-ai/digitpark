@@ -6,10 +6,9 @@ using TMPro;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Main Onboarding UI Builder - Rediseño completo
-    /// Layout: ProgressBar → TopBar → StepImage → Title → Description → Panels → Navigation
-    /// Soporta 8 steps del OnboardingManager:
-    ///   welcome, name, avatar, games, cashbattle, tournaments, rewards, complete
+    /// Main Onboarding UI Builder - Slide-Based Architecture
+    /// Each step is an independent slide inside SlidesContainer (like CashBattle).
+    /// 8 slides: Welcome, Name, Avatar, Games, CashBattle, Tournaments, Rewards, Completion
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
     /// Menu: DigitPark/UI Builders/Onboarding/Main Onboarding
@@ -45,14 +44,14 @@ namespace DigitPark.Editor
         private const float TOPBAR_TOP = 0.988f;
         private const float TOPBAR_BOT = 0.955f;
 
-        private const float IMAGE_TOP = 0.94f;
-        private const float IMAGE_BOT = 0.58f;
+        private const float ICON_TOP = 0.92f;
+        private const float ICON_BOT = 0.63f;
 
-        private const float TITLE_TOP = 0.56f;
-        private const float TITLE_BOT = 0.47f;
+        private const float TITLE_TOP = 0.61f;
+        private const float TITLE_BOT = 0.50f;
 
-        private const float DESC_TOP = 0.46f;
-        private const float DESC_BOT = 0.28f;
+        private const float CONTENT_TOP = 0.48f;
+        private const float CONTENT_BOT = 0.12f;
 
         private const float DOTS_TOP = 0.095f;
         private const float DOTS_BOT = 0.065f;
@@ -66,8 +65,17 @@ namespace DigitPark.Editor
 
         #region Paths
 
-        private const string ICONS_PATH = "Assets/_Project/Art/Icons/Onboarding/";
-        private const string GAME_ICONS_PATH = "Assets/_Project/Art/Icons/Games/";
+        private static readonly string[] SLIDE_ICONS =
+        {
+            "Assets/_Project/Art/Icons/Onboarding/WelcomeIcon.png",
+            "Assets/_Project/Art/Icons/Social/Profile/ProfileIconNeon.png",
+            "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png",
+            "Assets/_Project/Art/Icons/Onboarding/GamesIcon.png",
+            "Assets/_Project/Art/Icons/Onboarding/CashBattleIcon.png",
+            "Assets/_Project/Art/Icons/Onboarding/TournamentsIcon.png",
+            "Assets/_Project/Art/Icons/Onboarding/RewardsIcon.png",
+            "Assets/_Project/Art/Icons/Onboarding/CompleteIcon.png"
+        };
 
         #endregion
 
@@ -80,19 +88,19 @@ namespace DigitPark.Editor
         private void OnGUI()
         {
             GUILayout.Label("Main Onboarding UI Builder", EditorStyles.boldLabel);
-            GUILayout.Label("Tutorial nuevos usuarios - Neon Cyan - REDISEÑO", EditorStyles.miniLabel);
+            GUILayout.Label("Slide-Based Architecture (8 slides independientes)", EditorStyles.miniLabel);
             GUILayout.Space(10);
 
             EditorGUILayout.HelpBox(
-                "Nuevo diseño (de arriba a abajo):\n\n" +
-                "1. Progress Bar (línea delgada cyan)\n" +
-                "2. Top Bar (contador de pasos + saltar)\n" +
-                "3. Step Image (icono grande centrado)\n" +
-                "4. Title + Description (texto grande legible)\n" +
-                "5. Paneles especiales (nombre, avatar, completado)\n" +
-                "6. Navigation (dots + prev/next)\n\n" +
-                "Soporta 8 steps: welcome, name, avatar, games,\n" +
-                "cashbattle, tournaments, rewards, complete",
+                "Arquitectura slide-based (como CashBattle):\n\n" +
+                "Canvas\n" +
+                "  Background\n" +
+                "  ProgressBar (Slider, maxValue=7)\n" +
+                "  TopBar (DIGITPARK 36px + StepCounter 28px + SkipButton 28px)\n" +
+                "  SlidesContainer\n" +
+                "    Slide1 (Welcome) - Slide8 (Completion)\n" +
+                "  DotsContainer\n" +
+                "  NavigationPanel (PrevButton 36px + NextButton 36px)",
                 MessageType.Info);
 
             GUILayout.Space(15);
@@ -105,16 +113,15 @@ namespace DigitPark.Editor
             GUILayout.Space(10);
             GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("1. Background + Top Bar", GUILayout.Height(25)))
+            if (GUILayout.Button("1. Background + TopBar + Progress", GUILayout.Height(25)))
             {
                 Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
                 if (c != null) { CreateBackground(c.transform); CreateTopBar(); }
             }
-            if (GUILayout.Button("2. Content Area (Image + Text)", GUILayout.Height(25))) CreateContentArea();
-            if (GUILayout.Button("3. Name Input Panel", GUILayout.Height(25))) CreateNameInputPanel();
-            if (GUILayout.Button("4. Avatar Selection Panel", GUILayout.Height(25))) CreateAvatarSelectionPanel();
-            if (GUILayout.Button("5. Completion Panel", GUILayout.Height(25))) CreateCompletionPanel();
-            if (GUILayout.Button("6. Navigation (Dots + Buttons)", GUILayout.Height(25))) CreateNavigation();
+            if (GUILayout.Button("2. SlidesContainer (8 slides)", GUILayout.Height(25)))
+                CreateSlidesContainer();
+            if (GUILayout.Button("3. Navigation (Dots + Buttons)", GUILayout.Height(25)))
+                CreateNavigation();
 
             GUILayout.Space(15);
 
@@ -135,6 +142,11 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Limpiar TODOS los hijos del Canvas antes de reconstruir
+            for (int i = canvas.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(canvas.transform.GetChild(i).gameObject);
+
+            // Limpiar Background/SafeArea de otros canvases raíz (legacy)
             CleanupOldUI();
 
             var scaler = canvas.GetComponent<CanvasScaler>();
@@ -145,29 +157,12 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            // Limpiar elementos anteriores
-            string[] oldNames = {
-                "Background", "ProgressBar", "TopBar", "StepImage", "IconGlow",
-                "TitleText", "DescriptionText", "NameInputPanel", "AvatarSelectionPanel",
-                "CompletionPanel", "DotsContainer", "NavigationPanel",
-                "SafeArea", "SlidesContainer", "NavigationPanel", "WelcomeGiftBlocker"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
-
             CreateBackground(canvas.transform);
             CreateTopBar();
-            CreateContentArea();
-            CreateNameInputPanel();
-            CreateAvatarSelectionPanel();
-            CreateCompletionPanel();
+            CreateSlidesContainer();
             CreateNavigation();
-            SetupManagerReferences();
 
-            Debug.Log("[OnboardingUI] Onboarding RECONSTRUIDO exitosamente!");
+            Debug.Log("[OnboardingUI] Onboarding RECONSTRUIDO (slide-based, 8 slides)!");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
         }
@@ -186,14 +181,14 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Top Bar (Progress + StepCounter + Skip)
+        #region Top Bar (Progress + DIGITPARK Label + StepCounter + Skip)
 
         private static void CreateTopBar()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
-            // --- Progress Bar (thin cyan line at very top) ---
+            // --- Progress Bar ---
             var progressGO = FindOrCreate(canvas.transform, "ProgressBar");
             var pRT = GetOrAdd<RectTransform>(progressGO);
             SetAnchors(pRT, 0, PROGRESS_BOT, 1, PROGRESS_TOP);
@@ -206,7 +201,6 @@ namespace DigitPark.Editor
             slider.value = 0;
             slider.interactable = false;
 
-            // Slider Background (dark track)
             var sliderBg = FindOrCreate(progressGO.transform, "Background");
             var sbRT = GetOrAdd<RectTransform>(sliderBg);
             sbRT.anchorMin = Vector2.zero;
@@ -215,11 +209,10 @@ namespace DigitPark.Editor
             sbRT.offsetMax = Vector2.zero;
             GetOrAdd<Image>(sliderBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
 
-            // Fill Area
             var fillArea = FindOrCreate(progressGO.transform, "Fill Area");
             var faRT = GetOrAdd<RectTransform>(fillArea);
             faRT.anchorMin = Vector2.zero;
-            faRT.anchorMax = new Vector2(1, 1);
+            faRT.anchorMax = Vector2.one;
             faRT.offsetMin = Vector2.zero;
             faRT.offsetMax = Vector2.zero;
 
@@ -236,23 +229,38 @@ namespace DigitPark.Editor
             slider.targetGraphic = GetOrAdd<Image>(progressGO);
             GetOrAdd<Image>(progressGO).color = Color.clear;
 
-            // --- Top Bar (step counter + skip button) ---
+            // --- Top Bar ---
             var topBar = FindOrCreate(canvas.transform, "TopBar");
             var tbRT = GetOrAdd<RectTransform>(topBar);
             SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
 
-            // Step Counter (left)
+            // DIGITPARK label (left)
+            var titleLabel = FindOrCreate(topBar.transform, "TitleLabel");
+            var tlRT = GetOrAdd<RectTransform>(titleLabel);
+            tlRT.anchorMin = new Vector2(0, 0);
+            tlRT.anchorMax = new Vector2(0.40f, 1);
+            tlRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            tlRT.offsetMax = Vector2.zero;
+            var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLabel);
+            tlTMP.text = "DIGITPARK";
+            tlTMP.fontSize = 36;
+            tlTMP.color = CYAN_NEON;
+            tlTMP.fontStyle = FontStyles.Bold;
+            tlTMP.alignment = TextAlignmentOptions.Left;
+
+            // Step Counter (center)
             var counter = FindOrCreate(topBar.transform, "StepCounter");
             var cRT = GetOrAdd<RectTransform>(counter);
-            cRT.anchorMin = new Vector2(0, 0);
-            cRT.anchorMax = new Vector2(0.3f, 1);
-            cRT.offsetMin = new Vector2(SIDE_PAD, 0);
+            cRT.anchorMin = new Vector2(0.35f, 0);
+            cRT.anchorMax = new Vector2(0.65f, 1);
+            cRT.offsetMin = Vector2.zero;
             cRT.offsetMax = Vector2.zero;
             var cTMP = GetOrAdd<TextMeshProUGUI>(counter);
             cTMP.text = "1/8";
-            cTMP.fontSize = 18;
+            cTMP.fontSize = 28;
             cTMP.color = TEXT_SECONDARY;
-            cTMP.alignment = TextAlignmentOptions.Left;
+            cTMP.fontStyle = FontStyles.Bold;
+            cTMP.alignment = TextAlignmentOptions.Center;
 
             // Skip Button (right)
             var skipBtn = FindOrCreate(topBar.transform, "SkipButton");
@@ -273,112 +281,233 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
             stTMP.text = "SALTAR";
-            stTMP.fontSize = 16;
+            stTMP.fontSize = 28;
             stTMP.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
 
-            Debug.Log("[OnboardingUI] TopBar creado (ProgressBar + StepCounter + Skip)");
+            Debug.Log("[OnboardingUI] TopBar creado (ProgressBar + DIGITPARK + StepCounter + Skip)");
         }
 
         #endregion
 
-        #region Content Area (StepImage + Title + Description)
+        #region Slides Container
 
-        private static void CreateContentArea()
+        private static void CreateSlidesContainer()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
-            // --- Icon Glow (subtle glow behind step image) ---
-            var glow = FindOrCreate(canvas.transform, "IconGlow");
-            var glRT = GetOrAdd<RectTransform>(glow);
-            glRT.anchorMin = new Vector2(0.10f, IMAGE_BOT - 0.03f);
-            glRT.anchorMax = new Vector2(0.90f, IMAGE_TOP + 0.01f);
+            var container = FindOrCreate(canvas.transform, "SlidesContainer");
+            var cRT = GetOrAdd<RectTransform>(container);
+            cRT.anchorMin = Vector2.zero;
+            cRT.anchorMax = Vector2.one;
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
+
+            // Clean old slides
+            for (int i = container.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(container.transform.GetChild(i).gameObject);
+
+            CreateSlide1_Welcome(container.transform);
+            CreateSlide2_Name(container.transform);
+            CreateSlide3_Avatar(container.transform);
+            CreateSlide4_Games(container.transform);
+            CreateSlide5_CashBattle(container.transform);
+            CreateSlide6_Tournaments(container.transform);
+            CreateSlide7_Rewards(container.transform);
+            CreateSlide8_Completion(container.transform);
+
+            Debug.Log("[OnboardingUI] SlidesContainer creado (8 slides)");
+        }
+
+        // --- Slide Base: Icon + Title (shared by info slides) ---
+        private static Transform CreateSlideBase(Transform parent, string name, int iconIndex, bool active)
+        {
+            var slide = FindOrCreate(parent, name);
+            var sRT = GetOrAdd<RectTransform>(slide);
+            sRT.anchorMin = Vector2.zero;
+            sRT.anchorMax = Vector2.one;
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = Vector2.zero;
+            slide.SetActive(active);
+
+            // Limpiar hijos anteriores del slide
+            while (slide.transform.childCount > 0)
+                DestroyImmediate(slide.transform.GetChild(0).gameObject);
+
+            // IconGlow
+            var glow = new GameObject("IconGlow");
+            glow.transform.SetParent(slide.transform, false);
+            var glRT = glow.AddComponent<RectTransform>();
+            glRT.anchorMin = new Vector2(0.10f, ICON_BOT - 0.03f);
+            glRT.anchorMax = new Vector2(0.90f, ICON_TOP + 0.01f);
             glRT.offsetMin = Vector2.zero;
             glRT.offsetMax = Vector2.zero;
-            GetOrAdd<Image>(glow).color = CYAN_GLOW;
+            glow.AddComponent<Image>().color = CYAN_GLOW;
 
-            // --- Step Image (large centered icon) ---
-            var stepImg = FindOrCreate(canvas.transform, "StepImage");
-            var siRT = GetOrAdd<RectTransform>(stepImg);
-            siRT.anchorMin = new Vector2(0.20f, IMAGE_BOT);
-            siRT.anchorMax = new Vector2(0.80f, IMAGE_TOP);
-            siRT.offsetMin = Vector2.zero;
-            siRT.offsetMax = Vector2.zero;
-            var siImg = GetOrAdd<Image>(stepImg);
-            siImg.color = Color.white;
-            siImg.preserveAspect = true;
+            // SlideIcon
+            var icon = new GameObject("SlideIcon");
+            icon.transform.SetParent(slide.transform, false);
+            var iRT = icon.AddComponent<RectTransform>();
+            iRT.anchorMin = new Vector2(0.20f, ICON_BOT);
+            iRT.anchorMax = new Vector2(0.80f, ICON_TOP);
+            iRT.offsetMin = Vector2.zero;
+            iRT.offsetMax = Vector2.zero;
+            var iImg = icon.AddComponent<Image>();
+            iImg.color = Color.white;
+            iImg.preserveAspect = true;
 
-            // Try load welcome icon
-            Sprite welcomeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICONS_PATH + "WelcomeIcon.png");
-            if (welcomeSprite != null) siImg.sprite = welcomeSprite;
+            if (iconIndex >= 0 && iconIndex < SLIDE_ICONS.Length)
+            {
+                Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(SLIDE_ICONS[iconIndex]);
+                if (sprite != null) iImg.sprite = sprite;
+            }
 
-            // --- Title Text ---
-            var title = FindOrCreate(canvas.transform, "TitleText");
-            var tRT = GetOrAdd<RectTransform>(title);
+            return slide.transform;
+        }
+
+        private static TextMeshProUGUI CreateSlideTitle(Transform slide, string text, Color color)
+        {
+            var titleGO = new GameObject("SlideTitle");
+            titleGO.transform.SetParent(slide, false);
+            var tRT = titleGO.AddComponent<RectTransform>();
             tRT.anchorMin = new Vector2(0.05f, TITLE_BOT);
             tRT.anchorMax = new Vector2(0.95f, TITLE_TOP);
             tRT.offsetMin = Vector2.zero;
             tRT.offsetMax = Vector2.zero;
-            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
-            tTMP.text = "\u00A1Bienvenido a DigitPark!";
-            tTMP.fontSize = 34;
-            tTMP.color = CYAN_NEON;
-            tTMP.fontStyle = FontStyles.Bold;
-            tTMP.alignment = TextAlignmentOptions.Center;
-            tTMP.enableWordWrapping = true;
 
-            // --- Description Text ---
-            var desc = FindOrCreate(canvas.transform, "DescriptionText");
-            var dRT = GetOrAdd<RectTransform>(desc);
-            dRT.anchorMin = new Vector2(0.08f, DESC_BOT);
-            dRT.anchorMax = new Vector2(0.92f, DESC_TOP);
-            dRT.offsetMin = Vector2.zero;
-            dRT.offsetMax = Vector2.zero;
-            var dTMP = GetOrAdd<TextMeshProUGUI>(desc);
-            dTMP.text = "Tu destino para juegos mentales, competencias y diversi\u00F3n.";
-            dTMP.fontSize = 20;
-            dTMP.color = TEXT_WHITE;
-            dTMP.alignment = TextAlignmentOptions.Center;
-            dTMP.enableWordWrapping = true;
+            var tmp = titleGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = 78;
+            tmp.color = color;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableWordWrapping = true;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 48;
+            tmp.fontSizeMax = 78;
+            return tmp;
+        }
 
-            Debug.Log("[OnboardingUI] ContentArea creado (IconGlow + StepImage + Title + Description)");
+        private static Transform CreateContentCard(Transform slide)
+        {
+            var card = new GameObject("ContentCard");
+            card.transform.SetParent(slide, false);
+            var cRT = card.AddComponent<RectTransform>();
+            cRT.anchorMin = new Vector2(0.06f, CONTENT_BOT);
+            cRT.anchorMax = new Vector2(0.94f, CONTENT_TOP);
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
+
+            var bg = card.AddComponent<Image>();
+            bg.color = CARD_BG;
+            var outline = card.AddComponent<Outline>();
+            outline.effectColor = CYAN_DARK;
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            var content = new GameObject("Content");
+            content.transform.SetParent(card.transform, false);
+            var coRT = content.AddComponent<RectTransform>();
+            coRT.anchorMin = new Vector2(0.04f, 0.04f);
+            coRT.anchorMax = new Vector2(0.96f, 0.96f);
+            coRT.offsetMin = Vector2.zero;
+            coRT.offsetMax = Vector2.zero;
+
+            var vlg = content.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 12;
+            vlg.padding = new RectOffset(15, 15, 10, 10);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            return content.transform;
+        }
+
+        private static void AddContentText(Transform parent, string text, int fontSize, Color color,
+            TextAlignmentOptions align, bool bold = false)
+        {
+            var go = new GameObject("Text");
+            go.transform.SetParent(parent, false);
+            go.AddComponent<LayoutElement>().preferredHeight = fontSize + 16;
+            var tmp = go.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = fontSize;
+            tmp.color = color;
+            tmp.alignment = align;
+            tmp.enableWordWrapping = true;
+            tmp.fontStyle = FontStyles.Bold;
+        }
+
+        private static void AddContentSpacer(Transform parent, float height)
+        {
+            var go = new GameObject("Spacer");
+            go.transform.SetParent(parent, false);
+            go.AddComponent<LayoutElement>().preferredHeight = height;
+        }
+
+        private static void AddBulletText(Transform parent, string text)
+        {
+            AddContentText(parent, "\u2022 " + text, 32, TEXT_WHITE, TextAlignmentOptions.Left);
         }
 
         #endregion
 
-        #region Name Input Panel
+        #region Slide 1 - Welcome
 
-        private static void CreateNameInputPanel()
+        private static void CreateSlide1_Welcome(Transform parent)
         {
-            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
-            if (canvas == null) return;
+            var slide = CreateSlideBase(parent, "Slide1", 0, true); // active by default
+            CreateSlideTitle(slide, "\u00A1Bienvenido a DigitPark!", CYAN_NEON);
 
-            var panel = FindOrCreate(canvas.transform, "NameInputPanel");
-            var pRT = GetOrAdd<RectTransform>(panel);
-            pRT.anchorMin = new Vector2(0.08f, 0.22f);
-            pRT.anchorMax = new Vector2(0.92f, 0.55f);
+            var content = CreateContentCard(slide);
+            AddContentText(content, "Tu destino para juegos mentales, competencias y diversi\u00F3n.",
+                36, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(content, 10);
+            AddContentText(content, "ENTRENA TU MENTE Y COMPITE",
+                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+            AddContentSpacer(content, 14);
+            AddBulletText(content, "5 minijuegos cognitivos");
+            AddBulletText(content, "Compite contra jugadores de todo el mundo");
+            AddBulletText(content, "Recompensas diarias y logros");
+        }
+
+        #endregion
+
+        #region Slide 2 - Name Input
+
+        private static void CreateSlide2_Name(Transform parent)
+        {
+            var slide = CreateSlideBase(parent, "Slide2", 1, false);
+            CreateSlideTitle(slide, "\u00BFC\u00F3mo te llamas?", CYAN_NEON);
+
+            // NameInputPanel
+            var panel = new GameObject("NameInputPanel");
+            panel.transform.SetParent(slide, false);
+            var pRT = panel.AddComponent<RectTransform>();
+            pRT.anchorMin = new Vector2(0.08f, 0.18f);
+            pRT.anchorMax = new Vector2(0.92f, 0.48f);
             pRT.offsetMin = Vector2.zero;
             pRT.offsetMax = Vector2.zero;
-            panel.SetActive(false);
 
-            // Card background
-            var pBg = GetOrAdd<Image>(panel);
+            var pBg = panel.AddComponent<Image>();
             pBg.color = CARD_BG;
-            var pOutline = GetOrAdd<Outline>(panel);
+            var pOutline = panel.AddComponent<Outline>();
             pOutline.effectColor = CYAN_DARK;
             pOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
-            // Input container (with VLG)
-            var container = FindOrCreate(panel.transform, "InputContainer");
-            var cRT = GetOrAdd<RectTransform>(container);
+            // InputContainer
+            var container = new GameObject("InputContainer");
+            container.transform.SetParent(panel.transform, false);
+            var cRT = container.AddComponent<RectTransform>();
             cRT.anchorMin = new Vector2(0.06f, 0.08f);
             cRT.anchorMax = new Vector2(0.94f, 0.92f);
             cRT.offsetMin = Vector2.zero;
             cRT.offsetMax = Vector2.zero;
 
-            var vlg = GetOrAdd<VerticalLayoutGroup>(container);
+            var vlg = container.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 12;
             vlg.padding = new RectOffset(0, 0, 10, 10);
             vlg.childAlignment = TextAnchor.UpperCenter;
@@ -387,150 +516,243 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // --- Name Input Field ---
-            var inputGO = FindOrCreate(container.transform, "NameInput");
-            GetOrAdd<LayoutElement>(inputGO).preferredHeight = 70;
-            var inputBg = GetOrAdd<Image>(inputGO);
+            // NameInput
+            var inputGO = new GameObject("NameInput");
+            inputGO.transform.SetParent(container.transform, false);
+            inputGO.AddComponent<LayoutElement>().preferredHeight = 85;
+            var inputBg = inputGO.AddComponent<Image>();
             inputBg.color = INPUT_BG;
-            var inputOutline = GetOrAdd<Outline>(inputGO);
+            var inputOutline = inputGO.AddComponent<Outline>();
             inputOutline.effectColor = CYAN_DARK;
             inputOutline.effectDistance = new Vector2(1, 1);
 
-            var input = GetOrAdd<TMP_InputField>(inputGO);
+            var input = inputGO.AddComponent<TMP_InputField>();
             input.contentType = TMP_InputField.ContentType.Standard;
             input.characterLimit = 20;
 
-            // Text Area
-            var textArea = FindOrCreate(inputGO.transform, "Text Area");
-            var taRT = GetOrAdd<RectTransform>(textArea);
+            var textArea = new GameObject("Text Area");
+            textArea.transform.SetParent(inputGO.transform, false);
+            var taRT = textArea.AddComponent<RectTransform>();
             taRT.anchorMin = Vector2.zero;
             taRT.anchorMax = Vector2.one;
             taRT.offsetMin = new Vector2(15, 5);
             taRT.offsetMax = new Vector2(-15, -5);
-            GetOrAdd<RectMask2D>(textArea);
+            textArea.AddComponent<RectMask2D>();
 
-            // Placeholder
-            var placeholder = FindOrCreate(textArea.transform, "Placeholder");
-            var phRT = GetOrAdd<RectTransform>(placeholder);
+            var placeholder = new GameObject("Placeholder");
+            placeholder.transform.SetParent(textArea.transform, false);
+            var phRT = placeholder.AddComponent<RectTransform>();
             phRT.anchorMin = Vector2.zero;
             phRT.anchorMax = Vector2.one;
             phRT.offsetMin = Vector2.zero;
             phRT.offsetMax = Vector2.zero;
-            var phTMP = GetOrAdd<TextMeshProUGUI>(placeholder);
+            var phTMP = placeholder.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Escribe tu nombre...";
-            phTMP.fontSize = 22;
+            phTMP.fontSize = 40;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
-            phTMP.fontStyle = FontStyles.Italic;
+            phTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
             phTMP.alignment = TextAlignmentOptions.Left;
 
-            // Text
-            var text = FindOrCreate(textArea.transform, "Text");
-            var txtRT = GetOrAdd<RectTransform>(text);
+            var text = new GameObject("Text");
+            text.transform.SetParent(textArea.transform, false);
+            var txtRT = text.AddComponent<RectTransform>();
             txtRT.anchorMin = Vector2.zero;
             txtRT.anchorMax = Vector2.one;
             txtRT.offsetMin = Vector2.zero;
             txtRT.offsetMax = Vector2.zero;
-            var txtTMP = GetOrAdd<TextMeshProUGUI>(text);
-            txtTMP.fontSize = 22;
+            var txtTMP = text.AddComponent<TextMeshProUGUI>();
+            txtTMP.fontSize = 40;
             txtTMP.color = TEXT_WHITE;
+            txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.alignment = TextAlignmentOptions.Left;
 
-            // Wire TMP_InputField
             input.textViewport = taRT;
             input.textComponent = txtTMP;
             input.placeholder = phTMP;
 
-            // --- Confirm Button ---
-            var confirmBtn = FindOrCreate(container.transform, "ConfirmNameButton");
-            GetOrAdd<LayoutElement>(confirmBtn).preferredHeight = 55;
-            var cbBg = GetOrAdd<Image>(confirmBtn);
+            // ConfirmNameButton
+            var confirmBtn = new GameObject("ConfirmNameButton");
+            confirmBtn.transform.SetParent(container.transform, false);
+            confirmBtn.AddComponent<LayoutElement>().preferredHeight = 70;
+            var cbBg = confirmBtn.AddComponent<Image>();
             cbBg.color = CYAN_NEON;
-            GetOrAdd<Button>(confirmBtn).targetGraphic = cbBg;
-            var cbOutline = GetOrAdd<Outline>(confirmBtn);
+            confirmBtn.AddComponent<Button>().targetGraphic = cbBg;
+            var cbOutline = confirmBtn.AddComponent<Outline>();
             cbOutline.effectColor = CYAN_DARK;
             cbOutline.effectDistance = new Vector2(1, 1);
 
-            var confirmText = FindOrCreate(confirmBtn.transform, "Text");
-            var ctRT = GetOrAdd<RectTransform>(confirmText);
+            var confirmText = new GameObject("Text");
+            confirmText.transform.SetParent(confirmBtn.transform, false);
+            var ctRT = confirmText.AddComponent<RectTransform>();
             ctRT.anchorMin = Vector2.zero;
             ctRT.anchorMax = Vector2.one;
             ctRT.offsetMin = Vector2.zero;
             ctRT.offsetMax = Vector2.zero;
-            var ctTMP = GetOrAdd<TextMeshProUGUI>(confirmText);
+            var ctTMP = confirmText.AddComponent<TextMeshProUGUI>();
             ctTMP.text = "CONFIRMAR";
-            ctTMP.fontSize = 22;
+            ctTMP.fontSize = 36;
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
 
-            // --- Error Text ---
-            var errorText = FindOrCreate(container.transform, "NameErrorText");
-            GetOrAdd<LayoutElement>(errorText).preferredHeight = 30;
-            var eTMP = GetOrAdd<TextMeshProUGUI>(errorText);
+            // NameErrorText
+            var errorText = new GameObject("NameErrorText");
+            errorText.transform.SetParent(container.transform, false);
+            errorText.AddComponent<LayoutElement>().preferredHeight = 40;
+            var eTMP = errorText.AddComponent<TextMeshProUGUI>();
             eTMP.text = "";
-            eTMP.fontSize = 16;
+            eTMP.fontSize = 26;
             eTMP.color = RED_ERROR;
+            eTMP.fontStyle = FontStyles.Bold;
             eTMP.alignment = TextAlignmentOptions.Center;
             errorText.SetActive(false);
-
-            Debug.Log("[OnboardingUI] NameInputPanel creado");
         }
 
         #endregion
 
-        #region Avatar Selection Panel
+        #region Slide 3 - Avatar Selection
 
-        private static void CreateAvatarSelectionPanel()
+        private static void CreateSlide3_Avatar(Transform parent)
         {
-            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
-            if (canvas == null) return;
+            var slide = CreateSlideBase(parent, "Slide3", 2, false);
+            CreateSlideTitle(slide, "Elige tu Avatar", CYAN_NEON);
 
-            var panel = FindOrCreate(canvas.transform, "AvatarSelectionPanel");
-            var pRT = GetOrAdd<RectTransform>(panel);
+            // AvatarSelectionPanel
+            var panel = new GameObject("AvatarSelectionPanel");
+            panel.transform.SetParent(slide, false);
+            var pRT = panel.AddComponent<RectTransform>();
             pRT.anchorMin = new Vector2(0.05f, 0.14f);
-            pRT.anchorMax = new Vector2(0.95f, 0.55f);
+            pRT.anchorMax = new Vector2(0.95f, 0.48f);
             pRT.offsetMin = Vector2.zero;
             pRT.offsetMax = Vector2.zero;
-            panel.SetActive(false);
 
-            // Avatar Grid Container
-            var grid = FindOrCreate(panel.transform, "AvatarContainer");
-            var gRT = GetOrAdd<RectTransform>(grid);
+            var grid = new GameObject("AvatarContainer");
+            grid.transform.SetParent(panel.transform, false);
+            var gRT = grid.AddComponent<RectTransform>();
             gRT.anchorMin = Vector2.zero;
             gRT.anchorMax = Vector2.one;
             gRT.offsetMin = new Vector2(10, 10);
             gRT.offsetMax = new Vector2(-10, -10);
 
-            var gridLayout = GetOrAdd<GridLayoutGroup>(grid);
+            var gridLayout = grid.AddComponent<GridLayoutGroup>();
             gridLayout.cellSize = new Vector2(150, 180);
             gridLayout.spacing = new Vector2(20, 15);
             gridLayout.padding = new RectOffset(10, 10, 5, 5);
             gridLayout.childAlignment = TextAnchor.MiddleCenter;
             gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             gridLayout.constraintCount = 3;
-
-            Debug.Log("[OnboardingUI] AvatarSelectionPanel creado (grid 3 columnas)");
         }
 
         #endregion
 
-        #region Completion Panel
+        #region Slide 4 - Games
 
-        private static void CreateCompletionPanel()
+        private static void CreateSlide4_Games(Transform parent)
         {
-            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
-            if (canvas == null) return;
+            var slide = CreateSlideBase(parent, "Slide4", 3, false);
+            CreateSlideTitle(slide, "Juegos Cognitivos", CYAN_NEON);
 
-            var panel = FindOrCreate(canvas.transform, "CompletionPanel");
-            var pRT = GetOrAdd<RectTransform>(panel);
+            var content = CreateContentCard(slide);
+            AddContentText(content, "Entrena tu mente con minijuegos dise\u00F1ados para mejorar tus habilidades.",
+                36, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(content, 10);
+            AddContentText(content, "6 MINIJUEGOS UNICOS",
+                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+            AddContentSpacer(content, 14);
+            AddBulletText(content, "DigitRush: Velocidad y reflejos");
+            AddBulletText(content, "FlashTap: Reacci\u00F3n r\u00E1pida");
+            AddBulletText(content, "MemoryPairs: Memoria visual");
+            AddBulletText(content, "QuickMath: C\u00E1lculo mental");
+            AddBulletText(content, "OddOneOut: Atenci\u00F3n al detalle");
+        }
+
+        #endregion
+
+        #region Slide 5 - CashBattle
+
+        private static void CreateSlide5_CashBattle(Transform parent)
+        {
+            var slide = CreateSlideBase(parent, "Slide5", 4, false);
+            CreateSlideTitle(slide, "CashBattle", CYAN_NEON);
+
+            var content = CreateContentCard(slide);
+            AddContentText(content, "\u00BFListo para el desaf\u00EDo? Compite 1v1 contra otros jugadores por premios reales.",
+                36, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(content, 10);
+            AddContentText(content, "COMPITE POR PREMIOS REALES",
+                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+            AddContentSpacer(content, 14);
+            AddBulletText(content, "Matchmaking 1v1 por habilidad");
+            AddBulletText(content, "Apuestas desde $1 USD");
+            AddBulletText(content, "Plataforma segura y verificada");
+        }
+
+        #endregion
+
+        #region Slide 6 - Tournaments
+
+        private static void CreateSlide6_Tournaments(Transform parent)
+        {
+            var slide = CreateSlideBase(parent, "Slide6", 5, false);
+            CreateSlideTitle(slide, "Torneos", CYAN_NEON);
+
+            var content = CreateContentCard(slide);
+            AddContentText(content, "\u00DAnete a torneos con decenas de jugadores.",
+                36, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(content, 10);
+            AddContentText(content, "GANA GRANDES PREMIOS",
+                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+            AddContentSpacer(content, 14);
+            AddBulletText(content, "Hasta 256 jugadores por torneo");
+            AddBulletText(content, "Premios garantizados");
+            AddBulletText(content, "Sistema de brackets profesional");
+        }
+
+        #endregion
+
+        #region Slide 7 - Rewards
+
+        private static void CreateSlide7_Rewards(Transform parent)
+        {
+            var slide = CreateSlideBase(parent, "Slide7", 6, false);
+            CreateSlideTitle(slide, "Recompensas Diarias", CYAN_NEON);
+
+            var content = CreateContentCard(slide);
+            AddContentText(content, "Vuelve cada d\u00EDa para obtener monedas, gemas y m\u00E1s recompensas.",
+                36, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(content, 10);
+            AddContentText(content, "RECOMPENSAS CADA DIA",
+                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+            AddContentSpacer(content, 14);
+            AddBulletText(content, "Monedas gratis cada d\u00EDa");
+            AddBulletText(content, "Bonos semanales de gemas");
+            AddBulletText(content, "Misiones diarias con premios");
+        }
+
+        #endregion
+
+        #region Slide 8 - Completion
+
+        private static void CreateSlide8_Completion(Transform parent)
+        {
+            var slide = FindOrCreate(parent, "Slide8");
+            var sRT = GetOrAdd<RectTransform>(slide);
+            sRT.anchorMin = Vector2.zero;
+            sRT.anchorMax = Vector2.one;
+            sRT.offsetMin = Vector2.zero;
+            sRT.offsetMax = Vector2.zero;
+            slide.SetActive(false);
+
+            // CompletionPanel (full content area)
+            var panel = new GameObject("CompletionPanel");
+            panel.transform.SetParent(slide.transform, false);
+            var pRT = panel.AddComponent<RectTransform>();
             pRT.anchorMin = new Vector2(0.05f, 0.12f);
             pRT.anchorMax = new Vector2(0.95f, 0.94f);
             pRT.offsetMin = Vector2.zero;
             pRT.offsetMax = Vector2.zero;
-            panel.SetActive(false);
 
-            // VLG for stacked content
-            var vlg = GetOrAdd<VerticalLayoutGroup>(panel);
+            var vlg = panel.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 15;
             vlg.padding = new RectOffset(20, 20, 30, 20);
             vlg.childAlignment = TextAnchor.UpperCenter;
@@ -539,85 +761,95 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // --- Completion Icon Placeholder ---
-            var iconGO = FindOrCreate(panel.transform, "CompletionIcon");
-            GetOrAdd<LayoutElement>(iconGO).preferredHeight = 200;
-            var iconImg = GetOrAdd<Image>(iconGO);
+            // CompletionIcon
+            var iconGO = new GameObject("CompletionIcon");
+            iconGO.transform.SetParent(panel.transform, false);
+            iconGO.AddComponent<LayoutElement>().preferredHeight = 200;
+            var iconImg = iconGO.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
-            Sprite completeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICONS_PATH + "CompleteIcon.png");
+            Sprite completeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SLIDE_ICONS[7]);
             if (completeSprite != null) iconImg.sprite = completeSprite;
 
-            // --- Completion Title ---
-            var compTitle = FindOrCreate(panel.transform, "CompletionTitle");
-            GetOrAdd<LayoutElement>(compTitle).preferredHeight = 50;
-            var ctTMP = GetOrAdd<TextMeshProUGUI>(compTitle);
+            // CompletionTitle
+            var compTitle = new GameObject("CompletionTitle");
+            compTitle.transform.SetParent(panel.transform, false);
+            compTitle.AddComponent<LayoutElement>().preferredHeight = 90;
+            var ctTMP = compTitle.AddComponent<TextMeshProUGUI>();
             ctTMP.text = "\u00A1Bien hecho!";
-            ctTMP.fontSize = 32;
+            ctTMP.fontSize = 72;
             ctTMP.color = CYAN_NEON;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
+            ctTMP.enableAutoSizing = true;
+            ctTMP.fontSizeMin = 48;
+            ctTMP.fontSizeMax = 72;
 
-            // --- Completion Message ---
-            var compMsg = FindOrCreate(panel.transform, "CompletionMessage");
-            GetOrAdd<LayoutElement>(compMsg).preferredHeight = 60;
-            var cmTMP = GetOrAdd<TextMeshProUGUI>(compMsg);
+            // CompletionMessage
+            var compMsg = new GameObject("CompletionMessage");
+            compMsg.transform.SetParent(panel.transform, false);
+            compMsg.AddComponent<LayoutElement>().preferredHeight = 70;
+            var cmTMP = compMsg.AddComponent<TextMeshProUGUI>();
             cmTMP.text = "Has completado el tutorial.\nAqu\u00ED tienes tus recompensas de bienvenida.";
-            cmTMP.fontSize = 18;
+            cmTMP.fontSize = 32;
             cmTMP.color = TEXT_WHITE;
+            cmTMP.fontStyle = FontStyles.Bold;
             cmTMP.alignment = TextAlignmentOptions.Center;
             cmTMP.enableWordWrapping = true;
 
-            // --- Rewards Display Card ---
-            var rewardsCard = FindOrCreate(panel.transform, "RewardsCard");
-            GetOrAdd<LayoutElement>(rewardsCard).preferredHeight = 90;
-            var rcBg = GetOrAdd<Image>(rewardsCard);
+            // RewardsCard
+            var rewardsCard = new GameObject("RewardsCard");
+            rewardsCard.transform.SetParent(panel.transform, false);
+            rewardsCard.AddComponent<LayoutElement>().preferredHeight = 100;
+            var rcBg = rewardsCard.AddComponent<Image>();
             rcBg.color = CARD_BG;
-            var rcOutline = GetOrAdd<Outline>(rewardsCard);
+            var rcOutline = rewardsCard.AddComponent<Outline>();
             rcOutline.effectColor = GOLD;
             rcOutline.effectDistance = new Vector2(2, 2);
 
-            var rewardText = FindOrCreate(rewardsCard.transform, "RewardText");
-            var rwRT = GetOrAdd<RectTransform>(rewardText);
+            var rewardText = new GameObject("RewardText");
+            rewardText.transform.SetParent(rewardsCard.transform, false);
+            var rwRT = rewardText.AddComponent<RectTransform>();
             rwRT.anchorMin = Vector2.zero;
             rwRT.anchorMax = Vector2.one;
             rwRT.offsetMin = new Vector2(10, 10);
             rwRT.offsetMax = new Vector2(-10, -10);
-            var rwTMP = GetOrAdd<TextMeshProUGUI>(rewardText);
+            var rwTMP = rewardText.AddComponent<TextMeshProUGUI>();
             rwTMP.text = "+500 Monedas  |  +50 Gemas";
-            rwTMP.fontSize = 26;
+            rwTMP.fontSize = 42;
             rwTMP.color = GOLD;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.alignment = TextAlignmentOptions.Center;
 
-            // --- Spacer ---
-            var spacer = FindOrCreate(panel.transform, "Spacer");
-            GetOrAdd<LayoutElement>(spacer).preferredHeight = 30;
+            // Spacer
+            var spacer = new GameObject("Spacer");
+            spacer.transform.SetParent(panel.transform, false);
+            spacer.AddComponent<LayoutElement>().preferredHeight = 30;
 
-            // --- Start Playing Button ---
-            var startBtn = FindOrCreate(panel.transform, "StartPlayingButton");
-            GetOrAdd<LayoutElement>(startBtn).preferredHeight = 65;
-            var sbBg = GetOrAdd<Image>(startBtn);
+            // StartPlayingButton
+            var startBtn = new GameObject("StartPlayingButton");
+            startBtn.transform.SetParent(panel.transform, false);
+            startBtn.AddComponent<LayoutElement>().preferredHeight = 80;
+            var sbBg = startBtn.AddComponent<Image>();
             sbBg.color = GREEN_SUCCESS;
-            GetOrAdd<Button>(startBtn).targetGraphic = sbBg;
-            var sbOutline = GetOrAdd<Outline>(startBtn);
+            startBtn.AddComponent<Button>().targetGraphic = sbBg;
+            var sbOutline = startBtn.AddComponent<Outline>();
             sbOutline.effectColor = new Color(0.1f, 0.5f, 0.2f, 1f);
             sbOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
-            var startText = FindOrCreate(startBtn.transform, "Text");
-            var spRT = GetOrAdd<RectTransform>(startText);
+            var startText = new GameObject("Text");
+            startText.transform.SetParent(startBtn.transform, false);
+            var spRT = startText.AddComponent<RectTransform>();
             spRT.anchorMin = Vector2.zero;
             spRT.anchorMax = Vector2.one;
             spRT.offsetMin = Vector2.zero;
             spRT.offsetMax = Vector2.zero;
-            var spTMP = GetOrAdd<TextMeshProUGUI>(startText);
+            var spTMP = startText.AddComponent<TextMeshProUGUI>();
             spTMP.text = "\u00A1COMENZAR A JUGAR!";
-            spTMP.fontSize = 24;
+            spTMP.fontSize = 48;
             spTMP.color = TEXT_DARK;
             spTMP.fontStyle = FontStyles.Bold;
             spTMP.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[OnboardingUI] CompletionPanel creado (icon + title + msg + rewards + button)");
         }
 
         #endregion
@@ -675,7 +907,7 @@ namespace DigitPark.Editor
             ptRT.offsetMax = Vector2.zero;
             var ptTMP = GetOrAdd<TextMeshProUGUI>(prevText);
             ptTMP.text = "ATR\u00C1S";
-            ptTMP.fontSize = 20;
+            ptTMP.fontSize = 36;
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.alignment = TextAlignmentOptions.Center;
@@ -702,7 +934,7 @@ namespace DigitPark.Editor
             ntRT.offsetMax = Vector2.zero;
             var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
             ntTMP.text = "SIGUIENTE";
-            ntTMP.fontSize = 20;
+            ntTMP.fontSize = 36;
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;
@@ -733,15 +965,15 @@ namespace DigitPark.Editor
             SetRef(so, "skipButton", FindInPath<Button>(r, "TopBar/SkipButton"));
             SetRef(so, "skipButtonText", FindInPath<TextMeshProUGUI>(r, "TopBar/SkipButton/Text"));
 
-            // UI - Step Display
-            SetRef(so, "stepImage", FindInPath<Image>(r, "StepImage"));
-            SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "TitleText"));
-            SetRef(so, "descriptionText", FindInPath<TextMeshProUGUI>(r, "DescriptionText"));
+            // UI - Slides Container
+            Transform slidesT = r.Find("SlidesContainer");
+            if (slidesT != null) SetRef(so, "slidesContainer", slidesT);
 
             // UI - Navigation
             SetRef(so, "nextButton", FindInPath<Button>(r, "NavigationPanel/NextButton"));
             SetRef(so, "prevButton", FindInPath<Button>(r, "NavigationPanel/PrevButton"));
             SetRef(so, "nextButtonText", FindInPath<TextMeshProUGUI>(r, "NavigationPanel/NextButton/Text"));
+            SetRef(so, "prevButtonText", FindInPath<TextMeshProUGUI>(r, "NavigationPanel/PrevButton/Text"));
             Transform dotsT = r.Find("DotsContainer");
             if (dotsT != null) SetRef(so, "dotsContainer", dotsT);
 
@@ -749,26 +981,26 @@ namespace DigitPark.Editor
             SetRef(so, "progressBar", FindInPath<Slider>(r, "ProgressBar"));
             SetRef(so, "stepCounterText", FindInPath<TextMeshProUGUI>(r, "TopBar/StepCounter"));
 
-            // UI - Name Input
-            Transform namePanel = r.Find("NameInputPanel");
+            // UI - Name Input (inside Slide2)
+            Transform namePanel = r.Find("SlidesContainer/Slide2/NameInputPanel");
             if (namePanel != null) SetRef(so, "nameInputPanel", namePanel.gameObject);
-            SetRef(so, "nameInput", FindInPath<TMP_InputField>(r, "NameInputPanel/InputContainer/NameInput"));
-            SetRef(so, "confirmNameButton", FindInPath<Button>(r, "NameInputPanel/InputContainer/ConfirmNameButton"));
-            SetRef(so, "nameErrorText", FindInPath<TextMeshProUGUI>(r, "NameInputPanel/InputContainer/NameErrorText"));
+            SetRef(so, "nameInput", FindInPath<TMP_InputField>(r, "SlidesContainer/Slide2/NameInputPanel/InputContainer/NameInput"));
+            SetRef(so, "confirmNameButton", FindInPath<Button>(r, "SlidesContainer/Slide2/NameInputPanel/InputContainer/ConfirmNameButton"));
+            SetRef(so, "nameErrorText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide2/NameInputPanel/InputContainer/NameErrorText"));
 
-            // UI - Avatar Selection
-            Transform avatarPanel = r.Find("AvatarSelectionPanel");
+            // UI - Avatar Selection (inside Slide3)
+            Transform avatarPanel = r.Find("SlidesContainer/Slide3/AvatarSelectionPanel");
             if (avatarPanel != null) SetRef(so, "avatarSelectionPanel", avatarPanel.gameObject);
-            Transform avatarGrid = r.Find("AvatarSelectionPanel/AvatarContainer");
+            Transform avatarGrid = r.Find("SlidesContainer/Slide3/AvatarSelectionPanel/AvatarContainer");
             if (avatarGrid != null) SetRef(so, "avatarContainer", avatarGrid);
 
-            // UI - Tutorial Completion
-            Transform compPanel = r.Find("CompletionPanel");
+            // UI - Tutorial Completion (inside Slide8)
+            Transform compPanel = r.Find("SlidesContainer/Slide8/CompletionPanel");
             if (compPanel != null) SetRef(so, "completionPanel", compPanel.gameObject);
-            SetRef(so, "completionTitleText", FindInPath<TextMeshProUGUI>(r, "CompletionPanel/CompletionTitle"));
-            SetRef(so, "completionMessageText", FindInPath<TextMeshProUGUI>(r, "CompletionPanel/CompletionMessage"));
-            SetRef(so, "rewardText", FindInPath<TextMeshProUGUI>(r, "CompletionPanel/RewardsCard/RewardText"));
-            SetRef(so, "startPlayingButton", FindInPath<Button>(r, "CompletionPanel/StartPlayingButton"));
+            SetRef(so, "completionTitleText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide8/CompletionPanel/CompletionTitle"));
+            SetRef(so, "completionMessageText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide8/CompletionPanel/CompletionMessage"));
+            SetRef(so, "rewardText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide8/CompletionPanel/RewardsCard/RewardText"));
+            SetRef(so, "startPlayingButton", FindInPath<Button>(r, "SlidesContainer/Slide8/CompletionPanel/StartPlayingButton"));
 
             // UI - Sections (for animations)
             Transform progressBarT = r.Find("ProgressBar");
@@ -779,16 +1011,9 @@ namespace DigitPark.Editor
             Transform navPanelT = r.Find("NavigationPanel");
             if (navPanelT != null) SetRef(so, "navigationTransform", navPanelT.GetComponent<RectTransform>());
 
-            // Step Images
-            SetSpriteRef(so, "welcomeImage", ICONS_PATH + "WelcomeIcon.png");
-            SetSpriteRef(so, "gamesImage", ICONS_PATH + "GamesIcon.png");
-            SetSpriteRef(so, "cashBattleImage", ICONS_PATH + "CashBattleIcon.png");
-            SetSpriteRef(so, "tournamentsImage", ICONS_PATH + "TournamentsIcon.png");
-            SetSpriteRef(so, "rewardsImage", ICONS_PATH + "RewardsIcon.png");
-
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
-            Debug.Log("[OnboardingUI] Referencias del manager asignadas");
+            Debug.Log("[OnboardingUI] Referencias del manager asignadas (slide-based)");
         }
 
         #endregion
@@ -801,6 +1026,9 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);
@@ -842,21 +1070,6 @@ namespace DigitPark.Editor
             T c = obj.GetComponent<T>();
             if (c == null) c = obj.AddComponent<T>();
             return c;
-        }
-
-        private static void SetSpriteRef(SerializedObject so, string propName, string assetPath)
-        {
-            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
-            if (sprite != null)
-            {
-                var prop = so.FindProperty(propName);
-                if (prop != null) prop.objectReferenceValue = sprite;
-                else Debug.LogWarning($"[OnboardingUI] Property '{propName}' no encontrada");
-            }
-            else
-            {
-                Debug.LogWarning($"[OnboardingUI] Sprite no encontrado: {assetPath}");
-            }
         }
 
         private static void SetAnchors(RectTransform rt, float xMin, float yMin, float xMax, float yMax)

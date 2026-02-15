@@ -212,6 +212,14 @@ namespace DigitPark.Managers
                 analyticsService.AddComponent<AnalyticsService>();
             }
 
+            // Crear AchievementService
+            if (AchievementService.Instance == null)
+            {
+                GameObject achievementService = new GameObject("AchievementService");
+                achievementService.AddComponent<AchievementService>();
+                Debug.Log("[Boot] AchievementService creado");
+            }
+
             // Esperar un frame para que los servicios se inicialicen
             yield return new WaitForSeconds(0.5f);
 

@@ -48,9 +48,9 @@ namespace DigitPark.Editor
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
         private const float TOPBAR_TOP = 0.988f;
-        private const float TOPBAR_BOT = 0.960f;
+        private const float TOPBAR_BOT = 0.945f;
 
-        private const float STREAK_TOP = 0.955f;
+        private const float STREAK_TOP = 0.940f;
         private const float STREAK_BOT = 0.890f;
 
         private const float WEEK_TOP = 0.890f;
@@ -59,17 +59,17 @@ namespace DigitPark.Editor
         private const float DAYS_TOP = 0.860f;
         private const float DAYS_BOT = 0.555f;
 
-        private const float DAY7_TOP = 0.545f;
-        private const float DAY7_BOT = 0.410f;
+        private const float DAY7_TOP = 0.550f;
+        private const float DAY7_BOT = 0.380f;
 
-        private const float TODAY_TOP = 0.400f;
-        private const float TODAY_BOT = 0.300f;
+        private const float TODAY_TOP = 0.370f;
+        private const float TODAY_BOT = 0.265f;
 
-        private const float CLAIM_TOP = 0.290f;
-        private const float CLAIM_BOT = 0.225f;
+        private const float CLAIM_TOP = 0.255f;
+        private const float CLAIM_BOT = 0.195f;
 
-        private const float TIMER_TOP = 0.225f;
-        private const float TIMER_BOT = 0.185f;
+        private const float TIMER_TOP = 0.190f;
+        private const float TIMER_BOT = 0.155f;
 
         private const float SIDE_PAD = 25f;
 
@@ -255,13 +255,16 @@ namespace DigitPark.Editor
             // --- TitleText (center) ---
             var title = FindOrCreate(topBar.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.15f, 0);
-            tRT.anchorMax = new Vector2(0.65f, 1);
+            tRT.anchorMin = new Vector2(0.08f, 0);
+            tRT.anchorMax = new Vector2(0.72f, 1);
             tRT.offsetMin = Vector2.zero;
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "RECOMPENSAS DIARIAS";
-            tTMP.fontSize = 22;
+            tTMP.fontSize = 78;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = 36;
+            tTMP.fontSizeMax = 78;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.color = CYAN_NEON;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -318,7 +321,8 @@ namespace DigitPark.Editor
             var text = FindOrCreate(pill.transform, "Text");
             var tmp = GetOrAdd<TextMeshProUGUI>(text);
             tmp.text = amount;
-            tmp.fontSize = 14;
+            tmp.fontSize = 22;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
             var textLE = GetOrAdd<LayoutElement>(text);
@@ -362,7 +366,7 @@ namespace DigitPark.Editor
 
             // --- Top row: [FireIcon] RACHA ACTUAL: [5 DIAS] ---
             var topRow = FindOrCreate(inner.transform, "TopRow");
-            GetOrAdd<LayoutElement>(topRow).preferredHeight = 30;
+            GetOrAdd<LayoutElement>(topRow).preferredHeight = 38;
             var trHLG = GetOrAdd<HorizontalLayoutGroup>(topRow);
             trHLG.spacing = 8;
             trHLG.childAlignment = TextAnchor.MiddleCenter;
@@ -383,17 +387,17 @@ namespace DigitPark.Editor
             var streakLabel = FindOrCreate(topRow.transform, "StreakLabel");
             var slTMP = GetOrAdd<TextMeshProUGUI>(streakLabel);
             slTMP.text = "RACHA ACTUAL:";
-            slTMP.fontSize = 16;
+            slTMP.fontSize = 32;
             slTMP.fontStyle = FontStyles.Bold;
             slTMP.color = TEXT_WHITE;
             slTMP.alignment = TextAlignmentOptions.MidlineLeft;
             var slLE = GetOrAdd<LayoutElement>(streakLabel);
-            slLE.minWidth = 160;
+            slLE.minWidth = 200;
 
             var streakCount = FindOrCreate(topRow.transform, "StreakCount");
             var scTMP = GetOrAdd<TextMeshProUGUI>(streakCount);
             scTMP.text = "5 D\u00CDAS";
-            scTMP.fontSize = 20;
+            scTMP.fontSize = 42;
             scTMP.fontStyle = FontStyles.Bold;
             scTMP.color = ORANGE_FIRE;
             scTMP.alignment = TextAlignmentOptions.MidlineRight;
@@ -444,10 +448,11 @@ namespace DigitPark.Editor
 
             // --- Bottom: StreakBonusText ---
             var bonusText = FindOrCreate(inner.transform, "BonusText");
-            GetOrAdd<LayoutElement>(bonusText).preferredHeight = 18;
+            GetOrAdd<LayoutElement>(bonusText).preferredHeight = 26;
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
             btTMP.text = "Bonus d\u00EDa 7: +100 gemas";
-            btTMP.fontSize = 13;
+            btTMP.fontSize = 26;
+            btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = GEM_COLOR;
             btTMP.alignment = TextAlignmentOptions.Center;
 
@@ -467,9 +472,13 @@ namespace DigitPark.Editor
             var wRT = GetOrAdd<RectTransform>(weekLabel);
             SetAnchors(wRT, 0.05f, WEEK_BOT, 0.95f, WEEK_TOP);
 
+            // Remove any leftover Image component (was causing orange bg)
+            var oldImg = weekLabel.GetComponent<Image>();
+            if (oldImg != null) Object.DestroyImmediate(oldImg);
+
             var wTMP = GetOrAdd<TextMeshProUGUI>(weekLabel);
             wTMP.text = "\u2500\u2500\u2500 SEMANA 1 \u2500\u2500\u2500";
-            wTMP.fontSize = 16;
+            wTMP.fontSize = 30;
             wTMP.fontStyle = FontStyles.Bold;
             wTMP.color = GOLD;
             wTMP.alignment = TextAlignmentOptions.Center;
@@ -491,7 +500,7 @@ namespace DigitPark.Editor
             SetAnchors(dgRT, NormX(SIDE_PAD), DAYS_BOT, NormX(1080 - SIDE_PAD), DAYS_TOP);
 
             var grid = GetOrAdd<GridLayoutGroup>(daysGrid);
-            grid.cellSize = new Vector2(300, 155);
+            grid.cellSize = new Vector2(310, 195);
             grid.spacing = new Vector2(15, 12);
             grid.padding = new RectOffset(15, 15, 15, 15);
             grid.childAlignment = TextAnchor.MiddleCenter;
@@ -568,10 +577,10 @@ namespace DigitPark.Editor
             var dayLabel = new GameObject("DayLabel");
             dayLabel.transform.SetParent(card.transform, false);
             dayLabel.AddComponent<RectTransform>();
-            dayLabel.AddComponent<LayoutElement>().preferredHeight = 18;
+            dayLabel.AddComponent<LayoutElement>().preferredHeight = 24;
             var dlTMP = dayLabel.AddComponent<TextMeshProUGUI>();
             dlTMP.text = $"D\u00CDA {day}";
-            dlTMP.fontSize = 13;
+            dlTMP.fontSize = 26;
             dlTMP.fontStyle = FontStyles.Bold;
             dlTMP.color = claimed ? GREEN_SUCCESS : (current ? GOLD : TEXT_WHITE);
             dlTMP.alignment = TextAlignmentOptions.Center;
@@ -621,10 +630,10 @@ namespace DigitPark.Editor
             var amountObj = new GameObject("AmountText");
             amountObj.transform.SetParent(card.transform, false);
             amountObj.AddComponent<RectTransform>();
-            amountObj.AddComponent<LayoutElement>().preferredHeight = 22;
+            amountObj.AddComponent<LayoutElement>().preferredHeight = 28;
             var amTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amTMP.text = $"+{amount}";
-            amTMP.fontSize = 18;
+            amTMP.fontSize = 36;
             amTMP.fontStyle = FontStyles.Bold;
             amTMP.color = claimed ? new Color(1, 1, 1, 0.5f) : TEXT_WHITE;
             amTMP.alignment = TextAlignmentOptions.Center;
@@ -633,10 +642,11 @@ namespace DigitPark.Editor
             var typeObj = new GameObject("TypeText");
             typeObj.transform.SetParent(card.transform, false);
             typeObj.AddComponent<RectTransform>();
-            typeObj.AddComponent<LayoutElement>().preferredHeight = 16;
+            typeObj.AddComponent<LayoutElement>().preferredHeight = 20;
             var ttTMP = typeObj.AddComponent<TextMeshProUGUI>();
             ttTMP.text = typeName;
-            ttTMP.fontSize = 11;
+            ttTMP.fontSize = 24;
+            ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = TEXT_SECONDARY;
             ttTMP.alignment = TextAlignmentOptions.Center;
 
@@ -663,7 +673,7 @@ namespace DigitPark.Editor
                 ctRT.offsetMax = Vector2.zero;
                 var ctTMP = checkText.AddComponent<TextMeshProUGUI>();
                 ctTMP.text = "\u2713";
-                ctTMP.fontSize = 16;
+                ctTMP.fontSize = 22;
                 ctTMP.fontStyle = FontStyles.Bold;
                 ctTMP.color = TEXT_DARK;
                 ctTMP.alignment = TextAlignmentOptions.Center;
@@ -690,7 +700,7 @@ namespace DigitPark.Editor
                 bttRT.offsetMax = Vector2.zero;
                 var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                 bttTMP.text = "HOY";
-                bttTMP.fontSize = 12;
+                bttTMP.fontSize = 24;
                 bttTMP.fontStyle = FontStyles.Bold;
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;
@@ -795,35 +805,44 @@ namespace DigitPark.Editor
             infoLE.flexibleWidth = 1;
 
             var d7Title = FindOrCreate(info.transform, "DayLabel");
-            GetOrAdd<LayoutElement>(d7Title).preferredHeight = 24;
+            GetOrAdd<LayoutElement>(d7Title).preferredHeight = 34;
             var d7tTMP = GetOrAdd<TextMeshProUGUI>(d7Title);
             d7tTMP.text = "D\u00CDA 7 - GRAN PREMIO";
-            d7tTMP.fontSize = 18;
+            d7tTMP.fontSize = 36;
+            d7tTMP.enableAutoSizing = true;
+            d7tTMP.fontSizeMin = 22;
+            d7tTMP.fontSizeMax = 36;
             d7tTMP.fontStyle = FontStyles.Bold;
             d7tTMP.color = GOLD;
             d7tTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
             var d7Reward1 = FindOrCreate(info.transform, "Reward1");
-            GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 20;
+            GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 28;
             var r1TMP = GetOrAdd<TextMeshProUGUI>(d7Reward1);
             r1TMP.text = "500 Monedas + 50 Gemas";
-            r1TMP.fontSize = 15;
+            r1TMP.fontSize = 32;
+            r1TMP.enableAutoSizing = true;
+            r1TMP.fontSizeMin = 20;
+            r1TMP.fontSizeMax = 32;
+            r1TMP.fontStyle = FontStyles.Bold;
             r1TMP.color = TEXT_WHITE;
             r1TMP.alignment = TextAlignmentOptions.MidlineLeft;
 
             var d7Reward2 = FindOrCreate(info.transform, "Reward2");
-            GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 18;
+            GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 24;
             var r2TMP = GetOrAdd<TextMeshProUGUI>(d7Reward2);
             r2TMP.text = "+ Item Exclusivo";
-            r2TMP.fontSize = 13;
+            r2TMP.fontSize = 28;
+            r2TMP.fontStyle = FontStyles.Bold;
             r2TMP.color = GOLD;
             r2TMP.alignment = TextAlignmentOptions.MidlineLeft;
 
             var d7Status = FindOrCreate(info.transform, "StatusText");
-            GetOrAdd<LayoutElement>(d7Status).preferredHeight = 18;
+            GetOrAdd<LayoutElement>(d7Status).preferredHeight = 24;
             var stTMP = GetOrAdd<TextMeshProUGUI>(d7Status);
-            stTMP.text = "\uD83D\uDD12 Desbloquea en 2 d\u00EDas";
-            stTMP.fontSize = 13;
+            stTMP.text = "Desbloquea en 2 d\u00EDas";
+            stTMP.fontSize = 26;
+            stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -872,7 +891,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "HOY";
-            btTMP.fontSize = 14;
+            btTMP.fontSize = 28;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = TEXT_DARK;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -901,18 +920,22 @@ namespace DigitPark.Editor
             ipLE.flexibleWidth = 1;
 
             var rewardLabel = FindOrCreate(infoPanel.transform, "RewardLabel");
-            GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 20;
+            GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 28;
             var rlTMP = GetOrAdd<TextMeshProUGUI>(rewardLabel);
             rlTMP.text = "RECOMPENSA DE HOY";
-            rlTMP.fontSize = 14;
+            rlTMP.fontSize = 28;
+            rlTMP.enableAutoSizing = true;
+            rlTMP.fontSizeMin = 18;
+            rlTMP.fontSizeMax = 28;
+            rlTMP.fontStyle = FontStyles.Bold;
             rlTMP.color = TEXT_SECONDARY;
             rlTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
             var rewardAmount = FindOrCreate(infoPanel.transform, "RewardAmount");
-            GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 24;
+            GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 32;
             var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
             raTMP.text = "300 Monedas + 25 XP";
-            raTMP.fontSize = 18;
+            raTMP.fontSize = 36;
             raTMP.fontStyle = FontStyles.Bold;
             raTMP.color = COIN_COLOR;
             raTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -956,7 +979,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(claimText);
             ctTMP.text = "RECLAMAR RECOMPENSA";
-            ctTMP.fontSize = 22;
+            ctTMP.fontSize = 48;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = TEXT_DARK;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -999,17 +1022,18 @@ namespace DigitPark.Editor
             var label = FindOrCreate(timerBar.transform, "Label");
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Pr\u00F3xima recompensa en:";
-            lTMP.fontSize = 13;
+            lTMP.fontSize = 28;
+            lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.MidlineRight;
             var lLE = GetOrAdd<LayoutElement>(label);
-            lLE.minWidth = 190;
+            lLE.minWidth = 250;
 
             // Time text
             var timeText = FindOrCreate(timerBar.transform, "TimeText");
             var ttTMP = GetOrAdd<TextMeshProUGUI>(timeText);
             ttTMP.text = "14h 32m 15s";
-            ttTMP.fontSize = 15;
+            ttTMP.fontSize = 34;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = CYAN_NEON;
             ttTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1052,7 +1076,7 @@ namespace DigitPark.Editor
             var ppRT = GetOrAdd<RectTransform>(popup);
             ppRT.anchorMin = new Vector2(0.5f, 0.5f);
             ppRT.anchorMax = new Vector2(0.5f, 0.5f);
-            ppRT.sizeDelta = new Vector2(420, 380);
+            ppRT.sizeDelta = new Vector2(500, 520);
             GetOrAdd<Image>(popup).color = CARD_BG;
             var ppOutline = GetOrAdd<Outline>(popup);
             ppOutline.effectColor = GOLD;
@@ -1084,10 +1108,10 @@ namespace DigitPark.Editor
 
             // Title
             var celebTitle = FindOrCreate(popup.transform, "CelebTitle");
-            GetOrAdd<LayoutElement>(celebTitle).preferredHeight = 32;
+            GetOrAdd<LayoutElement>(celebTitle).preferredHeight = 42;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(celebTitle);
             ctTMP.text = "\u00A1Recompensa Obtenida!";
-            ctTMP.fontSize = 24;
+            ctTMP.fontSize = 52;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = GOLD;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -1095,34 +1119,35 @@ namespace DigitPark.Editor
             // Claim Reward Icon
             var claimRewardIcon = FindOrCreate(popup.transform, "ClaimRewardIcon");
             var criLE = GetOrAdd<LayoutElement>(claimRewardIcon);
-            criLE.preferredWidth = 50;
-            criLE.preferredHeight = 50;
+            criLE.preferredWidth = 60;
+            criLE.preferredHeight = 60;
             var criImg = GetOrAdd<Image>(claimRewardIcon);
             criImg.preserveAspect = true;
             criImg.color = COIN_COLOR;
 
             // Claim Reward Text
             var claimRewardText = FindOrCreate(popup.transform, "ClaimRewardText");
-            GetOrAdd<LayoutElement>(claimRewardText).preferredHeight = 35;
+            GetOrAdd<LayoutElement>(claimRewardText).preferredHeight = 45;
             var crtTMP = GetOrAdd<TextMeshProUGUI>(claimRewardText);
             crtTMP.text = "+300 Monedas";
-            crtTMP.fontSize = 28;
+            crtTMP.fontSize = 56;
             crtTMP.fontStyle = FontStyles.Bold;
             crtTMP.color = COIN_COLOR;
             crtTMP.alignment = TextAlignmentOptions.Center;
 
             // Streak Info
             var streakInfo = FindOrCreate(popup.transform, "StreakInfo");
-            GetOrAdd<LayoutElement>(streakInfo).preferredHeight = 22;
+            GetOrAdd<LayoutElement>(streakInfo).preferredHeight = 30;
             var siTMP = GetOrAdd<TextMeshProUGUI>(streakInfo);
             siTMP.text = "Racha: 6 d\u00EDas";
-            siTMP.fontSize = 15;
+            siTMP.fontSize = 32;
+            siTMP.fontStyle = FontStyles.Bold;
             siTMP.color = TEXT_SECONDARY;
             siTMP.alignment = TextAlignmentOptions.Center;
 
             // Continue Button
             var continueBtn = FindOrCreate(popup.transform, "ContinueButton");
-            GetOrAdd<LayoutElement>(continueBtn).preferredHeight = 48;
+            GetOrAdd<LayoutElement>(continueBtn).preferredHeight = 55;
             var conBg = GetOrAdd<Image>(continueBtn);
             conBg.color = CYAN_NEON;
             GetOrAdd<Button>(continueBtn).targetGraphic = conBg;
@@ -1135,7 +1160,7 @@ namespace DigitPark.Editor
             cnRT.offsetMax = Vector2.zero;
             var cnTMP = GetOrAdd<TextMeshProUGUI>(conText);
             cnTMP.text = "CONTINUAR";
-            cnTMP.fontSize = 20;
+            cnTMP.fontSize = 40;
             cnTMP.fontStyle = FontStyles.Bold;
             cnTMP.color = TEXT_DARK;
             cnTMP.alignment = TextAlignmentOptions.Center;
@@ -1168,7 +1193,7 @@ namespace DigitPark.Editor
             var ppRT = GetOrAdd<RectTransform>(popup);
             ppRT.anchorMin = new Vector2(0.5f, 0.5f);
             ppRT.anchorMax = new Vector2(0.5f, 0.5f);
-            ppRT.sizeDelta = new Vector2(400, 300);
+            ppRT.sizeDelta = new Vector2(480, 440);
             GetOrAdd<Image>(popup).color = CARD_BG;
             var ppOutline = GetOrAdd<Outline>(popup);
             ppOutline.effectColor = GOLD;
@@ -1193,27 +1218,27 @@ namespace DigitPark.Editor
 
             // Milestone Text
             var milestoneText = FindOrCreate(popup.transform, "MilestoneText");
-            GetOrAdd<LayoutElement>(milestoneText).preferredHeight = 32;
+            GetOrAdd<LayoutElement>(milestoneText).preferredHeight = 42;
             var mtTMP = GetOrAdd<TextMeshProUGUI>(milestoneText);
             mtTMP.text = "\u00A17 d\u00EDas seguidos!";
-            mtTMP.fontSize = 24;
+            mtTMP.fontSize = 52;
             mtTMP.fontStyle = FontStyles.Bold;
             mtTMP.color = GOLD;
             mtTMP.alignment = TextAlignmentOptions.Center;
 
             // Milestone Bonus Text
             var milestoneBonusText = FindOrCreate(popup.transform, "MilestoneBonusText");
-            GetOrAdd<LayoutElement>(milestoneBonusText).preferredHeight = 28;
+            GetOrAdd<LayoutElement>(milestoneBonusText).preferredHeight = 36;
             var mbtTMP = GetOrAdd<TextMeshProUGUI>(milestoneBonusText);
             mbtTMP.text = "+100 gemas de bonus";
-            mbtTMP.fontSize = 20;
+            mbtTMP.fontSize = 42;
             mbtTMP.fontStyle = FontStyles.Bold;
             mbtTMP.color = GEM_COLOR;
             mbtTMP.alignment = TextAlignmentOptions.Center;
 
             // Continue Button
             var continueBtn = FindOrCreate(popup.transform, "ContinueBtn");
-            GetOrAdd<LayoutElement>(continueBtn).preferredHeight = 45;
+            GetOrAdd<LayoutElement>(continueBtn).preferredHeight = 52;
             var conBg = GetOrAdd<Image>(continueBtn);
             conBg.color = CYAN_NEON;
             GetOrAdd<Button>(continueBtn).targetGraphic = conBg;
@@ -1226,7 +1251,7 @@ namespace DigitPark.Editor
             cnRT.offsetMax = Vector2.zero;
             var cnTMP = GetOrAdd<TextMeshProUGUI>(conText);
             cnTMP.text = "CONTINUAR";
-            cnTMP.fontSize = 18;
+            cnTMP.fontSize = 38;
             cnTMP.fontStyle = FontStyles.Bold;
             cnTMP.color = TEXT_DARK;
             cnTMP.alignment = TextAlignmentOptions.Center;
@@ -1317,6 +1342,9 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);

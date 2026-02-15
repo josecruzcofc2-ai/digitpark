@@ -8,7 +8,7 @@ namespace DigitPark.Editor
     /// <summary>
     /// Editor tool to preview Onboarding steps/slides without entering Play mode.
     /// Auto-detects scene type:
-    ///   - Main Onboarding (8 steps): toggles panels + updates title/description
+    ///   - Main Onboarding (8 slides): toggles Slide1-Slide8 in SlidesContainer
     ///   - Cash Battle Onboarding (5 slides): toggles Slide1-Slide5
     ///
     /// Menu: DigitPark/UI Builders/Onboarding/Preview Slides
@@ -21,19 +21,10 @@ namespace DigitPark.Editor
         private int activeIndex = 0;
 
         // Cash Battle refs
-        private GameObject slidesContainer;
+        private GameObject cashSlidesContainer;
 
         // Main Onboarding refs
-        private Canvas canvas;
-        private GameObject nameInputPanel;
-        private GameObject avatarSelectionPanel;
-        private GameObject completionPanel;
-        private GameObject stepImageObj;
-        private GameObject iconGlowObj;
-        private GameObject titleTextObj;
-        private GameObject descTextObj;
-        private TextMeshProUGUI titleTMP;
-        private TextMeshProUGUI descTMP;
+        private GameObject mainSlidesContainer;
 
         // Step data for Main Onboarding preview
         private static readonly string[] MAIN_LABELS =
@@ -46,30 +37,6 @@ namespace DigitPark.Editor
             "6. Torneos (Info)",
             "7. Recompensas (Info)",
             "8. Completado"
-        };
-
-        private static readonly string[] MAIN_TITLES =
-        {
-            "\u00A1Bienvenido a DigitPark!",
-            "\u00BFC\u00F3mo te llamas?",
-            "Elige tu Avatar",
-            "Juegos Cognitivos",
-            "CashBattle",
-            "Torneos",
-            "Recompensas Diarias",
-            "\u00A1Est\u00E1s Listo!"
-        };
-
-        private static readonly string[] MAIN_DESCS =
-        {
-            "Tu destino para juegos mentales, competencias y diversi\u00F3n.",
-            "Elige un nombre para tu perfil.",
-            "Selecciona c\u00F3mo quieres que te vean otros jugadores.",
-            "Entrena tu mente con 6 minijuegos dise\u00F1ados para mejorar memoria, reflejos, matem\u00E1ticas y m\u00E1s.",
-            "\u00BFListo para el desaf\u00EDo? Compite 1v1 contra otros jugadores por premios reales.",
-            "Participa en torneos con decenas de jugadores. \u00A1El premio mayor est\u00E1 en juego!",
-            "Vuelve cada d\u00EDa para obtener monedas, gemas y m\u00E1s recompensas.",
-            "Has completado el tutorial. \u00A1Es hora de jugar!"
         };
 
         // Cash Battle slide labels
@@ -104,11 +71,10 @@ namespace DigitPark.Editor
             GUILayout.Label("Onboarding Preview", EditorStyles.boldLabel);
             GUILayout.Space(5);
 
-            // Mode indicator
             switch (currentMode)
             {
                 case SceneMode.MainOnboarding:
-                    EditorGUILayout.HelpBox("Escena: Main Onboarding (8 pasos)\nAlterna paneles y texto por paso.", MessageType.Info);
+                    EditorGUILayout.HelpBox("Escena: Main Onboarding (8 slides)\nAlterna slides independientes en SlidesContainer.", MessageType.Info);
                     break;
                 case SceneMode.CashBattleOnboarding:
                     EditorGUILayout.HelpBox("Escena: Cash Battle Onboarding (5 slides)\nMuestra/oculta slides individuales.", MessageType.Info);
@@ -187,17 +153,17 @@ namespace DigitPark.Editor
             if (currentMode == SceneMode.CashBattleOnboarding)
                 ActivateCashSlide(index);
             else
-                ActivateMainStep(index);
+                ActivateMainSlide(index);
         }
 
         #region Cash Battle Preview
 
         private void DrawCashBattlePreview()
         {
-            if (slidesContainer == null)
+            if (cashSlidesContainer == null)
             {
                 FindCashBattleElements();
-                if (slidesContainer == null)
+                if (cashSlidesContainer == null)
                 {
                     EditorGUILayout.HelpBox("SlidesContainer no encontrado.\nEjecuta el CashBattle UIBuilder primero.", MessageType.Warning);
                     return;
@@ -208,7 +174,7 @@ namespace DigitPark.Editor
 
             for (int i = 0; i < CASH_LABELS.Length; i++)
             {
-                Transform slide = slidesContainer.transform.Find($"Slide{i + 1}");
+                Transform slide = cashSlidesContainer.transform.Find($"Slide{i + 1}");
                 bool isActive = slide != null && slide.gameObject.activeSelf;
 
                 Color orig = GUI.backgroundColor;
@@ -233,30 +199,28 @@ namespace DigitPark.Editor
             Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
             if (c == null) return;
 
-            // New structure: Canvas -> SlidesContainer
             Transform container = c.transform.Find("SlidesContainer");
             if (container != null)
             {
-                slidesContainer = container.gameObject;
+                cashSlidesContainer = container.gameObject;
                 return;
             }
 
-            // Old structure: Canvas -> SafeArea -> SlidesContainer
             Transform safeArea = c.transform.Find("SafeArea");
             if (safeArea != null)
             {
                 container = safeArea.Find("SlidesContainer");
-                if (container != null) slidesContainer = container.gameObject;
+                if (container != null) cashSlidesContainer = container.gameObject;
             }
         }
 
         private void ActivateCashSlide(int index)
         {
-            if (slidesContainer == null) return;
+            if (cashSlidesContainer == null) return;
 
             for (int i = 1; i <= 5; i++)
             {
-                Transform slide = slidesContainer.transform.Find($"Slide{i}");
+                Transform slide = cashSlidesContainer.transform.Find($"Slide{i}");
                 if (slide != null) slide.gameObject.SetActive(i == index + 1);
             }
 
@@ -269,22 +233,29 @@ namespace DigitPark.Editor
 
         private void DrawMainOnboardingPreview()
         {
-            if (canvas == null)
+            if (mainSlidesContainer == null)
             {
                 FindMainOnboardingElements();
-                if (canvas == null)
+                if (mainSlidesContainer == null)
                 {
-                    EditorGUILayout.HelpBox("Canvas no encontrado.\nEjecuta el Onboarding UIBuilder primero.", MessageType.Warning);
+                    EditorGUILayout.HelpBox("SlidesContainer no encontrado.\nEjecuta el Onboarding UIBuilder primero.", MessageType.Warning);
                     return;
                 }
             }
 
-            GUILayout.Label("Pasos:", EditorStyles.boldLabel);
+            GUILayout.Label("Slides:", EditorStyles.boldLabel);
 
             for (int i = 0; i < MAIN_LABELS.Length; i++)
             {
+                Transform slide = mainSlidesContainer.transform.Find($"Slide{i + 1}");
+                bool isActive = slide != null && slide.gameObject.activeSelf;
+
                 Color orig = GUI.backgroundColor;
-                if (i == activeIndex) GUI.backgroundColor = CYAN;
+                if (isActive)
+                {
+                    GUI.backgroundColor = CYAN;
+                    activeIndex = i;
+                }
 
                 if (GUILayout.Button(MAIN_LABELS[i], GUILayout.Height(26)))
                     ActivateIndex(i);
@@ -298,59 +269,22 @@ namespace DigitPark.Editor
 
         private void FindMainOnboardingElements()
         {
-            canvas = UIBuilderCanvasHelper.FindMainCanvas();
-            if (canvas == null) return;
+            Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
+            if (c == null) return;
 
-            Transform r = canvas.transform;
-
-            nameInputPanel = FindChild(r, "NameInputPanel");
-            avatarSelectionPanel = FindChild(r, "AvatarSelectionPanel");
-            completionPanel = FindChild(r, "CompletionPanel");
-            stepImageObj = FindChild(r, "StepImage");
-            iconGlowObj = FindChild(r, "IconGlow");
-            titleTextObj = FindChild(r, "TitleText");
-            descTextObj = FindChild(r, "DescriptionText");
-
-            if (titleTextObj != null) titleTMP = titleTextObj.GetComponent<TextMeshProUGUI>();
-            if (descTextObj != null) descTMP = descTextObj.GetComponent<TextMeshProUGUI>();
+            Transform container = c.transform.Find("SlidesContainer");
+            if (container != null)
+                mainSlidesContainer = container.gameObject;
         }
 
-        private void ActivateMainStep(int stepIndex)
+        private void ActivateMainSlide(int index)
         {
-            activeIndex = stepIndex;
+            if (mainSlidesContainer == null) return;
 
-            // Hide all special panels
-            if (nameInputPanel != null) nameInputPanel.SetActive(false);
-            if (avatarSelectionPanel != null) avatarSelectionPanel.SetActive(false);
-            if (completionPanel != null) completionPanel.SetActive(false);
-
-            bool isCompletion = stepIndex == 7;
-
-            // Show/hide base content elements
-            if (stepImageObj != null) stepImageObj.SetActive(!isCompletion);
-            if (iconGlowObj != null) iconGlowObj.SetActive(!isCompletion);
-            if (titleTextObj != null) titleTextObj.SetActive(!isCompletion);
-            if (descTextObj != null) descTextObj.SetActive(!isCompletion);
-
-            // Update title and description text
-            if (!isCompletion && stepIndex < MAIN_TITLES.Length)
+            for (int i = 1; i <= 8; i++)
             {
-                if (titleTMP != null) titleTMP.text = MAIN_TITLES[stepIndex];
-                if (descTMP != null) descTMP.text = MAIN_DESCS[stepIndex];
-            }
-
-            // Show step-specific panel
-            switch (stepIndex)
-            {
-                case 1: // Name Input
-                    if (nameInputPanel != null) nameInputPanel.SetActive(true);
-                    break;
-                case 2: // Avatar Selection
-                    if (avatarSelectionPanel != null) avatarSelectionPanel.SetActive(true);
-                    break;
-                case 7: // Completion
-                    if (completionPanel != null) completionPanel.SetActive(true);
-                    break;
+                Transform slide = mainSlidesContainer.transform.Find($"Slide{i}");
+                if (slide != null) slide.gameObject.SetActive(i == index + 1);
             }
 
             MarkDirty();
@@ -359,12 +293,6 @@ namespace DigitPark.Editor
         #endregion
 
         #region Helpers
-
-        private static GameObject FindChild(Transform parent, string name)
-        {
-            Transform t = parent.Find(name);
-            return t != null ? t.gameObject : null;
-        }
 
         private void MarkDirty()
         {

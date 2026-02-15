@@ -43,12 +43,12 @@ namespace DigitPark.Editor
         private const float TOPBAR_BOT = 0.955f;
 
         private const float ICON_TOP = 0.92f;
-        private const float ICON_BOT = 0.58f;
+        private const float ICON_BOT = 0.63f;
 
-        private const float TITLE_TOP = 0.56f;
-        private const float TITLE_BOT = 0.47f;
+        private const float TITLE_TOP = 0.61f;
+        private const float TITLE_BOT = 0.50f;
 
-        private const float CONTENT_TOP = 0.45f;
+        private const float CONTENT_TOP = 0.48f;
         private const float CONTENT_BOT = 0.12f;
 
         private const float DOTS_TOP = 0.095f;
@@ -143,6 +143,11 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Limpiar TODOS los hijos del Canvas antes de reconstruir
+            for (int i = canvas.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(canvas.transform.GetChild(i).gameObject);
+
+            // Limpiar Background/SafeArea de otros canvases raíz (legacy)
             CleanupOldUI();
 
             var scaler = canvas.GetComponent<CanvasScaler>();
@@ -151,19 +156,6 @@ namespace DigitPark.Editor
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
                 scaler.matchWidthOrHeight = 0f;
-            }
-
-            // Limpiar elementos anteriores
-            string[] oldNames =
-            {
-                "Background", "ProgressBar", "TopBar", "Logo",
-                "SlidesContainer", "SafeArea", "NavigationPanel",
-                "DotsContainer", "LegalText", "LegalTextContainer"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
             }
 
             CreateBackground(canvas.transform);
@@ -256,7 +248,7 @@ namespace DigitPark.Editor
             tlRT.offsetMax = Vector2.zero;
             var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLabel);
             tlTMP.text = "CASH BATTLE";
-            tlTMP.fontSize = 20;
+            tlTMP.fontSize = 36;
             tlTMP.color = GOLD;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.alignment = TextAlignmentOptions.Left;
@@ -270,8 +262,9 @@ namespace DigitPark.Editor
             ptRT.offsetMax = Vector2.zero;
             var ptTMP = GetOrAdd<TextMeshProUGUI>(progressText);
             ptTMP.text = "1 / 5";
-            ptTMP.fontSize = 16;
+            ptTMP.fontSize = 28;
             ptTMP.color = TEXT_SECONDARY;
+            ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.alignment = TextAlignmentOptions.Center;
 
             // Skip Button (right)
@@ -293,7 +286,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
             stTMP.text = "SALTAR";
-            stTMP.fontSize = 16;
+            stTMP.fontSize = 28;
             stTMP.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
@@ -317,6 +310,10 @@ namespace DigitPark.Editor
             cRT.offsetMin = Vector2.zero;
             cRT.offsetMax = Vector2.zero;
 
+            // Limpiar slides anteriores del container
+            for (int i = container.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(container.transform.GetChild(i).gameObject);
+
             CreateSlide1_Welcome(container.transform);
             CreateSlide2_Verification(container.transform);
             CreateSlide3_Deposit(container.transform);
@@ -333,13 +330,13 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "\u00A1BIENVENIDO A\nCASH BATTLE!", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "La plataforma de competencias\ncon DINERO REAL en Digit Park", 20, TEXT_WHITE, TextAlignmentOptions.Center);
-            AddContentSpacer(card, 8);
-            AddContentText(card, "GANA DINERO REAL JUGANDO", 22, GREEN_WIN, TextAlignmentOptions.Center, true);
-            AddContentSpacer(card, 12);
-            AddContentText(card, "\u2022  Competencias 1v1 desde $1 USD", 18, TEXT_WHITE);
-            AddContentText(card, "\u2022  Torneos con premios garantizados", 18, TEXT_WHITE);
-            AddContentText(card, "\u2022  Retiros r\u00E1pidos y seguros", 18, TEXT_WHITE);
+            AddContentText(card, "La plataforma de competencias\ncon DINERO REAL en Digit Park", 36, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentSpacer(card, 10);
+            AddContentText(card, "GANA DINERO REAL JUGANDO", 42, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentSpacer(card, 14);
+            AddContentText(card, "\u2022  Competencias 1v1 desde $1 USD", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  Torneos con premios garantizados", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  Retiros r\u00E1pidos y seguros", 32, TEXT_WHITE);
         }
 
         private static void CreateSlide2_Verification(Transform parent)
@@ -349,13 +346,13 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "VERIFICA TU EDAD\n(18+ REQUERIDO)", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "Para jugar con dinero real, debes:", 20, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "Para jugar con dinero real, debes:", 36, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2713  Ser mayor de 18 a\u00F1os", 18, TEXT_WHITE);
-            AddContentText(card, "\u2713  Verificar tu identidad con Triump\u2122", 18, TEXT_WHITE);
-            AddContentText(card, "\u2713  Confirmar tu informaci\u00F3n bancaria", 18, TEXT_WHITE);
+            AddContentText(card, "\u2713  Ser mayor de 18 a\u00F1os", 32, TEXT_WHITE);
+            AddContentText(card, "\u2713  Verificar tu identidad con Triump\u2122", 32, TEXT_WHITE);
+            AddContentText(card, "\u2713  Confirmar tu informaci\u00F3n bancaria", 32, TEXT_WHITE);
             AddContentSpacer(card, 12);
-            AddContentText(card, "Proceso 100% seguro y confidencial", 16, TEXT_SECONDARY, TextAlignmentOptions.Center);
+            AddContentText(card, "Proceso 100% seguro y confidencial", 26, TEXT_SECONDARY, TextAlignmentOptions.Center);
         }
 
         private static void CreateSlide3_Deposit(Transform parent)
@@ -365,13 +362,13 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "DEPOSITA FONDOS\nEN TU WALLET", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "A\u00F1ade dinero a tu cuenta f\u00E1cilmente:", 20, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "A\u00F1ade dinero a tu cuenta f\u00E1cilmente:", 36, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2022  Tarjeta de cr\u00E9dito/d\u00E9bito", 18, TEXT_WHITE);
-            AddContentText(card, "\u2022  Transferencia bancaria", 18, TEXT_WHITE);
-            AddContentText(card, "\u2022  M\u00E9todos de pago locales", 18, TEXT_WHITE);
+            AddContentText(card, "\u2022  Tarjeta de cr\u00E9dito/d\u00E9bito", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  Transferencia bancaria", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  M\u00E9todos de pago locales", 32, TEXT_WHITE);
             AddContentSpacer(card, 12);
-            AddContentText(card, "Dep\u00F3sito m\u00EDnimo: $5 USD", 20, GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "Dep\u00F3sito m\u00EDnimo: $5 USD", 42, GOLD, TextAlignmentOptions.Center, true);
         }
 
         private static void CreateSlide4_Play(Transform parent)
@@ -381,15 +378,15 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "ELIGE TU JUEGO\nY APUESTA", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "COMPETENCIAS 1v1", 20, ORANGE_GOLD, TextAlignmentOptions.Center, true);
-            AddContentText(card, "\u2022  Matchmaking por habilidad (MMR)", 17, TEXT_WHITE);
-            AddContentText(card, "\u2022  Apuestas desde $1 hasta $250 USD", 17, TEXT_WHITE);
-            AddContentText(card, "\u2022  El ganador se lleva el 80%", 17, TEXT_WHITE);
-            AddContentSpacer(card, 8);
-            AddContentText(card, "TORNEOS", 20, ORANGE_GOLD, TextAlignmentOptions.Center, true);
-            AddContentText(card, "\u2022  Hasta 256 jugadores", 17, TEXT_WHITE);
-            AddContentText(card, "\u2022  Premios garantizados", 17, TEXT_WHITE);
-            AddContentText(card, "\u2022  Sistema de brackets profesional", 17, TEXT_WHITE);
+            AddContentText(card, "COMPETENCIAS 1v1", 42, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Matchmaking por habilidad (MMR)", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  Apuestas desde $1 hasta $250 USD", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  El ganador se lleva el 80%", 32, TEXT_WHITE);
+            AddContentSpacer(card, 10);
+            AddContentText(card, "TORNEOS", 42, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Hasta 256 jugadores", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  Premios garantizados", 32, TEXT_WHITE);
+            AddContentText(card, "\u2022  Sistema de brackets profesional", 32, TEXT_WHITE);
         }
 
         private static void CreateSlide5_Win(Transform parent)
@@ -399,14 +396,14 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "\u00A1GANA Y RETIRA\nTU DINERO!", GREEN_WIN);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "RETIROS R\u00C1PIDOS Y SEGUROS", 20, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentText(card, "RETIROS R\u00C1PIDOS Y SEGUROS", 42, GREEN_WIN, TextAlignmentOptions.Center, true);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2713  Retiro m\u00EDnimo: $10 USD", 18, TEXT_WHITE);
-            AddContentText(card, "\u2713  M\u00E1ximo: $500 USD por retiro", 18, TEXT_WHITE);
-            AddContentText(card, "\u2713  Procesamiento en 1-3 d\u00EDas h\u00E1biles", 18, TEXT_WHITE);
-            AddContentText(card, "\u2713  Directo a tu cuenta bancaria", 18, TEXT_WHITE);
-            AddContentSpacer(card, 12);
-            AddContentText(card, "\u00A1EMPIEZA A GANAR HOY!", 22, GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2713  Retiro m\u00EDnimo: $10 USD", 32, TEXT_WHITE);
+            AddContentText(card, "\u2713  M\u00E1ximo: $500 USD por retiro", 32, TEXT_WHITE);
+            AddContentText(card, "\u2713  Procesamiento en 1-3 d\u00EDas h\u00E1biles", 32, TEXT_WHITE);
+            AddContentText(card, "\u2713  Directo a tu cuenta bancaria", 32, TEXT_WHITE);
+            AddContentSpacer(card, 14);
+            AddContentText(card, "\u00A1EMPIEZA A GANAR HOY!", 42, GOLD, TextAlignmentOptions.Center, true);
         }
 
         #endregion
@@ -470,11 +467,14 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = title.AddComponent<TextMeshProUGUI>();
             tTMP.text = text;
-            tTMP.fontSize = 32;
+            tTMP.fontSize = 78;
             tTMP.color = color;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
             tTMP.enableWordWrapping = true;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = 48;
+            tTMP.fontSizeMax = 78;
         }
 
         private static Transform CreateContentCard(Transform slide)
@@ -517,14 +517,14 @@ namespace DigitPark.Editor
         {
             var obj = new GameObject("Text");
             obj.transform.SetParent(content, false);
-            obj.AddComponent<LayoutElement>().preferredHeight = fontSize + 12;
+            obj.AddComponent<LayoutElement>().preferredHeight = fontSize + 16;
             var tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = fontSize;
             tmp.color = color;
             tmp.alignment = align;
             tmp.enableWordWrapping = true;
-            if (bold) tmp.fontStyle = FontStyles.Bold;
+            tmp.fontStyle = FontStyles.Bold;
         }
 
         private static void AddContentSpacer(Transform content, float height)
@@ -589,7 +589,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
             btTMP.text = "ATR\u00C1S";
-            btTMP.fontSize = 20;
+            btTMP.fontSize = 36;
             btTMP.color = TEXT_SECONDARY;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -616,7 +616,7 @@ namespace DigitPark.Editor
             ntRT.offsetMax = Vector2.zero;
             var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
             ntTMP.text = "SIGUIENTE";
-            ntTMP.fontSize = 20;
+            ntTMP.fontSize = 36;
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;
@@ -642,8 +642,9 @@ namespace DigitPark.Editor
 
             var lTMP = GetOrAdd<TextMeshProUGUI>(legal);
             lTMP.text = "Powered by Triump\u2122 \u2022 Juego responsable \u2022 Solo mayores de 18 a\u00F1os";
-            lTMP.fontSize = 11;
+            lTMP.fontSize = 18;
             lTMP.color = TEXT_SECONDARY;
+            lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableWordWrapping = true;
 
@@ -719,6 +720,9 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
+                // No tocar TransitionCanvas ni EffectsCanvas
+                if (canvas.gameObject.name.Contains("Transition") ||
+                    canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)
                 {
                     Transform t = canvas.transform.Find(name);

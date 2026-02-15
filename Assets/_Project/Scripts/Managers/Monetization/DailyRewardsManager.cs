@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Localization;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.UI;
 
@@ -316,7 +317,7 @@ namespace DigitPark.Managers
                 int bonusIndex = GetMilestoneIndex(nextMilestone);
                 if (bonusIndex >= 0 && bonusIndex < milestoneBonuses.Length)
                 {
-                    streakBonusText.text = L("dr_bonus_day", nextMilestone, milestoneBonuses[bonusIndex]);
+                    streakBonusText.text = L("dr_bonus_info", nextMilestone, milestoneBonuses[bonusIndex]);
                 }
             }
         }
@@ -442,7 +443,7 @@ namespace DigitPark.Managers
 
             if (claimButtonText)
             {
-                claimButtonText.text = canClaimToday ? L("dr_claim") : L("dr_claimed");
+                claimButtonText.text = canClaimToday ? L("dr_claim_reward") : L("dr_claimed");
             }
 
             if (claimGlow)
@@ -802,6 +803,9 @@ namespace DigitPark.Managers
             UpdateCurrentDayDisplay();
             PopulateRewardsGrid();
 
+            // Achievement tracking
+            AchievementService.Instance?.OnDailyRewardClaimed(currentStreak);
+
             Debug.Log($"[DailyRewards] Claimed day {currentDayInCycle}, streak: {currentStreak}");
         }
 
@@ -915,12 +919,12 @@ namespace DigitPark.Managers
 
                 if (milestoneText)
                 {
-                    milestoneText.text = L("dr_milestone", days);
+                    milestoneText.text = L("dr_milestone_days", days);
                 }
 
                 if (milestoneBonusText)
                 {
-                    milestoneBonusText.text = L("dr_milestone_bonus", bonus);
+                    milestoneBonusText.text = L("dr_milestone_bonus_gems", bonus);
                 }
             }
         }
@@ -931,10 +935,14 @@ namespace DigitPark.Managers
             if (milestonePanel) milestonePanel.SetActive(false);
         }
 
-        private void Update()
+        private void OnEnable()
         {
-            // Update timer every second
-            UpdateNextResetTimer();
+            InvokeRepeating(nameof(UpdateNextResetTimer), 0f, 1f);
+        }
+
+        private void OnDisable()
+        {
+            CancelInvoke(nameof(UpdateNextResetTimer));
         }
 
         private void OnBackClicked()

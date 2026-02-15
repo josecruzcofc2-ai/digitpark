@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using DigitPark.Managers;
+using DigitPark.Services;
 
 namespace DigitPark.DevTools
 {
@@ -10,6 +11,7 @@ namespace DigitPark.DevTools
     /// Runtime debug panel for testing achievements.
     /// Add this to any scene to test unlocking achievements with notifications.
     /// Press F12 to toggle the panel visibility.
+    /// Uses AchievementService as the single source of truth.
     /// </summary>
     public class AchievementDebugPanel : MonoBehaviour
     {
@@ -27,15 +29,11 @@ namespace DigitPark.DevTools
         private List<AchievementDebugItem> debugItems = new List<AchievementDebugItem>();
         private bool isVisible;
 
-        // Achievement definitions
-        private List<DebugAchievementData> achievements;
-
         private void Awake()
         {
             if (transform.parent != null)
                 transform.SetParent(null);
             DontDestroyOnLoad(gameObject);
-            InitializeAchievements();
             CreateUI();
             CreateFloatingToggle();
 
@@ -72,18 +70,14 @@ namespace DigitPark.DevTools
             }
         }
 
-        /// <summary>
-        /// Creates a small floating button always visible to open/close the panel.
-        /// </summary>
         private void CreateFloatingToggle()
         {
-            // Canvas independiente para el botón flotante
             GameObject toggleRoot = new GameObject("FloatingToggle");
             toggleRoot.transform.SetParent(transform);
 
             Canvas toggleCanvas = toggleRoot.AddComponent<Canvas>();
             toggleCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            toggleCanvas.sortingOrder = 10001; // Por encima del panel
+            toggleCanvas.sortingOrder = 10001;
 
             CanvasScaler scaler = toggleRoot.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -92,7 +86,6 @@ namespace DigitPark.DevTools
 
             toggleRoot.AddComponent<GraphicRaycaster>();
 
-            // Botón flotante
             floatingToggleBtn = new GameObject("ToggleBtn");
             floatingToggleBtn.transform.SetParent(toggleRoot.transform, false);
 
@@ -114,7 +107,6 @@ namespace DigitPark.DevTools
             btn.colors = colors;
             btn.onClick.AddListener(TogglePanel);
 
-            // Texto del botón
             GameObject textObj = new GameObject("Text");
             textObj.transform.SetParent(floatingToggleBtn.transform, false);
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -139,93 +131,14 @@ namespace DigitPark.DevTools
 
             if (isVisible)
             {
-                // Panel abierto: botón dice "X" en rojo
                 if (text != null) { text.text = "X"; text.color = new Color(1f, 0.3f, 0.3f); }
                 if (bg != null) bg.color = new Color(0.3f, 0.08f, 0.08f, 0.9f);
             }
             else
             {
-                // Panel cerrado: botón dice "DBG" en dorado
                 if (text != null) { text.text = "DBG"; text.color = new Color(1f, 0.84f, 0f); }
                 if (bg != null) bg.color = new Color(0.1f, 0.1f, 0.15f, 0.85f);
             }
-        }
-
-        private void InitializeAchievements()
-        {
-            achievements = new List<DebugAchievementData>
-            {
-                // BEGINNER
-                new DebugAchievementData("first_game", "Primer Paso", 10, "Beginner", "Logro_Primeros_Pasos"),
-                new DebugAchievementData("tutorial_complete", "Aprendiz", 10, "Beginner", "Logro_Graduado"),
-                new DebugAchievementData("first_win", "Primera Victoria", 15, "Beginner", "Logro_Primera_Victoria"),
-                new DebugAchievementData("profile_complete", "Identidad", 10, "Beginner", "Logro_Perfil_Completo"),
-
-                // MASTERY
-                new DebugAchievementData("digitrush_master", "Maestro de Dígitos", 50, "Mastery", "Logro_Maestro_Numeros"),
-                new DebugAchievementData("flashtap_master", "Reflejos de Luz", 50, "Mastery", "Logro_Reflejos_Rayo"),
-                new DebugAchievementData("memorypairs_master", "Memoria Fotográfica", 50, "Mastery", "Logro_Genio"),
-                new DebugAchievementData("quickmath_master", "Calculadora Humana", 50, "Mastery", "Logro_Maestro_Matematicas"),
-                new DebugAchievementData("oddoneout_master", "Ojo de Águila", 50, "Mastery", "Logro_Ojo_Aguila"),
-
-                // VICTORIES
-                new DebugAchievementData("wins_10", "Competidor", 20, "Victories", "Logro_10_Victorias"),
-                new DebugAchievementData("wins_50", "Veterano", 40, "Victories", "Logro_50_Victorias"),
-                new DebugAchievementData("wins_100", "Centurión", 60, "Victories", "Logro_Centurion"),
-                new DebugAchievementData("wins_500", "Leyenda", 100, "Victories", "Logro_500_Victorias"),
-                new DebugAchievementData("wins_1000", "Inmortal", 200, "Victories", "Logro_1000_Victorias"),
-
-                // STREAKS
-                new DebugAchievementData("streak_3", "En Racha", 25, "Streaks", "Logro_Racha_Fuego"),
-                new DebugAchievementData("streak_5", "Imparable", 40, "Streaks", "Logro_Victoria_Racha_7"),
-                new DebugAchievementData("streak_10", "Dominación", 75, "Streaks", "Logro_Demoledor"),
-                new DebugAchievementData("streak_20", "Invencible", 150, "Streaks", "Logro_Victoria_Racha_30", true),
-
-                // CASH BATTLE
-                new DebugAchievementData("cash_first", "Apostador", 25, "CashBattle", "Logro_Ficha_Cash"),
-                new DebugAchievementData("cash_first_win", "Ganador Real", 35, "CashBattle", "Logro_Rey_Monedas"),
-                new DebugAchievementData("cash_10_wins", "Jugador Serio", 50, "CashBattle", "Logro_VIP_1000"),
-                new DebugAchievementData("cash_50_wins", "High Roller", 100, "CashBattle", "Logro_VIP_Dados"),
-                new DebugAchievementData("cash_100_wins", "Tiburón", 200, "CashBattle", "Logro_Tiburon_Cash"),
-                new DebugAchievementData("cash_earnings_100", "Primeros $100", 75, "CashBattle", "Logro_Bolsa_100"),
-                new DebugAchievementData("cash_earnings_1000", "Club de los Mil", 250, "CashBattle", "Logro_Millonario", true),
-
-                // TOURNAMENTS
-                new DebugAchievementData("tournament_first", "Participante", 20, "Tournaments", "Logro_Torneo_Bracket"),
-                new DebugAchievementData("tournament_top3", "Podio", 50, "Tournaments", "Logro_Coleccion_Trofeos"),
-                new DebugAchievementData("tournament_win", "Campeón", 100, "Tournaments", "Logro_Campeon_1"),
-                new DebugAchievementData("tournament_5_wins", "Multicampeón", 200, "Tournaments", "Logro_4_Estrellas"),
-                new DebugAchievementData("tournament_create", "Organizador", 30, "Tournaments", "Logro_Organizador_Torneo"),
-
-                // SOCIAL
-                new DebugAchievementData("friend_first", "Primer Amigo", 15, "Social", "Logro_Primer_Rival"),
-                new DebugAchievementData("friends_10", "Popular", 30, "Social", "Logro_Social_10_Amigos"),
-                new DebugAchievementData("friends_50", "Influencer", 75, "Social", "Logro_Influencer"),
-                new DebugAchievementData("challenge_friend", "Retador", 20, "Social", "Logro_Versus"),
-                new DebugAchievementData("beat_friend", "Rival", 25, "Social", "Logro_Amigo_Rival"),
-
-                // PROGRESSION
-                new DebugAchievementData("level_10", "Nivel 10", 25, "Progression", "Logro_Nivel_10"),
-                new DebugAchievementData("level_25", "Nivel 25", 50, "Progression", "Logro_Nivel_25"),
-                new DebugAchievementData("level_50", "Nivel 50", 75, "Progression", "Logro_Nivel50"),
-                new DebugAchievementData("level_100", "Nivel 100", 150, "Progression", "Logro_Avance_Epico"),
-
-                // COLLECTOR - Reservado para V2
-
-                // TIME
-                new DebugAchievementData("days_7", "Una Semana", 25, "Time", "Logro_Racha_7_Dias"),
-                new DebugAchievementData("days_30", "Un Mes", 50, "Time", "Logro_Racha_30_Dias"),
-                new DebugAchievementData("days_100", "100 Días", 100, "Time", "Logro_Racha_100_Dias"),
-                new DebugAchievementData("days_365", "Un Año", 300, "Time", "Logro_Racha_365_Dias", true),
-                new DebugAchievementData("daily_streak_7", "Racha Semanal", 30, "Time", "Logro_Login_Semanal"),
-                new DebugAchievementData("daily_streak_30", "Racha Mensual", 75, "Time", "Logro_Login_Mensual"),
-
-                // SECRET
-                new DebugAchievementData("night_owl", "Búho Nocturno", 50, "Secret", "Logro_Buho_Nocturno", true),
-                new DebugAchievementData("perfect_game", "Perfección", 100, "Secret", "Logro_Perfeccionista", true),
-                new DebugAchievementData("comeback_king", "Rey del Comeback", 75, "Secret", "Logro_Ave_Fenix", true),
-                new DebugAchievementData("speed_demon", "Demonio de Velocidad", 100, "Secret", "Logro_Demonio_Velocidad", true),
-            };
         }
 
         private void CreateUI()
@@ -292,7 +205,7 @@ namespace DigitPark.DevTools
             statsRT.sizeDelta = Vector2.zero;
 
             statsText = statsObj.AddComponent<TextMeshProUGUI>();
-            statsText.text = "0/53 (0%)";
+            statsText.text = "0/0 (0%)";
             statsText.fontSize = 16;
             statsText.color = new Color(0f, 1f, 1f);
             statsText.alignment = TextAlignmentOptions.Center;
@@ -355,17 +268,8 @@ namespace DigitPark.DevTools
 
             contentParent = content.transform;
 
-            // Create achievement items
-            string currentCategory = "";
-            foreach (var achievement in achievements)
-            {
-                if (achievement.category != currentCategory)
-                {
-                    currentCategory = achievement.category;
-                    CreateCategoryHeader(currentCategory);
-                }
-                CreateAchievementItem(achievement);
-            }
+            // Build items from Service if available, or wait
+            PopulateItems();
 
             // Bottom buttons
             GameObject bottomPanel = CreatePanel(mainPanel.transform, "BottomPanel");
@@ -412,6 +316,42 @@ namespace DigitPark.DevTools
             instrText.alignment = TextAlignmentOptions.Center;
         }
 
+        /// <summary>
+        /// Populates items from AchievementService (single source of truth)
+        /// </summary>
+        private void PopulateItems()
+        {
+            var service = AchievementService.Instance;
+            if (service == null || service.AllAchievements.Count == 0)
+            {
+                // Service not ready yet - try again later
+                Invoke(nameof(PopulateItems), 1f);
+                return;
+            }
+
+            // Clear existing items
+            foreach (var item in debugItems)
+            {
+                if (item.root != null) Destroy(item.root);
+            }
+            debugItems.Clear();
+
+            // Build from Service
+            string currentCategory = "";
+            foreach (var achievement in service.AllAchievements)
+            {
+                string cat = achievement.category.ToString();
+                if (cat != currentCategory)
+                {
+                    currentCategory = cat;
+                    CreateCategoryHeader(currentCategory);
+                }
+                CreateAchievementItem(achievement);
+            }
+
+            UpdateStats();
+        }
+
         private void CreateCategoryHeader(string category)
         {
             GameObject header = new GameObject($"Header_{category}");
@@ -440,7 +380,7 @@ namespace DigitPark.DevTools
             text.alignment = TextAlignmentOptions.Center;
         }
 
-        private void CreateAchievementItem(DebugAchievementData data)
+        private void CreateAchievementItem(AchievementData data)
         {
             GameObject item = new GameObject($"Item_{data.id}");
             item.transform.SetParent(contentParent, false);
@@ -481,7 +421,11 @@ namespace DigitPark.DevTools
             checkText.color = new Color(0.2f, 0.8f, 0.4f);
             checkText.alignment = TextAlignmentOptions.Center;
 
-            // Title
+            // Title - use localized title from Service
+            string displayTitle = data.titleKey;
+            if (Localization.LocalizationManager.Instance != null)
+                displayTitle = Localization.LocalizationManager.Instance.GetText(data.titleKey);
+
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(item.transform, false);
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -491,8 +435,8 @@ namespace DigitPark.DevTools
             titleRT.offsetMax = new Vector2(-50, 0);
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            string secretTag = data.isSecret ? " <color=#AA33FF>[S]</color>" : "";
-            titleText.text = $"{data.title}{secretTag}";
+            string secretTag = data.isHidden ? " <color=#AA33FF>[S]</color>" : "";
+            titleText.text = $"{displayTitle}{secretTag}";
             titleText.fontSize = 14;
             titleText.color = Color.white;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -516,14 +460,15 @@ namespace DigitPark.DevTools
             // Store reference
             AchievementDebugItem debugItem = new AchievementDebugItem
             {
-                data = data,
+                achievementId = data.id,
+                root = item,
                 background = bg,
                 checkText = checkText,
                 button = toggleButton
             };
             debugItems.Add(debugItem);
 
-            // Button click
+            // Button click - use Service API
             toggleButton.onClick.AddListener(() => ToggleAchievement(debugItem));
         }
 
@@ -569,62 +514,53 @@ namespace DigitPark.DevTools
             return btn;
         }
 
+        /// <summary>
+        /// Toggle achievement via AchievementService (proper unlock/lock)
+        /// </summary>
         private void ToggleAchievement(AchievementDebugItem item)
         {
-            bool isCompleted = PlayerPrefs.GetInt($"Achievement_{item.data.id}_completed", 0) == 1;
+            var service = AchievementService.Instance;
+            if (service == null)
+            {
+                Debug.LogWarning("[DebugPanel] AchievementService not available!");
+                return;
+            }
+
+            bool isCompleted = service.IsUnlocked(item.achievementId);
 
             if (isCompleted)
             {
-                // Lock it
-                PlayerPrefs.SetInt($"Achievement_{item.data.id}_completed", 0);
-                PlayerPrefs.SetInt($"Achievement_{item.data.id}_progress", 0);
-                PlayerPrefs.Save();
-
-                item.checkText.text = "";
-                item.background.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+                // Can't "un-unlock" through Service - reset all instead
+                Debug.Log($"[DebugPanel] {item.achievementId} is already unlocked. Use Reset to clear all.");
+                return;
             }
             else
             {
-                // Unlock it
-                PlayerPrefs.SetInt($"Achievement_{item.data.id}_completed", 1);
-                PlayerPrefs.SetInt($"Achievement_{item.data.id}_progress", 100);
-                PlayerPrefs.Save();
+                // Unlock through Service - this triggers toast automatically via events
+                service.UnlockAchievement(item.achievementId);
 
                 item.checkText.text = "V";
                 item.background.color = new Color(0.15f, 0.35f, 0.2f, 0.9f);
 
-                // Trigger notification
-                TriggerNotification(item.data);
+                Debug.Log($"[DebugPanel] Unlocked via Service: {item.achievementId}");
             }
 
             UpdateStats();
         }
 
-        private void TriggerNotification(DebugAchievementData data)
-        {
-            if (AchievementNotificationManager.Instance != null)
-            {
-                Sprite icon = Resources.Load<Sprite>($"Icons/Achievements/{data.iconName}");
-                AchievementNotificationManager.Instance.ShowNotification(
-                    data.title,
-                    $"+{data.points} pts",
-                    data.points,
-                    icon,
-                    data.isSecret
-                );
-                UnityEngine.Debug.Log($"[DebugPanel] Achievement unlocked: {data.title}");
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("[DebugPanel] AchievementNotificationManager not found!");
-            }
-        }
-
         private void RefreshStates()
         {
+            var service = AchievementService.Instance;
+            if (service == null)
+            {
+                // Service not ready - repopulate when available
+                PopulateItems();
+                return;
+            }
+
             foreach (var item in debugItems)
             {
-                bool isCompleted = PlayerPrefs.GetInt($"Achievement_{item.data.id}_completed", 0) == 1;
+                bool isCompleted = service.IsUnlocked(item.achievementId);
                 item.checkText.text = isCompleted ? "V" : "";
                 item.background.color = isCompleted
                     ? new Color(0.15f, 0.35f, 0.2f, 0.9f)
@@ -635,36 +571,47 @@ namespace DigitPark.DevTools
 
         private void UpdateStats()
         {
+            var service = AchievementService.Instance;
+            if (service == null || statsText == null) return;
+
             int unlocked = 0;
-            foreach (var item in debugItems)
+            int total = service.AllAchievements.Count;
+            foreach (var ach in service.AllAchievements)
             {
-                if (PlayerPrefs.GetInt($"Achievement_{item.data.id}_completed", 0) == 1)
+                if (service.IsUnlocked(ach.id))
                     unlocked++;
             }
-            int total = debugItems.Count;
             int percent = total > 0 ? (unlocked * 100 / total) : 0;
             statsText.text = $"{unlocked}/{total} ({percent}%)";
         }
 
         private void UnlockRandom()
         {
-            var locked = debugItems.FindAll(i => PlayerPrefs.GetInt($"Achievement_{i.data.id}_completed", 0) == 0);
+            var service = AchievementService.Instance;
+            if (service == null) return;
+
+            var locked = new List<AchievementData>();
+            foreach (var ach in service.AllAchievements)
+            {
+                if (!service.IsUnlocked(ach.id))
+                    locked.Add(ach);
+            }
+
             if (locked.Count > 0)
             {
                 var random = locked[Random.Range(0, locked.Count)];
-                ToggleAchievement(random);
+                service.UnlockAchievement(random.id);
+                RefreshStates();
             }
         }
 
         private void ResetAll()
         {
-            foreach (var item in debugItems)
+            var service = AchievementService.Instance;
+            if (service != null)
             {
-                PlayerPrefs.DeleteKey($"Achievement_{item.data.id}_completed");
-                PlayerPrefs.DeleteKey($"Achievement_{item.data.id}_progress");
-                PlayerPrefs.DeleteKey($"Achievement_{item.data.id}_claimed");
+                service.ResetAllAchievements();
             }
-            PlayerPrefs.Save();
             RefreshStates();
         }
 
@@ -687,33 +634,14 @@ namespace DigitPark.DevTools
             };
         }
 
-        // Helper classes
+        // Helper class
         private class AchievementDebugItem
         {
-            public DebugAchievementData data;
+            public string achievementId;
+            public GameObject root;
             public Image background;
             public TextMeshProUGUI checkText;
             public Button button;
-        }
-
-        private class DebugAchievementData
-        {
-            public string id;
-            public string title;
-            public int points;
-            public string category;
-            public string iconName;
-            public bool isSecret;
-
-            public DebugAchievementData(string id, string title, int points, string category, string iconName, bool isSecret = false)
-            {
-                this.id = id;
-                this.title = title;
-                this.points = points;
-                this.category = category;
-                this.iconName = iconName;
-                this.isSecret = isSecret;
-            }
         }
     }
 }

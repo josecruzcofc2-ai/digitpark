@@ -7,12 +7,16 @@ using System.Linq;
 using DigitPark.UI.Items;
 using DigitPark.Monetization;
 using DigitPark.Localization;
+using DigitPark.Services;
 using DG.Tweening;
+using ServiceAchievementData = DigitPark.Services.AchievementData;
+using ServiceCategory = DigitPark.Services.AchievementCategory;
 
 namespace DigitPark.Managers
 {
     /// <summary>
     /// Trophy Showcase Achievements Manager.
+    /// UI layer that reads data from AchievementService.
     /// Displays achievements as collectible trophies in glass display cases.
     /// </summary>
     public class AchievementsManager : MonoBehaviour
@@ -91,7 +95,7 @@ namespace DigitPark.Managers
         private AchievementCategory currentCategory = AchievementCategory.All;
         private List<AchievementDefinition> allAchievements = new List<AchievementDefinition>();
         private List<TrophyCardUI> spawnedCards = new List<TrophyCardUI>();
-        private AchievementData selectedAchievement;
+        private DigitPark.UI.Items.AchievementData selectedAchievement;
         private TrophyCardUI selectedCard;
 
         public enum AchievementCategory
@@ -120,104 +124,76 @@ namespace DigitPark.Managers
             LoadShowcase();
         }
 
-        private void InitializeAchievements()
+        private void OnDestroy()
         {
-            // Define all achievements with their data
-            // Total: 53 achievements across 11 categories
-            allAchievements = new List<AchievementDefinition>
+            // Unsubscribe from Service events to avoid memory leaks
+            var service = AchievementService.Instance;
+            if (service != null)
             {
-                // ==================== BEGINNER (Onboarding) ====================
-                new AchievementDefinition("first_game", "Primer Paso", "Completa tu primera partida", AchievementCategory.Beginner, 10, 1, "Logro_Primeros_Pasos"),
-                new AchievementDefinition("tutorial_complete", "Aprendiz", "Completa el tutorial", AchievementCategory.Beginner, 10, 1, "Logro_Graduado"),
-                new AchievementDefinition("first_win", "Primera Victoria", "Gana tu primera partida", AchievementCategory.Beginner, 15, 1, "Logro_Primera_Victoria"),
-                new AchievementDefinition("profile_complete", "Identidad", "Completa tu perfil (avatar, nombre)", AchievementCategory.Beginner, 10, 1, "Logro_Perfil_Completo"),
-
-                // ==================== MASTERY (Per Game) ====================
-                new AchievementDefinition("digitrush_master", "Maestro de Dígitos", "Alcanza 10,000 puntos en DigitRush", AchievementCategory.Mastery, 50, 10000, "Logro_Maestro_Numeros"),
-                new AchievementDefinition("flashtap_master", "Reflejos de Luz", "Alcanza 100 taps perfectos en FlashTap", AchievementCategory.Mastery, 50, 100, "Logro_Reflejos_Rayo"),
-                new AchievementDefinition("memorypairs_master", "Memoria Fotográfica", "Completa MemoryPairs sin errores", AchievementCategory.Mastery, 50, 1, "Logro_Genio"),
-                new AchievementDefinition("quickmath_master", "Calculadora Humana", "Resuelve 50 problemas seguidos en QuickMath", AchievementCategory.Mastery, 50, 50, "Logro_Maestro_Matematicas"),
-                new AchievementDefinition("oddoneout_master", "Ojo de Águila", "Encuentra 100 diferencias en OddOneOut", AchievementCategory.Mastery, 50, 100, "Logro_Ojo_Aguila"),
-
-                // ==================== VICTORIES ====================
-                new AchievementDefinition("wins_10", "Competidor", "Gana 10 partidas", AchievementCategory.Victories, 20, 10, "Logro_10_Victorias"),
-                new AchievementDefinition("wins_50", "Veterano", "Gana 50 partidas", AchievementCategory.Victories, 40, 50, "Logro_50_Victorias"),
-                new AchievementDefinition("wins_100", "Centurión", "Gana 100 partidas", AchievementCategory.Victories, 60, 100, "Logro_Centurion"),
-                new AchievementDefinition("wins_500", "Leyenda", "Gana 500 partidas", AchievementCategory.Victories, 100, 500, "Logro_500_Victorias"),
-                new AchievementDefinition("wins_1000", "Inmortal", "Gana 1,000 partidas", AchievementCategory.Victories, 200, 1000, "Logro_1000_Victorias"),
-
-                // ==================== STREAKS ====================
-                new AchievementDefinition("streak_3", "En Racha", "Gana 3 partidas seguidas", AchievementCategory.Streaks, 25, 3, "Logro_Racha_Fuego"),
-                new AchievementDefinition("streak_5", "Imparable", "Gana 5 partidas seguidas", AchievementCategory.Streaks, 40, 5, "Logro_Victoria_Racha_7"),
-                new AchievementDefinition("streak_10", "Dominación", "Gana 10 partidas seguidas", AchievementCategory.Streaks, 75, 10, "Logro_Demoledor"),
-                new AchievementDefinition("streak_20", "Invencible", "Gana 20 partidas seguidas", AchievementCategory.Streaks, 150, 20, "Logro_Victoria_Racha_30", true), // SECRET
-
-                // ==================== CASH BATTLE ====================
-                new AchievementDefinition("cash_first", "Apostador", "Completa tu primera Cash Battle", AchievementCategory.CashBattle, 25, 1, "Logro_Ficha_Cash"),
-                new AchievementDefinition("cash_first_win", "Ganador Real", "Gana tu primera Cash Battle", AchievementCategory.CashBattle, 35, 1, "Logro_Rey_Monedas"),
-                new AchievementDefinition("cash_10_wins", "Jugador Serio", "Gana 10 Cash Battles", AchievementCategory.CashBattle, 50, 10, "Logro_VIP_1000"),
-                new AchievementDefinition("cash_50_wins", "High Roller", "Gana 50 Cash Battles", AchievementCategory.CashBattle, 100, 50, "Logro_VIP_Dados"),
-                new AchievementDefinition("cash_100_wins", "Tiburón", "Gana 100 Cash Battles", AchievementCategory.CashBattle, 200, 100, "Logro_Tiburon_Cash"),
-                new AchievementDefinition("cash_earnings_100", "Primeros $100", "Acumula $100 en ganancias", AchievementCategory.CashBattle, 75, 100, "Logro_Bolsa_100"),
-                new AchievementDefinition("cash_earnings_1000", "Club de los Mil", "Acumula $1,000 en ganancias", AchievementCategory.CashBattle, 250, 1000, "Logro_Millonario", true), // SECRET
-
-                // ==================== TOURNAMENTS ====================
-                new AchievementDefinition("tournament_first", "Participante", "Participa en tu primer torneo", AchievementCategory.Tournaments, 20, 1, "Logro_Torneo_Bracket"),
-                new AchievementDefinition("tournament_top3", "Podio", "Termina en Top 3 de un torneo", AchievementCategory.Tournaments, 50, 1, "Logro_Coleccion_Trofeos"),
-                new AchievementDefinition("tournament_win", "Campeón", "Gana un torneo", AchievementCategory.Tournaments, 100, 1, "Logro_Campeon_1"),
-                new AchievementDefinition("tournament_5_wins", "Multicampeón", "Gana 5 torneos", AchievementCategory.Tournaments, 200, 5, "Logro_4_Estrellas"),
-                new AchievementDefinition("tournament_create", "Organizador", "Crea tu primer torneo", AchievementCategory.Tournaments, 30, 1, "Logro_Organizador_Torneo"),
-
-                // ==================== SOCIAL ====================
-                new AchievementDefinition("friend_first", "Primer Amigo", "Añade tu primer amigo", AchievementCategory.Social, 15, 1, "Logro_Primer_Rival"),
-                new AchievementDefinition("friends_10", "Popular", "Tiene 10 amigos", AchievementCategory.Social, 30, 10, "Logro_Social_10_Amigos"),
-                new AchievementDefinition("friends_50", "Influencer", "Tiene 50 amigos", AchievementCategory.Social, 75, 50, "Logro_Influencer"),
-                new AchievementDefinition("challenge_friend", "Retador", "Reta a un amigo a una partida", AchievementCategory.Social, 20, 1, "Logro_Versus"),
-                new AchievementDefinition("beat_friend", "Rival", "Vence a un amigo", AchievementCategory.Social, 25, 1, "Logro_Amigo_Rival"),
-
-                // ==================== PROGRESSION ====================
-                new AchievementDefinition("level_10", "Nivel 10", "Alcanza el nivel 10", AchievementCategory.Progression, 25, 10, "Logro_Nivel_10"),
-                new AchievementDefinition("level_25", "Nivel 25", "Alcanza el nivel 25", AchievementCategory.Progression, 50, 25, "Logro_Nivel_25"),
-                new AchievementDefinition("level_50", "Nivel 50", "Alcanza el nivel 50", AchievementCategory.Progression, 75, 50, "Logro_Nivel50"),
-                new AchievementDefinition("level_100", "Nivel 100", "Alcanza el nivel 100", AchievementCategory.Progression, 150, 100, "Logro_Avance_Epico"),
-
-                // ==================== COLLECTOR ==================== (Reservado para V2)
-
-                // ==================== TIME ====================
-                new AchievementDefinition("days_7", "Una Semana", "Juega 7 días", AchievementCategory.Time, 25, 7, "Logro_Racha_7_Dias"),
-                new AchievementDefinition("days_30", "Un Mes", "Juega 30 días", AchievementCategory.Time, 50, 30, "Logro_Racha_30_Dias"),
-                new AchievementDefinition("days_100", "100 Días", "Juega 100 días", AchievementCategory.Time, 100, 100, "Logro_Racha_100_Dias"),
-                new AchievementDefinition("days_365", "Un Año", "Juega 365 días", AchievementCategory.Time, 300, 365, "Logro_Racha_365_Dias", true), // SECRET
-                new AchievementDefinition("daily_streak_7", "Racha Semanal", "Login 7 días seguidos", AchievementCategory.Time, 30, 7, "Logro_Login_Semanal"),
-                new AchievementDefinition("daily_streak_30", "Racha Mensual", "Login 30 días seguidos", AchievementCategory.Time, 75, 30, "Logro_Login_Mensual"),
-
-                // ==================== SECRET ====================
-                new AchievementDefinition("night_owl", "Búho Nocturno", "Juega a las 3:00 AM", AchievementCategory.Secret, 50, 1, "Logro_Buho_Nocturno", true),
-                new AchievementDefinition("perfect_game", "Perfección", "Completa cualquier juego con 100% precisión", AchievementCategory.Secret, 100, 1, "Logro_Perfeccionista", true),
-                new AchievementDefinition("comeback_king", "Rey del Comeback", "Gana perdiendo por 50%+", AchievementCategory.Secret, 75, 1, "Logro_Ave_Fenix", true),
-                new AchievementDefinition("speed_demon", "Demonio de Velocidad", "Completa un juego en menos de 10 segundos", AchievementCategory.Secret, 100, 1, "Logro_Demonio_Velocidad", true),
-            };
-
-            // Load saved progress
-            LoadAllProgress();
-        }
-
-        private void LoadAllProgress()
-        {
-            foreach (var achievement in allAchievements)
-            {
-                achievement.currentProgress = PlayerPrefs.GetInt($"Achievement_{achievement.id}_progress", 0);
-                achievement.isCompleted = PlayerPrefs.GetInt($"Achievement_{achievement.id}_completed", 0) == 1;
-                achievement.isClaimed = PlayerPrefs.GetInt($"Achievement_{achievement.id}_claimed", 0) == 1;
+                service.OnAchievementProgress -= OnServiceProgressUpdated;
+                service.OnAchievementUnlocked -= OnServiceAchievementUnlocked;
             }
         }
 
-        private void SaveProgress(AchievementDefinition achievement)
+        private void InitializeAchievements()
         {
-            PlayerPrefs.SetInt($"Achievement_{achievement.id}_progress", achievement.currentProgress);
-            PlayerPrefs.SetInt($"Achievement_{achievement.id}_completed", achievement.isCompleted ? 1 : 0);
-            PlayerPrefs.SetInt($"Achievement_{achievement.id}_claimed", achievement.isClaimed ? 1 : 0);
-            PlayerPrefs.Save();
+            allAchievements.Clear();
+
+            var service = AchievementService.Instance;
+            if (service == null)
+            {
+                Debug.LogWarning("[AchievementsManager] AchievementService not available, using empty list");
+                return;
+            }
+
+            // Build local definitions from the Service's data
+            foreach (var svcAch in service.AllAchievements)
+            {
+                var category = MapServiceCategory(svcAch.category);
+                bool isSecret = svcAch.isHidden || category == AchievementCategory.Secret;
+
+                var def = new AchievementDefinition(
+                    svcAch.id,
+                    AutoLocalizer.Get(svcAch.titleKey),
+                    AutoLocalizer.Get(svcAch.descriptionKey),
+                    category,
+                    svcAch.points,
+                    svcAch.targetValue,
+                    svcAch.iconName,
+                    isSecret
+                );
+
+                // Load progress from Service
+                def.currentProgress = service.GetCurrentValue(svcAch.id);
+                def.isCompleted = service.IsUnlocked(svcAch.id);
+                def.isClaimed = service.IsClaimed(svcAch.id);
+
+                allAchievements.Add(def);
+            }
+
+            Debug.Log($"[AchievementsManager] Loaded {allAchievements.Count} achievements from Service");
+        }
+
+        /// <summary>
+        /// Maps Service AchievementCategory to Manager AchievementCategory
+        /// </summary>
+        private AchievementCategory MapServiceCategory(ServiceCategory serviceCategory)
+        {
+            return serviceCategory switch
+            {
+                ServiceCategory.Beginner => AchievementCategory.Beginner,
+                ServiceCategory.Mastery => AchievementCategory.Mastery,
+                ServiceCategory.Victories => AchievementCategory.Victories,
+                ServiceCategory.Streaks => AchievementCategory.Streaks,
+                ServiceCategory.CashBattle => AchievementCategory.CashBattle,
+                ServiceCategory.Tournaments => AchievementCategory.Tournaments,
+                ServiceCategory.Social => AchievementCategory.Social,
+                ServiceCategory.Progression => AchievementCategory.Progression,
+                ServiceCategory.Collector => AchievementCategory.Collector,
+                ServiceCategory.Time => AchievementCategory.Time,
+                ServiceCategory.Secret => AchievementCategory.Secret,
+                _ => AchievementCategory.Beginner
+            };
         }
 
         private void SetupUI()
@@ -253,6 +229,56 @@ namespace DigitPark.Managers
             if (collectorTab) collectorTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Collector));
             if (timeTab) timeTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Time));
             if (secretTab) secretTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Secret));
+
+            // Subscribe to Service events
+            var service = AchievementService.Instance;
+            if (service != null)
+            {
+                service.OnAchievementProgress += OnServiceProgressUpdated;
+                service.OnAchievementUnlocked += OnServiceAchievementUnlocked;
+            }
+        }
+
+        #endregion
+
+        #region Service Event Handlers
+
+        private void OnServiceProgressUpdated(ServiceAchievementData svcData, float progress)
+        {
+            // Update local definition
+            var def = allAchievements.Find(a => a.id == svcData.id);
+            if (def != null)
+            {
+                def.currentProgress = AchievementService.Instance?.GetCurrentValue(svcData.id) ?? def.currentProgress;
+            }
+
+            // Refresh visible card
+            var card = spawnedCards.Find(c => c.GetData()?.id == svcData.id);
+            if (card != null)
+            {
+                card.RefreshProgress(def?.currentProgress ?? 0);
+            }
+        }
+
+        private void OnServiceAchievementUnlocked(ServiceAchievementData svcData)
+        {
+            // Update local definition
+            var def = allAchievements.Find(a => a.id == svcData.id);
+            if (def != null)
+            {
+                def.isCompleted = true;
+                def.currentProgress = svcData.targetValue;
+            }
+
+            // Animate visible card
+            var card = spawnedCards.Find(c => c.GetData()?.id == svcData.id);
+            if (card != null)
+            {
+                card.PlayUnlockAnimation();
+            }
+
+            // Update header stats
+            UpdateHeaderStats();
         }
 
         #endregion
@@ -415,8 +441,8 @@ namespace DigitPark.Managers
                 card = cardObj.AddComponent<TrophyCardUI>();
             }
 
-            // Convert to AchievementData
-            var data = new AchievementData
+            // Convert to UI AchievementData
+            var data = new DigitPark.UI.Items.AchievementData
             {
                 id = definition.id,
                 title = definition.title,
@@ -447,27 +473,17 @@ namespace DigitPark.Managers
         {
             if (string.IsNullOrEmpty(iconName))
             {
-                Debug.LogWarning($"[Achievements] Icon name is empty, using default");
                 return defaultTrophyIcon;
             }
 
             // Try to load from Resources
             var sprite = Resources.Load<Sprite>($"Icons/Achievements/{iconName}");
-            if (sprite != null)
-            {
-                Debug.Log($"[Achievements] Loaded icon: {iconName}");
-                return sprite;
-            }
+            if (sprite != null) return sprite;
 
             // Try loading from alternate path
             sprite = Resources.Load<Sprite>($"Achievements/{iconName}");
-            if (sprite != null)
-            {
-                Debug.Log($"[Achievements] Loaded icon from alternate path: {iconName}");
-                return sprite;
-            }
+            if (sprite != null) return sprite;
 
-            Debug.LogWarning($"[Achievements] Could not load icon: {iconName} - using default");
             return defaultTrophyIcon;
         }
 
@@ -482,7 +498,6 @@ namespace DigitPark.Managers
             var bg = card.AddComponent<Image>();
             bg.color = new Color(0.05f, 0.08f, 0.12f, 0.95f);
 
-            // This is a simplified fallback - the prefab will have all the proper structure
             return card;
         }
 
@@ -509,8 +524,8 @@ namespace DigitPark.Managers
                 {
                     emptyStateText.text = currentCategory switch
                     {
-                        AchievementCategory.Secret => "Los logros secretos se revelan al completarlos...",
-                        _ => "No hay logros en esta categoría"
+                        AchievementCategory.Secret => AutoLocalizer.Get("ach_secret_empty"),
+                        _ => AutoLocalizer.Get("ach_category_empty")
                     };
                 }
             }
@@ -528,14 +543,14 @@ namespace DigitPark.Managers
 
         #region Detail Panel
 
-        private void OnTrophyCardClicked(TrophyCardUI card, AchievementData data)
+        private void OnTrophyCardClicked(TrophyCardUI card, DigitPark.UI.Items.AchievementData data)
         {
             selectedCard = card;
             selectedAchievement = data;
             ShowDetailPanel(data);
         }
 
-        private void ShowDetailPanel(AchievementData data)
+        private void ShowDetailPanel(DigitPark.UI.Items.AchievementData data)
         {
             if (detailPanel == null) return;
 
@@ -556,7 +571,7 @@ namespace DigitPark.Managers
             if (detailDescriptionText)
             {
                 detailDescriptionText.text = data.isSecret && !data.isCompleted
-                    ? "Completa este logro secreto para descubrir su descripción..."
+                    ? AutoLocalizer.Get("ach_secret_description_hidden")
                     : data.description;
             }
 
@@ -575,7 +590,7 @@ namespace DigitPark.Managers
             {
                 if (data.isCompleted)
                 {
-                    detailProgressText.text = L("completed");
+                    detailProgressText.text = AutoLocalizer.Get("completed");
                     detailProgressText.color = new Color(0f, 1f, 0.5f);
                 }
                 else
@@ -673,30 +688,35 @@ namespace DigitPark.Managers
         {
             if (selectedAchievement == null || selectedAchievement.isClaimed) return;
 
-            // Find and update the definition
-            var definition = allAchievements.Find(a => a.id == selectedAchievement.id);
-            if (definition != null)
+            // Delegate to Service for persistence
+            bool claimed = AchievementService.Instance?.ClaimReward(selectedAchievement.id) ?? false;
+
+            if (claimed)
             {
-                definition.isClaimed = true;
-                SaveProgress(definition);
+                // Update local definition
+                var definition = allAchievements.Find(a => a.id == selectedAchievement.id);
+                if (definition != null)
+                {
+                    definition.isClaimed = true;
+                }
+
+                selectedAchievement.isClaimed = true;
+
+                // Hide claim button
+                if (claimRewardButton)
+                {
+                    claimRewardButton.interactable = false;
+                    claimRewardButton.transform.DOScale(0f, 0.2f);
+                }
+
+                // Show celebration
+                ShowRewardCelebration(selectedAchievement.points);
+
+                // Update header
+                UpdateHeaderStats();
+
+                Debug.Log($"[Achievements] Claimed reward: {selectedAchievement.title} (+{selectedAchievement.points} pts)");
             }
-
-            selectedAchievement.isClaimed = true;
-
-            // Hide claim button
-            if (claimRewardButton)
-            {
-                claimRewardButton.interactable = false;
-                claimRewardButton.transform.DOScale(0f, 0.2f);
-            }
-
-            // Show celebration
-            ShowRewardCelebration(selectedAchievement.points);
-
-            // Update header
-            UpdateHeaderStats();
-
-            Debug.Log($"[Achievements] Claimed reward: {selectedAchievement.title} (+{selectedAchievement.points} pts)");
         }
 
         private void ShowRewardCelebration(int points)
@@ -739,66 +759,6 @@ namespace DigitPark.Managers
         #region Public API
 
         /// <summary>
-        /// Update progress for an achievement (call from game logic)
-        /// </summary>
-        public void UpdateProgress(string achievementId, int progress)
-        {
-            var achievement = allAchievements.Find(a => a.id == achievementId);
-            if (achievement == null || achievement.isCompleted) return;
-
-            achievement.currentProgress = Mathf.Min(progress, achievement.targetProgress);
-
-            if (achievement.currentProgress >= achievement.targetProgress)
-            {
-                achievement.isCompleted = true;
-                Debug.Log($"[Achievements] Completed: {achievement.title}");
-
-                // Show toast notification (works in any scene)
-                if (AchievementNotificationManager.Instance != null)
-                {
-                    AchievementNotificationManager.Instance.ShowNotification(achievement);
-                }
-
-                // Find and animate the card (only if in Achievements scene)
-                var card = spawnedCards.Find(c => c.GetData()?.id == achievementId);
-                if (card != null)
-                {
-                    card.PlayUnlockAnimation();
-                }
-            }
-
-            SaveProgress(achievement);
-            UpdateHeaderStats();
-
-            // Refresh card if visible
-            var visibleCard = spawnedCards.Find(c => c.GetData()?.id == achievementId);
-            if (visibleCard != null)
-            {
-                visibleCard.RefreshProgress(achievement.currentProgress);
-            }
-        }
-
-        /// <summary>
-        /// Increment progress for an achievement
-        /// </summary>
-        public void IncrementProgress(string achievementId, int amount = 1)
-        {
-            var achievement = allAchievements.Find(a => a.id == achievementId);
-            if (achievement == null) return;
-
-            UpdateProgress(achievementId, achievement.currentProgress + amount);
-        }
-
-        /// <summary>
-        /// Check if an achievement is completed
-        /// </summary>
-        public bool IsCompleted(string achievementId)
-        {
-            var achievement = allAchievements.Find(a => a.id == achievementId);
-            return achievement?.isCompleted ?? false;
-        }
-
-        /// <summary>
         /// Get total earned points
         /// </summary>
         public int GetTotalPoints()
@@ -816,17 +776,10 @@ namespace DigitPark.Managers
         }
 
         #endregion
-
-        private string L(string key, params object[] args)
-        {
-            if (LocalizationManager.Instance == null) return key;
-            string text = LocalizationManager.Instance.GetText(key);
-            return args.Length > 0 ? string.Format(text, args) : text;
-        }
     }
 
     /// <summary>
-    /// Internal achievement definition
+    /// Internal achievement definition for UI display
     /// </summary>
     [Serializable]
     public class AchievementDefinition

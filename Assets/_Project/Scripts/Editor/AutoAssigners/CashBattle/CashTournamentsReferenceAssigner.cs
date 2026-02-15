@@ -278,16 +278,6 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static Canvas FindMainCanvas()
         {
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                    return c;
-            }
-            foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name != "TransitionCanvas")
-                    return c;
-            }
             return UIBuilderCanvasHelper.FindMainCanvas();
         }
 

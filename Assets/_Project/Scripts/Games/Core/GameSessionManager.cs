@@ -275,6 +275,36 @@ namespace DigitPark.Games
             CurrentContext.AddResult(result);
             OnGameCompleted?.Invoke(result);
 
+            // === Achievement tracking ===
+            {
+                string gameType = CurrentContext.CurrentGame?.ToString();
+                int score = (int)result.FinalScore;
+                int accuracy = result.Errors == 0 ? 100 : Mathf.Max(0, 100 - (result.Errors * 10));
+
+                AchievementService.Instance?.OnGameCompleted(
+                    result.Completed,
+                    result.TotalTime,
+                    gameType,
+                    score,
+                    accuracy,
+                    wasBehind: false
+                );
+
+                // Win streak tracking
+                if (result.Completed)
+                {
+                    int currentStreak = PlayerPrefs.GetInt("CurrentWinStreak", 0) + 1;
+                    PlayerPrefs.SetInt("CurrentWinStreak", currentStreak);
+                    PlayerPrefs.Save();
+                    AchievementService.Instance?.OnWinStreakChanged(currentStreak);
+                }
+                else
+                {
+                    PlayerPrefs.SetInt("CurrentWinStreak", 0);
+                    PlayerPrefs.Save();
+                }
+            }
+
             // Incrementar contador de partidas en ReviewService
             ReviewService.Instance?.IncrementGamesPlayed();
 

@@ -161,6 +161,10 @@ namespace DigitPark.Editor
         /// </summary>
         private static void CleanupOldUI(Canvas canvas)
         {
+            // No tocar TransitionCanvas ni EffectsCanvas
+            if (canvas.gameObject.name.Contains("Transition") ||
+                canvas.gameObject.name.Contains("Effects")) return;
+
             Debug.Log("[TrophyShowcase] Limpiando UI antigua...");
 
             // List of old element names to remove
@@ -323,7 +327,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(titleRow, "TitleText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "LOGROS";
-            titleText.fontSize = 36;
+            titleText.fontSize = 78;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -344,7 +348,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI completionText = GetOrAddComponent<TextMeshProUGUI>(completionDisplay);
             completionText.text = "5/17";
-            completionText.fontSize = 28;
+            completionText.fontSize = 36;
             completionText.fontStyle = FontStyles.Bold;
             completionText.color = CYAN_NEON;
             completionText.alignment = TextAlignmentOptions.MidlineRight;
@@ -378,14 +382,15 @@ namespace DigitPark.Editor
             GameObject progressLabelLeft = FindOrCreateChild(progressLabelRow, "Left");
             TextMeshProUGUI progressLeftText = GetOrAddComponent<TextMeshProUGUI>(progressLabelLeft);
             progressLeftText.text = "Progreso Total";
-            progressLeftText.fontSize = 13;
+            progressLeftText.fontSize = 22;
+            progressLeftText.fontStyle = FontStyles.Bold;
             progressLeftText.color = TEXT_SECONDARY;
             progressLeftText.alignment = TextAlignmentOptions.MidlineLeft;
 
             GameObject progressLabelRight = FindOrCreateChild(progressLabelRow, "Right");
             TextMeshProUGUI progressRightText = GetOrAddComponent<TextMeshProUGUI>(progressLabelRight);
             progressRightText.text = "27/50 (54%)";
-            progressRightText.fontSize = 13;
+            progressRightText.fontSize = 22;
             progressRightText.fontStyle = FontStyles.Bold;
             progressRightText.color = CYAN_NEON;
             progressRightText.alignment = TextAlignmentOptions.MidlineRight;
@@ -522,7 +527,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = 11;
+            tabText.fontSize = 20;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
@@ -713,7 +718,8 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(centerContent, "EmptyStateText");
             TextMeshProUGUI emptyText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             emptyText.text = "No hay logros en esta categoría";
-            emptyText.fontSize = 18;
+            emptyText.fontSize = 28;
+            emptyText.fontStyle = FontStyles.Bold;
             emptyText.color = TEXT_SECONDARY;
             emptyText.alignment = TextAlignmentOptions.Center;
             LayoutElement textLE = GetOrAddComponent<LayoutElement>(textObj);
@@ -723,7 +729,8 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(centerContent, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Sigue jugando para desbloquear más logros";
-            subtitleText.fontSize = 14;
+            subtitleText.fontSize = 22;
+            subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.color = new Color(TEXT_SECONDARY.r, TEXT_SECONDARY.g, TEXT_SECONDARY.b, 0.7f);
             subtitleText.alignment = TextAlignmentOptions.Center;
             LayoutElement subtitleLE = GetOrAddComponent<LayoutElement>(subtitleObj);
@@ -833,7 +840,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(infoSection, "Title");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = title;
-            titleText.fontSize = 14;
+            titleText.fontSize = 22;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = isUnlocked ? TEXT_PRIMARY : (isSecret ? CAT_SECRET : TEXT_SECONDARY);
             titleText.alignment = TextAlignmentOptions.Center;
@@ -863,7 +870,8 @@ namespace DigitPark.Editor
                 GameObject progressText = FindOrCreateChild(infoSection, "ProgressText");
                 TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressText);
                 progressTmp.text = $"{progressPercent}%";
-                progressTmp.fontSize = 11;
+                progressTmp.fontSize = 16;
+                progressTmp.fontStyle = FontStyles.Bold;
                 progressTmp.color = TEXT_SECONDARY;
                 progressTmp.alignment = TextAlignmentOptions.Center;
                 LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressText);
@@ -888,7 +896,7 @@ namespace DigitPark.Editor
                 SetRectTransformStretch(checkmark);
                 TextMeshProUGUI checkText = GetOrAddComponent<TextMeshProUGUI>(checkmark);
                 checkText.text = "V";
-                checkText.fontSize = 18;
+                checkText.fontSize = 22;
                 checkText.fontStyle = FontStyles.Bold;
                 checkText.color = TEXT_DARK;
                 checkText.alignment = TextAlignmentOptions.Center;
@@ -912,7 +920,7 @@ namespace DigitPark.Editor
                 SetRectTransformStretch(pointsText);
                 TextMeshProUGUI pointsTmp = GetOrAddComponent<TextMeshProUGUI>(pointsText);
                 pointsTmp.text = $"{points} pts";
-                pointsTmp.fontSize = 10;
+                pointsTmp.fontSize = 16;
                 pointsTmp.fontStyle = FontStyles.Bold;
                 pointsTmp.color = GOLD;
                 pointsTmp.alignment = TextAlignmentOptions.Center;
@@ -978,7 +986,7 @@ namespace DigitPark.Editor
             GameObject closeText = FindOrCreateChild(closeBtn, "Text");
             TextMeshProUGUI closeTmp = GetOrAddComponent<TextMeshProUGUI>(closeText);
             closeTmp.text = "X";
-            closeTmp.fontSize = 22;
+            closeTmp.fontSize = 28;
             closeTmp.fontStyle = FontStyles.Bold;
             closeTmp.color = TEXT_PRIMARY;
             closeTmp.alignment = TextAlignmentOptions.Center;
@@ -998,7 +1006,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(panel, "DetailTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Primera Victoria";
-            titleText.fontSize = 26;
+            titleText.fontSize = 42;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1009,7 +1017,8 @@ namespace DigitPark.Editor
             GameObject descObj = FindOrCreateChild(panel, "DetailDescription");
             TextMeshProUGUI descText = GetOrAddComponent<TextMeshProUGUI>(descObj);
             descText.text = "Gana tu primera partida en cualquier modo de juego.";
-            descText.fontSize = 15;
+            descText.fontSize = 24;
+            descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             descText.alignment = TextAlignmentOptions.Center;
             LayoutElement descLE = GetOrAddComponent<LayoutElement>(descObj);
@@ -1019,7 +1028,8 @@ namespace DigitPark.Editor
             GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
             TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
             categoryText.text = "Categoria: Principiante";
-            categoryText.fontSize = 14;
+            categoryText.fontSize = 22;
+            categoryText.fontStyle = FontStyles.Bold;
             categoryText.color = CYAN_NEON;
             categoryText.alignment = TextAlignmentOptions.Center;
             LayoutElement categoryLE = GetOrAddComponent<LayoutElement>(categoryObj);
@@ -1072,7 +1082,7 @@ namespace DigitPark.Editor
             GameObject progressTextObj = FindOrCreateChild(progressSection, "DetailProgressText");
             TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
             progressTmp.text = "1/1 Completado";
-            progressTmp.fontSize = 14;
+            progressTmp.fontSize = 22;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = BUTTON_SUCCESS;
             progressTmp.alignment = TextAlignmentOptions.Center;
@@ -1083,7 +1093,7 @@ namespace DigitPark.Editor
             GameObject pointsObj = FindOrCreateChild(panel, "DetailPointsText");
             TextMeshProUGUI pointsTmp2 = GetOrAddComponent<TextMeshProUGUI>(pointsObj);
             pointsTmp2.text = "+50 pts";
-            pointsTmp2.fontSize = 16;
+            pointsTmp2.fontSize = 24;
             pointsTmp2.fontStyle = FontStyles.Bold;
             pointsTmp2.color = GOLD;
             pointsTmp2.alignment = TextAlignmentOptions.Center;
@@ -1115,7 +1125,7 @@ namespace DigitPark.Editor
             GameObject rewardAmount = FindOrCreateChild(rewardSection, "RewardAmount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "50 Gemas";
-            rewardTmp.fontSize = 20;
+            rewardTmp.fontSize = 32;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1134,7 +1144,7 @@ namespace DigitPark.Editor
             GameObject claimText = FindOrCreateChild(claimBtn, "ClaimButtonText");
             TextMeshProUGUI claimTmp = GetOrAddComponent<TextMeshProUGUI>(claimText);
             claimTmp.text = "RECLAMAR RECOMPENSA";
-            claimTmp.fontSize = 18;
+            claimTmp.fontSize = 30;
             claimTmp.fontStyle = FontStyles.Bold;
             claimTmp.color = TEXT_DARK;
             claimTmp.alignment = TextAlignmentOptions.Center;
@@ -1194,7 +1204,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(centerContent, "CelebrationTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "LOGRO DESBLOQUEADO!";
-            titleText.fontSize = 30;
+            titleText.fontSize = 48;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1205,7 +1215,8 @@ namespace DigitPark.Editor
             GameObject nameObj = FindOrCreateChild(centerContent, "CelebrationAchievementName");
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = "Primera Victoria";
-            nameText.fontSize = 22;
+            nameText.fontSize = 36;
+            nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Center;
             LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
@@ -1231,7 +1242,7 @@ namespace DigitPark.Editor
             GameObject rewardAmount = FindOrCreateChild(rewardDisplay, "Amount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "+50";
-            rewardTmp.fontSize = 40;
+            rewardTmp.fontSize = 52;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1242,7 +1253,8 @@ namespace DigitPark.Editor
             GameObject pointsEarned = FindOrCreateChild(centerContent, "PointsEarned");
             TextMeshProUGUI pointsTmp = GetOrAddComponent<TextMeshProUGUI>(pointsEarned);
             pointsTmp.text = "+50 Puntos";
-            pointsTmp.fontSize = 18;
+            pointsTmp.fontSize = 28;
+            pointsTmp.fontStyle = FontStyles.Bold;
             pointsTmp.color = GOLD;
             pointsTmp.alignment = TextAlignmentOptions.Center;
             LayoutElement pointsLE = GetOrAddComponent<LayoutElement>(pointsEarned);
@@ -1261,7 +1273,7 @@ namespace DigitPark.Editor
             GameObject continueText = FindOrCreateChild(continueBtn, "Text");
             TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
             continueTmp.text = "CONTINUAR";
-            continueTmp.fontSize = 20;
+            continueTmp.fontSize = 34;
             continueTmp.fontStyle = FontStyles.Bold;
             continueTmp.color = TEXT_DARK;
             continueTmp.alignment = TextAlignmentOptions.Center;
@@ -1431,7 +1443,8 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI progressTmp = progressText.AddComponent<TextMeshProUGUI>();
             progressTmp.text = "50%";
-            progressTmp.fontSize = 10;
+            progressTmp.fontSize = 16;
+            progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = TEXT_SECONDARY;
             progressTmp.alignment = TextAlignmentOptions.Center;
 
@@ -1452,7 +1465,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTmp = titleText.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Logro";
-            titleTmp.fontSize = 13;
+            titleTmp.fontSize = 22;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = TEXT_SECONDARY;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -1469,7 +1482,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI pointsTmp = pointsText.AddComponent<TextMeshProUGUI>();
             pointsTmp.text = "50 pts";
-            pointsTmp.fontSize = 11;
+            pointsTmp.fontSize = 16;
             pointsTmp.fontStyle = FontStyles.Bold;
             pointsTmp.color = GOLD;
             pointsTmp.alignment = TextAlignmentOptions.Center;
@@ -1496,7 +1509,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTmp = checkmark.AddComponent<TextMeshProUGUI>();
             checkTmp.text = "V";
-            checkTmp.fontSize = 16;
+            checkTmp.fontSize = 22;
             checkTmp.fontStyle = FontStyles.Bold;
             checkTmp.color = TEXT_DARK;
             checkTmp.alignment = TextAlignmentOptions.Center;
