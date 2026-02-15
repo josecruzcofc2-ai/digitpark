@@ -755,6 +755,87 @@ namespace DigitPark.Editor
             captionRT.offsetMax = new Vector2(-30, 0);
 
             dropdown.captionText = captionText;
+
+            // Build dropdown template
+            BuildDropdownTemplate(row.transform, dropdown);
+        }
+
+        private static void BuildDropdownTemplate(Transform dropdownParent, TMP_Dropdown dropdown)
+        {
+            GameObject template = FindOrCreateChild(dropdownParent.gameObject, "Template");
+            RectTransform templateRT = GetOrAddComponent<RectTransform>(template);
+            templateRT.anchorMin = new Vector2(0, 0);
+            templateRT.anchorMax = new Vector2(1, 0);
+            templateRT.pivot = new Vector2(0.5f, 1);
+            templateRT.sizeDelta = new Vector2(0, 200);
+            GetOrAddComponent<Image>(template).color = INPUT_BG;
+            ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(template);
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+            GameObject viewport = FindOrCreateChild(template, "Viewport");
+            RectTransform viewportRT = GetOrAddComponent<RectTransform>(viewport);
+            viewportRT.anchorMin = Vector2.zero;
+            viewportRT.anchorMax = Vector2.one;
+            viewportRT.sizeDelta = new Vector2(-2, -2);
+            viewportRT.anchoredPosition = Vector2.zero;
+            Mask viewportMask = GetOrAddComponent<Mask>(viewport);
+            viewportMask.showMaskGraphic = false;
+            GetOrAddComponent<Image>(viewport).color = Color.white;
+            scrollRect.viewport = viewportRT;
+
+            GameObject content = FindOrCreateChild(viewport, "Content");
+            RectTransform contentRT = GetOrAddComponent<RectTransform>(content);
+            contentRT.anchorMin = new Vector2(0, 1);
+            contentRT.anchorMax = new Vector2(1, 1);
+            contentRT.pivot = new Vector2(0.5f, 1);
+            contentRT.sizeDelta = Vector2.zero;
+            scrollRect.content = contentRT;
+
+            GameObject item = FindOrCreateChild(content, "Item");
+            RectTransform itemRT = GetOrAddComponent<RectTransform>(item);
+            itemRT.anchorMin = new Vector2(0, 0.5f);
+            itemRT.anchorMax = new Vector2(1, 0.5f);
+            itemRT.sizeDelta = new Vector2(0, 40);
+            Toggle itemToggle = GetOrAddComponent<Toggle>(item);
+
+            GameObject itemBg = FindOrCreateChild(item, "Item Background");
+            RectTransform itemBgRT = GetOrAddComponent<RectTransform>(itemBg);
+            itemBgRT.anchorMin = Vector2.zero;
+            itemBgRT.anchorMax = Vector2.one;
+            itemBgRT.sizeDelta = Vector2.zero;
+            Image itemBgImg = GetOrAddComponent<Image>(itemBg);
+            itemBgImg.color = PANEL_BG;
+
+            GameObject itemCheck = FindOrCreateChild(item, "Item Checkmark");
+            RectTransform checkRT = GetOrAddComponent<RectTransform>(itemCheck);
+            checkRT.anchorMin = new Vector2(0, 0.5f);
+            checkRT.anchorMax = new Vector2(0, 0.5f);
+            checkRT.pivot = new Vector2(0, 0.5f);
+            checkRT.sizeDelta = new Vector2(16, 16);
+            checkRT.anchoredPosition = new Vector2(8, 0);
+            Image checkImg = GetOrAddComponent<Image>(itemCheck);
+            checkImg.color = CYAN_NEON;
+
+            GameObject itemLabel = FindOrCreateChild(item, "Item Label");
+            RectTransform itemLabelRT = GetOrAddComponent<RectTransform>(itemLabel);
+            itemLabelRT.anchorMin = Vector2.zero;
+            itemLabelRT.anchorMax = Vector2.one;
+            itemLabelRT.offsetMin = new Vector2(30, 0);
+            itemLabelRT.offsetMax = new Vector2(-8, 0);
+            TextMeshProUGUI itemLabelText = GetOrAddComponent<TextMeshProUGUI>(itemLabel);
+            itemLabelText.fontSize = 40;
+            itemLabelText.color = TEXT_PRIMARY;
+            itemLabelText.alignment = TextAlignmentOptions.Left;
+
+            itemToggle.targetGraphic = itemBgImg;
+            itemToggle.graphic = checkImg;
+            itemToggle.isOn = true;
+            dropdown.template = templateRT;
+            dropdown.itemText = itemLabelText;
+
+            template.SetActive(false);
         }
 
         // ==================== REFRESH INDICATOR ====================

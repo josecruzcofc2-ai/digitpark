@@ -36,6 +36,8 @@ namespace DigitPark.Editor.AutoAssigners
             "notificationBadge", "notificationBadgeText",
             // Premium
             "premiumButton", "premiumBadge", "premiumPanel",
+            // Monetization
+            "shopButton", "achievementsButton", "dailyMissionsButton",
             // Animation
             "titleAnimator"
             // Note: notificationIconNormal, notificationIconActive (Sprites) assigned via UIBuilder icon system
@@ -253,6 +255,11 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "premiumButton", FindButtonByName("premiumcard", "premium"));
             AssignReference(so, "premiumBadge", FindByNameContains<Transform>("premiumcard", "premiumbadge"));
             AssignPremiumPanel(so);
+
+            // Monetization
+            AssignReference(so, "shopButton", FindButtonByName("shopcard", "shop", "tienda"));
+            AssignReference(so, "achievementsButton", FindButtonByName("achievementscard", "achievements", "logros"));
+            AssignReference(so, "dailyMissionsButton", FindButtonByName("dailyrewardcard", "dailyreward", "dailymissions", "recompensas"));
 
             // Animation
             AssignAnimator(so, "titleAnimator", "logotext", "title", "digitpark");

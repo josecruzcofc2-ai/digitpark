@@ -1051,6 +1051,11 @@ namespace DigitPark.Editor
             if (premCard != null)
                 SetRef(so, "premiumBadge", premCard.gameObject);
 
+            // Monetization buttons
+            SetRef(so, "shopButton", FindInPath<Button>(r, "ExtraRow/ShopCard"));
+            SetRef(so, "achievementsButton", FindInPath<Button>(r, "ExtraRow/AchievementsCard"));
+            SetRef(so, "dailyMissionsButton", FindInPath<Button>(r, "DailyRewardCard"));
+
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
             Debug.Log("[MainMenuUI] Referencias del manager asignadas");

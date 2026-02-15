@@ -28,6 +28,19 @@ namespace DigitPark.UI
             {
                 iconImage = GetComponentInChildren<Image>();
             }
+
+            // Ensure there's a raycast target for the button to receive clicks
+            if (iconImage != null)
+            {
+                iconImage.raycastTarget = true;
+            }
+            Image rootImage = GetComponent<Image>();
+            if (rootImage == null)
+            {
+                rootImage = gameObject.AddComponent<Image>();
+                rootImage.color = Color.clear;
+                rootImage.raycastTarget = true;
+            }
         }
 
         private void Start()

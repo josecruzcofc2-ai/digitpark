@@ -187,16 +187,19 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "bonusBalanceText", FindTextByDeep(root, "BonusBalanceText"));
 
             // ==================== TAB BUTTONS ====================
-            Transform depositTabT = FindDeep(root, "DepositTab");
-            if (depositTabT == null) depositTabT = FindDeep(root, "DepositTabButton");
+            Transform depositTabT = FindDeep(root, "DepositTabButton");
+            if (depositTabT == null) depositTabT = FindDeep(root, "TabDeposits");
+            if (depositTabT == null) depositTabT = FindDeep(root, "DepositTab");
             AssignReference(so, "depositTabButton", depositTabT != null ? depositTabT.GetComponent<Button>() : null);
 
-            Transform withdrawTabT = FindDeep(root, "WithdrawTab");
-            if (withdrawTabT == null) withdrawTabT = FindDeep(root, "WithdrawTabButton");
+            Transform withdrawTabT = FindDeep(root, "WithdrawTabButton");
+            if (withdrawTabT == null) withdrawTabT = FindDeep(root, "TabWithdrawals");
+            if (withdrawTabT == null) withdrawTabT = FindDeep(root, "WithdrawTab");
             AssignReference(so, "withdrawTabButton", withdrawTabT != null ? withdrawTabT.GetComponent<Button>() : null);
 
-            Transform historyTabT = FindDeep(root, "HistoryTab");
-            if (historyTabT == null) historyTabT = FindDeep(root, "HistoryTabButton");
+            Transform historyTabT = FindDeep(root, "HistoryTabButton");
+            if (historyTabT == null) historyTabT = FindDeep(root, "HistoryTab");
+            if (historyTabT == null) historyTabT = FindDeep(root, "TabAll");
             AssignReference(so, "historyTabButton", historyTabT != null ? historyTabT.GetComponent<Button>() : null);
 
             // ==================== TAB PANELS ====================
@@ -239,10 +242,21 @@ namespace DigitPark.Editor.AutoAssigners
             // ==================== TRANSACTION HISTORY ====================
             // transactionItemPrefab -> skip (prefab)
             Transform transactionsContainerT = FindDeep(root, "TransactionsContainer");
+            if (transactionsContainerT == null)
+            {
+                // UIBuilder creates Content inside TransactionsList/ScrollView/Viewport
+                Transform txList = FindDeep(root, "TransactionsList");
+                if (txList != null)
+                {
+                    Transform viewport = FindDeep(txList, "Viewport");
+                    if (viewport != null) transactionsContainerT = FindDeep(viewport, "Content");
+                }
+            }
             AssignReference(so, "transactionsContainer", transactionsContainerT);
 
             Transform emptyHistoryTextT = FindDeep(root, "EmptyHistoryText");
             if (emptyHistoryTextT == null) emptyHistoryTextT = FindDeep(root, "EmptyStateText");
+            if (emptyHistoryTextT == null) emptyHistoryTextT = FindDeep(root, "EmptyText");
             AssignReference(so, "emptyHistoryText", emptyHistoryTextT != null ? emptyHistoryTextT.GetComponent<TextMeshProUGUI>() : null);
 
             Transform loadMoreButtonT = FindDeep(root, "LoadMoreButton");
@@ -269,9 +283,18 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static MonoBehaviour FindCashWalletSceneController()
         {
+            MonoBehaviour fallback = null;
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "CashWalletSceneController") return mb;
-            return null;
+            {
+                if (mb.GetType().Name == "CashWalletSceneController")
+                {
+                    // Prefer the instance that is NOT on a Canvas object
+                    if (mb.GetComponent<Canvas>() == null)
+                        return mb;
+                    fallback = mb;
+                }
+            }
+            return fallback;
         }
 
         private static Canvas FindMainCanvas()

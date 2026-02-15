@@ -231,9 +231,11 @@ namespace DigitPark.Editor
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.vertical = true;
-            scroll.movementType = ScrollRect.MovementType.Elastic;
-            scroll.elasticity = 0.1f;
-            scroll.scrollSensitivity = 30f;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.elasticity = 0.2f;
+            scroll.inertia = true;
+            scroll.decelerationRate = 0.135f;
+            scroll.scrollSensitivity = 12f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -487,10 +489,23 @@ namespace DigitPark.Editor
             // PremiumPanelUI overlay
             BuildPremiumPanelOverlay(canvas.transform);
 
+            // Logout ConfirmPanelUI overlay
+            BuildConfirmPanelOverlay(canvas.transform, "LogoutConfirmPanel",
+                "Cerrar Sesion", "¿Estas seguro que deseas cerrar sesion?",
+                "Confirmar", "Cancelar");
+
+            // Delete Account ConfirmPanelUI overlay
+            BuildConfirmPanelOverlay(canvas.transform, "DeleteConfirmPanel",
+                "Eliminar Cuenta", "¿Estas seguro que deseas eliminar tu cuenta? Esta accion no se puede deshacer.",
+                "Eliminar", "Cancelar");
+
             // SelfExclusion ConfirmPanelUI overlay
             BuildConfirmPanelOverlay(canvas.transform, "SelfExclusionConfirmPanel",
                 "Auto Exclusion", "¿Estas seguro que deseas auto-excluirte? No podras jugar partidas con dinero real.",
                 "Confirmar", "Cancelar");
+
+            // Change Name InputPanelUI overlay
+            BuildInputPanelOverlay(canvas.transform);
         }
 
         private static void BuildPremiumPanelOverlay(Transform parent)
@@ -555,6 +570,189 @@ namespace DigitPark.Editor
                 if (blockerProp != null) blockerProp.objectReferenceValue = blocker;
                 var titleProp = so.FindProperty("titleText");
                 if (titleProp != null) titleProp.objectReferenceValue = titleTxt;
+                so.ApplyModifiedProperties();
+            }
+
+            panelRoot.SetActive(false);
+        }
+
+        private static void BuildInputPanelOverlay(Transform parent)
+        {
+            GameObject panelRoot = new GameObject("ChangeNamePanel");
+            panelRoot.transform.SetParent(parent, false);
+
+            RectTransform rt = panelRoot.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // Blocker
+            GameObject blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(panelRoot.transform, false);
+            RectTransform blockerRT = blocker.AddComponent<RectTransform>();
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            Image blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0, 0, 0, 0.7f);
+
+            // Card
+            GameObject card = new GameObject("Panel");
+            card.transform.SetParent(panelRoot.transform, false);
+            RectTransform cardRT = card.AddComponent<RectTransform>();
+            cardRT.anchorMin = new Vector2(0.08f, 0.3f);
+            cardRT.anchorMax = new Vector2(0.92f, 0.7f);
+            cardRT.offsetMin = Vector2.zero;
+            cardRT.offsetMax = Vector2.zero;
+            Image cardBg = card.AddComponent<Image>();
+            cardBg.sprite = WhiteSprite;
+            cardBg.color = CARD_BG;
+
+            // Title
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(card.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0, 0.78f);
+            titleRT.anchorMax = Vector2.one;
+            titleRT.offsetMin = new Vector2(20, 0);
+            titleRT.offsetMax = new Vector2(-20, -10);
+            TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTxt.font = Font;
+            titleTxt.text = "Cambiar Nombre";
+            titleTxt.fontSize = 78;
+            titleTxt.fontStyle = FontStyles.Bold;
+            titleTxt.color = CYAN_NEON;
+            titleTxt.alignment = TextAlignmentOptions.Center;
+
+            // InputField
+            GameObject inputObj = new GameObject("InputField");
+            inputObj.transform.SetParent(card.transform, false);
+            RectTransform inputRT = inputObj.AddComponent<RectTransform>();
+            inputRT.anchorMin = new Vector2(0.08f, 0.48f);
+            inputRT.anchorMax = new Vector2(0.92f, 0.72f);
+            inputRT.offsetMin = Vector2.zero;
+            inputRT.offsetMax = Vector2.zero;
+            Image inputBg = inputObj.AddComponent<Image>();
+            inputBg.sprite = WhiteSprite;
+            inputBg.color = DROPDOWN_BG;
+
+            // TMP InputField TextArea
+            GameObject textArea = new GameObject("Text Area");
+            textArea.transform.SetParent(inputObj.transform, false);
+            RectTransform textAreaRT = textArea.AddComponent<RectTransform>();
+            textAreaRT.anchorMin = Vector2.zero;
+            textAreaRT.anchorMax = Vector2.one;
+            textAreaRT.offsetMin = new Vector2(12, 4);
+            textAreaRT.offsetMax = new Vector2(-12, -4);
+            textArea.AddComponent<RectMask2D>();
+
+            GameObject placeholder = new GameObject("Placeholder");
+            placeholder.transform.SetParent(textArea.transform, false);
+            RectTransform placeholderRT = placeholder.AddComponent<RectTransform>();
+            placeholderRT.anchorMin = Vector2.zero;
+            placeholderRT.anchorMax = Vector2.one;
+            placeholderRT.offsetMin = Vector2.zero;
+            placeholderRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI placeholderTxt = placeholder.AddComponent<TextMeshProUGUI>();
+            placeholderTxt.font = Font;
+            placeholderTxt.text = "Nuevo nombre...";
+            placeholderTxt.fontSize = 60;
+            placeholderTxt.fontStyle = FontStyles.Italic;
+            placeholderTxt.color = TEXT_GRAY;
+            placeholderTxt.alignment = TextAlignmentOptions.Left;
+
+            GameObject inputText = new GameObject("Text");
+            inputText.transform.SetParent(textArea.transform, false);
+            RectTransform inputTextRT = inputText.AddComponent<RectTransform>();
+            inputTextRT.anchorMin = Vector2.zero;
+            inputTextRT.anchorMax = Vector2.one;
+            inputTextRT.offsetMin = Vector2.zero;
+            inputTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI inputTxtComp = inputText.AddComponent<TextMeshProUGUI>();
+            inputTxtComp.font = Font;
+            inputTxtComp.fontSize = 60;
+            inputTxtComp.color = TEXT_WHITE;
+            inputTxtComp.alignment = TextAlignmentOptions.Left;
+
+            TMP_InputField tmpInput = inputObj.AddComponent<TMP_InputField>();
+            tmpInput.textViewport = textAreaRT;
+            tmpInput.textComponent = inputTxtComp;
+            tmpInput.placeholder = placeholderTxt;
+            tmpInput.fontAsset = Font;
+            tmpInput.pointSize = 60;
+            tmpInput.characterLimit = 20;
+
+            // Confirm Button
+            GameObject confirmObj = new GameObject("ConfirmButton");
+            confirmObj.transform.SetParent(card.transform, false);
+            RectTransform confirmBtnRT = confirmObj.AddComponent<RectTransform>();
+            confirmBtnRT.anchorMin = new Vector2(0.55f, 0.08f);
+            confirmBtnRT.anchorMax = new Vector2(0.92f, 0.35f);
+            confirmBtnRT.offsetMin = Vector2.zero;
+            confirmBtnRT.offsetMax = Vector2.zero;
+            Image confirmBg = confirmObj.AddComponent<Image>();
+            confirmBg.sprite = WhiteSprite;
+            confirmBg.color = CYAN_NEON;
+            Button confirmBtn = confirmObj.AddComponent<Button>();
+            confirmBtn.targetGraphic = confirmBg;
+
+            GameObject confirmTxtObj = new GameObject("Text");
+            confirmTxtObj.transform.SetParent(confirmObj.transform, false);
+            RectTransform cTxtRT = confirmTxtObj.AddComponent<RectTransform>();
+            cTxtRT.anchorMin = Vector2.zero;
+            cTxtRT.anchorMax = Vector2.one;
+            cTxtRT.offsetMin = Vector2.zero;
+            cTxtRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI confirmTxtComp = confirmTxtObj.AddComponent<TextMeshProUGUI>();
+            confirmTxtComp.font = Font;
+            confirmTxtComp.text = "Guardar";
+            confirmTxtComp.fontSize = 60;
+            confirmTxtComp.fontStyle = FontStyles.Bold;
+            confirmTxtComp.color = DARK_NAVY;
+            confirmTxtComp.alignment = TextAlignmentOptions.Center;
+
+            // Cancel Button
+            GameObject cancelObj = new GameObject("CancelButton");
+            cancelObj.transform.SetParent(card.transform, false);
+            RectTransform cancelBtnRT = cancelObj.AddComponent<RectTransform>();
+            cancelBtnRT.anchorMin = new Vector2(0.08f, 0.08f);
+            cancelBtnRT.anchorMax = new Vector2(0.45f, 0.35f);
+            cancelBtnRT.offsetMin = Vector2.zero;
+            cancelBtnRT.offsetMax = Vector2.zero;
+            Image cancelBg = cancelObj.AddComponent<Image>();
+            cancelBg.sprite = WhiteSprite;
+            cancelBg.color = BUTTON_BG;
+            Button cancelBtn = cancelObj.AddComponent<Button>();
+            cancelBtn.targetGraphic = cancelBg;
+
+            GameObject cancelTxtObj = new GameObject("Text");
+            cancelTxtObj.transform.SetParent(cancelObj.transform, false);
+            RectTransform ccTxtRT = cancelTxtObj.AddComponent<RectTransform>();
+            ccTxtRT.anchorMin = Vector2.zero;
+            ccTxtRT.anchorMax = Vector2.one;
+            ccTxtRT.offsetMin = Vector2.zero;
+            ccTxtRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI cancelTxtComp = cancelTxtObj.AddComponent<TextMeshProUGUI>();
+            cancelTxtComp.font = Font;
+            cancelTxtComp.text = "Cancelar";
+            cancelTxtComp.fontSize = 60;
+            cancelTxtComp.color = TEXT_GRAY;
+            cancelTxtComp.alignment = TextAlignmentOptions.Center;
+
+            // Add InputPanelUI component
+            var inputComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.InputPanelUI, Assembly-CSharp"));
+            if (inputComp != null)
+            {
+                SerializedObject so = new SerializedObject(inputComp);
+                var pp = so.FindProperty("panel"); if (pp != null) pp.objectReferenceValue = card;
+                var tp = so.FindProperty("titleText"); if (tp != null) tp.objectReferenceValue = titleTxt;
+                var ip = so.FindProperty("inputField"); if (ip != null) ip.objectReferenceValue = tmpInput;
+                var cb = so.FindProperty("confirmButton"); if (cb != null) cb.objectReferenceValue = confirmBtn;
+                var ccb = so.FindProperty("cancelButton"); if (ccb != null) ccb.objectReferenceValue = cancelBtn;
+                var ct = so.FindProperty("confirmButtonText"); if (ct != null) ct.objectReferenceValue = confirmTxtComp;
+                var cct = so.FindProperty("cancelButtonText"); if (cct != null) cct.objectReferenceValue = cancelTxtComp;
                 so.ApplyModifiedProperties();
             }
 

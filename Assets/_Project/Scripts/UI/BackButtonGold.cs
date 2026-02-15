@@ -28,6 +28,20 @@ namespace DigitPark.UI
             {
                 iconImage = GetComponentInChildren<Image>();
             }
+
+            // Ensure there's a raycast target for the button to receive clicks
+            if (iconImage != null)
+            {
+                iconImage.raycastTarget = true;
+            }
+            // Add invisible hit area if no graphic exists on this object
+            Image rootImage = GetComponent<Image>();
+            if (rootImage == null)
+            {
+                rootImage = gameObject.AddComponent<Image>();
+                rootImage.color = Color.clear;
+                rootImage.raycastTarget = true;
+            }
         }
 
         private void Start()

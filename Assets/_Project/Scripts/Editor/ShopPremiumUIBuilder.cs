@@ -1433,12 +1433,17 @@ namespace DigitPark.Editor
 
         private static void AddShopManager(Canvas canvas)
         {
-            var existing = canvas.GetComponent<Monetization.ShopManager>();
-            if (existing == null)
+            // Check if ShopManager already exists ANYWHERE in the scene (not just on Canvas)
+            var existing = Object.FindObjectOfType<Monetization.ShopManager>();
+            if (existing != null)
             {
-                canvas.gameObject.AddComponent<Monetization.ShopManager>();
-                Debug.Log("[ShopPremiumUIBuilder] ShopManager agregado");
+                Debug.Log($"[ShopPremiumUIBuilder] ShopManager ya existe en '{existing.gameObject.name}', no se duplica");
+                return;
             }
+
+            // Only add to Canvas if no ShopManager exists in the scene at all
+            canvas.gameObject.AddComponent<Monetization.ShopManager>();
+            Debug.Log("[ShopPremiumUIBuilder] ShopManager agregado al Canvas");
         }
 
         // ==================== UTILITIES ====================

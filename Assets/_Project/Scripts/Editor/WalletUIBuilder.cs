@@ -1163,9 +1163,18 @@ namespace DigitPark.Editor
 
         private static MonoBehaviour FindWalletController()
         {
+            MonoBehaviour fallback = null;
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "CashWalletSceneController") return mb;
-            return null;
+            {
+                if (mb.GetType().Name == "CashWalletSceneController")
+                {
+                    // Prefer the instance that is NOT on a Canvas object
+                    if (mb.GetComponent<Canvas>() == null)
+                        return mb;
+                    fallback = mb;
+                }
+            }
+            return fallback;
         }
 
         private static void ResetAssignState()

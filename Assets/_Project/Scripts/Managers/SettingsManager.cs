@@ -77,8 +77,8 @@ namespace DigitPark.Managers
         [SerializeField] private ConfirmPanelUI selfExclusionConfirmPanel;
 
         // URLs Legales
-        private const string URL_TERMS = "https://digitpark.com/terms";
-        private const string URL_PRIVACY = "https://digitpark.com/privacy";
+        private const string URL_TERMS = "https://docs.triumpharcade.com/terms-of-use";
+        private const string URL_PRIVACY = "https://docs.triumpharcade.com/privacy-policy";
         private const string URL_RESPONSIBLE_GAMING = "https://docs.triumpharcade.com/responsible-gaming-policy";
         private const string URL_TRIUMPH_TERMS = "https://docs.triumpharcade.com/terms-of-use";
 
@@ -364,6 +364,12 @@ namespace DigitPark.Managers
         private void OnLanguageChanged()
         {
             RefreshThemeDropdownLabels();
+
+            // Refresh all texts in Settings when language changes
+            if (AutoLocalizer.Instance != null)
+            {
+                AutoLocalizer.Instance.LocalizeAllTexts();
+            }
         }
 
         private void HidePanels()

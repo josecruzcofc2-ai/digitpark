@@ -787,6 +787,102 @@ namespace DigitPark.Editor
             arrowRT.anchoredPosition = new Vector2(-12, 0);
             arrowRT.sizeDelta = new Vector2(20, 20);
             SetText(arrow, "▼", 30, FontStyles.Bold, TEXT_MUTED, TextAlignmentOptions.Center);
+
+            // Dropdown template
+            BuildDropdownTemplate(obj.transform, dropdown);
+        }
+
+        private static void BuildDropdownTemplate(Transform dropdownParent, TMP_Dropdown dropdown)
+        {
+            GameObject template = new GameObject("Template");
+            template.transform.SetParent(dropdownParent, false);
+            RectTransform templateRT = template.AddComponent<RectTransform>();
+            templateRT.anchorMin = new Vector2(0, 0);
+            templateRT.anchorMax = new Vector2(1, 0);
+            templateRT.pivot = new Vector2(0.5f, 1);
+            templateRT.sizeDelta = new Vector2(0, 200);
+            Image templateBg = template.AddComponent<Image>();
+            templateBg.color = INPUT_BG;
+            ScrollRect scrollRect = template.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+            // Viewport
+            GameObject viewport = new GameObject("Viewport");
+            viewport.transform.SetParent(template.transform, false);
+            RectTransform viewportRT = viewport.AddComponent<RectTransform>();
+            viewportRT.anchorMin = Vector2.zero;
+            viewportRT.anchorMax = Vector2.one;
+            viewportRT.sizeDelta = new Vector2(-2, -2);
+            viewportRT.anchoredPosition = Vector2.zero;
+            Mask viewportMask = viewport.AddComponent<Mask>();
+            viewportMask.showMaskGraphic = false;
+            viewport.AddComponent<Image>().color = Color.white;
+            scrollRect.viewport = viewportRT;
+
+            // Content
+            GameObject content = new GameObject("Content");
+            content.transform.SetParent(viewport.transform, false);
+            RectTransform contentRT = content.AddComponent<RectTransform>();
+            contentRT.anchorMin = new Vector2(0, 1);
+            contentRT.anchorMax = new Vector2(1, 1);
+            contentRT.pivot = new Vector2(0.5f, 1);
+            contentRT.sizeDelta = Vector2.zero;
+            scrollRect.content = contentRT;
+
+            // Item template
+            GameObject item = new GameObject("Item");
+            item.transform.SetParent(content.transform, false);
+            RectTransform itemRT = item.AddComponent<RectTransform>();
+            itemRT.anchorMin = new Vector2(0, 0.5f);
+            itemRT.anchorMax = new Vector2(1, 0.5f);
+            itemRT.sizeDelta = new Vector2(0, 40);
+            Toggle itemToggle = item.AddComponent<Toggle>();
+
+            // Item Background
+            GameObject itemBg = new GameObject("Item Background");
+            itemBg.transform.SetParent(item.transform, false);
+            RectTransform itemBgRT = itemBg.AddComponent<RectTransform>();
+            itemBgRT.anchorMin = Vector2.zero;
+            itemBgRT.anchorMax = Vector2.one;
+            itemBgRT.sizeDelta = Vector2.zero;
+            Image itemBgImg = itemBg.AddComponent<Image>();
+            itemBgImg.color = CARD_BG;
+
+            // Item Checkmark
+            GameObject itemCheck = new GameObject("Item Checkmark");
+            itemCheck.transform.SetParent(item.transform, false);
+            RectTransform checkRT = itemCheck.AddComponent<RectTransform>();
+            checkRT.anchorMin = new Vector2(0, 0.5f);
+            checkRT.anchorMax = new Vector2(0, 0.5f);
+            checkRT.pivot = new Vector2(0, 0.5f);
+            checkRT.sizeDelta = new Vector2(16, 16);
+            checkRT.anchoredPosition = new Vector2(8, 0);
+            Image checkImg = itemCheck.AddComponent<Image>();
+            checkImg.color = CYAN_NEON;
+
+            // Item Label
+            GameObject itemLabel = new GameObject("Item Label");
+            itemLabel.transform.SetParent(item.transform, false);
+            RectTransform itemLabelRT = itemLabel.AddComponent<RectTransform>();
+            itemLabelRT.anchorMin = Vector2.zero;
+            itemLabelRT.anchorMax = Vector2.one;
+            itemLabelRT.offsetMin = new Vector2(30, 0);
+            itemLabelRT.offsetMax = new Vector2(-8, 0);
+            TextMeshProUGUI itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
+            itemLabelText.fontSize = 40;
+            itemLabelText.color = TEXT_PRIMARY;
+            itemLabelText.alignment = TextAlignmentOptions.Left;
+
+            // Wire up
+            itemToggle.targetGraphic = itemBgImg;
+            itemToggle.graphic = checkImg;
+            itemToggle.isOn = true;
+            dropdown.template = templateRT;
+            dropdown.itemText = itemLabelText;
+
+            template.SetActive(false);
         }
 
         private static void CreateStyledToggleRow(GameObject parent, string name, string label, bool defaultValue)

@@ -65,7 +65,7 @@ namespace DigitPark.Editor
 
             Image iconImage = iconObj.AddComponent<Image>();
             iconImage.sprite = goldIcon;
-            iconImage.raycastTarget = false; // Don't block raycasts
+            iconImage.raycastTarget = true; // Required for button hit area
             iconImage.preserveAspect = true;
 
             // Set button target graphic

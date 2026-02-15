@@ -5,6 +5,7 @@ using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 using System.Reflection;
+using DigitPark.Editor;
 
 namespace DigitPark.Editor.AutoAssigners
 {
@@ -163,35 +164,71 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(manager);
             so.Update();
 
-            // Tab Buttons
+            // Use FindMainCanvas as root for deep search
+            Canvas canvas = FindMainCanvas();
+            Transform root = canvas != null ? canvas.transform : manager.transform.root;
+
+            // Tab Buttons (UIBuilder creates: GemsTab, CoinsTab, CosmeticsTab, OffersTab)
             AssignReference(so, "_gemsTabButton", FindButtonByName("gemstab", "gems", "gemas"));
             AssignReference(so, "_coinsTabButton", FindButtonByName("coinstab", "coins", "monedas"));
-            AssignReference(so, "_themesTabButton", FindButtonByName("themestab", "themes", "temas"));
+            AssignReference(so, "_themesTabButton", FindButtonByName("cosmeticstab", "themestab", "themes", "temas", "cosmetics"));
             AssignReference(so, "_offersTabButton", FindButtonByName("offerstab", "offers", "ofertas"));
 
-            // Content Panels (Note: _themesContent excluded - V2 feature)
-            AssignReference(so, "_gemsContent", FindByNameContains<Transform>("gemscontent", "gemscontainer", "gemspanel", "gemssection"));
-            AssignReference(so, "_coinsContent", FindByNameContains<Transform>("coinscontent", "coinscontainer", "coinspanel", "coinssection"));
-            AssignReference(so, "_offersContent", FindByNameContains<Transform>("offerscontent", "offerscontainer", "offerspanel", "specialofferbanner"));
+            // Content Panels - fields are GameObject, use FindGameObjectByName
+            // UIBuilder creates: GemsSection, CoinsSection, SpecialOfferBanner as content areas
+            AssignReference(so, "_gemsContent", FindGameObjectByName("gemscontent", "gemssection", "gemscontainer", "gemspanel"));
+            AssignReference(so, "_coinsContent", FindGameObjectByName("coinscontent", "coinssection", "coinscontainer", "coinspanel"));
+            AssignReference(so, "_offersContent", FindGameObjectByName("offerscontent", "specialofferbanner", "offerscontainer", "offerspanel"));
 
-            // Popups
-            AssignReference(so, "_purchasePopup", FindByNameContains<Transform>("purchasepopup", "confirmpopup", "buypopup"));
-            AssignReference(so, "_notEnoughGemsPopup", FindByNameContains<Transform>("notenough", "nogemssenough", "needgems"));
+            // Popups - fields are GameObject, use FindGameObjectByName
+            // UIBuilder creates: PurchasePopup (inside PurchaseBlocker), NotEnoughPopup (inside NotEnoughBlocker)
+            AssignReference(so, "_purchasePopup", FindGameObjectByName("purchasepopup", "purchaseblocker", "confirmpopup", "buypopup"));
+            AssignReference(so, "_notEnoughGemsPopup", FindGameObjectByName("notenoughpopup", "notenoughblocker", "notenough", "needgems"));
 
-            // Popup UI
-            AssignReference(so, "_popupItemName", FindTextByName("popupitemname", "itemname", "popuptitle"));
-            AssignReference(so, "_popupItemPrice", FindTextByName("popupitemprice", "itemprice", "price"));
-            AssignReference(so, "_popupConfirmButton", FindButtonByName("popupconfirm", "confirm", "comprar", "buy"));
-            AssignReference(so, "_popupCancelButton", FindButtonByName("popupcancel", "cancel", "cancelar"));
-            AssignReference(so, "_notEnoughCloseButton", FindButtonByName("notenoughclose", "closenotenough", "cerrar"));
-            AssignReference(so, "_notEnoughGetGemsButton", FindButtonByName("getgems", "buymoregems", "obtener"));
+            // Popup UI - find within popup context
+            // UIBuilder creates generic names: Title, Amount, Price, etc. inside popups
+            // Search for specific popup children first, then fall back to generic
+            Transform purchasePopupT = FindDeep(root, "PurchasePopup");
+            if (purchasePopupT != null)
+            {
+                AssignReference(so, "_popupItemName", FindTextInParent(purchasePopupT, "amount", "itemname", "popupitemname"));
+                AssignReference(so, "_popupItemPrice", FindTextInParent(purchasePopupT, "price", "itemprice", "popupitemprice"));
+                AssignReference(so, "_popupConfirmButton", FindButtonInParent(purchasePopupT, "confirmbutton", "confirm", "comprar", "buy"));
+                AssignReference(so, "_popupCancelButton", FindButtonInParent(purchasePopupT, "cancelbutton", "cancel", "cancelar"));
+            }
+            else
+            {
+                AssignReference(so, "_popupItemName", FindTextByName("popupitemname", "itemname", "popuptitle"));
+                AssignReference(so, "_popupItemPrice", FindTextByName("popupitemprice", "itemprice"));
+                AssignReference(so, "_popupConfirmButton", FindButtonByName("popupconfirm", "confirmbutton", "confirm"));
+                AssignReference(so, "_popupCancelButton", FindButtonByName("popupcancel", "cancelbutton"));
+            }
+
+            Transform notEnoughPopupT = FindDeep(root, "NotEnoughPopup");
+            if (notEnoughPopupT != null)
+            {
+                AssignReference(so, "_notEnoughCloseButton", FindButtonInParent(notEnoughPopupT, "closebutton", "close", "cerrar"));
+                AssignReference(so, "_notEnoughGetGemsButton", FindButtonInParent(notEnoughPopupT, "getgemsbutton", "getgems", "obtener"));
+            }
+            else
+            {
+                AssignReference(so, "_notEnoughCloseButton", FindButtonByName("notenoughclose", "closebutton", "cerrar"));
+                AssignReference(so, "_notEnoughGetGemsButton", FindButtonByName("getgemsbutton", "getgems", "obtener"));
+            }
 
             // Navigation
-            AssignReference(so, "_backButton", FindButtonByName("back", "return", "atras"));
+            AssignReference(so, "_backButton", FindButtonByName("backbutton", "back", "return", "atras"));
 
             // Currency Display
-            AssignReference(so, "_headerGemsText", FindTextByName("headergems", "gemstext", "gemsvalue"));
-            AssignReference(so, "_headerCoinsText", FindTextByName("headercoins", "coinstext", "coinsvalue"));
+            // UIBuilder creates Amount text inside GemsDisplay/CoinsDisplay containers
+            Transform gemsDisplayT = FindDeep(root, "GemsDisplay");
+            Transform coinsDisplayT = FindDeep(root, "CoinsDisplay");
+            TextMeshProUGUI gemsText = gemsDisplayT != null ? FindTextInParent(gemsDisplayT, "amount", "gemstext", "gemsvalue") : null;
+            TextMeshProUGUI coinsText = coinsDisplayT != null ? FindTextInParent(coinsDisplayT, "amount", "coinstext", "coinsvalue") : null;
+            if (gemsText == null) gemsText = FindTextByName("headergems", "gemstext", "gemsvalue");
+            if (coinsText == null) coinsText = FindTextByName("headercoins", "coinstext", "coinsvalue");
+            AssignReference(so, "_headerGemsText", gemsText);
+            AssignReference(so, "_headerCoinsText", coinsText);
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -202,9 +239,18 @@ namespace DigitPark.Editor.AutoAssigners
 
         private static MonoBehaviour FindShopManager()
         {
+            MonoBehaviour fallback = null;
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "ShopManager") return mb;
-            return null;
+            {
+                if (mb.GetType().Name == "ShopManager")
+                {
+                    // Prefer the instance that is NOT on a Canvas object
+                    if (mb.GetComponent<Canvas>() == null)
+                        return mb;
+                    fallback = mb;
+                }
+            }
+            return fallback;
         }
 
         private static void AssignReference(SerializedObject so, string propertyName, Object value)
@@ -220,10 +266,37 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Finders
 
+        private static Canvas FindMainCanvas()
+        {
+            return UIBuilderCanvasHelper.FindMainCanvas();
+        }
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root == null) return null;
+            if (root.name == name) return root;
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeep(child, name);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
         private static T FindByNameContains<T>(params string[] patterns) where T : Component
         {
             var all = Object.FindObjectsOfType<T>(true);
             foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            return null;
+        }
+
+        /// <summary>
+        /// Finds a GameObject by name pattern (for GameObject-type serialized fields)
+        /// </summary>
+        private static GameObject FindGameObjectByName(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t.gameObject;
             return null;
         }
 
@@ -234,10 +307,30 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
+        /// <summary>
+        /// Finds a TextMeshProUGUI within a specific parent hierarchy
+        /// </summary>
+        private static TextMeshProUGUI FindTextInParent(Transform parent, params string[] patterns)
+        {
+            var texts = parent.GetComponentsInChildren<TextMeshProUGUI>(true);
+            foreach (var p in patterns) foreach (var t in texts) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
+            return null;
+        }
+
         private static Button FindButtonByName(params string[] patterns)
         {
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
+            return null;
+        }
+
+        /// <summary>
+        /// Finds a Button within a specific parent hierarchy
+        /// </summary>
+        private static Button FindButtonInParent(Transform parent, params string[] patterns)
+        {
+            var buttons = parent.GetComponentsInChildren<Button>(true);
+            foreach (var p in patterns) foreach (var b in buttons) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
         }
 
