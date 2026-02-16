@@ -26,12 +26,14 @@ namespace DigitPark.Animations
 
         // Cache for active animations
         private Dictionary<int, Tween> activeTweens = new Dictionary<int, Tween>();
+        private bool isActiveInstance;
 
         private void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
+                isActiveInstance = true;
                 if (transform.parent != null)
                     transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
@@ -257,7 +259,10 @@ namespace DigitPark.Animations
 
         private void OnDestroy()
         {
-            DOTween.KillAll();
+            if (isActiveInstance)
+            {
+                DOTween.KillAll();
+            }
         }
     }
 
