@@ -932,17 +932,7 @@ namespace DigitPark.Editor
 
         private static Canvas FindMainCanvas()
         {
-            // Buscar Canvas principal por nombre
-            foreach (var c in Object.FindObjectsOfType<Canvas>(true))
-                if (c.transform.parent == null && c.gameObject.name == "Canvas")
-                    return c;
-            // Fallback: primer Canvas raíz que no sea Transition/Effects
-            foreach (var c in Object.FindObjectsOfType<Canvas>(true))
-                if (c.transform.parent == null &&
-                    !c.gameObject.name.Contains("Transition") &&
-                    !c.gameObject.name.Contains("Effects"))
-                    return c;
-            return null;
+            return UIBuilderCanvasHelper.FindMainCanvas();
         }
 
         private static GameObject FindOrCreate(Transform parent, string name)

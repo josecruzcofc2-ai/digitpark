@@ -53,28 +53,7 @@ namespace DigitPark.Editor
 
         private static void BuildPlayModeSelectionUI()
         {
-            // Find the main Canvas (skip TransitionCanvas and other special canvases)
-            Canvas canvas = null;
-            foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-            {
-                if (c.gameObject.name == "Canvas")
-                {
-                    canvas = c;
-                    break;
-                }
-            }
-            if (canvas == null)
-            {
-                // Fallback: use any root canvas that isn't TransitionCanvas
-                foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-                {
-                    if (c.transform.parent == null && c.gameObject.name != "TransitionCanvas")
-                    {
-                        canvas = c;
-                        break;
-                    }
-                }
-            }
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[PlayModeSelectionUIBuilder] No se encontró Canvas en la escena");
