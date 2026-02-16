@@ -231,11 +231,11 @@ namespace DigitPark.Editor
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.vertical = true;
-            scroll.movementType = ScrollRect.MovementType.Clamped;
-            scroll.elasticity = 0.2f;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.elasticity = 0.1f;
             scroll.inertia = true;
             scroll.decelerationRate = 0.135f;
-            scroll.scrollSensitivity = 12f;
+            scroll.scrollSensitivity = 25f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -245,6 +245,10 @@ namespace DigitPark.Editor
             viewportRT.anchorMin = Vector2.zero;
             viewportRT.anchorMax = Vector2.one;
             viewportRT.sizeDelta = Vector2.zero;
+
+            Image viewportImg = viewport.AddComponent<Image>();
+            viewportImg.color = Color.clear;
+            viewportImg.raycastTarget = true;
 
             viewport.AddComponent<RectMask2D>();
 
