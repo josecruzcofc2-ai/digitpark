@@ -43,6 +43,7 @@ namespace DigitPark.Managers
         [SerializeField] public Button shopButton;
         [SerializeField] public Button achievementsButton;
         [SerializeField] public Button dailyMissionsButton;
+        [SerializeField] public Button missionsCardButton;
 
         [Header("UI - Premium")]
         [SerializeField] public Button premiumButton;
@@ -101,6 +102,7 @@ namespace DigitPark.Managers
             shopButton?.onClick.AddListener(OnShopButtonClicked);
             achievementsButton?.onClick.AddListener(OnAchievementsButtonClicked);
             dailyMissionsButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
+            missionsCardButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
 
             // User info buttons
             userButton?.onClick.AddListener(OnUserButtonClicked);

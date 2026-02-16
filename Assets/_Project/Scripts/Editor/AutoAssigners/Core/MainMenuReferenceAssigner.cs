@@ -260,6 +260,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "shopButton", FindButtonByName("shopcard", "shop", "tienda"));
             AssignReference(so, "achievementsButton", FindButtonByName("achievementscard", "achievements", "logros"));
             AssignReference(so, "dailyMissionsButton", FindButtonByName("dailyrewardcard", "dailyreward", "dailymissions", "recompensas"));
+            AssignReference(so, "missionsCardButton", FindButtonByName("missionscard", "misiones"));
 
             // Animation
             AssignAnimator(so, "titleAnimator", "logotext", "title", "digitpark");

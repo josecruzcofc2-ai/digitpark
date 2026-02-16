@@ -434,6 +434,9 @@ namespace DigitPark.Editor
             so.FindProperty("sideColor").colorValue = new Color(0.04f, 0.06f, 0.12f, 1f);
             so.FindProperty("shadowColor").colorValue = new Color(0f, 0f, 0f, 0.4f);
             so.FindProperty("glowColor").colorValue = CYAN_NEON;
+            so.FindProperty("errorFaceColor").colorValue = new Color(0.4f, 0.08f, 0.08f, 1f);
+            so.FindProperty("errorTextColor").colorValue = new Color(1f, 0.4f, 0.4f, 1f);
+            so.FindProperty("errorGlowColor").colorValue = new Color(1f, 0.2f, 0.2f, 0.8f);
             so.ApplyModifiedProperties();
         }
 

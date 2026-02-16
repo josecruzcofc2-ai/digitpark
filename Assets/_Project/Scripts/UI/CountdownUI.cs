@@ -324,6 +324,11 @@ namespace DigitPark.UI
                 StopAllCoroutines();
                 isCountingDown = false;
 
+                if (backgroundOverlay != null)
+                {
+                    backgroundOverlay.raycastTarget = false;
+                }
+
                 if (countdownPanel != null)
                 {
                     countdownPanel.SetActive(false);

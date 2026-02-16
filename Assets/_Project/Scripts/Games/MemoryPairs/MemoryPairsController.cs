@@ -76,6 +76,9 @@ namespace DigitPark.Games
         private float lastMatchTime = 0f;
         private const float COMBO_TIMEOUT = 5f;
 
+        // Penalización
+        private float penaltyTime = 0f;
+
         protected override void Awake()
         {
             base.Awake();
@@ -429,6 +432,11 @@ namespace DigitPark.Games
                 currentCombo = 0; // Resetear combo
                 RegisterError();
 
+                // Penalización de +1 segundo
+                penaltyTime += 1f;
+                currentTime += 1f;
+                UpdateTimer();
+
                 // Vibración de error
                 TriggerHaptic(HapticType.Error);
 
@@ -445,6 +453,9 @@ namespace DigitPark.Games
                     if (secondSelectedCard < card3DEffects.Length && card3DEffects[secondSelectedCard] != null)
                         card3DEffects[secondSelectedCard].ShowError();
                 }
+
+                // Mostrar "+1" flotante rojo entre las dos cartas
+                ShowPenaltyText(firstSelectedCard, secondSelectedCard);
             }
 
             firstSelectedCard = -1;
@@ -497,6 +508,84 @@ namespace DigitPark.Games
                 }
             }
             return Vector2.zero;
+        }
+
+        private void ShowPenaltyText(int card1, int card2)
+        {
+            // Posicionar entre las dos cartas
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null && cardButtons.Length > 0)
+                canvas = cardButtons[0].GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            Vector2 pos1 = GetCardPosition(card1);
+            Vector2 pos2 = GetCardPosition(card2);
+            Vector2 midPos = (pos1 + pos2) / 2f;
+
+            StartCoroutine(AnimatePenaltyText(midPos, canvas));
+        }
+
+        private IEnumerator AnimatePenaltyText(Vector2 anchoredPos, Canvas canvas)
+        {
+            GameObject penaltyObj = new GameObject("PenaltyText");
+            penaltyObj.transform.SetParent(canvas.transform, false);
+
+            RectTransform rt = penaltyObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(120, 60);
+            rt.anchoredPosition = anchoredPos + new Vector2(0, 30f);
+
+            TextMeshProUGUI tmp = penaltyObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "+1";
+            tmp.fontSize = 42;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(1f, 0.3f, 0.3f, 1f);
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+
+            Outline outline = penaltyObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
+            outline.effectDistance = new Vector2(2, -2);
+
+            Vector2 startPos = rt.anchoredPosition;
+
+            // Punch scale
+            float punchDur = 0.12f;
+            float punchElapsed = 0f;
+            while (punchElapsed < punchDur)
+            {
+                punchElapsed += Time.deltaTime;
+                float t = punchElapsed / punchDur;
+                float scale = t < 0.5f
+                    ? Mathf.Lerp(0.3f, 1.4f, t * 2f)
+                    : Mathf.Lerp(1.4f, 1f, (t - 0.5f) * 2f);
+                rt.localScale = Vector3.one * scale;
+                yield return null;
+            }
+            rt.localScale = Vector3.one;
+
+            // Float up + fade out
+            float duration = 1.2f;
+            float elapsed = 0f;
+            Color startColor = tmp.color;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+
+                float yOffset = 80f * t * (1f - t * 0.3f);
+                rt.anchoredPosition = startPos + new Vector2(0, yOffset);
+
+                if (t > 0.5f)
+                {
+                    float fadeT = (t - 0.5f) / 0.5f;
+                    tmp.color = new Color(startColor.r, startColor.g, startColor.b, Mathf.Lerp(1f, 0f, fadeT));
+                }
+
+                yield return null;
+            }
+
+            Destroy(penaltyObj);
         }
 
         #endregion
@@ -848,6 +937,14 @@ namespace DigitPark.Games
             winPanelCanvasGroup.alpha = 1f;
         }
 
+        public override void EndGame()
+        {
+            // Call base first (it sets PenaltyTime = errorCount * config.errorPenalty)
+            base.EndGame();
+            // Override with our tracked penaltyTime (+1s per error, already added to currentTime)
+            currentResult.PenaltyTime = penaltyTime;
+        }
+
         protected override void OnGameReset()
         {
             pairsFound = 0;
@@ -857,6 +954,7 @@ namespace DigitPark.Games
             currentCombo = 0;
             maxCombo = 0;
             currentRound = 1;
+            penaltyTime = 0f;
 
             for (int i = 0; i < cardRevealed.Length; i++)
             {

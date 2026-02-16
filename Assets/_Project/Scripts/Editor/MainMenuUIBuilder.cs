@@ -1055,6 +1055,7 @@ namespace DigitPark.Editor
             SetRef(so, "shopButton", FindInPath<Button>(r, "ExtraRow/ShopCard"));
             SetRef(so, "achievementsButton", FindInPath<Button>(r, "ExtraRow/AchievementsCard"));
             SetRef(so, "dailyMissionsButton", FindInPath<Button>(r, "DailyRewardCard"));
+            SetRef(so, "missionsCardButton", FindInPath<Button>(r, "QuickActionsPanel/MissionsCard"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

@@ -56,7 +56,7 @@ namespace DigitPark.Editor
             new[] { "Social/Scores" },
             new[] { "Social/SearchPlayers" },
             new[] { "Social/Friends" },
-            new[] { "FriendRequests" },
+            new[] { "Social/FriendRequests" },
             new[] { "Social/MatchHistory" },
             new[] { "Social/Notifications" },
 

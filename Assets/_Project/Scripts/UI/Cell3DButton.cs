@@ -43,6 +43,11 @@ namespace DigitPark.UI
         [SerializeField] private Color completedTextColor = new Color(0.5f, 0.8f, 0.5f, 1f);
         [SerializeField] private Color completedGlowColor = new Color(0.2f, 0.8f, 0.3f, 0.6f);
 
+        [Header("Colors - Error State (Red)")]
+        [SerializeField] private Color errorFaceColor = new Color(0.4f, 0.08f, 0.08f, 1f);
+        [SerializeField] private Color errorTextColor = new Color(1f, 0.4f, 0.4f, 1f);
+        [SerializeField] private Color errorGlowColor = new Color(1f, 0.2f, 0.2f, 0.8f);
+
         [Header("Colors - Combo (Dorado)")]
         [SerializeField] private Color comboGlowColor = new Color(1f, 0.85f, 0.2f, 1f);
         [SerializeField] private Color comboFaceColor = new Color(0.2f, 0.25f, 0.1f, 1f);
@@ -64,6 +69,33 @@ namespace DigitPark.UI
         {
             button = GetComponent<Button>();
 
+            // Auto-detect buttonFace if not serialized (runtime fallback)
+            if (buttonFace == null)
+            {
+                Transform face = transform.Find("Face");
+                if (face != null)
+                {
+                    buttonFace = face.GetComponent<RectTransform>();
+                    Debug.Log($"[Cell3DButton] Auto-detected buttonFace en '{gameObject.name}'");
+                }
+            }
+
+            // Auto-detect shadowImage if not serialized
+            if (shadowImage == null)
+            {
+                Transform shadow = transform.Find("Shadow");
+                if (shadow != null)
+                    shadowImage = shadow.GetComponent<Image>();
+            }
+
+            // Auto-detect sideImage if not serialized
+            if (sideImage == null)
+            {
+                Transform side = transform.Find("Side");
+                if (side != null)
+                    sideImage = side.GetComponent<Image>();
+            }
+
             if (buttonFace != null)
             {
                 originalPosition = buttonFace.anchoredPosition;
@@ -77,6 +109,11 @@ namespace DigitPark.UI
 
         private void Start()
         {
+            if (buttonFace == null)
+            {
+                Debug.LogWarning($"[Cell3DButton] buttonFace es NULL en '{gameObject.name}'. Las animaciones 3D no funcionarán.");
+            }
+
             // Iniciar en estado "esperando" (presionado y oscuro)
             SetWaitingState();
         }
@@ -340,14 +377,14 @@ namespace DigitPark.UI
         }
 
         /// <summary>
-        /// Efecto de shake para error
+        /// Efecto de error: flash rojo + shake + release a estado normal
         /// </summary>
         public void ShakeError()
         {
             if (currentAnimation != null)
                 StopCoroutine(currentAnimation);
 
-            currentAnimation = StartCoroutine(AnimateShake());
+            currentAnimation = StartCoroutine(AnimateErrorAndRelease());
         }
 
         /// <summary>
@@ -556,6 +593,90 @@ namespace DigitPark.UI
             {
                 faceImg.color = originalColor;
             }
+        }
+
+        /// <summary>
+        /// Error completo: flash rojo intenso + shake + transición de vuelta a estado normal
+        /// </summary>
+        private IEnumerator AnimateErrorAndRelease()
+        {
+            if (buttonFace == null) yield break;
+
+            isPressed = true;
+
+            // 1. Flash rojo inmediato
+            if (faceImage != null) faceImage.color = errorFaceColor;
+            if (numberText != null) numberText.color = errorTextColor;
+            if (glowOutline != null) glowOutline.effectColor = errorGlowColor;
+
+            // 2. Shake mientras está rojo
+            Vector2 startPos = buttonFace.anchoredPosition;
+            float shakeDuration = 0.35f;
+            float shakeMagnitude = 12f;
+            float elapsed = 0f;
+
+            while (elapsed < shakeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float decay = 1f - elapsed / shakeDuration;
+
+                float x = Random.Range(-1f, 1f) * shakeMagnitude * decay;
+                float y = Random.Range(-1f, 1f) * shakeMagnitude * decay;
+
+                buttonFace.anchoredPosition = startPos + new Vector2(x, y);
+
+                // Transición gradual de rojo a normal durante el shake
+                float t = elapsed / shakeDuration;
+                if (faceImage != null)
+                    faceImage.color = Color.Lerp(errorFaceColor, faceColor, t);
+                if (glowOutline != null)
+                    glowOutline.effectColor = Color.Lerp(errorGlowColor, glowColor, t);
+
+                yield return null;
+            }
+
+            buttonFace.anchoredPosition = startPos;
+
+            // 3. Release: volver a estado normal (levantado e iluminado)
+            float releaseDur = 0.2f;
+            elapsed = 0f;
+            Vector2 pressedPos = startPos;
+            Vector2 normalPos = originalPosition;
+
+            while (elapsed < releaseDur)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / releaseDur;
+                t = 1f - Mathf.Pow(1f - t, 2f); // ease out
+
+                buttonFace.anchoredPosition = Vector2.Lerp(pressedPos, normalPos, t);
+
+                if (sideImage != null)
+                {
+                    RectTransform sideRT = sideImage.GetComponent<RectTransform>();
+                    float sideHeight = Mathf.Lerp(2f, pressDepth, t);
+                    sideRT.sizeDelta = new Vector2(sideRT.sizeDelta.x, sideHeight);
+                }
+
+                if (numberText != null)
+                    numberText.color = Color.Lerp(errorTextColor, textColor, t);
+
+                yield return null;
+            }
+
+            // Estado final: normal (levantado, iluminado)
+            buttonFace.anchoredPosition = originalPosition;
+            if (faceImage != null) faceImage.color = faceColor;
+            if (numberText != null) numberText.color = textColor;
+            if (glowOutline != null) glowOutline.effectColor = glowColor;
+            if (shadowImage != null) shadowImage.color = shadowColor;
+            if (sideImage != null)
+            {
+                RectTransform sideRT = sideImage.GetComponent<RectTransform>();
+                sideRT.sizeDelta = new Vector2(sideRT.sizeDelta.x, pressDepth);
+            }
+
+            isPressed = false;
         }
 
         private IEnumerator AnimatePopUp()

@@ -434,8 +434,10 @@ namespace DigitPark.Games
 
             RegisterError();
 
-            // Penalty time +1s
+            // Penalty time +1s - visible en timer
             penaltyTime += 1f;
+            currentTime += 1f;
+            UpdateTimer();
 
             // Resetear combo
             currentCombo = 0;
@@ -452,6 +454,9 @@ namespace DigitPark.Games
 
             // Show red feedback with penalty
             ShowFeedback(AutoLocalizer.Get("oddoneout_incorrect_penalty"), new Color(1f, 0.3f, 0.3f, 1f));
+
+            // Texto "+1" flotante rojo
+            ShowPenaltyText(buttonIndex, isRightGrid);
         }
 
         #region Feedback
@@ -586,6 +591,88 @@ namespace DigitPark.Games
                 }
             }
             return Vector2.zero;
+        }
+
+        private void ShowPenaltyText(int buttonIndex, bool isRightGrid)
+        {
+            Button[] buttons = isRightGrid ? rightGridButtons : leftGridButtons;
+            if (buttons == null || buttonIndex >= buttons.Length || buttons[buttonIndex] == null) return;
+
+            RectTransform buttonRT = buttons[buttonIndex].GetComponent<RectTransform>();
+            if (buttonRT == null) return;
+
+            Canvas canvas = buttons[buttonIndex].GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            StartCoroutine(AnimatePenaltyText(buttonRT, canvas));
+        }
+
+        private IEnumerator AnimatePenaltyText(RectTransform buttonRT, Canvas canvas)
+        {
+            GameObject penaltyObj = new GameObject("PenaltyText");
+            penaltyObj.transform.SetParent(canvas.transform, false);
+
+            RectTransform rt = penaltyObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(120, 60);
+
+            TextMeshProUGUI tmp = penaltyObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "+1";
+            tmp.fontSize = 42;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(1f, 0.3f, 0.3f, 1f);
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+
+            Outline outline = penaltyObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
+            outline.effectDistance = new Vector2(2, -2);
+
+            Vector3 buttonWorldPos = buttonRT.position;
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, buttonWorldPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform, screenPos, canvas.worldCamera, out Vector2 localPos);
+            rt.anchoredPosition = localPos + new Vector2(0, 30f);
+
+            Vector2 startPos = rt.anchoredPosition;
+
+            // Punch scale
+            float punchDur = 0.12f;
+            float punchElapsed = 0f;
+            while (punchElapsed < punchDur)
+            {
+                punchElapsed += Time.deltaTime;
+                float t = punchElapsed / punchDur;
+                float scale = t < 0.5f
+                    ? Mathf.Lerp(0.3f, 1.4f, t * 2f)
+                    : Mathf.Lerp(1.4f, 1f, (t - 0.5f) * 2f);
+                rt.localScale = Vector3.one * scale;
+                yield return null;
+            }
+            rt.localScale = Vector3.one;
+
+            // Float up + fade out
+            float duration = 1.2f;
+            float elapsed = 0f;
+            Color startColor = tmp.color;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+
+                float yOffset = 80f * t * (1f - t * 0.3f);
+                rt.anchoredPosition = startPos + new Vector2(0, yOffset);
+
+                if (t > 0.5f)
+                {
+                    float fadeT = (t - 0.5f) / 0.5f;
+                    tmp.color = new Color(startColor.r, startColor.g, startColor.b, Mathf.Lerp(1f, 0f, fadeT));
+                }
+
+                yield return null;
+            }
+
+            Destroy(penaltyObj);
         }
 
         #endregion

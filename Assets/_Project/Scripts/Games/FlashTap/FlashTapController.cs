@@ -52,7 +52,7 @@ namespace DigitPark.Games
         [SerializeField] private int totalAttempts = 5;
         [SerializeField] private float minWaitTime = 3f;
         [SerializeField] private float maxWaitTime = 6f;
-        [SerializeField] private float penaltyDuration = 2f;
+        [SerializeField] private float penaltyDuration = 0.5f;
         [SerializeField] private float cooldownAfterError = 1f;
         [SerializeField] private float delayBetweenAttempts = 1.5f;
 

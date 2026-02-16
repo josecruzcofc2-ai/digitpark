@@ -581,6 +581,11 @@ namespace DigitPark.Managers
             // Resetear combo
             currentCombo = 0;
             totalErrors++;
+
+            // Penalización de +1 segundo
+            currentTime += 1f;
+            UpdateTimerDisplay();
+
             UpdateComboDisplay();
             UpdateRoundUI();
 
@@ -590,16 +595,29 @@ namespace DigitPark.Managers
             // Partículas de error
             PlayErrorParticles(buttonIndex);
 
-            RectTransform rt = gridButtons[buttonIndex].GetComponent<RectTransform>();
-
-            if (shakeCoroutines[buttonIndex] != null)
+            // Animación de error en Cell3DButton (flash rojo + shake + release)
+            var cell3D = gridButtons[buttonIndex].GetComponent<Cell3DButton>();
+            if (cell3D != null)
             {
-                StopCoroutine(shakeCoroutines[buttonIndex]);
-                rt.anchoredPosition = shakeOriginalPositions[buttonIndex];
+                cell3D.ShakeError();
+            }
+            else
+            {
+                // Fallback: shake del RectTransform directamente
+                RectTransform rt = gridButtons[buttonIndex].GetComponent<RectTransform>();
+
+                if (shakeCoroutines[buttonIndex] != null)
+                {
+                    StopCoroutine(shakeCoroutines[buttonIndex]);
+                    rt.anchoredPosition = shakeOriginalPositions[buttonIndex];
+                }
+
+                shakeOriginalPositions[buttonIndex] = rt.anchoredPosition;
+                shakeCoroutines[buttonIndex] = StartCoroutine(ShakeButton(buttonIndex));
             }
 
-            shakeOriginalPositions[buttonIndex] = rt.anchoredPosition;
-            shakeCoroutines[buttonIndex] = StartCoroutine(ShakeButton(buttonIndex));
+            // Mostrar "+1" flotante rojo sobre el botón
+            ShowPenaltyText(buttonIndex);
         }
 
         private IEnumerator ShakeButton(int buttonIndex)
@@ -661,6 +679,93 @@ namespace DigitPark.Managers
                 }
             }
             return Vector2.zero;
+        }
+
+        private void ShowPenaltyText(int buttonIndex)
+        {
+            if (buttonIndex >= gridButtons.Length || gridButtons[buttonIndex] == null) return;
+
+            RectTransform buttonRT = gridButtons[buttonIndex].GetComponent<RectTransform>();
+            if (buttonRT == null) return;
+
+            // Crear texto "+1" flotante directamente en el canvas
+            Canvas canvas = gridButtons[buttonIndex].GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            StartCoroutine(AnimatePenaltyText(buttonRT, canvas));
+        }
+
+        private IEnumerator AnimatePenaltyText(RectTransform buttonRT, Canvas canvas)
+        {
+            // Crear objeto de texto
+            GameObject penaltyObj = new GameObject("PenaltyText");
+            penaltyObj.transform.SetParent(canvas.transform, false);
+
+            RectTransform rt = penaltyObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(120, 60);
+
+            TextMeshProUGUI tmp = penaltyObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "+1";
+            tmp.fontSize = 42;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(1f, 0.3f, 0.3f, 1f); // Rojo
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+
+            // Outline negro para legibilidad
+            Outline outline = penaltyObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
+            outline.effectDistance = new Vector2(2, -2);
+
+            // Posicionar sobre el botón
+            Vector3 buttonWorldPos = buttonRT.position;
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, buttonWorldPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform, screenPos, canvas.worldCamera, out Vector2 localPos);
+            rt.anchoredPosition = localPos + new Vector2(0, 30f);
+
+            // Animación: escala punch + flotar arriba + fade out
+            Vector2 startPos = rt.anchoredPosition;
+            float duration = 1.2f;
+            float elapsed = 0f;
+
+            // Punch scale inicial
+            float punchDur = 0.12f;
+            float punchElapsed = 0f;
+            while (punchElapsed < punchDur)
+            {
+                punchElapsed += Time.deltaTime;
+                float t = punchElapsed / punchDur;
+                float scale = t < 0.5f
+                    ? Mathf.Lerp(0.3f, 1.4f, t * 2f)
+                    : Mathf.Lerp(1.4f, 1f, (t - 0.5f) * 2f);
+                rt.localScale = Vector3.one * scale;
+                yield return null;
+            }
+            rt.localScale = Vector3.one;
+
+            // Flotar hacia arriba y fade out
+            Color startColor = tmp.color;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+
+                // Movimiento hacia arriba con desaceleración
+                float yOffset = 80f * t * (1f - t * 0.3f);
+                rt.anchoredPosition = startPos + new Vector2(0, yOffset);
+
+                // Fade out en la segunda mitad
+                if (t > 0.5f)
+                {
+                    float fadeT = (t - 0.5f) / 0.5f;
+                    tmp.color = new Color(startColor.r, startColor.g, startColor.b, Mathf.Lerp(1f, 0f, fadeT));
+                }
+
+                yield return null;
+            }
+
+            Destroy(penaltyObj);
         }
 
         #endregion
