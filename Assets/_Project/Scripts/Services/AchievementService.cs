@@ -763,6 +763,15 @@ namespace DigitPark.Services
 
             // Legacy friends_5 is now friends_10 (threshold increased)
             // Legacy streak_7 is now streak_5/streak_10 (split)
+
+            // Pre-load icon sprites from Resources
+            foreach (var achievement in achievements)
+            {
+                if (achievement.icon == null && !string.IsNullOrEmpty(achievement.iconName))
+                {
+                    achievement.icon = Resources.Load<Sprite>($"Icons/Achievements/{achievement.iconName}");
+                }
+            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -539,10 +540,11 @@ namespace DigitPark.UI.Panels
             mainPanel.transform.SetParent(transform, false);
 
             RectTransform rt = mainPanel.AddComponent<RectTransform>();
+            // Nearly fullscreen for 1080x1920 reference
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(480, 580);
+            rt.sizeDelta = new Vector2(980, 1500);
 
             Image bg = mainPanel.AddComponent<Image>();
             bg.color = darkBg;
@@ -550,12 +552,12 @@ namespace DigitPark.UI.Panels
             // Borde neon
             Outline outline = mainPanel.AddComponent<Outline>();
             outline.effectColor = neonCyan;
-            outline.effectDistance = new Vector2(2, 2);
+            outline.effectDistance = new Vector2(3, 3);
 
             // Layout
             VerticalLayoutGroup vlg = mainPanel.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(15, 15, 15, 15);
-            vlg.spacing = 8;
+            vlg.padding = new RectOffset(30, 30, 60, 30);
+            vlg.spacing = 20;
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -571,14 +573,14 @@ namespace DigitPark.UI.Panels
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 35);
+            rt.sizeDelta = new Vector2(0, 70);
 
             LayoutElement le = titleObj.AddComponent<LayoutElement>();
-            le.preferredHeight = 35;
+            le.preferredHeight = 70;
 
             TextMeshProUGUI tmp = titleObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("premium_title");
-            tmp.fontSize = 28;
+            tmp.fontSize = 70;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = neonGold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -608,13 +610,54 @@ namespace DigitPark.UI.Panels
 
         private void CreatePremiumCard(Transform parent)
         {
-            premiumCard = CreateCard(parent, "PremiumCard", neonGold);
+            premiumCard = CreateCard(parent, "PremiumCard", neonGold, true);
 
-            // Badge recomendado
-            (recommendedBadge, recommendedText) = CreateRecommendedBadge(premiumCard.transform);
+            // Titulo con estrellas a los lados
+            GameObject titleRow = new GameObject("PremiumTitleRow");
+            titleRow.transform.SetParent(premiumCard.transform, false);
+            LayoutElement titleRowLe = titleRow.AddComponent<LayoutElement>();
+            titleRowLe.preferredHeight = 60;
+            HorizontalLayoutGroup titleHlg = titleRow.AddComponent<HorizontalLayoutGroup>();
+            titleHlg.spacing = 12;
+            titleHlg.childAlignment = TextAnchor.MiddleCenter;
+            titleHlg.childControlWidth = false;
+            titleHlg.childControlHeight = false;
+            titleHlg.childForceExpandWidth = false;
+            titleHlg.childForceExpandHeight = false;
 
-            // Titulo
-            premiumTitleText = CreateCardTitle(premiumCard.transform, AutoLocalizer.Get("premium_full_title"), neonGold);
+            Sprite starSprite = Resources.Load<Sprite>("Icons/UI/StarRecommended");
+
+            // Estrella izquierda
+            GameObject starL = new GameObject("StarLeft");
+            starL.transform.SetParent(titleRow.transform, false);
+            RectTransform starLrt = starL.AddComponent<RectTransform>();
+            starLrt.sizeDelta = new Vector2(50, 50);
+            Image starLimg = starL.AddComponent<Image>();
+            starLimg.sprite = starSprite;
+            starLimg.preserveAspect = true;
+            starLimg.raycastTarget = false;
+
+            // Texto titulo
+            GameObject titleObj = new GameObject("CardTitle");
+            titleObj.transform.SetParent(titleRow.transform, false);
+            RectTransform titleRt = titleObj.AddComponent<RectTransform>();
+            titleRt.sizeDelta = new Vector2(400, 60);
+            premiumTitleText = titleObj.AddComponent<TextMeshProUGUI>();
+            premiumTitleText.text = AutoLocalizer.Get("premium_full_title");
+            premiumTitleText.fontSize = 56;
+            premiumTitleText.fontStyle = FontStyles.Bold;
+            premiumTitleText.color = neonGold;
+            premiumTitleText.alignment = TextAlignmentOptions.Center;
+
+            // Estrella derecha
+            GameObject starR = new GameObject("StarRight");
+            starR.transform.SetParent(titleRow.transform, false);
+            RectTransform starRrt = starR.AddComponent<RectTransform>();
+            starRrt.sizeDelta = new Vector2(50, 50);
+            Image starRimg = starR.AddComponent<Image>();
+            starRimg.sprite = starSprite;
+            starRimg.preserveAspect = true;
+            starRimg.raycastTarget = false;
 
             // Descripcion (incluye los beneficios en una línea)
             premiumDescriptionText = CreateCardDescription(premiumCard.transform, AutoLocalizer.Get("premium_full_description"));
@@ -690,7 +733,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("acquired_text");
-            tmp.fontSize = 28;
+            tmp.fontSize = 60;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = accentColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -702,27 +745,28 @@ namespace DigitPark.UI.Panels
             return overlay;
         }
 
-        private GameObject CreateCard(Transform parent, string name, Color accentColor)
+        private GameObject CreateCard(Transform parent, string name, Color accentColor, bool highlighted = false)
         {
             GameObject card = new GameObject(name);
             card.transform.SetParent(parent, false);
 
             RectTransform rt = card.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 145);
+            rt.sizeDelta = new Vector2(0, 350);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 145;
+            le.preferredHeight = 350;
 
             Image bg = card.AddComponent<Image>();
-            bg.color = cardBg;
+            bg.color = highlighted ? new Color(0.08f, 0.12f, 0.22f, 0.98f) : cardBg;
 
             Outline outline = card.AddComponent<Outline>();
-            outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.5f);
-            outline.effectDistance = new Vector2(2, 2);
+            float alpha = highlighted ? 1f : 0.6f;
+            outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, alpha);
+            outline.effectDistance = highlighted ? new Vector2(5, 5) : new Vector2(3, 3);
 
             VerticalLayoutGroup vlg = card.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(15, 15, 10, 10);
-            vlg.spacing = 5;
+            vlg.padding = new RectOffset(25, 25, 20, 20);
+            vlg.spacing = 12;
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -738,11 +782,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 28;
+            le.preferredHeight = 50;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 20;
+            tmp.fontSize = 56;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -756,11 +800,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 20;
+            le.preferredHeight = 40;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 13;
+            tmp.fontSize = 44;
             tmp.color = new Color(0.8f, 0.8f, 0.85f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
 
@@ -773,11 +817,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 28;
+            le.preferredHeight = 50;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 22;
+            tmp.fontSize = 60;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -791,11 +835,11 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 18;
+            le.preferredHeight = 35;
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 12;
+            tmp.fontSize = 42;
             tmp.color = new Color(0.7f, 1f, 0.7f, 1f);
             tmp.alignment = TextAlignmentOptions.Left;
 
@@ -808,11 +852,11 @@ namespace DigitPark.UI.Panels
             btnObj.transform.SetParent(parent, false);
 
             RectTransform rt = btnObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(160, 35);
+            rt.sizeDelta = new Vector2(350, 70);
 
             LayoutElement le = btnObj.AddComponent<LayoutElement>();
-            le.preferredHeight = 35;
-            le.preferredWidth = 160;
+            le.preferredHeight = 70;
+            le.preferredWidth = 350;
 
             Image bg = btnObj.AddComponent<Image>();
             bg.color = color;
@@ -832,7 +876,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("buy_button");
-            tmp.fontSize = 16;
+            tmp.fontSize = 50;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -846,12 +890,17 @@ namespace DigitPark.UI.Panels
             GameObject badge = new GameObject("RecommendedBadge");
             badge.transform.SetParent(parent, false);
 
-            RectTransform rt = badge.AddComponent<RectTransform>();
+            // Ignore layout so it floats as overlay on the card
+            LayoutElement badgeLe = badge.AddComponent<LayoutElement>();
+            badgeLe.ignoreLayout = true;
+
+            RectTransform rt = badge.GetComponent<RectTransform>();
+            if (rt == null) rt = badge.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(1, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(1, 1);
             rt.anchoredPosition = new Vector2(-10, -10);
-            rt.sizeDelta = new Vector2(120, 30);
+            rt.sizeDelta = new Vector2(320, 54);
 
             Image bg = badge.AddComponent<Image>();
             bg.color = neonGold;
@@ -867,7 +916,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("premium_recommended");
-            tmp.fontSize = 12;
+            tmp.fontSize = 32;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -881,13 +930,13 @@ namespace DigitPark.UI.Panels
             btnObj.transform.SetParent(parent, false);
 
             LayoutElement le = btnObj.AddComponent<LayoutElement>();
-            le.preferredHeight = 25;
+            le.preferredHeight = 45;
 
             restoreButton = btnObj.AddComponent<Button>();
 
             TextMeshProUGUI tmp = btnObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("restore_purchases");
-            tmp.fontSize = 14;
+            tmp.fontSize = 44;
             tmp.color = neonCyan;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Underline;
@@ -911,7 +960,7 @@ namespace DigitPark.UI.Panels
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(1, 1);
             rt.anchoredPosition = new Vector2(-5, -5);
-            rt.sizeDelta = new Vector2(45, 45);
+            rt.sizeDelta = new Vector2(65, 65);
 
             Image bg = btnObj.AddComponent<Image>();
             bg.color = new Color(0.9f, 0.2f, 0.2f, 1f);
@@ -945,7 +994,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "X";
-            tmp.fontSize = 28;
+            tmp.fontSize = 56;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;

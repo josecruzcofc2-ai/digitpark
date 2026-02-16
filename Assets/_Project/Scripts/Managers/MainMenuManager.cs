@@ -210,7 +210,9 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Actualiza la UI relacionada con premium
+        /// Actualiza la UI relacionada con premium.
+        /// El botón Premium siempre es visible (para que no-premium pueda comprarlo).
+        /// Solo cambia la apariencia según el estado.
         /// </summary>
         private void UpdatePremiumUI()
         {
@@ -218,8 +220,22 @@ namespace DigitPark.Managers
 
             bool isPremium = PremiumManager.Instance.IsPremium;
 
-            // Mostrar/ocultar badge de premium con animación
-            if (premiumBadge != null)
+            // Cambiar apariencia del botón según estado premium
+            if (premiumButton != null)
+            {
+                var buttonImage = premiumButton.GetComponent<Image>();
+                if (buttonImage != null)
+                {
+                    // Si es premium, cambiar a color dorado suave (indica activo)
+                    buttonImage.color = isPremium
+                        ? new Color(1f, 0.84f, 0f, 0.5f)  // Dorado semi-transparente
+                        : new Color(1f, 0.84f, 0f, 1f);   // Dorado completo
+                }
+            }
+
+            // El premiumBadge es un indicador visual (ej: estrella/checkmark)
+            // Solo mostrarlo si ES premium, pero nunca ocultar el botón padre
+            if (premiumBadge != null && premiumBadge != premiumButton?.gameObject)
             {
                 if (isPremium && !premiumBadge.activeSelf)
                 {
@@ -231,19 +247,6 @@ namespace DigitPark.Managers
                 {
                     premiumBadge.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
                         .OnComplete(() => premiumBadge.SetActive(false));
-                }
-            }
-
-            // Cambiar apariencia del botón si ya es premium
-            if (premiumButton != null)
-            {
-                var buttonImage = premiumButton.GetComponent<Image>();
-                if (buttonImage != null)
-                {
-                    // Si es premium, cambiar a color dorado suave
-                    buttonImage.color = isPremium
-                        ? new Color(1f, 0.84f, 0f, 0.5f)  // Dorado semi-transparente
-                        : new Color(1f, 0.84f, 0f, 1f);   // Dorado completo
                 }
             }
         }

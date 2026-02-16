@@ -247,10 +247,7 @@ namespace DigitPark.Themes
             if (theme == null) return false;
             if (!theme.isPremium) return true;
 
-            // Debug controller overrides
-            if (ThemeDebugController.Instance != null && ThemeDebugController.Instance.UnlockAllThemes)
-                return true;
-
+            // Debug controller override
             if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
                 return true;
 

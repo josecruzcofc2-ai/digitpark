@@ -170,13 +170,20 @@ namespace DigitPark.Managers
 
             Debug.Log($"[AchievementNotification] Achievement unlocked: {achievement.titleKey}");
 
+            // Load icon: prefer Sprite field, fallback to loading by iconName
+            Sprite icon = achievement.icon;
+            if (icon == null)
+            {
+                icon = LoadAchievementIcon(achievement.iconName);
+            }
+
             // Create toast data
             AchievementToastData toastData = new AchievementToastData
             {
                 achievementId = achievement.id,
                 title = GetLocalizedTitle(achievement.titleKey),
                 description = GetLocalizedDescription(achievement.descriptionKey),
-                icon = achievement.icon,
+                icon = icon,
                 isSecret = achievement.isHidden
             };
 
@@ -256,6 +263,7 @@ namespace DigitPark.Managers
                 if (toastPrefab != null)
                 {
                     GameObject toastObj = Instantiate(toastPrefab, _notificationCanvas.transform);
+                    FixToastLayout(toastObj);
                     _currentToast = toastObj.GetComponent<AchievementToastUI>();
 
                     if (_currentToast == null)
@@ -284,7 +292,86 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Creates a simple toast UI by code when prefab is not available
+        /// Fixes layout on prefab instances to ensure correct sizing and fonts.
+        /// Corrects any stale settings from old prefab builds.
+        /// </summary>
+        private void FixToastLayout(GameObject toastObj)
+        {
+            // Fix container size
+            Transform containerT = toastObj.transform.Find("ToastContainer");
+            if (containerT != null)
+            {
+                RectTransform containerRT = containerT.GetComponent<RectTransform>();
+                if (containerRT != null)
+                {
+                    containerRT.sizeDelta = new Vector2(950f, 200f);
+                    containerRT.anchoredPosition = new Vector2(0f, -80f);
+                }
+            }
+
+            // Fix Content HorizontalLayoutGroup
+            var hlgs = toastObj.GetComponentsInChildren<HorizontalLayoutGroup>(true);
+            foreach (var hlg in hlgs)
+            {
+                if (hlg.gameObject.name == "Content")
+                {
+                    hlg.childControlWidth = true;
+                    hlg.childControlHeight = true;
+                    hlg.childForceExpandWidth = false;
+                    hlg.childForceExpandHeight = false;
+                }
+            }
+
+            // Fix icon size
+            Transform iconSection = FindChildRecursive(toastObj.transform, "IconSection");
+            if (iconSection != null)
+            {
+                var iconLE = iconSection.GetComponent<LayoutElement>();
+                if (iconLE != null)
+                {
+                    iconLE.minWidth = 120f;
+                    iconLE.minHeight = 120f;
+                    iconLE.preferredWidth = 120f;
+                    iconLE.preferredHeight = 120f;
+                }
+            }
+
+            // Fix font sizes on TMP components
+            var tmps = toastObj.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true);
+            foreach (var tmp in tmps)
+            {
+                switch (tmp.gameObject.name)
+                {
+                    case "HeaderText":
+                        tmp.fontSize = 26f;
+                        break;
+                    case "AchievementTitle":
+                        tmp.fontSize = 36f;
+                        break;
+                    case "AchievementDescription":
+                        tmp.fontSize = 22f;
+                        break;
+                    case "CompletionText":
+                        tmp.fontSize = 20f;
+                        break;
+                }
+            }
+        }
+
+        private static Transform FindChildRecursive(Transform parent, string name)
+        {
+            if (parent.name == name) return parent;
+            foreach (Transform child in parent)
+            {
+                Transform found = FindChildRecursive(child, name);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Creates a simple toast UI by code when prefab is not available.
+        /// Sized for 1080x1920 mobile reference resolution.
         /// </summary>
         private AchievementToastUI CreateFallbackToast()
         {
@@ -300,15 +387,15 @@ namespace DigitPark.Managers
             cg.alpha = 1f;
             cg.blocksRaycasts = false;
 
-            // Toast container
+            // Toast container - 950x200 for mobile readability
             GameObject container = new GameObject("ToastContainer");
             container.transform.SetParent(toastRoot.transform, false);
             RectTransform containerRT = container.AddComponent<RectTransform>();
             containerRT.anchorMin = new Vector2(0.5f, 1f);
             containerRT.anchorMax = new Vector2(0.5f, 1f);
             containerRT.pivot = new Vector2(0.5f, 1f);
-            containerRT.anchoredPosition = new Vector2(0f, -60f);
-            containerRT.sizeDelta = new Vector2(420f, 120f);
+            containerRT.anchoredPosition = new Vector2(0f, -80f);
+            containerRT.sizeDelta = new Vector2(950f, 200f);
 
             // Background
             Image bg = container.AddComponent<Image>();
@@ -319,21 +406,31 @@ namespace DigitPark.Managers
 
             // Layout
             HorizontalLayoutGroup hlg = container.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 12f;
-            hlg.padding = new RectOffset(12, 12, 10, 10);
+            hlg.spacing = 15f;
+            hlg.padding = new RectOffset(15, 15, 12, 12);
             hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = false;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
 
-            // Icon
+            // Icon frame + icon
+            GameObject iconFrame = new GameObject("IconFrame");
+            iconFrame.transform.SetParent(container.transform, false);
+            Image iconFrameBg = iconFrame.AddComponent<Image>();
+            iconFrameBg.color = new Color(1f, 0.84f, 0f, 1f); // Gold frame
+            LayoutElement iconFrameLE = iconFrame.AddComponent<LayoutElement>();
+            iconFrameLE.minWidth = 116f;
+            iconFrameLE.minHeight = 116f;
+            iconFrameLE.preferredWidth = 116f;
+            iconFrameLE.preferredHeight = 116f;
+
             GameObject iconObj = new GameObject("AchievementIcon");
-            iconObj.transform.SetParent(container.transform, false);
+            iconObj.transform.SetParent(iconFrame.transform, false);
             RectTransform iconRT = iconObj.AddComponent<RectTransform>();
-            iconRT.sizeDelta = new Vector2(72f, 72f);
-            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 72f;
-            iconLE.minHeight = 72f;
+            iconRT.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRT.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRT.sizeDelta = new Vector2(106f, 106f);
             Image iconImg = iconObj.AddComponent<Image>();
             iconImg.color = Color.white;
 
@@ -342,42 +439,49 @@ namespace DigitPark.Managers
             infoObj.transform.SetParent(container.transform, false);
             LayoutElement infoLE = infoObj.AddComponent<LayoutElement>();
             infoLE.flexibleWidth = 1f;
-            infoLE.minHeight = 90f;
+            infoLE.minHeight = 160f;
 
             VerticalLayoutGroup vlg = infoObj.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 3f;
+            vlg.spacing = 4f;
             vlg.childAlignment = TextAnchor.MiddleLeft;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
 
-            // Header
+            // Header - 26pt cyan
             GameObject headerObj = new GameObject("HeaderText");
             headerObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI headerTMP = headerObj.AddComponent<TMPro.TextMeshProUGUI>();
-            headerTMP.text = "LOGRO DESBLOQUEADO";
-            headerTMP.fontSize = 13f;
+            headerTMP.text = Localization.AutoLocalizer.Get("ach_achievement_unlocked");
+            headerTMP.fontSize = 26f;
             headerTMP.fontStyle = TMPro.FontStyles.Bold;
             headerTMP.color = new Color(0f, 1f, 1f, 1f);
+            headerTMP.enableWordWrapping = false;
+            headerTMP.overflowMode = TMPro.TextOverflowModes.Ellipsis;
             if (TMPro.TMP_Settings.defaultFontAsset != null) headerTMP.font = TMPro.TMP_Settings.defaultFontAsset;
 
-            // Title
+            // Title - 36pt gold
             GameObject titleObj = new GameObject("AchievementTitle");
             titleObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI titleTMP = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
             titleTMP.text = "Titulo";
-            titleTMP.fontSize = 18f;
+            titleTMP.fontSize = 36f;
             titleTMP.fontStyle = TMPro.FontStyles.Bold;
             titleTMP.color = new Color(1f, 0.84f, 0f, 1f);
+            titleTMP.enableWordWrapping = false;
+            titleTMP.overflowMode = TMPro.TextOverflowModes.Ellipsis;
             if (TMPro.TMP_Settings.defaultFontAsset != null) titleTMP.font = TMPro.TMP_Settings.defaultFontAsset;
 
-            // Description
+            // Description - 22pt light gray
             GameObject descObj = new GameObject("AchievementDescription");
             descObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI descTMP = descObj.AddComponent<TMPro.TextMeshProUGUI>();
             descTMP.text = "Desc";
-            descTMP.fontSize = 12f;
+            descTMP.fontSize = 22f;
             descTMP.color = new Color(0.7f, 0.75f, 0.8f, 1f);
+            descTMP.enableWordWrapping = false;
+            descTMP.overflowMode = TMPro.TextOverflowModes.Ellipsis;
             if (TMPro.TMP_Settings.defaultFontAsset != null) descTMP.font = TMPro.TMP_Settings.defaultFontAsset;
 
             // Add AchievementToastUI and wire references via reflection

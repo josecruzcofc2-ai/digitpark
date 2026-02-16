@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 using System;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -67,19 +68,14 @@ namespace DigitPark.UI
         private Sequence _displaySequence;
         private Vector2 _hiddenPosition;
         private Vector2 _shownPosition;
+        private bool _positionsInitialized;
 
         // Achievement data for click handling
         private string _currentAchievementId;
 
         private void Awake()
         {
-            // Calculate positions
-            if (toastContainer != null)
-            {
-                _shownPosition = toastContainer.anchoredPosition;
-                _hiddenPosition = new Vector2(_shownPosition.x, _shownPosition.y + 200f);
-                toastContainer.anchoredPosition = _hiddenPosition;
-            }
+            InitializePositions();
 
             // Start hidden
             if (canvasGroup != null)
@@ -90,10 +86,25 @@ namespace DigitPark.UI
             gameObject.SetActive(false);
         }
 
+        /// <summary>
+        /// Calculate show/hide positions. Safe to call multiple times.
+        /// </summary>
+        private void InitializePositions()
+        {
+            if (toastContainer != null && !_positionsInitialized)
+            {
+                _shownPosition = toastContainer.anchoredPosition;
+                _hiddenPosition = new Vector2(_shownPosition.x, _shownPosition.y + 200f);
+                toastContainer.anchoredPosition = _hiddenPosition;
+                _positionsInitialized = true;
+            }
+        }
+
         private void OnDestroy()
         {
             _currentTween?.Kill();
             _displaySequence?.Kill();
+            CancelInvoke();
         }
 
         /// <summary>
@@ -107,6 +118,10 @@ namespace DigitPark.UI
                 DismissImmediate();
             }
 
+            // Ensure positions are calculated (may not have happened in Awake
+            // if references were assigned via reflection after AddComponent)
+            InitializePositions();
+
             _isShowing = true;
             _currentAchievementId = data.achievementId;
 
@@ -116,6 +131,23 @@ namespace DigitPark.UI
             // Show and animate
             gameObject.SetActive(true);
             PlayShowAnimation(data.isEpic);
+
+            // Safety fallback: force dismiss after total expected duration + buffer
+            CancelInvoke(nameof(ForceDismiss));
+            float totalDuration = slideInDuration + displayDuration + slideOutDuration + 2f;
+            Invoke(nameof(ForceDismiss), totalDuration);
+        }
+
+        /// <summary>
+        /// Safety fallback in case DOTween animation fails to dismiss
+        /// </summary>
+        private void ForceDismiss()
+        {
+            if (_isShowing)
+            {
+                Debug.Log("[AchievementToast] Force dismiss (safety fallback)");
+                DismissImmediate();
+            }
         }
 
         /// <summary>
@@ -123,6 +155,7 @@ namespace DigitPark.UI
         /// </summary>
         public void DismissImmediate()
         {
+            CancelInvoke(nameof(ForceDismiss));
             _currentTween?.Kill();
             _displaySequence?.Kill();
 
@@ -136,8 +169,9 @@ namespace DigitPark.UI
                 canvasGroup.alpha = 0f;
             }
 
-            gameObject.SetActive(false);
             _isShowing = false;
+            gameObject.SetActive(false);
+            OnToastDismissed?.Invoke();
         }
 
         /// <summary>
@@ -160,6 +194,11 @@ namespace DigitPark.UI
             }
 
             // Texts
+            if (headerText != null)
+            {
+                headerText.text = AutoLocalizer.Get("ach_achievement_unlocked");
+            }
+
             if (titleText != null)
             {
                 titleText.text = data.title;
@@ -172,7 +211,7 @@ namespace DigitPark.UI
 
             if (completionText != null)
             {
-                completionText.text = "COMPLETADO";
+                completionText.text = AutoLocalizer.Get("completed");
             }
 
             // Progress bar (always full for completed achievements)
@@ -304,6 +343,7 @@ namespace DigitPark.UI
 
         private void PlayHideAnimation()
         {
+            CancelInvoke(nameof(ForceDismiss));
             _currentTween?.Kill();
 
             Sequence hideSequence = DOTween.Sequence();

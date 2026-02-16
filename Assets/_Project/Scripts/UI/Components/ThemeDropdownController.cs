@@ -12,7 +12,7 @@ namespace DigitPark.UI.Components
     /// Runtime controller for the theme dropdown in Settings.
     /// Populates dynamically from ThemeManager.AvailableThemes.
     /// Shows lock icon for premium themes that haven't been purchased.
-    /// Lock disappears when purchased OR when ThemeDebugController.UnlockAllThemes is ON.
+    /// Lock disappears when purchased OR when PremiumDebugController.AllowThemeChange is ON.
     /// </summary>
     [RequireComponent(typeof(TMP_Dropdown))]
     public class ThemeDropdownController : MonoBehaviour
@@ -111,11 +111,7 @@ namespace DigitPark.UI.Components
             if (theme == null) return false;
             if (!theme.isPremium) return true;
 
-            // Debug controller overrides
-            if (ThemeDebugController.Instance != null && ThemeDebugController.Instance.UnlockAllThemes)
-                return true;
-
-            // PremiumDebugController (existing debug tool)
+            // Debug controller override
             if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
                 return true;
 

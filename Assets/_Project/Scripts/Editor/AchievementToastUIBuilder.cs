@@ -31,10 +31,10 @@ namespace DigitPark.Editor
         private static readonly Color SECRET_PURPLE = new Color(0.7f, 0.3f, 1f, 1f);
 
         // ==================== DIMENSIONES ====================
-        private const float TOAST_WIDTH = 420f;
-        private const float TOAST_HEIGHT = 140f;
-        private const float ICON_SIZE = 80f;
-        private const float TOAST_MARGIN_TOP = 60f;
+        private const float TOAST_WIDTH = 950f;
+        private const float TOAST_HEIGHT = 200f;
+        private const float ICON_SIZE = 110f;
+        private const float TOAST_MARGIN_TOP = 80f;
         private const float BORDER_RADIUS = 12f;
 
         [MenuItem("DigitPark/UI Builders/Common/Achievement Toast Notification", false, 50)]
@@ -109,8 +109,8 @@ namespace DigitPark.Editor
             contentHLG.spacing = 15f;
             contentHLG.padding = new RectOffset(0, 0, 0, 0);
             contentHLG.childAlignment = TextAnchor.MiddleLeft;
-            contentHLG.childControlWidth = false;
-            contentHLG.childControlHeight = false;
+            contentHLG.childControlWidth = true;
+            contentHLG.childControlHeight = true;
             contentHLG.childForceExpandWidth = false;
             contentHLG.childForceExpandHeight = false;
 
@@ -319,14 +319,14 @@ namespace DigitPark.Editor
             headerHLG.childForceExpandWidth = false;
 
             LayoutElement headerLE = headerRow.AddComponent<LayoutElement>();
-            headerLE.minHeight = 24f;
-            headerLE.preferredHeight = 24f;
+            headerLE.minHeight = 34f;
+            headerLE.preferredHeight = 34f;
 
             // Star icon
             GameObject starIcon = CreateChild(headerRow, "StarIcon");
             LayoutElement starLE = starIcon.AddComponent<LayoutElement>();
-            starLE.minWidth = 20f;
-            starLE.minHeight = 20f;
+            starLE.minWidth = 28f;
+            starLE.minHeight = 28f;
 
             Image starImg = starIcon.AddComponent<Image>();
             starImg.color = GOLD;
@@ -335,7 +335,7 @@ namespace DigitPark.Editor
             GameObject headerText = CreateChild(headerRow, "HeaderText");
             TextMeshProUGUI headerTMP = headerText.AddComponent<TextMeshProUGUI>();
             headerTMP.text = "¡LOGRO DESBLOQUEADO!";
-            headerTMP.fontSize = 14f;
+            headerTMP.fontSize = 26f;
             headerTMP.fontStyle = FontStyles.Bold;
             headerTMP.color = CYAN_NEON;
             headerTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -347,26 +347,26 @@ namespace DigitPark.Editor
             GameObject titleObj = CreateChild(infoSection, "AchievementTitle");
             TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Primera Victoria";
-            titleTMP.fontSize = 20f;
+            titleTMP.fontSize = 36f;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.color = GOLD;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
             LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
-            titleLE.minHeight = 26f;
-            titleLE.preferredHeight = 26f;
+            titleLE.minHeight = 44f;
+            titleLE.preferredHeight = 44f;
 
             // Achievement Description
             GameObject descObj = CreateChild(infoSection, "AchievementDescription");
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Gana tu primera partida";
-            descTMP.fontSize = 13f;
+            descTMP.fontSize = 22f;
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
             LayoutElement descLE = descObj.AddComponent<LayoutElement>();
-            descLE.minHeight = 18f;
-            descLE.preferredHeight = 18f;
+            descLE.minHeight = 28f;
+            descLE.preferredHeight = 28f;
 
             // Progress Bar Section
             GameObject progressSection = CreateChild(infoSection, "ProgressSection");
@@ -377,14 +377,14 @@ namespace DigitPark.Editor
             progressHLG.childControlHeight = true;
 
             LayoutElement progressSectionLE = progressSection.AddComponent<LayoutElement>();
-            progressSectionLE.minHeight = 16f;
-            progressSectionLE.preferredHeight = 16f;
+            progressSectionLE.minHeight = 24f;
+            progressSectionLE.preferredHeight = 24f;
 
             // Progress Bar
             GameObject progressBar = CreateChild(progressSection, "ProgressBar");
             LayoutElement progressBarLE = progressBar.AddComponent<LayoutElement>();
             progressBarLE.flexibleWidth = 1f;
-            progressBarLE.minHeight = 10f;
+            progressBarLE.minHeight = 14f;
 
             Image progressBarBg = progressBar.AddComponent<Image>();
             progressBarBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
@@ -402,11 +402,11 @@ namespace DigitPark.Editor
             // Completion Text
             GameObject completionText = CreateChild(progressSection, "CompletionText");
             LayoutElement completionLE = completionText.AddComponent<LayoutElement>();
-            completionLE.minWidth = 90f;
+            completionLE.minWidth = 160f;
 
             TextMeshProUGUI completionTMP = completionText.AddComponent<TextMeshProUGUI>();
             completionTMP.text = "COMPLETADO";
-            completionTMP.fontSize = 11f;
+            completionTMP.fontSize = 20f;
             completionTMP.fontStyle = FontStyles.Bold;
             completionTMP.color = SUCCESS_GREEN;
             completionTMP.alignment = TextAlignmentOptions.MidlineRight;
