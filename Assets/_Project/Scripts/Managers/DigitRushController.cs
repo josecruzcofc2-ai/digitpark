@@ -315,7 +315,7 @@ namespace DigitPark.Managers
         private void OnPremiumBannerClicked()
         {
             Debug.Log("[Game] Banner premium clickeado");
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UICanvasHelper.FindMainCanvas();
             if (canvas != null)
             {
                 DigitPark.UI.Panels.PremiumPanelUI.CreateAndShow(canvas.transform);

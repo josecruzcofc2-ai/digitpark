@@ -109,6 +109,20 @@ namespace DigitPark.Editor
 
         private static void CreateSearchPlayersLayout(Transform canvasTransform)
         {
+            // ========== BACKGROUND ==========
+            GameObject bg = CreateOrFind(canvasTransform, "Background");
+            bg.transform.SetAsFirstSibling();
+            RectTransform bgRT = bg.GetComponent<RectTransform>();
+            if (bgRT == null) bgRT = bg.AddComponent<RectTransform>();
+            bgRT.anchorMin = Vector2.zero;
+            bgRT.anchorMax = Vector2.one;
+            bgRT.offsetMin = Vector2.zero;
+            bgRT.offsetMax = Vector2.zero;
+            Image bgImg = bg.GetComponent<Image>();
+            if (bgImg == null) bgImg = bg.AddComponent<Image>();
+            bgImg.color = new Color(0.02f, 0.03f, 0.08f, 1f);
+            bgImg.raycastTarget = false;
+
             // ========== HEADER ==========
             GameObject header = CreateOrFind(canvasTransform, "Header");
             SetupRectTransform(header,

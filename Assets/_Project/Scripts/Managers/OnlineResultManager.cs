@@ -229,7 +229,7 @@ namespace DigitPark.Managers
             }
 
             // Encontrar Canvas en la escena actual
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UICanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogError("[OnlineResultManager] No Canvas found in scene!");

@@ -244,7 +244,7 @@ namespace DigitPark.Managers
         {
             // Buscar currency pills del header (creados por UIBuilder)
             var canvas = GetComponentInParent<Canvas>();
-            if (canvas == null) canvas = FindObjectOfType<Canvas>();
+            if (canvas == null) canvas = UICanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
             var coinPill = FindDeepChild(canvas.transform, "CoinPill");

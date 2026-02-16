@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.UI;
 using DigitPark.UI.Common;
 using DigitPark.UI.Panels;
 using DigitPark.Localization;
@@ -98,7 +99,7 @@ namespace DigitPark.Managers
         /// </summary>
         private void CreateUsernamePopup()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = UICanvasHelper.FindMainCanvas();
             if (canvas != null)
             {
                 usernamePopup = UsernamePopup.Create(canvas.transform);
@@ -111,7 +112,7 @@ namespace DigitPark.Managers
         /// </summary>
         private void CreateForgotPasswordPopup()
         {
-            Canvas canvas = FindFirstObjectByType<Canvas>();
+            Canvas canvas = UICanvasHelper.FindMainCanvas();
             if (canvas != null)
             {
                 forgotPasswordPopup = ForgotPasswordPopup.Create(canvas.transform);

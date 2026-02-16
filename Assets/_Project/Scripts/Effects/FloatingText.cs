@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using DigitPark.UI;
 
 namespace DigitPark.Effects
 {
@@ -43,7 +44,7 @@ namespace DigitPark.Effects
             }
 
             // Buscar o crear canvas
-            canvas = FindObjectOfType<Canvas>();
+            canvas = UICanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
                 Debug.LogWarning("[FloatingText] No se encontro Canvas");

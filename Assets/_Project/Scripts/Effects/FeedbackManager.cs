@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using DigitPark.UI;
 
 namespace DigitPark.Effects
 {
@@ -284,7 +285,7 @@ namespace DigitPark.Effects
         {
             // Crear overlay temporal
             GameObject flashObj = new GameObject("ScreenFlash");
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = UICanvasHelper.FindMainCanvas();
             if (canvas != null)
             {
                 flashObj.transform.SetParent(canvas.transform, false);

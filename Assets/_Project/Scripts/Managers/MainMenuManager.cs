@@ -6,6 +6,7 @@ using DG.Tweening;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.UI;
 using DigitPark.UI.Common;
 using DigitPark.UI.Panels;
 
@@ -473,7 +474,7 @@ namespace DigitPark.Managers
             else
             {
                 // Crear panel por código si no está asignado
-                var canvas = FindObjectOfType<Canvas>();
+                Canvas canvas = UICanvasHelper.FindMainCanvas();
                 if (canvas != null)
                 {
                     PremiumPanelUI.CreateAndShow(canvas.transform);
