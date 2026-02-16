@@ -253,12 +253,15 @@ namespace DigitPark.Editor
             sr.horizontal = false;
             sr.vertical = true;
             sr.movementType = ScrollRect.MovementType.Elastic;
-            sr.scrollSensitivity = 50f;
+            sr.scrollSensitivity = 10f;
             SetImage(scrollView, Color.clear);
 
             // Viewport
             GameObject viewport = CreateChild(scrollView, "Viewport");
             StretchFull(viewport);
+            Image vpImg = viewport.AddComponent<Image>();
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
             viewport.AddComponent<RectMask2D>();
             sr.viewport = viewport.GetComponent<RectTransform>();
 

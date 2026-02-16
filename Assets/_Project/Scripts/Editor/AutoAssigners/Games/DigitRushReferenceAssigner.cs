@@ -257,7 +257,7 @@ namespace DigitPark.Editor.AutoAssigners
             Transform resultExitT = FindDeep(root, "ResultExitButton");
             AssignReference(so, "resultExitButton", resultExitT != null ? resultExitT.GetComponent<Button>() : null);
 
-            // Win/Lose Panels (Cash Battle)
+            // Win/Lose Panels (Real Money - legacy, kept for compatibility)
             AssignReference(so, "winPanelRealMoney", FindWinPanelController("WinPanel_RealMoney"));
             AssignReference(so, "losePanelRealMoney", FindWinPanelController("LosePanel_RealMoney"));
 

@@ -881,6 +881,7 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.scrollSensitivity = 10f;
 
             GetOrAdd<Image>(scrollView).color = Color.clear;
 
@@ -891,6 +892,9 @@ namespace DigitPark.Editor
             vpRT.anchorMax = Vector2.one;
             vpRT.offsetMin = Vector2.zero;
             vpRT.offsetMax = Vector2.zero;
+            var vpImg = GetOrAdd<Image>(viewport);
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
             GetOrAdd<RectMask2D>(viewport);
             scrollRect.viewport = vpRT;
 

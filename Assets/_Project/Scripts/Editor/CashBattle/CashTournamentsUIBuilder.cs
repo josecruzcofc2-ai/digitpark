@@ -769,12 +769,12 @@ namespace DigitPark.Editor
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.vertical = true;
-            scroll.scrollSensitivity = 30;
+            scroll.scrollSensitivity = 10;
 
             Image svBg = scrollView.AddComponent<Image>();
             svBg.color = new Color(0, 0, 0, 0);
 
-            // Viewport con RectMask2D
+            // Viewport
             GameObject viewport = new GameObject("Viewport");
             viewport.transform.SetParent(scrollView.transform, false);
 
@@ -783,7 +783,9 @@ namespace DigitPark.Editor
             vpRT.anchorMax = Vector2.one;
             vpRT.sizeDelta = Vector2.zero;
 
-            viewport.AddComponent<Image>().color = new Color(0, 0, 0, 0);
+            Image vpImg = viewport.AddComponent<Image>();
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
             viewport.AddComponent<RectMask2D>();
 
             // Content

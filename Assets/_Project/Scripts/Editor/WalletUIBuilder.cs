@@ -713,7 +713,7 @@ namespace DigitPark.Editor
             sr.horizontal = false;
             sr.vertical = true;
             sr.movementType = ScrollRect.MovementType.Elastic;
-            sr.scrollSensitivity = 30;
+            sr.scrollSensitivity = 10;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -725,6 +725,9 @@ namespace DigitPark.Editor
             vpRT.offsetMin = Vector2.zero;
             vpRT.offsetMax = Vector2.zero;
 
+            Image vpImg = viewport.AddComponent<Image>();
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
             viewport.AddComponent<RectMask2D>();
             sr.viewport = vpRT;
 

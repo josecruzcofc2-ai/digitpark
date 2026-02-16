@@ -402,7 +402,7 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
-            scrollRect.scrollSensitivity = 30;
+            scrollRect.scrollSensitivity = 10;
 
             var svImg = GetOrAdd<Image>(scrollView);
             svImg.color = Color.clear;

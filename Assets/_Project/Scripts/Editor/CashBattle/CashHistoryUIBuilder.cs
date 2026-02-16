@@ -652,12 +652,11 @@ namespace DigitPark.Editor
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.vertical = true;
-            scroll.scrollSensitivity = 30;
+            scroll.scrollSensitivity = 10;
 
             scrollView.AddComponent<Image>().color = new Color(0, 0, 0, 0);
 
-            // Viewport - IMPORTANTE: RectMask2D en lugar de Mask para mejor rendimiento
-            // y no requiere Image con alpha
+            // Viewport
             GameObject viewport = new GameObject("Viewport");
             viewport.transform.SetParent(scrollView.transform, false);
 
@@ -668,7 +667,9 @@ namespace DigitPark.Editor
             vpRT.offsetMin = Vector2.zero;
             vpRT.offsetMax = Vector2.zero;
 
-            // Usar RectMask2D en lugar de Mask - funciona mejor para ScrollRect
+            Image vpImg = viewport.AddComponent<Image>();
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
             viewport.AddComponent<RectMask2D>();
 
             // Content

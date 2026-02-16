@@ -43,6 +43,8 @@ namespace DigitPark.Managers
         private string currentMatchId;
         private bool isWaitingForOpponent = false;
 
+        private const string PREFAB_BASE = "Prefabs/WinPanels/";
+
         private void Awake()
         {
             if (_instance != null && _instance != this)
@@ -52,6 +54,23 @@ namespace DigitPark.Managers
             }
             _instance = this;
             DontDestroyOnLoad(gameObject);
+            LoadPrefabsFromResources();
+        }
+
+        /// <summary>
+        /// Auto-carga prefabs desde Resources si no están asignados por Inspector
+        /// </summary>
+        private void LoadPrefabsFromResources()
+        {
+            if (onlineWinPanelPrefab == null)
+                onlineWinPanelPrefab = Resources.Load<GameObject>(PREFAB_BASE + "OnlineWinPanel");
+            if (onlineLosePanelPrefab == null)
+                onlineLosePanelPrefab = Resources.Load<GameObject>(PREFAB_BASE + "OnlineLosePanel");
+
+            int loaded = 0;
+            if (onlineWinPanelPrefab != null) loaded++;
+            if (onlineLosePanelPrefab != null) loaded++;
+            Debug.Log($"[OnlineResultManager] Prefabs loaded from Resources: {loaded}/2");
         }
 
         /// <summary>

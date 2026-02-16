@@ -314,11 +314,13 @@ namespace DigitPark.Editor
             Mask oldMask = viewport.GetComponent<Mask>();
             if (oldMask != null) DestroyImmediate(oldMask);
 
-            // Eliminar Image viejo si existe (RectMask2D no lo necesita)
-            Image oldImg = viewport.GetComponent<Image>();
-            if (oldImg != null) DestroyImmediate(oldImg);
+            // Image transparente necesario para raycast/drag detection
+            Image vpImg = viewport.GetComponent<Image>();
+            if (vpImg == null) vpImg = viewport.AddComponent<Image>();
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
 
-            // Usar RectMask2D - funciona sin necesidad de Image
+            // RectMask2D para clipping
             RectMask2D rectMask = viewport.GetComponent<RectMask2D>();
             if (rectMask == null) rectMask = viewport.AddComponent<RectMask2D>();
 
@@ -348,6 +350,9 @@ namespace DigitPark.Editor
             scrollRect.viewport = viewport.GetComponent<RectTransform>();
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.elasticity = 0.1f;
+            scrollRect.scrollSensitivity = 10f;
 
             // Scrollbar
             GameObject scrollbar = CreateOrFind(scrollView.transform, "Scrollbar Vertical");

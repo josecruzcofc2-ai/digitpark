@@ -9,6 +9,7 @@ using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI;
 using DigitPark.Games;
+using DigitPark.Services;
 
 namespace DigitPark.Managers
 {
@@ -887,14 +888,42 @@ namespace DigitPark.Managers
             yield return new WaitForSeconds(0.5f);
 
             // Mostrar panel según modo de juego
-            if (IsOnlineMode())
+            var ctx = GameSessionManager.Instance?.CurrentContext;
+
+            // 1. Online free 1v1 (no sprint)
+            if (IsOnlineMode() && ctx?.Mode != GameMode.CognitiveSprint)
             {
                 HandleOnlineResult(result);
             }
-            else if (!IsPracticeMode())
+            // 2. Online sprint final → esperar oponente, luego SprintSummary
+            else if (IsOnlineMode() && ctx?.Mode == GameMode.CognitiveSprint)
             {
-                ShowRealMoneyResult(result);
+                if (!ctx.HasMoreGames)
+                    OnlineResultManager.Instance.SubmitSprintAndWaitForResult(ctx);
+                else
+                    HandleOnlineResult(result);
             }
+            // 3. Tournament
+            else if (ctx?.Mode == GameMode.Tournament)
+            {
+                HandleTournamentResult(result, ctx);
+            }
+            // 4. CashBattle single game
+            else if (ctx != null && ctx.EntryFee > 0 && ctx.Mode == GameMode.SingleGame)
+            {
+                HandleCashBattleResult(result, ctx);
+            }
+            // 5. CognitiveSprint final (practice o cash)
+            else if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
+            {
+                ResultPanelManager.Instance.ShowSprintSummary(ctx);
+            }
+            // 6. CognitiveSprint mid-game → panel normal de transición
+            else if (ctx?.Mode == GameMode.CognitiveSprint && ctx.HasMoreGames)
+            {
+                ShowPracticeResult(isNewRecord);
+            }
+            // 7. Practice single
             else
             {
                 ShowPracticeResult(isNewRecord);
@@ -1050,6 +1079,71 @@ namespace DigitPark.Managers
                     Debug.Log($"[DigitRush] Resultado online: {(playerWon ? "VICTORIA" : "DERROTA")}");
                 }
             );
+        }
+
+        private void HandleTournamentResult(MinigameResult result, GameContext ctx)
+        {
+            var tournamentService = ServiceLocator.Tournament;
+
+            int position = 1;
+            decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
+            int attemptsUsed = PlayerPrefs.GetInt($"tournament_{ctx.TournamentId}_attempts", 1);
+            int maxAttempts = 3;
+            float bestTime = PlayerPrefs.GetFloat($"tournament_{ctx.TournamentId}_best", result.FinalScore);
+
+            if (tournamentService?.ActiveTournament != null)
+            {
+                var tournament = tournamentService.ActiveTournament;
+                position = tournament.MyPosition ?? 1;
+                prize = tournament.PrizePool;
+
+                tournamentService.SubmitTournamentScore(ctx.TournamentId, (int)(result.FinalScore * 100f));
+            }
+
+            if (result.FinalScore < bestTime)
+            {
+                bestTime = result.FinalScore;
+                PlayerPrefs.SetFloat($"tournament_{ctx.TournamentId}_best", bestTime);
+            }
+            PlayerPrefs.SetInt($"tournament_{ctx.TournamentId}_attempts", attemptsUsed + 1);
+            PlayerPrefs.Save();
+
+            ResultPanelManager.Instance.ShowTournamentResult(
+                result, position, attemptsUsed, maxAttempts, bestTime, prize);
+        }
+
+        private void HandleCashBattleResult(MinigameResult result, GameContext ctx)
+        {
+            string matchId = ctx.MatchId ?? OnlineResultManager.GetCurrentMatchId();
+            string opponentName = ctx.OpponentName ?? OnlineResultManager.GetCurrentOpponentName();
+
+            if (MatchmakingService.Instance != null && !string.IsNullOrEmpty(matchId))
+            {
+                MatchmakingService.Instance.SubmitMatchResult(
+                    matchId, result.FinalScore, result.TotalTime, result.Errors);
+
+                MatchmakingService.Instance.ListenForOpponentResult(matchId,
+                    (opponentScore, opponentTime) =>
+                    {
+                        var opponentResult = new MinigameResult
+                        {
+                            TotalTime = opponentTime,
+                            PenaltyTime = opponentScore - opponentTime,
+                            Errors = 0,
+                            Completed = true
+                        };
+
+                        bool playerWon = result.FinalScore < opponentScore;
+                        ResultPanelManager.Instance.ShowCashBattleResult(
+                            result, opponentResult, ctx.EntryFee, playerWon, opponentName);
+                    });
+            }
+            else
+            {
+                bool playerWon = result.Completed;
+                ResultPanelManager.Instance.ShowCashBattleResult(
+                    result, null, ctx.EntryFee, playerWon, opponentName);
+            }
         }
 
         #endregion

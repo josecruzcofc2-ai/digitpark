@@ -477,6 +477,9 @@ namespace DigitPark.Editor
             // Viewport
             GameObject tabsViewport = FindOrCreateChild(tabsScrollArea, "Viewport");
             SetRectTransformStretch(tabsViewport);
+            Image tabsVpImg = GetOrAddComponent<Image>(tabsViewport);
+            tabsVpImg.color = Color.clear;
+            tabsVpImg.raycastTarget = true;
             GetOrAddComponent<RectMask2D>(tabsViewport);
             tabsScroll.viewport = tabsViewport.GetComponent<RectTransform>();
 
@@ -573,7 +576,7 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
-            scrollRect.scrollSensitivity = 30f;
+            scrollRect.scrollSensitivity = 10f;
 
             Image scrollBg = GetOrAddComponent<Image>(scrollView);
             scrollBg.color = Color.clear;
@@ -582,6 +585,9 @@ namespace DigitPark.Editor
             GameObject viewport = FindOrCreateChild(scrollView, "Viewport");
             SetRectTransformStretch(viewport);
             RectTransform viewportRT = viewport.GetComponent<RectTransform>();
+            Image vpImg = GetOrAddComponent<Image>(viewport);
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
             GetOrAddComponent<RectMask2D>(viewport);
             scrollRect.viewport = viewportRT;
 

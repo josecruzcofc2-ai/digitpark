@@ -448,7 +448,7 @@ namespace DigitPark.Editor
             ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
-            scrollRect.scrollSensitivity = 50f;
+            scrollRect.scrollSensitivity = 10f;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
             scrollRect.elasticity = 0.1f;
 
@@ -463,7 +463,10 @@ namespace DigitPark.Editor
             viewportRT.sizeDelta = Vector2.zero;
             viewportRT.anchoredPosition = Vector2.zero;
 
-            RectMask2D rectMask = GetOrAddComponent<RectMask2D>(viewport);
+            Image vpImg = GetOrAddComponent<Image>(viewport);
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
+            GetOrAddComponent<RectMask2D>(viewport);
             scrollRect.viewport = viewportRT;
 
             // Content
