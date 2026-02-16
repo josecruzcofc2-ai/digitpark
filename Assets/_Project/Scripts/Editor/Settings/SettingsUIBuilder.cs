@@ -87,7 +87,7 @@ namespace DigitPark.Editor
             BuildAppearanceCard(content);
             BuildPremiumCard(content);
             BuildLegalCard(content);
-            BuildDeveloperCard(content);
+
             BuildDangerZoneCard(content);
             BuildVersionFooter(content);
 
@@ -464,13 +464,6 @@ namespace DigitPark.Editor
             CreateSettingsRow(card, "TriumphTermsButton", "Terminos Triumph", ">", TEXT_GRAY, true);
             CreateSeparator(card);
             CreateSettingsRow(card, "SelfExclusionButton", "Auto Exclusion", ">", DANGER_RED, true);
-        }
-
-        private static void BuildDeveloperCard(Transform parent)
-        {
-            Transform card = CreateCard(parent, "DeveloperCard", "DESARROLLADOR", new Color(1f, 0.6f, 0f, 0.3f));
-
-            CreateToggleRow(card, "CashBattleBypassToggle", "Bypass Auth CashBattle", false);
         }
 
         private static void BuildDangerZoneCard(Transform parent)
