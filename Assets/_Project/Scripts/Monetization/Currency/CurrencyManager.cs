@@ -5,6 +5,16 @@ using System.Threading.Tasks;
 namespace DigitPark.Monetization
 {
     /// <summary>
+    /// Tipo de moneda para apuestas
+    /// </summary>
+    public enum BetCurrencyType
+    {
+        None,
+        Gems,
+        Coins
+    }
+
+    /// <summary>
     /// Manager central para el sistema de monedas virtuales (Gemas y Monedas).
     /// Singleton que persiste entre escenas.
     /// </summary>
@@ -278,6 +288,106 @@ namespace DigitPark.Monetization
             if (gems > 0) AddGems(gems);
             if (coins > 0) AddCoins(coins);
             Debug.Log($"[CurrencyManager] Recompensa de logro: {gems} gemas, {coins} monedas");
+        }
+
+        // ==================== ESCROW (Betting) ====================
+
+        private int _escrowedGems;
+        private int _escrowedCoins;
+        private BetCurrencyType _escrowType = BetCurrencyType.None;
+
+        public int EscrowedGems => _escrowedGems;
+        public int EscrowedCoins => _escrowedCoins;
+        public BetCurrencyType EscrowType => _escrowType;
+
+        /// <summary>
+        /// Deducts gems and holds them in escrow for a bet
+        /// </summary>
+        public bool EscrowGems(int amount)
+        {
+            if (amount <= 0) return true;
+            if (!SpendGems(amount)) return false;
+
+            _escrowedGems = amount;
+            _escrowedCoins = 0;
+            _escrowType = BetCurrencyType.Gems;
+            Debug.Log($"[CurrencyManager] Escrow: {amount} gems held for bet");
+            return true;
+        }
+
+        /// <summary>
+        /// Deducts coins and holds them in escrow for a bet
+        /// </summary>
+        public bool EscrowCoins(int amount)
+        {
+            if (amount <= 0) return true;
+            if (!SpendCoins(amount)) return false;
+
+            _escrowedCoins = amount;
+            _escrowedGems = 0;
+            _escrowType = BetCurrencyType.Coins;
+            Debug.Log($"[CurrencyManager] Escrow: {amount} coins held for bet");
+            return true;
+        }
+
+        /// <summary>
+        /// Settles the bet. If won, returns 2x escrow. If lost, escrow is forfeited.
+        /// </summary>
+        public void SettleBet(bool won)
+        {
+            if (_escrowType == BetCurrencyType.None) return;
+
+            if (won)
+            {
+                switch (_escrowType)
+                {
+                    case BetCurrencyType.Gems:
+                        int gemsWon = _escrowedGems * 2;
+                        AddGems(gemsWon);
+                        Debug.Log($"[CurrencyManager] Bet WON: +{gemsWon} gems (2x {_escrowedGems})");
+                        break;
+                    case BetCurrencyType.Coins:
+                        int coinsWon = _escrowedCoins * 2;
+                        AddCoins(coinsWon);
+                        Debug.Log($"[CurrencyManager] Bet WON: +{coinsWon} coins (2x {_escrowedCoins})");
+                        break;
+                }
+            }
+            else
+            {
+                Debug.Log($"[CurrencyManager] Bet LOST: escrow forfeited ({_escrowType}: {(_escrowType == BetCurrencyType.Gems ? _escrowedGems : _escrowedCoins)})");
+            }
+
+            ClearEscrow();
+        }
+
+        /// <summary>
+        /// Cancels the bet and returns the escrowed amount
+        /// </summary>
+        public void CancelEscrow()
+        {
+            if (_escrowType == BetCurrencyType.None) return;
+
+            switch (_escrowType)
+            {
+                case BetCurrencyType.Gems:
+                    AddGems(_escrowedGems);
+                    Debug.Log($"[CurrencyManager] Escrow cancelled: +{_escrowedGems} gems returned");
+                    break;
+                case BetCurrencyType.Coins:
+                    AddCoins(_escrowedCoins);
+                    Debug.Log($"[CurrencyManager] Escrow cancelled: +{_escrowedCoins} coins returned");
+                    break;
+            }
+
+            ClearEscrow();
+        }
+
+        private void ClearEscrow()
+        {
+            _escrowedGems = 0;
+            _escrowedCoins = 0;
+            _escrowType = BetCurrencyType.None;
         }
 
         // ==================== DEBUG ====================

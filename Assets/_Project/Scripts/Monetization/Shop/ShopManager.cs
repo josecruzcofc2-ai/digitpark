@@ -14,16 +14,18 @@ namespace DigitPark.Monetization
     public class ShopManager : MonoBehaviour
     {
         [Header("Tab References")]
+        [SerializeField] private Button _featuredTabButton;
         [SerializeField] private Button _gemsTabButton;
         [SerializeField] private Button _coinsTabButton;
         [SerializeField] private Button _themesTabButton;
-        [SerializeField] private Button _offersTabButton;
+        [SerializeField] private Button _cosmeticsTabButton;
 
         [Header("Content References")]
+        [SerializeField] private GameObject _featuredContent;
         [SerializeField] private GameObject _gemsContent;
         [SerializeField] private GameObject _coinsContent;
         [SerializeField] private GameObject _themesContent;
-        [SerializeField] private GameObject _offersContent;
+        [SerializeField] private GameObject _cosmeticsContent;
 
         [Header("Tab Visual Settings")]
         [SerializeField] private Color _activeTabColor = new Color(0f, 1f, 1f, 1f);
@@ -56,8 +58,8 @@ namespace DigitPark.Monetization
         [Header("Shop Items")]
         [SerializeField] private List<ShopItemUI> _shopItems = new List<ShopItemUI>();
 
-        private ShopTab _currentTab = ShopTab.Gems;
-        private ShopTab _previousTab = ShopTab.Gems;
+        private ShopTab _currentTab = ShopTab.Featured;
+        private ShopTab _previousTab = ShopTab.Featured;
         private bool _isTabTransitioning;
         private Sequence _tabTransitionSequence;
         private Dictionary<ShopTab, Button> _tabButtons;
@@ -204,18 +206,20 @@ namespace DigitPark.Monetization
         {
             _tabButtons = new Dictionary<ShopTab, Button>
             {
+                { ShopTab.Featured, _featuredTabButton },
                 { ShopTab.Gems, _gemsTabButton },
                 { ShopTab.Coins, _coinsTabButton },
                 { ShopTab.Themes, _themesTabButton },
-                { ShopTab.Offers, _offersTabButton }
+                { ShopTab.Cosmetics, _cosmeticsTabButton }
             };
 
             _tabContents = new Dictionary<ShopTab, GameObject>
             {
+                { ShopTab.Featured, _featuredContent },
                 { ShopTab.Gems, _gemsContent },
                 { ShopTab.Coins, _coinsContent },
                 { ShopTab.Themes, _themesContent },
-                { ShopTab.Offers, _offersContent }
+                { ShopTab.Cosmetics, _cosmeticsContent }
             };
 
             // Cache tab images and texts for color changes
@@ -246,14 +250,16 @@ namespace DigitPark.Monetization
         private void SetupButtons()
         {
             // Tab buttons
+            if (_featuredTabButton != null)
+                _featuredTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Featured));
             if (_gemsTabButton != null)
                 _gemsTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Gems));
             if (_coinsTabButton != null)
                 _coinsTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Coins));
             if (_themesTabButton != null)
                 _themesTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Themes));
-            if (_offersTabButton != null)
-                _offersTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Offers));
+            if (_cosmeticsTabButton != null)
+                _cosmeticsTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Cosmetics));
 
             // Back button
             if (_backButton != null)
@@ -399,14 +405,16 @@ namespace DigitPark.Monetization
         {
             switch (tab)
             {
+                case ShopTab.Featured:
+                    return new Color(1f, 0.84f, 0f, 1f); // Gold
                 case ShopTab.Gems:
                     return new Color(0.4f, 0.8f, 1f, 1f); // Gem blue
                 case ShopTab.Coins:
                     return new Color(1f, 0.85f, 0.3f, 1f); // Gold
                 case ShopTab.Themes:
                     return new Color(0.6f, 0.3f, 0.9f, 1f); // Purple
-                case ShopTab.Offers:
-                    return new Color(1f, 0.5f, 0.1f, 1f); // Orange
+                case ShopTab.Cosmetics:
+                    return new Color(1f, 0.3f, 0.6f, 1f); // Pink/Magenta
                 default:
                     return _activeTabColor;
             }

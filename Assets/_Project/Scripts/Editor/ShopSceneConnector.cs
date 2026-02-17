@@ -70,6 +70,12 @@ namespace DigitPark.Editor
             // Create coin pack items
             CreateCoinPackAssets(folderPath);
 
+            // V2: Create theme items
+            CreateThemeAssets(folderPath);
+
+            // V2: Create featured/bundle items
+            CreateFeaturedAssets(folderPath);
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
@@ -81,14 +87,15 @@ namespace DigitPark.Editor
 
         private static void CreateGemPackAssets(string folderPath)
         {
+            // V2 gem tiers (updated)
             var gemPacks = new (string id, string name, int gems, float price, int bonus, bool popular)[]
             {
-                ("gems_100", "100 Gemas", 100, 0.99f, 0, false),
+                ("gems_80", "80 Gemas", 80, 0.99f, 0, false),
                 ("gems_500", "500 Gemas", 500, 4.99f, 10, false),
                 ("gems_1200", "1,200 Gemas", 1200, 9.99f, 20, true),
-                ("gems_2500", "2,500 Gemas", 2500, 19.99f, 25, false),
-                ("gems_6500", "6,500 Gemas", 6500, 49.99f, 30, false),
-                ("gems_14000", "14,000 Gemas", 14000, 99.99f, 35, false),
+                ("gems_2800", "2,800 Gemas", 2800, 19.99f, 25, false),
+                ("gems_7500", "7,500 Gemas", 7500, 49.99f, 30, false),
+                ("gems_16000", "16,000 Gemas", 16000, 99.99f, 35, false),
             };
 
             foreach (var pack in gemPacks)
@@ -121,11 +128,13 @@ namespace DigitPark.Editor
 
         private static void CreateCoinPackAssets(string folderPath)
         {
+            // V2: 4 coin packs
             var coinPacks = new (string id, string name, int coins, int gemsPrice, int bonus, bool popular)[]
             {
                 ("coins_1000", "1,000 Monedas", 1000, 50, 0, false),
                 ("coins_5000", "5,000 Monedas", 5000, 200, 25, false),
                 ("coins_15000", "15,000 Monedas", 15000, 500, 50, true),
+                ("coins_50000", "50,000 Monedas", 50000, 1500, 60, false),
             };
 
             foreach (var pack in coinPacks)
@@ -152,6 +161,118 @@ namespace DigitPark.Editor
 
                 AssetDatabase.CreateAsset(item, assetPath);
                 Debug.Log($"[ShopConnector] Created: {assetPath}");
+            }
+        }
+
+        private static void CreateThemeAssets(string folderPath)
+        {
+            var themes = new (string id, string name, float price)[]
+            {
+                ("theme_volcano", "Volcano", 2.50f),
+                ("theme_ocean", "Ocean", 2.50f),
+                ("theme_clean_light", "Clean Light", 2.50f),
+                ("theme_retro_arcade", "Retro Arcade", 2.50f),
+                ("theme_cyberpunk", "Cyberpunk", 2.50f),
+                ("theme_minimalist", "Minimalist", 2.50f),
+                ("theme_forest", "Forest", 2.50f),
+                ("theme_vaporwave", "Vaporwave", 2.50f),
+                ("theme_steampunk", "Steampunk", 2.50f),
+            };
+
+            foreach (var theme in themes)
+            {
+                string assetPath = $"{folderPath}/{theme.id}.asset";
+                if (AssetDatabase.LoadAssetAtPath<ShopItemData>(assetPath) != null) continue;
+
+                ShopItemData item = ScriptableObject.CreateInstance<ShopItemData>();
+                item.itemId = theme.id;
+                item.displayName = theme.name;
+                item.description = $"Tema visual: {theme.name}";
+                item.itemType = ShopItemType.Theme;
+                item.shopTab = ShopTab.Themes;
+                item.priceType = PriceType.RealMoney;
+                item.realMoneyPrice = theme.price;
+                item.iapProductId = $"com.digitpark.{theme.id}";
+                item.themeId = theme.id.Replace("theme_", "");
+                item.accentColor = new Color(0.6f, 0.3f, 0.9f, 1f);
+                item.sortOrder = System.Array.IndexOf(themes, theme);
+
+                AssetDatabase.CreateAsset(item, assetPath);
+                Debug.Log($"[ShopConnector] Created: {assetPath}");
+            }
+
+            // Theme Bundle
+            string bundlePath = $"{folderPath}/theme_bundle_all.asset";
+            if (AssetDatabase.LoadAssetAtPath<ShopItemData>(bundlePath) == null)
+            {
+                ShopItemData bundle = ScriptableObject.CreateInstance<ShopItemData>();
+                bundle.itemId = "theme_bundle_all";
+                bundle.displayName = "Todos los Temas";
+                bundle.description = "9 temas premium - Ahorra $7.50!";
+                bundle.itemType = ShopItemType.PremiumBundle;
+                bundle.shopTab = ShopTab.Featured;
+                bundle.priceType = PriceType.RealMoney;
+                bundle.realMoneyPrice = 14.99f;
+                bundle.originalPrice = 22.50f;
+                bundle.discountPercent = 33;
+                bundle.iapProductId = "com.digitpark.theme_bundle_all";
+                bundle.accentColor = new Color(0.6f, 0.3f, 0.9f, 1f);
+
+                AssetDatabase.CreateAsset(bundle, bundlePath);
+                Debug.Log($"[ShopConnector] Created: {bundlePath}");
+            }
+        }
+
+        private static void CreateFeaturedAssets(string folderPath)
+        {
+            // Starter Pack
+            string starterPath = $"{folderPath}/starter_pack.asset";
+            if (AssetDatabase.LoadAssetAtPath<ShopItemData>(starterPath) == null)
+            {
+                ShopItemData starter = ScriptableObject.CreateInstance<ShopItemData>();
+                starter.itemId = "starter_pack";
+                starter.displayName = "Starter Pack";
+                starter.description = "500 Gemas + 5,000 Monedas + 1 Tema aleatorio";
+                starter.itemType = ShopItemType.StarterPack;
+                starter.shopTab = ShopTab.Featured;
+                starter.priceType = PriceType.RealMoney;
+                starter.realMoneyPrice = 2.99f;
+                starter.originalPrice = 9.99f;
+                starter.discountPercent = 70;
+                starter.gemsAmount = 500;
+                starter.coinsAmount = 5000;
+                starter.iapProductId = "com.digitpark.starter_pack";
+                starter.accentColor = new Color(0.2f, 0.8f, 0.4f, 1f);
+                starter.sortOrder = 0;
+
+                AssetDatabase.CreateAsset(starter, starterPath);
+                Debug.Log($"[ShopConnector] Created: {starterPath}");
+            }
+
+            // Weekly Deal
+            string weeklyPath = $"{folderPath}/weekly_deal.asset";
+            if (AssetDatabase.LoadAssetAtPath<ShopItemData>(weeklyPath) == null)
+            {
+                ShopItemData weekly = ScriptableObject.CreateInstance<ShopItemData>();
+                weekly.itemId = "weekly_deal";
+                weekly.displayName = "Oferta Semanal";
+                weekly.description = "1,200 Gemas + 10,000 Monedas";
+                weekly.itemType = ShopItemType.SpecialOffer;
+                weekly.shopTab = ShopTab.Featured;
+                weekly.priceType = PriceType.RealMoney;
+                weekly.realMoneyPrice = 4.99f;
+                weekly.originalPrice = 12.99f;
+                weekly.discountPercent = 60;
+                weekly.isLimitedTime = true;
+                weekly.offerDurationHours = 168f; // 7 days
+                weekly.gemsAmount = 1200;
+                weekly.coinsAmount = 10000;
+                weekly.iapProductId = "com.digitpark.weekly_deal";
+                weekly.accentColor = new Color(0.6f, 0.3f, 0.9f, 1f);
+                weekly.sortOrder = 1;
+
+                AssetDatabase.CreateAsset(weekly, weeklyPath);
+                Debug.Log($"[ShopConnector] Created: {weeklyPath}");
             }
         }
 
@@ -207,79 +328,54 @@ namespace DigitPark.Editor
             Transform tabsPanel = FindDeep(root, "TabsPanel");
             if (tabsPanel == null) return;
 
-            // Gems Tab
-            Transform gemsTab = tabsPanel.Find("GemsTab");
-            if (gemsTab != null)
+            // V2: 5 tabs - Featured, Gems, Coins, Themes, Cosmetics
+            var tabMappings = new (string goName, string fieldName)[]
             {
-                Button btn = gemsTab.GetComponent<Button>();
-                if (btn != null)
+                ("FeaturedTab", "_featuredTabButton"),
+                ("GemsTab", "_gemsTabButton"),
+                ("CoinsTab", "_coinsTabButton"),
+                ("ThemesTab", "_themesTabButton"),
+                ("CosmeticsTab", "_cosmeticsTabButton"),
+            };
+
+            foreach (var (goName, fieldName) in tabMappings)
+            {
+                Transform tab = tabsPanel.Find(goName);
+                if (tab != null)
                 {
-                    manager.FindProperty("_gemsTabButton").objectReferenceValue = btn;
+                    Button btn = tab.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        manager.FindProperty(fieldName).objectReferenceValue = btn;
+                    }
                 }
             }
 
-            // Coins Tab
-            Transform coinsTab = tabsPanel.Find("CoinsTab");
-            if (coinsTab != null)
-            {
-                Button btn = coinsTab.GetComponent<Button>();
-                if (btn != null)
-                {
-                    manager.FindProperty("_coinsTabButton").objectReferenceValue = btn;
-                }
-            }
-
-            // Cosmetics/Themes Tab
-            Transform cosmeticsTab = tabsPanel.Find("CosmeticsTab");
-            if (cosmeticsTab != null)
-            {
-                Button btn = cosmeticsTab.GetComponent<Button>();
-                if (btn != null)
-                {
-                    manager.FindProperty("_themesTabButton").objectReferenceValue = btn;
-                }
-            }
-
-            // Offers Tab
-            Transform offersTab = tabsPanel.Find("OffersTab");
-            if (offersTab != null)
-            {
-                Button btn = offersTab.GetComponent<Button>();
-                if (btn != null)
-                {
-                    manager.FindProperty("_offersTabButton").objectReferenceValue = btn;
-                }
-            }
-
-            Debug.Log("[ShopConnector] Tab buttons connected");
+            Debug.Log("[ShopConnector] Tab buttons connected (5 tabs V2)");
         }
 
         private static void ConnectContentAreas(SerializedObject manager, Transform root)
         {
-            // Find the scroll view content
-            Transform scrollView = FindDeep(root, "ShopScrollView");
-            if (scrollView == null) return;
-
-            Transform content = FindDeep(scrollView, "Content");
-            if (content == null) return;
-
-            // Gems Section
-            Transform gemsSection = content.Find("GemsSection");
-            Transform gemsGrid = content.Find("GemsGrid");
-            if (gemsGrid != null)
+            // V2: Each tab has its own ScrollView
+            var contentMappings = new (string scrollViewName, string fieldName)[]
             {
-                manager.FindProperty("_gemsContent").objectReferenceValue = gemsGrid.gameObject;
+                ("FeaturedScrollView", "_featuredContent"),
+                ("GemsScrollView", "_gemsContent"),
+                ("CoinsScrollView", "_coinsContent"),
+                ("ThemesScrollView", "_themesContent"),
+                ("CosmeticsScrollView", "_cosmeticsContent"),
+            };
+
+            foreach (var (scrollViewName, fieldName) in contentMappings)
+            {
+                Transform scrollView = FindDeep(root, scrollViewName);
+                if (scrollView != null)
+                {
+                    manager.FindProperty(fieldName).objectReferenceValue = scrollView.gameObject;
+                }
             }
 
-            // Coins Section
-            Transform coinsSection = content.Find("CoinsSection");
-            Transform coinsGrid = content.Find("CoinsGrid");
-            if (coinsGrid != null)
-            {
-                manager.FindProperty("_coinsContent").objectReferenceValue = coinsGrid.gameObject;
-            }
-
-            Debug.Log("[ShopConnector] Content areas connected");
+            Debug.Log("[ShopConnector] Content areas connected (5 tabs V2)");
         }
 
         private static void ConnectHeader(SerializedObject manager, Transform root)
@@ -449,7 +545,7 @@ namespace DigitPark.Editor
             }
 
             // Find grids and add ShopItemUI
-            string[] gridNames = { "GemsGrid", "CoinsGrid" };
+            string[] gridNames = { "GemsGrid", "CoinsGrid", "ThemesGrid" };
 
             int added = 0;
             foreach (string gridName in gridNames)

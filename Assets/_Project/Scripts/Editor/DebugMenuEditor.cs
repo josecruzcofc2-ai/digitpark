@@ -13,32 +13,46 @@ namespace DigitPark.Editor
     {
         #region Premium
 
-        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Remove Ads")]
-        private static void UnlockRemoveAds()
+        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Create Tournaments")]
+        private static void UnlockCreateTournaments()
         {
             if (PremiumManager.Instance != null)
             {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.RemoveAds);
-                Debug.Log("[Debug] Remove Ads desbloqueado");
+                PremiumManager.Instance.UnlockProduct(PremiumProduct.CreateTournaments);
+                Debug.Log("[Debug] Create Tournaments desbloqueado");
             }
             else
             {
-                SetPremiumPlayerPref("Premium_NoAds", true);
+                SetPremiumPlayerPref("Premium_CreateTournaments", true);
             }
         }
 
-        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Premium Full")]
-        private static void UnlockPremiumFull()
+        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Cash Battle Create")]
+        private static void UnlockCashBattleCreate()
         {
             if (PremiumManager.Instance != null)
             {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.PremiumFull);
-                Debug.Log("[Debug] Premium Full desbloqueado");
+                PremiumManager.Instance.UnlockProduct(PremiumProduct.CashBattleCreate);
+                Debug.Log("[Debug] Cash Battle Create desbloqueado");
             }
             else
             {
-                SetPremiumPlayerPref("Premium_NoAds", true);
+                SetPremiumPlayerPref("Premium_CashBattleCreate", true);
+            }
+        }
+
+        [MenuItem("Tools/DigitPark Debug/Premium/Unlock Tournament Bundle")]
+        private static void UnlockTournamentBundle()
+        {
+            if (PremiumManager.Instance != null)
+            {
+                PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
+                Debug.Log("[Debug] Tournament Bundle desbloqueado");
+            }
+            else
+            {
                 SetPremiumPlayerPref("Premium_CreateTournaments", true);
+                SetPremiumPlayerPref("Premium_CashBattleCreate", true);
             }
         }
 
@@ -59,7 +73,7 @@ namespace DigitPark.Editor
         [MenuItem("Tools/DigitPark Debug/Premium/Unlock ALL Premium")]
         private static void UnlockAllPremium()
         {
-            UnlockPremiumFull();
+            UnlockTournamentBundle();
             UnlockStylesPro();
             Debug.Log("[Debug] Todos los productos premium desbloqueados");
         }
@@ -67,8 +81,8 @@ namespace DigitPark.Editor
         [MenuItem("Tools/DigitPark Debug/Premium/Reset All Premium")]
         private static void ResetAllPremium()
         {
-            PlayerPrefs.DeleteKey("Premium_NoAds");
             PlayerPrefs.DeleteKey("Premium_CreateTournaments");
+            PlayerPrefs.DeleteKey("Premium_CashBattleCreate");
             PlayerPrefs.DeleteKey("Premium_StylesPro");
             PlayerPrefs.Save();
             Debug.Log("[Debug] Estado premium reseteado");
@@ -228,8 +242,8 @@ namespace DigitPark.Editor
         private static void QuickSetupTesting()
         {
             // Desbloquear premium
-            SetPremiumPlayerPref("Premium_NoAds", true);
             SetPremiumPlayerPref("Premium_CreateTournaments", true);
+            SetPremiumPlayerPref("Premium_CashBattleCreate", true);
             SetPremiumPlayerPref("Premium_StylesPro", true);
 
             Debug.Log("[Debug] Configuracion rapida aplicada: Premium completo desbloqueado");

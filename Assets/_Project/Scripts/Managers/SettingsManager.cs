@@ -46,10 +46,10 @@ namespace DigitPark.Managers
 
         [Header("UI - Premium Section")]
         [SerializeField] private GameObject premiumSection;
-        [SerializeField] private Button removeAdsButton;
-        [SerializeField] private TextMeshProUGUI removeAdsButtonText;
-        [SerializeField] private Button premiumFullButton;
-        [SerializeField] private TextMeshProUGUI premiumFullButtonText;
+        [SerializeField] private Button createTournamentsButton;
+        [SerializeField] private TextMeshProUGUI createTournamentsButtonText;
+        [SerializeField] private Button tournamentBundleButton;
+        [SerializeField] private TextMeshProUGUI tournamentBundleButtonText;
         [SerializeField] private Button restorePurchasesButton;
 
         [Header("UI - Premium Button (Pro)")]
@@ -263,8 +263,8 @@ namespace DigitPark.Managers
             backButton?.onClick.AddListener(OnBackButtonClicked);
 
             // Premium buttons
-            removeAdsButton?.onClick.AddListener(OnRemoveAdsClicked);
-            premiumFullButton?.onClick.AddListener(OnPremiumFullClicked);
+            createTournamentsButton?.onClick.AddListener(OnCreateTournamentsClicked);
+            tournamentBundleButton?.onClick.AddListener(OnTournamentBundleClicked);
             restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
 
@@ -761,92 +761,63 @@ namespace DigitPark.Managers
         {
             if (PremiumManager.Instance == null) return;
 
-            bool hasNoAds = PremiumManager.Instance.HasNoAds;
             bool canCreateTournaments = PremiumManager.Instance.CanCreateTournaments;
+            bool canCreateCashBattle = PremiumManager.Instance.CanCreateCashBattle;
+            bool hasBundle = canCreateTournaments && canCreateCashBattle;
 
-            // Actualizar botón de quitar anuncios
-            if (removeAdsButton != null)
+            // Actualizar boton de crear torneos
+            if (createTournamentsButton != null)
             {
-                removeAdsButton.interactable = !hasNoAds;
-                if (removeAdsButtonText != null)
-                {
-                    if (hasNoAds)
-                    {
-                        removeAdsButtonText.text = AutoLocalizer.Get("already_purchased");
-                    }
-                    else
-                    {
-                        removeAdsButtonText.text = $"{AutoLocalizer.Get("remove_ads_title")} - {PremiumManager.PRICE_REMOVE_ADS}";
-                    }
-                }
-            }
-
-            // Actualizar botón de premium completo
-            if (premiumFullButton != null)
-            {
-                premiumFullButton.interactable = !canCreateTournaments;
-                if (premiumFullButtonText != null)
+                createTournamentsButton.interactable = !canCreateTournaments;
+                if (createTournamentsButtonText != null)
                 {
                     if (canCreateTournaments)
                     {
-                        premiumFullButtonText.text = AutoLocalizer.Get("already_purchased");
+                        createTournamentsButtonText.text = AutoLocalizer.Get("already_purchased");
                     }
                     else
                     {
-                        premiumFullButtonText.text = $"{AutoLocalizer.Get("premium_full_title")} - {PremiumManager.PRICE_PREMIUM_FULL}";
+                        createTournamentsButtonText.text = $"{AutoLocalizer.Get("create_tournaments_title")} - {PremiumManager.PRICE_CREATE_TOURNAMENTS}";
                     }
                 }
             }
 
-            // Ocultar sección de premium si ya tiene todo
-            if (premiumSection != null && hasNoAds && canCreateTournaments)
+            // Actualizar boton de tournament bundle
+            if (tournamentBundleButton != null)
             {
-                // Opcionalmente ocultar la sección si tiene todo
+                tournamentBundleButton.interactable = !hasBundle;
+                if (tournamentBundleButtonText != null)
+                {
+                    if (hasBundle)
+                    {
+                        tournamentBundleButtonText.text = AutoLocalizer.Get("already_purchased");
+                    }
+                    else
+                    {
+                        tournamentBundleButtonText.text = $"{AutoLocalizer.Get("tournament_bundle_title")} - {PremiumManager.PRICE_TOURNAMENT_BUNDLE}";
+                    }
+                }
+            }
+
+            // Ocultar seccion de premium si ya tiene todo
+            if (premiumSection != null && hasBundle)
+            {
+                // Opcionalmente ocultar la seccion si tiene todo
                 // premiumSection.SetActive(false);
             }
 
-            Debug.Log($"[Settings] Premium UI actualizada - NoAds: {hasNoAds}, CreateTournaments: {canCreateTournaments}");
+            Debug.Log($"[Settings] Premium UI actualizada - CreateTournaments: {canCreateTournaments}, CashBattle: {canCreateCashBattle}");
 
-            // Actualizar el badge del botón Pro
+            // Actualizar el badge del boton Pro
             UpdatePremiumBadge();
         }
 
         /// <summary>
-        /// Compra: Quitar anuncios ($10 MXN)
+        /// Compra: Crear Torneos ($3.99 USD)
         /// </summary>
-        private void OnRemoveAdsClicked()
+        private void OnCreateTournamentsClicked()
         {
-            Debug.Log("[Settings] Iniciando compra: Quitar Anuncios");
-
-            if (PremiumManager.Instance.HasNoAds)
-            {
-                errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
-                return;
-            }
-
-            // Deshabilitar botón mientras se procesa
-            if (removeAdsButton != null) removeAdsButton.interactable = false;
-
-            PremiumManager.Instance.PurchaseRemoveAds(success =>
-            {
-                if (success)
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("purchase_success"));
-                }
-                else
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
-                    if (removeAdsButton != null) removeAdsButton.interactable = true;
-                }
-            });
-        }
-
-        /// <summary>
-        /// Compra: Premium completo ($20 MXN)
-        /// </summary>
-        private void OnPremiumFullClicked()
-        {
-            Debug.Log("[Settings] Iniciando compra: Premium Completo");
+            Debug.Log("[Settings] Iniciando compra: Crear Torneos");
 
             if (PremiumManager.Instance.CanCreateTournaments)
             {
@@ -854,10 +825,10 @@ namespace DigitPark.Managers
                 return;
             }
 
-            // Deshabilitar botón mientras se procesa
-            if (premiumFullButton != null) premiumFullButton.interactable = false;
+            // Deshabilitar boton mientras se procesa
+            if (createTournamentsButton != null) createTournamentsButton.interactable = false;
 
-            PremiumManager.Instance.PurchasePremiumFull(success =>
+            PremiumManager.Instance.PurchaseCreateTournaments(success =>
             {
                 if (success)
                 {
@@ -866,7 +837,38 @@ namespace DigitPark.Managers
                 else
                 {
                     errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
-                    if (premiumFullButton != null) premiumFullButton.interactable = true;
+                    if (createTournamentsButton != null) createTournamentsButton.interactable = true;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Compra: Tournament Bundle ($8.99 USD)
+        /// </summary>
+        private void OnTournamentBundleClicked()
+        {
+            Debug.Log("[Settings] Iniciando compra: Tournament Bundle");
+
+            bool hasBundle = PremiumManager.Instance.CanCreateTournaments && PremiumManager.Instance.CanCreateCashBattle;
+            if (hasBundle)
+            {
+                errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
+                return;
+            }
+
+            // Deshabilitar boton mientras se procesa
+            if (tournamentBundleButton != null) tournamentBundleButton.interactable = false;
+
+            PremiumManager.Instance.PurchaseTournamentBundle(success =>
+            {
+                if (success)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("purchase_success"));
+                }
+                else
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("purchase_failed"));
+                    if (tournamentBundleButton != null) tournamentBundleButton.interactable = true;
                 }
             });
         }
@@ -910,8 +912,8 @@ namespace DigitPark.Managers
             if (premiumBadge == null) return;
 
             bool isPremium = PremiumManager.Instance != null &&
-                            PremiumManager.Instance.HasNoAds &&
-                            PremiumManager.Instance.CanCreateTournaments;
+                            PremiumManager.Instance.CanCreateTournaments &&
+                            PremiumManager.Instance.CanCreateCashBattle;
 
             if (isPremium && !premiumBadge.activeSelf)
             {

@@ -333,27 +333,19 @@ namespace DigitPark.UI.Components
         {
             if (PremiumManager.Instance != null)
             {
-                PremiumManager.Instance.PurchaseStylesPro((success) =>
+                // StylesPro is legacy - unlock directly since there is no IAP purchase flow for it
+                PremiumManager.Instance.UnlockProduct(PremiumProduct.StylesPro);
+                Debug.Log("[ThemeSelector] Styles PRO desbloqueado!");
+                HideLockedPanel();
+
+                // Aplicar el tema ahora que esta desbloqueado
+                if (previewTheme != null)
                 {
-                    if (success)
-                    {
-                        Debug.Log("[ThemeSelector] Styles PRO desbloqueado!");
-                        HideLockedPanel();
+                    ThemeManager.Instance.SetTheme(previewTheme);
+                }
 
-                        // Aplicar el tema ahora que está desbloqueado
-                        if (previewTheme != null)
-                        {
-                            ThemeManager.Instance.SetTheme(previewTheme);
-                        }
-
-                        // Actualizar UI de todos los items
-                        RefreshThemeItems();
-                    }
-                    else
-                    {
-                        Debug.Log("[ThemeSelector] Compra cancelada o fallida");
-                    }
-                });
+                // Actualizar UI de todos los items
+                RefreshThemeItems();
             }
         }
 

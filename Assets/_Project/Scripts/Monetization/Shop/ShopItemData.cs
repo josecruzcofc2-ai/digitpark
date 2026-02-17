@@ -241,8 +241,8 @@ namespace DigitPark.Monetization
                     break;
 
                 case ShopItemType.Theme:
-                    // TODO: Unlock theme
-                    Debug.Log($"[ShopItemData] Tema desbloqueado: {themeId}");
+                    if (!string.IsNullOrEmpty(themeId))
+                        DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
                     break;
 
                 case ShopItemType.Avatar:
@@ -257,8 +257,7 @@ namespace DigitPark.Monetization
                     if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
                     if (!string.IsNullOrEmpty(themeId))
                     {
-                        // TODO: Unlock theme
-                        Debug.Log($"[ShopItemData] Tema desbloqueado: {themeId}");
+                        DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
                     }
                     break;
             }
@@ -302,7 +301,7 @@ namespace DigitPark.Monetization
                 case ShopItemType.SpecialOffer:
                 case ShopItemType.PremiumBundle:
                 case ShopItemType.StarterPack:
-                    shopTab = ShopTab.Offers;
+                    shopTab = ShopTab.Featured;
                     break;
             }
         }

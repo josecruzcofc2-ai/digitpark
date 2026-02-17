@@ -211,7 +211,7 @@ namespace DigitPark.Monetization
         /// <summary>
         /// Navega a la tienda con un tab especifico
         /// </summary>
-        public void NavigateToShop(ShopTab tab = ShopTab.Gems)
+        public void NavigateToShop(ShopTab tab = ShopTab.Featured)
         {
             NavigateTo(Scenes.SHOP, new NavigationParams
             {
@@ -238,7 +238,7 @@ namespace DigitPark.Monetization
         {
             NavigateTo(Scenes.SHOP, new NavigationParams
             {
-                TargetTab = ShopTab.Offers.ToString(),
+                TargetTab = ShopTab.Featured.ToString(),
                 ItemId = offerId
             });
         }
@@ -249,9 +249,10 @@ namespace DigitPark.Monetization
     /// </summary>
     public enum ShopTab
     {
+        Featured,
         Gems,
         Coins,
         Themes,
-        Offers
+        Cosmetics
     }
 }

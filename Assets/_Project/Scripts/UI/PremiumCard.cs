@@ -33,7 +33,7 @@ namespace DigitPark.UI
 
         [Header("Offer Data")]
         [SerializeField] private string _offerId;
-        [SerializeField] private Monetization.ShopTab _targetTab = Monetization.ShopTab.Offers;
+        [SerializeField] private Monetization.ShopTab _targetTab = Monetization.ShopTab.Featured;
 
         [Header("Audio")]
         [SerializeField] private AudioClip _clickSound;
@@ -135,28 +135,28 @@ namespace DigitPark.UI
             {
                 case PremiumCardType.PremiumBundle:
                     SetContent("BUNDLE PREMIUM", "1000 Gemas + Temas Exclusivos", "$14.99", "50%", true);
-                    _targetTab = Monetization.ShopTab.Offers;
+                    _targetTab = Monetization.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.StarterPack:
                     SetContent("STARTER PACK", "500 Gemas + Tema Exclusivo", "$2.99", "70%", true);
-                    _targetTab = Monetization.ShopTab.Offers;
+                    _targetTab = Monetization.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.DailyDeal:
                     SetContent("OFERTA DEL DIA", "1000 Monedas + 50 Gemas", "$1.99", "50%", true);
-                    _targetTab = Monetization.ShopTab.Offers;
+                    _targetTab = Monetization.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.WeeklyBundle:
                     SetContent("BUNDLE SEMANAL", "Todo lo que necesitas", "$4.99", "40%", true);
-                    _targetTab = Monetization.ShopTab.Offers;
+                    _targetTab = Monetization.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.SpecialOffer:
                 default:
                     SetContent("OFERTA ESPECIAL", "Tiempo limitado!", "$4.99", "60%", true);
-                    _targetTab = Monetization.ShopTab.Offers;
+                    _targetTab = Monetization.ShopTab.Featured;
                     break;
             }
         }
@@ -235,7 +235,7 @@ namespace DigitPark.UI
             }
             else if (_cardType == PremiumCardType.PremiumBundle)
             {
-                navigator.NavigateToShop(Monetization.ShopTab.Offers);
+                navigator.NavigateToShop(Monetization.ShopTab.Featured);
             }
             else
             {

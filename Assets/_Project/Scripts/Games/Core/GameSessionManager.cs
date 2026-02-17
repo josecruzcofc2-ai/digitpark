@@ -273,6 +273,23 @@ namespace DigitPark.Games
             }
 
             CurrentContext.AddResult(result);
+
+            // === Post-game coin rewards ===
+            int coinsEarned = CalculatePostGameReward(result, CurrentContext.Mode);
+            if (coinsEarned > 0)
+            {
+                DigitPark.Monetization.CurrencyManager.Instance?.AddCoins(coinsEarned);
+                Debug.Log($"[GameSession] Post-game reward: +{coinsEarned} coins (mode: {CurrentContext.Mode})");
+            }
+
+            // === Settle bet if active ===
+            if (CurrentContext.BetAmount > 0 && CurrentContext.BetCurrencyType != DigitPark.Monetization.BetCurrencyType.None)
+            {
+                bool playerWon = result.Completed;
+                DigitPark.Monetization.CurrencyManager.Instance?.SettleBet(playerWon);
+                Debug.Log($"[GameSession] Bet settled: {(playerWon ? "WON" : "LOST")} {CurrentContext.BetAmount} {CurrentContext.BetCurrencyType}");
+            }
+
             OnGameCompleted?.Invoke(result);
 
             // === Achievement tracking ===
@@ -392,6 +409,43 @@ namespace DigitPark.Games
                 GameType.OddOneOut => "OddOneOut",
                 _ => "MainMenu"
             };
+        }
+
+        /// <summary>
+        /// Calcula la recompensa en monedas post-juego segun modo y resultado
+        /// </summary>
+        private int CalculatePostGameReward(MinigameResult result, GameMode mode)
+        {
+            switch (mode)
+            {
+                case GameMode.Practice:
+                    int reward = 15; // Base: complete practice
+                    // Bonus for beating personal best
+                    if (result.Completed)
+                    {
+                        var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                        if (playerData != null && CurrentContext.CurrentGame.HasValue)
+                        {
+                            var stats = playerData.GetGameStats(CurrentContext.CurrentGame.Value.ToString());
+                            if (stats != null && result.TotalTime < stats.bestTime)
+                                reward += 10; // Beat personal best bonus
+                        }
+                    }
+                    return reward;
+
+                case GameMode.SingleGame:
+                case GameMode.Online:
+                    return result.Completed ? 25 : 10; // Win: +25, Loss: +10
+
+                case GameMode.Tournament:
+                    return result.Completed ? 50 : 15; // Win: +50, Loss: +15
+
+                case GameMode.CognitiveSprint:
+                    return result.Completed ? 30 : 10; // Win: +30, Loss: +10
+
+                default:
+                    return 0;
+            }
         }
 
         /// <summary>

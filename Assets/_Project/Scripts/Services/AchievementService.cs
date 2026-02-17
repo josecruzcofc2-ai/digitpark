@@ -115,6 +115,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 50,
+                rewardGems = 5,
                 points = 10,
                 iconName = "Logro_Primeros_Pasos"
             });
@@ -127,6 +128,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 50,
+                rewardGems = 5,
                 points = 10,
                 iconName = "Logro_Graduado"
             });
@@ -139,6 +141,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 75,
+                rewardGems = 5,
                 points = 15,
                 iconName = "Logro_Primera_Victoria"
             });
@@ -151,6 +154,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 50,
+                rewardGems = 5,
                 points = 10,
                 iconName = "Logro_Perfil_Completo"
             });
@@ -164,6 +168,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 10000,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Maestro_Numeros"
             });
@@ -176,6 +181,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 100,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Reflejos_Rayo"
             });
@@ -188,6 +194,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 1,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Genio"
             });
@@ -200,6 +207,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 50,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Maestro_Matematicas"
             });
@@ -212,6 +220,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 100,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Ojo_Aguila"
             });
@@ -225,6 +234,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 10,
                 rewardCoins = 100,
+                rewardGems = 5,
                 points = 15,
                 iconName = "Logro_10_Partidas"
             });
@@ -237,6 +247,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 50,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 30,
                 iconName = "Logro_50_Partidas"
             });
@@ -249,6 +260,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 100,
                 rewardCoins = 500,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_100_Partidas"
             });
@@ -262,6 +274,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 10,
                 rewardCoins = 100,
+                rewardGems = 5,
                 points = 20,
                 iconName = "Logro_10_Victorias"
             });
@@ -274,6 +287,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 50,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 40,
                 iconName = "Logro_50_Victorias"
             });
@@ -286,6 +300,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 100,
                 rewardCoins = 500,
+                rewardGems = 15,
                 points = 60,
                 iconName = "Logro_Centurion"
             });
@@ -298,6 +313,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 500,
                 rewardCoins = 1000,
+                rewardGems = 50,
                 points = 100,
                 iconName = "Logro_500_Victorias"
             });
@@ -310,6 +326,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 1000,
                 rewardCoins = 2000,
+                rewardGems = 75,
                 points = 200,
                 iconName = "Logro_1000_Victorias"
             });
@@ -323,6 +340,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 3,
                 rewardCoins = 150,
+                rewardGems = 5,
                 points = 25,
                 iconName = "Logro_Racha_Fuego"
             });
@@ -335,6 +353,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 5,
                 rewardCoins = 250,
+                rewardGems = 15,
                 points = 40,
                 iconName = "Logro_Victoria_Racha_7"
             });
@@ -347,6 +366,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 10,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 75,
                 iconName = "Logro_Demoledor"
             });
@@ -359,6 +379,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 20,
                 rewardCoins = 1000,
+                rewardGems = 50,
                 points = 150,
                 iconName = "Logro_Victoria_Racha_30",
                 isHidden = true
@@ -373,6 +394,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 1,
                 rewardCoins = 100,
+                rewardGems = 5,
                 points = 25,
                 iconName = "Logro_Ficha_Cash"
             });
@@ -385,6 +407,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 1,
                 rewardCoins = 150,
+                rewardGems = 15,
                 points = 35,
                 iconName = "Logro_Rey_Monedas"
             });
@@ -397,6 +420,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 10,
                 rewardCoins = 300,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_VIP_1000"
             });
@@ -409,6 +433,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 50,
                 rewardCoins = 750,
+                rewardGems = 50,
                 points = 100,
                 iconName = "Logro_VIP_Dados"
             });
@@ -421,6 +446,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 100,
                 rewardCoins = 1500,
+                rewardGems = 75,
                 points = 200,
                 iconName = "Logro_Tiburon_Cash"
             });
@@ -433,6 +459,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 100,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 75,
                 iconName = "Logro_Bolsa_100"
             });
@@ -445,6 +472,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 1000,
                 rewardCoins = 2000,
+                rewardGems = 75,
                 points = 250,
                 iconName = "Logro_Millonario",
                 isHidden = true
@@ -459,6 +487,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 100,
+                rewardGems = 5,
                 points = 20,
                 iconName = "Logro_Torneo_Bracket"
             });
@@ -471,6 +500,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 300,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Coleccion_Trofeos"
             });
@@ -483,6 +513,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 100,
                 iconName = "Logro_Campeon_1"
             });
@@ -495,6 +526,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 5,
                 rewardCoins = 1000,
+                rewardGems = 75,
                 points = 200,
                 iconName = "Logro_4_Estrellas"
             });
@@ -507,6 +539,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 150,
+                rewardGems = 15,
                 points = 30,
                 iconName = "Logro_Organizador_Torneo"
             });
@@ -520,6 +553,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 1,
                 rewardCoins = 75,
+                rewardGems = 5,
                 points = 15,
                 iconName = "Logro_Primer_Rival"
             });
@@ -532,6 +566,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 10,
                 rewardCoins = 200,
+                rewardGems = 15,
                 points = 30,
                 iconName = "Logro_Social_10_Amigos"
             });
@@ -544,6 +579,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 50,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 75,
                 iconName = "Logro_Influencer"
             });
@@ -556,6 +592,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 1,
                 rewardCoins = 100,
+                rewardGems = 5,
                 points = 20,
                 iconName = "Logro_Versus"
             });
@@ -568,6 +605,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 1,
                 rewardCoins = 125,
+                rewardGems = 5,
                 points = 25,
                 iconName = "Logro_Amigo_Rival"
             });
@@ -581,6 +619,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 10,
                 rewardCoins = 150,
+                rewardGems = 5,
                 points = 25,
                 iconName = "Logro_Nivel_10"
             });
@@ -593,6 +632,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 25,
                 rewardCoins = 300,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Nivel_25"
             });
@@ -605,6 +645,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 50,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 75,
                 iconName = "Logro_Nivel50"
             });
@@ -617,6 +658,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 100,
                 rewardCoins = 1000,
+                rewardGems = 50,
                 points = 150,
                 iconName = "Logro_Avance_Epico"
             });
@@ -630,6 +672,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 7,
                 rewardCoins = 150,
+                rewardGems = 5,
                 points = 25,
                 iconName = "Logro_Racha_7_Dias"
             });
@@ -642,6 +685,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 30,
                 rewardCoins = 300,
+                rewardGems = 15,
                 points = 50,
                 iconName = "Logro_Racha_30_Dias"
             });
@@ -654,6 +698,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 100,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 100,
                 iconName = "Logro_Racha_100_Dias"
             });
@@ -666,6 +711,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 365,
                 rewardCoins = 2000,
+                rewardGems = 75,
                 points = 300,
                 iconName = "Logro_Racha_365_Dias",
                 isHidden = true
@@ -679,6 +725,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 7,
                 rewardCoins = 200,
+                rewardGems = 15,
                 points = 30,
                 iconName = "Logro_Login_Semanal"
             });
@@ -691,6 +738,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 30,
                 rewardCoins = 500,
+                rewardGems = 50,
                 points = 75,
                 iconName = "Logro_Login_Mensual"
             });
@@ -704,6 +752,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 250,
+                rewardGems = 100,
                 points = 50,
                 iconName = "Logro_Buho_Nocturno",
                 isHidden = true
@@ -717,6 +766,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 500,
+                rewardGems = 100,
                 points = 100,
                 iconName = "Logro_Perfeccionista",
                 isHidden = true
@@ -730,6 +780,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 400,
+                rewardGems = 100,
                 points = 75,
                 iconName = "Logro_Ave_Fenix",
                 isHidden = true
@@ -743,6 +794,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 500,
+                rewardGems = 100,
                 points = 100,
                 iconName = "Logro_Demonio_Velocidad",
                 isHidden = true
@@ -1104,10 +1156,20 @@ namespace DigitPark.Services
 
         private void GiveReward(AchievementData achievement)
         {
-            if (achievement.rewardCoins > 0)
+            var currency = DigitPark.Monetization.CurrencyManager.Instance;
+            if (currency != null)
             {
-                Debug.Log($"[Achievements] +{achievement.rewardCoins} monedas por logro");
-                AnalyticsService.Instance?.LogVirtualCurrencyEarned("coins", achievement.rewardCoins, "achievement");
+                if (achievement.rewardCoins > 0)
+                {
+                    currency.AddCoins(achievement.rewardCoins);
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("coins", achievement.rewardCoins, "achievement");
+                }
+                if (achievement.rewardGems > 0)
+                {
+                    currency.AddGems(achievement.rewardGems);
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("gems", achievement.rewardGems, "achievement");
+                }
+                Debug.Log($"[Achievements] Reward: +{achievement.rewardCoins} coins, +{achievement.rewardGems} gems for {achievement.id}");
             }
         }
 
@@ -1403,6 +1465,7 @@ namespace DigitPark.Services
         public AchievementCategory category;
         public int targetValue = 1;
         public int rewardCoins = 0;
+        public int rewardGems = 0;
         public int points = 0;
         public string iconName;
         public Sprite icon;

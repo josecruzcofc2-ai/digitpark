@@ -11,9 +11,9 @@ namespace DigitPark.UI.Panels
 {
     /// <summary>
     /// Panel de Premium reutilizable que muestra las opciones de compra:
-    /// - Sin Anuncios ($10 MXN)
-    /// - Premium Completo ($20 MXN) - Sin anuncios + Crear torneos
-    /// - Estilos PRO ($29 MXN) - 5 temas visuales exclusivos
+    /// - Create Tournaments ($3.99 USD) - Crear torneos personalizados
+    /// - Tournament Bundle ($8.99 USD) - Crear torneos + Cash Battle
+    /// - Estilos PRO - 5 temas visuales exclusivos (legacy)
     ///
     /// Estilo: Neon theme con colores cyan, yellow/gold y purple
     /// </summary>
@@ -26,21 +26,21 @@ namespace DigitPark.UI.Panels
         [Header("Title")]
         [SerializeField] private TextMeshProUGUI titleText;
 
-        [Header("No Ads Option")]
-        [SerializeField] private GameObject noAdsCard;
-        [SerializeField] private TextMeshProUGUI noAdsTitleText;
-        [SerializeField] private TextMeshProUGUI noAdsDescriptionText;
-        [SerializeField] private TextMeshProUGUI noAdsPriceText;
-        [SerializeField] private Button noAdsBuyButton;
-        [SerializeField] private TextMeshProUGUI noAdsBuyButtonText;
+        [Header("Create Tournaments Option")]
+        [SerializeField] private GameObject createTournamentsCard;
+        [SerializeField] private TextMeshProUGUI createTournamentsTitleText;
+        [SerializeField] private TextMeshProUGUI createTournamentsDescriptionText;
+        [SerializeField] private TextMeshProUGUI createTournamentsPriceText;
+        [SerializeField] private Button createTournamentsBuyButton;
+        [SerializeField] private TextMeshProUGUI createTournamentsBuyButtonText;
 
-        [Header("Premium Option")]
-        [SerializeField] private GameObject premiumCard;
-        [SerializeField] private TextMeshProUGUI premiumTitleText;
-        [SerializeField] private TextMeshProUGUI premiumDescriptionText;
-        [SerializeField] private TextMeshProUGUI premiumPriceText;
-        [SerializeField] private Button premiumBuyButton;
-        [SerializeField] private TextMeshProUGUI premiumBuyButtonText;
+        [Header("Tournament Bundle Option")]
+        [SerializeField] private GameObject bundleCard;
+        [SerializeField] private TextMeshProUGUI bundleTitleText;
+        [SerializeField] private TextMeshProUGUI bundleDescriptionText;
+        [SerializeField] private TextMeshProUGUI bundlePriceText;
+        [SerializeField] private Button bundleBuyButton;
+        [SerializeField] private TextMeshProUGUI bundleBuyButtonText;
         [SerializeField] private GameObject recommendedBadge;
         [SerializeField] private TextMeshProUGUI recommendedText;
 
@@ -65,8 +65,8 @@ namespace DigitPark.UI.Panels
         [SerializeField] private Button closeButton;
 
         [Header("Acquired Overlays")]
-        [SerializeField] private GameObject noAdsAcquiredOverlay;
-        [SerializeField] private GameObject premiumAcquiredOverlay;
+        [SerializeField] private GameObject createTournamentsAcquiredOverlay;
+        [SerializeField] private GameObject bundleAcquiredOverlay;
         [SerializeField] private GameObject stylesProAcquiredOverlay;
 
         [Header("Neon Colors")]
@@ -77,8 +77,8 @@ namespace DigitPark.UI.Panels
         [SerializeField] private Color cardBg = new Color(0.05f, 0.1f, 0.18f, 0.95f);
 
         // Callbacks
-        private Action onNoAdsPurchase;
-        private Action onPremiumPurchase;
+        private Action onCreateTournamentsPurchase;
+        private Action onBundlePurchase;
         private Action onStylesProPurchase;
         private Action onRestorePurchases;
         private Action onClose;
@@ -102,11 +102,11 @@ namespace DigitPark.UI.Panels
         {
             if (listenersConfigured) return;
 
-            if (noAdsBuyButton != null)
-                noAdsBuyButton.onClick.AddListener(OnNoAdsBuyClicked);
+            if (createTournamentsBuyButton != null)
+                createTournamentsBuyButton.onClick.AddListener(OnCreateTournamentsBuyClicked);
 
-            if (premiumBuyButton != null)
-                premiumBuyButton.onClick.AddListener(OnPremiumBuyClicked);
+            if (bundleBuyButton != null)
+                bundleBuyButton.onClick.AddListener(OnBundleBuyClicked);
 
             if (stylesProBuyButton != null)
                 stylesProBuyButton.onClick.AddListener(OnStylesProBuyClicked);
@@ -131,11 +131,11 @@ namespace DigitPark.UI.Panels
 
         private void OnDestroy()
         {
-            if (noAdsBuyButton != null)
-                noAdsBuyButton.onClick.RemoveListener(OnNoAdsBuyClicked);
+            if (createTournamentsBuyButton != null)
+                createTournamentsBuyButton.onClick.RemoveListener(OnCreateTournamentsBuyClicked);
 
-            if (premiumBuyButton != null)
-                premiumBuyButton.onClick.RemoveListener(OnPremiumBuyClicked);
+            if (bundleBuyButton != null)
+                bundleBuyButton.onClick.RemoveListener(OnBundleBuyClicked);
 
             if (stylesProBuyButton != null)
                 stylesProBuyButton.onClick.RemoveListener(OnStylesProBuyClicked);
@@ -150,14 +150,14 @@ namespace DigitPark.UI.Panels
         /// <summary>
         /// Muestra el panel de premium con callbacks personalizados
         /// </summary>
-        public void Show(Action onNoAdsCallback = null, Action onPremiumCallback = null,
+        public void Show(Action onCreateTournamentsCallback = null, Action onBundleCallback = null,
                         Action onStylesProCallback = null, Action onRestoreCallback = null,
                         Action onCloseCallback = null)
         {
             ConfigureListeners();
 
-            onNoAdsPurchase = onNoAdsCallback;
-            onPremiumPurchase = onPremiumCallback;
+            onCreateTournamentsPurchase = onCreateTournamentsCallback;
+            onBundlePurchase = onBundleCallback;
             onStylesProPurchase = onStylesProCallback;
             onRestorePurchases = onRestoreCallback;
             onClose = onCloseCallback;
@@ -195,9 +195,9 @@ namespace DigitPark.UI.Panels
         public void ShowWithDefaultHandlers()
         {
             Show(
-                onNoAdsCallback: () => PremiumManager.Instance?.PurchaseRemoveAds(),
-                onPremiumCallback: () => PremiumManager.Instance?.PurchasePremiumFull(),
-                onStylesProCallback: () => PremiumManager.Instance?.PurchaseStylesPro(),
+                onCreateTournamentsCallback: () => PremiumManager.Instance?.PurchaseCreateTournaments(),
+                onBundleCallback: () => PremiumManager.Instance?.PurchaseTournamentBundle(),
+                onStylesProCallback: () => { /* StylesPro is legacy, no purchase method */ },
                 onRestoreCallback: () => PremiumManager.Instance?.RestorePurchases(),
                 onCloseCallback: Hide
             );
@@ -212,25 +212,25 @@ namespace DigitPark.UI.Panels
             if (titleText != null)
                 titleText.text = AutoLocalizer.Get("premium_title");
 
-            // Sin Anuncios
-            if (noAdsTitleText != null)
-                noAdsTitleText.text = AutoLocalizer.Get("no_ads_title");
-            if (noAdsDescriptionText != null)
-                noAdsDescriptionText.text = AutoLocalizer.Get("no_ads_description");
-            if (noAdsPriceText != null)
-                noAdsPriceText.text = AutoLocalizer.Get("no_ads_price");
-            if (noAdsBuyButtonText != null)
-                noAdsBuyButtonText.text = AutoLocalizer.Get("buy_button");
+            // Create Tournaments
+            if (createTournamentsTitleText != null)
+                createTournamentsTitleText.text = AutoLocalizer.Get("create_tournaments_title");
+            if (createTournamentsDescriptionText != null)
+                createTournamentsDescriptionText.text = AutoLocalizer.Get("create_tournaments_description");
+            if (createTournamentsPriceText != null)
+                createTournamentsPriceText.text = PremiumManager.PRICE_CREATE_TOURNAMENTS;
+            if (createTournamentsBuyButtonText != null)
+                createTournamentsBuyButtonText.text = AutoLocalizer.Get("buy_button");
 
-            // Premium
-            if (premiumTitleText != null)
-                premiumTitleText.text = AutoLocalizer.Get("premium_full_title");
-            if (premiumDescriptionText != null)
-                premiumDescriptionText.text = AutoLocalizer.Get("premium_full_description");
-            if (premiumPriceText != null)
-                premiumPriceText.text = AutoLocalizer.Get("premium_full_price");
-            if (premiumBuyButtonText != null)
-                premiumBuyButtonText.text = AutoLocalizer.Get("buy_button");
+            // Tournament Bundle
+            if (bundleTitleText != null)
+                bundleTitleText.text = AutoLocalizer.Get("tournament_bundle_title");
+            if (bundleDescriptionText != null)
+                bundleDescriptionText.text = AutoLocalizer.Get("tournament_bundle_description");
+            if (bundlePriceText != null)
+                bundlePriceText.text = PremiumManager.PRICE_TOURNAMENT_BUNDLE;
+            if (bundleBuyButtonText != null)
+                bundleBuyButtonText.text = AutoLocalizer.Get("buy_button");
             if (recommendedText != null)
                 recommendedText.text = AutoLocalizer.Get("premium_recommended");
 
@@ -268,27 +268,28 @@ namespace DigitPark.UI.Panels
         {
             if (PremiumManager.Instance == null) return;
 
-            bool hasNoAds = PremiumManager.Instance.HasNoAds;
-            bool hasPremium = PremiumManager.Instance.CanCreateTournaments;
+            bool canCreateTournaments = PremiumManager.Instance.CanCreateTournaments;
+            bool canCreateCashBattle = PremiumManager.Instance.CanCreateCashBattle;
+            bool hasBundle = canCreateTournaments && canCreateCashBattle;
             bool hasStylesPro = PremiumManager.Instance.HasStylesPro;
 
-            // Si ya tiene Premium, deshabilitar ambos botones
-            if (hasPremium)
+            // Si ya tiene Tournament Bundle, deshabilitar ambos botones
+            if (hasBundle)
             {
-                SetNoAdsCardState(false, AutoLocalizer.Get("premium_active"));
-                SetPremiumCardState(false, AutoLocalizer.Get("you_are_premium"));
+                SetCreateTournamentsCardState(false, AutoLocalizer.Get("premium_active"));
+                SetBundleCardState(false, AutoLocalizer.Get("premium_active"));
             }
-            // Si solo tiene No Ads
-            else if (hasNoAds)
+            // Si solo tiene Create Tournaments
+            else if (canCreateTournaments)
             {
-                SetNoAdsCardState(false, AutoLocalizer.Get("no_ads_active"));
-                SetPremiumCardState(true, null);
+                SetCreateTournamentsCardState(false, AutoLocalizer.Get("already_purchased"));
+                SetBundleCardState(true, null);
             }
             // No tiene ninguno
             else
             {
-                SetNoAdsCardState(true, null);
-                SetPremiumCardState(true, null);
+                SetCreateTournamentsCardState(true, null);
+                SetBundleCardState(true, null);
             }
 
             // Estilos PRO es independiente de los otros productos
@@ -301,38 +302,38 @@ namespace DigitPark.UI.Panels
                 SetStylesProCardState(true, null);
             }
 
-            // Ocultar botón de Restore Purchases si tiene TODOS los productos
-            bool hasAllProducts = (hasPremium || hasNoAds) && hasStylesPro;
+            // Ocultar boton de Restore Purchases si tiene TODOS los productos
+            bool hasAllProducts = hasBundle && hasStylesPro;
             if (restoreButton != null)
             {
                 restoreButton.gameObject.SetActive(!hasAllProducts);
             }
         }
 
-        private void SetNoAdsCardState(bool canBuy, string statusText)
+        private void SetCreateTournamentsCardState(bool canBuy, string statusText)
         {
-            if (noAdsBuyButton != null)
-                noAdsBuyButton.interactable = canBuy;
+            if (createTournamentsBuyButton != null)
+                createTournamentsBuyButton.interactable = canBuy;
 
-            if (!canBuy && noAdsBuyButtonText != null && !string.IsNullOrEmpty(statusText))
-                noAdsBuyButtonText.text = statusText;
+            if (!canBuy && createTournamentsBuyButtonText != null && !string.IsNullOrEmpty(statusText))
+                createTournamentsBuyButtonText.text = statusText;
 
             // Mostrar/ocultar overlay de "Adquirido"
-            if (noAdsAcquiredOverlay != null)
-                noAdsAcquiredOverlay.SetActive(!canBuy);
+            if (createTournamentsAcquiredOverlay != null)
+                createTournamentsAcquiredOverlay.SetActive(!canBuy);
         }
 
-        private void SetPremiumCardState(bool canBuy, string statusText)
+        private void SetBundleCardState(bool canBuy, string statusText)
         {
-            if (premiumBuyButton != null)
-                premiumBuyButton.interactable = canBuy;
+            if (bundleBuyButton != null)
+                bundleBuyButton.interactable = canBuy;
 
-            if (!canBuy && premiumBuyButtonText != null && !string.IsNullOrEmpty(statusText))
-                premiumBuyButtonText.text = statusText;
+            if (!canBuy && bundleBuyButtonText != null && !string.IsNullOrEmpty(statusText))
+                bundleBuyButtonText.text = statusText;
 
             // Mostrar/ocultar overlay de "Adquirido"
-            if (premiumAcquiredOverlay != null)
-                premiumAcquiredOverlay.SetActive(!canBuy);
+            if (bundleAcquiredOverlay != null)
+                bundleAcquiredOverlay.SetActive(!canBuy);
         }
 
         private void SetStylesProCardState(bool canBuy, string statusText)
@@ -371,8 +372,8 @@ namespace DigitPark.UI.Panels
                     blockerPanel.SetActive(false);
             }
 
-            onNoAdsPurchase = null;
-            onPremiumPurchase = null;
+            onCreateTournamentsPurchase = null;
+            onBundlePurchase = null;
             onStylesProPurchase = null;
             onRestorePurchases = null;
             onClose = null;
@@ -419,16 +420,16 @@ namespace DigitPark.UI.Panels
 
         #region Button Handlers
 
-        private void OnNoAdsBuyClicked()
+        private void OnCreateTournamentsBuyClicked()
         {
-            Debug.Log("[PremiumPanelUI] Comprar Sin Anuncios clickeado");
-            onNoAdsPurchase?.Invoke();
+            Debug.Log("[PremiumPanelUI] Comprar Create Tournaments clickeado");
+            onCreateTournamentsPurchase?.Invoke();
         }
 
-        private void OnPremiumBuyClicked()
+        private void OnBundleBuyClicked()
         {
-            Debug.Log("[PremiumPanelUI] Comprar Premium clickeado");
-            onPremiumPurchase?.Invoke();
+            Debug.Log("[PremiumPanelUI] Comprar Tournament Bundle clickeado");
+            onBundlePurchase?.Invoke();
         }
 
         private void OnStylesProBuyClicked()
@@ -497,11 +498,11 @@ namespace DigitPark.UI.Panels
             // === TITULO ===
             titleText = CreateTitle(panel.transform);
 
-            // === CARD SIN ANUNCIOS ===
-            CreateNoAdsCard(panel.transform);
+            // === CARD CREATE TOURNAMENTS ===
+            CreateCreateTournamentsCard(panel.transform);
 
-            // === CARD PREMIUM ===
-            CreatePremiumCard(panel.transform);
+            // === CARD TOURNAMENT BUNDLE ===
+            CreateBundleCard(panel.transform);
 
             // === CARD ESTILOS PRO ===
             CreateStylesProCard(panel.transform);
@@ -588,33 +589,33 @@ namespace DigitPark.UI.Panels
             return tmp;
         }
 
-        private void CreateNoAdsCard(Transform parent)
+        private void CreateCreateTournamentsCard(Transform parent)
         {
-            noAdsCard = CreateCard(parent, "NoAdsCard", neonCyan);
+            createTournamentsCard = CreateCard(parent, "CreateTournamentsCard", neonCyan);
 
             // Titulo
-            noAdsTitleText = CreateCardTitle(noAdsCard.transform, AutoLocalizer.Get("no_ads_title"), neonCyan);
+            createTournamentsTitleText = CreateCardTitle(createTournamentsCard.transform, AutoLocalizer.Get("create_tournaments_title"), neonCyan);
 
             // Descripcion
-            noAdsDescriptionText = CreateCardDescription(noAdsCard.transform, AutoLocalizer.Get("no_ads_description"));
+            createTournamentsDescriptionText = CreateCardDescription(createTournamentsCard.transform, AutoLocalizer.Get("create_tournaments_description"));
 
             // Precio
-            noAdsPriceText = CreateCardPrice(noAdsCard.transform, AutoLocalizer.Get("no_ads_price"), neonCyan);
+            createTournamentsPriceText = CreateCardPrice(createTournamentsCard.transform, PremiumManager.PRICE_CREATE_TOURNAMENTS, neonCyan);
 
             // Boton comprar
-            (noAdsBuyButton, noAdsBuyButtonText) = CreateBuyButton(noAdsCard.transform, neonCyan);
+            (createTournamentsBuyButton, createTournamentsBuyButtonText) = CreateBuyButton(createTournamentsCard.transform, neonCyan);
 
             // Overlay de "Adquirido"
-            noAdsAcquiredOverlay = CreateAcquiredOverlay(noAdsCard.transform, neonCyan);
+            createTournamentsAcquiredOverlay = CreateAcquiredOverlay(createTournamentsCard.transform, neonCyan);
         }
 
-        private void CreatePremiumCard(Transform parent)
+        private void CreateBundleCard(Transform parent)
         {
-            premiumCard = CreateCard(parent, "PremiumCard", neonGold, true);
+            bundleCard = CreateCard(parent, "BundleCard", neonGold, true);
 
             // Titulo con estrellas a los lados
-            GameObject titleRow = new GameObject("PremiumTitleRow");
-            titleRow.transform.SetParent(premiumCard.transform, false);
+            GameObject titleRow = new GameObject("BundleTitleRow");
+            titleRow.transform.SetParent(bundleCard.transform, false);
             LayoutElement titleRowLe = titleRow.AddComponent<LayoutElement>();
             titleRowLe.preferredHeight = 60;
             HorizontalLayoutGroup titleHlg = titleRow.AddComponent<HorizontalLayoutGroup>();
@@ -642,12 +643,12 @@ namespace DigitPark.UI.Panels
             titleObj.transform.SetParent(titleRow.transform, false);
             RectTransform titleRt = titleObj.AddComponent<RectTransform>();
             titleRt.sizeDelta = new Vector2(400, 60);
-            premiumTitleText = titleObj.AddComponent<TextMeshProUGUI>();
-            premiumTitleText.text = AutoLocalizer.Get("premium_full_title");
-            premiumTitleText.fontSize = 56;
-            premiumTitleText.fontStyle = FontStyles.Bold;
-            premiumTitleText.color = neonGold;
-            premiumTitleText.alignment = TextAlignmentOptions.Center;
+            bundleTitleText = titleObj.AddComponent<TextMeshProUGUI>();
+            bundleTitleText.text = AutoLocalizer.Get("tournament_bundle_title");
+            bundleTitleText.fontSize = 56;
+            bundleTitleText.fontStyle = FontStyles.Bold;
+            bundleTitleText.color = neonGold;
+            bundleTitleText.alignment = TextAlignmentOptions.Center;
 
             // Estrella derecha
             GameObject starR = new GameObject("StarRight");
@@ -659,17 +660,17 @@ namespace DigitPark.UI.Panels
             starRimg.preserveAspect = true;
             starRimg.raycastTarget = false;
 
-            // Descripcion (incluye los beneficios en una línea)
-            premiumDescriptionText = CreateCardDescription(premiumCard.transform, AutoLocalizer.Get("premium_full_description"));
+            // Descripcion (incluye los beneficios en una linea)
+            bundleDescriptionText = CreateCardDescription(bundleCard.transform, AutoLocalizer.Get("tournament_bundle_description"));
 
             // Precio
-            premiumPriceText = CreateCardPrice(premiumCard.transform, AutoLocalizer.Get("premium_full_price"), neonGold);
+            bundlePriceText = CreateCardPrice(bundleCard.transform, PremiumManager.PRICE_TOURNAMENT_BUNDLE, neonGold);
 
             // Boton comprar
-            (premiumBuyButton, premiumBuyButtonText) = CreateBuyButton(premiumCard.transform, neonGold);
+            (bundleBuyButton, bundleBuyButtonText) = CreateBuyButton(bundleCard.transform, neonGold);
 
             // Overlay de "Adquirido"
-            premiumAcquiredOverlay = CreateAcquiredOverlay(premiumCard.transform, neonGold);
+            bundleAcquiredOverlay = CreateAcquiredOverlay(bundleCard.transform, neonGold);
         }
 
         private void CreateStylesProCard(Transform parent)

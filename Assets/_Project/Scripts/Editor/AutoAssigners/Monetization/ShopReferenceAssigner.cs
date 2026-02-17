@@ -25,10 +25,10 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
-            // Tabs
-            "_gemsTabButton", "_coinsTabButton", "_themesTabButton", "_offersTabButton",
-            // Content panels (Note: _themesContent excluded - V2 feature)
-            "_gemsContent", "_coinsContent", "_offersContent",
+            // Tabs (5 tabs V2)
+            "_featuredTabButton", "_gemsTabButton", "_coinsTabButton", "_themesTabButton", "_cosmeticsTabButton",
+            // Content panels (5 content areas V2)
+            "_featuredContent", "_gemsContent", "_coinsContent", "_themesContent", "_cosmeticsContent",
             // Popups
             "_purchasePopup", "_notEnoughGemsPopup",
             // Popup UI
@@ -78,7 +78,7 @@ namespace DigitPark.Editor.AutoAssigners
 
             EditorGUILayout.HelpBox(
                 "Assigns UI references to ShopManager:\n" +
-                "• Tabs (gems, coins, themes, offers)\n" +
+                "• Tabs (featured, gems, coins, themes, cosmetics)\n" +
                 "• Content panels for each tab\n" +
                 "• Purchase and Not Enough Gems popups\n" +
                 "• Currency display texts",
@@ -168,17 +168,19 @@ namespace DigitPark.Editor.AutoAssigners
             Canvas canvas = FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : manager.transform.root;
 
-            // Tab Buttons (UIBuilder creates: GemsTab, CoinsTab, CosmeticsTab, OffersTab)
+            // Tab Buttons (V2 UIBuilder creates: FeaturedTab, GemsTab, CoinsTab, ThemesTab, CosmeticsTab)
+            AssignReference(so, "_featuredTabButton", FindButtonByName("featuredtab", "featured", "destacado"));
             AssignReference(so, "_gemsTabButton", FindButtonByName("gemstab", "gems", "gemas"));
             AssignReference(so, "_coinsTabButton", FindButtonByName("coinstab", "coins", "monedas"));
-            AssignReference(so, "_themesTabButton", FindButtonByName("cosmeticstab", "themestab", "themes", "temas", "cosmetics"));
-            AssignReference(so, "_offersTabButton", FindButtonByName("offerstab", "offers", "ofertas"));
+            AssignReference(so, "_themesTabButton", FindButtonByName("themestab", "themes", "temas"));
+            AssignReference(so, "_cosmeticsTabButton", FindButtonByName("cosmeticstab", "cosmetics", "cosmeticos"));
 
-            // Content Panels - fields are GameObject, use FindGameObjectByName
-            // UIBuilder creates: GemsSection, CoinsSection, SpecialOfferBanner as content areas
-            AssignReference(so, "_gemsContent", FindGameObjectByName("gemscontent", "gemssection", "gemscontainer", "gemspanel"));
-            AssignReference(so, "_coinsContent", FindGameObjectByName("coinscontent", "coinssection", "coinscontainer", "coinspanel"));
-            AssignReference(so, "_offersContent", FindGameObjectByName("offerscontent", "specialofferbanner", "offerscontainer", "offerspanel"));
+            // Content Panels - V2: each tab has its own ScrollView
+            AssignReference(so, "_featuredContent", FindGameObjectByName("featuredscrollview", "featuredcontent", "featuredpanel"));
+            AssignReference(so, "_gemsContent", FindGameObjectByName("gemsscrollview", "gemscontent", "gemssection", "gemspanel"));
+            AssignReference(so, "_coinsContent", FindGameObjectByName("coinsscrollview", "coinscontent", "coinssection", "coinspanel"));
+            AssignReference(so, "_themesContent", FindGameObjectByName("themesscrollview", "themescontent", "themespanel"));
+            AssignReference(so, "_cosmeticsContent", FindGameObjectByName("cosmeticsscrollview", "cosmeticscontent", "cosmeticspanel"));
 
             // Popups - fields are GameObject, use FindGameObjectByName
             // UIBuilder creates: PurchasePopup (inside PurchaseBlocker), NotEnoughPopup (inside NotEnoughBlocker)

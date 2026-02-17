@@ -251,11 +251,13 @@ namespace DigitPark.Themes
             if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
                 return true;
 
-            // Verificar si el usuario tiene Styles PRO comprado
-            if (PremiumManager.Instance != null)
-            {
-                return PremiumManager.Instance.HasStylesPro;
-            }
+            // Check individual theme ownership
+            if (IsThemeOwned(theme.themeId))
+                return true;
+
+            // Legacy: Check if user has StylesPro (backwards compatibility)
+            if (PremiumManager.Instance != null && PremiumManager.Instance.HasStylesPro)
+                return true;
 
             return false;
         }
@@ -290,6 +292,52 @@ namespace DigitPark.Themes
         public List<ThemeData> GetLockedThemes()
         {
             return availableThemes.FindAll(t => !IsThemeAvailable(t));
+        }
+
+        /// <summary>
+        /// Verifica si un tema individual esta desbloqueado
+        /// </summary>
+        public bool IsThemeOwned(string themeId)
+        {
+            if (string.IsNullOrEmpty(themeId)) return false;
+            return PlayerPrefs.GetInt($"OwnedTheme_{themeId}", 0) == 1;
+        }
+
+        /// <summary>
+        /// Desbloquea un tema individual
+        /// </summary>
+        public void UnlockTheme(string themeId)
+        {
+            if (string.IsNullOrEmpty(themeId)) return;
+            PlayerPrefs.SetInt($"OwnedTheme_{themeId}", 1);
+            PlayerPrefs.Save();
+            Debug.Log($"[ThemeManager] Tema desbloqueado: {themeId}");
+            OnThemeChanged?.Invoke(_currentTheme);
+        }
+
+        /// <summary>
+        /// Obtiene los IDs de todos los temas desbloqueados
+        /// </summary>
+        public List<string> GetOwnedThemeIds()
+        {
+            var owned = new List<string>();
+            foreach (var theme in availableThemes)
+            {
+                if (!theme.isPremium || IsThemeOwned(theme.themeId))
+                {
+                    owned.Add(theme.themeId);
+                }
+            }
+            // Include all if user has StylesPro
+            if (PremiumManager.Instance != null && PremiumManager.Instance.HasStylesPro)
+            {
+                foreach (var theme in availableThemes)
+                {
+                    if (!owned.Contains(theme.themeId))
+                        owned.Add(theme.themeId);
+                }
+            }
+            return owned;
         }
 
         /// <summary>

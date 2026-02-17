@@ -40,19 +40,20 @@ namespace DigitPark.Editor
             new[] { "Core/Settings" },
             new[] { "Social/Profile" },
 
-            // === 8-10: GAME FLOW ===
+            // === 8-11: GAME FLOW ===
             new[] { "Games/PlayModeSelection" },
             new[] { "Games/GameSelector" },
+            new[] { "Games/BetSelection" },
             new[] { "Games/Matchmaking" },
 
-            // === 11-15: GAMES ===
+            // === 12-16: GAMES ===
             new[] { "Games/DigitRush" },
             new[] { "Games/FlashTap" },
             new[] { "Games/MemoryPairs" },
             new[] { "Games/OddOneOut" },
             new[] { "Games/QuickMath" },
 
-            // === 16-21: SOCIAL ===
+            // === 17-22: SOCIAL ===
             new[] { "Social/Scores" },
             new[] { "Social/SearchPlayers" },
             new[] { "Social/Friends" },
@@ -60,18 +61,18 @@ namespace DigitPark.Editor
             new[] { "Social/MatchHistory" },
             new[] { "Social/Notifications" },
 
-            // === 22-25: MONETIZATION ===
+            // === 23-26: MONETIZATION ===
             new[] { "Monetization/Shop" },
             new[] { "Monetization/DailyMissions" },
             new[] { "Monetization/DailyRewards" },
             new[] { "Monetization/Achievements" },
 
-            // === 26-28: TOURNAMENTS ===
+            // === 27-29: TOURNAMENTS ===
             new[] { "Tournaments/TournamentsBrowser" },
             new[] { "Tournaments/TournamentCreate" },
             new[] { "Tournaments/TournamentLobby" },
 
-            // === 29-34: CASH BATTLE ===
+            // === 30-35: CASH BATTLE ===
             new[] { "CashBattle/CashBattleHub" },
             new[] { "CashBattle/CashBattle1v1" },
             new[] { "CashBattle/CashTournaments" },
@@ -119,7 +120,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Configura el orden de escenas en Build Settings.\n" +
                 "Indice 0 = Boot (entry point). Orden por flujo de navegacion.\n" +
-                "35 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
+                "36 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -278,11 +279,11 @@ namespace DigitPark.Editor
                 "[1-3] Auth (Login, Register, AgeVerification)\n" +
                 "[4] Onboarding\n" +
                 "[5-7] Core (MainMenu, Settings, Profile)\n" +
-                "[8-15] Games\n" +
-                "[16-21] Social\n" +
-                "[22-25] Monetization\n" +
-                "[26-28] Tournaments\n" +
-                "[29-34] Cash Battle",
+                "[8-16] Games\n" +
+                "[17-22] Social\n" +
+                "[23-26] Monetization\n" +
+                "[27-29] Tournaments\n" +
+                "[30-35] Cash Battle",
                 "OK");
         }
     }

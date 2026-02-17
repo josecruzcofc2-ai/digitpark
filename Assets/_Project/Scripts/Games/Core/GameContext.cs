@@ -51,6 +51,16 @@ namespace DigitPark.Games
         public string MatchId { get; set; }
 
         /// <summary>
+        /// Monto de la apuesta (0 = gratis)
+        /// </summary>
+        public int BetAmount { get; set; }
+
+        /// <summary>
+        /// Tipo de moneda de la apuesta
+        /// </summary>
+        public DigitPark.Monetization.BetCurrencyType BetCurrencyType { get; set; }
+
+        /// <summary>
         /// Resultados de cada juego jugado en esta sesion
         /// </summary>
         public List<MinigameResult> Results { get; set; }

@@ -265,10 +265,10 @@ namespace DigitPark.Games
             }
             else if (isOnlineMatchMode)
             {
-                // Modo 1v1 online - navegar a matchmaking
-                Debug.Log($"[GameSelector] Iniciando matchmaking para {gameType}");
+                // Modo 1v1 online - navegar a seleccion de apuesta
+                Debug.Log($"[GameSelector] Iniciando seleccion de apuesta para {gameType}");
                 MatchmakingManager.SetMatchGameType(gameType, false);
-                SceneManager.LoadScene("Matchmaking");
+                SceneManager.LoadScene("BetSelection");
             }
             else
             {
@@ -380,10 +380,10 @@ namespace DigitPark.Games
             }
             else if (isOnlineMatchMode)
             {
-                // Modo 1v1 online con Cognitive Sprint
-                Debug.Log("[GameSelector] Iniciando matchmaking para Cognitive Sprint");
+                // Modo 1v1 online con Cognitive Sprint - seleccion de apuesta primero
+                Debug.Log("[GameSelector] Iniciando seleccion de apuesta para Cognitive Sprint");
                 MatchmakingManager.SetMatchGameType(GameType.DigitRush, true); // true = isCognitiveSprint
-                SceneManager.LoadScene("Matchmaking");
+                SceneManager.LoadScene("BetSelection");
             }
             else
             {

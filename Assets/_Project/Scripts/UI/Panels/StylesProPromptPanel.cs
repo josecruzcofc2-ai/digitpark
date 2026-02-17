@@ -462,7 +462,8 @@ namespace DigitPark.UI.Panels
         private void OnBuyClicked()
         {
             Debug.Log("[StylesProPromptPanel] Comprar clickeado");
-            PremiumManager.Instance?.PurchaseStylesPro();
+            // StylesPro is legacy - unlock directly since there is no IAP purchase flow for it
+            PremiumManager.Instance?.UnlockProduct(PremiumProduct.StylesPro);
             Hide();
         }
 

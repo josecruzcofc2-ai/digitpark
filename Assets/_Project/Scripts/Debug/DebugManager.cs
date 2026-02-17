@@ -207,22 +207,27 @@ namespace DigitPark.DevTools
 
             if (PremiumManager.Instance != null)
             {
-                GUILayout.Label($"No Ads: {PremiumManager.Instance.HasNoAds}");
                 GUILayout.Label($"Create Tournaments: {PremiumManager.Instance.CanCreateTournaments}");
+                GUILayout.Label($"Cash Battle Create: {PremiumManager.Instance.CanCreateCashBattle}");
                 GUILayout.Label($"Styles PRO: {PremiumManager.Instance.HasStylesPro}");
                 GUILayout.Label($"Is Premium: {PremiumManager.Instance.IsPremium}");
 
                 GUILayout.Space(10);
                 GUILayout.Label("=== Desbloquear (Test) ===", GUI.skin.box);
 
-                if (GUILayout.Button("Desbloquear: No Ads"))
+                if (GUILayout.Button("Desbloquear: Create Tournaments"))
                 {
-                    PremiumManager.Instance.UnlockProduct(PremiumProduct.RemoveAds);
+                    PremiumManager.Instance.UnlockProduct(PremiumProduct.CreateTournaments);
                 }
 
-                if (GUILayout.Button("Desbloquear: Premium Full"))
+                if (GUILayout.Button("Desbloquear: Tournament Bundle"))
                 {
-                    PremiumManager.Instance.UnlockProduct(PremiumProduct.PremiumFull);
+                    PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
+                }
+
+                if (GUILayout.Button("Desbloquear: Cash Battle Create"))
+                {
+                    PremiumManager.Instance.UnlockProduct(PremiumProduct.CashBattleCreate);
                 }
 
                 if (GUILayout.Button("Desbloquear: Styles PRO"))
@@ -234,8 +239,8 @@ namespace DigitPark.DevTools
 
                 if (GUILayout.Button("Resetear Todo Premium"))
                 {
-                    PlayerPrefs.DeleteKey("Premium_NoAds");
                     PlayerPrefs.DeleteKey("Premium_CreateTournaments");
+                    PlayerPrefs.DeleteKey("Premium_CashBattleCreate");
                     PlayerPrefs.DeleteKey("Premium_StylesPro");
                     PlayerPrefs.Save();
                     UnityEngine.Debug.Log("[Debug] Estado premium reseteado - reinicia la app");
@@ -515,7 +520,7 @@ namespace DigitPark.DevTools
         {
             if (PremiumManager.Instance != null)
             {
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.PremiumFull);
+                PremiumManager.Instance.UnlockProduct(PremiumProduct.TournamentBundle);
                 PremiumManager.Instance.UnlockProduct(PremiumProduct.StylesPro);
                 UnityEngine.Debug.Log("[Debug] Todos los productos premium desbloqueados");
             }
