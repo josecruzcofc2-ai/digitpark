@@ -235,7 +235,7 @@ namespace DigitPark.Editor
             scroll.elasticity = 0.1f;
             scroll.inertia = true;
             scroll.decelerationRate = 0.135f;
-            scroll.scrollSensitivity = 10f;
+            scroll.scrollSensitivity = 50f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");

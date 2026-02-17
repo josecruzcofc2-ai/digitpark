@@ -427,7 +427,7 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
-            scrollRect.scrollSensitivity = 30f;
+            scrollRect.scrollSensitivity = 50f;
 
             Image scrollBg = GetOrAddComponent<Image>(scrollView);
             scrollBg.color = Color.clear;

@@ -448,7 +448,7 @@ namespace DigitPark.Editor
             ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
-            scrollRect.scrollSensitivity = 10f;
+            scrollRect.scrollSensitivity = 50f;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
             scrollRect.elasticity = 0.1f;
 

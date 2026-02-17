@@ -10,8 +10,9 @@ using DigitPark.Editor;
 namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
-    /// Reference Assigner for Shop scene.
+    /// Reference Assigner for Shop scene V3.
     /// Automatically finds and assigns UI references to ShopManager.
+    /// Scroll continuo sin tabs.
     ///
     /// Menu: DigitPark/Auto Assigners/References/Monetization/Shop References
     /// </summary>
@@ -25,10 +26,8 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
-            // Tabs (5 tabs V2)
-            "_featuredTabButton", "_gemsTabButton", "_coinsTabButton", "_themesTabButton", "_cosmeticsTabButton",
-            // Content panels (5 content areas V2)
-            "_featuredContent", "_gemsContent", "_coinsContent", "_themesContent", "_cosmeticsContent",
+            // Scroll View (V3 single scroll)
+            "_shopScrollView",
             // Popups
             "_purchasePopup", "_notEnoughGemsPopup",
             // Popup UI
@@ -64,7 +63,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private void OnGUI()
         {
-            GUILayout.Label("Shop Scene Reference Assigner", EditorStyles.boldLabel);
+            GUILayout.Label("Shop Scene Reference Assigner V3", EditorStyles.boldLabel);
             GUILayout.Space(10);
 
             string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
@@ -77,11 +76,11 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to ShopManager:\n" +
-                "• Tabs (featured, gems, coins, themes, cosmetics)\n" +
-                "• Content panels for each tab\n" +
+                "Assigns UI references to ShopManager V3:\n" +
+                "• ShopScrollView (scroll continuo)\n" +
                 "• Purchase and Not Enough Gems popups\n" +
-                "• Currency display texts",
+                "• Currency display texts\n" +
+                "• Back button",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -134,7 +133,7 @@ namespace DigitPark.Editor.AutoAssigners
                 GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
                 GUILayout.Label(result.success ? (result.status == "Already Set" ? "●" : "✓") : "✗", GUILayout.Width(20));
                 GUI.color = Color.white;
-                GUILayout.Label(result.fieldName, GUILayout.Width(180));
+                GUILayout.Label(result.fieldName, GUILayout.Width(200));
                 GUILayout.Label(result.status, GUILayout.Width(120));
                 if (result.assignedObject != null)
                     EditorGUILayout.ObjectField(result.assignedObject, typeof(Object), true, GUILayout.Width(150));
@@ -149,9 +148,13 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Assignment Logic
 
-        private static void AssignAllReferences()
+        /// <summary>
+        /// Ejecuta la asignacion de todas las referencias.
+        /// Internal para que ShopPremiumUIBuilder pueda invocarlo automaticamente.
+        /// </summary>
+        internal static void AssignAllReferences()
         {
-            Log("=== ASSIGNING SHOP REFERENCES ===");
+            Log("=== ASSIGNING SHOP V3 REFERENCES ===");
 
             var manager = FindShopManager();
             if (manager == null)
@@ -164,32 +167,17 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(manager);
             so.Update();
 
-            // Use FindMainCanvas as root for deep search
             Canvas canvas = FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : manager.transform.root;
 
-            // Tab Buttons (V2 UIBuilder creates: FeaturedTab, GemsTab, CoinsTab, ThemesTab, CosmeticsTab)
-            AssignReference(so, "_featuredTabButton", FindButtonByName("featuredtab", "featured", "destacado"));
-            AssignReference(so, "_gemsTabButton", FindButtonByName("gemstab", "gems", "gemas"));
-            AssignReference(so, "_coinsTabButton", FindButtonByName("coinstab", "coins", "monedas"));
-            AssignReference(so, "_themesTabButton", FindButtonByName("themestab", "themes", "temas"));
-            AssignReference(so, "_cosmeticsTabButton", FindButtonByName("cosmeticstab", "cosmetics", "cosmeticos"));
+            // ScrollView (V3: single ShopScrollView)
+            AssignReference(so, "_shopScrollView", FindGameObjectByName("shopscrollview", "shopscroll", "mainscrollview"));
 
-            // Content Panels - V2: each tab has its own ScrollView
-            AssignReference(so, "_featuredContent", FindGameObjectByName("featuredscrollview", "featuredcontent", "featuredpanel"));
-            AssignReference(so, "_gemsContent", FindGameObjectByName("gemsscrollview", "gemscontent", "gemssection", "gemspanel"));
-            AssignReference(so, "_coinsContent", FindGameObjectByName("coinsscrollview", "coinscontent", "coinssection", "coinspanel"));
-            AssignReference(so, "_themesContent", FindGameObjectByName("themesscrollview", "themescontent", "themespanel"));
-            AssignReference(so, "_cosmeticsContent", FindGameObjectByName("cosmeticsscrollview", "cosmeticscontent", "cosmeticspanel"));
-
-            // Popups - fields are GameObject, use FindGameObjectByName
-            // UIBuilder creates: PurchasePopup (inside PurchaseBlocker), NotEnoughPopup (inside NotEnoughBlocker)
+            // Popups - fields are GameObject
             AssignReference(so, "_purchasePopup", FindGameObjectByName("purchasepopup", "purchaseblocker", "confirmpopup", "buypopup"));
             AssignReference(so, "_notEnoughGemsPopup", FindGameObjectByName("notenoughpopup", "notenoughblocker", "notenough", "needgems"));
 
             // Popup UI - find within popup context
-            // UIBuilder creates generic names: Title, Amount, Price, etc. inside popups
-            // Search for specific popup children first, then fall back to generic
             Transform purchasePopupT = FindDeep(root, "PurchasePopup");
             if (purchasePopupT != null)
             {
@@ -222,7 +210,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "_backButton", FindButtonByName("backbutton", "back", "return", "atras"));
 
             // Currency Display
-            // UIBuilder creates Amount text inside GemsDisplay/CoinsDisplay containers
             Transform gemsDisplayT = FindDeep(root, "GemsDisplay");
             Transform coinsDisplayT = FindDeep(root, "CoinsDisplay");
             TextMeshProUGUI gemsText = gemsDisplayT != null ? FindTextInParent(gemsDisplayT, "amount", "gemstext", "gemsvalue") : null;
@@ -246,7 +233,6 @@ namespace DigitPark.Editor.AutoAssigners
             {
                 if (mb.GetType().Name == "ShopManager")
                 {
-                    // Prefer the instance that is NOT on a Canvas object
                     if (mb.GetComponent<Canvas>() == null)
                         return mb;
                     fallback = mb;
@@ -285,16 +271,6 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
-        private static T FindByNameContains<T>(params string[] patterns) where T : Component
-        {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
-            return null;
-        }
-
-        /// <summary>
-        /// Finds a GameObject by name pattern (for GameObject-type serialized fields)
-        /// </summary>
         private static GameObject FindGameObjectByName(params string[] patterns)
         {
             var all = Object.FindObjectsOfType<Transform>(true);
@@ -309,9 +285,6 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
-        /// <summary>
-        /// Finds a TextMeshProUGUI within a specific parent hierarchy
-        /// </summary>
         private static TextMeshProUGUI FindTextInParent(Transform parent, params string[] patterns)
         {
             var texts = parent.GetComponentsInChildren<TextMeshProUGUI>(true);
@@ -326,9 +299,6 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
-        /// <summary>
-        /// Finds a Button within a specific parent hierarchy
-        /// </summary>
         private static Button FindButtonInParent(Transform parent, params string[] patterns)
         {
             var buttons = parent.GetComponentsInChildren<Button>(true);
@@ -340,7 +310,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Helpers
 
-        private static void ResetLog() { log = ""; assignedCount = 0; failedCount = 0; alreadySetCount = 0; results.Clear(); }
+        internal static void ResetLog() { log = ""; assignedCount = 0; failedCount = 0; alreadySetCount = 0; results.Clear(); }
         private static void Log(string msg) { log += msg + "\n"; Debug.Log($"[ShopReferenceAssigner] {msg}"); }
         private static void AddResult(string f, string s, bool ok, Object o) { results.Add(new ReferenceResult { fieldName = f, status = s, success = ok, assignedObject = o }); }
 

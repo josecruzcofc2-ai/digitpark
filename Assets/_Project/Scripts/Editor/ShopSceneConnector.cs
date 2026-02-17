@@ -302,15 +302,11 @@ namespace DigitPark.Editor
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
-            // Find SafeArea
             Transform safeArea = canvas.transform.Find("SafeArea");
             if (safeArea == null) safeArea = canvas.transform;
 
-            // ========== TAB BUTTONS ==========
-            ConnectTabButtons(serializedManager, safeArea);
-
-            // ========== CONTENT AREAS ==========
-            ConnectContentAreas(serializedManager, safeArea);
+            // ========== SCROLL VIEW (V3) ==========
+            ConnectScrollView(serializedManager, safeArea);
 
             // ========== HEADER ==========
             ConnectHeader(serializedManager, safeArea);
@@ -320,62 +316,20 @@ namespace DigitPark.Editor
 
             serializedManager.ApplyModifiedProperties();
 
-            Debug.Log("[ShopConnector] ShopManager references connected");
+            Debug.Log("[ShopConnector] ShopManager references connected (V3)");
         }
 
-        private static void ConnectTabButtons(SerializedObject manager, Transform root)
+        private static void ConnectScrollView(SerializedObject manager, Transform root)
         {
-            Transform tabsPanel = FindDeep(root, "TabsPanel");
-            if (tabsPanel == null) return;
-
-            // V2: 5 tabs - Featured, Gems, Coins, Themes, Cosmetics
-            var tabMappings = new (string goName, string fieldName)[]
+            Transform scrollView = FindDeep(root, "ShopScrollView");
+            if (scrollView != null)
             {
-                ("FeaturedTab", "_featuredTabButton"),
-                ("GemsTab", "_gemsTabButton"),
-                ("CoinsTab", "_coinsTabButton"),
-                ("ThemesTab", "_themesTabButton"),
-                ("CosmeticsTab", "_cosmeticsTabButton"),
-            };
-
-            foreach (var (goName, fieldName) in tabMappings)
-            {
-                Transform tab = tabsPanel.Find(goName);
-                if (tab != null)
-                {
-                    Button btn = tab.GetComponent<Button>();
-                    if (btn != null)
-                    {
-                        manager.FindProperty(fieldName).objectReferenceValue = btn;
-                    }
-                }
+                var prop = manager.FindProperty("_shopScrollView");
+                if (prop != null)
+                    prop.objectReferenceValue = scrollView.gameObject;
             }
 
-            Debug.Log("[ShopConnector] Tab buttons connected (5 tabs V2)");
-        }
-
-        private static void ConnectContentAreas(SerializedObject manager, Transform root)
-        {
-            // V2: Each tab has its own ScrollView
-            var contentMappings = new (string scrollViewName, string fieldName)[]
-            {
-                ("FeaturedScrollView", "_featuredContent"),
-                ("GemsScrollView", "_gemsContent"),
-                ("CoinsScrollView", "_coinsContent"),
-                ("ThemesScrollView", "_themesContent"),
-                ("CosmeticsScrollView", "_cosmeticsContent"),
-            };
-
-            foreach (var (scrollViewName, fieldName) in contentMappings)
-            {
-                Transform scrollView = FindDeep(root, scrollViewName);
-                if (scrollView != null)
-                {
-                    manager.FindProperty(fieldName).objectReferenceValue = scrollView.gameObject;
-                }
-            }
-
-            Debug.Log("[ShopConnector] Content areas connected (5 tabs V2)");
+            Debug.Log("[ShopConnector] ScrollView connected (V3)");
         }
 
         private static void ConnectHeader(SerializedObject manager, Transform root)
@@ -544,8 +498,8 @@ namespace DigitPark.Editor
                 return;
             }
 
-            // Find grids and add ShopItemUI
-            string[] gridNames = { "GemsGrid", "CoinsGrid", "ThemesGrid" };
+            // Find grids and add ShopItemUI (V3: all sections)
+            string[] gridNames = { "GemsGrid", "CoinsGrid", "ThemesGrid", "FramesGrid", "GemFramesGrid", "PremiumFramesGrid", "TitlesGrid" };
 
             int added = 0;
             foreach (string gridName in gridNames)

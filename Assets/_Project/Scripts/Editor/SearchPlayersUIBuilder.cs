@@ -352,7 +352,7 @@ namespace DigitPark.Editor
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
             scrollRect.elasticity = 0.1f;
-            scrollRect.scrollSensitivity = 10f;
+            scrollRect.scrollSensitivity = 50f;
 
             // Scrollbar
             GameObject scrollbar = CreateOrFind(scrollView.transform, "Scrollbar Vertical");

@@ -713,7 +713,7 @@ namespace DigitPark.Editor
             sr.horizontal = false;
             sr.vertical = true;
             sr.movementType = ScrollRect.MovementType.Elastic;
-            sr.scrollSensitivity = 10;
+            sr.scrollSensitivity = 50;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");

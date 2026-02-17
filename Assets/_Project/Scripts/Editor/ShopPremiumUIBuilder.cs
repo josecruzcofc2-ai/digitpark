@@ -2,27 +2,25 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Shop Premium UI Builder - Estilo Clash Royale
-    /// Scroll vertical continuo con todas las secciones visibles
-    /// Diseño TOP 10 iOS
+    /// Shop Premium UI Builder V3 - Estilo Clash Royale
+    /// Scroll vertical continuo con cards profesionales grandes
+    /// Diseño TOP 10 iOS - 1080x1920 reference
     /// </summary>
     public class ShopPremiumUIBuilder : EditorWindow
     {
         // ==================== COLORES PREMIUM ====================
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
-        private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.3f);
 
         private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
         private static readonly Color PANEL_BG = new Color(0.06f, 0.1f, 0.16f, 0.98f);
         private static readonly Color CARD_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
-        private static readonly Color CARD_HIGHLIGHT = new Color(0.1f, 0.15f, 0.22f, 1f);
         private static readonly Color HEADER_BG = new Color(0.02f, 0.04f, 0.08f, 0.98f);
-        private static readonly Color SECTION_BG = new Color(0.04f, 0.07f, 0.12f, 0.95f);
 
         private static readonly Color TEXT_PRIMARY = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.7f, 0.8f, 1f);
@@ -33,7 +31,6 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_SECONDARY = new Color(0.15f, 0.2f, 0.28f, 1f);
 
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
-        private static readonly Color GOLD_LIGHT = new Color(1f, 0.92f, 0.5f, 1f);
         private static readonly Color PURPLE_PREMIUM = new Color(0.6f, 0.3f, 0.95f, 1f);
         private static readonly Color PURPLE_LIGHT = new Color(0.75f, 0.5f, 1f, 1f);
         private static readonly Color ORANGE_HOT = new Color(1f, 0.45f, 0.1f, 1f);
@@ -41,45 +38,74 @@ namespace DigitPark.Editor
         private static readonly Color GREEN_FREE = new Color(0.3f, 0.9f, 0.4f, 1f);
 
         private static readonly Color GEM_COLOR = new Color(0.4f, 0.85f, 1f, 1f);
-        private static readonly Color GEM_DARK = new Color(0.2f, 0.5f, 0.7f, 1f);
         private static readonly Color COIN_COLOR = new Color(1f, 0.85f, 0.3f, 1f);
-        private static readonly Color COIN_DARK = new Color(0.8f, 0.6f, 0.1f, 1f);
+
+        private static readonly Color FRAME_COLOR = new Color(0.85f, 0.6f, 0.2f, 1f);
+        private static readonly Color TITLE_COLOR = new Color(0.9f, 0.75f, 1f, 1f);
 
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.9f);
 
-        // ==================== DIMENSIONES PREMIUM ====================
+        // ==================== DIMENSIONES V3.1 (consistente con toda la app) ====================
         private const float HEADER_HEIGHT = 100f;
         private const float CONTENT_PADDING = 16f;
-        private const float SECTION_SPACING = 24f;
+        private const float SECTION_SPACING = 32f;
 
-        // Featured Banner
-        private const float FEATURED_HEIGHT = 180f;
+        // Section dividers (estilo BetSelection, prominentes)
+        private const float SECTION_DIVIDER_HEIGHT = 100f;
+        private const float SECTION_DIVIDER_FONT = 48f;
+
+        // Banners
+        private const float FEATURED_HEIGHT = 220f;
+        private const float OFFER_HEIGHT = 175f;
+        private const float VIP_HEIGHT = 175f;
+
+        // Grid cells (mas altos para textos grandes)
+        private const float GRID_CELL_W = 330f;
+        private const float GRID_GEM_COIN_H = 330f;
+        private const float GRID_THEME_H = 350f;
+        private const float GRID_COSMETIC_H = 290f;
+        private const float GRID_SPACING = 12f;
+        private const int GRID_COLUMNS = 3;
+
+        // Title cards (2 columns)
+        private const float TITLE_CELL_W = 510f;
+        private const float TITLE_CELL_H = 100f;
+        private const int TITLE_COLUMNS = 2;
 
         // Daily Deals
-        private const float DAILY_SECTION_HEIGHT = 200f;
-        private const float DAILY_ITEM_WIDTH = 180f;
-        private const float DAILY_ITEM_HEIGHT = 160f;
+        private const float DAILY_ITEM_HEIGHT = 210f;
 
-        // Shop Items
-        private const float ITEM_WIDTH = 170f;
-        private const float ITEM_HEIGHT = 200f;
-        private const float ITEM_SPACING = 12f;
-
-        // Premium Section
-        private const float PREMIUM_HEIGHT = 140f;
+        // Text sizes (consistentes con BetSelection, DailyMissions, Achievements, etc.)
+        private const float SCENE_TITLE_FONT = 78f;
+        private const float AMOUNT_FONT = 40f;
+        private const float PRICE_FONT = 30f;
+        private const float BONUS_FONT = 24f;
+        private const float BADGE_FONT = 24f;
+        private const float CARD_NAME_FONT = 26f;
+        private const float PRICE_BTN_HEIGHT = 52f;
+        private const float BADGE_HEIGHT = 34f;
+        private const float POPUP_TITLE_FONT = 48f;
+        private const float POPUP_TEXT_FONT = 26f;
+        private const float BTN_TEXT_FONT = 36f;
 
         [MenuItem("DigitPark/UI Builders/Monetization/Shop Premium (Clash Royale Style)", false, 181)]
         public static void BuildUI()
         {
-            if (!EditorUtility.DisplayDialog("Shop Premium UI Builder",
-                "Esto construira la UI PREMIUM de Shop estilo Clash Royale.\n\n" +
+            if (!EditorUtility.DisplayDialog("Shop Premium UI Builder V3",
+                "Esto construira la UI PREMIUM V3 de Shop estilo Clash Royale.\n\n" +
                 "Incluye:\n" +
                 "- Featured Banner con countdown\n" +
-                "- Daily Deals (3 items + 1 GRATIS)\n" +
-                "- Packs de Gemas (6 items)\n" +
-                "- Packs de Monedas (3 items)\n" +
-                "- Temas/Cosmeticos (6 items)\n" +
-                "- Seccion Premium/VIP\n\n" +
+                "- Ofertas Especiales (2 banners)\n" +
+                "- Daily Deals (3 items)\n" +
+                "- Gemas (6 packs)\n" +
+                "- Monedas (4 packs)\n" +
+                "- Temas (9 items)\n" +
+                "- Marcos (8 items)\n" +
+                "- Marcos Gemas (6 items)\n" +
+                "- Marcos Premium (3 items)\n" +
+                "- Titulos (10 items)\n" +
+                "- VIP Bundle\n\n" +
+                "Cards grandes 330px, 3 columnas.\n" +
                 "Asegurate de tener la escena Shop abierta.\n\nContinuar?",
                 "Si, Construir", "Cancelar"))
                 return;
@@ -89,14 +115,13 @@ namespace DigitPark.Editor
 
         private static void BuildCompleteUI()
         {
-            Debug.Log("[ShopPremiumUIBuilder] ========== INICIANDO CONSTRUCCION PREMIUM ==========");
+            Debug.Log("[ShopPremiumUIBuilder] ========== INICIANDO CONSTRUCCION V3 ==========");
 
             CleanupOldUI();
 
             Canvas canvas = SetupCanvas();
             if (canvas == null) return;
 
-            // Limpiar canvas existente
             ClearExistingUI(canvas);
 
             // Estructura base
@@ -113,15 +138,23 @@ namespace DigitPark.Editor
             CreatePurchasePopup(canvas);
             CreateNotEnoughPopup(canvas);
 
-            // Agregar ShopManager si no existe
+            // ShopManager
             AddShopManager(canvas);
 
+            // Force layout rebuild
+            foreach (var layout in canvas.GetComponentsInChildren<LayoutGroup>(true))
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
+            }
+
             MarkSceneDirty();
-            Debug.Log("[ShopPremiumUIBuilder] ========== CONSTRUCCION PREMIUM COMPLETADA ==========");
+            Debug.Log("[ShopPremiumUIBuilder] ========== CONSTRUCCION V3 COMPLETADA ==========");
+
+            // Auto-assign references
+            AutoAssignReferences();
 
             EditorUtility.DisplayDialog("Completado",
-                "Shop Premium UI construida exitosamente!\n\n" +
-                "Ejecuta 'DigitPark > Tools > Auto Assign > Shop Manager References' para conectar las referencias.",
+                "Shop Premium V3 UI construida y referencias asignadas automaticamente!",
                 "OK");
         }
 
@@ -166,7 +199,6 @@ namespace DigitPark.Editor
 
         private static void ClearExistingUI(Canvas canvas)
         {
-            // Eliminar hijos existentes excepto EventSystem
             for (int i = canvas.transform.childCount - 1; i >= 0; i--)
             {
                 var child = canvas.transform.GetChild(i);
@@ -181,10 +213,8 @@ namespace DigitPark.Editor
         {
             GameObject bg = CreateChild(canvas.gameObject, "Background");
             SetStretch(bg);
-
             Image bgImage = bg.AddComponent<Image>();
             bgImage.color = DARK_BG;
-
             bg.transform.SetAsFirstSibling();
         }
 
@@ -201,7 +231,6 @@ namespace DigitPark.Editor
         private static void CreatePremiumHeader(GameObject parent)
         {
             GameObject header = CreateChild(parent, "Header");
-
             RectTransform rt = header.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
@@ -212,33 +241,52 @@ namespace DigitPark.Editor
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = HEADER_BG;
 
-            // Glow inferior
             CreateGlowLine(header, CYAN_NEON, false);
 
-            // Back Button
-            GameObject backBtn = CreateChild(header, "BackButton");
-            RectTransform backRT = backBtn.GetComponent<RectTransform>();
-            backRT.anchorMin = new Vector2(0, 0.5f);
-            backRT.anchorMax = new Vector2(0, 0.5f);
-            backRT.pivot = new Vector2(0, 0.5f);
-            backRT.anchoredPosition = new Vector2(20, 0);
-            backRT.sizeDelta = new Vector2(55, 55);
+            // Back Button (prefab)
+            GameObject backPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Project/Prefabs/Common/BackButton.prefab");
+            if (backPrefab != null)
+            {
+                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(backPrefab, header.transform);
+                backBtn.name = "BackButton";
+                RectTransform backRT = backBtn.GetComponent<RectTransform>();
+                if (backRT != null)
+                {
+                    backRT.anchorMin = new Vector2(0, 0.5f);
+                    backRT.anchorMax = new Vector2(0, 0.5f);
+                    backRT.pivot = new Vector2(0, 0.5f);
+                    backRT.anchoredPosition = new Vector2(16, 0);
+                    backRT.sizeDelta = new Vector2(55, 55);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[ShopPremiumUIBuilder] BackButton.prefab no encontrado en Prefabs/Common/");
+                // Fallback: boton manual
+                GameObject backBtn = CreateChild(header, "BackButton");
+                RectTransform backRT = backBtn.GetComponent<RectTransform>();
+                backRT.anchorMin = new Vector2(0, 0.5f);
+                backRT.anchorMax = new Vector2(0, 0.5f);
+                backRT.pivot = new Vector2(0, 0.5f);
+                backRT.anchoredPosition = new Vector2(16, 0);
+                backRT.sizeDelta = new Vector2(55, 55);
 
-            Image backBg = backBtn.AddComponent<Image>();
-            backBg.color = BUTTON_SECONDARY;
-            AddOutline(backBtn, CYAN_DARK, 1);
+                Image backBg = backBtn.AddComponent<Image>();
+                backBg.color = BUTTON_SECONDARY;
+                AddOutline(backBtn, CYAN_DARK, 1);
+                Button backButton = backBtn.AddComponent<Button>();
+                SetupButton(backButton, BUTTON_SECONDARY);
 
-            Button backButton = backBtn.AddComponent<Button>();
-            SetupButton(backButton, BUTTON_SECONDARY);
-
-            GameObject backIcon = CreateChild(backBtn, "Icon");
-            SetStretch(backIcon);
-            TextMeshProUGUI backText = backIcon.AddComponent<TextMeshProUGUI>();
-            backText.text = "<";
-            backText.fontSize = 36;
-            backText.fontStyle = FontStyles.Bold;
-            backText.color = CYAN_NEON;
-            backText.alignment = TextAlignmentOptions.Center;
+                GameObject backIcon = CreateChild(backBtn, "Icon");
+                SetStretch(backIcon);
+                TextMeshProUGUI backText = backIcon.AddComponent<TextMeshProUGUI>();
+                backText.text = "<";
+                backText.fontSize = 36;
+                backText.fontStyle = FontStyles.Bold;
+                backText.color = CYAN_NEON;
+                backText.alignment = TextAlignmentOptions.Center;
+            }
 
             // Title
             GameObject title = CreateChild(header, "Title");
@@ -246,15 +294,18 @@ namespace DigitPark.Editor
             titleRT.anchorMin = new Vector2(0, 0.5f);
             titleRT.anchorMax = new Vector2(0, 0.5f);
             titleRT.pivot = new Vector2(0, 0.5f);
-            titleRT.anchoredPosition = new Vector2(90, 0);
-            titleRT.sizeDelta = new Vector2(200, 50);
+            titleRT.anchoredPosition = new Vector2(95, 0);
+            titleRT.sizeDelta = new Vector2(220, 55);
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "TIENDA";
-            titleText.fontSize = 38;
+            titleText.fontSize = SCENE_TITLE_FONT;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 36;
+            titleText.fontSizeMax = SCENE_TITLE_FONT;
 
             // Currency Display
             CreateHeaderCurrency(header);
@@ -270,27 +321,24 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
             rt.anchoredPosition = new Vector2(-20, 0);
-            rt.sizeDelta = new Vector2(260, 50);
+            rt.sizeDelta = new Vector2(300, 50);
 
             HorizontalLayoutGroup hlg = container.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 12;
+            hlg.spacing = 14;
             hlg.childAlignment = TextAnchor.MiddleRight;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
 
-            // Gems
-            CreateCurrencyPill(container, "GemsDisplay", "1,250", GEM_COLOR, true);
-
-            // Coins
-            CreateCurrencyPill(container, "CoinsDisplay", "5,430", COIN_COLOR, false);
+            CreateCurrencyPill(container, "GemsDisplay", "1,250", GEM_COLOR);
+            CreateCurrencyPill(container, "CoinsDisplay", "5,430", COIN_COLOR);
         }
 
-        private static void CreateCurrencyPill(GameObject parent, string name, string amount, Color color, bool isGems)
+        private static void CreateCurrencyPill(GameObject parent, string name, string amount, Color color)
         {
             GameObject pill = CreateChild(parent, name);
             RectTransform rt = pill.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(120, 44);
+            rt.sizeDelta = new Vector2(135, 46);
 
             Image bg = pill.AddComponent<Image>();
             bg.color = new Color(0.08f, 0.12f, 0.18f, 0.95f);
@@ -298,14 +346,14 @@ namespace DigitPark.Editor
 
             HorizontalLayoutGroup hlg = pill.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 6;
-            hlg.padding = new RectOffset(8, 8, 4, 4);
+            hlg.padding = new RectOffset(10, 10, 4, 4);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
 
             LayoutElement le = pill.AddComponent<LayoutElement>();
-            le.minWidth = 120;
-            le.preferredWidth = 120;
+            le.minWidth = 135;
+            le.preferredWidth = 135;
 
             // Icon
             GameObject icon = CreateChild(pill, "Icon");
@@ -313,16 +361,16 @@ namespace DigitPark.Editor
             iconImg.color = color;
             iconImg.preserveAspect = true;
             LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minWidth = 26;
-            iconLE.minHeight = 26;
-            iconLE.preferredWidth = 26;
-            iconLE.preferredHeight = 26;
+            iconLE.minWidth = 28;
+            iconLE.minHeight = 28;
+            iconLE.preferredWidth = 28;
+            iconLE.preferredHeight = 28;
 
             // Amount
             GameObject amountObj = CreateChild(pill, "Amount");
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = 17;
+            amountText.fontSize = 22;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             amountText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -334,14 +382,14 @@ namespace DigitPark.Editor
             Image plusBg = plus.AddComponent<Image>();
             plusBg.color = color;
             LayoutElement plusLE = plus.AddComponent<LayoutElement>();
-            plusLE.minWidth = 20;
-            plusLE.minHeight = 20;
+            plusLE.minWidth = 22;
+            plusLE.minHeight = 22;
 
             GameObject plusText = CreateChild(plus, "Text");
             SetStretch(plusText);
             TextMeshProUGUI pt = plusText.AddComponent<TextMeshProUGUI>();
             pt.text = "+";
-            pt.fontSize = 16;
+            pt.fontSize = 18;
             pt.fontStyle = FontStyles.Bold;
             pt.color = TEXT_DARK;
             pt.alignment = TextAlignmentOptions.Center;
@@ -365,6 +413,7 @@ namespace DigitPark.Editor
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
             scrollRect.elasticity = 0.1f;
             scrollRect.decelerationRate = 0.135f;
+            scrollRect.scrollSensitivity = 50f;
 
             // Viewport
             GameObject viewport = CreateChild(scrollView, "Viewport");
@@ -393,27 +442,42 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // === SECCIONES ===
+            // === TODAS LAS SECCIONES ===
 
             // 1. Featured Banner
             CreateFeaturedBanner(content);
 
-            // 2. Daily Deals
+            // 2. Ofertas Especiales (2 banners)
+            CreateSpecialOffersSection(content);
+
+            // 3. Daily Deals
             CreateDailyDealsSection(content);
 
-            // 3. Gems Section
+            // 4. Gems
             CreateGemsSection(content);
 
-            // 4. Coins Section
+            // 5. Coins
             CreateCoinsSection(content);
 
-            // 5. Themes Section
+            // 6. Themes
             CreateThemesSection(content);
 
-            // 6. Premium Section
-            CreatePremiumSection(content);
+            // 7. Marcos
+            CreateFramesSection(content);
 
-            Debug.Log("[ShopPremiumUIBuilder] Scroll content creado");
+            // 8. Marcos Gemas
+            CreateGemFramesSection(content);
+
+            // 9. Marcos Premium
+            CreatePremiumFramesSection(content);
+
+            // 10. Titulos
+            CreateTitlesSection(content);
+
+            // 11. VIP Bundle
+            CreateVIPSection(content);
+
+            Debug.Log("[ShopPremiumUIBuilder] Scroll content V3 creado con todas las secciones");
         }
 
         // ==================== FEATURED BANNER ====================
@@ -428,30 +492,33 @@ namespace DigitPark.Editor
 
             Image bannerBg = banner.AddComponent<Image>();
             bannerBg.color = new Color(0.12f, 0.06f, 0.22f, 1f);
-            AddOutline(banner, PURPLE_PREMIUM, 2);
+            AddOutline(banner, PURPLE_PREMIUM, 3);
 
-            // Gradient overlay would go here with shader
+            // Shadow effect via second outline
+            Shadow shadow = banner.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
+            shadow.effectDistance = new Vector2(4, -4);
 
             HorizontalLayoutGroup hlg = banner.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 15;
-            hlg.padding = new RectOffset(20, 20, 15, 15);
+            hlg.spacing = 20;
+            hlg.padding = new RectOffset(24, 24, 20, 20);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
 
-            // Left - Icon/Image
+            // Left - Icon
             GameObject iconContainer = CreateChild(banner, "IconContainer");
             LayoutElement iconLE = iconContainer.AddComponent<LayoutElement>();
-            iconLE.minWidth = 120;
-            iconLE.preferredWidth = 120;
+            iconLE.minWidth = 130;
+            iconLE.preferredWidth = 130;
 
             GameObject icon = CreateChild(iconContainer, "Icon");
             RectTransform iconRT = icon.GetComponent<RectTransform>();
             iconRT.anchorMin = new Vector2(0.5f, 0.5f);
             iconRT.anchorMax = new Vector2(0.5f, 0.5f);
-            iconRT.sizeDelta = new Vector2(100, 100);
+            iconRT.sizeDelta = new Vector2(110, 110);
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = GOLD;
 
@@ -468,58 +535,42 @@ namespace DigitPark.Editor
             infoVlg.childForceExpandHeight = false;
 
             // Badge
-            GameObject badge = CreateChild(info, "Badge");
-            Image badgeBg = badge.AddComponent<Image>();
-            badgeBg.color = ORANGE_HOT;
-            LayoutElement badgeLE = badge.AddComponent<LayoutElement>();
-            badgeLE.minHeight = 26;
-            badgeLE.preferredHeight = 26;
-            badgeLE.minWidth = 100;
-            badgeLE.preferredWidth = 100;
-
-            GameObject badgeText = CreateChild(badge, "Text");
-            SetStretch(badgeText);
-            TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
-            bt.text = "70% OFF";
-            bt.fontSize = 14;
-            bt.fontStyle = FontStyles.Bold;
-            bt.color = TEXT_PRIMARY;
-            bt.alignment = TextAlignmentOptions.Center;
+            CreateInlineBadge(info, "70% OFF", ORANGE_HOT, 110);
 
             // Title
             GameObject title = CreateChild(info, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "STARTER PACK";
-            titleText.fontSize = 28;
+            titleText.fontSize = 36;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
-            titleLE.minHeight = 35;
+            titleLE.minHeight = 42;
 
             // Contents
             GameObject contents = CreateChild(info, "Contents");
             TextMeshProUGUI contentsText = contents.AddComponent<TextMeshProUGUI>();
             contentsText.text = "500 Gemas + Tema Exclusivo + Avatar";
-            contentsText.fontSize = 13;
+            contentsText.fontSize = 22;
             contentsText.color = TEXT_SECONDARY;
             LayoutElement contentsLE = contents.AddComponent<LayoutElement>();
-            contentsLE.minHeight = 20;
+            contentsLE.minHeight = 26;
 
             // Timer
             GameObject timer = CreateChild(info, "Timer");
             TextMeshProUGUI timerText = timer.AddComponent<TextMeshProUGUI>();
-            timerText.text = "⏱ Expira en: 23:45:12";
-            timerText.fontSize = 12;
+            timerText.text = "Expira en: 23:45:12";
+            timerText.fontSize = 22;
             timerText.color = ORANGE_HOT;
             LayoutElement timerLE = timer.AddComponent<LayoutElement>();
-            timerLE.minHeight = 18;
+            timerLE.minHeight = 26;
 
             // Right - Buy
             GameObject buyContainer = CreateChild(banner, "BuyContainer");
             LayoutElement buyContainerLE = buyContainer.AddComponent<LayoutElement>();
-            buyContainerLE.minWidth = 130;
-            buyContainerLE.preferredWidth = 130;
+            buyContainerLE.minWidth = 140;
+            buyContainerLE.preferredWidth = 140;
 
             VerticalLayoutGroup buyVlg = buyContainer.AddComponent<VerticalLayoutGroup>();
             buyVlg.spacing = 4;
@@ -532,33 +583,141 @@ namespace DigitPark.Editor
             GameObject origPrice = CreateChild(buyContainer, "OriginalPrice");
             TextMeshProUGUI origText = origPrice.AddComponent<TextMeshProUGUI>();
             origText.text = "<s>$9.99</s>";
-            origText.fontSize = 14;
+            origText.fontSize = 22;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
             LayoutElement origLE = origPrice.AddComponent<LayoutElement>();
-            origLE.minHeight = 20;
+            origLE.minHeight = 26;
 
             // Buy button
-            GameObject buyBtn = CreateChild(buyContainer, "BuyButton");
-            Image buyBg = buyBtn.AddComponent<Image>();
-            buyBg.color = BUTTON_SUCCESS;
-            Button buyButton = buyBtn.AddComponent<Button>();
-            SetupButton(buyButton, BUTTON_SUCCESS);
-            AddOutline(buyBtn, new Color(0.4f, 1f, 0.5f, 0.6f), 2);
-            LayoutElement buyLE = buyBtn.AddComponent<LayoutElement>();
-            buyLE.minHeight = 55;
-            buyLE.preferredHeight = 55;
+            CreatePriceButton(buyContainer, "$2.99", BUTTON_SUCCESS, TEXT_DARK, 58, PRICE_FONT);
 
-            GameObject buyText = CreateChild(buyBtn, "Text");
-            SetStretch(buyText);
-            TextMeshProUGUI buyTxt = buyText.AddComponent<TextMeshProUGUI>();
-            buyTxt.text = "$2.99";
-            buyTxt.fontSize = 26;
-            buyTxt.fontStyle = FontStyles.Bold;
-            buyTxt.color = TEXT_DARK;
-            buyTxt.alignment = TextAlignmentOptions.Center;
+            Debug.Log("[ShopPremiumUIBuilder] Featured Banner V3 creado");
+        }
 
-            Debug.Log("[ShopPremiumUIBuilder] Featured Banner creado");
+        // ==================== SPECIAL OFFERS ====================
+
+        private static void CreateSpecialOffersSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "SpecialOffersSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionHeader(section, "OFERTAS ESPECIALES", ORANGE_HOT);
+
+            // Offer 1
+            CreateOfferBanner(section, "Offer_WeekendGems", "PACK FIN DE SEMANA",
+                "2,000 Gemas + 10,000 Monedas", "50% OFF", "$4.99", "<s>$9.99</s>",
+                new Color(0.08f, 0.12f, 0.25f, 1f), GEM_COLOR);
+
+            // Offer 2
+            CreateOfferBanner(section, "Offer_MegaCoins", "MEGA MONEDAS",
+                "50,000 Monedas + 3 Marcos", "LIMITADO", "$2.99", "<s>$5.99</s>",
+                new Color(0.15f, 0.1f, 0.05f, 1f), COIN_COLOR);
+
+            Debug.Log("[ShopPremiumUIBuilder] Special Offers V3 creado");
+        }
+
+        private static void CreateOfferBanner(GameObject parent, string name, string title,
+            string contents, string badge, string price, string origPrice,
+            Color bgColor, Color accentColor)
+        {
+            GameObject banner = CreateChild(parent, name);
+
+            LayoutElement le = banner.AddComponent<LayoutElement>();
+            le.minHeight = OFFER_HEIGHT;
+            le.preferredHeight = OFFER_HEIGHT;
+
+            Image bannerBg = banner.AddComponent<Image>();
+            bannerBg.color = bgColor;
+            AddOutline(banner, accentColor, 2);
+
+            Shadow shadow = banner.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            shadow.effectDistance = new Vector2(3, -3);
+
+            HorizontalLayoutGroup hlg = banner.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 16;
+            hlg.padding = new RectOffset(20, 20, 16, 16);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = true;
+
+            // Icon
+            GameObject iconContainer = CreateChild(banner, "IconContainer");
+            LayoutElement iconLE = iconContainer.AddComponent<LayoutElement>();
+            iconLE.minWidth = 100;
+            iconLE.preferredWidth = 100;
+
+            GameObject icon = CreateChild(iconContainer, "Icon");
+            RectTransform iconRT = icon.GetComponent<RectTransform>();
+            iconRT.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRT.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRT.sizeDelta = new Vector2(85, 85);
+            Image iconImg = icon.AddComponent<Image>();
+            iconImg.color = accentColor;
+
+            // Info
+            GameObject info = CreateChild(banner, "Info");
+            LayoutElement infoLE = info.AddComponent<LayoutElement>();
+            infoLE.flexibleWidth = 1;
+
+            VerticalLayoutGroup infoVlg = info.AddComponent<VerticalLayoutGroup>();
+            infoVlg.spacing = 5;
+            infoVlg.childAlignment = TextAnchor.MiddleLeft;
+            infoVlg.childControlWidth = true;
+            infoVlg.childControlHeight = true;
+            infoVlg.childForceExpandHeight = false;
+
+            CreateInlineBadge(info, badge, RED_URGENT, 110);
+
+            GameObject titleObj = CreateChild(info, "Title");
+            TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
+            titleText.text = title;
+            titleText.fontSize = 30;
+            titleText.fontStyle = FontStyles.Bold;
+            titleText.color = TEXT_PRIMARY;
+            titleText.alignment = TextAlignmentOptions.MidlineLeft;
+            LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
+            titleLE.minHeight = 36;
+
+            GameObject contentsObj = CreateChild(info, "Contents");
+            TextMeshProUGUI contentsText = contentsObj.AddComponent<TextMeshProUGUI>();
+            contentsText.text = contents;
+            contentsText.fontSize = 22;
+            contentsText.color = TEXT_SECONDARY;
+            LayoutElement contentsLE = contentsObj.AddComponent<LayoutElement>();
+            contentsLE.minHeight = 26;
+
+            // Buy
+            GameObject buyContainer = CreateChild(banner, "BuyContainer");
+            LayoutElement buyContainerLE = buyContainer.AddComponent<LayoutElement>();
+            buyContainerLE.minWidth = 130;
+            buyContainerLE.preferredWidth = 130;
+
+            VerticalLayoutGroup buyVlg = buyContainer.AddComponent<VerticalLayoutGroup>();
+            buyVlg.spacing = 3;
+            buyVlg.childAlignment = TextAnchor.MiddleCenter;
+            buyVlg.childControlWidth = true;
+            buyVlg.childControlHeight = true;
+            buyVlg.childForceExpandHeight = false;
+
+            GameObject origObj = CreateChild(buyContainer, "OriginalPrice");
+            TextMeshProUGUI origText = origObj.AddComponent<TextMeshProUGUI>();
+            origText.text = origPrice;
+            origText.fontSize = 22;
+            origText.color = TEXT_MUTED;
+            origText.alignment = TextAlignmentOptions.Center;
+            LayoutElement origLE = origObj.AddComponent<LayoutElement>();
+            origLE.minHeight = 26;
+
+            CreatePriceButton(buyContainer, price, BUTTON_SUCCESS, TEXT_DARK, 52, PRICE_FONT);
         }
 
         // ==================== DAILY DEALS ====================
@@ -567,42 +726,63 @@ namespace DigitPark.Editor
         {
             GameObject section = CreateChild(parent, "DailyDealsSection");
 
-            LayoutElement sectionLE = section.AddComponent<LayoutElement>();
-            sectionLE.minHeight = DAILY_SECTION_HEIGHT + 45;
-
             VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
+            vlg.spacing = 14;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            // Header
-            GameObject header = CreateChild(section, "Header");
-            LayoutElement headerLE = header.AddComponent<LayoutElement>();
-            headerLE.minHeight = 35;
+            // Header divider estilo BetSelection + timer
+            GameObject headerRow = CreateChild(section, "Header");
+            LayoutElement headerLE = headerRow.AddComponent<LayoutElement>();
+            headerLE.minHeight = SECTION_DIVIDER_HEIGHT;
+            headerLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
 
-            HorizontalLayoutGroup headerHlg = header.AddComponent<HorizontalLayoutGroup>();
-            headerHlg.childAlignment = TextAnchor.MiddleLeft;
-            headerHlg.childControlWidth = false;
-            headerHlg.childControlHeight = true;
+            HorizontalLayoutGroup headerHlg = headerRow.AddComponent<HorizontalLayoutGroup>();
+            headerHlg.padding = new RectOffset(0, 0, 0, 0);
+            headerHlg.spacing = 20;
+            headerHlg.childAlignment = TextAnchor.MiddleCenter;
+            headerHlg.childControlWidth = true;
+            headerHlg.childControlHeight = false;
+            headerHlg.childForceExpandWidth = true;
+            headerHlg.childForceExpandHeight = false;
 
-            GameObject titleObj = CreateChild(header, "Title");
+            // Left line
+            GameObject lineL = CreateChild(headerRow, "LineLeft");
+            LayoutElement llLE = lineL.AddComponent<LayoutElement>();
+            llLE.flexibleWidth = 1;
+            llLE.preferredHeight = 2;
+            lineL.AddComponent<Image>().color = new Color(ORANGE_HOT.r, ORANGE_HOT.g, ORANGE_HOT.b, 0.35f);
+
+            // Title
+            GameObject titleObj = CreateChild(headerRow, "SectionTitle");
+            LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
+            titleLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.text = "⚡ OFERTAS DIARIAS";
-            titleText.fontSize = 22;
+            titleText.text = "OFERTAS DIARIAS";
+            titleText.fontSize = SECTION_DIVIDER_FONT;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = ORANGE_HOT;
-            LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
-            titleLE.minWidth = 250;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableWordWrapping = false;
 
-            GameObject timerObj = CreateChild(header, "Timer");
+            // Right line
+            GameObject lineR = CreateChild(headerRow, "LineRight");
+            LayoutElement lrLE = lineR.AddComponent<LayoutElement>();
+            lrLE.flexibleWidth = 1;
+            lrLE.preferredHeight = 2;
+            lineR.AddComponent<Image>().color = new Color(ORANGE_HOT.r, ORANGE_HOT.g, ORANGE_HOT.b, 0.35f);
+
+            // Timer (after right line)
+            GameObject timerObj = CreateChild(headerRow, "Timer");
+            LayoutElement timerLE = timerObj.AddComponent<LayoutElement>();
+            timerLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
+            timerLE.minWidth = 130;
             TextMeshProUGUI timerText = timerObj.AddComponent<TextMeshProUGUI>();
-            timerText.text = "⏱ 12:34:56";
-            timerText.fontSize = 16;
+            timerText.text = "12:34:56";
+            timerText.fontSize = 26;
             timerText.color = TEXT_SECONDARY;
             timerText.alignment = TextAlignmentOptions.MidlineRight;
-            LayoutElement timerLE = timerObj.AddComponent<LayoutElement>();
-            timerLE.flexibleWidth = 1;
 
             // Items container
             GameObject itemsContainer = CreateChild(section, "Items");
@@ -610,57 +790,45 @@ namespace DigitPark.Editor
             itemsLE.minHeight = DAILY_ITEM_HEIGHT;
 
             HorizontalLayoutGroup itemsHlg = itemsContainer.AddComponent<HorizontalLayoutGroup>();
-            itemsHlg.spacing = 12;
+            itemsHlg.spacing = GRID_SPACING;
             itemsHlg.childAlignment = TextAnchor.MiddleCenter;
             itemsHlg.childControlWidth = true;
             itemsHlg.childControlHeight = true;
             itemsHlg.childForceExpandWidth = true;
 
             // 3 Daily Items
-            CreateDailyItem(itemsContainer, "Daily_Bonus", "25 Gemas", "100", GEM_COLOR, new Color(0.3f, 0.6f, 1f, 1f), false);
-            CreateDailyItem(itemsContainer, "Daily_Gems", "200 Gemas", "GRATIS", GEM_COLOR, GEM_COLOR, true);
-            CreateDailyItem(itemsContainer, "Daily_Coins", "5,000 Monedas", "50", GEM_COLOR, COIN_COLOR, false);
+            CreateDailyItem(itemsContainer, "Daily_Free", "200 Gemas", "GRATIS", GEM_COLOR, true, "1x DIARIO");
+            CreateDailyItem(itemsContainer, "Daily_Gems", "25 Gemas", "100", GEM_COLOR, false, "HOT");
+            CreateDailyItem(itemsContainer, "Daily_Coins", "5,000 Monedas", "50", COIN_COLOR, false, "");
 
-            Debug.Log("[ShopPremiumUIBuilder] Daily Deals creado");
+            Debug.Log("[ShopPremiumUIBuilder] Daily Deals V3 creado");
         }
 
-        private static void CreateDailyItem(GameObject parent, string name, string itemName, string price, Color priceColor, Color iconColor, bool isFree)
+        private static void CreateDailyItem(GameObject parent, string name, string itemName,
+            string price, Color iconColor, bool isFree, string badgeText)
         {
             GameObject item = CreateChild(parent, name);
 
             Image itemBg = item.AddComponent<Image>();
             itemBg.color = CARD_BG;
-            AddOutline(item, isFree ? GREEN_FREE : iconColor * 0.5f, isFree ? 2 : 1);
+            AddOutline(item, isFree ? GREEN_FREE : iconColor * 0.5f, isFree ? 3 : 1);
 
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);
 
             VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 8;
-            vlg.padding = new RectOffset(10, 10, 12, 12);
+            vlg.padding = new RectOffset(12, 12, 12, 12);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            // Free badge
-            if (isFree)
+            // Badge
+            if (!string.IsNullOrEmpty(badgeText))
             {
-                GameObject badge = CreateChild(item, "FreeBadge");
-                Image badgeBg = badge.AddComponent<Image>();
-                badgeBg.color = GREEN_FREE;
-                LayoutElement badgeLE = badge.AddComponent<LayoutElement>();
-                badgeLE.minHeight = 22;
-                badgeLE.preferredHeight = 22;
-
-                GameObject badgeText = CreateChild(badge, "Text");
-                SetStretch(badgeText);
-                TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
-                bt.text = "1x DIARIO";
-                bt.fontSize = 11;
-                bt.fontStyle = FontStyles.Bold;
-                bt.color = TEXT_DARK;
-                bt.alignment = TextAlignmentOptions.Center;
+                Color badgeColor = isFree ? GREEN_FREE : ORANGE_HOT;
+                CreateInlineBadge(item, badgeText, badgeColor, 0);
             }
 
             // Icon
@@ -668,56 +836,25 @@ namespace DigitPark.Editor
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = iconColor;
             LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minHeight = 50;
-            iconLE.preferredHeight = 50;
-            iconLE.minWidth = 50;
-            iconLE.preferredWidth = 50;
+            iconLE.minHeight = 55;
+            iconLE.preferredHeight = 55;
+            iconLE.minWidth = 55;
+            iconLE.preferredWidth = 55;
 
             // Name
             GameObject nameObj = CreateChild(item, "Name");
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = itemName;
-            nameText.fontSize = 14;
+            nameText.fontSize = CARD_NAME_FONT;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Center;
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
-            nameLE.minHeight = 22;
+            nameLE.minHeight = 30;
 
             // Price button
-            GameObject priceBtn = CreateChild(item, "PriceButton");
-            Image priceBg = priceBtn.AddComponent<Image>();
-            priceBg.color = isFree ? GREEN_FREE : priceColor;
-            LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
-            priceLE.minHeight = 36;
-            priceLE.preferredHeight = 36;
-
-            HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
-            priceHlg.spacing = 5;
-            priceHlg.padding = new RectOffset(12, 12, 4, 4);
-            priceHlg.childAlignment = TextAnchor.MiddleCenter;
-            priceHlg.childControlWidth = false;
-            priceHlg.childControlHeight = true;
-
-            if (!isFree)
-            {
-                GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
-                Image gemImg = gemIcon.AddComponent<Image>();
-                gemImg.color = TEXT_DARK;
-                LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
-                gemLE.minWidth = 18;
-                gemLE.minHeight = 18;
-            }
-
-            GameObject priceText = CreateChild(priceBtn, "Text");
-            TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
-            pt.text = price;
-            pt.fontSize = 15;
-            pt.fontStyle = FontStyles.Bold;
-            pt.color = TEXT_DARK;
-            pt.alignment = TextAlignmentOptions.Center;
-            LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
-            ptLE.flexibleWidth = 1;
+            Color priceBtnColor = isFree ? GREEN_FREE : GEM_COLOR;
+            CreatePriceButton(item, price, priceBtnColor, TEXT_DARK, 46, PRICE_FONT);
         }
 
         // ==================== GEMS SECTION ====================
@@ -727,38 +864,37 @@ namespace DigitPark.Editor
             GameObject section = CreateChild(parent, "GemsSection");
 
             VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
+            vlg.spacing = 14;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            // Header
-            CreateSectionHeader(section, "💎 GEMAS", GEM_COLOR);
+            CreateSectionHeader(section, "GEMAS", GEM_COLOR);
 
             // Grid
             GameObject grid = CreateChild(section, "GemsGrid");
 
             GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(ITEM_WIDTH, ITEM_HEIGHT);
-            glg.spacing = new Vector2(ITEM_SPACING, ITEM_SPACING);
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_GEM_COIN_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
             glg.startCorner = GridLayoutGroup.Corner.UpperLeft;
             glg.startAxis = GridLayoutGroup.Axis.Horizontal;
             glg.childAlignment = TextAnchor.UpperCenter;
             glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            glg.constraintCount = 3;
+            glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = ITEM_HEIGHT * 2 + ITEM_SPACING;
+            gridLE.minHeight = GRID_GEM_COIN_H * 2 + GRID_SPACING;
 
             // 6 Gem packs
-            CreateShopItem(grid, "Gems_100", "100", "$0.99", "", GEM_COLOR, "");
-            CreateShopItem(grid, "Gems_500", "500", "$4.99", "+10%", GEM_COLOR, "");
-            CreateShopItem(grid, "Gems_1200", "1,200", "$9.99", "+20%", GEM_COLOR, "BEST_VALUE");
-            CreateShopItem(grid, "Gems_2500", "2,500", "$19.99", "+25%", GEM_COLOR, "");
-            CreateShopItem(grid, "Gems_6500", "6,500", "$49.99", "+30%", GEM_COLOR, "POPULAR");
-            CreateShopItem(grid, "Gems_14000", "14,000", "$99.99", "+40%", GEM_COLOR, "MEGA");
+            CreateShopCard(grid, "Gems_100", "100", "$0.99", "", GEM_COLOR, "", false);
+            CreateShopCard(grid, "Gems_500", "500", "$4.99", "+10%", GEM_COLOR, "", false);
+            CreateShopCard(grid, "Gems_1200", "1,200", "$9.99", "+20%", GEM_COLOR, "MEJOR VALOR", false);
+            CreateShopCard(grid, "Gems_2500", "2,500", "$19.99", "+25%", GEM_COLOR, "", false);
+            CreateShopCard(grid, "Gems_6500", "6,500", "$49.99", "+30%", GEM_COLOR, "POPULAR", false);
+            CreateShopCard(grid, "Gems_14000", "14,000", "$99.99", "+40%", GEM_COLOR, "MEGA PACK", false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Gems Section creado");
+            Debug.Log("[ShopPremiumUIBuilder] Gems Section V3 creado");
         }
 
         // ==================== COINS SECTION ====================
@@ -768,33 +904,33 @@ namespace DigitPark.Editor
             GameObject section = CreateChild(parent, "CoinsSection");
 
             VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
+            vlg.spacing = 14;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            // Header
-            CreateSectionHeader(section, "🪙 MONEDAS", COIN_COLOR);
+            CreateSectionHeader(section, "MONEDAS", COIN_COLOR);
 
             // Grid
             GameObject grid = CreateChild(section, "CoinsGrid");
 
             GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(ITEM_WIDTH, ITEM_HEIGHT);
-            glg.spacing = new Vector2(ITEM_SPACING, ITEM_SPACING);
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_GEM_COIN_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
             glg.childAlignment = TextAnchor.UpperCenter;
             glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            glg.constraintCount = 3;
+            glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = ITEM_HEIGHT;
+            gridLE.minHeight = GRID_GEM_COIN_H * 2 + GRID_SPACING;
 
-            // 3 Coin packs (bought with gems)
-            CreateShopItem(grid, "Coins_1000", "1,000", "50", "", COIN_COLOR, "", true);
-            CreateShopItem(grid, "Coins_5000", "5,000", "200", "+25%", COIN_COLOR, "", true);
-            CreateShopItem(grid, "Coins_15000", "15,000", "500", "+50%", COIN_COLOR, "BEST_VALUE", true);
+            // 4 Coin packs (bought with gems)
+            CreateShopCard(grid, "Coins_1000", "1,000", "50", "", COIN_COLOR, "", true);
+            CreateShopCard(grid, "Coins_5000", "5,000", "200", "+25%", COIN_COLOR, "", true);
+            CreateShopCard(grid, "Coins_15000", "15,000", "500", "+50%", COIN_COLOR, "MEJOR VALOR", true);
+            CreateShopCard(grid, "Coins_50000", "50,000", "1,500", "+75%", COIN_COLOR, "MEGA PACK", true);
 
-            Debug.Log("[ShopPremiumUIBuilder] Coins Section creado");
+            Debug.Log("[ShopPremiumUIBuilder] Coins Section V3 creado");
         }
 
         // ==================== THEMES SECTION ====================
@@ -804,151 +940,309 @@ namespace DigitPark.Editor
             GameObject section = CreateChild(parent, "ThemesSection");
 
             VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
+            vlg.spacing = 14;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            // Header
-            CreateSectionHeader(section, "\ud83c\udfa8 TEMAS", PURPLE_PREMIUM);
+            CreateSectionHeader(section, "TEMAS", PURPLE_PREMIUM);
 
             // Grid
             GameObject grid = CreateChild(section, "ThemesGrid");
 
             GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(ITEM_WIDTH, ITEM_HEIGHT + 20);
-            glg.spacing = new Vector2(ITEM_SPACING, ITEM_SPACING);
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_THEME_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
             glg.childAlignment = TextAnchor.UpperCenter;
             glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            glg.constraintCount = 3;
+            glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = (ITEM_HEIGHT + 20) * 2 + ITEM_SPACING;
+            gridLE.minHeight = GRID_THEME_H * 3 + GRID_SPACING * 2;
 
-            // Theme items
-            CreateThemeItem(grid, "Theme_Neon", "Neon Cyan", "EQUIPADO", CYAN_NEON, true);
-            CreateThemeItem(grid, "Theme_Gold", "Oro Real", "500", GOLD, false);
-            CreateThemeItem(grid, "Theme_Purple", "Amatista", "500", PURPLE_PREMIUM, false);
-            CreateThemeItem(grid, "Theme_Red", "Rubi", "750", new Color(1f, 0.2f, 0.3f, 1f), false);
-            CreateThemeItem(grid, "Theme_Green", "Esmeralda", "750", new Color(0.2f, 0.9f, 0.4f, 1f), false);
-            CreateThemeItem(grid, "Theme_Rainbow", "Arcoiris", "$2.99", new Color(1f, 0.5f, 0.8f, 1f), false);
+            // 9 Theme items
+            CreateThemeCard(grid, "Theme_Neon", "Neon Cyan", "EQUIPADO", CYAN_NEON, true);
+            CreateThemeCard(grid, "Theme_Gold", "Oro Real", "500", GOLD, false);
+            CreateThemeCard(grid, "Theme_Purple", "Amatista", "500", PURPLE_PREMIUM, false);
+            CreateThemeCard(grid, "Theme_Red", "Rubi", "750", new Color(1f, 0.2f, 0.3f, 1f), false);
+            CreateThemeCard(grid, "Theme_Green", "Esmeralda", "750", new Color(0.2f, 0.9f, 0.4f, 1f), false);
+            CreateThemeCard(grid, "Theme_Blue", "Zafiro", "750", new Color(0.2f, 0.5f, 1f, 1f), false);
+            CreateThemeCard(grid, "Theme_Orange", "Ambar", "1,000", ORANGE_HOT, false);
+            CreateThemeCard(grid, "Theme_Pink", "Sakura", "1,000", new Color(1f, 0.5f, 0.7f, 1f), false);
+            CreateThemeCard(grid, "Theme_Rainbow", "Arcoiris", "$2.99", new Color(1f, 0.5f, 0.8f, 1f), false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Themes Section creado");
+            Debug.Log("[ShopPremiumUIBuilder] Themes Section V3 creado (9 items)");
         }
 
-        private static void CreateThemeItem(GameObject parent, string name, string displayName, string price, Color themeColor, bool isEquipped)
+        // ==================== FRAMES SECTION ====================
+
+        private static void CreateFramesSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "FramesSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionHeader(section, "MARCOS", FRAME_COLOR);
+
+            // Grid
+            GameObject grid = CreateChild(section, "FramesGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_COSMETIC_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = GRID_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = GRID_COSMETIC_H * 3 + GRID_SPACING * 2;
+
+            // 8 Frame items
+            CreateCosmeticCard(grid, "Frame_Basic", "Basico", "EQUIPADO", FRAME_COLOR, true);
+            CreateCosmeticCard(grid, "Frame_Bronze", "Bronce", "200", new Color(0.8f, 0.5f, 0.2f, 1f), false);
+            CreateCosmeticCard(grid, "Frame_Silver", "Plata", "400", new Color(0.75f, 0.75f, 0.8f, 1f), false);
+            CreateCosmeticCard(grid, "Frame_Gold", "Oro", "800", GOLD, false);
+            CreateCosmeticCard(grid, "Frame_Platinum", "Platino", "1,200", new Color(0.8f, 0.85f, 0.9f, 1f), false);
+            CreateCosmeticCard(grid, "Frame_Diamond", "Diamante", "2,000", GEM_COLOR, false);
+            CreateCosmeticCard(grid, "Frame_Fire", "Fuego", "1,500", new Color(1f, 0.35f, 0.1f, 1f), false);
+            CreateCosmeticCard(grid, "Frame_Ice", "Hielo", "1,500", new Color(0.5f, 0.8f, 1f, 1f), false);
+
+            Debug.Log("[ShopPremiumUIBuilder] Frames Section V3 creado (8 items)");
+        }
+
+        // ==================== GEM FRAMES SECTION ====================
+
+        private static void CreateGemFramesSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "GemFramesSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionHeader(section, "MARCOS GEMAS", GEM_COLOR);
+
+            // Grid
+            GameObject grid = CreateChild(section, "GemFramesGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_COSMETIC_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = GRID_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = GRID_COSMETIC_H * 2 + GRID_SPACING;
+
+            // 6 Gem frame items (bought with gems)
+            CreateCosmeticCard(grid, "GemFrame_Sapphire", "Zafiro", "100", new Color(0.2f, 0.4f, 1f, 1f), false);
+            CreateCosmeticCard(grid, "GemFrame_Emerald", "Esmeralda", "150", new Color(0.2f, 0.8f, 0.4f, 1f), false);
+            CreateCosmeticCard(grid, "GemFrame_Ruby", "Rubi", "200", new Color(1f, 0.2f, 0.3f, 1f), false);
+            CreateCosmeticCard(grid, "GemFrame_Amethyst", "Amatista", "250", PURPLE_LIGHT, false);
+            CreateCosmeticCard(grid, "GemFrame_Topaz", "Topacio", "300", new Color(1f, 0.8f, 0.2f, 1f), false);
+            CreateCosmeticCard(grid, "GemFrame_Obsidian", "Obsidiana", "500", new Color(0.3f, 0.25f, 0.35f, 1f), false);
+
+            Debug.Log("[ShopPremiumUIBuilder] Gem Frames Section V3 creado (6 items)");
+        }
+
+        // ==================== PREMIUM FRAMES SECTION ====================
+
+        private static void CreatePremiumFramesSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "PremiumFramesSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionHeader(section, "MARCOS PREMIUM", PURPLE_PREMIUM);
+
+            // Grid
+            GameObject grid = CreateChild(section, "PremiumFramesGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_COSMETIC_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = GRID_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = GRID_COSMETIC_H;
+
+            // 3 Premium frame items (real money)
+            CreateCosmeticCard(grid, "PremFrame_Legendary", "Legendario", "$1.99", GOLD, false);
+            CreateCosmeticCard(grid, "PremFrame_Mythic", "Mitico", "$2.99", PURPLE_PREMIUM, false);
+            CreateCosmeticCard(grid, "PremFrame_Celestial", "Celestial", "$4.99", CYAN_NEON, false);
+
+            Debug.Log("[ShopPremiumUIBuilder] Premium Frames Section V3 creado (3 items)");
+        }
+
+        // ==================== TITLES SECTION ====================
+
+        private static void CreateTitlesSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "TitlesSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionHeader(section, "TITULOS", TITLE_COLOR);
+
+            // Grid (2 columns, wider cards)
+            GameObject grid = CreateChild(section, "TitlesGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(TITLE_CELL_W, TITLE_CELL_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = TITLE_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = TITLE_CELL_H * 5 + GRID_SPACING * 4;
+
+            // 10 Title items
+            CreateTitleCard(grid, "Title_Novato", "Novato", "EQUIPADO", TEXT_SECONDARY, true);
+            CreateTitleCard(grid, "Title_Veterano", "Veterano", "500", new Color(0.6f, 0.8f, 0.6f, 1f), false);
+            CreateTitleCard(grid, "Title_Campeon", "Campeon", "1,000", GOLD, false);
+            CreateTitleCard(grid, "Title_Leyenda", "Leyenda", "2,000", PURPLE_LIGHT, false);
+            CreateTitleCard(grid, "Title_Maestro", "Gran Maestro", "3,000", ORANGE_HOT, false);
+            CreateTitleCard(grid, "Title_Genio", "Genio Digital", "150", GEM_COLOR, false);
+            CreateTitleCard(grid, "Title_Flash", "Velocista", "100", new Color(1f, 0.9f, 0.2f, 1f), false);
+            CreateTitleCard(grid, "Title_Memoria", "Mente Brillante", "200", new Color(0.5f, 1f, 0.8f, 1f), false);
+            CreateTitleCard(grid, "Title_Elite", "Elite", "$0.99", RED_URGENT, false);
+            CreateTitleCard(grid, "Title_Inmortal", "Inmortal", "$1.99", new Color(1f, 0.85f, 0.5f, 1f), false);
+
+            Debug.Log("[ShopPremiumUIBuilder] Titles Section V3 creado (10 items)");
+        }
+
+        private static void CreateTitleCard(GameObject parent, string name, string displayName,
+            string price, Color titleColor, bool isEquipped)
         {
             GameObject item = CreateChild(parent, name);
 
             Image itemBg = item.AddComponent<Image>();
             itemBg.color = CARD_BG;
-            AddOutline(item, isEquipped ? themeColor : themeColor * 0.4f, isEquipped ? 2 : 1);
+            AddOutline(item, isEquipped ? titleColor : titleColor * 0.4f, isEquipped ? 2 : 1);
 
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);
 
-            VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 6;
-            vlg.padding = new RectOffset(8, 8, 10, 10);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
+            HorizontalLayoutGroup hlg = item.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 12;
+            hlg.padding = new RectOffset(16, 16, 10, 10);
+            hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = true;
 
-            if (isEquipped)
-            {
-                GameObject badge = CreateChild(item, "EquippedBadge");
-                Image badgeBg = badge.AddComponent<Image>();
-                badgeBg.color = themeColor;
-                LayoutElement badgeLE = badge.AddComponent<LayoutElement>();
-                badgeLE.minHeight = 20;
-                badgeLE.preferredHeight = 20;
-
-                GameObject badgeText = CreateChild(badge, "Text");
-                SetStretch(badgeText);
-                TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
-                bt.text = "EQUIPADO";
-                bt.fontSize = 10;
-                bt.fontStyle = FontStyles.Bold;
-                bt.color = TEXT_DARK;
-                bt.alignment = TextAlignmentOptions.Center;
-            }
-
-            // Theme preview (color swatch)
-            GameObject preview = CreateChild(item, "Preview");
-            Image previewImg = preview.AddComponent<Image>();
-            previewImg.color = themeColor;
-            LayoutElement previewLE = preview.AddComponent<LayoutElement>();
-            previewLE.minHeight = 70;
-            previewLE.preferredHeight = 70;
-
-            // Create inner glow effect
-            AddOutline(preview, themeColor * 0.5f, 3);
-
-            // Name
-            GameObject nameObj = CreateChild(item, "Name");
+            // Title name
+            GameObject nameObj = CreateChild(item, "TitleName");
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = displayName;
-            nameText.fontSize = 16;
+            nameText.fontSize = 28;
             nameText.fontStyle = FontStyles.Bold;
-            nameText.color = themeColor;
-            nameText.alignment = TextAlignmentOptions.Center;
+            nameText.color = titleColor;
+            nameText.alignment = TextAlignmentOptions.MidlineLeft;
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
-            nameLE.minHeight = 24;
+            nameLE.flexibleWidth = 1;
 
-            // Price/Action button
-            GameObject priceBtn = CreateChild(item, "PriceButton");
-            Image priceBg = priceBtn.AddComponent<Image>();
-            priceBg.color = isEquipped ? BUTTON_SECONDARY : BUTTON_SUCCESS;
-            LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
-            priceLE.minHeight = 36;
-            priceLE.preferredHeight = 36;
-
-            HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
-            priceHlg.spacing = 5;
-            priceHlg.padding = new RectOffset(10, 10, 4, 4);
-            priceHlg.childAlignment = TextAnchor.MiddleCenter;
-            priceHlg.childControlWidth = false;
-            priceHlg.childControlHeight = true;
-
-            if (!isEquipped && !price.StartsWith("$"))
+            // Price/Status
+            if (isEquipped)
             {
-                // Gem price icon
-                GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
-                Image gemImg = gemIcon.AddComponent<Image>();
-                gemImg.color = TEXT_DARK;
-                LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
-                gemLE.minWidth = 18;
-                gemLE.minHeight = 18;
+                GameObject statusObj = CreateChild(item, "Status");
+                TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
+                statusText.text = "EQUIPADO";
+                statusText.fontSize = 22;
+                statusText.fontStyle = FontStyles.Bold;
+                statusText.color = TEXT_SECONDARY;
+                statusText.alignment = TextAlignmentOptions.MidlineRight;
+                LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
+                statusLE.minWidth = 120;
             }
+            else
+            {
+                // Price button inline
+                GameObject priceContainer = CreateChild(item, "PriceContainer");
+                LayoutElement pcLE = priceContainer.AddComponent<LayoutElement>();
+                pcLE.minWidth = 120;
+                pcLE.preferredWidth = 120;
 
-            GameObject priceText = CreateChild(priceBtn, "Text");
-            TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
-            pt.text = isEquipped ? "EQUIPADO" : price;
-            pt.fontSize = isEquipped ? 12 : 15;
-            pt.fontStyle = FontStyles.Bold;
-            pt.color = isEquipped ? TEXT_SECONDARY : TEXT_DARK;
-            pt.alignment = TextAlignmentOptions.Center;
-            LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
-            ptLE.flexibleWidth = 1;
+                bool isGemPrice = !price.StartsWith("$") && !price.Equals("GRATIS");
+                Color btnColor = price.StartsWith("$") ? BUTTON_SUCCESS : GEM_COLOR;
+
+                GameObject priceBtn = CreateChild(priceContainer, "PriceButton");
+                RectTransform priceBtnRT = priceBtn.GetComponent<RectTransform>();
+                priceBtnRT.anchorMin = new Vector2(0.5f, 0.5f);
+                priceBtnRT.anchorMax = new Vector2(0.5f, 0.5f);
+                priceBtnRT.sizeDelta = new Vector2(110, 40);
+
+                Image priceBg = priceBtn.AddComponent<Image>();
+                priceBg.color = btnColor;
+
+                HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
+                priceHlg.spacing = 5;
+                priceHlg.padding = new RectOffset(10, 10, 4, 4);
+                priceHlg.childAlignment = TextAnchor.MiddleCenter;
+                priceHlg.childControlWidth = false;
+                priceHlg.childControlHeight = true;
+
+                if (isGemPrice)
+                {
+                    GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
+                    Image gemImg = gemIcon.AddComponent<Image>();
+                    gemImg.color = TEXT_DARK;
+                    LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
+                    gemLE.minWidth = 18;
+                    gemLE.minHeight = 18;
+                }
+
+                GameObject priceText = CreateChild(priceBtn, "Text");
+                TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
+                pt.text = price;
+                pt.fontSize = PRICE_FONT;
+                pt.fontStyle = FontStyles.Bold;
+                pt.color = TEXT_DARK;
+                pt.alignment = TextAlignmentOptions.Center;
+                LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
+                ptLE.flexibleWidth = 1;
+            }
         }
 
-        // ==================== PREMIUM SECTION ====================
+        // ==================== VIP SECTION ====================
 
-        private static void CreatePremiumSection(GameObject parent)
+        private static void CreateVIPSection(GameObject parent)
         {
-            GameObject section = CreateChild(parent, "PremiumSection");
+            GameObject section = CreateChild(parent, "VIPSection");
 
             LayoutElement sectionLE = section.AddComponent<LayoutElement>();
-            sectionLE.minHeight = PREMIUM_HEIGHT;
+            sectionLE.minHeight = VIP_HEIGHT;
 
             Image sectionBg = section.AddComponent<Image>();
             sectionBg.color = new Color(0.1f, 0.05f, 0.18f, 1f);
-            AddOutline(section, PURPLE_PREMIUM, 2);
+            AddOutline(section, GOLD, 3);
+
+            Shadow shadow = section.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
+            shadow.effectDistance = new Vector2(4, -4);
 
             HorizontalLayoutGroup hlg = section.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 20;
-            hlg.padding = new RectOffset(20, 20, 15, 15);
+            hlg.padding = new RectOffset(24, 24, 18, 18);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
@@ -957,13 +1251,13 @@ namespace DigitPark.Editor
             // Icon
             GameObject iconContainer = CreateChild(section, "IconContainer");
             LayoutElement iconLE = iconContainer.AddComponent<LayoutElement>();
-            iconLE.minWidth = 80;
+            iconLE.minWidth = 90;
 
             GameObject icon = CreateChild(iconContainer, "Icon");
             RectTransform iconRT = icon.GetComponent<RectTransform>();
             iconRT.anchorMin = new Vector2(0.5f, 0.5f);
             iconRT.anchorMax = new Vector2(0.5f, 0.5f);
-            iconRT.sizeDelta = new Vector2(70, 70);
+            iconRT.sizeDelta = new Vector2(75, 75);
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = GOLD;
 
@@ -973,59 +1267,40 @@ namespace DigitPark.Editor
             infoLE.flexibleWidth = 1;
 
             VerticalLayoutGroup infoVlg = info.AddComponent<VerticalLayoutGroup>();
-            infoVlg.spacing = 4;
+            infoVlg.spacing = 5;
             infoVlg.childAlignment = TextAnchor.MiddleLeft;
             infoVlg.childControlHeight = true;
             infoVlg.childForceExpandHeight = false;
 
-            // VIP Badge
-            GameObject badge = CreateChild(info, "Badge");
-            Image badgeBg = badge.AddComponent<Image>();
-            badgeBg.color = GOLD;
-            LayoutElement badgeLE = badge.AddComponent<LayoutElement>();
-            badgeLE.minHeight = 24;
-            badgeLE.preferredHeight = 24;
-            badgeLE.minWidth = 60;
-            badgeLE.preferredWidth = 60;
+            CreateInlineBadge(info, "VIP", GOLD, 65);
 
-            GameObject badgeText = CreateChild(badge, "Text");
-            SetStretch(badgeText);
-            TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
-            bt.text = "VIP";
-            bt.fontSize = 12;
-            bt.fontStyle = FontStyles.Bold;
-            bt.color = TEXT_DARK;
-            bt.alignment = TextAlignmentOptions.Center;
-
-            // Title
             GameObject title = CreateChild(info, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "BUNDLE PREMIUM";
-            titleText.fontSize = 20;
+            titleText.fontSize = 30;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
-            titleLE.minHeight = 28;
+            titleLE.minHeight = 36;
 
-            // Desc
             GameObject desc = CreateChild(info, "Description");
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.text = "50 niveles de recompensas exclusivas";
-            descText.fontSize = 13;
+            descText.fontSize = 22;
             descText.color = TEXT_SECONDARY;
             LayoutElement descLE = desc.AddComponent<LayoutElement>();
-            descLE.minHeight = 20;
+            descLE.minHeight = 22;
 
             // Buy
             GameObject buyContainer = CreateChild(section, "BuyContainer");
             LayoutElement buyContainerLE = buyContainer.AddComponent<LayoutElement>();
-            buyContainerLE.minWidth = 120;
+            buyContainerLE.minWidth = 130;
 
             GameObject buyBtn = CreateChild(buyContainer, "BuyButton");
             RectTransform buyRT = buyBtn.GetComponent<RectTransform>();
             buyRT.anchorMin = new Vector2(0.5f, 0.5f);
             buyRT.anchorMax = new Vector2(0.5f, 0.5f);
-            buyRT.sizeDelta = new Vector2(110, 50);
+            buyRT.sizeDelta = new Vector2(120, 55);
 
             Image buyBg = buyBtn.AddComponent<Image>();
             buyBg.color = PURPLE_PREMIUM;
@@ -1037,50 +1312,21 @@ namespace DigitPark.Editor
             SetStretch(buyText);
             TextMeshProUGUI buyTxt = buyText.AddComponent<TextMeshProUGUI>();
             buyTxt.text = "$9.99";
-            buyTxt.fontSize = 20;
+            buyTxt.fontSize = 30;
             buyTxt.fontStyle = FontStyles.Bold;
             buyTxt.color = TEXT_PRIMARY;
             buyTxt.alignment = TextAlignmentOptions.Center;
 
-            Debug.Log("[ShopPremiumUIBuilder] Premium Section creado");
+            Debug.Log("[ShopPremiumUIBuilder] VIP Section V3 creado");
         }
 
-        // ==================== HELPER: SECTION HEADER ====================
+        // ==================== CARD BUILDERS ====================
 
-        private static void CreateSectionHeader(GameObject parent, string title, Color color)
-        {
-            GameObject header = CreateChild(parent, "Header");
-            LayoutElement headerLE = header.AddComponent<LayoutElement>();
-            headerLE.minHeight = 35;
-
-            HorizontalLayoutGroup hlg = header.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 10;
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-
-            GameObject titleObj = CreateChild(header, "Title");
-            TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.text = title;
-            titleText.fontSize = 22;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = color;
-            LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
-            titleLE.minWidth = 200;
-
-            // Separator line
-            GameObject line = CreateChild(header, "Line");
-            Image lineImg = line.AddComponent<Image>();
-            lineImg.color = color * 0.3f;
-            LayoutElement lineLE = line.AddComponent<LayoutElement>();
-            lineLE.flexibleWidth = 1;
-            lineLE.minHeight = 2;
-            lineLE.preferredHeight = 2;
-        }
-
-        // ==================== HELPER: SHOP ITEM ====================
-
-        private static void CreateShopItem(GameObject parent, string name, string amount, string price, string bonus, Color color, string badge, bool useGems = false)
+        /// <summary>
+        /// Card para items de Gemas/Monedas (330x280)
+        /// </summary>
+        private static void CreateShopCard(GameObject parent, string name, string amount,
+            string price, string bonus, Color color, string badge, bool useGems)
         {
             GameObject item = CreateChild(parent, name);
 
@@ -1091,20 +1337,20 @@ namespace DigitPark.Editor
             Color outlineColor = color * 0.5f;
             int outlineWidth = 1;
 
-            if (badge == "BEST_VALUE")
+            if (badge == "MEJOR VALOR")
             {
                 outlineColor = GREEN_FREE;
-                outlineWidth = 2;
+                outlineWidth = 3;
             }
             else if (badge == "POPULAR")
             {
                 outlineColor = GOLD;
-                outlineWidth = 2;
+                outlineWidth = 3;
             }
-            else if (badge == "MEGA")
+            else if (badge == "MEGA PACK")
             {
                 outlineColor = ORANGE_HOT;
-                outlineWidth = 2;
+                outlineWidth = 3;
             }
 
             AddOutline(item, outlineColor, outlineWidth);
@@ -1114,7 +1360,7 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 6;
-            vlg.padding = new RectOffset(8, 8, 10, 10);
+            vlg.padding = new RectOffset(12, 12, 12, 12);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
@@ -1123,41 +1369,11 @@ namespace DigitPark.Editor
             // Badge
             if (hasBadge)
             {
-                GameObject badgeObj = CreateChild(item, "Badge");
-                Image badgeBg = badgeObj.AddComponent<Image>();
-
-                string badgeText = "";
                 Color badgeColor = GOLD;
+                if (badge == "MEJOR VALOR") badgeColor = GREEN_FREE;
+                else if (badge == "MEGA PACK") badgeColor = ORANGE_HOT;
 
-                switch (badge)
-                {
-                    case "BEST_VALUE":
-                        badgeText = "MEJOR VALOR";
-                        badgeColor = GREEN_FREE;
-                        break;
-                    case "POPULAR":
-                        badgeText = "POPULAR";
-                        badgeColor = GOLD;
-                        break;
-                    case "MEGA":
-                        badgeText = "MEGA PACK";
-                        badgeColor = ORANGE_HOT;
-                        break;
-                }
-
-                badgeBg.color = badgeColor;
-                LayoutElement badgeLE = badgeObj.AddComponent<LayoutElement>();
-                badgeLE.minHeight = 20;
-                badgeLE.preferredHeight = 20;
-
-                GameObject badgeTextObj = CreateChild(badgeObj, "Text");
-                SetStretch(badgeTextObj);
-                TextMeshProUGUI bt = badgeTextObj.AddComponent<TextMeshProUGUI>();
-                bt.text = badgeText;
-                bt.fontSize = 10;
-                bt.fontStyle = FontStyles.Bold;
-                bt.color = TEXT_DARK;
-                bt.alignment = TextAlignmentOptions.Center;
+                CreateInlineBadge(item, badge, badgeColor, 0);
             }
 
             // Icon
@@ -1165,21 +1381,21 @@ namespace DigitPark.Editor
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
             LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minHeight = 50;
-            iconLE.preferredHeight = 50;
-            iconLE.minWidth = 50;
-            iconLE.preferredWidth = 50;
+            iconLE.minHeight = 65;
+            iconLE.preferredHeight = 65;
+            iconLE.minWidth = 65;
+            iconLE.preferredWidth = 65;
 
             // Amount
             GameObject amountObj = CreateChild(item, "Amount");
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = 22;
+            amountText.fontSize = AMOUNT_FONT;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Center;
             LayoutElement amountLE = amountObj.AddComponent<LayoutElement>();
-            amountLE.minHeight = 28;
+            amountLE.minHeight = 38;
 
             // Bonus
             if (!string.IsNullOrEmpty(bonus))
@@ -1187,25 +1403,27 @@ namespace DigitPark.Editor
                 GameObject bonusObj = CreateChild(item, "Bonus");
                 TextMeshProUGUI bonusText = bonusObj.AddComponent<TextMeshProUGUI>();
                 bonusText.text = bonus + " BONUS";
-                bonusText.fontSize = 11;
+                bonusText.fontSize = BONUS_FONT;
                 bonusText.fontStyle = FontStyles.Bold;
                 bonusText.color = BUTTON_SUCCESS;
                 bonusText.alignment = TextAlignmentOptions.Center;
                 LayoutElement bonusLE = bonusObj.AddComponent<LayoutElement>();
-                bonusLE.minHeight = 16;
+                bonusLE.minHeight = 22;
             }
 
             // Price button
+            Color priceBtnColor = useGems ? GEM_COLOR : BUTTON_SUCCESS;
             GameObject priceBtn = CreateChild(item, "PriceButton");
             Image priceBg = priceBtn.AddComponent<Image>();
-            priceBg.color = useGems ? GEM_COLOR : BUTTON_SUCCESS;
+            priceBg.color = priceBtnColor;
+            AddOutline(priceBtn, priceBtnColor * 1.2f, 1);
             LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
-            priceLE.minHeight = 36;
-            priceLE.preferredHeight = 36;
+            priceLE.minHeight = PRICE_BTN_HEIGHT;
+            priceLE.preferredHeight = PRICE_BTN_HEIGHT;
 
             HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
-            priceHlg.spacing = 5;
-            priceHlg.padding = new RectOffset(10, 10, 4, 4);
+            priceHlg.spacing = 6;
+            priceHlg.padding = new RectOffset(14, 14, 6, 6);
             priceHlg.childAlignment = TextAnchor.MiddleCenter;
             priceHlg.childControlWidth = false;
             priceHlg.childControlHeight = true;
@@ -1216,19 +1434,223 @@ namespace DigitPark.Editor
                 Image gemImg = gemIcon.AddComponent<Image>();
                 gemImg.color = TEXT_DARK;
                 LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
-                gemLE.minWidth = 18;
-                gemLE.minHeight = 18;
+                gemLE.minWidth = 22;
+                gemLE.minHeight = 22;
             }
 
             GameObject priceText = CreateChild(priceBtn, "Text");
             TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
             pt.text = price;
-            pt.fontSize = 16;
+            pt.fontSize = PRICE_FONT;
             pt.fontStyle = FontStyles.Bold;
             pt.color = TEXT_DARK;
             pt.alignment = TextAlignmentOptions.Center;
             LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
             ptLE.flexibleWidth = 1;
+        }
+
+        /// <summary>
+        /// Card para Temas (330x300) con preview de color
+        /// </summary>
+        private static void CreateThemeCard(GameObject parent, string name, string displayName,
+            string price, Color themeColor, bool isEquipped)
+        {
+            GameObject item = CreateChild(parent, name);
+
+            Image itemBg = item.AddComponent<Image>();
+            itemBg.color = CARD_BG;
+            AddOutline(item, isEquipped ? themeColor : themeColor * 0.4f, isEquipped ? 3 : 1);
+
+            Button btn = item.AddComponent<Button>();
+            SetupButton(btn, CARD_BG);
+
+            VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(12, 12, 12, 12);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            if (isEquipped)
+            {
+                CreateInlineBadge(item, "EQUIPADO", themeColor, 0);
+            }
+
+            // Theme preview (color swatch)
+            GameObject preview = CreateChild(item, "Preview");
+            Image previewImg = preview.AddComponent<Image>();
+            previewImg.color = themeColor;
+            LayoutElement previewLE = preview.AddComponent<LayoutElement>();
+            previewLE.minHeight = 90;
+            previewLE.preferredHeight = 90;
+            AddOutline(preview, themeColor * 0.5f, 3);
+
+            // Name
+            GameObject nameObj = CreateChild(item, "Name");
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = displayName;
+            nameText.fontSize = CARD_NAME_FONT;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.color = themeColor;
+            nameText.alignment = TextAlignmentOptions.Center;
+            LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
+            nameLE.minHeight = 30;
+
+            // Price/Action button
+            if (isEquipped)
+            {
+                GameObject statusObj = CreateChild(item, "Status");
+                TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
+                statusText.text = "EN USO";
+                statusText.fontSize = 22;
+                statusText.color = TEXT_SECONDARY;
+                statusText.alignment = TextAlignmentOptions.Center;
+                LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
+                statusLE.minHeight = PRICE_BTN_HEIGHT;
+            }
+            else
+            {
+                bool isGemPrice = !price.StartsWith("$") && !price.Equals("GRATIS");
+                Color btnColor = price.StartsWith("$") ? BUTTON_SUCCESS : (isGemPrice ? GEM_COLOR : GREEN_FREE);
+
+                GameObject priceBtn = CreateChild(item, "PriceButton");
+                Image priceBg = priceBtn.AddComponent<Image>();
+                priceBg.color = btnColor;
+                AddOutline(priceBtn, btnColor * 1.2f, 1);
+                LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
+                priceLE.minHeight = PRICE_BTN_HEIGHT;
+                priceLE.preferredHeight = PRICE_BTN_HEIGHT;
+
+                HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
+                priceHlg.spacing = 6;
+                priceHlg.padding = new RectOffset(14, 14, 6, 6);
+                priceHlg.childAlignment = TextAnchor.MiddleCenter;
+                priceHlg.childControlWidth = false;
+                priceHlg.childControlHeight = true;
+
+                if (isGemPrice)
+                {
+                    GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
+                    Image gemImg = gemIcon.AddComponent<Image>();
+                    gemImg.color = TEXT_DARK;
+                    LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
+                    gemLE.minWidth = 22;
+                    gemLE.minHeight = 22;
+                }
+
+                GameObject priceText = CreateChild(priceBtn, "Text");
+                TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
+                pt.text = price;
+                pt.fontSize = PRICE_FONT;
+                pt.fontStyle = FontStyles.Bold;
+                pt.color = TEXT_DARK;
+                pt.alignment = TextAlignmentOptions.Center;
+                LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
+                ptLE.flexibleWidth = 1;
+            }
+        }
+
+        /// <summary>
+        /// Card para Marcos/Cosmeticos (330x240)
+        /// </summary>
+        private static void CreateCosmeticCard(GameObject parent, string name, string displayName,
+            string price, Color itemColor, bool isEquipped)
+        {
+            GameObject item = CreateChild(parent, name);
+
+            Image itemBg = item.AddComponent<Image>();
+            itemBg.color = CARD_BG;
+            AddOutline(item, isEquipped ? itemColor : itemColor * 0.4f, isEquipped ? 2 : 1);
+
+            Button btn = item.AddComponent<Button>();
+            SetupButton(btn, CARD_BG);
+
+            VerticalLayoutGroup vlg = item.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(12, 12, 10, 10);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            if (isEquipped)
+            {
+                CreateInlineBadge(item, "EQUIPADO", itemColor, 0);
+            }
+
+            // Icon/Preview
+            GameObject icon = CreateChild(item, "Icon");
+            Image iconImg = icon.AddComponent<Image>();
+            iconImg.color = itemColor;
+            LayoutElement iconLE = icon.AddComponent<LayoutElement>();
+            iconLE.minHeight = 60;
+            iconLE.preferredHeight = 60;
+            iconLE.minWidth = 60;
+            iconLE.preferredWidth = 60;
+
+            // Name
+            GameObject nameObj = CreateChild(item, "Name");
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = displayName;
+            nameText.fontSize = CARD_NAME_FONT;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.color = itemColor;
+            nameText.alignment = TextAlignmentOptions.Center;
+            LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
+            nameLE.minHeight = 30;
+
+            // Price
+            if (isEquipped)
+            {
+                GameObject statusObj = CreateChild(item, "Status");
+                TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
+                statusText.text = "EN USO";
+                statusText.fontSize = 22;
+                statusText.color = TEXT_SECONDARY;
+                statusText.alignment = TextAlignmentOptions.Center;
+                LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
+                statusLE.minHeight = 40;
+            }
+            else
+            {
+                bool isGemPrice = !price.StartsWith("$") && !price.Equals("EQUIPADO") && !price.Equals("GRATIS");
+                Color btnColor = price.StartsWith("$") ? BUTTON_SUCCESS : (isGemPrice ? GEM_COLOR : GREEN_FREE);
+
+                GameObject priceBtn = CreateChild(item, "PriceButton");
+                Image priceBg = priceBtn.AddComponent<Image>();
+                priceBg.color = btnColor;
+                LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
+                priceLE.minHeight = 42;
+                priceLE.preferredHeight = 42;
+
+                HorizontalLayoutGroup priceHlg = priceBtn.AddComponent<HorizontalLayoutGroup>();
+                priceHlg.spacing = 5;
+                priceHlg.padding = new RectOffset(12, 12, 5, 5);
+                priceHlg.childAlignment = TextAnchor.MiddleCenter;
+                priceHlg.childControlWidth = false;
+                priceHlg.childControlHeight = true;
+
+                if (isGemPrice)
+                {
+                    GameObject gemIcon = CreateChild(priceBtn, "GemIcon");
+                    Image gemImg = gemIcon.AddComponent<Image>();
+                    gemImg.color = TEXT_DARK;
+                    LayoutElement gemLE = gemIcon.AddComponent<LayoutElement>();
+                    gemLE.minWidth = 20;
+                    gemLE.minHeight = 20;
+                }
+
+                GameObject priceText = CreateChild(priceBtn, "Text");
+                TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
+                pt.text = price;
+                pt.fontSize = PRICE_FONT;
+                pt.fontStyle = FontStyles.Bold;
+                pt.color = TEXT_DARK;
+                pt.alignment = TextAlignmentOptions.Center;
+                LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
+                ptLE.flexibleWidth = 1;
+            }
         }
 
         // ==================== POPUPS ====================
@@ -1249,7 +1671,7 @@ namespace DigitPark.Editor
             RectTransform popupRT = popup.GetComponent<RectTransform>();
             popupRT.anchorMin = new Vector2(0.5f, 0.5f);
             popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRT.sizeDelta = new Vector2(420, 340);
+            popupRT.sizeDelta = new Vector2(520, 440);
 
             Image popupBg = popup.AddComponent<Image>();
             popupBg.color = PANEL_BG;
@@ -1257,7 +1679,7 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = popup.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 18;
-            vlg.padding = new RectOffset(25, 25, 25, 25);
+            vlg.padding = new RectOffset(28, 28, 28, 28);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
@@ -1267,12 +1689,12 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Confirmar Compra";
-            titleText.fontSize = 26;
+            titleText.fontSize = POPUP_TITLE_FONT;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
-            titleLE.minHeight = 35;
+            titleLE.minHeight = 52;
 
             // Preview
             GameObject preview = CreateChild(popup, "Preview");
@@ -1282,29 +1704,29 @@ namespace DigitPark.Editor
             previewHlg.childControlWidth = false;
             previewHlg.childControlHeight = true;
             LayoutElement previewLE = preview.AddComponent<LayoutElement>();
-            previewLE.minHeight = 55;
+            previewLE.minHeight = 60;
 
             GameObject previewIcon = CreateChild(preview, "Icon");
             Image previewImg = previewIcon.AddComponent<Image>();
             previewImg.color = GEM_COLOR;
             LayoutElement iconLE = previewIcon.AddComponent<LayoutElement>();
-            iconLE.minWidth = 50;
-            iconLE.minHeight = 50;
+            iconLE.minWidth = 55;
+            iconLE.minHeight = 55;
 
             GameObject previewAmount = CreateChild(preview, "Amount");
             TextMeshProUGUI amountText = previewAmount.AddComponent<TextMeshProUGUI>();
             amountText.text = "1,200 Gemas";
-            amountText.fontSize = 24;
+            amountText.fontSize = 32;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             LayoutElement amountLE = previewAmount.AddComponent<LayoutElement>();
-            amountLE.minWidth = 200;
+            amountLE.minWidth = 220;
 
             // Price
             GameObject priceObj = CreateChild(popup, "Price");
             TextMeshProUGUI priceText = priceObj.AddComponent<TextMeshProUGUI>();
             priceText.text = "Precio: $9.99";
-            priceText.fontSize = 18;
+            priceText.fontSize = POPUP_TEXT_FONT;
             priceText.color = TEXT_SECONDARY;
             priceText.alignment = TextAlignmentOptions.Center;
             LayoutElement priceLE = priceObj.AddComponent<LayoutElement>();
@@ -1313,20 +1735,17 @@ namespace DigitPark.Editor
             // Buttons
             GameObject buttons = CreateChild(popup, "Buttons");
             HorizontalLayoutGroup btnHlg = buttons.AddComponent<HorizontalLayoutGroup>();
-            btnHlg.spacing = 15;
+            btnHlg.spacing = 16;
             btnHlg.childControlWidth = true;
             btnHlg.childControlHeight = true;
             btnHlg.childForceExpandWidth = true;
             LayoutElement btnLE = buttons.AddComponent<LayoutElement>();
-            btnLE.minHeight = 55;
+            btnLE.minHeight = 65;
 
-            // Cancel
             CreatePopupButton(buttons, "CancelButton", "Cancelar", BUTTON_SECONDARY, TEXT_PRIMARY);
-
-            // Confirm
             CreatePopupButton(buttons, "ConfirmButton", "Comprar", BUTTON_SUCCESS, TEXT_DARK);
 
-            Debug.Log("[ShopPremiumUIBuilder] PurchasePopup creado");
+            Debug.Log("[ShopPremiumUIBuilder] PurchasePopup V3 creado");
         }
 
         private static void CreateNotEnoughPopup(Canvas canvas)
@@ -1345,7 +1764,7 @@ namespace DigitPark.Editor
             RectTransform popupRT = popup.GetComponent<RectTransform>();
             popupRT.anchorMin = new Vector2(0.5f, 0.5f);
             popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRT.sizeDelta = new Vector2(400, 300);
+            popupRT.sizeDelta = new Vector2(500, 420);
 
             Image popupBg = popup.AddComponent<Image>();
             popupBg.color = PANEL_BG;
@@ -1353,7 +1772,7 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = popup.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 15;
-            vlg.padding = new RectOffset(25, 25, 25, 25);
+            vlg.padding = new RectOffset(28, 28, 28, 28);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
@@ -1364,46 +1783,46 @@ namespace DigitPark.Editor
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = GEM_COLOR;
             LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minHeight = 55;
-            iconLE.minWidth = 55;
-            iconLE.preferredHeight = 55;
-            iconLE.preferredWidth = 55;
+            iconLE.minHeight = 60;
+            iconLE.minWidth = 60;
+            iconLE.preferredHeight = 60;
+            iconLE.preferredWidth = 60;
 
             // Title
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Gemas Insuficientes";
-            titleText.fontSize = 24;
+            titleText.fontSize = POPUP_TITLE_FONT;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GEM_COLOR;
             titleText.alignment = TextAlignmentOptions.Center;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
-            titleLE.minHeight = 32;
+            titleLE.minHeight = 52;
 
             // Message
             GameObject msg = CreateChild(popup, "Message");
             TextMeshProUGUI msgText = msg.AddComponent<TextMeshProUGUI>();
-            msgText.text = "No tienes suficientes gemas.\n¡Consigue más en la tienda!";
-            msgText.fontSize = 15;
+            msgText.text = "No tienes suficientes gemas.\nConsigue mas en la tienda!";
+            msgText.fontSize = POPUP_TEXT_FONT;
             msgText.color = TEXT_SECONDARY;
             msgText.alignment = TextAlignmentOptions.Center;
             LayoutElement msgLE = msg.AddComponent<LayoutElement>();
-            msgLE.minHeight = 45;
+            msgLE.minHeight = 48;
 
             // Buttons
             GameObject buttons = CreateChild(popup, "Buttons");
             HorizontalLayoutGroup btnHlg = buttons.AddComponent<HorizontalLayoutGroup>();
-            btnHlg.spacing = 15;
+            btnHlg.spacing = 16;
             btnHlg.childControlWidth = true;
             btnHlg.childControlHeight = true;
             btnHlg.childForceExpandWidth = true;
             LayoutElement btnLE = buttons.AddComponent<LayoutElement>();
-            btnLE.minHeight = 50;
+            btnLE.minHeight = 65;
 
             CreatePopupButton(buttons, "CloseButton", "Cerrar", BUTTON_SECONDARY, TEXT_PRIMARY);
             CreatePopupButton(buttons, "GetGemsButton", "Obtener Gemas", GEM_COLOR, TEXT_DARK);
 
-            Debug.Log("[ShopPremiumUIBuilder] NotEnoughPopup creado");
+            Debug.Log("[ShopPremiumUIBuilder] NotEnoughPopup V3 creado");
         }
 
         private static void CreatePopupButton(GameObject parent, string name, string text, Color bgColor, Color textColor)
@@ -1423,7 +1842,7 @@ namespace DigitPark.Editor
             SetStretch(textObj);
             TextMeshProUGUI txt = textObj.AddComponent<TextMeshProUGUI>();
             txt.text = text;
-            txt.fontSize = 17;
+            txt.fontSize = BTN_TEXT_FONT;
             txt.fontStyle = FontStyles.Bold;
             txt.color = textColor;
             txt.alignment = TextAlignmentOptions.Center;
@@ -1433,7 +1852,6 @@ namespace DigitPark.Editor
 
         private static void AddShopManager(Canvas canvas)
         {
-            // Check if ShopManager already exists ANYWHERE in the scene (not just on Canvas)
             var existing = Object.FindObjectOfType<Monetization.ShopManager>();
             if (existing != null)
             {
@@ -1441,9 +1859,117 @@ namespace DigitPark.Editor
                 return;
             }
 
-            // Only add to Canvas if no ShopManager exists in the scene at all
             canvas.gameObject.AddComponent<Monetization.ShopManager>();
             Debug.Log("[ShopPremiumUIBuilder] ShopManager agregado al Canvas");
+        }
+
+        private static void AutoAssignReferences()
+        {
+            Debug.Log("[ShopPremiumUIBuilder] Auto-asignando referencias...");
+            ShopReferenceAssigner.ResetLog();
+            ShopReferenceAssigner.AssignAllReferences();
+            Debug.Log("[ShopPremiumUIBuilder] Referencias auto-asignadas");
+        }
+
+        // ==================== HELPER: SECTION HEADER ====================
+
+        /// <summary>
+        /// Section divider estilo BetSelection: [--- linea ---] TITULO [--- linea ---]
+        /// Elegante, centrado, prominente.
+        /// </summary>
+        private static void CreateSectionHeader(GameObject parent, string title, Color color)
+        {
+            GameObject divider = CreateChild(parent, title.Replace(" ", "") + "Divider");
+            LayoutElement divLE = divider.AddComponent<LayoutElement>();
+            divLE.minHeight = SECTION_DIVIDER_HEIGHT;
+            divLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
+
+            HorizontalLayoutGroup hlg = divider.AddComponent<HorizontalLayoutGroup>();
+            hlg.padding = new RectOffset(0, 0, 0, 0);
+            hlg.spacing = 20;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = false;
+
+            // Left line
+            GameObject lineL = CreateChild(divider, "LineLeft");
+            LayoutElement llLE = lineL.AddComponent<LayoutElement>();
+            llLE.flexibleWidth = 1;
+            llLE.preferredHeight = 2;
+            Image lineLeftImg = lineL.AddComponent<Image>();
+            lineLeftImg.color = new Color(color.r, color.g, color.b, 0.35f);
+
+            // Section title (centered, very prominent)
+            GameObject titleObj = CreateChild(divider, "SectionTitle");
+            LayoutElement tLE = titleObj.AddComponent<LayoutElement>();
+            tLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
+            TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
+            titleText.text = title;
+            titleText.fontSize = SECTION_DIVIDER_FONT;
+            titleText.fontStyle = FontStyles.Bold;
+            titleText.color = color;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableWordWrapping = false;
+
+            // Right line
+            GameObject lineR = CreateChild(divider, "LineRight");
+            LayoutElement lrLE = lineR.AddComponent<LayoutElement>();
+            lrLE.flexibleWidth = 1;
+            lrLE.preferredHeight = 2;
+            Image lineRightImg = lineR.AddComponent<Image>();
+            lineRightImg.color = new Color(color.r, color.g, color.b, 0.35f);
+        }
+
+        // ==================== HELPER: INLINE BADGE ====================
+
+        private static void CreateInlineBadge(GameObject parent, string text, Color bgColor, float width)
+        {
+            GameObject badge = CreateChild(parent, "Badge");
+            Image badgeBg = badge.AddComponent<Image>();
+            badgeBg.color = bgColor;
+            LayoutElement badgeLE = badge.AddComponent<LayoutElement>();
+            badgeLE.minHeight = BADGE_HEIGHT;
+            badgeLE.preferredHeight = BADGE_HEIGHT;
+            if (width > 0)
+            {
+                badgeLE.minWidth = width;
+                badgeLE.preferredWidth = width;
+            }
+
+            GameObject badgeText = CreateChild(badge, "Text");
+            SetStretch(badgeText);
+            TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
+            bt.text = text;
+            bt.fontSize = BADGE_FONT;
+            bt.fontStyle = FontStyles.Bold;
+            bt.color = TEXT_DARK;
+            bt.alignment = TextAlignmentOptions.Center;
+        }
+
+        // ==================== HELPER: PRICE BUTTON ====================
+
+        private static void CreatePriceButton(GameObject parent, string price, Color bgColor, Color textColor, float height, float fontSize)
+        {
+            GameObject priceBtn = CreateChild(parent, "BuyButton");
+            Image priceBg = priceBtn.AddComponent<Image>();
+            priceBg.color = bgColor;
+            Button buyButton = priceBtn.AddComponent<Button>();
+            SetupButton(buyButton, bgColor);
+            AddOutline(priceBtn, bgColor * 1.3f, 2);
+            LayoutElement priceLE = priceBtn.AddComponent<LayoutElement>();
+            priceLE.minHeight = height;
+            priceLE.preferredHeight = height;
+
+            GameObject priceText = CreateChild(priceBtn, "Text");
+            SetStretch(priceText);
+            TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
+            pt.text = price;
+            pt.fontSize = fontSize;
+            pt.fontStyle = FontStyles.Bold;
+            pt.color = textColor;
+            pt.alignment = TextAlignmentOptions.Center;
         }
 
         // ==================== UTILITIES ====================
@@ -1454,7 +1980,6 @@ namespace DigitPark.Editor
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
-                // No tocar TransitionCanvas ni EffectsCanvas
                 if (canvas.gameObject.name.Contains("Transition") ||
                     canvas.gameObject.name.Contains("Effects")) continue;
                 foreach (string name in toClean)

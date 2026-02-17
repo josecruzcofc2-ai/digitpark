@@ -56,26 +56,26 @@ namespace DigitPark.Editor
         private static readonly Color STEPPER_BG = new Color(0.08f, 0.12f, 0.2f);
 
         // ==================== FONT SIZES ====================
-        private const int TITLE_SIZE = 48;
-        private const int GAME_NAME_SIZE = 26;
-        private const int CURR_LABEL_SIZE = 22;
-        private const int CURR_VALUE_SIZE = 32;
-        private const int SECTION_SIZE = 16;
-        private const int CARD_COST_SIZE = 24;
-        private const int CARD_REWARD_SIZE = 16;
-        private const int CARD_BADGE_SIZE = 12;
-        private const int BTN_SIZE = 28;
-        private const int CUSTOM_TOGGLE_SIZE = 22;
-        private const int CUSTOM_INPUT_SIZE = 30;
-        private const int CUSTOM_PREVIEW_SIZE = 20;
-        private const int STEPPER_SIZE = 24;
+        private const int TITLE_SIZE = 78;
+        private const int GAME_NAME_SIZE = 36;
+        private const int CURR_LABEL_SIZE = 28;
+        private const int CURR_VALUE_SIZE = 42;
+        private const int SECTION_SIZE = 40;
+        private const int CARD_COST_SIZE = 40;
+        private const int CARD_REWARD_SIZE = 30;
+        private const int CARD_BADGE_SIZE = 24;
+        private const int BTN_SIZE = 36;
+        private const int CUSTOM_TOGGLE_SIZE = 28;
+        private const int CUSTOM_INPUT_SIZE = 36;
+        private const int CUSTOM_PREVIEW_SIZE = 26;
+        private const int STEPPER_SIZE = 28;
 
         // ==================== LAYOUT ====================
-        private const float CARD_H = 58f;
-        private const float CARD_PAD_H = 14f;
-        private const float CARD_PAD_V = 8f;
-        private const float BTN_H = 55f;
-        private const float CUSTOM_H = 155f;
+        private const float CARD_H = 85f;
+        private const float CARD_PAD_H = 16f;
+        private const float CARD_PAD_V = 10f;
+        private const float BTN_H = 70f;
+        private const float CUSTOM_H = 195f;
 
         [MenuItem("DigitPark/UI Builders/Games/BetSelection Scene", false, 350)]
         public static void ShowWindow()
@@ -137,7 +137,13 @@ namespace DigitPark.Editor
             SetFullStretch(bg.GetComponent<RectTransform>());
             bg.AddComponent<Image>().color = BG_DARK;
 
-            // === BACK BUTTON ===
+            // === HEADER ===
+            CreateHeader(canvas.transform);
+
+            // === CURRENCY BAR ===
+            CreateCurrencyBar(canvas.transform);
+
+            // === BACK BUTTON (after header so it renders on top) ===
             GameObject backPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Assets/_Project/Prefabs/Common/BackButton.prefab");
             if (backPrefab != null)
@@ -154,12 +160,6 @@ namespace DigitPark.Editor
                     brt.sizeDelta = new Vector2(50, 50);
                 }
             }
-
-            // === HEADER ===
-            CreateHeader(canvas.transform);
-
-            // === CURRENCY BAR ===
-            CreateCurrencyBar(canvas.transform);
 
             // === SCROLL AREA ===
             GameObject content = CreateScrollArea(canvas.transform);
@@ -241,7 +241,7 @@ namespace DigitPark.Editor
             Debug.Log("[BetSelectionUIBuilder] UI built. Running Reference Assigner...");
 
             // === AUTO-ASSIGN ===
-            var manager = DigitPark.Editor.AutoAssigners.BetSelectionReferenceAssigner.FindBetSelectionManager();
+            var manager = DigitPark.Editor.AutoAssigners.BetSelectionReferenceAssigner.FindBetSelectionPanel();
             if (manager != null)
             {
                 DigitPark.Editor.AutoAssigners.BetSelectionReferenceAssigner.AssignAllReferences();
@@ -249,8 +249,8 @@ namespace DigitPark.Editor
             }
             else
             {
-                Debug.LogWarning("[BetSelectionUIBuilder] BetSelectionManager not found. " +
-                    "Add BetSelectionManager component, then run Auto Assigner.");
+                Debug.LogWarning("[BetSelectionUIBuilder] BetSelectionPanel not found. " +
+                    "Add BetSelectionPanel component, then run Auto Assigner.");
             }
         }
 
@@ -260,7 +260,7 @@ namespace DigitPark.Editor
         {
             GameObject header = CreateUI("HeaderSection", parent);
             RectTransform hrt = header.GetComponent<RectTransform>();
-            hrt.anchorMin = new Vector2(0, 0.89f);
+            hrt.anchorMin = new Vector2(0, 0.87f);
             hrt.anchorMax = new Vector2(1, 1f);
             hrt.offsetMin = Vector2.zero;
             hrt.offsetMax = Vector2.zero;
@@ -277,9 +277,9 @@ namespace DigitPark.Editor
             vlg.childControlHeight = false;
 
             CreateText("TitleText", header.transform, "ELIGE TU APUESTA",
-                TITLE_SIZE, NEON_CYAN, FontStyles.Bold, 55f);
+                TITLE_SIZE, NEON_CYAN, FontStyles.Bold, 80f);
             CreateText("GameNameText", header.transform, "",
-                GAME_NAME_SIZE, GOLD, FontStyles.Italic, 30f);
+                GAME_NAME_SIZE, GOLD, FontStyles.Italic, 42f);
         }
 
         // ==================== CURRENCY BAR (prominent) ====================
@@ -288,8 +288,8 @@ namespace DigitPark.Editor
         {
             GameObject bar = CreateUI("CurrencyBar", parent);
             RectTransform brt = bar.GetComponent<RectTransform>();
-            brt.anchorMin = new Vector2(0.03f, 0.82f);
-            brt.anchorMax = new Vector2(0.97f, 0.885f);
+            brt.anchorMin = new Vector2(0.03f, 0.80f);
+            brt.anchorMax = new Vector2(0.97f, 0.865f);
             brt.offsetMin = Vector2.zero;
             brt.offsetMax = Vector2.zero;
             bar.AddComponent<Image>().color = CURRENCY_BG;
@@ -334,7 +334,7 @@ namespace DigitPark.Editor
             // Label
             GameObject labelGO = CreateUI(labelName, col.transform);
             var labelLE = labelGO.AddComponent<LayoutElement>();
-            labelLE.preferredHeight = 26;
+            labelLE.preferredHeight = 34;
             TextMeshProUGUI labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
             labelTMP.text = label;
             labelTMP.fontSize = CURR_LABEL_SIZE;
@@ -345,7 +345,7 @@ namespace DigitPark.Editor
             // Value
             GameObject valueGO = CreateUI(valueName, col.transform);
             var valueLE = valueGO.AddComponent<LayoutElement>();
-            valueLE.preferredHeight = 36;
+            valueLE.preferredHeight = 48;
             TextMeshProUGUI valueTMP = valueGO.AddComponent<TextMeshProUGUI>();
             valueTMP.text = "0";
             valueTMP.fontSize = CURR_VALUE_SIZE;
@@ -362,7 +362,7 @@ namespace DigitPark.Editor
             GameObject scrollArea = CreateUI("ScrollArea", parent);
             RectTransform srt = scrollArea.GetComponent<RectTransform>();
             srt.anchorMin = new Vector2(0, 0.01f);
-            srt.anchorMax = new Vector2(1, 0.815f);
+            srt.anchorMax = new Vector2(1, 0.795f);
             srt.offsetMin = Vector2.zero;
             srt.offsetMax = Vector2.zero;
 
@@ -370,16 +370,22 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
-            scrollRect.scrollSensitivity = 30;
+            scrollRect.elasticity = 0.1f;
+            scrollRect.decelerationRate = 0.135f;
+            scrollRect.scrollSensitivity = 50f;
 
-            // Viewport with mask
+            // Image on ScrollArea for raycast input (required for scroll to work)
+            Image scrollImg = scrollArea.AddComponent<Image>();
+            scrollImg.color = Color.clear;
+
+            // Viewport with RectMask2D
             GameObject viewport = CreateUI("Viewport", scrollArea.transform);
             RectTransform vpRT = viewport.GetComponent<RectTransform>();
             SetFullStretch(vpRT);
             Image vpImg = viewport.AddComponent<Image>();
-            vpImg.color = new Color(1, 1, 1, 0.003f);
-            Mask vpMask = viewport.AddComponent<Mask>();
-            vpMask.showMaskGraphic = false;
+            vpImg.color = Color.clear;
+            vpImg.raycastTarget = true;
+            viewport.AddComponent<RectMask2D>();
 
             // Content
             GameObject content = CreateUI("Content", viewport.transform);
@@ -397,7 +403,7 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
+            vlg.childControlHeight = true;
 
             ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -453,14 +459,16 @@ namespace DigitPark.Editor
             // Cost text
             GameObject costGO = CreateUI(costTextName, card.transform);
             var costLE = costGO.AddComponent<LayoutElement>();
-            costLE.preferredWidth = 200;
-            costLE.flexibleWidth = 0;
+            costLE.flexibleWidth = 1;
             TextMeshProUGUI costTMP = costGO.AddComponent<TextMeshProUGUI>();
             costTMP.text = costText;
             costTMP.fontSize = CARD_COST_SIZE;
             costTMP.color = accentColor;
             costTMP.fontStyle = FontStyles.Bold;
             costTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            costTMP.enableWordWrapping = false;
+            costTMP.overflowMode = TextOverflowModes.Ellipsis;
+            costTMP.raycastTarget = false;
 
             // Reward text
             GameObject rewardGO = CreateUI(rewardTextName, card.transform);
@@ -471,14 +479,15 @@ namespace DigitPark.Editor
             rewardTMP.fontSize = CARD_REWARD_SIZE;
             rewardTMP.color = TEXT_SECONDARY;
             rewardTMP.alignment = TextAlignmentOptions.MidlineRight;
+            rewardTMP.raycastTarget = false;
 
             // Badge (Image on parent, TMP on child - separate Graphic components)
             if (!string.IsNullOrEmpty(badgeText))
             {
                 GameObject badge = CreateUI("Badge", card.transform);
                 var badgeLE = badge.AddComponent<LayoutElement>();
-                badgeLE.preferredWidth = 50;
-                badgeLE.preferredHeight = 24;
+                badgeLE.preferredWidth = 110;
+                badgeLE.preferredHeight = 38;
                 badge.AddComponent<Image>().color =
                     new Color(accentColor.r, accentColor.g, accentColor.b, 0.25f);
                 AddOutline(badge, accentColor * 0.6f, 1);
@@ -491,6 +500,7 @@ namespace DigitPark.Editor
                 badgeTMP.color = accentColor;
                 badgeTMP.fontStyle = FontStyles.Bold;
                 badgeTMP.alignment = TextAlignmentOptions.Center;
+                badgeTMP.raycastTarget = false;
             }
 
             // Glass overlay
@@ -533,7 +543,7 @@ namespace DigitPark.Editor
             // === ROW 1: Currency toggles ===
             GameObject toggleRow = CreateUI("ToggleRow", card.transform);
             var trLE = toggleRow.AddComponent<LayoutElement>();
-            trLE.preferredHeight = 38;
+            trLE.preferredHeight = 46;
             var trHLG = toggleRow.AddComponent<HorizontalLayoutGroup>();
             trHLG.spacing = 10;
             trHLG.childAlignment = TextAnchor.MiddleCenter;
@@ -548,7 +558,7 @@ namespace DigitPark.Editor
             // === ROW 2: Stepper (minus, input, plus) ===
             GameObject inputRow = CreateUI("InputRow", card.transform);
             var irLE = inputRow.AddComponent<LayoutElement>();
-            irLE.preferredHeight = 48;
+            irLE.preferredHeight = 56;
             var irHLG = inputRow.AddComponent<HorizontalLayoutGroup>();
             irHLG.spacing = 8;
             irHLG.childAlignment = TextAnchor.MiddleCenter;
@@ -561,13 +571,13 @@ namespace DigitPark.Editor
             CreateFlexSpacer(inputRow.transform);
 
             // Minus button
-            CreateStepperButton("CustomMinusButton", inputRow.transform, "-5", 55);
+            CreateStepperButton("CustomMinusButton", inputRow.transform, "-5", 65);
 
             // Input field
             CreateAmountInputField("CustomAmountInput", inputRow.transform);
 
             // Plus button
-            CreateStepperButton("CustomPlusButton", inputRow.transform, "+5", 55);
+            CreateStepperButton("CustomPlusButton", inputRow.transform, "+5", 65);
 
             // Right spacer
             CreateFlexSpacer(inputRow.transform);
@@ -575,7 +585,7 @@ namespace DigitPark.Editor
             // === ROW 3: Reward preview ===
             GameObject previewGO = CreateUI("CustomRewardText", card.transform);
             var pvLE = previewGO.AddComponent<LayoutElement>();
-            pvLE.preferredHeight = 28;
+            pvLE.preferredHeight = 34;
             TextMeshProUGUI pvTMP = previewGO.AddComponent<TextMeshProUGUI>();
             pvTMP.text = "Gana: 20 monedas";
             pvTMP.fontSize = CUSTOM_PREVIEW_SIZE;
@@ -641,7 +651,7 @@ namespace DigitPark.Editor
             // Root with background
             GameObject inputObj = CreateUI(name, parent);
             var le = inputObj.AddComponent<LayoutElement>();
-            le.preferredWidth = 160;
+            le.preferredWidth = 180;
 
             Image bg = inputObj.AddComponent<Image>();
             bg.color = INPUT_BG;
@@ -693,7 +703,7 @@ namespace DigitPark.Editor
         {
             GameObject div = CreateUI(name, parent);
             var le = div.AddComponent<LayoutElement>();
-            le.preferredHeight = 26;
+            le.preferredHeight = 48;
 
             var hlg = div.AddComponent<HorizontalLayoutGroup>();
             hlg.padding = new RectOffset(5, 5, 0, 0);
@@ -714,8 +724,8 @@ namespace DigitPark.Editor
             // Section text
             GameObject textGO = CreateUI("SectionText", div.transform);
             var tLE = textGO.AddComponent<LayoutElement>();
-            tLE.preferredWidth = 160;
-            tLE.preferredHeight = 22;
+            tLE.preferredWidth = 260;
+            tLE.preferredHeight = 46;
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = SECTION_SIZE;

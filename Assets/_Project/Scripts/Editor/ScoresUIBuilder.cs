@@ -536,7 +536,7 @@ namespace DigitPark.Editor
             scroll.vertical = true;
             scroll.movementType = ScrollRect.MovementType.Elastic;
             scroll.elasticity = 0.1f;
-            scroll.scrollSensitivity = 30f;
+            scroll.scrollSensitivity = 50f;
 
             // Viewport
             GameObject viewport = CreateOrFind(scrollView.transform, "Viewport");

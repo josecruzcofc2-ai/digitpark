@@ -980,7 +980,7 @@ namespace DigitPark.Editor
             scrollRect.elasticity = 0.1f;
             scrollRect.inertia = true;
             scrollRect.decelerationRate = 0.135f;
-            scrollRect.scrollSensitivity = 20f;
+            scrollRect.scrollSensitivity = 50f;
 
             // Mask for scroll content
             Image scrollMask = scrollView.AddComponent<Image>();

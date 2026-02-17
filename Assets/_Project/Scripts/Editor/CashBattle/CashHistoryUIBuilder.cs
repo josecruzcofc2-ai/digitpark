@@ -652,7 +652,7 @@ namespace DigitPark.Editor
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.vertical = true;
-            scroll.scrollSensitivity = 10;
+            scroll.scrollSensitivity = 50;
 
             scrollView.AddComponent<Image>().color = new Color(0, 0, 0, 0);
 

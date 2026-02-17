@@ -3,35 +3,17 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using System.Collections.Generic;
-using DG.Tweening;
 
 namespace DigitPark.Monetization
 {
     /// <summary>
-    /// Manager principal de la escena Shop.
-    /// Maneja tabs, items, compras y navegacion.
+    /// Manager principal de la escena Shop V3.
+    /// Scroll continuo sin tabs - todas las secciones visibles.
     /// </summary>
     public class ShopManager : MonoBehaviour
     {
-        [Header("Tab References")]
-        [SerializeField] private Button _featuredTabButton;
-        [SerializeField] private Button _gemsTabButton;
-        [SerializeField] private Button _coinsTabButton;
-        [SerializeField] private Button _themesTabButton;
-        [SerializeField] private Button _cosmeticsTabButton;
-
-        [Header("Content References")]
-        [SerializeField] private GameObject _featuredContent;
-        [SerializeField] private GameObject _gemsContent;
-        [SerializeField] private GameObject _coinsContent;
-        [SerializeField] private GameObject _themesContent;
-        [SerializeField] private GameObject _cosmeticsContent;
-
-        [Header("Tab Visual Settings")]
-        [SerializeField] private Color _activeTabColor = new Color(0f, 1f, 1f, 1f);
-        [SerializeField] private Color _inactiveTabColor = new Color(0.12f, 0.16f, 0.2f, 1f);
-        [SerializeField] private Color _activeTextColor = new Color(0.02f, 0.05f, 0.1f, 1f);
-        [SerializeField] private Color _inactiveTextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+        [Header("Scroll View")]
+        [SerializeField] private GameObject _shopScrollView;
 
         [Header("Popups")]
         [SerializeField] private GameObject _purchasePopup;
@@ -58,18 +40,11 @@ namespace DigitPark.Monetization
         [Header("Shop Items")]
         [SerializeField] private List<ShopItemUI> _shopItems = new List<ShopItemUI>();
 
-        private ShopTab _currentTab = ShopTab.Featured;
-        private ShopTab _previousTab = ShopTab.Featured;
-        private bool _isTabTransitioning;
-        private Sequence _tabTransitionSequence;
-        private Dictionary<ShopTab, Button> _tabButtons;
-        private Dictionary<ShopTab, GameObject> _tabContents;
-        private Dictionary<ShopTab, Image> _tabImages;
-        private Dictionary<ShopTab, TextMeshProUGUI> _tabTexts;
-        private Dictionary<ShopTab, Vector2> _tabContentOriginalPositions = new Dictionary<ShopTab, Vector2>();
-
         // Current item being purchased
         private ShopItemUI _currentPurchaseItem;
+
+        // ScrollRect reference for programmatic scrolling
+        private ScrollRect _scrollRect;
 
         // Events
         public event Action<ShopTab> OnTabChanged;
@@ -78,8 +53,8 @@ namespace DigitPark.Monetization
 
         private void Awake()
         {
-            InitializeTabDictionaries();
             FindShopItems();
+            CacheScrollRect();
         }
 
         private void Start()
@@ -89,21 +64,25 @@ namespace DigitPark.Monetization
             SetupCurrencyListeners();
             HandleNavigationParams();
             RefreshCurrencyDisplay();
+            ForceLayoutRebuild();
         }
 
         private void OnDestroy()
         {
-            _tabTransitionSequence?.Kill();
             RemoveCurrencyListeners();
+        }
+
+        private void CacheScrollRect()
+        {
+            if (_shopScrollView != null)
+                _scrollRect = _shopScrollView.GetComponent<ScrollRect>();
         }
 
         private void FindShopItems()
         {
-            // Find all ShopItemUI components in the scene
             _shopItems.Clear();
             _shopItems.AddRange(FindObjectsOfType<ShopItemUI>());
 
-            // Subscribe to item events
             foreach (var item in _shopItems)
             {
                 item.OnPurchaseRequested += OnItemPurchaseRequested;
@@ -114,19 +93,16 @@ namespace DigitPark.Monetization
 
         private void SetupPopups()
         {
-            // Purchase popup buttons
             if (_popupConfirmButton != null)
                 _popupConfirmButton.onClick.AddListener(ConfirmPurchase);
             if (_popupCancelButton != null)
                 _popupCancelButton.onClick.AddListener(CancelPurchase);
 
-            // Not enough gems popup buttons
             if (_notEnoughCloseButton != null)
                 _notEnoughCloseButton.onClick.AddListener(HideNotEnoughGemsPopup);
             if (_notEnoughGetGemsButton != null)
                 _notEnoughGetGemsButton.onClick.AddListener(OnGetGemsClicked);
 
-            // Make sure popups are hidden initially
             HidePurchasePopup();
             HideNotEnoughGemsPopup();
         }
@@ -152,7 +128,6 @@ namespace DigitPark.Monetization
                 currency.OnNotEnoughGems -= OnNotEnoughGems;
             }
 
-            // Unsubscribe from shop items
             foreach (var item in _shopItems)
             {
                 if (item != null)
@@ -185,7 +160,6 @@ namespace DigitPark.Monetization
             if (_coinsDisplay != null)
                 _coinsDisplay.SetAmount(currency.Coins);
 
-            // Also update header text if available
             if (_headerGemsText != null)
                 _headerGemsText.text = FormatCurrency(currency.Gems);
             if (_headerCoinsText != null)
@@ -202,71 +176,10 @@ namespace DigitPark.Monetization
                 return amount.ToString("N0");
         }
 
-        private void InitializeTabDictionaries()
-        {
-            _tabButtons = new Dictionary<ShopTab, Button>
-            {
-                { ShopTab.Featured, _featuredTabButton },
-                { ShopTab.Gems, _gemsTabButton },
-                { ShopTab.Coins, _coinsTabButton },
-                { ShopTab.Themes, _themesTabButton },
-                { ShopTab.Cosmetics, _cosmeticsTabButton }
-            };
-
-            _tabContents = new Dictionary<ShopTab, GameObject>
-            {
-                { ShopTab.Featured, _featuredContent },
-                { ShopTab.Gems, _gemsContent },
-                { ShopTab.Coins, _coinsContent },
-                { ShopTab.Themes, _themesContent },
-                { ShopTab.Cosmetics, _cosmeticsContent }
-            };
-
-            // Cache tab images and texts for color changes
-            _tabImages = new Dictionary<ShopTab, Image>();
-            _tabTexts = new Dictionary<ShopTab, TextMeshProUGUI>();
-
-            foreach (var kvp in _tabButtons)
-            {
-                if (kvp.Value != null)
-                {
-                    _tabImages[kvp.Key] = kvp.Value.GetComponent<Image>();
-                    _tabTexts[kvp.Key] = kvp.Value.GetComponentInChildren<TextMeshProUGUI>();
-                }
-            }
-
-            // Cache original positions for tab content panels
-            foreach (var kvp in _tabContents)
-            {
-                if (kvp.Value != null)
-                {
-                    var rt = kvp.Value.GetComponent<RectTransform>();
-                    if (rt != null)
-                        _tabContentOriginalPositions[kvp.Key] = rt.anchoredPosition;
-                }
-            }
-        }
-
         private void SetupButtons()
         {
-            // Tab buttons
-            if (_featuredTabButton != null)
-                _featuredTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Featured));
-            if (_gemsTabButton != null)
-                _gemsTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Gems));
-            if (_coinsTabButton != null)
-                _coinsTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Coins));
-            if (_themesTabButton != null)
-                _themesTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Themes));
-            if (_cosmeticsTabButton != null)
-                _cosmeticsTabButton.onClick.AddListener(() => SwitchToTab(ShopTab.Cosmetics));
-
-            // Back button
             if (_backButton != null)
                 _backButton.onClick.AddListener(OnBackButtonClick);
-
-            // Initial tab
-            SwitchToTab(_currentTab);
         }
 
         private void HandleNavigationParams()
@@ -276,22 +189,20 @@ namespace DigitPark.Monetization
 
             if (navParams != null)
             {
-                // Switch to target tab
+                // Scroll to section based on tab param
                 if (!string.IsNullOrEmpty(navParams.TargetTab))
                 {
                     if (Enum.TryParse<ShopTab>(navParams.TargetTab, out ShopTab targetTab))
                     {
-                        SwitchToTab(targetTab);
+                        ScrollToSection(targetTab);
                     }
                 }
 
-                // Show popup if requested
                 if (navParams.ShowPopup)
                 {
                     ShowNotEnoughGemsPopup();
                 }
 
-                // Scroll to specific offer
                 if (!string.IsNullOrEmpty(navParams.ItemId))
                 {
                     ScrollToItem(navParams.ItemId);
@@ -302,127 +213,31 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Cambia a una tab especifica con animacion DOTween
+        /// Scroll programatico a una seccion por ShopTab.
+        /// Mapea tabs a posiciones aproximadas del scroll.
         /// </summary>
-        public void SwitchToTab(ShopTab tab)
+        public void ScrollToSection(ShopTab tab)
         {
-            if (_isTabTransitioning) return;
-            if (_currentTab == tab && _tabContents.TryGetValue(tab, out var currentPanel) && currentPanel != null && currentPanel.activeSelf) return;
+            if (_scrollRect == null) return;
 
-            _previousTab = _currentTab;
-            _currentTab = tab;
-
-            // Update tab button visuals with DOTween
-            foreach (var kvp in _tabButtons)
-            {
-                bool isActive = kvp.Key == tab;
-
-                if (_tabImages.TryGetValue(kvp.Key, out Image image) && image != null)
-                {
-                    image.DOColor(isActive ? GetTabColor(kvp.Key) : _inactiveTabColor, 0.2f);
-                }
-
-                if (_tabTexts.TryGetValue(kvp.Key, out TextMeshProUGUI text) && text != null)
-                {
-                    text.DOColor(isActive ? _activeTextColor : _inactiveTextColor, 0.2f);
-                }
-
-                // Scale animation for active tab
-                if (kvp.Value != null)
-                {
-                    kvp.Value.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
-                }
-            }
-
-            // Determine slide direction
-            bool goingRight = (int)tab > (int)_previousTab;
-
-            // Animate content panels
-            _tabTransitionSequence?.Kill();
-            _tabTransitionSequence = DOTween.Sequence();
-            _isTabTransitioning = true;
-
-            // Fade out + slide old content
-            if (_tabContents.TryGetValue(_previousTab, out var oldContent) && oldContent != null && oldContent.activeSelf && _previousTab != tab)
-            {
-                var oldCG = oldContent.GetComponent<CanvasGroup>();
-                if (oldCG == null) oldCG = oldContent.AddComponent<CanvasGroup>();
-                var oldRT = oldContent.GetComponent<RectTransform>();
-                Vector2 oldOrigPos = _tabContentOriginalPositions.ContainsKey(_previousTab) ? _tabContentOriginalPositions[_previousTab] : Vector2.zero;
-                float exitDir = goingRight ? -30f : 30f;
-                var capturedOldContent = oldContent;
-                var capturedOldRT = oldRT;
-                var capturedOldCG = oldCG;
-                var capturedOldOrigPos = oldOrigPos;
-
-                _tabTransitionSequence
-                    .Join(capturedOldCG.DOFade(0f, 0.15f))
-                    .Join(capturedOldRT.DOAnchorPosX(capturedOldOrigPos.x + exitDir, 0.15f));
-
-                _tabTransitionSequence.InsertCallback(0.15f, () =>
-                {
-                    capturedOldContent.SetActive(false);
-                    capturedOldRT.anchoredPosition = capturedOldOrigPos;
-                    capturedOldCG.alpha = 1f;
-                });
-            }
-
-            // Fade in + slide new content
-            if (_tabContents.TryGetValue(tab, out var newContent) && newContent != null)
-            {
-                var newCG = newContent.GetComponent<CanvasGroup>();
-                if (newCG == null) newCG = newContent.AddComponent<CanvasGroup>();
-                var newRT = newContent.GetComponent<RectTransform>();
-                Vector2 newOrigPos = _tabContentOriginalPositions.ContainsKey(tab) ? _tabContentOriginalPositions[tab] : Vector2.zero;
-                float enterDir = goingRight ? 30f : -30f;
-
-                newCG.alpha = 0f;
-                newContent.SetActive(true);
-                newRT.anchoredPosition = newOrigPos + new Vector2(enterDir, 0);
-
-                float enterDelay = (_previousTab != tab && oldContent != null && oldContent != newContent) ? 0.1f : 0f;
-
-                _tabTransitionSequence.Insert(enterDelay, newCG.DOFade(1f, 0.2f));
-                _tabTransitionSequence.Insert(enterDelay, newRT.DOAnchorPos(newOrigPos, 0.2f).SetEase(Ease.OutQuad));
-            }
-
-            // Hide all other content panels immediately (safety)
-            foreach (var kvp in _tabContents)
-            {
-                if (kvp.Key != tab && kvp.Key != _previousTab && kvp.Value != null)
-                {
-                    kvp.Value.SetActive(false);
-                }
-            }
-
-            _tabTransitionSequence.OnComplete(() => _isTabTransitioning = false);
-
-            OnTabChanged?.Invoke(tab);
-            Debug.Log($"[ShopManager] Switched to tab: {tab}");
-        }
-
-        private Color GetTabColor(ShopTab tab)
-        {
+            // Normalized position (1 = top, 0 = bottom)
+            float pos = 1f;
             switch (tab)
             {
-                case ShopTab.Featured:
-                    return new Color(1f, 0.84f, 0f, 1f); // Gold
-                case ShopTab.Gems:
-                    return new Color(0.4f, 0.8f, 1f, 1f); // Gem blue
-                case ShopTab.Coins:
-                    return new Color(1f, 0.85f, 0.3f, 1f); // Gold
-                case ShopTab.Themes:
-                    return new Color(0.6f, 0.3f, 0.9f, 1f); // Purple
-                case ShopTab.Cosmetics:
-                    return new Color(1f, 0.3f, 0.6f, 1f); // Pink/Magenta
-                default:
-                    return _activeTabColor;
+                case ShopTab.Featured: pos = 1f; break;
+                case ShopTab.Gems: pos = 0.7f; break;
+                case ShopTab.Coins: pos = 0.55f; break;
+                case ShopTab.Themes: pos = 0.4f; break;
+                case ShopTab.Cosmetics: pos = 0.2f; break;
             }
+
+            _scrollRect.verticalNormalizedPosition = pos;
+            OnTabChanged?.Invoke(tab);
+            Debug.Log($"[ShopManager] Scrolled to section: {tab}");
         }
 
         private void ScrollToItem(string itemId)
         {
-            // TODO: Implement scroll to specific item
             Debug.Log($"[ShopManager] Scroll to item: {itemId}");
         }
 
@@ -440,14 +255,12 @@ namespace DigitPark.Monetization
 
             var itemData = item.ItemData;
 
-            // For real money items, show confirmation popup
             if (itemData.priceType == PriceType.RealMoney)
             {
                 ShowPurchasePopup(item);
                 return;
             }
 
-            // For in-game currency, check if can afford
             if (!itemData.CanAfford())
             {
                 if (itemData.priceType == PriceType.Gems)
@@ -457,7 +270,6 @@ namespace DigitPark.Monetization
                 return;
             }
 
-            // Show confirmation popup for all purchases
             ShowPurchasePopup(item);
         }
 
@@ -470,7 +282,6 @@ namespace DigitPark.Monetization
             _currentPurchaseItem = item;
             var itemData = item.ItemData;
 
-            // Populate popup
             if (_popupItemIcon != null && itemData.icon != null)
             {
                 _popupItemIcon.sprite = itemData.icon;
@@ -543,7 +354,7 @@ namespace DigitPark.Monetization
         private void OnGetGemsClicked()
         {
             HideNotEnoughGemsPopup();
-            SwitchToTab(ShopTab.Gems);
+            ScrollToSection(ShopTab.Gems);
         }
 
         // ==================== PURCHASE METHODS ====================
@@ -564,14 +375,12 @@ namespace DigitPark.Monetization
 
             var itemData = _currentPurchaseItem.ItemData;
 
-            // Handle real money purchases (IAP)
             if (itemData.priceType == PriceType.RealMoney)
             {
                 ProcessIAPPurchase(itemData);
             }
             else
             {
-                // In-game currency purchase
                 bool success = _currentPurchaseItem.TryPurchase();
                 if (success)
                 {
@@ -585,11 +394,7 @@ namespace DigitPark.Monetization
 
         private void ProcessIAPPurchase(ShopItemData itemData)
         {
-            // For now, simulate IAP purchase
-            // In production, this would call PremiumManager or Unity IAP
             Debug.Log($"[ShopManager] Processing IAP: {itemData.iapProductId}");
-
-            // Simulate successful purchase
             StartCoroutine(SimulateIAPPurchase(itemData));
         }
 
@@ -597,7 +402,6 @@ namespace DigitPark.Monetization
         {
             yield return new WaitForSeconds(0.5f);
 
-            // Grant the rewards
             itemData.GrantRewards();
 
             OnItemPurchased?.Invoke(itemData.itemId);
@@ -619,9 +423,6 @@ namespace DigitPark.Monetization
                 _coinsDisplay.SetAmount(coins);
         }
 
-        /// <summary>
-        /// Registra un ShopItemUI manualmente
-        /// </summary>
         public void RegisterShopItem(ShopItemUI item)
         {
             if (item != null && !_shopItems.Contains(item))
@@ -631,9 +432,6 @@ namespace DigitPark.Monetization
             }
         }
 
-        /// <summary>
-        /// Obtiene todos los items de una tab especifica
-        /// </summary>
         public List<ShopItemUI> GetItemsForTab(ShopTab tab)
         {
             var result = new List<ShopItemUI>();
@@ -645,6 +443,26 @@ namespace DigitPark.Monetization
                 }
             }
             return result;
+        }
+
+        // ==================== LAYOUT ====================
+
+        private void ForceLayoutRebuild()
+        {
+            if (_shopScrollView != null)
+            {
+                var scrollContent = _shopScrollView.GetComponent<ScrollRect>();
+                if (scrollContent != null && scrollContent.content != null)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(scrollContent.content);
+                }
+            }
+
+            // Also rebuild all nested layout groups
+            foreach (var layout in GetComponentsInChildren<LayoutGroup>(true))
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
+            }
         }
     }
 }
