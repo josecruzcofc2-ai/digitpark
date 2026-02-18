@@ -228,15 +228,15 @@ namespace DigitPark.Editor
             cardsRT.offsetMin = Vector2.zero;
             cardsRT.offsetMax = Vector2.zero;
 
-            // Vertical Layout
+            // Vertical Layout - cards fill available space
             VerticalLayoutGroup vlg = cardsSection.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 40;
-            vlg.padding = new RectOffset(15, 15, 20, 20);
+            vlg.spacing = 30;
+            vlg.padding = new RectOffset(15, 15, 10, 10);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
+            vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
+            vlg.childForceExpandHeight = true;
 
             // Load icon sprites
             Sprite soloIcon = AssetDatabase.LoadAssetAtPath<Sprite>(SOLO_ICON_PATH);
@@ -248,32 +248,27 @@ namespace DigitPark.Editor
             CreateNeonModeCard(cardsSection.transform, "SoloCard",
                 "SOLO",
                 "Train your brain at your own pace.\nNo competition, just practice.",
-                CYAN_NEON, 280, soloIcon);
+                CYAN_NEON, soloIcon);
 
             CreateNeonModeCard(cardsSection.transform, "OneVsOneCard",
                 "1 VS 1",
                 "Challenge other players in real-time.\nTest your skills head-to-head.",
-                CYAN_NEON, 280, oneVsOneIcon);
+                CYAN_NEON, oneVsOneIcon);
 
             CreateNeonModeCard(cardsSection.transform, "TournamentsCard",
                 "TOURNAMENTS",
                 "Join free tournaments for rankings.\nClimb the leaderboard!",
-                CYAN_NEON, 280, tournamentsIcon);
+                CYAN_NEON, tournamentsIcon);
         }
 
         private static void CreateNeonModeCard(Transform parent, string name, string title,
-            string description, Color accentColor, float height, Sprite iconSprite = null)
+            string description, Color accentColor, Sprite iconSprite = null)
         {
             Color sideColor = new Color(accentColor.r * 0.3f, accentColor.g * 0.3f, accentColor.b * 0.3f, 1f);
 
             // ========== CARD CONTAINER ==========
             GameObject card = CreateElement(parent, name);
-            RectTransform cardRT = card.GetComponent<RectTransform>();
-            cardRT.sizeDelta = new Vector2(0, height);
-
-            LayoutElement cardLE = card.AddComponent<LayoutElement>();
-            cardLE.preferredHeight = height;
-            cardLE.minHeight = height;
+            // Height controlled by VerticalLayoutGroup (fills available space)
 
             // ========== SHADOW ==========
             GameObject shadow = CreateElement(card, "Shadow");

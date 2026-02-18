@@ -251,6 +251,9 @@ namespace DigitPark.Editor
             var outline = GetOrAdd<Outline>(bar);
             outline.effectColor = CYAN_DARK;
             outline.effectDistance = new Vector2(1, 1);
+            var barShadow = bar.AddComponent<Shadow>();
+            barShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            barShadow.effectDistance = new Vector2(3, -4);
 
             // Input Field
             var inputGO = FindOrCreate(bar.transform, "SearchInput");
@@ -328,6 +331,9 @@ namespace DigitPark.Editor
             var outline = GetOrAdd<Outline>(nav);
             outline.effectColor = PURPLE_ACCENT;
             outline.effectDistance = new Vector2(1.5f, 1.5f);
+            var navShadow = nav.AddComponent<Shadow>();
+            navShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            navShadow.effectDistance = new Vector2(3, -4);
 
             // Label
             var label = FindOrCreate(nav.transform, "Label");
@@ -500,6 +506,9 @@ namespace DigitPark.Editor
             var cardOutline = card.AddComponent<Outline>();
             cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.4f);
             cardOutline.effectDistance = new Vector2(1, 1);
+            var cardShadow = card.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            cardShadow.effectDistance = new Vector2(3, -4);
 
             // ---- Avatar Frame (left) ----
             var avatarFrame = new GameObject("AvatarFrame");

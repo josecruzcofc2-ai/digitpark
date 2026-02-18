@@ -555,6 +555,9 @@ namespace DigitPark.Editor
             Button prevButton = previewBtn.AddComponent<Button>();
             SetupButtonColors(prevButton, BUTTON_SECONDARY);
             AddOutline(previewBtn, CYAN_DARK);
+            var prevShadow = previewBtn.AddComponent<Shadow>();
+            prevShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            prevShadow.effectDistance = new Vector2(3, -4);
             SetLayoutElement(previewBtn, 90);
 
             GameObject prevText = CreateChild(previewBtn, "Text");
@@ -572,6 +575,9 @@ namespace DigitPark.Editor
             Button createButton = createBtn.AddComponent<Button>();
             SetupButtonColors(createButton, BUTTON_PRIMARY);
             AddOutline(createBtn, CYAN_GLOW, 3);
+            var createShadow = createBtn.AddComponent<Shadow>();
+            createShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            createShadow.effectDistance = new Vector2(3, -4);
             SetLayoutElement(createBtn, 100);
 
             // Glow behind button
@@ -718,6 +724,9 @@ namespace DigitPark.Editor
 
             SetImage(card, CARD_BG);
             AddOutline(card, CYAN_DARK);
+            var cardShadow = card.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            cardShadow.effectDistance = new Vector2(3, -4);
 
             VerticalLayoutGroup vlg = card.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = CARD_INNER_SPACING;

@@ -333,6 +333,27 @@ namespace DigitPark.Managers
                 int prize = Mathf.RoundToInt(currentTournament.totalPrizePool * (percent / 100f));
                 CreatePrizeRow(L(placeKey), prize, percent);
             }
+
+            // Staggered entrance animation for prize rows
+            AnimatePrizeRowsEntrance();
+        }
+
+        private void AnimatePrizeRowsEntrance()
+        {
+            if (prizeDistributionContainer == null || prizeDistributionContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < prizeDistributionContainer.childCount; i++)
+            {
+                var child = prizeDistributionContainer.GetChild(i);
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.08f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+            }
         }
 
         private void CreatePrizeRow(string place, int prize, float percent)

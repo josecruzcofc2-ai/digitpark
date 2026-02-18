@@ -303,8 +303,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = new Vector2(180, 65);
-            rt.anchoredPosition = new Vector2(-20, 0);
+            rt.sizeDelta = new Vector2(300, 70);
+            rt.anchoredPosition = new Vector2(-15, 0);
 
             // Background
             Image bg = balanceWidget.AddComponent<Image>();
@@ -315,41 +315,26 @@ namespace DigitPark.Editor
             outline.effectColor = CARD_BORDER;
             outline.effectDistance = new Vector2(1, -1);
 
-            // Coin icon
-            GameObject coinIcon = new GameObject("CoinIcon");
-            coinIcon.transform.SetParent(balanceWidget.transform, false);
-
-            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
-            coinRT.anchorMin = new Vector2(0, 0);
-            coinRT.anchorMax = new Vector2(0, 1);
-            coinRT.pivot = new Vector2(0, 0.5f);
-            coinRT.sizeDelta = new Vector2(40, 0);
-            coinRT.anchoredPosition = new Vector2(8, 0);
-
-            TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
-            coinText.text = "$";
-            coinText.fontSize = 52;
-            coinText.color = TEXT_GOLD;
-            coinText.alignment = TextAlignmentOptions.Center;
-            coinText.fontStyle = FontStyles.Bold;
-
-            // Balance text
+            // Balance text (includes $ sign via code)
             GameObject balanceObj = new GameObject("BalanceText");
             balanceObj.transform.SetParent(balanceWidget.transform, false);
 
             RectTransform balanceRT = balanceObj.AddComponent<RectTransform>();
-            balanceRT.anchorMin = new Vector2(0, 0);
-            balanceRT.anchorMax = new Vector2(1, 1);
+            balanceRT.anchorMin = Vector2.zero;
+            balanceRT.anchorMax = Vector2.one;
             balanceRT.sizeDelta = Vector2.zero;
-            balanceRT.offsetMin = new Vector2(45, 0);
+            balanceRT.offsetMin = new Vector2(15, 0);
             balanceRT.offsetMax = new Vector2(-10, 0);
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
-            balanceText.text = "0.00";
-            balanceText.fontSize = 52;
-            balanceText.color = TEXT_PRIMARY;
-            balanceText.alignment = TextAlignmentOptions.Left;
+            balanceText.text = "$0.00";
+            balanceText.fontSize = 44;
+            balanceText.color = TEXT_GOLD;
+            balanceText.alignment = TextAlignmentOptions.Center;
             balanceText.fontStyle = FontStyles.Bold;
+            balanceText.enableAutoSizing = true;
+            balanceText.fontSizeMin = 28;
+            balanceText.fontSizeMax = 44;
         }
 
         #endregion
@@ -537,16 +522,51 @@ namespace DigitPark.Editor
 
         private static void CreateActionButton(Transform parent, string name, string text, Color accent, Color bgColor, string iconName)
         {
-            GameObject btn = new GameObject(name);
-            btn.transform.SetParent(parent, false);
+            // Wrapper to hold shadow + button
+            GameObject wrapper = new GameObject(name);
+            wrapper.transform.SetParent(parent, false);
+
+            LayoutElement wrapperLE = wrapper.AddComponent<LayoutElement>();
+            wrapperLE.preferredWidth = 350;
+            wrapperLE.flexibleWidth = 1;
+
+            // Shadow (behind button, offset down-right)
+            GameObject shadow = new GameObject("Shadow");
+            shadow.transform.SetParent(wrapper.transform, false);
+            RectTransform shadowRT = shadow.AddComponent<RectTransform>();
+            shadowRT.anchorMin = Vector2.zero;
+            shadowRT.anchorMax = Vector2.one;
+            shadowRT.offsetMin = new Vector2(4, -6);
+            shadowRT.offsetMax = new Vector2(4, -6);
+            Image shadowImg = shadow.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.35f);
+
+            // Side (3D depth below button)
+            GameObject side = new GameObject("Side");
+            side.transform.SetParent(wrapper.transform, false);
+            RectTransform sideRT = side.AddComponent<RectTransform>();
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.pivot = new Vector2(0.5f, 1);
+            sideRT.sizeDelta = new Vector2(0, 6);
+            sideRT.anchoredPosition = Vector2.zero;
+            Image sideImg = side.AddComponent<Image>();
+            sideImg.color = new Color(bgColor.r * 0.5f, bgColor.g * 0.5f, bgColor.b * 0.5f, 1f);
+
+            // Button face
+            GameObject btn = new GameObject("Face");
+            btn.transform.SetParent(wrapper.transform, false);
+            RectTransform btnRT = btn.AddComponent<RectTransform>();
+            btnRT.anchorMin = Vector2.zero;
+            btnRT.anchorMax = Vector2.one;
+            btnRT.offsetMin = Vector2.zero;
+            btnRT.offsetMax = Vector2.zero;
 
             Image bg = btn.AddComponent<Image>();
             bg.color = bgColor;
 
-            LayoutElement btnLE = btn.AddComponent<LayoutElement>();
-            btnLE.preferredWidth = 350;
-
-            Button button = btn.AddComponent<Button>();
+            // Button component on wrapper for easy reference assignment
+            Button button = wrapper.AddComponent<Button>();
             button.targetGraphic = bg;
 
             Outline outline = btn.AddComponent<Outline>();

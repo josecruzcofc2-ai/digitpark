@@ -183,6 +183,10 @@ namespace DigitPark.Editor
             if (searchBarOutline == null) searchBarOutline = searchBar.AddComponent<Outline>();
             searchBarOutline.effectColor = CYAN_DARK;
             searchBarOutline.effectDistance = new Vector2(1.5f, 1.5f);
+            Shadow searchBarShadow = searchBar.GetComponent<Shadow>();
+            if (searchBarShadow == null || searchBarShadow is Outline) searchBarShadow = searchBar.AddComponent<Shadow>();
+            searchBarShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            searchBarShadow.effectDistance = new Vector2(3, -4);
 
             // Icono de Lupa (integrado a la izquierda)
             GameObject searchIcon = CreateOrFind(searchBar.transform, "SearchIcon");
@@ -298,6 +302,10 @@ namespace DigitPark.Editor
             if (resultsOutline == null) resultsOutline = resultsPanel.AddComponent<Outline>();
             resultsOutline.effectColor = CYAN_DARK;
             resultsOutline.effectDistance = new Vector2(1, 1);
+            Shadow resultsShadow = resultsPanel.GetComponent<Shadow>();
+            if (resultsShadow == null || resultsShadow is Outline) resultsShadow = resultsPanel.AddComponent<Shadow>();
+            resultsShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            resultsShadow.effectDistance = new Vector2(3, -4);
 
             // ========== SCROLL VIEW ==========
             GameObject scrollView = CreateOrFind(resultsPanel.transform, "ResultsScrollView");
@@ -470,6 +478,9 @@ namespace DigitPark.Editor
             Outline cardOutline = card.AddComponent<Outline>();
             cardOutline.effectColor = CYAN_NEON;
             cardOutline.effectDistance = new Vector2(3f, 3f);
+            var cardShadow = card.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            cardShadow.effectDistance = new Vector2(3, -4);
 
             // ========== AVATAR ==========
             GameObject avatarContainer = new GameObject("AvatarContainer");

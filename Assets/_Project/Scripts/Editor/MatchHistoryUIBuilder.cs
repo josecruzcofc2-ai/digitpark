@@ -486,6 +486,9 @@ namespace DigitPark.Editor
             var cardOutline = card.AddComponent<Outline>();
             cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.3f);
             cardOutline.effectDistance = new Vector2(1, 1);
+            var cardShadow = card.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            cardShadow.effectDistance = new Vector2(3, -4);
 
             // ---- Color Bar (left accent, 5px wide) ----
             var colorBar = new GameObject("ColorBar");

@@ -406,8 +406,8 @@ namespace DigitPark.Managers
 
         private void NavigateToCashBattleHub()
         {
-            // Check if user is verified first
-            if (!AgeVerificationManager.IsVerified())
+            // Check if user is verified first (bypass respects editor config)
+            if (!SettingsManager.IsCashBattleAuthBypassed() && !AgeVerificationManager.IsVerified())
             {
                 Debug.LogWarning("[CashBattleOnboarding] User not verified! Redirecting to AgeVerification...");
                 SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.AGE_VERIFICATION);

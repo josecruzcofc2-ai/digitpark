@@ -353,6 +353,9 @@ namespace DigitPark.Editor
             Outline outline = btn.AddComponent<Outline>();
             outline.effectColor = isSelected ? CYAN_NEON : new Color(0.3f, 0.3f, 0.4f, 0.3f);
             outline.effectDistance = new Vector2(1.5f, 1.5f);
+            var btnShadow = btn.AddComponent<Shadow>();
+            btnShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            btnShadow.effectDistance = new Vector2(3, -4);
 
             // Button component
             Button button = btn.AddComponent<Button>();
@@ -662,6 +665,9 @@ namespace DigitPark.Editor
                 entryBg.color = i % 2 == 0
                     ? new Color(0.06f, 0.1f, 0.16f, 0.95f)
                     : new Color(0.04f, 0.08f, 0.13f, 0.95f);
+                var entryShadow = entry.AddComponent<Shadow>();
+                entryShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+                entryShadow.effectDistance = new Vector2(3, -4);
 
                 // Top 3: borde sutil de medalla
                 if (i < 3)

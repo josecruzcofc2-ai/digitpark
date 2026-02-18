@@ -40,13 +40,6 @@ namespace DigitPark.Managers
         [SerializeField] private CashBattle1v1Manager gameSelectionPanel;
         [SerializeField] private TournamentListPanel tournamentListPanel;
 
-        [Header("UI - Age Verification")]
-        [SerializeField] private GameObject ageVerificationPanel;
-        [SerializeField] private Button verifyAgeButton;
-        [SerializeField] private TextMeshProUGUI verificationStatusText;
-        [SerializeField] private TextMeshProUGUI verificationTitleText;
-        [SerializeField] private TextMeshProUGUI verificationDescText;
-
         [Header("UI - Bet Confirmation")]
         [SerializeField] private GameObject confirmBetPanel;
         [SerializeField] private TextMeshProUGUI confirmBetText;
@@ -59,9 +52,6 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI matchmakingTimerText;
         [SerializeField] private TextMeshProUGUI opponentNameText;
         [SerializeField] private Button cancelMatchmakingButton;
-
-        [Header("Settings")]
-        [SerializeField] private bool requireAgeVerification = true;
 
         // Services
         private IKYCService _kycService;
@@ -178,8 +168,6 @@ namespace DigitPark.Managers
             walletCard?.onClick.AddListener(OnWalletClicked);
             historyCard?.onClick.AddListener(OnHistoryClicked);
 
-            verifyAgeButton?.onClick.AddListener(OnVerifyAgeClicked);
-
             if (gameSelectionPanel != null)
             {
                 gameSelectionPanel.OnBackClicked += () => NavigateTo(CashBattleState.Main);
@@ -269,11 +257,6 @@ namespace DigitPark.Managers
             if (titleText != null)
                 titleText.text = "Cash Battle";
 
-            if (verificationTitleText != null)
-                verificationTitleText.text = GetLocalizedText("cash_battle_verification_title");
-
-            if (verificationDescText != null)
-                verificationDescText.text = GetLocalizedText("cash_battle_verification_desc");
         }
 
         private string GetLocalizedText(string key)
@@ -289,14 +272,23 @@ namespace DigitPark.Managers
 
         private void CheckKYCVerification()
         {
+            if (SettingsManager.IsCashBattleAuthBypassed())
+            {
+                Debug.Log("[CashBattle] Bypass de auth activo - saltando verificacion KYC");
+                isKYCVerified = true;
+                ShowMainPanel();
+                return;
+            }
+
             if (_kycService != null)
             {
                 isKYCVerified = _kycService.CanAccessCashBattle;
             }
 
-            if (requireAgeVerification && !isKYCVerified)
+            if (!isKYCVerified)
             {
-                ShowAgeVerificationPanel();
+                Debug.Log("[CashBattle] Usuario no verificado KYC - volviendo al menu principal");
+                SceneManager.LoadScene("MainMenu");
             }
             else
             {
@@ -304,33 +296,8 @@ namespace DigitPark.Managers
             }
         }
 
-        private void ShowAgeVerificationPanel()
-        {
-            // Navegar directamente a la escena de verificacion de edad
-            Debug.Log("[CashBattle] Usuario no verificado - navegando a AgeVerification");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.AGE_VERIFICATION);
-
-            // Actualizar texto de estado
-            if (_kycService != null && verificationStatusText != null)
-            {
-                var status = _kycService.CurrentStatus;
-                verificationStatusText.text = status switch
-                {
-                    KYCStatus.NotStarted => L("cashbattle_kyc_required"),
-                    KYCStatus.AgeVerified => L("cashbattle_kyc_complete_identity"),
-                    KYCStatus.DocumentPending => L("cashbattle_kyc_pending"),
-                    KYCStatus.Rejected => L("cashbattle_kyc_rejected"),
-                    _ => ""
-                };
-            }
-
-            Debug.Log("[CashBattle] Mostrando panel de verificación");
-        }
-
         private void ShowMainPanel()
         {
-            if (ageVerificationPanel != null)
-                AnimatePanelOut(ageVerificationPanel.transform, () => ageVerificationPanel.SetActive(false));
             if (mainPanel != null)
             {
                 mainPanel.SetActive(true);
@@ -338,12 +305,6 @@ namespace DigitPark.Managers
             }
 
             Debug.Log("[CashBattle] Mostrando panel principal");
-        }
-
-        private void OnVerifyAgeClicked()
-        {
-            Debug.Log("[CashBattle] Navegando a verificación de edad");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.AGE_VERIFICATION);
         }
 
         #endregion
@@ -471,54 +432,24 @@ namespace DigitPark.Managers
         private void OnBattles1v1Clicked()
         {
             Debug.Log("[CashBattle] Navegando a escena CashBattle1v1");
-
-            if (!isKYCVerified && requireAgeVerification)
-            {
-                ShowAgeVerificationPanel();
-                return;
-            }
-
-            // Navegar a la escena de Batallas 1v1
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_BATTLE_1V1);
         }
 
         private void OnCashTournamentsClicked()
         {
             Debug.Log("[CashBattle] Navegando a escena CashTournaments");
-
-            if (!isKYCVerified && requireAgeVerification)
-            {
-                ShowAgeVerificationPanel();
-                return;
-            }
-
-            // Navegar a la escena de Torneos Cash
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_TOURNAMENTS);
         }
 
         private void OnWalletClicked()
         {
             Debug.Log("[CashBattle] Navegando a escena Wallet");
-
-            if (!isKYCVerified && requireAgeVerification)
-            {
-                ShowAgeVerificationPanel();
-                return;
-            }
-
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
         }
 
         private void OnHistoryClicked()
         {
             Debug.Log("[CashBattle] Navegando a escena History");
-
-            if (!isKYCVerified && requireAgeVerification)
-            {
-                ShowAgeVerificationPanel();
-                return;
-            }
-
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_HISTORY);
         }
 

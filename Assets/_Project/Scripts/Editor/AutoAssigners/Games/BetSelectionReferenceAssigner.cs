@@ -9,7 +9,7 @@ namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
     /// Reference Assigner for BetSelection scene.
-    /// Automatically finds and assigns UI references to BetSelectionManager.
+    /// Automatically finds and assigns UI references to BetSelectionPanel.
     /// Supports: Free + 5 Coin tiers + 5 Gem tiers + Custom bet section + Action buttons.
     ///
     /// Menu: DigitPark/Auto Assigners/References/Games/BetSelection References
@@ -24,6 +24,8 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
+            // Navigation
+            "_backButton",
             // Header
             "_titleText", "_gameNameText",
             // Currency Display
@@ -86,7 +88,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to BetSelectionManager:\n" +
+                "Assigns UI references to BetSelectionPanel:\n" +
                 "- Header (title, game name)\n" +
                 "- Currency display (gems, coins labels + values)\n" +
                 "- Free bet (button, cost, reward)\n" +
@@ -98,7 +100,7 @@ namespace DigitPark.Editor.AutoAssigners
 
             GUILayout.Space(10);
 
-            MonoBehaviour targetManager = FindBetSelectionManager();
+            MonoBehaviour targetManager = FindBetSelectionPanel();
             if (targetManager != null)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -109,8 +111,8 @@ namespace DigitPark.Editor.AutoAssigners
             else
             {
                 EditorGUILayout.HelpBox(
-                    "BetSelectionManager not found in scene!\n" +
-                    "Add the BetSelectionManager component to a GameObject first.",
+                    "BetSelectionPanel not found in scene!\n" +
+                    "Add the BetSelectionPanel component to a GameObject first.",
                     MessageType.Error);
             }
 
@@ -172,16 +174,19 @@ namespace DigitPark.Editor.AutoAssigners
         {
             Log("=== ASSIGNING BETSELECTION REFERENCES ===");
 
-            var manager = FindBetSelectionManager();
+            var manager = FindBetSelectionPanel();
             if (manager == null)
             {
-                Log("ERROR: BetSelectionManager not found in scene!");
+                Log("ERROR: BetSelectionPanel not found in scene!");
                 failedCount = REQUIRED_REFS.Length;
                 return;
             }
 
             SerializedObject so = new SerializedObject(manager);
             so.Update();
+
+            // Navigation
+            AssignReference(so, "_backButton", FindButtonByName("backbutton", "back", "return", "atras"));
 
             // Header
             AssignReference(so, "_titleText", FindTextByName("titletext", "title"));
@@ -268,10 +273,10 @@ namespace DigitPark.Editor.AutoAssigners
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 
-        public static MonoBehaviour FindBetSelectionManager()
+        public static MonoBehaviour FindBetSelectionPanel()
         {
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "BetSelectionManager") return mb;
+                if (mb.GetType().Name == "BetSelectionPanel") return mb;
             return null;
         }
 

@@ -372,6 +372,11 @@ namespace DigitPark.Editor
             searchBg.color = INPUT_BG;
             AddOutline(searchBar, CYAN_DARK);
 
+            // 3D depth shadow
+            Shadow searchShadow = searchBar.AddComponent<Shadow>();
+            searchShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            searchShadow.effectDistance = new Vector2(3, -4);
+
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(searchBar);
             hlg.spacing = 10;
             hlg.padding = new RectOffset(15, 15, 10, 10);
@@ -513,6 +518,11 @@ namespace DigitPark.Editor
             Image itemBg = GetOrAddComponent<Image>(item);
             itemBg.color = PANEL_BG;
             AddOutline(item, CYAN_DARK);
+
+            // 3D depth shadow
+            Shadow itemShadow = item.AddComponent<Shadow>();
+            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            itemShadow.effectDistance = new Vector2(3, -4);
 
             Button itemButton = GetOrAddComponent<Button>(item);
             SetupButtonColors(itemButton, PANEL_BG);
@@ -682,6 +692,11 @@ namespace DigitPark.Editor
             Image filterBg = GetOrAddComponent<Image>(filterPanel);
             filterBg.color = PANEL_BG;
             AddOutline(filterPanel, CYAN_DARK);
+
+            // 3D depth shadow
+            Shadow filterShadow = filterPanel.AddComponent<Shadow>();
+            filterShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            filterShadow.effectDistance = new Vector2(3, -4);
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(filterPanel);
             vlg.spacing = 10;
@@ -961,6 +976,11 @@ namespace DigitPark.Editor
             Button fabButton = GetOrAddComponent<Button>(fab);
             SetupButtonColors(fabButton, BUTTON_PRIMARY);
             AddOutline(fab, CYAN_GLOW, 3);
+
+            // 3D depth shadow
+            Shadow fabShadow = fab.AddComponent<Shadow>();
+            fabShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            fabShadow.effectDistance = new Vector2(3, -4);
 
             // Plus Icon
             GameObject plusObj = FindOrCreateChild(fab, "PlusIcon");

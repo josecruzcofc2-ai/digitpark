@@ -325,10 +325,14 @@ namespace DigitPark.Managers
         {
             if (previewPanel)
             {
-                previewPanel.SetActive(!previewPanel.activeSelf);
                 if (previewPanel.activeSelf)
                 {
+                    AnimatePanelOut(previewPanel);
+                }
+                else
+                {
                     UpdatePreview();
+                    AnimatePanelIn(previewPanel);
                 }
             }
         }
@@ -432,6 +436,35 @@ namespace DigitPark.Managers
                 else
                     loadingOverlay.SetActive(false);
             }
+        }
+
+        private void AnimatePanelIn(GameObject panel)
+        {
+            if (panel == null) return;
+            panel.SetActive(true);
+            CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            panel.transform.localScale = Vector3.one * 0.85f;
+            DOTween.Kill(panel.transform);
+            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            cg.DOFade(1f, 0.25f);
+        }
+
+        private void AnimatePanelOut(GameObject panel, Action onComplete = null)
+        {
+            if (panel == null) { onComplete?.Invoke(); return; }
+            CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            DOTween.Kill(panel.transform);
+            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
+            cg.DOFade(0f, 0.2f).OnComplete(() =>
+            {
+                panel.SetActive(false);
+                cg.alpha = 1f;
+                panel.transform.localScale = Vector3.one;
+                onComplete?.Invoke();
+            });
         }
     }
 

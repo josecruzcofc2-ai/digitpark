@@ -500,7 +500,9 @@ namespace DigitPark.Managers
             if (dailyProgressBar)
             {
                 dailyProgressBar.maxValue = dailyMissionsRequired;
-                dailyProgressBar.value = Mathf.Min(completedDaily, dailyMissionsRequired);
+                float targetValue = Mathf.Min(completedDaily, dailyMissionsRequired);
+                DOTween.Kill(dailyProgressBar);
+                dailyProgressBar.DOValue(targetValue, 0.6f).SetEase(Ease.OutQuad);
             }
 
             if (dailyProgressText)
@@ -924,7 +926,7 @@ namespace DigitPark.Managers
             if (mission.definition == null) return;
             selectedMission = mission;
 
-            if (missionDetailPanel) missionDetailPanel.SetActive(true);
+            if (missionDetailPanel) AnimatePanelIn(missionDetailPanel);
 
             if (detailTitleText) detailTitleText.text = L(mission.definition.titleLocKey);
             if (detailDescriptionText) detailDescriptionText.text = L(mission.definition.descriptionLocKey);
@@ -956,7 +958,8 @@ namespace DigitPark.Managers
 
         private void CloseDetail()
         {
-            if (missionDetailPanel) missionDetailPanel.SetActive(false);
+            if (missionDetailPanel && missionDetailPanel.activeSelf)
+                AnimatePanelOut(missionDetailPanel);
             selectedMission = null;
         }
 
@@ -1075,7 +1078,6 @@ namespace DigitPark.Managers
         {
             if (rewardPopup)
             {
-                rewardPopup.SetActive(true);
                 string rewardTypeName = type == "gems" ? L("reward_gems") : L("reward_coins");
                 if (rewardPopupText) rewardPopupText.text = $"+{amount} {rewardTypeName}";
                 if (rewardPopupIcon)
@@ -1085,13 +1087,15 @@ namespace DigitPark.Managers
                         : (coinIconNeon != null ? coinIconNeon : coinIcon);
                 }
 
+                AnimatePanelIn(rewardPopup);
                 Invoke(nameof(HideRewardPopup), 2f);
             }
         }
 
         private void HideRewardPopup()
         {
-            if (rewardPopup) rewardPopup.SetActive(false);
+            if (rewardPopup && rewardPopup.activeSelf)
+                AnimatePanelOut(rewardPopup);
         }
 
         #endregion
@@ -1140,6 +1144,35 @@ namespace DigitPark.Managers
             foreach (var m in activeDailyMissions) if (m.missionId == id) return m;
             foreach (var m in activeWeeklyMissions) if (m.missionId == id) return m;
             return null;
+        }
+
+        private void AnimatePanelIn(GameObject panel)
+        {
+            if (panel == null) return;
+            panel.SetActive(true);
+            CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            panel.transform.localScale = Vector3.one * 0.85f;
+            DOTween.Kill(panel.transform);
+            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            cg.DOFade(1f, 0.25f);
+        }
+
+        private void AnimatePanelOut(GameObject panel, Action onComplete = null)
+        {
+            if (panel == null) { onComplete?.Invoke(); return; }
+            CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            DOTween.Kill(panel.transform);
+            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
+            cg.DOFade(0f, 0.2f).OnComplete(() =>
+            {
+                panel.SetActive(false);
+                cg.alpha = 1f;
+                panel.transform.localScale = Vector3.one;
+                onComplete?.Invoke();
+            });
         }
 
         private void OnBackClicked()

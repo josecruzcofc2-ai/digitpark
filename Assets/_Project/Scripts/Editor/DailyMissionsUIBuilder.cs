@@ -573,6 +573,11 @@ namespace DigitPark.Editor
             tbOutline.effectColor = new Color(ORANGE_TIMER.r * 0.4f, ORANGE_TIMER.g * 0.4f, ORANGE_TIMER.b * 0.4f, 1f);
             tbOutline.effectDistance = new Vector2(1, 1);
 
+            // 3D depth shadow
+            var timerShadow = timerBar.AddComponent<Shadow>();
+            timerShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            timerShadow.effectDistance = new Vector2(3, -4);
+
             var hlg = GetOrAdd<HorizontalLayoutGroup>(timerBar);
             hlg.spacing = 10;
             hlg.padding = new RectOffset(15, 15, 0, 0);
@@ -699,6 +704,11 @@ namespace DigitPark.Editor
             var pOutline = GetOrAdd<Outline>(panel);
             pOutline.effectColor = CYAN_DARK;
             pOutline.effectDistance = new Vector2(1, 1);
+
+            // 3D depth shadow
+            var panelShadow = panel.AddComponent<Shadow>();
+            panelShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            panelShadow.effectDistance = new Vector2(3, -4);
 
             var vlg = GetOrAdd<VerticalLayoutGroup>(panel);
             vlg.spacing = 8;
@@ -1033,6 +1043,11 @@ namespace DigitPark.Editor
             var cardOutline = GetOrAdd<Outline>(card);
             cardOutline.effectColor = isCompleted ? GREEN_SUCCESS : (isWeekly ? new Color(PURPLE_WEEKLY.r * 0.5f, PURPLE_WEEKLY.g * 0.5f, PURPLE_WEEKLY.b * 0.5f, 1f) : CYAN_DARK);
             cardOutline.effectDistance = new Vector2(1, 1);
+
+            // 3D depth shadow
+            var cardShadow = card.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            cardShadow.effectDistance = new Vector2(3, -4);
 
             var cardLE = GetOrAdd<LayoutElement>(card);
             cardLE.preferredHeight = 130;

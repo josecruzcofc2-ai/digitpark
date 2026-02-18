@@ -567,6 +567,11 @@ namespace DigitPark.Editor
                 outline.effectDistance = new Vector2(1, 1);
             }
 
+            // 3D depth shadow
+            var cardShadow = card.AddComponent<Shadow>();
+            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            cardShadow.effectDistance = new Vector2(3, -4);
+
             // VLG for card content
             var vlg = card.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 4;
@@ -764,6 +769,34 @@ namespace DigitPark.Editor
             d7Outline.effectColor = GOLD;
             d7Outline.effectDistance = new Vector2(2, 2);
 
+            // Shadow (3D depth behind card)
+            var day7Shadow = FindOrCreate(day7.transform, "Shadow");
+            day7Shadow.transform.SetAsFirstSibling();
+            var dsShadowRT = GetOrAdd<RectTransform>(day7Shadow);
+            dsShadowRT.anchorMin = Vector2.zero;
+            dsShadowRT.anchorMax = Vector2.one;
+            dsShadowRT.offsetMin = new Vector2(8, -10);
+            dsShadowRT.offsetMax = Vector2.zero;
+            var dsShadowImg = GetOrAdd<Image>(day7Shadow);
+            dsShadowImg.color = new Color(0f, 0f, 0f, 0.5f);
+            dsShadowImg.raycastTarget = false;
+            var dsShadowLE = GetOrAdd<LayoutElement>(day7Shadow);
+            dsShadowLE.ignoreLayout = true;
+
+            // Side (3D depth strip below card)
+            var day7Side = FindOrCreate(day7.transform, "Side");
+            day7Side.transform.SetSiblingIndex(1);
+            var dsSideRT = GetOrAdd<RectTransform>(day7Side);
+            dsSideRT.anchorMin = new Vector2(0, 0);
+            dsSideRT.anchorMax = new Vector2(1, 0);
+            dsSideRT.offsetMin = new Vector2(0, -8);
+            dsSideRT.offsetMax = new Vector2(0, 0);
+            var dsSideImg = GetOrAdd<Image>(day7Side);
+            dsSideImg.color = new Color(GOLD.r * 0.3f, GOLD.g * 0.3f, GOLD.b * 0.3f, 1f);
+            dsSideImg.raycastTarget = false;
+            var dsSideLE = GetOrAdd<LayoutElement>(day7Side);
+            dsSideLE.ignoreLayout = true;
+
             // HLG content
             var hlg = GetOrAdd<HorizontalLayoutGroup>(day7);
             hlg.spacing = 15;
@@ -880,6 +913,11 @@ namespace DigitPark.Editor
             tOutline.effectColor = CYAN_DARK;
             tOutline.effectDistance = new Vector2(1, 1);
 
+            // 3D depth shadow
+            var todayShadow = today.AddComponent<Shadow>();
+            todayShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            todayShadow.effectDistance = new Vector2(3, -4);
+
             // HLG content
             var hlg = GetOrAdd<HorizontalLayoutGroup>(today);
             hlg.spacing = 15;
@@ -990,6 +1028,11 @@ namespace DigitPark.Editor
             var cbOutline = GetOrAdd<Outline>(claimBtn);
             cbOutline.effectColor = new Color(0.1f, 0.5f, 0.2f, 1f);
             cbOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            // 3D depth shadow
+            var claimShadow = claimBtn.AddComponent<Shadow>();
+            claimShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            claimShadow.effectDistance = new Vector2(3, -4);
 
             var claimText = FindOrCreate(claimBtn.transform, "Text");
             var ctRT = GetOrAdd<RectTransform>(claimText);

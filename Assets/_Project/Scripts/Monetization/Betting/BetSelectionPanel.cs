@@ -14,8 +14,11 @@ namespace DigitPark.Monetization.Betting
     /// Flujo: GameSelector -> BetSelection -> Matchmaking -> Game
     /// Soporta apuestas preset (monedas/gemas) y personalizada (multiplos de 5).
     /// </summary>
-    public class BetSelectionManager : MonoBehaviour
+    public class BetSelectionPanel : MonoBehaviour
     {
+        [Header("=== NAVIGATION ===")]
+        [SerializeField] private Button _backButton;
+
         [Header("=== HEADER ===")]
         [SerializeField] private TextMeshProUGUI _titleText;
         [SerializeField] private TextMeshProUGUI _gameNameText;
@@ -124,6 +127,8 @@ namespace DigitPark.Monetization.Betting
 
         private void SetupListeners()
         {
+            _backButton?.onClick.AddListener(OnCancelClicked);
+
             _freeBetButton?.onClick.AddListener(() => SelectPresetBet(_freeBetButton, 0, BetCurrencyType.None));
 
             _coins50Button?.onClick.AddListener(() => SelectPresetBet(_coins50Button, 50, BetCurrencyType.Coins));
@@ -157,6 +162,7 @@ namespace DigitPark.Monetization.Betting
 
         private void RemoveListeners()
         {
+            _backButton?.onClick.RemoveAllListeners();
             _freeBetButton?.onClick.RemoveAllListeners();
             _coins50Button?.onClick.RemoveAllListeners();
             _coins100Button?.onClick.RemoveAllListeners();

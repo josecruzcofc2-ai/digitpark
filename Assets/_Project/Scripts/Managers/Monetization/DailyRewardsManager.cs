@@ -307,7 +307,9 @@ namespace DigitPark.Managers
             {
                 int nextMilestone = GetNextMilestone();
                 streakProgressBar.maxValue = nextMilestone;
-                streakProgressBar.value = currentStreak % nextMilestone;
+                float targetValue = currentStreak % nextMilestone;
+                DOTween.Kill(streakProgressBar);
+                streakProgressBar.DOValue(targetValue, 0.6f).SetEase(Ease.OutQuad);
 
                 // Crear/actualizar milestone markers
                 UpdateStreakMilestoneMarkers(nextMilestone);
@@ -889,8 +891,6 @@ namespace DigitPark.Managers
         {
             if (claimAnimationPanel)
             {
-                claimAnimationPanel.SetActive(true);
-
                 if (claimRewardText)
                 {
                     claimRewardText.text = $"+{reward.amount} {GetRewardTypeName(reward.type)}";
@@ -900,6 +900,8 @@ namespace DigitPark.Managers
                 {
                     claimRewardIcon.sprite = GetRewardIcon(reward.type);
                 }
+
+                AnimatePanelIn(claimAnimationPanel);
 
                 if (claimParticles)
                 {
@@ -942,8 +944,6 @@ namespace DigitPark.Managers
         {
             if (milestonePanel)
             {
-                milestonePanel.SetActive(true);
-
                 if (milestoneText)
                 {
                     milestoneText.text = L("dr_milestone_days", days);
@@ -953,13 +953,17 @@ namespace DigitPark.Managers
                 {
                     milestoneBonusText.text = L("dr_milestone_bonus_gems", bonus);
                 }
+
+                AnimatePanelIn(milestonePanel);
             }
         }
 
         private void OnContinueClicked()
         {
-            if (claimAnimationPanel) claimAnimationPanel.SetActive(false);
-            if (milestonePanel) milestonePanel.SetActive(false);
+            if (claimAnimationPanel && claimAnimationPanel.activeSelf)
+                AnimatePanelOut(claimAnimationPanel);
+            if (milestonePanel && milestonePanel.activeSelf)
+                AnimatePanelOut(milestonePanel);
         }
 
         private void OnEnable()
@@ -970,6 +974,35 @@ namespace DigitPark.Managers
         private void OnDisable()
         {
             CancelInvoke(nameof(UpdateNextResetTimer));
+        }
+
+        private void AnimatePanelIn(GameObject panel)
+        {
+            if (panel == null) return;
+            panel.SetActive(true);
+            CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            panel.transform.localScale = Vector3.one * 0.85f;
+            DOTween.Kill(panel.transform);
+            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            cg.DOFade(1f, 0.25f);
+        }
+
+        private void AnimatePanelOut(GameObject panel, Action onComplete = null)
+        {
+            if (panel == null) { onComplete?.Invoke(); return; }
+            CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            DOTween.Kill(panel.transform);
+            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
+            cg.DOFade(0f, 0.2f).OnComplete(() =>
+            {
+                panel.SetActive(false);
+                cg.alpha = 1f;
+                panel.transform.localScale = Vector3.one;
+                onComplete?.Invoke();
+            });
         }
 
         private void OnBackClicked()

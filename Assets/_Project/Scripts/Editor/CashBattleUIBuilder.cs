@@ -70,12 +70,11 @@ namespace DigitPark.Editor
 
             EditorGUILayout.HelpBox(
                 "Construye la UI para CashBattleHub.unity:\n\n" +
-                "- 4 tarjetas principales:\n" +
+                "- 4 tarjetas full-width verticales:\n" +
                 "  * Batallas 1v1\n" +
                 "  * Torneos Cash\n" +
                 "  * Mi Wallet\n" +
                 "  * Historial\n" +
-                "- Panel de verificacion de edad\n" +
                 "- Background premium dorado",
                 MessageType.Info);
 
@@ -216,7 +215,7 @@ namespace DigitPark.Editor
         {
             // Destroy specific known elements
             string[] toDestroy = {
-                "Background", "SafeArea", "MainPanel", "AgeVerificationPanel", "Header",
+                "Background", "SafeArea", "MainPanel", "Header",
                 "GameSelectionPanel", "TournamentListPanel", "ConfirmBetPanel", "MatchmakingPanel",
                 "WalletPanel", "HistoryPanel"
             };
@@ -489,8 +488,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(1, 0.5f);
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = new Vector2(180, 65);
-            rt.anchoredPosition = new Vector2(-20, 0);
+            rt.sizeDelta = new Vector2(300, 70);
+            rt.anchoredPosition = new Vector2(-15, 0);
 
             // Background
             Image bg = balanceWidget.AddComponent<Image>();
@@ -501,41 +500,26 @@ namespace DigitPark.Editor
             outline.effectColor = CARD_BORDER;
             outline.effectDistance = new Vector2(1, -1);
 
-            // Coin icon (text emoji for now)
-            GameObject coinIcon = new GameObject("CoinIcon");
-            coinIcon.transform.SetParent(balanceWidget.transform, false);
-
-            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
-            coinRT.anchorMin = new Vector2(0, 0);
-            coinRT.anchorMax = new Vector2(0, 1);
-            coinRT.pivot = new Vector2(0, 0.5f);
-            coinRT.sizeDelta = new Vector2(40, 0);
-            coinRT.anchoredPosition = new Vector2(8, 0);
-
-            TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
-            coinText.text = "$";
-            coinText.fontSize = 52;
-            coinText.color = TEXT_GOLD;
-            coinText.alignment = TextAlignmentOptions.Center;
-            coinText.fontStyle = FontStyles.Bold;
-
-            // Balance text
+            // Balance text (includes $ sign via code)
             GameObject balanceObj = new GameObject("BalanceText");
             balanceObj.transform.SetParent(balanceWidget.transform, false);
 
             RectTransform balanceRT = balanceObj.AddComponent<RectTransform>();
-            balanceRT.anchorMin = new Vector2(0, 0);
-            balanceRT.anchorMax = new Vector2(1, 1);
+            balanceRT.anchorMin = Vector2.zero;
+            balanceRT.anchorMax = Vector2.one;
             balanceRT.sizeDelta = Vector2.zero;
-            balanceRT.offsetMin = new Vector2(45, 0);
+            balanceRT.offsetMin = new Vector2(15, 0);
             balanceRT.offsetMax = new Vector2(-10, 0);
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
-            balanceText.text = "0.00";
-            balanceText.fontSize = 52;
-            balanceText.color = TEXT_PRIMARY;
-            balanceText.alignment = TextAlignmentOptions.Left;
+            balanceText.text = "$0.00";
+            balanceText.fontSize = 44;
+            balanceText.color = TEXT_GOLD;
+            balanceText.alignment = TextAlignmentOptions.Center;
             balanceText.fontStyle = FontStyles.Bold;
+            balanceText.enableAutoSizing = true;
+            balanceText.fontSizeMin = 28;
+            balanceText.fontSizeMax = 44;
         }
 
         #endregion
@@ -563,67 +547,65 @@ namespace DigitPark.Editor
             cardsRT.anchorMax = Vector2.one;
             cardsRT.sizeDelta = Vector2.zero;
 
-            // NUEVO LAYOUT:
-            // - Batallas 1v1: Card GRANDE arriba (45% altura)
-            // - Torneos + Wallet: Fila de 2 cards (33% altura)
-            // - Historial: Card ancho completo abajo (20% altura)
+            // LAYOUT: 4 cards full-width apilados verticalmente
+            // Distribucion uniforme con spacing entre cards
+            // Card 0 (top):    0.77 - 1.00 (23%)
+            // Card 1:          0.52 - 0.75 (23%)
+            // Card 2:          0.27 - 0.50 (23%)
+            // Card 3 (bottom): 0.02 - 0.25 (23%)
+            // Gaps de 2% entre cards
             CreateBattles1v1Card(cardsContainer.transform);
             CreateTournamentsCashCard(cardsContainer.transform);
             CreateWalletCard(cardsContainer.transform);
             CreateHistoryCard(cardsContainer.transform);
 
-            // MainPanel visible por defecto - el Manager lo ocultara si necesita verificacion
             panel.SetActive(true);
         }
 
         private static void CreateBattles1v1Card(Transform parent)
         {
-            // CARD PRINCIPAL - Arriba, ancho completo, 45% altura
             GameObject card = CreatePremiumCard(parent, "Battles1v1Card",
                 "BATALLAS 1v1",
-                "Enfrenta a otros jugadores",
+                "Enfrenta a otros jugadores en tiempo real",
                 "",
-                new Vector2(0, 0.57f),      // anchorMin
-                new Vector2(1, 1f));        // anchorMax
+                new Vector2(0, 0.77f),
+                new Vector2(1, 1f));
 
             AddCardIconImage(card.transform, "Battles1v1Icon");
         }
 
         private static void CreateTournamentsCashCard(Transform parent)
         {
-            // Card izquierdo medio
             GameObject card = CreatePremiumCard(parent, "CashTournamentsCard",
-                "TORNEOS",
-                "Grandes premios",
+                "TORNEOS CASH",
+                "Compite por grandes premios",
                 "",
-                new Vector2(0, 0.22f),       // anchorMin
-                new Vector2(0.49f, 0.55f));  // anchorMax
+                new Vector2(0, 0.52f),
+                new Vector2(1, 0.75f));
 
             AddCardIconImage(card.transform, "TournamentsCashIcon");
         }
 
         private static void CreateWalletCard(Transform parent)
         {
-            // Card derecho medio
             GameObject card = CreatePremiumCard(parent, "WalletCard",
                 "MI WALLET",
-                "Deposita y retira",
+                "Deposita y retira fondos",
                 "",
-                new Vector2(0.51f, 0.22f),   // anchorMin
-                new Vector2(1, 0.55f));      // anchorMax
+                new Vector2(0, 0.27f),
+                new Vector2(1, 0.50f));
 
             AddCardIconImage(card.transform, "WalletCashIcon");
         }
 
         private static void CreateHistoryCard(Transform parent)
         {
-            // Card inferior - ancho completo
             GameObject card = CreatePremiumCard(parent, "HistoryCard",
                 "HISTORIAL",
                 "Tus batallas y estadisticas",
                 "",
-                new Vector2(0, 0),           // anchorMin
-                new Vector2(1, 0.20f));      // anchorMax
+                new Vector2(0, 0.02f),
+                new Vector2(1, 0.25f));
 
             AddCardIconImage(card.transform, "HistoryCashIcon");
         }
@@ -641,10 +623,33 @@ namespace DigitPark.Editor
             rt.anchorMin = anchorMin;
             rt.anchorMax = anchorMax;
             rt.sizeDelta = Vector2.zero;
-            rt.offsetMin = new Vector2(5, 5);
-            rt.offsetMax = new Vector2(-5, -5);
+            rt.offsetMin = new Vector2(5, 3);
+            rt.offsetMax = new Vector2(-5, -3);
 
-            // Card background con gradiente sutil
+            // Shadow (behind card content)
+            GameObject shadow = new GameObject("Shadow");
+            shadow.transform.SetParent(card.transform, false);
+            RectTransform shadowRT = shadow.AddComponent<RectTransform>();
+            shadowRT.anchorMin = Vector2.zero;
+            shadowRT.anchorMax = Vector2.one;
+            shadowRT.offsetMin = new Vector2(8, -12);
+            shadowRT.offsetMax = Vector2.zero;
+            Image shadowImg = shadow.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.45f);
+
+            // Side (3D depth strip below card)
+            GameObject side = new GameObject("Side");
+            side.transform.SetParent(card.transform, false);
+            RectTransform sideRT = side.AddComponent<RectTransform>();
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.offsetMin = new Vector2(0, -7);
+            sideRT.offsetMax = new Vector2(0, 0);
+            Image sideImg = side.AddComponent<Image>();
+            sideImg.color = new Color(0.5f, 0.35f, 0.05f, 1f);
+            sideImg.raycastTarget = false;
+
+            // Card background
             Image bg = card.AddComponent<Image>();
             bg.color = new Color(0.1f, 0.08f, 0.12f, 0.95f);
 
@@ -662,67 +667,51 @@ namespace DigitPark.Editor
             btn.colors = colors;
             btn.targetGraphic = bg;
 
-            // Calcular si es card grande (Batallas 1v1) o pequeño
-            bool isLargeCard = (anchorMax.y - anchorMin.y) > 0.35f;
-            bool isWideCard = (anchorMax.x - anchorMin.x) > 0.6f;
+            // Layout: Icon (left 100px) | Title + Subtitle (center) | no arrow
+            int iconSize = 100;
+            int iconMarginLeft = 15;
+            int textMarginLeft = iconMarginLeft + iconSize + 15; // 130
 
             // === TITULO ===
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(card.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
-            if (isLargeCard)
-            {
-                // Card grande - titulo arriba a la derecha del icono (150px + margen)
-                titleRT.anchorMin = new Vector2(0, 0.55f);
-                titleRT.anchorMax = new Vector2(1, 0.95f);
-                titleRT.offsetMin = new Vector2(175, 0);  // Ajustado para icono 150px
-                titleRT.offsetMax = new Vector2(-160, -10);  // Espacio para flecha x3
-            }
-            else
-            {
-                // Card pequeño (icono 150px + margen)
-                titleRT.anchorMin = new Vector2(0, 0.5f);
-                titleRT.anchorMax = new Vector2(1, 1);
-                titleRT.offsetMin = new Vector2(175, 5);  // Ajustado para icono 150px
-                titleRT.offsetMax = new Vector2(-115, -8);  // Espacio para flecha x3
-            }
+            titleRT.anchorMin = new Vector2(0, 0.5f);
+            titleRT.anchorMax = new Vector2(1, 1f);
+            titleRT.offsetMin = new Vector2(textMarginLeft, 2);
+            titleRT.offsetMax = new Vector2(-15, -5);
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = 68;
+            titleText.fontSize = 52;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontStyle = FontStyles.Bold;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 32;
+            titleText.fontSizeMax = 52;
 
             // === SUBTITULO ===
             GameObject subtitleObj = new GameObject("Subtitle");
             subtitleObj.transform.SetParent(card.transform, false);
 
             RectTransform subRT = subtitleObj.AddComponent<RectTransform>();
-            if (isLargeCard)
-            {
-                subRT.anchorMin = new Vector2(0, 0.30f);
-                subRT.anchorMax = new Vector2(1, 0.55f);
-                subRT.offsetMin = new Vector2(175, 0);   // Ajustado para icono 150px
-                subRT.offsetMax = new Vector2(-160, 0);   // Espacio para flecha x3
-            }
-            else
-            {
-                subRT.anchorMin = new Vector2(0, 0);
-                subRT.anchorMax = new Vector2(1, 0.5f);
-                subRT.offsetMin = new Vector2(175, 8);  // Ajustado para icono 150px
-                subRT.offsetMax = new Vector2(-115, -5);  // Espacio para flecha x3
-            }
+            subRT.anchorMin = new Vector2(0, 0);
+            subRT.anchorMax = new Vector2(1, 0.5f);
+            subRT.offsetMin = new Vector2(textMarginLeft, 5);
+            subRT.offsetMax = new Vector2(-15, -2);
 
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subText.text = subtitle;
-            subText.fontSize = 52;
+            subText.fontSize = 36;
             subText.color = TEXT_SECONDARY;
             subText.alignment = TextAlignmentOptions.Left;
-            subText.fontStyle = FontStyles.Bold;
+            subText.enableAutoSizing = true;
+            subText.fontSizeMin = 24;
+            subText.fontSizeMax = 36;
 
-            // === DETALLE (rango de precio) - BADGE PROMINENTE ===
+            // === DETALLE (badge) ===
             if (!string.IsNullOrEmpty(detail))
             {
                 GameObject detailObj = new GameObject("PriceBadge");
@@ -732,19 +721,16 @@ namespace DigitPark.Editor
                 detailRT.anchorMin = new Vector2(1, 0);
                 detailRT.anchorMax = new Vector2(1, 0);
                 detailRT.pivot = new Vector2(1, 0);
-                detailRT.sizeDelta = isLargeCard ? new Vector2(160, 45) : new Vector2(130, 38);  // MAS GRANDE
-                detailRT.anchoredPosition = new Vector2(-12, 12);
+                detailRT.sizeDelta = new Vector2(130, 38);
+                detailRT.anchoredPosition = new Vector2(-12, 8);
 
-                // Fondo con gradiente cyan más visible
                 Image detailBg = detailObj.AddComponent<Image>();
-                detailBg.color = new Color(0f, 0.85f, 1f, 0.25f);  // Más opaco
+                detailBg.color = new Color(0f, 0.85f, 1f, 0.25f);
 
-                // Borde cyan brillante para destacar
                 Outline badgeOutline = detailObj.AddComponent<Outline>();
                 badgeOutline.effectColor = new Color(0f, 0.9f, 1f, 0.8f);
                 badgeOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-                // Texto en objeto hijo separado
                 GameObject detailTextObj = new GameObject("DetailText");
                 detailTextObj.transform.SetParent(detailObj.transform, false);
 
@@ -755,42 +741,13 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI detailText = detailTextObj.AddComponent<TextMeshProUGUI>();
                 detailText.text = detail;
-                detailText.fontSize = isLargeCard ? 26 : 22;  // AUMENTADO: 22→26, 18→22
+                detailText.fontSize = 22;
                 detailText.color = CYAN_ACCENT;
                 detailText.alignment = TextAlignmentOptions.Center;
                 detailText.fontStyle = FontStyles.Bold;
             }
 
-            // === FLECHA INDICADORA (affordance - muestra que es tocable) ===
-            CreateTouchIndicator(card.transform, isLargeCard);
-
-            // NOTA: Indicador de jugadores activos se muestra DENTRO de las escenas
-            // CashBattle1v1 y CashTournaments, no en el Hub
-
             return card;
-        }
-
-        /// <summary>
-        /// Crea flecha indicadora que muestra que el card es tocable (affordance)
-        /// </summary>
-        private static void CreateTouchIndicator(Transform cardTransform, bool isLargeCard)
-        {
-            GameObject arrow = new GameObject("TouchArrow");
-            arrow.transform.SetParent(cardTransform, false);
-
-            RectTransform rt = arrow.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(1, 0.5f);
-            rt.anchorMax = new Vector2(1, 0.5f);
-            rt.pivot = new Vector2(1, 0.5f);
-            rt.sizeDelta = isLargeCard ? new Vector2(150, 150) : new Vector2(105, 105);
-            rt.anchoredPosition = new Vector2(-10, 0);
-
-            TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
-            arrowText.text = ">";
-            arrowText.fontSize = isLargeCard ? 126 : 90;
-            arrowText.color = new Color(1f, 0.84f, 0f, 0.6f);  // Dorado semi-transparente
-            arrowText.alignment = TextAlignmentOptions.Center;
-            arrowText.fontStyle = FontStyles.Bold;
         }
 
         // NOTA: CreatePlayersCountIndicator eliminado del Hub
@@ -809,9 +766,8 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(0, 0.5f);
             rt.pivot = new Vector2(0, 0.5f);
 
-            // Todos los iconos a 150x150
-            rt.sizeDelta = new Vector2(150, 150);
-            rt.anchoredPosition = new Vector2(12, 0);
+            rt.sizeDelta = new Vector2(100, 100);
+            rt.anchoredPosition = new Vector2(15, 0);
 
             // Imagen del icono
             Image iconImg = iconObj.AddComponent<Image>();
@@ -843,7 +799,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
                 text.text = GetFallbackEmoji(iconName);
-                text.fontSize = 60;  // Icono 150x150 para todos
+                text.fontSize = 48;
                 text.color = TEXT_GOLD;
                 text.alignment = TextAlignmentOptions.Center;
             }

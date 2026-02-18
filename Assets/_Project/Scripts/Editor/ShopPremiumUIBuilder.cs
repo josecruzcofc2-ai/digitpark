@@ -494,10 +494,33 @@ namespace DigitPark.Editor
             bannerBg.color = new Color(0.12f, 0.06f, 0.22f, 1f);
             AddOutline(banner, PURPLE_PREMIUM, 3);
 
-            // Shadow effect via second outline
-            Shadow shadow = banner.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
-            shadow.effectDistance = new Vector2(4, -4);
+            // Shadow (child element for 3D depth)
+            GameObject shadowObj = CreateChild(banner, "Shadow");
+            shadowObj.transform.SetAsFirstSibling();
+            RectTransform shadowRT = shadowObj.GetComponent<RectTransform>();
+            shadowRT.anchorMin = Vector2.zero;
+            shadowRT.anchorMax = Vector2.one;
+            shadowRT.offsetMin = new Vector2(8, -10);
+            shadowRT.offsetMax = Vector2.zero;
+            Image shadowImg = shadowObj.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
+            shadowImg.raycastTarget = false;
+            LayoutElement shadowLE = shadowObj.AddComponent<LayoutElement>();
+            shadowLE.ignoreLayout = true;
+
+            // Side (3D depth strip below banner)
+            GameObject sideObj = CreateChild(banner, "Side");
+            sideObj.transform.SetSiblingIndex(1);
+            RectTransform sideRT = sideObj.GetComponent<RectTransform>();
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.offsetMin = new Vector2(0, -8);
+            sideRT.offsetMax = new Vector2(0, 0);
+            Image sideImg = sideObj.AddComponent<Image>();
+            sideImg.color = new Color(PURPLE_PREMIUM.r * 0.3f, PURPLE_PREMIUM.g * 0.3f, PURPLE_PREMIUM.b * 0.3f, 1f);
+            sideImg.raycastTarget = false;
+            LayoutElement sideLE = sideObj.AddComponent<LayoutElement>();
+            sideLE.ignoreLayout = true;
 
             HorizontalLayoutGroup hlg = banner.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 20;
@@ -636,9 +659,33 @@ namespace DigitPark.Editor
             bannerBg.color = bgColor;
             AddOutline(banner, accentColor, 2);
 
-            Shadow shadow = banner.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            shadow.effectDistance = new Vector2(3, -3);
+            // Shadow (child element for 3D depth)
+            GameObject shadowObj = CreateChild(banner, "Shadow");
+            shadowObj.transform.SetAsFirstSibling();
+            RectTransform shadowRT = shadowObj.GetComponent<RectTransform>();
+            shadowRT.anchorMin = Vector2.zero;
+            shadowRT.anchorMax = Vector2.one;
+            shadowRT.offsetMin = new Vector2(8, -10);
+            shadowRT.offsetMax = Vector2.zero;
+            Image shadowImg = shadowObj.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
+            shadowImg.raycastTarget = false;
+            LayoutElement shadowLE = shadowObj.AddComponent<LayoutElement>();
+            shadowLE.ignoreLayout = true;
+
+            // Side (3D depth strip below banner)
+            GameObject sideObj = CreateChild(banner, "Side");
+            sideObj.transform.SetSiblingIndex(1);
+            RectTransform sideRT = sideObj.GetComponent<RectTransform>();
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.offsetMin = new Vector2(0, -8);
+            sideRT.offsetMax = new Vector2(0, 0);
+            Image sideImg = sideObj.AddComponent<Image>();
+            sideImg.color = new Color(accentColor.r * 0.3f, accentColor.g * 0.3f, accentColor.b * 0.3f, 1f);
+            sideImg.raycastTarget = false;
+            LayoutElement sideLE = sideObj.AddComponent<LayoutElement>();
+            sideLE.ignoreLayout = true;
 
             HorizontalLayoutGroup hlg = banner.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 16;
@@ -812,6 +859,11 @@ namespace DigitPark.Editor
             Image itemBg = item.AddComponent<Image>();
             itemBg.color = CARD_BG;
             AddOutline(item, isFree ? GREEN_FREE : iconColor * 0.5f, isFree ? 3 : 1);
+
+            // Subtle shadow for depth
+            Shadow itemShadow = item.AddComponent<Shadow>();
+            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            itemShadow.effectDistance = new Vector2(3, -4);
 
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);
@@ -1138,6 +1190,11 @@ namespace DigitPark.Editor
             itemBg.color = CARD_BG;
             AddOutline(item, isEquipped ? titleColor : titleColor * 0.4f, isEquipped ? 2 : 1);
 
+            // Subtle shadow for depth
+            Shadow itemShadow = item.AddComponent<Shadow>();
+            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            itemShadow.effectDistance = new Vector2(3, -4);
+
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);
 
@@ -1236,9 +1293,33 @@ namespace DigitPark.Editor
             sectionBg.color = new Color(0.1f, 0.05f, 0.18f, 1f);
             AddOutline(section, GOLD, 3);
 
-            Shadow shadow = section.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
-            shadow.effectDistance = new Vector2(4, -4);
+            // Shadow (child element for 3D depth)
+            GameObject shadowObj = CreateChild(section, "Shadow");
+            shadowObj.transform.SetAsFirstSibling();
+            RectTransform shadowRT = shadowObj.GetComponent<RectTransform>();
+            shadowRT.anchorMin = Vector2.zero;
+            shadowRT.anchorMax = Vector2.one;
+            shadowRT.offsetMin = new Vector2(8, -10);
+            shadowRT.offsetMax = Vector2.zero;
+            Image shadowImg = shadowObj.AddComponent<Image>();
+            shadowImg.color = new Color(0f, 0f, 0f, 0.5f);
+            shadowImg.raycastTarget = false;
+            LayoutElement shadowLE = shadowObj.AddComponent<LayoutElement>();
+            shadowLE.ignoreLayout = true;
+
+            // Side (3D depth strip below banner)
+            GameObject sideObj = CreateChild(section, "Side");
+            sideObj.transform.SetSiblingIndex(1);
+            RectTransform sideRT = sideObj.GetComponent<RectTransform>();
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.offsetMin = new Vector2(0, -8);
+            sideRT.offsetMax = new Vector2(0, 0);
+            Image sideImg = sideObj.AddComponent<Image>();
+            sideImg.color = new Color(GOLD.r * 0.3f, GOLD.g * 0.3f, GOLD.b * 0.3f, 1f);
+            sideImg.raycastTarget = false;
+            LayoutElement sideLE = sideObj.AddComponent<LayoutElement>();
+            sideLE.ignoreLayout = true;
 
             HorizontalLayoutGroup hlg = section.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 20;
@@ -1355,6 +1436,11 @@ namespace DigitPark.Editor
 
             AddOutline(item, outlineColor, outlineWidth);
 
+            // Subtle shadow for depth
+            Shadow itemShadow = item.AddComponent<Shadow>();
+            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            itemShadow.effectDistance = new Vector2(3, -4);
+
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);
 
@@ -1461,6 +1547,11 @@ namespace DigitPark.Editor
             itemBg.color = CARD_BG;
             AddOutline(item, isEquipped ? themeColor : themeColor * 0.4f, isEquipped ? 3 : 1);
 
+            // Subtle shadow for depth
+            Shadow itemShadow = item.AddComponent<Shadow>();
+            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            itemShadow.effectDistance = new Vector2(3, -4);
+
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);
 
@@ -1562,6 +1653,11 @@ namespace DigitPark.Editor
             Image itemBg = item.AddComponent<Image>();
             itemBg.color = CARD_BG;
             AddOutline(item, isEquipped ? itemColor : itemColor * 0.4f, isEquipped ? 2 : 1);
+
+            // Subtle shadow for depth
+            Shadow itemShadow = item.AddComponent<Shadow>();
+            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            itemShadow.effectDistance = new Vector2(3, -4);
 
             Button btn = item.AddComponent<Button>();
             SetupButton(btn, CARD_BG);

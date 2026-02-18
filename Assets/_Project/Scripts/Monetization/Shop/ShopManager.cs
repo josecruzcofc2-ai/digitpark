@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 
@@ -30,6 +31,11 @@ namespace DigitPark.Monetization
 
         [Header("Navigation")]
         [SerializeField] private Button _backButton;
+
+        [Header("Entrance Animation")]
+        [SerializeField] private RectTransform _headerTransform;
+        [SerializeField] private RectTransform _tabsTransform;
+        [SerializeField] private RectTransform _scrollViewTransform;
 
         [Header("Currency Display")]
         [SerializeField] private CurrencyDisplayUI _gemsDisplay;
@@ -65,6 +71,7 @@ namespace DigitPark.Monetization
             HandleNavigationParams();
             RefreshCurrencyDisplay();
             ForceLayoutRebuild();
+            AnimateEntrance();
         }
 
         private void OnDestroy()
@@ -138,11 +145,15 @@ namespace DigitPark.Monetization
         private void OnGemsChanged(int newAmount, int delta)
         {
             RefreshCurrencyDisplay();
+            if (delta != 0)
+                AnimateCurrencyChange(_gemsDisplay, _headerGemsText, delta > 0);
         }
 
         private void OnCoinsChanged(int newAmount, int delta)
         {
             RefreshCurrencyDisplay();
+            if (delta != 0)
+                AnimateCurrencyChange(_coinsDisplay, _headerCoinsText, delta > 0);
         }
 
         private void OnNotEnoughGems(int amountNeeded)
@@ -313,6 +324,7 @@ namespace DigitPark.Monetization
             }
 
             _purchasePopup.SetActive(true);
+            AnimatePanelIn(_purchasePopup.transform);
             Debug.Log($"[ShopManager] Showing purchase popup for: {itemData.displayName}");
         }
 
@@ -323,6 +335,7 @@ namespace DigitPark.Monetization
                 if (_popupItemName != null) _popupItemName.text = itemName;
                 if (_popupItemPrice != null) _popupItemPrice.text = price;
                 _purchasePopup.SetActive(true);
+                AnimatePanelIn(_purchasePopup.transform);
             }
         }
 
@@ -330,7 +343,10 @@ namespace DigitPark.Monetization
         {
             if (_purchasePopup != null)
             {
-                _purchasePopup.SetActive(false);
+                AnimatePanelOut(_purchasePopup.transform, () =>
+                {
+                    _purchasePopup.SetActive(false);
+                });
             }
             _currentPurchaseItem = null;
         }
@@ -340,6 +356,7 @@ namespace DigitPark.Monetization
             if (_notEnoughGemsPopup != null)
             {
                 _notEnoughGemsPopup.SetActive(true);
+                AnimatePanelIn(_notEnoughGemsPopup.transform);
             }
         }
 
@@ -347,7 +364,10 @@ namespace DigitPark.Monetization
         {
             if (_notEnoughGemsPopup != null)
             {
-                _notEnoughGemsPopup.SetActive(false);
+                AnimatePanelOut(_notEnoughGemsPopup.transform, () =>
+                {
+                    _notEnoughGemsPopup.SetActive(false);
+                });
             }
         }
 
@@ -385,6 +405,7 @@ namespace DigitPark.Monetization
                 if (success)
                 {
                     OnItemPurchased?.Invoke(itemData.itemId);
+                    PlayPurchaseCelebration(_currentPurchaseItem);
                     Debug.Log($"[ShopManager] Purchase successful: {itemData.displayName}");
                 }
             }
@@ -443,6 +464,137 @@ namespace DigitPark.Monetization
                 }
             }
             return result;
+        }
+
+        // ==================== ANIMATIONS ====================
+
+        private void AnimateEntrance()
+        {
+            // Header: slide from top
+            if (_headerTransform != null)
+            {
+                Vector2 pos = _headerTransform.anchoredPosition;
+                _headerTransform.anchoredPosition = new Vector2(pos.x, pos.y + 200);
+                _headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack);
+            }
+
+            // Tabs: fade + slide up
+            if (_tabsTransform != null)
+            {
+                var cg = _tabsTransform.GetComponent<CanvasGroup>();
+                if (cg == null) cg = _tabsTransform.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                Vector2 pos = _tabsTransform.anchoredPosition;
+                _tabsTransform.anchoredPosition = new Vector2(pos.x, pos.y - 50);
+                DOTween.Sequence()
+                    .AppendInterval(0.15f)
+                    .Append(_tabsTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
+                    .Join(cg.DOFade(1f, 0.35f));
+            }
+
+            // ScrollView: fade in + staggered items
+            if (_scrollViewTransform != null)
+            {
+                var cg = _scrollViewTransform.GetComponent<CanvasGroup>();
+                if (cg == null) cg = _scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                DOTween.Sequence()
+                    .AppendInterval(0.25f)
+                    .Append(cg.DOFade(1f, 0.4f))
+                    .OnComplete(() => AnimateShopItemsEntrance());
+            }
+        }
+
+        private void AnimateShopItemsEntrance()
+        {
+            if (_shopItems == null || _shopItems.Count == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < _shopItems.Count; i++)
+            {
+                if (_shopItems[i] == null) continue;
+                var item = _shopItems[i].transform;
+                var itemCG = item.GetComponent<CanvasGroup>();
+                if (itemCG == null) itemCG = item.gameObject.AddComponent<CanvasGroup>();
+                itemCG.alpha = 0f;
+                item.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, itemCG.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, item.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
+            }
+        }
+
+        private void AnimatePanelIn(Transform panel)
+        {
+            // Find the inner popup (first child with an Image)
+            Transform popupInner = panel.childCount > 0 ? panel.GetChild(0) : panel;
+
+            popupInner.localScale = Vector3.one * 0.85f;
+            var cg = popupInner.GetComponent<CanvasGroup>();
+            if (cg == null) cg = popupInner.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+
+            DOTween.Sequence()
+                .Join(popupInner.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f).SetEase(Ease.OutQuad))
+                .SetUpdate(true);
+        }
+
+        private void AnimatePanelOut(Transform panel, Action onComplete)
+        {
+            Transform popupInner = panel.childCount > 0 ? panel.GetChild(0) : panel;
+
+            var cg = popupInner.GetComponent<CanvasGroup>();
+            if (cg == null) cg = popupInner.gameObject.AddComponent<CanvasGroup>();
+
+            DOTween.Sequence()
+                .Join(popupInner.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f).SetEase(Ease.InQuad))
+                .OnComplete(() =>
+                {
+                    popupInner.localScale = Vector3.one;
+                    cg.alpha = 1f;
+                    onComplete?.Invoke();
+                })
+                .SetUpdate(true);
+        }
+
+        private void AnimateCurrencyChange(CurrencyDisplayUI display, TextMeshProUGUI headerText, bool isGain)
+        {
+            if (display != null)
+            {
+                display.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 5, 0.5f).SetUpdate(true);
+            }
+
+            if (headerText != null)
+            {
+                Color flashColor = isGain ? new Color(0.3f, 1f, 0.5f, 1f) : new Color(1f, 0.3f, 0.3f, 1f);
+                Color originalColor = headerText.color;
+                headerText.DOColor(flashColor, 0.15f).SetUpdate(true)
+                    .OnComplete(() => headerText.DOColor(originalColor, 0.3f).SetUpdate(true));
+            }
+        }
+
+        private void PlayPurchaseCelebration(ShopItemUI item)
+        {
+            if (item == null) return;
+
+            // Punch scale on the purchased item
+            item.transform.DOPunchScale(Vector3.one * 0.2f, 0.4f, 5, 0.5f);
+
+            // Particle celebration
+            var particleSpawner = DigitPark.Animations.ParticleEffectSpawner.Instance;
+            if (particleSpawner != null)
+            {
+                particleSpawner.SpawnCenterBurst();
+            }
+
+            // Screen flash
+            var uiAnimManager = DigitPark.Animations.UIAnimationManager.Instance;
+            if (uiAnimManager != null)
+            {
+                uiAnimManager.GoldFlash();
+            }
         }
 
         // ==================== LAYOUT ====================

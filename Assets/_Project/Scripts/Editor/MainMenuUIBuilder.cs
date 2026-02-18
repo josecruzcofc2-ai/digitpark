@@ -681,6 +681,18 @@ namespace DigitPark.Editor
             shadow.effectColor = new Color(0, 0.5f, 0.5f, 0.5f);
             shadow.effectDistance = new Vector2(3, -3);
 
+            // Side (3D depth strip below card)
+            var sideObj = FindOrCreate(card.transform, "Side");
+            sideObj.transform.SetAsFirstSibling();
+            var sideRT = GetOrAdd<RectTransform>(sideObj);
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.offsetMin = new Vector2(0, -8);
+            sideRT.offsetMax = new Vector2(0, 0);
+            var sideImg = GetOrAdd<Image>(sideObj);
+            sideImg.color = CYAN_DARK;
+            sideImg.raycastTarget = false;
+
             // Icon
             var icon = FindOrCreate(card.transform, "Icon");
             var iconRT = GetOrAdd<RectTransform>(icon);
@@ -777,6 +789,18 @@ namespace DigitPark.Editor
             var shadow = GetOrAdd<Shadow>(card);
             shadow.effectColor = new Color(1f, 0.6f, 0f, 0.6f);
             shadow.effectDistance = new Vector2(4, -4);
+
+            // Side (3D depth strip below card)
+            var sideObj = FindOrCreate(card.transform, "Side");
+            sideObj.transform.SetAsFirstSibling();
+            var sideRT = GetOrAdd<RectTransform>(sideObj);
+            sideRT.anchorMin = new Vector2(0, 0);
+            sideRT.anchorMax = new Vector2(1, 0);
+            sideRT.offsetMin = new Vector2(0, -10);
+            sideRT.offsetMax = new Vector2(0, 0);
+            var sideImg = GetOrAdd<Image>(sideObj);
+            sideImg.color = GOLD_DARK;
+            sideImg.raycastTarget = false;
 
             // Inner glow
             var glow = FindOrCreate(card.transform, "InnerGlow");

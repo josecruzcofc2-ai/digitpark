@@ -54,8 +54,10 @@ namespace DigitPark.Tools
             if (cashBattleBypassAuth)
             {
                 PlayerPrefs.SetInt("CashBattleBypassAuth", 1);
+                PlayerPrefs.SetInt("Mock_KYC_Status", 3); // KYCStatus.FullyVerified
+                PlayerPrefs.SetInt("AgeVerified", 1);     // Legacy fallback
                 PlayerPrefs.Save();
-                Debug.Log("[EditorBootConfig] CashBattle bypass auth ENABLED");
+                Debug.Log("[EditorBootConfig] CashBattle bypass auth ENABLED (KYC set to FullyVerified)");
             }
 
             if (simulateAuthenticated)

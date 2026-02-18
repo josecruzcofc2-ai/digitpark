@@ -30,8 +30,6 @@ namespace DigitPark.Editor.AutoAssigners
             "mainPanel", "battles1v1Card", "cashTournamentsCard", "walletCard", "historyCard",
             // Sub-panels
             "gameSelectionPanel", "tournamentListPanel",
-            // Age Verification
-            "ageVerificationPanel", "verifyAgeButton", "verificationStatusText", "verificationTitleText", "verificationDescText",
             // Confirm Bet
             "confirmBetPanel", "confirmBetText", "confirmBetButton", "cancelBetButton",
             // Matchmaking
@@ -76,7 +74,7 @@ namespace DigitPark.Editor.AutoAssigners
                 "Asigna referencias UI a CashBattleManager:\n" +
                 "- Header (titulo, balance, back button)\n" +
                 "- Tarjetas del menu principal\n" +
-                "- Paneles de verificacion, apuesta, matchmaking",
+                "- Paneles de apuesta y matchmaking",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -209,20 +207,6 @@ namespace DigitPark.Editor.AutoAssigners
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
                 if (mb.GetType().Name == "TournamentListPanel") { tournamentListMB = mb; break; }
             AssignReference(so, "tournamentListPanel", tournamentListMB);
-
-            // === Age Verification ===
-            Transform ageVerifT = FindDeep(root, "AgeVerificationPanel");
-            if (ageVerifT != null)
-                AssignReference(so, "ageVerificationPanel", ageVerifT.gameObject);
-            else
-                AssignReference(so, "ageVerificationPanel", (Object)null);
-
-            Transform verifyAgeBtnT = FindDeep(root, "VerifyAgeButton");
-            AssignReference(so, "verifyAgeButton", verifyAgeBtnT != null ? verifyAgeBtnT.GetComponent<Button>() : null);
-
-            AssignReference(so, "verificationStatusText", FindTextByDeep(root, "VerificationStatusText"));
-            AssignReference(so, "verificationTitleText", FindTextByDeep(root, "VerificationTitleText"));
-            AssignReference(so, "verificationDescText", FindTextByDeep(root, "VerificationDescText"));
 
             // === Confirm Bet ===
             Transform confirmBetPanelT = FindDeep(root, "ConfirmBetPanel");

@@ -36,6 +36,8 @@ namespace DigitPark.Editor.AutoAssigners
             "_notEnoughCloseButton", "_notEnoughGetGemsButton",
             // Navigation
             "_backButton",
+            // Entrance Animation
+            "_headerTransform", "_tabsTransform", "_scrollViewTransform",
             // Currency
             "_headerGemsText", "_headerCoinsText"
         };
@@ -208,6 +210,14 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Navigation
             AssignReference(so, "_backButton", FindButtonByName("backbutton", "back", "return", "atras"));
+
+            // Entrance Animation (RectTransform references)
+            Transform headerT = FindDeep(root, "Header");
+            Transform tabsT = FindDeep(root, "TabsPanel");
+            Transform scrollViewT = FindDeep(root, "ShopScrollView");
+            AssignReference(so, "_headerTransform", headerT != null ? (Object)headerT.GetComponent<RectTransform>() : null);
+            AssignReference(so, "_tabsTransform", tabsT != null ? (Object)tabsT.GetComponent<RectTransform>() : null);
+            AssignReference(so, "_scrollViewTransform", scrollViewT != null ? (Object)scrollViewT.GetComponent<RectTransform>() : null);
 
             // Currency Display
             Transform gemsDisplayT = FindDeep(root, "GemsDisplay");

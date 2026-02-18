@@ -302,6 +302,11 @@ namespace DigitPark.Editor
             infoBg.color = PANEL_BG;
             AddOutline(infoPanel, CYAN_DARK);
 
+            // 3D depth shadow
+            Shadow infoShadow = infoPanel.AddComponent<Shadow>();
+            infoShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            infoShadow.effectDistance = new Vector2(3, -4);
+
             // Layout
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(infoPanel);
             vlg.spacing = 15;
@@ -455,6 +460,11 @@ namespace DigitPark.Editor
             lbBg.color = PANEL_BG;
             AddOutline(leaderboard, CYAN_DARK);
 
+            // 3D depth shadow
+            Shadow lbShadow = leaderboard.AddComponent<Shadow>();
+            lbShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            lbShadow.effectDistance = new Vector2(3, -4);
+
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(leaderboard);
             vlg.spacing = 0;
             vlg.padding = new RectOffset(0, 0, 0, 0);
@@ -581,10 +591,25 @@ namespace DigitPark.Editor
         {
             GameObject row = FindOrCreateChild(parent, $"Row_{rank}");
 
-            Color rowBg = rank <= 3 ? new Color(0.06f, 0.1f, 0.15f, 1f) : Color.clear;
+            Color rowBg = rank <= 3 ? new Color(0.06f, 0.1f, 0.15f, 1f) : new Color(0.04f, 0.06f, 0.1f, 1f);
 
             Image rowImage = GetOrAddComponent<Image>(row);
             rowImage.color = rowBg;
+
+            // Shadow sutil
+            Shadow rowShadow = row.GetComponent<Shadow>();
+            if (rowShadow == null) rowShadow = row.AddComponent<Shadow>();
+            rowShadow.effectColor = new Color(0f, 0f, 0f, 0.3f);
+            rowShadow.effectDistance = new Vector2(2, -3);
+
+            // Outline sutil para top 3
+            if (rank <= 3)
+            {
+                Color outlineColor = rank == 1 ? new Color(1f, 0.84f, 0f, 0.3f) :
+                                     rank == 2 ? new Color(0.75f, 0.75f, 0.75f, 0.3f) :
+                                                 new Color(0.8f, 0.5f, 0.2f, 0.3f);
+                AddOutline(row, outlineColor);
+            }
 
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(row);
             hlg.spacing = 10;
@@ -662,6 +687,11 @@ namespace DigitPark.Editor
             Image myPosBg = GetOrAddComponent<Image>(myPos);
             myPosBg.color = CYAN_DARK;
             AddOutline(myPos, CYAN_NEON, 2);
+
+            // 3D depth shadow
+            Shadow myPosShadow = myPos.AddComponent<Shadow>();
+            myPosShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            myPosShadow.effectDistance = new Vector2(3, -4);
 
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(myPos);
             hlg.spacing = 15;
@@ -752,6 +782,12 @@ namespace DigitPark.Editor
             Button playButton = GetOrAddComponent<Button>(playBtn);
             SetupButtonColors(playButton, BUTTON_PRIMARY);
             AddOutline(playBtn, CYAN_GLOW, 3);
+
+            // 3D depth shadow
+            Shadow playShadow = playBtn.AddComponent<Shadow>();
+            playShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            playShadow.effectDistance = new Vector2(3, -4);
+
             LayoutElement playLE = GetOrAddComponent<LayoutElement>(playBtn);
             playLE.flexibleWidth = 2;
 

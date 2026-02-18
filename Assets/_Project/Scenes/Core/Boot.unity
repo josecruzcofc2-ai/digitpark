@@ -409,8 +409,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21ed4130f2f45fa4cbfaa1558f79d5e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasNoAds: 0
   canCreateTournaments: 0
+  canCreateCashBattle: 0
   hasStylesPro: 0
   allowThemeChange: 0
   applyChanges: 0
@@ -536,6 +536,58 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableAnalytics: 1
   debugMode: 1
+--- !u!1 &1433805790
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1433805792}
+  - component: {fileID: 1433805791}
+  m_Layer: 0
+  m_Name: EditorBootConfig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1433805791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433805790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a65989666dd70f849bdc67519dba4bb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skipBootFlow: 0
+  targetScene: 0
+  simulateAuthenticated: 1
+  cashBattleBypassAuth: 0
+  info: 'Este objeto solo funciona en el Editor.
+
+    Se ignora automaticamente en
+    builds.'
+--- !u!4 &1433805792
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433805790}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 393.04797, y: 1039.1941, z: -9.713475}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1944334945
 GameObject:
   m_ObjectHideFlags: 0
@@ -673,58 +725,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!1 &1963913662
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1963913664}
-  - component: {fileID: 1963913663}
-  m_Layer: 0
-  m_Name: AgeVerification
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1963913663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1963913662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a65989666dd70f849bdc67519dba4bb8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  skipBootFlow: 0
-  targetScene: 0
-  simulateAuthenticated: 1
-  cashBattleBypassAuth: 1
-  info: 'Este objeto solo funciona en el Editor.
-
-    Se ignora automaticamente en
-    builds.'
---- !u!4 &1963913664
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1963913662}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 545.08716, y: 1425.5616, z: 5.694929}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -736,4 +736,4 @@ SceneRoots:
   - {fileID: 53479289}
   - {fileID: 1327254061}
   - {fileID: 1002361395}
-  - {fileID: 1963913664}
+  - {fileID: 1433805792}

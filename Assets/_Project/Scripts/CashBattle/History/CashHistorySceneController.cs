@@ -531,6 +531,7 @@ namespace DigitPark.CashBattle
 
             selectedEntry = entry;
             detailPanel.SetActive(true);
+            AnimatePanelIn(detailPanel.transform);
 
             // Populate detail info
             if (detailTitleText)
@@ -582,7 +583,7 @@ namespace DigitPark.CashBattle
         {
             if (detailPanel)
             {
-                detailPanel.SetActive(false);
+                AnimatePanelOut(detailPanel.transform, () => detailPanel.SetActive(false));
             }
             selectedEntry = null;
         }
@@ -639,6 +640,31 @@ namespace DigitPark.CashBattle
                         loadingIndicator.SetActive(false);
                 }
             }
+        }
+
+        // ==================== PANEL ANIMATIONS ====================
+
+        private void AnimatePanelIn(Transform t)
+        {
+            t.localScale = Vector3.one * 0.85f;
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            DOTween.Sequence()
+                .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                .Join(cg.DOFade(1f, 0.25f))
+                .SetUpdate(true);
+        }
+
+        private void AnimatePanelOut(Transform t, System.Action onComplete)
+        {
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
+            DOTween.Sequence()
+                .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(cg.DOFade(0f, 0.2f))
+                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true);
         }
 
         // ==================== NAVIGATION ====================
