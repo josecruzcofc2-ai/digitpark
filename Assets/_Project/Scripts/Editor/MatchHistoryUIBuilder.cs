@@ -409,7 +409,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "No has jugado partidas aun\nJuega para ver tu historial";
-            eTMP.fontSize = 18;
+            eTMP.fontSize = 30;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
@@ -421,7 +421,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Cargando...";
-            ldTMP.fontSize = 18;
+            ldTMP.fontSize = 30;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -447,7 +447,7 @@ namespace DigitPark.Editor
             lmtRT.offsetMax = Vector2.zero;
             var lmtTMP = GetOrAdd<TextMeshProUGUI>(lmText);
             lmtTMP.text = "Cargar mas...";
-            lmtTMP.fontSize = 16;
+            lmtTMP.fontSize = 30;
             lmtTMP.color = CYAN_NEON;
             lmtTMP.fontStyle = FontStyles.Bold;
             lmtTMP.alignment = TextAlignmentOptions.Center;
@@ -521,7 +521,7 @@ namespace DigitPark.Editor
             gnRT.offsetMax = Vector2.zero;
             var gnTMP = gameName.AddComponent<TextMeshProUGUI>();
             gnTMP.text = "Digit Rush";
-            gnTMP.fontSize = 19;
+            gnTMP.fontSize = 30;
             gnTMP.color = TEXT_WHITE;
             gnTMP.fontStyle = FontStyles.Bold;
             gnTMP.alignment = TextAlignmentOptions.Left;
@@ -536,7 +536,7 @@ namespace DigitPark.Editor
             rbRT.offsetMax = Vector2.zero;
             var rbTMP = resultBadge.AddComponent<TextMeshProUGUI>();
             rbTMP.text = "WIN";
-            rbTMP.fontSize = 17;
+            rbTMP.fontSize = 30;
             rbTMP.color = GREEN_WIN;
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.alignment = TextAlignmentOptions.Right;
@@ -551,7 +551,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = subtitle.AddComponent<TextMeshProUGUI>();
             stTMP.text = "vs. Player123";
-            stTMP.fontSize = 15;
+            stTMP.fontSize = 30;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
 
@@ -565,7 +565,7 @@ namespace DigitPark.Editor
             dtRT.offsetMax = Vector2.zero;
             var dtTMP = detail.AddComponent<TextMeshProUGUI>();
             dtTMP.text = "12.5s \u00B7 0 err";
-            dtTMP.fontSize = 14;
+            dtTMP.fontSize = 30;
             dtTMP.color = CYAN_NEON;
             dtTMP.alignment = TextAlignmentOptions.Left;
 
@@ -579,7 +579,7 @@ namespace DigitPark.Editor
             dateRT.offsetMax = new Vector2(-12, 0);
             var dateTMP = dateText.AddComponent<TextMeshProUGUI>();
             dateTMP.text = "Hace 2h";
-            dateTMP.fontSize = 13;
+            dateTMP.fontSize = 30;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.alignment = TextAlignmentOptions.Right;
 

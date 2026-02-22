@@ -257,7 +257,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = Vector2.zero;
             var cTMP = GetOrAdd<TextMeshProUGUI>(counter);
             cTMP.text = "1/8";
-            cTMP.fontSize = 28;
+            cTMP.fontSize = 30;
             cTMP.color = TEXT_SECONDARY;
             cTMP.fontStyle = FontStyles.Bold;
             cTMP.alignment = TextAlignmentOptions.Center;
@@ -281,7 +281,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
             stTMP.text = "SALTAR";
-            stTMP.fontSize = 28;
+            stTMP.fontSize = 30;
             stTMP.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
@@ -601,7 +601,7 @@ namespace DigitPark.Editor
             errorText.AddComponent<LayoutElement>().preferredHeight = 40;
             var eTMP = errorText.AddComponent<TextMeshProUGUI>();
             eTMP.text = "";
-            eTMP.fontSize = 26;
+            eTMP.fontSize = 30;
             eTMP.color = RED_ERROR;
             eTMP.fontStyle = FontStyles.Bold;
             eTMP.alignment = TextAlignmentOptions.Center;

@@ -86,7 +86,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Daily Rewards", false, 185)]
+        [MenuItem("DigitPark/UI Builders/Monetization/Daily Rewards", false, 183)]
         public static void ShowWindow()
         {
             GetWindow<DailyRewardsPremiumUIBuilder>("Daily Rewards Builder");
@@ -321,7 +321,7 @@ namespace DigitPark.Editor
             var text = FindOrCreate(pill.transform, "Text");
             var tmp = GetOrAdd<TextMeshProUGUI>(text);
             tmp.text = amount;
-            tmp.fontSize = 22;
+            tmp.fontSize = 30;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -451,7 +451,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(bonusText).preferredHeight = 30;
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
             btTMP.text = "Bonus d\u00EDa 7: +100 gemas";
-            btTMP.fontSize = 26;
+            btTMP.fontSize = 30;
             btTMP.enableAutoSizing = true;
             btTMP.fontSizeMin = 18;
             btTMP.fontSizeMax = 26;
@@ -589,7 +589,7 @@ namespace DigitPark.Editor
             dayLabel.AddComponent<LayoutElement>().preferredHeight = 28;
             var dlTMP = dayLabel.AddComponent<TextMeshProUGUI>();
             dlTMP.text = $"D\u00CDA {day}";
-            dlTMP.fontSize = 26;
+            dlTMP.fontSize = 30;
             dlTMP.fontStyle = FontStyles.Bold;
             dlTMP.color = claimed ? GREEN_SUCCESS : (current ? GOLD : TEXT_WHITE);
             dlTMP.alignment = TextAlignmentOptions.Center;
@@ -655,7 +655,7 @@ namespace DigitPark.Editor
             typeObj.AddComponent<LayoutElement>().preferredHeight = 26;
             var ttTMP = typeObj.AddComponent<TextMeshProUGUI>();
             ttTMP.text = typeName;
-            ttTMP.fontSize = 24;
+            ttTMP.fontSize = 30;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = TEXT_SECONDARY;
             ttTMP.alignment = TextAlignmentOptions.Center;
@@ -711,7 +711,7 @@ namespace DigitPark.Editor
                 bttRT.offsetMax = Vector2.zero;
                 var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                 bttTMP.text = "HOY";
-                bttTMP.fontSize = 24;
+                bttTMP.fontSize = 30;
                 bttTMP.fontStyle = FontStyles.Bold;
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;
@@ -875,7 +875,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 30;
             var r2TMP = GetOrAdd<TextMeshProUGUI>(d7Reward2);
             r2TMP.text = "+ Item Exclusivo";
-            r2TMP.fontSize = 28;
+            r2TMP.fontSize = 30;
             r2TMP.fontStyle = FontStyles.Bold;
             r2TMP.color = GOLD;
             r2TMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -885,7 +885,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(d7Status).preferredHeight = 28;
             var stTMP = GetOrAdd<TextMeshProUGUI>(d7Status);
             stTMP.text = "Desbloquea en 2 d\u00EDas";
-            stTMP.fontSize = 26;
+            stTMP.fontSize = 30;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -943,7 +943,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "HOY";
-            btTMP.fontSize = 28;
+            btTMP.fontSize = 30;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = TEXT_DARK;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -976,7 +976,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 30;
             var rlTMP = GetOrAdd<TextMeshProUGUI>(rewardLabel);
             rlTMP.text = "RECOMPENSA DE HOY";
-            rlTMP.fontSize = 28;
+            rlTMP.fontSize = 30;
             rlTMP.enableAutoSizing = true;
             rlTMP.fontSizeMin = 18;
             rlTMP.fontSizeMax = 28;
@@ -1087,7 +1087,7 @@ namespace DigitPark.Editor
             var label = FindOrCreate(timerBar.transform, "Label");
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Pr\u00F3xima recompensa en:";
-            lTMP.fontSize = 26;
+            lTMP.fontSize = 30;
             lTMP.enableAutoSizing = true;
             lTMP.fontSizeMin = 18;
             lTMP.fontSizeMax = 26;

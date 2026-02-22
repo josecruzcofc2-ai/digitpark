@@ -501,6 +501,15 @@ namespace DigitPark.Managers
                 }
             }
             spawnedCards.Clear();
+
+            // Also destroy any UIBuilder placeholder cards left in the container
+            if (showcaseContainer != null)
+            {
+                for (int i = showcaseContainer.childCount - 1; i >= 0; i--)
+                {
+                    Destroy(showcaseContainer.GetChild(i).gameObject);
+                }
+            }
         }
 
         private void ShowEmptyState()

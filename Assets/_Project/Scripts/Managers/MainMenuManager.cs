@@ -9,6 +9,7 @@ using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.UI.Common;
 using DigitPark.UI.Panels;
+using DigitPark.Monetization;
 
 namespace DigitPark.Managers
 {
@@ -28,6 +29,7 @@ namespace DigitPark.Managers
 
         [Header("UI - User Info")]
         [SerializeField] public Button userButton;
+        [SerializeField] public Button profileHeaderButton;
         [SerializeField] public TextMeshProUGUI userText;
         [SerializeField] public Button searchButton;
 
@@ -43,6 +45,7 @@ namespace DigitPark.Managers
         [SerializeField] public Button shopButton;
         [SerializeField] public Button achievementsButton;
         [SerializeField] public Button dailyMissionsButton;
+        [SerializeField] public Button dailyRewardsButton;
         [SerializeField] public Button missionsCardButton;
 
         [Header("UI - Premium")]
@@ -102,10 +105,12 @@ namespace DigitPark.Managers
             shopButton?.onClick.AddListener(OnShopButtonClicked);
             achievementsButton?.onClick.AddListener(OnAchievementsButtonClicked);
             dailyMissionsButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
+            dailyRewardsButton?.onClick.AddListener(OnDailyRewardsButtonClicked);
             missionsCardButton?.onClick.AddListener(OnDailyMissionsButtonClicked);
 
             // User info buttons
             userButton?.onClick.AddListener(OnUserButtonClicked);
+            profileHeaderButton?.onClick.AddListener(OnUserButtonClicked);
             searchButton?.onClick.AddListener(OnSearchButtonClicked);
             notificationsButton?.onClick.AddListener(OnNotificationsButtonClicked);
 
@@ -364,7 +369,7 @@ namespace DigitPark.Managers
             if (SettingsManager.IsCashBattleAuthBypassed())
             {
                 Debug.Log("[MainMenu] Bypass de autenticación ACTIVO - navegando directo a CashBattleHub");
-                SceneManager.LoadScene("CashBattleHub");
+                SceneNavigator.Instance?.NavigateTo("CashBattleHub");
                 return;
             }
 
@@ -388,7 +393,7 @@ namespace DigitPark.Managers
             {
                 // Usuario verificado - ir directo al Hub
                 Debug.Log("[MainMenu] Usuario verificado - navegando a CashBattleHub");
-                SceneManager.LoadScene("CashBattleHub");
+                SceneNavigator.Instance?.NavigateTo("CashBattleHub");
             }
         }
 
@@ -464,6 +469,12 @@ namespace DigitPark.Managers
         {
             Debug.Log("[MainMenu] Navegando a DailyMissions");
             SceneManager.LoadScene("DailyMissions");
+        }
+
+        private void OnDailyRewardsButtonClicked()
+        {
+            Debug.Log("[MainMenu] Navegando a DailyRewards");
+            SceneManager.LoadScene("DailyRewards");
         }
 
         private void OnPremiumButtonClicked()

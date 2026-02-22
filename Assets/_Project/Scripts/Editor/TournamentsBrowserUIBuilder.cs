@@ -100,6 +100,7 @@ namespace DigitPark.Editor
             CreateFAB(safeArea);
 
             MarkSceneDirty();
+            AutoAssigners.TournamentsBrowserReferenceAssigner.RunAutoAssign();
             Debug.Log("[TournamentsBrowserUIBuilder] ========== CONSTRUCCION COMPLETADA ==========");
         }
 

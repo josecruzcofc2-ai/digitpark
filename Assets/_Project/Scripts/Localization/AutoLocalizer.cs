@@ -78,6 +78,9 @@ namespace DigitPark.Localization
             { "ChangeLanguage", "change_language" },
             { "ChangueLanguageText", "change_language" }, // Typo in scene
 
+            // Toggle
+            { "VibrationToggleLabel", "vibration" },
+
             // Theme/Style
             { "ChangeStyleText", "change_style" },
             { "ChangeStyleLabel", "change_style" },
@@ -85,6 +88,25 @@ namespace DigitPark.Localization
             { "ChangeThemeText", "change_style" },
             { "ChangeThemeLabel", "change_style" },
             { "ThemeLabel", "change_style" },
+
+            // Settings Section Titles
+            { "AccountCardTitle", "settings_account" },
+            { "AudioCardTitle", "settings_audio" },
+            { "AppearanceCardTitle", "settings_appearance" },
+            // PremiumSectionTitle already mapped in PREMIUM section below
+            { "LegalCardTitle", "settings_legal" },
+            { "DangerCardTitle", "settings_danger_zone" },
+
+            // Settings Button Labels
+            { "ShopButtonText", "shop_nav" },
+            // RestorePurchasesButtonText already mapped in PREMIUM section below
+            // RemoveAdsButtonText already mapped in PREMIUM section below
+            // PremiumFullButtonText already mapped in PREMIUM section below
+            { "TermsButtonText", "terms_conditions" },
+            { "PrivacyButtonText", "privacy_policy" },
+            { "ResponsibleGamingButtonText", "responsible_gaming" },
+            { "TriumphTermsButtonText", "triumph_terms" },
+            { "SelfExclusionButtonText", "self_exclusion" },
 
             { "BackButton", "back_button" },
             { "BackButtonText", "back_button" },

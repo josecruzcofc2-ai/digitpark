@@ -66,7 +66,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Social/Notifications", false, 172)]
+        [MenuItem("DigitPark/UI Builders/Social/Notifications", false, 174)]
         public static void ShowWindow()
         {
             GetWindow<NotificationsUIBuilder>("Notifications Builder");

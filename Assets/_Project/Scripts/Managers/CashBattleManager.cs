@@ -34,6 +34,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button battles1v1Card;
         [SerializeField] private Button cashTournamentsCard;
         [SerializeField] private Button walletCard;
+        [SerializeField] private Button cashProfileCard;
         [SerializeField] private Button historyCard;
 
         [Header("UI - Sub Panels")]
@@ -166,6 +167,7 @@ namespace DigitPark.Managers
             battles1v1Card?.onClick.AddListener(OnBattles1v1Clicked);
             cashTournamentsCard?.onClick.AddListener(OnCashTournamentsClicked);
             walletCard?.onClick.AddListener(OnWalletClicked);
+            cashProfileCard?.onClick.AddListener(OnCashProfileClicked);
             historyCard?.onClick.AddListener(OnHistoryClicked);
 
             if (gameSelectionPanel != null)
@@ -445,6 +447,12 @@ namespace DigitPark.Managers
         {
             Debug.Log("[CashBattle] Navegando a escena Wallet");
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
+        }
+
+        private void OnCashProfileClicked()
+        {
+            Debug.Log("[CashBattle] Navegando a escena CashProfile");
+            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_PROFILE);
         }
 
         private void OnHistoryClicked()

@@ -72,12 +72,13 @@ namespace DigitPark.Editor
             new[] { "Tournaments/TournamentCreate" },
             new[] { "Tournaments/TournamentLobby" },
 
-            // === 30-35: CASH BATTLE ===
+            // === 30-36: CASH BATTLE ===
             new[] { "CashBattle/CashBattleHub" },
             new[] { "CashBattle/CashBattle1v1" },
             new[] { "CashBattle/CashTournaments" },
             new[] { "CashBattle/CashWallet" },
             new[] { "CashBattle/CashHistory" },
+            new[] { "CashBattle/CashProfile" },
             new[] { "Onboarding/CashBattleOnboarding" },
         };
 
@@ -120,7 +121,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Configura el orden de escenas en Build Settings.\n" +
                 "Indice 0 = Boot (entry point). Orden por flujo de navegacion.\n" +
-                "36 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
+                "37 escenas totales: Auth > Core > Games > Social > Monetization > Tournaments > CashBattle",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -283,7 +284,7 @@ namespace DigitPark.Editor
                 "[17-22] Social\n" +
                 "[23-26] Monetization\n" +
                 "[27-29] Tournaments\n" +
-                "[30-35] Cash Battle",
+                "[30-36] Cash Battle",
                 "OK");
         }
     }

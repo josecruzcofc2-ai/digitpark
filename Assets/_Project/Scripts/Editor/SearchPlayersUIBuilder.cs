@@ -527,7 +527,7 @@ namespace DigitPark.Editor
             usernameRect.sizeDelta = new Vector2(0, 28);
             TextMeshProUGUI usernameTmp = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTmp.text = "Username";
-            usernameTmp.fontSize = 22;
+            usernameTmp.fontSize = 30;
             usernameTmp.color = Color.white;
             usernameTmp.fontStyle = FontStyles.Bold;
             usernameTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -542,7 +542,7 @@ namespace DigitPark.Editor
             handleRect.sizeDelta = new Vector2(0, 22);
             TextMeshProUGUI handleTmp = handleObj.AddComponent<TextMeshProUGUI>();
             handleTmp.text = "@handle";
-            handleTmp.fontSize = 16;
+            handleTmp.fontSize = 30;
             handleTmp.color = PLACEHOLDER_COLOR;
             handleTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -577,7 +577,7 @@ namespace DigitPark.Editor
             winTextRect.sizeDelta = new Vector2(80, 24);
             TextMeshProUGUI winTextTmp = winText.AddComponent<TextMeshProUGUI>();
             winTextTmp.text = "0%";
-            winTextTmp.fontSize = 15;
+            winTextTmp.fontSize = 30;
             winTextTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             winTextTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -591,7 +591,7 @@ namespace DigitPark.Editor
             sepRect.sizeDelta = new Vector2(20, 20);
             TextMeshProUGUI sepTmp = sep.AddComponent<TextMeshProUGUI>();
             sepTmp.text = "•";
-            sepTmp.fontSize = 14;
+            sepTmp.fontSize = 22;
             sepTmp.color = PLACEHOLDER_COLOR;
             sepTmp.alignment = TextAlignmentOptions.Center;
 
@@ -617,7 +617,7 @@ namespace DigitPark.Editor
             gameTextRect.sizeDelta = new Vector2(100, 24);
             TextMeshProUGUI gameTextTmp = gameText.AddComponent<TextMeshProUGUI>();
             gameTextTmp.text = "Game";
-            gameTextTmp.fontSize = 15;
+            gameTextTmp.fontSize = 30;
             gameTextTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             gameTextTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -641,7 +641,7 @@ namespace DigitPark.Editor
             labelRect.sizeDelta = new Vector2(70, 20);
             TextMeshProUGUI labelTmp = onlineLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "Online";
-            labelTmp.fontSize = 13;
+            labelTmp.fontSize = 30;
             labelTmp.color = new Color(0.2f, 1f, 0.4f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineRight;
 
@@ -726,7 +726,7 @@ namespace DigitPark.Editor
             textRect.sizeDelta = Vector2.zero;
             TextMeshProUGUI tmp = btnText.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 16;
+            tmp.fontSize = 30;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

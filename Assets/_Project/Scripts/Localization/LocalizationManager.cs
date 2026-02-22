@@ -201,7 +201,7 @@ namespace DigitPark.Localization
                 string line = lines[i].TrimEnd('\r');
 
                 // Saltar líneas vacías y comentarios
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("=") || line.StartsWith("#"))
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("=") || line.StartsWith("#") || line.StartsWith("//"))
                 {
                     // Si teníamos una key pendiente, guardarla
                     if (!string.IsNullOrEmpty(currentKey) && !string.IsNullOrEmpty(en))

@@ -66,6 +66,15 @@ namespace DigitPark.Editor.AutoAssigners
             window.minSize = new Vector2(600, 500);
         }
 
+        /// <summary>
+        /// Public entry point for auto-assigning references (called from SettingsUIBuilder).
+        /// </summary>
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #endregion
 
         #region Window GUI

@@ -11,7 +11,8 @@ namespace DigitPark.UI.Items
     /// Trophy Card UI component for the Achievement Trophy Showcase.
     /// Features: 3D-like glass case effect, glow, particles, animations.
     /// </summary>
-    public class TrophyCardUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    public class TrophyCardUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler,
+        IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         [Header("Card Structure")]
         [SerializeField] private RectTransform cardContainer;
@@ -60,6 +61,9 @@ namespace DigitPark.UI.Items
         private Tween _glowTween;
         private Tween _shineTween;
 
+        // Cached parent ScrollRect for drag forwarding
+        private ScrollRect _parentScrollRect;
+
         private void OnEnable()
         {
             if (_isUnlocked)
@@ -90,6 +94,9 @@ namespace DigitPark.UI.Items
 
             // Auto-find references if not assigned in Inspector
             FindReferencesIfNeeded();
+
+            // Disable raycastTarget on decorative images so they don't block scroll
+            DisableDecorativeRaycasts();
 
             UpdateVisuals();
 
@@ -186,6 +193,24 @@ namespace DigitPark.UI.Items
                 if (shineTransform != null)
                     shineEffect = shineTransform.GetComponent<Image>();
             }
+        }
+
+        /// <summary>
+        /// Disable raycastTarget on decorative/non-interactive images
+        /// so they don't interfere with ScrollRect drag detection.
+        /// Only the cardBackground needs raycastTarget for the card to be clickable.
+        /// </summary>
+        private void DisableDecorativeRaycasts()
+        {
+            if (glassOverlay) glassOverlay.raycastTarget = false;
+            if (borderGlow) borderGlow.raycastTarget = false;
+            if (trophyIcon) trophyIcon.raycastTarget = false;
+            if (trophyShadow) trophyShadow.raycastTarget = false;
+            if (lockedOverlay) lockedOverlay.raycastTarget = false;
+            if (shineEffect) shineEffect.raycastTarget = false;
+            if (completedBadge) completedBadge.raycastTarget = false;
+            if (progressFill) progressFill.raycastTarget = false;
+            if (progressBackground) progressBackground.raycastTarget = false;
         }
 
         private void UpdateVisuals()
@@ -484,6 +509,38 @@ namespace DigitPark.UI.Items
 
             // Reset glow
             UpdateGlowColor();
+        }
+
+        #endregion
+
+        #region Drag Forwarding (ScrollRect passthrough)
+
+        private ScrollRect GetParentScrollRect()
+        {
+            if (_parentScrollRect == null)
+                _parentScrollRect = GetComponentInParent<ScrollRect>();
+            return _parentScrollRect;
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            var sr = GetParentScrollRect();
+            if (sr != null)
+                sr.OnBeginDrag(eventData);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            var sr = GetParentScrollRect();
+            if (sr != null)
+                sr.OnDrag(eventData);
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            var sr = GetParentScrollRect();
+            if (sr != null)
+                sr.OnEndDrag(eventData);
         }
 
         #endregion

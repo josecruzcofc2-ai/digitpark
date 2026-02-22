@@ -80,6 +80,7 @@ namespace DigitPark.Editor
                 // Force layout update
                 Canvas.ForceUpdateCanvases();
 
+                AutoAssigners.RegisterReferenceAssigner.RunAutoAssign();
                 Debug.Log("✅ Register UI rebuilt successfully!");
                 EditorUtility.SetDirty(canvas.gameObject);
             }
@@ -462,7 +463,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = loadingText.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Creando cuenta...";
-            text.fontSize = 24;
+            text.fontSize = 30;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
 

@@ -27,7 +27,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Header
             "titleText", "balanceText", "backButton",
             // Menu Cards
-            "mainPanel", "battles1v1Card", "cashTournamentsCard", "walletCard", "historyCard",
+            "mainPanel", "battles1v1Card", "cashTournamentsCard", "walletCard", "cashProfileCard", "historyCard",
             // Sub-panels
             "gameSelectionPanel", "tournamentListPanel",
             // Confirm Bet
@@ -191,6 +191,9 @@ namespace DigitPark.Editor.AutoAssigners
 
             Transform walletT = FindDeep(root, "WalletCard");
             AssignReference(so, "walletCard", walletT != null ? walletT.GetComponent<Button>() : null);
+
+            Transform cashProfileT = FindDeep(root, "CashProfileCard");
+            AssignReference(so, "cashProfileCard", cashProfileT != null ? cashProfileT.GetComponent<Button>() : null);
 
             Transform historyT = FindDeep(root, "HistoryCard");
             AssignReference(so, "historyCard", historyT != null ? historyT.GetComponent<Button>() : null);

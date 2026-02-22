@@ -544,7 +544,7 @@ namespace DigitPark.Editor
             itRT.offsetMax = Vector2.zero;
             var itTMP = GetOrAdd<TextMeshProUGUI>(infoText);
             itTMP.text = "?";
-            itTMP.fontSize = 28;
+            itTMP.fontSize = 30;
             itTMP.fontStyle = FontStyles.Bold;
             itTMP.color = CYAN_NEON;
             itTMP.alignment = TextAlignmentOptions.Center;
@@ -603,7 +603,7 @@ namespace DigitPark.Editor
             var label = FindOrCreate(timerBar.transform, "Label");
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Se reinician en:";
-            lTMP.fontSize = 24;
+            lTMP.fontSize = 30;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -678,7 +678,7 @@ namespace DigitPark.Editor
             ttRT.offsetMax = Vector2.zero;
             var ttTMP = GetOrAdd<TextMeshProUGUI>(tabText);
             ttTMP.text = label;
-            ttTMP.fontSize = 22;
+            ttTMP.fontSize = 30;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = isActive ? TEXT_DARK : new Color(0.5f, 0.5f, 0.5f, 1f);
             ttTMP.alignment = TextAlignmentOptions.Center;
@@ -733,7 +733,7 @@ namespace DigitPark.Editor
             var titleLeft = FindOrCreate(titleRow.transform, "TitleLeft");
             var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLeft);
             tlTMP.text = "Progreso Diario";
-            tlTMP.fontSize = 26;
+            tlTMP.fontSize = 30;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.color = TEXT_WHITE;
             tlTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -741,7 +741,7 @@ namespace DigitPark.Editor
             var titleRight = FindOrCreate(titleRow.transform, "TitleRight");
             var trTMP = GetOrAdd<TextMeshProUGUI>(titleRight);
             trTMP.text = "4/6 Misiones";
-            trTMP.fontSize = 22;
+            trTMP.fontSize = 30;
             trTMP.fontStyle = FontStyles.Bold;
             trTMP.color = TEXT_SECONDARY;
             trTMP.alignment = TextAlignmentOptions.MidlineRight;
@@ -810,7 +810,7 @@ namespace DigitPark.Editor
             var bonusText = FindOrCreate(bonusRow.transform, "BonusRewardText");
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
             btTMP.text = "Bonus: +100 monedas";
-            btTMP.fontSize = 22;
+            btTMP.fontSize = 30;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = GOLD;
             btTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -836,7 +836,7 @@ namespace DigitPark.Editor
             cbTextRT.offsetMax = Vector2.zero;
             var cbTextTMP = GetOrAdd<TextMeshProUGUI>(cbTextObj);
             cbTextTMP.text = "Reclamar";
-            cbTextTMP.fontSize = 24;
+            cbTextTMP.fontSize = 30;
             cbTextTMP.fontStyle = FontStyles.Bold;
             cbTextTMP.color = TEXT_DARK;
             cbTextTMP.alignment = TextAlignmentOptions.Center;
@@ -868,7 +868,7 @@ namespace DigitPark.Editor
             rwRT.offsetMax = Vector2.zero;
             var rwTMP = GetOrAdd<TextMeshProUGUI>(rewardText);
             rwTMP.text = reward;
-            rwTMP.fontSize = 14;
+            rwTMP.fontSize = 30;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.color = TEXT_WHITE;
             rwTMP.alignment = TextAlignmentOptions.Center;
@@ -977,7 +977,7 @@ namespace DigitPark.Editor
             var emptyState = FindOrCreate(content.transform, "EmptyStateText");
             var esTMP = GetOrAdd<TextMeshProUGUI>(emptyState);
             esTMP.text = "No hay misiones disponibles";
-            esTMP.fontSize = 24;
+            esTMP.fontSize = 30;
             esTMP.fontStyle = FontStyles.Bold;
             esTMP.color = TEXT_SECONDARY;
             esTMP.alignment = TextAlignmentOptions.Center;
@@ -1021,7 +1021,7 @@ namespace DigitPark.Editor
             var titleGO = FindOrCreate(header.transform, "Title");
             var tTMP = GetOrAdd<TextMeshProUGUI>(titleGO);
             tTMP.text = title;
-            tTMP.fontSize = 28;
+            tTMP.fontSize = 30;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.color = color;
             tTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1105,7 +1105,7 @@ namespace DigitPark.Editor
                 coRT.offsetMax = Vector2.zero;
                 var coTMP = GetOrAdd<TextMeshProUGUI>(checkOverlay);
                 coTMP.text = "\u2713";
-                coTMP.fontSize = 24;
+                coTMP.fontSize = 30;
                 coTMP.fontStyle = FontStyles.Bold;
                 coTMP.color = GREEN_SUCCESS;
                 coTMP.alignment = TextAlignmentOptions.Center;
@@ -1127,7 +1127,7 @@ namespace DigitPark.Editor
             var titleGO = FindOrCreate(infoPanel.transform, "Title");
             var titleTMP = GetOrAdd<TextMeshProUGUI>(titleGO);
             titleTMP.text = title;
-            titleTMP.fontSize = 26;
+            titleTMP.fontSize = 30;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.color = isCompleted ? GREEN_SUCCESS : TEXT_WHITE;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1139,13 +1139,13 @@ namespace DigitPark.Editor
             var descGO = FindOrCreate(infoPanel.transform, "Description");
             var descTMP = GetOrAdd<TextMeshProUGUI>(descGO);
             descTMP.text = description;
-            descTMP.fontSize = 20;
+            descTMP.fontSize = 30;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.overflowMode = TextOverflowModes.Ellipsis;
             var descLE = GetOrAdd<LayoutElement>(descGO);
-            descLE.preferredHeight = 26;
+            descLE.preferredHeight = 28;
 
             // Progress Row
             var progressRow = FindOrCreate(infoPanel.transform, "ProgressRow");
@@ -1182,7 +1182,7 @@ namespace DigitPark.Editor
             var progressText = FindOrCreate(progressRow.transform, "ProgressText");
             var ptTMP = GetOrAdd<TextMeshProUGUI>(progressText);
             ptTMP.text = current + "/" + target;
-            ptTMP.fontSize = 20;
+            ptTMP.fontSize = 30;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1249,7 +1249,7 @@ namespace DigitPark.Editor
             var amountText = FindOrCreate(rewardDisplay.transform, "Amount");
             var atTMP = GetOrAdd<TextMeshProUGUI>(amountText);
             atTMP.text = rewardAmount;
-            atTMP.fontSize = 22;
+            atTMP.fontSize = 30;
             atTMP.fontStyle = FontStyles.Bold;
             atTMP.color = rewardColor;
             atTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1276,7 +1276,7 @@ namespace DigitPark.Editor
             {
                 abBg.color = GREEN_SUCCESS;
                 actTMP.text = "Reclamar";
-                actTMP.fontSize = 22;
+                actTMP.fontSize = 30;
                 actTMP.fontStyle = FontStyles.Bold;
                 actTMP.color = TEXT_DARK;
                 actTMP.alignment = TextAlignmentOptions.Center;
@@ -1289,7 +1289,7 @@ namespace DigitPark.Editor
                 abBg.color = CARD_BG;
                 abBtn.interactable = false;
                 actTMP.text = "En Progreso";
-                actTMP.fontSize = 20;
+                actTMP.fontSize = 30;
                 actTMP.fontStyle = FontStyles.Bold;
                 actTMP.color = TEXT_SECONDARY;
                 actTMP.alignment = TextAlignmentOptions.Center;
@@ -1369,7 +1369,7 @@ namespace DigitPark.Editor
             var missionName = FindOrCreate(popup.transform, "MissionName");
             var mnTMP = GetOrAdd<TextMeshProUGUI>(missionName);
             mnTMP.text = "Nombre de la misi\u00F3n";
-            mnTMP.fontSize = 26;
+            mnTMP.fontSize = 30;
             mnTMP.fontStyle = FontStyles.Bold;
             mnTMP.color = TEXT_SECONDARY;
             mnTMP.alignment = TextAlignmentOptions.Center;
@@ -1380,12 +1380,12 @@ namespace DigitPark.Editor
             var detailDesc = FindOrCreate(popup.transform, "DetailDescription");
             var ddTMP = GetOrAdd<TextMeshProUGUI>(detailDesc);
             ddTMP.text = "Descripci\u00F3n de la misi\u00F3n";
-            ddTMP.fontSize = 22;
+            ddTMP.fontSize = 30;
             ddTMP.fontStyle = FontStyles.Bold;
             ddTMP.color = TEXT_SECONDARY;
             ddTMP.alignment = TextAlignmentOptions.Center;
             var ddLE = GetOrAdd<LayoutElement>(detailDesc);
-            ddLE.preferredHeight = 26;
+            ddLE.preferredHeight = 28;
 
             // Detail Progress Bar (detailProgressBar)
             var detailProgressContainer = FindOrCreate(popup.transform, "DetailProgressBar");
@@ -1431,7 +1431,7 @@ namespace DigitPark.Editor
             var detailProgressText = FindOrCreate(popup.transform, "DetailProgressText");
             var dptTMP = GetOrAdd<TextMeshProUGUI>(detailProgressText);
             dptTMP.text = "3/5";
-            dptTMP.fontSize = 22;
+            dptTMP.fontSize = 30;
             dptTMP.fontStyle = FontStyles.Bold;
             dptTMP.color = CYAN_NEON;
             dptTMP.alignment = TextAlignmentOptions.Center;

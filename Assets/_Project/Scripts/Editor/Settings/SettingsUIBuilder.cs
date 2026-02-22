@@ -56,7 +56,7 @@ namespace DigitPark.Editor
 
         // ==================== MAIN ENTRY POINT ====================
 
-        [MenuItem("DigitPark/UI Builders/Settings", false, 400)]
+        [MenuItem("DigitPark/UI Builders/Core/Settings", false, 160)]
         public static void BuildSettingsUI()
         {
             if (WhiteSprite == null || Font == null)
@@ -96,6 +96,9 @@ namespace DigitPark.Editor
 
             Canvas.ForceUpdateCanvases();
             EditorUtility.SetDirty(canvas.gameObject);
+
+            // Auto-assign references to SettingsManager
+            DigitPark.Editor.AutoAssigners.SettingsReferenceAssigner.RunAutoAssign();
 
             Debug.Log("[SettingsUIBuilder] Settings UI built successfully!");
         }
@@ -232,10 +235,10 @@ namespace DigitPark.Editor
             scroll.horizontal = false;
             scroll.vertical = true;
             scroll.movementType = ScrollRect.MovementType.Elastic;
-            scroll.elasticity = 0.1f;
+            scroll.elasticity = 0.15f;
             scroll.inertia = true;
-            scroll.decelerationRate = 0.135f;
-            scroll.scrollSensitivity = 50f;
+            scroll.decelerationRate = 0.05f;
+            scroll.scrollSensitivity = 15f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -271,7 +274,7 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
             vlg.spacing = CARD_SPACING;
-            vlg.padding = new RectOffset((int)SIDE_PADDING, (int)SIDE_PADDING, 20, 80);
+            vlg.padding = new RectOffset((int)SIDE_PADDING, (int)SIDE_PADDING, 20, 120);
 
             ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -307,7 +310,7 @@ namespace DigitPark.Editor
         {
             Transform card = CreateCard(parent, "AppearanceCard", "APARIENCIA", CYAN_BORDER);
 
-            CreateDropdownRow(card, "LanguageDropdown", "ChangeLangLabel", "Idioma",
+            CreateDropdownRow(card, "LanguageDropdown", "ChangeLanguageLabel", "Idioma",
                 new[] { "English", "Espanol", "Francais", "Portugues", "Deutsch" }, 1);
             CreateSeparator(card);
 
@@ -440,11 +443,11 @@ namespace DigitPark.Editor
             CreateSeparator(card);
 
             // Remove Ads
-            CreateSettingsRow(card, "RemoveAdsButton", "Quitar Anuncios", "$10", GOLD, true, "RemoveAdsButtonText");
+            CreateSettingsRow(card, "RemoveAdsButton", "Quitar Anuncios", "$10", GOLD, true, "RemoveAdsPriceText");
             CreateSeparator(card);
 
             // Premium Full
-            CreateSettingsRow(card, "PremiumFullButton", "Premium Completo", "$20", GOLD, true, "PremiumFullButtonText");
+            CreateSettingsRow(card, "PremiumFullButton", "Premium Completo", "$20", GOLD, true, "PremiumFullPriceText");
             CreateSeparator(card);
 
             // Shop entry
@@ -946,15 +949,15 @@ namespace DigitPark.Editor
             vlg.spacing = 0;
             vlg.padding = new RectOffset((int)CARD_INNER_PAD, (int)CARD_INNER_PAD, (int)CARD_INNER_PAD, (int)CARD_INNER_PAD);
 
-            // Section title
-            CreateSectionTitle(cardObj.transform, title, borderColor == DANGER_BORDER ? DANGER_RED : CYAN_NEON);
+            // Section title - name derived from card for AutoLocalizer matching
+            CreateSectionTitle(cardObj.transform, $"{name}Title", title, borderColor == DANGER_BORDER ? DANGER_RED : CYAN_NEON);
 
             return cardObj.transform;
         }
 
-        private static void CreateSectionTitle(Transform parent, string text, Color color)
+        private static void CreateSectionTitle(Transform parent, string objName, string text, Color color)
         {
-            GameObject titleObj = new GameObject("SectionTitle");
+            GameObject titleObj = new GameObject(objName);
             titleObj.transform.SetParent(parent, false);
 
             LayoutElement layout = titleObj.AddComponent<LayoutElement>();
@@ -1003,8 +1006,8 @@ namespace DigitPark.Editor
                 btn.colors = cb;
             }
 
-            // Label text (left)
-            GameObject labelObj = new GameObject("Text");
+            // Label text (left) - name matches AutoLocalizer TextNameToKeyMap
+            GameObject labelObj = new GameObject($"{buttonName}Text");
             labelObj.transform.SetParent(row.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
@@ -1066,7 +1069,7 @@ namespace DigitPark.Editor
             outline.effectColor = textColor * 0.5f;
             outline.effectDistance = new Vector2(1, -1);
 
-            TextMeshProUGUI label = CreateTextChild(row.transform, "Text", text, 66, textColor, TextAlignmentOptions.Center);
+            TextMeshProUGUI label = CreateTextChild(row.transform, $"{name}Text", text, 66, textColor, TextAlignmentOptions.Center);
             label.fontStyle = FontStyles.Bold;
         }
 
@@ -1207,8 +1210,8 @@ namespace DigitPark.Editor
             containerBg.color = BUTTON_BG;
             containerBg.raycastTarget = false;
 
-            // Label (top-left area)
-            GameObject labelObj = new GameObject("Label");
+            // Label (top-left area) - name matches AutoLocalizer TextNameToKeyMap
+            GameObject labelObj = new GameObject($"{sliderName}Label");
             labelObj.transform.SetParent(container.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
@@ -1334,8 +1337,8 @@ namespace DigitPark.Editor
             containerBg.color = BUTTON_BG;
             containerBg.raycastTarget = false;
 
-            // Label
-            GameObject labelObj = new GameObject("Label");
+            // Label - name matches AutoLocalizer TextNameToKeyMap
+            GameObject labelObj = new GameObject($"{name}Label");
             labelObj.transform.SetParent(container.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();

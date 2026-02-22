@@ -744,6 +744,15 @@ namespace DigitPark.Managers
                 if (item) Destroy(item);
             }
             spawnedItems.Clear();
+
+            // Also destroy any UIBuilder placeholder cards left in the container
+            if (missionsContainer != null)
+            {
+                for (int i = missionsContainer.childCount - 1; i >= 0; i--)
+                {
+                    Destroy(missionsContainer.GetChild(i).gameObject);
+                }
+            }
         }
 
         private void CreateMissionCard(ActiveMission mission)

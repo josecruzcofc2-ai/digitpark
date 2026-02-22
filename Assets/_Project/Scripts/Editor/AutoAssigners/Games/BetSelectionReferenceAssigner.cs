@@ -69,6 +69,12 @@ namespace DigitPark.Editor.AutoAssigners
             window.minSize = new Vector2(600, 600);
         }
 
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
+        }
+
         #endregion
 
         #region Window GUI

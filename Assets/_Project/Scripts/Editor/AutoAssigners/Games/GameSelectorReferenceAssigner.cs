@@ -41,11 +41,17 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/GameSelector References", false, 231)]
+        [MenuItem("DigitPark/Auto Assigners/References/Games/GameSelector References", false, 237)]
         public static void ShowWindow()
         {
             var window = GetWindow<GameSelectorReferenceAssigner>("GameSelector Reference Assigner");
             window.minSize = new Vector2(600, 550);
+        }
+
+        public static void RunAutoAssign()
+        {
+            ResetLog();
+            AssignAllReferences();
         }
 
         #endregion

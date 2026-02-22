@@ -39,6 +39,7 @@ namespace DigitPark.CashBattle
 
         [Header("Interaction")]
         [SerializeField] private Button itemButton;
+        [SerializeField] private Button opponentNameButton;
 
         [Header("Colors")]
         [SerializeField] private Color winColor = new Color(0f, 1f, 0.5f, 1f);
@@ -49,6 +50,7 @@ namespace DigitPark.CashBattle
 
         private HistoryEntry _entry;
         private Action<HistoryEntry> _onClick;
+        private Action<string> _onOpponentClick;
 
         private void Awake()
         {
@@ -61,12 +63,14 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Configura el item con los datos de la entrada
         /// </summary>
-        public void Setup(HistoryEntry entry, Action<HistoryEntry> onClick = null)
+        public void Setup(HistoryEntry entry, Action<HistoryEntry> onClick = null, Action<string> onOpponentClick = null)
         {
             _entry = entry;
             _onClick = onClick;
+            _onOpponentClick = onOpponentClick;
 
             UpdateDisplay();
+            SetupOpponentClick();
         }
 
         private void UpdateDisplay()
@@ -212,6 +216,31 @@ namespace DigitPark.CashBattle
 
             bgColor.a = alpha;
             backgroundImage.color = bgColor;
+        }
+
+        private void SetupOpponentClick()
+        {
+            if (opponentNameButton == null || _entry == null) return;
+
+            // Only enable opponent click for 1v1 matches or CognitiveSprint with a valid opponentId
+            bool hasOpponent = (_entry.type == HistoryEntryType.Match1v1 || _entry.type == HistoryEntryType.CognitiveSprint)
+                && !string.IsNullOrEmpty(_entry.opponentId);
+
+            opponentNameButton.gameObject.SetActive(hasOpponent);
+
+            if (hasOpponent)
+            {
+                opponentNameButton.onClick.RemoveAllListeners();
+                opponentNameButton.onClick.AddListener(OnOpponentNameClicked);
+            }
+        }
+
+        private void OnOpponentNameClicked()
+        {
+            if (_entry != null && !string.IsNullOrEmpty(_entry.opponentId))
+            {
+                _onOpponentClick?.Invoke(_entry.opponentId);
+            }
         }
 
         private void OnItemClicked()

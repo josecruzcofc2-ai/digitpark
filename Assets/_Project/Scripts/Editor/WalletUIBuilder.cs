@@ -262,7 +262,7 @@ namespace DigitPark.Editor
                 arrowRT.offsetMax = Vector2.zero;
 
                 TextMeshProUGUI arrowTMP = backArrow.AddComponent<TextMeshProUGUI>();
-                arrowTMP.text = "\u2039";
+                arrowTMP.text = "<";
                 arrowTMP.fontSize = 42;
                 arrowTMP.color = TEXT_WHITE;
                 arrowTMP.fontStyle = FontStyles.Bold;
@@ -728,6 +728,7 @@ namespace DigitPark.Editor
 
             Image svBg = scrollView.AddComponent<Image>();
             svBg.color = Color.clear;
+            svBg.raycastTarget = false;
 
             ScrollRect sr = scrollView.AddComponent<ScrollRect>();
             sr.horizontal = false;
@@ -807,7 +808,7 @@ namespace DigitPark.Editor
             bonusRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + SECTION_SPACING + 140));
             TextMeshProUGUI bonusTMP = bonusText.AddComponent<TextMeshProUGUI>();
             bonusTMP.text = "+$0.00 bonus";
-            bonusTMP.fontSize = 24;
+            bonusTMP.fontSize = 30;
             bonusTMP.color = new Color(0.2f, 0.95f, 0.4f, 1f);
             bonusTMP.alignment = TextAlignmentOptions.Center;
             bonusText.SetActive(false);
@@ -834,13 +835,13 @@ namespace DigitPark.Editor
             histTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI histTextTMP = histText.AddComponent<TextMeshProUGUI>();
             histTextTMP.text = "Historial";
-            histTextTMP.fontSize = 28;
+            histTextTMP.fontSize = 30;
             histTextTMP.color = TEXT_SECONDARY;
             histTextTMP.fontStyle = FontStyles.Bold;
             histTextTMP.alignment = TextAlignmentOptions.Center;
             historyTab.SetActive(false);
 
-            // C. DepositPanel (hidden overlay)
+            // C. DepositPanel (modal overlay - shown when DEPOSITAR button pressed)
             GameObject depositPanel = new GameObject("DepositPanel");
             depositPanel.transform.SetParent(parent, false);
             RectTransform dpRT = depositPanel.AddComponent<RectTransform>();
@@ -849,26 +850,149 @@ namespace DigitPark.Editor
             dpRT.offsetMin = Vector2.zero;
             dpRT.offsetMax = Vector2.zero;
             Image dpBg = depositPanel.AddComponent<Image>();
-            dpBg.color = DARK_BG;
-            VerticalLayoutGroup dpVlg = depositPanel.AddComponent<VerticalLayoutGroup>();
-            dpVlg.padding = new RectOffset(20, 20, 20, 20);
-            dpVlg.spacing = 10;
+            dpBg.color = new Color(0f, 0f, 0f, 0.85f);
+            dpBg.raycastTarget = true;
+
+            // Inner panel - centered modal card with gold neon double glow
+            GameObject dpInner = new GameObject("InnerPanel");
+            dpInner.transform.SetParent(depositPanel.transform, false);
+            RectTransform dpInnerRT = dpInner.AddComponent<RectTransform>();
+            dpInnerRT.anchorMin = new Vector2(0.5f, 0.5f);
+            dpInnerRT.anchorMax = new Vector2(0.5f, 0.5f);
+            dpInnerRT.pivot = new Vector2(0.5f, 0.5f);
+            dpInnerRT.sizeDelta = new Vector2(960, 1500);
+            Image dpInnerBg = dpInner.AddComponent<Image>();
+            dpInnerBg.color = CARD_BG;
+            Outline dpGlow1 = dpInner.AddComponent<Outline>();
+            dpGlow1.effectColor = GOLD;
+            dpGlow1.effectDistance = new Vector2(3, 3);
+            Outline dpGlow2 = dpInner.AddComponent<Outline>();
+            dpGlow2.effectColor = new Color(1f, 0.84f, 0f, 0.4f);
+            dpGlow2.effectDistance = new Vector2(6, 6);
+
+            // Close button (top-right X)
+            CreateModalCloseButton(dpInner.transform, "CloseDepositButton");
+
+            // Content layout inside inner panel
+            VerticalLayoutGroup dpVlg = dpInner.AddComponent<VerticalLayoutGroup>();
+            dpVlg.padding = new RectOffset(40, 40, 100, 40);
+            dpVlg.spacing = 28;
             dpVlg.childForceExpandWidth = true;
             dpVlg.childForceExpandHeight = false;
             dpVlg.childControlWidth = true;
-            dpVlg.childControlHeight = false;
+            dpVlg.childControlHeight = true;
 
+            // Title - gold with glow
+            GameObject dpTitle = new GameObject("Title");
+            dpTitle.transform.SetParent(dpInner.transform, false);
+            dpTitle.AddComponent<RectTransform>();
+            LayoutElement dpTitleLE = dpTitle.AddComponent<LayoutElement>();
+            dpTitleLE.preferredHeight = 120;
+            TextMeshProUGUI dpTitleTMP = dpTitle.AddComponent<TextMeshProUGUI>();
+            dpTitleTMP.text = "Selecciona un monto";
+            dpTitleTMP.fontSize = 78;
+            dpTitleTMP.color = TEXT_GOLD;
+            dpTitleTMP.fontStyle = FontStyles.Bold;
+            dpTitleTMP.alignment = TextAlignmentOptions.Center;
+            dpTitleTMP.outlineWidth = 0.15f;
+            dpTitleTMP.outlineColor = new Color(0.5f, 0.35f, 0f, 0.4f);
+
+            // Subtitle
+            GameObject dpSubtitle = new GameObject("Subtitle");
+            dpSubtitle.transform.SetParent(dpInner.transform, false);
+            dpSubtitle.AddComponent<RectTransform>();
+            LayoutElement subLE = dpSubtitle.AddComponent<LayoutElement>();
+            subLE.preferredHeight = 72;
+            TextMeshProUGUI dpSubTMP = dpSubtitle.AddComponent<TextMeshProUGUI>();
+            dpSubTMP.text = "Elige el monto que deseas depositar";
+            dpSubTMP.fontSize = 56;
+            dpSubTMP.color = TEXT_SECONDARY;
+            dpSubTMP.alignment = TextAlignmentOptions.Center;
+
+            // Deposit options card with gold neon border
+            GameObject optionsCard = new GameObject("OptionsCard");
+            optionsCard.transform.SetParent(dpInner.transform, false);
+            optionsCard.AddComponent<RectTransform>();
+            LayoutElement ocLE = optionsCard.AddComponent<LayoutElement>();
+            ocLE.flexibleHeight = 1;
+            ocLE.flexibleWidth = 1;
+            Image ocBg = optionsCard.AddComponent<Image>();
+            ocBg.color = new Color(0.07f, 0.08f, 0.11f, 1f);
+            Outline ocOutline = optionsCard.AddComponent<Outline>();
+            ocOutline.effectColor = CARD_BORDER;
+            ocOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            VerticalLayoutGroup ocVlg = optionsCard.AddComponent<VerticalLayoutGroup>();
+            ocVlg.padding = new RectOffset(20, 20, 20, 20);
+            ocVlg.childForceExpandWidth = true;
+            ocVlg.childForceExpandHeight = true;
+            ocVlg.childControlWidth = true;
+            ocVlg.childControlHeight = true;
+
+            // DepositOptionsContainer (GridLayout - prefabs spawned at runtime)
             GameObject depositOptions = new GameObject("DepositOptionsContainer");
-            depositOptions.transform.SetParent(depositPanel.transform, false);
+            depositOptions.transform.SetParent(optionsCard.transform, false);
             depositOptions.AddComponent<RectTransform>();
+            LayoutElement doLE = depositOptions.AddComponent<LayoutElement>();
+            doLE.flexibleHeight = 1;
+            doLE.flexibleWidth = 1;
+            GridLayoutGroup doGrid = depositOptions.AddComponent<GridLayoutGroup>();
+            doGrid.cellSize = new Vector2(430, 200);
+            doGrid.spacing = new Vector2(20, 20);
+            doGrid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            doGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            doGrid.childAlignment = TextAnchor.UpperCenter;
+            doGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            doGrid.constraintCount = 2;
+
+            // Payment methods card with gold neon border
+            GameObject paymentCard = new GameObject("PaymentMethodsCard");
+            paymentCard.transform.SetParent(dpInner.transform, false);
+            paymentCard.AddComponent<RectTransform>();
+            LayoutElement pcLE = paymentCard.AddComponent<LayoutElement>();
+            pcLE.preferredHeight = 240;
+            Image pcBg = paymentCard.AddComponent<Image>();
+            pcBg.color = new Color(0.07f, 0.08f, 0.11f, 1f);
+            Outline pcOutline = paymentCard.AddComponent<Outline>();
+            pcOutline.effectColor = CARD_BORDER;
+            pcOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            VerticalLayoutGroup pcVlg = paymentCard.AddComponent<VerticalLayoutGroup>();
+            pcVlg.padding = new RectOffset(30, 30, 20, 20);
+            pcVlg.spacing = 16;
+            pcVlg.childForceExpandWidth = true;
+            pcVlg.childForceExpandHeight = false;
+            pcVlg.childControlWidth = true;
+            pcVlg.childControlHeight = true;
+
+            GameObject pmTitle = new GameObject("PaymentTitle");
+            pmTitle.transform.SetParent(paymentCard.transform, false);
+            pmTitle.AddComponent<RectTransform>();
+            LayoutElement pmtLE = pmTitle.AddComponent<LayoutElement>();
+            pmtLE.preferredHeight = 80;
+            TextMeshProUGUI pmtTMP = pmTitle.AddComponent<TextMeshProUGUI>();
+            pmtTMP.text = "Método de pago";
+            pmtTMP.fontSize = 64;
+            pmtTMP.color = TEXT_WHITE;
+            pmtTMP.fontStyle = FontStyles.Bold;
+            pmtTMP.alignment = TextAlignmentOptions.Left;
 
             GameObject paymentMethods = new GameObject("PaymentMethodsContainer");
-            paymentMethods.transform.SetParent(depositPanel.transform, false);
+            paymentMethods.transform.SetParent(paymentCard.transform, false);
             paymentMethods.AddComponent<RectTransform>();
+            LayoutElement pmcLE = paymentMethods.AddComponent<LayoutElement>();
+            pmcLE.preferredHeight = 130;
+            pmcLE.flexibleWidth = 1;
+            HorizontalLayoutGroup pmHlg = paymentMethods.AddComponent<HorizontalLayoutGroup>();
+            pmHlg.spacing = 12;
+            pmHlg.childForceExpandWidth = true;
+            pmHlg.childForceExpandHeight = true;
+            pmHlg.childControlWidth = true;
+            pmHlg.childControlHeight = true;
 
             depositPanel.SetActive(false);
 
-            // D. WithdrawPanel (hidden overlay)
+            // D. WithdrawPanel (modal overlay - shown when RETIRAR button pressed)
             GameObject withdrawPanel = new GameObject("WithdrawPanel");
             withdrawPanel.transform.SetParent(parent, false);
             RectTransform wpRT = withdrawPanel.AddComponent<RectTransform>();
@@ -877,22 +1001,65 @@ namespace DigitPark.Editor
             wpRT.offsetMin = Vector2.zero;
             wpRT.offsetMax = Vector2.zero;
             Image wpBg = withdrawPanel.AddComponent<Image>();
-            wpBg.color = DARK_BG;
-            VerticalLayoutGroup wpVlg = withdrawPanel.AddComponent<VerticalLayoutGroup>();
-            wpVlg.padding = new RectOffset(20, 20, 20, 20);
-            wpVlg.spacing = 10;
+            wpBg.color = new Color(0f, 0f, 0f, 0.85f);
+            wpBg.raycastTarget = true;
+
+            // Inner panel - centered modal card with gold neon double glow
+            GameObject wpInner = new GameObject("InnerPanel");
+            wpInner.transform.SetParent(withdrawPanel.transform, false);
+            RectTransform wpInnerRT = wpInner.AddComponent<RectTransform>();
+            wpInnerRT.anchorMin = new Vector2(0.5f, 0.5f);
+            wpInnerRT.anchorMax = new Vector2(0.5f, 0.5f);
+            wpInnerRT.pivot = new Vector2(0.5f, 0.5f);
+            wpInnerRT.sizeDelta = new Vector2(960, 1050);
+            Image wpInnerBg = wpInner.AddComponent<Image>();
+            wpInnerBg.color = CARD_BG;
+            Outline wpGlow1 = wpInner.AddComponent<Outline>();
+            wpGlow1.effectColor = GOLD;
+            wpGlow1.effectDistance = new Vector2(3, 3);
+            Outline wpGlow2 = wpInner.AddComponent<Outline>();
+            wpGlow2.effectColor = new Color(1f, 0.84f, 0f, 0.4f);
+            wpGlow2.effectDistance = new Vector2(6, 6);
+
+            // Close button (top-right X)
+            CreateModalCloseButton(wpInner.transform, "CloseWithdrawButton");
+
+            // Content layout inside inner panel
+            VerticalLayoutGroup wpVlg = wpInner.AddComponent<VerticalLayoutGroup>();
+            wpVlg.padding = new RectOffset(50, 50, 100, 50);
+            wpVlg.spacing = 30;
             wpVlg.childForceExpandWidth = true;
             wpVlg.childForceExpandHeight = false;
             wpVlg.childControlWidth = true;
-            wpVlg.childControlHeight = false;
+            wpVlg.childControlHeight = true;
+
+            // Withdraw title - gold with glow
+            GameObject wpTitle = new GameObject("Title");
+            wpTitle.transform.SetParent(wpInner.transform, false);
+            wpTitle.AddComponent<RectTransform>();
+            LayoutElement wpTitleLE = wpTitle.AddComponent<LayoutElement>();
+            wpTitleLE.preferredHeight = 120;
+            TextMeshProUGUI wpTitleTMP = wpTitle.AddComponent<TextMeshProUGUI>();
+            wpTitleTMP.text = "Retirar fondos";
+            wpTitleTMP.fontSize = 78;
+            wpTitleTMP.color = TEXT_GOLD;
+            wpTitleTMP.fontStyle = FontStyles.Bold;
+            wpTitleTMP.alignment = TextAlignmentOptions.Center;
+            wpTitleTMP.outlineWidth = 0.15f;
+            wpTitleTMP.outlineColor = new Color(0.5f, 0.35f, 0f, 0.4f);
 
             // WithdrawAmountInput (TMP_InputField)
             GameObject inputObj = new GameObject("WithdrawAmountInput");
-            inputObj.transform.SetParent(withdrawPanel.transform, false);
+            inputObj.transform.SetParent(wpInner.transform, false);
             RectTransform inputRT = inputObj.AddComponent<RectTransform>();
-            inputRT.sizeDelta = new Vector2(400, 70);
+            LayoutElement inputLE = inputObj.AddComponent<LayoutElement>();
+            inputLE.preferredHeight = 160;
+            inputLE.flexibleWidth = 1;
             Image inputBg = inputObj.AddComponent<Image>();
             inputBg.color = new Color(0.15f, 0.17f, 0.22f, 1f);
+            Outline inputOutline = inputObj.AddComponent<Outline>();
+            inputOutline.effectColor = CARD_BORDER;
+            inputOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
             // Text Area
             GameObject textArea = new GameObject("Text Area");
@@ -900,8 +1067,8 @@ namespace DigitPark.Editor
             RectTransform taRT = textArea.AddComponent<RectTransform>();
             taRT.anchorMin = Vector2.zero;
             taRT.anchorMax = Vector2.one;
-            taRT.offsetMin = new Vector2(10, 0);
-            taRT.offsetMax = new Vector2(-10, 0);
+            taRT.offsetMin = new Vector2(20, 0);
+            taRT.offsetMax = new Vector2(-20, 0);
 
             // Input text
             GameObject inputText = new GameObject("Text");
@@ -911,7 +1078,8 @@ namespace DigitPark.Editor
             itRT.anchorMax = Vector2.one;
             itRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI itTMP = inputText.AddComponent<TextMeshProUGUI>();
-            itTMP.fontSize = 28;
+            itTMP.fontSize = 72;
+            itTMP.color = TEXT_WHITE;
 
             // Placeholder
             GameObject placeholder = new GameObject("Placeholder");
@@ -922,7 +1090,7 @@ namespace DigitPark.Editor
             phRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI phTMP = placeholder.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Ingrese monto...";
-            phTMP.fontSize = 28;
+            phTMP.fontSize = 72;
             phTMP.fontStyle = FontStyles.Italic;
             phTMP.color = new Color(0.5f, 0.5f, 0.55f, 0.5f);
 
@@ -933,40 +1101,72 @@ namespace DigitPark.Editor
 
             // WithdrawableAmountText
             GameObject withdrawableAmt = new GameObject("WithdrawableAmountText");
-            withdrawableAmt.transform.SetParent(withdrawPanel.transform, false);
-            RectTransform waRT = withdrawableAmt.AddComponent<RectTransform>();
-            waRT.sizeDelta = new Vector2(400, 40);
+            withdrawableAmt.transform.SetParent(wpInner.transform, false);
+            withdrawableAmt.AddComponent<RectTransform>();
+            LayoutElement waLE = withdrawableAmt.AddComponent<LayoutElement>();
+            waLE.preferredHeight = 80;
             TextMeshProUGUI waTMP = withdrawableAmt.AddComponent<TextMeshProUGUI>();
             waTMP.text = "$0.00 disponible";
-            waTMP.fontSize = 24;
+            waTMP.fontSize = 56;
             waTMP.color = TEXT_WHITE;
             waTMP.alignment = TextAlignmentOptions.Left;
 
             // WithdrawMinText
             GameObject withdrawMin = new GameObject("WithdrawMinText");
-            withdrawMin.transform.SetParent(withdrawPanel.transform, false);
-            RectTransform wmRT = withdrawMin.AddComponent<RectTransform>();
-            wmRT.sizeDelta = new Vector2(400, 35);
+            withdrawMin.transform.SetParent(wpInner.transform, false);
+            withdrawMin.AddComponent<RectTransform>();
+            LayoutElement wmLE = withdrawMin.AddComponent<LayoutElement>();
+            wmLE.preferredHeight = 70;
             TextMeshProUGUI wmTMP = withdrawMin.AddComponent<TextMeshProUGUI>();
             wmTMP.text = "M\u00ednimo: $10.00";
-            wmTMP.fontSize = 20;
+            wmTMP.fontSize = 48;
             wmTMP.color = TEXT_SECONDARY;
             wmTMP.alignment = TextAlignmentOptions.Left;
 
             // WithdrawFeeText
             GameObject withdrawFee = new GameObject("WithdrawFeeText");
-            withdrawFee.transform.SetParent(withdrawPanel.transform, false);
-            RectTransform wfRT = withdrawFee.AddComponent<RectTransform>();
-            wfRT.sizeDelta = new Vector2(400, 35);
+            withdrawFee.transform.SetParent(wpInner.transform, false);
+            withdrawFee.AddComponent<RectTransform>();
+            LayoutElement wfLE = withdrawFee.AddComponent<LayoutElement>();
+            wfLE.preferredHeight = 70;
             TextMeshProUGUI wfTMP = withdrawFee.AddComponent<TextMeshProUGUI>();
             wfTMP.text = "Comisi\u00f3n: $0.00";
-            wfTMP.fontSize = 20;
+            wfTMP.fontSize = 48;
             wfTMP.color = TEXT_SECONDARY;
             wfTMP.alignment = TextAlignmentOptions.Left;
 
+            // Confirm Withdraw button (green with gold glow)
+            GameObject confirmWithdraw = new GameObject("ConfirmWithdrawButton");
+            confirmWithdraw.transform.SetParent(wpInner.transform, false);
+            confirmWithdraw.AddComponent<RectTransform>();
+            LayoutElement cwLE = confirmWithdraw.AddComponent<LayoutElement>();
+            cwLE.preferredHeight = 160;
+            cwLE.flexibleWidth = 1;
+            Image cwBg = confirmWithdraw.AddComponent<Image>();
+            cwBg.color = GREEN_DARK;
+            Button cwButton = confirmWithdraw.AddComponent<Button>();
+            cwButton.targetGraphic = cwBg;
+            Outline cwOutline = confirmWithdraw.AddComponent<Outline>();
+            cwOutline.effectColor = GOLD;
+            cwOutline.effectDistance = new Vector2(2f, 2f);
+
+            GameObject cwText = new GameObject("Text");
+            cwText.transform.SetParent(confirmWithdraw.transform, false);
+            RectTransform cwTextRT = cwText.AddComponent<RectTransform>();
+            cwTextRT.anchorMin = Vector2.zero;
+            cwTextRT.anchorMax = Vector2.one;
+            cwTextRT.offsetMin = Vector2.zero;
+            cwTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI cwTextTMP = cwText.AddComponent<TextMeshProUGUI>();
+            cwTextTMP.text = "RETIRAR";
+            cwTextTMP.fontSize = 72;
+            cwTextTMP.color = GREEN;
+            cwTextTMP.fontStyle = FontStyles.Bold;
+            cwTextTMP.alignment = TextAlignmentOptions.Center;
+
             withdrawPanel.SetActive(false);
 
-            // E. TransactionHistoryPanel (hidden container)
+            // E. TransactionHistoryPanel (hidden - controller reference)
             GameObject txHistPanel = new GameObject("TransactionHistoryPanel");
             txHistPanel.transform.SetParent(parent, false);
             RectTransform thpRT = txHistPanel.AddComponent<RectTransform>();
@@ -1008,7 +1208,7 @@ namespace DigitPark.Editor
             vkTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI vkTextTMP = vkText.AddComponent<TextMeshProUGUI>();
             vkTextTMP.text = "Verificar Identidad";
-            vkTextTMP.fontSize = 28;
+            vkTextTMP.fontSize = 30;
             vkTextTMP.color = GREEN;
             vkTextTMP.fontStyle = FontStyles.Bold;
             vkTextTMP.alignment = TextAlignmentOptions.Center;
@@ -1052,7 +1252,7 @@ namespace DigitPark.Editor
             etRT.sizeDelta = new Vector2(400, 60);
             TextMeshProUGUI etTMP = errorText.AddComponent<TextMeshProUGUI>();
             etTMP.text = "";
-            etTMP.fontSize = 28;
+            etTMP.fontSize = 30;
             etTMP.color = RED;
             etTMP.fontStyle = FontStyles.Bold;
             etTMP.alignment = TextAlignmentOptions.Center;
@@ -1077,11 +1277,50 @@ namespace DigitPark.Editor
             lmTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI lmTextTMP = lmText.AddComponent<TextMeshProUGUI>();
             lmTextTMP.text = "Cargar m\u00e1s";
-            lmTextTMP.fontSize = 28;
+            lmTextTMP.fontSize = 30;
             lmTextTMP.color = TEXT_WHITE;
             lmTextTMP.fontStyle = FontStyles.Bold;
             lmTextTMP.alignment = TextAlignmentOptions.Center;
             loadMoreBtn.SetActive(false);
+        }
+
+        private static void CreateModalCloseButton(Transform parent, string name)
+        {
+            GameObject closeBtn = new GameObject(name);
+            closeBtn.transform.SetParent(parent, false);
+            RectTransform closeBtnRT = closeBtn.AddComponent<RectTransform>();
+            closeBtnRT.anchorMin = new Vector2(1, 1);
+            closeBtnRT.anchorMax = new Vector2(1, 1);
+            closeBtnRT.pivot = new Vector2(1, 1);
+            closeBtnRT.sizeDelta = new Vector2(100, 100);
+            closeBtnRT.anchoredPosition = new Vector2(-15, -15);
+            LayoutElement closeBtnLE = closeBtn.AddComponent<LayoutElement>();
+            closeBtnLE.ignoreLayout = true;
+            Image closeBg = closeBtn.AddComponent<Image>();
+            closeBg.color = new Color(0.85f, 0.15f, 0.15f, 1f);
+            Button closeButton = closeBtn.AddComponent<Button>();
+            closeButton.targetGraphic = closeBg;
+            ColorBlock closeColors = closeButton.colors;
+            closeColors.highlightedColor = new Color(1f, 0.85f, 0.85f, 1f);
+            closeColors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            closeButton.colors = closeColors;
+            Outline closeOutline = closeBtn.AddComponent<Outline>();
+            closeOutline.effectColor = new Color(1f, 0.35f, 0.35f, 0.8f);
+            closeOutline.effectDistance = new Vector2(2f, 2f);
+
+            GameObject closeText = new GameObject("Text");
+            closeText.transform.SetParent(closeBtn.transform, false);
+            RectTransform closeTextRT = closeText.AddComponent<RectTransform>();
+            closeTextRT.anchorMin = Vector2.zero;
+            closeTextRT.anchorMax = Vector2.one;
+            closeTextRT.offsetMin = Vector2.zero;
+            closeTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI closeTMP = closeText.AddComponent<TextMeshProUGUI>();
+            closeTMP.text = "X";
+            closeTMP.fontSize = 72;
+            closeTMP.color = TEXT_WHITE;
+            closeTMP.fontStyle = FontStyles.Bold;
+            closeTMP.alignment = TextAlignmentOptions.Center;
         }
 
         private static GameObject CreateOverlayPanel(Transform parent, string name)
@@ -1104,7 +1343,18 @@ namespace DigitPark.Editor
 
         private static void ConnectToController(Canvas canvas, GameObject walletUI)
         {
-            var controller = Object.FindFirstObjectByType<CashBattle.CashWalletSceneController>();
+            // Remove any CashWalletSceneController accidentally placed on Canvas objects
+            foreach (var c in Object.FindObjectsOfType<Canvas>(true))
+            {
+                var stray = c.GetComponent<CashBattle.CashWalletSceneController>();
+                if (stray != null)
+                {
+                    Debug.LogWarning($"[WalletUIBuilder] Removing stray CashWalletSceneController from Canvas '{c.name}'");
+                    Object.DestroyImmediate(stray);
+                }
+            }
+
+            var controller = FindWalletController();
             if (controller == null)
             {
                 Debug.LogWarning("[WalletUIBuilder] CashWalletSceneController no encontrado.");
@@ -1121,7 +1371,7 @@ namespace DigitPark.Editor
                 if (prop != null) prop.objectReferenceValue = backBtn.GetComponent<Button>();
             }
 
-            // Balance text
+            // Balance text (BalanceAmount in BalanceCard)
             var balanceText = walletUI.transform.Find("BalanceCard/BalanceAmount");
             if (balanceText != null)
             {
@@ -1129,7 +1379,7 @@ namespace DigitPark.Editor
                 if (prop != null) prop.objectReferenceValue = balanceText.GetComponent<TextMeshProUGUI>();
             }
 
-            // Deposit button
+            // Action buttons (DEPOSITAR/RETIRAR in BalanceCard) -> open modal panels
             var depositBtn = walletUI.transform.Find("BalanceCard/ActionButtons/DepositButton");
             if (depositBtn != null)
             {
@@ -1137,12 +1387,71 @@ namespace DigitPark.Editor
                 if (prop != null) prop.objectReferenceValue = depositBtn.GetComponent<Button>();
             }
 
-            // Withdraw button
             var withdrawBtn = walletUI.transform.Find("BalanceCard/ActionButtons/WithdrawButton");
             if (withdrawBtn != null)
             {
                 var prop = so.FindProperty("withdrawTabButton");
                 if (prop != null) prop.objectReferenceValue = withdrawBtn.GetComponent<Button>();
+            }
+
+            // Close buttons on modal panels
+            var closeDepositBtn = FindDeep(walletUI.transform, "CloseDepositButton");
+            if (closeDepositBtn != null)
+            {
+                var prop = so.FindProperty("closeDepositButton");
+                if (prop != null) prop.objectReferenceValue = closeDepositBtn.GetComponent<Button>();
+            }
+
+            var closeWithdrawBtn = FindDeep(walletUI.transform, "CloseWithdrawButton");
+            if (closeWithdrawBtn != null)
+            {
+                var prop = so.FindProperty("closeWithdrawButton");
+                if (prop != null) prop.objectReferenceValue = closeWithdrawBtn.GetComponent<Button>();
+            }
+
+            // Tab panels
+            var dpPanel = walletUI.transform.Find("DepositPanel");
+            if (dpPanel != null)
+            {
+                var prop = so.FindProperty("depositPanel");
+                if (prop != null) prop.objectReferenceValue = dpPanel.gameObject;
+            }
+
+            var wpPanel = walletUI.transform.Find("WithdrawPanel");
+            if (wpPanel != null)
+            {
+                var prop = so.FindProperty("withdrawPanel");
+                if (prop != null) prop.objectReferenceValue = wpPanel.gameObject;
+            }
+
+            var thPanel = walletUI.transform.Find("TransactionHistoryPanel");
+            if (thPanel != null)
+            {
+                var prop = so.FindProperty("transactionHistoryPanel");
+                if (prop != null) prop.objectReferenceValue = thPanel.gameObject;
+            }
+
+            // History tab button
+            var histTabBtn = walletUI.transform.Find("HistoryTabButton");
+            if (histTabBtn != null)
+            {
+                var prop = so.FindProperty("historyTabButton");
+                if (prop != null) prop.objectReferenceValue = histTabBtn.GetComponent<Button>();
+            }
+
+            // Deposit section containers (nested inside OptionsCard and PaymentMethodsCard)
+            var depositContainer = FindDeep(walletUI.transform, "DepositOptionsContainer");
+            if (depositContainer != null)
+            {
+                var prop = so.FindProperty("depositOptionsContainer");
+                if (prop != null) prop.objectReferenceValue = depositContainer;
+            }
+
+            var paymentContainer = FindDeep(walletUI.transform, "PaymentMethodsContainer");
+            if (paymentContainer != null)
+            {
+                var prop = so.FindProperty("paymentMethodsContainer");
+                if (prop != null) prop.objectReferenceValue = paymentContainer.gameObject;
             }
 
             // Transactions container
@@ -1228,12 +1537,12 @@ namespace DigitPark.Editor
             AssignRef(so, "balanceText", FindTextDeep(root, "BalanceText"));
             AssignRef(so, "bonusBalanceText", FindTextDeep(root, "BonusBalanceText"));
 
-            // ==================== TAB BUTTONS ====================
-            AssignRef(so, "depositTabButton", FindBtnDeep(root, "TabDeposits"));
-
-            AssignRef(so, "withdrawTabButton", FindBtnDeep(root, "TabWithdrawals"));
-
+            // ==================== ACTION BUTTONS (open modal panels) ====================
+            AssignRef(so, "depositTabButton", FindBtnDeep(root, "DepositButton"));
+            AssignRef(so, "withdrawTabButton", FindBtnDeep(root, "WithdrawButton"));
             AssignRef(so, "historyTabButton", FindBtnDeep(root, "HistoryTabButton"));
+            AssignRef(so, "closeDepositButton", FindBtnDeep(root, "CloseDepositButton"));
+            AssignRef(so, "closeWithdrawButton", FindBtnDeep(root, "CloseWithdrawButton"));
 
             // ==================== TAB PANELS ====================
             AssignGORef(so, "depositPanel", FindDeep(root, "DepositPanel"));
@@ -1245,6 +1554,12 @@ namespace DigitPark.Editor
             AssignTransformRef(so, "depositOptionsContainer", FindDeep(root, "DepositOptionsContainer"));
             AssignGORef(so, "paymentMethodsContainer", FindDeep(root, "PaymentMethodsContainer"));
 
+            // Prefabs (desde disco)
+            var depositPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PREFABS_PATH + "DepositOptionUI.prefab");
+            AssignRef(so, "depositOptionPrefab", depositPrefab);
+            var txPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PREFABS_PATH + "TransactionItemUI.prefab");
+            AssignRef(so, "transactionItemPrefab", txPrefab);
+
             // ==================== WITHDRAW SECTION ====================
             // Special handling for TMP_InputField
             Transform withdrawInputT = FindDeep(root, "WithdrawAmountInput");
@@ -1255,7 +1570,7 @@ namespace DigitPark.Editor
                 else { AddAR("withdrawAmountInput", "InputField component missing", false, null); failedCount++; }
             }
             else { AddAR("withdrawAmountInput", "Not found", false, null); failedCount++; }
-            AssignRef(so, "withdrawButton", FindBtnDeep(root, "WithdrawButton"));
+            AssignRef(so, "withdrawButton", FindBtnDeep(root, "ConfirmWithdrawButton"));
             AssignRef(so, "withdrawableAmountText", FindTextDeep(root, "WithdrawableAmountText"));
             AssignRef(so, "withdrawMinText", FindTextDeep(root, "WithdrawMinText"));
             AssignRef(so, "withdrawFeeText", FindTextDeep(root, "WithdrawFeeText"));

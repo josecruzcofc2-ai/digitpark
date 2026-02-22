@@ -262,7 +262,7 @@ namespace DigitPark.Editor
             ptRT.offsetMax = Vector2.zero;
             var ptTMP = GetOrAdd<TextMeshProUGUI>(progressText);
             ptTMP.text = "1 / 5";
-            ptTMP.fontSize = 28;
+            ptTMP.fontSize = 30;
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.alignment = TextAlignmentOptions.Center;
@@ -286,7 +286,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
             stTMP.text = "SALTAR";
-            stTMP.fontSize = 28;
+            stTMP.fontSize = 30;
             stTMP.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
@@ -642,7 +642,7 @@ namespace DigitPark.Editor
 
             var lTMP = GetOrAdd<TextMeshProUGUI>(legal);
             lTMP.text = "Powered by Triump\u2122 \u2022 Juego responsable \u2022 Solo mayores de 18 a\u00F1os";
-            lTMP.fontSize = 18;
+            lTMP.fontSize = 30;
             lTMP.color = TEXT_SECONDARY;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;

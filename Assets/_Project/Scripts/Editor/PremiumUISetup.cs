@@ -195,7 +195,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI iconTMP = iconObj.AddComponent<TextMeshProUGUI>();
             iconTMP.text = "★";
-            iconTMP.fontSize = 24;
+            iconTMP.fontSize = 30;
             iconTMP.color = neonGold;
             iconTMP.alignment = TextAlignmentOptions.Center;
 
@@ -212,7 +212,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = "PRO";
-            textTMP.fontSize = 22;
+            textTMP.fontSize = 30;
             textTMP.color = neonGold;
             textTMP.alignment = TextAlignmentOptions.Center;
             textTMP.fontStyle = FontStyles.Bold;
@@ -246,7 +246,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI badgeTextTMP = badgeTextObj.AddComponent<TextMeshProUGUI>();
             badgeTextTMP.text = "V";
-            badgeTextTMP.fontSize = 16;
+            badgeTextTMP.fontSize = 30;
             badgeTextTMP.color = Color.black;
             badgeTextTMP.alignment = TextAlignmentOptions.Center;
             badgeTextTMP.fontStyle = FontStyles.Bold;

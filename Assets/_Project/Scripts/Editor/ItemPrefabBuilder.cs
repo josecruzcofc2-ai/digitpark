@@ -305,7 +305,7 @@ namespace DigitPark.Editor
             expandTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI expandTextTMP = expandText.AddComponent<TextMeshProUGUI>();
             expandTextTMP.text = "Ver datos del torneo";
-            expandTextTMP.fontSize = 14;
+            expandTextTMP.fontSize = 30;
             expandTextTMP.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             expandTextTMP.alignment = TextAlignmentOptions.Center;
             expandTextTMP.raycastTarget = false;
@@ -320,7 +320,7 @@ namespace DigitPark.Editor
             arrowRT.sizeDelta = new Vector2(30, 0);
             TextMeshProUGUI arrowTMP = arrow.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = "v";
-            arrowTMP.fontSize = 20;
+            arrowTMP.fontSize = 22;
             arrowTMP.color = CYAN_NEON;
             arrowTMP.alignment = TextAlignmentOptions.Center;
 
@@ -412,7 +412,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI positionTMP = positionObj.AddComponent<TextMeshProUGUI>();
             positionTMP.text = "1";
-            positionTMP.fontSize = 28;
+            positionTMP.fontSize = 30;
             positionTMP.color = GOLD;
             positionTMP.alignment = TextAlignmentOptions.Center;
             positionTMP.fontStyle = FontStyles.Bold;
@@ -431,7 +431,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI usernameTMP = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTMP.text = "Username";
-            usernameTMP.fontSize = 22;
+            usernameTMP.fontSize = 30;
             usernameTMP.color = Color.white;
             usernameTMP.alignment = TextAlignmentOptions.Center;
             usernameTMP.enableWordWrapping = false;
@@ -451,7 +451,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timeTMP = timeObj.AddComponent<TextMeshProUGUI>();
             timeTMP.text = "0.000s";
-            timeTMP.fontSize = 22;
+            timeTMP.fontSize = 30;
             timeTMP.color = GREEN_TIME;
             timeTMP.alignment = TextAlignmentOptions.Center;
 
@@ -580,7 +580,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 12;
+            tmp.fontSize = 30;
             tmp.color = Color.black;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -643,7 +643,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 18;
+            tmp.fontSize = 30;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

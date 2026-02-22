@@ -126,7 +126,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI modeTMP = modeText.AddComponent<TextMeshProUGUI>();
             modeTMP.text = "1v1";
-            modeTMP.fontSize = 11;
+            modeTMP.fontSize = 13;
             modeTMP.fontStyle = FontStyles.Bold;
             modeTMP.color = CYAN;
             modeTMP.alignment = TextAlignmentOptions.Center;
@@ -144,7 +144,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "QuickMath vs @Player123";
-            titleText.fontSize = 16;
+            titleText.fontSize = 18;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_WHITE;
             titleText.alignment = TextAlignmentOptions.Left;
@@ -163,7 +163,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI feeText = feeObj.AddComponent<TextMeshProUGUI>();
             feeText.text = "Entrada: $5.00";
-            feeText.fontSize = 13;
+            feeText.fontSize = 15;
             feeText.color = TEXT_SECONDARY;
             feeText.alignment = TextAlignmentOptions.Left;
 
@@ -180,7 +180,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dateText = dateObj.AddComponent<TextMeshProUGUI>();
             dateText.text = "Hace 2h";
-            dateText.fontSize = 12;
+            dateText.fontSize = 14;
             dateText.color = TEXT_SECONDARY;
             dateText.alignment = TextAlignmentOptions.Right;
 
@@ -208,7 +208,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rbTMP = rbText.AddComponent<TextMeshProUGUI>();
             rbTMP.text = "VICTORIA";
-            rbTMP.fontSize = 12;
+            rbTMP.fontSize = 14;
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.color = GREEN;
             rbTMP.alignment = TextAlignmentOptions.Center;

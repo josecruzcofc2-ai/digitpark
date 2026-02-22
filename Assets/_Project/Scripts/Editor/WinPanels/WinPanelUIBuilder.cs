@@ -889,12 +889,16 @@ namespace DigitPark.Editor
             {
                 AssetDatabase.CreateFolder("Assets/_Project", "Prefabs");
             }
-            if (!AssetDatabase.IsValidFolder("Assets/_Project/Prefabs/UI"))
+            if (!AssetDatabase.IsValidFolder("Assets/_Project/Prefabs/Games"))
             {
-                AssetDatabase.CreateFolder("Assets/_Project/Prefabs", "UI");
+                AssetDatabase.CreateFolder("Assets/_Project/Prefabs", "Games");
+            }
+            if (!AssetDatabase.IsValidFolder("Assets/_Project/Prefabs/Games/WinPanels"))
+            {
+                AssetDatabase.CreateFolder("Assets/_Project/Prefabs/Games", "WinPanels");
             }
 
-            string path = $"Assets/_Project/Prefabs/UI/{name}.prefab";
+            string path = $"Assets/_Project/Prefabs/Games/WinPanels/{name}.prefab";
 
             // Eliminar prefab existente si existe
             if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null)

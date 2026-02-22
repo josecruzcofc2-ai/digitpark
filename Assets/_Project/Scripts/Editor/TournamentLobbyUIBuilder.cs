@@ -79,6 +79,7 @@ namespace DigitPark.Editor
             CreateLeaveConfirmPopup(canvas);
 
             MarkSceneDirty();
+            AutoAssigners.TournamentLobbyReferenceAssigner.RunAutoAssign();
             Debug.Log("[TournamentLobbyUIBuilder] ========== CONSTRUCCION COMPLETADA ==========");
         }
 

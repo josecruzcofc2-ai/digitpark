@@ -269,7 +269,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = 24;
+            btTMP.fontSize = 30;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -547,7 +547,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Dia 3 de 7 - Reclama tu premio!";
-            sTMP.fontSize = 28;
+            sTMP.fontSize = 30;
             sTMP.color = TEXT_SECONDARY;
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -1061,6 +1061,7 @@ namespace DigitPark.Editor
             SetRef(so, "cashBattleButton", FindInPath<Button>(r, "CashBattleCard"));
             SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
             SetRef(so, "userButton", FindInPath<Button>(r, "ProfileCard"));
+            SetRef(so, "profileHeaderButton", FindInPath<Button>(r, "Header/ProfileButton"));
             SetRef(so, "userText", FindInPath<TextMeshProUGUI>(r, "ProfileCard/InfoSection/Username"));
             SetRef(so, "searchButton", FindInPath<Button>(r, "QuickActionsPanel/SearchCard"));
             SetRef(so, "notificationsButton", FindInPath<Button>(r, "Header/NotificationsButton"));
@@ -1078,7 +1079,7 @@ namespace DigitPark.Editor
             // Monetization buttons
             SetRef(so, "shopButton", FindInPath<Button>(r, "ExtraRow/ShopCard"));
             SetRef(so, "achievementsButton", FindInPath<Button>(r, "ExtraRow/AchievementsCard"));
-            SetRef(so, "dailyMissionsButton", FindInPath<Button>(r, "DailyRewardCard"));
+            SetRef(so, "dailyRewardsButton", FindInPath<Button>(r, "DailyRewardCard"));
             SetRef(so, "missionsCardButton", FindInPath<Button>(r, "QuickActionsPanel/MissionsCard"));
 
             so.ApplyModifiedProperties();

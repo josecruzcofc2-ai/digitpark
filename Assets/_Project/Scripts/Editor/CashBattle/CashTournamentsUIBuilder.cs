@@ -244,6 +244,7 @@ namespace DigitPark.Editor
 
             Image img = bg.AddComponent<Image>();
             img.color = BG_DARK;
+            img.raycastTarget = false;
         }
 
         private static GameObject CreateSafeArea(Transform parent)
@@ -582,7 +583,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI refreshTMP = refreshTextObj.AddComponent<TextMeshProUGUI>();
             refreshTMP.text = "Actualizar";
-            refreshTMP.fontSize = 28;
+            refreshTMP.fontSize = 30;
             refreshTMP.color = BG_DARK;
             refreshTMP.fontStyle = FontStyles.Bold;
             refreshTMP.alignment = TextAlignmentOptions.Center;
@@ -618,12 +619,12 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI capTMP = caption.AddComponent<TextMeshProUGUI>();
             capTMP.text = options.Count > 0 ? options[0] : name;
-            capTMP.fontSize = 24;
+            capTMP.fontSize = 30;
             capTMP.color = TEXT_WHITE;
             capTMP.alignment = TextAlignmentOptions.Left;
             capTMP.enableAutoSizing = true;
-            capTMP.fontSizeMin = 16;
-            capTMP.fontSizeMax = 24;
+            capTMP.fontSizeMin = 18;
+            capTMP.fontSizeMax = 30;
 
             dd.captionText = capTMP;
 
@@ -639,7 +640,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI arrowTMP = arrow.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = "\u25BC";
-            arrowTMP.fontSize = 18;
+            arrowTMP.fontSize = 22;
             arrowTMP.color = TEXT_WHITE;
             arrowTMP.alignment = TextAlignmentOptions.Center;
 
@@ -758,6 +759,7 @@ namespace DigitPark.Editor
 
             Image svBg = scrollView.AddComponent<Image>();
             svBg.color = new Color(0, 0, 0, 0);
+            svBg.raycastTarget = false;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");

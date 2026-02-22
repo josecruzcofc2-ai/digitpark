@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System;
 using System.Collections.Generic;
@@ -19,20 +20,6 @@ namespace DigitPark.CashBattle
         [Header("Header")]
         [SerializeField] private Button backButton;
         [SerializeField] private TextMeshProUGUI titleText;
-
-        // ==================== STATS PANEL ====================
-        [Header("Stats Panel")]
-        [SerializeField] private GameObject statsPanel;
-        [SerializeField] private TextMeshProUGUI totalMatchesText;
-        [SerializeField] private TextMeshProUGUI winRateText;
-        [SerializeField] private TextMeshProUGUI netProfitText;
-        [SerializeField] private TextMeshProUGUI winsText;
-        [SerializeField] private TextMeshProUGUI lossesText;
-        [SerializeField] private TextMeshProUGUI drawsText;
-        [SerializeField] private TextMeshProUGUI currentStreakText;
-        [SerializeField] private TextMeshProUGUI bestStreakText;
-        [SerializeField] private TextMeshProUGUI tournamentsPlayedText;
-        [SerializeField] private TextMeshProUGUI tournamentWinsText;
 
         // ==================== TABS ====================
         [Header("Tabs")]
@@ -100,7 +87,6 @@ namespace DigitPark.CashBattle
             SetupButtonListeners();
             SetupDropdowns();
             SubscribeToEvents();
-            RefreshStats();
             LoadEntries(reset: true);
 
             // Check navigation params
@@ -188,7 +174,6 @@ namespace DigitPark.CashBattle
             {
                 HistoryManager.Instance.OnEntryAdded += OnEntryAdded;
                 HistoryManager.Instance.OnEntryUpdated += OnEntryUpdated;
-                HistoryManager.Instance.OnStatsUpdated += OnStatsUpdated;
             }
         }
 
@@ -198,7 +183,6 @@ namespace DigitPark.CashBattle
             {
                 HistoryManager.Instance.OnEntryAdded -= OnEntryAdded;
                 HistoryManager.Instance.OnEntryUpdated -= OnEntryUpdated;
-                HistoryManager.Instance.OnStatsUpdated -= OnStatsUpdated;
             }
         }
 
@@ -419,7 +403,7 @@ namespace DigitPark.CashBattle
                 var entryUI = entryObj.GetComponent<HistoryEntryItemUI>();
                 if (entryUI)
                 {
-                    entryUI.Setup(entry, OnEntryClicked);
+                    entryUI.Setup(entry, OnEntryClicked, OnOpponentClicked);
                 }
             }
 
@@ -462,60 +446,6 @@ namespace DigitPark.CashBattle
         {
             currentPage++;
             LoadEntries(reset: false);
-        }
-
-        // ==================== STATS ====================
-
-        private void RefreshStats()
-        {
-            if (HistoryManager.Instance == null) return;
-
-            var stats = HistoryManager.Instance.GetStats();
-
-            // Main stats
-            if (totalMatchesText)
-                totalMatchesText.text = stats.totalMatches.ToString();
-
-            if (winRateText)
-                winRateText.text = $"{stats.winRate:F1}%";
-
-            if (netProfitText)
-            {
-                netProfitText.text = stats.netProfit >= 0
-                    ? $"+${stats.netProfit:F2}"
-                    : $"-${Math.Abs(stats.netProfit):F2}";
-                netProfitText.color = stats.netProfit >= 0
-                    ? new Color(0f, 1f, 0.5f) // Green
-                    : new Color(1f, 0.4f, 0.4f); // Red
-            }
-
-            // W/L/D
-            if (winsText) winsText.text = stats.wins.ToString();
-            if (lossesText) lossesText.text = stats.losses.ToString();
-            if (drawsText) drawsText.text = stats.draws.ToString();
-
-            // Streaks
-            var (currentStreak, isWinStreak) = HistoryManager.Instance.GetCurrentStreak();
-            if (currentStreakText)
-            {
-                currentStreakText.text = $"{currentStreak} {(isWinStreak ? "W" : "L")}";
-                currentStreakText.color = isWinStreak
-                    ? new Color(0f, 1f, 0.5f)
-                    : new Color(1f, 0.4f, 0.4f);
-            }
-
-            if (bestStreakText)
-            {
-                int bestStreak = HistoryManager.Instance.GetBestWinStreak();
-                bestStreakText.text = $"{bestStreak} W";
-            }
-
-            // Tournaments
-            if (tournamentsPlayedText)
-                tournamentsPlayedText.text = stats.tournamentsPlayed.ToString();
-
-            if (tournamentWinsText)
-                tournamentWinsText.text = stats.tournamentWins.ToString();
         }
 
         // ==================== DETAIL PANEL ====================
@@ -597,13 +527,11 @@ namespace DigitPark.CashBattle
             {
                 LoadEntries(reset: true);
             }
-            RefreshStats();
         }
 
         private void OnEntryUpdated(HistoryEntry entry)
         {
             LoadEntries(reset: true);
-            RefreshStats();
 
             // Update detail panel if showing this entry
             if (selectedEntry != null && selectedEntry.entryId == entry.entryId)
@@ -612,9 +540,14 @@ namespace DigitPark.CashBattle
             }
         }
 
-        private void OnStatsUpdated(HistoryStats stats)
+        private void OnOpponentClicked(string opponentId)
         {
-            RefreshStats();
+            if (string.IsNullOrEmpty(opponentId)) return;
+
+            // Navigate to normal Profile (not CashProfile - privacy rule)
+            PlayerPrefs.SetString("ViewProfileId", opponentId);
+            PlayerPrefs.SetString("ProfileReturnScene", "CashHistory");
+            SceneManager.LoadScene("Profile");
         }
 
         // ==================== LOADING ====================
@@ -711,7 +644,6 @@ namespace DigitPark.CashBattle
         /// </summary>
         public void RefreshAll()
         {
-            RefreshStats();
             LoadEntries(reset: true);
         }
     }

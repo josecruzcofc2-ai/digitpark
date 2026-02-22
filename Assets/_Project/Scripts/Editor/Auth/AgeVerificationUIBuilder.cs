@@ -78,6 +78,7 @@ namespace DigitPark.Editor
                 // Force layout update
                 Canvas.ForceUpdateCanvases();
 
+                AutoAssigners.AgeVerificationReferenceAssigner.RunAutoAssign();
                 Debug.Log("✅ AgeVerification UI rebuilt successfully!");
                 EditorUtility.SetDirty(canvas.gameObject);
             }

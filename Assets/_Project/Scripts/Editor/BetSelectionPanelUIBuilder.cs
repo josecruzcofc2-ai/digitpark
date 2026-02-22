@@ -63,12 +63,12 @@ namespace DigitPark.Editor
         private const int SECTION_SIZE = 40;
         private const int CARD_COST_SIZE = 40;
         private const int CARD_REWARD_SIZE = 30;
-        private const int CARD_BADGE_SIZE = 24;
+        private const int CARD_BADGE_SIZE = 30;
         private const int BTN_SIZE = 36;
-        private const int CUSTOM_TOGGLE_SIZE = 28;
+        private const int CUSTOM_TOGGLE_SIZE = 30;
         private const int CUSTOM_INPUT_SIZE = 36;
-        private const int CUSTOM_PREVIEW_SIZE = 26;
-        private const int STEPPER_SIZE = 28;
+        private const int CUSTOM_PREVIEW_SIZE = 30;
+        private const int STEPPER_SIZE = 30;
 
         // ==================== LAYOUT ====================
         private const float CARD_H = 85f;
@@ -135,7 +135,9 @@ namespace DigitPark.Editor
             // === BACKGROUND ===
             GameObject bg = CreateUI("Background", canvas.transform);
             SetFullStretch(bg.GetComponent<RectTransform>());
-            bg.AddComponent<Image>().color = BG_DARK;
+            var bgImg = bg.AddComponent<Image>();
+            bgImg.color = BG_DARK;
+            bgImg.raycastTarget = false;
 
             // === HEADER ===
             CreateHeader(canvas.transform);
@@ -241,17 +243,8 @@ namespace DigitPark.Editor
             Debug.Log("[BetSelectionUIBuilder] UI built. Running Reference Assigner...");
 
             // === AUTO-ASSIGN ===
-            var manager = DigitPark.Editor.AutoAssigners.BetSelectionReferenceAssigner.FindBetSelectionPanel();
-            if (manager != null)
-            {
-                DigitPark.Editor.AutoAssigners.BetSelectionReferenceAssigner.AssignAllReferences();
-                Debug.Log("[BetSelectionUIBuilder] References auto-assigned!");
-            }
-            else
-            {
-                Debug.LogWarning("[BetSelectionUIBuilder] BetSelectionPanel not found. " +
-                    "Add BetSelectionPanel component, then run Auto Assigner.");
-            }
+            AutoAssigners.BetSelectionReferenceAssigner.RunAutoAssign();
+            Debug.Log("[BetSelectionUIBuilder] References auto-assigned!");
         }
 
         // ==================== HEADER ====================

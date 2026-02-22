@@ -238,7 +238,6 @@ namespace DigitPark.Editor
             CreateBackground(canvasTransform);
             GameObject safeArea = CreateSafeArea(canvasTransform);
             CreateHeader(safeArea.transform);
-            CreateStatsPanel(safeArea.transform);
             CreateFiltersPanel(safeArea.transform);
             CreateMatchHistoryList(safeArea.transform);
 
@@ -569,7 +568,7 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
             rt.sizeDelta = new Vector2(-30, 60);
-            rt.anchoredPosition = new Vector2(0, -590);  // Debajo del stats panel (105 + 480 + 5)
+            rt.anchoredPosition = new Vector2(0, -110);  // Debajo del header (105 + 5)
 
             // Horizontal layout for filters
             HorizontalLayoutGroup hlg = panel.AddComponent<HorizontalLayoutGroup>();
@@ -632,14 +631,16 @@ namespace DigitPark.Editor
             svRT.anchorMin = new Vector2(0, 0);
             svRT.anchorMax = new Vector2(1, 1);
             svRT.offsetMin = new Vector2(10, 15);  // Bottom padding
-            svRT.offsetMax = new Vector2(-10, -660);  // Top offset (header 105 + stats 480 + gap 5 + filters 60 + gap 10)
+            svRT.offsetMax = new Vector2(-10, -180);  // Top offset (header 105 + gap 5 + filters 60 + gap 10)
 
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.vertical = true;
             scroll.scrollSensitivity = 50;
 
-            scrollView.AddComponent<Image>().color = new Color(0, 0, 0, 0);
+            var scrollBgImg = scrollView.AddComponent<Image>();
+            scrollBgImg.color = new Color(0, 0, 0, 0);
+            scrollBgImg.raycastTarget = false;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -838,7 +839,7 @@ namespace DigitPark.Editor
             mt.alignment = TextAlignmentOptions.Center;
             mt.fontStyle = FontStyles.Bold;
 
-            // Opponent
+            // Opponent (clickeable)
             GameObject oppObj = new GameObject("Opponent");
             oppObj.transform.SetParent(item.transform, false);
 
@@ -852,9 +853,28 @@ namespace DigitPark.Editor
             TextMeshProUGUI oppText = oppObj.AddComponent<TextMeshProUGUI>();
             oppText.text = $"vs {opponent}";
             oppText.fontSize = 36;
-            oppText.fontStyle = FontStyles.Bold;
+            oppText.fontStyle = FontStyles.Bold | FontStyles.Underline;
             oppText.color = CYAN_ACCENT;
             oppText.alignment = TextAlignmentOptions.Left;
+
+            // Transparent button over opponent name for click detection
+            GameObject oppBtnObj = new GameObject("OpponentNameButton");
+            oppBtnObj.transform.SetParent(oppObj.transform, false);
+
+            RectTransform oppBtnRT = oppBtnObj.AddComponent<RectTransform>();
+            oppBtnRT.anchorMin = Vector2.zero;
+            oppBtnRT.anchorMax = Vector2.one;
+            oppBtnRT.sizeDelta = Vector2.zero;
+
+            Image oppBtnImg = oppBtnObj.AddComponent<Image>();
+            oppBtnImg.color = new Color(0, 0, 0, 0);
+            oppBtnImg.raycastTarget = true;
+
+            Button oppBtn = oppBtnObj.AddComponent<Button>();
+            ColorBlock oppBtnColors = oppBtn.colors;
+            oppBtnColors.highlightedColor = new Color(0f, 0.9f, 1f, 0.1f);
+            oppBtnColors.pressedColor = new Color(0f, 0.9f, 1f, 0.15f);
+            oppBtn.colors = oppBtnColors;
 
             // Date + Score row
             GameObject infoRow = new GameObject("InfoRow");
@@ -1167,22 +1187,6 @@ namespace DigitPark.Editor
             AssignRef(so, "backButton", FindBtnDeep(root, "BackButton"));
 
             AssignRef(so, "titleText", FindTextDeep(root, "Title"));
-
-            // ==================== STATS PANEL ====================
-            Transform statsPanelT = FindDeep(root, "StatsPanel");
-            AssignGORef(so, "statsPanel", statsPanelT != null ? statsPanelT.gameObject : null);
-
-            // Stats use parent/child pattern: find "Stat_XXX" then get child "Value"
-            AssignRef(so, "winsText", FindStatValueText(root, "Stat_Victorias"));
-            AssignRef(so, "lossesText", FindStatValueText(root, "Stat_Derrotas"));
-            AssignRef(so, "winRateText", FindStatValueText(root, "Stat_Win Rate"));
-            AssignRef(so, "netProfitText", FindStatValueText(root, "Stat_Ganado"));
-            AssignRef(so, "drawsText", FindStatValueText(root, "Stat_Empates"));
-            AssignRef(so, "totalMatchesText", FindStatValueText(root, "Stat_Total Partidas"));
-            AssignRef(so, "currentStreakText", FindStatValueText(root, "Stat_Racha Actual"));
-            AssignRef(so, "bestStreakText", FindStatValueText(root, "Stat_Mejor Racha"));
-            AssignRef(so, "tournamentsPlayedText", FindStatValueText(root, "Stat_Torneos Jugados"));
-            AssignRef(so, "tournamentWinsText", FindStatValueText(root, "Stat_Torneos Ganados"));
 
             // ==================== FILTER TABS ====================
             AssignRef(so, "allTabButton", FindBtnDeep(root, "FilterAll"));

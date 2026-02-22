@@ -102,6 +102,7 @@ namespace DigitPark.Editor
             // Crear nueva estructura
             CreateNewGameSelectorLayout(canvasTransform);
 
+            AutoAssigners.GameSelectorReferenceAssigner.RunAutoAssign();
             Debug.Log("GameSelector UI reconstruida exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
         }
@@ -250,7 +251,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI badgeTmp = badgeText.GetComponent<TextMeshProUGUI>();
                 if (badgeTmp == null) badgeTmp = badgeText.AddComponent<TextMeshProUGUI>();
                 badgeTmp.text = "PRO";
-                badgeTmp.fontSize = 16;
+                badgeTmp.fontSize = 30;
                 badgeTmp.fontStyle = FontStyles.Bold;
                 badgeTmp.color = DARK_BG;
                 badgeTmp.alignment = TextAlignmentOptions.Center;
@@ -294,10 +295,10 @@ namespace DigitPark.Editor
             if (innerPanelBg == null) innerPanelBg = innerPanel.AddComponent<Image>();
             innerPanelBg.color = CARD_BG;
 
-            // Borde neón dorado para el panel
+            // Borde neón cyan para el panel
             Outline panelOutline = innerPanel.GetComponent<Outline>();
             if (panelOutline == null) panelOutline = innerPanel.AddComponent<Outline>();
-            panelOutline.effectColor = GOLD;
+            panelOutline.effectColor = CYAN_NEON;
             panelOutline.effectDistance = new Vector2(3, 3);
 
             // Título del panel
@@ -311,7 +312,7 @@ namespace DigitPark.Editor
             titleTmp.text = "Cognitive Sprint";
             titleTmp.fontSize = 48;
             titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = GOLD;
+            titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
 
             // Subtítulo
@@ -323,7 +324,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTmp = subtitle.GetComponent<TextMeshProUGUI>();
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Selecciona 3-5 juegos para el sprint";
-            subtitleTmp.fontSize = 24;
+            subtitleTmp.fontSize = 30;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
@@ -360,7 +361,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI selectedTmp = selectedText.GetComponent<TextMeshProUGUI>();
             if (selectedTmp == null) selectedTmp = selectedText.AddComponent<TextMeshProUGUI>();
             selectedTmp.text = "0/5 juegos seleccionados";
-            selectedTmp.fontSize = 24;
+            selectedTmp.fontSize = 30;
             selectedTmp.color = Color.white;
             selectedTmp.alignment = TextAlignmentOptions.Center;
 
@@ -441,7 +442,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTmp = subtitle.GetComponent<TextMeshProUGUI>();
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Reglas del juego";
-            subtitleTmp.fontSize = 24;
+            subtitleTmp.fontSize = 30;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
@@ -461,7 +462,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI rulesTmp = rulesText.GetComponent<TextMeshProUGUI>();
             if (rulesTmp == null) rulesTmp = rulesText.AddComponent<TextMeshProUGUI>();
             rulesTmp.text = "• Regla 1\n• Regla 2\n• Regla 3"; // Placeholder
-            rulesTmp.fontSize = 26; // Más grande para mejor legibilidad
+            rulesTmp.fontSize = 30; // Más grande para mejor legibilidad
             rulesTmp.fontStyle = FontStyles.Bold; // Negrita
             rulesTmp.color = new Color(0.9f, 0.9f, 0.9f, 1f); // Un poco más brillante
             rulesTmp.alignment = TextAlignmentOptions.TopLeft;
@@ -511,7 +512,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTmp = toggleLabel.GetComponent<TextMeshProUGUI>();
             if (labelTmp == null) labelTmp = toggleLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "No volver a mostrar estas reglas";
-            labelTmp.fontSize = 20;
+            labelTmp.fontSize = 30;
             labelTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -569,7 +570,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI textTmp = textObj.GetComponent<TextMeshProUGUI>();
             if (textTmp == null) textTmp = textObj.AddComponent<TextMeshProUGUI>();
             textTmp.text = text;
-            textTmp.fontSize = 24;
+            textTmp.fontSize = 30;
             textTmp.fontStyle = FontStyles.Bold;
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
@@ -629,7 +630,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTmp = label.GetComponent<TextMeshProUGUI>();
             if (labelTmp == null) labelTmp = label.AddComponent<TextMeshProUGUI>();
             labelTmp.text = labelText;
-            labelTmp.fontSize = 28;
+            labelTmp.fontSize = 30;
             labelTmp.color = Color.white;
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -669,7 +670,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI textTmp = textObj.GetComponent<TextMeshProUGUI>();
             if (textTmp == null) textTmp = textObj.AddComponent<TextMeshProUGUI>();
             textTmp.text = text;
-            textTmp.fontSize = 24;
+            textTmp.fontSize = 30;
             textTmp.fontStyle = FontStyles.Bold;
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
@@ -745,7 +746,8 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            // Solo limpiar SafeArea, NO destruir Background (se necesita como base)
+            string[] toClean = { "SafeArea" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;

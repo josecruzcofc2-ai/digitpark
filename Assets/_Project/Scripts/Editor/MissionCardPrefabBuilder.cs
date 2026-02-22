@@ -242,7 +242,7 @@ namespace DigitPark.Editor
                 textRt.offsetMax = Vector2.zero;
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = text;
-                tmp.fontSize = 14;
+                tmp.fontSize = 30;
                 tmp.color = textColor;
                 tmp.fontStyle = FontStyles.Bold;
                 tmp.alignment = TextAlignmentOptions.Center;

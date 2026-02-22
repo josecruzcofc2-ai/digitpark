@@ -87,6 +87,7 @@ namespace DigitPark.Editor
                 // Force layout update
                 Canvas.ForceUpdateCanvases();
 
+                AutoAssigners.LoginReferenceAssigner.RunAutoAssign();
                 Debug.Log("✅ Login UI rebuilt successfully!");
                 EditorUtility.SetDirty(canvas.gameObject);
             }
@@ -584,7 +585,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
             buttonText.font = DefaultFont;
             buttonText.text = text;
-            buttonText.fontSize = 18;
+            buttonText.fontSize = 30;
             buttonText.fontStyle = FontStyles.Bold;
             buttonText.color = textColor;
             buttonText.alignment = TextAlignmentOptions.Left;
@@ -690,7 +691,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = loadingText.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Cargando...";
-            text.fontSize = 24;
+            text.fontSize = 30;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
 

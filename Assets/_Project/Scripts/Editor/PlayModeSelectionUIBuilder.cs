@@ -160,7 +160,7 @@ namespace DigitPark.Editor
                 new Vector2(22, 0), new Vector2(25, 30));
             TextMeshProUGUI arrowTmp = arrow.AddComponent<TextMeshProUGUI>();
             arrowTmp.text = "<";
-            arrowTmp.fontSize = 26;
+            arrowTmp.fontSize = 30;
             arrowTmp.color = CYAN_NEON;
             arrowTmp.fontStyle = FontStyles.Bold;
             arrowTmp.alignment = TextAlignmentOptions.Center;
@@ -172,7 +172,7 @@ namespace DigitPark.Editor
                 new Vector2(12, 0), Vector2.zero);
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "BACK";
-            tmp.fontSize = 18;
+            tmp.fontSize = 30;
             tmp.color = Color.white;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -357,7 +357,7 @@ namespace DigitPark.Editor
                 Vector2.zero, new Vector2(-300, 0));
             TextMeshProUGUI descTmp = descObj.AddComponent<TextMeshProUGUI>();
             descTmp.text = description;
-            descTmp.fontSize = 26;
+            descTmp.fontSize = 30;
             descTmp.color = TEXT_SECONDARY;
             descTmp.alignment = TextAlignmentOptions.Center;
             descTmp.enableWordWrapping = true;

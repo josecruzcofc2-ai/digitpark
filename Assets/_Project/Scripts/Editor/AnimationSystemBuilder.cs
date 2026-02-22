@@ -96,7 +96,7 @@ namespace DigitPark.Editor
             textRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = "BUTTON";
-            text.fontSize = 24;
+            text.fontSize = 30;
             text.alignment = TextAlignmentOptions.Center;
             text.color = Color.white;
 

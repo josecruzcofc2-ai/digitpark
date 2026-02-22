@@ -80,6 +80,7 @@ namespace DigitPark.Editor
             CreateConfirmPopup(canvas);
 
             MarkSceneDirty();
+            AutoAssigners.TournamentCreateReferenceAssigner.RunAutoAssign();
             Debug.Log("[TournamentCreateUIBuilder] ========== CONSTRUCCION V2 COMPLETADA ==========");
         }
 

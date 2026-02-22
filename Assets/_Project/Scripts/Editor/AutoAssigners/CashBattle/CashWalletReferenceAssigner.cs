@@ -214,7 +214,11 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "transactionHistoryPanel", txHistoryPanelT != null ? txHistoryPanelT.gameObject : null);
 
             // ==================== DEPOSIT SECTION ====================
-            // depositOptionPrefab -> skip (prefab)
+            // Prefabs (desde disco)
+            var depositPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/CashBattle/Wallet/DepositOptionUI.prefab");
+            AssignReference(so, "depositOptionPrefab", depositPrefab);
+            var txItemPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/CashBattle/Wallet/TransactionItemUI.prefab");
+            AssignReference(so, "transactionItemPrefab", txItemPrefab);
             // paymentMethodButtons -> skip (array, complex)
             Transform depositOptionsContainerT = FindDeep(root, "DepositOptionsContainer");
             AssignReference(so, "depositOptionsContainer", depositOptionsContainerT);

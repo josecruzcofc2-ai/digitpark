@@ -22,11 +22,13 @@ namespace DigitPark.CashBattle
         [SerializeField] private TextMeshProUGUI balanceText;
         [SerializeField] private TextMeshProUGUI bonusBalanceText;
 
-        // ==================== TABS ====================
-        [Header("Tabs")]
+        // ==================== ACTION BUTTONS ====================
+        [Header("Action Buttons")]
         [SerializeField] private Button depositTabButton;
         [SerializeField] private Button withdrawTabButton;
         [SerializeField] private Button historyTabButton;
+        [SerializeField] private Button closeDepositButton;
+        [SerializeField] private Button closeWithdrawButton;
         [SerializeField] private Color activeTabColor = new Color(0f, 0.83f, 1f, 1f);
         [SerializeField] private Color inactiveTabColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
@@ -135,8 +137,10 @@ namespace DigitPark.CashBattle
             // Setup deposit options
             PopulateDepositOptions();
 
-            // Setup initial tab
-            ShowTab(WalletTab.Deposit);
+            // Start with all overlay panels hidden - main view shows transaction list
+            if (depositPanel) depositPanel.SetActive(false);
+            if (withdrawPanel) withdrawPanel.SetActive(false);
+            if (transactionHistoryPanel) transactionHistoryPanel.SetActive(false);
 
             // Hide overlays
             if (loadingOverlay) loadingOverlay.SetActive(false);
@@ -160,13 +164,19 @@ namespace DigitPark.CashBattle
             if (backButton)
                 backButton.onClick.AddListener(OnBackClicked);
 
-            // Tab buttons
+            // Action buttons - open modal panels
             if (depositTabButton)
-                depositTabButton.onClick.AddListener(() => ShowTab(WalletTab.Deposit));
+                depositTabButton.onClick.AddListener(() => ShowOverlayPanel(depositPanel));
             if (withdrawTabButton)
-                withdrawTabButton.onClick.AddListener(() => ShowTab(WalletTab.Withdraw));
+                withdrawTabButton.onClick.AddListener(() => ShowOverlayPanel(withdrawPanel));
             if (historyTabButton)
                 historyTabButton.onClick.AddListener(() => ShowTab(WalletTab.History));
+
+            // Close buttons on modal panels
+            if (closeDepositButton)
+                closeDepositButton.onClick.AddListener(() => HideOverlayPanel(depositPanel));
+            if (closeWithdrawButton)
+                closeWithdrawButton.onClick.AddListener(() => HideOverlayPanel(withdrawPanel));
 
             // Withdraw
             if (withdrawButton)
@@ -363,6 +373,50 @@ namespace DigitPark.CashBattle
 
             // Scale animation for active tab
             button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
+        }
+
+        // ==================== OVERLAY PANELS ====================
+
+        private void ShowOverlayPanel(GameObject panel)
+        {
+            if (panel == null) return;
+
+            // Hide any other open panel first
+            if (depositPanel && depositPanel != panel && depositPanel.activeSelf)
+                depositPanel.SetActive(false);
+            if (withdrawPanel && withdrawPanel != panel && withdrawPanel.activeSelf)
+                withdrawPanel.SetActive(false);
+
+            panel.SetActive(true);
+            var cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.25f).SetEase(Ease.OutQuad);
+
+            // Scale punch on inner panel for premium feel
+            var inner = panel.transform.Find("InnerPanel");
+            if (inner != null)
+            {
+                inner.localScale = Vector3.one * 0.92f;
+                inner.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+            }
+
+            // Refresh content
+            if (panel == withdrawPanel)
+                RefreshWithdrawPanel();
+        }
+
+        private void HideOverlayPanel(GameObject panel)
+        {
+            if (panel == null || !panel.activeSelf) return;
+
+            var cg = panel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+            cg.DOFade(0f, 0.2f).OnComplete(() =>
+            {
+                panel.SetActive(false);
+                cg.alpha = 1f;
+            });
         }
 
         // ==================== DEPOSIT ====================

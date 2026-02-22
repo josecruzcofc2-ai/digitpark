@@ -367,6 +367,20 @@ namespace DigitPark.Editor
 
             return animator;
         }
+
+        /// <summary>
+        /// Add CashProfileAnimator to the CashProfile scene.
+        /// Handles entrance sequence, continuous effects, and exit animations.
+        /// </summary>
+        public static DigitPark.Animations.CashProfileAnimator AddCashProfileAnimator(GameObject container)
+        {
+            if (container == null) return null;
+
+            var existing = container.GetComponent<DigitPark.Animations.CashProfileAnimator>();
+            if (existing != null) return existing;
+
+            return container.AddComponent<DigitPark.Animations.CashProfileAnimator>();
+        }
     }
 }
 #endif

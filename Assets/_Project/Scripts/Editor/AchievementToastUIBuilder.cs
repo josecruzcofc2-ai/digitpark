@@ -335,7 +335,7 @@ namespace DigitPark.Editor
             GameObject headerText = CreateChild(headerRow, "HeaderText");
             TextMeshProUGUI headerTMP = headerText.AddComponent<TextMeshProUGUI>();
             headerTMP.text = "¡LOGRO DESBLOQUEADO!";
-            headerTMP.fontSize = 26f;
+            headerTMP.fontSize = 30f;
             headerTMP.fontStyle = FontStyles.Bold;
             headerTMP.color = CYAN_NEON;
             headerTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -360,7 +360,7 @@ namespace DigitPark.Editor
             GameObject descObj = CreateChild(infoSection, "AchievementDescription");
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Gana tu primera partida";
-            descTMP.fontSize = 22f;
+            descTMP.fontSize = 30f;
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -406,7 +406,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI completionTMP = completionText.AddComponent<TextMeshProUGUI>();
             completionTMP.text = "COMPLETADO";
-            completionTMP.fontSize = 20f;
+            completionTMP.fontSize = 30f;
             completionTMP.fontStyle = FontStyles.Bold;
             completionTMP.color = SUCCESS_GREEN;
             completionTMP.alignment = TextAlignmentOptions.MidlineRight;

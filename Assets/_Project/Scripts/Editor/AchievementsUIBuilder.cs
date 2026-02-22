@@ -105,6 +105,7 @@ namespace DigitPark.Editor
             CreateTrophyCardPrefab();
 
             MarkSceneDirty();
+            AutoAssigners.AchievementsReferenceAssigner.RunAutoAssign();
             Debug.Log("[TrophyShowcase] ========== CONSTRUCCION COMPLETADA ==========");
 
             EditorUtility.DisplayDialog("Trophy Showcase Completado",
@@ -233,12 +234,14 @@ namespace DigitPark.Editor
 
             Image bgImage = GetOrAddComponent<Image>(bg);
             bgImage.color = DARK_BG;
+            bgImage.raycastTarget = false;
 
             // Ambient particles effect (visual layer)
             GameObject particles = FindOrCreateChild(bg, "AmbientParticles");
             SetRectTransformStretch(particles);
             Image particlesImage = GetOrAddComponent<Image>(particles);
             particlesImage.color = new Color(0.1f, 0.2f, 0.3f, 0.1f);
+            particlesImage.raycastTarget = false;
 
             bg.transform.SetAsFirstSibling();
         }
@@ -387,7 +390,7 @@ namespace DigitPark.Editor
             GameObject progressLabelLeft = FindOrCreateChild(progressLabelRow, "Left");
             TextMeshProUGUI progressLeftText = GetOrAddComponent<TextMeshProUGUI>(progressLabelLeft);
             progressLeftText.text = "Progreso Total";
-            progressLeftText.fontSize = 24;
+            progressLeftText.fontSize = 30;
             progressLeftText.fontStyle = FontStyles.Bold;
             progressLeftText.color = TEXT_SECONDARY;
             progressLeftText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -395,7 +398,7 @@ namespace DigitPark.Editor
             GameObject progressLabelRight = FindOrCreateChild(progressLabelRow, "Right");
             TextMeshProUGUI progressRightText = GetOrAddComponent<TextMeshProUGUI>(progressLabelRight);
             progressRightText.text = "27/50 (54%)";
-            progressRightText.fontSize = 24;
+            progressRightText.fontSize = 30;
             progressRightText.fontStyle = FontStyles.Bold;
             progressRightText.color = CYAN_NEON;
             progressRightText.alignment = TextAlignmentOptions.MidlineRight;
@@ -535,7 +538,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = 24;
+            tabText.fontSize = 30;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
@@ -744,7 +747,7 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(centerContent, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Sigue jugando para desbloquear más logros";
-            subtitleText.fontSize = 24;
+            subtitleText.fontSize = 30;
             subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.color = new Color(TEXT_SECONDARY.r, TEXT_SECONDARY.g, TEXT_SECONDARY.b, 0.7f);
             subtitleText.alignment = TextAlignmentOptions.Center;
@@ -782,6 +785,7 @@ namespace DigitPark.Editor
 
             Image glassImage = GetOrAddComponent<Image>(glassOverlay);
             glassImage.color = isUnlocked ? new Color(1f, 1f, 1f, 0.1f) : GLASS_OVERLAY;
+            glassImage.raycastTarget = false;
 
             // Trophy Display Area
             GameObject trophyArea = FindOrCreateChild(cardContainer, "TrophyArea");
@@ -802,6 +806,7 @@ namespace DigitPark.Editor
             Image trophyImage = GetOrAddComponent<Image>(trophyIcon);
             trophyImage.color = isSecret ? new Color(0.4f, 0.4f, 0.5f, 0.5f) :
                                 isUnlocked ? accentColor : new Color(0.3f, 0.3f, 0.35f, 1f);
+            trophyImage.raycastTarget = false;
 
             // Question Mark for secret
             if (isSecret)
@@ -824,6 +829,7 @@ namespace DigitPark.Editor
 
                 Image lockedImage = GetOrAddComponent<Image>(lockedOverlay);
                 lockedImage.color = new Color(0f, 0f, 0f, 0.5f);
+                lockedImage.raycastTarget = false;
 
                 GameObject lockIcon = FindOrCreateChild(lockedOverlay, "LockIcon");
                 RectTransform lockRT = GetOrAddComponent<RectTransform>(lockIcon);
@@ -833,6 +839,7 @@ namespace DigitPark.Editor
 
                 Image lockImage = GetOrAddComponent<Image>(lockIcon);
                 lockImage.color = TEXT_SECONDARY;
+                lockImage.raycastTarget = false;
             }
 
             // Info Section
@@ -855,13 +862,13 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(infoSection, "Title");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = title;
-            titleText.fontSize = 26;
+            titleText.fontSize = 30;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = isUnlocked ? TEXT_PRIMARY : (isSecret ? CAT_SECRET : TEXT_SECONDARY);
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = 18;
-            titleText.fontSizeMax = 26;
+            titleText.fontSizeMax = 30;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
             titleLE.minHeight = 24;
 
@@ -874,6 +881,7 @@ namespace DigitPark.Editor
 
                 Image progressBg = GetOrAddComponent<Image>(progressBar);
                 progressBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
+                progressBg.raycastTarget = false;
 
                 GameObject progressFill = FindOrCreateChild(progressBar, "Fill");
                 RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
@@ -883,12 +891,13 @@ namespace DigitPark.Editor
 
                 Image fillImage = GetOrAddComponent<Image>(progressFill);
                 fillImage.color = accentColor;
+                fillImage.raycastTarget = false;
 
                 // Progress Text
                 GameObject progressText = FindOrCreateChild(infoSection, "ProgressText");
                 TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressText);
                 progressTmp.text = $"{progressPercent}%";
-                progressTmp.fontSize = 20;
+                progressTmp.fontSize = 30;
                 progressTmp.fontStyle = FontStyles.Bold;
                 progressTmp.color = TEXT_SECONDARY;
                 progressTmp.alignment = TextAlignmentOptions.Center;
@@ -909,6 +918,7 @@ namespace DigitPark.Editor
 
                 Image badgeImage = GetOrAddComponent<Image>(completedBadge);
                 badgeImage.color = BUTTON_SUCCESS;
+                badgeImage.raycastTarget = false;
 
                 GameObject checkmark = FindOrCreateChild(completedBadge, "Checkmark");
                 SetRectTransformStretch(checkmark);
@@ -1011,7 +1021,7 @@ namespace DigitPark.Editor
             GameObject descObj = FindOrCreateChild(panel, "DetailDescription");
             TextMeshProUGUI descText = GetOrAddComponent<TextMeshProUGUI>(descObj);
             descText.text = "Gana tu primera partida en cualquier modo de juego.";
-            descText.fontSize = 26;
+            descText.fontSize = 30;
             descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             descText.alignment = TextAlignmentOptions.Center;
@@ -1022,7 +1032,7 @@ namespace DigitPark.Editor
             GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
             TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
             categoryText.text = "Categoria: Principiante";
-            categoryText.fontSize = 24;
+            categoryText.fontSize = 30;
             categoryText.fontStyle = FontStyles.Bold;
             categoryText.color = CYAN_NEON;
             categoryText.alignment = TextAlignmentOptions.Center;
@@ -1076,7 +1086,7 @@ namespace DigitPark.Editor
             GameObject progressTextObj = FindOrCreateChild(progressSection, "DetailProgressText");
             TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
             progressTmp.text = "1/1 Completado";
-            progressTmp.fontSize = 24;
+            progressTmp.fontSize = 30;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = BUTTON_SUCCESS;
             progressTmp.alignment = TextAlignmentOptions.Center;
@@ -1415,7 +1425,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI progressTmp = progressText.AddComponent<TextMeshProUGUI>();
             progressTmp.text = "50%";
-            progressTmp.fontSize = 16;
+            progressTmp.fontSize = 30;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = TEXT_SECONDARY;
             progressTmp.alignment = TextAlignmentOptions.Center;
@@ -1437,7 +1447,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTmp = titleText.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Logro";
-            titleTmp.fontSize = 26;
+            titleTmp.fontSize = 30;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = TEXT_SECONDARY;
             titleTmp.alignment = TextAlignmentOptions.Center;

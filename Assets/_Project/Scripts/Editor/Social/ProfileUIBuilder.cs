@@ -364,7 +364,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(status);
             sTMP.text = "Tu perfil";
-            sTMP.fontSize = 27;
+            sTMP.fontSize = 30;
             sTMP.color = CYAN_NEON;
             sTMP.alignment = TextAlignmentOptions.Center;
 
@@ -462,12 +462,12 @@ namespace DigitPark.Editor
             lRT.offsetMax = new Vector2(-5, 0);
             var lTMP = GetOrAdd<TextMeshProUGUI>(lbl);
             lTMP.text = label;
-            lTMP.fontSize = 24;
+            lTMP.fontSize = 30;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableAutoSizing = true;
             lTMP.fontSizeMin = 18;
-            lTMP.fontSizeMax = 24;
+            lTMP.fontSizeMax = 30;
         }
 
         #endregion
@@ -739,7 +739,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-20, -10);
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "ELIGE UN JUEGO";
-            tTMP.fontSize = 22;
+            tTMP.fontSize = 30;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -788,7 +788,7 @@ namespace DigitPark.Editor
             cntRT.offsetMax = Vector2.zero;
             var cntTMP = GetOrAdd<TextMeshProUGUI>(cnText);
             cntTMP.text = "Cancelar";
-            cntTMP.fontSize = 18;
+            cntTMP.fontSize = 30;
             cntTMP.color = TEXT_SECONDARY;
             cntTMP.alignment = TextAlignmentOptions.Center;
 
@@ -817,7 +817,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-15, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 20;
+            tTMP.fontSize = 30;
             tTMP.color = accent;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;

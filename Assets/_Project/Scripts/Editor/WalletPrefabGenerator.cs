@@ -186,7 +186,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
             dateTMP.text = "Fecha";
-            dateTMP.fontSize = 26;
+            dateTMP.fontSize = 30;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.alignment = TextAlignmentOptions.Left;
@@ -218,7 +218,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusTMP = statusObj.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "";
-            statusTMP.fontSize = 24;
+            statusTMP.fontSize = 30;
             statusTMP.color = TEXT_SECONDARY;
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Right;
@@ -293,63 +293,73 @@ namespace DigitPark.Editor
 
             // === Content Layout ===
             HorizontalLayoutGroup hlg = root.AddComponent<HorizontalLayoutGroup>();
-            hlg.padding = new RectOffset(20, 20, 15, 15);
-            hlg.spacing = 15;
+            hlg.padding = new RectOffset(15, 15, 10, 10);
+            hlg.spacing = 8;
             hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childForceExpandWidth = false;
-            hlg.childControlWidth = false;
             hlg.childForceExpandHeight = true;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
 
             // === Amount Section ===
             GameObject amountSection = CreateChild("AmountSection", root.transform);
             LayoutElement amountLE = amountSection.AddComponent<LayoutElement>();
-            amountLE.preferredWidth = 100;
+            amountLE.flexibleWidth = 1;
 
             VerticalLayoutGroup amountVLG = amountSection.AddComponent<VerticalLayoutGroup>();
             amountVLG.childAlignment = TextAnchor.MiddleLeft;
             amountVLG.childForceExpandHeight = false;
+            amountVLG.childForceExpandWidth = true;
             amountVLG.childControlHeight = false;
+            amountVLG.childControlWidth = true;
             amountVLG.spacing = 2;
 
             // Amount text
             GameObject amountObj = CreateChild("AmountText", amountSection.transform);
             LayoutElement amountTextLE = amountObj.AddComponent<LayoutElement>();
-            amountTextLE.preferredHeight = 35;
+            amountTextLE.preferredHeight = 50;
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$10.00";
-            amountTMP.fontSize = 28;
+            amountTMP.fontSize = 42;
             amountTMP.color = TEXT_WHITE;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Left;
+            amountTMP.enableAutoSizing = true;
+            amountTMP.fontSizeMin = 24;
+            amountTMP.fontSizeMax = 42;
+            amountTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Label "Depositar"
             GameObject labelObj = CreateChild("Label", amountSection.transform);
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
-            labelLE.preferredHeight = 18;
+            labelLE.preferredHeight = 22;
 
             TextMeshProUGUI labelTMP = labelObj.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Depositar";
-            labelTMP.fontSize = 12;
+            labelTMP.fontSize = 30;
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.alignment = TextAlignmentOptions.Left;
-
-            // === Spacer ===
-            GameObject spacer = CreateChild("Spacer", root.transform);
-            LayoutElement spacerLE = spacer.AddComponent<LayoutElement>();
-            spacerLE.flexibleWidth = 1;
+            labelTMP.enableAutoSizing = true;
+            labelTMP.fontSizeMin = 18;
+            labelTMP.fontSizeMax = 18;
 
             // === Bonus Text ===
             GameObject bonusObj = CreateChild("BonusText", root.transform);
             LayoutElement bonusLE = bonusObj.AddComponent<LayoutElement>();
-            bonusLE.preferredWidth = 120;
+            bonusLE.preferredWidth = 150;
+            bonusLE.flexibleWidth = 0;
 
             TextMeshProUGUI bonusTMP = bonusObj.AddComponent<TextMeshProUGUI>();
             bonusTMP.text = "+$0.50 BONUS";
-            bonusTMP.fontSize = 18;
+            bonusTMP.fontSize = 30;
             bonusTMP.color = GOLD;
             bonusTMP.fontStyle = FontStyles.Bold;
             bonusTMP.alignment = TextAlignmentOptions.Right;
+            bonusTMP.enableAutoSizing = true;
+            bonusTMP.fontSizeMin = 18;
+            bonusTMP.fontSizeMax = 27;
+            bonusTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // === Popular Badge (hidden by default) ===
             GameObject popularBadge = CreateChild("PopularBadge", root.transform);
@@ -357,7 +367,7 @@ namespace DigitPark.Editor
             badgeRT.anchorMin = new Vector2(1, 1);
             badgeRT.anchorMax = new Vector2(1, 1);
             badgeRT.pivot = new Vector2(1, 1);
-            badgeRT.sizeDelta = new Vector2(70, 22);
+            badgeRT.sizeDelta = new Vector2(110, 35);
             badgeRT.anchoredPosition = new Vector2(0, 0);
 
             Image badgeBg = popularBadge.AddComponent<Image>();
@@ -371,7 +381,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI badgeTMP = badgeText.AddComponent<TextMeshProUGUI>();
             badgeTMP.text = "POPULAR";
-            badgeTMP.fontSize = 10;
+            badgeTMP.fontSize = 30;
             badgeTMP.color = Color.black;
             badgeTMP.fontStyle = FontStyles.Bold;
             badgeTMP.alignment = TextAlignmentOptions.Center;
