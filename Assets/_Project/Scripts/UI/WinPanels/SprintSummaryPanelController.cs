@@ -100,6 +100,9 @@ namespace DigitPark.UI
                 rematchButton.onClick.AddListener(() => OnRematchClicked?.Invoke());
             if (playAgainButton != null)
                 playAgainButton.onClick.AddListener(() => OnPlayAgainClicked?.Invoke());
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav2 = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav2 != null) autoNav2.DisableAutoNavigation();
             if (backButton != null)
                 backButton.onClick.AddListener(() => OnBackClicked?.Invoke());
         }
@@ -356,7 +359,7 @@ namespace DigitPark.UI
                 col.transform.SetParent(row.transform, false);
                 col.AddComponent<RectTransform>();
                 var tmp = col.AddComponent<TextMeshProUGUI>();
-                tmp.fontSize = 20;
+                tmp.fontSize = FontSizes.Body;
                 tmp.color = Color.white;
                 tmp.alignment = TextAlignmentOptions.Center;
             }

@@ -239,6 +239,9 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             createAccountButton?.onClick.AddListener(OnCreateAccountClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackButtonClicked);
 
             // El ErrorPanelUI maneja su propio botón internamente

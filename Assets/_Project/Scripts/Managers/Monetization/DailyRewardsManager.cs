@@ -215,6 +215,9 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
             if (claimButton) claimButton.onClick.AddListener(OnClaimClicked);
             if (continueButton) continueButton.onClick.AddListener(OnContinueClicked);
@@ -369,7 +372,7 @@ namespace DigitPark.Managers
 
                     var labelText = labelObj.AddComponent<TMPro.TextMeshProUGUI>();
                     labelText.text = milestone.ToString();
-                    labelText.fontSize = 9;
+                    labelText.fontSize = FontSizes.Body;
                     labelText.fontStyle = TMPro.FontStyles.Bold;
                     labelText.alignment = TMPro.TextAlignmentOptions.Center;
 
@@ -388,7 +391,7 @@ namespace DigitPark.Managers
 
                         var rlText = rewardLabelObj.AddComponent<TMPro.TextMeshProUGUI>();
                         rlText.text = $"+{milestoneBonuses[mIdx]}";
-                        rlText.fontSize = 8;
+                        rlText.fontSize = FontSizes.Body;
                         rlText.color = new Color(0.4f, 0.8f, 1f); // GEM_COLOR
                         rlText.alignment = TMPro.TextAlignmentOptions.Center;
                         rlText.overflowMode = TMPro.TextOverflowModes.Overflow;
@@ -589,7 +592,7 @@ namespace DigitPark.Managers
 
             var dayLabelText = dayLabelObj.AddComponent<TextMeshProUGUI>();
             dayLabelText.text = L("dr_day", dayIndex + 1);
-            dayLabelText.fontSize = 11;
+            dayLabelText.fontSize = FontSizes.Body;
             dayLabelText.fontStyle = FontStyles.Bold;
             dayLabelText.alignment = TextAlignmentOptions.Center;
             dayLabelText.color = isToday ? CYAN_NEON : new Color(0.6f, 0.6f, 0.65f);
@@ -619,7 +622,7 @@ namespace DigitPark.Managers
 
             var amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = $"+{reward.amount}";
-            amountText.fontSize = 13;
+            amountText.fontSize = FontSizes.Body;
             amountText.fontStyle = FontStyles.Bold;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.color = isClaimed ? new Color(0.5f, 0.5f, 0.5f) : GetRewardTypeColor(reward.type);
@@ -648,7 +651,7 @@ namespace DigitPark.Managers
             {
                 statusText.text = "";
             }
-            statusText.fontSize = 11;
+            statusText.fontSize = FontSizes.Body;
             statusText.fontStyle = FontStyles.Bold;
             statusText.alignment = TextAlignmentOptions.Center;
 
@@ -692,7 +695,7 @@ namespace DigitPark.Managers
 
             var titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = L("dr_grand_prize");
-            titleText.fontSize = 16;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.color = isClaimed ? new Color(0.5f, 0.5f, 0.5f) : GOLD;
@@ -722,7 +725,7 @@ namespace DigitPark.Managers
 
             var detailText = detailObj.AddComponent<TextMeshProUGUI>();
             detailText.text = $"+{reward.amount} {GetRewardTypeName(reward.type)}";
-            detailText.fontSize = 18;
+            detailText.fontSize = FontSizes.Body;
             detailText.fontStyle = FontStyles.Bold;
             detailText.alignment = TextAlignmentOptions.Left;
             detailText.color = isClaimed ? new Color(0.5f, 0.5f, 0.5f) : GetRewardTypeColor(reward.type);
@@ -752,7 +755,7 @@ namespace DigitPark.Managers
                 statusText.text = L("dr_unlocks_in", daysUntil);
                 statusText.color = new Color(0.6f, 0.6f, 0.65f);
             }
-            statusText.fontSize = 12;
+            statusText.fontSize = FontSizes.Body;
             statusText.alignment = TextAlignmentOptions.Left;
 
             // Shimmer effect premium (solo si no reclamado)

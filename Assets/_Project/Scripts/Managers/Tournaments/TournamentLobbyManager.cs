@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Data;
 using DigitPark.Localization;
+using DigitPark.UI;
+using DigitPark.UI.Items;
+using DigitPark.Games;
 using DG.Tweening;
 using DigitPark.Animations;
 
@@ -13,7 +16,7 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager para la escena del lobby de torneo.
-    /// Muestra detalles del torneo, participantes y permite unirse/salir.
+    /// Muestra detalles del torneo, participantes, chat y permite unirse/salir.
     /// </summary>
     public class TournamentLobbyManager : MonoBehaviour
     {
@@ -25,41 +28,44 @@ namespace DigitPark.Managers
 
         [Header("UI - Tournament Info")]
         [SerializeField] private TextMeshProUGUI gameTypeText;
-        [SerializeField] private Image gameTypeIcon;
         [SerializeField] private TextMeshProUGUI entryFeeText;
         [SerializeField] private TextMeshProUGUI prizePoolText;
-        [SerializeField] private TextMeshProUGUI playersCountText;
-        [SerializeField] private Slider playersProgressBar;
-        [SerializeField] private TextMeshProUGUI startTimeText;
+        [SerializeField] private Image playersProgressBar;
+        [SerializeField] private TextMeshProUGUI playersProgressText;
         [SerializeField] private TextMeshProUGUI countdownText;
 
         [Header("UI - Rules")]
-        [SerializeField] private TextMeshProUGUI roundsText;
-        [SerializeField] private TextMeshProUGUI timeLimitText;
-        [SerializeField] private TextMeshProUGUI formatText;
+        [SerializeField] private TextMeshProUGUI attemptsRuleText;
+        [SerializeField] private TextMeshProUGUI timeLimitRuleText;
 
         [Header("UI - Prize Distribution")]
         [SerializeField] private Transform prizeDistributionContainer;
         [SerializeField] private GameObject prizeRowPrefab;
 
+        [Header("UI - Tabs")]
+        [SerializeField] private Button participantsTabButton;
+        [SerializeField] private Button chatTabButton;
+        [SerializeField] private GameObject participantsContent;
+        [SerializeField] private GameObject chatContent;
+        [SerializeField] private Image participantsTabIndicator;
+        [SerializeField] private Image chatTabIndicator;
+        [SerializeField] private TextMeshProUGUI chatBadgeText;
+
         [Header("UI - Participants")]
         [SerializeField] private Transform participantsContainer;
         [SerializeField] private GameObject participantItemPrefab;
         [SerializeField] private TextMeshProUGUI participantsHeaderText;
-        [SerializeField] private Button viewAllParticipantsButton;
 
         [Header("UI - Chat")]
-        [SerializeField] private GameObject chatPanel;
+        [SerializeField] private ScrollRect chatScrollRect;
         [SerializeField] private Transform chatMessagesContainer;
         [SerializeField] private TMP_InputField chatInput;
         [SerializeField] private Button sendChatButton;
-        [SerializeField] private ScrollRect chatScrollRect;
 
         [Header("UI - Actions")]
         [SerializeField] private Button joinButton;
         [SerializeField] private Button leaveButton;
         [SerializeField] private Button shareButton;
-        [SerializeField] private Button readyButton;
         [SerializeField] private TextMeshProUGUI joinButtonText;
 
         [Header("UI - Status")]
@@ -70,13 +76,19 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField] private float refreshInterval = 5f;
+        [SerializeField] private Sprite defaultAvatarSprite;
 
         // State
         private TournamentData currentTournament;
         private List<ParticipantData> participants = new List<ParticipantData>();
         private bool hasJoined = false;
-        private bool isReady = false;
         private bool isLoading = false;
+        private int currentTab = 0; // 0 = Participants, 1 = Chat
+        private int unreadChatCount = 0;
+
+        // Chat colors
+        private static readonly Color CHAT_COLOR_ME = new Color(0f, 1f, 1f);
+        private static readonly Color CHAT_COLOR_OTHER = new Color(0.8f, 0.8f, 0.8f);
 
         private void Start()
         {
@@ -103,26 +115,163 @@ namespace DigitPark.Managers
             ShowLoadingOverlay(false);
             if (startingOverlay) startingOverlay.SetActive(false);
             if (leaveButton) leaveButton.gameObject.SetActive(false);
-            if (readyButton) readyButton.gameObject.SetActive(false);
 
+            // Default to participants tab
+            SwitchToTab(0);
             UpdateActionButtons();
         }
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
             if (joinButton) joinButton.onClick.AddListener(OnJoinClicked);
             if (leaveButton) leaveButton.onClick.AddListener(OnLeaveClicked);
             if (shareButton) shareButton.onClick.AddListener(OnShareClicked);
-            if (readyButton) readyButton.onClick.AddListener(OnReadyClicked);
-            if (viewAllParticipantsButton) viewAllParticipantsButton.onClick.AddListener(OnViewAllParticipants);
             if (sendChatButton) sendChatButton.onClick.AddListener(OnSendChat);
+            if (participantsTabButton) participantsTabButton.onClick.AddListener(OnParticipantsTabClicked);
+            if (chatTabButton) chatTabButton.onClick.AddListener(OnChatTabClicked);
 
             if (chatInput)
             {
                 chatInput.onSubmit.AddListener(_ => OnSendChat());
             }
         }
+
+        // ── Tab Navigation ──
+
+        private void SwitchToTab(int tabIndex)
+        {
+            currentTab = tabIndex;
+
+            if (participantsContent) participantsContent.SetActive(tabIndex == 0);
+            if (chatContent) chatContent.SetActive(tabIndex == 1);
+
+            Color activeColor = new Color(0f, 1f, 1f);
+            Color inactiveColor = new Color(0.5f, 0.5f, 0.5f, 0.3f);
+
+            if (participantsTabIndicator) participantsTabIndicator.color = tabIndex == 0 ? activeColor : inactiveColor;
+            if (chatTabIndicator) chatTabIndicator.color = tabIndex == 1 ? activeColor : inactiveColor;
+
+            if (tabIndex == 1)
+            {
+                unreadChatCount = 0;
+                UpdateChatBadge(0);
+                ScrollChatToBottom();
+            }
+        }
+
+        private void OnParticipantsTabClicked()
+        {
+            SwitchToTab(0);
+        }
+
+        private void OnChatTabClicked()
+        {
+            SwitchToTab(1);
+        }
+
+        // ── Chat ──
+
+        private void OnSendChat()
+        {
+            if (chatInput == null || string.IsNullOrWhiteSpace(chatInput.text)) return;
+
+            string message = chatInput.text.Trim();
+            chatInput.text = "";
+
+            string sender = "You"; // In production: PlayerData.Instance.username
+            CreateChatMessage(sender, message, true);
+            SaveChatMessage(sender, message);
+            ScrollChatToBottom();
+
+            chatInput.ActivateInputField();
+        }
+
+        private void CreateChatMessage(string sender, string message, bool isMe)
+        {
+            if (chatMessagesContainer == null) return;
+
+            GameObject msgObj = new GameObject($"Msg_{chatMessagesContainer.childCount}");
+            msgObj.transform.SetParent(chatMessagesContainer, false);
+            var rt = msgObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0, 50);
+
+            var text = msgObj.AddComponent<TextMeshProUGUI>();
+            text.text = $"<b>[{sender}]</b> {message}";
+            text.fontSize = FontSizes.Body;
+            text.color = isMe ? CHAT_COLOR_ME : CHAT_COLOR_OTHER;
+            text.alignment = TextAlignmentOptions.Left;
+            text.enableWordWrapping = true;
+
+            var le = msgObj.AddComponent<LayoutElement>();
+            le.minHeight = 40;
+
+            // Badge for unread if on participants tab
+            if (currentTab != 1 && !isMe)
+            {
+                unreadChatCount++;
+                UpdateChatBadge(unreadChatCount);
+            }
+        }
+
+        private void UpdateChatBadge(int count)
+        {
+            if (chatBadgeText == null) return;
+
+            if (count <= 0)
+            {
+                chatBadgeText.transform.parent.gameObject.SetActive(false);
+            }
+            else
+            {
+                chatBadgeText.transform.parent.gameObject.SetActive(true);
+                chatBadgeText.text = count > 99 ? "99+" : count.ToString();
+            }
+        }
+
+        private void ScrollChatToBottom()
+        {
+            if (chatScrollRect == null) return;
+            Canvas.ForceUpdateCanvases();
+            chatScrollRect.verticalNormalizedPosition = 0f;
+        }
+
+        private void LoadChatHistory()
+        {
+            if (currentTournament == null) return;
+
+            string key = $"chat_{currentTournament.tournamentId}";
+            string json = PlayerPrefs.GetString(key, "");
+            if (string.IsNullOrEmpty(json)) return;
+
+            // Simple format: "sender|message\n"
+            string[] lines = json.Split('\n');
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrEmpty(line)) continue;
+                int sep = line.IndexOf('|');
+                if (sep < 0) continue;
+                string sender = line.Substring(0, sep);
+                string msg = line.Substring(sep + 1);
+                CreateChatMessage(sender, msg, sender == "You");
+            }
+        }
+
+        private void SaveChatMessage(string sender, string message)
+        {
+            if (currentTournament == null) return;
+
+            string key = $"chat_{currentTournament.tournamentId}";
+            string existing = PlayerPrefs.GetString(key, "");
+            existing += $"{sender}|{message}\n";
+            PlayerPrefs.SetString(key, existing);
+            PlayerPrefs.Save();
+        }
+
+        // ── Tournament Loading ──
 
         private void LoadTournamentFromParams()
         {
@@ -147,6 +296,7 @@ namespace DigitPark.Managers
             SceneNavigator.Instance?.ClearPendingParams();
             UpdateUI();
             LoadParticipants();
+            LoadChatHistory();
         }
 
         private void LoadTournamentById(string id)
@@ -165,6 +315,7 @@ namespace DigitPark.Managers
             ShowLoadingOverlay(false);
             UpdateUI();
             LoadParticipants();
+            LoadChatHistory();
         }
 
         private TournamentData CreateMockTournament()
@@ -179,9 +330,12 @@ namespace DigitPark.Managers
                 maxParticipants = 32,
                 status = TournamentStatus.Scheduled,
                 startTime = DateTime.Now.AddMinutes(30),
-                endTime = DateTime.Now.AddHours(2)
+                endTime = DateTime.Now.AddHours(2),
+                rules = new TournamentRules { maxAttempts = 3 }
             };
         }
+
+        // ── UI Updates ──
 
         private void UpdateUI()
         {
@@ -202,21 +356,35 @@ namespace DigitPark.Managers
             if (entryFeeText) entryFeeText.text = currentTournament.entryFee == 0 ? L("tournament_free") : $"${currentTournament.entryFee}";
             if (prizePoolText) prizePoolText.text = $"${currentTournament.totalPrizePool}";
 
-            // Players
-            if (playersCountText) playersCountText.text = $"{currentTournament.currentParticipants}/{currentTournament.maxParticipants}";
+            // Players progress
+            if (playersProgressText)
+            {
+                playersProgressText.text = L("tournament_players_progress",
+                    currentTournament.currentParticipants, currentTournament.maxParticipants);
+            }
             if (playersProgressBar)
             {
-                playersProgressBar.maxValue = currentTournament.maxParticipants;
-                playersProgressBar.value = currentTournament.currentParticipants;
+                float fill = currentTournament.maxParticipants > 0
+                    ? (float)currentTournament.currentParticipants / currentTournament.maxParticipants
+                    : 0f;
+                playersProgressBar.fillAmount = fill;
             }
 
             // Time
             UpdateTimeDisplay();
 
             // Rules
-            if (roundsText) roundsText.text = L("tournament_best_of_3");
-            if (timeLimitText) timeLimitText.text = L("tournament_60_seconds");
-            if (formatText) formatText.text = L("tournament_elimination");
+            if (attemptsRuleText)
+            {
+                int attempts = currentTournament.rules?.maxAttempts ?? -1;
+                attemptsRuleText.text = attempts < 0
+                    ? L("tournament_rules_attempts", "∞")
+                    : L("tournament_rules_attempts", attempts);
+            }
+            if (timeLimitRuleText)
+            {
+                timeLimitRuleText.text = L("tournament_rules_time_limit", 60);
+            }
 
             // Prize distribution
             UpdatePrizeDistribution();
@@ -264,11 +432,6 @@ namespace DigitPark.Managers
             if (currentTournament == null) return;
 
             TimeSpan timeUntilStart = currentTournament.startTime - DateTime.Now;
-
-            if (startTimeText)
-            {
-                startTimeText.text = currentTournament.startTime.ToString("HH:mm dd/MM");
-            }
 
             if (countdownText)
             {
@@ -372,9 +535,11 @@ namespace DigitPark.Managers
 
                 var text = row.AddComponent<TextMeshProUGUI>();
                 text.text = $"{place}: ${prize} ({percent}%)";
-                text.fontSize = 14;
+                text.fontSize = FontSizes.Body;
             }
         }
+
+        // ── Participants ──
 
         private void LoadParticipants()
         {
@@ -389,7 +554,8 @@ namespace DigitPark.Managers
                     id = Guid.NewGuid().ToString(),
                     username = $"Player{i + 1}",
                     avatarUrl = "",
-                    isReady = UnityEngine.Random.value > 0.5f
+                    rank = i + 1,
+                    bestTime = UnityEngine.Random.Range(8f, 45f)
                 });
             }
 
@@ -420,9 +586,6 @@ namespace DigitPark.Managers
             AnimateParticipantsListEntrance();
         }
 
-        /// <summary>
-        /// Anima la entrada de los items de participantes con efecto staggered
-        /// </summary>
         private void AnimateParticipantsListEntrance()
         {
             if (participantsContainer == null || participantsContainer.childCount == 0) return;
@@ -448,20 +611,114 @@ namespace DigitPark.Managers
             if (participantItemPrefab != null)
             {
                 item = Instantiate(participantItemPrefab, participantsContainer);
+
+                var itemUI = item.GetComponent<ParticipantItemUI>();
+                if (itemUI != null)
+                {
+                    var displayData = new ParticipantDisplayData
+                    {
+                        userId = participant.id,
+                        username = participant.username,
+                        avatar = defaultAvatarSprite, // Default avatar, replaced if user has photo
+                        rank = participant.rank,
+                        bestTime = participant.bestTime,
+                        showRank = true,
+                        showScore = false,
+                        showBestTime = true,
+                        isOnline = true,
+                        isSelf = false
+                    };
+                    itemUI.Setup(displayData);
+                }
             }
             else
             {
+                // Fallback: create simple text item when prefab is not assigned
                 item = new GameObject(participant.username);
                 item.transform.SetParent(participantsContainer, false);
                 var rt = item.AddComponent<RectTransform>();
-                rt.sizeDelta = new Vector2(200, 40);
+                rt.sizeDelta = new Vector2(0, 70);
 
-                var text = item.AddComponent<TextMeshProUGUI>();
-                text.text = participant.username + (participant.isReady ? " [OK]" : "");
-                text.fontSize = 14;
-                text.color = participant.isReady ? new Color(0f, 1f, 0.5f) : Color.white;
+                var le = item.AddComponent<LayoutElement>();
+                le.minHeight = 70;
+
+                var bg = item.AddComponent<Image>();
+                bg.color = participant.rank <= 3
+                    ? new Color(0.06f, 0.1f, 0.15f, 1f)
+                    : new Color(0.04f, 0.06f, 0.1f, 1f);
+
+                var hlg = item.AddComponent<HorizontalLayoutGroup>();
+                hlg.spacing = 8;
+                hlg.padding = new RectOffset(16, 16, 6, 6);
+                hlg.childAlignment = TextAnchor.MiddleCenter;
+                hlg.childControlWidth = true;
+                hlg.childControlHeight = true;
+                hlg.childForceExpandWidth = false;
+
+                // Rank
+                var rankObj = new GameObject("Rank");
+                rankObj.transform.SetParent(item.transform, false);
+                var rankText = rankObj.AddComponent<TextMeshProUGUI>();
+                rankText.text = $"#{participant.rank}";
+                rankText.fontSize = FontSizes.LabelLarge;
+                rankText.fontStyle = FontStyles.Bold;
+                rankText.color = new Color(0f, 1f, 1f);
+                rankText.alignment = TextAlignmentOptions.Center;
+                var rankLE = rankObj.AddComponent<LayoutElement>();
+                rankLE.minWidth = 50;
+                rankLE.preferredWidth = 50;
+
+                // Avatar
+                var avatarObj = new GameObject("Avatar");
+                avatarObj.transform.SetParent(item.transform, false);
+                var avatarImg = avatarObj.AddComponent<Image>();
+                avatarImg.sprite = defaultAvatarSprite;
+                avatarImg.preserveAspect = true;
+                var avatarLE = avatarObj.AddComponent<LayoutElement>();
+                avatarLE.minWidth = 44;
+                avatarLE.minHeight = 44;
+                avatarLE.preferredWidth = 44;
+                avatarLE.preferredHeight = 44;
+
+                // Name
+                var nameObj = new GameObject("PlayerName");
+                nameObj.transform.SetParent(item.transform, false);
+                var nameText = nameObj.AddComponent<TextMeshProUGUI>();
+                nameText.text = participant.username;
+                nameText.fontSize = FontSizes.Body;
+                nameText.fontStyle = FontStyles.Bold;
+                nameText.color = Color.white;
+                nameText.alignment = TextAlignmentOptions.Left;
+                var nameLE = nameObj.AddComponent<LayoutElement>();
+                nameLE.flexibleWidth = 1;
+
+                // Time
+                var timeObj = new GameObject("BestTime");
+                timeObj.transform.SetParent(item.transform, false);
+                var timeText = timeObj.AddComponent<TextMeshProUGUI>();
+                timeText.text = participant.bestTime > 0 ? FormatTime(participant.bestTime) : "-";
+                timeText.fontSize = FontSizes.LabelLarge;
+                timeText.fontStyle = FontStyles.Bold;
+                timeText.color = new Color(0f, 1f, 1f);
+                timeText.alignment = TextAlignmentOptions.Right;
+                var timeLE = timeObj.AddComponent<LayoutElement>();
+                timeLE.minWidth = 120;
+                timeLE.preferredWidth = 120;
             }
         }
+
+        private string FormatTime(float seconds)
+        {
+            if (seconds >= 60)
+            {
+                int mins = (int)(seconds / 60);
+                float secs = seconds % 60;
+                return $"{mins}:{secs:00.00}";
+            }
+            return $"{seconds:0.00}s";
+        }
+
+        // ── Actions ──
 
         private void UpdateActionButtons()
         {
@@ -480,12 +737,6 @@ namespace DigitPark.Managers
             }
 
             if (leaveButton) leaveButton.gameObject.SetActive(hasJoined);
-            if (readyButton)
-            {
-                readyButton.gameObject.SetActive(hasJoined);
-                var readyText = readyButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (readyText) readyText.text = isReady ? L("tournament_ready") : L("tournament_mark_ready");
-            }
         }
 
         private void RefreshTournament()
@@ -530,18 +781,10 @@ namespace DigitPark.Managers
             if (isLoading || !hasJoined) return;
 
             hasJoined = false;
-            isReady = false;
             currentTournament.currentParticipants--;
             UpdateUI();
             UpdateActionButtons();
             ShowStatus(L("tournament_left"));
-        }
-
-        private void OnReadyClicked()
-        {
-            isReady = !isReady;
-            UpdateActionButtons();
-            ShowStatus(isReady ? L("tournament_you_ready") : L("tournament_not_ready"));
         }
 
         private void OnShareClicked()
@@ -551,34 +794,42 @@ namespace DigitPark.Managers
             ShowStatus(L("tournament_link_copied"));
         }
 
-        private void OnViewAllParticipants()
-        {
-            Debug.Log("[TournamentLobby] View all participants");
-            // Could open a modal with full list
-        }
-
-        private void OnSendChat()
-        {
-            if (chatInput == null || string.IsNullOrWhiteSpace(chatInput.text)) return;
-
-            string message = chatInput.text;
-            chatInput.text = "";
-
-            // Add message to chat (would send to server in production)
-            Debug.Log($"[TournamentLobby] Chat: {message}");
-        }
+        // ── Tournament Start ──
 
         private void ShowStartingOverlay(int seconds)
         {
             if (startingOverlay) startingOverlay.SetActive(true);
-            if (startingCountdownText) startingCountdownText.text = seconds.ToString();
+            if (startingCountdownText)
+                startingCountdownText.text = L("tournament_starting_in", seconds);
         }
 
         private void StartTournament()
         {
-            Debug.Log("[TournamentLobby] Tournament starting!");
-            // Would navigate to game scene with tournament context
+            if (currentTournament == null) return;
+
+            // Parse game type from category string
+            GameType gameType = GameType.MemoryPairs;
+            switch (currentTournament.category)
+            {
+                case "Digit Rush": gameType = GameType.DigitRush; break;
+                case "Memory Pairs": gameType = GameType.MemoryPairs; break;
+                case "Quick Math": gameType = GameType.QuickMath; break;
+                case "Flash Tap": gameType = GameType.FlashTap; break;
+                case "Odd One Out": gameType = GameType.OddOneOut; break;
+            }
+
+            if (GameSessionManager.Instance != null)
+            {
+                GameSessionManager.Instance.StartTournamentSession(
+                    gameType,
+                    currentTournament.tournamentId,
+                    Guid.NewGuid().ToString(),
+                    "", "" // no opponent in leaderboard tournaments
+                );
+            }
         }
+
+        // ── Status & Overlays ──
 
         private void ShowStatus(string message)
         {
@@ -636,7 +887,7 @@ namespace DigitPark.Managers
         public string id;
         public string username;
         public string avatarUrl;
-        public bool isReady;
         public int rank;
+        public float bestTime;
     }
 }

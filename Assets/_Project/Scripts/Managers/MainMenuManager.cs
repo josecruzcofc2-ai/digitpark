@@ -342,7 +342,7 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             // Cargar la escena de selección de modo
-            SceneManager.LoadScene("PlayModeSelection");
+            SceneNavigator.Instance?.NavigateTo("PlayModeSelection");
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            SceneManager.LoadScene("Scores");
+            SceneNavigator.Instance?.NavigateTo("Scores");
         }
 
         /// <summary>
@@ -377,7 +377,7 @@ namespace DigitPark.Managers
             if (!DigitPark.Services.ServiceLocator.Exists)
             {
                 Debug.Log("[MainMenu] ServiceLocator no disponible - navegando a AgeVerification");
-                SceneManager.LoadScene("AgeVerification");
+                SceneNavigator.Instance?.NavigateTo("AgeVerification");
                 return;
             }
             var kycService = DigitPark.Services.ServiceLocator.KYC;
@@ -387,7 +387,7 @@ namespace DigitPark.Managers
             {
                 // Usuario NO verificado - ir a verificacion de edad primero
                 Debug.Log("[MainMenu] Usuario no verificado - navegando a AgeVerification");
-                SceneManager.LoadScene("AgeVerification");
+                SceneNavigator.Instance?.NavigateTo("AgeVerification");
             }
             else
             {
@@ -406,7 +406,7 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            SceneManager.LoadScene("Settings");
+            SceneNavigator.Instance?.NavigateTo("Settings");
         }
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             // TODO: Abrir panel de perfil o navegar a escena Profile
-            SceneManager.LoadScene("Profile");
+            SceneNavigator.Instance?.NavigateTo("Profile");
         }
 
         /// <summary>
@@ -432,7 +432,7 @@ namespace DigitPark.Managers
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
             // TODO: Abrir panel de búsqueda de jugadores
-            SceneManager.LoadScene("SearchPlayers");
+            SceneNavigator.Instance?.NavigateTo("SearchPlayers");
         }
 
         /// <summary>
@@ -447,7 +447,7 @@ namespace DigitPark.Managers
 
             // Navegar a la escena de Notificaciones
             PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
-            SceneManager.LoadScene("Notifications");
+            SceneNavigator.Instance?.NavigateTo("Notifications");
         }
 
         /// <summary>
@@ -456,25 +456,25 @@ namespace DigitPark.Managers
         private void OnShopButtonClicked()
         {
             Debug.Log("[MainMenu] Navegando a Shop");
-            SceneManager.LoadScene("Shop");
+            SceneNavigator.Instance?.NavigateTo("Shop");
         }
 
         private void OnAchievementsButtonClicked()
         {
             Debug.Log("[MainMenu] Navegando a Achievements");
-            SceneManager.LoadScene("Achievements");
+            SceneNavigator.Instance?.NavigateTo("Achievements");
         }
 
         private void OnDailyMissionsButtonClicked()
         {
             Debug.Log("[MainMenu] Navegando a DailyMissions");
-            SceneManager.LoadScene("DailyMissions");
+            SceneNavigator.Instance?.NavigateTo("DailyMissions");
         }
 
         private void OnDailyRewardsButtonClicked()
         {
             Debug.Log("[MainMenu] Navegando a DailyRewards");
-            SceneManager.LoadScene("DailyRewards");
+            SceneNavigator.Instance?.NavigateTo("DailyRewards");
         }
 
         private void OnPremiumButtonClicked()

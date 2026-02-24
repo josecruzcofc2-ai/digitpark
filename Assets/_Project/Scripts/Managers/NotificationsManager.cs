@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DG.Tweening;
+using DigitPark.UI;
 
 namespace DigitPark.Managers
 {
@@ -98,6 +99,9 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackClicked);
 
             tabAll?.onClick.AddListener(() => SwitchTab(NotificationCategory.All));
@@ -165,7 +169,7 @@ namespace DigitPark.Managers
 
             var tmp = separator.AddComponent<TextMeshProUGUI>();
             tmp.text = $"— {groupName} —";
-            tmp.fontSize = 14;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

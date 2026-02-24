@@ -6,6 +6,7 @@ using TMPro;
 using DG.Tweening;
 using DigitPark.Managers;
 using DigitPark.Localization;
+using DigitPark.Monetization;
 
 namespace DigitPark.Games
 {
@@ -114,7 +115,9 @@ namespace DigitPark.Games
             if (cognitiveSprintButton != null)
                 cognitiveSprintButton.onClick.AddListener(OpenCognitiveSprintPanel);
 
-            // Back
+            // Back - disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton != null)
                 backButton.onClick.AddListener(GoBack);
         }
@@ -397,7 +400,7 @@ namespace DigitPark.Games
         /// </summary>
         private void GoBack()
         {
-            SceneManager.LoadScene("MainMenu");
+            SceneNavigator.Instance?.GoBack();
         }
 
         /// <summary>

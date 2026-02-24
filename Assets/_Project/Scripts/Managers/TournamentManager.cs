@@ -11,6 +11,8 @@ using DigitPark.UI.Panels;
 using DigitPark.UI.Items;
 using DG.Tweening;
 using DigitPark.Animations;
+using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Managers
 {
@@ -209,7 +211,9 @@ namespace DigitPark.Managers
             confirmButton?.onClick.AddListener(OnConfirmClicked);
             cancelButton?.onClick.AddListener(HideConfirmPopup);
 
-            // Navigation
+            // Navigation - disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackButtonClicked);
 
             // Leaderboard Navigation
@@ -866,7 +870,7 @@ namespace DigitPark.Managers
 
             // Participantes
             TextMeshProUGUI participantsText = CreateItemText(itemObj.transform, "ParticipantsText",
-                $"{tournament.currentParticipants}/{tournament.maxParticipants}", 24, new Color(1f, 0.84f, 0f));
+                $"{tournament.currentParticipants}/{tournament.maxParticipants}", (int)FontSizes.Body, new Color(1f, 0.84f, 0f));
             RectTransform participantsRT = participantsText.GetComponent<RectTransform>();
             participantsRT.anchorMin = new Vector2(0, 0);
             participantsRT.anchorMax = new Vector2(0.15f, 1);
@@ -879,7 +883,7 @@ namespace DigitPark.Managers
 
             // Creador
             TextMeshProUGUI creatorText = CreateItemText(itemObj.transform, "CreatorText",
-                tournament.creatorName, 22, Color.white);
+                tournament.creatorName, (int)FontSizes.Body, Color.white);
             RectTransform creatorRT = creatorText.GetComponent<RectTransform>();
             creatorRT.anchorMin = new Vector2(0.15f, 0);
             creatorRT.anchorMax = new Vector2(0.70f, 1);
@@ -892,7 +896,7 @@ namespace DigitPark.Managers
             // Tiempo
             string timeString = FormatTimeRemaining(tournament.GetTimeRemaining());
             TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText",
-                timeString, 22, new Color(0f, 1f, 0.53f));
+                timeString, (int)FontSizes.Body, new Color(0f, 1f, 0.53f));
             RectTransform timeRT = timeText.GetComponent<RectTransform>();
             timeRT.anchorMin = new Vector2(0.70f, 0);
             timeRT.anchorMax = new Vector2(1f, 1);
@@ -1576,7 +1580,7 @@ namespace DigitPark.Managers
                 ? AutoLocalizer.Get("no_active_tournaments")
                 : AutoLocalizer.Get("not_in_tournament");
             text.alignment = TextAnchor.MiddleCenter;
-            text.fontSize = 24;
+            text.fontSize = (int)FontSizes.Body;
             text.color = Color.gray;
 
             // Animated fade-in for empty state
@@ -1791,7 +1795,7 @@ namespace DigitPark.Managers
 
             // Texto del título
             TextMeshProUGUI titleText = CreateItemText(titleObj.transform, "TitleText",
-                tournament.name, 32, Color.white);
+                tournament.name, (int)FontSizes.BodyLarge, Color.white);
             RectTransform titleTextRT = titleText.GetComponent<RectTransform>();
             titleTextRT.anchorMin = new Vector2(0, 0.5f);
             titleTextRT.anchorMax = new Vector2(1, 1);
@@ -1807,7 +1811,7 @@ namespace DigitPark.Managers
             string timeRemainingLabel = AutoLocalizer.Get("time_remaining");
             TextMeshProUGUI infoText = CreateItemText(titleObj.transform, "InfoText",
                 $"{participantsLabel}: {tournament.currentParticipants}/{tournament.maxParticipants} | {timeRemainingLabel} {timeRemaining}",
-                20, new Color(0.8f, 0.8f, 0.8f));
+                (int)FontSizes.Body, new Color(0.8f, 0.8f, 0.8f));
             RectTransform infoTextRT = infoText.GetComponent<RectTransform>();
             infoTextRT.anchorMin = new Vector2(0, 0);
             infoTextRT.anchorMax = new Vector2(1, 0.5f);
@@ -1862,7 +1866,7 @@ namespace DigitPark.Managers
                 posColor = new Color(1f, 0.84f, 0f); // Amarillo
 
             // 1. POSICIÓN (izquierda) - 15% del ancho
-            TextMeshProUGUI posText = CreateItemText(itemObj.transform, "PositionText", $"{position}", 28, posColor);
+            TextMeshProUGUI posText = CreateItemText(itemObj.transform, "PositionText", $"{position}", (int)FontSizes.Body, posColor);
             RectTransform posRT = posText.GetComponent<RectTransform>();
             posRT.anchorMin = new Vector2(0, 0);
             posRT.anchorMax = new Vector2(0.15f, 1);
@@ -1875,7 +1879,7 @@ namespace DigitPark.Managers
             CreateLeaderboardVerticalDivider(itemObj.transform, 0.15f);
 
             // 2. USERNAME (centro) - del 15% al 70%
-            TextMeshProUGUI nameText = CreateItemText(itemObj.transform, "NameText", participant.username, 22, Color.white);
+            TextMeshProUGUI nameText = CreateItemText(itemObj.transform, "NameText", participant.username, (int)FontSizes.Body, Color.white);
             RectTransform nameRT = nameText.GetComponent<RectTransform>();
             nameRT.anchorMin = new Vector2(0.15f, 0);
             nameRT.anchorMax = new Vector2(0.70f, 1);
@@ -1890,7 +1894,7 @@ namespace DigitPark.Managers
             string timeString = participant.bestTime == float.MaxValue ?
                 AutoLocalizer.Get("no_time") : $"{participant.bestTime:F3}s";
 
-            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText", timeString, 22, new Color(0f, 1f, 0.53f));
+            TextMeshProUGUI timeText = CreateItemText(itemObj.transform, "TimeText", timeString, (int)FontSizes.Body, new Color(0f, 1f, 0.53f));
             RectTransform timeRT = timeText.GetComponent<RectTransform>();
             timeRT.anchorMin = new Vector2(0.70f, 0);
             timeRT.anchorMax = new Vector2(1f, 1);
@@ -1959,8 +1963,8 @@ namespace DigitPark.Managers
         /// </summary>
         private void OnBackButtonClicked()
         {
-            Debug.Log("[Tournament] Volviendo al menú principal");
-            SceneManager.LoadScene("MainMenu");
+            Debug.Log("[Tournament] Volviendo atrás");
+            SceneNavigator.Instance?.GoBack();
         }
 
         /// <summary>

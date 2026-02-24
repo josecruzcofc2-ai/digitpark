@@ -70,6 +70,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button claimRewardButton;
         [SerializeField] private TextMeshProUGUI claimButtonText;
         [SerializeField] private Button closeDetailButton;
+        [SerializeField] private Button cancelButton;
         [SerializeField] private ParticleSystem detailParticles;
 
         [Header("Reward Celebration")]
@@ -124,6 +125,18 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
+            // Kill all tracked tweens
+            _emptyIconFloatTween?.Kill();
+
+            // Kill tweens on all spawned cards
+            foreach (var card in spawnedCards)
+            {
+                if (card != null)
+                {
+                    card.transform.DOKill(true);
+                }
+            }
+
             // Unsubscribe from Service events to avoid memory leaks
             var service = AchievementService.Instance;
             if (service != null)
@@ -206,11 +219,14 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
-            // Back button
+            // Back button - disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
 
             // Detail panel
             if (closeDetailButton) closeDetailButton.onClick.AddListener(CloseDetailPanel);
+            if (cancelButton) cancelButton.onClick.AddListener(CloseDetailPanel);
             if (detailBlocker) detailBlocker.GetComponent<Button>()?.onClick.AddListener(CloseDetailPanel);
             if (claimRewardButton) claimRewardButton.onClick.AddListener(ClaimReward);
 
@@ -298,8 +314,7 @@ namespace DigitPark.Managers
 
             if (completionText)
             {
-                int percentage = total > 0 ? (completed * 100 / total) : 0;
-                completionText.text = $"{completed}/{total} ({percentage}%)";
+                completionText.text = $"{completed}/{total}";
             }
 
             if (overallProgressBar)
@@ -497,6 +512,9 @@ namespace DigitPark.Managers
                 if (card != null)
                 {
                     card.OnCardClicked -= OnTrophyCardClicked;
+                    // Kill all DOTween animations on this card before destroying
+                    card.gameObject.transform.DOKill(true);
+                    card.transform.DOKill(true);
                     Destroy(card.gameObject);
                 }
             }
@@ -507,10 +525,14 @@ namespace DigitPark.Managers
             {
                 for (int i = showcaseContainer.childCount - 1; i >= 0; i--)
                 {
-                    Destroy(showcaseContainer.GetChild(i).gameObject);
+                    var child = showcaseContainer.GetChild(i);
+                    child.DOKill(true);
+                    Destroy(child.gameObject);
                 }
             }
         }
+
+        private Tween _emptyIconFloatTween;
 
         private void ShowEmptyState()
         {
@@ -537,9 +559,10 @@ namespace DigitPark.Managers
                 var icon = emptyStateContainer.transform.Find("Icon");
                 if (icon != null)
                 {
+                    icon.DOKill();
                     icon.localScale = Vector3.zero;
                     icon.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
-                    icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
+                    _emptyIconFloatTween = icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
                         .SetDelay(0.4f);
@@ -551,7 +574,11 @@ namespace DigitPark.Managers
         {
             if (emptyStateContainer)
             {
-                // Kill any running tweens on the icon to prevent leaks
+                // Kill tracked infinite tween
+                _emptyIconFloatTween?.Kill();
+                _emptyIconFloatTween = null;
+
+                // Kill any remaining tweens on the icon
                 var icon = emptyStateContainer.transform.Find("Icon");
                 if (icon != null) icon.DOKill();
 
@@ -602,8 +629,14 @@ namespace DigitPark.Managers
 
             if (detailProgressBar)
             {
-                detailProgressBar.maxValue = data.targetProgress;
-                detailProgressBar.value = data.currentProgress;
+                // Hide progress bar when achievement is completed
+                detailProgressBar.gameObject.SetActive(!data.isCompleted);
+
+                if (!data.isCompleted)
+                {
+                    detailProgressBar.maxValue = data.targetProgress;
+                    detailProgressBar.value = data.currentProgress;
+                }
             }
 
             if (detailProgressText)

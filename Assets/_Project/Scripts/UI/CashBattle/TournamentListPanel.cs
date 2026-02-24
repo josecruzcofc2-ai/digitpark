@@ -65,6 +65,9 @@ namespace DigitPark.UI.CashBattle
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButtonGold prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButtonGold>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(() => OnBackClicked?.Invoke());
             refreshButton?.onClick.AddListener(LoadTournaments);
             gameFilterDropdown?.onValueChanged.AddListener(_ => ApplyFilters());
@@ -506,19 +509,19 @@ namespace DigitPark.UI.CashBattle
             infoLayout.childForceExpandHeight = false;
 
             // Name
-            CreateLabel(infoContainer.transform, "Name", "Tournament Name", 32, true, new Color(1f, 0.84f, 0f));
+            CreateLabel(infoContainer.transform, "Name", "Tournament Name", (int)FontSizes.BodyLarge, true, new Color(1f, 0.84f, 0f));
 
             // Game type
-            CreateLabel(infoContainer.transform, "GameType", "Game Type", 24, true, new Color(0f, 0.9f, 1f));
+            CreateLabel(infoContainer.transform, "GameType", "Game Type", (int)FontSizes.Body, true, new Color(0f, 0.9f, 1f));
 
             // Prize pool
-            CreateLabel(infoContainer.transform, "PrizePool", "Prize: $0", 28, true, new Color(0.3f, 1f, 0.5f));
+            CreateLabel(infoContainer.transform, "PrizePool", "Prize: $0", (int)FontSizes.Body, true, new Color(0.3f, 1f, 0.5f));
 
             // Entry fee
-            CreateLabel(infoContainer.transform, "EntryFee", "Entry: $0", 22, true, Color.white);
+            CreateLabel(infoContainer.transform, "EntryFee", "Entry: $0", (int)FontSizes.Body, true, Color.white);
 
             // Participants
-            CreateLabel(infoContainer.transform, "Participants", "0/0 jugadores", 20, false, new Color(0.7f, 0.7f, 0.7f));
+            CreateLabel(infoContainer.transform, "Participants", "0/0 jugadores", (int)FontSizes.Body, false, new Color(0.7f, 0.7f, 0.7f));
 
             // Join button
             GameObject joinBtn = new GameObject("JoinButton");
@@ -549,7 +552,7 @@ namespace DigitPark.UI.CashBattle
 
             TextMeshProUGUI joinText = joinTextObj.AddComponent<TextMeshProUGUI>();
             joinText.text = AutoLocalizer.Get("tournament_join");
-            joinText.fontSize = 28;
+            joinText.fontSize = FontSizes.Body;
             joinText.color = new Color(0.08f, 0.06f, 0.12f);
             joinText.alignment = TextAlignmentOptions.Center;
             joinText.fontStyle = FontStyles.Bold;

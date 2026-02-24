@@ -127,6 +127,9 @@ namespace DigitPark.Monetization.Betting
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = _backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             _backButton?.onClick.AddListener(OnCancelClicked);
 
             _freeBetButton?.onClick.AddListener(() => SelectPresetBet(_freeBetButton, 0, BetCurrencyType.None));

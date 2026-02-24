@@ -408,6 +408,9 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
             if (closeDetailButton) closeDetailButton.onClick.AddListener(CloseDetail);
             if (claimRewardButton) claimRewardButton.onClick.AddListener(ClaimMissionReward);
@@ -640,7 +643,7 @@ namespace DigitPark.Managers
             titleLE.preferredHeight = 28;
             var emptyTitle = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
             emptyTitle.text = L("ms_no_missions");
-            emptyTitle.fontSize = 18;
+            emptyTitle.fontSize = FontSizes.AutoMinTiny;
             emptyTitle.fontStyle = TMPro.FontStyles.Bold;
             emptyTitle.color = new Color(0.6f, 0.6f, 0.65f);
             emptyTitle.alignment = TMPro.TextAlignmentOptions.Center;
@@ -651,7 +654,7 @@ namespace DigitPark.Managers
             subLE.preferredHeight = 22;
             var subText = subObj.AddComponent<TMPro.TextMeshProUGUI>();
             subText.text = L("ms_refresh_in", UIPolish.FormatTimerHHMMSS(0, 0, 0));
-            subText.fontSize = 13;
+            subText.fontSize = FontSizes.DebugText;
             subText.color = new Color(0.4f, 0.4f, 0.45f);
             subText.alignment = TMPro.TextAlignmentOptions.Center;
 
@@ -854,7 +857,7 @@ namespace DigitPark.Managers
 
             var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = L(mission.definition.titleLocKey);
-            titleTmp.fontSize = 15;
+            titleTmp.fontSize = FontSizes.DebugText;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = mission.isClaimed ? new Color(0.45f, 0.45f, 0.45f) : Color.white;
 
@@ -869,7 +872,7 @@ namespace DigitPark.Managers
 
             var descText = descObj.AddComponent<TextMeshProUGUI>();
             descText.text = L(mission.definition.descriptionLocKey);
-            descText.fontSize = 11;
+            descText.fontSize = FontSizes.DebugText;
             descText.color = new Color(0.6f, 0.6f, 0.65f);
 
             // Progress text
@@ -897,7 +900,7 @@ namespace DigitPark.Managers
                 progressTmp.text = $"{mission.currentProgress}/{mission.definition.targetAmount}";
                 progressTmp.color = new Color(0.55f, 0.55f, 0.6f);
             }
-            progressTmp.fontSize = 11;
+            progressTmp.fontSize = FontSizes.DebugText;
             progressTmp.alignment = TextAlignmentOptions.Left;
 
             // Reward
@@ -911,7 +914,7 @@ namespace DigitPark.Managers
 
             var rewardAmountTmp = rewardAmountObj.AddComponent<TextMeshProUGUI>();
             rewardAmountTmp.text = $"+{mission.definition.rewardAmount}";
-            rewardAmountTmp.fontSize = 14;
+            rewardAmountTmp.fontSize = FontSizes.DebugText;
             rewardAmountTmp.fontStyle = FontStyles.Bold;
             rewardAmountTmp.alignment = TextAlignmentOptions.Center;
             rewardAmountTmp.color = mission.isClaimed

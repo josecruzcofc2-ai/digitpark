@@ -46,6 +46,7 @@ namespace DigitPark.Managers
         [Header("UI - Rules")]
         [SerializeField] private TMP_Dropdown roundsDropdown;
         [SerializeField] private TMP_Dropdown timeLimitDropdown;
+        [SerializeField] private TMP_Dropdown maxAttemptsDropdown;
         [SerializeField] private Toggle allowSpectatorsToggle;
         [SerializeField] private Toggle privateToggle;
         [SerializeField] private TMP_InputField privateCodeInput;
@@ -79,6 +80,7 @@ namespace DigitPark.Managers
         // Entry fee options
         private readonly decimal[] entryFeeOptions = { 0, 1, 2, 5, 10, 25, 50, 100 };
         private readonly int[] maxPlayersOptions = { 8, 16, 32, 64, 128 };
+        private readonly int[] maxAttemptsOptions = { 1, 2, 3, 5, 10 };
 
         private void Start()
         {
@@ -104,6 +106,9 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
             if (createButton) createButton.onClick.AddListener(OnCreateClicked);
             if (previewButton) previewButton.onClick.AddListener(TogglePreview);
@@ -118,6 +123,7 @@ namespace DigitPark.Managers
             if (entryFeeDropdown) entryFeeDropdown.onValueChanged.AddListener(OnEntryFeeChanged);
             if (entryFeeSlider) entryFeeSlider.onValueChanged.AddListener(OnEntryFeeSliderChanged);
             if (maxPlayersDropdown) maxPlayersDropdown.onValueChanged.AddListener(OnMaxPlayersChanged);
+            if (maxAttemptsDropdown) maxAttemptsDropdown.onValueChanged.AddListener(OnMaxAttemptsChanged);
             if (startImmediatelyToggle) startImmediatelyToggle.onValueChanged.AddListener(OnStartImmediatelyChanged);
             if (privateToggle) privateToggle.onValueChanged.AddListener(OnPrivateChanged);
         }
@@ -199,6 +205,22 @@ namespace DigitPark.Managers
                     "Sin límite"
                 });
             }
+
+            // Max attempts
+            if (maxAttemptsDropdown)
+            {
+                maxAttemptsDropdown.ClearOptions();
+                var options = new List<string>();
+                foreach (var attempts in maxAttemptsOptions)
+                {
+                    string label = attempts == 3
+                        ? AutoLocalizer.Get("tournament_attempts_recommended", attempts)
+                        : AutoLocalizer.Get("tournament_rules_attempts", attempts);
+                    options.Add(label);
+                }
+                maxAttemptsDropdown.AddOptions(options);
+                maxAttemptsDropdown.value = 2; // Default: 3 attempts (index 2)
+            }
         }
 
         private void OnNameChanged(string name)
@@ -248,6 +270,15 @@ namespace DigitPark.Managers
                 currentConfig.maxPlayers = maxPlayersOptions[index];
             }
             UpdateEstimatedPrize();
+            UpdatePreview();
+        }
+
+        private void OnMaxAttemptsChanged(int index)
+        {
+            if (index < maxAttemptsOptions.Length)
+            {
+                currentConfig.maxAttempts = maxAttemptsOptions[index];
+            }
             UpdatePreview();
         }
 
@@ -482,5 +513,6 @@ namespace DigitPark.Managers
         public int rounds = 1;
         public int timeLimitSeconds = 60;
         public bool allowSpectators = true;
+        public int maxAttempts = 3;
     }
 }

@@ -274,6 +274,9 @@ namespace DigitPark.Managers
             }
 
             playAgainButton?.onClick.AddListener(OnPlayAgainClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackButtonClicked);
             premiumBannerButton?.onClick.AddListener(OnPremiumBannerClicked);
             resultPlayAgainButton?.onClick.AddListener(OnPlayAgainClicked);
@@ -706,7 +709,7 @@ namespace DigitPark.Managers
 
             TextMeshProUGUI tmp = penaltyObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "+1";
-            tmp.fontSize = 42;
+            tmp.fontSize = FontSizes.Penalty;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(1f, 0.3f, 0.3f, 1f); // Rojo
             tmp.alignment = TextAlignmentOptions.Center;

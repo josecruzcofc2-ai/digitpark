@@ -189,6 +189,9 @@ namespace DigitPark.Monetization
 
         private void SetupButtons()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = _backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (_backButton != null)
                 _backButton.onClick.AddListener(OnBackButtonClick);
         }

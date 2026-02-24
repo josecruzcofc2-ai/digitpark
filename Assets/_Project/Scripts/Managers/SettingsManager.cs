@@ -10,6 +10,7 @@ using DigitPark.UI;
 using DigitPark.UI.Panels;
 using DigitPark.UI.Components;
 using DigitPark.Themes;
+using DigitPark.Monetization;
 
 namespace DigitPark.Managers
 {
@@ -40,6 +41,8 @@ namespace DigitPark.Managers
 
         [Header("UI - Buttons")]
         [SerializeField] private Button changeNameButton;
+        [SerializeField] private TextMeshProUGUI changeNameCostText;
+        [SerializeField] private Button copyIDButton;
         [SerializeField] private Button logoutButton;
         [SerializeField] private Button deleteAccountButton;
         [SerializeField] private Button backButton;
@@ -87,6 +90,8 @@ namespace DigitPark.Managers
         private const string NOTIFICATIONS_KEY = "NotificationsEnabled";
         // CashBattleBypassAuth solo se puede activar desde EditorBootConfig (Editor-only)
         private const string CASHBATTLE_BYPASS_AUTH_KEY = "CashBattleBypassAuth";
+        private const string NAME_CHANGE_COUNT_KEY = "NameChangeCount";
+        private const int NAME_CHANGE_GEM_COST = 100;
 
         private PlayerData currentPlayer;
 
@@ -102,6 +107,7 @@ namespace DigitPark.Managers
             SetupListeners();
             HidePanels();
             UpdatePremiumUI();
+            UpdateNameChangeCost();
 
             if (settingsPanel != null)
             {
@@ -258,8 +264,12 @@ namespace DigitPark.Managers
 
             // Botones principales
             changeNameButton?.onClick.AddListener(OnChangeNameButtonClicked);
+            copyIDButton?.onClick.AddListener(OnCopyIDClicked);
             logoutButton?.onClick.AddListener(OnLogoutClicked);
             deleteAccountButton?.onClick.AddListener(OnDeleteAccountButtonClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackButtonClicked);
 
             // Premium buttons
@@ -268,8 +278,8 @@ namespace DigitPark.Managers
             restorePurchasesButton?.onClick.AddListener(OnRestorePurchasesClicked);
             premiumButton?.onClick.AddListener(OnPremiumButtonClicked);
 
-            // Shop
-            shopButton?.onClick.AddListener(() => SceneManager.LoadScene("Shop"));
+            // Shop (use SceneNavigator so GoBack returns to Settings)
+            shopButton?.onClick.AddListener(() => SceneNavigator.Instance?.NavigateTo("Shop"));
 
             // Legal buttons
             termsButton?.onClick.AddListener(() => OpenURL(URL_TERMS));
@@ -616,20 +626,79 @@ namespace DigitPark.Managers
 
         #endregion
 
+        #region Copy ID
+
+        private void OnCopyIDClicked()
+        {
+            string playerID = currentPlayer?.userId ?? "Unknown";
+            GUIUtility.systemCopyBuffer = playerID;
+            Debug.Log($"[Settings] ID copiada al portapapeles: {playerID}");
+
+            // Show toast notification
+            if (InAppNotificationManager.Instance != null)
+            {
+                InAppNotificationManager.Instance.Show(
+                    AutoLocalizer.Get("id_copied"), "", "info");
+            }
+        }
+
+        #endregion
+
         #region Change Name
+
+        private void UpdateNameChangeCost()
+        {
+            if (changeNameCostText == null) return;
+
+            if (IsFirstNameChange())
+            {
+                changeNameCostText.text = AutoLocalizer.Get("free_label");
+                changeNameCostText.color = new Color(0.2f, 0.8f, 0.4f); // green
+            }
+            else
+            {
+                changeNameCostText.text = $"{NAME_CHANGE_GEM_COST} \u2666";
+                changeNameCostText.color = new Color(0f, 1f, 1f); // cyan
+            }
+        }
+
+        private int GetNameChangeCount()
+        {
+            return PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
+        }
+
+        private bool IsFirstNameChange()
+        {
+            return GetNameChangeCount() == 0;
+        }
 
         private void OnChangeNameButtonClicked()
         {
             Debug.Log("[Settings] Mostrando panel de cambio de nombre");
 
+            int changeCount = GetNameChangeCount();
+
+            // After first free change, check if user has enough gems
+            if (changeCount > 0)
+            {
+                int currentGems = CurrencyManager.Instance?.Gems ?? 0;
+                if (currentGems < NAME_CHANGE_GEM_COST)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                    return;
+                }
+            }
+
             if (changeNamePanel != null)
             {
                 changeNamePanel.SetLengthLimits(3, 20);
                 changeNamePanel.Show(
-                    AutoLocalizer.Get("change_name_title"),
+                    changeCount == 0
+                        ? AutoLocalizer.Get("change_name_title")
+                        : AutoLocalizer.Get("change_name_title_cost", NAME_CHANGE_GEM_COST),
                     AutoLocalizer.Get("new_name_placeholder"),
                     OnConfirmNameClicked,
-                    null // OnCancel se maneja internamente
+                    null
                 );
             }
         }
@@ -638,11 +707,24 @@ namespace DigitPark.Managers
         {
             if (currentPlayer == null) return;
 
-            // La validación ya se hace en InputPanelUI
             if (newUsername == currentPlayer.username)
             {
                 changeNamePanel?.Hide();
                 return;
+            }
+
+            int changeCount = GetNameChangeCount();
+
+            // Deduct gems if not first change
+            if (changeCount > 0)
+            {
+                bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
+                if (!spent)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    return;
+                }
             }
 
             Debug.Log($"[Settings] Cambiando nombre a: {newUsername}");
@@ -653,6 +735,9 @@ namespace DigitPark.Managers
             {
                 Debug.Log("[Settings] Nombre actualizado exitosamente");
                 currentPlayer.username = newUsername;
+                PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
+                PlayerPrefs.Save();
+                UpdateNameChangeCost();
                 changeNamePanel?.Hide();
             }
             else
@@ -674,10 +759,10 @@ namespace DigitPark.Managers
             if (deleteConfirmPanel != null)
             {
                 deleteConfirmPanel.Show(
-                    AutoLocalizer.Get("delete_confirm_title"),
-                    AutoLocalizer.Get("confirm_delete_account"),
+                    "Eliminar Cuenta",
+                    "¿Estas seguro que deseas eliminar tu cuenta?\n\nEsta accion no se puede deshacer. Todos tus datos, progreso y compras se perderan permanentemente.",
                     OnConfirmDeleteClicked,
-                    null // OnCancel se maneja internamente
+                    null
                 );
             }
         }
@@ -723,10 +808,10 @@ namespace DigitPark.Managers
             if (logoutConfirmPanel != null)
             {
                 logoutConfirmPanel.Show(
-                    AutoLocalizer.Get("logout_confirm_title"),
-                    AutoLocalizer.Get("logout_confirm_message"),
+                    "Cerrar Sesion",
+                    "¿Estas seguro que deseas cerrar sesion?\n\nTendras que iniciar sesion de nuevo.",
                     OnConfirmLogoutClicked,
-                    null // OnCancel se maneja internamente
+                    null
                 );
             }
         }
@@ -746,8 +831,8 @@ namespace DigitPark.Managers
 
         private void OnBackButtonClicked()
         {
-            Debug.Log("[Settings] Volviendo al menú principal");
-            SceneManager.LoadScene("MainMenu");
+            Debug.Log("[Settings] Volviendo atrás");
+            SceneNavigator.Instance?.GoBack();
         }
 
         #endregion

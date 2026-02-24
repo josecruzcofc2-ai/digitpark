@@ -8,6 +8,7 @@ using DigitPark.Games;
 using DigitPark.Services;
 using DigitPark.UI.Components;
 using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.Managers
 {
@@ -132,6 +133,9 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             cancelButton?.onClick.AddListener(OnCancelClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnCancelClicked);
 
             // Subscribe to avatar changes
@@ -280,7 +284,7 @@ namespace DigitPark.Managers
 
                 placeholderText = placeholderGO.AddComponent<TextMeshProUGUI>();
                 placeholderText.alignment = TextAlignmentOptions.Center;
-                placeholderText.fontSize = 24;
+                placeholderText.fontSize = FontSizes.Body;
                 placeholderText.fontStyle = FontStyles.Bold;
             }
 

@@ -85,6 +85,9 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             if (verifyButton) verifyButton.onClick.AddListener(OnVerifyClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
         }
 

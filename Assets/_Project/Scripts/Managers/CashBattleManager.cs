@@ -162,6 +162,9 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButtonGold prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButtonGold>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackClicked);
 
             battles1v1Card?.onClick.AddListener(OnBattles1v1Clicked);
@@ -419,8 +422,8 @@ namespace DigitPark.Managers
             switch (currentState)
             {
                 case CashBattleState.Main:
-                    Debug.Log("[CashBattle] Volviendo al Main Menu");
-                    SceneManager.LoadScene("MainMenu");
+                    Debug.Log("[CashBattle] Volviendo atrás");
+                    SceneNavigator.Instance?.GoBack();
                     break;
                 case CashBattleState.Matchmaking:
                     CancelMatchmaking();

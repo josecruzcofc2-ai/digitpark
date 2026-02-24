@@ -52,6 +52,9 @@ namespace DigitPark.Managers
         {
             searchButton?.onClick.AddListener(OnSearchClicked);
             clearButton?.onClick.AddListener(OnClearClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             backButton?.onClick.AddListener(OnBackClicked);
 
             // Busqueda en tiempo real mientras escribe

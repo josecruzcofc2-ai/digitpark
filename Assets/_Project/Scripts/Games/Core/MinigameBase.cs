@@ -72,6 +72,9 @@ namespace DigitPark.Games
         /// </summary>
         protected virtual void SetupNavigationButtons()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton != null)
                 backButton.onClick.AddListener(OnBackClicked);
 

@@ -7,6 +7,7 @@ using DigitPark.Monetization;
 using DigitPark.Data;
 using DG.Tweening;
 using DigitPark.Animations;
+using DigitPark.UI;
 
 namespace DigitPark.Managers
 {
@@ -98,6 +99,9 @@ namespace DigitPark.Managers
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton) backButton.onClick.AddListener(OnBackClicked);
             if (createTournamentButton) createTournamentButton.onClick.AddListener(OnCreateTournamentClicked);
             if (clearFiltersButton) clearFiltersButton.onClick.AddListener(ClearFilters);
@@ -385,7 +389,7 @@ namespace DigitPark.Managers
 
             var tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = $"{tournament.name}\n{tournament.category} - ${tournament.entryFee}";
-            tmp.fontSize = 16;
+            tmp.fontSize = FontSizes.Body;
             tmp.alignment = TextAlignmentOptions.Left;
 
             return item;

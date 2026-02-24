@@ -71,6 +71,9 @@ namespace DigitPark.CashBattle
 
         private void SetupListeners()
         {
+            // Disable auto-navigation from BackButtonGold prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButtonGold>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton)
                 backButton.onClick.AddListener(OnBackClicked);
         }
