@@ -23,7 +23,7 @@ namespace DigitPark.Editor
                 new SceneBackButtonConfig("Settings", "Header", new Vector2(30, 0), anchorY: 0.5f)
             },
             {
-                "Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",
+                "Assets/_Project/Scenes/Games/Navigation/Matchmaking.unity",
                 new SceneBackButtonConfig("Matchmaking", "SafeArea", new Vector2(30, -40), anchorY: 1f)
             },
             {

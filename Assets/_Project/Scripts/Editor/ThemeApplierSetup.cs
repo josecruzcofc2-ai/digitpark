@@ -111,11 +111,11 @@ namespace DigitPark.Editor
                 "Assets/_Project/Scenes/_Core/Boot.unity",
                 "Assets/_Project/Scenes/_Core/MainMenu.unity",
                 "Assets/_Project/Scenes/_Core/Settings.unity",
-                // Games - Flow
-                "Assets/_Project/Scenes/Games/Flow/GameSelector.unity",
-                "Assets/_Project/Scenes/Games/Flow/PlayModeSelection.unity",
-                "Assets/_Project/Scenes/Games/Flow/BetSelection.unity",
-                "Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",
+                // Games - Navigation
+                "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity",
+                "Assets/_Project/Scenes/Games/Navigation/PlayModeSelection.unity",
+                "Assets/_Project/Scenes/Games/Navigation/BetSelection.unity",
+                "Assets/_Project/Scenes/Games/Navigation/Matchmaking.unity",
                 // Games - Minigames
                 "Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",
                 "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",
@@ -145,7 +145,7 @@ namespace DigitPark.Editor
                 // "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
                 // "Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",
                 // "Assets/_Project/Scenes/CashBattle/CashHistory.unity",
-                // "Assets/_Project/Scenes/CashBattle/CashTournaments.unity",
+                // "Assets/_Project/Scenes/Tournaments/CashTournaments.unity",
                 // "Assets/_Project/Scenes/CashBattle/CashWallet.unity",
                 // *** EXCLUIDA - AgeVerification (estilo gold fijo) ***
                 // "Assets/_Project/Scenes/Auth/AgeVerification.unity",

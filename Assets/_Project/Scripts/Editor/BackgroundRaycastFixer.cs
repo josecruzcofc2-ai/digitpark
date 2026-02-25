@@ -124,11 +124,11 @@ namespace DigitPark.Editor
                 // Core
                 "Assets/_Project/Scenes/_Core/MainMenu.unity",
                 "Assets/_Project/Scenes/_Core/Settings.unity",
-                // Games - Flow
-                "Assets/_Project/Scenes/Games/Flow/GameSelector.unity",
-                "Assets/_Project/Scenes/Games/Flow/PlayModeSelection.unity",
-                "Assets/_Project/Scenes/Games/Flow/BetSelection.unity",
-                "Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",
+                // Games - Navigation
+                "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity",
+                "Assets/_Project/Scenes/Games/Navigation/PlayModeSelection.unity",
+                "Assets/_Project/Scenes/Games/Navigation/BetSelection.unity",
+                "Assets/_Project/Scenes/Games/Navigation/Matchmaking.unity",
                 // Games - Minigames
                 "Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",
                 "Assets/_Project/Scenes/Games/Minigames/FlashTap.unity",

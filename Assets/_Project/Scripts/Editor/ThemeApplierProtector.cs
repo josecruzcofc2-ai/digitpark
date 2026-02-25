@@ -22,7 +22,7 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
             "Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",
             "Assets/_Project/Scenes/CashBattle/CashHistory.unity",
-            "Assets/_Project/Scenes/CashBattle/CashTournaments.unity",
+            "Assets/_Project/Scenes/Tournaments/CashTournaments.unity",
             "Assets/_Project/Scenes/CashBattle/CashWallet.unity",
             "Assets/_Project/Scenes/Auth/AgeVerification.unity",
         };

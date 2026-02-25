@@ -243,8 +243,8 @@ namespace DigitPark.Editor
                 "Assets/_Project/Scenes/Social/Profile/Profile.unity",
                 "Assets/_Project/Scenes/Social/Profile/Scores.unity",
                 "Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",
-                // Games - Flow
-                "Assets/_Project/Scenes/Games/Flow/GameSelector.unity",
+                // Games - Navigation
+                "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity",
                 // Games - Minigames
                 "Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",
                 "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",

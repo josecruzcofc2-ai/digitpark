@@ -40,11 +40,11 @@ namespace DigitPark.Editor
             new[] { "_Core/Settings" },
             new[] { "Social/Profile/Profile" },
 
-            // === 8-11: GAME FLOW ===
-            new[] { "Games/Flow/PlayModeSelection" },
-            new[] { "Games/Flow/GameSelector" },
-            new[] { "Games/Flow/BetSelection" },
-            new[] { "Games/Flow/Matchmaking" },
+            // === 8-11: GAME NAVIGATION ===
+            new[] { "Games/Navigation/PlayModeSelection" },
+            new[] { "Games/Navigation/GameSelector" },
+            new[] { "Games/Navigation/BetSelection" },
+            new[] { "Games/Navigation/Matchmaking" },
 
             // === 12-16: GAMES ===
             new[] { "Games/Minigames/DigitRush" },
@@ -75,7 +75,7 @@ namespace DigitPark.Editor
             // === 30-36: CASH BATTLE ===
             new[] { "CashBattle/CashBattleHub" },
             new[] { "CashBattle/CashBattle1v1" },
-            new[] { "CashBattle/CashTournaments" },
+            new[] { "Tournaments/CashTournaments" },
             new[] { "CashBattle/CashWallet" },
             new[] { "CashBattle/CashHistory" },
             new[] { "CashBattle/CashProfile" },

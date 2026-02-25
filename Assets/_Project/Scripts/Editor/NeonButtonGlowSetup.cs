@@ -46,7 +46,7 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/Social/Profile/Profile.unity",
             "Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",
             "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
-            "Assets/_Project/Scenes/Games/Flow/GameSelector.unity"
+            "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity"
         };
 
         // Game scenes - need careful filtering

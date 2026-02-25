@@ -44,11 +44,11 @@ public static class FontSizeBatchRebuilder
             E("Assets/_Project/Scenes/Auth/Register.unity",                  "RegisterUIBuilder",              "RebuildRegisterScene"),
             E("Assets/_Project/Scenes/Auth/AgeVerification.unity",           "AgeVerificationUIBuilder",       "RebuildAgeVerificationScene"),
 
-            // ── Games - Flow ──
-            E("Assets/_Project/Scenes/Games/Flow/GameSelector.unity",        "GameSelectorUIBuilder",          "RebuildGameSelectorUI"),
-            E("Assets/_Project/Scenes/Games/Flow/PlayModeSelection.unity",   "PlayModeSelectionUIBuilder",     "BuildPlayModeSelectionUI"),
-            E("Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",         "MatchmakingUIBuilder",           "BuildUI"),
-            E("Assets/_Project/Scenes/Games/Flow/BetSelection.unity",        "BetSelectionPanelUIBuilder",     "BuildScene"),
+            // ── Games - Navigation ──
+            E("Assets/_Project/Scenes/Games/Navigation/GameSelector.unity",        "GameSelectorUIBuilder",          "RebuildGameSelectorUI"),
+            E("Assets/_Project/Scenes/Games/Navigation/PlayModeSelection.unity",   "PlayModeSelectionUIBuilder",     "BuildPlayModeSelectionUI"),
+            E("Assets/_Project/Scenes/Games/Navigation/Matchmaking.unity",         "MatchmakingUIBuilder",           "BuildUI"),
+            E("Assets/_Project/Scenes/Games/Navigation/BetSelection.unity",        "BetSelectionPanelUIBuilder",     "BuildScene"),
 
             // ── Games - Minigames ──
             E("Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",      "DigitRushUIBuilder",             "RebuildDigitRushUI"),
@@ -84,7 +84,7 @@ public static class FontSizeBatchRebuilder
             // ── CashBattle ──
             E("Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",     "CashBattleUIBuilder",            "BuildPremiumUI"),
             E("Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",     "CashBattle1v1UIBuilder",         "BuildCashBattle1v1UI"),
-            E("Assets/_Project/Scenes/CashBattle/CashTournaments.unity",   "CashTournamentsUIBuilder",       "BuildCashTournamentsUI"),
+            E("Assets/_Project/Scenes/Tournaments/CashTournaments.unity",   "CashTournamentsUIBuilder",       "BuildCashTournamentsUI"),
             E("Assets/_Project/Scenes/CashBattle/CashHistory.unity",       "CashHistoryUIBuilder",           "BuildCashHistoryUI"),
             E("Assets/_Project/Scenes/CashBattle/CashProfile.unity",       "CashProfileUIBuilder",           "BuildAndAssign"),
             E("Assets/_Project/Scenes/CashBattle/CashWallet.unity",        "WalletUIBuilder",                "BuildWalletUI"),
