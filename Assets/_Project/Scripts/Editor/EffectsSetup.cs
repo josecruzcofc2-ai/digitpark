@@ -148,14 +148,13 @@ namespace DigitPark.Editor
         {
             string[] scenes = new string[]
             {
-                "Assets/_Project/Scenes/Boot.unity",
-                "Assets/_Project/Scenes/Login.unity",
-                "Assets/_Project/Scenes/Register.unity",
-                "Assets/_Project/Scenes/MainMenu.unity",
-                "Assets/_Project/Scenes/Game.unity",
-                "Assets/_Project/Scenes/Settings.unity",
-                "Assets/_Project/Scenes/Scores.unity",
-                "Assets/_Project/Scenes/Tournaments.unity"
+                "Assets/_Project/Scenes/_Core/Boot.unity",
+                "Assets/_Project/Scenes/Auth/Login.unity",
+                "Assets/_Project/Scenes/Auth/Register.unity",
+                "Assets/_Project/Scenes/_Core/MainMenu.unity",
+                "Assets/_Project/Scenes/_Core/Settings.unity",
+                "Assets/_Project/Scenes/Social/Profile/Scores.unity",
+                "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity"
             };
 
             int totalButtons = 0;

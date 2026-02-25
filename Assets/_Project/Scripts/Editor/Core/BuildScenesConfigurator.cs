@@ -25,7 +25,7 @@ namespace DigitPark.Editor
         private static readonly string[][] SCENE_ORDER = new string[][]
         {
             // === 0: ENTRY POINT ===
-            new[] { "Core/Boot" },
+            new[] { "_Core/Boot" },
 
             // === 1-3: AUTH FLOW ===
             new[] { "Auth/Login" },
@@ -36,30 +36,30 @@ namespace DigitPark.Editor
             new[] { "Onboarding/Onboarding" },
 
             // === 5-7: CORE (hub + settings) ===
-            new[] { "Core/MainMenu" },
-            new[] { "Core/Settings" },
-            new[] { "Social/Profile" },
+            new[] { "_Core/MainMenu" },
+            new[] { "_Core/Settings" },
+            new[] { "Social/Profile/Profile" },
 
             // === 8-11: GAME FLOW ===
-            new[] { "Games/PlayModeSelection" },
-            new[] { "Games/GameSelector" },
-            new[] { "Games/BetSelection" },
-            new[] { "Games/Matchmaking" },
+            new[] { "Games/Flow/PlayModeSelection" },
+            new[] { "Games/Flow/GameSelector" },
+            new[] { "Games/Flow/BetSelection" },
+            new[] { "Games/Flow/Matchmaking" },
 
             // === 12-16: GAMES ===
-            new[] { "Games/DigitRush" },
-            new[] { "Games/FlashTap" },
-            new[] { "Games/MemoryPairs" },
-            new[] { "Games/OddOneOut" },
-            new[] { "Games/QuickMath" },
+            new[] { "Games/Minigames/DigitRush" },
+            new[] { "Games/Minigames/FlashTap" },
+            new[] { "Games/Minigames/MemoryPairs" },
+            new[] { "Games/Minigames/OddOneOut" },
+            new[] { "Games/Minigames/QuickMath" },
 
             // === 17-22: SOCIAL ===
-            new[] { "Social/Scores" },
-            new[] { "Social/SearchPlayers" },
-            new[] { "Social/Friends" },
-            new[] { "Social/FriendRequests" },
-            new[] { "Social/MatchHistory" },
-            new[] { "Social/Notifications" },
+            new[] { "Social/Profile/Scores" },
+            new[] { "Social/Friends/SearchPlayers" },
+            new[] { "Social/Friends/Friends" },
+            new[] { "Social/Friends/FriendRequests" },
+            new[] { "Social/Profile/MatchHistory" },
+            new[] { "Social/Notifications/Notifications" },
 
             // === 23-26: MONETIZATION ===
             new[] { "Monetization/Shop" },
@@ -241,12 +241,19 @@ namespace DigitPark.Editor
             string folder = path.Split('/')[0];
             switch (folder)
             {
-                case "Core": return "CORE";
+                case "_Core": return "CORE";
                 case "Auth": return "AUTH";
                 case "Onboarding":
                     return path.Contains("CashBattle") ? "CASH BATTLE" : "ONBOARDING";
-                case "Games": return "GAMES";
-                case "Social": return "SOCIAL";
+                case "Games":
+                    if (path.Contains("Flow/")) return "GAME FLOW";
+                    if (path.Contains("Minigames/")) return "MINIGAMES";
+                    return "GAMES";
+                case "Social":
+                    if (path.Contains("Friends/")) return "SOCIAL - FRIENDS";
+                    if (path.Contains("Profile/")) return "SOCIAL - PROFILE";
+                    if (path.Contains("Notifications/")) return "SOCIAL - NOTIFICATIONS";
+                    return "SOCIAL";
                 case "Monetization": return "MONETIZATION";
                 case "Tournaments": return "TOURNAMENTS";
                 case "CashBattle": return "CASH BATTLE";

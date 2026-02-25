@@ -19,11 +19,11 @@ namespace DigitPark.Editor
         private static readonly Dictionary<string, SceneBackButtonConfig> TARGET_SCENES = new Dictionary<string, SceneBackButtonConfig>
         {
             {
-                "Assets/_Project/Scenes/Core/Settings.unity",
+                "Assets/_Project/Scenes/_Core/Settings.unity",
                 new SceneBackButtonConfig("Settings", "Header", new Vector2(30, 0), anchorY: 0.5f)
             },
             {
-                "Assets/_Project/Scenes/Games/Matchmaking.unity",
+                "Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",
                 new SceneBackButtonConfig("Matchmaking", "SafeArea", new Vector2(30, -40), anchorY: 1f)
             },
             {

@@ -36,33 +36,39 @@ public static class FontSizeBatchRebuilder
         var entries = new Entry[]
         {
             // ── Core ──
-            E("Assets/_Project/Scenes/Core/MainMenu.unity",                  "MainMenuUIBuilder",              "RebuildMainMenu"),
-            E("Assets/_Project/Scenes/Core/Settings.unity",                  "SettingsUIBuilder",              "BuildSettingsUI"),
+            E("Assets/_Project/Scenes/_Core/MainMenu.unity",                 "MainMenuUIBuilder",              "RebuildMainMenu"),
+            E("Assets/_Project/Scenes/_Core/Settings.unity",                 "SettingsUIBuilder",              "BuildSettingsUI"),
 
             // ── Auth ──
             E("Assets/_Project/Scenes/Auth/Login.unity",                     "LoginUIBuilder",                 "RebuildLoginScene"),
             E("Assets/_Project/Scenes/Auth/Register.unity",                  "RegisterUIBuilder",              "RebuildRegisterScene"),
             E("Assets/_Project/Scenes/Auth/AgeVerification.unity",           "AgeVerificationUIBuilder",       "RebuildAgeVerificationScene"),
 
-            // ── Games ──
-            E("Assets/_Project/Scenes/Games/DigitRush.unity",               "DigitRushUIBuilder",             "RebuildDigitRushUI"),
-            E("Assets/_Project/Scenes/Games/FlashTap.unity",                "FlashTapUIBuilder",              "RebuildFlashTapUI"),
-            E("Assets/_Project/Scenes/Games/MemoryPairs.unity",             "MemoryPairsUIBuilder",           "RebuildMemoryPairsUI"),
-            E("Assets/_Project/Scenes/Games/OddOneOut.unity",               "OddOneOutUIBuilder",             "RebuildOddOneOutUI"),
-            E("Assets/_Project/Scenes/Games/QuickMath.unity",               "QuickMathUIBuilder",             "RebuildQuickMathUI"),
-            E("Assets/_Project/Scenes/Games/GameSelector.unity",            "GameSelectorUIBuilder",          "RebuildGameSelectorUI"),
-            E("Assets/_Project/Scenes/Games/PlayModeSelection.unity",       "PlayModeSelectionUIBuilder",     "BuildPlayModeSelectionUI"),
-            E("Assets/_Project/Scenes/Games/Matchmaking.unity",             "MatchmakingUIBuilder",           "BuildUI"),
-            E("Assets/_Project/Scenes/Games/BetSelection.unity",            "BetSelectionPanelUIBuilder",     "BuildScene"),
+            // ── Games - Flow ──
+            E("Assets/_Project/Scenes/Games/Flow/GameSelector.unity",        "GameSelectorUIBuilder",          "RebuildGameSelectorUI"),
+            E("Assets/_Project/Scenes/Games/Flow/PlayModeSelection.unity",   "PlayModeSelectionUIBuilder",     "BuildPlayModeSelectionUI"),
+            E("Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",         "MatchmakingUIBuilder",           "BuildUI"),
+            E("Assets/_Project/Scenes/Games/Flow/BetSelection.unity",        "BetSelectionPanelUIBuilder",     "BuildScene"),
 
-            // ── Social ──
-            E("Assets/_Project/Scenes/Social/Profile.unity",                "ProfileUIBuilder",               "RebuildProfile"),
-            E("Assets/_Project/Scenes/Social/Friends.unity",                "FriendsUIBuilder",               "RebuildFriends"),
-            E("Assets/_Project/Scenes/Social/FriendRequests.unity",         "FriendRequestsUIBuilder",        "RebuildFriendRequests"),
-            E("Assets/_Project/Scenes/Social/MatchHistory.unity",           "MatchHistoryUIBuilder",          "RebuildMatchHistory"),
-            E("Assets/_Project/Scenes/Social/Notifications.unity",          "NotificationsUIBuilder",         "RebuildNotifications"),
-            E("Assets/_Project/Scenes/Social/Scores.unity",                 "ScoresUIBuilder",                "RebuildScoresUI"),
-            E("Assets/_Project/Scenes/Social/SearchPlayers.unity",          "SearchPlayersUIBuilder",         "RebuildSearchPlayersUI"),
+            // ── Games - Minigames ──
+            E("Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",      "DigitRushUIBuilder",             "RebuildDigitRushUI"),
+            E("Assets/_Project/Scenes/Games/Minigames/FlashTap.unity",       "FlashTapUIBuilder",              "RebuildFlashTapUI"),
+            E("Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",    "MemoryPairsUIBuilder",           "RebuildMemoryPairsUI"),
+            E("Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity",      "OddOneOutUIBuilder",             "RebuildOddOneOutUI"),
+            E("Assets/_Project/Scenes/Games/Minigames/QuickMath.unity",      "QuickMathUIBuilder",             "RebuildQuickMathUI"),
+
+            // ── Social - Profile ──
+            E("Assets/_Project/Scenes/Social/Profile/Profile.unity",          "ProfileUIBuilder",               "RebuildProfile"),
+            E("Assets/_Project/Scenes/Social/Profile/MatchHistory.unity",     "MatchHistoryUIBuilder",          "RebuildMatchHistory"),
+            E("Assets/_Project/Scenes/Social/Profile/Scores.unity",           "ScoresUIBuilder",                "RebuildScoresUI"),
+
+            // ── Social - Friends ──
+            E("Assets/_Project/Scenes/Social/Friends/Friends.unity",          "FriendsUIBuilder",               "RebuildFriends"),
+            E("Assets/_Project/Scenes/Social/Friends/FriendRequests.unity",   "FriendRequestsUIBuilder",        "RebuildFriendRequests"),
+            E("Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",    "SearchPlayersUIBuilder",         "RebuildSearchPlayersUI"),
+
+            // ── Social - Notifications ──
+            E("Assets/_Project/Scenes/Social/Notifications/Notifications.unity", "NotificationsUIBuilder",      "RebuildNotifications"),
 
             // ── Monetization ──
             E("Assets/_Project/Scenes/Monetization/Achievements.unity",     "AchievementsUIBuilder",          "BuildTrophyShowcase"),

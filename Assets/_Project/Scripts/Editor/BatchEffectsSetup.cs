@@ -232,27 +232,25 @@ namespace DigitPark.Editor
         {
             return new string[]
             {
-                // Escenas principales
-                "Assets/_Project/Scenes/Boot.unity",
-                "Assets/_Project/Scenes/Login.unity",
-                "Assets/_Project/Scenes/Register.unity",
-                "Assets/_Project/Scenes/MainMenu.unity",
-                "Assets/_Project/Scenes/Scores.unity",
-                "Assets/_Project/Scenes/Settings.unity",
-                "Assets/_Project/Scenes/Tournaments.unity",
-                "Assets/_Project/Scenes/HowToPlay.unity",
-                "Assets/_Project/Scenes/CountrySelector.unity",
-                // Escenas nuevas
-                "Assets/_Project/Scenes/Profile.unity",
-                "Assets/_Project/Scenes/SearchPlayers.unity",
-                "Assets/_Project/Scenes/CashBattle.unity",
-                // Escenas de juegos
-                "Assets/_Project/Scenes/Games/GameSelector.unity",
-                "Assets/_Project/Scenes/Games/DigitRush.unity",
-                "Assets/_Project/Scenes/Games/MemoryPairs.unity",
-                "Assets/_Project/Scenes/Games/QuickMath.unity",
-                "Assets/_Project/Scenes/Games/FlashTap.unity",
-                "Assets/_Project/Scenes/Games/OddOneOut.unity"
+                // Core
+                "Assets/_Project/Scenes/_Core/Boot.unity",
+                "Assets/_Project/Scenes/_Core/MainMenu.unity",
+                "Assets/_Project/Scenes/_Core/Settings.unity",
+                // Auth
+                "Assets/_Project/Scenes/Auth/Login.unity",
+                "Assets/_Project/Scenes/Auth/Register.unity",
+                // Social
+                "Assets/_Project/Scenes/Social/Profile/Profile.unity",
+                "Assets/_Project/Scenes/Social/Profile/Scores.unity",
+                "Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",
+                // Games - Flow
+                "Assets/_Project/Scenes/Games/Flow/GameSelector.unity",
+                // Games - Minigames
+                "Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",
+                "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",
+                "Assets/_Project/Scenes/Games/Minigames/QuickMath.unity",
+                "Assets/_Project/Scenes/Games/Minigames/FlashTap.unity",
+                "Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity"
             };
         }
     }

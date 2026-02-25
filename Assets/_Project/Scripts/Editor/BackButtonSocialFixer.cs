@@ -16,11 +16,11 @@ namespace DigitPark.Editor
 
         private static readonly string[] TARGET_SCENES = new string[]
         {
-            "Assets/_Project/Scenes/Social/Scores.unity",
-            "Assets/_Project/Scenes/Social/Profile.unity",
-            "Assets/_Project/Scenes/Social/MatchHistory.unity",
-            "Assets/_Project/Scenes/Social/Friends.unity",
-            "Assets/_Project/Scenes/FriendRequests.unity"
+            "Assets/_Project/Scenes/Social/Profile/Scores.unity",
+            "Assets/_Project/Scenes/Social/Profile/Profile.unity",
+            "Assets/_Project/Scenes/Social/Profile/MatchHistory.unity",
+            "Assets/_Project/Scenes/Social/Friends/Friends.unity",
+            "Assets/_Project/Scenes/Social/Friends/FriendRequests.unity"
         };
 
         [MenuItem("DigitPark/UI/Fix BackButton Neon in Social Scenes", false, 204)]

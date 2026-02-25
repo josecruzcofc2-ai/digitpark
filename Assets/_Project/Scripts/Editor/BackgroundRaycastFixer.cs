@@ -122,21 +122,25 @@ namespace DigitPark.Editor
             return new string[]
             {
                 // Core
-                "Assets/_Project/Scenes/Core/MainMenu.unity",
-                "Assets/_Project/Scenes/Core/Settings.unity",
-                // Games
-                "Assets/_Project/Scenes/Games/GameSelector.unity",
-                "Assets/_Project/Scenes/Games/DigitRush.unity",
-                "Assets/_Project/Scenes/Games/FlashTap.unity",
-                "Assets/_Project/Scenes/Games/MemoryPairs.unity",
-                "Assets/_Project/Scenes/Games/OddOneOut.unity",
-                "Assets/_Project/Scenes/Games/QuickMath.unity",
-                "Assets/_Project/Scenes/Games/Matchmaking.unity",
-                // Social
-                "Assets/_Project/Scenes/Social/Profile.unity",
-                "Assets/_Project/Scenes/Social/Friends.unity",
-                "Assets/_Project/Scenes/Social/Scores.unity",
-                "Assets/_Project/Scenes/Social/MatchHistory.unity",
+                "Assets/_Project/Scenes/_Core/MainMenu.unity",
+                "Assets/_Project/Scenes/_Core/Settings.unity",
+                // Games - Flow
+                "Assets/_Project/Scenes/Games/Flow/GameSelector.unity",
+                "Assets/_Project/Scenes/Games/Flow/PlayModeSelection.unity",
+                "Assets/_Project/Scenes/Games/Flow/BetSelection.unity",
+                "Assets/_Project/Scenes/Games/Flow/Matchmaking.unity",
+                // Games - Minigames
+                "Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",
+                "Assets/_Project/Scenes/Games/Minigames/FlashTap.unity",
+                "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",
+                "Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity",
+                "Assets/_Project/Scenes/Games/Minigames/QuickMath.unity",
+                // Social - Profile
+                "Assets/_Project/Scenes/Social/Profile/Profile.unity",
+                "Assets/_Project/Scenes/Social/Profile/Scores.unity",
+                "Assets/_Project/Scenes/Social/Profile/MatchHistory.unity",
+                // Social - Friends
+                "Assets/_Project/Scenes/Social/Friends/Friends.unity",
                 // Monetization
                 "Assets/_Project/Scenes/Monetization/Achievements.unity",
                 "Assets/_Project/Scenes/Monetization/Shop.unity",
