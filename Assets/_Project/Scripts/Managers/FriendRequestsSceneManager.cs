@@ -7,6 +7,7 @@ using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Components;
+using DigitPark.Localization;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -151,8 +152,8 @@ namespace DigitPark.Managers
                 if (emptyText != null)
                 {
                     emptyText.text = showingReceived
-                        ? "No tienes solicitudes pendientes"
-                        : "No has enviado solicitudes";
+                        ? AutoLocalizer.Get("requests_no_received")
+                        : AutoLocalizer.Get("requests_no_sent");
                     emptyText.gameObject.SetActive(true);
                     AnimateEmptyText();
                 }
@@ -206,11 +207,11 @@ namespace DigitPark.Managers
                 var date = request.GetCreatedAt();
                 var diff = System.DateTime.Now - date;
                 if (diff.TotalMinutes < 60)
-                    timestampText.text = $"Hace {(int)diff.TotalMinutes} min";
+                    timestampText.text = AutoLocalizer.Get("time_ago_minutes", (int)diff.TotalMinutes);
                 else if (diff.TotalHours < 24)
-                    timestampText.text = $"Hace {(int)diff.TotalHours} horas";
+                    timestampText.text = AutoLocalizer.Get("time_ago_hours", (int)diff.TotalHours);
                 else if (diff.TotalDays < 7)
-                    timestampText.text = $"Hace {(int)diff.TotalDays} dias";
+                    timestampText.text = AutoLocalizer.Get("time_ago_days", (int)diff.TotalDays);
                 else
                     timestampText.text = date.ToString("dd/MM/yyyy");
             }
@@ -302,15 +303,15 @@ namespace DigitPark.Managers
             if (pendingCountText != null)
             {
                 pendingCountText.text = count > 0
-                    ? $"{count} pendiente{(count != 1 ? "s" : "")}"
+                    ? AutoLocalizer.Get("requests_pending_count", count)
                     : "";
             }
 
             if (titleText != null)
             {
                 titleText.text = count > 0
-                    ? $"SOLICITUDES ({count})"
-                    : "SOLICITUDES";
+                    ? AutoLocalizer.Get("requests_title_count", count)
+                    : AutoLocalizer.Get("requests_title");
             }
         }
 
@@ -392,8 +393,8 @@ namespace DigitPark.Managers
             if (currentItems.Count == 0 && emptyText != null)
             {
                 emptyText.text = showingReceived
-                    ? "No tienes solicitudes pendientes"
-                    : "No has enviado solicitudes";
+                    ? AutoLocalizer.Get("requests_no_received")
+                    : AutoLocalizer.Get("requests_no_sent");
                 emptyText.gameObject.SetActive(true);
                 AnimateEmptyText();
             }

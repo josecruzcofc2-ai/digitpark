@@ -549,7 +549,7 @@ namespace DigitPark.Managers
             posObj.AddComponent<RectTransform>();
             TextMeshProUGUI posText = posObj.AddComponent<TextMeshProUGUI>();
             posText.text = entry.position <= 3 ? $"{entry.position}" : $"#{entry.position}";
-            posText.fontSize = entry.position <= 3 ? 28 : 22;
+            posText.fontSize = entry.position <= 3 ? FontSizes.Body : FontSizes.Body;
             posText.color = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(0.5f, 0.55f, 0.65f);
             posText.fontStyle = FontStyles.Bold;
             posText.alignment = TextAlignmentOptions.Center;
@@ -577,7 +577,7 @@ namespace DigitPark.Managers
             nameObj.AddComponent<RectTransform>();
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = entry.username;
-            nameText.fontSize = 20;
+            nameText.fontSize = FontSizes.Body;
             nameText.color = isCurrentPlayer ? new Color(0f, 1f, 1f) : Color.white;
             nameText.fontStyle = FontStyles.Bold;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -594,7 +594,7 @@ namespace DigitPark.Managers
             timeObj.AddComponent<RectTransform>();
             TextMeshProUGUI timeText = timeObj.AddComponent<TextMeshProUGUI>();
             timeText.text = $"{entry.time:F3}s";
-            timeText.fontSize = 20;
+            timeText.fontSize = FontSizes.Body;
             timeText.color = new Color(0f, 1f, 0.53f);
             timeText.fontStyle = FontStyles.Bold;
             timeText.alignment = TextAlignmentOptions.MidlineRight;
@@ -770,7 +770,7 @@ namespace DigitPark.Managers
                 text.font = TMP_Settings.defaultFontAsset;
             text.text = message;
             text.alignment = TextAlignmentOptions.Center;
-            text.fontSize = 24;
+            text.fontSize = FontSizes.Body;
             text.color = Color.red;
         }
 

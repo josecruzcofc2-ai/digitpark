@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using DigitPark.Managers;
 using DigitPark.Services;
+using DigitPark.UI;
 
 namespace DigitPark.DevTools
 {
@@ -116,7 +117,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "DBG";
-            tmp.fontSize = 14;
+            tmp.fontSize = FontSizes.DebugText;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(1f, 0.84f, 0f);
             tmp.alignment = TextAlignmentOptions.Center;
@@ -191,7 +192,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Achievement Tester";
-            titleText.fontSize = 24;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = new Color(1f, 0.84f, 0f);
             titleText.alignment = TextAlignmentOptions.Center;
@@ -206,7 +207,7 @@ namespace DigitPark.DevTools
 
             statsText = statsObj.AddComponent<TextMeshProUGUI>();
             statsText.text = "0/0 (0%)";
-            statsText.fontSize = 16;
+            statsText.fontSize = FontSizes.DebugText;
             statsText.color = new Color(0f, 1f, 1f);
             statsText.alignment = TextAlignmentOptions.Center;
 
@@ -311,7 +312,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI instrText = instructionObj.AddComponent<TextMeshProUGUI>();
             instrText.text = $"Presiona {toggleKey} para ocultar";
-            instrText.fontSize = 12;
+            instrText.fontSize = FontSizes.DebugText;
             instrText.color = new Color(0.5f, 0.5f, 0.5f);
             instrText.alignment = TextAlignmentOptions.Center;
         }
@@ -374,7 +375,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = $"-- {category.ToUpper()} --";
-            text.fontSize = 14;
+            text.fontSize = FontSizes.DebugText;
             text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
@@ -417,7 +418,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI checkText = checkObj.AddComponent<TextMeshProUGUI>();
             checkText.text = "";
-            checkText.fontSize = 24;
+            checkText.fontSize = FontSizes.Body;
             checkText.color = new Color(0.2f, 0.8f, 0.4f);
             checkText.alignment = TextAlignmentOptions.Center;
 
@@ -437,7 +438,7 @@ namespace DigitPark.DevTools
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             string secretTag = data.isHidden ? " <color=#AA33FF>[S]</color>" : "";
             titleText.text = $"{displayTitle}{secretTag}";
-            titleText.fontSize = 14;
+            titleText.fontSize = FontSizes.DebugText;
             titleText.color = Color.white;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -453,7 +454,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI pointsText = pointsObj.AddComponent<TextMeshProUGUI>();
             pointsText.text = $"{data.points}";
-            pointsText.fontSize = 12;
+            pointsText.fontSize = FontSizes.DebugText;
             pointsText.color = new Color(1f, 0.84f, 0f);
             pointsText.alignment = TextAlignmentOptions.MidlineRight;
 
@@ -506,7 +507,7 @@ namespace DigitPark.DevTools
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 14;
+            tmp.fontSize = FontSizes.DebugText;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;

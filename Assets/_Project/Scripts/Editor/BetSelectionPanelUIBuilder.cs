@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -16,7 +17,7 @@ namespace DigitPark.Editor
     public class BetSelectionUIBuilder : EditorWindow
     {
         // ==================== COLORS ====================
-        private static readonly Color BG_DARK = new Color(0.02f, 0.03f, 0.06f);
+        private static readonly Color BG_DARK = new Color(0.02f, 0.04f, 0.08f);
         private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.14f);
         private static readonly Color HEADER_BG = new Color(0.04f, 0.06f, 0.12f, 0.9f);
         private static readonly Color CURRENCY_BG = new Color(0.03f, 0.05f, 0.1f, 0.95f);
@@ -55,23 +56,8 @@ namespace DigitPark.Editor
         private static readonly Color CUSTOM_CARD_BG = new Color(0.05f, 0.05f, 0.1f);
         private static readonly Color STEPPER_BG = new Color(0.08f, 0.12f, 0.2f);
 
-        // ==================== FONT SIZES ====================
-        private const int TITLE_SIZE = 78;
-        private const int GAME_NAME_SIZE = 36;
-        private const int CURR_LABEL_SIZE = 28;
-        private const int CURR_VALUE_SIZE = 42;
-        private const int SECTION_SIZE = 40;
-        private const int CARD_COST_SIZE = 40;
-        private const int CARD_REWARD_SIZE = 30;
-        private const int CARD_BADGE_SIZE = 30;
-        private const int BTN_SIZE = 36;
-        private const int CUSTOM_TOGGLE_SIZE = 30;
-        private const int CUSTOM_INPUT_SIZE = 36;
-        private const int CUSTOM_PREVIEW_SIZE = 30;
-        private const int STEPPER_SIZE = 30;
-
         // ==================== LAYOUT ====================
-        private const float CARD_H = 85f;
+        private const float CARD_H = 128f;
         private const float CARD_PAD_H = 16f;
         private const float CARD_PAD_V = 10f;
         private const float BTN_H = 70f;
@@ -128,6 +114,18 @@ namespace DigitPark.Editor
             {
                 Debug.LogError("[BetSelectionUIBuilder] No Canvas found in scene!");
                 return;
+            }
+
+            // Ensure GraphicRaycaster (required for ALL UI events)
+            if (canvas.GetComponent<GraphicRaycaster>() == null)
+                canvas.gameObject.AddComponent<GraphicRaycaster>();
+
+            // Ensure EventSystem exists in scene
+            if (Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                GameObject eventSystem = new GameObject("EventSystem");
+                eventSystem.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                eventSystem.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
             }
 
             CleanCanvasChildren(canvas.transform);
@@ -237,6 +235,13 @@ namespace DigitPark.Editor
             CreateActionButtons(content.transform);
             CreateSpacer(content.transform, 20f);
 
+            // === FORCE LAYOUT REBUILD ===
+            // Without this, ContentSizeFitter won't compute the Content height,
+            // and ScrollRect thinks the content fits → scroll doesn't work
+            Canvas.ForceUpdateCanvases();
+            var contentRT = content.GetComponent<RectTransform>();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRT);
+
             // === FINALIZE ===
             EditorUtility.SetDirty(canvas.gameObject);
             EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
@@ -270,9 +275,9 @@ namespace DigitPark.Editor
             vlg.childControlHeight = false;
 
             CreateText("TitleText", header.transform, "ELIGE TU APUESTA",
-                TITLE_SIZE, NEON_CYAN, FontStyles.Bold, 80f);
+                (int)FontSizes.SceneTitle, NEON_CYAN, FontStyles.Bold, 80f);
             CreateText("GameNameText", header.transform, "",
-                GAME_NAME_SIZE, GOLD, FontStyles.Italic, 42f);
+                (int)FontSizes.Button, GOLD, FontStyles.Italic, 42f);
         }
 
         // ==================== CURRENCY BAR (prominent) ====================
@@ -330,10 +335,11 @@ namespace DigitPark.Editor
             labelLE.preferredHeight = 34;
             TextMeshProUGUI labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
             labelTMP.text = label;
-            labelTMP.fontSize = CURR_LABEL_SIZE;
+            labelTMP.fontSize = FontSizes.Body;
             labelTMP.color = color;
             labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.alignment = TextAlignmentOptions.Center;
+
 
             // Value
             GameObject valueGO = CreateUI(valueName, col.transform);
@@ -341,17 +347,18 @@ namespace DigitPark.Editor
             valueLE.preferredHeight = 48;
             TextMeshProUGUI valueTMP = valueGO.AddComponent<TextMeshProUGUI>();
             valueTMP.text = "0";
-            valueTMP.fontSize = CURR_VALUE_SIZE;
+            valueTMP.fontSize = FontSizes.ValueMedium;
             valueTMP.color = TEXT_PRIMARY;
             valueTMP.fontStyle = FontStyles.Bold;
             valueTMP.alignment = TextAlignmentOptions.Center;
+
         }
 
         // ==================== SCROLL AREA ====================
 
         private static GameObject CreateScrollArea(Transform parent)
         {
-            // ScrollRect wrapper
+            // ScrollRect wrapper (matches ShopPremiumUIBuilder + AchievementsUIBuilder pattern)
             GameObject scrollArea = CreateUI("ScrollArea", parent);
             RectTransform srt = scrollArea.GetComponent<RectTransform>();
             srt.anchorMin = new Vector2(0, 0.01f);
@@ -367,11 +374,12 @@ namespace DigitPark.Editor
             scrollRect.decelerationRate = 0.135f;
             scrollRect.scrollSensitivity = 50f;
 
-            // Image on ScrollArea for raycast input (required for scroll to work)
+            // Transparent Image on ScrollArea for raycast capture
             Image scrollImg = scrollArea.AddComponent<Image>();
             scrollImg.color = Color.clear;
+            scrollImg.raycastTarget = true;
 
-            // Viewport with RectMask2D
+            // Viewport with Image + RectMask2D (matching AchievementsUIBuilder)
             GameObject viewport = CreateUI("Viewport", scrollArea.transform);
             RectTransform vpRT = viewport.GetComponent<RectTransform>();
             SetFullStretch(vpRT);
@@ -386,8 +394,15 @@ namespace DigitPark.Editor
             crt.anchorMin = new Vector2(0, 1);
             crt.anchorMax = new Vector2(1, 1);
             crt.pivot = new Vector2(0.5f, 1);
-            crt.offsetMin = Vector2.zero;
-            crt.offsetMax = Vector2.zero;
+            crt.sizeDelta = new Vector2(0, 0);
+
+            // Transparent Image on Content catches raycasts in dead zones (spacing/padding)
+            // ensuring scroll works when touching ANY part of the content area
+            Image contentBg = content.AddComponent<Image>();
+            contentBg.color = Color.clear;
+
+            ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var vlg = content.AddComponent<VerticalLayoutGroup>();
             vlg.padding = new RectOffset(16, 16, 8, 12);
@@ -397,9 +412,6 @@ namespace DigitPark.Editor
             vlg.childForceExpandHeight = false;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
-
-            ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             scrollRect.content = crt;
             scrollRect.viewport = vpRT;
@@ -455,7 +467,7 @@ namespace DigitPark.Editor
             costLE.flexibleWidth = 1;
             TextMeshProUGUI costTMP = costGO.AddComponent<TextMeshProUGUI>();
             costTMP.text = costText;
-            costTMP.fontSize = CARD_COST_SIZE;
+            costTMP.fontSize = FontSizes.LabelLarge;
             costTMP.color = accentColor;
             costTMP.fontStyle = FontStyles.Bold;
             costTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -463,16 +475,18 @@ namespace DigitPark.Editor
             costTMP.overflowMode = TextOverflowModes.Ellipsis;
             costTMP.raycastTarget = false;
 
+
             // Reward text
             GameObject rewardGO = CreateUI(rewardTextName, card.transform);
             var rwLE = rewardGO.AddComponent<LayoutElement>();
             rwLE.flexibleWidth = 1;
             TextMeshProUGUI rewardTMP = rewardGO.AddComponent<TextMeshProUGUI>();
             rewardTMP.text = rewardText;
-            rewardTMP.fontSize = CARD_REWARD_SIZE;
+            rewardTMP.fontSize = FontSizes.Body;
             rewardTMP.color = TEXT_SECONDARY;
             rewardTMP.alignment = TextAlignmentOptions.MidlineRight;
             rewardTMP.raycastTarget = false;
+
 
             // Badge (Image on parent, TMP on child - separate Graphic components)
             if (!string.IsNullOrEmpty(badgeText))
@@ -489,11 +503,12 @@ namespace DigitPark.Editor
                 SetFullStretch(badgeTextGO.GetComponent<RectTransform>());
                 TextMeshProUGUI badgeTMP = badgeTextGO.AddComponent<TextMeshProUGUI>();
                 badgeTMP.text = badgeText;
-                badgeTMP.fontSize = CARD_BADGE_SIZE;
+                badgeTMP.fontSize = FontSizes.Body;
                 badgeTMP.color = accentColor;
                 badgeTMP.fontStyle = FontStyles.Bold;
                 badgeTMP.alignment = TextAlignmentOptions.Center;
                 badgeTMP.raycastTarget = false;
+
             }
 
             // Glass overlay
@@ -581,10 +596,11 @@ namespace DigitPark.Editor
             pvLE.preferredHeight = 34;
             TextMeshProUGUI pvTMP = previewGO.AddComponent<TextMeshProUGUI>();
             pvTMP.text = "Gana: 20 monedas";
-            pvTMP.fontSize = CUSTOM_PREVIEW_SIZE;
+            pvTMP.fontSize = FontSizes.Body;
             pvTMP.color = CUSTOM_TEAL;
             pvTMP.fontStyle = FontStyles.Bold;
             pvTMP.alignment = TextAlignmentOptions.Center;
+
         }
 
         private static void CreateToggleButton(string name, Transform parent,
@@ -607,7 +623,7 @@ namespace DigitPark.Editor
             SetFullStretch(textGO.GetComponent<RectTransform>());
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = CUSTOM_TOGGLE_SIZE;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -633,7 +649,7 @@ namespace DigitPark.Editor
             SetFullStretch(textGO.GetComponent<RectTransform>());
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = STEPPER_SIZE;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = NEON_CYAN;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -665,9 +681,10 @@ namespace DigitPark.Editor
             SetFullStretch(phRT);
             TextMeshProUGUI phTMP = phGO.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Monto...";
-            phTMP.fontSize = CUSTOM_INPUT_SIZE;
+            phTMP.fontSize = FontSizes.Button;
             phTMP.color = TEXT_DIM;
             phTMP.alignment = TextAlignmentOptions.Center;
+
 
             // Input text
             GameObject txtGO = CreateUI("Text", textArea.transform);
@@ -675,10 +692,11 @@ namespace DigitPark.Editor
             SetFullStretch(txtRT);
             TextMeshProUGUI txtTMP = txtGO.AddComponent<TextMeshProUGUI>();
             txtTMP.text = "10";
-            txtTMP.fontSize = CUSTOM_INPUT_SIZE;
+            txtTMP.fontSize = FontSizes.Button;
             txtTMP.color = TEXT_PRIMARY;
             txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.alignment = TextAlignmentOptions.Center;
+
 
             // Wire up
             inputField.textViewport = taRT;
@@ -721,7 +739,7 @@ namespace DigitPark.Editor
             tLE.preferredHeight = 46;
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = SECTION_SIZE;
+            tmp.fontSize = FontSizes.LabelLarge;
             tmp.color = color;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -777,7 +795,7 @@ namespace DigitPark.Editor
             SetFullStretch(textGO.GetComponent<RectTransform>());
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = BTN_SIZE;
+            tmp.fontSize = FontSizes.Button;
             tmp.color = Color.white;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -814,7 +832,6 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.enableAutoSizing = false;
             return tmp;
         }
 

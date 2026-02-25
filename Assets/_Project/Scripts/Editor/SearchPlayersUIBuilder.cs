@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.Editor.AutoAssigners;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -14,7 +15,7 @@ namespace DigitPark.Editor
         // Colores del tema neón
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.95f);
         private static readonly Color INPUT_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color PLACEHOLDER_COLOR = new Color(0.4f, 0.4f, 0.4f, 1f);
@@ -164,7 +165,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(500, 60));
-            SetupText(title, "BUSCAR JUGADORES", 78, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "BUSCAR JUGADORES", (int)FontSizes.SceneTitle, CYAN_NEON, FontStyles.Bold);
 
             // ========== SEARCH BAR INTEGRADO (Diseño Moderno) ==========
             // Un único campo de búsqueda con lupa y Clear integrados
@@ -225,7 +226,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderTmp = placeholder.GetComponent<TextMeshProUGUI>();
             if (placeholderTmp == null) placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "Buscar por nombre de usuario...";
-            placeholderTmp.fontSize = 40;
+            placeholderTmp.fontSize = FontSizes.LabelLarge;
             placeholderTmp.color = PLACEHOLDER_COLOR;
             placeholderTmp.fontStyle = FontStyles.Bold;
             placeholderTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -236,7 +237,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTmp = inputText.GetComponent<TextMeshProUGUI>();
             if (inputTmp == null) inputTmp = inputText.AddComponent<TextMeshProUGUI>();
             inputTmp.text = "";
-            inputTmp.fontSize = 40;
+            inputTmp.fontSize = FontSizes.LabelLarge;
             inputTmp.color = Color.white;
             inputTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -245,7 +246,7 @@ namespace DigitPark.Editor
             tmpInput.textComponent = inputTmp;
             tmpInput.placeholder = placeholderTmp;
             tmpInput.fontAsset = inputTmp.font;
-            tmpInput.pointSize = 40;
+            tmpInput.pointSize = FontSizes.LabelLarge;
 
             // Clear Button - Botón estilo neón con texto "Clear"
             GameObject clearButton = CreateOrFind(searchBar.transform, "ClearButton");
@@ -277,7 +278,7 @@ namespace DigitPark.Editor
             // Texto "Clear"
             GameObject clearText = CreateOrFind(clearButton.transform, "Text");
             SetupRectTransform(clearText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(clearText, "Clear", 32, DARK_BG, FontStyles.Bold);
+            SetupText(clearText, "Clear", (int)FontSizes.BodyLarge, DARK_BG, FontStyles.Bold);
 
             // SearchButton oculto (mantener referencia para el Manager pero no visible)
             // La búsqueda es en tiempo real, no necesita botón
@@ -421,21 +422,21 @@ namespace DigitPark.Editor
             SetupRectTransform(emptyTitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 20), new Vector2(700, 100));
-            SetupText(emptyTitle, "Busca jugadores", 64, Color.white, FontStyles.Bold);
+            SetupText(emptyTitle, "Busca jugadores", (int)FontSizes.AuthTitle, Color.white, FontStyles.Bold);
 
             // Empty Description - Texto más visible
             GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -40), new Vector2(760, 160));
-            SetupText(emptyDesc, "Encuentra jugadores para\nagregar como amigos o retar", 40, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
+            SetupText(emptyDesc, "Encuentra jugadores para\nagregar como amigos o retar", (int)FontSizes.LabelLarge, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
 
             // No Results Text (se mostrará cuando no haya resultados)
             GameObject noResultsText = CreateOrFind(resultsPanel.transform, "NoResultsText");
             SetupRectTransform(noResultsText,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(400, 60));
-            SetupText(noResultsText, "No se encontraron jugadores", 24, PLACEHOLDER_COLOR, FontStyles.Bold);
+            SetupText(noResultsText, "No se encontraron jugadores", (int)FontSizes.Body, PLACEHOLDER_COLOR, FontStyles.Bold);
             noResultsText.SetActive(false);
 
             // Loading Indicator
@@ -446,7 +447,7 @@ namespace DigitPark.Editor
 
             GameObject loadingText = CreateOrFind(loadingIndicator.transform, "Text");
             SetupRectTransform(loadingText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(loadingText, "Buscando...", 24, CYAN_NEON, FontStyles.Bold);
+            SetupText(loadingText, "Buscando...", (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold);
             loadingIndicator.SetActive(false);
 
             // ========== CREAR PREFAB DE PLAYER CARD ==========
@@ -527,7 +528,7 @@ namespace DigitPark.Editor
             usernameRect.sizeDelta = new Vector2(0, 28);
             TextMeshProUGUI usernameTmp = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTmp.text = "Username";
-            usernameTmp.fontSize = 30;
+            usernameTmp.fontSize = FontSizes.Body;
             usernameTmp.color = Color.white;
             usernameTmp.fontStyle = FontStyles.Bold;
             usernameTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -542,7 +543,7 @@ namespace DigitPark.Editor
             handleRect.sizeDelta = new Vector2(0, 22);
             TextMeshProUGUI handleTmp = handleObj.AddComponent<TextMeshProUGUI>();
             handleTmp.text = "@handle";
-            handleTmp.fontSize = 30;
+            handleTmp.fontSize = FontSizes.Body;
             handleTmp.color = PLACEHOLDER_COLOR;
             handleTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -577,7 +578,7 @@ namespace DigitPark.Editor
             winTextRect.sizeDelta = new Vector2(80, 24);
             TextMeshProUGUI winTextTmp = winText.AddComponent<TextMeshProUGUI>();
             winTextTmp.text = "0%";
-            winTextTmp.fontSize = 30;
+            winTextTmp.fontSize = FontSizes.Body;
             winTextTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             winTextTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -591,7 +592,7 @@ namespace DigitPark.Editor
             sepRect.sizeDelta = new Vector2(20, 20);
             TextMeshProUGUI sepTmp = sep.AddComponent<TextMeshProUGUI>();
             sepTmp.text = "•";
-            sepTmp.fontSize = 22;
+            sepTmp.fontSize = FontSizes.Body;
             sepTmp.color = PLACEHOLDER_COLOR;
             sepTmp.alignment = TextAlignmentOptions.Center;
 
@@ -617,7 +618,7 @@ namespace DigitPark.Editor
             gameTextRect.sizeDelta = new Vector2(100, 24);
             TextMeshProUGUI gameTextTmp = gameText.AddComponent<TextMeshProUGUI>();
             gameTextTmp.text = "Game";
-            gameTextTmp.fontSize = 30;
+            gameTextTmp.fontSize = FontSizes.Body;
             gameTextTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             gameTextTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -641,7 +642,7 @@ namespace DigitPark.Editor
             labelRect.sizeDelta = new Vector2(70, 20);
             TextMeshProUGUI labelTmp = onlineLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "Online";
-            labelTmp.fontSize = 30;
+            labelTmp.fontSize = FontSizes.Body;
             labelTmp.color = new Color(0.2f, 1f, 0.4f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineRight;
 
@@ -726,7 +727,7 @@ namespace DigitPark.Editor
             textRect.sizeDelta = Vector2.zero;
             TextMeshProUGUI tmp = btnText.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 30;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

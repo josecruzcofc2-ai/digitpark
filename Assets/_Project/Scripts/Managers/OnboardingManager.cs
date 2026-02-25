@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
 using DigitPark.Localization;
+using DigitPark.UI;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -636,7 +637,7 @@ namespace DigitPark.Managers
 
             var nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = option.name;
-            nameText.fontSize = 12;
+            nameText.fontSize = FontSizes.Body;
             nameText.alignment = TextAlignmentOptions.Center;
             nameText.color = Color.white;
 

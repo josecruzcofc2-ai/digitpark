@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 using DigitPark.Editor.AutoAssigners;
 
 namespace DigitPark.Editor
@@ -17,7 +18,7 @@ namespace DigitPark.Editor
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.5f, 1f);
         private static readonly Color CYAN_GLOW = new Color(0f, 0.83f, 1f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.95f);
         private static readonly Color TAB_INACTIVE = new Color(0.15f, 0.2f, 0.25f, 1f);
         private static readonly Color TAB_ACTIVE = new Color(0f, 0.83f, 1f, 1f);
@@ -286,7 +287,7 @@ namespace DigitPark.Editor
             RectTransform titleRT = SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(500, 100));
-            TextMeshProUGUI titleTMP = SetupText(title, "RANKINGS", 78, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTMP = SetupText(title, "RANKINGS", (int)FontSizes.SceneTitle, CYAN_NEON, FontStyles.Bold);
             titleTMP.alignment = TextAlignmentOptions.Center;
 
             AddTextGlow(title, CYAN_NEON);
@@ -400,7 +401,7 @@ namespace DigitPark.Editor
             RectTransform nameRT = nameObj.AddComponent<RectTransform>();
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
             nameTMP.text = label;
-            nameTMP.fontSize = 22;
+            nameTMP.fontSize = FontSizes.Body;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.color = isSelected ? Color.white : new Color(0.5f, 0.5f, 0.6f, 1f);
             nameTMP.alignment = TextAlignmentOptions.Center;
@@ -508,7 +509,7 @@ namespace DigitPark.Editor
             Color textColor = isActive ? DARK_BG : Color.white;
             TextMeshProUGUI tabTMP = tabText.AddComponent<TextMeshProUGUI>();
             tabTMP.text = text;
-            tabTMP.fontSize = 24;
+            tabTMP.fontSize = FontSizes.Body;
             tabTMP.color = textColor;
             tabTMP.fontStyle = FontStyles.Bold;
             tabTMP.alignment = TextAlignmentOptions.Center;
@@ -595,21 +596,21 @@ namespace DigitPark.Editor
             SetupRectTransform(icon,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -30), new Vector2(150, 150));
-            TextMeshProUGUI iconTMP = SetupText(icon, "ranking_icon", 100, GOLD, FontStyles.Bold);
+            TextMeshProUGUI iconTMP = SetupText(icon, "ranking_icon", (int)FontSizes.CardSymbol, GOLD, FontStyles.Bold);
             iconTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject title = CreateOrFind(emptyState.transform, "EmptyTitle");
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 30), new Vector2(500, 60));
-            TextMeshProUGUI titleTMP = SetupText(title, "empty_leaderboard_title", 32, Color.white, FontStyles.Bold);
+            TextMeshProUGUI titleTMP = SetupText(title, "empty_leaderboard_title", (int)FontSizes.BodyLarge, Color.white, FontStyles.Bold);
             titleTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject subtitle = CreateOrFind(emptyState.transform, "EmptySubtitle");
             SetupRectTransform(subtitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -30), new Vector2(450, 50));
-            TextMeshProUGUI subTMP = SetupText(subtitle, "empty_leaderboard_subtitle", 22, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
+            TextMeshProUGUI subTMP = SetupText(subtitle, "empty_leaderboard_subtitle", (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
             subTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject playBtn = CreateOrFind(emptyState.transform, "PlayButton");
@@ -638,7 +639,7 @@ namespace DigitPark.Editor
 
             GameObject playText = CreateOrFind(playBtn.transform, "Text");
             SetupRectTransform(playText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI playTMP = SetupText(playText, "play_now", 28, DARK_BG, FontStyles.Bold);
+            TextMeshProUGUI playTMP = SetupText(playText, "play_now", (int)FontSizes.Body, DARK_BG, FontStyles.Bold);
             playTMP.alignment = TextAlignmentOptions.Center;
 
             emptyState.SetActive(false);
@@ -690,7 +691,7 @@ namespace DigitPark.Editor
                 GameObject posObj = FindOrCreateChild(entry, "PositionText");
                 TextMeshProUGUI posText = GetOrAddComponent<TextMeshProUGUI>(posObj);
                 posText.text = i < 3 ? $"{i + 1}" : $"#{i + 1}";
-                posText.fontSize = i < 3 ? 56 : 44;
+                posText.fontSize = i < 3 ? FontSizes.DisplayMedium : FontSizes.ValueLarge;
                 posText.fontStyle = FontStyles.Bold;
                 posText.alignment = TextAlignmentOptions.Center;
                 LayoutElement posLE = GetOrAddComponent<LayoutElement>(posObj);
@@ -717,7 +718,7 @@ namespace DigitPark.Editor
                 GameObject nameObj = FindOrCreateChild(entry, "UsernameText");
                 TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
                 nameText.text = names[i];
-                nameText.fontSize = 40;
+                nameText.fontSize = FontSizes.LabelLarge;
                 nameText.fontStyle = FontStyles.Bold;
                 nameText.color = Color.white;
                 nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -731,7 +732,7 @@ namespace DigitPark.Editor
                 GameObject timeObj = FindOrCreateChild(entry, "TimeText");
                 TextMeshProUGUI timeText = GetOrAddComponent<TextMeshProUGUI>(timeObj);
                 timeText.text = times[i];
-                timeText.fontSize = 40;
+                timeText.fontSize = FontSizes.LabelLarge;
                 timeText.fontStyle = FontStyles.Bold;
                 timeText.color = TIME_COLOR;
                 timeText.alignment = TextAlignmentOptions.MidlineRight;
@@ -778,7 +779,7 @@ namespace DigitPark.Editor
 
             // Etiqueta "TU POSICIÓN"
             GameObject label = CreateOrFind(posPanel.transform, "PositionLabel");
-            TextMeshProUGUI labelTMP = SetupText(label, "TU POSICIÓN", 36, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
+            TextMeshProUGUI labelTMP = SetupText(label, "TU POSICIÓN", (int)FontSizes.Button, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
             labelTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement labelLE = label.GetComponent<LayoutElement>();
             if (labelLE == null) labelLE = label.AddComponent<LayoutElement>();
@@ -786,7 +787,7 @@ namespace DigitPark.Editor
 
             // Número de posición
             GameObject posNumber = CreateOrFind(posPanel.transform, "PositionNumber");
-            TextMeshProUGUI numTMP = SetupText(posNumber, "#--", 72, GOLD, FontStyles.Bold);
+            TextMeshProUGUI numTMP = SetupText(posNumber, "#--", (int)FontSizes.DisplayLarge, GOLD, FontStyles.Bold);
             numTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement numLE = posNumber.GetComponent<LayoutElement>();
             if (numLE == null) numLE = posNumber.AddComponent<LayoutElement>();
@@ -797,7 +798,7 @@ namespace DigitPark.Editor
 
             // Tiempo del jugador
             GameObject posTime = CreateOrFind(posPanel.transform, "PositionTime");
-            TextMeshProUGUI timeTMP = SetupText(posTime, "--", 44, TIME_COLOR, FontStyles.Bold);
+            TextMeshProUGUI timeTMP = SetupText(posTime, "--", (int)FontSizes.ValueLarge, TIME_COLOR, FontStyles.Bold);
             timeTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement timeLE = posTime.GetComponent<LayoutElement>();
             if (timeLE == null) timeLE = posTime.AddComponent<LayoutElement>();
@@ -826,7 +827,7 @@ namespace DigitPark.Editor
 
             GameObject loadingText = CreateOrFind(loadingPanel.transform, "LoadingText");
             SetupRectTransform(loadingText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI loadingTMP = SetupText(loadingText, "loading_rankings", 24, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI loadingTMP = SetupText(loadingText, "loading_rankings", (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold);
             loadingTMP.alignment = TextAlignmentOptions.Center;
 
             loadingPanel.SetActive(false);

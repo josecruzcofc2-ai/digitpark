@@ -37,7 +37,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Schedule
             "startTimeDropdown", "startImmediatelyToggle", "scheduledTimeText",
             // Rules
-            "roundsDropdown", "timeLimitDropdown", "allowSpectatorsToggle",
+            "roundsDropdown", "timeLimitDropdown", "maxAttemptsDropdown", "allowSpectatorsToggle",
             // Privacy
             "privateToggle", "privateCodeInput",
             // Preview
@@ -206,6 +206,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Rules
             AssignReference(so, "roundsDropdown", FindByNameContains<TMP_Dropdown>("rounds", "rondas"));
             AssignReference(so, "timeLimitDropdown", FindByNameContains<TMP_Dropdown>("timelimit", "tiempo", "limit"));
+            AssignReference(so, "maxAttemptsDropdown", FindByNameContains<TMP_Dropdown>("maxattempts", "intentos"));
             AssignToggle(so, "allowSpectatorsToggle", "spectator", "espectador", "watch");
 
             // Privacy

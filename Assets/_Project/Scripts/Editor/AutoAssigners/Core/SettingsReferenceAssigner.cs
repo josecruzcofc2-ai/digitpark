@@ -32,7 +32,8 @@ namespace DigitPark.Editor.AutoAssigners
             // Theme
             "themeDropdown", "changeThemeLabel",
             // Buttons
-            "changeNameButton", "logoutButton", "deleteAccountButton", "backButton",
+            "changeNameButton", "changeNameCostText", "copyIDButton",
+            "logoutButton", "deleteAccountButton", "backButton",
             // Shop
             "shopButton",
             // Premium Section
@@ -201,6 +202,8 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Buttons
             AssignReference(so, "changeNameButton", FindButtonByName("changename", "name", "nombre"));
+            AssignReference(so, "changeNameCostText", FindTextByName("changenamecosttext"));
+            AssignReference(so, "copyIDButton", FindButtonByName("copybutton", "copy"));
             AssignReference(so, "logoutButton", FindButtonByName("logout", "signout", "salir"));
             AssignReference(so, "deleteAccountButton", FindButtonByName("delete", "eliminar", "borrar"));
             AssignReference(so, "backButton", FindButtonByName("back", "return", "atras"));

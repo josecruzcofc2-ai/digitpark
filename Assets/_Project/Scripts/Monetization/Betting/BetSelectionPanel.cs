@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -100,12 +101,16 @@ namespace DigitPark.Monetization.Betting
         private const int MIN_CUSTOM = 5;
 
         // Visual colors
-        private static readonly Color SEL_TINT = new Color(0f, 0.85f, 0.95f, 0.18f);
         private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.14f, 1f);
+        private static readonly Color CARD_SEL = new Color(0.10f, 0.22f, 0.34f, 1f);
+        private static readonly Color SEL_OUTLINE = new Color(0f, 1f, 1f, 0.7f);
         private static readonly Color CUSTOM_SEL = new Color(0.12f, 0.08f, 0.22f, 1f);
         private static readonly Color CUSTOM_UNSEL = new Color(0.05f, 0.05f, 0.1f, 1f);
         private static readonly Color TOGGLE_ON = new Color(0f, 0.8f, 1f, 0.3f);
         private static readonly Color TOGGLE_OFF = new Color(0.08f, 0.1f, 0.16f, 1f);
+
+        // Store original outline state per card for restore on deselect
+        private Dictionary<Button, (Color color, Vector2 distance)> _originalOutlines = new Dictionary<Button, (Color, Vector2)>();
 
         private void Start()
         {
@@ -312,11 +317,29 @@ namespace DigitPark.Monetization.Betting
         private void HighlightCard(Button btn, bool on)
         {
             if (btn == null) return;
+
+            // Background tint
             var img = btn.GetComponent<Image>();
-            if (img == null) return;
-            img.color = on
-                ? new Color(CARD_BG.r + SEL_TINT.r, CARD_BG.g + SEL_TINT.g, CARD_BG.b + SEL_TINT.b, 1f)
-                : CARD_BG;
+            if (img != null)
+                img.color = on ? CARD_SEL : CARD_BG;
+
+            // Outline glow: bright cyan when selected, restore original when not
+            var outline = btn.GetComponent<Outline>();
+            if (outline != null)
+            {
+                if (on)
+                {
+                    if (!_originalOutlines.ContainsKey(btn))
+                        _originalOutlines[btn] = (outline.effectColor, outline.effectDistance);
+                    outline.effectColor = SEL_OUTLINE;
+                    outline.effectDistance = new Vector2(3, 3);
+                }
+                else if (_originalOutlines.TryGetValue(btn, out var original))
+                {
+                    outline.effectColor = original.color;
+                    outline.effectDistance = original.distance;
+                }
+            }
         }
 
         private void SetCustomHighlight(bool on)

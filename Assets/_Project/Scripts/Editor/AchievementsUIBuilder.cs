@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -18,16 +19,16 @@ namespace DigitPark.Editor
 
         private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.05f, 0.08f, 0.12f, 0.98f);
-        private static readonly Color CARD_BG = new Color(0.04f, 0.07f, 0.11f, 1f);
+        internal static readonly Color CARD_BG = new Color(0.04f, 0.07f, 0.11f, 1f);
         private static readonly Color HEADER_BG = new Color(0.03f, 0.05f, 0.08f, 0.95f);
         private static readonly Color POPUP_BG = new Color(0.04f, 0.06f, 0.1f, 0.98f);
 
-        private static readonly Color TEXT_PRIMARY = new Color(0.95f, 0.95f, 0.95f, 1f);
-        private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.7f, 0.75f, 1f);
-        private static readonly Color TEXT_DARK = new Color(0.02f, 0.04f, 0.08f, 1f);
+        internal static readonly Color TEXT_PRIMARY = new Color(0.95f, 0.95f, 0.95f, 1f);
+        internal static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.7f, 0.75f, 1f);
+        internal static readonly Color TEXT_DARK = new Color(0.02f, 0.04f, 0.08f, 1f);
 
         private static readonly Color BUTTON_SECONDARY = new Color(0.12f, 0.16f, 0.22f, 1f);
-        private static readonly Color BUTTON_SUCCESS = new Color(0.2f, 0.8f, 0.4f, 1f);
+        internal static readonly Color BUTTON_SUCCESS = new Color(0.2f, 0.8f, 0.4f, 1f);
 
         // Trophy Colors
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
@@ -39,29 +40,29 @@ namespace DigitPark.Editor
         private static readonly Color CAT_BEGINNER = new Color(0.3f, 0.7f, 1f, 1f);     // Light Blue
         private static readonly Color CAT_GAMES = new Color(0.5f, 1f, 0.5f, 1f);        // Light Green
         private static readonly Color CAT_COMPETITION = new Color(1f, 0.6f, 0.2f, 1f);  // Orange
-        private static readonly Color CAT_SECRET = new Color(0.8f, 0.2f, 1f, 1f);       // Purple
+        internal static readonly Color CAT_SECRET = new Color(0.8f, 0.2f, 1f, 1f);       // Purple
 
         // Trophy Card States
-        private static readonly Color TROPHY_UNLOCKED_GLOW = new Color(0f, 1f, 1f, 0.6f);
-        private static readonly Color TROPHY_LOCKED_BG = new Color(0.08f, 0.1f, 0.14f, 1f);
-        private static readonly Color TROPHY_PROGRESS_GLOW = new Color(1f, 0.84f, 0f, 0.5f);
-        private static readonly Color TROPHY_SECRET_GLOW = new Color(0.8f, 0.2f, 1f, 0.5f);
+        internal static readonly Color TROPHY_UNLOCKED_GLOW = new Color(0f, 1f, 1f, 0.6f);
+        internal static readonly Color TROPHY_LOCKED_BG = new Color(0.08f, 0.1f, 0.14f, 1f);
+        internal static readonly Color TROPHY_PROGRESS_GLOW = new Color(1f, 0.84f, 0f, 0.5f);
+        internal static readonly Color TROPHY_SECRET_GLOW = new Color(0.8f, 0.2f, 1f, 0.5f);
 
-        private static readonly Color GLASS_OVERLAY = new Color(1f, 1f, 1f, 0.08f);
+        internal static readonly Color GLASS_OVERLAY = new Color(1f, 1f, 1f, 0.08f);
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.9f);
 
         // ==================== PREFABS ====================
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         // ==================== DIMENSIONES ====================
-        private const float HEADER_HEIGHT = 130f;
+        private const float HEADER_HEIGHT = 150f;
         private const float TABS_HEIGHT = 65f;
         // 3 columns for mobile (1080px): (1080 - 40 padding - 30 spacing) / 3 = 336
         private const float TROPHY_CARD_WIDTH = 320f;
         private const float TROPHY_CARD_HEIGHT = 380f;
         private const float GRID_SPACING = 15f;
         private const float CONTENT_PADDING = 15f;
-        private const float DETAIL_PANEL_HEIGHT = 420f;
+        private const float DETAIL_PANEL_HEIGHT = 720f;
 
         [MenuItem("DigitPark/UI Builders/Monetization/Achievements", false, 185)]
         public static void BuildUI()
@@ -333,42 +334,39 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(titleRow, "TitleText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "LOGROS";
-            titleText.fontSize = 78;
+            titleText.fontSize = FontSizes.SceneTitle;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
-            titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 36;
-            titleText.fontSizeMax = 78;
 
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
             titleLE.minWidth = 250;
             titleLE.minHeight = 60;
 
-            // Completion Counter (instead of points)
+            // Completion Counter (top-right, aligned with title row)
             GameObject completionDisplay = FindOrCreateChild(header, "CompletionDisplay");
             RectTransform completionRT = GetOrAddComponent<RectTransform>(completionDisplay);
             completionRT.anchorMin = new Vector2(1, 1);
             completionRT.anchorMax = new Vector2(1, 1);
             completionRT.pivot = new Vector2(1, 1);
-            completionRT.anchoredPosition = new Vector2(-20, -20);
-            completionRT.sizeDelta = new Vector2(100, 40);
+            completionRT.anchoredPosition = new Vector2(-20, -15);
+            completionRT.sizeDelta = new Vector2(120, 50);
 
             TextMeshProUGUI completionText = GetOrAddComponent<TextMeshProUGUI>(completionDisplay);
             completionText.text = "5/17";
-            completionText.fontSize = 42;
+            completionText.fontSize = FontSizes.Button;
             completionText.fontStyle = FontStyles.Bold;
             completionText.color = CYAN_NEON;
             completionText.alignment = TextAlignmentOptions.MidlineRight;
 
-            // Progress Section
+            // Progress Section - more space below title row
             GameObject progressSection = FindOrCreateChild(header, "ProgressSection");
             RectTransform progressSectionRT = GetOrAddComponent<RectTransform>(progressSection);
             progressSectionRT.anchorMin = new Vector2(0, 0);
             progressSectionRT.anchorMax = new Vector2(1, 0);
             progressSectionRT.pivot = new Vector2(0.5f, 0);
-            progressSectionRT.anchoredPosition = new Vector2(0, 15);
-            progressSectionRT.sizeDelta = new Vector2(-40, 45);
+            progressSectionRT.anchoredPosition = new Vector2(0, 10);
+            progressSectionRT.sizeDelta = new Vector2(-40, 55);
 
             VerticalLayoutGroup progressVlg = GetOrAddComponent<VerticalLayoutGroup>(progressSection);
             progressVlg.spacing = 6;
@@ -390,7 +388,7 @@ namespace DigitPark.Editor
             GameObject progressLabelLeft = FindOrCreateChild(progressLabelRow, "Left");
             TextMeshProUGUI progressLeftText = GetOrAddComponent<TextMeshProUGUI>(progressLabelLeft);
             progressLeftText.text = "Progreso Total";
-            progressLeftText.fontSize = 30;
+            progressLeftText.fontSize = FontSizes.Body;
             progressLeftText.fontStyle = FontStyles.Bold;
             progressLeftText.color = TEXT_SECONDARY;
             progressLeftText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -398,7 +396,7 @@ namespace DigitPark.Editor
             GameObject progressLabelRight = FindOrCreateChild(progressLabelRow, "Right");
             TextMeshProUGUI progressRightText = GetOrAddComponent<TextMeshProUGUI>(progressLabelRight);
             progressRightText.text = "27/50 (54%)";
-            progressRightText.fontSize = 30;
+            progressRightText.fontSize = FontSizes.Body;
             progressRightText.fontStyle = FontStyles.Bold;
             progressRightText.color = CYAN_NEON;
             progressRightText.alignment = TextAlignmentOptions.MidlineRight;
@@ -538,7 +536,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = 30;
+            tabText.fontSize = FontSizes.Body;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
@@ -736,7 +734,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(centerContent, "EmptyStateText");
             TextMeshProUGUI emptyText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             emptyText.text = "No hay logros en esta categoría";
-            emptyText.fontSize = 32;
+            emptyText.fontSize = FontSizes.BodyLarge;
             emptyText.fontStyle = FontStyles.Bold;
             emptyText.color = TEXT_SECONDARY;
             emptyText.alignment = TextAlignmentOptions.Center;
@@ -747,7 +745,7 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(centerContent, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Sigue jugando para desbloquear más logros";
-            subtitleText.fontSize = 30;
+            subtitleText.fontSize = FontSizes.Body;
             subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.color = new Color(TEXT_SECONDARY.r, TEXT_SECONDARY.g, TEXT_SECONDARY.b, 0.7f);
             subtitleText.alignment = TextAlignmentOptions.Center;
@@ -762,173 +760,226 @@ namespace DigitPark.Editor
         {
             GameObject card = FindOrCreateChild(parent, name);
 
-            // Card Container for animations
+            // Clean up old structure (TrophyArea, InfoSection) if rebuilding
+            Transform oldTrophyArea = card.transform.Find("CardContainer/TrophyArea");
+            if (oldTrophyArea != null) Object.DestroyImmediate(oldTrophyArea.gameObject);
+            Transform oldInfoSection = card.transform.Find("CardContainer/InfoSection");
+            if (oldInfoSection != null) Object.DestroyImmediate(oldInfoSection.gameObject);
+
+            // ── CardContainer ──
             GameObject cardContainer = FindOrCreateChild(card, "CardContainer");
             SetRectTransformStretch(cardContainer);
 
-            // Card Background
             Image cardBg = GetOrAddComponent<Image>(cardContainer);
-            cardBg.color = isUnlocked ? new Color(0.06f, 0.12f, 0.1f, 1f) : CARD_BG;
 
-            // Border Glow
+            // Determine glow color
             Color glowColor = isSecret ? TROPHY_SECRET_GLOW :
                               isUnlocked ? TROPHY_UNLOCKED_GLOW :
                               hasProgress ? TROPHY_PROGRESS_GLOW :
-                              new Color(0.2f, 0.25f, 0.3f, 0.3f);
+                              new Color(0.3f, 0.3f, 0.4f, 0.3f);
+
+            // Card BG: tinted when unlocked, flat when locked
+            if (isUnlocked)
+            {
+                cardBg.color = new Color(
+                    0.05f + glowColor.r * 0.05f,
+                    0.08f + glowColor.g * 0.05f,
+                    0.12f + glowColor.b * 0.05f,
+                    0.95f);
+            }
+            else
+            {
+                cardBg.color = CARD_BG;
+            }
+
+            // Outline on CardContainer
             AddOutline(cardContainer, glowColor, isUnlocked ? 2 : 1);
 
-            // Glass Overlay
+            // ── BorderGlow (child Image, stretch +4px, firstSibling) ──
+            GameObject borderGlow = FindOrCreateChild(cardContainer, "BorderGlow");
+            RectTransform borderRT = GetOrAddComponent<RectTransform>(borderGlow);
+            borderRT.anchorMin = Vector2.zero;
+            borderRT.anchorMax = Vector2.one;
+            borderRT.sizeDelta = new Vector2(4, 4);
+            borderRT.anchoredPosition = Vector2.zero;
+
+            Image borderImage = GetOrAddComponent<Image>(borderGlow);
+            borderImage.color = glowColor;
+            borderImage.raycastTarget = false;
+            borderGlow.transform.SetAsFirstSibling();
+
+            // ── GlassOverlay ──
             GameObject glassOverlay = FindOrCreateChild(cardContainer, "GlassOverlay");
             SetRectTransformStretch(glassOverlay);
             RectTransform glassRT = glassOverlay.GetComponent<RectTransform>();
             glassRT.offsetMax = new Vector2(0, -TROPHY_CARD_HEIGHT * 0.4f);
 
             Image glassImage = GetOrAddComponent<Image>(glassOverlay);
-            glassImage.color = isUnlocked ? new Color(1f, 1f, 1f, 0.1f) : GLASS_OVERLAY;
+            glassImage.color = new Color(1f, 1f, 1f, isUnlocked ? 0.1f : 0.05f);
             glassImage.raycastTarget = false;
 
-            // Trophy Display Area
-            GameObject trophyArea = FindOrCreateChild(cardContainer, "TrophyArea");
-            RectTransform trophyAreaRT = GetOrAddComponent<RectTransform>(trophyArea);
-            trophyAreaRT.anchorMin = new Vector2(0.5f, 1);
-            trophyAreaRT.anchorMax = new Vector2(0.5f, 1);
-            trophyAreaRT.pivot = new Vector2(0.5f, 1);
-            trophyAreaRT.anchoredPosition = new Vector2(0, -20);
-            trophyAreaRT.sizeDelta = new Vector2(100, 100);
-
-            // Trophy Icon
-            GameObject trophyIcon = FindOrCreateChild(trophyArea, "TrophyIcon");
-            SetRectTransformStretch(trophyIcon);
-            RectTransform trophyIconRT = trophyIcon.GetComponent<RectTransform>();
-            trophyIconRT.offsetMin = new Vector2(15, 15);
-            trophyIconRT.offsetMax = new Vector2(-15, -15);
+            // ── TrophyIcon (direct child of CardContainer, 220x220, top-center) ──
+            GameObject trophyIcon = FindOrCreateChild(cardContainer, "TrophyIcon");
+            RectTransform trophyRT = GetOrAddComponent<RectTransform>(trophyIcon);
+            trophyRT.anchorMin = new Vector2(0.5f, 1);
+            trophyRT.anchorMax = new Vector2(0.5f, 1);
+            trophyRT.pivot = new Vector2(0.5f, 1);
+            trophyRT.anchoredPosition = new Vector2(0, -10);
+            trophyRT.sizeDelta = new Vector2(220, 220);
 
             Image trophyImage = GetOrAddComponent<Image>(trophyIcon);
-            trophyImage.color = isSecret ? new Color(0.4f, 0.4f, 0.5f, 0.5f) :
-                                isUnlocked ? accentColor : new Color(0.3f, 0.3f, 0.35f, 1f);
             trophyImage.raycastTarget = false;
 
-            // Question Mark for secret
+            // TrophyIcon visibility & color by state
             if (isSecret)
             {
-                GameObject questionMark = FindOrCreateChild(trophyArea, "QuestionMark");
-                SetRectTransformStretch(questionMark);
-                TextMeshProUGUI questionText = GetOrAddComponent<TextMeshProUGUI>(questionMark);
-                questionText.text = "?";
-                questionText.fontSize = 48;
-                questionText.fontStyle = FontStyles.Bold;
-                questionText.color = CAT_SECRET;
-                questionText.alignment = TextAlignmentOptions.Center;
+                trophyIcon.SetActive(false);
+                trophyImage.color = new Color(0.4f, 0.4f, 0.5f, 0.5f);
             }
-
-            // Locked Overlay
-            if (!isUnlocked && !isSecret)
+            else
             {
-                GameObject lockedOverlay = FindOrCreateChild(trophyArea, "LockedOverlay");
-                SetRectTransformStretch(lockedOverlay);
-
-                Image lockedImage = GetOrAddComponent<Image>(lockedOverlay);
-                lockedImage.color = new Color(0f, 0f, 0f, 0.5f);
-                lockedImage.raycastTarget = false;
-
-                GameObject lockIcon = FindOrCreateChild(lockedOverlay, "LockIcon");
-                RectTransform lockRT = GetOrAddComponent<RectTransform>(lockIcon);
-                lockRT.anchorMin = new Vector2(0.5f, 0.5f);
-                lockRT.anchorMax = new Vector2(0.5f, 0.5f);
-                lockRT.sizeDelta = new Vector2(30, 30);
-
-                Image lockImage = GetOrAddComponent<Image>(lockIcon);
-                lockImage.color = TEXT_SECONDARY;
-                lockImage.raycastTarget = false;
+                trophyIcon.SetActive(true);
+                trophyImage.color = isUnlocked ? Color.white : new Color(0.4f, 0.4f, 0.4f, 1f);
             }
 
-            // Info Section
-            GameObject infoSection = FindOrCreateChild(cardContainer, "InfoSection");
-            RectTransform infoRT = GetOrAddComponent<RectTransform>(infoSection);
-            infoRT.anchorMin = new Vector2(0, 0);
-            infoRT.anchorMax = new Vector2(1, 0);
-            infoRT.pivot = new Vector2(0.5f, 0);
-            infoRT.anchoredPosition = new Vector2(0, 15);
-            infoRT.sizeDelta = new Vector2(0, 85);
+            // ── TrophyShadow (child of TrophyIcon, 180x25, bottom) ──
+            GameObject trophyShadow = FindOrCreateChild(trophyIcon, "TrophyShadow");
+            RectTransform shadowRT = GetOrAddComponent<RectTransform>(trophyShadow);
+            shadowRT.anchorMin = new Vector2(0.5f, 0);
+            shadowRT.anchorMax = new Vector2(0.5f, 0);
+            shadowRT.pivot = new Vector2(0.5f, 1);
+            shadowRT.anchoredPosition = new Vector2(0, -5);
+            shadowRT.sizeDelta = new Vector2(180, 25);
 
-            VerticalLayoutGroup infoVlg = GetOrAddComponent<VerticalLayoutGroup>(infoSection);
-            infoVlg.spacing = 6;
-            infoVlg.padding = new RectOffset(12, 12, 8, 8);
-            infoVlg.childAlignment = TextAnchor.LowerCenter;
-            infoVlg.childControlWidth = true;
-            infoVlg.childControlHeight = true;
+            Image shadowImage = GetOrAddComponent<Image>(trophyShadow);
+            shadowImage.color = new Color(0f, 0f, 0f, 0.3f);
+            shadowImage.raycastTarget = false;
+            trophyShadow.SetActive(isUnlocked && !isSecret);
 
-            // Title
-            GameObject titleObj = FindOrCreateChild(infoSection, "Title");
+            // ── LockedOverlay (child of TrophyIcon, stretch) ──
+            GameObject lockedOverlay = FindOrCreateChild(trophyIcon, "LockedOverlay");
+            SetRectTransformStretch(lockedOverlay);
+
+            Image lockedImage = GetOrAddComponent<Image>(lockedOverlay);
+            lockedImage.color = new Color(0f, 0f, 0f, 0.5f);
+            lockedImage.raycastTarget = false;
+            lockedOverlay.SetActive(!isUnlocked && !isSecret);
+
+            // ── QuestionMark (child of TrophyIcon, stretch) ──
+            GameObject questionMark = FindOrCreateChild(trophyIcon, "QuestionMark");
+            SetRectTransformStretch(questionMark);
+
+            TextMeshProUGUI questionText = GetOrAddComponent<TextMeshProUGUI>(questionMark);
+            questionText.text = "?";
+            questionText.fontSize = FontSizes.ValueMedium;
+            questionText.fontStyle = FontStyles.Bold;
+            questionText.color = CAT_SECRET;
+            questionText.alignment = TextAlignmentOptions.Center;
+            questionMark.SetActive(isSecret);
+
+            // ── ProgressContainer (absolute pos, y=70, h=40) ──
+            GameObject progressContainer = FindOrCreateChild(cardContainer, "ProgressContainer");
+            RectTransform progressContainerRT = GetOrAddComponent<RectTransform>(progressContainer);
+            progressContainerRT.anchorMin = new Vector2(0, 0);
+            progressContainerRT.anchorMax = new Vector2(1, 0);
+            progressContainerRT.pivot = new Vector2(0.5f, 0);
+            progressContainerRT.anchoredPosition = new Vector2(0, 70);
+            progressContainerRT.sizeDelta = new Vector2(-24, 40);
+
+            VerticalLayoutGroup progressVlg = GetOrAddComponent<VerticalLayoutGroup>(progressContainer);
+            progressVlg.spacing = 4;
+            progressVlg.padding = new RectOffset(4, 4, 2, 2);
+            progressVlg.childAlignment = TextAnchor.MiddleCenter;
+            progressVlg.childControlWidth = true;
+            progressVlg.childControlHeight = true;
+
+            // Progress Background
+            GameObject progressBg = FindOrCreateChild(progressContainer, "ProgressBackground");
+            Image progressBgImage = GetOrAddComponent<Image>(progressBg);
+            progressBgImage.color = new Color(0.1f, 0.12f, 0.15f, 1f);
+            progressBgImage.raycastTarget = false;
+            LayoutElement progressBgLE = GetOrAddComponent<LayoutElement>(progressBg);
+            progressBgLE.minHeight = 10;
+            progressBgLE.preferredHeight = 10;
+
+            // Progress Fill (anchor-based)
+            GameObject progressFill = FindOrCreateChild(progressBg, "ProgressFill");
+            RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
+            fillRT.anchorMin = Vector2.zero;
+            fillRT.anchorMax = new Vector2(progressPercent / 100f, 1);
+            fillRT.sizeDelta = Vector2.zero;
+
+            Image fillImage = GetOrAddComponent<Image>(progressFill);
+            fillImage.color = accentColor;
+            fillImage.raycastTarget = false;
+
+            // Progress Text
+            GameObject progressTextObj = FindOrCreateChild(progressContainer, "ProgressText");
+            TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
+            progressTmp.text = $"{progressPercent}%";
+            progressTmp.fontSize = FontSizes.Body;
+            progressTmp.fontStyle = FontStyles.Bold;
+            progressTmp.color = TEXT_SECONDARY;
+            progressTmp.alignment = TextAlignmentOptions.Center;
+            LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressTextObj);
+            progressTextLE.minHeight = 22;
+
+            // Toggle visibility: active only when in-progress
+            progressContainer.SetActive(hasProgress && !isUnlocked);
+
+            // ── TitleText (absolute pos, y=15, h=60) ──
+            GameObject titleObj = FindOrCreateChild(cardContainer, "TitleText");
+            RectTransform titleRT = GetOrAddComponent<RectTransform>(titleObj);
+            titleRT.anchorMin = new Vector2(0, 0);
+            titleRT.anchorMax = new Vector2(1, 0);
+            titleRT.pivot = new Vector2(0.5f, 0);
+            titleRT.anchoredPosition = new Vector2(0, 15);
+            titleRT.sizeDelta = new Vector2(-16, 60);
+
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
-            titleText.text = title;
-            titleText.fontSize = 30;
+            titleText.text = isSecret ? "???" : title;
+            titleText.fontSize = FontSizes.DisplayMedium;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = isUnlocked ? TEXT_PRIMARY : (isSecret ? CAT_SECRET : TEXT_SECONDARY);
+            titleText.color = isUnlocked ? Color.white : (isSecret ? CAT_SECRET : TEXT_SECONDARY);
             titleText.alignment = TextAlignmentOptions.Center;
-            titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 18;
-            titleText.fontSizeMax = 30;
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minHeight = 24;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Progress Bar (if in progress)
-            if (hasProgress && !isUnlocked)
-            {
-                GameObject progressBar = FindOrCreateChild(infoSection, "ProgressBar");
-                LayoutElement progressLE = GetOrAddComponent<LayoutElement>(progressBar);
-                progressLE.minHeight = 12;
+            // ── CompletedBadge (always created, toggled with SetActive) ──
+            GameObject completedBadge = FindOrCreateChild(cardContainer, "CompletedBadge");
+            RectTransform badgeRT = GetOrAddComponent<RectTransform>(completedBadge);
+            badgeRT.anchorMin = new Vector2(1, 1);
+            badgeRT.anchorMax = new Vector2(1, 1);
+            badgeRT.pivot = new Vector2(1, 1);
+            badgeRT.anchoredPosition = new Vector2(-8, -8);
+            badgeRT.sizeDelta = new Vector2(26, 26);
 
-                Image progressBg = GetOrAddComponent<Image>(progressBar);
-                progressBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
-                progressBg.raycastTarget = false;
+            Image badgeImage = GetOrAddComponent<Image>(completedBadge);
+            badgeImage.color = BUTTON_SUCCESS;
+            badgeImage.raycastTarget = false;
 
-                GameObject progressFill = FindOrCreateChild(progressBar, "Fill");
-                RectTransform fillRT = GetOrAddComponent<RectTransform>(progressFill);
-                fillRT.anchorMin = Vector2.zero;
-                fillRT.anchorMax = new Vector2(progressPercent / 100f, 1);
-                fillRT.sizeDelta = Vector2.zero;
+            GameObject checkmark = FindOrCreateChild(completedBadge, "Checkmark");
+            SetRectTransformStretch(checkmark);
+            TextMeshProUGUI checkText = GetOrAddComponent<TextMeshProUGUI>(checkmark);
+            checkText.text = "V";
+            checkText.fontSize = FontSizes.Body;
+            checkText.fontStyle = FontStyles.Bold;
+            checkText.color = TEXT_DARK;
+            checkText.alignment = TextAlignmentOptions.Center;
+            completedBadge.SetActive(isUnlocked);
 
-                Image fillImage = GetOrAddComponent<Image>(progressFill);
-                fillImage.color = accentColor;
-                fillImage.raycastTarget = false;
+            // ── ShineEffect (inactive, for animations) ──
+            GameObject shineEffect = FindOrCreateChild(cardContainer, "ShineEffect");
+            RectTransform shineRT = GetOrAddComponent<RectTransform>(shineEffect);
+            shineRT.anchorMin = new Vector2(0, 0);
+            shineRT.anchorMax = new Vector2(0, 1);
+            shineRT.pivot = new Vector2(0.5f, 0.5f);
+            shineRT.anchoredPosition = new Vector2(-200, 0);
+            shineRT.sizeDelta = new Vector2(60, 0);
 
-                // Progress Text
-                GameObject progressText = FindOrCreateChild(infoSection, "ProgressText");
-                TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressText);
-                progressTmp.text = $"{progressPercent}%";
-                progressTmp.fontSize = 30;
-                progressTmp.fontStyle = FontStyles.Bold;
-                progressTmp.color = TEXT_SECONDARY;
-                progressTmp.alignment = TextAlignmentOptions.Center;
-                LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressText);
-                progressTextLE.minHeight = 15;
-            }
-
-            // Completed Badge
-            if (isUnlocked)
-            {
-                GameObject completedBadge = FindOrCreateChild(cardContainer, "CompletedBadge");
-                RectTransform badgeRT = GetOrAddComponent<RectTransform>(completedBadge);
-                badgeRT.anchorMin = new Vector2(1, 1);
-                badgeRT.anchorMax = new Vector2(1, 1);
-                badgeRT.pivot = new Vector2(1, 1);
-                badgeRT.anchoredPosition = new Vector2(-8, -8);
-                badgeRT.sizeDelta = new Vector2(28, 28);
-
-                Image badgeImage = GetOrAddComponent<Image>(completedBadge);
-                badgeImage.color = BUTTON_SUCCESS;
-                badgeImage.raycastTarget = false;
-
-                GameObject checkmark = FindOrCreateChild(completedBadge, "Checkmark");
-                SetRectTransformStretch(checkmark);
-                TextMeshProUGUI checkText = GetOrAddComponent<TextMeshProUGUI>(checkmark);
-                checkText.text = "V";
-                checkText.fontSize = 22;
-                checkText.fontStyle = FontStyles.Bold;
-                checkText.color = TEXT_DARK;
-                checkText.alignment = TextAlignmentOptions.Center;
-            }
+            Image shineImage = GetOrAddComponent<Image>(shineEffect);
+            shineImage.color = new Color(1f, 1f, 1f, 0.15f);
+            shineImage.raycastTarget = false;
+            shineEffect.SetActive(false);
 
             // Make card clickable
             Button cardButton = GetOrAddComponent<Button>(card);
@@ -954,7 +1005,7 @@ namespace DigitPark.Editor
             RectTransform panelRT = GetOrAddComponent<RectTransform>(panel);
             panelRT.anchorMin = new Vector2(0.5f, 0.5f);
             panelRT.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRT.sizeDelta = new Vector2(480, DETAIL_PANEL_HEIGHT);
+            panelRT.sizeDelta = new Vector2(700, DETAIL_PANEL_HEIGHT);
 
             Image panelBg = GetOrAddComponent<Image>(panel);
             panelBg.color = POPUP_BG;
@@ -965,81 +1016,96 @@ namespace DigitPark.Editor
             panelCanvasGroup.alpha = 1f;
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(panel);
-            vlg.spacing = 18;
-            vlg.padding = new RectOffset(30, 30, 30, 25);
+            vlg.spacing = 16;
+            vlg.padding = new RectOffset(35, 35, 35, 30);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Close Button
+            // ==================== RED CLOSE BUTTON (top-right, like CashWallet) ====================
             GameObject closeBtn = FindOrCreateChild(panel, "CloseButton");
             RectTransform closeRT = GetOrAddComponent<RectTransform>(closeBtn);
             closeRT.anchorMin = new Vector2(1, 1);
             closeRT.anchorMax = new Vector2(1, 1);
             closeRT.pivot = new Vector2(1, 1);
-            closeRT.anchoredPosition = new Vector2(-12, -12);
-            closeRT.sizeDelta = new Vector2(40, 40);
+            closeRT.anchoredPosition = new Vector2(-15, -15);
+            closeRT.sizeDelta = new Vector2(90, 90);
+
+            // Ignore layout so VLG doesn't control position
+            LayoutElement closeBtnLE = GetOrAddComponent<LayoutElement>(closeBtn);
+            closeBtnLE.ignoreLayout = true;
 
             Image closeBg = GetOrAddComponent<Image>(closeBtn);
-            closeBg.color = BUTTON_SECONDARY;
+            closeBg.color = new Color(0.85f, 0.15f, 0.15f, 1f); // RED
+
             Button closeButton = GetOrAddComponent<Button>(closeBtn);
-            SetupButtonColors(closeButton, BUTTON_SECONDARY);
+            closeButton.targetGraphic = closeBg;
+            ColorBlock closeColors = closeButton.colors;
+            closeColors.normalColor = Color.white;
+            closeColors.highlightedColor = new Color(1f, 0.85f, 0.85f, 1f);
+            closeColors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            closeColors.selectedColor = Color.white;
+            closeButton.colors = closeColors;
+
+            Outline closeOutline = GetOrAddComponent<Outline>(closeBtn);
+            closeOutline.effectColor = new Color(1f, 0.35f, 0.35f, 0.8f);
+            closeOutline.effectDistance = new Vector2(2f, 2f);
 
             GameObject closeText = FindOrCreateChild(closeBtn, "Text");
             TextMeshProUGUI closeTmp = GetOrAddComponent<TextMeshProUGUI>(closeText);
             closeTmp.text = "X";
-            closeTmp.fontSize = 32;
+            closeTmp.fontSize = FontSizes.DisplayLarge;
             closeTmp.fontStyle = FontStyles.Bold;
             closeTmp.color = TEXT_PRIMARY;
             closeTmp.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(closeText);
 
-            // Trophy Icon (large)
+            // ==================== TROPHY ICON (large, matching card icon size) ====================
             GameObject trophyObj = FindOrCreateChild(panel, "DetailTrophyIcon");
             Image trophyBg = GetOrAddComponent<Image>(trophyObj);
             trophyBg.color = GOLD;
             LayoutElement trophyLE = GetOrAddComponent<LayoutElement>(trophyObj);
-            trophyLE.minWidth = 90;
-            trophyLE.minHeight = 90;
-            trophyLE.preferredWidth = 90;
-            trophyLE.preferredHeight = 90;
+            trophyLE.minWidth = 180;
+            trophyLE.minHeight = 180;
+            trophyLE.preferredWidth = 180;
+            trophyLE.preferredHeight = 180;
 
-            // Title
+            // ==================== TITLE (DisplayMedium to match Settings standard) ====================
             GameObject titleObj = FindOrCreateChild(panel, "DetailTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Primera Victoria";
-            titleText.fontSize = 48;
+            titleText.fontSize = FontSizes.DisplayMedium;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minHeight = 40;
+            titleLE.minHeight = 55;
 
-            // Description
+            // ==================== DESCRIPTION (SectionHeader to match Settings) ====================
             GameObject descObj = FindOrCreateChild(panel, "DetailDescription");
             TextMeshProUGUI descText = GetOrAddComponent<TextMeshProUGUI>(descObj);
             descText.text = "Gana tu primera partida en cualquier modo de juego.";
-            descText.fontSize = 30;
+            descText.fontSize = FontSizes.SectionHeader;
             descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             descText.alignment = TextAlignmentOptions.Center;
             LayoutElement descLE = GetOrAddComponent<LayoutElement>(descObj);
-            descLE.minHeight = 45;
+            descLE.minHeight = 55;
 
-            // Category Text
+            // ==================== CATEGORY TEXT ====================
             GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
             TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
             categoryText.text = "Categoria: Principiante";
-            categoryText.fontSize = 30;
+            categoryText.fontSize = FontSizes.Button;
             categoryText.fontStyle = FontStyles.Bold;
             categoryText.color = CYAN_NEON;
             categoryText.alignment = TextAlignmentOptions.Center;
             LayoutElement categoryLE = GetOrAddComponent<LayoutElement>(categoryObj);
-            categoryLE.minHeight = 22;
+            categoryLE.minHeight = 35;
 
-            // Progress Section
+            // ==================== PROGRESS SECTION ====================
             GameObject progressSection = FindOrCreateChild(panel, "DetailProgressSection");
             VerticalLayoutGroup progVlg = GetOrAddComponent<VerticalLayoutGroup>(progressSection);
             progVlg.spacing = 8;
@@ -1048,7 +1114,7 @@ namespace DigitPark.Editor
             progVlg.childControlHeight = true;
             progVlg.childForceExpandWidth = true;
             LayoutElement progLE = GetOrAddComponent<LayoutElement>(progressSection);
-            progLE.minHeight = 55;
+            progLE.minHeight = 65;
 
             // Progress Bar (Slider)
             GameObject progressBar = FindOrCreateChild(progressSection, "DetailProgressBar");
@@ -1056,7 +1122,7 @@ namespace DigitPark.Editor
             progressBarBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
             AddOutline(progressBar, CYAN_DARK * 0.5f);
             LayoutElement progressBarLE = GetOrAddComponent<LayoutElement>(progressBar);
-            progressBarLE.minHeight = 22;
+            progressBarLE.minHeight = 26;
 
             // Add Slider component
             Slider detailSlider = GetOrAddComponent<Slider>(progressBar);
@@ -1086,24 +1152,24 @@ namespace DigitPark.Editor
             GameObject progressTextObj = FindOrCreateChild(progressSection, "DetailProgressText");
             TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
             progressTmp.text = "1/1 Completado";
-            progressTmp.fontSize = 30;
+            progressTmp.fontSize = FontSizes.Button;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = BUTTON_SUCCESS;
             progressTmp.alignment = TextAlignmentOptions.Center;
             LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressTextObj);
-            progressTextLE.minHeight = 20;
+            progressTextLE.minHeight = 30;
 
-            // Reward Section
+            // ==================== REWARD SECTION ====================
             GameObject rewardSection = FindOrCreateChild(panel, "DetailRewardSection");
             Image rewardBg = GetOrAddComponent<Image>(rewardSection);
             rewardBg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
             AddOutline(rewardSection, GOLD * 0.5f);
             LayoutElement rewardSectionLE = GetOrAddComponent<LayoutElement>(rewardSection);
-            rewardSectionLE.minHeight = 60;
+            rewardSectionLE.minHeight = 70;
 
             HorizontalLayoutGroup rewardHlg = GetOrAddComponent<HorizontalLayoutGroup>(rewardSection);
-            rewardHlg.spacing = 12;
-            rewardHlg.padding = new RectOffset(18, 18, 12, 12);
+            rewardHlg.spacing = 15;
+            rewardHlg.padding = new RectOffset(20, 20, 14, 14);
             rewardHlg.childAlignment = TextAnchor.MiddleCenter;
             rewardHlg.childControlWidth = false;
             rewardHlg.childControlHeight = true;
@@ -1112,36 +1178,55 @@ namespace DigitPark.Editor
             Image rewardIconImage = GetOrAddComponent<Image>(rewardIcon);
             rewardIconImage.color = new Color(0.4f, 0.8f, 1f, 1f); // Gem blue
             LayoutElement rewardIconLE = GetOrAddComponent<LayoutElement>(rewardIcon);
-            rewardIconLE.minWidth = 35;
-            rewardIconLE.minHeight = 35;
+            rewardIconLE.minWidth = 45;
+            rewardIconLE.minHeight = 45;
 
             GameObject rewardAmount = FindOrCreateChild(rewardSection, "RewardAmount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "50 Gemas";
-            rewardTmp.fontSize = 36;
+            rewardTmp.fontSize = FontSizes.SectionHeader;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
             LayoutElement rewardAmountLE = GetOrAddComponent<LayoutElement>(rewardAmount);
             rewardAmountLE.flexibleWidth = 1;
 
-            // Claim Button
+            // ==================== CLAIM BUTTON ====================
             GameObject claimBtn = FindOrCreateChild(panel, "ClaimRewardButton");
             Image claimBg = GetOrAddComponent<Image>(claimBtn);
             claimBg.color = BUTTON_SUCCESS;
             Button claimButton = GetOrAddComponent<Button>(claimBtn);
             SetupButtonColors(claimButton, BUTTON_SUCCESS);
             LayoutElement claimLE = GetOrAddComponent<LayoutElement>(claimBtn);
-            claimLE.minHeight = 55;
+            claimLE.minHeight = 65;
 
             GameObject claimText = FindOrCreateChild(claimBtn, "ClaimButtonText");
             TextMeshProUGUI claimTmp = GetOrAddComponent<TextMeshProUGUI>(claimText);
             claimTmp.text = "RECLAMAR RECOMPENSA";
-            claimTmp.fontSize = 36;
+            claimTmp.fontSize = FontSizes.LabelLarge;
             claimTmp.fontStyle = FontStyles.Bold;
             claimTmp.color = TEXT_DARK;
             claimTmp.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(claimText);
+
+            // ==================== CANCEL BUTTON (secondary, like CashWallet) ====================
+            GameObject cancelBtn = FindOrCreateChild(panel, "CancelButton");
+            Image cancelBg = GetOrAddComponent<Image>(cancelBtn);
+            cancelBg.color = BUTTON_SECONDARY;
+            Button cancelButton = GetOrAddComponent<Button>(cancelBtn);
+            SetupButtonColors(cancelButton, BUTTON_SECONDARY);
+            AddOutline(cancelBtn, CYAN_DARK * 0.5f);
+            LayoutElement cancelLE = GetOrAddComponent<LayoutElement>(cancelBtn);
+            cancelLE.minHeight = 55;
+
+            GameObject cancelText = FindOrCreateChild(cancelBtn, "CancelButtonText");
+            TextMeshProUGUI cancelTmp = GetOrAddComponent<TextMeshProUGUI>(cancelText);
+            cancelTmp.text = "CANCELAR";
+            cancelTmp.fontSize = FontSizes.Button;
+            cancelTmp.fontStyle = FontStyles.Bold;
+            cancelTmp.color = TEXT_SECONDARY;
+            cancelTmp.alignment = TextAlignmentOptions.Center;
+            SetRectTransformStretch(cancelText);
 
             Debug.Log("[TrophyShowcase] DetailPanel creado");
         }
@@ -1197,7 +1282,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(centerContent, "CelebrationTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "LOGRO DESBLOQUEADO!";
-            titleText.fontSize = 52;
+            titleText.fontSize = FontSizes.CardTitle;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1208,7 +1293,7 @@ namespace DigitPark.Editor
             GameObject nameObj = FindOrCreateChild(centerContent, "CelebrationAchievementName");
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = "Primera Victoria";
-            nameText.fontSize = 42;
+            nameText.fontSize = FontSizes.ValueMedium;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Center;
@@ -1235,7 +1320,7 @@ namespace DigitPark.Editor
             GameObject rewardAmount = FindOrCreateChild(rewardDisplay, "Amount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "+50";
-            rewardTmp.fontSize = 52;
+            rewardTmp.fontSize = FontSizes.CardTitle;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1255,7 +1340,7 @@ namespace DigitPark.Editor
             GameObject continueText = FindOrCreateChild(continueBtn, "Text");
             TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
             continueTmp.text = "CONTINUAR";
-            continueTmp.fontSize = 40;
+            continueTmp.fontSize = FontSizes.LabelLarge;
             continueTmp.fontStyle = FontStyles.Bold;
             continueTmp.color = TEXT_DARK;
             continueTmp.alignment = TextAlignmentOptions.Center;
@@ -1326,15 +1411,15 @@ namespace DigitPark.Editor
             borderImage.color = new Color(0.3f, 0.3f, 0.4f, 0.3f);
             borderGlow.transform.SetAsFirstSibling();
 
-            // Trophy Icon
+            // Trophy Icon - large and prominent (x4 from original 70x70)
             GameObject trophyIcon = new GameObject("TrophyIcon");
             trophyIcon.transform.SetParent(cardContainer.transform, false);
             RectTransform trophyRT = trophyIcon.AddComponent<RectTransform>();
             trophyRT.anchorMin = new Vector2(0.5f, 1);
             trophyRT.anchorMax = new Vector2(0.5f, 1);
             trophyRT.pivot = new Vector2(0.5f, 1);
-            trophyRT.anchoredPosition = new Vector2(0, -30);
-            trophyRT.sizeDelta = new Vector2(70, 70);
+            trophyRT.anchoredPosition = new Vector2(0, -10);
+            trophyRT.sizeDelta = new Vector2(220, 220);
 
             Image trophyImage = trophyIcon.AddComponent<Image>();
             trophyImage.color = new Color(0.3f, 0.3f, 0.35f, 1f);
@@ -1347,7 +1432,7 @@ namespace DigitPark.Editor
             shadowRT.anchorMax = new Vector2(0.5f, 0);
             shadowRT.pivot = new Vector2(0.5f, 1);
             shadowRT.anchoredPosition = new Vector2(0, -5);
-            shadowRT.sizeDelta = new Vector2(60, 15);
+            shadowRT.sizeDelta = new Vector2(180, 25);
 
             Image shadowImage = trophyShadow.AddComponent<Image>();
             shadowImage.color = new Color(0f, 0f, 0f, 0.3f);
@@ -1374,24 +1459,25 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI questionText = questionMark.AddComponent<TextMeshProUGUI>();
             questionText.text = "?";
-            questionText.fontSize = 42;
+            questionText.fontSize = FontSizes.ValueMedium;
             questionText.fontStyle = FontStyles.Bold;
             questionText.color = CAT_SECRET;
             questionText.alignment = TextAlignmentOptions.Center;
             questionMark.SetActive(false);
 
-            // Progress Container
+            // Progress Container - positioned above title with enough clearance
             GameObject progressContainer = new GameObject("ProgressContainer");
             progressContainer.transform.SetParent(cardContainer.transform, false);
             RectTransform progressContainerRT = progressContainer.AddComponent<RectTransform>();
             progressContainerRT.anchorMin = new Vector2(0, 0);
             progressContainerRT.anchorMax = new Vector2(1, 0);
             progressContainerRT.pivot = new Vector2(0.5f, 0);
-            progressContainerRT.anchoredPosition = new Vector2(0, 60);
-            progressContainerRT.sizeDelta = new Vector2(-24, 30);
+            progressContainerRT.anchoredPosition = new Vector2(0, 70);
+            progressContainerRT.sizeDelta = new Vector2(-24, 40);
 
             VerticalLayoutGroup progressVlg = progressContainer.AddComponent<VerticalLayoutGroup>();
             progressVlg.spacing = 4;
+            progressVlg.padding = new RectOffset(4, 4, 2, 2);
             progressVlg.childAlignment = TextAnchor.MiddleCenter;
             progressVlg.childControlWidth = true;
             progressVlg.childControlHeight = true;
@@ -1419,35 +1505,35 @@ namespace DigitPark.Editor
             Image fillImage = progressFill.AddComponent<Image>();
             fillImage.color = GOLD;
 
-            // Progress Text
+            // Progress Text - use smaller font that fits the container
             GameObject progressText = new GameObject("ProgressText");
             progressText.transform.SetParent(progressContainer.transform, false);
 
             TextMeshProUGUI progressTmp = progressText.AddComponent<TextMeshProUGUI>();
             progressTmp.text = "50%";
-            progressTmp.fontSize = 30;
+            progressTmp.fontSize = FontSizes.Body;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = TEXT_SECONDARY;
             progressTmp.alignment = TextAlignmentOptions.Center;
 
             LayoutElement progressTextLE = progressText.AddComponent<LayoutElement>();
-            progressTextLE.minHeight = 14;
+            progressTextLE.minHeight = 22;
 
             progressContainer.SetActive(false);
 
-            // Title Text
+            // Title Text - x2 size, auto-sizing for long names
             GameObject titleText = new GameObject("TitleText");
             titleText.transform.SetParent(cardContainer.transform, false);
             RectTransform titleRT = titleText.AddComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0, 0);
             titleRT.anchorMax = new Vector2(1, 0);
             titleRT.pivot = new Vector2(0.5f, 0);
-            titleRT.anchoredPosition = new Vector2(0, 32);
-            titleRT.sizeDelta = new Vector2(-20, 25);
+            titleRT.anchoredPosition = new Vector2(0, 15);
+            titleRT.sizeDelta = new Vector2(-16, 60);
 
             TextMeshProUGUI titleTmp = titleText.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Logro";
-            titleTmp.fontSize = 30;
+            titleTmp.fontSize = FontSizes.DisplayMedium;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = TEXT_SECONDARY;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -1474,7 +1560,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTmp = checkmark.AddComponent<TextMeshProUGUI>();
             checkTmp.text = "V";
-            checkTmp.fontSize = 22;
+            checkTmp.fontSize = FontSizes.Body;
             checkTmp.fontStyle = FontStyles.Bold;
             checkTmp.color = TEXT_DARK;
             checkTmp.alignment = TextAlignmentOptions.Center;

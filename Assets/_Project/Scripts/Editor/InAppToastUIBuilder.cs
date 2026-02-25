@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -107,7 +108,7 @@ namespace DigitPark.Editor
             itRT.offsetMax = Vector2.zero;
             var itTMP = iconText.AddComponent<TextMeshProUGUI>();
             itTMP.text = "🔔";
-            itTMP.fontSize = 30;
+            itTMP.fontSize = FontSizes.Body;
             itTMP.color = CYAN_NEON;
             itTMP.alignment = TextAlignmentOptions.Center;
 
@@ -130,12 +131,13 @@ namespace DigitPark.Editor
             tTitleRT.offsetMax = Vector2.zero;
             var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Notificación";
-            titleTMP.fontSize = 30;
+            titleTMP.fontSize = FontSizes.Body;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Left;
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
             titleTMP.maxVisibleLines = 1;
+
 
             // Body
             var bodyGO = new GameObject("Body");
@@ -147,11 +149,12 @@ namespace DigitPark.Editor
             bodyRT.offsetMax = Vector2.zero;
             var bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
             bodyTMP.text = "Descripción de la notificación";
-            bodyTMP.fontSize = 30;
+            bodyTMP.fontSize = FontSizes.Body;
             bodyTMP.color = TEXT_SECONDARY;
             bodyTMP.alignment = TextAlignmentOptions.Left;
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
             bodyTMP.maxVisibleLines = 1;
+
 
             // ---- Actions (right side) ----
             var actionsRow = new GameObject("ActionsRow");
@@ -199,7 +202,7 @@ namespace DigitPark.Editor
             xRT.offsetMax = Vector2.zero;
             var xTMP = xText.AddComponent<TextMeshProUGUI>();
             xTMP.text = "✕";
-            xTMP.fontSize = 22;
+            xTMP.fontSize = FontSizes.Body;
             xTMP.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             xTMP.alignment = TextAlignmentOptions.Center;
 
@@ -260,10 +263,11 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-3, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 30;
+            tTMP.fontSize = FontSizes.Body;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+
 
             return btn;
         }

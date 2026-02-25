@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -212,7 +213,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "AMIGOS";
-            tTMP.fontSize = 78;
+            tTMP.fontSize = FontSizes.SceneTitle;
             tTMP.color = TEXT_WHITE;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -226,7 +227,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 amigos";
-            cTMP.fontSize = 40;
+            cTMP.fontSize = FontSizes.LabelLarge;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -285,7 +286,7 @@ namespace DigitPark.Editor
             phRT.offsetMax = Vector2.zero;
             var phTMP = GetOrAdd<TextMeshProUGUI>(placeholder);
             phTMP.text = "Buscar amigos...";
-            phTMP.fontSize = 45;
+            phTMP.fontSize = FontSizes.ValueLarge;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
             phTMP.fontStyle = FontStyles.Bold;
             phTMP.alignment = TextAlignmentOptions.Left;
@@ -298,7 +299,7 @@ namespace DigitPark.Editor
             txtRT.offsetMin = Vector2.zero;
             txtRT.offsetMax = Vector2.zero;
             var txtTMP = GetOrAdd<TextMeshProUGUI>(text);
-            txtTMP.fontSize = 45;
+            txtTMP.fontSize = FontSizes.ValueLarge;
             txtTMP.color = TEXT_WHITE;
             txtTMP.alignment = TextAlignmentOptions.Left;
 
@@ -344,7 +345,7 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Solicitudes de amistad";
-            lTMP.fontSize = 45;
+            lTMP.fontSize = FontSizes.ValueLarge;
             lTMP.color = PURPLE_ACCENT;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Left;
@@ -368,7 +369,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = 35;
+            btTMP.fontSize = FontSizes.BodyLarge;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -383,7 +384,7 @@ namespace DigitPark.Editor
             aRT.sizeDelta = new Vector2(63, 63);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = 75;
+            aTMP.fontSize = FontSizes.DisplayLarge;
             aTMP.color = PURPLE_ACCENT;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -455,7 +456,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "No tienes amigos aun\nBusca jugadores para agregarlos";
-            eTMP.fontSize = 45;
+            eTMP.fontSize = FontSizes.ValueLarge;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
@@ -467,7 +468,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Cargando...";
-            ldTMP.fontSize = 45;
+            ldTMP.fontSize = FontSizes.ValueLarge;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -568,7 +569,7 @@ namespace DigitPark.Editor
             unRT.offsetMax = Vector2.zero;
             var unTMP = username.AddComponent<TextMeshProUGUI>();
             unTMP.text = "Username";
-            unTMP.fontSize = 50;
+            unTMP.fontSize = FontSizes.SectionHeader;
             unTMP.color = TEXT_WHITE;
             unTMP.fontStyle = FontStyles.Bold;
             unTMP.alignment = TextAlignmentOptions.Left;
@@ -583,7 +584,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = stats.AddComponent<TextMeshProUGUI>();
             stTMP.text = "65% WR \u00B7 Digit Rush";
-            stTMP.fontSize = 35;
+            stTMP.fontSize = FontSizes.BodyLarge;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
 
@@ -597,7 +598,7 @@ namespace DigitPark.Editor
             statusRT.offsetMax = Vector2.zero;
             var statusTMP = status.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "Online";
-            statusTMP.fontSize = 33;
+            statusTMP.fontSize = FontSizes.BodyLarge;
             statusTMP.color = GREEN_SUCCESS;
             statusTMP.alignment = TextAlignmentOptions.Left;
 
@@ -667,7 +668,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 35;
+            tTMP.fontSize = FontSizes.BodyLarge;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;

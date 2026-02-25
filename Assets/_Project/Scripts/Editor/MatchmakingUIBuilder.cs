@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEditor;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -23,7 +24,7 @@ namespace DigitPark.Editor
         //  NEON THEME COLORS
         // ═══════════════════════════════════════════════════════════════
 
-        private static readonly Color DARK_NAVY = new Color(0.02f, 0.03f, 0.08f, 1f);       // #050814
+        private static readonly Color DARK_NAVY = new Color(0.02f, 0.04f, 0.08f, 1f);       // #050A14
         private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.16f, 1f);          // #101428
         private static readonly Color CARD_BG_LIGHT = new Color(0.08f, 0.10f, 0.20f, 1f);    // #141A33
 
@@ -47,6 +48,7 @@ namespace DigitPark.Editor
         private const string ICON_ODD_ONE_OUT = "Assets/_Project/Art/Icons/Games/OddOneOutIcon.png";
         private const string ICON_COGNITIVE_SPRINT = "Assets/_Project/Art/Icons/Games/CognitiveSprintIcon.png";
         private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
+        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png";
 
         // ═══════════════════════════════════════════════════════════════
         //  MAIN BUILD
@@ -172,7 +174,7 @@ namespace DigitPark.Editor
                 SetFullStretch(arrow.GetComponent<RectTransform>());
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.text = "<";
-                arrowText.fontSize = 64;
+                arrowText.fontSize = FontSizes.AuthTitle;
                 arrowText.color = CYAN_NEON;
                 arrowText.alignment = TextAlignmentOptions.Center;
                 arrowText.fontStyle = FontStyles.Bold;
@@ -185,22 +187,22 @@ namespace DigitPark.Editor
 
         private static void CreateHeader(Transform parent)
         {
-            // Header container: top area
+            // Header container: expanded to fit large game icon
             GameObject header = CreateElement(parent, "Header");
             RectTransform headerRect = header.GetComponent<RectTransform>();
-            headerRect.anchorMin = new Vector2(0f, 0.87f);
+            headerRect.anchorMin = new Vector2(0f, 0.73f);
             headerRect.anchorMax = new Vector2(1f, 0.97f);
             headerRect.offsetMin = Vector2.zero;
             headerRect.offsetMax = Vector2.zero;
 
-            // --- Game Icon Container (centered) ---
+            // --- Game Icon Container (centered, square, 360x360) ---
             GameObject iconContainer = CreateElement(header.transform, "GameIconContainer");
             RectTransform iconContRect = iconContainer.GetComponent<RectTransform>();
-            iconContRect.anchorMin = new Vector2(0.5f, 0.35f);
-            iconContRect.anchorMax = new Vector2(0.5f, 1f);
+            iconContRect.anchorMin = new Vector2(0.5f, 0.5f);
+            iconContRect.anchorMax = new Vector2(0.5f, 0.5f);
             iconContRect.pivot = new Vector2(0.5f, 0.5f);
-            iconContRect.sizeDelta = new Vector2(120, 120);
-            iconContRect.anchoredPosition = new Vector2(0, 0);
+            iconContRect.sizeDelta = new Vector2(240, 240);
+            iconContRect.anchoredPosition = new Vector2(0, 30);
 
             // Icon background
             GameObject iconBg = CreateElement(iconContainer.transform, "IconBackground");
@@ -211,13 +213,13 @@ namespace DigitPark.Editor
             // Icon border glow
             Outline iconGlow = iconBg.AddComponent<Outline>();
             iconGlow.effectColor = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.5f);
-            iconGlow.effectDistance = new Vector2(2, -2);
+            iconGlow.effectDistance = new Vector2(3, -3);
 
             // Game Icon Image
             GameObject gameIcon = CreateElement(iconContainer.transform, "GameIcon");
             RectTransform gameIconRect = gameIcon.GetComponent<RectTransform>();
-            gameIconRect.anchorMin = new Vector2(0.1f, 0.1f);
-            gameIconRect.anchorMax = new Vector2(0.9f, 0.9f);
+            gameIconRect.anchorMin = new Vector2(0.05f, 0.05f);
+            gameIconRect.anchorMax = new Vector2(0.95f, 0.95f);
             gameIconRect.offsetMin = Vector2.zero;
             gameIconRect.offsetMax = Vector2.zero;
             Image gameIconImg = gameIcon.AddComponent<Image>();
@@ -229,7 +231,7 @@ namespace DigitPark.Editor
             SetFullStretch(placeholder.GetComponent<RectTransform>());
             TextMeshProUGUI placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "?";
-            placeholderTmp.fontSize = 72;
+            placeholderTmp.fontSize = FontSizes.CardSymbol;
             placeholderTmp.color = CYAN_NEON;
             placeholderTmp.alignment = TextAlignmentOptions.Center;
             placeholderTmp.fontStyle = FontStyles.Bold;
@@ -238,15 +240,16 @@ namespace DigitPark.Editor
             GameObject gameName = CreateElement(header.transform, "GameNameText");
             RectTransform gameNameRect = gameName.GetComponent<RectTransform>();
             gameNameRect.anchorMin = new Vector2(0.1f, 0f);
-            gameNameRect.anchorMax = new Vector2(0.9f, 0.3f);
+            gameNameRect.anchorMax = new Vector2(0.9f, 0.18f);
             gameNameRect.offsetMin = Vector2.zero;
             gameNameRect.offsetMax = Vector2.zero;
             TextMeshProUGUI gameNameTmp = gameName.AddComponent<TextMeshProUGUI>();
             gameNameTmp.text = "DIGIT RUSH";
-            gameNameTmp.fontSize = 52;
+            gameNameTmp.fontSize = FontSizes.CardTitle;
             gameNameTmp.color = TEXT_SECONDARY;
             gameNameTmp.alignment = TextAlignmentOptions.Center;
             gameNameTmp.fontStyle = FontStyles.Bold;
+
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -257,17 +260,18 @@ namespace DigitPark.Editor
         {
             GameObject title = CreateElement(parent, "TitleText");
             RectTransform titleRect = title.GetComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0.1f, 0.78f);
-            titleRect.anchorMax = new Vector2(0.9f, 0.83f);
+            titleRect.anchorMin = new Vector2(0.1f, 0.67f);
+            titleRect.anchorMax = new Vector2(0.9f, 0.72f);
             titleRect.offsetMin = Vector2.zero;
             titleRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI titleTmp = title.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "SEARCHING...";
-            titleTmp.fontSize = 72;
+            titleTmp.fontSize = FontSizes.DisplayLarge;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.fontStyle = FontStyles.Bold;
+
 
             // Glow
             Outline glow = title.AddComponent<Outline>();
@@ -283,8 +287,8 @@ namespace DigitPark.Editor
         {
             GameObject battleArea = CreateElement(parent, "BattleArea");
             RectTransform battleRect = battleArea.GetComponent<RectTransform>();
-            battleRect.anchorMin = new Vector2(0f, 0.30f);
-            battleRect.anchorMax = new Vector2(1f, 0.78f);
+            battleRect.anchorMin = new Vector2(0f, 0.24f);
+            battleRect.anchorMax = new Vector2(1f, 0.66f);
             battleRect.offsetMin = Vector2.zero;
             battleRect.offsetMax = Vector2.zero;
 
@@ -351,6 +355,11 @@ namespace DigitPark.Editor
             avatarContRect.offsetMin = Vector2.zero;
             avatarContRect.offsetMax = Vector2.zero;
 
+            // AspectRatioFitter to guarantee square
+            var aspectFitter = avatarContainer.AddComponent<AspectRatioFitter>();
+            aspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            aspectFitter.aspectRatio = 1f;
+
             // Avatar outer glow ring
             GameObject avatarGlow = CreateElement(avatarContainer.transform, "AvatarGlow");
             RectTransform glowRect = avatarGlow.GetComponent<RectTransform>();
@@ -388,12 +397,23 @@ namespace DigitPark.Editor
             avatarImg.color = Color.white;
             avatarImg.preserveAspect = true;
 
-            // Add AvatarUI component
+            // Set default avatar sprite on Image
+            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
+            if (defaultAvatar != null)
+            {
+                avatarImg.sprite = defaultAvatar;
+            }
+
+            // Add AvatarUI component with default sprite
             var avatarUI = avatar.AddComponent<DigitPark.UI.Components.AvatarUI>();
             SerializedObject avatarSO = new SerializedObject(avatarUI);
             avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = isPlayer;
             avatarSO.FindProperty("isEditable").boolValue = false;
             avatarSO.FindProperty("avatarImage").objectReferenceValue = avatarImg;
+            if (defaultAvatar != null)
+            {
+                avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
+            }
             avatarSO.ApplyModifiedProperties();
 
             // Opponent searching indicator (ring animation)
@@ -433,13 +453,11 @@ namespace DigitPark.Editor
             nameRect.offsetMax = Vector2.zero;
             TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nameTmp.text = isPlayer ? "Player" : "???";
-            nameTmp.fontSize = 68;
+            nameTmp.fontSize = FontSizes.DisplayLarge;
             nameTmp.color = TEXT_WHITE;
             nameTmp.alignment = TextAlignmentOptions.Left;
             nameTmp.fontStyle = FontStyles.Bold;
-            nameTmp.enableAutoSizing = true;
-            nameTmp.fontSizeMin = 44;
-            nameTmp.fontSizeMax = 68;
+
 
             // Level/Rank
             string levelObjName = isPlayer ? "PlayerLevel" : "OpponentLevel";
@@ -464,10 +482,11 @@ namespace DigitPark.Editor
             SetFullStretch(levelText.GetComponent<RectTransform>());
             TextMeshProUGUI levelTmp = levelText.AddComponent<TextMeshProUGUI>();
             levelTmp.text = isPlayer ? "Lv. 1" : "---";
-            levelTmp.fontSize = 44;
+            levelTmp.fontSize = FontSizes.ValueLarge;
             levelTmp.color = isPlayer ? CYAN_NEON : TEXT_MUTED;
             levelTmp.alignment = TextAlignmentOptions.Center;
             levelTmp.fontStyle = FontStyles.Bold;
+
 
             // "YOU" badge for player card
             if (isPlayer)
@@ -490,10 +509,11 @@ namespace DigitPark.Editor
                 SetFullStretch(youText.GetComponent<RectTransform>());
                 TextMeshProUGUI youTmp = youText.AddComponent<TextMeshProUGUI>();
                 youTmp.text = "YOU";
-                youTmp.fontSize = 32;
+                youTmp.fontSize = FontSizes.BodyLarge;
                 youTmp.color = CYAN_NEON;
                 youTmp.alignment = TextAlignmentOptions.Center;
                 youTmp.fontStyle = FontStyles.Bold;
+
             }
         }
 
@@ -536,10 +556,11 @@ namespace DigitPark.Editor
             SetFullStretch(vsText.GetComponent<RectTransform>());
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
-            vsTmp.fontSize = 2;
+            vsTmp.fontSize = FontSizes.ValueMedium;
             vsTmp.color = new Color(1, 1, 1, 0); // Invisible
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.raycastTarget = false;
+
 
             // Initially hidden until match found
             vsContainer.SetActive(false);
@@ -605,9 +626,10 @@ namespace DigitPark.Editor
             statusRect.offsetMax = Vector2.zero;
             TextMeshProUGUI statusTmp = statusText.AddComponent<TextMeshProUGUI>();
             statusTmp.text = "Looking for opponent...";
-            statusTmp.fontSize = 48;
+            statusTmp.fontSize = FontSizes.SectionHeader;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
+
 
             // --- Timer Text ---
             GameObject timerText = CreateElement(searchSection.transform, "TimerText");
@@ -618,10 +640,11 @@ namespace DigitPark.Editor
             timerRect.offsetMax = Vector2.zero;
             TextMeshProUGUI timerTmp = timerText.AddComponent<TextMeshProUGUI>();
             timerTmp.text = "0:00";
-            timerTmp.fontSize = 60;
+            timerTmp.fontSize = FontSizes.DisplayMedium;
             timerTmp.color = CYAN_NEON;
             timerTmp.alignment = TextAlignmentOptions.Center;
             timerTmp.fontStyle = FontStyles.Bold;
+
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -661,10 +684,11 @@ namespace DigitPark.Editor
             SetFullStretch(btnText.GetComponent<RectTransform>());
             TextMeshProUGUI textTmp = btnText.AddComponent<TextMeshProUGUI>();
             textTmp.text = "CANCEL";
-            textTmp.fontSize = 60;
+            textTmp.fontSize = FontSizes.DisplayMedium;
             textTmp.color = RED_NEON;
             textTmp.alignment = TextAlignmentOptions.Center;
             textTmp.fontStyle = FontStyles.Bold;
+
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -689,10 +713,11 @@ namespace DigitPark.Editor
             readyRect.offsetMax = Vector2.zero;
             TextMeshProUGUI readyTmp = readyText.AddComponent<TextMeshProUGUI>();
             readyTmp.text = "GET READY!";
-            readyTmp.fontSize = 80;
+            readyTmp.fontSize = FontSizes.Equation;
             readyTmp.color = TEXT_WHITE;
             readyTmp.alignment = TextAlignmentOptions.Center;
             readyTmp.fontStyle = FontStyles.Bold;
+
 
             // Countdown number (center, big)
             GameObject countdownText = CreateElement(panel.transform, "CountdownText");
@@ -703,10 +728,11 @@ namespace DigitPark.Editor
             countdownRect.offsetMax = Vector2.zero;
             TextMeshProUGUI countdownTmp = countdownText.AddComponent<TextMeshProUGUI>();
             countdownTmp.text = "3";
-            countdownTmp.fontSize = 400;
+            countdownTmp.fontSize = FontSizes.SceneTitle;
             countdownTmp.color = GREEN_NEON;
             countdownTmp.alignment = TextAlignmentOptions.Center;
             countdownTmp.fontStyle = FontStyles.Bold;
+
 
             // Countdown glow
             Outline countdownGlow = countdownText.AddComponent<Outline>();

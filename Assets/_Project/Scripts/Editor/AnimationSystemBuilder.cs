@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -96,7 +97,7 @@ namespace DigitPark.Editor
             textRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = "BUTTON";
-            text.fontSize = 30;
+            text.fontSize = FontSizes.Body;
             text.alignment = TextAlignmentOptions.Center;
             text.color = Color.white;
 

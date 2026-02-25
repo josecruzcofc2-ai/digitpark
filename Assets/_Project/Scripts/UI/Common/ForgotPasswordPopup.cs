@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using DG.Tweening;
 using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.UI.Common
 {
@@ -88,7 +89,7 @@ namespace DigitPark.UI.Common
                 popupPanel.transform,
                 "Title",
                 AutoLocalizer.Get("forgot_password_title"),
-                36,
+                (int)FontSizes.Button,
                 UIFactory.ElectricBlue,
                 TextAlignmentOptions.Center
             );
@@ -101,7 +102,7 @@ namespace DigitPark.UI.Common
                 popupPanel.transform,
                 "Description",
                 AutoLocalizer.Get("forgot_password_description"),
-                22,
+                (int)FontSizes.Body,
                 new Color(0.7f, 0.7f, 0.7f),
                 TextAlignmentOptions.Center
             );
@@ -117,7 +118,7 @@ namespace DigitPark.UI.Common
                 popupPanel.transform,
                 "MessageText",
                 "",
-                20,
+                (int)FontSizes.Body,
                 Color.white,
                 TextAlignmentOptions.Center
             );
@@ -173,7 +174,7 @@ namespace DigitPark.UI.Common
 
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = AutoLocalizer.Get("placeholder_email");
-            placeholderText.fontSize = 24;
+            placeholderText.fontSize = FontSizes.Body;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TextAlignmentOptions.Left;
 
@@ -187,7 +188,7 @@ namespace DigitPark.UI.Common
             textRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
-            inputText.fontSize = 24;
+            inputText.fontSize = FontSizes.Body;
             inputText.color = Color.white;
             inputText.alignment = TextAlignmentOptions.Left;
 
@@ -215,7 +216,7 @@ namespace DigitPark.UI.Common
             if (sendText != null)
             {
                 sendText.color = Color.black;
-                sendText.fontSize = 24;
+                sendText.fontSize = FontSizes.Body;
             }
 
             // Botón Cancelar (gris)
@@ -233,7 +234,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI cancelText = cancelButton.GetComponentInChildren<TextMeshProUGUI>();
             if (cancelText != null)
             {
-                cancelText.fontSize = 24;
+                cancelText.fontSize = FontSizes.Body;
             }
         }
 

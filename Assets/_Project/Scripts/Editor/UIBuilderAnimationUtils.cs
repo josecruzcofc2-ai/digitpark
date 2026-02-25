@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -204,7 +205,7 @@ namespace DigitPark.Editor
             textRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 28;
+            tmp.fontSize = FontSizes.Body;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;

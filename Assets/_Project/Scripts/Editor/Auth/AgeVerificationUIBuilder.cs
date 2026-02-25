@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -16,7 +17,7 @@ namespace DigitPark.Editor
 
         // Colors - GOLD Theme (Cash Battle)
         private static readonly Color GoldPremium = new Color(1f, 0.843f, 0f, 1f); // #FFD700
-        private static readonly Color DarkBrown = new Color(0.039f, 0.031f, 0.02f, 1f); // #0A0805
+        private static readonly Color DarkBrown = new Color(0.06f, 0.05f, 0.10f, 1f); // #0F0D1A
         private static readonly Color CardBackground = new Color(0.2f, 0.133f, 0.067f, 0.95f); // Marrón oscuro con alpha
         private static readonly Color InputBackground = new Color(0.133f, 0.086f, 0.043f, 1f); // Marrón más oscuro
         private static readonly Color TextWhite = Color.white;
@@ -164,7 +165,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = 122;
+            text.fontSize = FontSizes.AppBranding;
             text.fontStyle = FontStyles.Bold;
             text.color = GoldPremium;
             text.alignment = TextAlignmentOptions.Center;
@@ -217,6 +218,7 @@ namespace DigitPark.Editor
             CreateTitle(content.transform, "VERIFICACIÓN DE EDAD\nREQUERIDA");
             CreateSpacer(content.transform, 10f);
             CreateDescription(content.transform, "Las competencias con dinero real requieren que seas mayor de 18 años.");
+            CreateSpacer(content.transform, 30f);
             CreateStatusText(content.transform); // StatusText for verification status feedback
             CreateSpacer(content.transform, 10f);
             CreateGoldButton(content.transform, "VerifyButton", "VERIFICAR MI EDAD");
@@ -249,7 +251,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = 72;
+            titleText.fontSize = FontSizes.DisplayLarge;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GoldPremium;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -266,7 +268,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.font = DefaultFont;
             descText.text = text;
-            descText.fontSize = 54;
+            descText.fontSize = FontSizes.DisplayMedium;
             descText.fontStyle = FontStyles.Bold;
             descText.color = TextWhite;
             descText.alignment = TextAlignmentOptions.Center;
@@ -313,7 +315,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = text;
-            btnText.fontSize = 64;
+            btnText.fontSize = FontSizes.AuthTitle;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkBrown;
             btnText.alignment = TextAlignmentOptions.Center;
@@ -327,7 +329,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI legalText = legal.AddComponent<TextMeshProUGUI>();
             legalText.font = DefaultFont;
             legalText.text = text;
-            legalText.fontSize = 32;
+            legalText.fontSize = FontSizes.BodyLarge;
             legalText.fontStyle = FontStyles.Bold;
             legalText.color = TextGray;
             legalText.alignment = TextAlignmentOptions.Center;
@@ -354,7 +356,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI statusText = status.AddComponent<TextMeshProUGUI>();
             statusText.font = DefaultFont;
             statusText.text = "Toca el botón para iniciar la verificación";
-            statusText.fontSize = 54;
+            statusText.fontSize = FontSizes.DisplayMedium;
             statusText.fontStyle = FontStyles.Bold;
             statusText.color = TextWhite;
             statusText.alignment = TextAlignmentOptions.Center;
@@ -413,7 +415,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
-                arrowText.fontSize = 32;
+                arrowText.fontSize = FontSizes.BodyLarge;
                 arrowText.color = GoldPremium;
                 arrowText.alignment = TextAlignmentOptions.Center;
 

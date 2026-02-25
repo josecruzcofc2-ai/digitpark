@@ -53,7 +53,7 @@ namespace DigitPark.UI.Items
             if (positionText != null)
             {
                 positionText.text = entry.position <= 3 ? $"{entry.position}" : $"#{entry.position}";
-                positionText.fontSize = entry.position <= 3 ? 28 : 22;
+                positionText.fontSize = entry.position <= 3 ? FontSizes.Body : FontSizes.Body;
                 positionText.color = GetPositionColor(entry.position);
                 positionText.fontStyle = FontStyles.Bold;
             }

@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -22,7 +23,7 @@ namespace DigitPark.Editor
         private static readonly Color GOLD_LIGHT = new Color(1f, 0.93f, 0.55f, 1f);          // #FFEE8C Light Gold
         private static readonly Color AMBER = new Color(1f, 0.75f, 0f, 1f);                  // #FFBF00 Amber
 
-        private static readonly Color BG_DARK = new Color(0.08f, 0.06f, 0.12f, 1f);          // Very dark purple-black
+        private static readonly Color BG_DARK = new Color(0.06f, 0.05f, 0.10f, 1f);          // Very dark purple-black
         private static readonly Color BG_GRADIENT_TOP = new Color(0.15f, 0.1f, 0.05f, 1f);   // Dark brown/gold tint
         private static readonly Color BG_GRADIENT_BOTTOM = new Color(0.05f, 0.03f, 0.08f, 1f); // Almost black
 
@@ -447,7 +448,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
                 arrow.text = "<";
-                arrow.fontSize = 48;
+                arrow.fontSize = FontSizes.SectionHeader;
                 arrow.color = TEXT_GOLD;
                 arrow.alignment = TextAlignmentOptions.Center;
                 arrow.fontStyle = FontStyles.Bold;
@@ -462,16 +463,18 @@ namespace DigitPark.Editor
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(500, 80);
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchorMin = new Vector2(0.15f, 0f);
+            rt.anchorMax = new Vector2(0.70f, 1f);
+            rt.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.text = "Cash Battle";
-            title.fontSize = 78; // Bigger
+            title.fontSize = FontSizes.SceneTitle;
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = FontSizes.ValueLarge;
+            title.fontSizeMax = FontSizes.SceneTitle;
             title.fontStyle = FontStyles.Bold;
 
             // Gold outline effect
@@ -513,13 +516,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
             balanceText.text = "$0.00";
-            balanceText.fontSize = 44;
+            balanceText.fontSize = FontSizes.ValueLarge;
             balanceText.color = TEXT_GOLD;
             balanceText.alignment = TextAlignmentOptions.Center;
             balanceText.fontStyle = FontStyles.Bold;
             balanceText.enableAutoSizing = true;
-            balanceText.fontSizeMin = 28;
-            balanceText.fontSizeMax = 44;
+            balanceText.fontSizeMin = FontSizes.AutoMinBody;
+            balanceText.fontSizeMax = FontSizes.ValueLarge;
         }
 
         #endregion
@@ -681,10 +684,11 @@ namespace DigitPark.Editor
             btn.colors = colors;
             btn.targetGraphic = bg;
 
-            // Layout: Icon (left 100px) | Title + Subtitle (center) | no arrow
-            int iconSize = 100;
+            // Layout: Icon (left 200px) | Title + Subtitle (center) | Arrow right
+            int iconSize = 200;
             int iconMarginLeft = 15;
-            int textMarginLeft = iconMarginLeft + iconSize + 15; // 130
+            int textMarginLeft = iconMarginLeft + iconSize + 15; // 230
+            int arrowWidth = 60;
 
             // === TITULO ===
             GameObject titleObj = new GameObject("Title");
@@ -694,17 +698,17 @@ namespace DigitPark.Editor
             titleRT.anchorMin = new Vector2(0, 0.5f);
             titleRT.anchorMax = new Vector2(1, 1f);
             titleRT.offsetMin = new Vector2(textMarginLeft, 2);
-            titleRT.offsetMax = new Vector2(-15, -5);
+            titleRT.offsetMax = new Vector2(-arrowWidth - 10, -5);
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = 52;
+            titleText.fontSize = FontSizes.CardTitle;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontStyle = FontStyles.Bold;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 32;
-            titleText.fontSizeMax = 52;
+            titleText.fontSizeMin = FontSizes.AutoMinValue;
+            titleText.fontSizeMax = FontSizes.CardTitle;
 
             // === SUBTITULO ===
             GameObject subtitleObj = new GameObject("Subtitle");
@@ -714,16 +718,16 @@ namespace DigitPark.Editor
             subRT.anchorMin = new Vector2(0, 0);
             subRT.anchorMax = new Vector2(1, 0.5f);
             subRT.offsetMin = new Vector2(textMarginLeft, 5);
-            subRT.offsetMax = new Vector2(-15, -2);
+            subRT.offsetMax = new Vector2(-arrowWidth - 10, -2);
 
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subText.text = subtitle;
-            subText.fontSize = 36;
+            subText.fontSize = FontSizes.Button;
             subText.color = TEXT_SECONDARY;
             subText.alignment = TextAlignmentOptions.Left;
             subText.enableAutoSizing = true;
-            subText.fontSizeMin = 24;
-            subText.fontSizeMax = 36;
+            subText.fontSizeMin = FontSizes.AutoMinBody;
+            subText.fontSizeMax = FontSizes.Button;
 
             // === DETALLE (badge) ===
             if (!string.IsNullOrEmpty(detail))
@@ -755,11 +759,29 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI detailText = detailTextObj.AddComponent<TextMeshProUGUI>();
                 detailText.text = detail;
-                detailText.fontSize = 30;
+                detailText.fontSize = FontSizes.Body;
                 detailText.color = CYAN_ACCENT;
                 detailText.alignment = TextAlignmentOptions.Center;
                 detailText.fontStyle = FontStyles.Bold;
             }
+
+            // === ARROW ">" (right side) ===
+            GameObject arrowObj = new GameObject("Arrow");
+            arrowObj.transform.SetParent(card.transform, false);
+
+            RectTransform arrowRT = arrowObj.AddComponent<RectTransform>();
+            arrowRT.anchorMin = new Vector2(1, 0);
+            arrowRT.anchorMax = new Vector2(1, 1);
+            arrowRT.pivot = new Vector2(1, 0.5f);
+            arrowRT.sizeDelta = new Vector2(arrowWidth, 0);
+            arrowRT.anchoredPosition = Vector2.zero;
+
+            TextMeshProUGUI arrowText = arrowObj.AddComponent<TextMeshProUGUI>();
+            arrowText.text = ">";
+            arrowText.fontSize = FontSizes.DisplayLarge;
+            arrowText.color = TEXT_GOLD;
+            arrowText.alignment = TextAlignmentOptions.Center;
+            arrowText.fontStyle = FontStyles.Bold;
 
             return card;
         }
@@ -780,7 +802,7 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(0, 0.5f);
             rt.pivot = new Vector2(0, 0.5f);
 
-            rt.sizeDelta = new Vector2(100, 100);
+            rt.sizeDelta = new Vector2(200, 200);
             rt.anchoredPosition = new Vector2(15, 0);
 
             // Imagen del icono
@@ -813,7 +835,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
                 text.text = GetFallbackEmoji(iconName);
-                text.fontSize = 48;
+                text.fontSize = FontSizes.SectionHeader;
                 text.color = TEXT_GOLD;
                 text.alignment = TextAlignmentOptions.Center;
             }
@@ -878,7 +900,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Selecciona un Juego";
-            titleText.fontSize = 36;
+            titleText.fontSize = FontSizes.Button;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -927,7 +949,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI onlineText = onlineTextObj.AddComponent<TextMeshProUGUI>();
             onlineText.text = "47 jugadores online | Pool: $2,340";
-            onlineText.fontSize = 30;
+            onlineText.fontSize = FontSizes.Body;
             onlineText.color = TEXT_SECONDARY;
             onlineText.alignment = TextAlignmentOptions.Left;
             onlineText.fontStyle = FontStyles.Normal;
@@ -1053,7 +1075,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI iconTMP = iconText.AddComponent<TextMeshProUGUI>();
             iconTMP.text = icon;
-            iconTMP.fontSize = 32;
+            iconTMP.fontSize = FontSizes.BodyLarge;
             iconTMP.color = TEXT_GOLD;
             iconTMP.alignment = TextAlignmentOptions.Center;
 
@@ -1070,7 +1092,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
             nameTMP.text = gameName;
-            nameTMP.fontSize = 30;
+            nameTMP.fontSize = FontSizes.Body;
             nameTMP.color = TEXT_GOLD;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.alignment = TextAlignmentOptions.Left;
@@ -1088,7 +1110,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = description;
-            descTMP.fontSize = 30;
+            descTMP.fontSize = FontSizes.Body;
             descTMP.color = TEXT_SECONDARY;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
@@ -1117,7 +1139,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
             checkTMP.text = "V";
-            checkTMP.fontSize = 28;
+            checkTMP.fontSize = FontSizes.Body;
             checkTMP.color = BG_DARK;
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
@@ -1217,7 +1239,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
             checkTMP.text = "V";
-            checkTMP.fontSize = 36;
+            checkTMP.fontSize = FontSizes.Button;
             checkTMP.color = BG_DARK; // Dark text on gold background
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
@@ -1264,7 +1286,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Elige tu apuesta";
-            titleText.fontSize = 30;
+            titleText.fontSize = FontSizes.Body;
             titleText.color = TEXT_GOLD;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
@@ -1316,7 +1338,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dollarText = dollarSign.AddComponent<TextMeshProUGUI>();
             dollarText.text = "$";
-            dollarText.fontSize = 32;
+            dollarText.fontSize = FontSizes.BodyLarge;
             dollarText.color = GOLD_PRIMARY;
             dollarText.fontStyle = FontStyles.Bold;
             dollarText.alignment = TextAlignmentOptions.Center;
@@ -1350,7 +1372,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI inputText = inputTextArea.AddComponent<TextMeshProUGUI>();
             inputText.text = "";
-            inputText.fontSize = 30;
+            inputText.fontSize = FontSizes.Body;
             inputText.color = TEXT_PRIMARY;
             inputText.fontStyle = FontStyles.Bold;
             inputText.alignment = TextAlignmentOptions.Left;
@@ -1368,7 +1390,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = "Otro monto...";
-            placeholderText.fontSize = 30;
+            placeholderText.fontSize = FontSizes.Body;
             placeholderText.color = TEXT_SECONDARY;
             placeholderText.fontStyle = FontStyles.Italic;
             placeholderText.alignment = TextAlignmentOptions.Left;
@@ -1392,7 +1414,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI maxText = maxLabel.AddComponent<TextMeshProUGUI>();
             maxText.text = "Max: $250";
-            maxText.fontSize = 30;
+            maxText.fontSize = FontSizes.Body;
             maxText.color = TEXT_SECONDARY;
             maxText.fontStyle = FontStyles.Bold;
             maxText.alignment = TextAlignmentOptions.Center;
@@ -1430,7 +1452,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI applyText = applyTextObj.AddComponent<TextMeshProUGUI>();
             applyText.text = "OK";
-            applyText.fontSize = 30;
+            applyText.fontSize = FontSizes.Body;
             applyText.color = BG_DARK;
             applyText.fontStyle = FontStyles.Bold;
             applyText.alignment = TextAlignmentOptions.Center;
@@ -1467,7 +1489,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI earningsText = earningsObj.AddComponent<TextMeshProUGUI>();
             earningsText.text = "Si ganas recibes: $0.00";
-            earningsText.fontSize = 30;
+            earningsText.fontSize = FontSizes.Body;
             earningsText.color = new Color(0.4f, 1f, 0.6f, 1f); // Verde brillante
             earningsText.fontStyle = FontStyles.Bold;
             earningsText.alignment = TextAlignmentOptions.Left;
@@ -1485,7 +1507,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI poolText = poolObj.AddComponent<TextMeshProUGUI>();
             poolText.text = "Pool: $0.00 | Tu apuesta: $0.00 | Fee: 30%";
-            poolText.fontSize = 30;
+            poolText.fontSize = FontSizes.Body;
             poolText.color = TEXT_SECONDARY;
             poolText.fontStyle = FontStyles.Normal;
             poolText.alignment = TextAlignmentOptions.Left;
@@ -1501,7 +1523,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
             coinText.text = "$";
-            coinText.fontSize = 36;
+            coinText.fontSize = FontSizes.Button;
             coinText.alignment = TextAlignmentOptions.Center;
         }
 
@@ -1545,7 +1567,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = $"${amount}";
-            text.fontSize = 30;
+            text.fontSize = FontSizes.Body;
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
@@ -1635,7 +1657,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = "BUSCAR RIVAL";
-            text.fontSize = 34;
+            text.fontSize = FontSizes.BodyLarge;
             text.color = BG_DARK;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
@@ -1651,7 +1673,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI subtitleText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subtitleText.text = "12 jugadores buscando ahora";
-            subtitleText.fontSize = 30;
+            subtitleText.fontSize = FontSizes.Body;
             subtitleText.color = new Color(0.2f, 0.15f, 0.1f, 0.9f);
             subtitleText.fontStyle = FontStyles.Normal;
             subtitleText.alignment = TextAlignmentOptions.Center;
@@ -1669,7 +1691,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI leftFireText = leftFire.AddComponent<TextMeshProUGUI>();
             leftFireText.text = "🔥";
-            leftFireText.fontSize = 32;
+            leftFireText.fontSize = FontSizes.BodyLarge;
             leftFireText.alignment = TextAlignmentOptions.Center;
 
             // Right fire icon
@@ -1685,7 +1707,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rightFireText = rightFire.AddComponent<TextMeshProUGUI>();
             rightFireText.text = "🔥";
-            rightFireText.fontSize = 32;
+            rightFireText.fontSize = FontSizes.BodyLarge;
             rightFireText.alignment = TextAlignmentOptions.Center;
 
             // Online indicator dot
@@ -1746,7 +1768,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Torneos Disponibles";
-            titleText.fontSize = 38;
+            titleText.fontSize = FontSizes.Button;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -1866,7 +1888,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
             nameTMP.text = tournamentName;
-            nameTMP.fontSize = 30;
+            nameTMP.fontSize = FontSizes.Body;
             nameTMP.color = TEXT_GOLD;
             nameTMP.fontStyle = FontStyles.Bold;
 
@@ -1881,7 +1903,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI gameTMP = gameObj.AddComponent<TextMeshProUGUI>();
             gameTMP.text = gameType;
-            gameTMP.fontSize = 30;
+            gameTMP.fontSize = FontSizes.Body;
             gameTMP.color = CYAN_ACCENT;
             gameTMP.fontStyle = FontStyles.Bold;
 
@@ -1896,7 +1918,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI prizeTMP = prizeObj.AddComponent<TextMeshProUGUI>();
             prizeTMP.text = $"Premio: ${prizePool}";
-            prizeTMP.fontSize = 30;
+            prizeTMP.fontSize = FontSizes.Body;
             prizeTMP.color = new Color(0.3f, 1f, 0.5f);
             prizeTMP.fontStyle = FontStyles.Bold;
 
@@ -1911,7 +1933,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI entryTMP = entryObj.AddComponent<TextMeshProUGUI>();
             entryTMP.text = $"Entrada: ${entryFee}";
-            entryTMP.fontSize = 30;
+            entryTMP.fontSize = FontSizes.Body;
             entryTMP.color = TEXT_PRIMARY;
             entryTMP.fontStyle = FontStyles.Bold;
 
@@ -1926,7 +1948,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI partTMP = partObj.AddComponent<TextMeshProUGUI>();
             partTMP.text = $"{participants} jugadores";
-            partTMP.fontSize = 30;
+            partTMP.fontSize = FontSizes.Body;
             partTMP.color = TEXT_SECONDARY;
             partTMP.fontStyle = FontStyles.Bold;
 
@@ -1959,7 +1981,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI joinTMP = joinText.AddComponent<TextMeshProUGUI>();
             joinTMP.text = "Unirse";
-            joinTMP.fontSize = 30;
+            joinTMP.fontSize = FontSizes.Body;
             joinTMP.color = BG_DARK;
             joinTMP.fontStyle = FontStyles.Bold;
             joinTMP.alignment = TextAlignmentOptions.Center;
@@ -2011,7 +2033,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = "Apostar $0.00 en DigitRush?";
-            textTMP.fontSize = 32;
+            textTMP.fontSize = FontSizes.BodyLarge;
             textTMP.color = TEXT_GOLD;
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
@@ -2045,7 +2067,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI confirmTMP = confirmText.AddComponent<TextMeshProUGUI>();
             confirmTMP.text = "Confirmar";
-            confirmTMP.fontSize = 30;
+            confirmTMP.fontSize = FontSizes.Body;
             confirmTMP.color = BG_DARK;
             confirmTMP.fontStyle = FontStyles.Bold;
             confirmTMP.alignment = TextAlignmentOptions.Center;
@@ -2079,7 +2101,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI cancelTMP = cancelText.AddComponent<TextMeshProUGUI>();
             cancelTMP.text = "Cancelar";
-            cancelTMP.fontSize = 30;
+            cancelTMP.fontSize = FontSizes.Body;
             cancelTMP.color = TEXT_PRIMARY;
             cancelTMP.fontStyle = FontStyles.Bold;
             cancelTMP.alignment = TextAlignmentOptions.Center;
@@ -2149,7 +2171,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI iconTMP = iconText.AddComponent<TextMeshProUGUI>();
             iconTMP.text = "⚔";
-            iconTMP.fontSize = 60;
+            iconTMP.fontSize = FontSizes.DisplayMedium;
             iconTMP.color = BG_DARK;
             iconTMP.alignment = TextAlignmentOptions.Center;
 
@@ -2166,7 +2188,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusTMP = statusObj.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "Buscando oponente...";
-            statusTMP.fontSize = 36;
+            statusTMP.fontSize = FontSizes.Button;
             statusTMP.color = TEXT_GOLD;
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Center;
@@ -2184,7 +2206,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timerTMP = timerObj.AddComponent<TextMeshProUGUI>();
             timerTMP.text = "00:00";
-            timerTMP.fontSize = 42;
+            timerTMP.fontSize = FontSizes.ValueMedium;
             timerTMP.color = CYAN_ACCENT;
             timerTMP.fontStyle = FontStyles.Bold;
             timerTMP.alignment = TextAlignmentOptions.Center;
@@ -2202,7 +2224,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI opponentTMP = opponentObj.AddComponent<TextMeshProUGUI>();
             opponentTMP.text = "Buscando...";
-            opponentTMP.fontSize = 36;
+            opponentTMP.fontSize = FontSizes.Button;
             opponentTMP.color = TEXT_PRIMARY;
             opponentTMP.fontStyle = FontStyles.Bold;
             opponentTMP.alignment = TextAlignmentOptions.Center;
@@ -2236,7 +2258,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI cancelTMP = cancelText.AddComponent<TextMeshProUGUI>();
             cancelTMP.text = "Cancelar";
-            cancelTMP.fontSize = 30;
+            cancelTMP.fontSize = FontSizes.Body;
             cancelTMP.color = TEXT_PRIMARY;
             cancelTMP.fontStyle = FontStyles.Bold;
             cancelTMP.alignment = TextAlignmentOptions.Center;
@@ -2274,7 +2296,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Mi Wallet";
-            titleText.fontSize = 42;
+            titleText.fontSize = FontSizes.ValueMedium;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -2322,7 +2344,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = "$0.00";
-            amountText.fontSize = 72;
+            amountText.fontSize = FontSizes.DisplayLarge;
             amountText.color = GOLD_PRIMARY;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.fontStyle = FontStyles.Bold;
@@ -2338,7 +2360,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = "Balance Disponible";
-            labelText.fontSize = 30;
+            labelText.fontSize = FontSizes.Body;
             labelText.color = TEXT_SECONDARY;
             labelText.alignment = TextAlignmentOptions.Center;
             labelText.fontStyle = FontStyles.Bold;
@@ -2401,7 +2423,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.text = text;
-            btnText.fontSize = 32;
+            btnText.fontSize = FontSizes.BodyLarge;
             btnText.color = Color.white;
             btnText.fontStyle = FontStyles.Bold;
             btnText.alignment = TextAlignmentOptions.Center;
@@ -2420,7 +2442,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI headerText = headerObj.AddComponent<TextMeshProUGUI>();
             headerText.text = "Transacciones Recientes";
-            headerText.fontSize = 30;
+            headerText.fontSize = FontSizes.Body;
             headerText.color = TEXT_PRIMARY;
             headerText.fontStyle = FontStyles.Bold;
             headerText.alignment = TextAlignmentOptions.Left;
@@ -2465,7 +2487,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = 30;
+            amountText.fontSize = FontSizes.Body;
             amountText.color = isPositive ? new Color(0.3f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
             amountText.fontStyle = FontStyles.Bold;
             amountText.alignment = TextAlignmentOptions.Left;
@@ -2483,7 +2505,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI descText = descObj.AddComponent<TextMeshProUGUI>();
             descText.text = description;
-            descText.fontSize = 30;
+            descText.fontSize = FontSizes.Body;
             descText.color = TEXT_PRIMARY;
             descText.fontStyle = FontStyles.Bold;
             descText.alignment = TextAlignmentOptions.Left;
@@ -2503,7 +2525,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timeText = timeObj.AddComponent<TextMeshProUGUI>();
             timeText.text = time;
-            timeText.fontSize = 30;
+            timeText.fontSize = FontSizes.Body;
             timeText.color = TEXT_SECONDARY;
             timeText.alignment = TextAlignmentOptions.Left;
 
@@ -2549,7 +2571,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Historial de Partidas";
-            titleText.fontSize = 42;
+            titleText.fontSize = FontSizes.ValueMedium;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -2638,7 +2660,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.text = value;
-            valueText.fontSize = 32;
+            valueText.fontSize = FontSizes.BodyLarge;
             valueText.color = valueColor;
             valueText.fontStyle = FontStyles.Bold;
             valueText.alignment = TextAlignmentOptions.Center;
@@ -2656,7 +2678,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = label;
-            labelText.fontSize = 30;
+            labelText.fontSize = FontSizes.Body;
             labelText.color = TEXT_SECONDARY;
             labelText.fontStyle = FontStyles.Bold;
             labelText.alignment = TextAlignmentOptions.Center;
@@ -2711,7 +2733,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI iconTMP = iconText.AddComponent<TextMeshProUGUI>();
             iconTMP.text = gameType.Contains("Torneo") ? "T" : "VS";
-            iconTMP.fontSize = 30;
+            iconTMP.fontSize = FontSizes.Body;
             iconTMP.color = TEXT_GOLD;
             iconTMP.alignment = TextAlignmentOptions.Center;
 
@@ -2726,7 +2748,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI gameTMP = gameObj.AddComponent<TextMeshProUGUI>();
             gameTMP.text = gameType;
-            gameTMP.fontSize = 30;
+            gameTMP.fontSize = FontSizes.Body;
             gameTMP.color = TEXT_GOLD;
             gameTMP.fontStyle = FontStyles.Bold;
             gameTMP.alignment = TextAlignmentOptions.Left;
@@ -2742,7 +2764,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI oppTMP = oppObj.AddComponent<TextMeshProUGUI>();
             oppTMP.text = opponent.StartsWith("@") ? $"vs {opponent}" : opponent;
-            oppTMP.fontSize = 30;
+            oppTMP.fontSize = FontSizes.Body;
             oppTMP.color = CYAN_ACCENT;
             oppTMP.fontStyle = FontStyles.Bold;
             oppTMP.alignment = TextAlignmentOptions.Left;
@@ -2758,7 +2780,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
             dateTMP.text = dateTime;
-            dateTMP.fontSize = 30;
+            dateTMP.fontSize = FontSizes.Body;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.alignment = TextAlignmentOptions.Left;
 
@@ -2773,7 +2795,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI resultTMP = resultObj.AddComponent<TextMeshProUGUI>();
             resultTMP.text = isWin ? "VICTORIA" : "DERROTA";
-            resultTMP.fontSize = 30;
+            resultTMP.fontSize = FontSizes.Body;
             resultTMP.color = isWin ? new Color(0.3f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
             resultTMP.fontStyle = FontStyles.Bold;
             resultTMP.alignment = TextAlignmentOptions.Right;
@@ -2789,7 +2811,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = amount;
-            amountTMP.fontSize = 30;
+            amountTMP.fontSize = FontSizes.Body;
             amountTMP.color = isWin ? new Color(0.3f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Right;
@@ -2805,7 +2827,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI scoreTMP = scoreObj.AddComponent<TextMeshProUGUI>();
             scoreTMP.text = score;
-            scoreTMP.fontSize = 30;
+            scoreTMP.fontSize = FontSizes.Body;
             scoreTMP.color = TEXT_SECONDARY;
             scoreTMP.alignment = TextAlignmentOptions.Right;
         }

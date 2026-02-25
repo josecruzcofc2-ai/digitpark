@@ -110,7 +110,7 @@ namespace DigitPark.UI
             textRect.offsetMax = new Vector2(-20, -10);
 
             _statusText = textObj.AddComponent<TextMeshProUGUI>();
-            _statusText.fontSize = 28;
+            _statusText.fontSize = FontSizes.Body;
             _statusText.alignment = TextAlignmentOptions.Center;
             _statusText.color = Color.white;
             _statusText.fontStyle = FontStyles.Bold;

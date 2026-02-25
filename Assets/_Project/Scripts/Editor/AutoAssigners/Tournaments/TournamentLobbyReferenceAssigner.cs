@@ -24,14 +24,27 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
-            "backButton", "tournamentNameText", "statusBadgeText",
-            "gameTypeText",
-            // Note: entryFeeText, prizePoolText, playersCountText - inside Stat containers, need specific patterns
-            "participantsContainer",
-            // Note: joinButton excluded - V2 feature (lobby is view-only in V1)
-            "leaveButton", "shareButton",
-            // Note: loadingOverlay excluded - optional UI element
-            "statusText"
+            // Header
+            "backButton", "tournamentNameText", "statusBadgeText", "statusBadgeImage",
+            // Info
+            "gameTypeText", "entryFeeText", "prizePoolText",
+            "playersProgressBar", "playersProgressText", "countdownText",
+            // Rules
+            "attemptsRuleText", "timeLimitRuleText",
+            // Tabs
+            "participantsTabButton", "chatTabButton",
+            "participantsContent", "chatContent",
+            "participantsTabIndicator", "chatTabIndicator", "chatBadgeText",
+            // Participants
+            "participantsContainer", "participantsHeaderText",
+            // Chat
+            "chatScrollRect", "chatMessagesContainer", "chatInput", "sendChatButton",
+            // Actions
+            "joinButton", "leaveButton", "shareButton", "joinButtonText",
+            // Status
+            "loadingOverlay", "statusText", "startingOverlay", "startingCountdownText",
+            // Configuration
+            "defaultAvatarSprite"
         };
 
         private struct ReferenceResult
@@ -77,10 +90,12 @@ namespace DigitPark.Editor.AutoAssigners
 
             EditorGUILayout.HelpBox(
                 "Assigns UI references to TournamentLobbyManager:\n" +
-                "• Header (back, name, status)\n" +
-                "• Tournament info (game, fee, prize, players)\n" +
-                "• Participants list\n" +
-                "• Action buttons (join, leave, share)",
+                "• Header (back, name, status badge)\n" +
+                "• Info card (game, fee, prize, players progress, countdown, rules)\n" +
+                "• Tabs (participants, chat)\n" +
+                "• Participants list + Chat system\n" +
+                "• Action buttons (join, leave, share)\n" +
+                "• Overlays (loading, starting)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -106,7 +121,10 @@ namespace DigitPark.Editor.AutoAssigners
             GUI.backgroundColor = Color.white;
 
             GUILayout.Space(10);
+
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
             DrawResultsSummary();
+            EditorGUILayout.EndScrollView();
         }
 
         private void DrawResultsSummary()
@@ -132,7 +150,7 @@ namespace DigitPark.Editor.AutoAssigners
                 GUI.color = result.success ? (result.status == "Already Set" ? new Color(0.5f, 0.8f, 1f) : Color.green) : Color.red;
                 GUILayout.Label(result.success ? (result.status == "Already Set" ? "●" : "✓") : "✗", GUILayout.Width(20));
                 GUI.color = Color.white;
-                GUILayout.Label(result.fieldName, GUILayout.Width(180));
+                GUILayout.Label(result.fieldName, GUILayout.Width(220));
                 GUILayout.Label(result.status, GUILayout.Width(120));
                 if (result.assignedObject != null)
                     EditorGUILayout.ObjectField(result.assignedObject, typeof(Object), true, GUILayout.Width(150));
@@ -162,22 +180,56 @@ namespace DigitPark.Editor.AutoAssigners
             so.Update();
 
             // Header
-            AssignReference(so, "backButton", FindButtonByName("back", "return"));
-            AssignReference(so, "tournamentNameText", FindTextByName("tournamentname", "name", "title"));
-            AssignReference(so, "statusBadgeText", FindTextByName("statusbadge", "status", "badge"));
+            AssignReference(so, "backButton", FindButtonByName("backbutton", "back"));
+            AssignReference(so, "tournamentNameText", FindTextByExactName("TournamentNameText"));
+            AssignReference(so, "statusBadgeText", FindTextByExactName("StatusBadgeText"));
+            AssignReference(so, "statusBadgeImage", FindImageByExactName("StatusBadge"));
 
-            // Tournament Info
-            AssignReference(so, "gameTypeText", FindTextByName("gametype", "game"));
+            // Info Card
+            AssignReference(so, "gameTypeText", FindTextByExactName("GameTypeText"));
+            AssignReference(so, "entryFeeText", FindTextByExactName("EntryFeeText"));
+            AssignReference(so, "prizePoolText", FindTextByExactName("PrizePoolText"));
+            AssignReference(so, "playersProgressBar", FindImageByExactName("PlayersProgressBar"));
+            AssignReference(so, "playersProgressText", FindTextByExactName("PlayersProgressText"));
+            AssignReference(so, "countdownText", FindTextByExactName("CountdownText"));
+
+            // Rules
+            AssignReference(so, "attemptsRuleText", FindTextByExactName("AttemptsRuleText"));
+            AssignReference(so, "timeLimitRuleText", FindTextByExactName("TimeLimitRuleText"));
+
+            // Tabs
+            AssignReference(so, "participantsTabButton", FindButtonByExactName("ParticipantsTab"));
+            AssignReference(so, "chatTabButton", FindButtonByExactName("ChatTab"));
+            AssignGameObject(so, "participantsContent", "ParticipantsContent");
+            AssignGameObject(so, "chatContent", "ChatContent");
+            AssignReference(so, "participantsTabIndicator", FindImageByExactName("ParticipantsTabIndicator"));
+            AssignReference(so, "chatTabIndicator", FindImageByExactName("ChatTabIndicator"));
+            AssignReference(so, "chatBadgeText", FindTextByExactName("ChatBadgeText"));
 
             // Participants
-            AssignReference(so, "participantsContainer", FindByNameContains<Transform>("participants", "players", "container"));
+            AssignTransform(so, "participantsContainer", "Content", "ParticipantsScrollView");
+            AssignReference(so, "participantsHeaderText", FindTextByName("participantsheader", "leaderboardheader"));
+
+            // Chat
+            AssignScrollRect(so, "chatScrollRect", "ChatScrollView");
+            AssignTransform(so, "chatMessagesContainer", "ChatMessagesContainer");
+            AssignInputField(so, "chatInput", "ChatInput");
+            AssignReference(so, "sendChatButton", FindButtonByExactName("SendChatButton"));
 
             // Actions
-            AssignReference(so, "leaveButton", FindButtonByName("leave", "salir", "abandonar", "confirmleave"));
-            AssignReference(so, "shareButton", FindButtonByName("share", "compartir"));
+            AssignReference(so, "joinButton", FindButtonByExactName("JoinButton"));
+            AssignReference(so, "leaveButton", FindButtonByExactName("LeaveButton"));
+            AssignReference(so, "shareButton", FindButtonByExactName("ShareButton"));
+            AssignReference(so, "joinButtonText", FindTextByExactName("JoinButtonText"));
 
             // Status
-            AssignReference(so, "statusText", FindTextByName("status", "message"));
+            AssignGameObject(so, "loadingOverlay", "LoadingOverlay");
+            AssignReference(so, "statusText", FindTextByExactName("StatusText"));
+            AssignGameObject(so, "startingOverlay", "StartingOverlay");
+            AssignReference(so, "startingCountdownText", FindTextByExactName("StartingCountdownText"));
+
+            // Configuration - Default avatar sprite
+            AssignSpriteAsset(so, "defaultAvatarSprite", "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -206,10 +258,10 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Finders
 
-        private static T FindByNameContains<T>(params string[] patterns) where T : Component
+        private static TextMeshProUGUI FindTextByExactName(string name)
         {
-            var all = Object.FindObjectsOfType<T>(true);
-            foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            foreach (var t in Object.FindObjectsOfType<TextMeshProUGUI>(true))
+                if (t.gameObject.name == name) return t;
             return null;
         }
 
@@ -220,11 +272,118 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
+        private static Button FindButtonByExactName(string name)
+        {
+            foreach (var b in Object.FindObjectsOfType<Button>(true))
+                if (b.gameObject.name == name) return b;
+            return null;
+        }
+
         private static Button FindButtonByName(params string[] patterns)
         {
             var all = Object.FindObjectsOfType<Button>(true);
             foreach (var p in patterns) foreach (var b in all) if (b.gameObject.name.ToLower().Contains(p.ToLower())) return b;
             return null;
+        }
+
+        private static Image FindImageByExactName(string name)
+        {
+            foreach (var i in Object.FindObjectsOfType<Image>(true))
+                if (i.gameObject.name == name) return i;
+            return null;
+        }
+
+        private static T FindByNameContains<T>(params string[] patterns) where T : Component
+        {
+            var all = Object.FindObjectsOfType<T>(true);
+            foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            return null;
+        }
+
+        /// <summary>
+        /// Assigns a Transform field by finding a GameObject with exact name,
+        /// optionally scoped under a parent name.
+        /// </summary>
+        private static void AssignTransform(SerializedObject so, string propertyName, string targetName, string parentName = null)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+
+            foreach (var t in Object.FindObjectsOfType<Transform>(true))
+            {
+                if (t.gameObject.name != targetName) continue;
+                if (parentName != null && (t.parent == null || !t.parent.gameObject.name.Contains(parentName))) continue;
+                prop.objectReferenceValue = t;
+                AddResult(propertyName, "Assigned", true, t);
+                assignedCount++;
+                return;
+            }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignGameObject(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name == p)
+                    {
+                        prop.objectReferenceValue = o.gameObject;
+                        AddResult(propertyName, "Assigned", true, o.gameObject);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignScrollRect(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<ScrollRect>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name == p)
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignInputField(SerializedObject so, string propertyName, params string[] patterns)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var all = Object.FindObjectsOfType<TMP_InputField>(true);
+            foreach (var p in patterns)
+                foreach (var o in all)
+                    if (o.gameObject.name == p)
+                    {
+                        prop.objectReferenceValue = o;
+                        AddResult(propertyName, "Assigned", true, o);
+                        assignedCount++;
+                        return;
+                    }
+            AddResult(propertyName, "Not found", false, null); failedCount++;
+        }
+
+        private static void AssignSpriteAsset(SerializedObject so, string propertyName, string assetPath)
+        {
+            var prop = so.FindProperty(propertyName);
+            if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
+            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (sprite != null) { prop.objectReferenceValue = sprite; AddResult(propertyName, "Assigned", true, sprite); assignedCount++; }
+            else { AddResult(propertyName, $"Asset not found: {assetPath}", false, null); failedCount++; }
         }
 
         #endregion

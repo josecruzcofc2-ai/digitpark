@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -213,7 +214,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "NOTIFICACIONES";
-            tTMP.fontSize = 78;
+            tTMP.fontSize = FontSizes.SceneTitle;
             tTMP.color = TEXT_WHITE;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -227,7 +228,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 sin leer";
-            cTMP.fontSize = 35;
+            cTMP.fontSize = FontSizes.BodyLarge;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -288,7 +289,7 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(labelGO);
             lTMP.text = label;
-            lTMP.fontSize = 40;
+            lTMP.fontSize = FontSizes.LabelLarge;
             lTMP.color = active ? accentColor : TEXT_SECONDARY;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
@@ -369,7 +370,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 300;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "No tienes notificaciones\nTe avisaremos cuando algo importante suceda";
-            eTMP.fontSize = 45;
+            eTMP.fontSize = FontSizes.ValueLarge;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
@@ -381,7 +382,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Cargando...";
-            ldTMP.fontSize = 45;
+            ldTMP.fontSize = FontSizes.ValueLarge;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -438,7 +439,7 @@ namespace DigitPark.Editor
             matRT.offsetMax = Vector2.zero;
             var matTMP = GetOrAdd<TextMeshProUGUI>(maText);
             matTMP.text = "Marcar todas como leídas";
-            matTMP.fontSize = 40;
+            matTMP.fontSize = FontSizes.LabelLarge;
             matTMP.color = CYAN_NEON;
             matTMP.fontStyle = FontStyles.Bold;
             matTMP.alignment = TextAlignmentOptions.Center;
@@ -509,7 +510,7 @@ namespace DigitPark.Editor
             titRT.offsetMax = Vector2.zero;
             var tiTMP = tiTextGO.AddComponent<TextMeshProUGUI>();
             tiTMP.text = "🔔";
-            tiTMP.fontSize = 55;
+            tiTMP.fontSize = FontSizes.DisplayMedium;
             tiTMP.color = CYAN_NEON;
             tiTMP.alignment = TextAlignmentOptions.Center;
 
@@ -532,7 +533,7 @@ namespace DigitPark.Editor
             titleRT.offsetMax = Vector2.zero;
             var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Título de notificación";
-            titleTMP.fontSize = 43;
+            titleTMP.fontSize = FontSizes.ValueLarge;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Left;
@@ -549,7 +550,7 @@ namespace DigitPark.Editor
             tsRT.offsetMax = Vector2.zero;
             var tsTMP = timestamp.AddComponent<TextMeshProUGUI>();
             tsTMP.text = "Hace 5 min";
-            tsTMP.fontSize = 30;
+            tsTMP.fontSize = FontSizes.Body;
             tsTMP.color = TEXT_SECONDARY;
             tsTMP.alignment = TextAlignmentOptions.Right;
 
@@ -563,7 +564,7 @@ namespace DigitPark.Editor
             bodyRT.offsetMax = Vector2.zero;
             var bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
             bodyTMP.text = "Descripción de la notificación";
-            bodyTMP.fontSize = 35;
+            bodyTMP.fontSize = FontSizes.BodyLarge;
             bodyTMP.color = TEXT_SECONDARY;
             bodyTMP.alignment = TextAlignmentOptions.Left;
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
@@ -579,7 +580,7 @@ namespace DigitPark.Editor
             snRT.offsetMax = Vector2.zero;
             var snTMP = senderGO.AddComponent<TextMeshProUGUI>();
             snTMP.text = "de: Player123";
-            snTMP.fontSize = 30;
+            snTMP.fontSize = FontSizes.Body;
             snTMP.color = SOCIAL_COLOR;
             snTMP.fontStyle = FontStyles.Bold;
             snTMP.alignment = TextAlignmentOptions.Left;
@@ -645,7 +646,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-4, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 33;
+            tTMP.fontSize = FontSizes.BodyLarge;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;

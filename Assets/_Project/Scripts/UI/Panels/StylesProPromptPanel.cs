@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using DigitPark.Managers;
 using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.UI.Panels
 {
@@ -165,8 +166,8 @@ namespace DigitPark.UI.Panels
             rt.sizeDelta = new Vector2(400, 50);
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
-            tmp.text = "STYLES PRO";
-            tmp.fontSize = 38;
+            tmp.text = AutoLocalizer.Get("styles_pro_title");
+            tmp.fontSize = FontSizes.Button;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = goldColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -228,7 +229,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nameTmp.text = theme.name;
-            nameTmp.fontSize = 18;
+            nameTmp.fontSize = FontSizes.Body;
             nameTmp.fontStyle = FontStyles.Bold;
             nameTmp.color = theme.accentColor;
             nameTmp.alignment = TextAlignmentOptions.Center;
@@ -258,8 +259,8 @@ namespace DigitPark.UI.Panels
             textRt.offsetMax = Vector2.zero;
 
             TextMeshProUGUI tmp = badgeText.AddComponent<TextMeshProUGUI>();
-            tmp.text = isFree ? "FREE" : "PRO";
-            tmp.fontSize = 13;
+            tmp.text = isFree ? AutoLocalizer.Get("badge_free") : AutoLocalizer.Get("badge_pro");
+            tmp.fontSize = FontSizes.Body;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = isFree ? Color.white : Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -309,7 +310,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = "$29 MXN";
-            tmp.fontSize = 34;
+            tmp.fontSize = FontSizes.BodyLarge;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = goldColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -382,7 +383,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 20;
+            tmp.fontSize = FontSizes.Body;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = textColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -451,7 +452,7 @@ namespace DigitPark.UI.Panels
 
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = "X";
-                tmp.fontSize = 24;
+                tmp.fontSize = FontSizes.Body;
                 tmp.fontStyle = FontStyles.Bold;
                 tmp.color = Color.black;
                 tmp.alignment = TextAlignmentOptions.Center;

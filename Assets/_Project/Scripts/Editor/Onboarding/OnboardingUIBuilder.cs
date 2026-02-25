@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -243,7 +244,7 @@ namespace DigitPark.Editor
             tlRT.offsetMax = Vector2.zero;
             var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLabel);
             tlTMP.text = "DIGITPARK";
-            tlTMP.fontSize = 36;
+            tlTMP.fontSize = FontSizes.Button;
             tlTMP.color = CYAN_NEON;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.alignment = TextAlignmentOptions.Left;
@@ -257,7 +258,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = Vector2.zero;
             var cTMP = GetOrAdd<TextMeshProUGUI>(counter);
             cTMP.text = "1/8";
-            cTMP.fontSize = 30;
+            cTMP.fontSize = FontSizes.Body;
             cTMP.color = TEXT_SECONDARY;
             cTMP.fontStyle = FontStyles.Bold;
             cTMP.alignment = TextAlignmentOptions.Center;
@@ -281,7 +282,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
             stTMP.text = "SALTAR";
-            stTMP.fontSize = 30;
+            stTMP.fontSize = FontSizes.Body;
             stTMP.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
@@ -379,14 +380,14 @@ namespace DigitPark.Editor
 
             var tmp = titleGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 78;
+            tmp.fontSize = FontSizes.SceneTitle;
             tmp.color = color;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = true;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 48;
-            tmp.fontSizeMax = 78;
+            tmp.fontSizeMin = FontSizes.SectionHeader;
+            tmp.fontSizeMax = FontSizes.SceneTitle;
             return tmp;
         }
 
@@ -450,7 +451,7 @@ namespace DigitPark.Editor
 
         private static void AddBulletText(Transform parent, string text)
         {
-            AddContentText(parent, "\u2022 " + text, 32, TEXT_WHITE, TextAlignmentOptions.Left);
+            AddContentText(parent, "\u2022 " + text, (int)FontSizes.BodyLarge, TEXT_WHITE, TextAlignmentOptions.Left);
         }
 
         #endregion
@@ -464,10 +465,10 @@ namespace DigitPark.Editor
 
             var content = CreateContentCard(slide);
             AddContentText(content, "Tu destino para juegos mentales, competencias y diversi\u00F3n.",
-                36, TEXT_WHITE, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
             AddContentText(content, "ENTRENA TU MENTE Y COMPITE",
-                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+                (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
             AddBulletText(content, "5 minijuegos cognitivos");
             AddBulletText(content, "Compite contra jugadores de todo el mundo");
@@ -548,7 +549,7 @@ namespace DigitPark.Editor
             phRT.offsetMax = Vector2.zero;
             var phTMP = placeholder.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Escribe tu nombre...";
-            phTMP.fontSize = 40;
+            phTMP.fontSize = FontSizes.LabelLarge;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
             phTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
             phTMP.alignment = TextAlignmentOptions.Left;
@@ -561,7 +562,7 @@ namespace DigitPark.Editor
             txtRT.offsetMin = Vector2.zero;
             txtRT.offsetMax = Vector2.zero;
             var txtTMP = text.AddComponent<TextMeshProUGUI>();
-            txtTMP.fontSize = 40;
+            txtTMP.fontSize = FontSizes.LabelLarge;
             txtTMP.color = TEXT_WHITE;
             txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.alignment = TextAlignmentOptions.Left;
@@ -590,7 +591,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = confirmText.AddComponent<TextMeshProUGUI>();
             ctTMP.text = "CONFIRMAR";
-            ctTMP.fontSize = 36;
+            ctTMP.fontSize = FontSizes.Button;
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -601,7 +602,7 @@ namespace DigitPark.Editor
             errorText.AddComponent<LayoutElement>().preferredHeight = 40;
             var eTMP = errorText.AddComponent<TextMeshProUGUI>();
             eTMP.text = "";
-            eTMP.fontSize = 30;
+            eTMP.fontSize = FontSizes.Body;
             eTMP.color = RED_ERROR;
             eTMP.fontStyle = FontStyles.Bold;
             eTMP.alignment = TextAlignmentOptions.Center;
@@ -654,10 +655,10 @@ namespace DigitPark.Editor
 
             var content = CreateContentCard(slide);
             AddContentText(content, "Entrena tu mente con minijuegos dise\u00F1ados para mejorar tus habilidades.",
-                36, TEXT_WHITE, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
             AddContentText(content, "6 MINIJUEGOS UNICOS",
-                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+                (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
             AddBulletText(content, "DigitRush: Velocidad y reflejos");
             AddBulletText(content, "FlashTap: Reacci\u00F3n r\u00E1pida");
@@ -677,10 +678,10 @@ namespace DigitPark.Editor
 
             var content = CreateContentCard(slide);
             AddContentText(content, "\u00BFListo para el desaf\u00EDo? Compite 1v1 contra otros jugadores por premios reales.",
-                36, TEXT_WHITE, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
             AddContentText(content, "COMPITE POR PREMIOS REALES",
-                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+                (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
             AddBulletText(content, "Matchmaking 1v1 por habilidad");
             AddBulletText(content, "Apuestas desde $1 USD");
@@ -698,10 +699,10 @@ namespace DigitPark.Editor
 
             var content = CreateContentCard(slide);
             AddContentText(content, "\u00DAnete a torneos con decenas de jugadores.",
-                36, TEXT_WHITE, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
             AddContentText(content, "GANA GRANDES PREMIOS",
-                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+                (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
             AddBulletText(content, "Hasta 256 jugadores por torneo");
             AddBulletText(content, "Premios garantizados");
@@ -719,10 +720,10 @@ namespace DigitPark.Editor
 
             var content = CreateContentCard(slide);
             AddContentText(content, "Vuelve cada d\u00EDa para obtener monedas, gemas y m\u00E1s recompensas.",
-                36, TEXT_WHITE, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
             AddContentText(content, "RECOMPENSAS CADA DIA",
-                42, CYAN_NEON, TextAlignmentOptions.Center, true);
+                (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
             AddBulletText(content, "Monedas gratis cada d\u00EDa");
             AddBulletText(content, "Bonos semanales de gemas");
@@ -777,13 +778,13 @@ namespace DigitPark.Editor
             compTitle.AddComponent<LayoutElement>().preferredHeight = 90;
             var ctTMP = compTitle.AddComponent<TextMeshProUGUI>();
             ctTMP.text = "\u00A1Bien hecho!";
-            ctTMP.fontSize = 72;
+            ctTMP.fontSize = FontSizes.DisplayLarge;
             ctTMP.color = CYAN_NEON;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
             ctTMP.enableAutoSizing = true;
-            ctTMP.fontSizeMin = 48;
-            ctTMP.fontSizeMax = 72;
+            ctTMP.fontSizeMin = FontSizes.SectionHeader;
+            ctTMP.fontSizeMax = FontSizes.DisplayLarge;
 
             // CompletionMessage
             var compMsg = new GameObject("CompletionMessage");
@@ -791,7 +792,7 @@ namespace DigitPark.Editor
             compMsg.AddComponent<LayoutElement>().preferredHeight = 70;
             var cmTMP = compMsg.AddComponent<TextMeshProUGUI>();
             cmTMP.text = "Has completado el tutorial.\nAqu\u00ED tienes tus recompensas de bienvenida.";
-            cmTMP.fontSize = 32;
+            cmTMP.fontSize = FontSizes.BodyLarge;
             cmTMP.color = TEXT_WHITE;
             cmTMP.fontStyle = FontStyles.Bold;
             cmTMP.alignment = TextAlignmentOptions.Center;
@@ -816,7 +817,7 @@ namespace DigitPark.Editor
             rwRT.offsetMax = new Vector2(-10, -10);
             var rwTMP = rewardText.AddComponent<TextMeshProUGUI>();
             rwTMP.text = "+500 Monedas  |  +50 Gemas";
-            rwTMP.fontSize = 42;
+            rwTMP.fontSize = FontSizes.ValueMedium;
             rwTMP.color = GOLD;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.alignment = TextAlignmentOptions.Center;
@@ -846,7 +847,7 @@ namespace DigitPark.Editor
             spRT.offsetMax = Vector2.zero;
             var spTMP = startText.AddComponent<TextMeshProUGUI>();
             spTMP.text = "\u00A1COMENZAR A JUGAR!";
-            spTMP.fontSize = 48;
+            spTMP.fontSize = FontSizes.SectionHeader;
             spTMP.color = TEXT_DARK;
             spTMP.fontStyle = FontStyles.Bold;
             spTMP.alignment = TextAlignmentOptions.Center;
@@ -907,7 +908,7 @@ namespace DigitPark.Editor
             ptRT.offsetMax = Vector2.zero;
             var ptTMP = GetOrAdd<TextMeshProUGUI>(prevText);
             ptTMP.text = "ATR\u00C1S";
-            ptTMP.fontSize = 36;
+            ptTMP.fontSize = FontSizes.Button;
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.alignment = TextAlignmentOptions.Center;
@@ -934,7 +935,7 @@ namespace DigitPark.Editor
             ntRT.offsetMax = Vector2.zero;
             var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
             ntTMP.text = "SIGUIENTE";
-            ntTMP.fontSize = 36;
+            ntTMP.fontSize = FontSizes.Button;
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;

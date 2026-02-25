@@ -220,7 +220,7 @@ namespace DigitPark.UI.Components
 
             TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nameTmp.text = "Theme";
-            nameTmp.fontSize = 12;
+            nameTmp.fontSize = FontSizes.Body;
             nameTmp.alignment = TextAlignmentOptions.Center;
             nameTmp.color = Color.white;
 

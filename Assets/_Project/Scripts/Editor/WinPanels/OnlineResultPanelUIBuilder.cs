@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEditor;
 using System.IO;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -161,7 +162,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTMP = resultTitle.AddComponent<TextMeshProUGUI>();
             titleTMP.text = resultText;
-            titleTMP.fontSize = 72;
+            titleTMP.fontSize = FontSizes.DisplayLarge;
             titleTMP.color = mainColor;
             titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.fontStyle = FontStyles.Bold;
@@ -181,7 +182,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI subtitleTMP = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTMP.text = subtitleText;
-            subtitleTMP.fontSize = 28;
+            subtitleTMP.fontSize = FontSizes.Body;
             subtitleTMP.color = new Color(0.8f, 0.8f, 0.8f);
             subtitleTMP.alignment = TextAlignmentOptions.Center;
         }
@@ -221,7 +222,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI vsTMP = vsText.AddComponent<TextMeshProUGUI>();
             vsTMP.text = "VS";
-            vsTMP.fontSize = 42;
+            vsTMP.fontSize = FontSizes.ValueMedium;
             vsTMP.color = ORANGE_NEON;
             vsTMP.alignment = TextAlignmentOptions.Center;
             vsTMP.fontStyle = FontStyles.Bold;
@@ -279,7 +280,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
             nameTMP.text = isPlayer ? "TU" : "OPONENTE";
-            nameTMP.fontSize = 28;
+            nameTMP.fontSize = FontSizes.Body;
             nameTMP.color = cardColor;
             nameTMP.alignment = TextAlignmentOptions.Center;
             nameTMP.fontStyle = FontStyles.Bold;
@@ -294,7 +295,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timeTMP = timeObj.AddComponent<TextMeshProUGUI>();
             timeTMP.text = "12.45s";
-            timeTMP.fontSize = 48;
+            timeTMP.fontSize = FontSizes.SectionHeader;
             timeTMP.color = Color.white;
             timeTMP.alignment = TextAlignmentOptions.Center;
             timeTMP.fontStyle = FontStyles.Bold;
@@ -309,7 +310,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI errorsTMP = errorsObj.AddComponent<TextMeshProUGUI>();
             errorsTMP.text = "0 errores";
-            errorsTMP.fontSize = 22;
+            errorsTMP.fontSize = FontSizes.Body;
             errorsTMP.color = new Color(0.6f, 0.6f, 0.6f);
             errorsTMP.alignment = TextAlignmentOptions.Center;
         }
@@ -342,7 +343,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = isWin ? "Mas rapido por" : "Mas lento por";
-            labelTMP.fontSize = 24;
+            labelTMP.fontSize = FontSizes.Body;
             labelTMP.color = new Color(0.7f, 0.7f, 0.7f);
             labelTMP.alignment = TextAlignmentOptions.Center;
 
@@ -356,7 +357,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI diffTMP = diffValue.AddComponent<TextMeshProUGUI>();
             diffTMP.text = isWin ? "-2.35s" : "+2.35s";
-            diffTMP.fontSize = 42;
+            diffTMP.fontSize = FontSizes.ValueMedium;
             diffTMP.color = mainColor;
             diffTMP.alignment = TextAlignmentOptions.Center;
             diffTMP.fontStyle = FontStyles.Bold;
@@ -398,7 +399,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI continueTMP = continueText.AddComponent<TextMeshProUGUI>();
             continueTMP.text = "CONTINUAR";
-            continueTMP.fontSize = 32;
+            continueTMP.fontSize = FontSizes.BodyLarge;
             continueTMP.color = mainColor;
             continueTMP.alignment = TextAlignmentOptions.Center;
             continueTMP.fontStyle = FontStyles.Bold;
@@ -429,7 +430,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rematchTMP = rematchText.AddComponent<TextMeshProUGUI>();
             rematchTMP.text = "REVANCHA";
-            rematchTMP.fontSize = 32;
+            rematchTMP.fontSize = FontSizes.BodyLarge;
             rematchTMP.color = CYAN_NEON;
             rematchTMP.alignment = TextAlignmentOptions.Center;
             rematchTMP.fontStyle = FontStyles.Bold;

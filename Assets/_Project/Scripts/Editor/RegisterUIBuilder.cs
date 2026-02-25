@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -15,7 +16,7 @@ namespace DigitPark.Editor
 
         // Colors
         private static readonly Color CyanNeon = new Color(0f, 1f, 1f, 1f); // #00FFFF
-        private static readonly Color DarkNavy = new Color(0.039f, 0.055f, 0.153f, 1f); // #0A0E27
+        private static readonly Color DarkNavy = new Color(0.02f, 0.04f, 0.08f, 1f); // #050A14
         private static readonly Color CardBackground = new Color(0.125f, 0.188f, 0.376f, 0.95f); // #202860 con alpha
         private static readonly Color InputBackground = new Color(0.078f, 0.11f, 0.22f, 1f); // Más oscuro para inputs
         private static readonly Color TextWhite = Color.white;
@@ -166,7 +167,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = 122;
+            text.fontSize = FontSizes.AppBranding;
             text.fontStyle = FontStyles.Bold;
             text.color = CyanNeon;
             text.alignment = TextAlignmentOptions.Center;
@@ -231,7 +232,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = 72;
+            titleText.fontSize = FontSizes.DisplayLarge;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CyanNeon;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -283,10 +284,11 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.font = DefaultFont;
             placeholderText.text = placeholder;
-            placeholderText.fontSize = 52;
+            placeholderText.fontSize = FontSizes.CardTitle;
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.color = TextGray;
             placeholderText.alignment = TextAlignmentOptions.Left;
+            placeholderText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Input text
             GameObject textObj = new GameObject("Text");
@@ -299,7 +301,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
             inputText.font = DefaultFont;
-            inputText.fontSize = 52;
+            inputText.fontSize = FontSizes.CardTitle;
             inputText.fontStyle = FontStyles.Bold;
             inputText.color = TextWhite;
             inputText.alignment = TextAlignmentOptions.Left;
@@ -363,7 +365,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = text;
-            btnText.fontSize = 72;
+            btnText.fontSize = FontSizes.DisplayLarge;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkNavy;
             btnText.alignment = TextAlignmentOptions.Center;
@@ -417,7 +419,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
-                arrowText.fontSize = 32;
+                arrowText.fontSize = FontSizes.BodyLarge;
                 arrowText.color = CyanNeon;
                 arrowText.alignment = TextAlignmentOptions.Center;
 
@@ -463,7 +465,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = loadingText.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Creando cuenta...";
-            text.fontSize = 30;
+            text.fontSize = FontSizes.Body;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
 

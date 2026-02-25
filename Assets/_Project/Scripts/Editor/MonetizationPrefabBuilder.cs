@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 using DigitPark.UI.Items;
 
 namespace DigitPark.Editor
@@ -126,11 +127,11 @@ namespace DigitPark.Editor
 
             // Name
             CreateTextElement(content.transform, "NameText", "Nombre del Logro",
-                new Vector2(0, 0.6f), new Vector2(1, 1), 20, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                new Vector2(0, 0.6f), new Vector2(1, 1), (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Description
             CreateTextElement(content.transform, "DescriptionText", "Descripcion del logro aqui",
-                new Vector2(0, 0.3f), new Vector2(1, 0.6f), 14, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.3f), new Vector2(1, 0.6f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Progress Bar
             GameObject progressBg = CreateImageElement(content.transform, "ProgressBar",
@@ -151,7 +152,7 @@ namespace DigitPark.Editor
 
             // Progress Text
             CreateTextElement(content.transform, "ProgressText", "50/100",
-                new Vector2(0.72f, 0), new Vector2(1, 0.25f), 14, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0.72f, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Reward Section (derecha)
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",
@@ -166,7 +167,7 @@ namespace DigitPark.Editor
 
             // Reward Text
             CreateTextElement(rewardSection.transform, "RewardText", "+100",
-                new Vector2(0, 0), new Vector2(1, 0.4f), 16, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.4f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Claim Button
             GameObject claimBtn = CreateButton(item.transform, "ClaimButton", "Reclamar", GREEN, Color.black,
@@ -176,7 +177,7 @@ namespace DigitPark.Editor
 
             // Overlays
             GameObject completedOverlay = CreateOverlay(item.transform, "CompletedOverlay", new Color(0, 0, 0, 0.6f));
-            CreateTextElement(completedOverlay.transform, "Text", "COMPLETADO", Vector2.zero, Vector2.one, 18, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+            CreateTextElement(completedOverlay.transform, "Text", "COMPLETADO", Vector2.zero, Vector2.one, (int)FontSizes.Button, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
             completedOverlay.SetActive(false);
 
             GameObject lockedOverlay = CreateOverlay(item.transform, "LockedOverlay", LOCKED_BG);
@@ -218,11 +219,11 @@ namespace DigitPark.Editor
             CreateTextElement(item.transform, "CategoryNameText", "Categoria",
                 new Vector2(0, 0), new Vector2(0.6f, 1),
                 new Vector2(60, 0), new Vector2(0, 0),
-                22, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Progress Text
             CreateTextElement(item.transform, "ProgressText", "5/10",
-                new Vector2(0.6f, 0), new Vector2(0.85f, 1), 18, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Right);
+                new Vector2(0.6f, 0), new Vector2(0.85f, 1), (int)FontSizes.Button, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Right);
 
             // Expand Button
             GameObject expandBtn = CreateContainer(item.transform, "ExpandButton",
@@ -232,7 +233,7 @@ namespace DigitPark.Editor
 
             // Expand Arrow
             CreateTextElement(expandBtn.transform, "ExpandArrow", ">",
-                Vector2.zero, Vector2.one, 24, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Center);
+                Vector2.zero, Vector2.one, (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Add UI Component
             CategoryHeaderUI ui = item.AddComponent<CategoryHeaderUI>();
@@ -277,10 +278,10 @@ namespace DigitPark.Editor
                 new Vector2(75, 8), new Vector2(-100, -8));
 
             CreateTextElement(content.transform, "TitleText", "Titulo de Mision",
-                new Vector2(0, 0.65f), new Vector2(1, 1), 18, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                new Vector2(0, 0.65f), new Vector2(1, 1), (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             CreateTextElement(content.transform, "DescriptionText", "Descripcion de la mision",
-                new Vector2(0, 0.35f), new Vector2(1, 0.65f), 13, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.35f), new Vector2(1, 0.65f), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Progress Bar
             GameObject progressBg = CreateImageElement(content.transform, "ProgressBar",
@@ -300,7 +301,7 @@ namespace DigitPark.Editor
             slider.fillRect = fill.GetComponent<RectTransform>();
 
             CreateTextElement(content.transform, "ProgressText", "6/10",
-                new Vector2(0.78f, 0), new Vector2(1, 0.3f), 13, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0.78f, 0), new Vector2(1, 0.3f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Reward Section
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",
@@ -313,7 +314,7 @@ namespace DigitPark.Editor
             rewardIcon.GetComponent<Image>().color = GOLD;
 
             CreateTextElement(rewardSection.transform, "RewardAmountText", "+50",
-                new Vector2(0, 0), new Vector2(1, 0.4f), 16, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.4f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Claim Button
             GameObject claimBtn = CreateButton(item.transform, "ClaimButton", "Reclamar", GREEN, Color.black,
@@ -328,7 +329,7 @@ namespace DigitPark.Editor
             GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-55, -20), new Vector2(-15, 20),
-                36, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
             claimedCheck.SetActive(false);
 
             // Add UI Component
@@ -366,11 +367,11 @@ namespace DigitPark.Editor
 
             // Day Label
             CreateTextElement(item.transform, "DayLabelText", "Dia 1",
-                new Vector2(0, 0.85f), new Vector2(1, 1), 12, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0.85f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Day Number
             CreateTextElement(item.transform, "DayNumberText", "1",
-                new Vector2(0, 0.65f), new Vector2(1, 0.85f), 22, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0.65f), new Vector2(1, 0.85f), (int)FontSizes.Button, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Reward Icon
             GameObject rewardIcon = CreateImageElement(item.transform, "RewardIcon",
@@ -380,7 +381,7 @@ namespace DigitPark.Editor
 
             // Reward Amount
             CreateTextElement(item.transform, "RewardAmountText", "+100",
-                new Vector2(0, 0), new Vector2(1, 0.2f), 14, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.2f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Current Day Glow
             GameObject glow = CreateImageElement(item.transform, "CurrentDayGlow",
@@ -397,7 +398,7 @@ namespace DigitPark.Editor
             GameObject check = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(-25, -25), new Vector2(25, 25),
-                40, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                (int)FontSizes.LabelLarge, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
             check.SetActive(false);
 
             // Bonus Tag
@@ -407,7 +408,7 @@ namespace DigitPark.Editor
             Image bonusBg = bonusTag.AddComponent<Image>();
             bonusBg.color = PREMIUM_GOLD;
             CreateTextElement(bonusTag.transform, "BonusTagText", "BONUS",
-                Vector2.zero, Vector2.one, 9, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
+                Vector2.zero, Vector2.one, (int)FontSizes.Body, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
             bonusTag.SetActive(false);
 
             // Button
@@ -497,7 +498,7 @@ namespace DigitPark.Editor
 
             // Name Text
             CreateTextElement(item.transform, "NameText", "",
-                new Vector2(0, 0), new Vector2(1, 0.18f), 11, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.18f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Selection Ring
             GameObject ring = CreateImageElement(item.transform, "SelectionRing",
@@ -514,9 +515,9 @@ namespace DigitPark.Editor
             GameObject lockIcon = CreateTextElement(locked.transform, "LockIcon", "🔒",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(-15, -15), new Vector2(15, 15),
-                24, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
             CreateTextElement(locked.transform, "UnlockRequirementText", "Nivel 5",
-                new Vector2(0, 0), new Vector2(1, 0.25f), 10, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Center);
             locked.SetActive(false);
 
             // Button
@@ -565,15 +566,15 @@ namespace DigitPark.Editor
             CreateTextElement(item.transform, "PositionText", "1er Lugar",
                 new Vector2(0, 0), new Vector2(0.45f, 1),
                 new Vector2(55, 0), new Vector2(0, 0),
-                18, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Prize Amount Text
             CreateTextElement(item.transform, "PrizeAmountText", "$50.00",
-                new Vector2(0.45f, 0), new Vector2(0.75f, 1), 20, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0.45f, 0), new Vector2(0.75f, 1), (int)FontSizes.Button, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Percentage Text
             CreateTextElement(item.transform, "PercentageText", "(50%)",
-                new Vector2(0.75f, 0), new Vector2(1, 1), 14, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.75f, 0), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Add UI Component
             PrizeRowItemUI ui = item.AddComponent<PrizeRowItemUI>();
@@ -625,13 +626,13 @@ namespace DigitPark.Editor
             CreateTextElement(item.transform, "UsernameText", "Username",
                 new Vector2(0, 0.55f), new Vector2(0.5f, 0.9f),
                 new Vector2(70, 0), new Vector2(0, 0),
-                18, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Rank
             CreateTextElement(item.transform, "RankText", "#1",
                 new Vector2(0, 0.15f), new Vector2(0.25f, 0.55f),
                 new Vector2(70, 0), new Vector2(0, 0),
-                14, GOLD, FontStyles.Normal, TextAlignmentOptions.Left);
+                (int)FontSizes.Body, GOLD, FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Country Flag
             GameObject flag = CreateImageElement(item.transform, "CountryFlag",
@@ -642,22 +643,22 @@ namespace DigitPark.Editor
 
             // Score Text
             CreateTextElement(item.transform, "ScoreText", "1000",
-                new Vector2(0.5f, 0.15f), new Vector2(0.7f, 0.85f), 16, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0.15f), new Vector2(0.7f, 0.85f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Best Time Text
             CreateTextElement(item.transform, "BestTimeText", "2.345s",
-                new Vector2(0.65f, 0.15f), new Vector2(0.85f, 0.85f), 16, GREEN, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.65f, 0.15f), new Vector2(0.85f, 0.85f), (int)FontSizes.Body, GREEN, FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Ready Indicator
             GameObject ready = CreateTextElement(item.transform, "ReadyIndicator", "V",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-40, -15), new Vector2(-10, 15),
-                24, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                (int)FontSizes.Body, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
             ready.SetActive(false);
 
             // Status Text
             CreateTextElement(item.transform, "StatusText", "Esperando",
-                new Vector2(0.85f, 0.15f), new Vector2(1, 0.85f), 12, ORANGE, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.85f, 0.15f), new Vector2(1, 0.85f), (int)FontSizes.Body, ORANGE, FontStyles.Normal, TextAlignmentOptions.Center);
 
             // Button
             Button btn = item.AddComponent<Button>();
@@ -713,13 +714,13 @@ namespace DigitPark.Editor
             CreateTextElement(item.transform, "UsernameText", "Username",
                 new Vector2(0, 0.55f), new Vector2(0.5f, 0.95f),
                 new Vector2(80, 0), new Vector2(0, 0),
-                20, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Level
             CreateTextElement(item.transform, "LevelText", "Nivel 25",
                 new Vector2(0, 0.15f), new Vector2(0.3f, 0.55f),
                 new Vector2(80, 0), new Vector2(0, 0),
-                14, CYAN_NEON, FontStyles.Normal, TextAlignmentOptions.Left);
+                (int)FontSizes.Body, CYAN_NEON, FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Stats Container
             GameObject stats = CreateContainer(item.transform, "StatsContainer",
@@ -727,10 +728,10 @@ namespace DigitPark.Editor
             stats.SetActive(false);
 
             CreateTextElement(stats.transform, "WinsText", "150 victorias",
-                new Vector2(0, 0.5f), new Vector2(1, 1), 12, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
 
             CreateTextElement(stats.transform, "WinRateText", "65%",
-                new Vector2(0, 0), new Vector2(1, 0.5f), 12, GREEN, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0), new Vector2(1, 0.5f), (int)FontSizes.Body, GREEN, FontStyles.Normal, TextAlignmentOptions.Left);
 
             // Country Flag
             GameObject flag = CreateImageElement(item.transform, "CountryFlag",
@@ -746,7 +747,7 @@ namespace DigitPark.Editor
             Image friendBg = friendBadge.AddComponent<Image>();
             friendBg.color = GREEN;
             CreateTextElement(friendBadge.transform, "Text", "AMIGO",
-                Vector2.zero, Vector2.one, 9, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
+                Vector2.zero, Vector2.one, (int)FontSizes.Body, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
             friendBadge.SetActive(false);
 
             // Pending Badge
@@ -756,7 +757,7 @@ namespace DigitPark.Editor
             Image pendingBg = pendingBadge.AddComponent<Image>();
             pendingBg.color = ORANGE;
             CreateTextElement(pendingBadge.transform, "Text", "PENDIENTE",
-                Vector2.zero, Vector2.one, 8, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
+                Vector2.zero, Vector2.one, (int)FontSizes.Body, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
             pendingBadge.SetActive(false);
 
             // Action Buttons
@@ -873,7 +874,7 @@ namespace DigitPark.Editor
                 textRt.offsetMax = Vector2.zero;
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = text;
-                tmp.fontSize = 30;
+                tmp.fontSize = (int)FontSizes.Body;
                 tmp.color = textColor;
                 tmp.fontStyle = FontStyles.Bold;
                 tmp.alignment = TextAlignmentOptions.Center;

@@ -14,6 +14,7 @@ namespace DigitPark.UI.Panels
     {
         [Header("UI References")]
         [SerializeField] private GameObject panel;
+        [SerializeField] private GameObject blockerPanel;
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TMP_InputField inputField;
         [SerializeField] private Button confirmButton;
@@ -57,6 +58,9 @@ namespace DigitPark.UI.Panels
         {
             if (panel != null)
                 panel.SetActive(false);
+
+            if (blockerPanel != null && blockerPanel != this.gameObject)
+                blockerPanel.SetActive(false);
         }
 
         private void OnDestroy()
@@ -100,6 +104,9 @@ namespace DigitPark.UI.Panels
 
             onConfirm = onConfirmCallback;
             onCancel = onCancelCallback;
+
+            if (blockerPanel != null)
+                blockerPanel.SetActive(true);
 
             if (panel != null)
             {
@@ -158,7 +165,18 @@ namespace DigitPark.UI.Panels
         public void Hide()
         {
             if (panel != null)
-                AnimateOut(panel.transform, () => panel.SetActive(false));
+                AnimateOut(panel.transform, () =>
+                {
+                    panel.SetActive(false);
+                    gameObject.SetActive(false);
+                });
+
+            if (blockerPanel != null)
+            {
+                var blockerCG = blockerPanel.GetComponent<CanvasGroup>();
+                if (blockerCG == null) blockerCG = blockerPanel.AddComponent<CanvasGroup>();
+                blockerCG.DOFade(0f, 0.2f).OnComplete(() => blockerPanel.SetActive(false)).SetUpdate(true);
+            }
 
             if (inputField != null)
                 inputField.text = "";

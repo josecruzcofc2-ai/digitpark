@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -17,7 +18,7 @@ namespace DigitPark.Editor
         private static readonly Color GREEN_NEON = new Color(0.3f, 1f, 0.5f, 1f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color MAGENTA_NEON = new Color(1f, 0f, 0.8f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color CARD_BG = new Color(0.04f, 0.08f, 0.12f, 0.98f);
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.65f, 0.7f, 1f);
 
@@ -160,7 +161,7 @@ namespace DigitPark.Editor
                 new Vector2(22, 0), new Vector2(25, 30));
             TextMeshProUGUI arrowTmp = arrow.AddComponent<TextMeshProUGUI>();
             arrowTmp.text = "<";
-            arrowTmp.fontSize = 30;
+            arrowTmp.fontSize = FontSizes.Body;
             arrowTmp.color = CYAN_NEON;
             arrowTmp.fontStyle = FontStyles.Bold;
             arrowTmp.alignment = TextAlignmentOptions.Center;
@@ -172,7 +173,7 @@ namespace DigitPark.Editor
                 new Vector2(12, 0), Vector2.zero);
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "BACK";
-            tmp.fontSize = 30;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = Color.white;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -197,7 +198,7 @@ namespace DigitPark.Editor
                 new Vector2(0, -10), new Vector2(700, 60));
             TextMeshProUGUI titleTmp = title.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "SELECT MODE";
-            titleTmp.fontSize = 78;
+            titleTmp.fontSize = FontSizes.SceneTitle;
             titleTmp.color = CYAN_NEON;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -214,7 +215,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 20), new Vector2(500, 35));
             TextMeshProUGUI subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Choose how you want to play";
-            subtitleTmp.fontSize = 36;
+            subtitleTmp.fontSize = FontSizes.Button;
             subtitleTmp.color = TEXT_SECONDARY;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
         }
@@ -330,7 +331,7 @@ namespace DigitPark.Editor
                 new Vector2(-75, 0), new Vector2(90, 90));
             TextMeshProUGUI arrowTmp = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowTmp.text = ">";
-            arrowTmp.fontSize = 84;
+            arrowTmp.fontSize = FontSizes.CardSymbol;
             arrowTmp.color = accentColor;
             arrowTmp.fontStyle = FontStyles.Bold;
             arrowTmp.alignment = TextAlignmentOptions.Center;
@@ -343,7 +344,7 @@ namespace DigitPark.Editor
                 Vector2.zero, new Vector2(-300, -16));
             TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = title;
-            titleTmp.fontSize = 64;
+            titleTmp.fontSize = FontSizes.AuthTitle;
             titleTmp.color = accentColor;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -357,7 +358,7 @@ namespace DigitPark.Editor
                 Vector2.zero, new Vector2(-300, 0));
             TextMeshProUGUI descTmp = descObj.AddComponent<TextMeshProUGUI>();
             descTmp.text = description;
-            descTmp.fontSize = 30;
+            descTmp.fontSize = FontSizes.Body;
             descTmp.color = TEXT_SECONDARY;
             descTmp.alignment = TextAlignmentOptions.Center;
             descTmp.enableWordWrapping = true;

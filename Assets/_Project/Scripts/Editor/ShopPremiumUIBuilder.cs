@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.Editor.AutoAssigners;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -17,7 +18,7 @@ namespace DigitPark.Editor
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
 
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.06f, 0.1f, 0.16f, 0.98f);
         private static readonly Color CARD_BG = new Color(0.08f, 0.12f, 0.18f, 1f);
         private static readonly Color HEADER_BG = new Color(0.02f, 0.04f, 0.08f, 0.98f);
@@ -52,7 +53,6 @@ namespace DigitPark.Editor
 
         // Section dividers (estilo BetSelection, prominentes)
         private const float SECTION_DIVIDER_HEIGHT = 100f;
-        private const float SECTION_DIVIDER_FONT = 48f;
 
         // Banners
         private const float FEATURED_HEIGHT = 220f;
@@ -75,18 +75,9 @@ namespace DigitPark.Editor
         // Daily Deals
         private const float DAILY_ITEM_HEIGHT = 210f;
 
-        // Text sizes (consistentes con BetSelection, DailyMissions, Achievements, etc.)
-        private const float SCENE_TITLE_FONT = 78f;
-        private const float AMOUNT_FONT = 40f;
-        private const float PRICE_FONT = 30f;
-        private const float BONUS_FONT = 30f;
-        private const float BADGE_FONT = 30f;
-        private const float CARD_NAME_FONT = 30f;
+        // Non-font dimensions
         private const float PRICE_BTN_HEIGHT = 52f;
         private const float BADGE_HEIGHT = 34f;
-        private const float POPUP_TITLE_FONT = 48f;
-        private const float POPUP_TEXT_FONT = 30f;
-        private const float BTN_TEXT_FONT = 36f;
 
         [MenuItem("DigitPark/UI Builders/Monetization/Shop Premium (Clash Royale Style)", false, 181)]
         public static void BuildUI()
@@ -284,7 +275,7 @@ namespace DigitPark.Editor
                 SetStretch(backIcon);
                 TextMeshProUGUI backText = backIcon.AddComponent<TextMeshProUGUI>();
                 backText.text = "<";
-                backText.fontSize = 36;
+                backText.fontSize = FontSizes.Button;
                 backText.fontStyle = FontStyles.Bold;
                 backText.color = CYAN_NEON;
                 backText.alignment = TextAlignmentOptions.Center;
@@ -301,13 +292,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "TIENDA";
-            titleText.fontSize = SCENE_TITLE_FONT;
+            titleText.fontSize = FontSizes.SceneTitle;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 36;
-            titleText.fontSizeMax = SCENE_TITLE_FONT;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.SceneTitle;
 
             // Currency Display
             CreateHeaderCurrency(header);
@@ -372,7 +363,7 @@ namespace DigitPark.Editor
             GameObject amountObj = CreateChild(pill, "Amount");
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = 30;
+            amountText.fontSize = FontSizes.Body;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             amountText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -391,7 +382,7 @@ namespace DigitPark.Editor
             SetStretch(plusText);
             TextMeshProUGUI pt = plusText.AddComponent<TextMeshProUGUI>();
             pt.text = "+";
-            pt.fontSize = 22;
+            pt.fontSize = FontSizes.Body;
             pt.fontStyle = FontStyles.Bold;
             pt.color = TEXT_DARK;
             pt.alignment = TextAlignmentOptions.Center;
@@ -571,7 +562,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(info, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "STARTER PACK";
-            titleText.fontSize = 36;
+            titleText.fontSize = FontSizes.Button;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -582,7 +573,7 @@ namespace DigitPark.Editor
             GameObject contents = CreateChild(info, "Contents");
             TextMeshProUGUI contentsText = contents.AddComponent<TextMeshProUGUI>();
             contentsText.text = "500 Gemas + Tema Exclusivo + Avatar";
-            contentsText.fontSize = 30;
+            contentsText.fontSize = FontSizes.Body;
             contentsText.color = TEXT_SECONDARY;
             LayoutElement contentsLE = contents.AddComponent<LayoutElement>();
             contentsLE.minHeight = 26;
@@ -591,7 +582,7 @@ namespace DigitPark.Editor
             GameObject timer = CreateChild(info, "Timer");
             TextMeshProUGUI timerText = timer.AddComponent<TextMeshProUGUI>();
             timerText.text = "Expira en: 23:45:12";
-            timerText.fontSize = 30;
+            timerText.fontSize = FontSizes.Body;
             timerText.color = ORANGE_HOT;
             LayoutElement timerLE = timer.AddComponent<LayoutElement>();
             timerLE.minHeight = 26;
@@ -613,14 +604,14 @@ namespace DigitPark.Editor
             GameObject origPrice = CreateChild(buyContainer, "OriginalPrice");
             TextMeshProUGUI origText = origPrice.AddComponent<TextMeshProUGUI>();
             origText.text = "<s>$9.99</s>";
-            origText.fontSize = 30;
+            origText.fontSize = FontSizes.Body;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
             LayoutElement origLE = origPrice.AddComponent<LayoutElement>();
             origLE.minHeight = 26;
 
             // Buy button
-            CreatePriceButton(buyContainer, "$2.99", BUTTON_SUCCESS, TEXT_DARK, 58, PRICE_FONT);
+            CreatePriceButton(buyContainer, "$2.99", BUTTON_SUCCESS, TEXT_DARK, 58, FontSizes.Body);
 
             Debug.Log("[ShopPremiumUIBuilder] Featured Banner V3 creado");
         }
@@ -734,7 +725,7 @@ namespace DigitPark.Editor
             GameObject titleObj = CreateChild(info, "Title");
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = 30;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -744,7 +735,7 @@ namespace DigitPark.Editor
             GameObject contentsObj = CreateChild(info, "Contents");
             TextMeshProUGUI contentsText = contentsObj.AddComponent<TextMeshProUGUI>();
             contentsText.text = contents;
-            contentsText.fontSize = 30;
+            contentsText.fontSize = FontSizes.Body;
             contentsText.color = TEXT_SECONDARY;
             LayoutElement contentsLE = contentsObj.AddComponent<LayoutElement>();
             contentsLE.minHeight = 26;
@@ -765,13 +756,13 @@ namespace DigitPark.Editor
             GameObject origObj = CreateChild(buyContainer, "OriginalPrice");
             TextMeshProUGUI origText = origObj.AddComponent<TextMeshProUGUI>();
             origText.text = origPrice;
-            origText.fontSize = 30;
+            origText.fontSize = FontSizes.Body;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
             LayoutElement origLE = origObj.AddComponent<LayoutElement>();
             origLE.minHeight = 26;
 
-            CreatePriceButton(buyContainer, price, BUTTON_SUCCESS, TEXT_DARK, 52, PRICE_FONT);
+            CreatePriceButton(buyContainer, price, BUTTON_SUCCESS, TEXT_DARK, 52, FontSizes.Body);
         }
 
         // ==================== DAILY DEALS ====================
@@ -814,7 +805,7 @@ namespace DigitPark.Editor
             titleLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "OFERTAS DIARIAS";
-            titleText.fontSize = SECTION_DIVIDER_FONT;
+            titleText.fontSize = FontSizes.SectionHeader;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = ORANGE_HOT;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -834,7 +825,7 @@ namespace DigitPark.Editor
             timerLE.minWidth = 130;
             TextMeshProUGUI timerText = timerObj.AddComponent<TextMeshProUGUI>();
             timerText.text = "12:34:56";
-            timerText.fontSize = 30;
+            timerText.fontSize = FontSizes.Body;
             timerText.color = TEXT_SECONDARY;
             timerText.alignment = TextAlignmentOptions.MidlineRight;
 
@@ -905,7 +896,7 @@ namespace DigitPark.Editor
             GameObject nameObj = CreateChild(item, "Name");
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = itemName;
-            nameText.fontSize = CARD_NAME_FONT;
+            nameText.fontSize = FontSizes.Body;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Center;
@@ -914,7 +905,7 @@ namespace DigitPark.Editor
 
             // Price button
             Color priceBtnColor = isFree ? GREEN_FREE : GEM_COLOR;
-            CreatePriceButton(item, price, priceBtnColor, TEXT_DARK, 46, PRICE_FONT);
+            CreatePriceButton(item, price, priceBtnColor, TEXT_DARK, 46, FontSizes.Body);
         }
 
         // ==================== GEMS SECTION ====================
@@ -1219,7 +1210,7 @@ namespace DigitPark.Editor
             GameObject nameObj = CreateChild(item, "TitleName");
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = displayName;
-            nameText.fontSize = 30;
+            nameText.fontSize = FontSizes.Body;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = titleColor;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1232,7 +1223,7 @@ namespace DigitPark.Editor
                 GameObject statusObj = CreateChild(item, "Status");
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
                 statusText.text = "EQUIPADO";
-                statusText.fontSize = 30;
+                statusText.fontSize = FontSizes.Body;
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.MidlineRight;
@@ -1279,7 +1270,7 @@ namespace DigitPark.Editor
                 GameObject priceText = CreateChild(priceBtn, "Text");
                 TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
                 pt.text = price;
-                pt.fontSize = PRICE_FONT;
+                pt.fontSize = FontSizes.Body;
                 pt.fontStyle = FontStyles.Bold;
                 pt.color = TEXT_DARK;
                 pt.alignment = TextAlignmentOptions.Center;
@@ -1366,7 +1357,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(info, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "BUNDLE PREMIUM";
-            titleText.fontSize = 30;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
@@ -1375,7 +1366,7 @@ namespace DigitPark.Editor
             GameObject desc = CreateChild(info, "Description");
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.text = "50 niveles de recompensas exclusivas";
-            descText.fontSize = 30;
+            descText.fontSize = FontSizes.Body;
             descText.color = TEXT_SECONDARY;
             LayoutElement descLE = desc.AddComponent<LayoutElement>();
             descLE.minHeight = 22;
@@ -1401,7 +1392,7 @@ namespace DigitPark.Editor
             SetStretch(buyText);
             TextMeshProUGUI buyTxt = buyText.AddComponent<TextMeshProUGUI>();
             buyTxt.text = "$9.99";
-            buyTxt.fontSize = 30;
+            buyTxt.fontSize = FontSizes.Body;
             buyTxt.fontStyle = FontStyles.Bold;
             buyTxt.color = TEXT_PRIMARY;
             buyTxt.alignment = TextAlignmentOptions.Center;
@@ -1485,7 +1476,7 @@ namespace DigitPark.Editor
             GameObject amountObj = CreateChild(item, "Amount");
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = AMOUNT_FONT;
+            amountText.fontSize = FontSizes.LabelLarge;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Center;
@@ -1498,7 +1489,7 @@ namespace DigitPark.Editor
                 GameObject bonusObj = CreateChild(item, "Bonus");
                 TextMeshProUGUI bonusText = bonusObj.AddComponent<TextMeshProUGUI>();
                 bonusText.text = bonus + " BONUS";
-                bonusText.fontSize = BONUS_FONT;
+                bonusText.fontSize = FontSizes.Body;
                 bonusText.fontStyle = FontStyles.Bold;
                 bonusText.color = BUTTON_SUCCESS;
                 bonusText.alignment = TextAlignmentOptions.Center;
@@ -1536,7 +1527,7 @@ namespace DigitPark.Editor
             GameObject priceText = CreateChild(priceBtn, "Text");
             TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
             pt.text = price;
-            pt.fontSize = PRICE_FONT;
+            pt.fontSize = FontSizes.Body;
             pt.fontStyle = FontStyles.Bold;
             pt.color = TEXT_DARK;
             pt.alignment = TextAlignmentOptions.Center;
@@ -1591,7 +1582,7 @@ namespace DigitPark.Editor
             GameObject nameObj = CreateChild(item, "Name");
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = displayName;
-            nameText.fontSize = CARD_NAME_FONT;
+            nameText.fontSize = FontSizes.Body;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = themeColor;
             nameText.alignment = TextAlignmentOptions.Center;
@@ -1604,7 +1595,7 @@ namespace DigitPark.Editor
                 GameObject statusObj = CreateChild(item, "Status");
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
                 statusText.text = "EN USO";
-                statusText.fontSize = 30;
+                statusText.fontSize = FontSizes.Body;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.Center;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
@@ -1643,7 +1634,7 @@ namespace DigitPark.Editor
                 GameObject priceText = CreateChild(priceBtn, "Text");
                 TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
                 pt.text = price;
-                pt.fontSize = PRICE_FONT;
+                pt.fontSize = FontSizes.Body;
                 pt.fontStyle = FontStyles.Bold;
                 pt.color = TEXT_DARK;
                 pt.alignment = TextAlignmentOptions.Center;
@@ -1700,7 +1691,7 @@ namespace DigitPark.Editor
             GameObject nameObj = CreateChild(item, "Name");
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = displayName;
-            nameText.fontSize = CARD_NAME_FONT;
+            nameText.fontSize = FontSizes.Body;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = itemColor;
             nameText.alignment = TextAlignmentOptions.Center;
@@ -1713,7 +1704,7 @@ namespace DigitPark.Editor
                 GameObject statusObj = CreateChild(item, "Status");
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
                 statusText.text = "EN USO";
-                statusText.fontSize = 30;
+                statusText.fontSize = FontSizes.Body;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.Center;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
@@ -1751,7 +1742,7 @@ namespace DigitPark.Editor
                 GameObject priceText = CreateChild(priceBtn, "Text");
                 TextMeshProUGUI pt = priceText.AddComponent<TextMeshProUGUI>();
                 pt.text = price;
-                pt.fontSize = PRICE_FONT;
+                pt.fontSize = FontSizes.Body;
                 pt.fontStyle = FontStyles.Bold;
                 pt.color = TEXT_DARK;
                 pt.alignment = TextAlignmentOptions.Center;
@@ -1796,7 +1787,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Confirmar Compra";
-            titleText.fontSize = POPUP_TITLE_FONT;
+            titleText.fontSize = FontSizes.SectionHeader;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1823,7 +1814,7 @@ namespace DigitPark.Editor
             GameObject previewAmount = CreateChild(preview, "Amount");
             TextMeshProUGUI amountText = previewAmount.AddComponent<TextMeshProUGUI>();
             amountText.text = "1,200 Gemas";
-            amountText.fontSize = 32;
+            amountText.fontSize = FontSizes.BodyLarge;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             LayoutElement amountLE = previewAmount.AddComponent<LayoutElement>();
@@ -1833,7 +1824,7 @@ namespace DigitPark.Editor
             GameObject priceObj = CreateChild(popup, "Price");
             TextMeshProUGUI priceText = priceObj.AddComponent<TextMeshProUGUI>();
             priceText.text = "Precio: $9.99";
-            priceText.fontSize = POPUP_TEXT_FONT;
+            priceText.fontSize = FontSizes.Body;
             priceText.color = TEXT_SECONDARY;
             priceText.alignment = TextAlignmentOptions.Center;
             LayoutElement priceLE = priceObj.AddComponent<LayoutElement>();
@@ -1899,7 +1890,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Gemas Insuficientes";
-            titleText.fontSize = POPUP_TITLE_FONT;
+            titleText.fontSize = FontSizes.SectionHeader;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GEM_COLOR;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1910,7 +1901,7 @@ namespace DigitPark.Editor
             GameObject msg = CreateChild(popup, "Message");
             TextMeshProUGUI msgText = msg.AddComponent<TextMeshProUGUI>();
             msgText.text = "No tienes suficientes gemas.\nConsigue mas en la tienda!";
-            msgText.fontSize = POPUP_TEXT_FONT;
+            msgText.fontSize = FontSizes.Body;
             msgText.color = TEXT_SECONDARY;
             msgText.alignment = TextAlignmentOptions.Center;
             LayoutElement msgLE = msg.AddComponent<LayoutElement>();
@@ -1949,7 +1940,7 @@ namespace DigitPark.Editor
             SetStretch(textObj);
             TextMeshProUGUI txt = textObj.AddComponent<TextMeshProUGUI>();
             txt.text = text;
-            txt.fontSize = BTN_TEXT_FONT;
+            txt.fontSize = FontSizes.Button;
             txt.fontStyle = FontStyles.Bold;
             txt.color = textColor;
             txt.alignment = TextAlignmentOptions.Center;
@@ -2014,7 +2005,7 @@ namespace DigitPark.Editor
             tLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = SECTION_DIVIDER_FONT;
+            titleText.fontSize = FontSizes.SectionHeader;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = color;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -2049,7 +2040,7 @@ namespace DigitPark.Editor
             SetStretch(badgeText);
             TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
             bt.text = text;
-            bt.fontSize = BADGE_FONT;
+            bt.fontSize = FontSizes.Body;
             bt.fontStyle = FontStyles.Bold;
             bt.color = TEXT_DARK;
             bt.alignment = TextAlignmentOptions.Center;

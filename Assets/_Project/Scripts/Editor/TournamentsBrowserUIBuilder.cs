@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -16,7 +17,7 @@ namespace DigitPark.Editor
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
         private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.3f);
 
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.08f, 0.12f, 0.18f, 0.98f);
         private static readonly Color INPUT_BG = new Color(0.04f, 0.08f, 0.12f, 1f);
         private static readonly Color HEADER_BG = new Color(0.03f, 0.06f, 0.1f, 0.95f);
@@ -283,7 +284,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "TORNEOS";
-            titleText.fontSize = 78;
+            titleText.fontSize = FontSizes.SceneTitle;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -345,7 +346,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = 40;
+            tabText.fontSize = FontSizes.LabelLarge;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
@@ -426,7 +427,7 @@ namespace DigitPark.Editor
             GameObject filterTextObj = FindOrCreateChild(filterBtn, "Text");
             TextMeshProUGUI filterText = GetOrAddComponent<TextMeshProUGUI>(filterTextObj);
             filterText.text = "Filtros";
-            filterText.fontSize = 35;
+            filterText.fontSize = FontSizes.BodyLarge;
             filterText.fontStyle = FontStyles.Bold;
             filterText.color = TEXT_PRIMARY;
             filterText.alignment = TextAlignmentOptions.Center;
@@ -542,7 +543,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = $"Torneo de Ejemplo {index + 1}";
-            nameText.fontSize = 50;
+            nameText.fontSize = FontSizes.SectionHeader;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -557,7 +558,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI infoText = GetOrAddComponent<TextMeshProUGUI>(infoObj);
             infoText.text = "Digit Rush  |  8/16 jugadores";
-            infoText.fontSize = 35;
+            infoText.fontSize = FontSizes.BodyLarge;
             infoText.color = TEXT_SECONDARY;
             infoText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -571,7 +572,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI feeText = GetOrAddComponent<TextMeshProUGUI>(feeObj);
             feeText.text = "GRATIS";
-            feeText.fontSize = 45;
+            feeText.fontSize = FontSizes.ValueLarge;
             feeText.fontStyle = FontStyles.Bold;
             feeText.color = CYAN_NEON;
             feeText.alignment = TextAlignmentOptions.MidlineRight;
@@ -586,7 +587,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusText = GetOrAddComponent<TextMeshProUGUI>(statusObj);
             statusText.text = "Esperando...";
-            statusText.fontSize = 30;
+            statusText.fontSize = FontSizes.Body;
             statusText.color = TEXT_MUTED;
             statusText.alignment = TextAlignmentOptions.MidlineRight;
         }
@@ -630,7 +631,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(emptyState, "EmptyStateText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "No hay torneos disponibles";
-            titleText.fontSize = 60;
+            titleText.fontSize = FontSizes.DisplayMedium;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -642,7 +643,7 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(emptyState, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Se el primero en crear uno\no vuelve mas tarde";
-            subtitleText.fontSize = 40;
+            subtitleText.fontSize = FontSizes.LabelLarge;
             subtitleText.color = TEXT_SECONDARY;
             subtitleText.alignment = TextAlignmentOptions.Center;
 
@@ -666,7 +667,7 @@ namespace DigitPark.Editor
             GameObject createTextObj = FindOrCreateChild(createBtn, "Text");
             TextMeshProUGUI createText = GetOrAddComponent<TextMeshProUGUI>(createTextObj);
             createText.text = "Crear Torneo";
-            createText.fontSize = 50;
+            createText.fontSize = FontSizes.SectionHeader;
             createText.fontStyle = FontStyles.Bold;
             createText.color = TEXT_DARK;
             createText.alignment = TextAlignmentOptions.Center;
@@ -733,7 +734,7 @@ namespace DigitPark.Editor
             GameObject clearTextObj = FindOrCreateChild(clearBtn, "Text");
             TextMeshProUGUI clearText = GetOrAddComponent<TextMeshProUGUI>(clearTextObj);
             clearText.text = "Limpiar Filtros";
-            clearText.fontSize = 40;
+            clearText.fontSize = FontSizes.LabelLarge;
             clearText.color = TEXT_SECONDARY;
             clearText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(clearTextObj);
@@ -765,7 +766,7 @@ namespace DigitPark.Editor
             GameObject captionObj = FindOrCreateChild(row, "Label");
             TextMeshProUGUI captionText = GetOrAddComponent<TextMeshProUGUI>(captionObj);
             captionText.text = label;
-            captionText.fontSize = 40;
+            captionText.fontSize = FontSizes.LabelLarge;
             captionText.color = TEXT_PRIMARY;
             captionText.alignment = TextAlignmentOptions.Left;
             SetRectTransformStretch(captionObj);
@@ -844,7 +845,7 @@ namespace DigitPark.Editor
             itemLabelRT.offsetMin = new Vector2(30, 0);
             itemLabelRT.offsetMax = new Vector2(-8, 0);
             TextMeshProUGUI itemLabelText = GetOrAddComponent<TextMeshProUGUI>(itemLabel);
-            itemLabelText.fontSize = 40;
+            itemLabelText.fontSize = FontSizes.LabelLarge;
             itemLabelText.color = TEXT_PRIMARY;
             itemLabelText.alignment = TextAlignmentOptions.Left;
 
@@ -876,7 +877,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(refresh, "Text");
             TextMeshProUGUI refreshText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             refreshText.text = "Actualizando...";
-            refreshText.fontSize = 40;
+            refreshText.fontSize = FontSizes.LabelLarge;
             refreshText.color = CYAN_NEON;
             refreshText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -908,7 +909,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(loadMore, "Text");
             TextMeshProUGUI loadMoreText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadMoreText.text = "Cargar Mas";
-            loadMoreText.fontSize = 45;
+            loadMoreText.fontSize = FontSizes.ValueLarge;
             loadMoreText.color = TEXT_PRIMARY;
             loadMoreText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -950,7 +951,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI loadingText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadingText.text = "Cargando...";
-            loadingText.fontSize = 45;
+            loadingText.fontSize = FontSizes.ValueLarge;
             loadingText.color = TEXT_SECONDARY;
             loadingText.alignment = TextAlignmentOptions.Center;
 
@@ -987,7 +988,7 @@ namespace DigitPark.Editor
             GameObject plusObj = FindOrCreateChild(fab, "PlusIcon");
             TextMeshProUGUI plusText = GetOrAddComponent<TextMeshProUGUI>(plusObj);
             plusText.text = "+";
-            plusText.fontSize = 78;
+            plusText.fontSize = FontSizes.SceneTitle;
             plusText.fontStyle = FontStyles.Bold;
             plusText.color = TEXT_DARK;
             plusText.alignment = TextAlignmentOptions.Center;
@@ -1030,7 +1031,7 @@ namespace DigitPark.Editor
                 GameObject placeholderObj = FindOrCreateChild(textArea, "Placeholder");
                 TextMeshProUGUI placeholderText = GetOrAddComponent<TextMeshProUGUI>(placeholderObj);
                 placeholderText.text = placeholder;
-                placeholderText.fontSize = 40;
+                placeholderText.fontSize = FontSizes.LabelLarge;
                 placeholderText.fontStyle = FontStyles.Bold;
                 placeholderText.color = TEXT_MUTED;
                 placeholderText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1038,7 +1039,7 @@ namespace DigitPark.Editor
 
                 GameObject textObj = FindOrCreateChild(textArea, "Text");
                 TextMeshProUGUI textComponent = GetOrAddComponent<TextMeshProUGUI>(textObj);
-                textComponent.fontSize = 40;
+                textComponent.fontSize = FontSizes.LabelLarge;
                 textComponent.color = TEXT_PRIMARY;
                 textComponent.alignment = TextAlignmentOptions.MidlineLeft;
                 SetRectTransformStretch(textObj);

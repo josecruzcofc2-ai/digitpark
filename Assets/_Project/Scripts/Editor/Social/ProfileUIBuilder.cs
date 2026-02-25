@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -64,6 +65,8 @@ namespace DigitPark.Editor
         #region Prefab
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
+        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png";
+        private const string ICON_EDIT = "Assets/_Project/Art/Icons/Social/Profile/EditIconNeon.png";
 
         #endregion
 
@@ -143,6 +146,7 @@ namespace DigitPark.Editor
                 // Nombres nuevos (del builder)
                 "Background", "Header", "AvatarCard", "GeneralStatsCard",
                 "GameStatsCard", "ActionRow", "CTASection", "GameSelectionPanel",
+                "ChangeNamePanel", "ErrorPanel",
                 "ProfilePanel", "StatsPanel", "ContentPanel",
                 // Nombres viejos (UI original de la escena)
                 "HeaderPanel", "Divider", "Divider2", "Divider3",
@@ -162,6 +166,8 @@ namespace DigitPark.Editor
             CreateActionRow();
             CreateCTASection();
             CreateGameSelectionPanel();
+            BuildChangeNamePanel(canvas.transform);
+            BuildErrorPanel(canvas.transform);
             SetupManagerReferences();
 
             Debug.Log("[ProfileUI] Profile REDISEÑADO exitosamente!");
@@ -230,7 +236,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "PERFIL";
-            tTMP.fontSize = 78;
+            tTMP.fontSize = FontSizes.SceneTitle;
             tTMP.color = TEXT_WHITE;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -255,7 +261,7 @@ namespace DigitPark.Editor
             aiRT.offsetMax = new Vector2(-8, -8);
             var aiTMP = GetOrAdd<TextMeshProUGUI>(addIcon);
             aiTMP.text = "+";
-            aiTMP.fontSize = 56;
+            aiTMP.fontSize = FontSizes.DisplayMedium;
             aiTMP.color = GREEN_SUCCESS;
             aiTMP.fontStyle = FontStyles.Bold;
             aiTMP.alignment = TextAlignmentOptions.Center;
@@ -308,12 +314,23 @@ namespace DigitPark.Editor
             avImgComp.color = CARD_BG_LIGHT;
             avImgComp.preserveAspect = true;
 
+            // Set default avatar sprite on Image
+            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
+            if (defaultAvatar != null)
+            {
+                avImgComp.sprite = defaultAvatar;
+            }
+
             // AvatarUI component
             var avatarUI = GetOrAdd<DigitPark.UI.Components.AvatarUI>(avImg);
             var avatarSO = new SerializedObject(avatarUI);
             avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
             avatarSO.FindProperty("isEditable").boolValue = true;
             avatarSO.FindProperty("avatarImage").objectReferenceValue = avImgComp;
+            if (defaultAvatar != null)
+            {
+                avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
+            }
             avatarSO.ApplyModifiedProperties();
 
             // Edit Avatar Button (bottom-right corner of avatar)
@@ -323,23 +340,39 @@ namespace DigitPark.Editor
             eRT.anchorMax = new Vector2(1, 0);
             eRT.pivot = new Vector2(0.5f, 0.5f);
             eRT.anchoredPosition = new Vector2(-10, 10);
-            eRT.sizeDelta = new Vector2(60, 60);
+            eRT.sizeDelta = new Vector2(55, 55);
             var eBg = GetOrAdd<Image>(editBtn);
-            eBg.color = CYAN_NEON;
+            eBg.color = CARD_BG;
             GetOrAdd<Button>(editBtn).targetGraphic = eBg;
 
+            var editOutline = GetOrAdd<Outline>(editBtn);
+            editOutline.effectColor = CYAN_GLOW;
+            editOutline.effectDistance = new Vector2(2, 2);
+
+            // Edit icon sprite (instead of TMP text)
             var editIcon = FindOrCreate(editBtn.transform, "Icon");
             var eiRT = GetOrAdd<RectTransform>(editIcon);
             eiRT.anchorMin = Vector2.zero;
             eiRT.anchorMax = Vector2.one;
             eiRT.offsetMin = new Vector2(6, 6);
             eiRT.offsetMax = new Vector2(-6, -6);
-            var eiTMP = GetOrAdd<TextMeshProUGUI>(editIcon);
-            eiTMP.text = "Edit";
-            eiTMP.fontSize = 30;
-            eiTMP.color = TEXT_DARK;
-            eiTMP.fontStyle = FontStyles.Bold;
-            eiTMP.alignment = TextAlignmentOptions.Center;
+            // Remove old TMP if exists from previous build
+            var oldTMP = editIcon.GetComponent<TextMeshProUGUI>();
+            if (oldTMP != null) DestroyImmediate(oldTMP);
+            var eiImg = GetOrAdd<Image>(editIcon);
+            eiImg.preserveAspect = true;
+            eiImg.raycastTarget = false;
+            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_EDIT);
+            if (editSprite != null)
+            {
+                eiImg.sprite = editSprite;
+                eiImg.color = Color.white;
+            }
+            else
+            {
+                eiImg.color = CYAN_NEON;
+                Debug.LogWarning("[ProfileUI] EditIconNeon.png not found, using fallback color");
+            }
 
             // Username
             var username = FindOrCreate(card.transform, "UsernameText");
@@ -350,10 +383,34 @@ namespace DigitPark.Editor
             uRT.offsetMax = Vector2.zero;
             var uTMP = GetOrAdd<TextMeshProUGUI>(username);
             uTMP.text = "@Username";
-            uTMP.fontSize = 45;
+            uTMP.fontSize = FontSizes.ValueLarge;
             uTMP.color = TEXT_WHITE;
             uTMP.fontStyle = FontStyles.Bold;
             uTMP.alignment = TextAlignmentOptions.Center;
+
+            // Edit Name Button (small pencil icon next to username, only visible on own profile)
+            var editNameBtn = FindOrCreate(card.transform, "EditNameButton");
+            var enRT = GetOrAdd<RectTransform>(editNameBtn);
+            enRT.anchorMin = new Vector2(0.82f, 0.25f);
+            enRT.anchorMax = new Vector2(0.92f, 0.40f);
+            enRT.offsetMin = Vector2.zero;
+            enRT.offsetMax = Vector2.zero;
+            var enBtn = GetOrAdd<Button>(editNameBtn);
+            var enImg = GetOrAdd<Image>(editNameBtn);
+            enImg.preserveAspect = true;
+            enImg.raycastTarget = true;
+            Sprite editNameSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_EDIT);
+            if (editNameSprite != null)
+            {
+                enImg.sprite = editNameSprite;
+                enImg.color = new Color(1f, 1f, 1f, 0.7f);
+            }
+            else
+            {
+                enImg.color = CYAN_NEON;
+            }
+            // Scale down slightly vs avatar edit button
+            editNameBtn.transform.localScale = Vector3.one * 0.7f;
 
             // Status Text
             var status = FindOrCreate(card.transform, "StatusText");
@@ -364,7 +421,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(status);
             sTMP.text = "Tu perfil";
-            sTMP.fontSize = 30;
+            sTMP.fontSize = FontSizes.Body;
             sTMP.color = CYAN_NEON;
             sTMP.alignment = TextAlignmentOptions.Center;
 
@@ -390,19 +447,55 @@ namespace DigitPark.Editor
             outline.effectColor = CYAN_DARK;
             outline.effectDistance = new Vector2(2, 2);
 
-            // Title
+            // Title divider: ═══ ESTADÍSTICAS GENERALES ═══
             var title = FindOrCreate(card.transform, "Title");
             var tRT = GetOrAdd<RectTransform>(title);
             tRT.anchorMin = new Vector2(0, 0.88f);
             tRT.anchorMax = new Vector2(1, 1);
-            tRT.offsetMin = new Vector2(15, 0);
-            tRT.offsetMax = new Vector2(-15, -5);
-            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
-            tTMP.text = "ESTAD\u00CDSTICAS GENERALES";
-            tTMP.fontSize = 48;
-            tTMP.color = TEXT_SECONDARY;
-            tTMP.fontStyle = FontStyles.Bold;
-            tTMP.alignment = TextAlignmentOptions.Left;
+            tRT.offsetMin = new Vector2(10, 0);
+            tRT.offsetMax = new Vector2(-10, -5);
+            var tHLG = GetOrAdd<HorizontalLayoutGroup>(title);
+            tHLG.spacing = 12;
+            tHLG.childAlignment = TextAnchor.MiddleCenter;
+            tHLG.childForceExpandWidth = true;
+            tHLG.childForceExpandHeight = true;
+            tHLG.childControlWidth = true;
+            tHLG.childControlHeight = true;
+
+            // Remove old TMP if it existed as direct text
+            var oldTMP = title.GetComponent<TextMeshProUGUI>();
+            if (oldTMP != null) DestroyImmediate(oldTMP);
+
+            // Clear old children
+            for (int c = title.transform.childCount - 1; c >= 0; c--)
+                DestroyImmediate(title.transform.GetChild(c).gameObject);
+
+            var genLL = new GameObject("LeftLine");
+            genLL.transform.SetParent(title.transform, false);
+            var genLLle = genLL.AddComponent<LayoutElement>();
+            genLLle.flexibleWidth = 1; genLLle.preferredHeight = 2;
+            genLL.AddComponent<Image>().color = CYAN_GLOW;
+
+            var genTxt = new GameObject("TitleText");
+            genTxt.transform.SetParent(title.transform, false);
+            var genTxtLE = genTxt.AddComponent<LayoutElement>();
+            genTxtLE.flexibleWidth = 0; genTxtLE.preferredWidth = 620;
+            var genTxtTMP = genTxt.AddComponent<TextMeshProUGUI>();
+            genTxtTMP.text = "ESTAD\u00CDSTICAS GENERALES";
+            genTxtTMP.fontSize = FontSizes.SectionHeader;
+            genTxtTMP.color = CYAN_NEON;
+            genTxtTMP.fontStyle = FontStyles.Bold;
+            genTxtTMP.alignment = TextAlignmentOptions.Center;
+            genTxtTMP.characterSpacing = 6;
+            genTxtTMP.enableAutoSizing = true;
+            genTxtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            genTxtTMP.fontSizeMax = FontSizes.SectionHeader;
+
+            var genRL = new GameObject("RightLine");
+            genRL.transform.SetParent(title.transform, false);
+            var genRLle = genRL.AddComponent<LayoutElement>();
+            genRLle.flexibleWidth = 1; genRLle.preferredHeight = 2;
+            genRL.AddComponent<Image>().color = CYAN_GLOW;
 
             // Top Row: Total Games, Wins, Win Rate
             CreateStatBlock(card.transform, "TotalGames", "0", "Partidas", CYAN_NEON,
@@ -445,13 +538,13 @@ namespace DigitPark.Editor
             vRT.offsetMax = new Vector2(-5, -5);
             var vTMP = GetOrAdd<TextMeshProUGUI>(val);
             vTMP.text = value;
-            vTMP.fontSize = 56;
+            vTMP.fontSize = FontSizes.DisplayMedium;
             vTMP.color = accent;
             vTMP.fontStyle = FontStyles.Bold;
             vTMP.alignment = TextAlignmentOptions.Center;
             vTMP.enableAutoSizing = true;
-            vTMP.fontSizeMin = 32;
-            vTMP.fontSizeMax = 56;
+            vTMP.fontSizeMin = FontSizes.AutoMinValue;
+            vTMP.fontSizeMax = FontSizes.DisplayMedium;
 
             // Label
             var lbl = FindOrCreate(block.transform, "Label");
@@ -462,12 +555,12 @@ namespace DigitPark.Editor
             lRT.offsetMax = new Vector2(-5, 0);
             var lTMP = GetOrAdd<TextMeshProUGUI>(lbl);
             lTMP.text = label;
-            lTMP.fontSize = 30;
+            lTMP.fontSize = FontSizes.Body;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableAutoSizing = true;
-            lTMP.fontSizeMin = 18;
-            lTMP.fontSizeMax = 30;
+            lTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            lTMP.fontSizeMax = FontSizes.Body;
         }
 
         #endregion
@@ -489,19 +582,55 @@ namespace DigitPark.Editor
             outline.effectColor = CYAN_DARK;
             outline.effectDistance = new Vector2(2, 2);
 
-            // Title
+            // Title divider: ═══ STATS POR JUEGO ═══
             var title = FindOrCreate(card.transform, "Title");
             var tRT = GetOrAdd<RectTransform>(title);
             tRT.anchorMin = new Vector2(0, 0.88f);
             tRT.anchorMax = new Vector2(1, 1);
-            tRT.offsetMin = new Vector2(15, 0);
-            tRT.offsetMax = new Vector2(-15, -5);
-            var tTMP = GetOrAdd<TextMeshProUGUI>(title);
-            tTMP.text = "STATS POR JUEGO";
-            tTMP.fontSize = 48;
-            tTMP.color = TEXT_SECONDARY;
-            tTMP.fontStyle = FontStyles.Bold;
-            tTMP.alignment = TextAlignmentOptions.Left;
+            tRT.offsetMin = new Vector2(10, 0);
+            tRT.offsetMax = new Vector2(-10, -5);
+            var tHLG = GetOrAdd<HorizontalLayoutGroup>(title);
+            tHLG.spacing = 12;
+            tHLG.childAlignment = TextAnchor.MiddleCenter;
+            tHLG.childForceExpandWidth = true;
+            tHLG.childForceExpandHeight = true;
+            tHLG.childControlWidth = true;
+            tHLG.childControlHeight = true;
+
+            // Remove old TMP if it existed as direct text
+            var oldTMP2 = title.GetComponent<TextMeshProUGUI>();
+            if (oldTMP2 != null) DestroyImmediate(oldTMP2);
+
+            // Clear old children
+            for (int c = title.transform.childCount - 1; c >= 0; c--)
+                DestroyImmediate(title.transform.GetChild(c).gameObject);
+
+            var gsLL = new GameObject("LeftLine");
+            gsLL.transform.SetParent(title.transform, false);
+            var gsLLle = gsLL.AddComponent<LayoutElement>();
+            gsLLle.flexibleWidth = 1; gsLLle.preferredHeight = 2;
+            gsLL.AddComponent<Image>().color = CYAN_GLOW;
+
+            var gsTxt = new GameObject("TitleText");
+            gsTxt.transform.SetParent(title.transform, false);
+            var gsTxtLE = gsTxt.AddComponent<LayoutElement>();
+            gsTxtLE.flexibleWidth = 0; gsTxtLE.preferredWidth = 500;
+            var gsTxtTMP = gsTxt.AddComponent<TextMeshProUGUI>();
+            gsTxtTMP.text = "STATS POR JUEGO";
+            gsTxtTMP.fontSize = FontSizes.SectionHeader;
+            gsTxtTMP.color = CYAN_NEON;
+            gsTxtTMP.fontStyle = FontStyles.Bold;
+            gsTxtTMP.alignment = TextAlignmentOptions.Center;
+            gsTxtTMP.characterSpacing = 6;
+            gsTxtTMP.enableAutoSizing = true;
+            gsTxtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            gsTxtTMP.fontSizeMax = FontSizes.SectionHeader;
+
+            var gsRL = new GameObject("RightLine");
+            gsRL.transform.SetParent(title.transform, false);
+            var gsRLle = gsRL.AddComponent<LayoutElement>();
+            gsRLle.flexibleWidth = 1; gsRLle.preferredHeight = 2;
+            gsRL.AddComponent<Image>().color = CYAN_GLOW;
 
             // 5 game rows
             CreateGameRow(card.transform, "DigitRush", "Digit Rush", "-- | 0%", CYAN_NEON, 0);
@@ -546,28 +675,60 @@ namespace DigitPark.Editor
             var lbl = FindOrCreate(row.transform, "Label");
             var lRT = GetOrAdd<RectTransform>(lbl);
             lRT.anchorMin = new Vector2(0, 0);
-            lRT.anchorMax = new Vector2(0.50f, 1);
+            lRT.anchorMax = new Vector2(0.30f, 1);
             lRT.offsetMin = new Vector2(14, 0);
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(lbl);
             lTMP.text = label;
-            lTMP.fontSize = 34;
+            lTMP.fontSize = FontSizes.BodyLarge;
             lTMP.color = TEXT_WHITE;
             lTMP.alignment = TextAlignmentOptions.Left;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lTMP.fontSizeMax = FontSizes.BodyLarge;
+
+            // Progress bar background
+            var barBG = FindOrCreate(row.transform, "BarBG");
+            var barBGRT = GetOrAdd<RectTransform>(barBG);
+            barBGRT.anchorMin = new Vector2(0.32f, 0.25f);
+            barBGRT.anchorMax = new Vector2(0.70f, 0.75f);
+            barBGRT.offsetMin = Vector2.zero;
+            barBGRT.offsetMax = Vector2.zero;
+            var barBGImg = GetOrAdd<Image>(barBG);
+            barBGImg.color = new Color(0.10f, 0.10f, 0.14f, 1f);
+            barBGImg.raycastTarget = false;
+
+            // Progress bar fill
+            var barFill = FindOrCreate(barBG.transform, "BarFill");
+            var barFillRT = GetOrAdd<RectTransform>(barFill);
+            barFillRT.anchorMin = Vector2.zero;
+            barFillRT.anchorMax = Vector2.one;
+            barFillRT.offsetMin = Vector2.zero;
+            barFillRT.offsetMax = Vector2.zero;
+            var barFillImg = GetOrAdd<Image>(barFill);
+            barFillImg.color = accent;
+            barFillImg.type = Image.Type.Filled;
+            barFillImg.fillMethod = Image.FillMethod.Horizontal;
+            barFillImg.fillOrigin = 0; // Left
+            barFillImg.fillAmount = 0f;
+            barFillImg.raycastTarget = false;
 
             // Value
             var val = FindOrCreate(row.transform, "Value");
             var vRT = GetOrAdd<RectTransform>(val);
-            vRT.anchorMin = new Vector2(0.50f, 0);
+            vRT.anchorMin = new Vector2(0.72f, 0);
             vRT.anchorMax = new Vector2(1, 1);
-            vRT.offsetMin = Vector2.zero;
-            vRT.offsetMax = Vector2.zero;
+            vRT.offsetMin = new Vector2(4, 0);
+            vRT.offsetMax = new Vector2(0, 0);
             var vTMP = GetOrAdd<TextMeshProUGUI>(val);
             vTMP.text = value;
-            vTMP.fontSize = 34;
+            vTMP.fontSize = FontSizes.BodyLarge;
             vTMP.color = accent;
             vTMP.fontStyle = FontStyles.Bold;
             vTMP.alignment = TextAlignmentOptions.Right;
+            vTMP.enableAutoSizing = true;
+            vTMP.fontSizeMin = FontSizes.AutoMinBody;
+            vTMP.fontSizeMax = FontSizes.BodyLarge;
 
             // Separator line
             var sep = FindOrCreate(row.transform, "Separator");
@@ -634,7 +795,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 50;
+            tTMP.fontSize = FontSizes.SectionHeader;
             tTMP.color = accent;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -681,7 +842,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(text);
             tTMP.text = "RETAR";
-            tTMP.fontSize = 65;
+            tTMP.fontSize = FontSizes.AuthTitle;
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -739,7 +900,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-20, -10);
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "ELIGE UN JUEGO";
-            tTMP.fontSize = 30;
+            tTMP.fontSize = FontSizes.Body;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -788,7 +949,7 @@ namespace DigitPark.Editor
             cntRT.offsetMax = Vector2.zero;
             var cntTMP = GetOrAdd<TextMeshProUGUI>(cnText);
             cntTMP.text = "Cancelar";
-            cntTMP.fontSize = 30;
+            cntTMP.fontSize = FontSizes.Body;
             cntTMP.color = TEXT_SECONDARY;
             cntTMP.alignment = TextAlignmentOptions.Center;
 
@@ -817,7 +978,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-15, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 30;
+            tTMP.fontSize = FontSizes.Body;
             tTMP.color = accent;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -851,7 +1012,12 @@ namespace DigitPark.Editor
             SetRef(so, "avatarImage", FindInPath<Image>(r, "AvatarCard/AvatarFrame/AvatarImage"));
             SetRef(so, "avatarUI", FindInPath<DigitPark.UI.Components.AvatarUI>(r, "AvatarCard/AvatarFrame/AvatarImage"));
             SetRef(so, "editAvatarButton", FindInPath<Button>(r, "AvatarCard/AvatarFrame/EditButton"));
+            SetRef(so, "editNameButton", FindInPath<Button>(r, "AvatarCard/EditNameButton"));
             SetRef(so, "statusText", FindInPath<TextMeshProUGUI>(r, "AvatarCard/StatusText"));
+
+            // Change Name panels
+            SetRef(so, "changeNamePanel", FindInPath<DigitPark.UI.Panels.InputPanelUI>(r, "ChangeNamePanel"));
+            SetRef(so, "errorPanel", FindInPath<DigitPark.UI.Panels.ErrorPanelUI>(r, "ErrorPanel"));
 
             // General Stats
             SetRef(so, "totalGamesText", FindInPath<TextMeshProUGUI>(r, "GeneralStatsCard/TotalGames/Value"));
@@ -860,12 +1026,19 @@ namespace DigitPark.Editor
             SetRef(so, "bestTimeText", FindInPath<TextMeshProUGUI>(r, "GeneralStatsCard/BestTime/Value"));
             SetRef(so, "averageTimeText", FindInPath<TextMeshProUGUI>(r, "GeneralStatsCard/AvgTime/Value"));
 
-            // Game Stats
+            // Game Stats - Values
             SetRef(so, "digitRushValueText", FindInPath<TextMeshProUGUI>(r, "GameStatsCard/DigitRush/Value"));
             SetRef(so, "memoryPairsValueText", FindInPath<TextMeshProUGUI>(r, "GameStatsCard/MemoryPairs/Value"));
             SetRef(so, "quickMathValueText", FindInPath<TextMeshProUGUI>(r, "GameStatsCard/QuickMath/Value"));
             SetRef(so, "flashTapValueText", FindInPath<TextMeshProUGUI>(r, "GameStatsCard/FlashTap/Value"));
             SetRef(so, "oddOneOutValueText", FindInPath<TextMeshProUGUI>(r, "GameStatsCard/OddOneOut/Value"));
+
+            // Game Stats - Bar Fills
+            SetRef(so, "digitRushBarFill", FindInPath<Image>(r, "GameStatsCard/DigitRush/BarBG/BarFill"));
+            SetRef(so, "memoryPairsBarFill", FindInPath<Image>(r, "GameStatsCard/MemoryPairs/BarBG/BarFill"));
+            SetRef(so, "quickMathBarFill", FindInPath<Image>(r, "GameStatsCard/QuickMath/BarBG/BarFill"));
+            SetRef(so, "flashTapBarFill", FindInPath<Image>(r, "GameStatsCard/FlashTap/BarBG/BarFill"));
+            SetRef(so, "oddOneOutBarFill", FindInPath<Image>(r, "GameStatsCard/OddOneOut/BarBG/BarFill"));
 
             // Action Buttons
             SetRef(so, "friendsButton", FindInPath<Button>(r, "ActionRow/FriendsButton"));
@@ -965,6 +1138,166 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(xMax, yMax);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+        }
+
+        #endregion
+
+        #region Change Name & Error Panels
+
+        private static void BuildChangeNamePanel(Transform parent)
+        {
+            GameObject panelRoot = new GameObject("ChangeNamePanel");
+            panelRoot.transform.SetParent(parent, false);
+            RectTransform rt = panelRoot.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+
+            // Blocker
+            GameObject blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(panelRoot.transform, false);
+            RectTransform bRT = blocker.AddComponent<RectTransform>();
+            bRT.anchorMin = Vector2.zero; bRT.anchorMax = Vector2.one;
+            bRT.offsetMin = Vector2.zero; bRT.offsetMax = Vector2.zero;
+            blocker.AddComponent<Image>().color = new Color(0, 0, 0, 0.7f);
+
+            // Card
+            GameObject card = new GameObject("Panel");
+            card.transform.SetParent(panelRoot.transform, false);
+            RectTransform cRT = card.AddComponent<RectTransform>();
+            cRT.anchorMin = new Vector2(0.08f, 0.3f); cRT.anchorMax = new Vector2(0.92f, 0.7f);
+            cRT.offsetMin = Vector2.zero; cRT.offsetMax = Vector2.zero;
+            card.AddComponent<Image>().color = CARD_BG;
+
+            // Title
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(card.transform, false);
+            RectTransform tRT = titleObj.AddComponent<RectTransform>();
+            tRT.anchorMin = new Vector2(0, 0.78f); tRT.anchorMax = Vector2.one;
+            tRT.offsetMin = new Vector2(20, 0); tRT.offsetMax = new Vector2(-20, -10);
+            var titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTxt.text = "Cambiar Nombre";
+            titleTxt.fontSize = FontSizes.SceneTitle; titleTxt.fontStyle = FontStyles.Bold;
+            titleTxt.color = CYAN_NEON; titleTxt.alignment = TextAlignmentOptions.Center;
+
+            // Input Field
+            GameObject inputObj = new GameObject("InputField");
+            inputObj.transform.SetParent(card.transform, false);
+            RectTransform iRT = inputObj.AddComponent<RectTransform>();
+            iRT.anchorMin = new Vector2(0.08f, 0.48f); iRT.anchorMax = new Vector2(0.92f, 0.72f);
+            iRT.offsetMin = Vector2.zero; iRT.offsetMax = Vector2.zero;
+            inputObj.AddComponent<Image>().color = CARD_BG_LIGHT;
+
+            GameObject textArea = new GameObject("Text Area");
+            textArea.transform.SetParent(inputObj.transform, false);
+            RectTransform taRT = textArea.AddComponent<RectTransform>();
+            taRT.anchorMin = Vector2.zero; taRT.anchorMax = Vector2.one;
+            taRT.offsetMin = new Vector2(12, 4); taRT.offsetMax = new Vector2(-12, -4);
+            textArea.AddComponent<UnityEngine.UI.RectMask2D>();
+
+            GameObject placeholder = new GameObject("Placeholder");
+            placeholder.transform.SetParent(textArea.transform, false);
+            RectTransform phRT = placeholder.AddComponent<RectTransform>();
+            phRT.anchorMin = Vector2.zero; phRT.anchorMax = Vector2.one;
+            phRT.offsetMin = Vector2.zero; phRT.offsetMax = Vector2.zero;
+            var phTxt = placeholder.AddComponent<TextMeshProUGUI>();
+            phTxt.text = "Nuevo nombre...";
+            phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Italic;
+            phTxt.color = TEXT_SECONDARY; phTxt.alignment = TextAlignmentOptions.Left;
+
+            GameObject inputText = new GameObject("Text");
+            inputText.transform.SetParent(textArea.transform, false);
+            RectTransform itRT = inputText.AddComponent<RectTransform>();
+            itRT.anchorMin = Vector2.zero; itRT.anchorMax = Vector2.one;
+            itRT.offsetMin = Vector2.zero; itRT.offsetMax = Vector2.zero;
+            var iTxt = inputText.AddComponent<TextMeshProUGUI>();
+            iTxt.fontSize = FontSizes.Body; iTxt.color = TEXT_WHITE;
+            iTxt.alignment = TextAlignmentOptions.Left;
+
+            TMP_InputField tmpInput = inputObj.AddComponent<TMP_InputField>();
+            tmpInput.textViewport = taRT;
+            tmpInput.textComponent = iTxt;
+            tmpInput.placeholder = phTxt;
+            tmpInput.pointSize = FontSizes.Body;
+            tmpInput.characterLimit = 20;
+
+            // Confirm Button
+            GameObject confirmObj = new GameObject("ConfirmButton");
+            confirmObj.transform.SetParent(card.transform, false);
+            RectTransform cfRT = confirmObj.AddComponent<RectTransform>();
+            cfRT.anchorMin = new Vector2(0.55f, 0.08f); cfRT.anchorMax = new Vector2(0.92f, 0.35f);
+            cfRT.offsetMin = Vector2.zero; cfRT.offsetMax = Vector2.zero;
+            Image cfBg = confirmObj.AddComponent<Image>(); cfBg.color = CYAN_NEON;
+            Button confirmBtn = confirmObj.AddComponent<Button>(); confirmBtn.targetGraphic = cfBg;
+
+            GameObject cfTxtObj = new GameObject("Text");
+            cfTxtObj.transform.SetParent(confirmObj.transform, false);
+            RectTransform cfTxtRT = cfTxtObj.AddComponent<RectTransform>();
+            cfTxtRT.anchorMin = Vector2.zero; cfTxtRT.anchorMax = Vector2.one;
+            cfTxtRT.offsetMin = Vector2.zero; cfTxtRT.offsetMax = Vector2.zero;
+            var cfTxt = cfTxtObj.AddComponent<TextMeshProUGUI>();
+            cfTxt.text = "Guardar"; cfTxt.fontSize = FontSizes.Body;
+            cfTxt.fontStyle = FontStyles.Bold; cfTxt.color = TEXT_DARK;
+            cfTxt.alignment = TextAlignmentOptions.Center;
+
+            // Cancel Button
+            GameObject cancelObj = new GameObject("CancelButton");
+            cancelObj.transform.SetParent(card.transform, false);
+            RectTransform ccRT = cancelObj.AddComponent<RectTransform>();
+            ccRT.anchorMin = new Vector2(0.08f, 0.08f); ccRT.anchorMax = new Vector2(0.45f, 0.35f);
+            ccRT.offsetMin = Vector2.zero; ccRT.offsetMax = Vector2.zero;
+            Image ccBg = cancelObj.AddComponent<Image>(); ccBg.color = CARD_BG_LIGHT;
+            Button cancelBtn = cancelObj.AddComponent<Button>(); cancelBtn.targetGraphic = ccBg;
+
+            GameObject ccTxtObj = new GameObject("Text");
+            ccTxtObj.transform.SetParent(cancelObj.transform, false);
+            RectTransform ccTxtRT = ccTxtObj.AddComponent<RectTransform>();
+            ccTxtRT.anchorMin = Vector2.zero; ccTxtRT.anchorMax = Vector2.one;
+            ccTxtRT.offsetMin = Vector2.zero; ccTxtRT.offsetMax = Vector2.zero;
+            var ccTxt = ccTxtObj.AddComponent<TextMeshProUGUI>();
+            ccTxt.text = "Cancelar"; ccTxt.fontSize = FontSizes.Body;
+            ccTxt.color = TEXT_SECONDARY; ccTxt.alignment = TextAlignmentOptions.Center;
+
+            // Wire InputPanelUI component
+            var inputComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.InputPanelUI, Assembly-CSharp"));
+            if (inputComp != null)
+            {
+                var so = new SerializedObject(inputComp);
+                var pp = so.FindProperty("panel"); if (pp != null) pp.objectReferenceValue = card;
+                var bp = so.FindProperty("blockerPanel"); if (bp != null) bp.objectReferenceValue = blocker;
+                var tp = so.FindProperty("titleText"); if (tp != null) tp.objectReferenceValue = titleTxt;
+                var ip = so.FindProperty("inputField"); if (ip != null) ip.objectReferenceValue = tmpInput;
+                var cb = so.FindProperty("confirmButton"); if (cb != null) cb.objectReferenceValue = confirmBtn;
+                var ccb = so.FindProperty("cancelButton"); if (ccb != null) ccb.objectReferenceValue = cancelBtn;
+                var ct = so.FindProperty("confirmButtonText"); if (ct != null) ct.objectReferenceValue = cfTxt;
+                var cct = so.FindProperty("cancelButtonText"); if (cct != null) cct.objectReferenceValue = ccTxt;
+                so.ApplyModifiedProperties();
+            }
+
+            panelRoot.SetActive(false);
+            Debug.Log("[ProfileUI] ChangeNamePanel creado");
+        }
+
+        private static void BuildErrorPanel(Transform parent)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Common/ErrorPanel.prefab");
+            if (prefab != null)
+            {
+                GameObject errorPanel = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+                errorPanel.name = "ErrorPanel";
+                RectTransform rect = errorPanel.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    rect.anchorMin = new Vector2(0.5f, 0);
+                    rect.anchorMax = new Vector2(0.5f, 0);
+                    rect.pivot = new Vector2(0.5f, 0);
+                    rect.anchoredPosition = new Vector2(0, 200);
+                }
+                Debug.Log("[ProfileUI] ErrorPanel instantiated from prefab");
+            }
+            else
+            {
+                Debug.LogWarning("[ProfileUI] ErrorPanel prefab not found");
+            }
         }
 
         #endregion

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using System.IO;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -126,10 +127,11 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI modeTMP = modeText.AddComponent<TextMeshProUGUI>();
             modeTMP.text = "1v1";
-            modeTMP.fontSize = 13;
+            modeTMP.fontSize = FontSizes.Body;
             modeTMP.fontStyle = FontStyles.Bold;
             modeTMP.color = CYAN;
             modeTMP.alignment = TextAlignmentOptions.Center;
+
 
             // === Title ===
             GameObject titleObj = new GameObject("TitleText");
@@ -144,11 +146,12 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "QuickMath vs @Player123";
-            titleText.fontSize = 18;
+            titleText.fontSize = FontSizes.Button;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_WHITE;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
+
 
             // === Entry Fee ===
             GameObject feeObj = new GameObject("EntryFeeText");
@@ -163,9 +166,10 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI feeText = feeObj.AddComponent<TextMeshProUGUI>();
             feeText.text = "Entrada: $5.00";
-            feeText.fontSize = 15;
+            feeText.fontSize = FontSizes.Body;
             feeText.color = TEXT_SECONDARY;
             feeText.alignment = TextAlignmentOptions.Left;
+
 
             // === Date ===
             GameObject dateObj = new GameObject("DateText");
@@ -180,9 +184,10 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dateText = dateObj.AddComponent<TextMeshProUGUI>();
             dateText.text = "Hace 2h";
-            dateText.fontSize = 14;
+            dateText.fontSize = FontSizes.Body;
             dateText.color = TEXT_SECONDARY;
             dateText.alignment = TextAlignmentOptions.Right;
+
 
             // === Result Badge ===
             GameObject resultBadge = new GameObject("ResultBadge");
@@ -208,10 +213,11 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rbTMP = rbText.AddComponent<TextMeshProUGUI>();
             rbTMP.text = "VICTORIA";
-            rbTMP.fontSize = 14;
+            rbTMP.fontSize = FontSizes.Body;
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.color = GREEN;
             rbTMP.alignment = TextAlignmentOptions.Center;
+
 
             // === Net Result ===
             GameObject netObj = new GameObject("NetResultText");
@@ -226,10 +232,11 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI netText = netObj.AddComponent<TextMeshProUGUI>();
             netText.text = "+$4.50";
-            netText.fontSize = 20;
+            netText.fontSize = FontSizes.Button;
             netText.fontStyle = FontStyles.Bold;
             netText.color = GREEN;
             netText.alignment = TextAlignmentOptions.Center;
+
 
             // Guardar prefab - Renombrado a MatchHistoryItem según la nueva estructura
             string path = $"{PREFAB_PATH}/History/MatchHistoryItem.prefab";
@@ -313,10 +320,11 @@ namespace DigitPark.Editor
             ltRT.offsetMax = new Vector2(-6, 0);
             TextMeshProUGUI ltTMP = liveText.AddComponent<TextMeshProUGUI>();
             ltTMP.text = "LIVE";
-            ltTMP.fontSize = 32;
+            ltTMP.fontSize = FontSizes.BodyLarge;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.color = Color.white;
             ltTMP.alignment = TextAlignmentOptions.Center;
+
 
             // === Game Icon (izquierda, x2) ===
             GameObject gameIcon = new GameObject("GameIcon");
@@ -358,11 +366,12 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = "Quick Math Championship";
-            nameText.fontSize = 52;
+            nameText.fontSize = FontSizes.CardTitle;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_WHITE;
             nameText.alignment = TextAlignmentOptions.Left;
             nameText.overflowMode = TextOverflowModes.Ellipsis;
+
 
             // === Info Row (abajo del nombre): Prize + Players + Timer ===
             // Prize
@@ -399,10 +408,11 @@ namespace DigitPark.Editor
             ptRT.offsetMax = Vector2.zero;
             TextMeshProUGUI ptTMP = prizeText.AddComponent<TextMeshProUGUI>();
             ptTMP.text = "$500";
-            ptTMP.fontSize = 44;
+            ptTMP.fontSize = FontSizes.ValueLarge;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GREEN;
             ptTMP.alignment = TextAlignmentOptions.Left;
+
 
             // Players
             GameObject playersRow = new GameObject("PlayersRow");
@@ -438,9 +448,10 @@ namespace DigitPark.Editor
             pltRT.offsetMax = Vector2.zero;
             TextMeshProUGUI pltTMP = playersText.AddComponent<TextMeshProUGUI>();
             pltTMP.text = "15/20";
-            pltTMP.fontSize = 44;
+            pltTMP.fontSize = FontSizes.ValueLarge;
             pltTMP.color = TEXT_SECONDARY;
             pltTMP.alignment = TextAlignmentOptions.Left;
+
 
             // Timer
             GameObject timerRow = new GameObject("TimerRow");
@@ -476,9 +487,10 @@ namespace DigitPark.Editor
             ttRT.offsetMax = Vector2.zero;
             TextMeshProUGUI ttTMP = timerText.AddComponent<TextMeshProUGUI>();
             ttTMP.text = "02:45:00";
-            ttTMP.fontSize = 44;
+            ttTMP.fontSize = FontSizes.ValueLarge;
             ttTMP.color = CYAN;
             ttTMP.alignment = TextAlignmentOptions.Left;
+
 
             // === Entry Fee (derecha superior) ===
             GameObject entryBadge = new GameObject("EntryFeeBadge");
@@ -505,9 +517,10 @@ namespace DigitPark.Editor
             elRT.offsetMax = new Vector2(-8, -4);
             TextMeshProUGUI elTMP = entryLabel.AddComponent<TextMeshProUGUI>();
             elTMP.text = "Entrada";
-            elTMP.fontSize = 32;
+            elTMP.fontSize = FontSizes.BodyLarge;
             elTMP.color = TEXT_SECONDARY;
             elTMP.alignment = TextAlignmentOptions.Center;
+
 
             GameObject entryValue = new GameObject("Value");
             entryValue.transform.SetParent(entryBadge.transform, false);
@@ -519,10 +532,11 @@ namespace DigitPark.Editor
             evRT.offsetMax = new Vector2(-8, 0);
             TextMeshProUGUI evTMP = entryValue.AddComponent<TextMeshProUGUI>();
             evTMP.text = "$5";
-            evTMP.fontSize = 52;
+            evTMP.fontSize = FontSizes.CardTitle;
             evTMP.fontStyle = FontStyles.Bold;
             evTMP.color = GOLD;
             evTMP.alignment = TextAlignmentOptions.Center;
+
 
             // === Join Button (derecha inferior) ===
             GameObject joinBtn = new GameObject("JoinButton");
@@ -550,10 +564,11 @@ namespace DigitPark.Editor
             jtRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI jtTMP = joinText.AddComponent<TextMeshProUGUI>();
             jtTMP.text = "Unirse";
-            jtTMP.fontSize = 48;
+            jtTMP.fontSize = FontSizes.SectionHeader;
             jtTMP.fontStyle = FontStyles.Bold;
             jtTMP.color = Color.white;
             jtTMP.alignment = TextAlignmentOptions.Center;
+
 
             // Guardar prefab
             string path = $"{PREFAB_PATH}/Tournaments/TournamentCardUI.prefab";

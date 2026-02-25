@@ -5,6 +5,7 @@ using System.Collections;
 using DigitPark.Services;
 using DigitPark.Themes;
 using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.UI.Builders
 {
@@ -157,8 +158,8 @@ namespace DigitPark.UI.Builders
             dayRt.offsetMax = Vector2.zero;
 
             TextMeshProUGUI dayText = dayObj.AddComponent<TextMeshProUGUI>();
-            dayText.text = "Día 1";
-            dayText.fontSize = 14;
+            dayText.text = AutoLocalizer.Get("dr_day", 1);
+            dayText.fontSize = FontSizes.Body;
             dayText.alignment = TextAlignmentOptions.Center;
             dayText.color = Color.white;
 
@@ -174,7 +175,7 @@ namespace DigitPark.UI.Builders
 
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = "100";
-            amountText.fontSize = 20;
+            amountText.fontSize = FontSizes.Body;
             amountText.fontStyle = FontStyles.Bold;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.color = Color.cyan;
@@ -476,7 +477,7 @@ namespace DigitPark.UI.Builders
 
             // Configurar textos
             if (dayText != null)
-                dayText.text = $"{AutoLocalizer.Get("day")} {day}";
+                dayText.text = AutoLocalizer.Get("dr_day", day);
 
             if (amountText != null)
                 amountText.text = reward.amount.ToString();

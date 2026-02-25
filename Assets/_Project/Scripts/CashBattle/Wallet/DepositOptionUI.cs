@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -60,7 +61,7 @@ namespace DigitPark.CashBattle
                 if (option.bonus > 0)
                 {
                     _bonusText.gameObject.SetActive(true);
-                    _bonusText.text = $"+${option.bonus:F2} BONUS";
+                    _bonusText.text = AutoLocalizer.Get("deposit_bonus", $"${option.bonus:F2}");
                     _bonusText.color = _bonusColor;
                 }
                 else

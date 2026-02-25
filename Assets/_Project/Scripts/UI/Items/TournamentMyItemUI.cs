@@ -430,7 +430,7 @@ namespace DigitPark.UI.Items
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             string timeStr = participant.bestTime < float.MaxValue ? $"{participant.bestTime:F3}s" : "--";
             tmp.text = $"  #{position}  {participant.username}  {timeStr}  ({participant.attempts})";
-            tmp.fontSize = 18;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = isMe ? cyanColor : Color.white;
             tmp.alignment = TextAlignmentOptions.Left;
             tmp.verticalAlignment = VerticalAlignmentOptions.Middle;

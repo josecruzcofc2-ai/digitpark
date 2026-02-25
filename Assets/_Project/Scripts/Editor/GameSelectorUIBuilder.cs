@@ -15,7 +15,7 @@ namespace DigitPark.Editor
     {
         // Colores del tema neón
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color CARD_BG = new Color(0.05f, 0.1f, 0.15f, 0.9f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.5f, 0.5f, 1f);
@@ -251,7 +251,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI badgeTmp = badgeText.GetComponent<TextMeshProUGUI>();
                 if (badgeTmp == null) badgeTmp = badgeText.AddComponent<TextMeshProUGUI>();
                 badgeTmp.text = "PRO";
-                badgeTmp.fontSize = 30;
+                badgeTmp.fontSize = FontSizes.Body;
                 badgeTmp.fontStyle = FontStyles.Bold;
                 badgeTmp.color = DARK_BG;
                 badgeTmp.alignment = TextAlignmentOptions.Center;
@@ -310,7 +310,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTmp = panelTitle.GetComponent<TextMeshProUGUI>();
             if (titleTmp == null) titleTmp = panelTitle.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Cognitive Sprint";
-            titleTmp.fontSize = 48;
+            titleTmp.fontSize = FontSizes.SectionHeader;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -324,7 +324,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTmp = subtitle.GetComponent<TextMeshProUGUI>();
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Selecciona 3-5 juegos para el sprint";
-            subtitleTmp.fontSize = 30;
+            subtitleTmp.fontSize = FontSizes.Body;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
@@ -361,7 +361,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI selectedTmp = selectedText.GetComponent<TextMeshProUGUI>();
             if (selectedTmp == null) selectedTmp = selectedText.AddComponent<TextMeshProUGUI>();
             selectedTmp.text = "0/5 juegos seleccionados";
-            selectedTmp.fontSize = 30;
+            selectedTmp.fontSize = FontSizes.Body;
             selectedTmp.color = Color.white;
             selectedTmp.alignment = TextAlignmentOptions.Center;
 
@@ -428,7 +428,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTmp = gameTitle.GetComponent<TextMeshProUGUI>();
             if (titleTmp == null) titleTmp = gameTitle.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "DIGIT RUSH"; // Se cambia dinámicamente
-            titleTmp.fontSize = 38;
+            titleTmp.fontSize = FontSizes.Button;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -442,7 +442,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTmp = subtitle.GetComponent<TextMeshProUGUI>();
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Reglas del juego";
-            subtitleTmp.fontSize = 30;
+            subtitleTmp.fontSize = FontSizes.Body;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
@@ -462,7 +462,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI rulesTmp = rulesText.GetComponent<TextMeshProUGUI>();
             if (rulesTmp == null) rulesTmp = rulesText.AddComponent<TextMeshProUGUI>();
             rulesTmp.text = "• Regla 1\n• Regla 2\n• Regla 3"; // Placeholder
-            rulesTmp.fontSize = 30; // Más grande para mejor legibilidad
+            rulesTmp.fontSize = FontSizes.Body; // Más grande para mejor legibilidad
             rulesTmp.fontStyle = FontStyles.Bold; // Negrita
             rulesTmp.color = new Color(0.9f, 0.9f, 0.9f, 1f); // Un poco más brillante
             rulesTmp.alignment = TextAlignmentOptions.TopLeft;
@@ -512,7 +512,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTmp = toggleLabel.GetComponent<TextMeshProUGUI>();
             if (labelTmp == null) labelTmp = toggleLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "No volver a mostrar estas reglas";
-            labelTmp.fontSize = 30;
+            labelTmp.fontSize = FontSizes.Body;
             labelTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -570,7 +570,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI textTmp = textObj.GetComponent<TextMeshProUGUI>();
             if (textTmp == null) textTmp = textObj.AddComponent<TextMeshProUGUI>();
             textTmp.text = text;
-            textTmp.fontSize = 30;
+            textTmp.fontSize = FontSizes.Body;
             textTmp.fontStyle = FontStyles.Bold;
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
@@ -630,7 +630,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTmp = label.GetComponent<TextMeshProUGUI>();
             if (labelTmp == null) labelTmp = label.AddComponent<TextMeshProUGUI>();
             labelTmp.text = labelText;
-            labelTmp.fontSize = 30;
+            labelTmp.fontSize = FontSizes.Body;
             labelTmp.color = Color.white;
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -670,7 +670,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI textTmp = textObj.GetComponent<TextMeshProUGUI>();
             if (textTmp == null) textTmp = textObj.AddComponent<TextMeshProUGUI>();
             textTmp.text = text;
-            textTmp.fontSize = 30;
+            textTmp.fontSize = FontSizes.Body;
             textTmp.fontStyle = FontStyles.Bold;
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
@@ -728,7 +728,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = arrowText.GetComponent<TextMeshProUGUI>();
             if (tmp == null) tmp = arrowText.AddComponent<TextMeshProUGUI>();
             tmp.text = "<";
-            tmp.fontSize = 48;
+            tmp.fontSize = FontSizes.SectionHeader;
             tmp.color = CYAN_NEON;
             tmp.alignment = TextAlignmentOptions.Center;
         }
@@ -738,7 +738,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = obj.GetComponent<TextMeshProUGUI>();
             if (tmp == null) tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 78;
+            tmp.fontSize = FontSizes.SceneTitle;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = CYAN_NEON;
             tmp.alignment = TextAlignmentOptions.Center;

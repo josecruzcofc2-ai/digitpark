@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -207,7 +208,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "SOLICITUDES";
-            tTMP.fontSize = 78;
+            tTMP.fontSize = FontSizes.SceneTitle;
             tTMP.color = TEXT_WHITE;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -221,7 +222,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "2 pendientes";
-            cTMP.fontSize = 38;
+            cTMP.fontSize = FontSizes.Button;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -285,7 +286,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = GetOrAdd<TextMeshProUGUI>(textGO);
             tTMP.text = label;
-            tTMP.fontSize = 50;
+            tTMP.fontSize = FontSizes.SectionHeader;
             tTMP.color = active ? TEXT_DARK : TEXT_SECONDARY;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -355,7 +356,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "No tienes solicitudes pendientes";
-            eTMP.fontSize = 45;
+            eTMP.fontSize = FontSizes.ValueLarge;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
@@ -367,7 +368,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Cargando...";
-            ldTMP.fontSize = 45;
+            ldTMP.fontSize = FontSizes.ValueLarge;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -452,7 +453,7 @@ namespace DigitPark.Editor
             unRT.offsetMax = Vector2.zero;
             var unTMP = username.AddComponent<TextMeshProUGUI>();
             unTMP.text = "Username";
-            unTMP.fontSize = 50;
+            unTMP.fontSize = FontSizes.SectionHeader;
             unTMP.color = TEXT_WHITE;
             unTMP.fontStyle = FontStyles.Bold;
             unTMP.alignment = TextAlignmentOptions.Left;
@@ -467,7 +468,7 @@ namespace DigitPark.Editor
             tsRT.offsetMax = Vector2.zero;
             var tsTMP = timestamp.AddComponent<TextMeshProUGUI>();
             tsTMP.text = "Hace 5 min";
-            tsTMP.fontSize = 35;
+            tsTMP.fontSize = FontSizes.BodyLarge;
             tsTMP.color = TEXT_SECONDARY;
             tsTMP.alignment = TextAlignmentOptions.Left;
 
@@ -536,7 +537,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-3, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = 45;
+            tTMP.fontSize = FontSizes.ValueLarge;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;

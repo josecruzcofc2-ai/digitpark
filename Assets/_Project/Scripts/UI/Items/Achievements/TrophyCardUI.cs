@@ -80,6 +80,9 @@ namespace DigitPark.UI.Items
         private void OnDestroy()
         {
             StopAllAnimations();
+            // Kill ALL tweens targeting any child to prevent orphaned animations
+            if (transform != null) transform.DOKill(true);
+            if (cardContainer != null) cardContainer.DOKill(true);
         }
 
         /// <summary>

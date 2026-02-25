@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -335,7 +336,7 @@ namespace DigitPark.Editor
             GameObject headerText = CreateChild(headerRow, "HeaderText");
             TextMeshProUGUI headerTMP = headerText.AddComponent<TextMeshProUGUI>();
             headerTMP.text = "¡LOGRO DESBLOQUEADO!";
-            headerTMP.fontSize = 30f;
+            headerTMP.fontSize = FontSizes.Body;
             headerTMP.fontStyle = FontStyles.Bold;
             headerTMP.color = CYAN_NEON;
             headerTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -347,7 +348,7 @@ namespace DigitPark.Editor
             GameObject titleObj = CreateChild(infoSection, "AchievementTitle");
             TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Primera Victoria";
-            titleTMP.fontSize = 36f;
+            titleTMP.fontSize = FontSizes.Button;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.color = GOLD;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -360,7 +361,7 @@ namespace DigitPark.Editor
             GameObject descObj = CreateChild(infoSection, "AchievementDescription");
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Gana tu primera partida";
-            descTMP.fontSize = 30f;
+            descTMP.fontSize = FontSizes.Body;
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -406,7 +407,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI completionTMP = completionText.AddComponent<TextMeshProUGUI>();
             completionTMP.text = "COMPLETADO";
-            completionTMP.fontSize = 30f;
+            completionTMP.fontSize = FontSizes.Body;
             completionTMP.fontStyle = FontStyles.Bold;
             completionTMP.color = SUCCESS_GREEN;
             completionTMP.alignment = TextAlignmentOptions.MidlineRight;

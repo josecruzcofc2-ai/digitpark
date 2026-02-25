@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using DigitPark.UI;
 
 namespace DigitPark.Localization
 {
@@ -500,8 +501,8 @@ namespace DigitPark.Localization
                     tmp.enableAutoSizing = true;
                     // Configurar tamaños mínimo y máximo razonables
                     float currentSize = tmp.fontSize;
-                    tmp.fontSizeMin = Mathf.Max(8f, currentSize * 0.4f); // Mínimo 40% del tamaño original o 8
-                    tmp.fontSizeMax = currentSize > 0 ? currentSize : 36f; // Máximo el tamaño original
+                    tmp.fontSizeMin = Mathf.Max(FontSizes.AutoMinTiny, currentSize * 0.4f); // Mínimo 40% del tamaño original
+                    tmp.fontSizeMax = currentSize > 0 ? currentSize : FontSizes.Button; // Máximo el tamaño original
                 }
 
                 // 3. CONFIGURAR OVERFLOW para evitar que el texto se salga

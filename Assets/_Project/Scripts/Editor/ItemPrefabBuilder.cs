@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 using DigitPark.UI.Items;
 
 namespace DigitPark.Editor
@@ -124,19 +125,19 @@ namespace DigitPark.Editor
 
             // === PARTICIPANTES (0% - 15%) ===
             CreateTextElement(itemObj.transform, "ParticipantsText", "12/50",
-                0f, 0.15f, 24, GOLD, FontStyles.Bold);
+                0f, 0.15f, (int)FontSizes.Body, GOLD, FontStyles.Bold);
 
             CreateVerticalDivider(itemObj.transform, "VerticalDivider1", 0.15f);
 
             // === CREADOR (15% - 55%) ===
             CreateTextElement(itemObj.transform, "CreatorText", "@Username",
-                0.15f, 0.55f, 22, Color.white, FontStyles.Normal);
+                0.15f, 0.55f, (int)FontSizes.Body, Color.white, FontStyles.Normal);
 
             CreateVerticalDivider(itemObj.transform, "VerticalDivider2", 0.55f);
 
             // === TIEMPO (55% - 85%) ===
             CreateTextElement(itemObj.transform, "TimeText", "2h 30m",
-                0.55f, 0.85f, 22, GREEN_TIME, FontStyles.Normal);
+                0.55f, 0.85f, (int)FontSizes.Body, GREEN_TIME, FontStyles.Normal);
 
             CreateVerticalDivider(itemObj.transform, "VerticalDivider3", 0.85f);
 
@@ -151,7 +152,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI arrowTMP = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = ">";
-            arrowTMP.fontSize = 32;
+            arrowTMP.fontSize = (int)FontSizes.BodyLarge;
             arrowTMP.color = CYAN_NEON;
             arrowTMP.alignment = TextAlignmentOptions.Center;
             arrowTMP.fontStyle = FontStyles.Bold;
@@ -228,50 +229,50 @@ namespace DigitPark.Editor
 
             // Tournament Name
             CreateTextElementAnchored(header.transform, "TournamentName", "Torneo de @Creator",
-                new Vector2(0.05f, 0), new Vector2(0.7f, 1), 22, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Left);
+                new Vector2(0.05f, 0), new Vector2(0.7f, 1), (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Time Remaining
             CreateTextElementAnchored(header.transform, "TimeRemaining", "2d 5h",
-                new Vector2(0.7f, 0), new Vector2(0.98f, 1), 20, GREEN_TIME, FontStyles.Normal, TextAlignmentOptions.Right);
+                new Vector2(0.7f, 0), new Vector2(0.98f, 1), (int)FontSizes.Button, GREEN_TIME, FontStyles.Normal, TextAlignmentOptions.Right);
 
             // === PLAYER STATS (medio izquierda) ===
             GameObject playerStats = CreateSection(itemObj.transform, "PlayerStats", 0, 0.5f, 0.38f, 0.72f, Color.clear);
 
             CreateTextElementAnchored(playerStats.transform, "LabelMyPosition", "TU POSICIÓN",
-                new Vector2(0, 0.5f), new Vector2(0.5f, 1), 14, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0.5f), new Vector2(0.5f, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(playerStats.transform, "MyPosition", "#3",
-                new Vector2(0, 0), new Vector2(0.5f, 0.55f), 32, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(0.5f, 0.55f), (int)FontSizes.BodyLarge, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(playerStats.transform, "LabelMyTime", "TU MEJOR",
-                new Vector2(0.5f, 0.5f), new Vector2(1, 1), 14, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(playerStats.transform, "MyBestTime", "2.345s",
-                new Vector2(0.5f, 0), new Vector2(1, 0.55f), 24, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0), new Vector2(1, 0.55f), (int)FontSizes.Body, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // === CREATOR INFO (medio derecha) ===
             GameObject creatorInfo = CreateSection(itemObj.transform, "CreatorInfo", 0.5f, 1f, 0.38f, 0.72f, Color.clear);
 
             CreateTextElementAnchored(creatorInfo.transform, "LabelCreator", "CREADOR",
-                new Vector2(0, 0.5f), new Vector2(0.5f, 1), 14, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0.5f), new Vector2(0.5f, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(creatorInfo.transform, "CreatorName", "@Creator",
-                new Vector2(0, 0), new Vector2(0.5f, 0.55f), 18, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(0.5f, 0.55f), (int)FontSizes.Button, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(creatorInfo.transform, "LabelCreatorTime", "TIEMPO",
-                new Vector2(0.5f, 0.5f), new Vector2(1, 1), 14, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(creatorInfo.transform, "CreatorTime", "1.987s",
-                new Vector2(0.5f, 0), new Vector2(1, 0.55f), 24, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0), new Vector2(1, 0.55f), (int)FontSizes.Body, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // === TOURNAMENT INFO (abajo) ===
             GameObject tournamentInfo = CreateSection(itemObj.transform, "TournamentInfo", 0, 0.6f, 0.18f, 0.38f, Color.clear);
 
             CreateTextElementAnchored(tournamentInfo.transform, "Participants", "45/50 participantes",
-                new Vector2(0, 0), new Vector2(0.5f, 1), 16, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(0.5f, 1), (int)FontSizes.Button, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(tournamentInfo.transform, "MyAttempts", "5 intentos",
-                new Vector2(0.5f, 0), new Vector2(1, 1), 16, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0), new Vector2(1, 1), (int)FontSizes.Button, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
 
             // === ACTIONS (abajo derecha) ===
             GameObject actions = CreateSection(itemObj.transform, "Actions", 0.6f, 1f, 0.18f, 0.38f, Color.clear);
@@ -305,7 +306,7 @@ namespace DigitPark.Editor
             expandTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI expandTextTMP = expandText.AddComponent<TextMeshProUGUI>();
             expandTextTMP.text = "Ver datos del torneo";
-            expandTextTMP.fontSize = 30;
+            expandTextTMP.fontSize = (int)FontSizes.Body;
             expandTextTMP.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             expandTextTMP.alignment = TextAlignmentOptions.Center;
             expandTextTMP.raycastTarget = false;
@@ -320,7 +321,7 @@ namespace DigitPark.Editor
             arrowRT.sizeDelta = new Vector2(30, 0);
             TextMeshProUGUI arrowTMP = arrow.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = "v";
-            arrowTMP.fontSize = 22;
+            arrowTMP.fontSize = (int)FontSizes.Body;
             arrowTMP.color = CYAN_NEON;
             arrowTMP.alignment = TextAlignmentOptions.Center;
 
@@ -412,7 +413,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI positionTMP = positionObj.AddComponent<TextMeshProUGUI>();
             positionTMP.text = "1";
-            positionTMP.fontSize = 30;
+            positionTMP.fontSize = (int)FontSizes.Body;
             positionTMP.color = GOLD;
             positionTMP.alignment = TextAlignmentOptions.Center;
             positionTMP.fontStyle = FontStyles.Bold;
@@ -431,7 +432,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI usernameTMP = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTMP.text = "Username";
-            usernameTMP.fontSize = 30;
+            usernameTMP.fontSize = (int)FontSizes.Body;
             usernameTMP.color = Color.white;
             usernameTMP.alignment = TextAlignmentOptions.Center;
             usernameTMP.enableWordWrapping = false;
@@ -451,7 +452,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timeTMP = timeObj.AddComponent<TextMeshProUGUI>();
             timeTMP.text = "0.000s";
-            timeTMP.fontSize = 30;
+            timeTMP.fontSize = (int)FontSizes.Body;
             timeTMP.color = GREEN_TIME;
             timeTMP.alignment = TextAlignmentOptions.Center;
 
@@ -580,7 +581,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 30;
+            tmp.fontSize = (int)FontSizes.Body;
             tmp.color = Color.black;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -643,7 +644,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = 30;
+            tmp.fontSize = (int)FontSizes.Body;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

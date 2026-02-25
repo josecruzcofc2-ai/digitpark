@@ -32,7 +32,7 @@ namespace DigitPark.Editor.AutoAssigners
             "allTab", "beginnerTab", "masteryTab", "victoriesTab", "streaksTab",
             "cashBattleTab", "tournamentsTab", "socialTab", "progressionTab", "collectorTab", "timeTab", "secretTab",
             // Showcase
-            "showcaseContainer", "scrollRect",
+            "showcaseContainer", "scrollRect", "gridLayout",
             // Empty State
             "emptyStateContainer", "emptyStateText", "emptyStateIcon",
             // Detail Panel Structure
@@ -40,7 +40,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Detail Panel Content
             "detailTrophyIcon", "detailTitleText", "detailDescriptionText",
             "detailCategoryText", "detailProgressBar", "detailProgressText",
-            "claimRewardButton", "claimButtonText", "closeDetailButton",
+            "claimRewardButton", "claimButtonText", "closeDetailButton", "cancelButton",
             // Reward Celebration
             "rewardCelebration", "rewardAmountText", "celebrationGlow"
         };
@@ -174,11 +174,11 @@ namespace DigitPark.Editor.AutoAssigners
             SerializedObject so = new SerializedObject(manager);
             so.Update();
 
-            // Header
-            AssignReference(so, "backButton", FindButtonByName("back", "return"));
-            AssignReference(so, "titleText", FindTextByName("title", "header", "logros"));
-            AssignReference(so, "completionText", FindTextByName("completion", "completados", "progress"));
-            AssignReference(so, "overallProgressBar", FindByNameContains<Slider>("overall", "progress", "total"));
+            // Header - use exact names to avoid matching card children
+            AssignReference(so, "backButton", FindButtonByName("backbutton"));
+            AssignReference(so, "titleText", FindTextInParent("TitleText", "Header"));
+            AssignReference(so, "completionText", FindTextInParent("CompletionDisplay", "Header"));
+            AssignReference(so, "overallProgressBar", FindByNameExact<Slider>("OverallProgressBar"));
 
             // Tabs Container
             AssignReference(so, "tabsContainer", FindByNameContains<Transform>("tabscontainer", "tabs"));
@@ -198,9 +198,10 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "timeTab", FindButtonByName("timetab", "time", "tiempo"));
             AssignReference(so, "secretTab", FindButtonByName("secrettab", "secret", "secretos"));
 
-            // Showcase
-            AssignReference(so, "showcaseContainer", FindByNameContains<Transform>("showcase", "trophies", "container"));
-            AssignReference(so, "scrollRect", FindByNameContains<ScrollRect>("scroll", "showcase"));
+            // Showcase - showcaseContainer must be the Content child (with GridLayoutGroup), NOT the ScrollView parent
+            AssignReference(so, "showcaseContainer", FindShowcaseContent());
+            AssignReference(so, "scrollRect", FindByNameExact<ScrollRect>("TrophyShowcaseScrollView"));
+            AssignReference(so, "gridLayout", FindShowcaseGridLayout());
 
             // Empty State
             AssignReference(so, "emptyStateContainer", FindByNameContains<Transform>("emptystatecontainer", "emptystate"));
@@ -223,6 +224,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "claimRewardButton", FindButtonByName("claimrewardbutton", "claimreward"));
             AssignReference(so, "claimButtonText", FindTextByName("claimbuttontext"));
             AssignReference(so, "closeDetailButton", FindButtonByName("closebutton", "closedetail"));
+            AssignReference(so, "cancelButton", FindButtonByName("cancelbutton", "cancel"));
 
             // Reward Celebration
             AssignReference(so, "rewardCelebration", FindByNameContains<Transform>("rewardcelebration"));
@@ -260,6 +262,78 @@ namespace DigitPark.Editor.AutoAssigners
         {
             var all = Object.FindObjectsOfType<T>(true);
             foreach (var p in patterns) foreach (var o in all) if (o.gameObject.name.ToLower().Contains(p.ToLower())) return o;
+            return null;
+        }
+
+        /// <summary>
+        /// Find component by exact GameObject name (case-insensitive)
+        /// </summary>
+        private static T FindByNameExact<T>(string exactName) where T : Component
+        {
+            var all = Object.FindObjectsOfType<T>(true);
+            foreach (var o in all)
+                if (o.gameObject.name.Equals(exactName, System.StringComparison.OrdinalIgnoreCase)) return o;
+            return null;
+        }
+
+        /// <summary>
+        /// Find TMP text component whose GameObject name matches, scoped to a parent name
+        /// to avoid matching identically-named children in cards
+        /// </summary>
+        private static TextMeshProUGUI FindTextInParent(string namePattern, string parentPattern)
+        {
+            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
+            foreach (var t in all)
+            {
+                if (!t.gameObject.name.ToLower().Contains(namePattern.ToLower())) continue;
+                // Check that this text is under the expected parent hierarchy
+                Transform parent = t.transform.parent;
+                while (parent != null)
+                {
+                    if (parent.name.ToLower().Contains(parentPattern.ToLower())) return t;
+                    parent = parent.parent;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Find the Content child inside TrophyShowcaseScrollView (the one with GridLayoutGroup).
+        /// This is the correct showcaseContainer for card instantiation.
+        /// </summary>
+        private static Transform FindShowcaseContent()
+        {
+            // Find the ScrollView first
+            var scrollViews = Object.FindObjectsOfType<ScrollRect>(true);
+            foreach (var sr in scrollViews)
+            {
+                if (sr.gameObject.name.ToLower().Contains("trophyshowcase") ||
+                    sr.gameObject.name.ToLower().Contains("showcase"))
+                {
+                    // Return the content child (the one managed by GridLayoutGroup)
+                    if (sr.content != null) return sr.content;
+                    // Fallback: search for Content child with GridLayoutGroup
+                    var grid = sr.GetComponentInChildren<GridLayoutGroup>(true);
+                    if (grid != null) return grid.transform;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Find the GridLayoutGroup inside the showcase scroll view
+        /// </summary>
+        private static GridLayoutGroup FindShowcaseGridLayout()
+        {
+            var scrollViews = Object.FindObjectsOfType<ScrollRect>(true);
+            foreach (var sr in scrollViews)
+            {
+                if (sr.gameObject.name.ToLower().Contains("trophyshowcase") ||
+                    sr.gameObject.name.ToLower().Contains("showcase"))
+                {
+                    return sr.GetComponentInChildren<GridLayoutGroup>(true);
+                }
+            }
             return null;
         }
 

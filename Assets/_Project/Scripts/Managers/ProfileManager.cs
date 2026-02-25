@@ -10,6 +10,8 @@ using DG.Tweening;
 using DigitPark.Animations;
 using System.Collections.Generic;
 using DigitPark.Localization;
+using DigitPark.UI.Panels;
+using DigitPark.Monetization;
 
 namespace DigitPark.Managers
 {
@@ -30,10 +32,15 @@ namespace DigitPark.Managers
 
         [Header("UI - Profile Info")]
         [SerializeField] private TextMeshProUGUI usernameText;
+        [SerializeField] private Button editNameButton;
         [SerializeField] private Image avatarImage;
         [SerializeField] private AvatarUI avatarUI;
         [SerializeField] private Button editAvatarButton;
         [SerializeField] private TextMeshProUGUI statusText;  // "Tu perfil", "Amigo", "No es amigo"
+
+        [Header("UI - Change Name")]
+        [SerializeField] private InputPanelUI changeNamePanel;
+        [SerializeField] private ErrorPanelUI errorPanel;
 
         [Header("UI - General Stats")]
         [SerializeField] private TextMeshProUGUI totalGamesText;
@@ -48,6 +55,13 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI quickMathValueText;
         [SerializeField] private TextMeshProUGUI flashTapValueText;
         [SerializeField] private TextMeshProUGUI oddOneOutValueText;
+
+        [Header("UI - Game Stats Bars")]
+        [SerializeField] private Image digitRushBarFill;
+        [SerializeField] private Image memoryPairsBarFill;
+        [SerializeField] private Image quickMathBarFill;
+        [SerializeField] private Image flashTapBarFill;
+        [SerializeField] private Image oddOneOutBarFill;
 
         [Header("UI - Action Buttons (Centrados)")]
         [SerializeField] private Button friendsButton;    // Ver amigos (puede ocultarse por privacidad)
@@ -65,6 +79,10 @@ namespace DigitPark.Managers
         [SerializeField] private Button quickMathButton;
         [SerializeField] private Button flashTapButton;
         [SerializeField] private Button oddOneOutButton;
+
+        // Name change (same logic as Settings)
+        private const string NAME_CHANGE_COUNT_KEY = "NameChangeCount";
+        private const int NAME_CHANGE_GEM_COST = 100;
 
         // Estado
         private PlayerData currentPlayerData;
@@ -107,8 +125,9 @@ namespace DigitPark.Managers
             backButton?.onClick.AddListener(OnBackClicked);
             addFriendIconButton?.onClick.AddListener(OnAddFriendClicked);
 
-            // Avatar edit
+            // Edit buttons (solo perfil propio)
             editAvatarButton?.onClick.AddListener(OnEditAvatarClicked);
+            editNameButton?.onClick.AddListener(OnEditNameClicked);
 
             // Action Buttons
             friendsButton?.onClick.AddListener(OnFriendsClicked);
@@ -171,9 +190,11 @@ namespace DigitPark.Managers
             if (challengeButton != null)
                 challengeButton.gameObject.SetActive(false);
 
-            // Mostrar boton editar avatar (solo en perfil propio)
+            // Mostrar botones de edicion (solo en perfil propio)
             if (editAvatarButton != null)
                 editAvatarButton.gameObject.SetActive(true);
+            if (editNameButton != null)
+                editNameButton.gameObject.SetActive(true);
 
             // Cargar avatar del usuario actual
             LoadAvatar();
@@ -197,9 +218,11 @@ namespace DigitPark.Managers
                 currentPlayerData = await DatabaseService.Instance.GetPlayerDataById(playerId);
             }
 
-            // Ocultar boton editar avatar (no es nuestro perfil)
+            // Ocultar botones de edicion (no es nuestro perfil)
             if (editAvatarButton != null)
                 editAvatarButton.gameObject.SetActive(false);
+            if (editNameButton != null)
+                editNameButton.gameObject.SetActive(false);
 
             // Cargar avatar del otro jugador
             LoadAvatar();
@@ -324,45 +347,30 @@ namespace DigitPark.Managers
 
         private void UpdateGameStats()
         {
-            if (digitRushValueText != null)
-            {
-                var stats = currentPlayerData.digitRushStats;
-                digitRushValueText.text = stats != null
-                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
-                    : "-- | 0%";
-            }
+            UpdateSingleGameStat(currentPlayerData.digitRushStats, digitRushValueText, digitRushBarFill);
+            UpdateSingleGameStat(currentPlayerData.memoryPairsStats, memoryPairsValueText, memoryPairsBarFill);
+            UpdateSingleGameStat(currentPlayerData.quickMathStats, quickMathValueText, quickMathBarFill);
+            UpdateSingleGameStat(currentPlayerData.flashTapStats, flashTapValueText, flashTapBarFill);
+            UpdateSingleGameStat(currentPlayerData.oddOneOutStats, oddOneOutValueText, oddOneOutBarFill);
+        }
 
-            if (memoryPairsValueText != null)
+        private void UpdateSingleGameStat(GameStats stats, TextMeshProUGUI valueText, Image barFill)
+        {
+            float winRate = 0f;
+            if (valueText != null)
             {
-                var stats = currentPlayerData.memoryPairsStats;
-                memoryPairsValueText.text = stats != null
-                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
-                    : "-- | 0%";
+                if (stats != null)
+                {
+                    winRate = stats.GetWinRate();
+                    valueText.text = $"{stats.GetBestTimeFormatted()} | {winRate:F0}%";
+                }
+                else
+                {
+                    valueText.text = "-- | 0%";
+                }
             }
-
-            if (quickMathValueText != null)
-            {
-                var stats = currentPlayerData.quickMathStats;
-                quickMathValueText.text = stats != null
-                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
-                    : "-- | 0%";
-            }
-
-            if (flashTapValueText != null)
-            {
-                var stats = currentPlayerData.flashTapStats;
-                flashTapValueText.text = stats != null
-                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
-                    : "-- | 0%";
-            }
-
-            if (oddOneOutValueText != null)
-            {
-                var stats = currentPlayerData.oddOneOutStats;
-                oddOneOutValueText.text = stats != null
-                    ? $"{stats.GetBestTimeFormatted()} | {stats.GetWinRate():F0}%"
-                    : "-- | 0%";
-            }
+            if (barFill != null)
+                barFill.fillAmount = winRate / 100f;
         }
 
         private void AnimateGeneralStats()
@@ -648,6 +656,89 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Profile] Seleccion de juego cancelada");
             HideGameSelectionPanel();
+        }
+
+        #endregion
+
+        #region Change Name
+
+        private void OnEditNameClicked()
+        {
+            if (!isOwnProfile) return;
+
+            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
+
+            // After first free change, check gems
+            if (changeCount > 0)
+            {
+                int currentGems = CurrencyManager.Instance?.Gems ?? 0;
+                if (currentGems < NAME_CHANGE_GEM_COST)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                    return;
+                }
+            }
+
+            if (changeNamePanel != null)
+            {
+                changeNamePanel.SetLengthLimits(3, 20);
+                changeNamePanel.Show(
+                    changeCount == 0
+                        ? AutoLocalizer.Get("change_name_title")
+                        : AutoLocalizer.Get("change_name_title_cost", NAME_CHANGE_GEM_COST),
+                    AutoLocalizer.Get("new_name_placeholder"),
+                    OnConfirmNameChange,
+                    null
+                );
+            }
+        }
+
+        private async void OnConfirmNameChange(string newUsername)
+        {
+            if (currentPlayerData == null) return;
+            if (newUsername == currentPlayerData.username)
+            {
+                changeNamePanel?.Hide();
+                return;
+            }
+
+            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
+
+            // Deduct gems if not first change
+            if (changeCount > 0)
+            {
+                bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
+                if (!spent)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    return;
+                }
+            }
+
+            Debug.Log($"[Profile] Cambiando nombre a: {newUsername}");
+
+            bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
+
+            if (success)
+            {
+                Debug.Log("[Profile] Nombre actualizado exitosamente");
+                currentPlayerData.username = newUsername;
+                PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
+                PlayerPrefs.SetString("DisplayName", newUsername);
+                PlayerPrefs.Save();
+                changeNamePanel?.Hide();
+
+                // Actualizar UI inmediatamente
+                if (usernameText != null)
+                    usernameText.text = newUsername;
+            }
+            else
+            {
+                Debug.LogError("[Profile] Error al actualizar nombre");
+                changeNamePanel?.SetButtonsInteractable(true);
+                errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+            }
         }
 
         #endregion

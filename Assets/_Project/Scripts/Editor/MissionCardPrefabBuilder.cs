@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 using DigitPark.UI.Items;
 
 namespace DigitPark.Editor
@@ -74,13 +75,13 @@ namespace DigitPark.Editor
                 new Vector2(0, 0), new Vector2(1, 1),
                 new Vector2(80, 8), new Vector2(-100, -8));
 
-            // TitleText (18pt, bold, white)
+            // TitleText (bold, white)
             CreateTextElement(content.transform, "TitleText", "Titulo de Mision",
-                new Vector2(0, 0.65f), new Vector2(1, 1), 18, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                new Vector2(0, 0.65f), new Vector2(1, 1), (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
-            // DescriptionText (13pt, gray)
+            // DescriptionText (gray)
             CreateTextElement(content.transform, "DescriptionText", "Descripcion de la mision",
-                new Vector2(0, 0.35f), new Vector2(1, 0.65f), 13, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.35f), new Vector2(1, 0.65f), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Left);
 
             // ProgressBar
             GameObject progressBg = CreateImageElement(content.transform, "ProgressBar",
@@ -101,7 +102,7 @@ namespace DigitPark.Editor
 
             // ProgressText ("0/3")
             CreateTextElement(content.transform, "ProgressText", "0/3",
-                new Vector2(0.78f, 0), new Vector2(1, 0.3f), 13, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0.78f, 0), new Vector2(1, 0.3f), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // RewardSection
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",
@@ -117,7 +118,7 @@ namespace DigitPark.Editor
 
             // RewardAmountText ("+50", gold)
             CreateTextElement(rewardSection.transform, "RewardAmountText", "+50",
-                new Vector2(0, 0), new Vector2(1, 0.4f), 16, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.4f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // DifficultyIndicator (3px bottom strip)
             GameObject diffIndicator = CreateImageElement(item.transform, "DifficultyIndicator",
@@ -139,7 +140,7 @@ namespace DigitPark.Editor
             GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-55, -20), new Vector2(-15, 20),
-                36, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                (int)FontSizes.Button, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
             claimedCheck.SetActive(false);
 
             // Add MissionCardUI Component
@@ -242,7 +243,7 @@ namespace DigitPark.Editor
                 textRt.offsetMax = Vector2.zero;
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = text;
-                tmp.fontSize = 30;
+                tmp.fontSize = FontSizes.Body;
                 tmp.color = textColor;
                 tmp.fontStyle = FontStyles.Bold;
                 tmp.alignment = TextAlignmentOptions.Center;

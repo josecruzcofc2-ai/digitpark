@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -240,7 +241,7 @@ namespace DigitPark.Editor
 
             var logoTMP = GetOrAdd<TextMeshProUGUI>(logo);
             logoTMP.text = "DIGIT PARK";
-            logoTMP.fontSize = 78;
+            logoTMP.fontSize = FontSizes.SceneTitle;
             logoTMP.color = CYAN_NEON;
             logoTMP.fontStyle = FontStyles.Bold;
             logoTMP.alignment = TextAlignmentOptions.Center;
@@ -269,7 +270,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = 30;
+            btTMP.fontSize = FontSizes.Body;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -362,12 +363,17 @@ namespace DigitPark.Editor
             avImgComp.color = CARD_BG_LIGHT;
             avImgComp.preserveAspect = true;
 
-            // AvatarUI component
+            // AvatarUI component with default sprite
+            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
             var avatarUI = GetOrAdd<DigitPark.UI.Components.AvatarUI>(avImg);
             var avatarSO = new SerializedObject(avatarUI);
             avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
             avatarSO.FindProperty("isEditable").boolValue = false;
             avatarSO.FindProperty("avatarImage").objectReferenceValue = avImgComp;
+            if (defaultAvatar != null)
+            {
+                avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
+            }
             avatarSO.ApplyModifiedProperties();
 
             // Level Badge
@@ -386,7 +392,7 @@ namespace DigitPark.Editor
             ltRT.offsetMax = Vector2.zero;
             var ltTMP = GetOrAdd<TextMeshProUGUI>(lvlText);
             ltTMP.text = "Nv. 12";
-            ltTMP.fontSize = 32;
+            ltTMP.fontSize = FontSizes.BodyLarge;
             ltTMP.color = TEXT_DARK;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.alignment = TextAlignmentOptions.Center;
@@ -408,7 +414,7 @@ namespace DigitPark.Editor
             userRT.offsetMax = Vector2.zero;
             var userTMP = GetOrAdd<TextMeshProUGUI>(user);
             userTMP.text = "@Username";
-            userTMP.fontSize = 56;
+            userTMP.fontSize = FontSizes.DisplayMedium;
             userTMP.color = TEXT_WHITE;
             userTMP.fontStyle = FontStyles.Bold;
             userTMP.alignment = TextAlignmentOptions.Left;
@@ -444,7 +450,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(streak);
             stTMP.text = "Racha: 5 victorias";
-            stTMP.fontSize = 32;
+            stTMP.fontSize = FontSizes.BodyLarge;
             stTMP.color = GREEN_SUCCESS;
             stTMP.alignment = TextAlignmentOptions.Left;
 
@@ -479,7 +485,7 @@ namespace DigitPark.Editor
             val.AddComponent<LayoutElement>().preferredHeight = 40;
             var valTMP = val.AddComponent<TextMeshProUGUI>();
             valTMP.text = value;
-            valTMP.fontSize = 32;
+            valTMP.fontSize = FontSizes.BodyLarge;
             valTMP.color = color;
             valTMP.fontStyle = FontStyles.Bold;
             valTMP.alignment = TextAlignmentOptions.Center;
@@ -534,7 +540,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "RECOMPENSA DIARIA";
-            tTMP.fontSize = 36;
+            tTMP.fontSize = FontSizes.Button;
             tTMP.color = GOLD;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -547,7 +553,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Dia 3 de 7 - Reclama tu premio!";
-            sTMP.fontSize = 30;
+            sTMP.fontSize = FontSizes.Body;
             sTMP.color = TEXT_SECONDARY;
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -571,7 +577,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(cText);
             ctTMP.text = "Reclamar";
-            ctTMP.fontSize = 30;
+            ctTMP.fontSize = FontSizes.Body;
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -646,7 +652,7 @@ namespace DigitPark.Editor
             labelGO.AddComponent<LayoutElement>().preferredHeight = 44;
             var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
             lTMP.text = label;
-            lTMP.fontSize = 30;
+            lTMP.fontSize = FontSizes.Body;
             lTMP.color = TEXT_WHITE;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
@@ -721,7 +727,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "JUGAR";
-            tTMP.fontSize = 52;
+            tTMP.fontSize = FontSizes.CardTitle;
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -734,7 +740,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Elige un juego y compite";
-            sTMP.fontSize = 48;
+            sTMP.fontSize = FontSizes.SectionHeader;
             sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -748,7 +754,7 @@ namespace DigitPark.Editor
             aRT.sizeDelta = new Vector2(90, 90);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = 120;
+            aTMP.fontSize = FontSizes.AppBranding;
             aTMP.color = TEXT_DARK;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -833,7 +839,7 @@ namespace DigitPark.Editor
             cbtRT.offsetMax = Vector2.zero;
             var cbtTMP = GetOrAdd<TextMeshProUGUI>(cbText);
             cbtTMP.text = "$$$";
-            cbtTMP.fontSize = 48;
+            cbtTMP.fontSize = FontSizes.SectionHeader;
             cbtTMP.color = TEXT_WHITE;
             cbtTMP.fontStyle = FontStyles.Bold;
             cbtTMP.alignment = TextAlignmentOptions.Center;
@@ -867,7 +873,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "CASH BATTLE";
-            tTMP.fontSize = 52;
+            tTMP.fontSize = FontSizes.CardTitle;
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
@@ -881,7 +887,7 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Compite por dinero real";
-            sTMP.fontSize = 51;
+            sTMP.fontSize = FontSizes.SectionHeader;
             sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
             sTMP.alignment = TextAlignmentOptions.Left;
 
@@ -894,7 +900,7 @@ namespace DigitPark.Editor
             ageRT.offsetMax = Vector2.zero;
             var ageTMP = GetOrAdd<TextMeshProUGUI>(age);
             ageTMP.text = "18+";
-            ageTMP.fontSize = 36;
+            ageTMP.fontSize = FontSizes.Button;
             ageTMP.color = new Color(0.3f, 0.2f, 0f, 0.7f);
             ageTMP.fontStyle = FontStyles.Bold;
             ageTMP.alignment = TextAlignmentOptions.Left;
@@ -909,7 +915,7 @@ namespace DigitPark.Editor
             aRT.sizeDelta = new Vector2(90, 90);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = 126;
+            aTMP.fontSize = FontSizes.AppBranding;
             aTMP.color = TEXT_DARK;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -983,7 +989,7 @@ namespace DigitPark.Editor
             labelGO.AddComponent<LayoutElement>().preferredHeight = 72;
             var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
             lTMP.text = label;
-            lTMP.fontSize = 48;
+            lTMP.fontSize = FontSizes.SectionHeader;
             lTMP.color = TEXT_WHITE;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;

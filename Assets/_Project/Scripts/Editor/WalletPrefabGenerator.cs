@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using System.IO;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -169,7 +170,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Descripción";
-            descTMP.fontSize = 32;
+            descTMP.fontSize = FontSizes.BodyLarge;
             descTMP.color = TEXT_WHITE;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
@@ -186,7 +187,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
             dateTMP.text = "Fecha";
-            dateTMP.fontSize = 30;
+            dateTMP.fontSize = FontSizes.Body;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.alignment = TextAlignmentOptions.Left;
@@ -202,7 +203,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$0.00";
-            amountTMP.fontSize = 36;
+            amountTMP.fontSize = FontSizes.Button;
             amountTMP.color = GREEN;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Right;
@@ -218,7 +219,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusTMP = statusObj.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "";
-            statusTMP.fontSize = 30;
+            statusTMP.fontSize = FontSizes.Body;
             statusTMP.color = TEXT_SECONDARY;
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Right;
@@ -321,13 +322,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$10.00";
-            amountTMP.fontSize = 42;
+            amountTMP.fontSize = FontSizes.ValueMedium;
             amountTMP.color = TEXT_WHITE;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Left;
             amountTMP.enableAutoSizing = true;
-            amountTMP.fontSizeMin = 24;
-            amountTMP.fontSizeMax = 42;
+            amountTMP.fontSizeMin = FontSizes.AutoMinBody;
+            amountTMP.fontSizeMax = FontSizes.ValueMedium;
             amountTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Label "Depositar"
@@ -337,12 +338,12 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelTMP = labelObj.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Depositar";
-            labelTMP.fontSize = 30;
+            labelTMP.fontSize = FontSizes.Body;
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.alignment = TextAlignmentOptions.Left;
             labelTMP.enableAutoSizing = true;
-            labelTMP.fontSizeMin = 18;
-            labelTMP.fontSizeMax = 18;
+            labelTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            labelTMP.fontSizeMax = FontSizes.AutoMinTiny;
 
             // === Bonus Text ===
             GameObject bonusObj = CreateChild("BonusText", root.transform);
@@ -352,13 +353,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI bonusTMP = bonusObj.AddComponent<TextMeshProUGUI>();
             bonusTMP.text = "+$0.50 BONUS";
-            bonusTMP.fontSize = 30;
+            bonusTMP.fontSize = FontSizes.Body;
             bonusTMP.color = GOLD;
             bonusTMP.fontStyle = FontStyles.Bold;
             bonusTMP.alignment = TextAlignmentOptions.Right;
             bonusTMP.enableAutoSizing = true;
-            bonusTMP.fontSizeMin = 18;
-            bonusTMP.fontSizeMax = 27;
+            bonusTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            bonusTMP.fontSizeMax = FontSizes.Body;
             bonusTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // === Popular Badge (hidden by default) ===
@@ -381,7 +382,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI badgeTMP = badgeText.AddComponent<TextMeshProUGUI>();
             badgeTMP.text = "POPULAR";
-            badgeTMP.fontSize = 30;
+            badgeTMP.fontSize = FontSizes.Body;
             badgeTMP.color = Color.black;
             badgeTMP.fontStyle = FontStyles.Bold;
             badgeTMP.alignment = TextAlignmentOptions.Center;

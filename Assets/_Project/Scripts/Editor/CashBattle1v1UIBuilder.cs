@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -34,7 +35,7 @@ namespace DigitPark.Editor
         private static readonly Color GOLD_LIGHT = new Color(1f, 0.93f, 0.55f, 1f);
         private static readonly Color AMBER = new Color(1f, 0.75f, 0f, 1f);
 
-        private static readonly Color BG_DARK = new Color(0.08f, 0.06f, 0.12f, 1f);
+        private static readonly Color BG_DARK = new Color(0.06f, 0.05f, 0.10f, 1f);
         private static readonly Color CARD_BG = new Color(0.12f, 0.1f, 0.15f, 0.95f);
         private static readonly Color CARD_BORDER = new Color(0.85f, 0.65f, 0.13f, 0.6f);
 
@@ -340,7 +341,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
                 arrow.text = "<";
-                arrow.fontSize = 48;
+                arrow.fontSize = FontSizes.SectionHeader;
                 arrow.color = TEXT_GOLD;
                 arrow.alignment = TextAlignmentOptions.Center;
                 arrow.fontStyle = FontStyles.Bold;
@@ -355,17 +356,19 @@ namespace DigitPark.Editor
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(500, 80);
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchorMin = new Vector2(0.15f, 0f);
+            rt.anchorMax = new Vector2(0.70f, 1f);
+            rt.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.text = "Batallas 1v1";
-            title.fontSize = 78;
+            title.fontSize = FontSizes.SceneTitle;
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;
             title.fontStyle = FontStyles.Bold;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = FontSizes.ValueLarge;
+            title.fontSizeMax = FontSizes.SceneTitle;
         }
 
         private static void CreateBalanceWidget(Transform parent)
@@ -402,13 +405,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
             balanceText.text = "$0.00";
-            balanceText.fontSize = 44;
+            balanceText.fontSize = FontSizes.ValueLarge;
             balanceText.color = TEXT_GOLD;
             balanceText.alignment = TextAlignmentOptions.Center;
             balanceText.fontStyle = FontStyles.Bold;
             balanceText.enableAutoSizing = true;
-            balanceText.fontSizeMin = 28;
-            balanceText.fontSizeMax = 44;
+            balanceText.fontSizeMin = FontSizes.AutoMinBody;
+            balanceText.fontSizeMax = FontSizes.ValueLarge;
         }
 
         private static void BuildHeaderOnly()
@@ -495,7 +498,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Selecciona un Juego";
-            titleText.fontSize = 42;
+            titleText.fontSize = FontSizes.ValueMedium;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -601,7 +604,7 @@ namespace DigitPark.Editor
                 proRT.anchorMin = new Vector2(0, 1);
                 proRT.anchorMax = new Vector2(0, 1);
                 proRT.pivot = new Vector2(0, 1);
-                proRT.sizeDelta = new Vector2(60, 28);
+                proRT.sizeDelta = new Vector2(90, 42);
                 proRT.anchoredPosition = new Vector2(8, -8);
 
                 Image proBg = proBadge.AddComponent<Image>();
@@ -617,7 +620,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI proText = proTextObj.AddComponent<TextMeshProUGUI>();
                 proText.text = "PRO";
-                proText.fontSize = 16;
+                proText.fontSize = FontSizes.Body;
                 proText.color = Color.white;
                 proText.fontStyle = FontStyles.Bold;
                 proText.alignment = TextAlignmentOptions.Center;
@@ -648,7 +651,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
             checkTMP.text = "V";
-            checkTMP.fontSize = 28;
+            checkTMP.fontSize = FontSizes.Body;
             checkTMP.color = Color.white;
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
@@ -733,7 +736,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Elige tu apuesta";
-            titleText.fontSize = 52;
+            titleText.fontSize = FontSizes.CardTitle;
             titleText.color = TEXT_GOLD;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
@@ -753,7 +756,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
             text.text = "$5.00";
-            text.fontSize = 52;
+            text.fontSize = FontSizes.CardTitle;
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Right;
@@ -818,7 +821,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = $"${amount}";
-            text.fontSize = 36;
+            text.fontSize = FontSizes.Button;
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
@@ -863,7 +866,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dollarText = dollarSign.AddComponent<TextMeshProUGUI>();
             dollarText.text = "$";
-            dollarText.fontSize = 42;
+            dollarText.fontSize = FontSizes.ValueMedium;
             dollarText.color = GOLD_PRIMARY;
             dollarText.fontStyle = FontStyles.Bold;
             dollarText.alignment = TextAlignmentOptions.Center;
@@ -894,7 +897,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI inputText = inputTextArea.AddComponent<TextMeshProUGUI>();
             inputText.text = "";
-            inputText.fontSize = 48;
+            inputText.fontSize = FontSizes.SectionHeader;
             inputText.color = TEXT_PRIMARY;
             inputText.fontStyle = FontStyles.Bold;
             inputText.alignment = TextAlignmentOptions.Left;
@@ -912,7 +915,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI placeholderText = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderText.text = "Otro monto...";
-            placeholderText.fontSize = 48;
+            placeholderText.fontSize = FontSizes.SectionHeader;
             placeholderText.color = TEXT_SECONDARY;
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.alignment = TextAlignmentOptions.Left;
@@ -936,7 +939,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI maxText = maxLabel.AddComponent<TextMeshProUGUI>();
             maxText.text = "Max: $250";
-            maxText.fontSize = 38;
+            maxText.fontSize = FontSizes.Button;
             maxText.color = TEXT_SECONDARY;
             maxText.fontStyle = FontStyles.Bold;
             maxText.alignment = TextAlignmentOptions.Center;
@@ -970,7 +973,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI applyText = applyTextObj.AddComponent<TextMeshProUGUI>();
             applyText.text = "OK";
-            applyText.fontSize = 42;
+            applyText.fontSize = FontSizes.ValueMedium;
             applyText.color = BG_DARK;
             applyText.fontStyle = FontStyles.Bold;
             applyText.alignment = TextAlignmentOptions.Center;
@@ -1005,7 +1008,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI earningsText = earningsObj.AddComponent<TextMeshProUGUI>();
             earningsText.text = "Si ganas recibes: <color=#FFD700>$0.00</color>";
-            earningsText.fontSize = 52; // MAS GRANDE
+            earningsText.fontSize = FontSizes.CardTitle;
             earningsText.color = new Color(0.5f, 1f, 0.7f, 1f);
             earningsText.fontStyle = FontStyles.Bold;
             earningsText.alignment = TextAlignmentOptions.Left;
@@ -1024,7 +1027,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI poolText = poolObj.AddComponent<TextMeshProUGUI>();
             poolText.text = "Pool: $0.00 | Tu apuesta: $0.00 | Fee: 30%";
-            poolText.fontSize = 32; // MAS GRANDE
+            poolText.fontSize = FontSizes.BodyLarge;
             poolText.color = new Color(0.6f, 0.6f, 0.6f, 1f);
             poolText.fontStyle = FontStyles.Bold;
             poolText.alignment = TextAlignmentOptions.Left;
@@ -1054,7 +1057,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI coinText = coinTextObj.AddComponent<TextMeshProUGUI>();
             coinText.text = "$";
-            coinText.fontSize = 42;
+            coinText.fontSize = FontSizes.ValueMedium;
             coinText.color = BG_DARK;
             coinText.fontStyle = FontStyles.Bold;
             coinText.alignment = TextAlignmentOptions.Center;
@@ -1129,7 +1132,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = "Buscar oponente";
-            text.fontSize = 72; // Mas grande
+            text.fontSize = FontSizes.DisplayLarge;
             text.color = BG_DARK;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
@@ -1207,11 +1210,11 @@ namespace DigitPark.Editor
 
             // === Titulo ===
             GameObject titleObj = CreateLayoutText(card.transform, "SprintTitle",
-                "COGNITIVE SPRINT", 40, TEXT_GOLD, FontStyles.Bold, 55);
+                "COGNITIVE SPRINT", FontSizes.LabelLarge, TEXT_GOLD, FontStyles.Bold, 55);
 
             // === Subtitulo ===
             GameObject subtitleObj = CreateLayoutText(card.transform, "SprintSubtitle",
-                "Selecciona de 2 a 5 juegos", 20, TEXT_SECONDARY, FontStyles.Bold, 30);
+                "Selecciona de 2 a 5 juegos", FontSizes.Body, TEXT_SECONDARY, FontStyles.Bold, 30);
 
             // === Separador ===
             GameObject sep = new GameObject("Separator");
@@ -1233,7 +1236,7 @@ namespace DigitPark.Editor
 
             // === Selection Text (justo debajo de cards) ===
             GameObject selTextObj = CreateLayoutText(card.transform, "SprintSelectionText",
-                "Seleccionados: 0/5 (min: 2)", 24, Color.yellow, FontStyles.Bold, 40);
+                "Seleccionados: 0/5 (min: 2)", FontSizes.Body, Color.yellow, FontStyles.Bold, 40);
 
             // === Botones (justo debajo del texto) ===
             GameObject buttonsRow = new GameObject("SprintButtons");
@@ -1358,7 +1361,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = displayName;
-            nameText.fontSize = 28;
+            nameText.fontSize = FontSizes.Body;
             nameText.color = TEXT_PRIMARY;
             nameText.fontStyle = FontStyles.Bold;
             nameText.alignment = TextAlignmentOptions.Left;
@@ -1400,7 +1403,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkText = checkTextObj.AddComponent<TextMeshProUGUI>();
             checkText.text = "\u2713";
-            checkText.fontSize = 26;
+            checkText.fontSize = FontSizes.Body;
             checkText.color = Color.white;
             checkText.fontStyle = FontStyles.Bold;
             checkText.alignment = TextAlignmentOptions.Center;
@@ -1447,7 +1450,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = label;
-            text.fontSize = 26;
+            text.fontSize = FontSizes.Body;
             text.color = textColor;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;

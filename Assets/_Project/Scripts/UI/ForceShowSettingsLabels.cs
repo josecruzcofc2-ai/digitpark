@@ -125,7 +125,7 @@ namespace DigitPark.UI
             // 6. Asegurar font size razonable
             if (tmp.fontSize < 10)
             {
-                tmp.fontSize = 28;
+                tmp.fontSize = FontSizes.Body;
                 Debug.Log($"[ForceShowLabels] Font size era muy pequeno, cambiado a 28");
             }
 

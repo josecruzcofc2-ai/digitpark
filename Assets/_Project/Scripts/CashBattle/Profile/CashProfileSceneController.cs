@@ -6,6 +6,8 @@ using DigitPark.Localization;
 using DigitPark.Monetization;
 using DigitPark.Animations;
 using DigitPark.Effects;
+using DigitPark.UI.Panels;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.CashBattle
 {
@@ -28,7 +30,13 @@ namespace DigitPark.CashBattle
         [Header("Avatar")]
         [SerializeField] private Image avatarImage;
         [SerializeField] private TextMeshProUGUI usernameText;
+        [SerializeField] private Button editNameButton;
         [SerializeField] private TextMeshProUGUI memberSinceText;
+
+        // ==================== CHANGE NAME ====================
+        [Header("Change Name")]
+        [SerializeField] private InputPanelUI changeNamePanel;
+        [SerializeField] private ErrorPanelUI errorPanel;
 
         // ==================== SUMMARY STATS (3 boxes) ====================
         [Header("Summary Stats")]
@@ -48,6 +56,33 @@ namespace DigitPark.CashBattle
         [SerializeField] private TextMeshProUGUI avgEarningsText;
         [SerializeField] private TextMeshProUGUI totalEarningsText;
         [SerializeField] private TextMeshProUGUI totalSpentText;
+
+        // ==================== RECORD CARD ====================
+        [Header("Record Card")]
+        [SerializeField] private TextMeshProUGUI recordText;
+        [SerializeField] private Image winRateBarFill;
+        [SerializeField] private TextMeshProUGUI winRateText;
+
+        // ==================== RANK ====================
+        [Header("Rank")]
+        [SerializeField] private TextMeshProUGUI rankBadgeText;
+
+        // ==================== PER-GAME STATS ====================
+        [Header("Per-Game Stats")]
+        [SerializeField] private Image digitRushBarFill;
+        [SerializeField] private TextMeshProUGUI digitRushValueText;
+        [SerializeField] private Image memoryPairsBarFill;
+        [SerializeField] private TextMeshProUGUI memoryPairsValueText;
+        [SerializeField] private Image quickMathBarFill;
+        [SerializeField] private TextMeshProUGUI quickMathValueText;
+        [SerializeField] private Image flashTapBarFill;
+        [SerializeField] private TextMeshProUGUI flashTapValueText;
+        [SerializeField] private Image oddOneOutBarFill;
+        [SerializeField] private TextMeshProUGUI oddOneOutValueText;
+
+        // ==================== NAME CHANGE ====================
+        private const string NAME_CHANGE_COUNT_KEY = "NameChangeCount";
+        private const int NAME_CHANGE_GEM_COST = 100;
 
         // ==================== ANIMATOR ====================
         private CashProfileAnimator _animator;
@@ -76,6 +111,8 @@ namespace DigitPark.CashBattle
             if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton)
                 backButton.onClick.AddListener(OnBackClicked);
+
+            editNameButton?.onClick.AddListener(OnEditNameClicked);
         }
 
         // ==================== BUTTON EFFECTS ====================
@@ -108,7 +145,16 @@ namespace DigitPark.CashBattle
         {
             if (usernameText)
             {
-                string displayName = PlayerPrefs.GetString("DisplayName", "Player");
+                // Sync from AuthenticationService (single source of truth)
+                string displayName = null;
+                if (AuthenticationService.Instance != null)
+                {
+                    var playerData = AuthenticationService.Instance.GetCurrentPlayerData();
+                    displayName = playerData?.username;
+                }
+                if (string.IsNullOrEmpty(displayName))
+                    displayName = PlayerPrefs.GetString("DisplayName", "Player");
+
                 usernameText.text = displayName;
             }
 
@@ -176,6 +222,107 @@ namespace DigitPark.CashBattle
                 totalEarningsText.text = $"${stats.totalEarnings:F2}";
             if (totalSpentText)
                 totalSpentText.text = $"${stats.totalSpent:F2}";
+
+            // Record Card
+            if (recordText)
+                recordText.text = $"{stats.wins}W  \u00b7  {stats.losses}L  \u00b7  {stats.draws}D";
+            if (winRateText)
+                winRateText.text = $"{stats.winRate:F0}% Win Rate";
+            if (winRateBarFill)
+                winRateBarFill.fillAmount = stats.winRate / 100f;
+
+            // Rank
+            if (rankBadgeText)
+                rankBadgeText.text = GetRank(stats.totalMatches, stats.winRate);
+        }
+
+        // ==================== RANK CALCULATION ====================
+
+        private string GetRank(int totalMatches, float winRate)
+        {
+            if (totalMatches >= 100 && winRate >= 70) return "DIAMOND";
+            if (totalMatches >= 50 && winRate >= 60) return "PLATINUM";
+            if (totalMatches >= 25 && winRate >= 50) return "GOLD";
+            if (totalMatches >= 10) return "SILVER";
+            return "BRONZE";
+        }
+
+        // ==================== CHANGE NAME ====================
+
+        private void OnEditNameClicked()
+        {
+            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
+
+            if (changeCount > 0)
+            {
+                int currentGems = CurrencyManager.Instance?.Gems ?? 0;
+                if (currentGems < NAME_CHANGE_GEM_COST)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                    return;
+                }
+            }
+
+            if (changeNamePanel != null)
+            {
+                changeNamePanel.SetLengthLimits(3, 20);
+                changeNamePanel.Show(
+                    changeCount == 0
+                        ? AutoLocalizer.Get("change_name_title")
+                        : AutoLocalizer.Get("change_name_title_cost", NAME_CHANGE_GEM_COST),
+                    AutoLocalizer.Get("new_name_placeholder"),
+                    OnConfirmNameChange,
+                    null
+                );
+            }
+        }
+
+        private async void OnConfirmNameChange(string newUsername)
+        {
+            if (AuthenticationService.Instance == null) return;
+
+            var playerData = AuthenticationService.Instance.GetCurrentPlayerData();
+            if (playerData != null && newUsername == playerData.username)
+            {
+                changeNamePanel?.Hide();
+                return;
+            }
+
+            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
+
+            if (changeCount > 0)
+            {
+                bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
+                if (!spent)
+                {
+                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    return;
+                }
+            }
+
+            Debug.Log($"[CashProfile] Cambiando nombre a: {newUsername}");
+
+            bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
+
+            if (success)
+            {
+                Debug.Log("[CashProfile] Nombre actualizado exitosamente");
+                if (playerData != null) playerData.username = newUsername;
+                PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
+                PlayerPrefs.SetString("DisplayName", newUsername);
+                PlayerPrefs.Save();
+                changeNamePanel?.Hide();
+
+                if (usernameText != null)
+                    usernameText.text = newUsername;
+            }
+            else
+            {
+                Debug.LogError("[CashProfile] Error al actualizar nombre");
+                changeNamePanel?.SetButtonsInteractable(true);
+                errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+            }
         }
 
         // ==================== NAVIGATION ====================

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.UI.Common
 {
@@ -82,7 +83,7 @@ namespace DigitPark.UI.Common
                 popupPanel.transform,
                 "Title",
                 AutoLocalizer.Get("username_popup_title"),
-                40,
+                (int)FontSizes.LabelLarge,
                 UIFactory.ElectricBlue,
                 TMPro.TextAlignmentOptions.Center
             );
@@ -117,7 +118,7 @@ namespace DigitPark.UI.Common
 
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = AutoLocalizer.Get("username_placeholder");
-            placeholderText.fontSize = 24;
+            placeholderText.fontSize = FontSizes.Body;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TMPro.TextAlignmentOptions.Left;
 
@@ -133,7 +134,7 @@ namespace DigitPark.UI.Common
             textRT.offsetMax = new Vector2(-10, 0);
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
-            inputText.fontSize = 24;
+            inputText.fontSize = FontSizes.Body;
             inputText.color = Color.white;
             inputText.alignment = TMPro.TextAlignmentOptions.Left;
 

@@ -2,12 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Construye la UI completa de TournamentLobby
-    /// Incluye: SafeArea, Header, TournamentInfo, Leaderboard, ActionButtons, Popups
+    /// Construye la UI completa de TournamentLobby (rediseno profesional V2).
+    /// Layout: Header, InfoCard, TabBar (Participants/Chat), ContentArea, ActionBar,
+    /// plus PrizesPopup, LeaveConfirmPopup, LoadingOverlay, StartingOverlay.
     /// </summary>
     public class TournamentLobbyUIBuilder : EditorWindow
     {
@@ -16,8 +18,9 @@ namespace DigitPark.Editor
         private static readonly Color CYAN_DARK = new Color(0f, 0.4f, 0.4f, 1f);
         private static readonly Color CYAN_GLOW = new Color(0f, 1f, 1f, 0.3f);
 
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.08f, 0.12f, 0.18f, 0.98f);
+        private static readonly Color INFO_CARD_BG = new Color(0.06f, 0.06f, 0.12f, 0.95f);
         private static readonly Color POPUP_BG = new Color(0.05f, 0.08f, 0.12f, 0.98f);
         private static readonly Color HEADER_BG = new Color(0.03f, 0.06f, 0.1f, 0.95f);
 
@@ -35,15 +38,23 @@ namespace DigitPark.Editor
         private static readonly Color BRONZE = new Color(0.8f, 0.5f, 0.2f, 1f);
 
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.85f);
+        private static readonly Color TAB_ACTIVE = CYAN_NEON;
+        private static readonly Color TAB_INACTIVE = new Color(0.5f, 0.5f, 0.5f, 0.3f);
+        private static readonly Color BADGE_RED = new Color(0.9f, 0.2f, 0.2f, 1f);
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
+        private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";
+        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png";
 
         // ==================== DIMENSIONES ====================
         private const float HEADER_HEIGHT = 100f;
-        private const float INFO_PANEL_HEIGHT = 240f;
-        private const float MY_POSITION_HEIGHT = 100f;
-        private const float ACTION_BUTTONS_HEIGHT = 80f;
-        private const float CONTENT_PADDING = 20f;
+        private const float INFO_CARD_HEIGHT = 160f;
+        private const float TAB_BAR_HEIGHT = 60f;
+        private const float ACTION_BAR_HEIGHT = 80f;
+        private const float MY_POSITION_HEIGHT = 80f;
+        private const float CHAT_INPUT_HEIGHT = 70f;
+        private const float CONTENT_PADDING = 16f;
+        private const float TAB_INDICATOR_HEIGHT = 3f;
 
         [MenuItem("DigitPark/UI Builders/Tournaments/TournamentLobby", false, 234)]
         public static void BuildUI()
@@ -58,9 +69,8 @@ namespace DigitPark.Editor
 
         private static void BuildCompleteUI()
         {
-            Debug.Log("[TournamentLobbyUIBuilder] ========== INICIANDO CONSTRUCCION ==========");
+            Debug.Log("[TournamentLobbyUIBuilder] ========== INICIANDO CONSTRUCCION V2 ==========");
 
-            // Limpiar UI vieja de TODOS los Canvas (especialmente TransitionCanvas)
             CleanupOldUI();
 
             Canvas canvas = SetupCanvas();
@@ -70,17 +80,19 @@ namespace DigitPark.Editor
             GameObject safeArea = CreateSafeArea(canvas);
 
             CreateHeader(safeArea);
-            CreateTournamentInfoPanel(safeArea);
-            CreateLeaderboard(safeArea);
-            CreateMyPositionPanel(safeArea);
-            CreateActionButtons(safeArea);
+            CreateInfoCard(safeArea);
+            CreateTabBar(safeArea);
+            CreateContentArea(safeArea);
+            CreateActionBar(safeArea);
 
             CreatePrizesPopup(canvas);
             CreateLeaveConfirmPopup(canvas);
+            CreateLoadingOverlay(canvas);
+            CreateStartingOverlay(canvas);
 
             MarkSceneDirty();
             AutoAssigners.TournamentLobbyReferenceAssigner.RunAutoAssign();
-            Debug.Log("[TournamentLobbyUIBuilder] ========== CONSTRUCCION COMPLETADA ==========");
+            Debug.Log("[TournamentLobbyUIBuilder] ========== CONSTRUCCION V2 COMPLETADA ==========");
         }
 
         // ==================== CANVAS SETUP ====================
@@ -123,13 +135,12 @@ namespace DigitPark.Editor
         }
 
         /// <summary>
-        /// Limpia UI creada por el builder de TODOS los Canvas raíz.
-        /// En TransitionCanvas: elimina TODO excepto elementos de transición.
-        /// En Canvas principal: elimina Background, SafeArea y popups.
+        /// Limpia UI creada por el builder de TODOS los Canvas raiz.
+        /// En TransitionCanvas: elimina TODO excepto elementos de transicion.
+        /// En Canvas principal: elimina Background, SafeArea, popups y overlays.
         /// </summary>
         private static void CleanupOldUI()
         {
-            // Elementos que son parte del sistema de transiciones (NO eliminar)
             string[] transitionElements = { "FadeImage", "CircleWipeImage", "SlidePanel" };
 
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
@@ -138,7 +149,6 @@ namespace DigitPark.Editor
 
                 if (canvas.gameObject.name.Contains("Transition"))
                 {
-                    // TransitionCanvas: eliminar TODOS los hijos excepto elementos de transición
                     for (int i = canvas.transform.childCount - 1; i >= 0; i--)
                     {
                         Transform child = canvas.transform.GetChild(i);
@@ -156,8 +166,11 @@ namespace DigitPark.Editor
                 }
                 else
                 {
-                    // Canvas principal: eliminar elementos conocidos del builder
-                    string[] toClean = { "Background", "SafeArea", "PrizesBlocker", "LeaveBlocker" };
+                    string[] toClean = {
+                        "Background", "SafeArea",
+                        "PrizesBlocker", "LeaveBlocker",
+                        "LoadingOverlay", "StartingOverlay"
+                    };
                     foreach (string name in toClean)
                     {
                         Transform t = canvas.transform.Find(name);
@@ -170,6 +183,8 @@ namespace DigitPark.Editor
                 }
             }
         }
+
+        // ==================== BACKGROUND & SAFE AREA ====================
 
         private static void CreateBackground(Canvas canvas)
         {
@@ -199,7 +214,7 @@ namespace DigitPark.Editor
             return safeArea;
         }
 
-        // ==================== HEADER ====================
+        // ==================== HEADER (100px top) ====================
 
         private static void CreateHeader(GameObject parent)
         {
@@ -217,7 +232,7 @@ namespace DigitPark.Editor
 
             CreateBottomGlow(header);
 
-            // BackButton
+            // ── BackButton (prefab) ──
             GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
             GameObject backBtn;
             if (backBtnPrefab != null)
@@ -230,42 +245,74 @@ namespace DigitPark.Editor
             else
             {
                 backBtn = FindOrCreateChild(header, "BackButton");
-                Debug.LogWarning("[TournamentLobbyUI] BackButton prefab not found, using fallback");
+                Debug.LogWarning("[TournamentLobbyUIBuilder] BackButton prefab not found, using fallback");
             }
 
             RectTransform backRT = GetOrAddComponent<RectTransform>(backBtn);
             backRT.anchorMin = new Vector2(0, 0.5f);
             backRT.anchorMax = new Vector2(0, 0.5f);
             backRT.pivot = new Vector2(0, 0.5f);
-            backRT.anchoredPosition = new Vector2(20, 0);
+            backRT.anchoredPosition = new Vector2(16, 0);
             backRT.sizeDelta = new Vector2(50, 50);
 
-            // Tournament Name (dynamic)
+            // ── TournamentNameText (center, auto-size, cyan) ──
             GameObject titleObj = FindOrCreateChild(header, "TournamentNameText");
             RectTransform titleRT = GetOrAddComponent<RectTransform>(titleObj);
-            titleRT.anchorMin = new Vector2(0.5f, 0.5f);
-            titleRT.anchorMax = new Vector2(0.5f, 0.5f);
-            titleRT.sizeDelta = new Vector2(700, 90);
+            titleRT.anchorMin = new Vector2(0, 0);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.offsetMin = new Vector2(80, 10);
+            titleRT.offsetMax = new Vector2(-130, -10);
 
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Nombre del Torneo";
-            titleText.fontSize = 78;
+            titleText.fontSize = FontSizes.SectionHeader;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 18;
-            titleText.fontSizeMax = 78;
+            titleText.fontSizeMin = FontSizes.AutoMinTiny;
+            titleText.fontSizeMax = FontSizes.SectionHeader;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
             AddOutline(titleObj, CYAN_GLOW, 2);
 
-            // Prizes Button
+            // ── StatusBadge (right of title) ──
+            GameObject statusBadge = FindOrCreateChild(header, "StatusBadge");
+            RectTransform statusBadgeRT = GetOrAddComponent<RectTransform>(statusBadge);
+            statusBadgeRT.anchorMin = new Vector2(1, 0.5f);
+            statusBadgeRT.anchorMax = new Vector2(1, 0.5f);
+            statusBadgeRT.pivot = new Vector2(1, 0.5f);
+            statusBadgeRT.anchoredPosition = new Vector2(-70, 18);
+            statusBadgeRT.sizeDelta = new Vector2(120, 32);
+
+            Image statusBadgeImage = GetOrAddComponent<Image>(statusBadge);
+            statusBadgeImage.color = BUTTON_SUCCESS;
+            statusBadge.name = "StatusBadge";
+
+            // The Image component on StatusBadge is accessed as StatusBadgeImage by the AutoAssigner
+            // We need a separate child named StatusBadgeImage OR the manager references the Image on StatusBadge.
+            // Manager field: statusBadgeImage -> Image on the StatusBadge object itself.
+            // We rename nothing - the AutoAssigner maps "StatusBadge" -> Image component = statusBadgeImage.
+
+            GameObject statusBadgeTextObj = FindOrCreateChild(statusBadge, "StatusBadgeText");
+            SetRectTransformStretch(statusBadgeTextObj);
+            TextMeshProUGUI statusBadgeTMP = GetOrAddComponent<TextMeshProUGUI>(statusBadgeTextObj);
+            statusBadgeTMP.text = "ABIERTO";
+            statusBadgeTMP.fontSize = FontSizes.Body;
+            statusBadgeTMP.fontStyle = FontStyles.Bold;
+            statusBadgeTMP.color = TEXT_DARK;
+            statusBadgeTMP.alignment = TextAlignmentOptions.Center;
+            statusBadgeTMP.enableAutoSizing = true;
+            statusBadgeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            statusBadgeTMP.fontSizeMax = FontSizes.Body;
+
+            // ── PrizesButton (gold trophy icon, far right) ──
             GameObject prizesBtn = FindOrCreateChild(header, "PrizesButton");
             RectTransform prizesRT = GetOrAddComponent<RectTransform>(prizesBtn);
             prizesRT.anchorMin = new Vector2(1, 0.5f);
             prizesRT.anchorMax = new Vector2(1, 0.5f);
             prizesRT.pivot = new Vector2(1, 0.5f);
-            prizesRT.anchoredPosition = new Vector2(-20, 0);
-            prizesRT.sizeDelta = new Vector2(50, 50);
+            prizesRT.anchoredPosition = new Vector2(-16, -16);
+            prizesRT.sizeDelta = new Vector2(46, 46);
 
             Image prizesBg = GetOrAddComponent<Image>(prizesBtn);
             prizesBg.color = GOLD;
@@ -274,213 +321,465 @@ namespace DigitPark.Editor
             SetupButtonColors(prizesButton, GOLD);
             AddOutline(prizesBtn, new Color(1f, 0.84f, 0f, 0.5f));
 
-            GameObject prizesTextObj = FindOrCreateChild(prizesBtn, "Text");
-            TextMeshProUGUI prizesText = GetOrAddComponent<TextMeshProUGUI>(prizesTextObj);
-            prizesText.text = "$";
-            prizesText.fontSize = 56;
+            GameObject prizesIconObj = FindOrCreateChild(prizesBtn, "Text");
+            TextMeshProUGUI prizesText = GetOrAddComponent<TextMeshProUGUI>(prizesIconObj);
+            prizesText.text = "\u2666"; // diamond/trophy symbol
+            prizesText.fontSize = FontSizes.BodyLarge;
             prizesText.fontStyle = FontStyles.Bold;
             prizesText.color = TEXT_DARK;
             prizesText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(prizesTextObj);
+            SetRectTransformStretch(prizesIconObj);
 
             Debug.Log("[TournamentLobbyUIBuilder] Header creado");
         }
 
-        // ==================== TOURNAMENT INFO PANEL ====================
+        // ==================== INFO CARD (160px below header) ====================
 
-        private static void CreateTournamentInfoPanel(GameObject parent)
+        private static void CreateInfoCard(GameObject parent)
         {
-            GameObject infoPanel = FindOrCreateChild(parent, "TournamentInfoPanel");
+            GameObject infoCard = FindOrCreateChild(parent, "InfoCard");
 
-            RectTransform infoRT = GetOrAddComponent<RectTransform>(infoPanel);
+            RectTransform infoRT = GetOrAddComponent<RectTransform>(infoCard);
             infoRT.anchorMin = new Vector2(0, 1);
             infoRT.anchorMax = new Vector2(1, 1);
             infoRT.pivot = new Vector2(0.5f, 1);
-            infoRT.anchoredPosition = new Vector2(0, -HEADER_HEIGHT - 10);
-            infoRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, INFO_PANEL_HEIGHT);
+            infoRT.anchoredPosition = new Vector2(0, -HEADER_HEIGHT - 6);
+            infoRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, INFO_CARD_HEIGHT);
 
-            Image infoBg = GetOrAddComponent<Image>(infoPanel);
-            infoBg.color = PANEL_BG;
-            AddOutline(infoPanel, CYAN_DARK);
+            Image infoBg = GetOrAddComponent<Image>(infoCard);
+            infoBg.color = INFO_CARD_BG;
+            AddOutline(infoCard, CYAN_DARK);
 
-            // 3D depth shadow
-            Shadow infoShadow = infoPanel.AddComponent<Shadow>();
-            infoShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            infoShadow.effectDistance = new Vector2(3, -4);
-
-            // Layout
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(infoPanel);
-            vlg.spacing = 15;
-            vlg.padding = new RectOffset(25, 25, 20, 20);
+            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(infoCard);
+            vlg.spacing = 4;
+            vlg.padding = new RectOffset(16, 16, 8, 8);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Game Info Row
-            GameObject gameRow = FindOrCreateChild(infoPanel, "GameRow");
-            HorizontalLayoutGroup gameHlg = GetOrAddComponent<HorizontalLayoutGroup>(gameRow);
-            gameHlg.spacing = 15;
-            gameHlg.childAlignment = TextAnchor.MiddleCenter;
-            gameHlg.childControlWidth = true;
-            gameHlg.childControlHeight = true;
-            gameHlg.childForceExpandWidth = false;
+            // ── TopRow: GameType + Countdown ──
+            CreateInfoCardTopRow(infoCard);
 
-            LayoutElement gameLE = GetOrAddComponent<LayoutElement>(gameRow);
-            gameLE.minHeight = 70;
+            // ── MiddleRow: EntryFee + PrizePool ──
+            CreateInfoCardMiddleRow(infoCard);
 
-            // Game Icon
-            GameObject iconObj = FindOrCreateChild(gameRow, "GameIcon");
-            RectTransform iconRT = GetOrAddComponent<RectTransform>(iconObj);
-            iconRT.sizeDelta = new Vector2(50, 50);
-            Image iconImage = GetOrAddComponent<Image>(iconObj);
-            iconImage.color = CYAN_DARK;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
-            iconLE.minWidth = 50;
-            iconLE.minHeight = 50;
+            // ── ProgressRow: player progress bar ──
+            CreateInfoCardProgressRow(infoCard);
 
-            // Game Name
-            GameObject gameNameObj = FindOrCreateChild(gameRow, "GameName");
-            TextMeshProUGUI gameNameText = GetOrAddComponent<TextMeshProUGUI>(gameNameObj);
-            gameNameText.text = "Digit Rush";
-            gameNameText.fontSize = 48;
-            gameNameText.fontStyle = FontStyles.Bold;
-            gameNameText.color = TEXT_PRIMARY;
-            LayoutElement gameNameLE = GetOrAddComponent<LayoutElement>(gameNameObj);
-            gameNameLE.flexibleWidth = 1;
-            gameNameLE.minWidth = 300;
-            gameNameLE.minHeight = 60;
+            // ── RulesRow: attempts + time limit ──
+            CreateInfoCardRulesRow(infoCard);
 
-            // Stats Row
-            GameObject statsRow = FindOrCreateChild(infoPanel, "StatsRow");
-            HorizontalLayoutGroup statsHlg = GetOrAddComponent<HorizontalLayoutGroup>(statsRow);
-            statsHlg.spacing = 10;
-            statsHlg.childAlignment = TextAnchor.MiddleCenter;
-            statsHlg.childControlWidth = true;
-            statsHlg.childControlHeight = true;
-            statsHlg.childForceExpandWidth = true;
-            statsHlg.childForceExpandHeight = true;
-
-            LayoutElement statsLE = GetOrAddComponent<LayoutElement>(statsRow);
-            statsLE.minHeight = 100;
-
-            // Entry Fee Stat
-            CreateStatItem(statsRow, "EntryFeeStat", "Entrada", "GRATIS");
-
-            // Prize Pool Stat
-            CreateStatItem(statsRow, "PrizePoolStat", "Premio", "$50");
-
-            // Players Stat
-            CreateStatItem(statsRow, "PlayersStat", "Jugadores", "12/16");
-
-            // Status Row
-            GameObject statusRow = FindOrCreateChild(infoPanel, "StatusRow");
-            HorizontalLayoutGroup statusHlg = GetOrAddComponent<HorizontalLayoutGroup>(statusRow);
-            statusHlg.spacing = 10;
-            statusHlg.childAlignment = TextAnchor.MiddleCenter;
-            statusHlg.childControlWidth = true;
-            statusHlg.childControlHeight = true;
-            statusHlg.childForceExpandWidth = true;
-
-            LayoutElement statusLE = GetOrAddComponent<LayoutElement>(statusRow);
-            statusLE.minHeight = 55;
-
-            // Status Text
-            GameObject statusObj = FindOrCreateChild(statusRow, "StatusText");
-            TextMeshProUGUI statusText = GetOrAddComponent<TextMeshProUGUI>(statusObj);
-            statusText.text = "EN PROGRESO";
-            statusText.fontSize = 40;
-            statusText.fontStyle = FontStyles.Bold;
-            statusText.color = BUTTON_SUCCESS;
-            statusText.alignment = TextAlignmentOptions.Center;
-
-            // Time Remaining
-            GameObject timeObj = FindOrCreateChild(statusRow, "TimeText");
-            TextMeshProUGUI timeText = GetOrAddComponent<TextMeshProUGUI>(timeObj);
-            timeText.text = "Termina en: 02:45:30";
-            timeText.fontSize = 35;
-            timeText.color = TEXT_SECONDARY;
-            timeText.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[TournamentLobbyUIBuilder] TournamentInfoPanel creado");
+            Debug.Log("[TournamentLobbyUIBuilder] InfoCard creado");
         }
 
-        private static void CreateStatItem(GameObject parent, string name, string label, string value)
+        private static void CreateInfoCardTopRow(GameObject parent)
         {
-            GameObject item = FindOrCreateChild(parent, name);
+            GameObject topRow = FindOrCreateChild(parent, "TopRow");
 
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(item);
-            vlg.spacing = 5;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(topRow);
+            hlg.spacing = 10;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
 
-            // Label
-            GameObject labelObj = FindOrCreateChild(item, "Label");
-            TextMeshProUGUI labelText = GetOrAddComponent<TextMeshProUGUI>(labelObj);
-            labelText.text = label;
-            labelText.fontSize = 30;
-            labelText.color = TEXT_SECONDARY;
-            labelText.alignment = TextAlignmentOptions.Center;
+            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(topRow);
+            rowLE.minHeight = 34;
 
-            LayoutElement labelLE = GetOrAddComponent<LayoutElement>(labelObj);
-            labelLE.minHeight = 35;
+            // GameTypeRow (icon + text)
+            GameObject gameTypeRow = FindOrCreateChild(topRow, "GameTypeRow");
+            HorizontalLayoutGroup gtHlg = GetOrAddComponent<HorizontalLayoutGroup>(gameTypeRow);
+            gtHlg.spacing = 8;
+            gtHlg.childAlignment = TextAnchor.MiddleLeft;
+            gtHlg.childControlWidth = true;
+            gtHlg.childControlHeight = true;
+            gtHlg.childForceExpandWidth = false;
+            LayoutElement gtLE = GetOrAddComponent<LayoutElement>(gameTypeRow);
+            gtLE.flexibleWidth = 1;
 
-            // Value
-            GameObject valueObj = FindOrCreateChild(item, "Value");
-            TextMeshProUGUI valueText = GetOrAddComponent<TextMeshProUGUI>(valueObj);
-            valueText.text = value;
-            valueText.fontSize = 55;
-            valueText.fontStyle = FontStyles.Bold;
-            valueText.color = CYAN_NEON;
-            valueText.alignment = TextAlignmentOptions.Center;
+            // Game icon placeholder
+            GameObject gameIcon = FindOrCreateChild(gameTypeRow, "GameIcon");
+            Image gameIconImg = GetOrAddComponent<Image>(gameIcon);
+            gameIconImg.color = CYAN_DARK;
+            LayoutElement giLE = GetOrAddComponent<LayoutElement>(gameIcon);
+            giLE.minWidth = 28;
+            giLE.preferredWidth = 28;
+            giLE.minHeight = 28;
+            giLE.preferredHeight = 28;
 
-            LayoutElement valueLE = GetOrAddComponent<LayoutElement>(valueObj);
-            valueLE.minHeight = 55;
+            // GameTypeText
+            GameObject gameTypeTextObj = FindOrCreateChild(gameTypeRow, "GameTypeText");
+            TextMeshProUGUI gameTypeTMP = GetOrAddComponent<TextMeshProUGUI>(gameTypeTextObj);
+            gameTypeTMP.text = "Digit Rush";
+            gameTypeTMP.fontSize = FontSizes.BodyLarge;
+            gameTypeTMP.fontStyle = FontStyles.Bold;
+            gameTypeTMP.color = TEXT_PRIMARY;
+            gameTypeTMP.alignment = TextAlignmentOptions.Left;
+            LayoutElement gtTextLE = GetOrAddComponent<LayoutElement>(gameTypeTextObj);
+            gtTextLE.flexibleWidth = 1;
+            gtTextLE.minHeight = 30;
+
+            // TimeRow (clock icon + countdown)
+            GameObject timeRow = FindOrCreateChild(topRow, "TimeRow");
+            HorizontalLayoutGroup trHlg = GetOrAddComponent<HorizontalLayoutGroup>(timeRow);
+            trHlg.spacing = 6;
+            trHlg.childAlignment = TextAnchor.MiddleRight;
+            trHlg.childControlWidth = true;
+            trHlg.childControlHeight = true;
+            trHlg.childForceExpandWidth = false;
+            LayoutElement trLE = GetOrAddComponent<LayoutElement>(timeRow);
+            trLE.flexibleWidth = 1;
+
+            // Clock icon placeholder
+            GameObject clockIcon = FindOrCreateChild(timeRow, "ClockIcon");
+            Image clockIconImg = GetOrAddComponent<Image>(clockIcon);
+            clockIconImg.color = TEXT_SECONDARY;
+            LayoutElement ciLE = GetOrAddComponent<LayoutElement>(clockIcon);
+            ciLE.minWidth = 24;
+            ciLE.preferredWidth = 24;
+            ciLE.minHeight = 24;
+            ciLE.preferredHeight = 24;
+
+            // CountdownText
+            GameObject countdownObj = FindOrCreateChild(timeRow, "CountdownText");
+            TextMeshProUGUI countdownTMP = GetOrAddComponent<TextMeshProUGUI>(countdownObj);
+            countdownTMP.text = "02:45:30";
+            countdownTMP.fontSize = FontSizes.BodyLarge;
+            countdownTMP.fontStyle = FontStyles.Bold;
+            countdownTMP.color = CYAN_NEON;
+            countdownTMP.alignment = TextAlignmentOptions.Right;
+            LayoutElement cdLE = GetOrAddComponent<LayoutElement>(countdownObj);
+            cdLE.minWidth = 120;
+            cdLE.minHeight = 30;
         }
 
-        // ==================== LEADERBOARD ====================
-
-        private static void CreateLeaderboard(GameObject parent)
+        private static void CreateInfoCardMiddleRow(GameObject parent)
         {
-            float topOffset = HEADER_HEIGHT + INFO_PANEL_HEIGHT + 30;
-            float bottomOffset = MY_POSITION_HEIGHT + ACTION_BUTTONS_HEIGHT + 40;
+            GameObject middleRow = FindOrCreateChild(parent, "MiddleRow");
 
-            GameObject leaderboard = FindOrCreateChild(parent, "LeaderboardPanel");
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(middleRow);
+            hlg.spacing = 20;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = true;
 
-            RectTransform lbRT = GetOrAddComponent<RectTransform>(leaderboard);
-            lbRT.anchorMin = Vector2.zero;
-            lbRT.anchorMax = Vector2.one;
-            lbRT.offsetMin = new Vector2(CONTENT_PADDING, bottomOffset);
-            lbRT.offsetMax = new Vector2(-CONTENT_PADDING, -topOffset);
+            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(middleRow);
+            rowLE.minHeight = 36;
 
-            Image lbBg = GetOrAddComponent<Image>(leaderboard);
-            lbBg.color = PANEL_BG;
-            AddOutline(leaderboard, CYAN_DARK);
+            // EntryFeeGroup
+            GameObject entryFeeGroup = FindOrCreateChild(middleRow, "EntryFeeGroup");
+            HorizontalLayoutGroup efHlg = GetOrAddComponent<HorizontalLayoutGroup>(entryFeeGroup);
+            efHlg.spacing = 6;
+            efHlg.childAlignment = TextAnchor.MiddleCenter;
+            efHlg.childControlWidth = true;
+            efHlg.childControlHeight = true;
+            efHlg.childForceExpandWidth = false;
 
-            // 3D depth shadow
-            Shadow lbShadow = leaderboard.AddComponent<Shadow>();
-            lbShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            lbShadow.effectDistance = new Vector2(3, -4);
+            GameObject efIcon = FindOrCreateChild(entryFeeGroup, "Icon");
+            Image efIconImg = GetOrAddComponent<Image>(efIcon);
+            efIconImg.color = GOLD;
+            LayoutElement efIconLE = GetOrAddComponent<LayoutElement>(efIcon);
+            efIconLE.minWidth = 24;
+            efIconLE.preferredWidth = 24;
+            efIconLE.minHeight = 24;
+            efIconLE.preferredHeight = 24;
 
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(leaderboard);
-            vlg.spacing = 0;
-            vlg.padding = new RectOffset(0, 0, 0, 0);
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
+            GameObject entryFeeTextObj = FindOrCreateChild(entryFeeGroup, "EntryFeeText");
+            TextMeshProUGUI entryFeeTMP = GetOrAddComponent<TextMeshProUGUI>(entryFeeTextObj);
+            entryFeeTMP.text = "GRATIS";
+            entryFeeTMP.fontSize = FontSizes.Body;
+            entryFeeTMP.fontStyle = FontStyles.Bold;
+            entryFeeTMP.color = BUTTON_SUCCESS;
+            entryFeeTMP.alignment = TextAlignmentOptions.Left;
+            LayoutElement efTextLE = GetOrAddComponent<LayoutElement>(entryFeeTextObj);
+            efTextLE.flexibleWidth = 1;
+            efTextLE.minHeight = 30;
 
-            // Header Row
-            CreateLeaderboardHeader(leaderboard);
+            // PrizePoolGroup
+            GameObject prizePoolGroup = FindOrCreateChild(middleRow, "PrizePoolGroup");
+            HorizontalLayoutGroup ppHlg = GetOrAddComponent<HorizontalLayoutGroup>(prizePoolGroup);
+            ppHlg.spacing = 6;
+            ppHlg.childAlignment = TextAnchor.MiddleCenter;
+            ppHlg.childControlWidth = true;
+            ppHlg.childControlHeight = true;
+            ppHlg.childForceExpandWidth = false;
 
-            // ScrollView
-            CreateLeaderboardScrollView(leaderboard);
+            GameObject ppIcon = FindOrCreateChild(prizePoolGroup, "Icon");
+            Image ppIconImg = GetOrAddComponent<Image>(ppIcon);
+            ppIconImg.color = GOLD;
+            LayoutElement ppIconLE = GetOrAddComponent<LayoutElement>(ppIcon);
+            ppIconLE.minWidth = 24;
+            ppIconLE.preferredWidth = 24;
+            ppIconLE.minHeight = 24;
+            ppIconLE.preferredHeight = 24;
 
-            Debug.Log("[TournamentLobbyUIBuilder] Leaderboard creado");
+            GameObject prizePoolTextObj = FindOrCreateChild(prizePoolGroup, "PrizePoolText");
+            TextMeshProUGUI prizePoolTMP = GetOrAddComponent<TextMeshProUGUI>(prizePoolTextObj);
+            prizePoolTMP.text = "$50";
+            prizePoolTMP.fontSize = FontSizes.Body;
+            prizePoolTMP.fontStyle = FontStyles.Bold;
+            prizePoolTMP.color = GOLD;
+            prizePoolTMP.alignment = TextAlignmentOptions.Left;
+            LayoutElement ppTextLE = GetOrAddComponent<LayoutElement>(prizePoolTextObj);
+            ppTextLE.flexibleWidth = 1;
+            ppTextLE.minHeight = 30;
+        }
+
+        private static void CreateInfoCardProgressRow(GameObject parent)
+        {
+            GameObject progressRow = FindOrCreateChild(parent, "ProgressRow");
+
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(progressRow);
+            hlg.spacing = 10;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+
+            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(progressRow);
+            rowLE.minHeight = 28;
+
+            // Progress bar background
+            GameObject barBgObj = FindOrCreateChild(progressRow, "PlayersProgressBarBg");
+            Image barBgImage = GetOrAddComponent<Image>(barBgObj);
+            barBgImage.color = new Color(0.1f, 0.1f, 0.15f, 1f);
+            LayoutElement barBgLE = GetOrAddComponent<LayoutElement>(barBgObj);
+            barBgLE.flexibleWidth = 1;
+            barBgLE.minHeight = 18;
+            barBgLE.preferredHeight = 18;
+
+            // Progress bar fill (Image type=Filled) - named PlayersProgressBar
+            GameObject barFillObj = FindOrCreateChild(barBgObj, "PlayersProgressBar");
+            SetRectTransformStretch(barFillObj);
+            Image barFillImage = GetOrAddComponent<Image>(barFillObj);
+            barFillImage.color = new Color(0f, 0.9f, 0.8f, 1f); // cyan-green
+            barFillImage.type = Image.Type.Filled;
+            barFillImage.fillMethod = Image.FillMethod.Horizontal;
+            barFillImage.fillAmount = 0.7f;
+
+            // PlayersProgressText
+            GameObject progressTextObj = FindOrCreateChild(progressRow, "PlayersProgressText");
+            TextMeshProUGUI progressTMP = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
+            progressTMP.text = "7/10";
+            progressTMP.fontSize = FontSizes.Body;
+            progressTMP.fontStyle = FontStyles.Bold;
+            progressTMP.color = TEXT_PRIMARY;
+            progressTMP.alignment = TextAlignmentOptions.Right;
+            LayoutElement ptLE = GetOrAddComponent<LayoutElement>(progressTextObj);
+            ptLE.minWidth = 60;
+            ptLE.minHeight = 24;
+        }
+
+        private static void CreateInfoCardRulesRow(GameObject parent)
+        {
+            GameObject rulesRow = FindOrCreateChild(parent, "RulesRow");
+
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(rulesRow);
+            hlg.spacing = 20;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = true;
+
+            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(rulesRow);
+            rowLE.minHeight = 26;
+
+            // AttemptsRuleText
+            GameObject attemptsObj = FindOrCreateChild(rulesRow, "AttemptsRuleText");
+            TextMeshProUGUI attemptsTMP = GetOrAddComponent<TextMeshProUGUI>(attemptsObj);
+            attemptsTMP.text = "3 intentos";
+            attemptsTMP.fontSize = FontSizes.Body;
+            attemptsTMP.fontStyle = FontStyles.Italic;
+            attemptsTMP.color = TEXT_SECONDARY;
+            attemptsTMP.alignment = TextAlignmentOptions.Center;
+
+            // TimeLimitRuleText
+            GameObject timeLimitObj = FindOrCreateChild(rulesRow, "TimeLimitRuleText");
+            TextMeshProUGUI timeLimitTMP = GetOrAddComponent<TextMeshProUGUI>(timeLimitObj);
+            timeLimitTMP.text = "60s por ronda";
+            timeLimitTMP.fontSize = FontSizes.Body;
+            timeLimitTMP.fontStyle = FontStyles.Italic;
+            timeLimitTMP.color = TEXT_SECONDARY;
+            timeLimitTMP.alignment = TextAlignmentOptions.Center;
+        }
+
+        // ==================== TAB BAR (60px) ====================
+
+        private static void CreateTabBar(GameObject parent)
+        {
+            float topOffset = HEADER_HEIGHT + INFO_CARD_HEIGHT + 12;
+
+            GameObject tabBar = FindOrCreateChild(parent, "TabBar");
+
+            RectTransform tabBarRT = GetOrAddComponent<RectTransform>(tabBar);
+            tabBarRT.anchorMin = new Vector2(0, 1);
+            tabBarRT.anchorMax = new Vector2(1, 1);
+            tabBarRT.pivot = new Vector2(0.5f, 1);
+            tabBarRT.anchoredPosition = new Vector2(0, -topOffset);
+            tabBarRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, TAB_BAR_HEIGHT);
+
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(tabBar);
+            hlg.spacing = 0;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+
+            // ── ParticipantsTab ──
+            CreateTab(tabBar, "ParticipantsTab", "Participantes", "ParticipantsTabIndicator", true);
+
+            // ── ChatTab (with badge) ──
+            CreateChatTab(tabBar);
+
+            Debug.Log("[TournamentLobbyUIBuilder] TabBar creado");
+        }
+
+        private static void CreateTab(GameObject parent, string tabName, string label, string indicatorName, bool isActive)
+        {
+            GameObject tab = FindOrCreateChild(parent, tabName);
+
+            Image tabBg = GetOrAddComponent<Image>(tab);
+            tabBg.color = Color.clear;
+
+            Button tabButton = GetOrAddComponent<Button>(tab);
+            tabButton.transition = Selectable.Transition.None;
+
+            // Tab text
+            string textName = tabName + "Text";
+            GameObject textObj = FindOrCreateChild(tab, textName);
+            RectTransform textRT = GetOrAddComponent<RectTransform>(textObj);
+            textRT.anchorMin = new Vector2(0, 0);
+            textRT.anchorMax = new Vector2(1, 1);
+            textRT.offsetMin = new Vector2(0, TAB_INDICATOR_HEIGHT);
+            textRT.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI textTMP = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            textTMP.text = label;
+            textTMP.fontSize = FontSizes.Body;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.color = isActive ? TEXT_PRIMARY : TEXT_SECONDARY;
+            textTMP.alignment = TextAlignmentOptions.Center;
+
+            // Indicator bar (bottom)
+            GameObject indicator = FindOrCreateChild(tab, indicatorName);
+            RectTransform indRT = GetOrAddComponent<RectTransform>(indicator);
+            indRT.anchorMin = new Vector2(0, 0);
+            indRT.anchorMax = new Vector2(1, 0);
+            indRT.pivot = new Vector2(0.5f, 0);
+            indRT.anchoredPosition = Vector2.zero;
+            indRT.sizeDelta = new Vector2(0, TAB_INDICATOR_HEIGHT);
+
+            Image indImage = GetOrAddComponent<Image>(indicator);
+            indImage.color = isActive ? TAB_ACTIVE : TAB_INACTIVE;
+        }
+
+        private static void CreateChatTab(GameObject parent)
+        {
+            GameObject tab = FindOrCreateChild(parent, "ChatTab");
+
+            Image tabBg = GetOrAddComponent<Image>(tab);
+            tabBg.color = Color.clear;
+
+            Button tabButton = GetOrAddComponent<Button>(tab);
+            tabButton.transition = Selectable.Transition.None;
+
+            // Tab text
+            GameObject textObj = FindOrCreateChild(tab, "ChatTabText");
+            RectTransform textRT = GetOrAddComponent<RectTransform>(textObj);
+            textRT.anchorMin = new Vector2(0, 0);
+            textRT.anchorMax = new Vector2(1, 1);
+            textRT.offsetMin = new Vector2(0, TAB_INDICATOR_HEIGHT);
+            textRT.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI textTMP = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            textTMP.text = "Chat";
+            textTMP.fontSize = FontSizes.Body;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.color = TEXT_SECONDARY;
+            textTMP.alignment = TextAlignmentOptions.Center;
+
+            // ChatBadge (red circle, inactive by default)
+            GameObject badge = FindOrCreateChild(tab, "ChatBadge");
+            badge.SetActive(false);
+
+            RectTransform badgeRT = GetOrAddComponent<RectTransform>(badge);
+            badgeRT.anchorMin = new Vector2(1, 1);
+            badgeRT.anchorMax = new Vector2(1, 1);
+            badgeRT.pivot = new Vector2(0.5f, 0.5f);
+            badgeRT.anchoredPosition = new Vector2(-30, -14);
+            badgeRT.sizeDelta = new Vector2(28, 28);
+
+            Image badgeImg = GetOrAddComponent<Image>(badge);
+            badgeImg.color = BADGE_RED;
+
+            GameObject badgeTextObj = FindOrCreateChild(badge, "ChatBadgeText");
+            SetRectTransformStretch(badgeTextObj);
+            TextMeshProUGUI badgeTMP = GetOrAddComponent<TextMeshProUGUI>(badgeTextObj);
+            badgeTMP.text = "0";
+            badgeTMP.fontSize = FontSizes.Body;
+            badgeTMP.fontStyle = FontStyles.Bold;
+            badgeTMP.color = Color.white;
+            badgeTMP.alignment = TextAlignmentOptions.Center;
+            badgeTMP.enableAutoSizing = true;
+            badgeTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            badgeTMP.fontSizeMax = FontSizes.Body;
+
+            // Indicator bar (bottom)
+            GameObject indicator = FindOrCreateChild(tab, "ChatTabIndicator");
+            RectTransform indRT = GetOrAddComponent<RectTransform>(indicator);
+            indRT.anchorMin = new Vector2(0, 0);
+            indRT.anchorMax = new Vector2(1, 0);
+            indRT.pivot = new Vector2(0.5f, 0);
+            indRT.anchoredPosition = Vector2.zero;
+            indRT.sizeDelta = new Vector2(0, TAB_INDICATOR_HEIGHT);
+
+            Image indImage = GetOrAddComponent<Image>(indicator);
+            indImage.color = TAB_INACTIVE;
+        }
+
+        // ==================== CONTENT AREA (fills remaining space) ====================
+
+        private static void CreateContentArea(GameObject parent)
+        {
+            float topOffset = HEADER_HEIGHT + INFO_CARD_HEIGHT + TAB_BAR_HEIGHT + 18;
+            float bottomOffset = ACTION_BAR_HEIGHT + CONTENT_PADDING;
+
+            GameObject contentArea = FindOrCreateChild(parent, "ContentArea");
+
+            RectTransform caRT = GetOrAddComponent<RectTransform>(contentArea);
+            caRT.anchorMin = Vector2.zero;
+            caRT.anchorMax = Vector2.one;
+            caRT.offsetMin = new Vector2(CONTENT_PADDING, bottomOffset);
+            caRT.offsetMax = new Vector2(-CONTENT_PADDING, -topOffset);
+
+            // ── ParticipantsContent (active by default) ──
+            CreateParticipantsContent(contentArea);
+
+            // ── ChatContent (inactive by default) ──
+            CreateChatContent(contentArea);
+
+            Debug.Log("[TournamentLobbyUIBuilder] ContentArea creado");
+        }
+
+        // ── Participants Content ──
+
+        private static void CreateParticipantsContent(GameObject parent)
+        {
+            GameObject participantsContent = FindOrCreateChild(parent, "ParticipantsContent");
+            participantsContent.SetActive(true);
+            SetRectTransformStretch(participantsContent);
+
+            // ── LeaderboardHeader (column titles) ──
+            CreateLeaderboardHeader(participantsContent);
+
+            // ── ParticipantsScrollView ──
+            CreateParticipantsScrollView(participantsContent);
+
+            // ── MyPositionPanel (fixed bottom, 80px) ──
+            CreateMyPositionPanel(participantsContent);
         }
 
         private static void CreateLeaderboardHeader(GameObject parent)
@@ -488,26 +787,28 @@ namespace DigitPark.Editor
             GameObject header = FindOrCreateChild(parent, "LeaderboardHeader");
 
             RectTransform headerRT = GetOrAddComponent<RectTransform>(header);
+            headerRT.anchorMin = new Vector2(0, 1);
+            headerRT.anchorMax = new Vector2(1, 1);
+            headerRT.pivot = new Vector2(0.5f, 1);
+            headerRT.anchoredPosition = Vector2.zero;
+            headerRT.sizeDelta = new Vector2(0, 40);
 
             Image headerBg = GetOrAddComponent<Image>(header);
-            headerBg.color = new Color(0.03f, 0.06f, 0.1f, 1f);
+            headerBg.color = new Color(0.03f, 0.06f, 0.1f, 0.8f);
 
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(header);
-            hlg.spacing = 10;
-            hlg.padding = new RectOffset(20, 20, 10, 10);
+            hlg.spacing = 8;
+            hlg.padding = new RectOffset(16, 16, 4, 4);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
 
-            LayoutElement headerLE = GetOrAddComponent<LayoutElement>(header);
-            headerLE.minHeight = 80;
-
-            // Rank Column
-            GameObject rankCol = FindOrCreateChild(header, "RankColumn");
+            // # column
+            GameObject rankCol = FindOrCreateChild(header, "RankCol");
             TextMeshProUGUI rankText = GetOrAddComponent<TextMeshProUGUI>(rankCol);
             rankText.text = "#";
-            rankText.fontSize = 40;
+            rankText.fontSize = FontSizes.Body;
             rankText.fontStyle = FontStyles.Bold;
             rankText.color = TEXT_SECONDARY;
             rankText.alignment = TextAlignmentOptions.Center;
@@ -515,33 +816,60 @@ namespace DigitPark.Editor
             rankLE.minWidth = 50;
             rankLE.preferredWidth = 50;
 
-            // Player Column
-            GameObject playerCol = FindOrCreateChild(header, "PlayerColumn");
+            // Player column
+            GameObject playerCol = FindOrCreateChild(header, "PlayerCol");
             TextMeshProUGUI playerText = GetOrAddComponent<TextMeshProUGUI>(playerCol);
             playerText.text = "Jugador";
-            playerText.fontSize = 40;
+            playerText.fontSize = FontSizes.Body;
             playerText.fontStyle = FontStyles.Bold;
             playerText.color = TEXT_SECONDARY;
             playerText.alignment = TextAlignmentOptions.Left;
             LayoutElement playerLE = GetOrAddComponent<LayoutElement>(playerCol);
             playerLE.flexibleWidth = 1;
 
-            // Score Column
-            GameObject scoreCol = FindOrCreateChild(header, "ScoreColumn");
-            TextMeshProUGUI scoreText = GetOrAddComponent<TextMeshProUGUI>(scoreCol);
-            scoreText.text = "Puntos";
-            scoreText.fontSize = 40;
-            scoreText.fontStyle = FontStyles.Bold;
-            scoreText.color = TEXT_SECONDARY;
-            scoreText.alignment = TextAlignmentOptions.Right;
-            LayoutElement scoreLE = GetOrAddComponent<LayoutElement>(scoreCol);
-            scoreLE.minWidth = 250;
-            scoreLE.preferredWidth = 250;
+            // Time column (icon + text)
+            GameObject timeCol = FindOrCreateChild(header, "TimeCol");
+            HorizontalLayoutGroup timeHlg = GetOrAddComponent<HorizontalLayoutGroup>(timeCol);
+            timeHlg.spacing = 6;
+            timeHlg.childAlignment = TextAnchor.MiddleRight;
+            timeHlg.childControlWidth = false;
+            timeHlg.childControlHeight = false;
+            timeHlg.childForceExpandWidth = false;
+            LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeCol);
+            timeLE.minWidth = 130;
+            timeLE.preferredWidth = 130;
+
+            // Timer icon
+            GameObject timerIconObj = FindOrCreateChild(timeCol, "TimerIcon");
+            Image timerIcon = GetOrAddComponent<Image>(timerIconObj);
+            timerIcon.color = TEXT_SECONDARY;
+            timerIcon.preserveAspect = true;
+            RectTransform timerIconRT = GetOrAddComponent<RectTransform>(timerIconObj);
+            timerIconRT.sizeDelta = new Vector2(24, 24);
+            Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TIMER_ICON_PATH);
+            if (timerSprite != null) timerIcon.sprite = timerSprite;
+
+            // "Tiempos" text
+            GameObject timeLabelObj = FindOrCreateChild(timeCol, "TimeLabel");
+            TextMeshProUGUI timeText = GetOrAddComponent<TextMeshProUGUI>(timeLabelObj);
+            timeText.text = "Tiempos";
+            timeText.fontSize = FontSizes.Body;
+            timeText.fontStyle = FontStyles.Bold;
+            timeText.color = TEXT_SECONDARY;
+            timeText.alignment = TextAlignmentOptions.Right;
+            RectTransform timeLabelRT = GetOrAddComponent<RectTransform>(timeLabelObj);
+            timeLabelRT.sizeDelta = new Vector2(90, 32);
         }
 
-        private static void CreateLeaderboardScrollView(GameObject parent)
+        private static void CreateParticipantsScrollView(GameObject parent)
         {
-            GameObject scrollView = FindOrCreateChild(parent, "LeaderboardScrollView");
+            GameObject scrollView = FindOrCreateChild(parent, "ParticipantsScrollView");
+
+            RectTransform svRT = GetOrAddComponent<RectTransform>(scrollView);
+            svRT.anchorMin = Vector2.zero;
+            svRT.anchorMax = Vector2.one;
+            svRT.offsetMin = new Vector2(0, MY_POSITION_HEIGHT + 4);
+            svRT.offsetMax = new Vector2(0, -44); // below leaderboard header
 
             ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
             scrollRect.horizontal = false;
@@ -551,17 +879,14 @@ namespace DigitPark.Editor
             Image scrollBg = GetOrAddComponent<Image>(scrollView);
             scrollBg.color = Color.clear;
 
-            LayoutElement scrollLE = GetOrAddComponent<LayoutElement>(scrollView);
-            scrollLE.flexibleHeight = 1;
-
             // Viewport
             GameObject viewport = FindOrCreateChild(scrollView, "Viewport");
             SetRectTransformStretch(viewport);
-            RectTransform viewportRT = viewport.GetComponent<RectTransform>();
             GetOrAddComponent<RectMask2D>(viewport);
+            RectTransform viewportRT = viewport.GetComponent<RectTransform>();
             scrollRect.viewport = viewportRT;
 
-            // Content
+            // Content (this is participantsContainer)
             GameObject content = FindOrCreateChild(viewport, "Content");
             RectTransform contentRT = GetOrAddComponent<RectTransform>(content);
             contentRT.anchorMin = new Vector2(0, 1);
@@ -575,104 +900,16 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(content);
             vlg.spacing = 2;
-            vlg.padding = new RectOffset(0, 0, 5, 10);
+            vlg.padding = new RectOffset(0, 0, 4, 8);
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Sample Rows
-            for (int i = 0; i < 10; i++)
-            {
-                CreateLeaderboardRow(content, i + 1, $"Jugador{i + 1}", (1000 - i * 85));
-            }
+            // No sample rows - participants load at runtime from ParticipantItem prefab
         }
 
-        private static void CreateLeaderboardRow(GameObject parent, int rank, string playerName, int score)
-        {
-            GameObject row = FindOrCreateChild(parent, $"Row_{rank}");
-
-            Color rowBg = rank <= 3 ? new Color(0.06f, 0.1f, 0.15f, 1f) : new Color(0.04f, 0.06f, 0.1f, 1f);
-
-            Image rowImage = GetOrAddComponent<Image>(row);
-            rowImage.color = rowBg;
-
-            // Shadow sutil
-            Shadow rowShadow = row.GetComponent<Shadow>();
-            if (rowShadow == null) rowShadow = row.AddComponent<Shadow>();
-            rowShadow.effectColor = new Color(0f, 0f, 0f, 0.3f);
-            rowShadow.effectDistance = new Vector2(2, -3);
-
-            // Outline sutil para top 3
-            if (rank <= 3)
-            {
-                Color outlineColor = rank == 1 ? new Color(1f, 0.84f, 0f, 0.3f) :
-                                     rank == 2 ? new Color(0.75f, 0.75f, 0.75f, 0.3f) :
-                                                 new Color(0.8f, 0.5f, 0.2f, 0.3f);
-                AddOutline(row, outlineColor);
-            }
-
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(row);
-            hlg.spacing = 10;
-            hlg.padding = new RectOffset(20, 20, 8, 8);
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = true;
-            hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = false;
-
-            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(row);
-            rowLE.minHeight = 85;
-
-            // Rank
-            Color rankColor = rank == 1 ? GOLD : rank == 2 ? SILVER : rank == 3 ? BRONZE : TEXT_PRIMARY;
-
-            GameObject rankObj = FindOrCreateChild(row, "Rank");
-            TextMeshProUGUI rankText = GetOrAddComponent<TextMeshProUGUI>(rankObj);
-            rankText.text = rank.ToString();
-            rankText.fontSize = 50;
-            rankText.fontStyle = FontStyles.Bold;
-            rankText.color = rankColor;
-            rankText.alignment = TextAlignmentOptions.Center;
-            LayoutElement rankLE = GetOrAddComponent<LayoutElement>(rankObj);
-            rankLE.minWidth = 50;
-            rankLE.preferredWidth = 50;
-
-            // Avatar - se llena vía data con AvatarInitialGenerator o foto real
-            GameObject avatarObj = FindOrCreateChild(row, "Avatar");
-            RectTransform avatarRT = GetOrAddComponent<RectTransform>(avatarObj);
-            avatarRT.sizeDelta = new Vector2(50, 50);
-            Image avatarImage = GetOrAddComponent<Image>(avatarObj);
-            avatarImage.color = Color.white;
-            avatarImage.preserveAspect = true;
-            LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
-            avatarLE.minWidth = 50;
-            avatarLE.minHeight = 50;
-
-            // Player Name
-            GameObject nameObj = FindOrCreateChild(row, "PlayerName");
-            TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
-            nameText.text = playerName;
-            nameText.fontSize = 45;
-            nameText.fontStyle = FontStyles.Bold;
-            nameText.color = TEXT_PRIMARY;
-            nameText.alignment = TextAlignmentOptions.Left;
-            LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
-            nameLE.flexibleWidth = 1;
-
-            // Score
-            GameObject scoreObj = FindOrCreateChild(row, "Score");
-            TextMeshProUGUI scoreText = GetOrAddComponent<TextMeshProUGUI>(scoreObj);
-            scoreText.text = score.ToString();
-            scoreText.fontSize = 50;
-            scoreText.fontStyle = FontStyles.Bold;
-            scoreText.color = CYAN_NEON;
-            scoreText.alignment = TextAlignmentOptions.Right;
-            LayoutElement scoreLE = GetOrAddComponent<LayoutElement>(scoreObj);
-            scoreLE.minWidth = 250;
-            scoreLE.preferredWidth = 250;
-        }
-
-        // ==================== MY POSITION PANEL ====================
+        // CreateLeaderboardRow removed - participants load at runtime from prefab
 
         private static void CreateMyPositionPanel(GameObject parent)
         {
@@ -682,21 +919,16 @@ namespace DigitPark.Editor
             myPosRT.anchorMin = new Vector2(0, 0);
             myPosRT.anchorMax = new Vector2(1, 0);
             myPosRT.pivot = new Vector2(0.5f, 0);
-            myPosRT.anchoredPosition = new Vector2(0, ACTION_BUTTONS_HEIGHT + 20);
-            myPosRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, MY_POSITION_HEIGHT);
+            myPosRT.anchoredPosition = Vector2.zero;
+            myPosRT.sizeDelta = new Vector2(0, MY_POSITION_HEIGHT);
 
             Image myPosBg = GetOrAddComponent<Image>(myPos);
             myPosBg.color = CYAN_DARK;
             AddOutline(myPos, CYAN_NEON, 2);
 
-            // 3D depth shadow
-            Shadow myPosShadow = myPos.AddComponent<Shadow>();
-            myPosShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            myPosShadow.effectDistance = new Vector2(3, -4);
-
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(myPos);
-            hlg.spacing = 15;
-            hlg.padding = new RectOffset(25, 25, 10, 10);
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(16, 16, 8, 8);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
@@ -706,103 +938,243 @@ namespace DigitPark.Editor
             GameObject rankObj = FindOrCreateChild(myPos, "MyRank");
             TextMeshProUGUI rankText = GetOrAddComponent<TextMeshProUGUI>(rankObj);
             rankText.text = "#5";
-            rankText.fontSize = 56;
+            rankText.fontSize = FontSizes.LabelLarge;
             rankText.fontStyle = FontStyles.Bold;
             rankText.color = CYAN_NEON;
             rankText.alignment = TextAlignmentOptions.Center;
             LayoutElement rankLE = GetOrAddComponent<LayoutElement>(rankObj);
-            rankLE.minWidth = 60;
+            rankLE.minWidth = 50;
 
-            // My Avatar - se llena con AvatarUI component
+            // My Avatar
             GameObject avatarObj = FindOrCreateChild(myPos, "MyAvatar");
-            RectTransform avatarRT = GetOrAddComponent<RectTransform>(avatarObj);
             Image avatarImage = GetOrAddComponent<Image>(avatarObj);
             avatarImage.color = Color.white;
             avatarImage.preserveAspect = true;
+            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
+            if (defaultAvatar != null) avatarImage.sprite = defaultAvatar;
             LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
-            avatarLE.minWidth = 50;
-            avatarLE.minHeight = 50;
-
-            // Agregar AvatarUI para carga automática del avatar del usuario actual
-            var myAvatarUI = GetOrAddComponent<DigitPark.UI.Components.AvatarUI>(avatarObj);
-            SerializedObject myAvatarSO = new SerializedObject(myAvatarUI);
-            myAvatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
-            myAvatarSO.FindProperty("isEditable").boolValue = false;
-            myAvatarSO.FindProperty("avatarImage").objectReferenceValue = avatarImage;
-            myAvatarSO.ApplyModifiedProperties();
+            avatarLE.minWidth = 44;
+            avatarLE.minHeight = 44;
+            avatarLE.preferredWidth = 44;
+            avatarLE.preferredHeight = 44;
 
             // My Name
             GameObject nameObj = FindOrCreateChild(myPos, "MyName");
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = "Tu";
-            nameText.fontSize = 50;
+            nameText.fontSize = FontSizes.Body;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Left;
             LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
             nameLE.flexibleWidth = 1;
 
-            // My Score
-            GameObject scoreObj = FindOrCreateChild(myPos, "MyScore");
-            TextMeshProUGUI scoreText = GetOrAddComponent<TextMeshProUGUI>(scoreObj);
-            scoreText.text = "745";
-            scoreText.fontSize = 52;
-            scoreText.fontStyle = FontStyles.Bold;
-            scoreText.color = TEXT_PRIMARY;
-            scoreText.alignment = TextAlignmentOptions.Right;
-            LayoutElement scoreLE = GetOrAddComponent<LayoutElement>(scoreObj);
-            scoreLE.minWidth = 100;
-
-            Debug.Log("[TournamentLobbyUIBuilder] MyPositionPanel creado");
+            // My Time
+            GameObject timeObj = FindOrCreateChild(myPos, "MyTime");
+            TextMeshProUGUI myTimeText = GetOrAddComponent<TextMeshProUGUI>(timeObj);
+            myTimeText.text = "-";
+            myTimeText.fontSize = FontSizes.LabelLarge;
+            myTimeText.fontStyle = FontStyles.Bold;
+            myTimeText.color = TEXT_PRIMARY;
+            myTimeText.alignment = TextAlignmentOptions.Right;
+            LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeObj);
+            timeLE.minWidth = 100;
         }
 
-        // ==================== ACTION BUTTONS ====================
+        // ── Chat Content ──
 
-        private static void CreateActionButtons(GameObject parent)
+        private static void CreateChatContent(GameObject parent)
         {
-            GameObject actions = FindOrCreateChild(parent, "ActionButtonsPanel");
+            GameObject chatContent = FindOrCreateChild(parent, "ChatContent");
+            chatContent.SetActive(false);
+            SetRectTransformStretch(chatContent);
 
-            RectTransform actionsRT = GetOrAddComponent<RectTransform>(actions);
-            actionsRT.anchorMin = new Vector2(0, 0);
-            actionsRT.anchorMax = new Vector2(1, 0);
-            actionsRT.pivot = new Vector2(0.5f, 0);
-            actionsRT.anchoredPosition = new Vector2(0, CONTENT_PADDING);
-            actionsRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, ACTION_BUTTONS_HEIGHT);
+            // ── ChatScrollView ──
+            CreateChatScrollView(chatContent);
 
-            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(actions);
-            hlg.spacing = 15;
+            // ── ChatInputRow (70px bottom) ──
+            CreateChatInputRow(chatContent);
+        }
+
+        private static void CreateChatScrollView(GameObject parent)
+        {
+            GameObject scrollView = FindOrCreateChild(parent, "ChatScrollView");
+
+            RectTransform svRT = GetOrAddComponent<RectTransform>(scrollView);
+            svRT.anchorMin = Vector2.zero;
+            svRT.anchorMax = Vector2.one;
+            svRT.offsetMin = new Vector2(0, CHAT_INPUT_HEIGHT + 4);
+            svRT.offsetMax = Vector2.zero;
+
+            ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.scrollSensitivity = 50f;
+
+            Image scrollBg = GetOrAddComponent<Image>(scrollView);
+            scrollBg.color = Color.clear;
+
+            // Viewport
+            GameObject viewport = FindOrCreateChild(scrollView, "Viewport");
+            SetRectTransformStretch(viewport);
+            GetOrAddComponent<RectMask2D>(viewport);
+            RectTransform viewportRT = viewport.GetComponent<RectTransform>();
+            scrollRect.viewport = viewportRT;
+
+            // ChatMessagesContainer
+            GameObject messagesContainer = FindOrCreateChild(viewport, "ChatMessagesContainer");
+            RectTransform mcRT = GetOrAddComponent<RectTransform>(messagesContainer);
+            mcRT.anchorMin = new Vector2(0, 1);
+            mcRT.anchorMax = new Vector2(1, 1);
+            mcRT.pivot = new Vector2(0.5f, 1);
+            mcRT.sizeDelta = new Vector2(0, 0);
+            scrollRect.content = mcRT;
+
+            ContentSizeFitter csf = GetOrAddComponent<ContentSizeFitter>(messagesContainer);
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(messagesContainer);
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(10, 10, 10, 10);
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+        }
+
+        private static void CreateChatInputRow(GameObject parent)
+        {
+            GameObject inputRow = FindOrCreateChild(parent, "ChatInputRow");
+
+            RectTransform irRT = GetOrAddComponent<RectTransform>(inputRow);
+            irRT.anchorMin = new Vector2(0, 0);
+            irRT.anchorMax = new Vector2(1, 0);
+            irRT.pivot = new Vector2(0.5f, 0);
+            irRT.anchoredPosition = Vector2.zero;
+            irRT.sizeDelta = new Vector2(0, CHAT_INPUT_HEIGHT);
+
+            Image irBg = GetOrAddComponent<Image>(inputRow);
+            irBg.color = new Color(0.04f, 0.06f, 0.1f, 1f);
+
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(inputRow);
+            hlg.spacing = 8;
+            hlg.padding = new RectOffset(10, 10, 8, 8);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = true;
+
+            // ── ChatInput (TMP_InputField) ──
+            GameObject chatInputObj = FindOrCreateChild(inputRow, "ChatInput");
+            Image chatInputBg = GetOrAddComponent<Image>(chatInputObj);
+            chatInputBg.color = new Color(0.1f, 0.12f, 0.18f, 1f);
+            AddOutline(chatInputObj, CYAN_DARK);
+            LayoutElement ciLE = GetOrAddComponent<LayoutElement>(chatInputObj);
+            ciLE.flexibleWidth = 1;
+            ciLE.minHeight = 50;
+
+            TMP_InputField inputField = GetOrAddComponent<TMP_InputField>(chatInputObj);
+
+            // Text Area
+            GameObject textArea = FindOrCreateChild(chatInputObj, "Text Area");
+            SetRectTransformStretch(textArea);
+            RectTransform textAreaRT = textArea.GetComponent<RectTransform>();
+            textAreaRT.offsetMin = new Vector2(12, 4);
+            textAreaRT.offsetMax = new Vector2(-12, -4);
+            GetOrAddComponent<RectMask2D>(textArea);
+
+            // Placeholder
+            GameObject placeholderObj = FindOrCreateChild(textArea, "Placeholder");
+            SetRectTransformStretch(placeholderObj);
+            TextMeshProUGUI phText = GetOrAddComponent<TextMeshProUGUI>(placeholderObj);
+            phText.text = "Escribe un mensaje...";
+            phText.fontSize = FontSizes.Body;
+            phText.fontStyle = FontStyles.Italic;
+            phText.color = TEXT_SECONDARY;
+            phText.alignment = TextAlignmentOptions.MidlineLeft;
+
+            // Input text
+            GameObject textObj = FindOrCreateChild(textArea, "Text");
+            SetRectTransformStretch(textObj);
+            TextMeshProUGUI inputText = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            inputText.text = "";
+            inputText.fontSize = FontSizes.Body;
+            inputText.fontStyle = FontStyles.Normal;
+            inputText.color = TEXT_PRIMARY;
+            inputText.alignment = TextAlignmentOptions.MidlineLeft;
+
+            // Wire TMP_InputField references
+            inputField.textViewport = textAreaRT;
+            inputField.textComponent = inputText;
+            inputField.placeholder = phText;
+            inputField.caretColor = CYAN_NEON;
+            inputField.selectionColor = new Color(0f, 1f, 1f, 0.25f);
+
+            // ── SendChatButton ──
+            GameObject sendBtn = FindOrCreateChild(inputRow, "SendChatButton");
+            Image sendBg = GetOrAddComponent<Image>(sendBtn);
+            sendBg.color = BUTTON_PRIMARY;
+
+            Button sendButton = GetOrAddComponent<Button>(sendBtn);
+            SetupButtonColors(sendButton, BUTTON_PRIMARY);
+
+            LayoutElement sendLE = GetOrAddComponent<LayoutElement>(sendBtn);
+            sendLE.minWidth = 54;
+            sendLE.preferredWidth = 54;
+            sendLE.minHeight = 50;
+
+            GameObject sendTextObj = FindOrCreateChild(sendBtn, "Text");
+            SetRectTransformStretch(sendTextObj);
+            TextMeshProUGUI sendText = GetOrAddComponent<TextMeshProUGUI>(sendTextObj);
+            sendText.text = ">";
+            sendText.fontSize = FontSizes.BodyLarge;
+            sendText.fontStyle = FontStyles.Bold;
+            sendText.color = TEXT_DARK;
+            sendText.alignment = TextAlignmentOptions.Center;
+        }
+
+        // ==================== ACTION BAR (80px bottom) ====================
+
+        private static void CreateActionBar(GameObject parent)
+        {
+            GameObject actionBar = FindOrCreateChild(parent, "ActionBar");
+
+            RectTransform abRT = GetOrAddComponent<RectTransform>(actionBar);
+            abRT.anchorMin = new Vector2(0, 0);
+            abRT.anchorMax = new Vector2(1, 0);
+            abRT.pivot = new Vector2(0.5f, 0);
+            abRT.anchoredPosition = new Vector2(0, CONTENT_PADDING);
+            abRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, ACTION_BAR_HEIGHT);
+
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(actionBar);
+            hlg.spacing = 10;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = true;
             hlg.childForceExpandHeight = true;
 
-            // Play Button (primary)
-            GameObject playBtn = FindOrCreateChild(actions, "PlayButton");
-            Image playBg = GetOrAddComponent<Image>(playBtn);
-            playBg.color = BUTTON_PRIMARY;
-            Button playButton = GetOrAddComponent<Button>(playBtn);
-            SetupButtonColors(playButton, BUTTON_PRIMARY);
-            AddOutline(playBtn, CYAN_GLOW, 3);
+            // ── JoinButton (primary, biggest share) ──
+            GameObject joinBtn = FindOrCreateChild(actionBar, "JoinButton");
+            Image joinBg = GetOrAddComponent<Image>(joinBtn);
+            joinBg.color = BUTTON_PRIMARY;
+            Button joinButton = GetOrAddComponent<Button>(joinBtn);
+            SetupButtonColors(joinButton, BUTTON_PRIMARY);
+            AddOutline(joinBtn, CYAN_GLOW, 3);
+            LayoutElement joinLE = GetOrAddComponent<LayoutElement>(joinBtn);
+            joinLE.flexibleWidth = 2;
 
-            // 3D depth shadow
-            Shadow playShadow = playBtn.AddComponent<Shadow>();
-            playShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            playShadow.effectDistance = new Vector2(3, -4);
+            GameObject joinTextObj = FindOrCreateChild(joinBtn, "JoinButtonText");
+            SetRectTransformStretch(joinTextObj);
+            TextMeshProUGUI joinText = GetOrAddComponent<TextMeshProUGUI>(joinTextObj);
+            joinText.text = "UNIRSE";
+            joinText.fontSize = FontSizes.LabelLarge;
+            joinText.fontStyle = FontStyles.Bold;
+            joinText.color = TEXT_DARK;
+            joinText.alignment = TextAlignmentOptions.Center;
 
-            LayoutElement playLE = GetOrAddComponent<LayoutElement>(playBtn);
-            playLE.flexibleWidth = 2;
-
-            GameObject playTextObj = FindOrCreateChild(playBtn, "Text");
-            TextMeshProUGUI playText = GetOrAddComponent<TextMeshProUGUI>(playTextObj);
-            playText.text = "JUGAR";
-            playText.fontSize = 52;
-            playText.fontStyle = FontStyles.Bold;
-            playText.color = TEXT_DARK;
-            playText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(playTextObj);
-
-            // Share Button
-            GameObject shareBtn = FindOrCreateChild(actions, "ShareButton");
+            // ── ShareButton (secondary) ──
+            GameObject shareBtn = FindOrCreateChild(actionBar, "ShareButton");
             Image shareBg = GetOrAddComponent<Image>(shareBtn);
             shareBg.color = BUTTON_SECONDARY;
             Button shareButton = GetOrAddComponent<Button>(shareBtn);
@@ -812,16 +1184,16 @@ namespace DigitPark.Editor
             shareLE.flexibleWidth = 1;
 
             GameObject shareTextObj = FindOrCreateChild(shareBtn, "Text");
+            SetRectTransformStretch(shareTextObj);
             TextMeshProUGUI shareText = GetOrAddComponent<TextMeshProUGUI>(shareTextObj);
             shareText.text = "Compartir";
-            shareText.fontSize = 40;
+            shareText.fontSize = FontSizes.Body;
             shareText.fontStyle = FontStyles.Bold;
             shareText.color = TEXT_PRIMARY;
             shareText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(shareTextObj);
 
-            // Leave Button
-            GameObject leaveBtn = FindOrCreateChild(actions, "LeaveButton");
+            // ── LeaveButton (danger/secondary) ──
+            GameObject leaveBtn = FindOrCreateChild(actionBar, "LeaveButton");
             Image leaveBg = GetOrAddComponent<Image>(leaveBtn);
             leaveBg.color = BUTTON_DANGER;
             Button leaveButton = GetOrAddComponent<Button>(leaveBtn);
@@ -831,15 +1203,30 @@ namespace DigitPark.Editor
             leaveLE.flexibleWidth = 1;
 
             GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "Text");
+            SetRectTransformStretch(leaveTextObj);
             TextMeshProUGUI leaveText = GetOrAddComponent<TextMeshProUGUI>(leaveTextObj);
             leaveText.text = "Salir";
-            leaveText.fontSize = 40;
+            leaveText.fontSize = FontSizes.Body;
             leaveText.fontStyle = FontStyles.Bold;
             leaveText.color = TEXT_PRIMARY;
             leaveText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(leaveTextObj);
 
-            Debug.Log("[TournamentLobbyUIBuilder] ActionButtons creados");
+            // ── StatusText (below action bar, informational) ──
+            GameObject statusTextObj = FindOrCreateChild(parent, "StatusText");
+            RectTransform stRT = GetOrAddComponent<RectTransform>(statusTextObj);
+            stRT.anchorMin = new Vector2(0, 0);
+            stRT.anchorMax = new Vector2(1, 0);
+            stRT.pivot = new Vector2(0.5f, 0);
+            stRT.anchoredPosition = new Vector2(0, 2);
+            stRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, CONTENT_PADDING);
+
+            TextMeshProUGUI statusTMP = GetOrAddComponent<TextMeshProUGUI>(statusTextObj);
+            statusTMP.text = "";
+            statusTMP.fontSize = FontSizes.Body;
+            statusTMP.color = TEXT_SECONDARY;
+            statusTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[TournamentLobbyUIBuilder] ActionBar creado");
         }
 
         // ==================== PRIZES POPUP ====================
@@ -879,7 +1266,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(popup, "Title");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "PREMIOS";
-            titleText.fontSize = 64;
+            titleText.fontSize = FontSizes.AuthTitle;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -904,7 +1291,7 @@ namespace DigitPark.Editor
             GameObject closeTextObj = FindOrCreateChild(closeBtn, "Text");
             TextMeshProUGUI closeText = GetOrAddComponent<TextMeshProUGUI>(closeTextObj);
             closeText.text = "Cerrar";
-            closeText.fontSize = 45;
+            closeText.fontSize = FontSizes.ValueLarge;
             closeText.fontStyle = FontStyles.Bold;
             closeText.color = TEXT_PRIMARY;
             closeText.alignment = TextAlignmentOptions.Center;
@@ -932,7 +1319,7 @@ namespace DigitPark.Editor
             GameObject placeObj = FindOrCreateChild(row, "Place");
             TextMeshProUGUI placeText = GetOrAddComponent<TextMeshProUGUI>(placeObj);
             placeText.text = place;
-            placeText.fontSize = 55;
+            placeText.fontSize = FontSizes.DisplayMedium;
             placeText.fontStyle = FontStyles.Bold;
             placeText.color = color;
             placeText.alignment = TextAlignmentOptions.Left;
@@ -943,7 +1330,7 @@ namespace DigitPark.Editor
             GameObject amountObj = FindOrCreateChild(row, "Amount");
             TextMeshProUGUI amountText = GetOrAddComponent<TextMeshProUGUI>(amountObj);
             amountText.text = amount;
-            amountText.fontSize = 52;
+            amountText.fontSize = FontSizes.CardTitle;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Right;
@@ -988,7 +1375,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(popup, "Title");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Abandonar Torneo?";
-            titleText.fontSize = 52;
+            titleText.fontSize = FontSizes.CardTitle;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = BUTTON_DANGER;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -999,7 +1386,7 @@ namespace DigitPark.Editor
             GameObject msgObj = FindOrCreateChild(popup, "Message");
             TextMeshProUGUI msgText = GetOrAddComponent<TextMeshProUGUI>(msgObj);
             msgText.text = "Perderas tu progreso y\nno podras recuperar tu entrada.";
-            msgText.fontSize = 45;
+            msgText.fontSize = FontSizes.ValueLarge;
             msgText.color = TEXT_PRIMARY;
             msgText.alignment = TextAlignmentOptions.Center;
             LayoutElement msgLE = GetOrAddComponent<LayoutElement>(msgObj);
@@ -1026,7 +1413,7 @@ namespace DigitPark.Editor
             GameObject stayTextObj = FindOrCreateChild(stayBtn, "Text");
             TextMeshProUGUI stayText = GetOrAddComponent<TextMeshProUGUI>(stayTextObj);
             stayText.text = "Quedarme";
-            stayText.fontSize = 45;
+            stayText.fontSize = FontSizes.ValueLarge;
             stayText.fontStyle = FontStyles.Bold;
             stayText.color = TEXT_DARK;
             stayText.alignment = TextAlignmentOptions.Center;
@@ -1042,13 +1429,114 @@ namespace DigitPark.Editor
             GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "Text");
             TextMeshProUGUI leaveText = GetOrAddComponent<TextMeshProUGUI>(leaveTextObj);
             leaveText.text = "Abandonar";
-            leaveText.fontSize = 45;
+            leaveText.fontSize = FontSizes.ValueLarge;
             leaveText.fontStyle = FontStyles.Bold;
             leaveText.color = TEXT_PRIMARY;
             leaveText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(leaveTextObj);
 
             Debug.Log("[TournamentLobbyUIBuilder] LeaveConfirmPopup creado");
+        }
+
+        // ==================== LOADING OVERLAY ====================
+
+        private static void CreateLoadingOverlay(Canvas canvas)
+        {
+            GameObject overlay = FindOrCreateChild(canvas.gameObject, "LoadingOverlay");
+            overlay.SetActive(false);
+            SetRectTransformStretch(overlay);
+            overlay.transform.SetAsLastSibling();
+
+            Image overlayBg = GetOrAddComponent<Image>(overlay);
+            overlayBg.color = new Color(0f, 0f, 0f, 0.75f);
+
+            // Center container
+            GameObject center = FindOrCreateChild(overlay, "Center");
+            RectTransform centerRT = GetOrAddComponent<RectTransform>(center);
+            centerRT.anchorMin = new Vector2(0.2f, 0.4f);
+            centerRT.anchorMax = new Vector2(0.8f, 0.6f);
+            centerRT.offsetMin = Vector2.zero;
+            centerRT.offsetMax = Vector2.zero;
+
+            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(center);
+            vlg.spacing = 20;
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // Spinner
+            GameObject spinner = FindOrCreateChild(center, "Spinner");
+            Image spinnerImg = GetOrAddComponent<Image>(spinner);
+            spinnerImg.color = CYAN_NEON;
+            AddOutline(spinner, CYAN_GLOW, 3);
+            LayoutElement spinLE = GetOrAddComponent<LayoutElement>(spinner);
+            spinLE.minWidth = 60;
+            spinLE.preferredWidth = 60;
+            spinLE.minHeight = 60;
+            spinLE.preferredHeight = 60;
+
+            // StatusText inside loading
+            GameObject loadingText = FindOrCreateChild(center, "LoadingText");
+            TextMeshProUGUI loadingTMP = GetOrAddComponent<TextMeshProUGUI>(loadingText);
+            loadingTMP.text = "Cargando...";
+            loadingTMP.fontSize = FontSizes.BodyLarge;
+            loadingTMP.fontStyle = FontStyles.Bold;
+            loadingTMP.color = TEXT_PRIMARY;
+            loadingTMP.alignment = TextAlignmentOptions.Center;
+            LayoutElement ltLE = GetOrAddComponent<LayoutElement>(loadingText);
+            ltLE.minHeight = 30;
+
+            Debug.Log("[TournamentLobbyUIBuilder] LoadingOverlay creado");
+        }
+
+        // ==================== STARTING OVERLAY ====================
+
+        private static void CreateStartingOverlay(Canvas canvas)
+        {
+            GameObject overlay = FindOrCreateChild(canvas.gameObject, "StartingOverlay");
+            overlay.SetActive(false);
+            SetRectTransformStretch(overlay);
+            overlay.transform.SetAsLastSibling();
+
+            Image overlayBg = GetOrAddComponent<Image>(overlay);
+            overlayBg.color = new Color(0f, 0f, 0f, 0.85f);
+
+            // Big countdown number
+            GameObject countdownObj = FindOrCreateChild(overlay, "StartingCountdownText");
+            RectTransform cdRT = GetOrAddComponent<RectTransform>(countdownObj);
+            cdRT.anchorMin = new Vector2(0.5f, 0.5f);
+            cdRT.anchorMax = new Vector2(0.5f, 0.5f);
+            cdRT.sizeDelta = new Vector2(400, 300);
+
+            TextMeshProUGUI countdownTMP = GetOrAddComponent<TextMeshProUGUI>(countdownObj);
+            countdownTMP.text = "3";
+            countdownTMP.fontSize = FontSizes.Logo;
+            countdownTMP.fontStyle = FontStyles.Bold;
+            countdownTMP.color = CYAN_NEON;
+            countdownTMP.alignment = TextAlignmentOptions.Center;
+            countdownTMP.enableAutoSizing = true;
+            countdownTMP.fontSizeMin = FontSizes.DisplayLarge;
+            countdownTMP.fontSizeMax = FontSizes.Logo;
+            AddOutline(countdownObj, CYAN_GLOW, 4);
+
+            // Subtitle
+            GameObject subtitleObj = FindOrCreateChild(overlay, "StartingSubtitle");
+            RectTransform subRT = GetOrAddComponent<RectTransform>(subtitleObj);
+            subRT.anchorMin = new Vector2(0.5f, 0.5f);
+            subRT.anchorMax = new Vector2(0.5f, 0.5f);
+            subRT.anchoredPosition = new Vector2(0, -180);
+            subRT.sizeDelta = new Vector2(600, 60);
+
+            TextMeshProUGUI subtitleTMP = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
+            subtitleTMP.text = "El torneo comienza en...";
+            subtitleTMP.fontSize = FontSizes.SectionHeader;
+            subtitleTMP.fontStyle = FontStyles.Bold;
+            subtitleTMP.color = TEXT_PRIMARY;
+            subtitleTMP.alignment = TextAlignmentOptions.Center;
+
+            Debug.Log("[TournamentLobbyUIBuilder] StartingOverlay creado");
         }
 
         // ==================== UTILITY METHODS ====================

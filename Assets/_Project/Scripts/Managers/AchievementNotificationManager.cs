@@ -343,16 +343,16 @@ namespace DigitPark.Managers
                 switch (tmp.gameObject.name)
                 {
                     case "HeaderText":
-                        tmp.fontSize = 26f;
+                        tmp.fontSize = FontSizes.Body;
                         break;
                     case "AchievementTitle":
-                        tmp.fontSize = 36f;
+                        tmp.fontSize = FontSizes.Button;
                         break;
                     case "AchievementDescription":
-                        tmp.fontSize = 22f;
+                        tmp.fontSize = FontSizes.Body;
                         break;
                     case "CompletionText":
-                        tmp.fontSize = 20f;
+                        tmp.fontSize = FontSizes.Body;
                         break;
                 }
             }
@@ -454,7 +454,7 @@ namespace DigitPark.Managers
             headerObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI headerTMP = headerObj.AddComponent<TMPro.TextMeshProUGUI>();
             headerTMP.text = Localization.AutoLocalizer.Get("ach_achievement_unlocked");
-            headerTMP.fontSize = 26f;
+            headerTMP.fontSize = FontSizes.Body;
             headerTMP.fontStyle = TMPro.FontStyles.Bold;
             headerTMP.color = new Color(0f, 1f, 1f, 1f);
             headerTMP.enableWordWrapping = false;
@@ -466,7 +466,7 @@ namespace DigitPark.Managers
             titleObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI titleTMP = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
             titleTMP.text = "Titulo";
-            titleTMP.fontSize = 36f;
+            titleTMP.fontSize = FontSizes.Button;
             titleTMP.fontStyle = TMPro.FontStyles.Bold;
             titleTMP.color = new Color(1f, 0.84f, 0f, 1f);
             titleTMP.enableWordWrapping = false;
@@ -478,7 +478,7 @@ namespace DigitPark.Managers
             descObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI descTMP = descObj.AddComponent<TMPro.TextMeshProUGUI>();
             descTMP.text = "Desc";
-            descTMP.fontSize = 22f;
+            descTMP.fontSize = FontSizes.Body;
             descTMP.color = new Color(0.7f, 0.75f, 0.8f, 1f);
             descTMP.enableWordWrapping = false;
             descTMP.overflowMode = TMPro.TextOverflowModes.Ellipsis;

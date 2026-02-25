@@ -295,7 +295,7 @@ namespace DigitPark.UI
                 // Fallback: texto TMP si no hay imagen
                 Color titleColor = GetThemeColor(t => t.textTitle, new Color(0f, 1f, 1f));
                 TextMeshProUGUI title = UIFactory.CreateTitle(logoContainer, "Title", "DIGIT PARK");
-                title.fontSize = 288;
+                title.fontSize = FontSizes.Logo;
                 title.color = titleColor;
                 title.outlineWidth = 0.25f;
                 title.outlineColor = accentColor;
@@ -345,7 +345,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "Subtitle",
                 subtitleText,
-                64,
+                (int)FontSizes.AuthTitle,
                 textSecondary,
                 TextAlignmentOptions.Center
             );
@@ -365,7 +365,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "Subtitle2",
                 subtitle2Text,
-                56,
+                (int)FontSizes.DisplayMedium,
                 accentColor,
                 TextAlignmentOptions.Center
             );
@@ -454,7 +454,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "LoadingText",
                 "",
-                88,
+                (int)FontSizes.CardSymbol,
                 textColor,
                 TextAlignmentOptions.Center
             );
@@ -480,7 +480,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "VersionText",
                 $"v{Application.version}",
-                64,
+                (int)FontSizes.AuthTitle,
                 textDisabled,
                 TextAlignmentOptions.BottomRight
             );

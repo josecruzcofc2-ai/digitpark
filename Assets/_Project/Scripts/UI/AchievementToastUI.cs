@@ -104,6 +104,10 @@ namespace DigitPark.UI
         {
             _currentTween?.Kill();
             _displaySequence?.Kill();
+            // Kill any orphaned shine/snap-back tweens
+            if (shineEffect != null) shineEffect.DOKill();
+            if (toastContainer != null) toastContainer.DOKill();
+            if (canvasGroup != null) canvasGroup.DOKill();
             CancelInvoke();
         }
 
@@ -387,10 +391,13 @@ namespace DigitPark.UI
         {
             if (shineEffect == null) return;
 
+            // Kill any previous shine tween
+            shineEffect.DOKill();
+
             // Reset position
             shineEffect.anchoredPosition = new Vector2(-100f, 0f);
 
-            // Animate across
+            // Animate across (tracked via shineEffect target for DOKill)
             shineEffect.DOAnchorPosX(500f, 0.8f)
                 .SetEase(Ease.Linear);
         }

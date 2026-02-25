@@ -503,7 +503,7 @@ namespace DigitPark.CashBattle
             // Update minimum
             if (withdrawMinText)
             {
-                withdrawMinText.text = $"Mínimo: ${minimumWithdraw:F2}";
+                withdrawMinText.text = AutoLocalizer.Get("wallet_minimum", $"${minimumWithdraw:F2}");
             }
 
             // Show/hide KYC panel
@@ -527,7 +527,7 @@ namespace DigitPark.CashBattle
                 decimal fee = amount * (withdrawFeePercent / 100m);
                 if (withdrawFeeText)
                 {
-                    withdrawFeeText.text = fee > 0 ? $"Comisión: ${fee:F2}" : "Sin comisión";
+                    withdrawFeeText.text = fee > 0 ? AutoLocalizer.Get("wallet_fee", $"${fee:F2}") : AutoLocalizer.Get("wallet_no_fee");
                 }
             }
         }
@@ -648,7 +648,7 @@ namespace DigitPark.CashBattle
             if (bonusBalanceText)
             {
                 // Mostrar balance pendiente como "bonus" o lifetime deposits
-                bonusBalanceText.text = $"Pendiente: ${walletData.pendingBalance:F2}";
+                bonusBalanceText.text = AutoLocalizer.Get("wallet_pending", $"${walletData.pendingBalance:F2}");
             }
         }
 
@@ -675,7 +675,7 @@ namespace DigitPark.CashBattle
                 // Actualizar bonus balance sin animación
                 if (bonusBalanceText && WalletManager.Instance != null)
                 {
-                    bonusBalanceText.text = $"Pendiente: ${WalletManager.Instance.WalletData.pendingBalance:F2}";
+                    bonusBalanceText.text = AutoLocalizer.Get("wallet_pending", $"${WalletManager.Instance.WalletData.pendingBalance:F2}");
                 }
             }
             else

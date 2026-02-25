@@ -161,7 +161,7 @@ namespace DigitPark.UI
         /// <summary>
         /// Crea un TextMeshPro elemento
         /// </summary>
-        public static TextMeshProUGUI CreateText(Transform parent, string name, string content, int fontSize = 24, Color? color = null, TextAlignmentOptions alignment = TextAlignmentOptions.Center)
+        public static TextMeshProUGUI CreateText(Transform parent, string name, string content, int fontSize = 30, Color? color = null, TextAlignmentOptions alignment = TextAlignmentOptions.Center)
         {
             GameObject textObj = new GameObject(name);
             textObj.transform.SetParent(parent, false);
@@ -183,7 +183,7 @@ namespace DigitPark.UI
         /// </summary>
         public static TextMeshProUGUI CreateTitle(Transform parent, string name, string content)
         {
-            TextMeshProUGUI title = CreateText(parent, name, content, 72, ElectricBlue, TextAlignmentOptions.Center);
+            TextMeshProUGUI title = CreateText(parent, name, content, (int)FontSizes.DisplayLarge, ElectricBlue, TextAlignmentOptions.Center);
 
             RectTransform rt = title.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 1f);
@@ -229,7 +229,7 @@ namespace DigitPark.UI
             // Texto del botón
             if (!string.IsNullOrEmpty(text))
             {
-                TextMeshProUGUI buttonText = CreateText(buttonObj.transform, "Text", text, 32, Color.white);
+                TextMeshProUGUI buttonText = CreateText(buttonObj.transform, "Text", text, (int)FontSizes.BodyLarge, Color.white);
                 RectTransform textRT = buttonText.GetComponent<RectTransform>();
                 textRT.anchorMin = Vector2.zero;
                 textRT.anchorMax = Vector2.one;
@@ -250,7 +250,7 @@ namespace DigitPark.UI
             TextMeshProUGUI btnText = button.GetComponentInChildren<TextMeshProUGUI>();
             if (btnText != null)
             {
-                btnText.fontSize = 48;
+                btnText.fontSize = FontSizes.SectionHeader;
                 btnText.fontStyle = FontStyles.Bold;
             }
 
@@ -301,7 +301,7 @@ namespace DigitPark.UI
             placeholderObj.transform.SetParent(textAreaObj.transform, false);
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = placeholder;
-            placeholderText.fontSize = 28;
+            placeholderText.fontSize = FontSizes.Body;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -314,7 +314,7 @@ namespace DigitPark.UI
             GameObject textObj = new GameObject("Text");
             textObj.transform.SetParent(textAreaObj.transform, false);
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.fontSize = 28;
+            text.fontSize = FontSizes.Body;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.MidlineLeft;
             text.richText = false;
@@ -378,7 +378,7 @@ namespace DigitPark.UI
             // Label
             if (!string.IsNullOrEmpty(label))
             {
-                TextMeshProUGUI labelText = CreateText(toggleObj.transform, "Label", label, 28, Color.white, TextAlignmentOptions.MidlineLeft);
+                TextMeshProUGUI labelText = CreateText(toggleObj.transform, "Label", label, (int)FontSizes.Body, Color.white, TextAlignmentOptions.MidlineLeft);
                 RectTransform labelRT = labelText.GetComponent<RectTransform>();
                 labelRT.anchorMin = new Vector2(0f, 0f);
                 labelRT.anchorMax = new Vector2(1f, 1f);
@@ -484,7 +484,7 @@ namespace DigitPark.UI
             TMP_Dropdown dropdown = dropdownObj.AddComponent<TMP_Dropdown>();
 
             // Label
-            TextMeshProUGUI labelText = CreateText(dropdownObj.transform, "Label", options.Length > 0 ? options[0] : "", 28, Color.white, TextAlignmentOptions.MidlineLeft);
+            TextMeshProUGUI labelText = CreateText(dropdownObj.transform, "Label", options.Length > 0 ? options[0] : "", (int)FontSizes.Body, Color.white, TextAlignmentOptions.MidlineLeft);
             RectTransform labelRT = labelText.GetComponent<RectTransform>();
             labelRT.anchorMin = Vector2.zero;
             labelRT.anchorMax = Vector2.one;
@@ -498,7 +498,7 @@ namespace DigitPark.UI
             arrowObj.transform.SetParent(dropdownObj.transform, false);
             TextMeshProUGUI arrowText = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowText.text = "▼";
-            arrowText.fontSize = 24;
+            arrowText.fontSize = FontSizes.Body;
             arrowText.color = Color.white;
             arrowText.alignment = TextAlignmentOptions.Center;
 
@@ -595,7 +595,7 @@ namespace DigitPark.UI
 
             TextMeshProUGUI checkmarkText = checkmarkObj.AddComponent<TextMeshProUGUI>();
             checkmarkText.text = "V";
-            checkmarkText.fontSize = 24;
+            checkmarkText.fontSize = FontSizes.Body;
             checkmarkText.color = ElectricBlue;
             checkmarkText.alignment = TextAlignmentOptions.Center;
 
@@ -612,7 +612,7 @@ namespace DigitPark.UI
 
             TextMeshProUGUI itemLabelText = itemLabelObj.AddComponent<TextMeshProUGUI>();
             itemLabelText.text = "Item";
-            itemLabelText.fontSize = 24;
+            itemLabelText.fontSize = FontSizes.Body;
             itemLabelText.color = Color.white;
             itemLabelText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -726,7 +726,7 @@ namespace DigitPark.UI
         {
             GameObject loadingPanel = CreatePanel(parent, "LoadingPanel", new Color(0, 0, 0, 0.9f));
 
-            TextMeshProUGUI loadingText = CreateText(loadingPanel.transform, "LoadingText", "Cargando...", 36, ElectricBlue);
+            TextMeshProUGUI loadingText = CreateText(loadingPanel.transform, "LoadingText", "Cargando...", (int)FontSizes.Button, ElectricBlue);
             RectTransform loadingRT = loadingText.GetComponent<RectTransform>();
             loadingRT.anchoredPosition = Vector2.zero;
 
