@@ -53,7 +53,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashTournaments References", false, 242)]
+        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashTournaments References", false, 183)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashTournamentsReferenceAssigner>("CashTournaments Reference Assigner");

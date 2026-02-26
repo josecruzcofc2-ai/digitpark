@@ -55,7 +55,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Monetization/Achievements References", false, 275)]
+        [MenuItem("DigitPark/Auto Assigners/References/Monetization/Achievements References", false, 142)]
         public static void ShowWindow()
         {
             var window = GetWindow<AchievementsReferenceAssigner>("Achievements Reference Assigner");

@@ -84,7 +84,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU ====================
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Profile", false, 254)]
+        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Profile", false, 183)]
         public static void ShowWindow() => GetWindow<CashProfileUIBuilder>("Cash Profile Builder");
 
         // ==================== EDITOR WINDOW ====================
@@ -225,7 +225,7 @@ namespace DigitPark.Editor
             CreatePlayerCard(content);
             CreateRecordCard(content);
             CreateStreakCards(content);
-            CreateSectionHeader(content, "STATS POR JUEGO");
+            CreateSectionHeader(content, "STATS BY GAME");
             CreateGameStatsCard(content);
             // Bottom spacer
             CreateSpacer(content, 40);
@@ -343,7 +343,7 @@ namespace DigitPark.Editor
             trt.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI ttmp = title.AddComponent<TextMeshProUGUI>();
-            ttmp.text = "Mi Perfil Cash";
+            ttmp.text = "My Cash Profile";
             ttmp.fontSize = FontSizes.SceneTitle;
             ttmp.color = TEXT_GOLD;
             ttmp.alignment = TextAlignmentOptions.Center;
@@ -607,7 +607,7 @@ namespace DigitPark.Editor
             msRT.anchoredPosition = new Vector2(0, -300);
 
             TextMeshProUGUI msTmp = msince.AddComponent<TextMeshProUGUI>();
-            msTmp.text = "Miembro desde 2024";
+            msTmp.text = "Member since 2024";
             msTmp.fontSize = FontSizes.Body; msTmp.color = TEXT_MUTED;
             msTmp.alignment = TextAlignmentOptions.Center;
 
@@ -665,7 +665,7 @@ namespace DigitPark.Editor
             LayoutElement titLE = titObj.AddComponent<LayoutElement>();
             titLE.flexibleWidth = 0; titLE.preferredWidth = 450;
             TextMeshProUGUI titTmp = titObj.AddComponent<TextMeshProUGUI>();
-            titTmp.text = "RECORD GENERAL";
+            titTmp.text = "OVERALL RECORD";
             titTmp.fontSize = FontSizes.ValueLarge; titTmp.color = TEXT_GOLD;
             titTmp.alignment = TextAlignmentOptions.Center;
             titTmp.fontStyle = FontStyles.Bold;
@@ -749,8 +749,8 @@ namespace DigitPark.Editor
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
 
-            CreateStreakBox(row.transform, "CurrentStreakCard", "Racha Actual", "0", ACCENT_GREEN);
-            CreateStreakBox(row.transform, "BestStreakCard", "Mejor Racha", "0 W", GOLD_LIGHT);
+            CreateStreakBox(row.transform, "CurrentStreakCard", "Current Streak", "0", ACCENT_GREEN);
+            CreateStreakBox(row.transform, "BestStreakCard", "Best Streak", "0 W", GOLD_LIGHT);
         }
 
         private static void CreateStreakBox(Transform parent, string name, string label, string value, Color accent)
@@ -1229,7 +1229,7 @@ namespace DigitPark.Editor
             tRT.anchorMin = new Vector2(0, 0.78f); tRT.anchorMax = Vector2.one;
             tRT.offsetMin = new Vector2(20, 0); tRT.offsetMax = new Vector2(-20, -10);
             var titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
-            titleTxt.text = "Cambiar Nombre";
+            titleTxt.text = "Change Name";
             titleTxt.fontSize = FontSizes.SceneTitle; titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = GOLD_PRIMARY; titleTxt.alignment = TextAlignmentOptions.Center;
 
@@ -1254,7 +1254,7 @@ namespace DigitPark.Editor
             phRT.anchorMin = Vector2.zero; phRT.anchorMax = Vector2.one;
             phRT.offsetMin = Vector2.zero; phRT.offsetMax = Vector2.zero;
             var phTxt = placeholder.AddComponent<TextMeshProUGUI>();
-            phTxt.text = "Nuevo nombre...";
+            phTxt.text = "New name...";
             phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Italic;
             phTxt.color = TEXT_MUTED; phTxt.alignment = TextAlignmentOptions.Left;
 
@@ -1289,7 +1289,7 @@ namespace DigitPark.Editor
             cfTxtRT.anchorMin = Vector2.zero; cfTxtRT.anchorMax = Vector2.one;
             cfTxtRT.offsetMin = Vector2.zero; cfTxtRT.offsetMax = Vector2.zero;
             var cfTxt = cfTxtObj.AddComponent<TextMeshProUGUI>();
-            cfTxt.text = "Guardar"; cfTxt.fontSize = FontSizes.Body;
+            cfTxt.text = "Save"; cfTxt.fontSize = FontSizes.Body;
             cfTxt.fontStyle = FontStyles.Bold; cfTxt.color = new Color(0.1f, 0.1f, 0.1f, 1f);
             cfTxt.alignment = TextAlignmentOptions.Center;
 
@@ -1308,7 +1308,7 @@ namespace DigitPark.Editor
             ccTxtRT.anchorMin = Vector2.zero; ccTxtRT.anchorMax = Vector2.one;
             ccTxtRT.offsetMin = Vector2.zero; ccTxtRT.offsetMax = Vector2.zero;
             var ccTxt = ccTxtObj.AddComponent<TextMeshProUGUI>();
-            ccTxt.text = "Cancelar"; ccTxt.fontSize = FontSizes.Body;
+            ccTxt.text = "Cancel"; ccTxt.fontSize = FontSizes.Body;
             ccTxt.color = TEXT_MUTED; ccTxt.alignment = TextAlignmentOptions.Center;
 
             // Wire InputPanelUI component

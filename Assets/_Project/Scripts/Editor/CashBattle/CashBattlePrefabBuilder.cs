@@ -165,7 +165,7 @@ namespace DigitPark.Editor
             feeRT.offsetMax = new Vector2(0, -5);
 
             TextMeshProUGUI feeText = feeObj.AddComponent<TextMeshProUGUI>();
-            feeText.text = "Entrada: $5.00";
+            feeText.text = "Entry: $5.00";
             feeText.fontSize = FontSizes.Body;
             feeText.color = TEXT_SECONDARY;
             feeText.alignment = TextAlignmentOptions.Left;
@@ -183,7 +183,7 @@ namespace DigitPark.Editor
             dateRT.offsetMax = new Vector2(-100, -5);
 
             TextMeshProUGUI dateText = dateObj.AddComponent<TextMeshProUGUI>();
-            dateText.text = "Hace 2h";
+            dateText.text = "2h ago";
             dateText.fontSize = FontSizes.Body;
             dateText.color = TEXT_SECONDARY;
             dateText.alignment = TextAlignmentOptions.Right;
@@ -212,7 +212,7 @@ namespace DigitPark.Editor
             rbTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI rbTMP = rbText.AddComponent<TextMeshProUGUI>();
-            rbTMP.text = "VICTORIA";
+            rbTMP.text = "VICTORY";
             rbTMP.fontSize = FontSizes.Body;
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.color = GREEN;
@@ -516,7 +516,7 @@ namespace DigitPark.Editor
             elRT.offsetMin = new Vector2(8, 0);
             elRT.offsetMax = new Vector2(-8, -4);
             TextMeshProUGUI elTMP = entryLabel.AddComponent<TextMeshProUGUI>();
-            elTMP.text = "Entrada";
+            elTMP.text = "Entry";
             elTMP.fontSize = FontSizes.BodyLarge;
             elTMP.color = TEXT_SECONDARY;
             elTMP.alignment = TextAlignmentOptions.Center;
@@ -563,7 +563,7 @@ namespace DigitPark.Editor
             jtRT.anchorMax = Vector2.one;
             jtRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI jtTMP = joinText.AddComponent<TextMeshProUGUI>();
-            jtTMP.text = "Unirse";
+            jtTMP.text = "Join";
             jtTMP.fontSize = FontSizes.SectionHeader;
             jtTMP.fontStyle = FontStyles.Bold;
             jtTMP.color = Color.white;

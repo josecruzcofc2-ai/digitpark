@@ -52,7 +52,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Monetization/Shop References", false, 277)]
+        [MenuItem("DigitPark/Auto Assigners/References/Monetization/Shop References", false, 143)]
         public static void ShowWindow()
         {
             var window = GetWindow<ShopReferenceAssigner>("Shop Reference Assigner");

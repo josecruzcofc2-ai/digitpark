@@ -503,6 +503,7 @@ GameObject:
   - component: {fileID: 5459923619404245321}
   - component: {fileID: 7443091496708239304}
   - component: {fileID: 1403068686513995790}
+  - component: {fileID: 1161930260739141179}
   m_Layer: 5
   m_Name: ConfirmText
   m_TagString: Untagged
@@ -626,6 +627,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1161930260739141179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7364313235666057575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &7761949677665964750
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,6 +664,7 @@ GameObject:
   - component: {fileID: 7920088140265577442}
   - component: {fileID: 4014438089800886601}
   - component: {fileID: 3705922233604922788}
+  - component: {fileID: 3340401903994661915}
   m_Layer: 5
   m_Name: ConfirmPanel
   m_TagString: Untagged
@@ -723,6 +750,31 @@ MonoBehaviour:
   cancelButton: {fileID: 7767744139006343047}
   confirmButtonText: {fileID: 4814237858661386121}
   cancelButtonText: {fileID: 4679420804027747428}
+--- !u!114 &3340401903994661915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7761949677665964750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 4
+  applyToImage: 1
+  applyToText: 0
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &8672503792147183586
 GameObject:
   m_ObjectHideFlags: 0
@@ -946,6 +998,7 @@ GameObject:
   - component: {fileID: 7896162226479420393}
   - component: {fileID: 9220356056455004754}
   - component: {fileID: 2066541386983008918}
+  - component: {fileID: 640146249426712492}
   m_Layer: 5
   m_Name: MessageText
   m_TagString: Untagged
@@ -1069,3 +1122,28 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &640146249426712492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8832232781292427136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2

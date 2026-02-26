@@ -57,7 +57,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Social/Leaderboard References", false, 253)]
+        [MenuItem("DigitPark/Auto Assigners/References/Social/Leaderboard References", false, 152)]
         public static void ShowWindow()
         {
             var window = GetWindow<LeaderboardReferenceAssigner>("Leaderboard Reference Assigner");
@@ -195,8 +195,8 @@ namespace DigitPark.Editor.AutoAssigners
             AssignGameSelectorArrays(so);
 
             // ====== TABS ======
-            AssignReference(so, "nacionalTab", FindButtonByName("nacionaltab", "nacional", "local", "country"));
-            AssignReference(so, "mundialTab", FindButtonByName("mundialtab", "mundial", "global", "world"));
+            AssignReference(so, "nacionalTab", FindButtonByName("nationaltab", "nacionaltab", "nacional", "national", "local", "country"));
+            AssignReference(so, "mundialTab", FindButtonByName("globaltab", "mundialtab", "mundial", "global", "world"));
 
             // ====== LEADERBOARD ======
             AssignReference(so, "leaderboardContainer", FindByNameContains<Transform>("leaderboardcontainer", "leaderboard", "entries", "container"));

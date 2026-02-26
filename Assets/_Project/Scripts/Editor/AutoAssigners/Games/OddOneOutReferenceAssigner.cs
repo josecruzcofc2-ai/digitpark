@@ -57,7 +57,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/OddOneOut References", false, 234)]
+        [MenuItem("DigitPark/Auto Assigners/References/Games/OddOneOut References", false, 124)]
         public static void ShowWindow()
         {
             var window = GetWindow<OddOneOutReferenceAssigner>("OddOneOut Reference Assigner");

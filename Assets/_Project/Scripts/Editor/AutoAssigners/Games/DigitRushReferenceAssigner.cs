@@ -55,7 +55,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/DigitRush References", false, 230)]
+        [MenuItem("DigitPark/Auto Assigners/References/Games/DigitRush References", false, 120)]
         public static void ShowWindow()
         {
             var window = GetWindow<DigitRushReferenceAssigner>("DigitRush Reference Assigner");

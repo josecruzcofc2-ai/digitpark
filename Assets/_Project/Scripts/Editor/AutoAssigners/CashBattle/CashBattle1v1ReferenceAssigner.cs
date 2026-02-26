@@ -51,7 +51,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashBattle 1v1 References", false, 251)]
+        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashBattle 1v1 References", false, 181)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashBattle1v1ReferenceAssigner>("CashBattle 1v1 Reference Assigner");

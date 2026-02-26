@@ -141,7 +141,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(parent, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -150), new Vector2(0, 60));
-            string titleStr = isWin ? "RESULTADO DEL TORNEO" : "RESULTADO DEL TORNEO";
+            string titleStr = isWin ? "TOURNAMENT RESULT" : "TOURNAMENT RESULT";
             TextMeshProUGUI titleTmp = AddText(title, titleStr, 38, accentColor, FontStyles.Bold);
             AddGlow(title, accentColor, 3);
 
@@ -149,7 +149,7 @@ namespace DigitPark.Editor
             GameObject subtitle = CreateChild(parent, "Subtitle");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -195), new Vector2(0, 35));
-            AddText(subtitle, "Posicion #1", 24, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal);
+            AddText(subtitle, "Position #1", 24, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal);
         }
 
         private static void CreateStats(Transform parent, Color accentColor)
@@ -163,15 +163,15 @@ namespace DigitPark.Editor
 
             // Time
             CreateStatItem(statsContainer.transform, "TimeLabel", "TimeValue",
-                "TIEMPO", "12.45s", accentColor, 0f, 0.33f);
+                "TIME", "12.45s", accentColor, 0f, 0.33f);
 
             // Errors
             CreateStatItem(statsContainer.transform, "ErrorsLabel", "ErrorsValue",
-                "ERRORES", "2", new Color(0.8f, 0.6f, 0.4f), 0.33f, 0.66f);
+                "ERRORS", "2", new Color(0.8f, 0.6f, 0.4f), 0.33f, 0.66f);
 
             // Score
             CreateStatItem(statsContainer.transform, "ScoreLabel", "ScoreValue",
-                "PUNTUACION", "16.45s", CYAN_NEON, 0.66f, 1f);
+                "SCORE", "16.45s", CYAN_NEON, 0.66f, 1f);
         }
 
         private static void CreateStatItem(Transform parent, string labelName, string valueName,
@@ -236,7 +236,7 @@ namespace DigitPark.Editor
             posLblRt.anchorMax = new Vector2(1, 0.35f);
             posLblRt.offsetMin = Vector2.zero;
             posLblRt.offsetMax = Vector2.zero;
-            AddText(posLabel, "Posicion", 14, new Color(0.5f, 0.5f, 0.6f), FontStyles.Normal);
+            AddText(posLabel, "Position", 14, new Color(0.5f, 0.5f, 0.6f), FontStyles.Normal);
 
             // Attempts
             GameObject attemptsContainer = CreateChild(infoContainer.transform, "AttemptsContainer");
@@ -248,7 +248,7 @@ namespace DigitPark.Editor
 
             GameObject attemptsText = CreateChild(attemptsContainer.transform, "AttemptsText");
             SetFullStretch(attemptsText.GetComponent<RectTransform>());
-            TextMeshProUGUI attTmp = AddText(attemptsText, "2 de 3 intentos", 18, CYAN_NEON, FontStyles.Normal);
+            TextMeshProUGUI attTmp = AddText(attemptsText, "2 of 3 attempts", 18, CYAN_NEON, FontStyles.Normal);
             attTmp.enableWordWrapping = true;
 
             // Best time
@@ -261,7 +261,7 @@ namespace DigitPark.Editor
 
             GameObject bestTimeText = CreateChild(bestTimeContainer.transform, "BestTimeText");
             SetFullStretch(bestTimeText.GetComponent<RectTransform>());
-            TextMeshProUGUI btTmp = AddText(bestTimeText, "Mejor: 11.20s", 18, WIN_GREEN, FontStyles.Normal);
+            TextMeshProUGUI btTmp = AddText(bestTimeText, "Best: 11.20s", 18, WIN_GREEN, FontStyles.Normal);
             btTmp.enableWordWrapping = true;
         }
 
@@ -283,7 +283,7 @@ namespace DigitPark.Editor
             plRt.anchorMax = new Vector2(1, 1);
             plRt.offsetMin = Vector2.zero;
             plRt.offsetMax = Vector2.zero;
-            AddText(prizeLabel, "PREMIO POTENCIAL", 14, new Color(0.7f, 0.6f, 0.4f), FontStyles.Normal);
+            AddText(prizeLabel, "POTENTIAL PRIZE", 14, new Color(0.7f, 0.6f, 0.4f), FontStyles.Normal);
 
             // Prize value
             GameObject prizeValue = CreateChild(prizeSection.transform, "PrizeText");
@@ -322,13 +322,13 @@ namespace DigitPark.Editor
             topHlg.childControlWidth = false;
 
             // Retry button
-            CreateButton3D(topRow.transform, "RetryButton", "REINTENTAR", accentColor, 240, 55);
+            CreateButton3D(topRow.transform, "RetryButton", "RETRY", accentColor, 240, 55);
 
             // Leaderboard button
-            CreateButton3D(topRow.transform, "LeaderboardButton", "CLASIFICACION", CYAN_NEON, 240, 55);
+            CreateButton3D(topRow.transform, "LeaderboardButton", "LEADERBOARD", CYAN_NEON, 240, 55);
 
             // Exit button (bottom, full width)
-            CreateButton3D(buttonsContainer.transform, "ExitButton", "SALIR DEL TORNEO",
+            CreateButton3D(buttonsContainer.transform, "ExitButton", "EXIT TOURNAMENT",
                 new Color(0.4f, 0.35f, 0.3f), 350, 50);
         }
 
@@ -449,6 +449,10 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = size;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }
 
@@ -512,7 +516,7 @@ namespace DigitPark.Editor
 
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.38f, 26f);
+            float fontSize = Mathf.Min(height * 0.38f, FontSizes.Button);
             AddText(textObj, text, fontSize, new Color(0.03f, 0.02f, 0.01f), FontStyles.Bold);
 
             Button button = btn.AddComponent<Button>();

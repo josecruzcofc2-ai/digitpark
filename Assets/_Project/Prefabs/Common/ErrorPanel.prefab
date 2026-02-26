@@ -159,6 +159,7 @@ GameObject:
   - component: {fileID: 727593410094670410}
   - component: {fileID: 4951711426780226625}
   - component: {fileID: 4869196288130303097}
+  - component: {fileID: 4129975133333313605}
   m_Layer: 5
   m_Name: ErrorPanel
   m_TagString: Untagged
@@ -240,6 +241,31 @@ MonoBehaviour:
   errorText: {fileID: 780310354763299731}
   acceptButton: {fileID: 5212624454540572506}
   acceptButtonText: {fileID: 2740519919384281251}
+--- !u!114 &4129975133333313605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2870879376361091433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 4
+  applyToImage: 1
+  applyToText: 0
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &3898705073917377532
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,6 +411,7 @@ GameObject:
   - component: {fileID: 5528795472209646392}
   - component: {fileID: 6628466978705304396}
   - component: {fileID: 780310354763299731}
+  - component: {fileID: 1695664589561178710}
   m_Layer: 5
   m_Name: ErrorText
   m_TagString: Untagged
@@ -508,6 +535,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1695664589561178710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5543772524993706050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 34
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &7123918154542369330
 GameObject:
   m_ObjectHideFlags: 0

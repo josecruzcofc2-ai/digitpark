@@ -116,8 +116,10 @@ namespace DigitPark.Themes
             // Suscribirse a cambios de tema
             ThemeManager.OnThemeChanged += OnThemeChanged;
 
-            // Aplicar tema actual
-            if (ThemeManager.Instance?.CurrentTheme != null)
+            // Solo aplicar si el usuario tiene un tema no-base seleccionado.
+            // El tema base (neon_dark) ya tiene los colores correctos puestos por UIBuilders.
+            if (ThemeManager.Instance?.CurrentTheme != null &&
+                ThemeManager.Instance.CurrentTheme.themeId != "neon_dark")
             {
                 ApplyTheme(ThemeManager.Instance.CurrentTheme, false);
             }

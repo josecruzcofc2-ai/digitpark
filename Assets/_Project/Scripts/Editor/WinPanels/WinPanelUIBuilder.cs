@@ -133,7 +133,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(face.transform, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -170), new Vector2(0, 70));
-            TextMeshProUGUI titleTmp = AddText(title, "¡COMPLETADO!", 52, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = AddText(title, "COMPLETED!", 52, GREEN_NEON, FontStyles.Bold);
             AddGlow(title, GREEN_NEON, 3);
 
             // === STATS CONTAINER - más espacio ===
@@ -142,9 +142,9 @@ namespace DigitPark.Editor
                 new Vector2(0, -30), new Vector2(450, 160));
 
             // Tiempo
-            CreateStatRow(statsContainer.transform, "TimeRow", "TIEMPO", "00.00s", CYAN_NEON, 25);
+            CreateStatRow(statsContainer.transform, "TimeRow", "TIME", "00.00s", CYAN_NEON, 25);
             // Errores
-            CreateStatRow(statsContainer.transform, "ErrorsRow", "ERRORES", "0", CYAN_NEON, -35);
+            CreateStatRow(statsContainer.transform, "ErrorsRow", "ERRORS", "0", CYAN_NEON, -35);
 
             // === BOTONES - MÁS GRANDES ===
             GameObject buttonsContainer = CreateChild(face.transform, "ButtonsContainer");
@@ -158,10 +158,10 @@ namespace DigitPark.Editor
             btnLayout.childControlWidth = false;
 
             // Botón Jugar de Nuevo - MÁS GRANDE
-            CreateButton3D(buttonsContainer.transform, "PlayAgainButton", "JUGAR DE NUEVO", CYAN_NEON, 240, 70);
+            CreateButton3D(buttonsContainer.transform, "PlayAgainButton", "PLAY AGAIN", CYAN_NEON, 240, 70);
 
-            // Botón Aceptar - MÁS GRANDE
-            CreateButton3D(buttonsContainer.transform, "AcceptButton", "ACEPTAR", GREEN_NEON, 180, 70);
+            // Accept Button
+            CreateButton3D(buttonsContainer.transform, "AcceptButton", "ACCEPT", GREEN_NEON, 180, 70);
 
             // Agregar WinPanelController
             WinPanelController controller = panel.AddComponent<WinPanelController>();
@@ -222,14 +222,14 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(face.transform, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -160), new Vector2(0, 65));
-            TextMeshProUGUI titleTmp = AddText(title, "TIEMPO AGOTADO", 46, ORANGE_LIGHT, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = AddText(title, "TIME'S UP", 46, ORANGE_LIGHT, FontStyles.Bold);
             AddGlow(title, ORANGE_NEON, 3);
 
             // === SUBTÍTULO motivacional ===
             GameObject subtitle = CreateChild(face.transform, "Subtitle");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -210), new Vector2(0, 35));
-            AddText(subtitle, "¡Inténtalo de nuevo!", 22, new Color(0.8f, 0.65f, 0.5f), FontStyles.Italic);
+            AddText(subtitle, "Try again!", 22, new Color(0.8f, 0.65f, 0.5f), FontStyles.Italic);
 
             // === STATS CONTAINER ===
             GameObject statsContainer = CreateChild(face.transform, "StatsContainer");
@@ -237,9 +237,9 @@ namespace DigitPark.Editor
                 new Vector2(0, -30), new Vector2(420, 140));
 
             // Tiempo alcanzado
-            CreateStatRow(statsContainer.transform, "TimeRow", "TIEMPO", "00.00s", ORANGE_LIGHT, 20);
+            CreateStatRow(statsContainer.transform, "TimeRow", "TIME", "00.00s", ORANGE_LIGHT, 20);
             // Errores
-            CreateStatRow(statsContainer.transform, "ErrorsRow", "ERRORES", "0", ORANGE_LIGHT, -30);
+            CreateStatRow(statsContainer.transform, "ErrorsRow", "ERRORS", "0", ORANGE_LIGHT, -30);
 
             // === MEJOR TIEMPO (opcional) ===
             GameObject bestTimeContainer = CreateChild(face.transform, "BestTimeContainer");
@@ -251,7 +251,7 @@ namespace DigitPark.Editor
 
             GameObject bestTimeText = CreateChild(bestTimeContainer.transform, "BestTimeText");
             SetupRectTransform(bestTimeText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            AddText(bestTimeText, "Mejor: --.-s", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Normal);
+            AddText(bestTimeText, "Best: --.-s", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Normal);
 
             // === BOTONES ===
             GameObject buttonsContainer = CreateChild(face.transform, "ButtonsContainer");
@@ -265,10 +265,10 @@ namespace DigitPark.Editor
             btnLayout.childControlWidth = false;
 
             // Botón Reintentar (principal)
-            CreateButton3D(buttonsContainer.transform, "PlayAgainButton", "REINTENTAR", ORANGE_NEON, 220, 70);
+            CreateButton3D(buttonsContainer.transform, "PlayAgainButton", "RETRY", ORANGE_NEON, 220, 70);
 
-            // Botón Salir
-            CreateButton3D(buttonsContainer.transform, "AcceptButton", "SALIR", new Color(0.45f, 0.4f, 0.35f), 150, 70);
+            // Exit Button
+            CreateButton3D(buttonsContainer.transform, "AcceptButton", "EXIT", new Color(0.45f, 0.4f, 0.35f), 150, 70);
 
             // Agregar WinPanelController
             WinPanelController controller = panel.AddComponent<WinPanelController>();
@@ -345,7 +345,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(face.transform, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -175), new Vector2(0, 70));
-            TextMeshProUGUI titleTmp = AddText(title, "¡GANASTE!", 56, GOLD, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = AddText(title, "YOU WON!", 56, GOLD, FontStyles.Bold);
             AddGlow(title, GOLD, 4);
 
             // === DINERO GANADO (elemento principal) ===
@@ -365,7 +365,7 @@ namespace DigitPark.Editor
             GameObject wagerText = CreateChild(face.transform, "WagerText");
             SetupRectTransform(wagerText, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -345), new Vector2(350, 40));
-            AddText(wagerText, "Apuesta: $5.00", 24, new Color(0.8f, 0.7f, 0.5f), FontStyles.Normal);
+            AddText(wagerText, "Bet: $5.00", 24, new Color(0.8f, 0.7f, 0.5f), FontStyles.Normal);
 
             // === VS COMPARISON - MÁS GRANDE ===
             GameObject vsContainer = CreateChild(face.transform, "VSContainer");
@@ -384,7 +384,7 @@ namespace DigitPark.Editor
             GameObject playerLabel = CreateChild(playerScore.transform, "Label");
             SetupRectTransform(playerLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
-            AddText(playerLabel, "TÚ", 22, GOLD, FontStyles.Bold);
+            AddText(playerLabel, "YOU", 22, GOLD, FontStyles.Bold);
 
             GameObject playerValue = CreateChild(playerScore.transform, "Value");
             SetupRectTransform(playerValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -397,7 +397,7 @@ namespace DigitPark.Editor
                 Vector2.zero, new Vector2(60, 60));
             AddText(vsText, "VS", 28, GOLD_DARK, FontStyles.Bold);
 
-            // Opponent score (derecha)
+            // Opponent score (right)
             GameObject opponentScore = CreateChild(vsContainer.transform, "OpponentScore");
             SetupRectTransform(opponentScore, new Vector2(0.55f, 0), new Vector2(1, 1),
                 Vector2.zero, Vector2.zero);
@@ -405,7 +405,7 @@ namespace DigitPark.Editor
             GameObject oppLabel = CreateChild(opponentScore.transform, "Label");
             SetupRectTransform(oppLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
-            AddText(oppLabel, "OPONENTE", 20, new Color(0.7f, 0.6f, 0.5f), FontStyles.Bold);
+            AddText(oppLabel, "OPPONENT", 20, new Color(0.7f, 0.6f, 0.5f), FontStyles.Bold);
 
             GameObject oppValue = CreateChild(opponentScore.transform, "Value");
             SetupRectTransform(oppValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -417,15 +417,15 @@ namespace DigitPark.Editor
             SetupRectTransform(statsContainer, new Vector2(0.5f, 0), new Vector2(0.5f, 0),
                 new Vector2(0, 160), new Vector2(450, 100));
 
-            CreateStatRow(statsContainer.transform, "TimeRow", "Tu tiempo", "00.00s", GOLD_LIGHT, 25);
-            CreateStatRow(statsContainer.transform, "ErrorsRow", "Errores", "0", GOLD_LIGHT, -25);
+            CreateStatRow(statsContainer.transform, "TimeRow", "Your time", "00.00s", GOLD_LIGHT, 25);
+            CreateStatRow(statsContainer.transform, "ErrorsRow", "Errors", "0", GOLD_LIGHT, -25);
 
-            // === BOTÓN RECLAMAR - MÁS GRANDE ===
+            // === CLAIM BUTTON ===
             GameObject buttonContainer = CreateChild(face.transform, "ButtonContainer");
             SetupRectTransform(buttonContainer, new Vector2(0.5f, 0), new Vector2(0.5f, 0),
                 new Vector2(0, 55), new Vector2(350, 85));
 
-            CreatePremiumButton(buttonContainer.transform, "AcceptButton", "RECLAMAR", GOLD, 320, 75);
+            CreatePremiumButton(buttonContainer.transform, "AcceptButton", "CLAIM", GOLD, 320, 75);
 
             // === PARTÍCULAS ===
             GameObject particles = CreateChild(panel.transform, "ParticleEffects");
@@ -496,14 +496,14 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(face.transform, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -170), new Vector2(0, 70));
-            TextMeshProUGUI titleTmp = AddText(title, "DERROTA", 50, LOSE_NEON_LIGHT, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = AddText(title, "DEFEAT", 50, LOSE_NEON_LIGHT, FontStyles.Bold);
             AddGlow(title, LOSE_NEON, 4);
 
             // === SUBTÍTULO motivacional ===
             GameObject subtitle = CreateChild(face.transform, "Subtitle");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -225), new Vector2(0, 40));
-            AddText(subtitle, "La próxima será tuya", 24, new Color(0.7f, 0.5f, 0.6f), FontStyles.Italic);
+            AddText(subtitle, "Next time will be yours", 24, new Color(0.7f, 0.5f, 0.6f), FontStyles.Italic);
 
             // === DINERO PERDIDO (destacado pero no agresivo) ===
             GameObject moneyContainer = CreateChild(face.transform, "MoneyContainer");
@@ -538,7 +538,7 @@ namespace DigitPark.Editor
             GameObject playerLabel = CreateChild(playerScore.transform, "Label");
             SetupRectTransform(playerLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
-            AddText(playerLabel, "TÚ", 22, LOSE_NEON_LIGHT, FontStyles.Bold);
+            AddText(playerLabel, "YOU", 22, LOSE_NEON_LIGHT, FontStyles.Bold);
 
             GameObject playerValue = CreateChild(playerScore.transform, "Value");
             SetupRectTransform(playerValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -559,7 +559,7 @@ namespace DigitPark.Editor
             GameObject oppLabel = CreateChild(opponentScore.transform, "Label");
             SetupRectTransform(oppLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
-            AddText(oppLabel, "GANADOR", 20, WINNER_GREEN, FontStyles.Bold);
+            AddText(oppLabel, "WINNER", 20, WINNER_GREEN, FontStyles.Bold);
 
             GameObject oppValue = CreateChild(opponentScore.transform, "Value");
             SetupRectTransform(oppValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -572,8 +572,8 @@ namespace DigitPark.Editor
             SetupRectTransform(statsContainer, new Vector2(0.5f, 0), new Vector2(0.5f, 0),
                 new Vector2(0, 160), new Vector2(450, 100));
 
-            CreateStatRow(statsContainer.transform, "TimeRow", "Tu tiempo", "00.00s", LOSE_NEON_LIGHT, 25);
-            CreateStatRow(statsContainer.transform, "ErrorsRow", "Errores", "0", LOSE_NEON_LIGHT, -25);
+            CreateStatRow(statsContainer.transform, "TimeRow", "Your time", "00.00s", LOSE_NEON_LIGHT, 25);
+            CreateStatRow(statsContainer.transform, "ErrorsRow", "Errors", "0", LOSE_NEON_LIGHT, -25);
 
             // === BOTONES NEÓN ===
             GameObject buttonsContainer = CreateChild(face.transform, "ButtonsContainer");
@@ -587,10 +587,10 @@ namespace DigitPark.Editor
             btnLayout.childControlWidth = false;
 
             // Botón Revancha (principal) - Color magenta neón
-            CreateButton3D(buttonsContainer.transform, "RematchButton", "REVANCHA", LOSE_NEON, 220, 75);
+            CreateButton3D(buttonsContainer.transform, "RematchButton", "REMATCH", LOSE_NEON, 220, 75);
 
-            // Botón Aceptar - Más neutro
-            CreateButton3D(buttonsContainer.transform, "AcceptButton", "SALIR", new Color(0.4f, 0.35f, 0.45f), 160, 75);
+            // Exit Button
+            CreateButton3D(buttonsContainer.transform, "AcceptButton", "EXIT", new Color(0.4f, 0.35f, 0.45f), 160, 75);
 
             // Agregar WinPanelController
             WinPanelController controller = panel.AddComponent<WinPanelController>();
@@ -759,7 +759,7 @@ namespace DigitPark.Editor
             // Text - tamaño de fuente adaptativo basado en altura
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.35f, 28f); // Máximo 28, proporcional a altura
+            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Button);
             AddText(textObj, text, fontSize, DARK_BG, FontStyles.Bold);
 
             // Button component
@@ -808,7 +808,7 @@ namespace DigitPark.Editor
             // Text - tamaño adaptativo
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.38f, 32f); // Máximo 32 para botones premium
+            float fontSize = Mathf.Min(height * 0.38f, FontSizes.Button);
             AddText(textObj, text, fontSize, PREMIUM_BG, FontStyles.Bold);
 
             // Button component
@@ -955,6 +955,10 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = size;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }
 

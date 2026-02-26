@@ -62,7 +62,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/BetSelection References", false, 236)]
+        [MenuItem("DigitPark/Auto Assigners/References/Games/BetSelection References", false, 128)]
         public static void ShowWindow()
         {
             var window = GetWindow<BetSelectionReferenceAssigner>("BetSelection Reference Assigner");

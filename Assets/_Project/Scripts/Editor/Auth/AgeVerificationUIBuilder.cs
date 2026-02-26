@@ -43,7 +43,7 @@ namespace DigitPark.Editor
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
         private static Sprite VerificationIcon => AssetDatabase.LoadAssetAtPath<Sprite>(VERIFICATION_ICON_PATH);
 
-        [MenuItem("DigitPark/UI Builders/Auth/AgeVerification", false, 202)]
+        [MenuItem("DigitPark/UI Builders/Auth/AgeVerification", false, 102)]
         public static void RebuildAgeVerificationScene()
         {
             try
@@ -215,15 +215,15 @@ namespace DigitPark.Editor
 
             // Build card content
             CreateVerificationIcon(content.transform);
-            CreateTitle(content.transform, "VERIFICACIÓN DE EDAD\nREQUERIDA");
+            CreateTitle(content.transform, "AGE VERIFICATION\nREQUIRED");
             CreateSpacer(content.transform, 10f);
-            CreateDescription(content.transform, "Las competencias con dinero real requieren que seas mayor de 18 años.");
+            CreateDescription(content.transform, "Real money competitions require you to be over 18 years old.");
             CreateSpacer(content.transform, 30f);
             CreateStatusText(content.transform); // StatusText for verification status feedback
             CreateSpacer(content.transform, 10f);
-            CreateGoldButton(content.transform, "VerifyButton", "VERIFICAR MI EDAD");
+            CreateGoldButton(content.transform, "VerifyButton", "VERIFY MY AGE");
             CreateSpacer(content.transform, 10f);
-            CreateLegalText(content.transform, "Powered by Triump™ • Verificación segura y confidencial");
+            CreateLegalText(content.transform, "Powered by Triumph™ • Secure and confidential verification");
         }
 
         private static void CreateVerificationIcon(Transform parent)
@@ -255,6 +255,10 @@ namespace DigitPark.Editor
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GoldPremium;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.DisplayLarge;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
             layout.preferredHeight = 160;
@@ -273,6 +277,10 @@ namespace DigitPark.Editor
             descText.color = TextWhite;
             descText.alignment = TextAlignmentOptions.Center;
             descText.enableWordWrapping = true;
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = FontSizes.AutoMinBody;
+            descText.fontSizeMax = FontSizes.DisplayMedium;
+            descText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = desc.AddComponent<LayoutElement>();
             layout.preferredHeight = 200;
@@ -319,6 +327,10 @@ namespace DigitPark.Editor
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkBrown;
             btnText.alignment = TextAlignmentOptions.Center;
+            btnText.enableAutoSizing = true;
+            btnText.fontSizeMin = FontSizes.AutoMinBody;
+            btnText.fontSizeMax = FontSizes.AuthTitle;
+            btnText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateLegalText(Transform parent, string text)
@@ -334,6 +346,10 @@ namespace DigitPark.Editor
             legalText.color = TextGray;
             legalText.alignment = TextAlignmentOptions.Center;
             legalText.enableWordWrapping = true;
+            legalText.enableAutoSizing = true;
+            legalText.fontSizeMin = FontSizes.AutoMinCompact;
+            legalText.fontSizeMax = FontSizes.BodyLarge;
+            legalText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = legal.AddComponent<LayoutElement>();
             layout.preferredHeight = 90;
@@ -355,12 +371,16 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusText = status.AddComponent<TextMeshProUGUI>();
             statusText.font = DefaultFont;
-            statusText.text = "Toca el botón para iniciar la verificación";
+            statusText.text = "Tap the button to start verification";
             statusText.fontSize = FontSizes.DisplayMedium;
             statusText.fontStyle = FontStyles.Bold;
             statusText.color = TextWhite;
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.enableWordWrapping = true;
+            statusText.enableAutoSizing = true;
+            statusText.fontSizeMin = FontSizes.AutoMinBody;
+            statusText.fontSizeMax = FontSizes.DisplayMedium;
+            statusText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = status.AddComponent<LayoutElement>();
             layout.preferredHeight = 150;

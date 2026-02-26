@@ -8,7 +8,7 @@ namespace DigitPark.Editor
     /// </summary>
     public static class CashBattleOnboardingMenuItems
     {
-        [MenuItem("DigitPark/UI Builders/Onboarding/Reset Cash Battle Onboarding", false, 310)]
+        [MenuItem("DigitPark/UI Builders/Onboarding/Reset Cash Battle Onboarding", false, 173)]
         public static void ResetCashBattleOnboarding()
         {
             if (EditorUtility.DisplayDialog(
@@ -21,7 +21,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Check Onboarding Status", false, 311)]
+        [MenuItem("DigitPark/UI Builders/Onboarding/Check Onboarding Status", false, 174)]
         public static void CheckOnboardingStatus()
         {
             bool isComplete = DigitPark.Managers.CashBattleOnboardingManager.IsOnboardingComplete();

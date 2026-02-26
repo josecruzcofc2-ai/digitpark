@@ -49,7 +49,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Social/Notifications References", false, 232)]
+        [MenuItem("DigitPark/Auto Assigners/References/Social/Notifications References", false, 153)]
         public static void ShowWindow()
         {
             var window = GetWindow<NotificationsReferenceAssigner>("Notifications Reference Assigner");

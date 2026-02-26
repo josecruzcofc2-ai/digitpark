@@ -46,7 +46,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashBattleHub References", false, 240)]
+        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashBattleHub References", false, 180)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashBattleHubReferenceAssigner>("CashBattleHub Reference Assigner");

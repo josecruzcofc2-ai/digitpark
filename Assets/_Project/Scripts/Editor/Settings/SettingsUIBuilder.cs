@@ -57,7 +57,7 @@ namespace DigitPark.Editor
 
         // ==================== MAIN ENTRY POINT ====================
 
-        [MenuItem("DigitPark/UI Builders/Core/Settings", false, 160)]
+        [MenuItem("DigitPark/UI Builders/Core/Settings", false, 111)]
         public static void BuildSettingsUI()
         {
             if (WhiteSprite == null || Font == null)
@@ -210,11 +210,15 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.font = Font;
-            titleText.text = "AJUSTES";
+            titleText.text = "SETTINGS";
             titleText.fontSize = FontSizes.SceneTitle;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = TEXT_WHITE;
+            titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.SceneTitle;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
             titleText.raycastTarget = false;
         }
 
@@ -289,35 +293,35 @@ namespace DigitPark.Editor
 
         private static void BuildAccountCard(Transform parent)
         {
-            Transform card = CreateCard(parent, "AccountCard", "CUENTA", CYAN_BORDER);
+            Transform card = CreateCard(parent, "AccountCard", "ACCOUNT", CYAN_BORDER);
 
-            CreateSettingsRow(card, "ChangeNameButton", "Cambiar Nombre", "100 \u2666", CYAN_NEON, true, "ChangeNameCostText");
+            CreateSettingsRow(card, "ChangeNameButton", "Change Name", "100 \u2666", CYAN_NEON, true, "ChangeNameCostText");
             CreateSeparator(card);
             CreatePlayerIDRow(card);
         }
 
         private static void BuildAudioCard(Transform parent)
         {
-            Transform card = CreateCard(parent, "AudioCard", "AUDIO", CYAN_BORDER);
+            Transform card = CreateCard(parent, "AudioCard", "SOUND", CYAN_BORDER);
 
-            CreateSliderRow(card, "SoundVolumeSlider", "SoundValueText", "Musica", 0.5f);
+            CreateSliderRow(card, "SoundVolumeSlider", "SoundValueText", "Music", 0.5f);
             CreateSeparator(card);
-            CreateSliderRow(card, "EffectsVolumeSlider", "EffectsValueText", "Efectos", 0.5f);
+            CreateSliderRow(card, "EffectsVolumeSlider", "EffectsValueText", "Effects", 0.5f);
             CreateSeparator(card);
-            CreateToggleRow(card, "VibrationToggle", "Vibracion", true);
+            CreateToggleRow(card, "VibrationToggle", "Vibration", true);
         }
 
         private static void BuildAppearanceCard(Transform parent)
         {
-            Transform card = CreateCard(parent, "AppearanceCard", "APARIENCIA", CYAN_BORDER);
+            Transform card = CreateCard(parent, "AppearanceCard", "APPEARANCE", CYAN_BORDER);
 
-            CreateDropdownRow(card, "LanguageDropdown", "ChangeLanguageLabel", "Idioma",
+            CreateDropdownRow(card, "LanguageDropdown", "ChangeLanguageLabel", "Language",
                 new[] { "English", "Espanol", "Francais", "Portugues", "Deutsch" }, 1);
             CreateSeparator(card);
 
             // Load theme names dynamically from Resources/Themes
             string[] themeNames = GetThemeNamesFromResources();
-            CreateThemeDropdownRow(card, "ThemeDropdown", "ChangeThemeLabel", "Tema", themeNames, 0);
+            CreateThemeDropdownRow(card, "ThemeDropdown", "ChangeThemeLabel", "Theme", themeNames, 0);
         }
 
         /// <summary>
@@ -365,19 +369,28 @@ namespace DigitPark.Editor
 
             if (controller != null)
             {
-                // Load and assign lock icon sprite
-                Sprite lockSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
-                if (lockSprite != null)
+                var so = new SerializedObject(controller);
+
+                // Load and assign gold lock icon (paid themes)
+                Sprite goldLock = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+                if (goldLock != null)
                 {
-                    var so = new SerializedObject(controller);
-                    var lockProp = so.FindProperty("lockIconSprite");
-                    if (lockProp != null)
-                    {
-                        lockProp.objectReferenceValue = lockSprite;
-                        so.ApplyModifiedProperties();
-                    }
+                    var goldProp = so.FindProperty("lockGoldSprite");
+                    if (goldProp != null)
+                        goldProp.objectReferenceValue = goldLock;
                 }
-                Debug.Log("[SettingsUIBuilder] ThemeDropdownController added with lock icon");
+
+                // Load and assign silver lock icon (earnable themes)
+                Sprite silverLock = Resources.Load<Sprite>("UI/Icons/icon_lock_silver");
+                if (silverLock != null)
+                {
+                    var silverProp = so.FindProperty("lockSilverSprite");
+                    if (silverProp != null)
+                        silverProp.objectReferenceValue = silverLock;
+                }
+
+                so.ApplyModifiedProperties();
+                Debug.Log("[SettingsUIBuilder] ThemeDropdownController added with dual lock icons");
             }
 
             // Add lock icons to dropdown item template
@@ -444,45 +457,45 @@ namespace DigitPark.Editor
             CreateSeparator(card);
 
             // Remove Ads
-            CreateSettingsRow(card, "RemoveAdsButton", "Quitar Anuncios", "$10", GOLD, true, "RemoveAdsPriceText");
+            CreateSettingsRow(card, "RemoveAdsButton", "Remove Ads", "$10", GOLD, true, "RemoveAdsPriceText");
             CreateSeparator(card);
 
             // Premium Full
-            CreateSettingsRow(card, "PremiumFullButton", "Premium Completo", "$20", GOLD, true, "PremiumFullPriceText");
+            CreateSettingsRow(card, "PremiumFullButton", "Full Premium", "$20", GOLD, true, "PremiumFullPriceText");
             CreateSeparator(card);
 
             // Shop entry
-            CreateSettingsRow(card, "ShopButton", "Tienda", ">", CYAN_NEON, true);
+            CreateSettingsRow(card, "ShopButton", "Shop", ">", CYAN_NEON, true);
             CreateSeparator(card);
 
             // Restore Purchases
-            CreateSettingsRow(card, "RestorePurchasesButton", "Restaurar Compras", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "RestorePurchasesButton", "Restore Purchases", ">", TEXT_GRAY, true);
         }
 
         private static void BuildLegalCard(Transform parent)
         {
             Transform card = CreateCard(parent, "LegalCard", "LEGAL", CYAN_BORDER);
 
-            CreateSettingsRow(card, "TermsButton", "Terminos y Condiciones", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "TermsButton", "Terms and Conditions", ">", TEXT_GRAY, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "PrivacyButton", "Politica de Privacidad", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "PrivacyButton", "Privacy Policy", ">", TEXT_GRAY, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "ResponsibleGamingButton", "Juego Responsable", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "ResponsibleGamingButton", "Responsible Gaming", ">", TEXT_GRAY, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "TriumphTermsButton", "Terminos Triumph", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "TriumphTermsButton", "Triumph Terms", ">", TEXT_GRAY, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "SelfExclusionButton", "Auto Exclusion", ">", DANGER_RED, true);
+            CreateSettingsRow(card, "SelfExclusionButton", "Self Exclusion", ">", DANGER_RED, true);
         }
 
         private static void BuildDangerZoneCard(Transform parent)
         {
-            Transform card = CreateCard(parent, "DangerCard", "ZONA DE RIESGO", DANGER_BORDER);
+            Transform card = CreateCard(parent, "DangerCard", "DANGER ZONE", DANGER_BORDER);
 
             // Logout - styled as a full button
-            CreateDangerButton(card, "LogoutButton", "Cerrar Sesion", TEXT_GRAY, new Color(0.25f, 0.25f, 0.30f, 0.8f));
+            CreateDangerButton(card, "LogoutButton", "Sign Out", TEXT_GRAY, new Color(0.25f, 0.25f, 0.30f, 0.8f));
             CreateSeparator(card);
             // Delete Account - red button
-            CreateDangerButton(card, "DeleteAccountButton", "Eliminar Cuenta", DANGER_RED, new Color(0.3f, 0.08f, 0.08f, 0.6f));
+            CreateDangerButton(card, "DeleteAccountButton", "Delete Account", DANGER_RED, new Color(0.3f, 0.08f, 0.08f, 0.6f));
         }
 
         private static void BuildOverlayPanels(Canvas canvas)
@@ -492,18 +505,18 @@ namespace DigitPark.Editor
 
             // Logout ConfirmPanelUI overlay
             BuildConfirmPanelOverlay(canvas.transform, "LogoutConfirmPanel",
-                "Cerrar Sesion", "¿Estas seguro que deseas cerrar sesion?",
-                "Confirmar", "Cancelar");
+                "Sign Out", "Are you sure you want to sign out?",
+                "Confirm", "Cancel");
 
             // Delete Account ConfirmPanelUI overlay
             BuildConfirmPanelOverlay(canvas.transform, "DeleteConfirmPanel",
-                "Eliminar Cuenta", "¿Estas seguro que deseas eliminar tu cuenta? Esta accion no se puede deshacer.",
-                "Eliminar", "Cancelar");
+                "Delete Account", "Are you sure you want to delete your account? This action cannot be undone.",
+                "Delete", "Cancel");
 
             // SelfExclusion ConfirmPanelUI overlay
             BuildConfirmPanelOverlay(canvas.transform, "SelfExclusionConfirmPanel",
-                "Auto Exclusion", "¿Estas seguro que deseas auto-excluirte? No podras jugar partidas con dinero real.",
-                "Confirmar", "Cancelar");
+                "Self Exclusion", "Are you sure you want to self-exclude? You will not be able to play matches for real money.",
+                "Confirm", "Cancel");
 
             // Change Name InputPanelUI overlay
             BuildInputPanelOverlay(canvas.transform);
@@ -621,7 +634,7 @@ namespace DigitPark.Editor
             titleRT.offsetMax = new Vector2(-20, -10);
             TextMeshProUGUI titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
             titleTxt.font = Font;
-            titleTxt.text = "Cambiar Nombre";
+            titleTxt.text = "Change Name";
             titleTxt.fontSize = FontSizes.SceneTitle;
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = CYAN_NEON;
@@ -658,7 +671,7 @@ namespace DigitPark.Editor
             placeholderRT.offsetMax = Vector2.zero;
             TextMeshProUGUI placeholderTxt = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTxt.font = Font;
-            placeholderTxt.text = "Nuevo nombre...";
+            placeholderTxt.text = "New name...";
             placeholderTxt.fontSize = FontSizes.DisplayMedium;
             placeholderTxt.fontStyle = FontStyles.Italic;
             placeholderTxt.color = TEXT_GRAY;
@@ -708,7 +721,7 @@ namespace DigitPark.Editor
             cTxtRT.offsetMax = Vector2.zero;
             TextMeshProUGUI confirmTxtComp = confirmTxtObj.AddComponent<TextMeshProUGUI>();
             confirmTxtComp.font = Font;
-            confirmTxtComp.text = "Guardar";
+            confirmTxtComp.text = "Save";
             confirmTxtComp.fontSize = FontSizes.DisplayMedium;
             confirmTxtComp.fontStyle = FontStyles.Bold;
             confirmTxtComp.color = DARK_NAVY;
@@ -737,7 +750,7 @@ namespace DigitPark.Editor
             ccTxtRT.offsetMax = Vector2.zero;
             TextMeshProUGUI cancelTxtComp = cancelTxtObj.AddComponent<TextMeshProUGUI>();
             cancelTxtComp.font = Font;
-            cancelTxtComp.text = "Cancelar";
+            cancelTxtComp.text = "Cancel";
             cancelTxtComp.fontSize = FontSizes.DisplayMedium;
             cancelTxtComp.color = TEXT_GRAY;
             cancelTxtComp.alignment = TextAlignmentOptions.Center;
@@ -1131,7 +1144,7 @@ namespace DigitPark.Editor
             badgeBg.sprite = WhiteSprite;
             badgeBg.color = GOLD;
 
-            TextMeshProUGUI badgeText = CreateTextChild(badge.transform, "BadgeText", "ACTIVO", FontSizes.LabelLarge, DARK_NAVY, TextAlignmentOptions.Center);
+            TextMeshProUGUI badgeText = CreateTextChild(badge.transform, "BadgeText", "ACTIVE", FontSizes.LabelLarge, DARK_NAVY, TextAlignmentOptions.Center);
             badgeText.fontStyle = FontStyles.Bold;
 
             badge.SetActive(false); // Hidden by default, shown when premium is active
@@ -1206,7 +1219,7 @@ namespace DigitPark.Editor
             Button copyButton = copyBtn.AddComponent<Button>();
             copyButton.targetGraphic = copyBg;
 
-            TextMeshProUGUI copyText = CreateTextChild(copyBtn.transform, "Text", "Copiar", FontSizes.ValueLarge, DARK_NAVY, TextAlignmentOptions.Center);
+            TextMeshProUGUI copyText = CreateTextChild(copyBtn.transform, "Text", "Copy", FontSizes.ValueLarge, DARK_NAVY, TextAlignmentOptions.Center);
             copyText.fontStyle = FontStyles.Bold;
         }
 

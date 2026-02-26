@@ -60,7 +60,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Core/Settings References", false, 223)]
+        [MenuItem("DigitPark/Auto Assigners/References/Core/Settings References", false, 111)]
         public static void ShowWindow()
         {
             var window = GetWindow<SettingsReferenceAssigner>("Settings Reference Assigner");

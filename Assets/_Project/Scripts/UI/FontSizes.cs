@@ -17,11 +17,13 @@ namespace DigitPark.UI
         public const float ValueMedium   = 42f;
         public const float Penalty       = 42f;
         public const float LabelLarge    = 40f;
+        public const float TabLabel      = 36f;
         public const float Button        = 36f;
-        public const float BodyLarge     = 32f;
-        public const float Body          = 30f;
+        public const float BodyLarge     = 36f;
+        public const float Body          = 36f;
 
         // ── Auto-Size Minimums (only for fontSizeMin in auto-sizing, never as fixed size) ──
+        public const float AutoMinTab     = 22f;
         public const float AutoMinTitle   = 36f;
         public const float AutoMinValue   = 30f;
         public const float AutoMinBody    = 24f;

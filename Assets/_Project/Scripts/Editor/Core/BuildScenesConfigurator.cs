@@ -75,7 +75,7 @@ namespace DigitPark.Editor
             // === 30-36: CASH BATTLE ===
             new[] { "CashBattle/CashBattleHub" },
             new[] { "CashBattle/CashBattle1v1" },
-            new[] { "Tournaments/CashTournaments" },
+            new[] { "CashBattle/CashTournaments" },
             new[] { "CashBattle/CashWallet" },
             new[] { "CashBattle/CashHistory" },
             new[] { "CashBattle/CashProfile" },
@@ -246,7 +246,7 @@ namespace DigitPark.Editor
                 case "Onboarding":
                     return path.Contains("CashBattle") ? "CASH BATTLE" : "ONBOARDING";
                 case "Games":
-                    if (path.Contains("Flow/")) return "GAME FLOW";
+                    if (path.Contains("Navigation/")) return "GAME NAVIGATION";
                     if (path.Contains("Minigames/")) return "MINIGAMES";
                     return "GAMES";
                 case "Social":

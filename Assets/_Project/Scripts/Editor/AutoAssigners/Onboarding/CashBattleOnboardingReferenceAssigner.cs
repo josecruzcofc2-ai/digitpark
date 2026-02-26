@@ -40,7 +40,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Onboarding/CashBattleOnboarding References", false, 241)]
+        [MenuItem("DigitPark/Auto Assigners/References/Onboarding/CashBattleOnboarding References", false, 171)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashBattleOnboardingReferenceAssigner>("CashBattleOnboarding Reference Assigner");

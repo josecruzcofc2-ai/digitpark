@@ -43,7 +43,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/PlayModeSelection References", false, 233)]
+        [MenuItem("DigitPark/Auto Assigners/References/Games/PlayModeSelection References", false, 126)]
         public static void ShowWindow()
         {
             var window = GetWindow<PlayModeSelectionReferenceAssigner>("PlayModeSelection Reference Assigner");

@@ -124,14 +124,14 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(parent, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -120), new Vector2(0, 60));
-            TextMeshProUGUI titleTmp = AddText(title, "SPRINT COMPLETADO!", 42, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = AddText(title, "SPRINT COMPLETE!", 42, CYAN_NEON, FontStyles.Bold);
             AddGlow(title, BLUE_NEON, 3);
 
             // Subtitle
             GameObject subtitle = CreateChild(parent, "Subtitle");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -165), new Vector2(0, 35));
-            AddText(subtitle, "Resumen del Sprint", 22, new Color(0.6f, 0.7f, 0.9f), FontStyles.Italic);
+            AddText(subtitle, "Sprint Summary", 22, new Color(0.6f, 0.7f, 0.9f), FontStyles.Italic);
         }
 
         private static void CreateGamesTable(Transform parent)
@@ -158,9 +158,9 @@ namespace DigitPark.Editor
             headerBg.color = new Color(0.08f, 0.1f, 0.2f, 0.9f);
 
             // Header columns: Game | Time | Errors
-            CreateTableHeaderCell(headerRow.transform, "GameHeader", "JUEGO", 0f, 0.4f);
-            CreateTableHeaderCell(headerRow.transform, "TimeHeader", "TIEMPO", 0.4f, 0.7f);
-            CreateTableHeaderCell(headerRow.transform, "ErrorsHeader", "ERRORES", 0.7f, 1f);
+            CreateTableHeaderCell(headerRow.transform, "GameHeader", "GAME", 0f, 0.4f);
+            CreateTableHeaderCell(headerRow.transform, "TimeHeader", "TIME", 0.4f, 0.7f);
+            CreateTableHeaderCell(headerRow.transform, "ErrorsHeader", "ERRORS", 0.7f, 1f);
 
             // Rows container (populated at runtime)
             GameObject rowsContainer = CreateChild(tableContainer.transform, "GameRowsContainer");
@@ -265,15 +265,15 @@ namespace DigitPark.Editor
 
             // Total Time
             CreateStatItem(totalsContainer.transform, "TotalTimeLabel", "TotalTimeValue",
-                "TIEMPO TOTAL", "45.23s", CYAN_NEON, 0f, 0.35f);
+                "TOTAL TIME", "45.23s", CYAN_NEON, 0f, 0.35f);
 
             // Total Errors
             CreateStatItem(totalsContainer.transform, "TotalErrorsLabel", "TotalErrorsValue",
-                "ERRORES", "3", new Color(0.8f, 0.6f, 0.4f), 0.35f, 0.65f);
+                "ERRORS", "3", new Color(0.8f, 0.6f, 0.4f), 0.35f, 0.65f);
 
             // Total Score
             CreateStatItem(totalsContainer.transform, "TotalScoreLabel", "TotalScoreValue",
-                "PUNTUACION", "49.23s", GOLD, 0.65f, 1f);
+                "SCORE", "49.23s", GOLD, 0.65f, 1f);
         }
 
         private static void CreateStatItem(Transform parent, string labelName, string valueName,
@@ -335,7 +335,7 @@ namespace DigitPark.Editor
             gwRt.anchorMax = new Vector2(0.7f, 0.5f);
             gwRt.offsetMin = Vector2.zero;
             gwRt.offsetMax = Vector2.zero;
-            AddText(gamesWon, "Juegos: 2 - 1", 16, new Color(0.6f, 0.7f, 0.8f), FontStyles.Normal);
+            AddText(gamesWon, "Games: 2 - 1", 16, new Color(0.6f, 0.7f, 0.8f), FontStyles.Normal);
 
             // Overall result (center top)
             GameObject overallResult = CreateChild(vsSection.transform, "OverallResult");
@@ -383,7 +383,7 @@ namespace DigitPark.Editor
             efRt.anchorMax = new Vector2(1, 0.45f);
             efRt.offsetMin = Vector2.zero;
             efRt.offsetMax = Vector2.zero;
-            AddText(entryFee, "Entrada: $5.00", 16, new Color(0.7f, 0.6f, 0.4f), FontStyles.Normal);
+            AddText(entryFee, "Entry: $5.00", 16, new Color(0.7f, 0.6f, 0.4f), FontStyles.Normal);
         }
 
         private static void CreateButtons(Transform parent)
@@ -399,17 +399,17 @@ namespace DigitPark.Editor
             hlg.childControlWidth = false;
 
             // Play Again button (practice)
-            CreateButton3D(buttonsContainer.transform, "PlayAgainButton", "JUGAR DE NUEVO", BLUE_NEON, 240, 70);
+            CreateButton3D(buttonsContainer.transform, "PlayAgainButton", "PLAY AGAIN", BLUE_NEON, 240, 70);
 
             // Back button (practice)
-            CreateButton3D(buttonsContainer.transform, "BackButton", "VOLVER", new Color(0.4f, 0.4f, 0.5f), 160, 70);
+            CreateButton3D(buttonsContainer.transform, "BackButton", "BACK", new Color(0.4f, 0.4f, 0.5f), 160, 70);
 
             // Continue button (online/cash)
-            GameObject continueBtn = CreateButton3D(buttonsContainer.transform, "ContinueButton", "CONTINUAR", WIN_GREEN, 200, 70);
+            GameObject continueBtn = CreateButton3D(buttonsContainer.transform, "ContinueButton", "CONTINUE", WIN_GREEN, 200, 70);
             continueBtn.SetActive(false);
 
             // Rematch button (online/cash)
-            GameObject rematchBtn = CreateButton3D(buttonsContainer.transform, "RematchButton", "REVANCHA", CYAN_NEON, 200, 70);
+            GameObject rematchBtn = CreateButton3D(buttonsContainer.transform, "RematchButton", "REMATCH", CYAN_NEON, 200, 70);
             rematchBtn.SetActive(false);
         }
 
@@ -538,6 +538,10 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = size;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }
 
@@ -608,7 +612,7 @@ namespace DigitPark.Editor
             // Text
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.35f, 28f);
+            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Button);
             AddText(textObj, text, fontSize, new Color(0.02f, 0.05f, 0.1f), FontStyles.Bold);
 
             // Button component

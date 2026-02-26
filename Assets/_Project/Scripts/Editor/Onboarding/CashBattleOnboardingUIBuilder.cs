@@ -77,7 +77,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Cash Battle Onboarding", false, 302)]
+        [MenuItem("DigitPark/UI Builders/Onboarding/Cash Battle Onboarding", false, 171)]
         public static void ShowWindow()
         {
             GetWindow<CashBattleOnboardingUIBuilder>("CashBattle Onboarding Builder");
@@ -286,7 +286,7 @@ namespace DigitPark.Editor
             stRT.offsetMin = Vector2.zero;
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
-            stTMP.text = "SALTAR";
+            stTMP.text = "SKIP";
             stTMP.fontSize = FontSizes.Body;
             stTMP.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
@@ -328,83 +328,83 @@ namespace DigitPark.Editor
         {
             var slide = CreateSlideBase(parent, "Slide1", 0, true);
 
-            CreateSlideTitle(slide, "\u00A1BIENVENIDO A\nCASH BATTLE!", GOLD);
+            CreateSlideTitle(slide, "WELCOME TO\nCASH BATTLE!", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "La plataforma de competencias\ncon DINERO REAL en Digit Park", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "The real money competition\nplatform in Digit Park", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "GANA DINERO REAL JUGANDO", (int)FontSizes.ValueMedium, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentText(card, "WIN REAL MONEY PLAYING", (int)FontSizes.ValueMedium, GREEN_WIN, TextAlignmentOptions.Center, true);
             AddContentSpacer(card, 14);
-            AddContentText(card, "\u2022  Competencias 1v1 desde $1 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Torneos con premios garantizados", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Retiros r\u00E1pidos y seguros", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  1v1 competitions from $1 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Tournaments with guaranteed prizes", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Fast and secure withdrawals", (int)FontSizes.BodyLarge, TEXT_WHITE);
         }
 
         private static void CreateSlide2_Verification(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide2", 1, false);
 
-            CreateSlideTitle(slide, "VERIFICA TU EDAD\n(18+ REQUERIDO)", GOLD);
+            CreateSlideTitle(slide, "VERIFY YOUR AGE\n(18+ REQUIRED)", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "Para jugar con dinero real, debes:", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "To play with real money, you must:", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2713  Ser mayor de 18 a\u00F1os", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Verificar tu identidad con Triump\u2122", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Confirmar tu informaci\u00F3n bancaria", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Be 18 years or older", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Verify your identity with Triump\u2122", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Confirm your banking information", (int)FontSizes.BodyLarge, TEXT_WHITE);
             AddContentSpacer(card, 12);
-            AddContentText(card, "Proceso 100% seguro y confidencial", (int)FontSizes.Body, TEXT_SECONDARY, TextAlignmentOptions.Center);
+            AddContentText(card, "100% secure and confidential process", (int)FontSizes.Body, TEXT_SECONDARY, TextAlignmentOptions.Center);
         }
 
         private static void CreateSlide3_Deposit(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide3", 2, false);
 
-            CreateSlideTitle(slide, "DEPOSITA FONDOS\nEN TU WALLET", GOLD);
+            CreateSlideTitle(slide, "DEPOSIT FUNDS\nTO YOUR WALLET", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "A\u00F1ade dinero a tu cuenta f\u00E1cilmente:", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "Add money to your account easily:", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2022  Tarjeta de cr\u00E9dito/d\u00E9bito", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Transferencia bancaria", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  M\u00E9todos de pago locales", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Credit/debit card", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Bank transfer", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Local payment methods", (int)FontSizes.BodyLarge, TEXT_WHITE);
             AddContentSpacer(card, 12);
-            AddContentText(card, "Dep\u00F3sito m\u00EDnimo: $5 USD", (int)FontSizes.ValueMedium, GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "Minimum deposit: $5 USD", (int)FontSizes.ValueMedium, GOLD, TextAlignmentOptions.Center, true);
         }
 
         private static void CreateSlide4_Play(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide4", 3, false);
 
-            CreateSlideTitle(slide, "ELIGE TU JUEGO\nY APUESTA", GOLD);
+            CreateSlideTitle(slide, "CHOOSE YOUR GAME\nAND BET", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "COMPETENCIAS 1v1", (int)FontSizes.ValueMedium, ORANGE_GOLD, TextAlignmentOptions.Center, true);
-            AddContentText(card, "\u2022  Matchmaking por habilidad (MMR)", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Apuestas desde $1 hasta $250 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  El ganador se lleva el 80%", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "1v1 COMPETITIONS", (int)FontSizes.ValueMedium, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Skill-based matchmaking (MMR)", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Bets from $1 to $250 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Winner takes 80%", (int)FontSizes.BodyLarge, TEXT_WHITE);
             AddContentSpacer(card, 10);
-            AddContentText(card, "TORNEOS", (int)FontSizes.ValueMedium, ORANGE_GOLD, TextAlignmentOptions.Center, true);
-            AddContentText(card, "\u2022  Hasta 256 jugadores", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Premios garantizados", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Sistema de brackets profesional", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "TOURNAMENTS", (int)FontSizes.ValueMedium, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Up to 256 players", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Guaranteed prizes", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Professional bracket system", (int)FontSizes.BodyLarge, TEXT_WHITE);
         }
 
         private static void CreateSlide5_Win(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide5", 4, false);
 
-            CreateSlideTitle(slide, "\u00A1GANA Y RETIRA\nTU DINERO!", GREEN_WIN);
+            CreateSlideTitle(slide, "WIN AND WITHDRAW\nYOUR MONEY!", GREEN_WIN);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "RETIROS R\u00C1PIDOS Y SEGUROS", (int)FontSizes.ValueMedium, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentText(card, "FAST AND SECURE WITHDRAWALS", (int)FontSizes.ValueMedium, GREEN_WIN, TextAlignmentOptions.Center, true);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2713  Retiro m\u00EDnimo: $10 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  M\u00E1ximo: $500 USD por retiro", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Procesamiento en 1-3 d\u00EDas h\u00E1biles", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Directo a tu cuenta bancaria", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Minimum withdrawal: $10 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Maximum: $500 USD per withdrawal", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Processed in 1-3 business days", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Direct to your bank account", (int)FontSizes.BodyLarge, TEXT_WHITE);
             AddContentSpacer(card, 14);
-            AddContentText(card, "\u00A1EMPIEZA A GANAR HOY!", (int)FontSizes.ValueMedium, GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "START WINNING TODAY!", (int)FontSizes.ValueMedium, GOLD, TextAlignmentOptions.Center, true);
         }
 
         #endregion
@@ -589,7 +589,7 @@ namespace DigitPark.Editor
             btRT.offsetMin = Vector2.zero;
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
-            btTMP.text = "ATR\u00C1S";
+            btTMP.text = "BACK";
             btTMP.fontSize = FontSizes.Button;
             btTMP.color = TEXT_SECONDARY;
             btTMP.fontStyle = FontStyles.Bold;
@@ -616,7 +616,7 @@ namespace DigitPark.Editor
             ntRT.offsetMin = Vector2.zero;
             ntRT.offsetMax = Vector2.zero;
             var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
-            ntTMP.text = "SIGUIENTE";
+            ntTMP.text = "NEXT";
             ntTMP.fontSize = FontSizes.Button;
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
@@ -642,7 +642,7 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
 
             var lTMP = GetOrAdd<TextMeshProUGUI>(legal);
-            lTMP.text = "Powered by Triump\u2122 \u2022 Juego responsable \u2022 Solo mayores de 18 a\u00F1os";
+            lTMP.text = "Powered by Triump\u2122 \u2022 Responsible gaming \u2022 18+ only";
             lTMP.fontSize = FontSizes.Body;
             lTMP.color = TEXT_SECONDARY;
             lTMP.fontStyle = FontStyles.Bold;

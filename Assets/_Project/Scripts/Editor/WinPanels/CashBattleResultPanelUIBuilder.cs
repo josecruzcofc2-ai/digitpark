@@ -134,7 +134,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(parent, "Title");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -55), new Vector2(0, 70));
-            string titleStr = isWin ? "GANASTE!" : "PERDISTE";
+            string titleStr = isWin ? "YOU WON!" : "YOU LOST";
             TextMeshProUGUI titleTmp = AddText(title, titleStr, 52, accentColor, FontStyles.Bold);
             AddGlow(title, accentColor, 4);
 
@@ -142,7 +142,7 @@ namespace DigitPark.Editor
             GameObject subtitle = CreateChild(parent, "Subtitle");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -110), new Vector2(0, 35));
-            string subtitleStr = isWin ? "Victoria en Cash Battle" : "La proxima sera tuya";
+            string subtitleStr = isWin ? "Cash Battle Victory" : "Next time will be yours";
             AddText(subtitle, subtitleStr, 22, new Color(0.7f, 0.6f, 0.5f), FontStyles.Italic);
         }
 
@@ -169,13 +169,13 @@ namespace DigitPark.Editor
             GameObject entryFee = CreateChild(parent, "EntryFee");
             SetupRectTransform(entryFee, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -250), new Vector2(350, 30));
-            AddText(entryFee, "Entrada: $5.00", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Normal);
+            AddText(entryFee, "Entry: $5.00", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Normal);
 
             // Winner share info
             GameObject winnerShare = CreateChild(parent, "WinnerShare");
             SetupRectTransform(winnerShare, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -278), new Vector2(350, 25));
-            AddText(winnerShare, isWin ? "Ganador: 90% del pozo" : "", 16,
+            AddText(winnerShare, isWin ? "Winner: 90% of the pot" : "", 16,
                 new Color(0.5f, 0.5f, 0.4f), FontStyles.Normal);
         }
 
@@ -250,7 +250,7 @@ namespace DigitPark.Editor
             nameRt.anchorMax = new Vector2(0.95f, 0.95f);
             nameRt.offsetMin = Vector2.zero;
             nameRt.offsetMax = Vector2.zero;
-            AddText(nameObj, isPlayer ? "TU" : "OPONENTE", 22, cardColor, FontStyles.Bold);
+            AddText(nameObj, isPlayer ? "YOU" : "OPPONENT", 22, cardColor, FontStyles.Bold);
 
             // Time
             GameObject timeObj = CreateChild(card.transform, isPlayer ? "PlayerTime" : "OpponentTime");
@@ -268,7 +268,7 @@ namespace DigitPark.Editor
             errRt.anchorMax = new Vector2(0.9f, 0.35f);
             errRt.offsetMin = Vector2.zero;
             errRt.offsetMax = Vector2.zero;
-            AddText(errorsObj, "0 errores", 18, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
+            AddText(errorsObj, "0 errors", 18, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
         }
 
         private static void CreateFeeInfo(Transform parent, bool isWin)
@@ -290,11 +290,11 @@ namespace DigitPark.Editor
             hlg.childControlWidth = false;
 
             // New Match button
-            CreateButton3D(buttonsContainer.transform, "NewMatchButton", "NUEVA PARTIDA",
+            CreateButton3D(buttonsContainer.transform, "NewMatchButton", "NEW MATCH",
                 isWin ? CYAN_NEON : MAGENTA, 230, 70);
 
             // Continue button
-            CreateButton3D(buttonsContainer.transform, "ContinueButton", "CONTINUAR",
+            CreateButton3D(buttonsContainer.transform, "ContinueButton", "CONTINUE",
                 isWin ? accentColor : new Color(0.4f, 0.35f, 0.4f), 200, 70);
         }
 
@@ -411,6 +411,10 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = size;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }
 
@@ -474,7 +478,7 @@ namespace DigitPark.Editor
 
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.35f, 28f);
+            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Button);
             AddText(textObj, text, fontSize, new Color(0.02f, 0.02f, 0.05f), FontStyles.Bold);
 
             Button button = btn.AddComponent<Button>();

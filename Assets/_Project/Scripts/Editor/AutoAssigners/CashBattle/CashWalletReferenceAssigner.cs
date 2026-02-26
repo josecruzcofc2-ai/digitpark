@@ -51,7 +51,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashWallet References", false, 243)]
+        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashWallet References", false, 184)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashWalletReferenceAssigner>("CashWallet Reference Assigner");

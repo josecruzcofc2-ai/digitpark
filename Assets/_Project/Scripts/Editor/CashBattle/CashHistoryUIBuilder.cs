@@ -62,7 +62,7 @@ namespace DigitPark.Editor
             public Object assignedObject;
         }
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash History", false, 253)]
+        [MenuItem("DigitPark/UI Builders/CashBattle/Cash History", false, 182)]
         public static void ShowWindow()
         {
             GetWindow<CashHistoryUIBuilder>("Cash History Builder");
@@ -225,7 +225,7 @@ namespace DigitPark.Editor
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
-            GameObject prefab = CreateMatchHistoryItem(canvas.transform, "QuickMath", "@Opponent", true, 5f, 10f, "Hoy, 14:30", "5-3", "1v1");
+            GameObject prefab = CreateMatchHistoryItem(canvas.transform, "QuickMath", "@Opponent", true, 5f, 10f, "Today, 14:30", "5-3", "1v1");
             Selection.activeGameObject = prefab;
             Debug.Log("[CashHistoryUIBuilder] Match Item creado. Guárdalo como prefab.");
         }
@@ -378,7 +378,7 @@ namespace DigitPark.Editor
             titleRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.text = "Historial";
+            titleText.text = "History";
             titleText.fontSize = FontSizes.SceneTitle;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -473,18 +473,18 @@ namespace DigitPark.Editor
             glg.constraintCount = 5;
 
             // Stats con iconos - Row 1
-            CreateStatItemWithIcon(panel.transform, "stat_victories", "Victorias", "24", SUCCESS_GREEN);
-            CreateStatItemWithIcon(panel.transform, "stat_defeats", "Derrotas", "12", ERROR_RED);
+            CreateStatItemWithIcon(panel.transform, "stat_victories", "Victories", "24", SUCCESS_GREEN);
+            CreateStatItemWithIcon(panel.transform, "stat_defeats", "Defeats", "12", ERROR_RED);
             CreateStatItemWithIcon(panel.transform, "stat_winrate", "Win Rate", "67%", CYAN_ACCENT);
-            CreateStatItemWithIcon(panel.transform, "stat_earnings", "Ganado", "$156", SUCCESS_GREEN);
-            CreateStatItemWithIcon(panel.transform, "stat_draws", "Empates", "3", TEXT_SECONDARY);
+            CreateStatItemWithIcon(panel.transform, "stat_earnings", "Earned", "$156", SUCCESS_GREEN);
+            CreateStatItemWithIcon(panel.transform, "stat_draws", "Draws", "3", TEXT_SECONDARY);
 
             // Stats con iconos - Row 2
-            CreateStatItemWithIcon(panel.transform, "stat_total", "Total Partidas", "39", CYAN_ACCENT);
-            CreateStatItemWithIcon(panel.transform, "stat_streak", "Racha Actual", "5", GOLD_PRIMARY);
-            CreateStatItemWithIcon(panel.transform, "stat_beststreak", "Mejor Racha", "8", GOLD_LIGHT);
-            CreateStatItemWithIcon(panel.transform, "stat_tourneysplayed", "Torneos Jugados", "6", CYAN_ACCENT);
-            CreateStatItemWithIcon(panel.transform, "stat_tourneyswins", "Torneos Ganados", "2", SUCCESS_GREEN);
+            CreateStatItemWithIcon(panel.transform, "stat_total", "Total Matches", "39", CYAN_ACCENT);
+            CreateStatItemWithIcon(panel.transform, "stat_streak", "Current Streak", "5", GOLD_PRIMARY);
+            CreateStatItemWithIcon(panel.transform, "stat_beststreak", "Best Streak", "8", GOLD_LIGHT);
+            CreateStatItemWithIcon(panel.transform, "stat_tourneysplayed", "Tournaments Played", "6", CYAN_ACCENT);
+            CreateStatItemWithIcon(panel.transform, "stat_tourneyswins", "Tournaments Won", "2", SUCCESS_GREEN);
         }
 
         private static void CreateStatItemWithIcon(Transform parent, string iconName, string label, string value, Color valueColor)
@@ -585,9 +585,9 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
 
             // Filter buttons
-            CreateFilterButton(panel.transform, "FilterAll", "Todas", true);
-            CreateFilterButton(panel.transform, "FilterWins", "Victorias", false);
-            CreateFilterButton(panel.transform, "FilterLosses", "Derrotas", false);
+            CreateFilterButton(panel.transform, "FilterAll", "All", true);
+            CreateFilterButton(panel.transform, "FilterWins", "Victories", false);
+            CreateFilterButton(panel.transform, "FilterLosses", "Defeats", false);
         }
 
         private static void CreateFilterButton(Transform parent, string name, string text, bool isActive)
@@ -689,13 +689,13 @@ namespace DigitPark.Editor
             scroll.content = contentRT;
 
             // Sample matches with new design
-            CreateMatchHistoryItem(content.transform, "QuickMath", "@ProGamer99", true, 5f, 8.50f, "Hoy, 14:32", "1250-900", "1v1");
-            CreateMatchHistoryItem(content.transform, "FlashTap", "@SpeedKing", false, 10f, -10f, "Hoy, 12:15", "3-5", "1v1");
-            CreateMatchHistoryItem(content.transform, "MemoryPairs", "@MemMaster", true, 5f, 15f, "Ayer, 20:45", "6-4", "Torneo");
-            CreateMatchHistoryItem(content.transform, "CognitiveSprint", "@BrainStorm", true, 25f, 45f, "Ayer, 18:00", "7-2", "1v1");
-            CreateMatchHistoryItem(content.transform, "OddOneOut", "@EagleEye", false, 10f, -10f, "Hace 2 días", "2-5", "1v1");
-            CreateMatchHistoryItem(content.transform, "DigitRush", "@NumberKing", true, 15f, 27f, "Hace 2 días", "4500-3200", "1v1");
-            CreateMatchHistoryItem(content.transform, "QuickMath", "@MathWiz", true, 50f, 90f, "Hace 3 días", "8-3", "Torneo");
+            CreateMatchHistoryItem(content.transform, "QuickMath", "@ProGamer99", true, 5f, 8.50f, "Today, 14:32", "1250-900", "1v1");
+            CreateMatchHistoryItem(content.transform, "FlashTap", "@SpeedKing", false, 10f, -10f, "Today, 12:15", "3-5", "1v1");
+            CreateMatchHistoryItem(content.transform, "MemoryPairs", "@MemMaster", true, 5f, 15f, "Yesterday, 20:45", "6-4", "Tournament");
+            CreateMatchHistoryItem(content.transform, "CognitiveSprint", "@BrainStorm", true, 25f, 45f, "Yesterday, 18:00", "7-2", "1v1");
+            CreateMatchHistoryItem(content.transform, "OddOneOut", "@EagleEye", false, 10f, -10f, "2 days ago", "2-5", "1v1");
+            CreateMatchHistoryItem(content.transform, "DigitRush", "@NumberKing", true, 15f, 27f, "2 days ago", "4500-3200", "1v1");
+            CreateMatchHistoryItem(content.transform, "QuickMath", "@MathWiz", true, 50f, 90f, "3 days ago", "8-3", "Tournament");
         }
 
         private static GameObject CreateMatchHistoryItem(Transform parent, string game, string opponent, bool isWin, float entryFee, float netAmount, string date, string score, string mode)
@@ -826,7 +826,7 @@ namespace DigitPark.Editor
             modeLE.preferredHeight = 52;
 
             Image modeBg = modeBadge.AddComponent<Image>();
-            modeBg.color = mode == "Torneo" ? new Color(0.6f, 0.2f, 0.8f, 1f) : new Color(0.2f, 0.5f, 0.7f, 1f);
+            modeBg.color = mode == "Tournament" ? new Color(0.6f, 0.2f, 0.8f, 1f) : new Color(0.2f, 0.5f, 0.7f, 1f);
 
             GameObject modeText = new GameObject("Text");
             modeText.transform.SetParent(modeBadge.transform, false);
@@ -910,7 +910,7 @@ namespace DigitPark.Editor
             resRT.anchoredPosition = new Vector2(-30, -30);
 
             TextMeshProUGUI resText = resultObj.AddComponent<TextMeshProUGUI>();
-            resText.text = isWin ? "VICTORIA" : "DERROTA";
+            resText.text = isWin ? "VICTORY" : "DEFEAT";
             resText.fontSize = FontSizes.Button;
             resText.color = isWin ? SUCCESS_GREEN : ERROR_RED;
             resText.alignment = TextAlignmentOptions.Right;
@@ -947,7 +947,7 @@ namespace DigitPark.Editor
             entryRT.anchoredPosition = new Vector2(-30, 30);
 
             TextMeshProUGUI entryText = entryObj.AddComponent<TextMeshProUGUI>();
-            entryText.text = $"Entrada: ${entryFee:F0}";
+            entryText.text = $"Entry: ${entryFee:F0}";
             entryText.fontSize = FontSizes.Body;
             entryText.fontStyle = FontStyles.Bold;
             entryText.color = TEXT_SECONDARY;
@@ -985,7 +985,7 @@ namespace DigitPark.Editor
             rt.sizeDelta = new Vector2(0, 80);
 
             TextMeshProUGUI tmp = emptyState.AddComponent<TextMeshProUGUI>();
-            tmp.text = "No hay historial";
+            tmp.text = "No history";
             tmp.fontSize = FontSizes.Body;
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
@@ -1020,7 +1020,7 @@ namespace DigitPark.Editor
             textRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = "Cargar M\u00e1s";
+            tmp.text = "Load More";
             tmp.fontSize = FontSizes.Body;
             tmp.color = GOLD_PRIMARY;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -1098,15 +1098,15 @@ namespace DigitPark.Editor
             closeTMP.fontStyle = FontStyles.Bold;
 
             // Detail texts
-            CreateDetailText(detail.transform, "DetailTitleText", "T\u00edtulo", FontSizes.Button, FontStyles.Bold, TEXT_PRIMARY, 60);
-            CreateDetailText(detail.transform, "DetailSubtitleText", "Subtitulo", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 45);
-            CreateDetailText(detail.transform, "DetailResultText", "VICTORIA", FontSizes.ValueMedium, FontStyles.Bold, SUCCESS_GREEN, 65);
+            CreateDetailText(detail.transform, "DetailTitleText", "Title", FontSizes.Button, FontStyles.Bold, TEXT_PRIMARY, 60);
+            CreateDetailText(detail.transform, "DetailSubtitleText", "Subtitle", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 45);
+            CreateDetailText(detail.transform, "DetailResultText", "VICTORY", FontSizes.ValueMedium, FontStyles.Bold, SUCCESS_GREEN, 65);
             CreateDetailText(detail.transform, "DetailScoreText", "Score: 5 - 3", FontSizes.Body, FontStyles.Normal, TEXT_PRIMARY, 45);
-            CreateDetailText(detail.transform, "DetailEntryFeeText", "Entrada: $5.00", FontSizes.Body, FontStyles.Normal, GOLD_PRIMARY, 45);
-            CreateDetailText(detail.transform, "DetailPrizeText", "Premio: $8.50", FontSizes.Body, FontStyles.Normal, SUCCESS_GREEN, 45);
+            CreateDetailText(detail.transform, "DetailEntryFeeText", "Entry: $5.00", FontSizes.Body, FontStyles.Normal, GOLD_PRIMARY, 45);
+            CreateDetailText(detail.transform, "DetailPrizeText", "Prize: $8.50", FontSizes.Body, FontStyles.Normal, SUCCESS_GREEN, 45);
             CreateDetailText(detail.transform, "DetailNetText", "+$3.50", FontSizes.Button, FontStyles.Bold, SUCCESS_GREEN, 55);
-            CreateDetailText(detail.transform, "DetailDateText", "Hoy, 14:32", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 40);
-            CreateDetailText(detail.transform, "DetailDurationText", "Duraci\u00f3n: 2m 15s", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 40);
+            CreateDetailText(detail.transform, "DetailDateText", "Today, 14:32", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 40);
+            CreateDetailText(detail.transform, "DetailDurationText", "Duration: 2m 15s", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 40);
 
             detail.SetActive(false);
         }

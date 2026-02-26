@@ -48,8 +48,8 @@ namespace DigitPark.Editor
 
             string panelName = isWinVersion ? "OnlineWinPanel" : "OnlineLosePanel";
             Color mainColor = isWinVersion ? WIN_GREEN : LOSE_RED;
-            string resultText = isWinVersion ? "VICTORIA" : "DERROTA";
-            string subtitleText = isWinVersion ? "Mejor tiempo que tu oponente" : "Tu oponente fue mas rapido";
+            string resultText = isWinVersion ? "VICTORY" : "DEFEAT";
+            string subtitleText = isWinVersion ? "Faster than your opponent" : "Your opponent was faster";
 
             // Crear panel principal (sin parent para prefab)
             GameObject panel = new GameObject(panelName);
@@ -166,6 +166,10 @@ namespace DigitPark.Editor
             titleTMP.color = mainColor;
             titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTMP.fontSizeMax = FontSizes.DisplayLarge;
+            titleTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Efecto glow
             Outline titleGlow = resultTitle.AddComponent<Outline>();
@@ -185,6 +189,10 @@ namespace DigitPark.Editor
             subtitleTMP.fontSize = FontSizes.Body;
             subtitleTMP.color = new Color(0.8f, 0.8f, 0.8f);
             subtitleTMP.alignment = TextAlignmentOptions.Center;
+            subtitleTMP.enableAutoSizing = true;
+            subtitleTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            subtitleTMP.fontSizeMax = FontSizes.Body;
+            subtitleTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateVSSection(Transform parent, bool isWin)
@@ -279,11 +287,15 @@ namespace DigitPark.Editor
             nameRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
-            nameTMP.text = isPlayer ? "TU" : "OPONENTE";
+            nameTMP.text = isPlayer ? "YOU" : "OPPONENT";
             nameTMP.fontSize = FontSizes.Body;
             nameTMP.color = cardColor;
             nameTMP.alignment = TextAlignmentOptions.Center;
             nameTMP.fontStyle = FontStyles.Bold;
+            nameTMP.enableAutoSizing = true;
+            nameTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            nameTMP.fontSizeMax = FontSizes.Body;
+            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Tiempo
             GameObject timeObj = CreateElement(card.transform, isPlayer ? "PlayerTimeText" : "OpponentTimeText");
@@ -299,6 +311,10 @@ namespace DigitPark.Editor
             timeTMP.color = Color.white;
             timeTMP.alignment = TextAlignmentOptions.Center;
             timeTMP.fontStyle = FontStyles.Bold;
+            timeTMP.enableAutoSizing = true;
+            timeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            timeTMP.fontSizeMax = FontSizes.SectionHeader;
+            timeTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Errores
             GameObject errorsObj = CreateElement(card.transform, isPlayer ? "PlayerErrorsText" : "OpponentErrorsText");
@@ -309,10 +325,14 @@ namespace DigitPark.Editor
             errorsRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI errorsTMP = errorsObj.AddComponent<TextMeshProUGUI>();
-            errorsTMP.text = "0 errores";
+            errorsTMP.text = "0 errors";
             errorsTMP.fontSize = FontSizes.Body;
             errorsTMP.color = new Color(0.6f, 0.6f, 0.6f);
             errorsTMP.alignment = TextAlignmentOptions.Center;
+            errorsTMP.enableAutoSizing = true;
+            errorsTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            errorsTMP.fontSizeMax = FontSizes.Body;
+            errorsTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateTimeDifferenceSection(Transform parent, Color mainColor, bool isWin)
@@ -342,7 +362,7 @@ namespace DigitPark.Editor
             labelRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
-            labelTMP.text = isWin ? "Mas rapido por" : "Mas lento por";
+            labelTMP.text = isWin ? "Faster by" : "Slower by";
             labelTMP.fontSize = FontSizes.Body;
             labelTMP.color = new Color(0.7f, 0.7f, 0.7f);
             labelTMP.alignment = TextAlignmentOptions.Center;
@@ -398,11 +418,15 @@ namespace DigitPark.Editor
             continueTextRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI continueTMP = continueText.AddComponent<TextMeshProUGUI>();
-            continueTMP.text = "CONTINUAR";
+            continueTMP.text = "CONTINUE";
             continueTMP.fontSize = FontSizes.BodyLarge;
             continueTMP.color = mainColor;
             continueTMP.alignment = TextAlignmentOptions.Center;
             continueTMP.fontStyle = FontStyles.Bold;
+            continueTMP.enableAutoSizing = true;
+            continueTMP.fontSizeMin = FontSizes.AutoMinBody;
+            continueTMP.fontSizeMax = FontSizes.BodyLarge;
+            continueTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Rematch button (secundario)
             GameObject rematchBtn = CreateElement(buttonsContainer.transform, "RematchButton");
@@ -429,11 +453,15 @@ namespace DigitPark.Editor
             rematchTextRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI rematchTMP = rematchText.AddComponent<TextMeshProUGUI>();
-            rematchTMP.text = "REVANCHA";
+            rematchTMP.text = "REMATCH";
             rematchTMP.fontSize = FontSizes.BodyLarge;
             rematchTMP.color = CYAN_NEON;
             rematchTMP.alignment = TextAlignmentOptions.Center;
             rematchTMP.fontStyle = FontStyles.Bold;
+            rematchTMP.enableAutoSizing = true;
+            rematchTMP.fontSizeMin = FontSizes.AutoMinBody;
+            rematchTMP.fontSizeMax = FontSizes.BodyLarge;
+            rematchTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
     }
 }

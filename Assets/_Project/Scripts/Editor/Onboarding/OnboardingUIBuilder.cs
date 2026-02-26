@@ -80,7 +80,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Main Onboarding", false, 180)]
+        [MenuItem("DigitPark/UI Builders/Onboarding/Main Onboarding", false, 170)]
         public static void ShowWindow()
         {
             GetWindow<OnboardingUIBuilder>("Onboarding Builder");
@@ -281,7 +281,7 @@ namespace DigitPark.Editor
             stRT.offsetMin = Vector2.zero;
             stRT.offsetMax = Vector2.zero;
             var stTMP = GetOrAdd<TextMeshProUGUI>(skipText);
-            stTMP.text = "SALTAR";
+            stTMP.text = "SKIP";
             stTMP.fontSize = FontSizes.Body;
             stTMP.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
@@ -461,18 +461,18 @@ namespace DigitPark.Editor
         private static void CreateSlide1_Welcome(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide1", 0, true); // active by default
-            CreateSlideTitle(slide, "\u00A1Bienvenido a DigitPark!", CYAN_NEON);
+            CreateSlideTitle(slide, "Welcome to DigitPark!", CYAN_NEON);
 
             var content = CreateContentCard(slide);
-            AddContentText(content, "Tu destino para juegos mentales, competencias y diversi\u00F3n.",
+            AddContentText(content, "Your destination for brain games, competitions, and fun.",
                 (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
-            AddContentText(content, "ENTRENA TU MENTE Y COMPITE",
+            AddContentText(content, "TRAIN YOUR MIND AND COMPETE",
                 (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
-            AddBulletText(content, "5 minijuegos cognitivos");
-            AddBulletText(content, "Compite contra jugadores de todo el mundo");
-            AddBulletText(content, "Recompensas diarias y logros");
+            AddBulletText(content, "5 cognitive mini-games");
+            AddBulletText(content, "Compete against players from around the world");
+            AddBulletText(content, "Daily rewards and achievements");
         }
 
         #endregion
@@ -482,7 +482,7 @@ namespace DigitPark.Editor
         private static void CreateSlide2_Name(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide2", 1, false);
-            CreateSlideTitle(slide, "\u00BFC\u00F3mo te llamas?", CYAN_NEON);
+            CreateSlideTitle(slide, "What's your name?", CYAN_NEON);
 
             // NameInputPanel
             var panel = new GameObject("NameInputPanel");
@@ -548,7 +548,7 @@ namespace DigitPark.Editor
             phRT.offsetMin = Vector2.zero;
             phRT.offsetMax = Vector2.zero;
             var phTMP = placeholder.AddComponent<TextMeshProUGUI>();
-            phTMP.text = "Escribe tu nombre...";
+            phTMP.text = "Enter your name...";
             phTMP.fontSize = FontSizes.LabelLarge;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
             phTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
@@ -590,7 +590,7 @@ namespace DigitPark.Editor
             ctRT.offsetMin = Vector2.zero;
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = confirmText.AddComponent<TextMeshProUGUI>();
-            ctTMP.text = "CONFIRMAR";
+            ctTMP.text = "CONFIRM";
             ctTMP.fontSize = FontSizes.Button;
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
@@ -616,7 +616,7 @@ namespace DigitPark.Editor
         private static void CreateSlide3_Avatar(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide3", 2, false);
-            CreateSlideTitle(slide, "Elige tu Avatar", CYAN_NEON);
+            CreateSlideTitle(slide, "Choose your Avatar", CYAN_NEON);
 
             // AvatarSelectionPanel
             var panel = new GameObject("AvatarSelectionPanel");
@@ -651,20 +651,20 @@ namespace DigitPark.Editor
         private static void CreateSlide4_Games(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide4", 3, false);
-            CreateSlideTitle(slide, "Juegos Cognitivos", CYAN_NEON);
+            CreateSlideTitle(slide, "Cognitive Games", CYAN_NEON);
 
             var content = CreateContentCard(slide);
-            AddContentText(content, "Entrena tu mente con minijuegos dise\u00F1ados para mejorar tus habilidades.",
+            AddContentText(content, "Train your mind with mini-games designed to improve your skills.",
                 (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
-            AddContentText(content, "6 MINIJUEGOS UNICOS",
+            AddContentText(content, "6 UNIQUE MINI-GAMES",
                 (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
-            AddBulletText(content, "DigitRush: Velocidad y reflejos");
-            AddBulletText(content, "FlashTap: Reacci\u00F3n r\u00E1pida");
-            AddBulletText(content, "MemoryPairs: Memoria visual");
-            AddBulletText(content, "QuickMath: C\u00E1lculo mental");
-            AddBulletText(content, "OddOneOut: Atenci\u00F3n al detalle");
+            AddBulletText(content, "DigitRush: Speed and reflexes");
+            AddBulletText(content, "FlashTap: Quick reaction");
+            AddBulletText(content, "MemoryPairs: Visual memory");
+            AddBulletText(content, "QuickMath: Mental math");
+            AddBulletText(content, "OddOneOut: Attention to detail");
         }
 
         #endregion
@@ -677,15 +677,15 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "CashBattle", CYAN_NEON);
 
             var content = CreateContentCard(slide);
-            AddContentText(content, "\u00BFListo para el desaf\u00EDo? Compite 1v1 contra otros jugadores por premios reales.",
+            AddContentText(content, "Ready for the challenge? Compete 1v1 against other players for real prizes.",
                 (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
-            AddContentText(content, "COMPITE POR PREMIOS REALES",
+            AddContentText(content, "COMPETE FOR REAL PRIZES",
                 (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
-            AddBulletText(content, "Matchmaking 1v1 por habilidad");
-            AddBulletText(content, "Apuestas desde $1 USD");
-            AddBulletText(content, "Plataforma segura y verificada");
+            AddBulletText(content, "Skill-based 1v1 matchmaking");
+            AddBulletText(content, "Bets starting at $1 USD");
+            AddBulletText(content, "Secure and verified platform");
         }
 
         #endregion
@@ -695,18 +695,18 @@ namespace DigitPark.Editor
         private static void CreateSlide6_Tournaments(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide6", 5, false);
-            CreateSlideTitle(slide, "Torneos", CYAN_NEON);
+            CreateSlideTitle(slide, "Tournaments", CYAN_NEON);
 
             var content = CreateContentCard(slide);
-            AddContentText(content, "\u00DAnete a torneos con decenas de jugadores.",
+            AddContentText(content, "Join tournaments with dozens of players.",
                 (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
-            AddContentText(content, "GANA GRANDES PREMIOS",
+            AddContentText(content, "WIN BIG PRIZES",
                 (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
-            AddBulletText(content, "Hasta 256 jugadores por torneo");
-            AddBulletText(content, "Premios garantizados");
-            AddBulletText(content, "Sistema de brackets profesional");
+            AddBulletText(content, "Up to 256 players per tournament");
+            AddBulletText(content, "Guaranteed prizes");
+            AddBulletText(content, "Professional bracket system");
         }
 
         #endregion
@@ -716,18 +716,18 @@ namespace DigitPark.Editor
         private static void CreateSlide7_Rewards(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide7", 6, false);
-            CreateSlideTitle(slide, "Recompensas Diarias", CYAN_NEON);
+            CreateSlideTitle(slide, "Daily Rewards", CYAN_NEON);
 
             var content = CreateContentCard(slide);
-            AddContentText(content, "Vuelve cada d\u00EDa para obtener monedas, gemas y m\u00E1s recompensas.",
+            AddContentText(content, "Come back every day for coins, gems, and more rewards.",
                 (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(content, 10);
-            AddContentText(content, "RECOMPENSAS CADA DIA",
+            AddContentText(content, "REWARDS EVERY DAY",
                 (int)FontSizes.ValueMedium, CYAN_NEON, TextAlignmentOptions.Center, true);
             AddContentSpacer(content, 14);
-            AddBulletText(content, "Monedas gratis cada d\u00EDa");
-            AddBulletText(content, "Bonos semanales de gemas");
-            AddBulletText(content, "Misiones diarias con premios");
+            AddBulletText(content, "Free coins every day");
+            AddBulletText(content, "Weekly gem bonuses");
+            AddBulletText(content, "Daily missions with prizes");
         }
 
         #endregion
@@ -777,7 +777,7 @@ namespace DigitPark.Editor
             compTitle.transform.SetParent(panel.transform, false);
             compTitle.AddComponent<LayoutElement>().preferredHeight = 90;
             var ctTMP = compTitle.AddComponent<TextMeshProUGUI>();
-            ctTMP.text = "\u00A1Bien hecho!";
+            ctTMP.text = "Well done!";
             ctTMP.fontSize = FontSizes.DisplayLarge;
             ctTMP.color = CYAN_NEON;
             ctTMP.fontStyle = FontStyles.Bold;
@@ -791,7 +791,7 @@ namespace DigitPark.Editor
             compMsg.transform.SetParent(panel.transform, false);
             compMsg.AddComponent<LayoutElement>().preferredHeight = 70;
             var cmTMP = compMsg.AddComponent<TextMeshProUGUI>();
-            cmTMP.text = "Has completado el tutorial.\nAqu\u00ED tienes tus recompensas de bienvenida.";
+            cmTMP.text = "You've completed the tutorial.\nHere are your welcome rewards.";
             cmTMP.fontSize = FontSizes.BodyLarge;
             cmTMP.color = TEXT_WHITE;
             cmTMP.fontStyle = FontStyles.Bold;
@@ -816,7 +816,7 @@ namespace DigitPark.Editor
             rwRT.offsetMin = new Vector2(10, 10);
             rwRT.offsetMax = new Vector2(-10, -10);
             var rwTMP = rewardText.AddComponent<TextMeshProUGUI>();
-            rwTMP.text = "+500 Monedas  |  +50 Gemas";
+            rwTMP.text = "+500 Coins  |  +50 Gems";
             rwTMP.fontSize = FontSizes.ValueMedium;
             rwTMP.color = GOLD;
             rwTMP.fontStyle = FontStyles.Bold;
@@ -846,7 +846,7 @@ namespace DigitPark.Editor
             spRT.offsetMin = Vector2.zero;
             spRT.offsetMax = Vector2.zero;
             var spTMP = startText.AddComponent<TextMeshProUGUI>();
-            spTMP.text = "\u00A1COMENZAR A JUGAR!";
+            spTMP.text = "START PLAYING!";
             spTMP.fontSize = FontSizes.SectionHeader;
             spTMP.color = TEXT_DARK;
             spTMP.fontStyle = FontStyles.Bold;
@@ -907,7 +907,7 @@ namespace DigitPark.Editor
             ptRT.offsetMin = Vector2.zero;
             ptRT.offsetMax = Vector2.zero;
             var ptTMP = GetOrAdd<TextMeshProUGUI>(prevText);
-            ptTMP.text = "ATR\u00C1S";
+            ptTMP.text = "BACK";
             ptTMP.fontSize = FontSizes.Button;
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.fontStyle = FontStyles.Bold;
@@ -934,7 +934,7 @@ namespace DigitPark.Editor
             ntRT.offsetMin = Vector2.zero;
             ntRT.offsetMax = Vector2.zero;
             var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
-            ntTMP.text = "SIGUIENTE";
+            ntTMP.text = "NEXT";
             ntTMP.fontSize = FontSizes.Button;
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;

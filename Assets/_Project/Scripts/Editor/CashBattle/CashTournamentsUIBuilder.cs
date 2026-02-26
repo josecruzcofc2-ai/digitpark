@@ -57,7 +57,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Tournaments (Premium)", false, 252)]
+        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Tournaments (Premium)", false, 184)]
         public static void ShowWindow()
         {
             GetWindow<CashTournamentsUIBuilder>("Cash Tournaments Builder");
@@ -360,7 +360,7 @@ namespace DigitPark.Editor
             rt.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
-            title.text = "Torneos";
+            title.text = "Tournaments";
             title.fontSize = FontSizes.SceneTitle;
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;
@@ -441,7 +441,7 @@ namespace DigitPark.Editor
             labelRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
-            labelTMP.text = "Crear Torneo";
+            labelTMP.text = "Create Tournament";
             labelTMP.fontSize = FontSizes.CardTitle;
             labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.color = Color.white;
@@ -474,10 +474,10 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
 
             // Filter Buttons - se distribuirán equitativamente
-            CreateFilterButton(filterBar.transform, "Todos", true);
-            CreateFilterButton(filterBar.transform, "Activos", false);
-            CreateFilterButton(filterBar.transform, "Próximos", false);
-            CreateFilterButton(filterBar.transform, "Mis Torneos", false);
+            CreateFilterButton(filterBar.transform, "All", true);
+            CreateFilterButton(filterBar.transform, "Active", false);
+            CreateFilterButton(filterBar.transform, "Upcoming", false);
+            CreateFilterButton(filterBar.transform, "My Tournaments", false);
         }
 
         private static void CreateFilterButton(Transform parent, string text, bool isActive)
@@ -547,11 +547,11 @@ namespace DigitPark.Editor
 
             // Game Filter Dropdown
             CreateInlineDropdown(controlsBar.transform, "GameFilterDropdown",
-                new List<string> { "Todos", "QuickMath", "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut" });
+                new List<string> { "All", "QuickMath", "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut" });
 
             // Fee Filter Dropdown
             CreateInlineDropdown(controlsBar.transform, "FeeFilterDropdown",
-                new List<string> { "Todas", "$1", "$5", "$10", "$25" });
+                new List<string> { "All", "$1", "$5", "$10", "$25" });
 
             // Refresh Button
             GameObject refreshBtn = new GameObject("RefreshButton");
@@ -577,7 +577,7 @@ namespace DigitPark.Editor
             rbtRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI refreshTMP = refreshTextObj.AddComponent<TextMeshProUGUI>();
-            refreshTMP.text = "Actualizar";
+            refreshTMP.text = "Refresh";
             refreshTMP.fontSize = FontSizes.Body;
             refreshTMP.color = BG_DARK;
             refreshTMP.fontStyle = FontStyles.Bold;
@@ -907,7 +907,7 @@ namespace DigitPark.Editor
             ntRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI ntTMP = noTournamentsObj.AddComponent<TextMeshProUGUI>();
-            ntTMP.text = "No hay torneos disponibles";
+            ntTMP.text = "No tournaments available";
             ntTMP.fontSize = FontSizes.Body;
             ntTMP.color = TEXT_SECONDARY;
             ntTMP.alignment = TextAlignmentOptions.Center;
@@ -932,7 +932,7 @@ namespace DigitPark.Editor
             ltRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI ltTMP = loadingTextObj.AddComponent<TextMeshProUGUI>();
-            ltTMP.text = "Cargando...";
+            ltTMP.text = "Loading...";
             ltTMP.fontSize = FontSizes.Body;
             ltTMP.color = TEXT_WHITE;
             ltTMP.alignment = TextAlignmentOptions.Center;
@@ -1029,7 +1029,7 @@ namespace DigitPark.Editor
             ttLE.preferredHeight = 50;
 
             TextMeshProUGUI ttTMP = titleObj.AddComponent<TextMeshProUGUI>();
-            ttTMP.text = "Crear Torneo";
+            ttTMP.text = "Create Tournament";
             ttTMP.fontSize = FontSizes.Button;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = GOLD;
@@ -1037,13 +1037,13 @@ namespace DigitPark.Editor
 
 
             // MaxPlayersSlider
-            CreateSliderWithLabel(contentContainer.transform, "MaxPlayersSlider", "MaxPlayersText", "Max Jugadores: 10");
+            CreateSliderWithLabel(contentContainer.transform, "MaxPlayersSlider", "MaxPlayersText", "Max Players: 10");
 
             // EntryFeeSlider
             CreateSliderWithLabel(contentContainer.transform, "EntryFeeSlider", "EntryFeeText", "Entry Fee: $5");
 
             // DurationSlider
-            CreateSliderWithLabel(contentContainer.transform, "DurationSlider", "DurationText", "Duración: 30 min");
+            CreateSliderWithLabel(contentContainer.transform, "DurationSlider", "DurationText", "Duration: 30 min");
 
             // GameTypeDropdown
             CreateTMPDropdownInLayout(contentContainer.transform, "GameTypeDropdown",
@@ -1068,10 +1068,10 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
 
             // ConfirmCreateButton
-            CreatePanelButton(buttonsRow.transform, "ConfirmCreateButton", "Crear Torneo", GREEN, BG_DARK);
+            CreatePanelButton(buttonsRow.transform, "ConfirmCreateButton", "Create Tournament", GREEN, BG_DARK);
 
             // CancelCreateButton
-            CreatePanelButton(buttonsRow.transform, "CancelCreateButton", "Cancelar", new Color(0.6f, 0.2f, 0.2f, 1f), TEXT_WHITE);
+            CreatePanelButton(buttonsRow.transform, "CancelCreateButton", "Cancel", new Color(0.6f, 0.2f, 0.2f, 1f), TEXT_WHITE);
         }
 
         private static void CreateSliderWithLabel(Transform parent, string sliderName, string textName, string defaultText)
@@ -1298,7 +1298,7 @@ namespace DigitPark.Editor
             prizeRT.offsetMax = new Vector2(0, 0);
 
             TextMeshProUGUI prizeText = prizeObj.AddComponent<TextMeshProUGUI>();
-            prizeText.text = $"Premio: ${prize}";
+            prizeText.text = $"Prize: ${prize}";
             prizeText.fontSize = FontSizes.BodyLarge;
             prizeText.fontStyle = FontStyles.Bold;
             prizeText.color = GREEN;
@@ -1347,7 +1347,7 @@ namespace DigitPark.Editor
             jtRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI jt = joinText.AddComponent<TextMeshProUGUI>();
-            jt.text = "Unirse";
+            jt.text = "Join";
             jt.fontSize = FontSizes.BodyLarge;
             jt.fontStyle = FontStyles.Bold;
             jt.color = Color.white;

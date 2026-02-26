@@ -11,14 +11,15 @@ namespace DigitPark.UI.Components
     /// <summary>
     /// Runtime controller for the theme dropdown in Settings.
     /// Populates dynamically from ThemeManager.AvailableThemes.
-    /// Shows lock icon for premium themes that haven't been purchased.
-    /// Lock disappears when purchased OR when PremiumDebugController.AllowThemeChange is ON.
+    /// Shows gold lock for paid premium themes, silver lock for earnable themes.
+    /// Locks disappear when themes are acquired.
     /// </summary>
     [RequireComponent(typeof(TMP_Dropdown))]
     public class ThemeDropdownController : MonoBehaviour
     {
-        [Header("Lock Icon")]
-        [SerializeField] private Sprite lockIconSprite;
+        [Header("Lock Icons")]
+        [SerializeField] private Sprite lockGoldSprite;
+        [SerializeField] private Sprite lockSilverSprite;
 
         private TMP_Dropdown dropdown;
         private bool isInitialized = false;
@@ -31,10 +32,14 @@ namespace DigitPark.UI.Components
         {
             dropdown = GetComponent<TMP_Dropdown>();
 
-            // Auto-load lock icon if not assigned
-            if (lockIconSprite == null)
+            // Auto-load lock icons if not assigned
+            if (lockGoldSprite == null)
             {
-                lockIconSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+                lockGoldSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+            }
+            if (lockSilverSprite == null)
+            {
+                lockSilverSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_silver");
             }
         }
 
@@ -90,7 +95,7 @@ namespace DigitPark.UI.Components
             {
                 string displayName = theme.themeName;
 
-                // Add lock suffix for premium locked themes
+                // Add lock suffix for locked themes (spacing for icon)
                 if (theme.isPremium && !IsThemeUnlocked(theme))
                 {
                     displayName += "  \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
@@ -115,9 +120,13 @@ namespace DigitPark.UI.Components
             if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
                 return true;
 
-            // Check real purchase status
-            if (PremiumManager.Instance != null)
-                return PremiumManager.Instance.HasStylesPro;
+            // Check individual theme ownership
+            if (ThemeManager.Instance != null && ThemeManager.Instance.IsThemeOwned(theme.themeId))
+                return true;
+
+            // Check real purchase status (legacy StylesPro unlocks all paid themes)
+            if (!theme.isEarnable && PremiumManager.Instance != null && PremiumManager.Instance.HasStylesPro)
+                return true;
 
             return false;
         }
@@ -200,13 +209,24 @@ namespace DigitPark.UI.Components
         }
 
         /// <summary>
+        /// Returns the appropriate lock sprite for a theme.
+        /// Gold lock = paid (real money), Silver lock = earnable (gameplay).
+        /// </summary>
+        private Sprite GetLockSpriteForTheme(ThemeData theme)
+        {
+            if (theme == null) return lockGoldSprite;
+            return theme.isEarnable ? lockSilverSprite : lockGoldSprite;
+        }
+
+        /// <summary>
         /// Called by the dropdown template when it creates items.
         /// Adds lock icon Image to premium items.
-        /// Hook this after dropdown.Show() if needed.
+        /// Gold lock for paid themes, silver lock for earnable themes.
+        /// Lock disappears when theme is acquired.
         /// </summary>
         public void UpdateLockIcons()
         {
-            if (lockIconSprite == null || ThemeManager.Instance == null) return;
+            if (ThemeManager.Instance == null) return;
 
             var themes = ThemeManager.Instance.AvailableThemes;
 
@@ -221,6 +241,9 @@ namespace DigitPark.UI.Components
             {
                 Transform item = content.GetChild(i);
                 if (item == null) continue;
+
+                bool showLock = themes[i].isPremium && !IsThemeUnlocked(themes[i]);
+                Sprite lockSprite = GetLockSpriteForTheme(themes[i]);
 
                 // Find or create lock icon
                 Transform lockTransform = item.Find("LockIcon");
@@ -239,7 +262,6 @@ namespace DigitPark.UI.Components
                     lockRT.anchoredPosition = new Vector2(-8, 0);
 
                     lockImg = lockObj.AddComponent<Image>();
-                    lockImg.sprite = lockIconSprite;
                     lockImg.preserveAspect = true;
                     lockImg.raycastTarget = false;
                 }
@@ -248,10 +270,10 @@ namespace DigitPark.UI.Components
                     lockImg = lockTransform.GetComponent<Image>();
                 }
 
-                // Show lock only for premium themes that are locked
-                bool showLock = themes[i].isPremium && !IsThemeUnlocked(themes[i]);
+                // Set correct sprite and visibility
                 if (lockImg != null)
                 {
+                    lockImg.sprite = lockSprite;
                     lockImg.gameObject.SetActive(showLock);
                 }
             }

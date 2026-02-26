@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 748312073284787172}
   - component: {fileID: 8899650267710121766}
   - component: {fileID: 4512658057659947795}
+  - component: {fileID: 4900677195879751023}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -134,6 +135,31 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4900677195879751023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498227749312956490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 10
+  applyToImage: 0
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &2517375619781232875
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,6 +248,7 @@ GameObject:
   - component: {fileID: 9206268419674779938}
   - component: {fileID: 653760145383327544}
   - component: {fileID: 1704151390992722654}
+  - component: {fileID: 6106707578882583579}
   m_Layer: 0
   m_Name: Button3D
   m_TagString: Untagged
@@ -291,7 +318,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 653760145383327544}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -366,6 +393,31 @@ MonoBehaviour:
   releaseSound: {fileID: 0}
   pressParticles: {fileID: 0}
   constantParticles: {fileID: 0}
+--- !u!114 &6106707578882583579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4612464599640263145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elementType: 7
+  applyToImage: 1
+  applyToText: 1
+  applyToOutline: 0
+  applyToShadow: 0
+  targetImage: {fileID: 0}
+  targetTMPText: {fileID: 0}
+  targetLegacyText: {fileID: 0}
+  targetOutline: {fileID: 0}
+  targetShadow: {fileID: 0}
+  targetButton: {fileID: 0}
+  animateTransition: 1
+  transitionDuration: 0.2
 --- !u!1 &8165818692348632440
 GameObject:
   m_ObjectHideFlags: 0

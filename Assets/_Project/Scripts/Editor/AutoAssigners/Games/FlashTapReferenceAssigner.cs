@@ -51,7 +51,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/FlashTap References", false, 231)]
+        [MenuItem("DigitPark/Auto Assigners/References/Games/FlashTap References", false, 121)]
         public static void ShowWindow()
         {
             var window = GetWindow<FlashTapReferenceAssigner>("FlashTap Reference Assigner");

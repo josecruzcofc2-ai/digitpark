@@ -16,6 +16,9 @@ namespace DigitPark.Themes
         public Sprite themeIcon;
         public bool isPremium = false;
 
+        [Tooltip("Si es true, este tema se desbloquea por logros del juego (no dinero real)")]
+        public bool isEarnable = false;
+
         [Header("=== BACKGROUNDS ===")]
         [Tooltip("Color principal del fondo de la app")]
         public Color primaryBackground = new Color(0.05f, 0.05f, 0.1f, 1f);
