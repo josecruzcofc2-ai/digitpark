@@ -48,7 +48,7 @@ namespace DigitPark.Editor
         private const string ICON_ODD_ONE_OUT = "Assets/_Project/Art/Icons/Games/OddOneOutIcon.png";
         private const string ICON_COGNITIVE_SPRINT = "Assets/_Project/Art/Icons/Games/CognitiveSprintIcon.png";
         private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
-        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png";
+        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png";
 
         // ═══════════════════════════════════════════════════════════════
         //  MAIN BUILD

@@ -100,6 +100,13 @@ namespace DigitPark.Tools
                 _lastHasStylesPro = hasStylesPro;
                 ApplyPremiumState();
             }
+
+            // Auto-aplicar si cambia allowThemeChange
+            if (allowThemeChange != _lastAllowThemeChange)
+            {
+                _lastAllowThemeChange = allowThemeChange;
+                NotifyThemeChangeToggled();
+            }
             #endif
         }
 
@@ -177,6 +184,22 @@ namespace DigitPark.Tools
             _lastHasStylesPro = false;
             ApplyPremiumState();
             UnityEngine.Debug.Log("[PremiumDebug] 🔄 Estado premium reseteado");
+        }
+
+        /// <summary>
+        /// Notifica que allowThemeChange cambió, refrescando el dropdown de temas
+        /// </summary>
+        private void NotifyThemeChangeToggled()
+        {
+            // Disparar el evento de PremiumManager para que el ThemeDropdownController se refresque
+            var pmType = typeof(Managers.PremiumManager);
+            var eventField = pmType.GetField("OnPremiumStatusChanged", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            if (eventField != null)
+            {
+                var eventDelegate = eventField.GetValue(null) as System.Action;
+                eventDelegate?.Invoke();
+            }
+            UnityEngine.Debug.Log($"[PremiumDebug] AllowThemeChange = {allowThemeChange}");
         }
 
         #if UNITY_EDITOR

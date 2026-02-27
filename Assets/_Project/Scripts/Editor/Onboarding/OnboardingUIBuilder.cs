@@ -69,8 +69,8 @@ namespace DigitPark.Editor
         private static readonly string[] SLIDE_ICONS =
         {
             "Assets/_Project/Art/Icons/Onboarding/WelcomeIcon.png",
-            "Assets/_Project/Art/Icons/Social/Profile/ProfileIconNeon.png",
-            "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png",
+            "Assets/_Project/Art/Icons/Social/Profile/ProfileIcon.png",
+            "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png",
             "Assets/_Project/Art/Icons/Onboarding/GamesIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/CashBattleIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/TournamentsIcon.png",

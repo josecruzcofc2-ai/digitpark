@@ -158,8 +158,8 @@ namespace DigitPark.Managers
 
         private void LoadNeonIcons()
         {
-            coinIconNeon = Resources.Load<Sprite>("Icons/CoinIconNeon");
-            gemIconNeon = Resources.Load<Sprite>("Icons/GemIconNeon");
+            coinIconNeon = Resources.Load<Sprite>("Icons/CoinIcon");
+            gemIconNeon = Resources.Load<Sprite>("Icons/GemIcon");
         }
 
         private string L(string key, params object[] args)

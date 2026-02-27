@@ -68,7 +68,7 @@ namespace DigitPark.Editor
 
         private static readonly string[] SLIDE_ICONS =
         {
-            ICONS_BASE + "UI/CashBattleIconNeon.png",          // Slide 1: Welcome (reusa logo)
+            ICONS_BASE + "UI/CashBattleIcon.png",          // Slide 1: Welcome (reusa logo)
             ICONS_BASE + "UI/VerificationIcon.png",            // Slide 2: Verificación
             ICONS_BASE + "Wallet/DepositIcon.png",             // Slide 3: Depósito
             ICONS_BASE + "Tournaments/TrophyPrizeIcon.png",    // Slide 4: Juega

@@ -70,23 +70,21 @@ namespace DigitPark.Editor
         #region Icon Paths
 
         private const string ICONS_BASE = "Assets/_Project/Art/Icons";
-        private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/Actions/SettingsIconNeon.png";
-        private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/Actions/NotificationsNeon.png";
-        private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/Actions/NotificationsActiveNeon.png";
-        private const string ICON_PROFILE = ICONS_BASE + "/Social/Profile/ProfileIconNeon.png";
-        private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/Profile/AvatarDefaultNeon.png";
-        private const string ICON_TROPHY = ICONS_BASE + "/Tournaments/TrophyIconNeon.png";
-        private const string ICON_GEM = ICONS_BASE + "/Currency/GemIconNeon.png";
-        private const string ICON_COIN = ICONS_BASE + "/Currency/CoinIconNeon.png";
-        private const string ICON_RANKINGS = ICONS_BASE + "/Tournaments/RankingsIconNeon.png";
-        private const string ICON_SEARCH = ICONS_BASE + "/Navigation/Buttons/SearchIconNeon.png";
-        private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIconNeon.png";
-        private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIconNeon.png";
-        private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIconNeon.png";
-        private const string ICON_GIFT = ICONS_BASE + "/DailyRewards/GiftIconNeon.png";
-        private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/Monetization/AchievementsIconNeon.png";
-        private const string ICON_SHOP = ICONS_BASE + "/Monetization/ShopIconNeon.png";
-        private const string ICON_PREMIUM = ICONS_BASE + "/Premium/PremiumIconNeon.png";
+        private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/Actions/SettingsIcon.png";
+        private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/Actions/NotificationsIcon.png";
+        private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/Actions/NotificationsActiveIcon.png";
+        private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/Profile/AvatarDefault.png";
+        private const string ICON_GEM = ICONS_BASE + "/Currency/GemIcon.png";
+        private const string ICON_COIN = ICONS_BASE + "/Currency/CoinIcon.png";
+        private const string ICON_RANKINGS = ICONS_BASE + "/Tournaments/RankingsIcon.png";
+        private const string ICON_SEARCH = ICONS_BASE + "/Navigation/Buttons/SearchIcon.png";
+        private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
+        private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIcon.png";
+        private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIcon.png";
+        private const string ICON_GIFT = ICONS_BASE + "/DailyRewards/GiftIcon.png";
+        private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/Monetization/AchievementsIcon.png";
+        private const string ICON_SHOP = ICONS_BASE + "/Monetization/ShopIcon.png";
+        private const string ICON_PREMIUM = ICONS_BASE + "/Premium/PremiumIcon.png";
 
         #endregion
 
@@ -104,7 +102,7 @@ namespace DigitPark.Editor
 
             EditorGUILayout.HelpBox(
                 "Layout completo (de arriba a abajo):\n\n" +
-                "1. Header (Settings, Logo, Notificaciones, Perfil)\n" +
+                "1. Header (Settings, Logo, Notificaciones)\n" +
                 "2. Profile Card (Avatar grande + stats + nivel)\n" +
                 "3. Daily Reward (movida arriba, reclamar)\n" +
                 "4. Quick Access (Rankings, Buscar, Misiones)\n" +
@@ -248,9 +246,9 @@ namespace DigitPark.Editor
             logoTMP.enableVertexGradient = true;
             logoTMP.colorGradient = new VertexGradient(CYAN_NEON, CYAN_NEON, CYAN_GLOW, CYAN_GLOW);
 
-            // Notifications Button (right)
+            // Notifications Button (far right)
             var notifBtn = CreateIconButton(header.transform, "NotificationsButton",
-                new Vector2(1, 0.5f), new Vector2(-160, 0), new Vector2(100, 100));
+                new Vector2(1, 0.5f), new Vector2(-80, 0), new Vector2(100, 100));
 
             // Notification Badge
             var badge = FindOrCreate(notifBtn.transform, "Badge");
@@ -274,10 +272,6 @@ namespace DigitPark.Editor
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
-
-            // Profile Button (far right)
-            CreateIconButton(header.transform, "ProfileButton",
-                new Vector2(1, 0.5f), new Vector2(-50, 0), new Vector2(100, 100));
 
             Debug.Log("[MainMenuUI] Header creado");
         }
@@ -341,16 +335,16 @@ namespace DigitPark.Editor
             avSecRT.offsetMin = new Vector2(10, 10);
             avSecRT.offsetMax = new Vector2(0, -10);
 
-            // Avatar Frame (cyan ring)
+            // Avatar Frame (dark bg + white ring outline)
             var frame = FindOrCreate(avSec.transform, "AvatarFrame");
             var frameRT = GetOrAdd<RectTransform>(frame);
             frameRT.anchorMin = new Vector2(0.5f, 0.55f);
             frameRT.anchorMax = new Vector2(0.5f, 0.55f);
             frameRT.sizeDelta = new Vector2(240, 240);
-            GetOrAdd<Image>(frame).color = CYAN_NEON;
+            GetOrAdd<Image>(frame).color = CARD_BG;
             var fo = GetOrAdd<Outline>(frame);
-            fo.effectColor = CYAN_GLOW;
-            fo.effectDistance = new Vector2(3, 3);
+            fo.effectColor = Color.white;
+            fo.effectDistance = new Vector2(4, 4);
 
             // Avatar Image
             var avImg = FindOrCreate(frame.transform, "AvatarImage");
@@ -360,7 +354,7 @@ namespace DigitPark.Editor
             avImgRT.offsetMin = Vector2.zero;
             avImgRT.offsetMax = Vector2.zero;
             var avImgComp = GetOrAdd<Image>(avImg);
-            avImgComp.color = CARD_BG_LIGHT;
+            avImgComp.color = Color.white;
             avImgComp.preserveAspect = true;
 
             // AvatarUI component with default sprite
@@ -437,7 +431,6 @@ namespace DigitPark.Editor
             // Recreate stat items
             for (int i = stats.transform.childCount - 1; i >= 0; i--)
                 DestroyImmediate(stats.transform.GetChild(i).gameObject);
-            CreateStatItem(stats.transform, "Trophies", "1,250", GOLD);
             CreateStatItem(stats.transform, "Gems", "500", PURPLE_ACCENT);
             CreateStatItem(stats.transform, "Coins", "2,400", CYAN_NEON);
 
@@ -474,7 +467,7 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(stat.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 52;
+            icon.AddComponent<LayoutElement>().preferredHeight = 104;
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
             iconImg.preserveAspect = true;
@@ -641,9 +634,9 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(card.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 36;
+            icon.AddComponent<LayoutElement>().preferredHeight = 72;
             var iconImg = icon.AddComponent<Image>();
-            iconImg.color = accent;
+            iconImg.color = Color.white;
             iconImg.preserveAspect = true;
 
             var labelGO = new GameObject("Label");
@@ -819,31 +812,6 @@ namespace DigitPark.Editor
             glowImg.color = new Color(1, 0.9f, 0.6f, 0.3f);
             glowImg.raycastTarget = false;
 
-            // $$$ Badge (top-right)
-            var cashBadge = FindOrCreate(card.transform, "CashBadge");
-            var cbRT = GetOrAdd<RectTransform>(cashBadge);
-            cbRT.anchorMin = new Vector2(1, 1);
-            cbRT.anchorMax = new Vector2(1, 1);
-            cbRT.pivot = new Vector2(1, 1);
-            cbRT.anchoredPosition = new Vector2(-12, -12);
-            cbRT.sizeDelta = new Vector2(165, 90);
-            var cbBg = GetOrAdd<Image>(cashBadge);
-            cbBg.color = GOLD_DARK;
-            cbBg.raycastTarget = false;
-
-            var cbText = FindOrCreate(cashBadge.transform, "Text");
-            var cbtRT = GetOrAdd<RectTransform>(cbText);
-            cbtRT.anchorMin = Vector2.zero;
-            cbtRT.anchorMax = Vector2.one;
-            cbtRT.offsetMin = Vector2.zero;
-            cbtRT.offsetMax = Vector2.zero;
-            var cbtTMP = GetOrAdd<TextMeshProUGUI>(cbText);
-            cbtTMP.text = "$$$";
-            cbtTMP.fontSize = FontSizes.SectionHeader;
-            cbtTMP.color = TEXT_WHITE;
-            cbtTMP.fontStyle = FontStyles.Bold;
-            cbtTMP.alignment = TextAlignmentOptions.Center;
-
             // Icon (left, bigger than JUGAR)
             var icon = FindOrCreate(card.transform, "Icon");
             var iconRT = GetOrAdd<RectTransform>(icon);
@@ -948,7 +916,7 @@ namespace DigitPark.Editor
                 DestroyImmediate(panel.transform.GetChild(i).gameObject);
 
             CreateExtraCard(panel.transform, "AchievementsCard", "Achievements", ORANGE_ACCENT);
-            CreateExtraCard(panel.transform, "ShopCard", "Shop", CYAN_NEON);
+            CreateExtraCard(panel.transform, "ShopCard", "Shop", GOLD);
             CreateExtraCard(panel.transform, "PremiumCard", "Premium", GOLD);
 
             Debug.Log("[MainMenuUI] Extra Row creado");
@@ -972,13 +940,14 @@ namespace DigitPark.Editor
             vlg.padding = new RectOffset(10, 10, 15, 10);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
+            vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
 
             var icon = new GameObject("Icon");
             icon.transform.SetParent(card.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 125;
+            icon.AddComponent<LayoutElement>().preferredHeight = 250;
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
@@ -990,9 +959,12 @@ namespace DigitPark.Editor
             var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
             lTMP.text = label;
             lTMP.fontSize = FontSizes.SectionHeader;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lTMP.enableAutoSizing = true;
             lTMP.color = TEXT_WHITE;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
+            lTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -1067,7 +1039,6 @@ namespace DigitPark.Editor
             SetRef(so, "cashBattleButton", FindInPath<Button>(r, "CashBattleCard"));
             SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
             SetRef(so, "userButton", FindInPath<Button>(r, "ProfileCard"));
-            SetRef(so, "profileHeaderButton", FindInPath<Button>(r, "Header/ProfileButton"));
             SetRef(so, "userText", FindInPath<TextMeshProUGUI>(r, "ProfileCard/InfoSection/Username"));
             SetRef(so, "searchButton", FindInPath<Button>(r, "QuickActionsPanel/SearchCard"));
             SetRef(so, "notificationsButton", FindInPath<Button>(r, "Header/NotificationsButton"));
@@ -1124,11 +1095,10 @@ namespace DigitPark.Editor
             int a = 0;
             a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
             a += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
-            a += TryAssignIcon(canvas.transform, "Header/ProfileButton/Icon", ICON_PROFILE);
             a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarSection/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Trophies/Icon", ICON_TROPHY);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Gems/Icon", ICON_GEM);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Coins/Icon", ICON_COIN);
+            // Gems y Coins: sin icono asignado (pendiente de nuevos iconos unificados)
+            // a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Gems/Icon", ICON_GEM);
+            // a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Coins/Icon", ICON_COIN);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/RankingsCard/Icon", ICON_RANKINGS);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
@@ -1141,10 +1111,10 @@ namespace DigitPark.Editor
 
             AssignNotificationSprites();
 
-            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/16");
+            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/15");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
-            EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/16\nVer Console para detalles.", "OK");
+            EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/15\nVer Console para detalles.", "OK");
         }
 
         private static void AssignNotificationSprites()

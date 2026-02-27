@@ -69,7 +69,7 @@ namespace DigitPark.Editor
 
         private const string BACK_BTN_PREFAB           = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
         private const string ICON_AVATAR_DEFAULT_GOLD   = "Assets/_Project/Art/Icons/CashBattle/UI/AvatarDefaultGold.png";
-        private const string ICON_AVATAR_DEFAULT_NEON   = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png";
+        private const string ICON_AVATAR_DEFAULT_NEON   = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png";
 
         #endregion
 
@@ -584,7 +584,7 @@ namespace DigitPark.Editor
             Image enImg = editNameBtn.AddComponent<Image>();
             enImg.preserveAspect = true;
             enImg.raycastTarget = true;
-            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/Profile/EditIconNeon.png");
+            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/Profile/EditIcon.png");
             if (editSprite != null)
             {
                 enImg.sprite = editSprite;

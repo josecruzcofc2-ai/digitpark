@@ -29,7 +29,6 @@ namespace DigitPark.Managers
 
         [Header("UI - User Info")]
         [SerializeField] public Button userButton;
-        [SerializeField] public Button profileHeaderButton;
         [SerializeField] public TextMeshProUGUI userText;
         [SerializeField] public Button searchButton;
 
@@ -110,7 +109,6 @@ namespace DigitPark.Managers
 
             // User info buttons
             userButton?.onClick.AddListener(OnUserButtonClicked);
-            profileHeaderButton?.onClick.AddListener(OnUserButtonClicked);
             searchButton?.onClick.AddListener(OnSearchButtonClicked);
             notificationsButton?.onClick.AddListener(OnNotificationsButtonClicked);
 

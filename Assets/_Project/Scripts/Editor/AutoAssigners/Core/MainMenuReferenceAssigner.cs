@@ -30,7 +30,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Navigation
             "playButton", "scoresButton", "cashBattleButton", "settingsButton",
             // User Info
-            "userButton", "profileHeaderButton", "userText", "searchButton",
+            "userButton", "userText", "searchButton",
             // Notifications
             "notificationsButton", "notificationIconImage",
             "notificationBadge", "notificationBadgeText",
@@ -242,7 +242,6 @@ namespace DigitPark.Editor.AutoAssigners
 
             // User info
             AssignReference(so, "userButton", FindButtonByName("profilecard", "playercard"));
-            AssignReference(so, "profileHeaderButton", FindButtonByName("profilebutton"));
             AssignReference(so, "userText", FindTextByName("username", "usernametext"));
             AssignReference(so, "searchButton", FindButtonByName("searchcard", "search", "buscar"));
 

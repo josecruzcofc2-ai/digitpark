@@ -246,7 +246,7 @@ namespace DigitPark.UI
             logoContainer.anchorMax = new Vector2(0.5f, 0.55f);
             logoContainer.pivot = new Vector2(0.5f, 0.5f);
             logoContainer.sizeDelta = new Vector2(2250, 1650);
-            logoContainer.anchoredPosition = Vector2.zero;
+            logoContainer.anchoredPosition = new Vector2(0, -200);
 
             logoCanvasGroup = logoContainerObj.AddComponent<CanvasGroup>();
             logoCanvasGroup.alpha = 0f; // Comienza invisible para la animación
@@ -263,7 +263,7 @@ namespace DigitPark.UI
                 brainRT.anchorMax = new Vector2(0.5f, 0.55f);
                 brainRT.pivot = new Vector2(0.5f, 0f);
                 brainRT.sizeDelta = new Vector2(840, 840);
-                brainRT.anchoredPosition = Vector2.zero;
+                brainRT.anchoredPosition = new Vector2(0, 50);
 
                 Image brainImg = brainObj.AddComponent<Image>();
                 brainImg.sprite = brainSprite;
@@ -283,7 +283,7 @@ namespace DigitPark.UI
                 textRT.anchorMax = new Vector2(0.5f, 0.55f);
                 textRT.pivot = new Vector2(0.5f, 1f);
                 textRT.sizeDelta = new Vector2(1950, 720);
-                textRT.anchoredPosition = new Vector2(0, -15);
+                textRT.anchoredPosition = new Vector2(0, 185);
 
                 Image textImg = textLogoObj.AddComponent<Image>();
                 textImg.sprite = textSprite;
@@ -501,10 +501,6 @@ namespace DigitPark.UI
         private void CreateDecorations()
         {
             Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
-
-            // Líneas decorativas superiores
-            CreateDecoLine(canvas.transform, new Vector2(0.1f, 0.75f), new Vector2(0.3f, 0.75f), accentColor, 2f);
-            CreateDecoLine(canvas.transform, new Vector2(0.7f, 0.75f), new Vector2(0.9f, 0.75f), accentColor, 2f);
 
             // Líneas decorativas inferiores
             CreateDecoLine(canvas.transform, new Vector2(0.15f, 0.15f), new Vector2(0.35f, 0.15f), accentColor, 1f);

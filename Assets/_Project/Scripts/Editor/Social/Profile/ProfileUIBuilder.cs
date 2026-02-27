@@ -65,8 +65,8 @@ namespace DigitPark.Editor
         #region Prefab
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
-        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefaultNeon.png";
-        private const string ICON_EDIT = "Assets/_Project/Art/Icons/Social/Profile/EditIconNeon.png";
+        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png";
+        private const string ICON_EDIT = "Assets/_Project/Art/Icons/Social/Profile/EditIcon.png";
 
         #endregion
 
@@ -375,7 +375,7 @@ namespace DigitPark.Editor
             else
             {
                 eiImg.color = CYAN_NEON;
-                Debug.LogWarning("[ProfileUI] EditIconNeon.png not found, using fallback color");
+                Debug.LogWarning("[ProfileUI] EditIcon.png not found, using fallback color");
             }
 
             // Username

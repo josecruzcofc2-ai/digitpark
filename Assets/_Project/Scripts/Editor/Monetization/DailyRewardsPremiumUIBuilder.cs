@@ -287,11 +287,11 @@ namespace DigitPark.Editor
 
             // GemPill
             CreateCurrencyPill(currencyRow.transform, "GemPill", "1.2K", GEM_COLOR,
-                CURRENCY_ICONS + "GemIconNeon.png");
+                CURRENCY_ICONS + "GemIcon.png");
 
             // CoinPill
             CreateCurrencyPill(currencyRow.transform, "CoinPill", "5.4K", COIN_COLOR,
-                CURRENCY_ICONS + "CoinIconNeon.png");
+                CURRENCY_ICONS + "CoinIcon.png");
 
             Debug.Log("[DailyRewardsUI] TopBar creado (BackButton + Title + CurrencyPills)");
         }
@@ -373,15 +373,25 @@ namespace DigitPark.Editor
             trHLG.childControlHeight = true;
 
             var fireIcon = FindOrCreate(topRow.transform, "FireIcon");
-            var fireImg = GetOrAdd<Image>(fireIcon);
-            fireImg.preserveAspect = true;
-            fireImg.color = Color.white;
-            Sprite fireSprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_streak.png");
-            if (fireSprite != null) fireImg.sprite = fireSprite;
-            else fireImg.color = ORANGE_FIRE;
             var fireLE = GetOrAdd<LayoutElement>(fireIcon);
             fireLE.minWidth = 30;
             fireLE.minHeight = 30;
+            Sprite fireSprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_streak.png");
+            if (fireSprite != null)
+            {
+                var fireImg = GetOrAdd<Image>(fireIcon);
+                fireImg.preserveAspect = true;
+                fireImg.color = Color.white;
+                fireImg.sprite = fireSprite;
+            }
+            else
+            {
+                // Fallback: text emoji instead of colored rectangle
+                var fireTMP = GetOrAdd<TextMeshProUGUI>(fireIcon);
+                fireTMP.text = "\U0001F525";
+                fireTMP.fontSize = FontSizes.Button;
+                fireTMP.alignment = TextAlignmentOptions.Center;
+            }
 
             var streakLabel = FindOrCreate(topRow.transform, "StreakLabel");
             var slTMP = GetOrAdd<TextMeshProUGUI>(streakLabel);
@@ -645,19 +655,6 @@ namespace DigitPark.Editor
             amTMP.alignment = TextAlignmentOptions.Center;
             amTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Type Text
-            var typeObj = new GameObject("TypeText");
-            typeObj.transform.SetParent(card.transform, false);
-            typeObj.AddComponent<RectTransform>();
-            typeObj.AddComponent<LayoutElement>().preferredHeight = 38;
-            var ttTMP = typeObj.AddComponent<TextMeshProUGUI>();
-            ttTMP.text = typeName;
-            ttTMP.fontSize = FontSizes.Button;
-            ttTMP.fontStyle = FontStyles.Bold;
-            ttTMP.color = TEXT_SECONDARY;
-            ttTMP.alignment = TextAlignmentOptions.Center;
-            ttTMP.overflowMode = TextOverflowModes.Ellipsis;
-
             // Status overlays
             if (claimed)
             {
@@ -696,7 +693,7 @@ namespace DigitPark.Editor
                 bdRT.anchorMax = new Vector2(0.5f, 1);
                 bdRT.pivot = new Vector2(0.5f, 1);
                 bdRT.anchoredPosition = new Vector2(0, 2);
-                bdRT.sizeDelta = new Vector2(50, 20);
+                bdRT.sizeDelta = new Vector2(80, 22);
                 badge.AddComponent<Image>().color = GOLD;
 
                 var badgeText = new GameObject("Text");
@@ -734,7 +731,7 @@ namespace DigitPark.Editor
                 liRT.sizeDelta = new Vector2(30, 30);
                 var liImg = lockIcon.AddComponent<Image>();
                 liImg.preserveAspect = true;
-                Sprite lockSprite = AssetDatabase.LoadAssetAtPath<Sprite>(NAV_ICONS + "LockIconNeon.png");
+                Sprite lockSprite = AssetDatabase.LoadAssetAtPath<Sprite>(NAV_ICONS + "LockIcon.png");
                 if (lockSprite != null) { liImg.sprite = lockSprite; liImg.color = Color.white; }
                 else liImg.color = TEXT_SECONDARY;
             }
@@ -918,11 +915,11 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
 
-            // Left: HOY badge
+            // Left: HOY badge (wider to fit localized text like "DIA 2", "JOUR 2", etc.)
             var badge = FindOrCreate(today.transform, "TodayBadge");
             var bdLE = GetOrAdd<LayoutElement>(badge);
-            bdLE.minWidth = 55;
-            bdLE.preferredWidth = 55;
+            bdLE.minWidth = 80;
+            bdLE.preferredWidth = 80;
             bdLE.minHeight = 30;
             GetOrAdd<Image>(badge).color = GOLD;
 
@@ -1046,7 +1043,7 @@ namespace DigitPark.Editor
 
             var timerBar = FindOrCreate(canvas.transform, "TimerBar");
             var tbRT = GetOrAdd<RectTransform>(timerBar);
-            SetAnchors(tbRT, 0.1f, TIMER_BOT, 0.9f, TIMER_TOP);
+            SetAnchors(tbRT, 0.05f, TIMER_BOT, 0.95f, TIMER_TOP);
 
             var hlg = GetOrAdd<HorizontalLayoutGroup>(timerBar);
             hlg.spacing = 8;
@@ -1152,9 +1149,9 @@ namespace DigitPark.Editor
             var ciImg = GetOrAdd<Image>(celebIcon);
             ciImg.preserveAspect = true;
             ciImg.color = Color.white;
-            // Try icon_ui_claim.png first, then GiftIconNeon.png
+            // Try icon_ui_claim.png first, then GiftIcon.png
             Sprite claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "icon_ui_claim.png");
-            if (claimSprite == null) claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "GiftIconNeon.png");
+            if (claimSprite == null) claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "GiftIcon.png");
             if (claimSprite != null) ciImg.sprite = claimSprite;
             else ciImg.color = GOLD;
 
@@ -1374,8 +1371,8 @@ namespace DigitPark.Editor
             SetRef(so, "milestoneBonusText", FindInPath<TextMeshProUGUI>(r, "MilestoneBlocker/MilestonePopup/MilestoneBonusText"));
 
             // Reward Icons (Sprites loaded from assets)
-            SetSpriteRef(so, "coinIcon", CURRENCY_ICONS + "CoinIconNeon.png");
-            SetSpriteRef(so, "gemIcon", CURRENCY_ICONS + "GemIconNeon.png");
+            SetSpriteRef(so, "coinIcon", CURRENCY_ICONS + "CoinIcon.png");
+            SetSpriteRef(so, "gemIcon", CURRENCY_ICONS + "GemIcon.png");
             SetSpriteRef(so, "xpIcon", CURRENCY_ICONS + "icon_xp.png");
             SetSpriteRef(so, "mysteryIcon", UI_ICONS + "icon_ui_gift_generic.png");
 

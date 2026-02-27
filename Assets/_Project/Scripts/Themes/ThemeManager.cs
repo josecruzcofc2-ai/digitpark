@@ -255,8 +255,8 @@ namespace DigitPark.Themes
             if (IsThemeOwned(theme.themeId))
                 return true;
 
-            // Legacy: Check if user has StylesPro (backwards compatibility)
-            if (PremiumManager.Instance != null && PremiumManager.Instance.HasStylesPro)
+            // Legacy: StylesPro unlocks paid (non-earnable) premium themes
+            if (!theme.isEarnable && PremiumManager.Instance != null && PremiumManager.Instance.HasStylesPro)
                 return true;
 
             return false;

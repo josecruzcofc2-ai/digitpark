@@ -1026,7 +1026,7 @@ namespace DigitPark.Editor
             var iconImg = GetOrAdd<Image>(iconGO);
             iconImg.color = color;
             iconImg.preserveAspect = true;
-            Sprite iconSprite = LoadIcon(MISSIONS_ICONS_PATH + "MissionsIconNeon.png");
+            Sprite iconSprite = LoadIcon(MISSIONS_ICONS_PATH + "MissionsIcon.png");
             if (iconSprite != null) iconImg.sprite = iconSprite;
             var iconLE = GetOrAdd<LayoutElement>(iconGO);
             iconLE.minWidth = 24;
@@ -1238,7 +1238,7 @@ namespace DigitPark.Editor
             {
                 case "gems":
                     rewardColor = GEM_COLOR;
-                    currencyIconPath = CURRENCY_ICONS_PATH + "GemIconNeon.png";
+                    currencyIconPath = CURRENCY_ICONS_PATH + "GemIcon.png";
                     break;
                 case "xp":
                     rewardColor = XP_COLOR;
@@ -1246,7 +1246,7 @@ namespace DigitPark.Editor
                     break;
                 default: // coins
                     rewardColor = COIN_COLOR;
-                    currencyIconPath = CURRENCY_ICONS_PATH + "CoinIconNeon.png";
+                    currencyIconPath = CURRENCY_ICONS_PATH + "CoinIcon.png";
                     break;
             }
 
@@ -1472,7 +1472,7 @@ namespace DigitPark.Editor
             var riImg = GetOrAdd<Image>(rewardIcon);
             riImg.color = COIN_COLOR;
             riImg.preserveAspect = true;
-            Sprite coinSprite = LoadIcon(CURRENCY_ICONS_PATH + "CoinIconNeon.png");
+            Sprite coinSprite = LoadIcon(CURRENCY_ICONS_PATH + "CoinIcon.png");
             if (coinSprite != null) riImg.sprite = coinSprite;
             var riLE = GetOrAdd<LayoutElement>(rewardIcon);
             riLE.minWidth = 40;
@@ -1581,8 +1581,8 @@ namespace DigitPark.Editor
                 assigned += SetRef(so, "closeDetailButton", FindInPath<Button>(r, "RewardClaimBlocker"));
 
                 // Reward Icons (cargar desde assets)
-                var coinSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "CoinIconNeon.png");
-                var gemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "GemIconNeon.png");
+                var coinSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "CoinIcon.png");
+                var gemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "GemIcon.png");
                 if (coinSprite != null) { var p = so.FindProperty("coinIcon"); if (p != null) { p.objectReferenceValue = coinSprite; assigned++; } }
                 if (gemSprite != null) { var p = so.FindProperty("gemIcon"); if (p != null) { p.objectReferenceValue = gemSprite; assigned++; } }
 

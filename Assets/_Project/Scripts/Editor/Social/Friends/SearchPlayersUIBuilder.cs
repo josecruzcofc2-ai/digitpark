@@ -208,11 +208,11 @@ namespace DigitPark.Editor
             searchIconImg.preserveAspect = true;
             searchIconImg.raycastTarget = false;
             // Cargar icono de lupa neon
-            Sprite searchSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/Buttons/SearchIconNeon.png");
+            Sprite searchSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/Buttons/SearchIcon.png");
             if (searchSprite != null)
             {
                 searchIconImg.sprite = searchSprite;
-                Debug.Log("[SearchPlayersUI] SearchIconNeon asignado");
+                Debug.Log("[SearchPlayersUI] SearchIcon asignado");
             }
 
             // Input Field (ocupa el espacio central)
