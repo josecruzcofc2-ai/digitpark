@@ -10,7 +10,7 @@ namespace DigitPark.Editor.AutoAssigners
     /// <summary>
     /// Reference Assigner for BetSelection scene.
     /// Automatically finds and assigns UI references to BetSelectionPanel.
-    /// Supports: Free + 5 Coin tiers + 5 Gem tiers + Custom bet section + Action buttons.
+    /// Supports: Free + 5 DigitCoin tiers + 5 DigitGem tiers + Custom bet section + Action buttons.
     ///
     /// Menu: DigitPark/Auto Assigners/References/Games/BetSelection References
     /// </summary>
@@ -96,10 +96,10 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to BetSelectionPanel:\n" +
                 "- Header (title, game name)\n" +
-                "- Currency display (gems, coins labels + values)\n" +
+                "- Currency display (DigitGems, DigitCoins labels + values)\n" +
                 "- Free bet (button, cost, reward)\n" +
-                "- Coin bets: 50, 100, 250, 500, 1000\n" +
-                "- Gem bets: 10, 50, 100, 250, 500\n" +
+                "- DigitCoin bets: 50, 100, 250, 500, 1000\n" +
+                "- DigitGem bets: 10, 50, 100, 250, 500\n" +
                 "- Custom bet (card bg, toggles, input, stepper, preview)\n" +
                 "- Action buttons (play, cancel)",
                 MessageType.Info);

@@ -10,8 +10,8 @@ namespace DigitPark.Monetization
     public enum BetCurrencyType
     {
         None,
-        Gems,
-        Coins
+        DigitGems,
+        DigitCoins
     }
 
     /// <summary>
@@ -169,7 +169,7 @@ namespace DigitPark.Monetization
             }
 
             // No hay suficientes, navegar a la tienda
-            SceneNavigator.Instance.NavigateToShopForGems();
+            SceneNavigator.Instance.NavigateToShopForDigitGems();
             return false;
         }
 
@@ -310,8 +310,8 @@ namespace DigitPark.Monetization
 
             _escrowedGems = amount;
             _escrowedCoins = 0;
-            _escrowType = BetCurrencyType.Gems;
-            Debug.Log($"[CurrencyManager] Escrow: {amount} gems held for bet");
+            _escrowType = BetCurrencyType.DigitGems;
+            Debug.Log($"[CurrencyManager] Escrow: {amount} DigitGems held for bet");
             return true;
         }
 
@@ -325,8 +325,8 @@ namespace DigitPark.Monetization
 
             _escrowedCoins = amount;
             _escrowedGems = 0;
-            _escrowType = BetCurrencyType.Coins;
-            Debug.Log($"[CurrencyManager] Escrow: {amount} coins held for bet");
+            _escrowType = BetCurrencyType.DigitCoins;
+            Debug.Log($"[CurrencyManager] Escrow: {amount} DigitCoins held for bet");
             return true;
         }
 
@@ -341,21 +341,21 @@ namespace DigitPark.Monetization
             {
                 switch (_escrowType)
                 {
-                    case BetCurrencyType.Gems:
+                    case BetCurrencyType.DigitGems:
                         int gemsWon = _escrowedGems * 2;
                         AddGems(gemsWon);
-                        Debug.Log($"[CurrencyManager] Bet WON: +{gemsWon} gems (2x {_escrowedGems})");
+                        Debug.Log($"[CurrencyManager] Bet WON: +{gemsWon} DigitGems (2x {_escrowedGems})");
                         break;
-                    case BetCurrencyType.Coins:
+                    case BetCurrencyType.DigitCoins:
                         int coinsWon = _escrowedCoins * 2;
                         AddCoins(coinsWon);
-                        Debug.Log($"[CurrencyManager] Bet WON: +{coinsWon} coins (2x {_escrowedCoins})");
+                        Debug.Log($"[CurrencyManager] Bet WON: +{coinsWon} DigitCoins (2x {_escrowedCoins})");
                         break;
                 }
             }
             else
             {
-                Debug.Log($"[CurrencyManager] Bet LOST: escrow forfeited ({_escrowType}: {(_escrowType == BetCurrencyType.Gems ? _escrowedGems : _escrowedCoins)})");
+                Debug.Log($"[CurrencyManager] Bet LOST: escrow forfeited ({_escrowType}: {(_escrowType == BetCurrencyType.DigitGems ? _escrowedGems : _escrowedCoins)})");
             }
 
             ClearEscrow();
@@ -370,13 +370,13 @@ namespace DigitPark.Monetization
 
             switch (_escrowType)
             {
-                case BetCurrencyType.Gems:
+                case BetCurrencyType.DigitGems:
                     AddGems(_escrowedGems);
-                    Debug.Log($"[CurrencyManager] Escrow cancelled: +{_escrowedGems} gems returned");
+                    Debug.Log($"[CurrencyManager] Escrow cancelled: +{_escrowedGems} DigitGems returned");
                     break;
-                case BetCurrencyType.Coins:
+                case BetCurrencyType.DigitCoins:
                     AddCoins(_escrowedCoins);
-                    Debug.Log($"[CurrencyManager] Escrow cancelled: +{_escrowedCoins} coins returned");
+                    Debug.Log($"[CurrencyManager] Escrow cancelled: +{_escrowedCoins} DigitCoins returned");
                     break;
             }
 

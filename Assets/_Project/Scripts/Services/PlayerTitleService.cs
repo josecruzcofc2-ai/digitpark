@@ -10,8 +10,8 @@ namespace DigitPark.Services
     public enum TitlePriceType
     {
         Free,
-        Coins,
-        Gems,
+        DigitCoins,
+        DigitGems,
         RealMoney,
         Achievement,
         Secret
@@ -121,7 +121,7 @@ namespace DigitPark.Services
             {
                 titleId = "jugador",
                 nameKey = "title_jugador",
-                priceType = TitlePriceType.Coins,
+                priceType = TitlePriceType.DigitCoins,
                 coinPrice = 500
             });
 
@@ -129,7 +129,7 @@ namespace DigitPark.Services
             {
                 titleId = "veterano",
                 nameKey = "title_veterano",
-                priceType = TitlePriceType.Coins,
+                priceType = TitlePriceType.DigitCoins,
                 coinPrice = 3000
             });
 
@@ -137,7 +137,7 @@ namespace DigitPark.Services
             {
                 titleId = "leyenda",
                 nameKey = "title_leyenda",
-                priceType = TitlePriceType.Coins,
+                priceType = TitlePriceType.DigitCoins,
                 coinPrice = 10000
             });
 
@@ -145,7 +145,7 @@ namespace DigitPark.Services
             {
                 titleId = "inmortal",
                 nameKey = "title_inmortal",
-                priceType = TitlePriceType.Coins,
+                priceType = TitlePriceType.DigitCoins,
                 coinPrice = 25000
             });
 
@@ -154,7 +154,7 @@ namespace DigitPark.Services
             {
                 titleId = "estratega",
                 nameKey = "title_estratega",
-                priceType = TitlePriceType.Gems,
+                priceType = TitlePriceType.DigitGems,
                 gemPrice = 100
             });
 
@@ -162,7 +162,7 @@ namespace DigitPark.Services
             {
                 titleId = "genio",
                 nameKey = "title_genio",
-                priceType = TitlePriceType.Gems,
+                priceType = TitlePriceType.DigitGems,
                 gemPrice = 300
             });
 
@@ -170,7 +170,7 @@ namespace DigitPark.Services
             {
                 titleId = "maestro",
                 nameKey = "title_maestro",
-                priceType = TitlePriceType.Gems,
+                priceType = TitlePriceType.DigitGems,
                 gemPrice = 600
             });
 
@@ -178,7 +178,7 @@ namespace DigitPark.Services
             {
                 titleId = "iluminado",
                 nameKey = "title_iluminado",
-                priceType = TitlePriceType.Gems,
+                priceType = TitlePriceType.DigitGems,
                 gemPrice = 1000
             });
 
@@ -433,10 +433,10 @@ namespace DigitPark.Services
             {
                 case TitlePriceType.Free:
                     break;
-                case TitlePriceType.Coins:
+                case TitlePriceType.DigitCoins:
                     if (!currency.SpendCoins(title.coinPrice)) return false;
                     break;
-                case TitlePriceType.Gems:
+                case TitlePriceType.DigitGems:
                     if (!currency.SpendGems(title.gemPrice)) return false;
                     break;
                 case TitlePriceType.RealMoney:

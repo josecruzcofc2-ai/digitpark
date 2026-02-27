@@ -12,7 +12,7 @@ namespace DigitPark.Monetization
     public class CurrencyDisplayUI : MonoBehaviour
     {
         [Header("Currency Type")]
-        [SerializeField] private CurrencyType _currencyType = CurrencyType.Gems;
+        [SerializeField] private CurrencyType _currencyType = CurrencyType.DigitGems;
 
         [Header("UI References")]
         [SerializeField] private Image _iconImage;
@@ -101,7 +101,7 @@ namespace DigitPark.Monetization
             var currency = CurrencyManager.Instance;
             if (currency != null)
             {
-                if (_currencyType == CurrencyType.Gems)
+                if (_currencyType == CurrencyType.DigitGems)
                 {
                     currency.OnGemsChanged += OnCurrencyChangedGems;
                     SetAmount(currency.Gems, false);
@@ -126,7 +126,7 @@ namespace DigitPark.Monetization
 
         private void OnCurrencyChangedGems(int newAmount, int delta)
         {
-            if (_currencyType == CurrencyType.Gems)
+            if (_currencyType == CurrencyType.DigitGems)
             {
                 SetAmount(newAmount);
             }
@@ -134,7 +134,7 @@ namespace DigitPark.Monetization
 
         private void OnCurrencyChangedCoins(int newAmount, int delta)
         {
-            if (_currencyType == CurrencyType.Coins)
+            if (_currencyType == CurrencyType.DigitCoins)
             {
                 SetAmount(newAmount);
             }
@@ -146,11 +146,11 @@ namespace DigitPark.Monetization
             {
                 switch (_currencyType)
                 {
-                    case CurrencyType.Gems:
+                    case CurrencyType.DigitGems:
                         if (_gemsIcon != null) _iconImage.sprite = _gemsIcon;
                         _iconImage.color = _gemsColor;
                         break;
-                    case CurrencyType.Coins:
+                    case CurrencyType.DigitCoins:
                         if (_coinsIcon != null) _iconImage.sprite = _coinsIcon;
                         _iconImage.color = _coinsColor;
                         break;
@@ -216,7 +216,7 @@ namespace DigitPark.Monetization
             OnClicked?.Invoke();
 
             // Navigate to shop
-            ShopTab targetTab = _currencyType == CurrencyType.Gems ? ShopTab.Gems : ShopTab.Coins;
+            ShopTab targetTab = _currencyType == CurrencyType.DigitGems ? ShopTab.DigitGems : ShopTab.DigitCoins;
             SceneNavigator.Instance.NavigateToShop(targetTab);
 
             Debug.Log($"[CurrencyDisplayUI] Clicked, navigating to Shop ({targetTab})");
@@ -293,7 +293,7 @@ namespace DigitPark.Monetization
 
     public enum CurrencyType
     {
-        Gems,
-        Coins
+        DigitGems,
+        DigitCoins
     }
 }

@@ -19,8 +19,8 @@ namespace DigitPark.Services
     /// </summary>
     public enum FramePriceType
     {
-        Coins,
-        Gems,
+        DigitCoins,
+        DigitGems,
         RealMoney,
         Achievement,
         Secret

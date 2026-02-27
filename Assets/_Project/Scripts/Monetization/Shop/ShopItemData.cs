@@ -7,8 +7,8 @@ namespace DigitPark.Monetization
     /// </summary>
     public enum ShopItemType
     {
-        GemsPack,       // Paquete de gemas (compra con dinero real)
-        CoinsPack,      // Paquete de monedas (compra con gemas)
+        DigitGemsPack,  // Paquete de DigitGems (compra con dinero real)
+        DigitCoinsPack, // Paquete de DigitCoins (compra con DigitGems)
         Theme,          // Tema visual
         Avatar,         // Avatar
         SpecialOffer,   // Oferta especial (bundle)
@@ -22,8 +22,8 @@ namespace DigitPark.Monetization
     public enum PriceType
     {
         RealMoney,      // Dinero real (USD/MXN)
-        Gems,           // Gemas
-        Coins,          // Monedas
+        DigitGems,      // DigitGems
+        DigitCoins,     // DigitCoins
         Free            // Gratis
     }
 
@@ -46,8 +46,8 @@ namespace DigitPark.Monetization
         public string description;
 
         [Header("Type")]
-        public ShopItemType itemType = ShopItemType.GemsPack;
-        public ShopTab shopTab = ShopTab.Gems;
+        public ShopItemType itemType = ShopItemType.DigitGemsPack;
+        public ShopTab shopTab = ShopTab.DigitGems;
 
         [Header("Visuals")]
         public Sprite icon;
@@ -59,20 +59,20 @@ namespace DigitPark.Monetization
         [Tooltip("Precio en dinero real (ej: 0.99, 4.99)")]
         public float realMoneyPrice;
 
-        [Tooltip("Precio en gemas")]
+        [Tooltip("Precio en DigitGems")]
         public int gemsPrice;
 
-        [Tooltip("Precio en monedas")]
+        [Tooltip("Precio en DigitCoins")]
         public int coinsPrice;
 
         [Tooltip("ID del producto IAP (para compras reales)")]
         public string iapProductId;
 
         [Header("Rewards")]
-        [Tooltip("Cantidad de gemas que otorga")]
+        [Tooltip("Cantidad de DigitGems que otorga")]
         public int gemsAmount;
 
-        [Tooltip("Cantidad de monedas que otorga")]
+        [Tooltip("Cantidad de DigitCoins que otorga")]
         public int coinsAmount;
 
         [Tooltip("Porcentaje de bonus (ej: 20 = +20%)")]
@@ -116,9 +116,9 @@ namespace DigitPark.Monetization
             {
                 case PriceType.RealMoney:
                     return $"${realMoneyPrice:F2}";
-                case PriceType.Gems:
+                case PriceType.DigitGems:
                     return gemsPrice.ToString("N0");
-                case PriceType.Coins:
+                case PriceType.DigitCoins:
                     return coinsPrice.ToString("N0");
                 case PriceType.Free:
                     return "GRATIS";
@@ -140,7 +140,7 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Obtiene el total de gemas incluyendo bonus
+        /// Obtiene el total de DigitGems incluyendo bonus
         /// </summary>
         public int GetTotalGems()
         {
@@ -153,7 +153,7 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Obtiene el total de monedas incluyendo bonus
+        /// Obtiene el total de DigitCoins incluyendo bonus
         /// </summary>
         public int GetTotalCoins()
         {
@@ -175,9 +175,9 @@ namespace DigitPark.Monetization
 
             switch (priceType)
             {
-                case PriceType.Gems:
+                case PriceType.DigitGems:
                     return currency.HasEnoughGems(gemsPrice);
-                case PriceType.Coins:
+                case PriceType.DigitCoins:
                     return currency.HasEnoughCoins(coinsPrice);
                 case PriceType.Free:
                     return true;
@@ -199,11 +199,11 @@ namespace DigitPark.Monetization
 
             switch (priceType)
             {
-                case PriceType.Gems:
+                case PriceType.DigitGems:
                     if (!currency.SpendGems(gemsPrice)) return false;
                     break;
 
-                case PriceType.Coins:
+                case PriceType.DigitCoins:
                     if (!currency.SpendCoins(coinsPrice)) return false;
                     break;
 
@@ -232,11 +232,11 @@ namespace DigitPark.Monetization
 
             switch (itemType)
             {
-                case ShopItemType.GemsPack:
+                case ShopItemType.DigitGemsPack:
                     currency.ProcessGemsPurchase(gemsAmount, GetBonusGems());
                     break;
 
-                case ShopItemType.CoinsPack:
+                case ShopItemType.DigitCoinsPack:
                     currency.AddCoins(GetTotalCoins());
                     break;
 
@@ -287,12 +287,12 @@ namespace DigitPark.Monetization
             // Ensure proper tab assignment based on type
             switch (itemType)
             {
-                case ShopItemType.GemsPack:
-                    shopTab = ShopTab.Gems;
+                case ShopItemType.DigitGemsPack:
+                    shopTab = ShopTab.DigitGems;
                     break;
-                case ShopItemType.CoinsPack:
-                    shopTab = ShopTab.Coins;
-                    priceType = PriceType.Gems;
+                case ShopItemType.DigitCoinsPack:
+                    shopTab = ShopTab.DigitCoins;
+                    priceType = PriceType.DigitGems;
                     break;
                 case ShopItemType.Theme:
                 case ShopItemType.Avatar:

@@ -88,7 +88,7 @@ namespace DigitPark.Editor
                 "- BackButton prefab (top-left)\n" +
                 "- Title + Game name header\n" +
                 "- Prominent currency display\n" +
-                "- 11 preset bet cards (Free + 5 Coins + 5 Gems)\n" +
+                "- 11 preset bet cards (Free + 5 DigitCoins + 5 DigitGems)\n" +
                 "- Custom bet section (input + toggles + stepper)\n" +
                 "- ScrollRect for smooth scrolling\n" +
                 "- Play/Cancel action buttons\n" +
@@ -166,63 +166,63 @@ namespace DigitPark.Editor
 
             // === FREE BET ===
             CreateBetCard("FreeBetOption", content.transform,
-                "FREE", "+25 coins if you win", "FREE",
+                "FREE", "+25 DigitCoins if you win", "FREE",
                 "FreeBetCostText", "FreeBetRewardText",
                 NEON_GREEN, GREEN_GLOW);
 
             // === COIN BETS ===
-            CreateSectionDivider("CoinBetsHeader", content.transform, "COINS", COIN_COLOR);
+            CreateSectionDivider("CoinBetsHeader", content.transform, "DIGITCOINS", COIN_COLOR);
 
             CreateBetCard("Coins50BetOption", content.transform,
-                "50 Coins", "Win 100", null,
+                "50 DigitCoins", "Win 100", null,
                 "Coins50CostText", "Coins50RewardText",
                 COIN_COLOR, COIN_GLOW);
 
             CreateBetCard("Coins100BetOption", content.transform,
-                "100 Coins", "Win 200", null,
+                "100 DigitCoins", "Win 200", null,
                 "Coins100CostText", "Coins100RewardText",
                 COIN_COLOR, COIN_GLOW);
 
             CreateBetCard("Coins250BetOption", content.transform,
-                "250 Coins", "Win 500", null,
+                "250 DigitCoins", "Win 500", null,
                 "Coins250CostText", "Coins250RewardText",
                 COIN_COLOR, COIN_GLOW);
 
             CreateBetCard("Coins500BetOption", content.transform,
-                "500 Coins", "Win 1,000", "x2",
+                "500 DigitCoins", "Win 1,000", "x2",
                 "Coins500CostText", "Coins500RewardText",
                 COIN_COLOR, COIN_GLOW);
 
             CreateBetCard("Coins1000BetOption", content.transform,
-                "1,000 Coins", "Win 2,000", "x2",
+                "1,000 DigitCoins", "Win 2,000", "x2",
                 "Coins1000CostText", "Coins1000RewardText",
                 new Color(1f, 0.7f, 0.1f), new Color(1f, 0.7f, 0.1f, 0.4f));
 
             // === GEM BETS ===
-            CreateSectionDivider("GemBetsHeader", content.transform, "GEMS", GEM_COLOR);
+            CreateSectionDivider("GemBetsHeader", content.transform, "DIGITGEMS", GEM_COLOR);
 
             CreateBetCard("Gems10BetOption", content.transform,
-                "10 Gems", "Win 20", null,
+                "10 DigitGems", "Win 20", null,
                 "Gems10CostText", "Gems10RewardText",
                 GEM_COLOR, GEM_GLOW);
 
             CreateBetCard("Gems50BetOption", content.transform,
-                "50 Gems", "Win 100", null,
+                "50 DigitGems", "Win 100", null,
                 "Gems50CostText", "Gems50RewardText",
                 GEM_COLOR, GEM_GLOW);
 
             CreateBetCard("Gems100BetOption", content.transform,
-                "100 Gems", "Win 200", null,
+                "100 DigitGems", "Win 200", null,
                 "Gems100CostText", "Gems100RewardText",
                 GEM_COLOR, GEM_GLOW);
 
             CreateBetCard("Gems250BetOption", content.transform,
-                "250 Gems", "Win 500", "x2",
+                "250 DigitGems", "Win 500", "x2",
                 "Gems250CostText", "Gems250RewardText",
                 GEM_COLOR, GEM_GLOW);
 
             CreateBetCard("Gems500BetOption", content.transform,
-                "500 Gems", "Win 1,000", "x2",
+                "500 DigitGems", "Win 1,000", "x2",
                 "Gems500CostText", "Gems500RewardText",
                 PURPLE, PURPLE_GLOW);
 
@@ -302,9 +302,9 @@ namespace DigitPark.Editor
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
 
-            // Gems column
+            // DigitGems column
             CreateCurrencyColumn("GemsColumn", bar.transform,
-                "GEMS", "GemsLabel", "GemsValueText", GEM_COLOR);
+                "DIGITGEMS", "GemsLabel", "GemsValueText", GEM_COLOR);
 
             // Divider line
             GameObject divLine = CreateUI("Divider", bar.transform);
@@ -312,9 +312,9 @@ namespace DigitPark.Editor
             divLE.preferredWidth = 2;
             divLine.AddComponent<Image>().color = new Color(0.2f, 0.3f, 0.5f, 0.5f);
 
-            // Coins column
+            // DigitCoins column
             CreateCurrencyColumn("CoinsColumn", bar.transform,
-                "COINS", "CoinsLabel", "CoinsValueText", COIN_COLOR);
+                "DIGITCOINS", "CoinsLabel", "CoinsValueText", COIN_COLOR);
         }
 
         private static void CreateCurrencyColumn(string name, Transform parent,
@@ -560,8 +560,8 @@ namespace DigitPark.Editor
             trHLG.childControlWidth = true;
             trHLG.childControlHeight = true;
 
-            CreateToggleButton("CustomCoinsToggle", toggleRow.transform, "COINS", COIN_COLOR, true);
-            CreateToggleButton("CustomGemsToggle", toggleRow.transform, "GEMS", GEM_COLOR, false);
+            CreateToggleButton("CustomCoinsToggle", toggleRow.transform, "DIGITCOINS", COIN_COLOR, true);
+            CreateToggleButton("CustomGemsToggle", toggleRow.transform, "DIGITGEMS", GEM_COLOR, false);
 
             // === ROW 2: Stepper (minus, input, plus) ===
             GameObject inputRow = CreateUI("InputRow", card.transform);
@@ -595,7 +595,7 @@ namespace DigitPark.Editor
             var pvLE = previewGO.AddComponent<LayoutElement>();
             pvLE.preferredHeight = 34;
             TextMeshProUGUI pvTMP = previewGO.AddComponent<TextMeshProUGUI>();
-            pvTMP.text = "Win: 20 coins";
+            pvTMP.text = "Win: 20 DigitCoins";
             pvTMP.fontSize = FontSizes.Body;
             pvTMP.color = CUSTOM_TEAL;
             pvTMP.fontStyle = FontStyles.Bold;

@@ -65,8 +65,8 @@ namespace DigitPark.Data
         PlayAllGameTypes,
         WinStreak,
         CompleteCognitiveSprint,
-        SpendCoins,
-        EarnCoins,
+        SpendDigitCoins,
+        EarnDigitCoins,
         PlayTournament,
         InviteFriend
     }
@@ -76,7 +76,7 @@ namespace DigitPark.Data
     /// </summary>
     public enum MissionRewardType
     {
-        Coins,
-        Gems
+        DigitCoins,
+        DigitGems
     }
 }

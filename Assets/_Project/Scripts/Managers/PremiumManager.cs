@@ -1,8 +1,11 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
+using UnityEngine.Purchasing.Security;
 using DigitPark.Services.Firebase;
+using DigitPark.Monetization;
 
 namespace DigitPark.Managers
 {
@@ -52,16 +55,35 @@ namespace DigitPark.Managers
         // Estos IDs deben coincidir con los configurados en las tiendas
         // ================================================================
 
-        [Header("=== PRODUCT IDs ===")]
-        public const string PRODUCT_ID_CREATE_TOURNAMENTS = "com.digitpark.createtournaments";
-        public const string PRODUCT_ID_CASH_BATTLE_CREATE = "com.digitpark.cashbattlecreate";
-        public const string PRODUCT_ID_TOURNAMENT_BUNDLE = "com.digitpark.tournamentbundle";
-        public const string PRODUCT_ID_STYLES_PRO = "com.digitpark.stylespro"; // Legacy
+        [Header("=== PRODUCT IDs - Non-Consumable ===")]
+        public const string PRODUCT_ID_CREATE_TOURNAMENTS = "com.matrixsoftware.digitpark.createtournaments";
+        public const string PRODUCT_ID_CASH_BATTLE_CREATE = "com.matrixsoftware.digitpark.cashbattlecreate";
+        public const string PRODUCT_ID_TOURNAMENT_BUNDLE = "com.matrixsoftware.digitpark.tournamentbundle";
+        public const string PRODUCT_ID_STYLES_PRO = "com.matrixsoftware.digitpark.stylespro"; // Legacy
+
+        [Header("=== PRODUCT IDs - Gem Packs (Consumable) ===")]
+        public const string PRODUCT_ID_GEMS_100 = "com.matrixsoftware.digitpark.gems_100";
+        public const string PRODUCT_ID_GEMS_500 = "com.matrixsoftware.digitpark.gems_500";
+        public const string PRODUCT_ID_GEMS_1200 = "com.matrixsoftware.digitpark.gems_1200";
+        public const string PRODUCT_ID_GEMS_2500 = "com.matrixsoftware.digitpark.gems_2500";
+        public const string PRODUCT_ID_GEMS_6500 = "com.matrixsoftware.digitpark.gems_6500";
+        public const string PRODUCT_ID_GEMS_14000 = "com.matrixsoftware.digitpark.gems_14000";
 
         [Header("=== PRECIOS (Solo para mostrar en UI) ===")]
         public const string PRICE_CREATE_TOURNAMENTS = "$3.99";
         public const string PRICE_CASH_BATTLE_CREATE = "$6.99";
         public const string PRICE_TOURNAMENT_BUNDLE = "$8.99";
+
+        // Gem pack definitions: productId → (baseGems, bonusPercent)
+        private static readonly Dictionary<string, (int gems, int bonus)> GEM_PACK_MAP = new Dictionary<string, (int, int)>
+        {
+            { PRODUCT_ID_GEMS_100, (100, 0) },
+            { PRODUCT_ID_GEMS_500, (500, 10) },
+            { PRODUCT_ID_GEMS_1200, (1200, 20) },
+            { PRODUCT_ID_GEMS_2500, (2500, 25) },
+            { PRODUCT_ID_GEMS_6500, (6500, 30) },
+            { PRODUCT_ID_GEMS_14000, (14000, 35) },
+        };
 
         // Keys para PlayerPrefs (persistencia local)
         private const string CAN_CREATE_TOURNAMENTS_KEY = "Premium_CreateTournaments";
@@ -127,10 +149,18 @@ namespace DigitPark.Managers
 
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 
-            // Agregar productos NonConsumable (se compra una vez y se mantiene para siempre)
+            // NonConsumable products (purchased once, kept forever)
             builder.AddProduct(PRODUCT_ID_CREATE_TOURNAMENTS, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_CASH_BATTLE_CREATE, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_TOURNAMENT_BUNDLE, ProductType.NonConsumable);
+
+            // Consumable products - Gem Packs (can be purchased multiple times)
+            builder.AddProduct(PRODUCT_ID_GEMS_100, ProductType.Consumable);
+            builder.AddProduct(PRODUCT_ID_GEMS_500, ProductType.Consumable);
+            builder.AddProduct(PRODUCT_ID_GEMS_1200, ProductType.Consumable);
+            builder.AddProduct(PRODUCT_ID_GEMS_2500, ProductType.Consumable);
+            builder.AddProduct(PRODUCT_ID_GEMS_6500, ProductType.Consumable);
+            builder.AddProduct(PRODUCT_ID_GEMS_14000, ProductType.Consumable);
 
             Debug.Log("[Premium] Inicializando Unity IAP...");
             UnityPurchasing.Initialize(this, builder);
@@ -214,6 +244,123 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Premium] Iniciando compra: Tournament Bundle");
             BuyProduct(PRODUCT_ID_TOURNAMENT_BUNDLE, PremiumProduct.TournamentBundle, onComplete);
+        }
+
+        /// <summary>
+        /// Compra un paquete de gemas (consumable IAP)
+        /// </summary>
+        public void PurchaseGemPack(string iapProductId, Action<bool> onComplete = null)
+        {
+            if (!IsGemPackProduct(iapProductId))
+            {
+                Debug.LogError($"[Premium] Not a gem pack product: {iapProductId}");
+                onComplete?.Invoke(false);
+                return;
+            }
+
+            _purchaseCallback = onComplete;
+
+            if (_storeController == null)
+            {
+                Debug.LogError("[Premium] Store no inicializado");
+                onComplete?.Invoke(false);
+                return;
+            }
+
+            Product p = _storeController.products.WithID(iapProductId);
+            if (p != null && p.availableToPurchase)
+            {
+                Debug.Log($"[Premium] Comprando gem pack: {p.definition.id} - {p.metadata.localizedPriceString}");
+
+                AnalyticsService.Instance?.LogPurchaseStarted(
+                    iapProductId,
+                    (double)p.metadata.localizedPrice,
+                    p.metadata.isoCurrencyCode
+                );
+
+                _storeController.InitiatePurchase(p);
+            }
+            else
+            {
+                Debug.LogError($"[Premium] Gem pack no disponible: {iapProductId}");
+                onComplete?.Invoke(false);
+            }
+        }
+
+        /// <summary>
+        /// Checks if a product ID belongs to a gem pack
+        /// </summary>
+        public static bool IsGemPackProduct(string productId)
+        {
+            return GEM_PACK_MAP.ContainsKey(productId);
+        }
+
+        /// <summary>
+        /// Processes a gem pack purchase after successful IAP transaction
+        /// </summary>
+        private void ProcessGemPackPurchase(string productId)
+        {
+            if (!GEM_PACK_MAP.TryGetValue(productId, out var packInfo))
+            {
+                Debug.LogError($"[Premium] Unknown gem pack: {productId}");
+                return;
+            }
+
+            int bonusGems = packInfo.bonus > 0
+                ? Mathf.RoundToInt(packInfo.gems * (packInfo.bonus / 100f))
+                : 0;
+
+            CurrencyManager.Instance?.ProcessGemsPurchase(packInfo.gems, bonusGems);
+
+            Debug.Log($"[Premium] Gem pack granted: {packInfo.gems} + {bonusGems} bonus = {packInfo.gems + bonusGems} total");
+        }
+
+        /// <summary>
+        /// Gets the localized price for a gem pack from the store
+        /// </summary>
+        public string GetGemPackPrice(string iapProductId)
+        {
+            if (_storeController != null)
+            {
+                Product p = _storeController.products.WithID(iapProductId);
+                if (p != null)
+                    return p.metadata.localizedPriceString;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Generic purchase by product ID (for shop items like themes, bundles)
+        /// </summary>
+        public void PurchaseByProductId(string productId, Action<bool> onComplete = null)
+        {
+            _purchaseCallback = onComplete;
+
+            if (_storeController == null)
+            {
+                Debug.LogError("[Premium] Store no inicializado");
+                onComplete?.Invoke(false);
+                return;
+            }
+
+            Product p = _storeController.products.WithID(productId);
+            if (p != null && p.availableToPurchase)
+            {
+                Debug.Log($"[Premium] Comprando: {p.definition.id} - {p.metadata.localizedPriceString}");
+
+                AnalyticsService.Instance?.LogPurchaseStarted(
+                    productId,
+                    (double)p.metadata.localizedPrice,
+                    p.metadata.isoCurrencyCode
+                );
+
+                _storeController.InitiatePurchase(p);
+            }
+            else
+            {
+                Debug.LogError($"[Premium] Producto no disponible: {productId}");
+                onComplete?.Invoke(false);
+            }
         }
 
         private void BuyProduct(string productId, PremiumProduct product, Action<bool> onComplete)
@@ -428,6 +575,15 @@ namespace DigitPark.Managers
             string productId = args.purchasedProduct.definition.id;
             Debug.Log($"[Premium] Procesando compra: {productId}");
 
+            // Receipt validation (local)
+            if (!ValidateReceipt(args.purchasedProduct))
+            {
+                Debug.LogError($"[Premium] Receipt validation failed for: {productId}");
+                _purchaseCallback?.Invoke(false);
+                _purchaseCallback = null;
+                return PurchaseProcessingResult.Complete;
+            }
+
             // Analytics - Log purchase completed
             AnalyticsService.Instance?.LogPurchaseCompleted(
                 productId,
@@ -436,6 +592,16 @@ namespace DigitPark.Managers
                 args.purchasedProduct.transactionID
             );
 
+            // Handle gem pack consumables
+            if (IsGemPackProduct(productId))
+            {
+                ProcessGemPackPurchase(productId);
+                _purchaseCallback?.Invoke(true);
+                _purchaseCallback = null;
+                return PurchaseProcessingResult.Complete;
+            }
+
+            // Handle non-consumable premium products
             if (productId == PRODUCT_ID_CREATE_TOURNAMENTS)
             {
                 UnlockProduct(PremiumProduct.CreateTournaments);
@@ -458,6 +624,36 @@ namespace DigitPark.Managers
 
             _purchaseCallback = null;
             return PurchaseProcessingResult.Complete;
+        }
+
+        /// <summary>
+        /// Local receipt validation using CrossPlatformValidator.
+        /// Requires Tangle files generated via Window > Unity IAP > Receipt Validation Obfuscator.
+        /// </summary>
+        private bool ValidateReceipt(Product product)
+        {
+#if !UNITY_EDITOR
+            try
+            {
+                var validator = new CrossPlatformValidator(
+                    GooglePlayTangle.Data(),
+                    AppleTangle.Data(),
+                    Application.identifier
+                );
+
+                var result = validator.Validate(product.receipt);
+                Debug.Log($"[Premium] Receipt validated: {result.Length} receipts");
+                return true;
+            }
+            catch (IAPSecurityException ex)
+            {
+                Debug.LogError($"[Premium] Receipt validation failed: {ex.Message}");
+                return false;
+            }
+#else
+            // Skip validation in Editor
+            return true;
+#endif
         }
 
         /// <summary>

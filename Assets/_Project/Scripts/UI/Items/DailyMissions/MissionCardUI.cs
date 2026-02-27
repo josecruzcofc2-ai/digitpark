@@ -124,13 +124,13 @@ namespace DigitPark.UI.Items
             // Reward
             if (rewardIcon)
             {
-                rewardIcon.sprite = definition.rewardType == MissionRewardType.Gems ? gemIcon : coinIcon;
+                rewardIcon.sprite = definition.rewardType == MissionRewardType.DigitGems ? gemIcon : coinIcon;
             }
 
             if (rewardAmountText)
             {
                 rewardAmountText.text = $"+{definition.rewardAmount}";
-                rewardAmountText.color = definition.rewardType == MissionRewardType.Gems ? GEM_COLOR : COIN_COLOR;
+                rewardAmountText.color = definition.rewardType == MissionRewardType.DigitGems ? GEM_COLOR : COIN_COLOR;
             }
 
             // Background state

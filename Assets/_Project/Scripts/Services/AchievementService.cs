@@ -1162,14 +1162,14 @@ namespace DigitPark.Services
                 if (achievement.rewardCoins > 0)
                 {
                     currency.AddCoins(achievement.rewardCoins);
-                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("coins", achievement.rewardCoins, "achievement");
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", achievement.rewardCoins, "achievement");
                 }
                 if (achievement.rewardGems > 0)
                 {
                     currency.AddGems(achievement.rewardGems);
-                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("gems", achievement.rewardGems, "achievement");
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", achievement.rewardGems, "achievement");
                 }
-                Debug.Log($"[Achievements] Reward: +{achievement.rewardCoins} coins, +{achievement.rewardGems} gems for {achievement.id}");
+                Debug.Log($"[Achievements] Reward: +{achievement.rewardCoins} DigitCoins, +{achievement.rewardGems} DigitGems for {achievement.id}");
             }
         }
 

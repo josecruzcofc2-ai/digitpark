@@ -287,11 +287,11 @@ namespace DigitPark.Editor
 
             // GemPill
             CreateCurrencyPill(currencyRow.transform, "GemPill", "1.2K", GEM_COLOR,
-                CURRENCY_ICONS + "GemIcon.png");
+                CURRENCY_ICONS + "icon_digitgem_single.png");
 
             // CoinPill
             CreateCurrencyPill(currencyRow.transform, "CoinPill", "5.4K", COIN_COLOR,
-                CURRENCY_ICONS + "CoinIcon.png");
+                CURRENCY_ICONS + "icon_digitcoin_single.png");
 
             Debug.Log("[DailyRewardsUI] TopBar creado (BackButton + Title + CurrencyPills)");
         }
@@ -460,7 +460,7 @@ namespace DigitPark.Editor
             var bonusText = FindOrCreate(streak.transform, "BonusText");
             GetOrAdd<LayoutElement>(bonusText).preferredHeight = 28;
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
-            btTMP.text = "Day 7 bonus: +100 gems";
+            btTMP.text = "Day 7 bonus: +100 DigitGems";
             btTMP.fontSize = FontSizes.Button;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = GEM_COLOR;
@@ -521,11 +521,11 @@ namespace DigitPark.Editor
             // Sample data for days 1-6
             var dayData = new (int day, string type, int amount, string name, int state)[]
             {
-                (1, "coins", 100, "Coins", 0),   // 0 = CLAIMED
-                (2, "coins", 150, "Coins", 0),
-                (3, "gems",  25,  "Gems",   0),
-                (4, "coins", 200, "Coins", 0),
-                (5, "coins", 300, "Coins", 1),   // 1 = CURRENT
+                (1, "digitcoins", 100, "DigitCoins", 0),   // 0 = CLAIMED
+                (2, "digitcoins", 150, "DigitCoins", 0),
+                (3, "digitgems",  25,  "DigitGems",   0),
+                (4, "digitcoins", 200, "DigitCoins", 0),
+                (5, "digitcoins", 300, "DigitCoins", 1),   // 1 = CURRENT
                 (6, "xp",    25,  "XP",      2),   // 2 = LOCKED
             };
 
@@ -620,8 +620,8 @@ namespace DigitPark.Editor
                 // Fallback color based on type
                 Color fallbackColor = type switch
                 {
-                    "coins" => COIN_COLOR,
-                    "gems" => GEM_COLOR,
+                    "digitcoins" => COIN_COLOR,
+                    "digitgems" => GEM_COLOR,
                     "xp" => XP_COLOR,
                     _ => TEXT_WHITE
                 };
@@ -852,7 +852,7 @@ namespace DigitPark.Editor
             var d7Reward1 = FindOrCreate(info.transform, "Reward1");
             GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 34;
             var r1TMP = GetOrAdd<TextMeshProUGUI>(d7Reward1);
-            r1TMP.text = "500 Coins + 50 Gems";
+            r1TMP.text = "500 DigitCoins + 50 DigitGems";
             r1TMP.fontSize = FontSizes.Button;
             r1TMP.fontStyle = FontStyles.Bold;
             r1TMP.color = TEXT_WHITE;
@@ -973,7 +973,7 @@ namespace DigitPark.Editor
             var rewardAmount = FindOrCreate(infoPanel.transform, "RewardAmount");
             GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 38;
             var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
-            raTMP.text = "300 Coins + 25 XP";
+            raTMP.text = "300 DigitCoins + 25 XP";
             raTMP.fontSize = FontSizes.Button;
             raTMP.fontStyle = FontStyles.Bold;
             raTMP.color = COIN_COLOR;
@@ -1178,7 +1178,7 @@ namespace DigitPark.Editor
             var claimRewardText = FindOrCreate(popup.transform, "ClaimRewardText");
             GetOrAdd<LayoutElement>(claimRewardText).preferredHeight = 45;
             var crtTMP = GetOrAdd<TextMeshProUGUI>(claimRewardText);
-            crtTMP.text = "+300 Coins";
+            crtTMP.text = "+300 DigitCoins";
             crtTMP.fontSize = FontSizes.DisplayMedium;
             crtTMP.fontStyle = FontStyles.Bold;
             crtTMP.color = COIN_COLOR;
@@ -1279,7 +1279,7 @@ namespace DigitPark.Editor
             var milestoneBonusText = FindOrCreate(popup.transform, "MilestoneBonusText");
             GetOrAdd<LayoutElement>(milestoneBonusText).preferredHeight = 36;
             var mbtTMP = GetOrAdd<TextMeshProUGUI>(milestoneBonusText);
-            mbtTMP.text = "+100 bonus gems";
+            mbtTMP.text = "+100 bonus DigitGems";
             mbtTMP.fontSize = FontSizes.ValueMedium;
             mbtTMP.fontStyle = FontStyles.Bold;
             mbtTMP.color = GEM_COLOR;
@@ -1371,8 +1371,8 @@ namespace DigitPark.Editor
             SetRef(so, "milestoneBonusText", FindInPath<TextMeshProUGUI>(r, "MilestoneBlocker/MilestonePopup/MilestoneBonusText"));
 
             // Reward Icons (Sprites loaded from assets)
-            SetSpriteRef(so, "coinIcon", CURRENCY_ICONS + "CoinIcon.png");
-            SetSpriteRef(so, "gemIcon", CURRENCY_ICONS + "GemIcon.png");
+            SetSpriteRef(so, "coinIcon", CURRENCY_ICONS + "icon_digitcoin_single.png");
+            SetSpriteRef(so, "gemIcon", CURRENCY_ICONS + "icon_digitgem_single.png");
             SetSpriteRef(so, "xpIcon", CURRENCY_ICONS + "icon_xp.png");
             SetSpriteRef(so, "mysteryIcon", UI_ICONS + "icon_ui_gift_generic.png");
 

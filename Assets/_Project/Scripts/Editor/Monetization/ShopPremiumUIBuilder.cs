@@ -88,11 +88,11 @@ namespace DigitPark.Editor
                 "- Featured Banner con countdown\n" +
                 "- Ofertas Especiales (2 banners)\n" +
                 "- Daily Deals (3 items)\n" +
-                "- Gemas (6 packs)\n" +
-                "- Monedas (4 packs)\n" +
+                "- DigitGems (6 packs)\n" +
+                "- DigitCoins (4 packs)\n" +
                 "- Temas (9 items)\n" +
                 "- Marcos (8 items)\n" +
-                "- Marcos Gemas (6 items)\n" +
+                "- Marcos DigitGems (6 items)\n" +
                 "- Marcos Premium (3 items)\n" +
                 "- Titulos (10 items)\n" +
                 "- VIP Bundle\n\n" +
@@ -452,10 +452,10 @@ namespace DigitPark.Editor
             // 3. Daily Deals
             CreateDailyDealsSection(content);
 
-            // 4. Gems
+            // 4. DigitGems
             CreateGemsSection(content);
 
-            // 5. Coins
+            // 5. DigitCoins
             CreateCoinsSection(content);
 
             // 6. Themes
@@ -464,7 +464,7 @@ namespace DigitPark.Editor
             // 7. Marcos
             CreateFramesSection(content);
 
-            // 8. Marcos Gemas
+            // 8. Marcos DigitGems
             CreateGemFramesSection(content);
 
             // 9. Marcos Premium
@@ -573,7 +573,7 @@ namespace DigitPark.Editor
             // Contents
             GameObject contents = CreateChild(info, "Contents");
             TextMeshProUGUI contentsText = contents.AddComponent<TextMeshProUGUI>();
-            contentsText.text = "500 Gems + Exclusive Theme + Avatar";
+            contentsText.text = "500 DigitGems + Exclusive Theme + Avatar";
             contentsText.fontSize = FontSizes.Body;
             contentsText.color = TEXT_SECONDARY;
             LayoutElement contentsLE = contents.AddComponent<LayoutElement>();
@@ -633,12 +633,12 @@ namespace DigitPark.Editor
 
             // Offer 1
             CreateOfferBanner(section, "Offer_WeekendGems", "WEEKEND PACK",
-                "2,000 Gems + 10,000 Coins", "50% OFF", "$4.99", "<s>$9.99</s>",
+                "2,000 DigitGems + 10,000 DigitCoins", "50% OFF", "$4.99", "<s>$9.99</s>",
                 new Color(0.08f, 0.12f, 0.25f, 1f), GEM_COLOR);
 
             // Offer 2
-            CreateOfferBanner(section, "Offer_MegaCoins", "MEGA COINS",
-                "50,000 Coins + 3 Frames", "LIMITED", "$2.99", "<s>$5.99</s>",
+            CreateOfferBanner(section, "Offer_MegaCoins", "MEGA DIGITCOINS",
+                "50,000 DigitCoins + 3 Frames", "LIMITED", "$2.99", "<s>$5.99</s>",
                 new Color(0.15f, 0.1f, 0.05f, 1f), COIN_COLOR);
 
             Debug.Log("[ShopPremiumUIBuilder] Special Offers V3 creado");
@@ -843,9 +843,9 @@ namespace DigitPark.Editor
             itemsHlg.childForceExpandWidth = true;
 
             // 3 Daily Items
-            CreateDailyItem(itemsContainer, "Daily_Free", "200 Gems", "FREE", GEM_COLOR, true, "1x DAILY");
-            CreateDailyItem(itemsContainer, "Daily_Gems", "25 Gems", "100", GEM_COLOR, false, "HOT");
-            CreateDailyItem(itemsContainer, "Daily_Coins", "5,000 Coins", "50", COIN_COLOR, false, "");
+            CreateDailyItem(itemsContainer, "Daily_Free", "200 DigitGems", "FREE", GEM_COLOR, true, "1x DAILY");
+            CreateDailyItem(itemsContainer, "Daily_Gems", "25 DigitGems", "100", GEM_COLOR, false, "HOT");
+            CreateDailyItem(itemsContainer, "Daily_Coins", "5,000 DigitCoins", "50", COIN_COLOR, false, "");
 
             Debug.Log("[ShopPremiumUIBuilder] Daily Deals V3 creado");
         }
@@ -909,7 +909,7 @@ namespace DigitPark.Editor
             CreatePriceButton(item, price, priceBtnColor, TEXT_DARK, 46, FontSizes.Body);
         }
 
-        // ==================== GEMS SECTION ====================
+        // ==================== DIGITGEMS SECTION ====================
 
         private static void CreateGemsSection(GameObject parent)
         {
@@ -921,7 +921,7 @@ namespace DigitPark.Editor
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            CreateSectionHeader(section, "GEMS", GEM_COLOR);
+            CreateSectionHeader(section, "DIGITGEMS", GEM_COLOR);
 
             // Grid
             GameObject grid = CreateChild(section, "GemsGrid");
@@ -938,7 +938,7 @@ namespace DigitPark.Editor
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
             gridLE.minHeight = GRID_GEM_COIN_H * 2 + GRID_SPACING;
 
-            // 6 Gem packs - neon coherent color tiers
+            // 6 DigitGem packs - neon coherent color tiers
             CreateShopCard(grid, "Gems_100", "100", "$0.99", "", CYAN_DARK, "", false);
             CreateShopCard(grid, "Gems_500", "500", "$4.99", "+10%", CYAN_DARK, "", false);
             CreateShopCard(grid, "Gems_1200", "1,200", "$9.99", "+20%", new Color(0f, 1f, 1f, 0.7f), "BEST VALUE", false);
@@ -946,10 +946,10 @@ namespace DigitPark.Editor
             CreateShopCard(grid, "Gems_6500", "6,500", "$49.99", "+30%", new Color(0.24f, 1f, 0.42f, 0.7f), "POPULAR", false);
             CreateShopCard(grid, "Gems_14000", "14,000", "$99.99", "+40%", new Color(1f, 0.84f, 0f, 0.7f), "MEGA PACK", false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Gems Section V3 creado");
+            Debug.Log("[ShopPremiumUIBuilder] DigitGems Section V3 creado");
         }
 
-        // ==================== COINS SECTION ====================
+        // ==================== DIGITCOINS SECTION ====================
 
         private static void CreateCoinsSection(GameObject parent)
         {
@@ -961,7 +961,7 @@ namespace DigitPark.Editor
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            CreateSectionHeader(section, "COINS", COIN_COLOR);
+            CreateSectionHeader(section, "DIGITCOINS", COIN_COLOR);
 
             // Grid
             GameObject grid = CreateChild(section, "CoinsGrid");
@@ -976,13 +976,13 @@ namespace DigitPark.Editor
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
             gridLE.minHeight = GRID_GEM_COIN_H * 2 + GRID_SPACING;
 
-            // 4 Coin packs (bought with gems)
+            // 4 DigitCoin packs (bought with DigitGems)
             CreateShopCard(grid, "Coins_1000", "1,000", "50", "", COIN_COLOR, "", true);
             CreateShopCard(grid, "Coins_5000", "5,000", "200", "+25%", COIN_COLOR, "", true);
             CreateShopCard(grid, "Coins_15000", "15,000", "500", "+50%", COIN_COLOR, "BEST VALUE", true);
             CreateShopCard(grid, "Coins_50000", "50,000", "1,500", "+75%", COIN_COLOR, "MEGA PACK", true);
 
-            Debug.Log("[ShopPremiumUIBuilder] Coins Section V3 creado");
+            Debug.Log("[ShopPremiumUIBuilder] DigitCoins Section V3 creado");
         }
 
         // ==================== THEMES SECTION ====================
@@ -1078,7 +1078,7 @@ namespace DigitPark.Editor
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
 
-            CreateSectionHeader(section, "GEM FRAMES", GEM_COLOR);
+            CreateSectionHeader(section, "DIGITGEM FRAMES", GEM_COLOR);
 
             // Grid
             GameObject grid = CreateChild(section, "GemFramesGrid");
@@ -1093,7 +1093,7 @@ namespace DigitPark.Editor
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
             gridLE.minHeight = GRID_COSMETIC_H * 2 + GRID_SPACING;
 
-            // 6 Gem frame items (bought with gems)
+            // 6 DigitGem frame items (bought with DigitGems)
             CreateCosmeticCard(grid, "GemFrame_Sapphire", "Sapphire", "100", new Color(0.2f, 0.4f, 1f, 1f), false);
             CreateCosmeticCard(grid, "GemFrame_Emerald", "Emerald", "150", new Color(0.2f, 0.8f, 0.4f, 1f), false);
             CreateCosmeticCard(grid, "GemFrame_Ruby", "Ruby", "200", new Color(1f, 0.2f, 0.3f, 1f), false);
@@ -1101,7 +1101,7 @@ namespace DigitPark.Editor
             CreateCosmeticCard(grid, "GemFrame_Topaz", "Topaz", "300", new Color(1f, 0.8f, 0.2f, 1f), false);
             CreateCosmeticCard(grid, "GemFrame_Obsidian", "Obsidian", "500", new Color(0.3f, 0.25f, 0.35f, 1f), false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Gem Frames Section V3 creado (6 items)");
+            Debug.Log("[ShopPremiumUIBuilder] DigitGem Frames Section V3 creado (6 items)");
         }
 
         // ==================== PREMIUM FRAMES SECTION ====================
@@ -1404,7 +1404,7 @@ namespace DigitPark.Editor
         // ==================== CARD BUILDERS ====================
 
         /// <summary>
-        /// Card para items de Gemas/Monedas (330x280)
+        /// Card para items de DigitGems/DigitCoins (330x280)
         /// </summary>
         private static void CreateShopCard(GameObject parent, string name, string amount,
             string price, string bonus, Color color, string badge, bool useGems)
@@ -1814,7 +1814,7 @@ namespace DigitPark.Editor
 
             GameObject previewAmount = CreateChild(preview, "Amount");
             TextMeshProUGUI amountText = previewAmount.AddComponent<TextMeshProUGUI>();
-            amountText.text = "1,200 Gems";
+            amountText.text = "1,200 DigitGems";
             amountText.fontSize = FontSizes.BodyLarge;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
@@ -1890,7 +1890,7 @@ namespace DigitPark.Editor
             // Title
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.text = "Insufficient Gems";
+            titleText.text = "Insufficient DigitGems";
             titleText.fontSize = FontSizes.SectionHeader;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GEM_COLOR;
@@ -1901,7 +1901,7 @@ namespace DigitPark.Editor
             // Message
             GameObject msg = CreateChild(popup, "Message");
             TextMeshProUGUI msgText = msg.AddComponent<TextMeshProUGUI>();
-            msgText.text = "You don't have enough gems.\nGet more in the shop!";
+            msgText.text = "You don't have enough DigitGems.\nGet more in the shop!";
             msgText.fontSize = FontSizes.Body;
             msgText.color = TEXT_SECONDARY;
             msgText.alignment = TextAlignmentOptions.Center;
@@ -1919,7 +1919,7 @@ namespace DigitPark.Editor
             btnLE.minHeight = 65;
 
             CreatePopupButton(buttons, "CloseButton", "Close", BUTTON_SECONDARY, TEXT_PRIMARY);
-            CreatePopupButton(buttons, "GetGemsButton", "Get Gems", GEM_COLOR, TEXT_DARK);
+            CreatePopupButton(buttons, "GetGemsButton", "Get DigitGems", GEM_COLOR, TEXT_DARK);
 
             Debug.Log("[ShopPremiumUIBuilder] NotEnoughPopup V3 creado");
         }

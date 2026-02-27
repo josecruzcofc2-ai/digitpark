@@ -323,8 +323,8 @@ namespace DigitPark.Editor
             var DM = DigitPark.UI.Items.MissionDifficulty.Medium;
             var DH = DigitPark.UI.Items.MissionDifficulty.Hard;
             var CD = DigitPark.UI.Items.MissionCategory.Daily;
-            var C = MissionRewardType.Coins;
-            var G = MissionRewardType.Gems;
+            var C = MissionRewardType.DigitCoins;
+            var G = MissionRewardType.DigitGems;
 
             CreateMissionSO(P, "daily_play_3", "ms_daily_play_3_title", "ms_daily_play_3_desc",
                 MissionActionType.PlayGames, DigitPark.Games.GameType.DigitRush, false, 3, D, CD, C, 50, 0);
@@ -374,8 +374,8 @@ namespace DigitPark.Editor
             var DM = DigitPark.UI.Items.MissionDifficulty.Medium;
             var DH = DigitPark.UI.Items.MissionDifficulty.Hard;
             var CW = DigitPark.UI.Items.MissionCategory.Weekly;
-            var C = MissionRewardType.Coins;
-            var G = MissionRewardType.Gems;
+            var C = MissionRewardType.DigitCoins;
+            var G = MissionRewardType.DigitGems;
 
             CreateMissionSO(P, "weekly_play_20", "ms_weekly_play_20_title", "ms_weekly_play_20_desc",
                 MissionActionType.PlayGames, DigitPark.Games.GameType.DigitRush, false, 20, DM, CW, C, 300, 0);
@@ -826,7 +826,7 @@ namespace DigitPark.Editor
             // Bonus text
             var bonusText = FindOrCreate(bonusRow.transform, "BonusRewardText");
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
-            btTMP.text = "Bonus: +100 coins";
+            btTMP.text = "Bonus: +100 DigitCoins";
             btTMP.fontSize = FontSizes.Body;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = GOLD;
@@ -952,23 +952,23 @@ namespace DigitPark.Editor
             // --- 6 Daily Mission Cards ---
             CreateMissionCard(content, "Mission1",
                 "Play 3 Matches", "Play in any mode",
-                "play_matches", 2, 3, "50", "coins", false, false);
+                "play_matches", 2, 3, "50", "digitcoins", false, false);
 
             CreateMissionCard(content, "Mission2",
                 "Win 1 Match", "Win in any mode",
-                "win_matches", 1, 1, "100", "coins", true, false);
+                "win_matches", 1, 1, "100", "digitcoins", true, false);
 
             CreateMissionCard(content, "Mission3",
                 "Earn 500 Points", "Accumulate points in matches",
-                "earn_points", 350, 500, "25", "gems", false, false);
+                "earn_points", 350, 500, "25", "digitgems", false, false);
 
             CreateMissionCard(content, "Mission4",
                 "Play with a Friend", "Invite a friend to play",
-                "play_matches", 0, 1, "50", "coins", false, false);
+                "play_matches", 0, 1, "50", "digitcoins", false, false);
 
             CreateMissionCard(content, "Mission5",
                 "Complete 3 Minigames", "Play 3 different types",
-                "complete_minigames", 3, 3, "200", "coins", true, false);
+                "complete_minigames", 3, 3, "200", "digitcoins", true, false);
 
             CreateMissionCard(content, "Mission6",
                 "80% Precision", "Complete with 80%+ precision",
@@ -980,15 +980,15 @@ namespace DigitPark.Editor
             // --- 3 Weekly Mission Cards ---
             CreateMissionCard(content, "Weekly1",
                 "Win 10 Matches", "Accumulate wins this week",
-                "win_matches", 7, 10, "150", "gems", false, true);
+                "win_matches", 7, 10, "150", "digitgems", false, true);
 
             CreateMissionCard(content, "Weekly2",
                 "Play 20 Matches", "Play in any mode",
-                "play_matches", 15, 20, "500", "coins", false, true);
+                "play_matches", 15, 20, "500", "digitcoins", false, true);
 
             CreateMissionCard(content, "Weekly3",
                 "Reach Top 3", "Finish on podium 5 times",
-                "earn_points", 3, 5, "Premium Gems", "gems", false, true);
+                "earn_points", 3, 5, "Premium DigitGems", "digitgems", false, true);
 
             // Empty State Text (oculto, se muestra cuando no hay misiones)
             var emptyState = FindOrCreate(content.transform, "EmptyStateText");
@@ -1236,17 +1236,17 @@ namespace DigitPark.Editor
             string currencyIconPath;
             switch (rewardType)
             {
-                case "gems":
+                case "digitgems":
                     rewardColor = GEM_COLOR;
-                    currencyIconPath = CURRENCY_ICONS_PATH + "GemIcon.png";
+                    currencyIconPath = CURRENCY_ICONS_PATH + "icon_digitgem_single.png";
                     break;
                 case "xp":
                     rewardColor = XP_COLOR;
                     currencyIconPath = UI_ICONS_PATH + "icon_xp.png";
                     break;
-                default: // coins
+                default: // digitcoins
                     rewardColor = COIN_COLOR;
-                    currencyIconPath = CURRENCY_ICONS_PATH + "CoinIcon.png";
+                    currencyIconPath = CURRENCY_ICONS_PATH + "icon_digitcoin_single.png";
                     break;
             }
 
@@ -1472,7 +1472,7 @@ namespace DigitPark.Editor
             var riImg = GetOrAdd<Image>(rewardIcon);
             riImg.color = COIN_COLOR;
             riImg.preserveAspect = true;
-            Sprite coinSprite = LoadIcon(CURRENCY_ICONS_PATH + "CoinIcon.png");
+            Sprite coinSprite = LoadIcon(CURRENCY_ICONS_PATH + "icon_digitcoin_single.png");
             if (coinSprite != null) riImg.sprite = coinSprite;
             var riLE = GetOrAdd<LayoutElement>(rewardIcon);
             riLE.minWidth = 40;
@@ -1581,8 +1581,8 @@ namespace DigitPark.Editor
                 assigned += SetRef(so, "closeDetailButton", FindInPath<Button>(r, "RewardClaimBlocker"));
 
                 // Reward Icons (cargar desde assets)
-                var coinSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "CoinIcon.png");
-                var gemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "GemIcon.png");
+                var coinSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "icon_digitcoin_single.png");
+                var gemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(CURRENCY_ICONS_PATH + "icon_digitgem_single.png");
                 if (coinSprite != null) { var p = so.FindProperty("coinIcon"); if (p != null) { p.objectReferenceValue = coinSprite; assigned++; } }
                 if (gemSprite != null) { var p = so.FindProperty("gemIcon"); if (p != null) { p.objectReferenceValue = gemSprite; assigned++; } }
 

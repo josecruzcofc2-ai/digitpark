@@ -1137,9 +1137,9 @@ namespace DigitPark.Localization
 
             // ==================== REWARD TYPES ====================
             AddTranslation("reward_coins",
-                "Coins", "Monedas", "Pieces", "Moedas", "Munzen");
+                "DigitCoins", "DigitCoins", "DigitCoins", "DigitCoins", "DigitCoins");
             AddTranslation("reward_gems",
-                "Gems", "Gemas", "Gemmes", "Gemas", "Edelsteine");
+                "DigitGems", "DigitGems", "DigitGems", "DigitGems", "DigitGems");
             AddTranslation("reward_xp",
                 "XP", "XP", "XP", "XP", "XP");
 

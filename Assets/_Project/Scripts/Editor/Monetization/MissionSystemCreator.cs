@@ -81,83 +81,83 @@ namespace DigitPark.Editor
         {
             CreateMission(DAILY_PATH, "daily_play_3", "ms_daily_play_3_title", "ms_daily_play_3_desc",
                 MissionActionType.PlayGames, GameType.DigitRush, false, 3,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 50, 0);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 50, 0);
 
             CreateMission(DAILY_PATH, "daily_play_5", "ms_daily_play_5_title", "ms_daily_play_5_desc",
                 MissionActionType.PlayGames, GameType.DigitRush, false, 5,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 80, 1);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 80, 1);
 
             CreateMission(DAILY_PATH, "daily_win_1", "ms_daily_win_1_title", "ms_daily_win_1_desc",
                 MissionActionType.WinGames, GameType.DigitRush, false, 1,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 75, 2);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 75, 2);
 
             CreateMission(DAILY_PATH, "daily_win_3", "ms_daily_win_3_title", "ms_daily_win_3_desc",
                 MissionActionType.WinGames, GameType.DigitRush, false, 3,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 120, 3);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 120, 3);
 
             CreateMission(DAILY_PATH, "daily_digitrush_2", "ms_daily_digitrush_2_title", "ms_daily_digitrush_2_desc",
                 MissionActionType.PlaySpecificGame, GameType.DigitRush, true, 2,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 60, 4);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 60, 4);
 
             CreateMission(DAILY_PATH, "daily_memory_2", "ms_daily_memory_2_title", "ms_daily_memory_2_desc",
                 MissionActionType.PlaySpecificGame, GameType.MemoryPairs, true, 2,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 60, 5);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 60, 5);
 
             CreateMission(DAILY_PATH, "daily_quickmath_2", "ms_daily_quickmath_2_title", "ms_daily_quickmath_2_desc",
                 MissionActionType.PlaySpecificGame, GameType.QuickMath, true, 2,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 60, 6);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 60, 6);
 
             CreateMission(DAILY_PATH, "daily_flashtap_2", "ms_daily_flashtap_2_title", "ms_daily_flashtap_2_desc",
                 MissionActionType.PlaySpecificGame, GameType.FlashTap, true, 2,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 60, 7);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 60, 7);
 
             CreateMission(DAILY_PATH, "daily_oddoneout_2", "ms_daily_oddoneout_2_title", "ms_daily_oddoneout_2_desc",
                 MissionActionType.PlaySpecificGame, GameType.OddOneOut, true, 2,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 60, 8);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 60, 8);
 
             CreateMission(DAILY_PATH, "daily_score_500", "ms_daily_score_500_title", "ms_daily_score_500_desc",
                 MissionActionType.ReachScore, GameType.DigitRush, false, 500,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 40, 9);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 40, 9);
 
             CreateMission(DAILY_PATH, "daily_score_2000", "ms_daily_score_2000_title", "ms_daily_score_2000_desc",
                 MissionActionType.ReachScore, GameType.DigitRush, false, 2000,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 100, 10);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 100, 10);
 
             CreateMission(DAILY_PATH, "daily_score_5000", "ms_daily_score_5000_title", "ms_daily_score_5000_desc",
                 MissionActionType.ReachScore, GameType.DigitRush, false, 5000,
-                MissionDifficulty.Hard, MissionCategory.Daily, MissionRewardType.Gems, 25, 11);
+                MissionDifficulty.Hard, MissionCategory.Daily, MissionRewardType.DigitGems, 25, 11);
 
             CreateMission(DAILY_PATH, "daily_total_1000", "ms_daily_total_1000_title", "ms_daily_total_1000_desc",
                 MissionActionType.AccumulateScore, GameType.DigitRush, false, 1000,
-                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.Coins, 50, 12);
+                MissionDifficulty.Easy, MissionCategory.Daily, MissionRewardType.DigitCoins, 50, 12);
 
             CreateMission(DAILY_PATH, "daily_total_3000", "ms_daily_total_3000_title", "ms_daily_total_3000_desc",
                 MissionActionType.AccumulateScore, GameType.DigitRush, false, 3000,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 100, 13);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 100, 13);
 
             CreateMission(DAILY_PATH, "daily_precision_80", "ms_daily_precision_80_title", "ms_daily_precision_80_desc",
                 MissionActionType.PrecisionGame, GameType.DigitRush, false, 1,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 75, 14);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 75, 14);
 
             CreateMission(DAILY_PATH, "daily_win_digitrush", "ms_daily_win_digitrush_title", "ms_daily_win_digitrush_desc",
                 MissionActionType.WinSpecificGame, GameType.DigitRush, true, 1,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 80, 15);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 80, 15);
 
             CreateMission(DAILY_PATH, "daily_win_memory", "ms_daily_win_memory_title", "ms_daily_win_memory_desc",
                 MissionActionType.WinSpecificGame, GameType.MemoryPairs, true, 1,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 80, 16);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 80, 16);
 
             CreateMission(DAILY_PATH, "daily_perfect", "ms_daily_perfect_title", "ms_daily_perfect_desc",
                 MissionActionType.PrecisionGame, GameType.DigitRush, false, 1,
-                MissionDifficulty.Hard, MissionCategory.Daily, MissionRewardType.Gems, 30, 17);
+                MissionDifficulty.Hard, MissionCategory.Daily, MissionRewardType.DigitGems, 30, 17);
 
             CreateMission(DAILY_PATH, "daily_sprint_1", "ms_daily_sprint_1_title", "ms_daily_sprint_1_desc",
                 MissionActionType.CompleteCognitiveSprint, GameType.DigitRush, false, 1,
-                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.Coins, 100, 18);
+                MissionDifficulty.Medium, MissionCategory.Daily, MissionRewardType.DigitCoins, 100, 18);
 
             CreateMission(DAILY_PATH, "daily_all_games", "ms_daily_all_games_title", "ms_daily_all_games_desc",
                 MissionActionType.PlayAllGameTypes, GameType.DigitRush, false, 5,
-                MissionDifficulty.Hard, MissionCategory.Daily, MissionRewardType.Gems, 40, 19);
+                MissionDifficulty.Hard, MissionCategory.Daily, MissionRewardType.DigitGems, 40, 19);
         }
 
         #endregion
@@ -168,43 +168,43 @@ namespace DigitPark.Editor
         {
             CreateMission(WEEKLY_PATH, "weekly_play_20", "ms_weekly_play_20_title", "ms_weekly_play_20_desc",
                 MissionActionType.PlayGames, GameType.DigitRush, false, 20,
-                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.Coins, 300, 0);
+                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.DigitCoins, 300, 0);
 
             CreateMission(WEEKLY_PATH, "weekly_play_30", "ms_weekly_play_30_title", "ms_weekly_play_30_desc",
                 MissionActionType.PlayGames, GameType.DigitRush, false, 30,
-                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.Coins, 500, 1);
+                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.DigitCoins, 500, 1);
 
             CreateMission(WEEKLY_PATH, "weekly_win_10", "ms_weekly_win_10_title", "ms_weekly_win_10_desc",
                 MissionActionType.WinGames, GameType.DigitRush, false, 10,
-                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.Coins, 250, 2);
+                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.DigitCoins, 250, 2);
 
             CreateMission(WEEKLY_PATH, "weekly_win_20", "ms_weekly_win_20_title", "ms_weekly_win_20_desc",
                 MissionActionType.WinGames, GameType.DigitRush, false, 20,
-                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.Gems, 100, 3);
+                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.DigitGems, 100, 3);
 
             CreateMission(WEEKLY_PATH, "weekly_all_games", "ms_weekly_all_games_title", "ms_weekly_all_games_desc",
                 MissionActionType.PlayAllGameTypes, GameType.DigitRush, false, 5,
-                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.Gems, 75, 4);
+                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.DigitGems, 75, 4);
 
             CreateMission(WEEKLY_PATH, "weekly_streak_5", "ms_weekly_streak_5_title", "ms_weekly_streak_5_desc",
                 MissionActionType.WinStreak, GameType.DigitRush, false, 5,
-                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.Gems, 80, 5);
+                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.DigitGems, 80, 5);
 
             CreateMission(WEEKLY_PATH, "weekly_score_25k", "ms_weekly_score_25k_title", "ms_weekly_score_25k_desc",
                 MissionActionType.AccumulateScore, GameType.DigitRush, false, 25000,
-                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.Coins, 400, 6);
+                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.DigitCoins, 400, 6);
 
             CreateMission(WEEKLY_PATH, "weekly_score_50k", "ms_weekly_score_50k_title", "ms_weekly_score_50k_desc",
                 MissionActionType.AccumulateScore, GameType.DigitRush, false, 50000,
-                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.Gems, 120, 7);
+                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.DigitGems, 120, 7);
 
             CreateMission(WEEKLY_PATH, "weekly_precision_5", "ms_weekly_precision_5_title", "ms_weekly_precision_5_desc",
                 MissionActionType.PrecisionGame, GameType.DigitRush, false, 5,
-                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.Gems, 60, 8);
+                MissionDifficulty.Hard, MissionCategory.Weekly, MissionRewardType.DigitGems, 60, 8);
 
             CreateMission(WEEKLY_PATH, "weekly_tournament", "ms_weekly_tournament_title", "ms_weekly_tournament_desc",
                 MissionActionType.PlayTournament, GameType.DigitRush, false, 1,
-                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.Gems, 50, 9);
+                MissionDifficulty.Medium, MissionCategory.Weekly, MissionRewardType.DigitGems, 50, 9);
         }
 
         #endregion

@@ -221,13 +221,13 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Navega a la tienda para comprar gemas (Not Enough Gems flow)
+        /// Navega a la tienda para comprar DigitGems (Not Enough DigitGems flow)
         /// </summary>
-        public void NavigateToShopForGems()
+        public void NavigateToShopForDigitGems()
         {
             NavigateTo(Scenes.SHOP, new NavigationParams
             {
-                TargetTab = ShopTab.Gems.ToString(),
+                TargetTab = ShopTab.DigitGems.ToString(),
                 ShowPopup = true
             });
         }
@@ -251,8 +251,8 @@ namespace DigitPark.Monetization
     public enum ShopTab
     {
         Featured,
-        Gems,
-        Coins,
+        DigitGems,
+        DigitCoins,
         Themes,
         Cosmetics
     }

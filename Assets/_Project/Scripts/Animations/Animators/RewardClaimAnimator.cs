@@ -68,8 +68,8 @@ namespace DigitPark.Animations
                 audioSource = gameObject.AddComponent<AudioSource>();
 
             // Initialize current values
-            currentValues[RewardType.Coins] = 0;
-            currentValues[RewardType.Gems] = 0;
+            currentValues[RewardType.DigitCoins] = 0;
+            currentValues[RewardType.DigitGems] = 0;
             currentValues[RewardType.Tickets] = 0;
         }
 
@@ -80,7 +80,7 @@ namespace DigitPark.Animations
         /// </summary>
         public void ClaimCoins(Vector3 sourcePosition, int amount, Action onComplete = null)
         {
-            ClaimCurrency(RewardType.Coins, sourcePosition, amount, onComplete);
+            ClaimCurrency(RewardType.DigitCoins, sourcePosition, amount, onComplete);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace DigitPark.Animations
         /// </summary>
         public void ClaimGems(Vector3 sourcePosition, int amount, Action onComplete = null)
         {
-            ClaimCurrency(RewardType.Gems, sourcePosition, amount, onComplete);
+            ClaimCurrency(RewardType.DigitGems, sourcePosition, amount, onComplete);
         }
 
         /// <summary>
@@ -370,8 +370,8 @@ namespace DigitPark.Animations
         {
             return type switch
             {
-                RewardType.Coins => coinIconPrefab,
-                RewardType.Gems => gemIconPrefab,
+                RewardType.DigitCoins => coinIconPrefab,
+                RewardType.DigitGems => gemIconPrefab,
                 RewardType.Tickets => ticketIconPrefab,
                 _ => coinIconPrefab
             };
@@ -381,8 +381,8 @@ namespace DigitPark.Animations
         {
             return type switch
             {
-                RewardType.Coins => coinsTarget,
-                RewardType.Gems => gemsTarget,
+                RewardType.DigitCoins => coinsTarget,
+                RewardType.DigitGems => gemsTarget,
                 RewardType.Tickets => ticketsTarget,
                 _ => coinsTarget
             };
@@ -392,8 +392,8 @@ namespace DigitPark.Animations
         {
             return type switch
             {
-                RewardType.Coins => coinsText,
-                RewardType.Gems => gemsText,
+                RewardType.DigitCoins => coinsText,
+                RewardType.DigitGems => gemsText,
                 RewardType.Tickets => ticketsText,
                 _ => coinsText
             };
@@ -403,8 +403,8 @@ namespace DigitPark.Animations
         {
             return type switch
             {
-                RewardType.Coins => coinSound,
-                RewardType.Gems => gemSound,
+                RewardType.DigitCoins => coinSound,
+                RewardType.DigitGems => gemSound,
                 RewardType.Tickets => ticketSound,
                 _ => coinSound
             };
@@ -428,8 +428,8 @@ namespace DigitPark.Animations
 
     public enum RewardType
     {
-        Coins,
-        Gems,
+        DigitCoins,
+        DigitGems,
         Tickets
     }
 

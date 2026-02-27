@@ -74,7 +74,7 @@ namespace DigitPark.Services
                 frameId = "basic",
                 nameKey = "frame_basic",
                 rarity = FrameRarity.Common,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 500,
                 primaryColor = new Color(0.5f, 0.5f, 0.5f),
                 secondaryColor = new Color(0.3f, 0.3f, 0.3f)
@@ -85,7 +85,7 @@ namespace DigitPark.Services
                 frameId = "bronze",
                 nameKey = "frame_bronze",
                 rarity = FrameRarity.Common,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 1000,
                 primaryColor = new Color(0.8f, 0.5f, 0.2f),
                 secondaryColor = new Color(0.6f, 0.35f, 0.1f)
@@ -96,7 +96,7 @@ namespace DigitPark.Services
                 frameId = "silver",
                 nameKey = "frame_silver",
                 rarity = FrameRarity.Common,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 2500,
                 primaryColor = new Color(0.75f, 0.75f, 0.8f),
                 secondaryColor = new Color(0.5f, 0.5f, 0.55f)
@@ -107,7 +107,7 @@ namespace DigitPark.Services
                 frameId = "gold",
                 nameKey = "frame_gold",
                 rarity = FrameRarity.Rare,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 5000,
                 primaryColor = new Color(1f, 0.84f, 0f),
                 secondaryColor = new Color(0.85f, 0.65f, 0f)
@@ -118,7 +118,7 @@ namespace DigitPark.Services
                 frameId = "neon",
                 nameKey = "frame_neon",
                 rarity = FrameRarity.Rare,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 7500,
                 primaryColor = new Color(0f, 1f, 0.5f),
                 secondaryColor = new Color(0f, 0.8f, 1f)
@@ -129,7 +129,7 @@ namespace DigitPark.Services
                 frameId = "diamond",
                 nameKey = "frame_diamond",
                 rarity = FrameRarity.Epic,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 10000,
                 primaryColor = new Color(0.7f, 0.9f, 1f),
                 secondaryColor = new Color(0.4f, 0.7f, 1f)
@@ -140,7 +140,7 @@ namespace DigitPark.Services
                 frameId = "crystal",
                 nameKey = "frame_crystal",
                 rarity = FrameRarity.Epic,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 12000,
                 primaryColor = new Color(0.8f, 0.6f, 1f),
                 secondaryColor = new Color(0.5f, 0.2f, 0.8f)
@@ -151,7 +151,7 @@ namespace DigitPark.Services
                 frameId = "platinum",
                 nameKey = "frame_platinum",
                 rarity = FrameRarity.Legendary,
-                priceType = FramePriceType.Coins,
+                priceType = FramePriceType.DigitCoins,
                 coinPrice = 15000,
                 primaryColor = new Color(0.9f, 0.95f, 1f),
                 secondaryColor = new Color(0.7f, 0.75f, 0.85f)
@@ -163,7 +163,7 @@ namespace DigitPark.Services
                 frameId = "sapphire",
                 nameKey = "frame_sapphire",
                 rarity = FrameRarity.Rare,
-                priceType = FramePriceType.Gems,
+                priceType = FramePriceType.DigitGems,
                 gemPrice = 50,
                 primaryColor = new Color(0.05f, 0.2f, 0.8f),
                 secondaryColor = new Color(0.1f, 0.4f, 1f)
@@ -174,7 +174,7 @@ namespace DigitPark.Services
                 frameId = "ruby",
                 nameKey = "frame_ruby",
                 rarity = FrameRarity.Rare,
-                priceType = FramePriceType.Gems,
+                priceType = FramePriceType.DigitGems,
                 gemPrice = 150,
                 primaryColor = new Color(0.9f, 0.1f, 0.2f),
                 secondaryColor = new Color(1f, 0.3f, 0.4f)
@@ -185,7 +185,7 @@ namespace DigitPark.Services
                 frameId = "emerald",
                 nameKey = "frame_emerald",
                 rarity = FrameRarity.Epic,
-                priceType = FramePriceType.Gems,
+                priceType = FramePriceType.DigitGems,
                 gemPrice = 300,
                 primaryColor = new Color(0.1f, 0.8f, 0.3f),
                 secondaryColor = new Color(0.05f, 0.5f, 0.15f)
@@ -196,7 +196,7 @@ namespace DigitPark.Services
                 frameId = "amethyst",
                 nameKey = "frame_amethyst",
                 rarity = FrameRarity.Epic,
-                priceType = FramePriceType.Gems,
+                priceType = FramePriceType.DigitGems,
                 gemPrice = 500,
                 primaryColor = new Color(0.6f, 0.2f, 0.8f),
                 secondaryColor = new Color(0.4f, 0.1f, 0.6f)
@@ -207,7 +207,7 @@ namespace DigitPark.Services
                 frameId = "topaz",
                 nameKey = "frame_topaz",
                 rarity = FrameRarity.Epic,
-                priceType = FramePriceType.Gems,
+                priceType = FramePriceType.DigitGems,
                 gemPrice = 750,
                 primaryColor = new Color(1f, 0.75f, 0f),
                 secondaryColor = new Color(1f, 0.5f, 0f)
@@ -218,7 +218,7 @@ namespace DigitPark.Services
                 frameId = "obsidian",
                 nameKey = "frame_obsidian",
                 rarity = FrameRarity.Legendary,
-                priceType = FramePriceType.Gems,
+                priceType = FramePriceType.DigitGems,
                 gemPrice = 1000,
                 primaryColor = new Color(0.1f, 0.1f, 0.15f),
                 secondaryColor = new Color(0.3f, 0.05f, 0.4f)
@@ -470,10 +470,10 @@ namespace DigitPark.Services
 
             switch (frame.priceType)
             {
-                case FramePriceType.Coins:
+                case FramePriceType.DigitCoins:
                     if (!currency.SpendCoins(frame.coinPrice)) return false;
                     break;
-                case FramePriceType.Gems:
+                case FramePriceType.DigitGems:
                     if (!currency.SpendGems(frame.gemPrice)) return false;
                     break;
                 case FramePriceType.RealMoney:

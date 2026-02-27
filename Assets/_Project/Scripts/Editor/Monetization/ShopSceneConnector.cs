@@ -87,16 +87,18 @@ namespace DigitPark.Editor
 
         private static void CreateGemPackAssets(string folderPath)
         {
-            // V2 gem tiers (updated)
-            var gemPacks = new (string id, string name, int gems, float price, int bonus, bool popular)[]
+            // Production gem tiers - aligned with App Store / Google Play products
+            var gemPacks = new (string id, string name, int gems, float price, int bonus, bool popular, bool bestValue)[]
             {
-                ("gems_80", "80 Gems", 80, 0.99f, 0, false),
-                ("gems_500", "500 Gems", 500, 4.99f, 10, false),
-                ("gems_1200", "1,200 Gems", 1200, 9.99f, 20, true),
-                ("gems_2800", "2,800 Gems", 2800, 19.99f, 25, false),
-                ("gems_7500", "7,500 Gems", 7500, 49.99f, 30, false),
-                ("gems_16000", "16,000 Gems", 16000, 99.99f, 35, false),
+                ("gems_100", "100 DigitGems", 100, 0.99f, 0, false, false),
+                ("gems_500", "500 DigitGems", 500, 4.99f, 10, false, false),
+                ("gems_1200", "1,200 DigitGems", 1200, 9.99f, 20, true, true),
+                ("gems_2500", "2,500 DigitGems", 2500, 19.99f, 25, false, false),
+                ("gems_6500", "6,500 DigitGems", 6500, 49.99f, 30, false, false),
+                ("gems_14000", "14,000 DigitGems", 14000, 99.99f, 35, false, false),
             };
+
+            string iconBasePath = "Assets/_Project/Art/Icons/Currency";
 
             foreach (var pack in gemPacks)
             {
@@ -109,17 +111,26 @@ namespace DigitPark.Editor
                 ShopItemData item = ScriptableObject.CreateInstance<ShopItemData>();
                 item.itemId = pack.id;
                 item.displayName = pack.name;
-                item.description = $"Get {pack.gems} gems";
-                item.itemType = ShopItemType.GemsPack;
-                item.shopTab = ShopTab.Gems;
+                item.description = $"Get {pack.gems} DigitGems";
+                item.itemType = ShopItemType.DigitGemsPack;
+                item.shopTab = ShopTab.DigitGems;
                 item.priceType = PriceType.RealMoney;
                 item.realMoneyPrice = pack.price;
-                item.iapProductId = $"com.digitpark.{pack.id}";
+                item.iapProductId = $"com.matrixsoftware.digitpark.{pack.id}";
                 item.gemsAmount = pack.gems;
                 item.bonusPercent = pack.bonus;
                 item.isPopular = pack.popular;
+                item.isBestValue = pack.bestValue;
                 item.accentColor = new Color(0.4f, 0.8f, 1f, 1f); // Gem blue
                 item.sortOrder = System.Array.IndexOf(gemPacks, pack);
+
+                // Auto-load icon sprite
+                string iconPath = $"{iconBasePath}/icon_digitgem_pack_{pack.gems}.png";
+                Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+                if (iconSprite != null)
+                    item.icon = iconSprite;
+                else
+                    Debug.LogWarning($"[ShopConnector] Icon not found: {iconPath}");
 
                 AssetDatabase.CreateAsset(item, assetPath);
                 Debug.Log($"[ShopConnector] Created: {assetPath}");
@@ -128,14 +139,16 @@ namespace DigitPark.Editor
 
         private static void CreateCoinPackAssets(string folderPath)
         {
-            // V2: 4 coin packs
-            var coinPacks = new (string id, string name, int coins, int gemsPrice, int bonus, bool popular)[]
+            // Production: 4 coin packs (purchased with DigitGems)
+            var coinPacks = new (string id, string name, int coins, int gemsPrice, int bonus, bool popular, bool bestValue)[]
             {
-                ("coins_1000", "1,000 Coins", 1000, 50, 0, false),
-                ("coins_5000", "5,000 Coins", 5000, 200, 25, false),
-                ("coins_15000", "15,000 Coins", 15000, 500, 50, true),
-                ("coins_50000", "50,000 Coins", 50000, 1500, 60, false),
+                ("coins_1000", "1,000 DigitCoins", 1000, 50, 0, false, false),
+                ("coins_5000", "5,000 DigitCoins", 5000, 200, 25, false, false),
+                ("coins_15000", "15,000 DigitCoins", 15000, 500, 50, true, true),
+                ("coins_50000", "50,000 DigitCoins", 50000, 1500, 75, false, false),
             };
+
+            string iconBasePath = "Assets/_Project/Art/Icons/Currency";
 
             foreach (var pack in coinPacks)
             {
@@ -148,16 +161,25 @@ namespace DigitPark.Editor
                 ShopItemData item = ScriptableObject.CreateInstance<ShopItemData>();
                 item.itemId = pack.id;
                 item.displayName = pack.name;
-                item.description = $"Get {pack.coins} coins";
-                item.itemType = ShopItemType.CoinsPack;
-                item.shopTab = ShopTab.Coins;
-                item.priceType = PriceType.Gems;
+                item.description = $"Get {pack.coins} DigitCoins";
+                item.itemType = ShopItemType.DigitCoinsPack;
+                item.shopTab = ShopTab.DigitCoins;
+                item.priceType = PriceType.DigitGems;
                 item.gemsPrice = pack.gemsPrice;
                 item.coinsAmount = pack.coins;
                 item.bonusPercent = pack.bonus;
                 item.isPopular = pack.popular;
+                item.isBestValue = pack.bestValue;
                 item.accentColor = new Color(1f, 0.85f, 0.3f, 1f); // Gold
                 item.sortOrder = System.Array.IndexOf(coinPacks, pack);
+
+                // Auto-load icon sprite
+                string iconPath = $"{iconBasePath}/icon_digitcoin_pack_{pack.coins}.png";
+                Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+                if (iconSprite != null)
+                    item.icon = iconSprite;
+                else
+                    Debug.LogWarning($"[ShopConnector] Icon not found: {iconPath}");
 
                 AssetDatabase.CreateAsset(item, assetPath);
                 Debug.Log($"[ShopConnector] Created: {assetPath}");
@@ -192,7 +214,7 @@ namespace DigitPark.Editor
                 item.shopTab = ShopTab.Themes;
                 item.priceType = PriceType.RealMoney;
                 item.realMoneyPrice = theme.price;
-                item.iapProductId = $"com.digitpark.{theme.id}";
+                item.iapProductId = $"com.matrixsoftware.digitpark.{theme.id}";
                 item.themeId = theme.id.Replace("theme_", "");
                 item.accentColor = new Color(0.6f, 0.3f, 0.9f, 1f);
                 item.sortOrder = System.Array.IndexOf(themes, theme);
@@ -215,7 +237,7 @@ namespace DigitPark.Editor
                 bundle.realMoneyPrice = 14.99f;
                 bundle.originalPrice = 22.50f;
                 bundle.discountPercent = 33;
-                bundle.iapProductId = "com.digitpark.theme_bundle_all";
+                bundle.iapProductId = "com.matrixsoftware.digitpark.theme_bundle_all";
                 bundle.accentColor = new Color(0.6f, 0.3f, 0.9f, 1f);
 
                 AssetDatabase.CreateAsset(bundle, bundlePath);
@@ -232,7 +254,7 @@ namespace DigitPark.Editor
                 ShopItemData starter = ScriptableObject.CreateInstance<ShopItemData>();
                 starter.itemId = "starter_pack";
                 starter.displayName = "Starter Pack";
-                starter.description = "500 Gems + 5,000 Coins + 1 Random Theme";
+                starter.description = "500 DigitGems + 5,000 DigitCoins + 1 Random Theme";
                 starter.itemType = ShopItemType.StarterPack;
                 starter.shopTab = ShopTab.Featured;
                 starter.priceType = PriceType.RealMoney;
@@ -241,7 +263,7 @@ namespace DigitPark.Editor
                 starter.discountPercent = 70;
                 starter.gemsAmount = 500;
                 starter.coinsAmount = 5000;
-                starter.iapProductId = "com.digitpark.starter_pack";
+                starter.iapProductId = "com.matrixsoftware.digitpark.starter_pack";
                 starter.accentColor = new Color(0.2f, 0.8f, 0.4f, 1f);
                 starter.sortOrder = 0;
 
@@ -256,7 +278,7 @@ namespace DigitPark.Editor
                 ShopItemData weekly = ScriptableObject.CreateInstance<ShopItemData>();
                 weekly.itemId = "weekly_deal";
                 weekly.displayName = "Weekly Deal";
-                weekly.description = "1,200 Gems + 10,000 Coins";
+                weekly.description = "1,200 DigitGems + 10,000 DigitCoins";
                 weekly.itemType = ShopItemType.SpecialOffer;
                 weekly.shopTab = ShopTab.Featured;
                 weekly.priceType = PriceType.RealMoney;
@@ -267,7 +289,7 @@ namespace DigitPark.Editor
                 weekly.offerDurationHours = 168f; // 7 days
                 weekly.gemsAmount = 1200;
                 weekly.coinsAmount = 10000;
-                weekly.iapProductId = "com.digitpark.weekly_deal";
+                weekly.iapProductId = "com.matrixsoftware.digitpark.weekly_deal";
                 weekly.accentColor = new Color(0.6f, 0.3f, 0.9f, 1f);
                 weekly.sortOrder = 1;
 

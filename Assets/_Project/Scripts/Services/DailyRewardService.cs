@@ -99,68 +99,68 @@ namespace DigitPark.Services
 
         private void SetupDefaultRewards()
         {
-            // Día 1: 100 coins
+            // Día 1: 100 DigitCoins
             rewards.Add(new DailyReward
             {
                 day = 1,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 100,
-                description = "100 Monedas"
+                description = "100 DigitCoins"
             });
 
-            // Día 2: 150 coins
+            // Día 2: 150 DigitCoins
             rewards.Add(new DailyReward
             {
                 day = 2,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 150,
-                description = "150 Monedas"
+                description = "150 DigitCoins"
             });
 
-            // Día 3: 200 coins
+            // Día 3: 200 DigitCoins
             rewards.Add(new DailyReward
             {
                 day = 3,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 200,
-                description = "200 Monedas"
+                description = "200 DigitCoins"
             });
 
-            // Día 4: 250 coins
+            // Día 4: 250 DigitCoins
             rewards.Add(new DailyReward
             {
                 day = 4,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 250,
-                description = "250 Monedas"
+                description = "250 DigitCoins"
             });
 
-            // Día 5: 300 coins + bonus
+            // Día 5: 300 DigitCoins + bonus
             rewards.Add(new DailyReward
             {
                 day = 5,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 300,
-                description = "300 Monedas"
+                description = "300 DigitCoins"
             });
 
-            // Día 6: 400 coins
+            // Día 6: 400 DigitCoins
             rewards.Add(new DailyReward
             {
                 day = 6,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 400,
-                description = "400 Monedas"
+                description = "400 DigitCoins"
             });
 
-            // Día 7: Gran premio - 500 coins
+            // Día 7: Gran premio - 500 DigitCoins
             rewards.Add(new DailyReward
             {
                 day = 7,
-                type = RewardType.Coins,
+                type = RewardType.DigitCoins,
                 amount = 500,
                 isSpecial = true,
-                description = "500 Monedas (Premio Especial)"
+                description = "500 DigitCoins (Premio Especial)"
             });
 
             cycleLength = rewards.Count;
@@ -370,16 +370,16 @@ namespace DigitPark.Services
 
             switch (reward.type)
             {
-                case RewardType.Coins:
-                    // TODO: Implementar sistema de monedas cuando se agregue al PlayerData
-                    Debug.Log($"[DailyReward] +{reward.amount} monedas (pendiente implementar)");
-                    // Analytics para monedas virtuales ganadas
-                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("coins", reward.amount, "daily_reward");
+                case RewardType.DigitCoins:
+                    // TODO: Implementar sistema de DigitCoins cuando se agregue al PlayerData
+                    Debug.Log($"[DailyReward] +{reward.amount} DigitCoins (pendiente implementar)");
+                    // Analytics para DigitCoins ganadas
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", reward.amount, "daily_reward");
                     break;
 
-                case RewardType.Gems:
-                    // TODO: Implementar sistema de gemas si es necesario
-                    Debug.Log($"[DailyReward] +{reward.amount} gemas");
+                case RewardType.DigitGems:
+                    // TODO: Implementar sistema de DigitGems si es necesario
+                    Debug.Log($"[DailyReward] +{reward.amount} DigitGems");
                     break;
 
                 case RewardType.PremiumTime:
@@ -456,8 +456,8 @@ namespace DigitPark.Services
     /// </summary>
     public enum RewardType
     {
-        Coins,          // Monedas del juego
-        Gems,           // Gemas premium
+        DigitCoins,     // DigitCoins del juego
+        DigitGems,      // DigitGems premium
         PremiumTime,    // Tiempo de premium gratis
         Multiplier,     // Multiplicador de puntos
         RandomBox       // Caja misteriosa

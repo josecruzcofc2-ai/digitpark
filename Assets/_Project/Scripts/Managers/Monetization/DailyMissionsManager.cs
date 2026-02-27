@@ -158,8 +158,8 @@ namespace DigitPark.Managers
 
         private void LoadNeonIcons()
         {
-            coinIconNeon = Resources.Load<Sprite>("Icons/CoinIcon");
-            gemIconNeon = Resources.Load<Sprite>("Icons/GemIcon");
+            coinIconNeon = Resources.Load<Sprite>("Icons/DigitCoinIcon");
+            gemIconNeon = Resources.Load<Sprite>("Icons/DigitGemIcon");
         }
 
         private string L(string key, params object[] args)
@@ -919,7 +919,7 @@ namespace DigitPark.Managers
             rewardAmountTmp.alignment = TextAlignmentOptions.Center;
             rewardAmountTmp.color = mission.isClaimed
                 ? new Color(0.4f, 0.4f, 0.4f)
-                : (mission.definition.rewardType == MissionRewardType.Gems ? GEM_COLOR : COIN_COLOR);
+                : (mission.definition.rewardType == MissionRewardType.DigitGems ? GEM_COLOR : COIN_COLOR);
 
             // Detail click
             var button = item.AddComponent<Button>();
@@ -956,7 +956,7 @@ namespace DigitPark.Managers
 
             if (detailRewardText)
             {
-                string rewardTypeName = mission.definition.rewardType == MissionRewardType.Gems
+                string rewardTypeName = mission.definition.rewardType == MissionRewardType.DigitGems
                     ? L("reward_gems")
                     : L("reward_coins");
                 detailRewardText.text = $"+{mission.definition.rewardAmount} {rewardTypeName}";
@@ -993,8 +993,8 @@ namespace DigitPark.Managers
             SaveState();
 
             // Apply reward via CurrencyManager
-            int gems = mission.definition.rewardType == MissionRewardType.Gems ? mission.definition.rewardAmount : 0;
-            int coins = mission.definition.rewardType == MissionRewardType.Coins ? mission.definition.rewardAmount : 0;
+            int gems = mission.definition.rewardType == MissionRewardType.DigitGems ? mission.definition.rewardAmount : 0;
+            int coins = mission.definition.rewardType == MissionRewardType.DigitCoins ? mission.definition.rewardAmount : 0;
 
             if (CurrencyManager.Instance != null)
             {
@@ -1017,19 +1017,19 @@ namespace DigitPark.Managers
             }
 
             // Show popup
-            string rewardTypeStr = mission.definition.rewardType == MissionRewardType.Gems ? "gems" : "coins";
+            string rewardTypeStr = mission.definition.rewardType == MissionRewardType.DigitGems ? "digitgems" : "digitcoins";
             ShowRewardPopup(rewardTypeStr, mission.definition.rewardAmount);
 
             // Scale punch feedback
             if (claimRewardButton != null)
                 ScalePunch.Play(claimRewardButton.gameObject, 1.15f, 0.3f);
 
-            // Coin fly animation
+            // DigitCoin fly animation
             if (claimRewardButton != null && rewardPopupIcon != null)
             {
                 var originRT = claimRewardButton.GetComponent<RectTransform>();
                 var targetRT = rewardPopupIcon.GetComponent<RectTransform>();
-                Sprite flyIcon = mission.definition.rewardType == MissionRewardType.Gems
+                Sprite flyIcon = mission.definition.rewardType == MissionRewardType.DigitGems
                     ? (gemIconNeon != null ? gemIconNeon : gemIcon)
                     : (coinIconNeon != null ? coinIconNeon : coinIcon);
                 CoinFlyAnimation.Play(originRT, targetRT, rewardTypeStr, 6, 0.6f, flyIcon);
@@ -1074,12 +1074,12 @@ namespace DigitPark.Managers
                 PlayerPrefs.Save();
             }
 
-            ShowRewardPopup("coins", dailyBonusReward);
+            ShowRewardPopup("digitcoins", dailyBonusReward);
 
-            AnalyticsService.Instance?.LogVirtualCurrencyEarned("coins", dailyBonusReward, "daily_missions_bonus");
+            AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", dailyBonusReward, "daily_missions_bonus");
 
             UpdateDailyProgress();
-            Debug.Log($"[DailyMissions] Claimed daily bonus: {dailyBonusReward} coins");
+            Debug.Log($"[DailyMissions] Claimed daily bonus: {dailyBonusReward} DigitCoins");
         }
 
         #endregion
@@ -1090,11 +1090,11 @@ namespace DigitPark.Managers
         {
             if (rewardPopup)
             {
-                string rewardTypeName = type == "gems" ? L("reward_gems") : L("reward_coins");
+                string rewardTypeName = type == "digitgems" ? L("reward_gems") : L("reward_coins");
                 if (rewardPopupText) rewardPopupText.text = $"+{amount} {rewardTypeName}";
                 if (rewardPopupIcon)
                 {
-                    rewardPopupIcon.sprite = type == "gems"
+                    rewardPopupIcon.sprite = type == "digitgems"
                         ? (gemIconNeon != null ? gemIconNeon : gemIcon)
                         : (coinIconNeon != null ? coinIconNeon : coinIcon);
                 }

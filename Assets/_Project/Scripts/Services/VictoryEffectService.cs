@@ -10,8 +10,8 @@ namespace DigitPark.Services
     public enum EffectPriceType
     {
         Free,
-        Coins,
-        Gems,
+        DigitCoins,
+        DigitGems,
         RealMoney
     }
 
@@ -106,7 +106,7 @@ namespace DigitPark.Services
             {
                 effectId = "fireworks",
                 nameKey = "effect_fireworks",
-                priceType = EffectPriceType.Coins,
+                priceType = EffectPriceType.DigitCoins,
                 coinPrice = 2000,
                 primaryColor = new Color(1f, 0.3f, 0.1f),
                 secondaryColor = new Color(1f, 0.8f, 0f),
@@ -117,7 +117,7 @@ namespace DigitPark.Services
             {
                 effectId = "lightning",
                 nameKey = "effect_lightning",
-                priceType = EffectPriceType.Coins,
+                priceType = EffectPriceType.DigitCoins,
                 coinPrice = 5000,
                 primaryColor = new Color(0.3f, 0.6f, 1f),
                 secondaryColor = new Color(0.8f, 0.9f, 1f),
@@ -128,7 +128,7 @@ namespace DigitPark.Services
             {
                 effectId = "gold_rain",
                 nameKey = "effect_gold_rain",
-                priceType = EffectPriceType.Gems,
+                priceType = EffectPriceType.DigitGems,
                 gemPrice = 300,
                 primaryColor = new Color(1f, 0.84f, 0f),
                 secondaryColor = new Color(0.85f, 0.65f, 0f),
@@ -139,7 +139,7 @@ namespace DigitPark.Services
             {
                 effectId = "neon_explosion",
                 nameKey = "effect_neon_explosion",
-                priceType = EffectPriceType.Gems,
+                priceType = EffectPriceType.DigitGems,
                 gemPrice = 500,
                 primaryColor = new Color(0f, 1f, 1f),
                 secondaryColor = new Color(1f, 0f, 1f),
@@ -150,7 +150,7 @@ namespace DigitPark.Services
             {
                 effectId = "rainbow",
                 nameKey = "effect_rainbow",
-                priceType = EffectPriceType.Gems,
+                priceType = EffectPriceType.DigitGems,
                 gemPrice = 750,
                 primaryColor = new Color(1f, 0f, 0f),
                 secondaryColor = new Color(0.5f, 0f, 1f),
@@ -260,10 +260,10 @@ namespace DigitPark.Services
             {
                 case EffectPriceType.Free:
                     break;
-                case EffectPriceType.Coins:
+                case EffectPriceType.DigitCoins:
                     if (!currency.SpendCoins(effect.coinPrice)) return false;
                     break;
-                case EffectPriceType.Gems:
+                case EffectPriceType.DigitGems:
                     if (!currency.SpendGems(effect.gemPrice)) return false;
                     break;
                 case EffectPriceType.RealMoney:

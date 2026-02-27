@@ -227,22 +227,22 @@ namespace DigitPark.Progression
                 // Early levels - frequent rewards
                 { 5, new LevelReward("Avatar: Principiante", RewardType.Avatar, "avatar_beginner") },
                 { 10, new LevelReward("Título: Novato", RewardType.Title, "title_novice") },
-                { 15, new LevelReward("500 Monedas", RewardType.Coins, "500") },
+                { 15, new LevelReward("500 DigitCoins", RewardType.DigitCoins, "500") },
                 { 20, new LevelReward("Avatar: Jugador", RewardType.Avatar, "avatar_player") },
                 { 25, new LevelReward("Título: Jugador", RewardType.Title, "title_player") },
 
                 // Mid levels
-                { 30, new LevelReward("1000 Monedas", RewardType.Coins, "1000") },
+                { 30, new LevelReward("1000 DigitCoins", RewardType.DigitCoins, "1000") },
                 { 40, new LevelReward("Avatar: Veterano", RewardType.Avatar, "avatar_veteran") },
                 { 50, new LevelReward("Título: Veterano", RewardType.Title, "title_veteran") },
                 { 60, new LevelReward("Marco: Bronce", RewardType.Frame, "frame_bronze") },
-                { 75, new LevelReward("2000 Monedas", RewardType.Coins, "2000") },
+                { 75, new LevelReward("2000 DigitCoins", RewardType.DigitCoins, "2000") },
 
                 // High levels
                 { 100, new LevelReward("Título: Centurión", RewardType.Title, "title_centurion") },
                 { 100, new LevelReward("Avatar: Centurión", RewardType.Avatar, "avatar_centurion") },
                 { 125, new LevelReward("Marco: Plata", RewardType.Frame, "frame_silver") },
-                { 150, new LevelReward("5000 Monedas", RewardType.Coins, "5000") },
+                { 150, new LevelReward("5000 DigitCoins", RewardType.DigitCoins, "5000") },
                 { 175, new LevelReward("Título: Experto", RewardType.Title, "title_expert") },
                 { 200, new LevelReward("Avatar: Experto", RewardType.Avatar, "avatar_expert") },
 
@@ -399,8 +399,8 @@ namespace DigitPark.Progression
         Avatar,
         Title,
         Frame,
-        Coins,
-        Gems,
+        DigitCoins,
+        DigitGems,
         Cosmetic
     }
 

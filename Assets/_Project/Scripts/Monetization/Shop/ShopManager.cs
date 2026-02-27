@@ -4,6 +4,7 @@ using TMPro;
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
+using DigitPark.Managers;
 
 namespace DigitPark.Monetization
 {
@@ -239,8 +240,8 @@ namespace DigitPark.Monetization
             switch (tab)
             {
                 case ShopTab.Featured: pos = 1f; break;
-                case ShopTab.Gems: pos = 0.7f; break;
-                case ShopTab.Coins: pos = 0.55f; break;
+                case ShopTab.DigitGems: pos = 0.7f; break;
+                case ShopTab.DigitCoins: pos = 0.55f; break;
                 case ShopTab.Themes: pos = 0.4f; break;
                 case ShopTab.Cosmetics: pos = 0.2f; break;
             }
@@ -277,7 +278,7 @@ namespace DigitPark.Monetization
 
             if (!itemData.CanAfford())
             {
-                if (itemData.priceType == PriceType.Gems)
+                if (itemData.priceType == PriceType.DigitGems)
                 {
                     ShowNotEnoughGemsPopup();
                 }
@@ -307,11 +308,11 @@ namespace DigitPark.Monetization
                 string amountText = "";
                 switch (itemData.itemType)
                 {
-                    case ShopItemType.GemsPack:
-                        amountText = $"{itemData.GetTotalGems():N0} Gemas";
+                    case ShopItemType.DigitGemsPack:
+                        amountText = $"{itemData.GetTotalGems():N0} DigitGems";
                         break;
-                    case ShopItemType.CoinsPack:
-                        amountText = $"{itemData.GetTotalCoins():N0} Monedas";
+                    case ShopItemType.DigitCoinsPack:
+                        amountText = $"{itemData.GetTotalCoins():N0} DigitCoins";
                         break;
                     default:
                         amountText = itemData.displayName;
@@ -377,7 +378,7 @@ namespace DigitPark.Monetization
         private void OnGetGemsClicked()
         {
             HideNotEnoughGemsPopup();
-            ScrollToSection(ShopTab.Gems);
+            ScrollToSection(ShopTab.DigitGems);
         }
 
         // ==================== PURCHASE METHODS ====================
@@ -400,6 +401,8 @@ namespace DigitPark.Monetization
 
             if (itemData.priceType == PriceType.RealMoney)
             {
+                // IAP is async - hide popup immediately, IAP native dialog takes over
+                HidePurchasePopup();
                 ProcessIAPPurchase(itemData);
             }
             else
@@ -411,25 +414,50 @@ namespace DigitPark.Monetization
                     PlayPurchaseCelebration(_currentPurchaseItem);
                     Debug.Log($"[ShopManager] Purchase successful: {itemData.displayName}");
                 }
+                HidePurchasePopup();
             }
-
-            HidePurchasePopup();
         }
 
         private void ProcessIAPPurchase(ShopItemData itemData)
         {
-            Debug.Log($"[ShopManager] Processing IAP: {itemData.iapProductId}");
-            StartCoroutine(SimulateIAPPurchase(itemData));
-        }
+            string productId = itemData.iapProductId;
+            Debug.Log($"[ShopManager] Processing IAP: {productId}");
 
-        private System.Collections.IEnumerator SimulateIAPPurchase(ShopItemData itemData)
-        {
-            yield return new WaitForSeconds(0.5f);
-
-            itemData.GrantRewards();
-
-            OnItemPurchased?.Invoke(itemData.itemId);
-            Debug.Log($"[ShopManager] IAP purchase completed: {itemData.displayName}");
+            // Gem packs → real IAP via PremiumManager
+            if (PremiumManager.IsGemPackProduct(productId))
+            {
+                PremiumManager.Instance.PurchaseGemPack(productId, (success) =>
+                {
+                    if (success)
+                    {
+                        OnItemPurchased?.Invoke(itemData.itemId);
+                        PlayPurchaseCelebration(_currentPurchaseItem);
+                        Debug.Log($"[ShopManager] Gem pack IAP completed: {itemData.displayName}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ShopManager] Gem pack IAP failed: {itemData.displayName}");
+                    }
+                });
+            }
+            else
+            {
+                // Non-consumable premium products (themes, bundles, etc.)
+                PremiumManager.Instance.PurchaseByProductId(productId, (success) =>
+                {
+                    if (success)
+                    {
+                        itemData.GrantRewards();
+                        OnItemPurchased?.Invoke(itemData.itemId);
+                        PlayPurchaseCelebration(_currentPurchaseItem);
+                        Debug.Log($"[ShopManager] IAP completed: {itemData.displayName}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ShopManager] IAP failed: {itemData.displayName}");
+                    }
+                });
+            }
         }
 
         public void CancelPurchase()

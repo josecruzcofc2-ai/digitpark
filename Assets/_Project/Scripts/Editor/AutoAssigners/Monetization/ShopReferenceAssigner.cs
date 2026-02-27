@@ -86,7 +86,7 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to ShopManager V3:\n" +
                 "• ShopScrollView (scroll continuo)\n" +
-                "• Purchase and Not Enough Gems popups\n" +
+                "• Purchase and Not Enough DigitGems popups\n" +
                 "• Currency display texts\n" +
                 "• Back button",
                 MessageType.Info);

@@ -13,7 +13,7 @@ namespace DigitPark.Monetization.Betting
     /// Manager de la escena BetSelection.
     /// Pantalla de seleccion de apuesta antes de Matchmaking.
     /// Flujo: GameSelector -> BetSelection -> Matchmaking -> Game
-    /// Soporta apuestas preset (monedas/gemas) y personalizada (multiplos de 5).
+    /// Soporta apuestas preset (DigitCoins/DigitGems) y personalizada (multiplos de 5).
     /// </summary>
     public class BetSelectionPanel : MonoBehaviour
     {
@@ -35,7 +35,7 @@ namespace DigitPark.Monetization.Betting
         [SerializeField] private TextMeshProUGUI _freeBetCostText;
         [SerializeField] private TextMeshProUGUI _freeBetRewardText;
 
-        [Header("=== COIN BETS ===")]
+        [Header("=== DIGITCOIN BETS ===")]
         [SerializeField] private Button _coins50Button;
         [SerializeField] private TextMeshProUGUI _coins50CostText;
         [SerializeField] private TextMeshProUGUI _coins50RewardText;
@@ -52,7 +52,7 @@ namespace DigitPark.Monetization.Betting
         [SerializeField] private TextMeshProUGUI _coins1000CostText;
         [SerializeField] private TextMeshProUGUI _coins1000RewardText;
 
-        [Header("=== GEM BETS ===")]
+        [Header("=== DIGITGEM BETS ===")]
         [SerializeField] private Button _gems10Button;
         [SerializeField] private TextMeshProUGUI _gems10CostText;
         [SerializeField] private TextMeshProUGUI _gems10RewardText;
@@ -139,17 +139,17 @@ namespace DigitPark.Monetization.Betting
 
             _freeBetButton?.onClick.AddListener(() => SelectPresetBet(_freeBetButton, 0, BetCurrencyType.None));
 
-            _coins50Button?.onClick.AddListener(() => SelectPresetBet(_coins50Button, 50, BetCurrencyType.Coins));
-            _coins100Button?.onClick.AddListener(() => SelectPresetBet(_coins100Button, 100, BetCurrencyType.Coins));
-            _coins250Button?.onClick.AddListener(() => SelectPresetBet(_coins250Button, 250, BetCurrencyType.Coins));
-            _coins500Button?.onClick.AddListener(() => SelectPresetBet(_coins500Button, 500, BetCurrencyType.Coins));
-            _coins1000Button?.onClick.AddListener(() => SelectPresetBet(_coins1000Button, 1000, BetCurrencyType.Coins));
+            _coins50Button?.onClick.AddListener(() => SelectPresetBet(_coins50Button, 50, BetCurrencyType.DigitCoins));
+            _coins100Button?.onClick.AddListener(() => SelectPresetBet(_coins100Button, 100, BetCurrencyType.DigitCoins));
+            _coins250Button?.onClick.AddListener(() => SelectPresetBet(_coins250Button, 250, BetCurrencyType.DigitCoins));
+            _coins500Button?.onClick.AddListener(() => SelectPresetBet(_coins500Button, 500, BetCurrencyType.DigitCoins));
+            _coins1000Button?.onClick.AddListener(() => SelectPresetBet(_coins1000Button, 1000, BetCurrencyType.DigitCoins));
 
-            _gems10Button?.onClick.AddListener(() => SelectPresetBet(_gems10Button, 10, BetCurrencyType.Gems));
-            _gems50Button?.onClick.AddListener(() => SelectPresetBet(_gems50Button, 50, BetCurrencyType.Gems));
-            _gems100Button?.onClick.AddListener(() => SelectPresetBet(_gems100Button, 100, BetCurrencyType.Gems));
-            _gems250Button?.onClick.AddListener(() => SelectPresetBet(_gems250Button, 250, BetCurrencyType.Gems));
-            _gems500Button?.onClick.AddListener(() => SelectPresetBet(_gems500Button, 500, BetCurrencyType.Gems));
+            _gems10Button?.onClick.AddListener(() => SelectPresetBet(_gems10Button, 10, BetCurrencyType.DigitGems));
+            _gems50Button?.onClick.AddListener(() => SelectPresetBet(_gems50Button, 50, BetCurrencyType.DigitGems));
+            _gems100Button?.onClick.AddListener(() => SelectPresetBet(_gems100Button, 100, BetCurrencyType.DigitGems));
+            _gems250Button?.onClick.AddListener(() => SelectPresetBet(_gems250Button, 250, BetCurrencyType.DigitGems));
+            _gems500Button?.onClick.AddListener(() => SelectPresetBet(_gems500Button, 500, BetCurrencyType.DigitGems));
 
             _customCoinsToggle?.onClick.AddListener(() => SetCustomCurrency(false));
             _customGemsToggle?.onClick.AddListener(() => SetCustomCurrency(true));
@@ -310,7 +310,7 @@ namespace DigitPark.Monetization.Betting
 
             _isCustomBetSelected = true;
             _selectedBetAmount = _customAmount;
-            _selectedCurrencyType = _customIsGems ? BetCurrencyType.Gems : BetCurrencyType.Coins;
+            _selectedCurrencyType = _customIsGems ? BetCurrencyType.DigitGems : BetCurrencyType.DigitCoins;
             SetCustomHighlight(true);
         }
 
@@ -468,7 +468,7 @@ namespace DigitPark.Monetization.Betting
             if (_isCustomBetSelected)
             {
                 _selectedBetAmount = _customAmount;
-                _selectedCurrencyType = _customIsGems ? BetCurrencyType.Gems : BetCurrencyType.Coins;
+                _selectedCurrencyType = _customIsGems ? BetCurrencyType.DigitGems : BetCurrencyType.DigitCoins;
             }
 
             if (_selectedBetAmount > 0)
@@ -479,10 +479,10 @@ namespace DigitPark.Monetization.Betting
                 bool ok = false;
                 switch (_selectedCurrencyType)
                 {
-                    case BetCurrencyType.Coins:
+                    case BetCurrencyType.DigitCoins:
                         ok = currency.EscrowCoins(_selectedBetAmount);
                         break;
-                    case BetCurrencyType.Gems:
+                    case BetCurrencyType.DigitGems:
                         ok = currency.EscrowGems(_selectedBetAmount);
                         break;
                     default:

@@ -10,8 +10,8 @@ namespace DigitPark.Services
     public enum EmotePackPriceType
     {
         Free,
-        Coins,
-        Gems,
+        DigitCoins,
+        DigitGems,
         RealMoney
     }
 
@@ -131,7 +131,7 @@ namespace DigitPark.Services
             {
                 packId = "reactions_pack",
                 nameKey = "emote_pack_reactions",
-                priceType = EmotePackPriceType.Coins,
+                priceType = EmotePackPriceType.DigitCoins,
                 coinPrice = 1500,
                 emoteIds = new List<string> { "laugh", "cry", "angry", "surprised" }
             });
@@ -146,7 +146,7 @@ namespace DigitPark.Services
             {
                 packId = "flex_pack",
                 nameKey = "emote_pack_flex",
-                priceType = EmotePackPriceType.Gems,
+                priceType = EmotePackPriceType.DigitGems,
                 gemPrice = 300,
                 emoteIds = new List<string> { "crown", "fire", "diamond", "star" }
             });
@@ -303,10 +303,10 @@ namespace DigitPark.Services
             {
                 case EmotePackPriceType.Free:
                     break;
-                case EmotePackPriceType.Coins:
+                case EmotePackPriceType.DigitCoins:
                     if (!currency.SpendCoins(pack.coinPrice)) return false;
                     break;
-                case EmotePackPriceType.Gems:
+                case EmotePackPriceType.DigitGems:
                     if (!currency.SpendGems(pack.gemPrice)) return false;
                     break;
                 case EmotePackPriceType.RealMoney:

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -74,8 +75,8 @@ namespace DigitPark.Editor
         private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/Actions/NotificationsIcon.png";
         private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/Actions/NotificationsActiveIcon.png";
         private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/Profile/AvatarDefault.png";
-        private const string ICON_GEM = ICONS_BASE + "/Currency/GemIcon.png";
-        private const string ICON_COIN = ICONS_BASE + "/Currency/CoinIcon.png";
+        private const string ICON_GEM = ICONS_BASE + "/Currency/icon_digitgem_single.png";
+        private const string ICON_COIN = ICONS_BASE + "/Currency/icon_digitcoin_single.png";
         private const string ICON_RANKINGS = ICONS_BASE + "/Tournaments/RankingsIcon.png";
         private const string ICON_SEARCH = ICONS_BASE + "/Navigation/Buttons/SearchIcon.png";
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
@@ -229,11 +230,11 @@ namespace DigitPark.Editor
             CreateIconButton(header.transform, "SettingsButton",
                 new Vector2(0, 0.5f), new Vector2(50, 0), new Vector2(100, 100));
 
-            // Logo DIGIT PARK (center)
+            // Logo DIGIT PARK (center-left, narrower to make room for currency)
             var logo = FindOrCreate(header.transform, "LogoText");
             var logoRT = GetOrAdd<RectTransform>(logo);
-            logoRT.anchorMin = new Vector2(0.25f, 0);
-            logoRT.anchorMax = new Vector2(0.75f, 1);
+            logoRT.anchorMin = new Vector2(0.12f, 0);
+            logoRT.anchorMax = new Vector2(0.52f, 1);
             logoRT.offsetMin = Vector2.zero;
             logoRT.offsetMax = Vector2.zero;
 
@@ -246,9 +247,12 @@ namespace DigitPark.Editor
             logoTMP.enableVertexGradient = true;
             logoTMP.colorGradient = new VertexGradient(CYAN_NEON, CYAN_NEON, CYAN_GLOW, CYAN_GLOW);
 
+            // Currency Display (between logo and notifications)
+            CreateMainMenuCurrencyDisplay(header.transform);
+
             // Notifications Button (far right)
             var notifBtn = CreateIconButton(header.transform, "NotificationsButton",
-                new Vector2(1, 0.5f), new Vector2(-80, 0), new Vector2(100, 100));
+                new Vector2(1, 0.5f), new Vector2(-50, 0), new Vector2(80, 80));
 
             // Notification Badge
             var badge = FindOrCreate(notifBtn.transform, "Badge");
@@ -274,6 +278,143 @@ namespace DigitPark.Editor
             btTMP.alignment = TextAlignmentOptions.Center;
 
             Debug.Log("[MainMenuUI] Header creado");
+        }
+
+        /// <summary>
+        /// Creates the currency display pills in the MainMenu header.
+        /// Two pills: GemsDisplay (gem icon + amount) and CoinsDisplay (coin icon + amount).
+        /// Tapping each pill navigates to the Shop (corresponding section).
+        /// </summary>
+        private static void CreateMainMenuCurrencyDisplay(Transform headerTransform)
+        {
+            // Container anchored right, before notifications button
+            var container = FindOrCreate(headerTransform, "CurrencyDisplay");
+            var cRT = GetOrAdd<RectTransform>(container);
+            cRT.anchorMin = new Vector2(0.52f, 0.1f);
+            cRT.anchorMax = new Vector2(0.88f, 0.9f);
+            cRT.offsetMin = Vector2.zero;
+            cRT.offsetMax = Vector2.zero;
+
+            var hlg = GetOrAdd<HorizontalLayoutGroup>(container);
+            hlg.spacing = 10;
+            hlg.childAlignment = TextAnchor.MiddleRight;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.reverseArrangement = false;
+            hlg.padding = new RectOffset(0, 0, 4, 4);
+
+            // Remove old children if rebuilding
+            for (int i = container.transform.childCount - 1; i >= 0; i--)
+                Object.DestroyImmediate(container.transform.GetChild(i).gameObject);
+
+            // Gems pill
+            var gemColor = PURPLE_ACCENT;
+            CreateCurrencyPill(container, "GemsDisplay", "0", gemColor, CurrencyType.DigitGems);
+
+            // Coins pill
+            var coinColor = new Color(1f, 0.85f, 0.3f, 1f); // Gold
+            CreateCurrencyPill(container, "CoinsDisplay", "0", coinColor, CurrencyType.DigitCoins);
+        }
+
+        /// <summary>
+        /// Creates a single currency pill: [icon] [amount] [+]
+        /// Attaches CurrencyDisplayUI component for runtime auto-subscription.
+        /// </summary>
+        private static void CreateCurrencyPill(GameObject parent, string name, string amount, Color color, CurrencyType currencyType)
+        {
+            var pill = FindOrCreate(parent.transform, name);
+            var rt = GetOrAdd<RectTransform>(pill);
+            rt.sizeDelta = new Vector2(145, 46);
+
+            // Pill background
+            var bg = GetOrAdd<Image>(pill);
+            bg.color = new Color(0.08f, 0.12f, 0.18f, 0.95f);
+            var outline = GetOrAdd<Outline>(pill);
+            outline.effectColor = color * 0.6f;
+            outline.effectDistance = new Vector2(1, 1);
+
+            // Button for tap → navigate to shop
+            var btn = GetOrAdd<Button>(pill);
+            btn.targetGraphic = bg;
+
+            // Layout
+            var pillHLG = GetOrAdd<HorizontalLayoutGroup>(pill);
+            pillHLG.spacing = 6;
+            pillHLG.padding = new RectOffset(8, 8, 4, 4);
+            pillHLG.childAlignment = TextAnchor.MiddleCenter;
+            pillHLG.childControlWidth = false;
+            pillHLG.childControlHeight = true;
+
+            var le = GetOrAdd<LayoutElement>(pill);
+            le.minWidth = 145;
+            le.preferredWidth = 145;
+
+            // Remove old children if rebuilding
+            for (int i = pill.transform.childCount - 1; i >= 0; i--)
+                Object.DestroyImmediate(pill.transform.GetChild(i).gameObject);
+
+            // Icon
+            var icon = new GameObject("Icon");
+            icon.transform.SetParent(pill.transform, false);
+            var iconImg = icon.AddComponent<Image>();
+            iconImg.color = color;
+            iconImg.preserveAspect = true;
+            var iconLE = icon.AddComponent<LayoutElement>();
+            iconLE.minWidth = 30;
+            iconLE.minHeight = 30;
+            iconLE.preferredWidth = 30;
+            iconLE.preferredHeight = 30;
+
+            // Load icon sprite
+            string iconPath = currencyType == CurrencyType.DigitGems ? ICON_GEM : ICON_COIN;
+            Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (iconSprite != null)
+            {
+                iconImg.sprite = iconSprite;
+                iconImg.color = Color.white;
+            }
+
+            // Amount text
+            var amountObj = new GameObject("Amount");
+            amountObj.transform.SetParent(pill.transform, false);
+            amountObj.AddComponent<RectTransform>();
+            var amountText = amountObj.AddComponent<TextMeshProUGUI>();
+            amountText.text = amount;
+            amountText.fontSize = FontSizes.Body;
+            amountText.fontStyle = FontStyles.Bold;
+            amountText.color = TEXT_WHITE;
+            amountText.alignment = TextAlignmentOptions.MidlineLeft;
+            var amountLE = amountObj.AddComponent<LayoutElement>();
+            amountLE.flexibleWidth = 1;
+
+            // Plus indicator
+            var plus = new GameObject("Plus");
+            plus.transform.SetParent(pill.transform, false);
+            var plusImg = plus.AddComponent<Image>();
+            plusImg.color = color;
+            var plusLE = plus.AddComponent<LayoutElement>();
+            plusLE.minWidth = 20;
+            plusLE.minHeight = 20;
+            plusLE.preferredWidth = 20;
+            plusLE.preferredHeight = 20;
+
+            // Attach CurrencyDisplayUI component for runtime auto-subscription
+            var currencyUI = GetOrAdd<CurrencyDisplayUI>(pill);
+            var so = new SerializedObject(currencyUI);
+            so.FindProperty("_currencyType").enumValueIndex = (int)currencyType;
+            so.FindProperty("_iconImage").objectReferenceValue = iconImg;
+            so.FindProperty("_amountText").objectReferenceValue = amountText;
+            so.FindProperty("_button").objectReferenceValue = btn;
+            so.FindProperty("_plusButton").objectReferenceValue = plus;
+            if (iconSprite != null)
+            {
+                if (currencyType == CurrencyType.DigitGems)
+                    so.FindProperty("_gemsIcon").objectReferenceValue = iconSprite;
+                else
+                    so.FindProperty("_coinsIcon").objectReferenceValue = iconSprite;
+            }
+            so.ApplyModifiedProperties();
         }
 
         private static GameObject CreateIconButton(Transform parent, string name,
@@ -431,8 +572,8 @@ namespace DigitPark.Editor
             // Recreate stat items
             for (int i = stats.transform.childCount - 1; i >= 0; i--)
                 DestroyImmediate(stats.transform.GetChild(i).gameObject);
-            CreateStatItem(stats.transform, "Gems", "500", PURPLE_ACCENT);
-            CreateStatItem(stats.transform, "Coins", "2,400", CYAN_NEON);
+            CreateStatItem(stats.transform, "DigitGems", "500", PURPLE_ACCENT);
+            CreateStatItem(stats.transform, "DigitCoins", "2,400", CYAN_NEON);
 
             // Streak
             var streak = FindOrCreate(info.transform, "StreakRow");
@@ -1096,9 +1237,12 @@ namespace DigitPark.Editor
             a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
             a += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
             a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarSection/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
-            // Gems y Coins: sin icono asignado (pendiente de nuevos iconos unificados)
-            // a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Gems/Icon", ICON_GEM);
-            // a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/Coins/Icon", ICON_COIN);
+            // Currency Display icons in header
+            a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/GemsDisplay/Icon", ICON_GEM);
+            a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/CoinsDisplay/Icon", ICON_COIN);
+            // Profile stats icons
+            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/DigitGems/Icon", ICON_GEM);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/DigitCoins/Icon", ICON_COIN);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/RankingsCard/Icon", ICON_RANKINGS);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);
@@ -1111,10 +1255,10 @@ namespace DigitPark.Editor
 
             AssignNotificationSprites();
 
-            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/15");
+            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/17");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
-            EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/15\nVer Console para detalles.", "OK");
+            EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/17\nVer Console para detalles.", "OK");
         }
 
         private static void AssignNotificationSprites()

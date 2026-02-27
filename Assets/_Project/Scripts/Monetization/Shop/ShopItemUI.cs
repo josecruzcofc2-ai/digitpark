@@ -129,12 +129,12 @@ namespace DigitPark.Monetization
             {
                 switch (_itemData.itemType)
                 {
-                    case ShopItemType.GemsPack:
+                    case ShopItemType.DigitGemsPack:
                         _amountText.text = _itemData.gemsAmount.ToString("N0");
                         _amountText.color = _gemsColor;
                         break;
 
-                    case ShopItemType.CoinsPack:
+                    case ShopItemType.DigitCoinsPack:
                         _amountText.text = _itemData.coinsAmount.ToString("N0");
                         _amountText.color = _coinsColor;
                         break;
@@ -155,7 +155,7 @@ namespace DigitPark.Monetization
             // Price icon (show gem icon if price is in gems)
             if (_priceIcon != null)
             {
-                _priceIcon.gameObject.SetActive(_itemData.priceType == PriceType.Gems);
+                _priceIcon.gameObject.SetActive(_itemData.priceType == PriceType.DigitGems);
             }
 
             // Badges

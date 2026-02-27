@@ -181,8 +181,8 @@ namespace DigitPark.Managers
         /// </summary>
         private void LoadNeonIcons()
         {
-            coinIconNeon = Resources.Load<Sprite>("Icons/CoinIcon");
-            gemIconNeon = Resources.Load<Sprite>("Icons/GemIcon");
+            coinIconNeon = Resources.Load<Sprite>("Icons/DigitCoinIcon");
+            gemIconNeon = Resources.Load<Sprite>("Icons/DigitGemIcon");
         }
 
         /// <summary>
