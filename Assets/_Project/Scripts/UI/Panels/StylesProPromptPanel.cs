@@ -230,7 +230,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("styles_pro_title");
-            tmp.fontSize = FontSizes.SectionHeader;
+            tmp.fontSize = FontSizes.H4;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = GOLD;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -598,7 +598,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = priceText;
-            tmp.fontSize = FontSizes.ValueLarge;
+            tmp.fontSize = FontSizes.Subtitle;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = GOLD;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -654,7 +654,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("unlock_all_themes");
-            tmp.fontSize = FontSizes.Button;
+            tmp.fontSize = FontSizes.Body;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;

@@ -170,7 +170,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Description";
-            descTMP.fontSize = FontSizes.BodyLarge;
+            descTMP.fontSize = FontSizes.Body;
             descTMP.color = TEXT_WHITE;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
@@ -203,7 +203,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$0.00";
-            amountTMP.fontSize = FontSizes.Button;
+            amountTMP.fontSize = FontSizes.Body;
             amountTMP.color = GREEN;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Right;
@@ -322,13 +322,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$10.00";
-            amountTMP.fontSize = FontSizes.ValueMedium;
+            amountTMP.fontSize = FontSizes.Subtitle;
             amountTMP.color = TEXT_WHITE;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Left;
             amountTMP.enableAutoSizing = true;
             amountTMP.fontSizeMin = FontSizes.AutoMinBody;
-            amountTMP.fontSizeMax = FontSizes.ValueMedium;
+            amountTMP.fontSizeMax = FontSizes.Subtitle;
             amountTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Label "Depositar"
@@ -342,7 +342,7 @@ namespace DigitPark.Editor
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.alignment = TextAlignmentOptions.Left;
             labelTMP.enableAutoSizing = true;
-            labelTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            labelTMP.fontSizeMin = FontSizes.AutoMinBody;
             labelTMP.fontSizeMax = FontSizes.Body;
 
             // === Bonus Text ===
@@ -358,7 +358,7 @@ namespace DigitPark.Editor
             bonusTMP.fontStyle = FontStyles.Bold;
             bonusTMP.alignment = TextAlignmentOptions.Right;
             bonusTMP.enableAutoSizing = true;
-            bonusTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            bonusTMP.fontSizeMin = FontSizes.AutoMinBody;
             bonusTMP.fontSizeMax = FontSizes.Body;
             bonusTMP.overflowMode = TextOverflowModes.Ellipsis;
 

@@ -346,7 +346,7 @@ namespace DigitPark.Managers
                         tmp.fontSize = FontSizes.Body;
                         break;
                     case "AchievementTitle":
-                        tmp.fontSize = FontSizes.Button;
+                        tmp.fontSize = FontSizes.Body;
                         break;
                     case "AchievementDescription":
                         tmp.fontSize = FontSizes.Body;
@@ -466,7 +466,7 @@ namespace DigitPark.Managers
             titleObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI titleTMP = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
             titleTMP.text = "Titulo";
-            titleTMP.fontSize = FontSizes.Button;
+            titleTMP.fontSize = FontSizes.Body;
             titleTMP.fontStyle = TMPro.FontStyles.Bold;
             titleTMP.color = new Color(1f, 0.84f, 0f, 1f);
             titleTMP.enableWordWrapping = false;

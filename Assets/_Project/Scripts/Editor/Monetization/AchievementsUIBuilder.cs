@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -82,6 +83,12 @@ namespace DigitPark.Editor
             BuildTrophyShowcase();
         }
 
+        /// <summary>Called by AllScenesBatchBuilder — no dialogs.</summary>
+        public static void BuildSilent()
+        {
+            BuildTrophyShowcase();
+        }
+
         private static void BuildTrophyShowcase()
         {
             Debug.Log("[TrophyShowcase] ========== INICIANDO CONSTRUCCION ==========");
@@ -109,17 +116,18 @@ namespace DigitPark.Editor
             AutoAssigners.AchievementsReferenceAssigner.RunAutoAssign();
             Debug.Log("[TrophyShowcase] ========== CONSTRUCCION COMPLETADA ==========");
 
-            EditorUtility.DisplayDialog("Trophy Showcase Completado",
-                "UI del Trophy Showcase creada exitosamente.\n\n" +
-                "Elementos creados:\n" +
-                "- Header con progreso total\n" +
-                "- 5 tabs de categorias\n" +
-                "- Grid de trofeos (6 ejemplos)\n" +
-                "- Panel de detalle\n" +
-                "- Celebracion de recompensa\n" +
-                "- Prefab TrophyCard\n\n" +
-                "Asigna el AchievementsManager y conecta las referencias.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Trophy Showcase Completado",
+                    "UI del Trophy Showcase creada exitosamente.\n\n" +
+                    "Elementos creados:\n" +
+                    "- Header con progreso total\n" +
+                    "- 5 tabs de categorias\n" +
+                    "- Grid de trofeos (6 ejemplos)\n" +
+                    "- Panel de detalle\n" +
+                    "- Celebracion de recompensa\n" +
+                    "- Prefab TrophyCard\n\n" +
+                    "Asigna el AchievementsManager y conecta las referencias.",
+                    "OK");
         }
 
         // ==================== CANVAS SETUP ====================
@@ -303,65 +311,34 @@ namespace DigitPark.Editor
             backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
 
-            // Title Row - Trophy icon AFTER text to not overlap
-            GameObject titleRow = FindOrCreateChild(header, "TitleRow");
-            RectTransform titleRowRT = GetOrAddComponent<RectTransform>(titleRow);
-            titleRowRT.anchorMin = new Vector2(0.5f, 1);
-            titleRowRT.anchorMax = new Vector2(0.5f, 1);
-            titleRowRT.pivot = new Vector2(0.5f, 1);
-            titleRowRT.anchoredPosition = new Vector2(0, -10);
-            titleRowRT.sizeDelta = new Vector2(500, 60);
+            // Title — centered on screen
+            GameObject titleObj = FindOrCreateChild(header, "TitleText");
+            RectTransform titleRowRT = GetOrAddComponent<RectTransform>(titleObj);
+            titleRowRT.anchorMin = new Vector2(0.07f, 0.45f);
+            titleRowRT.anchorMax = new Vector2(0.53f, 0.95f);
+            titleRowRT.pivot = new Vector2(0.5f, 0.5f);
+            titleRowRT.sizeDelta = Vector2.zero;
+            titleRowRT.anchoredPosition = Vector2.zero;
 
-            HorizontalLayoutGroup titleHlg = GetOrAddComponent<HorizontalLayoutGroup>(titleRow);
-            titleHlg.spacing = 12;
-            titleHlg.childAlignment = TextAnchor.MiddleCenter;
-            titleHlg.childControlWidth = false;
-            titleHlg.childControlHeight = true;
-
-            // Trophy Icon (BEFORE text in layout)
-            GameObject trophyIcon = FindOrCreateChild(titleRow, "TrophyIcon");
-            RectTransform trophyRT = GetOrAddComponent<RectTransform>(trophyIcon);
-            trophyRT.sizeDelta = new Vector2(40, 40);
-
-            Image trophyImage = GetOrAddComponent<Image>(trophyIcon);
-            trophyImage.color = GOLD;
-
-            LayoutElement trophyLE = GetOrAddComponent<LayoutElement>(trophyIcon);
-            trophyLE.minWidth = 40;
-            trophyLE.minHeight = 40;
-
-            // Title Text (AFTER icon in layout)
-            GameObject titleObj = FindOrCreateChild(titleRow, "TitleText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "ACHIEVEMENTS";
-            titleText.fontSize = FontSizes.SceneTitle;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
-            titleText.fontSizeMax = FontSizes.SceneTitle;
+            titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
+            titleText.raycastTarget = false;
 
-            LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
-            titleLE.minWidth = 250;
-            titleLE.minHeight = 60;
-
-            // Completion Counter (top-right, aligned with title row)
-            GameObject completionDisplay = FindOrCreateChild(header, "CompletionDisplay");
-            RectTransform completionRT = GetOrAddComponent<RectTransform>(completionDisplay);
-            completionRT.anchorMin = new Vector2(1, 1);
-            completionRT.anchorMax = new Vector2(1, 1);
-            completionRT.pivot = new Vector2(1, 1);
-            completionRT.anchoredPosition = new Vector2(-20, -15);
-            completionRT.sizeDelta = new Vector2(120, 50);
-
-            TextMeshProUGUI completionText = GetOrAddComponent<TextMeshProUGUI>(completionDisplay);
-            completionText.text = "5/17";
-            completionText.fontSize = FontSizes.Button;
-            completionText.fontStyle = FontStyles.Bold;
-            completionText.color = CYAN_NEON;
-            completionText.alignment = TextAlignmentOptions.MidlineRight;
+            // Currency pills (top-right of header, above progress section)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.55f, 0.45f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             // Progress Section - more space below title row
             GameObject progressSection = FindOrCreateChild(header, "ProgressSection");
@@ -540,13 +517,13 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = FontSizes.TabLabel;
+            tabText.fontSize = FontSizes.BodyLarge;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? TEXT_DARK : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
             tabText.enableAutoSizing = true;
-            tabText.fontSizeMin = FontSizes.AutoMinTab;
-            tabText.fontSizeMax = FontSizes.TabLabel;
+            tabText.fontSizeMin = FontSizes.AutoMinBody;
+            tabText.fontSizeMax = FontSizes.BodyLarge;
             tabText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(textObj);
             RectTransform textRT = textObj.GetComponent<RectTransform>();
@@ -741,7 +718,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(centerContent, "EmptyStateText");
             TextMeshProUGUI emptyText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             emptyText.text = "No achievements in this category";
-            emptyText.fontSize = FontSizes.BodyLarge;
+            emptyText.fontSize = FontSizes.Body;
             emptyText.fontStyle = FontStyles.Bold;
             emptyText.color = TEXT_SECONDARY;
             emptyText.alignment = TextAlignmentOptions.Center;
@@ -878,7 +855,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI questionText = GetOrAddComponent<TextMeshProUGUI>(questionMark);
             questionText.text = "?";
-            questionText.fontSize = FontSizes.ValueMedium;
+            questionText.fontSize = FontSizes.Subtitle;
             questionText.fontStyle = FontStyles.Bold;
             questionText.color = CAT_SECRET;
             questionText.alignment = TextAlignmentOptions.Center;
@@ -945,7 +922,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = isSecret ? "???" : title;
-            titleText.fontSize = FontSizes.DisplayMedium;
+            titleText.fontSize = FontSizes.H3;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = isUnlocked ? Color.white : (isSecret ? CAT_SECRET : TEXT_SECONDARY);
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1063,7 +1040,7 @@ namespace DigitPark.Editor
             GameObject closeText = FindOrCreateChild(closeBtn, "Text");
             TextMeshProUGUI closeTmp = GetOrAddComponent<TextMeshProUGUI>(closeText);
             closeTmp.text = "X";
-            closeTmp.fontSize = FontSizes.DisplayLarge;
+            closeTmp.fontSize = FontSizes.H1;
             closeTmp.fontStyle = FontStyles.Bold;
             closeTmp.color = TEXT_PRIMARY;
             closeTmp.alignment = TextAlignmentOptions.Center;
@@ -1083,7 +1060,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(panel, "DetailTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "First Victory";
-            titleText.fontSize = FontSizes.DisplayMedium;
+            titleText.fontSize = FontSizes.H3;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1094,7 +1071,7 @@ namespace DigitPark.Editor
             GameObject descObj = FindOrCreateChild(panel, "DetailDescription");
             TextMeshProUGUI descText = GetOrAddComponent<TextMeshProUGUI>(descObj);
             descText.text = "Win your first game in any game mode.";
-            descText.fontSize = FontSizes.SectionHeader;
+            descText.fontSize = FontSizes.H4;
             descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             descText.alignment = TextAlignmentOptions.Center;
@@ -1105,7 +1082,7 @@ namespace DigitPark.Editor
             GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
             TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
             categoryText.text = "Category: Beginner";
-            categoryText.fontSize = FontSizes.Button;
+            categoryText.fontSize = FontSizes.Body;
             categoryText.fontStyle = FontStyles.Bold;
             categoryText.color = CYAN_NEON;
             categoryText.alignment = TextAlignmentOptions.Center;
@@ -1159,7 +1136,7 @@ namespace DigitPark.Editor
             GameObject progressTextObj = FindOrCreateChild(progressSection, "DetailProgressText");
             TextMeshProUGUI progressTmp = GetOrAddComponent<TextMeshProUGUI>(progressTextObj);
             progressTmp.text = "1/1 Completed";
-            progressTmp.fontSize = FontSizes.Button;
+            progressTmp.fontSize = FontSizes.Body;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = BUTTON_SUCCESS;
             progressTmp.alignment = TextAlignmentOptions.Center;
@@ -1191,7 +1168,7 @@ namespace DigitPark.Editor
             GameObject rewardAmount = FindOrCreateChild(rewardSection, "RewardAmount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "50 Gems";
-            rewardTmp.fontSize = FontSizes.SectionHeader;
+            rewardTmp.fontSize = FontSizes.H4;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1210,7 +1187,7 @@ namespace DigitPark.Editor
             GameObject claimText = FindOrCreateChild(claimBtn, "ClaimButtonText");
             TextMeshProUGUI claimTmp = GetOrAddComponent<TextMeshProUGUI>(claimText);
             claimTmp.text = "CLAIM REWARD";
-            claimTmp.fontSize = FontSizes.LabelLarge;
+            claimTmp.fontSize = FontSizes.BodyLarge;
             claimTmp.fontStyle = FontStyles.Bold;
             claimTmp.color = TEXT_DARK;
             claimTmp.alignment = TextAlignmentOptions.Center;
@@ -1229,7 +1206,7 @@ namespace DigitPark.Editor
             GameObject cancelText = FindOrCreateChild(cancelBtn, "CancelButtonText");
             TextMeshProUGUI cancelTmp = GetOrAddComponent<TextMeshProUGUI>(cancelText);
             cancelTmp.text = "CANCELAR";
-            cancelTmp.fontSize = FontSizes.Button;
+            cancelTmp.fontSize = FontSizes.Body;
             cancelTmp.fontStyle = FontStyles.Bold;
             cancelTmp.color = TEXT_SECONDARY;
             cancelTmp.alignment = TextAlignmentOptions.Center;
@@ -1289,7 +1266,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(centerContent, "CelebrationTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "ACHIEVEMENT UNLOCKED!";
-            titleText.fontSize = FontSizes.CardTitle;
+            titleText.fontSize = FontSizes.H3;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1300,7 +1277,7 @@ namespace DigitPark.Editor
             GameObject nameObj = FindOrCreateChild(centerContent, "CelebrationAchievementName");
             TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
             nameText.text = "First Victory";
-            nameText.fontSize = FontSizes.ValueMedium;
+            nameText.fontSize = FontSizes.Subtitle;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Center;
@@ -1327,7 +1304,7 @@ namespace DigitPark.Editor
             GameObject rewardAmount = FindOrCreateChild(rewardDisplay, "Amount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
             rewardTmp.text = "+50";
-            rewardTmp.fontSize = FontSizes.CardTitle;
+            rewardTmp.fontSize = FontSizes.H3;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1347,7 +1324,7 @@ namespace DigitPark.Editor
             GameObject continueText = FindOrCreateChild(continueBtn, "Text");
             TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
             continueTmp.text = "CONTINUAR";
-            continueTmp.fontSize = FontSizes.LabelLarge;
+            continueTmp.fontSize = FontSizes.BodyLarge;
             continueTmp.fontStyle = FontStyles.Bold;
             continueTmp.color = TEXT_DARK;
             continueTmp.alignment = TextAlignmentOptions.Center;
@@ -1391,8 +1368,8 @@ namespace DigitPark.Editor
             cardBg.color = CARD_BG;
 
             Outline outline = cardContainer.AddComponent<Outline>();
-            outline.effectColor = new Color(0.3f, 0.3f, 0.4f, 0.3f);
-            outline.effectDistance = new Vector2(1, 1);
+            outline.effectColor = new Color(0f, 0.4f, 0.5f, 0.35f);
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
 
             // Glass Overlay
             GameObject glassOverlay = new GameObject("GlassOverlay");
@@ -1466,7 +1443,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI questionText = questionMark.AddComponent<TextMeshProUGUI>();
             questionText.text = "?";
-            questionText.fontSize = FontSizes.ValueMedium;
+            questionText.fontSize = FontSizes.Subtitle;
             questionText.fontStyle = FontStyles.Bold;
             questionText.color = CAT_SECRET;
             questionText.alignment = TextAlignmentOptions.Center;
@@ -1540,7 +1517,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTmp = titleText.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Achievement";
-            titleTmp.fontSize = FontSizes.DisplayMedium;
+            titleTmp.fontSize = FontSizes.H3;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = TEXT_SECONDARY;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -1653,7 +1630,7 @@ namespace DigitPark.Editor
             btn.colors = colors;
         }
 
-        private static void AddOutline(GameObject obj, Color color, float distance = 1)
+        private static void AddOutline(GameObject obj, Color color, float distance = 1.5f)
         {
             Outline outline = obj.GetComponent<Outline>();
             if (outline == null)

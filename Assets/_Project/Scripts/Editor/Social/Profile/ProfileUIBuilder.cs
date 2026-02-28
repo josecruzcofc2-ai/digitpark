@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -224,26 +225,36 @@ namespace DigitPark.Editor
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
-            bRT.anchoredPosition = new Vector2(15, 0);
+            bRT.anchoredPosition = new Vector2(20, 0);
             bRT.sizeDelta = new Vector2(50, 50);
 
             // Title (center)
             var title = FindOrCreate(header.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.2f, 0);
-            tRT.anchorMax = new Vector2(0.8f, 1);
-            tRT.offsetMin = Vector2.zero;
-            tRT.offsetMax = Vector2.zero;
+            tRT.anchorMin = new Vector2(0.07f, 0f);
+            tRT.anchorMax = new Vector2(0.53f, 1f);
+            tRT.pivot = new Vector2(0.5f, 0.5f);
+            tRT.sizeDelta = Vector2.zero;
+            tRT.anchoredPosition = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "PROFILE";
-            tTMP.fontSize = FontSizes.SceneTitle;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.raycastTarget = false;
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Currency pills (between title and addFriend)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.55f, 0.1f);
+            pillsRT.anchorMax = new Vector2(0.87f, 0.9f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             // Add Friend Button (right)
             var addBtn = FindOrCreate(header.transform, "AddFriendButton");
@@ -251,8 +262,8 @@ namespace DigitPark.Editor
             aRT.anchorMin = new Vector2(1, 0.5f);
             aRT.anchorMax = new Vector2(1, 0.5f);
             aRT.pivot = new Vector2(1, 0.5f);
-            aRT.anchoredPosition = new Vector2(-15, 0);
-            aRT.sizeDelta = new Vector2(100, 100);
+            aRT.anchoredPosition = new Vector2(-10, 0);
+            aRT.sizeDelta = new Vector2(45, 45);
             var aBg = GetOrAdd<Image>(addBtn);
             aBg.color = new Color(1, 1, 1, 0.06f);
             GetOrAdd<Button>(addBtn).targetGraphic = aBg;
@@ -265,7 +276,7 @@ namespace DigitPark.Editor
             aiRT.offsetMax = new Vector2(-8, -8);
             var aiTMP = GetOrAdd<TextMeshProUGUI>(addIcon);
             aiTMP.text = "+";
-            aiTMP.fontSize = FontSizes.DisplayMedium;
+            aiTMP.fontSize = FontSizes.H3;
             aiTMP.color = GREEN_SUCCESS;
             aiTMP.fontStyle = FontStyles.Bold;
             aiTMP.alignment = TextAlignmentOptions.Center;
@@ -387,7 +398,7 @@ namespace DigitPark.Editor
             uRT.offsetMax = Vector2.zero;
             var uTMP = GetOrAdd<TextMeshProUGUI>(username);
             uTMP.text = "@Username";
-            uTMP.fontSize = FontSizes.ValueLarge;
+            uTMP.fontSize = FontSizes.Subtitle;
             uTMP.color = TEXT_WHITE;
             uTMP.fontStyle = FontStyles.Bold;
             uTMP.alignment = TextAlignmentOptions.Center;
@@ -486,14 +497,14 @@ namespace DigitPark.Editor
             genTxtLE.flexibleWidth = 0; genTxtLE.preferredWidth = 620;
             var genTxtTMP = genTxt.AddComponent<TextMeshProUGUI>();
             genTxtTMP.text = "GENERAL STATISTICS";
-            genTxtTMP.fontSize = FontSizes.SectionHeader;
+            genTxtTMP.fontSize = FontSizes.H4;
             genTxtTMP.color = CYAN_NEON;
             genTxtTMP.fontStyle = FontStyles.Bold;
             genTxtTMP.alignment = TextAlignmentOptions.Center;
             genTxtTMP.characterSpacing = 6;
             genTxtTMP.enableAutoSizing = true;
             genTxtTMP.fontSizeMin = FontSizes.AutoMinBody;
-            genTxtTMP.fontSizeMax = FontSizes.SectionHeader;
+            genTxtTMP.fontSizeMax = FontSizes.H4;
 
             var genRL = new GameObject("RightLine");
             genRL.transform.SetParent(title.transform, false);
@@ -542,13 +553,13 @@ namespace DigitPark.Editor
             vRT.offsetMax = new Vector2(-5, -5);
             var vTMP = GetOrAdd<TextMeshProUGUI>(val);
             vTMP.text = value;
-            vTMP.fontSize = FontSizes.DisplayMedium;
+            vTMP.fontSize = FontSizes.H3;
             vTMP.color = accent;
             vTMP.fontStyle = FontStyles.Bold;
             vTMP.alignment = TextAlignmentOptions.Center;
             vTMP.enableAutoSizing = true;
-            vTMP.fontSizeMin = FontSizes.AutoMinValue;
-            vTMP.fontSizeMax = FontSizes.DisplayMedium;
+            vTMP.fontSizeMin = FontSizes.AutoMinBody;
+            vTMP.fontSizeMax = FontSizes.H3;
 
             // Label
             var lbl = FindOrCreate(block.transform, "Label");
@@ -563,7 +574,7 @@ namespace DigitPark.Editor
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableAutoSizing = true;
-            lTMP.fontSizeMin = FontSizes.AutoMinTiny;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
             lTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -621,14 +632,14 @@ namespace DigitPark.Editor
             gsTxtLE.flexibleWidth = 0; gsTxtLE.preferredWidth = 500;
             var gsTxtTMP = gsTxt.AddComponent<TextMeshProUGUI>();
             gsTxtTMP.text = "STATS BY GAME";
-            gsTxtTMP.fontSize = FontSizes.SectionHeader;
+            gsTxtTMP.fontSize = FontSizes.H4;
             gsTxtTMP.color = CYAN_NEON;
             gsTxtTMP.fontStyle = FontStyles.Bold;
             gsTxtTMP.alignment = TextAlignmentOptions.Center;
             gsTxtTMP.characterSpacing = 6;
             gsTxtTMP.enableAutoSizing = true;
             gsTxtTMP.fontSizeMin = FontSizes.AutoMinBody;
-            gsTxtTMP.fontSizeMax = FontSizes.SectionHeader;
+            gsTxtTMP.fontSizeMax = FontSizes.H4;
 
             var gsRL = new GameObject("RightLine");
             gsRL.transform.SetParent(title.transform, false);
@@ -684,12 +695,12 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(lbl);
             lTMP.text = label;
-            lTMP.fontSize = FontSizes.BodyLarge;
+            lTMP.fontSize = FontSizes.Body;
             lTMP.color = TEXT_WHITE;
             lTMP.alignment = TextAlignmentOptions.Left;
             lTMP.enableAutoSizing = true;
             lTMP.fontSizeMin = FontSizes.AutoMinBody;
-            lTMP.fontSizeMax = FontSizes.BodyLarge;
+            lTMP.fontSizeMax = FontSizes.Body;
 
             // Progress bar background
             var barBG = FindOrCreate(row.transform, "BarBG");
@@ -726,13 +737,13 @@ namespace DigitPark.Editor
             vRT.offsetMax = new Vector2(0, 0);
             var vTMP = GetOrAdd<TextMeshProUGUI>(val);
             vTMP.text = value;
-            vTMP.fontSize = FontSizes.BodyLarge;
+            vTMP.fontSize = FontSizes.Body;
             vTMP.color = accent;
             vTMP.fontStyle = FontStyles.Bold;
             vTMP.alignment = TextAlignmentOptions.Right;
             vTMP.enableAutoSizing = true;
             vTMP.fontSizeMin = FontSizes.AutoMinBody;
-            vTMP.fontSizeMax = FontSizes.BodyLarge;
+            vTMP.fontSizeMax = FontSizes.Body;
 
             // Separator line
             var sep = FindOrCreate(row.transform, "Separator");
@@ -799,7 +810,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = FontSizes.SectionHeader;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = accent;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -846,7 +857,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(text);
             tTMP.text = "CHALLENGE";
-            tTMP.fontSize = FontSizes.AuthTitle;
+            tTMP.fontSize = FontSizes.H2;
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -1180,7 +1191,7 @@ namespace DigitPark.Editor
             tRT.offsetMin = new Vector2(20, 0); tRT.offsetMax = new Vector2(-20, -10);
             var titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
             titleTxt.text = "Change Name";
-            titleTxt.fontSize = FontSizes.SceneTitle; titleTxt.fontStyle = FontStyles.Bold;
+            titleTxt.fontSize = FontSizes.H4; titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = CYAN_NEON; titleTxt.alignment = TextAlignmentOptions.Center;
 
             // Input Field

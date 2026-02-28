@@ -759,7 +759,7 @@ namespace DigitPark.Editor
             // Text - tamaño de fuente adaptativo basado en altura
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Button);
+            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Body);
             AddText(textObj, text, fontSize, DARK_BG, FontStyles.Bold);
 
             // Button component
@@ -808,7 +808,7 @@ namespace DigitPark.Editor
             // Text - tamaño adaptativo
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.38f, FontSizes.Button);
+            float fontSize = Mathf.Min(height * 0.38f, FontSizes.Body);
             AddText(textObj, text, fontSize, PREMIUM_BG, FontStyles.Bold);
 
             // Button component

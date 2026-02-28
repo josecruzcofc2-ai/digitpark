@@ -201,25 +201,27 @@ namespace DigitPark.Editor
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
-            bRT.anchoredPosition = new Vector2(15, 0);
+            bRT.anchoredPosition = new Vector2(20, 0);
             bRT.sizeDelta = new Vector2(50, 50);
 
             // Title
             var title = FindOrCreate(header.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.12f, 0);
-            tRT.anchorMax = new Vector2(0.65f, 1);
-            tRT.offsetMin = Vector2.zero;
-            tRT.offsetMax = Vector2.zero;
+            tRT.anchorMin = new Vector2(0.07f, 0f);
+            tRT.anchorMax = new Vector2(0.53f, 1f);
+            tRT.pivot = new Vector2(0.5f, 0.5f);
+            tRT.sizeDelta = Vector2.zero;
+            tRT.anchoredPosition = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "FRIENDS";
-            tTMP.fontSize = FontSizes.SceneTitle;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.raycastTarget = false;
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Friends Count
@@ -231,7 +233,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 friends";
-            cTMP.fontSize = FontSizes.LabelLarge;
+            cTMP.fontSize = FontSizes.BodyLarge;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -290,7 +292,7 @@ namespace DigitPark.Editor
             phRT.offsetMax = Vector2.zero;
             var phTMP = GetOrAdd<TextMeshProUGUI>(placeholder);
             phTMP.text = "Search friends...";
-            phTMP.fontSize = FontSizes.ValueLarge;
+            phTMP.fontSize = FontSizes.Subtitle;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
             phTMP.fontStyle = FontStyles.Bold;
             phTMP.alignment = TextAlignmentOptions.Left;
@@ -303,7 +305,7 @@ namespace DigitPark.Editor
             txtRT.offsetMin = Vector2.zero;
             txtRT.offsetMax = Vector2.zero;
             var txtTMP = GetOrAdd<TextMeshProUGUI>(text);
-            txtTMP.fontSize = FontSizes.ValueLarge;
+            txtTMP.fontSize = FontSizes.Subtitle;
             txtTMP.color = TEXT_WHITE;
             txtTMP.alignment = TextAlignmentOptions.Left;
 
@@ -349,7 +351,7 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Friend requests";
-            lTMP.fontSize = FontSizes.ValueLarge;
+            lTMP.fontSize = FontSizes.Subtitle;
             lTMP.color = PURPLE_ACCENT;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Left;
@@ -373,7 +375,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = FontSizes.BodyLarge;
+            btTMP.fontSize = FontSizes.Body;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -388,7 +390,7 @@ namespace DigitPark.Editor
             aRT.sizeDelta = new Vector2(63, 63);
             var aTMP = GetOrAdd<TextMeshProUGUI>(arrow);
             aTMP.text = "\u203A";
-            aTMP.fontSize = FontSizes.DisplayLarge;
+            aTMP.fontSize = FontSizes.H1;
             aTMP.color = PURPLE_ACCENT;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
@@ -460,7 +462,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "You have no friends yet\nSearch for players to add them";
-            eTMP.fontSize = FontSizes.ValueLarge;
+            eTMP.fontSize = FontSizes.Subtitle;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
@@ -472,7 +474,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Loading...";
-            ldTMP.fontSize = FontSizes.ValueLarge;
+            ldTMP.fontSize = FontSizes.Subtitle;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -503,14 +505,14 @@ namespace DigitPark.Editor
             card.transform.SetParent(content, false);
 
             var cardRT = card.AddComponent<RectTransform>();
-            cardRT.sizeDelta = new Vector2(0, 130);
-            card.AddComponent<LayoutElement>().preferredHeight = 130;
+            cardRT.sizeDelta = new Vector2(0, 120);
+            card.AddComponent<LayoutElement>().preferredHeight = 120;
 
             var cardBg = card.AddComponent<Image>();
             cardBg.color = CARD_BG;
             var cardOutline = card.AddComponent<Outline>();
-            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.4f);
-            cardOutline.effectDistance = new Vector2(1, 1);
+            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.35f);
+            cardOutline.effectDistance = new Vector2(1.5f, 1.5f);
             var cardShadow = card.AddComponent<Shadow>();
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);
@@ -573,7 +575,7 @@ namespace DigitPark.Editor
             unRT.offsetMax = Vector2.zero;
             var unTMP = username.AddComponent<TextMeshProUGUI>();
             unTMP.text = "Username";
-            unTMP.fontSize = FontSizes.SectionHeader;
+            unTMP.fontSize = FontSizes.H4;
             unTMP.color = TEXT_WHITE;
             unTMP.fontStyle = FontStyles.Bold;
             unTMP.alignment = TextAlignmentOptions.Left;
@@ -588,7 +590,7 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = stats.AddComponent<TextMeshProUGUI>();
             stTMP.text = "65% WR \u00B7 Digit Rush";
-            stTMP.fontSize = FontSizes.BodyLarge;
+            stTMP.fontSize = FontSizes.Body;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
 
@@ -602,7 +604,7 @@ namespace DigitPark.Editor
             statusRT.offsetMax = Vector2.zero;
             var statusTMP = status.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "Online";
-            statusTMP.fontSize = FontSizes.BodyLarge;
+            statusTMP.fontSize = FontSizes.Body;
             statusTMP.color = GREEN_SUCCESS;
             statusTMP.alignment = TextAlignmentOptions.Left;
 
@@ -672,7 +674,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = FontSizes.BodyLarge;
+            tTMP.fontSize = FontSizes.Body;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;

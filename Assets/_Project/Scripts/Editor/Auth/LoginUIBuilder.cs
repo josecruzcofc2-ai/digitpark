@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.Events;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.UI.Common;
 
 namespace DigitPark.Editor
 {
@@ -174,7 +176,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = FontSizes.AppBranding;
+            text.fontSize = FontSizes.Branding;
             text.fontStyle = FontStyles.Bold;
             text.color = CyanNeon;
             text.alignment = TextAlignmentOptions.Center;
@@ -191,7 +193,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 100); // Subido para dejar espacio al footer
+            cardRect.anchoredPosition = new Vector2(0, 500);
 
             // Card background with neon border
             Image cardBg = card.AddComponent<Image>();
@@ -250,13 +252,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI question = footer.AddComponent<TextMeshProUGUI>();
             question.font = DefaultFont;
             question.text = "Don't have an account?";
-            question.fontSize = FontSizes.BodyLarge;
+            question.fontSize = FontSizes.Body;
             question.fontStyle = FontStyles.Bold;
             question.color = TextGray;
             question.alignment = TextAlignmentOptions.Center;
             question.enableAutoSizing = true;
-            question.fontSizeMin = FontSizes.AutoMinCompact;
-            question.fontSizeMax = FontSizes.BodyLarge;
+            question.fontSizeMin = FontSizes.AutoMinBody;
+            question.fontSizeMax = FontSizes.Body;
             question.overflowMode = TextOverflowModes.Ellipsis;
         }
 
@@ -291,13 +293,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = "Create an account";
-            btnText.fontSize = FontSizes.DisplayLarge;
+            btnText.fontSize = FontSizes.H1;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkNavy;
             btnText.alignment = TextAlignmentOptions.Center;
             btnText.enableAutoSizing = true;
             btnText.fontSizeMin = FontSizes.AutoMinBody;
-            btnText.fontSizeMax = FontSizes.DisplayLarge;
+            btnText.fontSizeMax = FontSizes.H1;
             btnText.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("✅ RegisterButton creado. Ahora puedes moverlo manualmente en la escena.");
@@ -311,13 +313,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = FontSizes.DisplayLarge;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CyanNeon;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
-            titleText.fontSizeMax = FontSizes.DisplayLarge;
+            titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
@@ -367,7 +369,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.font = DefaultFont;
             placeholderText.text = placeholder;
-            placeholderText.fontSize = FontSizes.CardTitle;
+            placeholderText.fontSize = FontSizes.H3;
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.color = TextGray;
             placeholderText.alignment = TextAlignmentOptions.Left;
@@ -384,7 +386,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
             inputText.font = DefaultFont;
-            inputText.fontSize = FontSizes.CardTitle;
+            inputText.fontSize = FontSizes.H3;
             inputText.fontStyle = FontStyles.Bold;
             inputText.color = TextWhite;
             inputText.alignment = TextAlignmentOptions.Left;
@@ -412,14 +414,23 @@ namespace DigitPark.Editor
             rect.sizeDelta = new Vector2(80, 80);
             rect.anchoredPosition = new Vector2(-10, 0);
 
+            Image eyeImage = eyeBtn.AddComponent<Image>();
+            eyeImage.sprite = EyeOpenIcon;
+            eyeImage.color = CyanNeon;
+
             Button btn = eyeBtn.AddComponent<Button>();
             btn.transition = Selectable.Transition.None;
 
-            Image eyeImage = eyeBtn.AddComponent<Image>();
-            eyeImage.sprite = EyeClosedIcon;
-            eyeImage.color = CyanNeon;
+            // Add PasswordToggle runtime component and wire references
+            var toggle = eyeBtn.AddComponent<PasswordToggle>();
+            var so = new SerializedObject(toggle);
+            so.FindProperty("passwordInput").objectReferenceValue = inputField;
+            so.FindProperty("eyeOpenIcon").objectReferenceValue = EyeOpenIcon;
+            so.FindProperty("eyeClosedIcon").objectReferenceValue = EyeClosedIcon;
+            so.ApplyModifiedProperties();
 
-            // TODO: Add toggle functionality in runtime script
+            // Wire onClick to PasswordToggle.TogglePasswordVisibility
+            UnityEventTools.AddPersistentListener(btn.onClick, toggle.TogglePasswordVisibility);
         }
 
         private static void CreateCenteredLink(Transform parent, string name, string text)
@@ -432,13 +443,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI linkText = linkBtn.AddComponent<TextMeshProUGUI>();
             linkText.font = DefaultFont;
             linkText.text = text;
-            linkText.fontSize = FontSizes.Button;
+            linkText.fontSize = FontSizes.Body;
             linkText.fontStyle = FontStyles.Bold;
             linkText.color = CyanNeon;
             linkText.alignment = TextAlignmentOptions.Center;
             linkText.enableAutoSizing = true;
-            linkText.fontSizeMin = FontSizes.AutoMinCompact;
-            linkText.fontSizeMax = FontSizes.Button;
+            linkText.fontSizeMin = FontSizes.AutoMinBody;
+            linkText.fontSizeMax = FontSizes.Body;
             linkText.overflowMode = TextOverflowModes.Ellipsis;
             btn.targetGraphic = linkText;
 
@@ -508,7 +519,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelText = label.AddComponent<TextMeshProUGUI>();
             labelText.font = DefaultFont;
             labelText.text = "Remember me";
-            labelText.fontSize = FontSizes.Button;
+            labelText.fontSize = FontSizes.Body;
             labelText.fontStyle = FontStyles.Bold;
             labelText.color = TextWhite;
             LayoutElement labelLayout = label.AddComponent<LayoutElement>();
@@ -551,13 +562,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
             buttonText.font = DefaultFont;
             buttonText.text = text;
-            buttonText.fontSize = FontSizes.DisplayLarge;
+            buttonText.fontSize = FontSizes.H1;
             buttonText.fontStyle = FontStyles.Bold;
             buttonText.color = DarkNavy;
             buttonText.alignment = TextAlignmentOptions.Center;
             buttonText.enableAutoSizing = true;
             buttonText.fontSizeMin = FontSizes.AutoMinBody;
-            buttonText.fontSizeMax = FontSizes.DisplayLarge;
+            buttonText.fontSizeMax = FontSizes.H1;
             buttonText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
@@ -610,7 +621,7 @@ namespace DigitPark.Editor
             buttonText.color = textColor;
             buttonText.alignment = TextAlignmentOptions.Left;
             buttonText.enableAutoSizing = true;
-            buttonText.fontSizeMin = FontSizes.AutoMinCompact;
+            buttonText.fontSizeMin = FontSizes.AutoMinBody;
             buttonText.fontSizeMax = FontSizes.Body;
             buttonText.overflowMode = TextOverflowModes.Ellipsis;
         }
@@ -630,7 +641,8 @@ namespace DigitPark.Editor
                 rect.anchorMin = new Vector2(0, 1);
                 rect.anchorMax = new Vector2(0, 1);
                 rect.pivot = new Vector2(0, 1);
-                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+                rect.anchoredPosition = new Vector2(20, -20);
+                rect.sizeDelta = new Vector2(50, 50);
 
                 Debug.Log("✅ BackButton instantiated from prefab");
             }
@@ -645,7 +657,7 @@ namespace DigitPark.Editor
                 rect.anchorMax = new Vector2(0, 1);
                 rect.pivot = new Vector2(0, 1);
                 rect.sizeDelta = new Vector2(50, 50);
-                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+                rect.anchoredPosition = new Vector2(20, -20);
 
                 Image bg = backBtn.AddComponent<Image>();
                 bg.sprite = WhiteSprite;
@@ -666,7 +678,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
-                arrowText.fontSize = FontSizes.BodyLarge;
+                arrowText.fontSize = FontSizes.Body;
                 arrowText.color = CyanNeon;
                 arrowText.alignment = TextAlignmentOptions.Center;
 

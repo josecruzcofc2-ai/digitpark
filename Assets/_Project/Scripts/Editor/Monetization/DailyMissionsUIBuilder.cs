@@ -5,6 +5,7 @@ using TMPro;
 using DigitPark.Managers;
 using DigitPark.Data;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -502,26 +503,36 @@ namespace DigitPark.Editor
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
-            bRT.anchoredPosition = new Vector2(SIDE_PAD, 0);
+            bRT.anchoredPosition = new Vector2(20, 0);
             bRT.sizeDelta = new Vector2(50, 50);
 
             // Title (center)
             var title = FindOrCreate(topBar.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.15f, 0);
-            tRT.anchorMax = new Vector2(0.85f, 1);
-            tRT.offsetMin = Vector2.zero;
-            tRT.offsetMax = Vector2.zero;
+            tRT.anchorMin = new Vector2(0.07f, 0f);
+            tRT.anchorMax = new Vector2(0.53f, 1f);
+            tRT.pivot = new Vector2(0.5f, 0.5f);
+            tRT.sizeDelta = Vector2.zero;
+            tRT.anchoredPosition = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "MISSIONS";
-            tTMP.fontSize = FontSizes.SceneTitle;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.raycastTarget = false;
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Currency pills (between title and info button)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.55f, 0.1f);
+            pillsRT.anchorMax = new Vector2(0.85f, 0.9f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             // Info Button (right)
             var infoBtn = FindOrCreate(topBar.transform, "InfoButton");
@@ -593,7 +604,7 @@ namespace DigitPark.Editor
             var timerIcon = FindOrCreate(timerBar.transform, "TimerIcon");
             var iconImg = GetOrAdd<Image>(timerIcon);
             iconImg.color = ORANGE_TIMER;
-            Sprite timerSprite = LoadIcon(UI_ICONS_PATH + "icon_ui_timer.png");
+            Sprite timerSprite = LoadIcon(UI_ICONS_PATH + "TimerIcon.png");
             if (timerSprite != null) { iconImg.sprite = timerSprite; iconImg.preserveAspect = true; }
             var iconLE = GetOrAdd<LayoutElement>(timerIcon);
             iconLE.minWidth = 24;
@@ -680,13 +691,13 @@ namespace DigitPark.Editor
             ttRT.offsetMax = Vector2.zero;
             var ttTMP = GetOrAdd<TextMeshProUGUI>(tabText);
             ttTMP.text = label;
-            ttTMP.fontSize = FontSizes.TabLabel;
+            ttTMP.fontSize = FontSizes.BodyLarge;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = isActive ? Color.white : TEXT_SECONDARY;
             ttTMP.alignment = TextAlignmentOptions.Center;
             ttTMP.enableAutoSizing = true;
-            ttTMP.fontSizeMin = FontSizes.AutoMinTab;
-            ttTMP.fontSizeMax = FontSizes.TabLabel;
+            ttTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ttTMP.fontSizeMax = FontSizes.BodyLarge;
             ttTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Indicator bar (bottom line)
@@ -1365,7 +1376,7 @@ namespace DigitPark.Editor
             var ceImg = GetOrAdd<Image>(celebIcon);
             ceImg.color = GOLD;
             ceImg.preserveAspect = true;
-            Sprite claimSprite = LoadIcon(UI_ICONS_PATH + "icon_ui_claim.png");
+            Sprite claimSprite = LoadIcon("Assets/_Project/Art/Icons/DailyRewards/icon_daily_claim.png");
             if (claimSprite != null) ceImg.sprite = claimSprite;
             var ceLE = GetOrAdd<LayoutElement>(celebIcon);
             ceLE.preferredWidth = 60;
@@ -1375,7 +1386,7 @@ namespace DigitPark.Editor
             var popupTitle = FindOrCreate(popup.transform, "Title");
             var ptTMP = GetOrAdd<TextMeshProUGUI>(popupTitle);
             ptTMP.text = "Mission Completed!";
-            ptTMP.fontSize = FontSizes.SectionHeader;
+            ptTMP.fontSize = FontSizes.H4;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GOLD;
             ptTMP.alignment = TextAlignmentOptions.Center;
@@ -1484,7 +1495,7 @@ namespace DigitPark.Editor
             var rewardAmount = FindOrCreate(rewardDisplay.transform, "Amount");
             var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
             raTMP.text = "+100";
-            raTMP.fontSize = FontSizes.ValueLarge;
+            raTMP.fontSize = FontSizes.Subtitle;
             raTMP.fontStyle = FontStyles.Bold;
             raTMP.color = COIN_COLOR;
             raTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1507,7 +1518,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(collectText);
             ctTMP.text = "Collect";
-            ctTMP.fontSize = FontSizes.Button;
+            ctTMP.fontSize = FontSizes.Body;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = TEXT_DARK;
             ctTMP.alignment = TextAlignmentOptions.Center;

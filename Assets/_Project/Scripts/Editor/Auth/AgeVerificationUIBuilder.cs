@@ -165,9 +165,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = logo.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Digit Park";
-            text.fontSize = FontSizes.AppBranding;
+            text.fontSize = FontSizes.Branding;
             text.fontStyle = FontStyles.Bold;
-            text.color = GoldPremium;
+            text.color = CyanNeon;
             text.alignment = TextAlignmentOptions.Center;
         }
 
@@ -182,7 +182,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, -50); // Ligeramente abajo del centro
+            cardRect.anchoredPosition = new Vector2(0, 500);
 
             // Card background with GOLD neon border
             Image cardBg = card.AddComponent<Image>();
@@ -251,13 +251,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.font = DefaultFont;
             titleText.text = text;
-            titleText.fontSize = FontSizes.DisplayLarge;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = GoldPremium;
+            titleText.color = CyanNeon;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
-            titleText.fontSizeMax = FontSizes.DisplayLarge;
+            titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
@@ -272,14 +272,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.font = DefaultFont;
             descText.text = text;
-            descText.fontSize = FontSizes.DisplayMedium;
+            descText.fontSize = FontSizes.H3;
             descText.fontStyle = FontStyles.Bold;
             descText.color = TextWhite;
             descText.alignment = TextAlignmentOptions.Center;
             descText.enableWordWrapping = true;
             descText.enableAutoSizing = true;
             descText.fontSizeMin = FontSizes.AutoMinBody;
-            descText.fontSizeMax = FontSizes.DisplayMedium;
+            descText.fontSizeMax = FontSizes.H3;
             descText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = desc.AddComponent<LayoutElement>();
@@ -323,13 +323,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.font = DefaultFont;
             btnText.text = text;
-            btnText.fontSize = FontSizes.AuthTitle;
+            btnText.fontSize = FontSizes.H2;
             btnText.fontStyle = FontStyles.Bold;
             btnText.color = DarkBrown;
             btnText.alignment = TextAlignmentOptions.Center;
             btnText.enableAutoSizing = true;
             btnText.fontSizeMin = FontSizes.AutoMinBody;
-            btnText.fontSizeMax = FontSizes.AuthTitle;
+            btnText.fontSizeMax = FontSizes.H2;
             btnText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
@@ -341,14 +341,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI legalText = legal.AddComponent<TextMeshProUGUI>();
             legalText.font = DefaultFont;
             legalText.text = text;
-            legalText.fontSize = FontSizes.BodyLarge;
+            legalText.fontSize = FontSizes.Body;
             legalText.fontStyle = FontStyles.Bold;
             legalText.color = TextGray;
             legalText.alignment = TextAlignmentOptions.Center;
             legalText.enableWordWrapping = true;
             legalText.enableAutoSizing = true;
-            legalText.fontSizeMin = FontSizes.AutoMinCompact;
-            legalText.fontSizeMax = FontSizes.BodyLarge;
+            legalText.fontSizeMin = FontSizes.AutoMinBody;
+            legalText.fontSizeMax = FontSizes.Body;
             legalText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = legal.AddComponent<LayoutElement>();
@@ -372,14 +372,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI statusText = status.AddComponent<TextMeshProUGUI>();
             statusText.font = DefaultFont;
             statusText.text = "Tap the button to start verification";
-            statusText.fontSize = FontSizes.DisplayMedium;
+            statusText.fontSize = FontSizes.H3;
             statusText.fontStyle = FontStyles.Bold;
             statusText.color = TextWhite;
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.enableWordWrapping = true;
             statusText.enableAutoSizing = true;
             statusText.fontSizeMin = FontSizes.AutoMinBody;
-            statusText.fontSizeMax = FontSizes.DisplayMedium;
+            statusText.fontSizeMax = FontSizes.H3;
             statusText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement layout = status.AddComponent<LayoutElement>();
@@ -400,7 +400,8 @@ namespace DigitPark.Editor
                 rect.anchorMin = new Vector2(0, 1);
                 rect.anchorMax = new Vector2(0, 1);
                 rect.pivot = new Vector2(0, 1);
-                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+                rect.anchoredPosition = new Vector2(20, -20);
+                rect.sizeDelta = new Vector2(50, 50);
 
                 Debug.Log("✅ BackButtonGold instantiated from prefab");
             }
@@ -415,7 +416,7 @@ namespace DigitPark.Editor
                 rect.anchorMax = new Vector2(0, 1);
                 rect.pivot = new Vector2(0, 1);
                 rect.sizeDelta = new Vector2(50, 50);
-                rect.anchoredPosition = new Vector2(PADDING, -PADDING);
+                rect.anchoredPosition = new Vector2(20, -20);
 
                 Image bg = backBtn.AddComponent<Image>();
                 bg.sprite = WhiteSprite;
@@ -435,7 +436,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
-                arrowText.fontSize = FontSizes.BodyLarge;
+                arrowText.fontSize = FontSizes.Body;
                 arrowText.color = GoldPremium;
                 arrowText.alignment = TextAlignmentOptions.Center;
 

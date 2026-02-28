@@ -424,7 +424,7 @@ namespace DigitPark.Managers
             itRT.offsetMin = Vector2.zero;
             itRT.offsetMax = Vector2.zero;
             var itTMP = iconText.AddComponent<TMPro.TextMeshProUGUI>();
-            itTMP.fontSize = FontSizes.AutoMinCompact;
+            itTMP.fontSize = FontSizes.AutoMinBody;
             itTMP.alignment = TMPro.TextAlignmentOptions.Center;
 
             // Title
@@ -436,7 +436,7 @@ namespace DigitPark.Managers
             tRT.offsetMin = new Vector2(60, 2);
             tRT.offsetMax = new Vector2(-10, -2);
             var tTMP = titleGO.AddComponent<TMPro.TextMeshProUGUI>();
-            tTMP.fontSize = FontSizes.AutoMinTiny;
+            tTMP.fontSize = FontSizes.AutoMinBody;
             tTMP.fontStyle = TMPro.FontStyles.Bold;
             tTMP.color = new Color(0.95f, 0.95f, 0.95f, 1f);
             tTMP.alignment = TMPro.TextAlignmentOptions.Left;
@@ -452,7 +452,7 @@ namespace DigitPark.Managers
             bRT.offsetMin = new Vector2(60, 2);
             bRT.offsetMax = new Vector2(-10, -2);
             var bTMP = bodyGO.AddComponent<TMPro.TextMeshProUGUI>();
-            bTMP.fontSize = FontSizes.DebugText;
+            bTMP.fontSize = FontSizes.Debug;
             bTMP.color = new Color(0.6f, 0.6f, 0.65f, 1f);
             bTMP.alignment = TMPro.TextAlignmentOptions.Left;
             bTMP.overflowMode = TMPro.TextOverflowModes.Ellipsis;
@@ -480,7 +480,7 @@ namespace DigitPark.Managers
             xRT.offsetMax = Vector2.zero;
             var xTMP = xText.AddComponent<TMPro.TextMeshProUGUI>();
             xTMP.text = "✕";
-            xTMP.fontSize = FontSizes.AutoMinTiny;
+            xTMP.fontSize = FontSizes.AutoMinBody;
             xTMP.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             xTMP.alignment = TMPro.TextAlignmentOptions.Center;
 

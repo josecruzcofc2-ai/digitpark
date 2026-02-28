@@ -537,6 +537,78 @@ namespace DigitPark.Localization
             { "NextButtonText", "next_button" },
             { "StartButton", "start_button" },
             { "StartButtonText", "start_button" },
+
+            // ==================== CASH MATCHMAKING ====================
+            { "SearchingTitleText", "matchmaking_searching" },
+            { "EntryFeeDisplayText", "cash_entry_fee_display" },
+            { "EntryFeeText", "cash_entry_fee_display" },
+            { "PlayerNameText", "player_name" },
+            { "OpponentNameText", "opponent_name" },
+            { "GetReadyText", "matchmaking_get_ready" },
+            { "CancelButtonText", "cancel" },
+            { "StatusText", "matchmaking_searching" },
+            { "TimerText", "matchmaking_timer" },
+
+            // ==================== CASH TOURNAMENT CREATE ====================
+            { "CreateTournamentTitle", "cash_create_tournament" },
+            { "CreateTournamentTitleText", "cash_create_tournament" },
+            { "TournamentNameLabel", "tournament_name" },
+            { "TournamentNameLabelText", "tournament_name" },
+            { "GameSelectionLabel", "select_game" },
+            { "GameSelectionLabelText", "select_game" },
+            { "EntryFeeLabel", "entry_fee" },
+            { "EntryFeeLabelText", "entry_fee" },
+            { "MaxPlayersLabel", "max_players" },
+            { "MaxPlayersLabelText", "max_players" },
+            { "ScheduleLabel", "schedule" },
+            { "ScheduleLabelText", "schedule" },
+            { "RulesLabel", "rules" },
+            { "RulesLabelText", "rules" },
+            { "RoundsLabel", "rounds" },
+            { "RoundsLabelText", "rounds" },
+            { "TimeLimitLabel", "time_limit" },
+            { "TimeLimitLabelText", "time_limit" },
+            { "MaxAttemptsLabel", "max_attempts" },
+            { "MaxAttemptsLabelText", "max_attempts" },
+            { "AllowSpectatorsLabel", "allow_spectators" },
+            { "AllowSpectatorsLabelText", "allow_spectators" },
+            { "PrivateTournamentLabel", "private_tournament" },
+            { "PrivateTournamentLabelText", "private_tournament" },
+            { "PreviewTitle", "preview" },
+            { "PreviewTitleText", "preview" },
+            { "CreationFeeText", "cash_creation_fee" },
+            { "CreateButtonText", "cash_create_tournament_btn" },
+
+            // ==================== CASH TOURNAMENT LOBBY ====================
+            { "TournamentNameText", "tournament_name" },
+            { "StatusBadgeText", "tournament_status" },
+            { "GameTypeInfoText", "game_type" },
+            { "EntryFeeInfoText", "entry_fee" },
+            { "PrizePoolInfoText", "prize_pool" },
+            { "PlayersProgressText", "players_progress" },
+            { "CountdownInfoText", "tournament_countdown" },
+            { "ParticipantsTabText", "participants" },
+            { "JoinButtonText", "tournament_join" },
+            { "LeaveButtonText", "tournament_leave" },
+            { "ShareButtonText", "share" },
+            { "StartingCountdownText", "tournament_starting" },
+
+            // ==================== CASH TOURNAMENT RESULTS ====================
+            { "ResultTitleText", "cash_tournament_complete" },
+            { "ResultSubtitleText", "tournament_name" },
+            { "PositionLabel", "tournament_position" },
+            { "PositionLabelText", "tournament_position" },
+            { "PrizeLabel", "cash_you_won" },
+            { "PrizeLabelText", "cash_you_won" },
+            { "RetryButtonText", "play_again" },
+            { "LeaderboardButtonText", "leaderboard" },
+            { "ExitButtonText", "exit" },
+
+            // ==================== CASH BATTLE 1V1 MODAL ====================
+            { "SelectGameTitle", "cash_select_game" },
+            { "SelectGameTitleText", "cash_select_game" },
+            { "ConfirmGameButtonText", "confirm" },
+            { "ViewDetailsButtonText", "cash_view_details" },
         };
 
         private void Awake()
@@ -676,8 +748,8 @@ namespace DigitPark.Localization
                     tmp.enableAutoSizing = true;
                     // Configurar tamaños mínimo y máximo razonables
                     float currentSize = tmp.fontSize;
-                    tmp.fontSizeMin = Mathf.Max(FontSizes.AutoMinTiny, currentSize * 0.4f); // Mínimo 40% del tamaño original
-                    tmp.fontSizeMax = currentSize > 0 ? currentSize : FontSizes.Button; // Máximo el tamaño original
+                    tmp.fontSizeMin = Mathf.Max(FontSizes.AutoMinBody, currentSize * 0.4f); // Mínimo 40% del tamaño original
+                    tmp.fontSizeMax = currentSize > 0 ? currentSize : FontSizes.Body; // Máximo el tamaño original
                 }
 
                 // 3. CONFIGURAR OVERFLOW para evitar que el texto se salga

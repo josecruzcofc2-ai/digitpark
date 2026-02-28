@@ -1,8 +1,8 @@
 // ============================================================
-// FontSizeBatchRebuilder.cs  –  ONE-TIME USE
-// Abre cada escena y ejecuta su UIBuilder para propagar
-// los cambios de FontSizes.cs a toda la UI.
-// Reutilizable: ejecuta todos los UIBuilders de golpe.
+// FontSizeBatchRebuilder.cs  –  LEGACY (use AllScenesBatchBuilder instead)
+// Quick static version that opens every scene and runs its UIBuilder.
+// For the EditorWindow version with progress UI, use:
+//   DigitPark > Tools > Batch Build All Scenes
 // ============================================================
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -19,16 +19,16 @@ public static class FontSizeBatchRebuilder
         public string method;  // static method to invoke
     }
 
-    [MenuItem("DigitPark/Tools/Font Size Batch Rebuild ALL", false, 9999)]
+    [MenuItem("DigitPark/Tools/Batch Rebuild ALL (Legacy Quick)", false, 9999)]
     public static void RebuildAll()
     {
         if (!EditorUtility.DisplayDialog(
-            "Font Size Batch Rebuild",
-            "Esto abrirá TODAS las escenas una por una y ejecutará cada UIBuilder.\n\n" +
-            "• 36 escenas + prefab builders\n" +
-            "• Puede tardar varios minutos\n" +
-            "• Guarda tu trabajo antes de continuar\n\n" +
-            "¿Continuar?", "Sí, Reconstruir TODO", "Cancelar"))
+            "Batch Rebuild ALL Scenes",
+            "Opens ALL scenes and runs every UIBuilder.\n\n" +
+            "• 39 scenes + prefab builders\n" +
+            "• May take several minutes\n" +
+            "• Save your work before continuing\n\n" +
+            "Continue?", "Yes, Rebuild ALL", "Cancel"))
             return;
 
         string originalScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
@@ -84,10 +84,13 @@ public static class FontSizeBatchRebuilder
             // ── CashBattle ──
             E("Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",     "CashBattleUIBuilder",            "BuildPremiumUI"),
             E("Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",     "CashBattle1v1UIBuilder",         "BuildCashBattle1v1UI"),
-            E("Assets/_Project/Scenes/CashBattle/CashTournaments.unity",    "CashTournamentsUIBuilder",       "BuildCashTournamentsUI"),
-            E("Assets/_Project/Scenes/CashBattle/CashHistory.unity",       "CashHistoryUIBuilder",           "BuildCashHistoryUI"),
-            E("Assets/_Project/Scenes/CashBattle/CashProfile.unity",       "CashProfileUIBuilder",           "BuildAndAssign"),
-            E("Assets/_Project/Scenes/CashBattle/CashWallet.unity",        "WalletUIBuilder",                "BuildWalletUI"),
+            E("Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournaments.unity",       "CashTournamentsUIBuilder",       "BuildCashTournamentsUI"),
+            E("Assets/_Project/Scenes/CashBattle/CashHistory.unity",                         "CashHistoryUIBuilder",           "BuildCashHistoryUI"),
+            E("Assets/_Project/Scenes/CashBattle/CashProfile.unity",                         "CashProfileUIBuilder",           "BuildAndAssign"),
+            E("Assets/_Project/Scenes/CashBattle/CashWallet.unity",                          "WalletUIBuilder",                "BuildWalletUI"),
+            E("Assets/_Project/Scenes/CashBattle/CashMatchmaking.unity",                     "CashMatchmakingUIBuilder",       "BuildUI"),
+            E("Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentCreate.unity", "CashTournamentCreateUIBuilder", "BuildGoldUI"),
+            E("Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentLobby.unity",  "CashTournamentLobbyUIBuilder",  "BuildGoldUI"),
 
             // ── Onboarding ──
             E("Assets/_Project/Scenes/Onboarding/Onboarding.unity",              "OnboardingUIBuilder",              "RebuildOnboarding"),
@@ -104,6 +107,7 @@ public static class FontSizeBatchRebuilder
             E(null, "TournamentResultPanelUIBuilder",   "BuildWinPanel"),
             E(null, "TournamentResultPanelUIBuilder",   "BuildLosePanel"),
             E(null, "SprintSummaryPanelUIBuilder",      "BuildSprintSummaryPanel"),
+            E(null, "CashTournamentResultsUIBuilder",   "BuildSilent"),
             E(null, "AchievementToastUIBuilder",        "CreateAchievementToastPrefab"),
             E(null, "InAppToastUIBuilder",              "CreateInAppToastPrefab"),
             E(null, "MonetizationPrefabBuilder",        "CreateAllPrefabs"),
@@ -187,12 +191,12 @@ public static class FontSizeBatchRebuilder
             catch { /* best effort */ }
         }
 
-        string summary = $"Font Size Batch Rebuild Completado!\n\n" +
+        string summary = $"Batch Rebuild ALL Completado!\n\n" +
                           $"OK: {ok}/{total}\n" +
                           $"FAIL: {fail}/{total}\n\n" +
                           "Revisa la Console para detalles.";
 
-        EditorUtility.DisplayDialog("Batch Rebuild Completado", summary, "OK");
+        EditorUtility.DisplayDialog("Batch Rebuild Done", summary, "OK");
         Debug.Log($"[BatchRebuild] ========== RESUMEN: {ok} OK, {fail} FAIL de {total} total ==========");
     }
 

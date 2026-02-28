@@ -20,7 +20,7 @@ namespace DigitPark.Editor
         private const string TOURNAMENT_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Tournaments/";
 
         // Colors - Premium Theme
-        private static readonly Color CARD_BG = new Color(0.1f, 0.12f, 0.16f, 1f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
         private static readonly Color CARD_BG_DARK = new Color(0.08f, 0.1f, 0.13f, 1f);
         private static readonly Color CYAN = new Color(0f, 0.9f, 1f, 1f);
         private static readonly Color GREEN = new Color(0.2f, 0.95f, 0.4f, 1f);
@@ -46,14 +46,22 @@ namespace DigitPark.Editor
 
             GameObject root = new GameObject("HistoryEntryItemUI");
             RectTransform rootRT = root.AddComponent<RectTransform>();
-            rootRT.sizeDelta = new Vector2(0, 90);
+            rootRT.sizeDelta = new Vector2(0, 120);
 
             LayoutElement rootLE = root.AddComponent<LayoutElement>();
-            rootLE.preferredHeight = 90;
-            rootLE.minHeight = 90;
+            rootLE.preferredHeight = 120;
+            rootLE.minHeight = 120;
 
             Image rootBg = root.AddComponent<Image>();
             rootBg.color = CARD_BG;
+
+            // Gold outline + shadow (unified style)
+            Outline rootOutline = root.AddComponent<Outline>();
+            rootOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.35f);
+            rootOutline.effectDistance = new Vector2(1.5f, 1.5f);
+            Shadow rootShadow = root.AddComponent<Shadow>();
+            rootShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            rootShadow.effectDistance = new Vector2(3, -4);
 
             Button rootBtn = root.AddComponent<Button>();
             rootBtn.targetGraphic = rootBg;
@@ -146,7 +154,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "QuickMath vs @Player123";
-            titleText.fontSize = FontSizes.Button;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_WHITE;
             titleText.alignment = TextAlignmentOptions.Left;
@@ -232,7 +240,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI netText = netObj.AddComponent<TextMeshProUGUI>();
             netText.text = "+$4.50";
-            netText.fontSize = FontSizes.Button;
+            netText.fontSize = FontSizes.Body;
             netText.fontStyle = FontStyles.Bold;
             netText.color = GREEN;
             netText.alignment = TextAlignmentOptions.Center;
@@ -263,6 +271,11 @@ namespace DigitPark.Editor
 
             Image rootBg = root.AddComponent<Image>();
             rootBg.color = CARD_BG;
+
+            // Gold outline (unified style)
+            Outline tcOutline = root.AddComponent<Outline>();
+            tcOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.35f);
+            tcOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
             Button rootBtn = root.AddComponent<Button>();
             rootBtn.targetGraphic = rootBg;
@@ -320,7 +333,7 @@ namespace DigitPark.Editor
             ltRT.offsetMax = new Vector2(-6, 0);
             TextMeshProUGUI ltTMP = liveText.AddComponent<TextMeshProUGUI>();
             ltTMP.text = "LIVE";
-            ltTMP.fontSize = FontSizes.BodyLarge;
+            ltTMP.fontSize = FontSizes.Body;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.color = Color.white;
             ltTMP.alignment = TextAlignmentOptions.Center;
@@ -366,7 +379,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = "Quick Math Championship";
-            nameText.fontSize = FontSizes.CardTitle;
+            nameText.fontSize = FontSizes.H3;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_WHITE;
             nameText.alignment = TextAlignmentOptions.Left;
@@ -408,7 +421,7 @@ namespace DigitPark.Editor
             ptRT.offsetMax = Vector2.zero;
             TextMeshProUGUI ptTMP = prizeText.AddComponent<TextMeshProUGUI>();
             ptTMP.text = "$500";
-            ptTMP.fontSize = FontSizes.ValueLarge;
+            ptTMP.fontSize = FontSizes.Subtitle;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GREEN;
             ptTMP.alignment = TextAlignmentOptions.Left;
@@ -448,7 +461,7 @@ namespace DigitPark.Editor
             pltRT.offsetMax = Vector2.zero;
             TextMeshProUGUI pltTMP = playersText.AddComponent<TextMeshProUGUI>();
             pltTMP.text = "15/20";
-            pltTMP.fontSize = FontSizes.ValueLarge;
+            pltTMP.fontSize = FontSizes.Subtitle;
             pltTMP.color = TEXT_SECONDARY;
             pltTMP.alignment = TextAlignmentOptions.Left;
 
@@ -487,7 +500,7 @@ namespace DigitPark.Editor
             ttRT.offsetMax = Vector2.zero;
             TextMeshProUGUI ttTMP = timerText.AddComponent<TextMeshProUGUI>();
             ttTMP.text = "02:45:00";
-            ttTMP.fontSize = FontSizes.ValueLarge;
+            ttTMP.fontSize = FontSizes.Subtitle;
             ttTMP.color = CYAN;
             ttTMP.alignment = TextAlignmentOptions.Left;
 
@@ -517,7 +530,7 @@ namespace DigitPark.Editor
             elRT.offsetMax = new Vector2(-8, -4);
             TextMeshProUGUI elTMP = entryLabel.AddComponent<TextMeshProUGUI>();
             elTMP.text = "Entry";
-            elTMP.fontSize = FontSizes.BodyLarge;
+            elTMP.fontSize = FontSizes.Body;
             elTMP.color = TEXT_SECONDARY;
             elTMP.alignment = TextAlignmentOptions.Center;
 
@@ -532,7 +545,7 @@ namespace DigitPark.Editor
             evRT.offsetMax = new Vector2(-8, 0);
             TextMeshProUGUI evTMP = entryValue.AddComponent<TextMeshProUGUI>();
             evTMP.text = "$5";
-            evTMP.fontSize = FontSizes.CardTitle;
+            evTMP.fontSize = FontSizes.H3;
             evTMP.fontStyle = FontStyles.Bold;
             evTMP.color = GOLD;
             evTMP.alignment = TextAlignmentOptions.Center;
@@ -564,7 +577,7 @@ namespace DigitPark.Editor
             jtRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI jtTMP = joinText.AddComponent<TextMeshProUGUI>();
             jtTMP.text = "Join";
-            jtTMP.fontSize = FontSizes.SectionHeader;
+            jtTMP.fontSize = FontSizes.H4;
             jtTMP.fontStyle = FontStyles.Bold;
             jtTMP.color = Color.white;
             jtTMP.alignment = TextAlignmentOptions.Center;

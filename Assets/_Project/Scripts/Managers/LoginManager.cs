@@ -56,6 +56,9 @@ namespace DigitPark.Managers
             // Configurar inputs (límites, placeholders, hints)
             ConfigureInputFields();
 
+            // Auto-configurar PasswordToggle si no están asignados
+            ConfigurePasswordToggles();
+
             // Configurar listeners
             SetupListeners();
 
@@ -196,6 +199,43 @@ namespace DigitPark.Managers
                 titleText.alignment = TextAlignmentOptions.Center;
             }
             // El layout de los toggles es manejado por LocalizedTextLayoutFixer global
+        }
+
+        /// <summary>
+        /// Busca y configura automáticamente los PasswordToggle en la escena
+        /// </summary>
+        private void ConfigurePasswordToggles()
+        {
+            var toggles = FindObjectsOfType<PasswordToggle>(true);
+            foreach (var toggle in toggles)
+            {
+                Transform parent = toggle.transform.parent;
+                while (parent != null)
+                {
+                    TMP_InputField input = parent.GetComponentInChildren<TMP_InputField>();
+                    if (input != null)
+                    {
+                        string parentName = parent.name.ToLower();
+                        if (parentName.Contains("password") && passwordInput != null)
+                        {
+                            SetPasswordToggleInput(toggle, passwordInput);
+                        }
+                        break;
+                    }
+                    parent = parent.parent;
+                }
+            }
+        }
+
+        private void SetPasswordToggleInput(PasswordToggle toggle, TMP_InputField input)
+        {
+            var field = typeof(PasswordToggle).GetField("passwordInput",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field != null)
+            {
+                field.SetValue(toggle, input);
+                Debug.Log($"[Login] PasswordToggle configurado para: {input.name}");
+            }
         }
 
         /// <summary>

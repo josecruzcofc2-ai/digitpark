@@ -15,7 +15,7 @@ namespace DigitPark.Editor
     {
         // Colores del tema neon
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color CARD_BG = new Color(0.12f, 0.15f, 0.2f, 0.95f);
+        private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.12f, 1f);
         private static readonly Color GREEN = new Color(0.3f, 0.9f, 0.4f, 1f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color PROGRESS_BG = new Color(0.1f, 0.12f, 0.15f, 1f);
@@ -77,7 +77,7 @@ namespace DigitPark.Editor
 
             // TitleText (bold, white)
             CreateTextElement(content.transform, "TitleText", "Mission Title",
-                new Vector2(0, 0.65f), new Vector2(1, 1), (int)FontSizes.Button, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+                new Vector2(0, 0.65f), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // DescriptionText (gray)
             CreateTextElement(content.transform, "DescriptionText", "Mission description",
@@ -140,7 +140,7 @@ namespace DigitPark.Editor
             GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-55, -20), new Vector2(-15, 20),
-                (int)FontSizes.Button, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                (int)FontSizes.Body, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
             claimedCheck.SetActive(false);
 
             // Add MissionCardUI Component

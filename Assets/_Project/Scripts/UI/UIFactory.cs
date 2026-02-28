@@ -183,7 +183,7 @@ namespace DigitPark.UI
         /// </summary>
         public static TextMeshProUGUI CreateTitle(Transform parent, string name, string content)
         {
-            TextMeshProUGUI title = CreateText(parent, name, content, (int)FontSizes.DisplayLarge, ElectricBlue, TextAlignmentOptions.Center);
+            TextMeshProUGUI title = CreateText(parent, name, content, (int)FontSizes.H1, ElectricBlue, TextAlignmentOptions.Center);
 
             RectTransform rt = title.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 1f);
@@ -229,7 +229,7 @@ namespace DigitPark.UI
             // Texto del botón
             if (!string.IsNullOrEmpty(text))
             {
-                TextMeshProUGUI buttonText = CreateText(buttonObj.transform, "Text", text, (int)FontSizes.BodyLarge, Color.white);
+                TextMeshProUGUI buttonText = CreateText(buttonObj.transform, "Text", text, (int)FontSizes.Body, Color.white);
                 RectTransform textRT = buttonText.GetComponent<RectTransform>();
                 textRT.anchorMin = Vector2.zero;
                 textRT.anchorMax = Vector2.one;
@@ -250,7 +250,7 @@ namespace DigitPark.UI
             TextMeshProUGUI btnText = button.GetComponentInChildren<TextMeshProUGUI>();
             if (btnText != null)
             {
-                btnText.fontSize = FontSizes.SectionHeader;
+                btnText.fontSize = FontSizes.H4;
                 btnText.fontStyle = FontStyles.Bold;
             }
 
@@ -726,7 +726,7 @@ namespace DigitPark.UI
         {
             GameObject loadingPanel = CreatePanel(parent, "LoadingPanel", new Color(0, 0, 0, 0.9f));
 
-            TextMeshProUGUI loadingText = CreateText(loadingPanel.transform, "LoadingText", "Cargando...", (int)FontSizes.Button, ElectricBlue);
+            TextMeshProUGUI loadingText = CreateText(loadingPanel.transform, "LoadingText", "Cargando...", (int)FontSizes.Body, ElectricBlue);
             RectTransform loadingRT = loadingText.GetComponent<RectTransform>();
             loadingRT.anchoredPosition = Vector2.zero;
 

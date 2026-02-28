@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -50,6 +51,12 @@ namespace DigitPark.Editor
                 "Si", "No"))
                 return;
 
+            BuildCompleteUI();
+        }
+
+        /// <summary>Called by AllScenesBatchBuilder — no dialogs.</summary>
+        public static void BuildSilent()
+        {
             BuildCompleteUI();
         }
 
@@ -277,22 +284,32 @@ namespace DigitPark.Editor
             // Title
             GameObject titleObj = FindOrCreateChild(header, "TitleText");
             RectTransform titleRT = GetOrAddComponent<RectTransform>(titleObj);
-            titleRT.anchorMin = new Vector2(0.1f, 0f);
-            titleRT.anchorMax = new Vector2(0.95f, 1f);
-            titleRT.offsetMin = Vector2.zero;
-            titleRT.offsetMax = Vector2.zero;
+            titleRT.anchorMin = new Vector2(0.07f, 0f);
+            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.pivot = new Vector2(0.5f, 0.5f);
+            titleRT.sizeDelta = Vector2.zero;
+            titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "TOURNAMENTS";
-            titleText.fontSize = FontSizes.SceneTitle;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.raycastTarget = false;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
-            titleText.fontSizeMax = FontSizes.SceneTitle;
+            titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
             AddOutline(titleObj, CYAN_GLOW, 2);
+
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.55f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             EditorUtility.SetDirty(header);
             Debug.Log("[TournamentsBrowserUIBuilder] Header creado");
@@ -350,13 +367,13 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(tab, "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
-            tabText.fontSize = FontSizes.TabLabel;
+            tabText.fontSize = FontSizes.BodyLarge;
             tabText.fontStyle = FontStyles.Bold;
             tabText.color = isActive ? Color.white : TEXT_PRIMARY;
             tabText.alignment = TextAlignmentOptions.Center;
             tabText.enableAutoSizing = true;
-            tabText.fontSizeMin = FontSizes.AutoMinTab;
-            tabText.fontSizeMax = FontSizes.TabLabel;
+            tabText.fontSizeMin = FontSizes.AutoMinBody;
+            tabText.fontSizeMax = FontSizes.BodyLarge;
             tabText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(textObj);
 
@@ -446,7 +463,7 @@ namespace DigitPark.Editor
             GameObject filterTextObj = FindOrCreateChild(filterBtn, "Text");
             TextMeshProUGUI filterText = GetOrAddComponent<TextMeshProUGUI>(filterTextObj);
             filterText.text = "Filters";
-            filterText.fontSize = FontSizes.BodyLarge;
+            filterText.fontSize = FontSizes.Body;
             filterText.fontStyle = FontStyles.Bold;
             filterText.color = TEXT_PRIMARY;
             filterText.alignment = TextAlignmentOptions.Center;
@@ -519,96 +536,8 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Sample Tournament Items
-            for (int i = 0; i < 3; i++)
-            {
-                CreateSampleTournamentItem(content, i);
-            }
-
             EditorUtility.SetDirty(scrollView);
             Debug.Log("[TournamentsBrowserUIBuilder] TournamentList creado");
-        }
-
-        private static void CreateSampleTournamentItem(GameObject parent, int index)
-        {
-            GameObject item = FindOrCreateChild(parent, $"TournamentItem_{index}");
-
-            RectTransform itemRT = GetOrAddComponent<RectTransform>(item);
-            itemRT.sizeDelta = new Vector2(0, 200);
-
-            Image itemBg = GetOrAddComponent<Image>(item);
-            itemBg.color = PANEL_BG;
-            AddOutline(item, CYAN_DARK);
-
-            // 3D depth shadow
-            Shadow itemShadow = item.AddComponent<Shadow>();
-            itemShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            itemShadow.effectDistance = new Vector2(3, -4);
-
-            Button itemButton = GetOrAddComponent<Button>(item);
-            SetupButtonColors(itemButton, PANEL_BG);
-
-            LayoutElement le = GetOrAddComponent<LayoutElement>(item);
-            le.minHeight = 200;
-            le.preferredHeight = 200;
-
-            // Tournament Name
-            GameObject nameObj = FindOrCreateChild(item, "TournamentName");
-            RectTransform nameRT = GetOrAddComponent<RectTransform>(nameObj);
-            nameRT.anchorMin = new Vector2(0, 0.6f);
-            nameRT.anchorMax = new Vector2(0.7f, 1);
-            nameRT.offsetMin = new Vector2(15, 0);
-            nameRT.offsetMax = new Vector2(0, -10);
-
-            TextMeshProUGUI nameText = GetOrAddComponent<TextMeshProUGUI>(nameObj);
-            nameText.text = $"Sample Tournament {index + 1}";
-            nameText.fontSize = FontSizes.SectionHeader;
-            nameText.fontStyle = FontStyles.Bold;
-            nameText.color = TEXT_PRIMARY;
-            nameText.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // Game & Players
-            GameObject infoObj = FindOrCreateChild(item, "Info");
-            RectTransform infoRT = GetOrAddComponent<RectTransform>(infoObj);
-            infoRT.anchorMin = new Vector2(0, 0.2f);
-            infoRT.anchorMax = new Vector2(0.7f, 0.6f);
-            infoRT.offsetMin = new Vector2(15, 0);
-            infoRT.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI infoText = GetOrAddComponent<TextMeshProUGUI>(infoObj);
-            infoText.text = "Digit Rush  |  8/16 players";
-            infoText.fontSize = FontSizes.BodyLarge;
-            infoText.color = TEXT_SECONDARY;
-            infoText.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // Entry Fee
-            GameObject feeObj = FindOrCreateChild(item, "EntryFee");
-            RectTransform feeRT = GetOrAddComponent<RectTransform>(feeObj);
-            feeRT.anchorMin = new Vector2(0.7f, 0.5f);
-            feeRT.anchorMax = new Vector2(1, 1);
-            feeRT.offsetMin = Vector2.zero;
-            feeRT.offsetMax = new Vector2(-15, -10);
-
-            TextMeshProUGUI feeText = GetOrAddComponent<TextMeshProUGUI>(feeObj);
-            feeText.text = "FREE";
-            feeText.fontSize = FontSizes.ValueLarge;
-            feeText.fontStyle = FontStyles.Bold;
-            feeText.color = CYAN_NEON;
-            feeText.alignment = TextAlignmentOptions.MidlineRight;
-
-            // Status
-            GameObject statusObj = FindOrCreateChild(item, "Status");
-            RectTransform statusRT = GetOrAddComponent<RectTransform>(statusObj);
-            statusRT.anchorMin = new Vector2(0.7f, 0);
-            statusRT.anchorMax = new Vector2(1, 0.5f);
-            statusRT.offsetMin = Vector2.zero;
-            statusRT.offsetMax = new Vector2(-15, 0);
-
-            TextMeshProUGUI statusText = GetOrAddComponent<TextMeshProUGUI>(statusObj);
-            statusText.text = "Waiting...";
-            statusText.fontSize = FontSizes.Body;
-            statusText.color = TEXT_MUTED;
-            statusText.alignment = TextAlignmentOptions.MidlineRight;
         }
 
         // ==================== EMPTY STATE ====================
@@ -650,7 +579,7 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(emptyState, "EmptyStateText");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "No tournaments available";
-            titleText.fontSize = FontSizes.DisplayMedium;
+            titleText.fontSize = FontSizes.H3;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -662,7 +591,7 @@ namespace DigitPark.Editor
             GameObject subtitleObj = FindOrCreateChild(emptyState, "Subtitle");
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Be the first to create one\nor come back later";
-            subtitleText.fontSize = FontSizes.LabelLarge;
+            subtitleText.fontSize = FontSizes.BodyLarge;
             subtitleText.color = TEXT_SECONDARY;
             subtitleText.alignment = TextAlignmentOptions.Center;
 
@@ -686,7 +615,7 @@ namespace DigitPark.Editor
             GameObject createTextObj = FindOrCreateChild(createBtn, "Text");
             TextMeshProUGUI createText = GetOrAddComponent<TextMeshProUGUI>(createTextObj);
             createText.text = "Create Tournament";
-            createText.fontSize = FontSizes.SectionHeader;
+            createText.fontSize = FontSizes.H4;
             createText.fontStyle = FontStyles.Bold;
             createText.color = TEXT_DARK;
             createText.alignment = TextAlignmentOptions.Center;
@@ -753,7 +682,7 @@ namespace DigitPark.Editor
             GameObject clearTextObj = FindOrCreateChild(clearBtn, "Text");
             TextMeshProUGUI clearText = GetOrAddComponent<TextMeshProUGUI>(clearTextObj);
             clearText.text = "Clear Filters";
-            clearText.fontSize = FontSizes.LabelLarge;
+            clearText.fontSize = FontSizes.BodyLarge;
             clearText.color = TEXT_SECONDARY;
             clearText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(clearTextObj);
@@ -785,7 +714,7 @@ namespace DigitPark.Editor
             GameObject captionObj = FindOrCreateChild(row, "Label");
             TextMeshProUGUI captionText = GetOrAddComponent<TextMeshProUGUI>(captionObj);
             captionText.text = label;
-            captionText.fontSize = FontSizes.LabelLarge;
+            captionText.fontSize = FontSizes.BodyLarge;
             captionText.color = TEXT_PRIMARY;
             captionText.alignment = TextAlignmentOptions.Left;
             SetRectTransformStretch(captionObj);
@@ -864,7 +793,7 @@ namespace DigitPark.Editor
             itemLabelRT.offsetMin = new Vector2(30, 0);
             itemLabelRT.offsetMax = new Vector2(-8, 0);
             TextMeshProUGUI itemLabelText = GetOrAddComponent<TextMeshProUGUI>(itemLabel);
-            itemLabelText.fontSize = FontSizes.LabelLarge;
+            itemLabelText.fontSize = FontSizes.BodyLarge;
             itemLabelText.color = TEXT_PRIMARY;
             itemLabelText.alignment = TextAlignmentOptions.Left;
 
@@ -896,7 +825,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(refresh, "Text");
             TextMeshProUGUI refreshText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             refreshText.text = "Refreshing...";
-            refreshText.fontSize = FontSizes.LabelLarge;
+            refreshText.fontSize = FontSizes.BodyLarge;
             refreshText.color = CYAN_NEON;
             refreshText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -928,7 +857,7 @@ namespace DigitPark.Editor
             GameObject textObj = FindOrCreateChild(loadMore, "Text");
             TextMeshProUGUI loadMoreText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadMoreText.text = "Load More";
-            loadMoreText.fontSize = FontSizes.ValueLarge;
+            loadMoreText.fontSize = FontSizes.Subtitle;
             loadMoreText.color = TEXT_PRIMARY;
             loadMoreText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -970,7 +899,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI loadingText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadingText.text = "Loading...";
-            loadingText.fontSize = FontSizes.ValueLarge;
+            loadingText.fontSize = FontSizes.Subtitle;
             loadingText.color = TEXT_SECONDARY;
             loadingText.alignment = TextAlignmentOptions.Center;
 
@@ -1007,7 +936,7 @@ namespace DigitPark.Editor
             GameObject plusObj = FindOrCreateChild(fab, "PlusIcon");
             TextMeshProUGUI plusText = GetOrAddComponent<TextMeshProUGUI>(plusObj);
             plusText.text = "+";
-            plusText.fontSize = FontSizes.SceneTitle;
+            plusText.fontSize = FontSizes.H4;
             plusText.fontStyle = FontStyles.Bold;
             plusText.color = TEXT_DARK;
             plusText.alignment = TextAlignmentOptions.Center;
@@ -1050,7 +979,7 @@ namespace DigitPark.Editor
                 GameObject placeholderObj = FindOrCreateChild(textArea, "Placeholder");
                 TextMeshProUGUI placeholderText = GetOrAddComponent<TextMeshProUGUI>(placeholderObj);
                 placeholderText.text = placeholder;
-                placeholderText.fontSize = FontSizes.LabelLarge;
+                placeholderText.fontSize = FontSizes.BodyLarge;
                 placeholderText.fontStyle = FontStyles.Bold;
                 placeholderText.color = TEXT_MUTED;
                 placeholderText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1058,7 +987,7 @@ namespace DigitPark.Editor
 
                 GameObject textObj = FindOrCreateChild(textArea, "Text");
                 TextMeshProUGUI textComponent = GetOrAddComponent<TextMeshProUGUI>(textObj);
-                textComponent.fontSize = FontSizes.LabelLarge;
+                textComponent.fontSize = FontSizes.BodyLarge;
                 textComponent.color = TEXT_PRIMARY;
                 textComponent.alignment = TextAlignmentOptions.MidlineLeft;
                 SetRectTransformStretch(textObj);

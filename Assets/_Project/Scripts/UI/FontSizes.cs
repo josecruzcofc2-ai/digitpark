@@ -2,35 +2,31 @@ namespace DigitPark.UI
 {
     public static class FontSizes
     {
-        // ── Standard Tiers (largest to smallest) ──
-        public const float Logo          = 288f;
-        public const float AppBranding   = 122f;
-        public const float CardSymbol    = 90f;
-        public const float Equation      = 80f;
-        public const float SceneTitle    = 78f;
-        public const float DisplayLarge  = 72f;
-        public const float AuthTitle     = 64f;
-        public const float DisplayMedium = 56f;
-        public const float CardTitle     = 52f;
-        public const float SectionHeader = 48f;
-        public const float ValueLarge    = 44f;
-        public const float ValueMedium   = 42f;
-        public const float Penalty       = 42f;
-        public const float LabelLarge    = 40f;
-        public const float TabLabel      = 36f;
-        public const float Button        = 36f;
-        public const float BodyLarge     = 36f;
-        public const float Body          = 36f;
+        // TIER 1: DISPLAY (decorativo/hero)
+        public const float Logo     = 288f;
+        public const float Branding = 120f;
+        public const float Symbol   = 88f;
+        public const float Equation = 80f;
 
-        // ── Auto-Size Minimums (only for fontSizeMin in auto-sizing, never as fixed size) ──
-        public const float AutoMinTab     = 22f;
-        public const float AutoMinTitle   = 36f;
-        public const float AutoMinValue   = 30f;
-        public const float AutoMinBody    = 24f;
-        public const float AutoMinCompact = 20f;
-        public const float AutoMinTiny    = 20f;
+        // TIER 2: HEADLINES
+        public const float H1 = 72f;
+        public const float H2 = 64f;
+        public const float H3 = 56f;
+        public const float H4 = 48f;
 
-        // ── Debug (not shipped to production) ──
-        public const float DebugText = 14f;
+        // TIER 3: CONTENT
+        public const float Subtitle  = 44f;
+        public const float BodyLarge = 40f;
+        public const float Body      = 36f;
+        public const float BodySmall = 32f;
+        public const float Caption   = 28f;
+
+        // TIER 4: AUTO-SIZE MINIMUMS
+        public const float AutoMinTitle = 36f;
+        public const float AutoMinBody  = 28f;
+        public const float AutoMinSmall = 24f;
+
+        // DEBUG
+        public const float Debug = 14f;
     }
 }

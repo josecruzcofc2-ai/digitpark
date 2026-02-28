@@ -185,6 +185,45 @@ namespace DigitPark.Editor
             Debug.Log("[WalletUIBuilder] UI construida!");
         }
 
+        /// <summary>
+        /// Builds the UI silently without confirmation dialogs. Used by batch builders.
+        /// </summary>
+        public static void BuildSilent()
+        {
+            Canvas canvas = FindMainCanvas();
+            if (canvas == null)
+            {
+                Debug.LogError("[WalletUIBuilder] Canvas not found - cannot build silently");
+                return;
+            }
+
+            CleanupOldUI();
+
+            // Cleanup canvas children
+            var toDelete = new List<GameObject>();
+            foreach (Transform child in canvas.transform)
+            {
+                if (child.name != "EventSystem")
+                    toDelete.Add(child.gameObject);
+            }
+            foreach (var obj in toDelete)
+                DestroyImmediate(obj);
+
+            // Build UI
+            GameObject root = CreateRoot(canvas.transform);
+            CreateHeader(root.transform);
+            CreateBalanceCard(root.transform);
+            CreateFilterTabs(root.transform);
+            CreateTransactionsList(root.transform);
+            CreateMissingPanels(root.transform);
+
+            ConnectToController(canvas, root);
+
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+            Debug.Log("[WalletUIBuilder] UI built silently (batch mode)");
+        }
+
         #region Root
 
         private static GameObject CreateRoot(Transform parent)
@@ -230,8 +269,8 @@ namespace DigitPark.Editor
                 backRT.anchorMin = new Vector2(0, 0.5f);
                 backRT.anchorMax = new Vector2(0, 0.5f);
                 backRT.pivot = new Vector2(0, 0.5f);
-                backRT.sizeDelta = new Vector2(55, 55);
-                backRT.anchoredPosition = new Vector2(SIDE_PADDING, 0);
+                backRT.sizeDelta = new Vector2(50, 50);
+                backRT.anchoredPosition = new Vector2(20, 0);
             }
             else
             {
@@ -244,8 +283,8 @@ namespace DigitPark.Editor
                 backRT.anchorMin = new Vector2(0, 0.5f);
                 backRT.anchorMax = new Vector2(0, 0.5f);
                 backRT.pivot = new Vector2(0, 0.5f);
-                backRT.sizeDelta = new Vector2(55, 55);
-                backRT.anchoredPosition = new Vector2(SIDE_PADDING, 0);
+                backRT.sizeDelta = new Vector2(50, 50);
+                backRT.anchoredPosition = new Vector2(20, 0);
 
                 Image backBg = backBtn.AddComponent<Image>();
                 backBg.color = CARD_BG;
@@ -264,7 +303,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI arrowTMP = backArrow.AddComponent<TextMeshProUGUI>();
                 arrowTMP.text = "<";
-                arrowTMP.fontSize = FontSizes.ValueMedium;
+                arrowTMP.fontSize = FontSizes.Subtitle;
                 arrowTMP.color = TEXT_WHITE;
                 arrowTMP.fontStyle = FontStyles.Bold;
                 arrowTMP.alignment = TextAlignmentOptions.Center;
@@ -275,19 +314,22 @@ namespace DigitPark.Editor
             title.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = title.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0.15f, 0f);
-            titleRT.anchorMax = new Vector2(0.70f, 1f);
+            titleRT.anchorMin = new Vector2(0.07f, 0f);
+            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.pivot = new Vector2(0.5f, 0.5f);
             titleRT.sizeDelta = Vector2.zero;
+            titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleTMP = title.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "My Wallet";
-            titleTMP.fontSize = FontSizes.SceneTitle;
+            titleTMP.fontSize = FontSizes.H4;
             titleTMP.color = TEXT_GOLD;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.raycastTarget = false;
             titleTMP.enableAutoSizing = true;
-            titleTMP.fontSizeMin = FontSizes.ValueLarge;
-            titleTMP.fontSizeMax = FontSizes.SceneTitle;
+            titleTMP.fontSizeMin = FontSizes.Subtitle;
+            titleTMP.fontSizeMax = FontSizes.H4;
 
             // Gold outline effect
             titleTMP.outlineWidth = 0.2f;
@@ -331,13 +373,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
             balanceText.text = "$0.00";
-            balanceText.fontSize = FontSizes.ValueLarge;
+            balanceText.fontSize = FontSizes.Subtitle;
             balanceText.color = TEXT_GOLD;
             balanceText.alignment = TextAlignmentOptions.Center;
             balanceText.fontStyle = FontStyles.Bold;
             balanceText.enableAutoSizing = true;
-            balanceText.fontSizeMin = FontSizes.AutoMinValue;
-            balanceText.fontSizeMax = FontSizes.ValueLarge;
+            balanceText.fontSizeMin = FontSizes.AutoMinBody;
+            balanceText.fontSizeMax = FontSizes.Subtitle;
         }
 
         #endregion
@@ -386,13 +428,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Available Balance";
-            labelTMP.fontSize = FontSizes.AuthTitle;
+            labelTMP.fontSize = FontSizes.H2;
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.alignment = TextAlignmentOptions.Left;
             labelTMP.enableAutoSizing = true;
             labelTMP.fontSizeMin = FontSizes.AutoMinBody;
-            labelTMP.fontSizeMax = FontSizes.AuthTitle;
+            labelTMP.fontSizeMax = FontSizes.H2;
 
             // Big Balance Amount
             GameObject amount = new GameObject("BalanceAmount");
@@ -407,7 +449,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountTMP = amount.AddComponent<TextMeshProUGUI>();
             amountTMP.text = "$0.00";
-            amountTMP.fontSize = FontSizes.DisplayMedium;
+            amountTMP.fontSize = FontSizes.H3;
             amountTMP.color = GREEN;
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Left;
@@ -444,13 +486,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Weekly limit";
-            labelTMP.fontSize = FontSizes.ValueMedium;
+            labelTMP.fontSize = FontSizes.Subtitle;
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.alignment = TextAlignmentOptions.Left;
             labelTMP.enableAutoSizing = true;
-            labelTMP.fontSizeMin = FontSizes.AutoMinTiny;
-            labelTMP.fontSizeMax = FontSizes.ValueMedium;
+            labelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            labelTMP.fontSizeMax = FontSizes.Subtitle;
 
             // Value
             GameObject value = new GameObject("Value");
@@ -463,13 +505,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI valueTMP = value.AddComponent<TextMeshProUGUI>();
             valueTMP.text = "$0 / $150";
-            valueTMP.fontSize = FontSizes.ValueMedium;
+            valueTMP.fontSize = FontSizes.Subtitle;
             valueTMP.color = CYAN;
             valueTMP.fontStyle = FontStyles.Bold;
             valueTMP.alignment = TextAlignmentOptions.Right;
             valueTMP.enableAutoSizing = true;
-            valueTMP.fontSizeMin = FontSizes.AutoMinTiny;
-            valueTMP.fontSizeMax = FontSizes.ValueMedium;
+            valueTMP.fontSizeMin = FontSizes.AutoMinBody;
+            valueTMP.fontSizeMax = FontSizes.Subtitle;
 
             // Progress bar background
             GameObject barBg = new GameObject("ProgressBarBg");
@@ -609,13 +651,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = text;
-            textTMP.fontSize = FontSizes.CardTitle;
+            textTMP.fontSize = FontSizes.H3;
             textTMP.color = accent;
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
             textTMP.enableAutoSizing = true;
             textTMP.fontSizeMin = FontSizes.AutoMinBody;
-            textTMP.fontSizeMax = FontSizes.CardTitle;
+            textTMP.fontSizeMax = FontSizes.H3;
         }
 
         #endregion
@@ -670,13 +712,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = text;
-            textTMP.fontSize = FontSizes.CardTitle;
+            textTMP.fontSize = FontSizes.H3;
             textTMP.color = active ? TEXT_WHITE : TEXT_SECONDARY;
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
             textTMP.enableAutoSizing = true;
-            textTMP.fontSizeMin = FontSizes.AutoMinTiny;
-            textTMP.fontSizeMax = FontSizes.CardTitle;
+            textTMP.fontSizeMin = FontSizes.AutoMinBody;
+            textTMP.fontSizeMax = FontSizes.H3;
         }
 
         #endregion
@@ -709,7 +751,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTMP = title.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Match History";
-            titleTMP.fontSize = FontSizes.ValueMedium;
+            titleTMP.fontSize = FontSizes.Subtitle;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Center;
@@ -788,7 +830,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI emptyTMP = empty.AddComponent<TextMeshProUGUI>();
             emptyTMP.text = "No transactions\n\nYour deposits and withdrawals\nwill appear here";
-            emptyTMP.fontSize = FontSizes.Button;
+            emptyTMP.fontSize = FontSizes.Body;
             emptyTMP.color = TEXT_SECONDARY;
             emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
@@ -893,7 +935,7 @@ namespace DigitPark.Editor
             dpTitleLE.preferredHeight = 120;
             TextMeshProUGUI dpTitleTMP = dpTitle.AddComponent<TextMeshProUGUI>();
             dpTitleTMP.text = "Select an amount";
-            dpTitleTMP.fontSize = FontSizes.SceneTitle;
+            dpTitleTMP.fontSize = FontSizes.H4;
             dpTitleTMP.color = TEXT_GOLD;
             dpTitleTMP.fontStyle = FontStyles.Bold;
             dpTitleTMP.alignment = TextAlignmentOptions.Center;
@@ -908,7 +950,7 @@ namespace DigitPark.Editor
             subLE.preferredHeight = 72;
             TextMeshProUGUI dpSubTMP = dpSubtitle.AddComponent<TextMeshProUGUI>();
             dpSubTMP.text = "Choose the amount you want to deposit";
-            dpSubTMP.fontSize = FontSizes.DisplayMedium;
+            dpSubTMP.fontSize = FontSizes.H3;
             dpSubTMP.color = TEXT_SECONDARY;
             dpSubTMP.alignment = TextAlignmentOptions.Center;
 
@@ -975,7 +1017,7 @@ namespace DigitPark.Editor
             pmtLE.preferredHeight = 80;
             TextMeshProUGUI pmtTMP = pmTitle.AddComponent<TextMeshProUGUI>();
             pmtTMP.text = "Payment method";
-            pmtTMP.fontSize = FontSizes.AuthTitle;
+            pmtTMP.fontSize = FontSizes.H2;
             pmtTMP.color = TEXT_WHITE;
             pmtTMP.fontStyle = FontStyles.Bold;
             pmtTMP.alignment = TextAlignmentOptions.Left;
@@ -1044,7 +1086,7 @@ namespace DigitPark.Editor
             wpTitleLE.preferredHeight = 120;
             TextMeshProUGUI wpTitleTMP = wpTitle.AddComponent<TextMeshProUGUI>();
             wpTitleTMP.text = "Withdraw funds";
-            wpTitleTMP.fontSize = FontSizes.SceneTitle;
+            wpTitleTMP.fontSize = FontSizes.H4;
             wpTitleTMP.color = TEXT_GOLD;
             wpTitleTMP.fontStyle = FontStyles.Bold;
             wpTitleTMP.alignment = TextAlignmentOptions.Center;
@@ -1081,7 +1123,7 @@ namespace DigitPark.Editor
             itRT.anchorMax = Vector2.one;
             itRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI itTMP = inputText.AddComponent<TextMeshProUGUI>();
-            itTMP.fontSize = FontSizes.DisplayLarge;
+            itTMP.fontSize = FontSizes.H1;
             itTMP.color = TEXT_WHITE;
 
             // Placeholder
@@ -1093,7 +1135,7 @@ namespace DigitPark.Editor
             phRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI phTMP = placeholder.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Enter amount...";
-            phTMP.fontSize = FontSizes.DisplayLarge;
+            phTMP.fontSize = FontSizes.H1;
             phTMP.fontStyle = FontStyles.Italic;
             phTMP.color = new Color(0.5f, 0.5f, 0.55f, 0.5f);
 
@@ -1110,7 +1152,7 @@ namespace DigitPark.Editor
             waLE.preferredHeight = 80;
             TextMeshProUGUI waTMP = withdrawableAmt.AddComponent<TextMeshProUGUI>();
             waTMP.text = "$0.00 available";
-            waTMP.fontSize = FontSizes.DisplayMedium;
+            waTMP.fontSize = FontSizes.H3;
             waTMP.color = TEXT_WHITE;
             waTMP.alignment = TextAlignmentOptions.Left;
 
@@ -1122,7 +1164,7 @@ namespace DigitPark.Editor
             wmLE.preferredHeight = 70;
             TextMeshProUGUI wmTMP = withdrawMin.AddComponent<TextMeshProUGUI>();
             wmTMP.text = "Minimum: $10.00";
-            wmTMP.fontSize = FontSizes.SectionHeader;
+            wmTMP.fontSize = FontSizes.H4;
             wmTMP.color = TEXT_SECONDARY;
             wmTMP.alignment = TextAlignmentOptions.Left;
 
@@ -1134,7 +1176,7 @@ namespace DigitPark.Editor
             wfLE.preferredHeight = 70;
             TextMeshProUGUI wfTMP = withdrawFee.AddComponent<TextMeshProUGUI>();
             wfTMP.text = "Fee: $0.00";
-            wfTMP.fontSize = FontSizes.SectionHeader;
+            wfTMP.fontSize = FontSizes.H4;
             wfTMP.color = TEXT_SECONDARY;
             wfTMP.alignment = TextAlignmentOptions.Left;
 
@@ -1162,7 +1204,7 @@ namespace DigitPark.Editor
             cwTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI cwTextTMP = cwText.AddComponent<TextMeshProUGUI>();
             cwTextTMP.text = "WITHDRAW";
-            cwTextTMP.fontSize = FontSizes.DisplayLarge;
+            cwTextTMP.fontSize = FontSizes.H1;
             cwTextTMP.color = GREEN;
             cwTextTMP.fontStyle = FontStyles.Bold;
             cwTextTMP.alignment = TextAlignmentOptions.Center;
@@ -1227,7 +1269,7 @@ namespace DigitPark.Editor
             ltRT.sizeDelta = new Vector2(400, 60);
             TextMeshProUGUI ltTMP = loadingText.AddComponent<TextMeshProUGUI>();
             ltTMP.text = "Processing...";
-            ltTMP.fontSize = FontSizes.BodyLarge;
+            ltTMP.fontSize = FontSizes.Body;
             ltTMP.color = TEXT_WHITE;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.alignment = TextAlignmentOptions.Center;
@@ -1241,7 +1283,7 @@ namespace DigitPark.Editor
             stRT.sizeDelta = new Vector2(400, 60);
             TextMeshProUGUI stTMP = successText.AddComponent<TextMeshProUGUI>();
             stTMP.text = "Operation successful!";
-            stTMP.fontSize = FontSizes.BodyLarge;
+            stTMP.fontSize = FontSizes.Body;
             stTMP.color = GREEN;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
@@ -1320,7 +1362,7 @@ namespace DigitPark.Editor
             closeTextRT.offsetMax = Vector2.zero;
             TextMeshProUGUI closeTMP = closeText.AddComponent<TextMeshProUGUI>();
             closeTMP.text = "X";
-            closeTMP.fontSize = FontSizes.DisplayLarge;
+            closeTMP.fontSize = FontSizes.H1;
             closeTMP.color = TEXT_WHITE;
             closeTMP.fontStyle = FontStyles.Bold;
             closeTMP.alignment = TextAlignmentOptions.Center;

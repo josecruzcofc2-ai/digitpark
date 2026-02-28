@@ -149,10 +149,10 @@ namespace DigitPark.Editor
                 GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
                 backBtn.name = "BackButton";
                 RectTransform rt = backBtn.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0, 1);
-                rt.anchorMax = new Vector2(0, 1);
-                rt.pivot = new Vector2(0, 1);
-                rt.anchoredPosition = new Vector2(30, -40);
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(0, 0.5f);
+                rt.pivot = new Vector2(0, 0.5f);
+                rt.anchoredPosition = new Vector2(20, 0);
                 rt.sizeDelta = new Vector2(50, 50);
             }
             else
@@ -160,10 +160,10 @@ namespace DigitPark.Editor
                 // Fallback: simple back button
                 GameObject backBtn = CreateElement(parent, "BackButton");
                 RectTransform rt = backBtn.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0, 1);
-                rt.anchorMax = new Vector2(0, 1);
-                rt.pivot = new Vector2(0, 1);
-                rt.anchoredPosition = new Vector2(30, -40);
+                rt.anchorMin = new Vector2(0, 0.5f);
+                rt.anchorMax = new Vector2(0, 0.5f);
+                rt.pivot = new Vector2(0, 0.5f);
+                rt.anchoredPosition = new Vector2(20, 0);
                 rt.sizeDelta = new Vector2(50, 50);
 
                 Image btnBg = backBtn.AddComponent<Image>();
@@ -174,7 +174,7 @@ namespace DigitPark.Editor
                 SetFullStretch(arrow.GetComponent<RectTransform>());
                 TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
                 arrowText.text = "<";
-                arrowText.fontSize = FontSizes.AuthTitle;
+                arrowText.fontSize = FontSizes.H2;
                 arrowText.color = CYAN_NEON;
                 arrowText.alignment = TextAlignmentOptions.Center;
                 arrowText.fontStyle = FontStyles.Bold;
@@ -231,7 +231,7 @@ namespace DigitPark.Editor
             SetFullStretch(placeholder.GetComponent<RectTransform>());
             TextMeshProUGUI placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "?";
-            placeholderTmp.fontSize = FontSizes.CardSymbol;
+            placeholderTmp.fontSize = FontSizes.Symbol;
             placeholderTmp.color = CYAN_NEON;
             placeholderTmp.alignment = TextAlignmentOptions.Center;
             placeholderTmp.fontStyle = FontStyles.Bold;
@@ -245,7 +245,7 @@ namespace DigitPark.Editor
             gameNameRect.offsetMax = Vector2.zero;
             TextMeshProUGUI gameNameTmp = gameName.AddComponent<TextMeshProUGUI>();
             gameNameTmp.text = "DIGIT RUSH";
-            gameNameTmp.fontSize = FontSizes.CardTitle;
+            gameNameTmp.fontSize = FontSizes.H3;
             gameNameTmp.color = TEXT_SECONDARY;
             gameNameTmp.alignment = TextAlignmentOptions.Center;
             gameNameTmp.fontStyle = FontStyles.Bold;
@@ -267,7 +267,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTmp = title.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "SEARCHING...";
-            titleTmp.fontSize = FontSizes.DisplayLarge;
+            titleTmp.fontSize = FontSizes.H1;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.fontStyle = FontStyles.Bold;
@@ -453,7 +453,7 @@ namespace DigitPark.Editor
             nameRect.offsetMax = Vector2.zero;
             TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nameTmp.text = isPlayer ? "Player" : "???";
-            nameTmp.fontSize = FontSizes.DisplayLarge;
+            nameTmp.fontSize = FontSizes.H1;
             nameTmp.color = TEXT_WHITE;
             nameTmp.alignment = TextAlignmentOptions.Left;
             nameTmp.fontStyle = FontStyles.Bold;
@@ -482,7 +482,7 @@ namespace DigitPark.Editor
             SetFullStretch(levelText.GetComponent<RectTransform>());
             TextMeshProUGUI levelTmp = levelText.AddComponent<TextMeshProUGUI>();
             levelTmp.text = isPlayer ? "Lv. 1" : "---";
-            levelTmp.fontSize = FontSizes.ValueLarge;
+            levelTmp.fontSize = FontSizes.Subtitle;
             levelTmp.color = isPlayer ? CYAN_NEON : TEXT_MUTED;
             levelTmp.alignment = TextAlignmentOptions.Center;
             levelTmp.fontStyle = FontStyles.Bold;
@@ -509,7 +509,7 @@ namespace DigitPark.Editor
                 SetFullStretch(youText.GetComponent<RectTransform>());
                 TextMeshProUGUI youTmp = youText.AddComponent<TextMeshProUGUI>();
                 youTmp.text = "YOU";
-                youTmp.fontSize = FontSizes.BodyLarge;
+                youTmp.fontSize = FontSizes.Body;
                 youTmp.color = CYAN_NEON;
                 youTmp.alignment = TextAlignmentOptions.Center;
                 youTmp.fontStyle = FontStyles.Bold;
@@ -556,7 +556,7 @@ namespace DigitPark.Editor
             SetFullStretch(vsText.GetComponent<RectTransform>());
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
-            vsTmp.fontSize = FontSizes.ValueMedium;
+            vsTmp.fontSize = FontSizes.Subtitle;
             vsTmp.color = new Color(1, 1, 1, 0); // Invisible
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.raycastTarget = false;
@@ -626,7 +626,7 @@ namespace DigitPark.Editor
             statusRect.offsetMax = Vector2.zero;
             TextMeshProUGUI statusTmp = statusText.AddComponent<TextMeshProUGUI>();
             statusTmp.text = "Searching for opponent...";
-            statusTmp.fontSize = FontSizes.SectionHeader;
+            statusTmp.fontSize = FontSizes.H4;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
 
@@ -640,7 +640,7 @@ namespace DigitPark.Editor
             timerRect.offsetMax = Vector2.zero;
             TextMeshProUGUI timerTmp = timerText.AddComponent<TextMeshProUGUI>();
             timerTmp.text = "0:00";
-            timerTmp.fontSize = FontSizes.DisplayMedium;
+            timerTmp.fontSize = FontSizes.H3;
             timerTmp.color = CYAN_NEON;
             timerTmp.alignment = TextAlignmentOptions.Center;
             timerTmp.fontStyle = FontStyles.Bold;
@@ -684,7 +684,7 @@ namespace DigitPark.Editor
             SetFullStretch(btnText.GetComponent<RectTransform>());
             TextMeshProUGUI textTmp = btnText.AddComponent<TextMeshProUGUI>();
             textTmp.text = "CANCEL";
-            textTmp.fontSize = FontSizes.DisplayMedium;
+            textTmp.fontSize = FontSizes.H3;
             textTmp.color = RED_NEON;
             textTmp.alignment = TextAlignmentOptions.Center;
             textTmp.fontStyle = FontStyles.Bold;
@@ -728,7 +728,7 @@ namespace DigitPark.Editor
             countdownRect.offsetMax = Vector2.zero;
             TextMeshProUGUI countdownTmp = countdownText.AddComponent<TextMeshProUGUI>();
             countdownTmp.text = "3";
-            countdownTmp.fontSize = FontSizes.SceneTitle;
+            countdownTmp.fontSize = FontSizes.H4;
             countdownTmp.color = GREEN_NEON;
             countdownTmp.alignment = TextAlignmentOptions.Center;
             countdownTmp.fontStyle = FontStyles.Bold;

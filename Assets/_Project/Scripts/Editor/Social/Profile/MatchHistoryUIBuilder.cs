@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -199,39 +200,36 @@ namespace DigitPark.Editor
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
-            bRT.anchoredPosition = new Vector2(15, 0);
+            bRT.anchoredPosition = new Vector2(20, 0);
             bRT.sizeDelta = new Vector2(50, 50);
 
             // Title
             var title = FindOrCreate(header.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.12f, 0);
-            tRT.anchorMax = new Vector2(0.65f, 1);
-            tRT.offsetMin = Vector2.zero;
-            tRT.offsetMax = Vector2.zero;
+            tRT.anchorMin = new Vector2(0.07f, 0f);
+            tRT.anchorMax = new Vector2(0.53f, 1f);
+            tRT.pivot = new Vector2(0.5f, 0.5f);
+            tRT.sizeDelta = Vector2.zero;
+            tRT.anchoredPosition = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "HISTORY";
-            tTMP.fontSize = FontSizes.SceneTitle;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.raycastTarget = false;
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Total Count
-            var count = FindOrCreate(header.transform, "TotalCountText");
-            var cRT = GetOrAdd<RectTransform>(count);
-            cRT.anchorMin = new Vector2(0.75f, 0);
-            cRT.anchorMax = new Vector2(1, 1);
-            cRT.offsetMin = Vector2.zero;
-            cRT.offsetMax = new Vector2(-15, 0);
-            var cTMP = GetOrAdd<TextMeshProUGUI>(count);
-            cTMP.text = "0 matches";
-            cTMP.fontSize = FontSizes.Button;
-            cTMP.color = TEXT_SECONDARY;
-            cTMP.alignment = TextAlignmentOptions.Right;
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.55f, 0.1f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.9f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             Debug.Log("[MatchHistoryUI] Header creado");
         }
@@ -298,7 +296,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = GetOrAdd<TextMeshProUGUI>(text);
             tTMP.text = label;
-            tTMP.fontSize = FontSizes.ValueLarge;
+            tTMP.fontSize = FontSizes.Subtitle;
             tTMP.color = active ? TEXT_DARK : TEXT_SECONDARY;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -344,7 +342,7 @@ namespace DigitPark.Editor
                 // Fallback: poner letra
                 var fallback = GetOrAdd<TextMeshProUGUI>(iconGO);
                 fallback.text = name.Replace("Filter", "").Substring(0, 2);
-                fallback.fontSize = FontSizes.LabelLarge;
+                fallback.fontSize = FontSizes.BodyLarge;
                 fallback.color = gameColor;
                 fallback.alignment = TextAlignmentOptions.Center;
             }
@@ -483,14 +481,14 @@ namespace DigitPark.Editor
             card.transform.SetParent(content, false);
 
             var cardRT = card.AddComponent<RectTransform>();
-            cardRT.sizeDelta = new Vector2(0, 100);
-            card.AddComponent<LayoutElement>().preferredHeight = 100;
+            cardRT.sizeDelta = new Vector2(0, 120);
+            card.AddComponent<LayoutElement>().preferredHeight = 120;
 
             var cardBg = card.AddComponent<Image>();
             cardBg.color = CARD_BG;
             var cardOutline = card.AddComponent<Outline>();
-            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.3f);
-            cardOutline.effectDistance = new Vector2(1, 1);
+            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.35f);
+            cardOutline.effectDistance = new Vector2(1.5f, 1.5f);
             var cardShadow = card.AddComponent<Shadow>();
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);

@@ -249,7 +249,7 @@ namespace DigitPark.Editor
             tlRT.offsetMax = Vector2.zero;
             var tlTMP = GetOrAdd<TextMeshProUGUI>(titleLabel);
             tlTMP.text = "CASH BATTLE";
-            tlTMP.fontSize = FontSizes.Button;
+            tlTMP.fontSize = FontSizes.Body;
             tlTMP.color = GOLD;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.alignment = TextAlignmentOptions.Left;
@@ -331,13 +331,13 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "WELCOME TO\nCASH BATTLE!", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "The real money competition\nplatform in Digit Park", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "The real money competition\nplatform in Digit Park", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "WIN REAL MONEY PLAYING", (int)FontSizes.ValueMedium, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentText(card, "WIN REAL MONEY PLAYING", (int)FontSizes.Subtitle, GREEN_WIN, TextAlignmentOptions.Center, true);
             AddContentSpacer(card, 14);
-            AddContentText(card, "\u2022  1v1 competitions from $1 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Tournaments with guaranteed prizes", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Fast and secure withdrawals", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  1v1 competitions from $1 USD", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Tournaments with guaranteed prizes", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Fast and secure withdrawals", (int)FontSizes.Body, TEXT_WHITE);
         }
 
         private static void CreateSlide2_Verification(Transform parent)
@@ -347,11 +347,11 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "VERIFY YOUR AGE\n(18+ REQUIRED)", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "To play with real money, you must:", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "To play with real money, you must:", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2713  Be 18 years or older", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Verify your identity with Triump\u2122", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Confirm your banking information", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Be 18 years or older", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2713  Verify your identity with Triump\u2122", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2713  Confirm your banking information", (int)FontSizes.Body, TEXT_WHITE);
             AddContentSpacer(card, 12);
             AddContentText(card, "100% secure and confidential process", (int)FontSizes.Body, TEXT_SECONDARY, TextAlignmentOptions.Center);
         }
@@ -363,13 +363,13 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "DEPOSIT FUNDS\nTO YOUR WALLET", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "Add money to your account easily:", (int)FontSizes.Button, TEXT_WHITE, TextAlignmentOptions.Center);
+            AddContentText(card, "Add money to your account easily:", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2022  Credit/debit card", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Bank transfer", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Local payment methods", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2022  Credit/debit card", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Bank transfer", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Local payment methods", (int)FontSizes.Body, TEXT_WHITE);
             AddContentSpacer(card, 12);
-            AddContentText(card, "Minimum deposit: $5 USD", (int)FontSizes.ValueMedium, GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "Minimum deposit: $5 USD", (int)FontSizes.Subtitle, GOLD, TextAlignmentOptions.Center, true);
         }
 
         private static void CreateSlide4_Play(Transform parent)
@@ -379,15 +379,15 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "CHOOSE YOUR GAME\nAND BET", GOLD);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "1v1 COMPETITIONS", (int)FontSizes.ValueMedium, ORANGE_GOLD, TextAlignmentOptions.Center, true);
-            AddContentText(card, "\u2022  Skill-based matchmaking (MMR)", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Bets from $1 to $250 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Winner takes 80%", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "1v1 COMPETITIONS", (int)FontSizes.Subtitle, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Skill-based matchmaking (MMR)", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Bets from $1 to $250 USD", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Winner takes 80%", (int)FontSizes.Body, TEXT_WHITE);
             AddContentSpacer(card, 10);
-            AddContentText(card, "TOURNAMENTS", (int)FontSizes.ValueMedium, ORANGE_GOLD, TextAlignmentOptions.Center, true);
-            AddContentText(card, "\u2022  Up to 256 players", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Guaranteed prizes", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2022  Professional bracket system", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "TOURNAMENTS", (int)FontSizes.Subtitle, ORANGE_GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "\u2022  Up to 256 players", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Guaranteed prizes", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2022  Professional bracket system", (int)FontSizes.Body, TEXT_WHITE);
         }
 
         private static void CreateSlide5_Win(Transform parent)
@@ -397,14 +397,14 @@ namespace DigitPark.Editor
             CreateSlideTitle(slide, "WIN AND WITHDRAW\nYOUR MONEY!", GREEN_WIN);
 
             var card = CreateContentCard(slide);
-            AddContentText(card, "FAST AND SECURE WITHDRAWALS", (int)FontSizes.ValueMedium, GREEN_WIN, TextAlignmentOptions.Center, true);
+            AddContentText(card, "FAST AND SECURE WITHDRAWALS", (int)FontSizes.Subtitle, GREEN_WIN, TextAlignmentOptions.Center, true);
             AddContentSpacer(card, 10);
-            AddContentText(card, "\u2713  Minimum withdrawal: $10 USD", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Maximum: $500 USD per withdrawal", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Processed in 1-3 business days", (int)FontSizes.BodyLarge, TEXT_WHITE);
-            AddContentText(card, "\u2713  Direct to your bank account", (int)FontSizes.BodyLarge, TEXT_WHITE);
+            AddContentText(card, "\u2713  Minimum withdrawal: $10 USD", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2713  Maximum: $500 USD per withdrawal", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2713  Processed in 1-3 business days", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2713  Direct to your bank account", (int)FontSizes.Body, TEXT_WHITE);
             AddContentSpacer(card, 14);
-            AddContentText(card, "START WINNING TODAY!", (int)FontSizes.ValueMedium, GOLD, TextAlignmentOptions.Center, true);
+            AddContentText(card, "START WINNING TODAY!", (int)FontSizes.Subtitle, GOLD, TextAlignmentOptions.Center, true);
         }
 
         #endregion
@@ -468,14 +468,14 @@ namespace DigitPark.Editor
             tRT.offsetMax = Vector2.zero;
             var tTMP = title.AddComponent<TextMeshProUGUI>();
             tTMP.text = text;
-            tTMP.fontSize = FontSizes.SceneTitle;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = color;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
             tTMP.enableWordWrapping = true;
             tTMP.enableAutoSizing = true;
-            tTMP.fontSizeMin = FontSizes.SectionHeader;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMin = FontSizes.H4;
+            tTMP.fontSizeMax = FontSizes.H4;
         }
 
         private static Transform CreateContentCard(Transform slide)
@@ -590,7 +590,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(backText);
             btTMP.text = "BACK";
-            btTMP.fontSize = FontSizes.Button;
+            btTMP.fontSize = FontSizes.Body;
             btTMP.color = TEXT_SECONDARY;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -617,7 +617,7 @@ namespace DigitPark.Editor
             ntRT.offsetMax = Vector2.zero;
             var ntTMP = GetOrAdd<TextMeshProUGUI>(nextText);
             ntTMP.text = "NEXT";
-            ntTMP.fontSize = FontSizes.Button;
+            ntTMP.fontSize = FontSizes.Body;
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;

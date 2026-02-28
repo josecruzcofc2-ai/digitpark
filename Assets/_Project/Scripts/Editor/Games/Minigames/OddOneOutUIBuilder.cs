@@ -206,7 +206,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(500, 50));
-            SetupText(title, "ODD ONE OUT", (int)FontSizes.SceneTitle, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "ODD ONE OUT", (int)FontSizes.H4, CYAN_NEON, FontStyles.Bold);
         }
 
         private static void CreateStatsBar(Transform parent)
@@ -237,15 +237,15 @@ namespace DigitPark.Editor
 
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "00:00", Color.white, 240, timerIcon, (int)FontSizes.BodyLarge);
+                "00:00", Color.white, 240, timerIcon, (int)FontSizes.Body);
 
             // Round
             CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
-                "1/5", CYAN_NEON, 180, roundIcon, (int)FontSizes.Button);
+                "1/5", CYAN_NEON, 180, roundIcon, (int)FontSizes.Body);
 
             // Errors
             CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
-                "0", ERROR_COLOR, 120, errorIcon, (int)FontSizes.BodyLarge);
+                "0", ERROR_COLOR, 120, errorIcon, (int)FontSizes.Body);
         }
 
         private static void CreateStatItem(Transform parent, string containerName, string iconName,
@@ -415,7 +415,7 @@ namespace DigitPark.Editor
             string textName = isRight ? $"RightButtonText_{index}" : $"LeftButtonText_{index}";
             GameObject textObj = CreateElement(face.transform, textName);
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI tmp = SetupText(textObj, "A", (int)FontSizes.ValueLarge, Color.white, FontStyles.Bold);
+            TextMeshProUGUI tmp = SetupText(textObj, "A", (int)FontSizes.Subtitle, Color.white, FontStyles.Bold);
             tmp.alignment = TextAlignmentOptions.Center;
 
             Outline textOutline = textObj.AddComponent<Outline>();
@@ -504,7 +504,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -40), new Vector2(0, 55));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", (int)FontSizes.ValueLarge, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", (int)FontSizes.Subtitle, GREEN_NEON, FontStyles.Bold);
 
             // Divider after title
             CreateDivider(content.transform, -80);
@@ -585,7 +585,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -40), new Vector2(0, 55));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", (int)FontSizes.ValueLarge, ERROR_COLOR, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", (int)FontSizes.Subtitle, ERROR_COLOR, FontStyles.Bold);
 
             // Divider after title
             CreateDivider(content.transform, -80);
@@ -707,7 +707,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "ODD ONE OUT", (int)FontSizes.ValueLarge, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "ODD ONE OUT", (int)FontSizes.Subtitle, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = titleObj.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
@@ -792,7 +792,7 @@ namespace DigitPark.Editor
 
             GameObject startText = CreateElement(startBtn.transform, "StartText");
             SetupRectTransform(startText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(startText, "START", (int)FontSizes.BodyLarge, DARK_BG, FontStyles.Bold);
+            SetupText(startText, "START", (int)FontSizes.Body, DARK_BG, FontStyles.Bold);
 
             settingsPanel.SetActive(false);
         }

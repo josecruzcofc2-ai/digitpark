@@ -582,7 +582,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = titleObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("premium_title");
-            tmp.fontSize = FontSizes.DisplayLarge;
+            tmp.fontSize = FontSizes.H1;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = neonGold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -646,10 +646,10 @@ namespace DigitPark.UI.Panels
             titleRt.sizeDelta = new Vector2(400, 60);
             bundleTitleText = titleObj.AddComponent<TextMeshProUGUI>();
             bundleTitleText.text = AutoLocalizer.Get("tournament_bundle_title");
-            bundleTitleText.fontSize = FontSizes.DisplayMedium;
+            bundleTitleText.fontSize = FontSizes.H3;
             bundleTitleText.enableAutoSizing = true;
             bundleTitleText.fontSizeMin = FontSizes.Body;
-            bundleTitleText.fontSizeMax = FontSizes.DisplayMedium;
+            bundleTitleText.fontSizeMax = FontSizes.H3;
             bundleTitleText.fontStyle = FontStyles.Bold;
             bundleTitleText.color = neonGold;
             bundleTitleText.alignment = TextAlignmentOptions.Center;
@@ -738,7 +738,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("acquired_text");
-            tmp.fontSize = FontSizes.DisplayMedium;
+            tmp.fontSize = FontSizes.H3;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = accentColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -791,10 +791,10 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.DisplayMedium;
+            tmp.fontSize = FontSizes.H3;
             tmp.enableAutoSizing = true;
             tmp.fontSizeMin = FontSizes.Body;
-            tmp.fontSizeMax = FontSizes.DisplayMedium;
+            tmp.fontSizeMax = FontSizes.H3;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -812,10 +812,10 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.ValueLarge;
+            tmp.fontSize = FontSizes.Subtitle;
             tmp.enableAutoSizing = true;
             tmp.fontSizeMin = FontSizes.AutoMinBody;
-            tmp.fontSizeMax = FontSizes.ValueLarge;
+            tmp.fontSizeMax = FontSizes.Subtitle;
             tmp.color = new Color(0.8f, 0.8f, 0.85f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
 
@@ -832,7 +832,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.DisplayMedium;
+            tmp.fontSize = FontSizes.H3;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -850,7 +850,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.ValueMedium;
+            tmp.fontSize = FontSizes.Subtitle;
             tmp.color = new Color(0.7f, 1f, 0.7f, 1f);
             tmp.alignment = TextAlignmentOptions.Left;
 
@@ -887,7 +887,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("buy_button");
-            tmp.fontSize = FontSizes.SectionHeader;
+            tmp.fontSize = FontSizes.H4;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -927,7 +927,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("premium_recommended");
-            tmp.fontSize = FontSizes.BodyLarge;
+            tmp.fontSize = FontSizes.Body;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -947,7 +947,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = btnObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("restore_purchases");
-            tmp.fontSize = FontSizes.ValueLarge;
+            tmp.fontSize = FontSizes.Subtitle;
             tmp.color = neonCyan;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Underline;
@@ -1005,7 +1005,7 @@ namespace DigitPark.UI.Panels
 
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "X";
-            tmp.fontSize = FontSizes.DisplayMedium;
+            tmp.fontSize = FontSizes.H3;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;

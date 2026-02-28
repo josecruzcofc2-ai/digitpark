@@ -268,8 +268,9 @@ namespace DigitPark.Editor.AutoAssigners
             }
             AssignReference(so, "entriesContainer", entriesContainerT);
 
-            // historyEntryPrefab - skip (prefab, can't auto-assign from scene)
-            Log("~ historyEntryPrefab: Skipped (prefab reference, assign manually)");
+            // historyEntryPrefab - load from prefab asset
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/CashBattle/History/MatchHistoryItem.prefab");
+            AssignReference(so, "historyEntryPrefab", prefab);
 
             // scrollRect
             Transform scrollRectT = FindDeep(root, "MatchHistoryList");

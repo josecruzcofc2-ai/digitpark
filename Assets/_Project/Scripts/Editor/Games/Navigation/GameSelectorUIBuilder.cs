@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 using DigitPark.Themes;
 using System.Collections.Generic;
 
@@ -120,9 +121,17 @@ namespace DigitPark.Editor
             // Title - valores ajustados por el usuario
             GameObject title = CreateOrFind(header.transform, "TitleText");
             SetupRectTransform(title,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -5), new Vector2(800, 70)); // Height 70
+                new Vector2(0.07f, 0f), new Vector2(0.53f, 1f),
+                Vector2.zero, Vector2.zero);
             SetupTitleText(title, "Select a Game");
+
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.58f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.98f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             // ========== GAMES GRID ==========
             GameObject gamesPanel = CreateOrFind(canvasTransform, "GamesPanel");
@@ -310,7 +319,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTmp = panelTitle.GetComponent<TextMeshProUGUI>();
             if (titleTmp == null) titleTmp = panelTitle.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Cognitive Sprint";
-            titleTmp.fontSize = FontSizes.SectionHeader;
+            titleTmp.fontSize = FontSizes.H4;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -428,7 +437,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTmp = gameTitle.GetComponent<TextMeshProUGUI>();
             if (titleTmp == null) titleTmp = gameTitle.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "DIGIT RUSH"; // Se cambia dinámicamente
-            titleTmp.fontSize = FontSizes.Button;
+            titleTmp.fontSize = FontSizes.Body;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -728,7 +737,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = arrowText.GetComponent<TextMeshProUGUI>();
             if (tmp == null) tmp = arrowText.AddComponent<TextMeshProUGUI>();
             tmp.text = "<";
-            tmp.fontSize = FontSizes.SectionHeader;
+            tmp.fontSize = FontSizes.H4;
             tmp.color = CYAN_NEON;
             tmp.alignment = TextAlignmentOptions.Center;
         }
@@ -738,14 +747,15 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = obj.GetComponent<TextMeshProUGUI>();
             if (tmp == null) tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.SceneTitle;
+            tmp.fontSize = FontSizes.H4;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = CYAN_NEON;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableAutoSizing = true;
             tmp.fontSizeMin = FontSizes.AutoMinTitle;
-            tmp.fontSizeMax = FontSizes.SceneTitle;
+            tmp.fontSizeMax = FontSizes.H4;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.raycastTarget = false;
         }
 
         private static void CleanupOldUI()

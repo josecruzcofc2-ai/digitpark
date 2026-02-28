@@ -345,7 +345,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "Subtitle",
                 subtitleText,
-                (int)FontSizes.AuthTitle,
+                (int)FontSizes.H2,
                 textSecondary,
                 TextAlignmentOptions.Center
             );
@@ -365,7 +365,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "Subtitle2",
                 subtitle2Text,
-                (int)FontSizes.DisplayMedium,
+                (int)FontSizes.H3,
                 accentColor,
                 TextAlignmentOptions.Center
             );
@@ -454,7 +454,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "LoadingText",
                 "",
-                (int)FontSizes.CardSymbol,
+                (int)FontSizes.Symbol,
                 textColor,
                 TextAlignmentOptions.Center
             );
@@ -480,7 +480,7 @@ namespace DigitPark.UI
                 canvas.transform,
                 "VersionText",
                 $"v{Application.version}",
-                (int)FontSizes.AuthTitle,
+                (int)FontSizes.H2,
                 textDisabled,
                 TextAlignmentOptions.BottomRight
             );

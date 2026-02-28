@@ -509,7 +509,7 @@ namespace DigitPark.UI.CashBattle
             infoLayout.childForceExpandHeight = false;
 
             // Name
-            CreateLabel(infoContainer.transform, "Name", "Tournament Name", (int)FontSizes.BodyLarge, true, new Color(1f, 0.84f, 0f));
+            CreateLabel(infoContainer.transform, "Name", "Tournament Name", (int)FontSizes.Body, true, new Color(1f, 0.84f, 0f));
 
             // Game type
             CreateLabel(infoContainer.transform, "GameType", "Game Type", (int)FontSizes.Body, true, new Color(0f, 0.9f, 1f));

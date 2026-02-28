@@ -337,7 +337,7 @@ namespace DigitPark.UI
             {
                 symbolText.text = "?";
                 symbolText.color = new Color(0f, 1f, 1f, 0.25f);
-                symbolText.fontSize = FontSizes.DisplayLarge;
+                symbolText.fontSize = FontSizes.H1;
             }
 
             if (cardImage != null)
@@ -370,7 +370,7 @@ namespace DigitPark.UI
             {
                 symbolText.text = cardSymbol;
                 symbolText.color = symbolColor;
-                symbolText.fontSize = FontSizes.CardSymbol;
+                symbolText.fontSize = FontSizes.Symbol;
             }
 
             if (cardImage != null)

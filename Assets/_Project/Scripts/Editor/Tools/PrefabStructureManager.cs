@@ -25,7 +25,7 @@ namespace DigitPark.Editor
             { "Animation", new[] { "TransitionCanvas", "UIAnimationManager", "ParticleEffectSpawner", "RewardClaimAnimator", "Button3D" } },
 
             // Games - Paneles de victoria/derrota
-            { "Games/WinPanels", new[] { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney", "OnlineWinPanel", "OnlineLosePanel" } },
+            { "Games/WinPanels", new[] { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney" } },
 
             // CashBattle - Sistema de dinero real
             { "CashBattle/Wallet", new[] { "TransactionItemUI", "DepositOptionUI" } },
@@ -240,7 +240,7 @@ namespace DigitPark.Editor
             moved += TryMovePrefab("UI/Tournaments/TournamentMyItem.prefab", "Tournaments/Browser/TournamentMyItem.prefab");
 
             // UI/WinPanels -> Games/WinPanels
-            string[] winPanels = { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney", "OnlineWinPanel", "OnlineLosePanel" };
+            string[] winPanels = { "WinPanel_Normal", "LosePanel_Normal", "WinPanel_RealMoney", "LosePanel_RealMoney" };
             foreach (var panel in winPanels)
             {
                 moved += TryMovePrefab($"UI/WinPanels/{panel}.prefab", $"Games/WinPanels/{panel}.prefab");

@@ -196,6 +196,30 @@ namespace DigitPark.Editor
                 "OK");
         }
 
+        /// <summary>
+        /// Builds the UI silently without confirmation dialogs. Used by batch builders.
+        /// </summary>
+        public static void BuildSilent()
+        {
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
+            if (canvas == null)
+            {
+                Debug.LogError("[CashProfileUIBuilder] Canvas not found - cannot build silently");
+                return;
+            }
+
+            Cleanup(canvas.transform);
+            BuildAll(canvas);
+            CreateAnimationManagers();
+
+            ResetAR();
+            RunAssignAll();
+
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+            Debug.Log("[CashProfileUIBuilder] UI built silently (batch mode)");
+        }
+
         // ================================================================
         //  BUILD ALL ELEMENTS
         // ================================================================
@@ -307,8 +331,9 @@ namespace DigitPark.Editor
                 RectTransform brt = btn.GetComponent<RectTransform>();
                 brt.anchorMin = new Vector2(0, 0.5f);
                 brt.anchorMax = new Vector2(0, 0.5f);
-                brt.sizeDelta = new Vector2(65, 65);
-                brt.anchoredPosition = new Vector2(42, 0);
+                brt.pivot = new Vector2(0, 0.5f);
+                brt.sizeDelta = new Vector2(50, 50);
+                brt.anchoredPosition = new Vector2(20, 0);
                 SetupButtonColorBlock(btn);
             }
             else
@@ -319,8 +344,9 @@ namespace DigitPark.Editor
                 RectTransform brt = btn.AddComponent<RectTransform>();
                 brt.anchorMin = new Vector2(0, 0.5f);
                 brt.anchorMax = new Vector2(0, 0.5f);
-                brt.sizeDelta = new Vector2(65, 65);
-                brt.anchoredPosition = new Vector2(42, 0);
+                brt.pivot = new Vector2(0, 0.5f);
+                brt.sizeDelta = new Vector2(50, 50);
+                brt.anchoredPosition = new Vector2(20, 0);
                 btn.AddComponent<Image>().color = new Color(1, 1, 1, 0);
                 btn.AddComponent<Button>();
                 SetupButtonColorBlock(btn);
@@ -330,7 +356,7 @@ namespace DigitPark.Editor
                 RectTransform art = arrow.AddComponent<RectTransform>();
                 art.anchorMin = Vector2.zero; art.anchorMax = Vector2.one; art.sizeDelta = Vector2.zero;
                 TextMeshProUGUI atmp = arrow.AddComponent<TextMeshProUGUI>();
-                atmp.text = "\u2190"; atmp.fontSize = FontSizes.ValueMedium; atmp.color = TEXT_WHITE;
+                atmp.text = "\u2190"; atmp.fontSize = FontSizes.Subtitle; atmp.color = TEXT_WHITE;
                 atmp.alignment = TextAlignmentOptions.Center; atmp.fontStyle = FontStyles.Bold;
             }
 
@@ -338,19 +364,22 @@ namespace DigitPark.Editor
             GameObject title = new GameObject("TitleText");
             title.transform.SetParent(header.transform, false);
             RectTransform trt = title.AddComponent<RectTransform>();
-            trt.anchorMin = new Vector2(0.15f, 0f);
-            trt.anchorMax = new Vector2(0.70f, 1f);
+            trt.anchorMin = new Vector2(0.07f, 0f);
+            trt.anchorMax = new Vector2(0.53f, 1f);
+            trt.pivot = new Vector2(0.5f, 0.5f);
             trt.sizeDelta = Vector2.zero;
+            trt.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI ttmp = title.AddComponent<TextMeshProUGUI>();
             ttmp.text = "My Cash Profile";
-            ttmp.fontSize = FontSizes.SceneTitle;
+            ttmp.fontSize = FontSizes.H4;
             ttmp.color = TEXT_GOLD;
             ttmp.alignment = TextAlignmentOptions.Center;
+            ttmp.raycastTarget = false;
             ttmp.fontStyle = FontStyles.Bold;
             ttmp.enableAutoSizing = true;
-            ttmp.fontSizeMin = FontSizes.ValueMedium;
-            ttmp.fontSizeMax = FontSizes.SceneTitle;
+            ttmp.fontSizeMin = FontSizes.Subtitle;
+            ttmp.fontSizeMax = FontSizes.H4;
             ttmp.outlineWidth = 0.15f;
             ttmp.outlineColor = new Color(0.5f, 0.35f, 0f, 0.5f);
 
@@ -385,10 +414,10 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI tmp = txt.AddComponent<TextMeshProUGUI>();
             tmp.text = "$0.00";
-            tmp.fontSize = FontSizes.ValueLarge; tmp.color = TEXT_GOLD;
+            tmp.fontSize = FontSizes.Subtitle; tmp.color = TEXT_GOLD;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
-            tmp.enableAutoSizing = true; tmp.fontSizeMin = FontSizes.AutoMinBody; tmp.fontSizeMax = FontSizes.ValueLarge;
+            tmp.enableAutoSizing = true; tmp.fontSizeMin = FontSizes.AutoMinBody; tmp.fontSizeMax = FontSizes.Subtitle;
         }
 
         // ================================================================
@@ -565,11 +594,11 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI unTmp = uname.AddComponent<TextMeshProUGUI>();
             unTmp.text = "@Player";
-            unTmp.fontSize = FontSizes.DisplayMedium; unTmp.color = TEXT_WHITE;
+            unTmp.fontSize = FontSizes.H3; unTmp.color = TEXT_WHITE;
             unTmp.alignment = TextAlignmentOptions.Center;
             unTmp.fontStyle = FontStyles.Bold;
             unTmp.enableAutoSizing = true;
-            unTmp.fontSizeMin = FontSizes.Button; unTmp.fontSizeMax = FontSizes.DisplayMedium;
+            unTmp.fontSizeMin = FontSizes.Body; unTmp.fontSizeMax = FontSizes.H3;
 
             // === Edit Name Button (pencil icon next to username) ===
             GameObject editNameBtn = new GameObject("EditNameButton");
@@ -666,7 +695,7 @@ namespace DigitPark.Editor
             titLE.flexibleWidth = 0; titLE.preferredWidth = 450;
             TextMeshProUGUI titTmp = titObj.AddComponent<TextMeshProUGUI>();
             titTmp.text = "OVERALL RECORD";
-            titTmp.fontSize = FontSizes.ValueLarge; titTmp.color = TEXT_GOLD;
+            titTmp.fontSize = FontSizes.Subtitle; titTmp.color = TEXT_GOLD;
             titTmp.alignment = TextAlignmentOptions.Center;
             titTmp.fontStyle = FontStyles.Bold;
             titTmp.characterSpacing = 6;
@@ -686,11 +715,11 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI recTmp = recObj.AddComponent<TextMeshProUGUI>();
             recTmp.text = "0W  \u00b7  0L  \u00b7  0D";
-            recTmp.fontSize = FontSizes.DisplayLarge; recTmp.color = TEXT_WHITE;
+            recTmp.fontSize = FontSizes.H1; recTmp.color = TEXT_WHITE;
             recTmp.alignment = TextAlignmentOptions.Center;
             recTmp.fontStyle = FontStyles.Bold;
             recTmp.enableAutoSizing = true;
-            recTmp.fontSizeMin = FontSizes.SectionHeader; recTmp.fontSizeMax = FontSizes.DisplayLarge;
+            recTmp.fontSizeMin = FontSizes.H4; recTmp.fontSizeMax = FontSizes.H1;
 
             // Win rate bar background
             GameObject barBG = new GameObject("WinRateBarBG");
@@ -723,7 +752,7 @@ namespace DigitPark.Editor
             rateRT.offsetMin = new Vector2(15, 0); rateRT.offsetMax = new Vector2(-15, 0);
             TextMeshProUGUI rateTmp = rateObj.AddComponent<TextMeshProUGUI>();
             rateTmp.text = "0% Win Rate";
-            rateTmp.fontSize = FontSizes.Button; rateTmp.color = GOLD_LIGHT;
+            rateTmp.fontSize = FontSizes.Body; rateTmp.color = GOLD_LIGHT;
             rateTmp.alignment = TextAlignmentOptions.Center;
             rateTmp.fontStyle = FontStyles.Bold;
         }
@@ -785,11 +814,11 @@ namespace DigitPark.Editor
             vRT.offsetMin = new Vector2(8, 0); vRT.offsetMax = new Vector2(-8, -6);
             TextMeshProUGUI vTmp = vObj.AddComponent<TextMeshProUGUI>();
             vTmp.text = value;
-            vTmp.fontSize = FontSizes.DisplayMedium; vTmp.color = accent;
+            vTmp.fontSize = FontSizes.H3; vTmp.color = accent;
             vTmp.alignment = TextAlignmentOptions.Center;
             vTmp.fontStyle = FontStyles.Bold;
             vTmp.enableAutoSizing = true;
-            vTmp.fontSizeMin = FontSizes.BodyLarge; vTmp.fontSizeMax = FontSizes.DisplayMedium;
+            vTmp.fontSizeMin = FontSizes.Body; vTmp.fontSizeMax = FontSizes.H3;
 
             // Label (bottom 35%)
             GameObject lObj = new GameObject("Label");
@@ -799,11 +828,11 @@ namespace DigitPark.Editor
             lRT.offsetMin = new Vector2(4, 4); lRT.offsetMax = new Vector2(-4, 0);
             TextMeshProUGUI lTmp = lObj.AddComponent<TextMeshProUGUI>();
             lTmp.text = label;
-            lTmp.fontSize = FontSizes.LabelLarge; lTmp.color = TEXT_MUTED;
+            lTmp.fontSize = FontSizes.BodyLarge; lTmp.color = TEXT_MUTED;
             lTmp.alignment = TextAlignmentOptions.Center;
             lTmp.fontStyle = FontStyles.Bold;
             lTmp.enableAutoSizing = true;
-            lTmp.fontSizeMin = FontSizes.AutoMinCompact; lTmp.fontSizeMax = FontSizes.LabelLarge;
+            lTmp.fontSizeMin = FontSizes.AutoMinBody; lTmp.fontSizeMax = FontSizes.BodyLarge;
         }
 
         // ================================================================
@@ -835,7 +864,7 @@ namespace DigitPark.Editor
             tle.flexibleWidth = 0; tle.preferredWidth = 500;
             TextMeshProUGUI tmp = txt.AddComponent<TextMeshProUGUI>();
             tmp.text = title;
-            tmp.fontSize = FontSizes.ValueLarge; tmp.color = TEXT_GOLD;
+            tmp.fontSize = FontSizes.Subtitle; tmp.color = TEXT_GOLD;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
             tmp.characterSpacing = 6;
@@ -926,11 +955,11 @@ namespace DigitPark.Editor
             nameRT.offsetMax = new Vector2(0, -6);
             TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nameTmp.text = gameName;
-            nameTmp.fontSize = FontSizes.BodyLarge; nameTmp.color = TEXT_WHITE;
+            nameTmp.fontSize = FontSizes.Body; nameTmp.color = TEXT_WHITE;
             nameTmp.alignment = TextAlignmentOptions.Left;
             nameTmp.fontStyle = FontStyles.Bold;
             nameTmp.enableAutoSizing = true;
-            nameTmp.fontSizeMin = FontSizes.AutoMinBody; nameTmp.fontSizeMax = FontSizes.BodyLarge;
+            nameTmp.fontSizeMin = FontSizes.AutoMinBody; nameTmp.fontSizeMax = FontSizes.Body;
 
             // Progress bar background
             GameObject barBG = new GameObject("BarBG");
@@ -964,11 +993,11 @@ namespace DigitPark.Editor
             valRT.offsetMax = new Vector2(-4, -6);
             TextMeshProUGUI valTmp = valObj.AddComponent<TextMeshProUGUI>();
             valTmp.text = "-- | 0%";
-            valTmp.fontSize = FontSizes.BodyLarge; valTmp.color = accent;
+            valTmp.fontSize = FontSizes.Body; valTmp.color = accent;
             valTmp.alignment = TextAlignmentOptions.Right;
             valTmp.fontStyle = FontStyles.Bold;
             valTmp.enableAutoSizing = true;
-            valTmp.fontSizeMin = FontSizes.AutoMinBody; valTmp.fontSizeMax = FontSizes.BodyLarge;
+            valTmp.fontSizeMin = FontSizes.AutoMinBody; valTmp.fontSizeMax = FontSizes.Body;
 
             // Bottom separator line
             if (index < 4) // no separator on last row
@@ -1230,7 +1259,7 @@ namespace DigitPark.Editor
             tRT.offsetMin = new Vector2(20, 0); tRT.offsetMax = new Vector2(-20, -10);
             var titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
             titleTxt.text = "Change Name";
-            titleTxt.fontSize = FontSizes.SceneTitle; titleTxt.fontStyle = FontStyles.Bold;
+            titleTxt.fontSize = FontSizes.H4; titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = GOLD_PRIMARY; titleTxt.alignment = TextAlignmentOptions.Center;
 
             // Input Field

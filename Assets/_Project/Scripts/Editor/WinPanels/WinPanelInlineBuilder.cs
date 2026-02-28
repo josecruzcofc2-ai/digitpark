@@ -409,7 +409,7 @@ namespace DigitPark.Editor
 
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            AddText(textObj, text, Mathf.Min(height * 0.35f, FontSizes.Button), new Color(0.02f, 0.05f, 0.1f), FontStyles.Bold);
+            AddText(textObj, text, Mathf.Min(height * 0.35f, FontSizes.Body), new Color(0.02f, 0.05f, 0.1f), FontStyles.Bold);
 
             Button button = btn.AddComponent<Button>();
             button.targetGraphic = faceImg;

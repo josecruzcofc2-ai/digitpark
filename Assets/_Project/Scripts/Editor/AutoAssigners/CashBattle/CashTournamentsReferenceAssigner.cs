@@ -191,7 +191,8 @@ namespace DigitPark.Editor.AutoAssigners
             if (containerT == null) containerT = FindDeep(root, "Content");
             AssignReference(so, "tournamentsContainer", containerT);
 
-            // Note: tournamentCardPrefab skipped - prefab requires manual assignment
+            var tournamentPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/CashBattle/Tournaments/TournamentCardUI.prefab");
+            AssignReference(so, "tournamentCardPrefab", tournamentPrefab);
 
             TextMeshProUGUI noTournamentsT = FindTextByDeep(root, "NoTournamentsText");
             if (noTournamentsT == null) noTournamentsT = FindTextByDeep(root, "EmptyStateText");

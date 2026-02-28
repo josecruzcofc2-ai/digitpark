@@ -25,9 +25,10 @@ namespace DigitPark.Editor.AutoAssigners
         private static readonly string[] REQUIRED_REFS = {
             // Header
             "titleText", "backButton",
-            // Games Grid
-            "gamesContainer",
-            // Note: gameCardPrefab excluded - prefab requires manual assignment
+            // Game Selection (dropdown + details)
+            "gameDropdown", "viewDetailsButton", "selectedGameIcon", "selectedGameDescription",
+            // Game Selection Modal
+            "gameSelectionModal", "gameCardsContainer", "confirmGameButton", "closeModalButton",
             // Entry Fee
             "selectedFeeText",
             // Note: entryFeeContainer, entryFeeButtons[] excluded - container/array manual assignment
@@ -79,7 +80,8 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to CashBattle1v1Manager:\n" +
                 "- Header (title, back button)\n" +
-                "- Games container/grid\n" +
+                "- Game selection dropdown + details\n" +
+                "- Game selection modal (overlay with cards)\n" +
                 "- Entry fee selection and custom input\n" +
                 "- Online players indicator\n" +
                 "- Find opponent button",
@@ -169,8 +171,17 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "titleText", FindTextByName("titletext"));
             AssignReference(so, "backButton", FindButtonByName("backbutton"));
 
-            // Games Grid (UIBuilder: "GamesContainer")
-            AssignReference(so, "gamesContainer", FindByNameContains<Transform>("gamescontainer"));
+            // Game Selection - Dropdown + Details
+            AssignReference(so, "gameDropdown", FindByNameContains<TMP_Dropdown>("gamedropdown"));
+            AssignReference(so, "viewDetailsButton", FindButtonByName("viewdetails"));
+            AssignReference(so, "selectedGameIcon", FindImageByName("selectedgameicon"));
+            AssignReference(so, "selectedGameDescription", FindTextByName("selectedgamedesc"));
+
+            // Game Selection Modal
+            AssignGameObject(so, "gameSelectionModal", "GameSelectionModal");
+            AssignReference(so, "gameCardsContainer", FindByNameContains<Transform>("gamecardscontainer"));
+            AssignReference(so, "confirmGameButton", FindButtonByName("confirmgame"));
+            AssignReference(so, "closeModalButton", FindButtonByName("closemodal"));
 
             // Entry Fee (UIBuilder: "SelectedFeeText")
             AssignReference(so, "selectedFeeText", FindTextByName("selectedfeetext"));

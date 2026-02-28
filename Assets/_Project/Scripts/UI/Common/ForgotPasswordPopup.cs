@@ -89,7 +89,7 @@ namespace DigitPark.UI.Common
                 popupPanel.transform,
                 "Title",
                 AutoLocalizer.Get("forgot_password_title"),
-                (int)FontSizes.Button,
+                (int)FontSizes.Body,
                 UIFactory.ElectricBlue,
                 TextAlignmentOptions.Center
             );

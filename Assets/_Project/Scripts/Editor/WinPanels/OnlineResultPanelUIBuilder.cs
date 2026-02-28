@@ -23,7 +23,7 @@ namespace DigitPark.Editor
         private static readonly Color CARD_BG = new Color(0.05f, 0.08f, 0.12f);
         private static readonly Color PANEL_BG = new Color(0.08f, 0.12f, 0.18f);
 
-        private const string PREFAB_PATH = "Assets/_Project/Prefabs/Games/WinPanels";
+        private const string PREFAB_PATH = "Assets/_Project/Resources/Prefabs/WinPanels";
 
         [MenuItem("DigitPark/Prefabs/Games/Online Win Panel", false, 197)]
         public static void BuildWinPanel()
@@ -117,9 +117,10 @@ namespace DigitPark.Editor
             EditorGUIUtility.PingObject(prefab);
 
             Debug.Log($"[OnlineResultPanelUIBuilder] Prefab creado: {prefabPath}");
-            EditorUtility.DisplayDialog("Prefab Creado",
-                $"{panelName} prefab guardado en:\n{prefabPath}\n\nAsignalo al OnlineResultManager.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Prefab Creado",
+                    $"{panelName} prefab guardado en:\n{prefabPath}\n\nAsignalo al OnlineResultManager.",
+                    "OK");
         }
 
         private static GameObject CreateElement(Transform parent, string name)
@@ -162,13 +163,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleTMP = resultTitle.AddComponent<TextMeshProUGUI>();
             titleTMP.text = resultText;
-            titleTMP.fontSize = FontSizes.DisplayLarge;
+            titleTMP.fontSize = FontSizes.H1;
             titleTMP.color = mainColor;
             titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.enableAutoSizing = true;
             titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            titleTMP.fontSizeMax = FontSizes.DisplayLarge;
+            titleTMP.fontSizeMax = FontSizes.H1;
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Efecto glow
@@ -190,7 +191,7 @@ namespace DigitPark.Editor
             subtitleTMP.color = new Color(0.8f, 0.8f, 0.8f);
             subtitleTMP.alignment = TextAlignmentOptions.Center;
             subtitleTMP.enableAutoSizing = true;
-            subtitleTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            subtitleTMP.fontSizeMin = FontSizes.AutoMinBody;
             subtitleTMP.fontSizeMax = FontSizes.Body;
             subtitleTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
@@ -230,7 +231,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI vsTMP = vsText.AddComponent<TextMeshProUGUI>();
             vsTMP.text = "VS";
-            vsTMP.fontSize = FontSizes.ValueMedium;
+            vsTMP.fontSize = FontSizes.Subtitle;
             vsTMP.color = ORANGE_NEON;
             vsTMP.alignment = TextAlignmentOptions.Center;
             vsTMP.fontStyle = FontStyles.Bold;
@@ -293,7 +294,7 @@ namespace DigitPark.Editor
             nameTMP.alignment = TextAlignmentOptions.Center;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.enableAutoSizing = true;
-            nameTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            nameTMP.fontSizeMin = FontSizes.AutoMinBody;
             nameTMP.fontSizeMax = FontSizes.Body;
             nameTMP.overflowMode = TextOverflowModes.Ellipsis;
 
@@ -307,13 +308,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timeTMP = timeObj.AddComponent<TextMeshProUGUI>();
             timeTMP.text = "12.45s";
-            timeTMP.fontSize = FontSizes.SectionHeader;
+            timeTMP.fontSize = FontSizes.H4;
             timeTMP.color = Color.white;
             timeTMP.alignment = TextAlignmentOptions.Center;
             timeTMP.fontStyle = FontStyles.Bold;
             timeTMP.enableAutoSizing = true;
             timeTMP.fontSizeMin = FontSizes.AutoMinBody;
-            timeTMP.fontSizeMax = FontSizes.SectionHeader;
+            timeTMP.fontSizeMax = FontSizes.H4;
             timeTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Errores
@@ -330,7 +331,7 @@ namespace DigitPark.Editor
             errorsTMP.color = new Color(0.6f, 0.6f, 0.6f);
             errorsTMP.alignment = TextAlignmentOptions.Center;
             errorsTMP.enableAutoSizing = true;
-            errorsTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            errorsTMP.fontSizeMin = FontSizes.AutoMinBody;
             errorsTMP.fontSizeMax = FontSizes.Body;
             errorsTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
@@ -377,7 +378,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI diffTMP = diffValue.AddComponent<TextMeshProUGUI>();
             diffTMP.text = isWin ? "-2.35s" : "+2.35s";
-            diffTMP.fontSize = FontSizes.ValueMedium;
+            diffTMP.fontSize = FontSizes.Subtitle;
             diffTMP.color = mainColor;
             diffTMP.alignment = TextAlignmentOptions.Center;
             diffTMP.fontStyle = FontStyles.Bold;
@@ -419,13 +420,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI continueTMP = continueText.AddComponent<TextMeshProUGUI>();
             continueTMP.text = "CONTINUE";
-            continueTMP.fontSize = FontSizes.BodyLarge;
+            continueTMP.fontSize = FontSizes.Body;
             continueTMP.color = mainColor;
             continueTMP.alignment = TextAlignmentOptions.Center;
             continueTMP.fontStyle = FontStyles.Bold;
             continueTMP.enableAutoSizing = true;
             continueTMP.fontSizeMin = FontSizes.AutoMinBody;
-            continueTMP.fontSizeMax = FontSizes.BodyLarge;
+            continueTMP.fontSizeMax = FontSizes.Body;
             continueTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Rematch button (secundario)
@@ -454,13 +455,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rematchTMP = rematchText.AddComponent<TextMeshProUGUI>();
             rematchTMP.text = "REMATCH";
-            rematchTMP.fontSize = FontSizes.BodyLarge;
+            rematchTMP.fontSize = FontSizes.Body;
             rematchTMP.color = CYAN_NEON;
             rematchTMP.alignment = TextAlignmentOptions.Center;
             rematchTMP.fontStyle = FontStyles.Bold;
             rematchTMP.enableAutoSizing = true;
             rematchTMP.fontSizeMin = FontSizes.AutoMinBody;
-            rematchTMP.fontSizeMax = FontSizes.BodyLarge;
+            rematchTMP.fontSizeMax = FontSizes.Body;
             rematchTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
     }

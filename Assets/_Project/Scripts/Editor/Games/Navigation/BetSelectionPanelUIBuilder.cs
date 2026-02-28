@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -153,10 +154,10 @@ namespace DigitPark.Editor
                 RectTransform brt = backBtn.GetComponent<RectTransform>();
                 if (brt != null)
                 {
-                    brt.anchorMin = new Vector2(0, 1);
-                    brt.anchorMax = new Vector2(0, 1);
-                    brt.pivot = new Vector2(0, 1);
-                    brt.anchoredPosition = new Vector2(20, -20);
+                    brt.anchorMin = new Vector2(0, 0.5f);
+                    brt.anchorMax = new Vector2(0, 0.5f);
+                    brt.pivot = new Vector2(0, 0.5f);
+                    brt.anchoredPosition = new Vector2(20, 0);
                     brt.sizeDelta = new Vector2(50, 50);
                 }
             }
@@ -266,7 +267,7 @@ namespace DigitPark.Editor
             AddOutline(header, CYAN_DARK, 1);
 
             var vlg = header.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(80, 20, 10, 5);
+            vlg.padding = new RectOffset(20, 20, 10, 5);
             vlg.spacing = 2;
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childForceExpandWidth = true;
@@ -274,10 +275,12 @@ namespace DigitPark.Editor
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
 
-            CreateText("TitleText", header.transform, "CHOOSE YOUR BET",
-                (int)FontSizes.SceneTitle, NEON_CYAN, FontStyles.Bold, 80f);
+            var titleTMP = CreateText("TitleText", header.transform, "CHOOSE YOUR BET",
+                (int)FontSizes.H4, NEON_CYAN, FontStyles.Bold, 80f);
+            titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTMP.raycastTarget = false;
             CreateText("GameNameText", header.transform, "",
-                (int)FontSizes.Button, GOLD, FontStyles.Italic, 42f);
+                (int)FontSizes.Body, GOLD, FontStyles.Italic, 42f);
         }
 
         // ==================== CURRENCY BAR (prominent) ====================
@@ -293,65 +296,13 @@ namespace DigitPark.Editor
             bar.AddComponent<Image>().color = CURRENCY_BG;
             AddOutline(bar, CYAN_DARK, 1);
 
-            var hlg = bar.AddComponent<HorizontalLayoutGroup>();
-            hlg.padding = new RectOffset(10, 10, 4, 4);
-            hlg.spacing = 8;
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childForceExpandWidth = true;
-            hlg.childForceExpandHeight = true;
-            hlg.childControlWidth = true;
-            hlg.childControlHeight = true;
-
-            // DigitGems column
-            CreateCurrencyColumn("GemsColumn", bar.transform,
-                "DIGITGEMS", "GemsLabel", "GemsValueText", GEM_COLOR);
-
-            // Divider line
-            GameObject divLine = CreateUI("Divider", bar.transform);
-            var divLE = divLine.AddComponent<LayoutElement>();
-            divLE.preferredWidth = 2;
-            divLine.AddComponent<Image>().color = new Color(0.2f, 0.3f, 0.5f, 0.5f);
-
-            // DigitCoins column
-            CreateCurrencyColumn("CoinsColumn", bar.transform,
-                "DIGITCOINS", "CoinsLabel", "CoinsValueText", COIN_COLOR);
-        }
-
-        private static void CreateCurrencyColumn(string name, Transform parent,
-            string label, string labelName, string valueName, Color color)
-        {
-            GameObject col = CreateUI(name, parent);
-            var vlg = col.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 0;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-
-            // Label
-            GameObject labelGO = CreateUI(labelName, col.transform);
-            var labelLE = labelGO.AddComponent<LayoutElement>();
-            labelLE.preferredHeight = 34;
-            TextMeshProUGUI labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
-            labelTMP.text = label;
-            labelTMP.fontSize = FontSizes.Body;
-            labelTMP.color = color;
-            labelTMP.fontStyle = FontStyles.Bold;
-            labelTMP.alignment = TextAlignmentOptions.Center;
-
-
-            // Value
-            GameObject valueGO = CreateUI(valueName, col.transform);
-            var valueLE = valueGO.AddComponent<LayoutElement>();
-            valueLE.preferredHeight = 48;
-            TextMeshProUGUI valueTMP = valueGO.AddComponent<TextMeshProUGUI>();
-            valueTMP.text = "0";
-            valueTMP.fontSize = FontSizes.ValueMedium;
-            valueTMP.color = TEXT_PRIMARY;
-            valueTMP.fontStyle = FontStyles.Bold;
-            valueTMP.alignment = TextAlignmentOptions.Center;
-
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(bar.transform);
+            var pRT = pills.GetComponent<RectTransform>();
+            pRT.anchorMin = Vector2.zero;
+            pRT.anchorMax = Vector2.one;
+            pRT.offsetMin = Vector2.zero;
+            pRT.offsetMax = Vector2.zero;
+            pills.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
         }
 
         // ==================== SCROLL AREA ====================
@@ -467,7 +418,7 @@ namespace DigitPark.Editor
             costLE.flexibleWidth = 1;
             TextMeshProUGUI costTMP = costGO.AddComponent<TextMeshProUGUI>();
             costTMP.text = costText;
-            costTMP.fontSize = FontSizes.LabelLarge;
+            costTMP.fontSize = FontSizes.BodyLarge;
             costTMP.color = accentColor;
             costTMP.fontStyle = FontStyles.Bold;
             costTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -681,7 +632,7 @@ namespace DigitPark.Editor
             SetFullStretch(phRT);
             TextMeshProUGUI phTMP = phGO.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Amount...";
-            phTMP.fontSize = FontSizes.Button;
+            phTMP.fontSize = FontSizes.Body;
             phTMP.color = TEXT_DIM;
             phTMP.alignment = TextAlignmentOptions.Center;
 
@@ -692,7 +643,7 @@ namespace DigitPark.Editor
             SetFullStretch(txtRT);
             TextMeshProUGUI txtTMP = txtGO.AddComponent<TextMeshProUGUI>();
             txtTMP.text = "10";
-            txtTMP.fontSize = FontSizes.Button;
+            txtTMP.fontSize = FontSizes.Body;
             txtTMP.color = TEXT_PRIMARY;
             txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.alignment = TextAlignmentOptions.Center;
@@ -739,7 +690,7 @@ namespace DigitPark.Editor
             tLE.preferredHeight = 46;
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.LabelLarge;
+            tmp.fontSize = FontSizes.BodyLarge;
             tmp.color = color;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -795,7 +746,7 @@ namespace DigitPark.Editor
             SetFullStretch(textGO.GetComponent<RectTransform>());
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = FontSizes.Button;
+            tmp.fontSize = FontSizes.Body;
             tmp.color = Color.white;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

@@ -158,20 +158,23 @@ namespace DigitPark.Editor
             backRT.anchorMin = new Vector2(0, 0.5f);
             backRT.anchorMax = new Vector2(0, 0.5f);
             backRT.pivot = new Vector2(0, 0.5f);
-            backRT.anchoredPosition = new Vector2(15, 0);
+            backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
 
             GameObject title = CreateOrFind(header.transform, "TitleText");
-            SetupRectTransform(title,
-                new Vector2(0.12f, 0), new Vector2(0.95f, 1),
+            var titleRt = SetupRectTransform(title,
+                new Vector2(0.07f, 0f), new Vector2(0.53f, 1f),
                 Vector2.zero, Vector2.zero);
-            SetupText(title, "SEARCH PLAYERS", (int)FontSizes.SceneTitle, CYAN_NEON, FontStyles.Bold);
+            titleRt.pivot = new Vector2(0.5f, 0.5f);
+            titleRt.sizeDelta = Vector2.zero;
+            SetupText(title, "SEARCH PLAYERS", (int)FontSizes.H4, CYAN_NEON, FontStyles.Bold);
             var titleTmp = title.GetComponent<TextMeshProUGUI>();
+            if (titleTmp != null) titleTmp.raycastTarget = false;
             if (titleTmp != null)
             {
                 titleTmp.enableAutoSizing = true;
                 titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
-                titleTmp.fontSizeMax = FontSizes.SceneTitle;
+                titleTmp.fontSizeMax = FontSizes.H4;
                 titleTmp.overflowMode = TextOverflowModes.Ellipsis;
             }
 
@@ -234,7 +237,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI placeholderTmp = placeholder.GetComponent<TextMeshProUGUI>();
             if (placeholderTmp == null) placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
             placeholderTmp.text = "Search by username...";
-            placeholderTmp.fontSize = FontSizes.LabelLarge;
+            placeholderTmp.fontSize = FontSizes.BodyLarge;
             placeholderTmp.color = PLACEHOLDER_COLOR;
             placeholderTmp.fontStyle = FontStyles.Bold;
             placeholderTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -245,7 +248,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTmp = inputText.GetComponent<TextMeshProUGUI>();
             if (inputTmp == null) inputTmp = inputText.AddComponent<TextMeshProUGUI>();
             inputTmp.text = "";
-            inputTmp.fontSize = FontSizes.LabelLarge;
+            inputTmp.fontSize = FontSizes.BodyLarge;
             inputTmp.color = Color.white;
             inputTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -254,7 +257,7 @@ namespace DigitPark.Editor
             tmpInput.textComponent = inputTmp;
             tmpInput.placeholder = placeholderTmp;
             tmpInput.fontAsset = inputTmp.font;
-            tmpInput.pointSize = FontSizes.LabelLarge;
+            tmpInput.pointSize = FontSizes.BodyLarge;
 
             // Clear Button - Botón estilo neón con texto "Clear"
             GameObject clearButton = CreateOrFind(searchBar.transform, "ClearButton");
@@ -286,7 +289,7 @@ namespace DigitPark.Editor
             // Texto "Clear"
             GameObject clearText = CreateOrFind(clearButton.transform, "Text");
             SetupRectTransform(clearText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(clearText, "Clear", (int)FontSizes.BodyLarge, DARK_BG, FontStyles.Bold);
+            SetupText(clearText, "Clear", (int)FontSizes.Body, DARK_BG, FontStyles.Bold);
 
             // SearchButton oculto (mantener referencia para el Manager pero no visible)
             // La búsqueda es en tiempo real, no necesita botón
@@ -430,14 +433,14 @@ namespace DigitPark.Editor
             SetupRectTransform(emptyTitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 20), new Vector2(700, 100));
-            SetupText(emptyTitle, "Search players", (int)FontSizes.AuthTitle, Color.white, FontStyles.Bold);
+            SetupText(emptyTitle, "Search players", (int)FontSizes.H2, Color.white, FontStyles.Bold);
 
             // Empty Description - Texto más visible
             GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -40), new Vector2(760, 160));
-            SetupText(emptyDesc, "Find players to\nadd as friends or challenge", (int)FontSizes.LabelLarge, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
+            SetupText(emptyDesc, "Find players to\nadd as friends or challenge", (int)FontSizes.BodyLarge, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
 
             // No Results Text (se mostrará cuando no haya resultados)
             GameObject noResultsText = CreateOrFind(resultsPanel.transform, "NoResultsText");
@@ -475,18 +478,18 @@ namespace DigitPark.Editor
 
             // LayoutElement con altura fija
             LayoutElement cardLayout = card.AddComponent<LayoutElement>();
-            cardLayout.minHeight = 150;
-            cardLayout.preferredHeight = 150;
+            cardLayout.minHeight = 120;
+            cardLayout.preferredHeight = 120;
             cardLayout.flexibleWidth = 1;
 
             // Card Background - Color VISIBLE que contrasta con el fondo
             Image cardBg = card.AddComponent<Image>();
-            cardBg.color = new Color(0.08f, 0.15f, 0.22f, 1f); // Azul oscuro visible
+            cardBg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
 
-            // Card Outline - Borde neón cyan brillante
+            // Card Outline - Unified cyan dark
             Outline cardOutline = card.AddComponent<Outline>();
-            cardOutline.effectColor = CYAN_NEON;
-            cardOutline.effectDistance = new Vector2(3f, 3f);
+            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.35f);
+            cardOutline.effectDistance = new Vector2(1.5f, 1.5f);
             var cardShadow = card.AddComponent<Shadow>();
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);

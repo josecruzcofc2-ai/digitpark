@@ -26,8 +26,8 @@ namespace DigitPark.Editor.AutoAssigners
         private const string GOOGLE_ICON = "Google/google_logo_official.png";
         private const string GOOGLE_DARK = "Google/google_icon_dark.png";
         private const string APPLE_ICON = "Apple/apple_logo_black.png";
-        private const string EYE_OPEN = "Common/icons8-eye-96.png";
-        private const string EYE_CLOSED = "Common/icons8-closed-eye-96.png";
+        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeOpen.png";
+        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeClosed.png";
 
         private struct AssignmentResult
         {
@@ -108,8 +108,8 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.BeginHorizontal();
             DrawIconBox("Google", $"{ICONS_BASE}/{GOOGLE_ICON}");
             DrawIconBox("Apple", $"{ICONS_BASE}/{APPLE_ICON}");
-            DrawIconBox("Eye Open", $"{ICONS_BASE}/{EYE_OPEN}");
-            DrawIconBox("Eye Closed", $"{ICONS_BASE}/{EYE_CLOSED}");
+            DrawIconBox("Eye Open", EYE_OPEN_PATH);
+            DrawIconBox("Eye Closed", EYE_CLOSED_PATH);
             EditorGUILayout.EndHorizontal();
         }
 
@@ -332,7 +332,7 @@ namespace DigitPark.Editor.AutoAssigners
 
                 if (isToggle)
                 {
-                    Sprite eyeSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{ICONS_BASE}/{EYE_OPEN}");
+                    Sprite eyeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(EYE_OPEN_PATH);
                     if (eyeSprite != null)
                     {
                         image.sprite = eyeSprite;
@@ -358,7 +358,7 @@ namespace DigitPark.Editor.AutoAssigners
 
                     if (eyeOpenProp != null)
                     {
-                        Sprite openSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{ICONS_BASE}/{EYE_OPEN}");
+                        Sprite openSprite = AssetDatabase.LoadAssetAtPath<Sprite>(EYE_OPEN_PATH);
                         if (openSprite != null)
                         {
                             eyeOpenProp.objectReferenceValue = openSprite;
@@ -370,7 +370,7 @@ namespace DigitPark.Editor.AutoAssigners
 
                     if (eyeClosedProp != null)
                     {
-                        Sprite closedSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{ICONS_BASE}/{EYE_CLOSED}");
+                        Sprite closedSprite = AssetDatabase.LoadAssetAtPath<Sprite>(EYE_CLOSED_PATH);
                         if (closedSprite != null)
                         {
                             eyeClosedProp.objectReferenceValue = closedSprite;

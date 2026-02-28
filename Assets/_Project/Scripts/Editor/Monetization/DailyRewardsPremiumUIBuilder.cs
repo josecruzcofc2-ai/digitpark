@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -250,84 +251,38 @@ namespace DigitPark.Editor
             bbRT.anchorMin = new Vector2(0, 0.5f);
             bbRT.anchorMax = new Vector2(0, 0.5f);
             bbRT.pivot = new Vector2(0, 0.5f);
-            bbRT.anchoredPosition = new Vector2(SIDE_PAD, 0);
+            bbRT.anchoredPosition = new Vector2(20, 0);
             bbRT.sizeDelta = new Vector2(50, 50);
 
             // --- TitleText (center) ---
             var title = FindOrCreate(topBar.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.08f, 0);
-            tRT.anchorMax = new Vector2(0.72f, 1);
-            tRT.offsetMin = Vector2.zero;
-            tRT.offsetMax = Vector2.zero;
+            tRT.anchorMin = new Vector2(0.07f, 0f);
+            tRT.anchorMax = new Vector2(0.53f, 1f);
+            tRT.pivot = new Vector2(0.5f, 0.5f);
+            tRT.sizeDelta = Vector2.zero;
+            tRT.anchoredPosition = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "DAILY REWARDS";
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.color = CYAN_NEON;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.raycastTarget = false;
 
             // --- Currency pills (right) ---
-            var currencyRow = FindOrCreate(topBar.transform, "CurrencyRow");
-            var crRT = GetOrAdd<RectTransform>(currencyRow);
+            var currencyRow = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform, "CurrencyRow");
+            var crRT = currencyRow.GetComponent<RectTransform>();
             crRT.anchorMin = new Vector2(1, 0.5f);
             crRT.anchorMax = new Vector2(1, 0.5f);
             crRT.pivot = new Vector2(1, 0.5f);
             crRT.anchoredPosition = new Vector2(-SIDE_PAD, 0);
-            crRT.sizeDelta = new Vector2(200, 30);
-
-            var crHLG = GetOrAdd<HorizontalLayoutGroup>(currencyRow);
-            crHLG.spacing = 10;
-            crHLG.childAlignment = TextAnchor.MiddleRight;
-            crHLG.childControlWidth = false;
-            crHLG.childControlHeight = true;
-
-            // GemPill
-            CreateCurrencyPill(currencyRow.transform, "GemPill", "1.2K", GEM_COLOR,
-                CURRENCY_ICONS + "icon_digitgem_single.png");
-
-            // CoinPill
-            CreateCurrencyPill(currencyRow.transform, "CoinPill", "5.4K", COIN_COLOR,
-                CURRENCY_ICONS + "icon_digitcoin_single.png");
+            crRT.sizeDelta = new Vector2(310, 50);
 
             Debug.Log("[DailyRewardsUI] TopBar creado (BackButton + Title + CurrencyPills)");
-        }
-
-        private static void CreateCurrencyPill(Transform parent, string name, string amount, Color color, string iconPath)
-        {
-            var pill = FindOrCreate(parent, name);
-            var hlg = GetOrAdd<HorizontalLayoutGroup>(pill);
-            hlg.spacing = 4;
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-
-            var pillLE = GetOrAdd<LayoutElement>(pill);
-            pillLE.minWidth = 80;
-
-            var icon = FindOrCreate(pill.transform, "Icon");
-            var iconImg = GetOrAdd<Image>(icon);
-            iconImg.preserveAspect = true;
-            iconImg.color = Color.white;
-            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
-            if (sprite != null) iconImg.sprite = sprite;
-            else iconImg.color = color;
-            var iconLE = GetOrAdd<LayoutElement>(icon);
-            iconLE.minWidth = 22;
-            iconLE.minHeight = 22;
-
-            var text = FindOrCreate(pill.transform, "Text");
-            var tmp = GetOrAdd<TextMeshProUGUI>(text);
-            tmp.text = amount;
-            tmp.fontSize = FontSizes.Button;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.color = color;
-            tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            var textLE = GetOrAdd<LayoutElement>(text);
-            textLE.minWidth = 40;
         }
 
         #endregion
@@ -389,14 +344,14 @@ namespace DigitPark.Editor
                 // Fallback: text emoji instead of colored rectangle
                 var fireTMP = GetOrAdd<TextMeshProUGUI>(fireIcon);
                 fireTMP.text = "\U0001F525";
-                fireTMP.fontSize = FontSizes.Button;
+                fireTMP.fontSize = FontSizes.Body;
                 fireTMP.alignment = TextAlignmentOptions.Center;
             }
 
             var streakLabel = FindOrCreate(topRow.transform, "StreakLabel");
             var slTMP = GetOrAdd<TextMeshProUGUI>(streakLabel);
             slTMP.text = "STREAK:";
-            slTMP.fontSize = FontSizes.Button;
+            slTMP.fontSize = FontSizes.Body;
             slTMP.fontStyle = FontStyles.Bold;
             slTMP.color = TEXT_WHITE;
             slTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -406,7 +361,7 @@ namespace DigitPark.Editor
             var streakCount = FindOrCreate(topRow.transform, "StreakCount");
             var scTMP = GetOrAdd<TextMeshProUGUI>(streakCount);
             scTMP.text = "5 DAYS";
-            scTMP.fontSize = FontSizes.ValueMedium;
+            scTMP.fontSize = FontSizes.Subtitle;
             scTMP.fontStyle = FontStyles.Bold;
             scTMP.color = ORANGE_FIRE;
             scTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -461,7 +416,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(bonusText).preferredHeight = 28;
             var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
             btTMP.text = "Day 7 bonus: +100 DigitGems";
-            btTMP.fontSize = FontSizes.Button;
+            btTMP.fontSize = FontSizes.Body;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = GEM_COLOR;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -489,7 +444,7 @@ namespace DigitPark.Editor
 
             var wTMP = GetOrAdd<TextMeshProUGUI>(weekLabel);
             wTMP.text = "\u2500\u2500\u2500 WEEK 1 \u2500\u2500\u2500";
-            wTMP.fontSize = FontSizes.Button;
+            wTMP.fontSize = FontSizes.Body;
             wTMP.fontStyle = FontStyles.Bold;
             wTMP.color = GOLD;
             wTMP.alignment = TextAlignmentOptions.Center;
@@ -596,7 +551,7 @@ namespace DigitPark.Editor
             dayLabel.AddComponent<LayoutElement>().preferredHeight = 38;
             var dlTMP = dayLabel.AddComponent<TextMeshProUGUI>();
             dlTMP.text = $"DAY {day}";
-            dlTMP.fontSize = FontSizes.Button;
+            dlTMP.fontSize = FontSizes.Body;
             dlTMP.fontStyle = FontStyles.Bold;
             dlTMP.color = claimed ? GREEN_SUCCESS : (current ? GOLD : TEXT_WHITE);
             dlTMP.alignment = TextAlignmentOptions.Center;
@@ -649,7 +604,7 @@ namespace DigitPark.Editor
             amountObj.AddComponent<LayoutElement>().preferredHeight = 38;
             var amTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amTMP.text = $"+{amount}";
-            amTMP.fontSize = FontSizes.Button;
+            amTMP.fontSize = FontSizes.Body;
             amTMP.fontStyle = FontStyles.Bold;
             amTMP.color = claimed ? new Color(1, 1, 1, 0.5f) : TEXT_WHITE;
             amTMP.alignment = TextAlignmentOptions.Center;
@@ -678,7 +633,7 @@ namespace DigitPark.Editor
                 ctRT.offsetMax = Vector2.zero;
                 var ctTMP = checkText.AddComponent<TextMeshProUGUI>();
                 ctTMP.text = "\u2713";
-                ctTMP.fontSize = FontSizes.Button;
+                ctTMP.fontSize = FontSizes.Body;
                 ctTMP.fontStyle = FontStyles.Bold;
                 ctTMP.color = TEXT_DARK;
                 ctTMP.alignment = TextAlignmentOptions.Center;
@@ -705,7 +660,7 @@ namespace DigitPark.Editor
                 bttRT.offsetMax = Vector2.zero;
                 var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                 bttTMP.text = "TODAY";
-                bttTMP.fontSize = FontSizes.Button;
+                bttTMP.fontSize = FontSizes.Body;
                 bttTMP.fontStyle = FontStyles.Bold;
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;
@@ -843,7 +798,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(d7Title).preferredHeight = 38;
             var d7tTMP = GetOrAdd<TextMeshProUGUI>(d7Title);
             d7tTMP.text = "DAY 7 - GRAND PRIZE";
-            d7tTMP.fontSize = FontSizes.Button;
+            d7tTMP.fontSize = FontSizes.Body;
             d7tTMP.fontStyle = FontStyles.Bold;
             d7tTMP.color = GOLD;
             d7tTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -853,7 +808,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(d7Reward1).preferredHeight = 34;
             var r1TMP = GetOrAdd<TextMeshProUGUI>(d7Reward1);
             r1TMP.text = "500 DigitCoins + 50 DigitGems";
-            r1TMP.fontSize = FontSizes.Button;
+            r1TMP.fontSize = FontSizes.Body;
             r1TMP.fontStyle = FontStyles.Bold;
             r1TMP.color = TEXT_WHITE;
             r1TMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -863,7 +818,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(d7Reward2).preferredHeight = 30;
             var r2TMP = GetOrAdd<TextMeshProUGUI>(d7Reward2);
             r2TMP.text = "+ Exclusive Item";
-            r2TMP.fontSize = FontSizes.Button;
+            r2TMP.fontSize = FontSizes.Body;
             r2TMP.fontStyle = FontStyles.Bold;
             r2TMP.color = GOLD;
             r2TMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -873,7 +828,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(d7Status).preferredHeight = 28;
             var stTMP = GetOrAdd<TextMeshProUGUI>(d7Status);
             stTMP.text = "Unlocks in 2 days";
-            stTMP.fontSize = FontSizes.Button;
+            stTMP.fontSize = FontSizes.Body;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -931,7 +886,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "TODAY";
-            btTMP.fontSize = FontSizes.Button;
+            btTMP.fontSize = FontSizes.Body;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.color = TEXT_DARK;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -964,7 +919,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 30;
             var rlTMP = GetOrAdd<TextMeshProUGUI>(rewardLabel);
             rlTMP.text = "TODAY'S REWARD";
-            rlTMP.fontSize = FontSizes.Button;
+            rlTMP.fontSize = FontSizes.Body;
             rlTMP.fontStyle = FontStyles.Bold;
             rlTMP.color = TEXT_SECONDARY;
             rlTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -974,7 +929,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 38;
             var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
             raTMP.text = "300 DigitCoins + 25 XP";
-            raTMP.fontSize = FontSizes.Button;
+            raTMP.fontSize = FontSizes.Body;
             raTMP.fontStyle = FontStyles.Bold;
             raTMP.color = COIN_COLOR;
             raTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1024,7 +979,7 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(claimText);
             ctTMP.text = "CLAIM REWARD";
-            ctTMP.fontSize = FontSizes.SectionHeader;
+            ctTMP.fontSize = FontSizes.H4;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = TEXT_DARK;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -1057,7 +1012,7 @@ namespace DigitPark.Editor
             var tiImg = GetOrAdd<Image>(timerIcon);
             tiImg.preserveAspect = true;
             tiImg.color = Color.white;
-            Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "icon_ui_timer.png");
+            Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "TimerIcon.png");
             if (timerSprite != null) tiImg.sprite = timerSprite;
             else tiImg.color = TEXT_SECONDARY;
             var tiLE = GetOrAdd<LayoutElement>(timerIcon);
@@ -1069,7 +1024,7 @@ namespace DigitPark.Editor
             var label = FindOrCreate(timerBar.transform, "Label");
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Next reward in:";
-            lTMP.fontSize = FontSizes.Button;
+            lTMP.fontSize = FontSizes.Body;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.MidlineRight;
@@ -1081,7 +1036,7 @@ namespace DigitPark.Editor
             var timeText = FindOrCreate(timerBar.transform, "TimeText");
             var ttTMP = GetOrAdd<TextMeshProUGUI>(timeText);
             ttTMP.text = "14h 32m 15s";
-            ttTMP.fontSize = FontSizes.Button;
+            ttTMP.fontSize = FontSizes.Body;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = CYAN_NEON;
             ttTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1149,9 +1104,8 @@ namespace DigitPark.Editor
             var ciImg = GetOrAdd<Image>(celebIcon);
             ciImg.preserveAspect = true;
             ciImg.color = Color.white;
-            // Try icon_ui_claim.png first, then GiftIcon.png
-            Sprite claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "icon_ui_claim.png");
-            if (claimSprite == null) claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "GiftIcon.png");
+            // Claim celebration icon
+            Sprite claimSprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_claim.png");
             if (claimSprite != null) ciImg.sprite = claimSprite;
             else ciImg.color = GOLD;
 
@@ -1160,7 +1114,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(celebTitle).preferredHeight = 42;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(celebTitle);
             ctTMP.text = "Reward Obtained!";
-            ctTMP.fontSize = FontSizes.CardTitle;
+            ctTMP.fontSize = FontSizes.H3;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = GOLD;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -1179,7 +1133,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(claimRewardText).preferredHeight = 45;
             var crtTMP = GetOrAdd<TextMeshProUGUI>(claimRewardText);
             crtTMP.text = "+300 DigitCoins";
-            crtTMP.fontSize = FontSizes.DisplayMedium;
+            crtTMP.fontSize = FontSizes.H3;
             crtTMP.fontStyle = FontStyles.Bold;
             crtTMP.color = COIN_COLOR;
             crtTMP.alignment = TextAlignmentOptions.Center;
@@ -1189,7 +1143,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(streakInfo).preferredHeight = 30;
             var siTMP = GetOrAdd<TextMeshProUGUI>(streakInfo);
             siTMP.text = "Streak: 6 days";
-            siTMP.fontSize = FontSizes.Button;
+            siTMP.fontSize = FontSizes.Body;
             siTMP.fontStyle = FontStyles.Bold;
             siTMP.color = TEXT_SECONDARY;
             siTMP.alignment = TextAlignmentOptions.Center;
@@ -1209,7 +1163,7 @@ namespace DigitPark.Editor
             cnRT.offsetMax = Vector2.zero;
             var cnTMP = GetOrAdd<TextMeshProUGUI>(conText);
             cnTMP.text = "CONTINUE";
-            cnTMP.fontSize = FontSizes.LabelLarge;
+            cnTMP.fontSize = FontSizes.BodyLarge;
             cnTMP.fontStyle = FontStyles.Bold;
             cnTMP.color = TEXT_DARK;
             cnTMP.alignment = TextAlignmentOptions.Center;
@@ -1270,7 +1224,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(milestoneText).preferredHeight = 42;
             var mtTMP = GetOrAdd<TextMeshProUGUI>(milestoneText);
             mtTMP.text = "7 days in a row!";
-            mtTMP.fontSize = FontSizes.CardTitle;
+            mtTMP.fontSize = FontSizes.H3;
             mtTMP.fontStyle = FontStyles.Bold;
             mtTMP.color = GOLD;
             mtTMP.alignment = TextAlignmentOptions.Center;
@@ -1280,7 +1234,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(milestoneBonusText).preferredHeight = 36;
             var mbtTMP = GetOrAdd<TextMeshProUGUI>(milestoneBonusText);
             mbtTMP.text = "+100 bonus DigitGems";
-            mbtTMP.fontSize = FontSizes.ValueMedium;
+            mbtTMP.fontSize = FontSizes.Subtitle;
             mbtTMP.fontStyle = FontStyles.Bold;
             mbtTMP.color = GEM_COLOR;
             mbtTMP.alignment = TextAlignmentOptions.Center;
@@ -1300,7 +1254,7 @@ namespace DigitPark.Editor
             cnRT.offsetMax = Vector2.zero;
             var cnTMP = GetOrAdd<TextMeshProUGUI>(conText);
             cnTMP.text = "CONTINUE";
-            cnTMP.fontSize = FontSizes.Button;
+            cnTMP.fontSize = FontSizes.Body;
             cnTMP.fontStyle = FontStyles.Bold;
             cnTMP.color = TEXT_DARK;
             cnTMP.alignment = TextAlignmentOptions.Center;
@@ -1374,7 +1328,7 @@ namespace DigitPark.Editor
             SetSpriteRef(so, "coinIcon", CURRENCY_ICONS + "icon_digitcoin_single.png");
             SetSpriteRef(so, "gemIcon", CURRENCY_ICONS + "icon_digitgem_single.png");
             SetSpriteRef(so, "xpIcon", CURRENCY_ICONS + "icon_xp.png");
-            SetSpriteRef(so, "mysteryIcon", UI_ICONS + "icon_ui_gift_generic.png");
+            SetSpriteRef(so, "mysteryIcon", DAILY_ICONS + "icon_daily_mystery.png");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

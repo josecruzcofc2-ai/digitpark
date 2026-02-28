@@ -52,9 +52,10 @@ namespace DigitPark.Editor
             EditorGUIUtility.PingObject(prefab);
 
             Debug.Log($"[SprintSummaryPanelUIBuilder] Prefab creado: {prefabPath}");
-            EditorUtility.DisplayDialog("Prefab Creado",
-                $"SprintSummaryPanel prefab guardado en:\n{prefabPath}\n\nAsignalo al ResultPanelManager.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Prefab Creado",
+                    $"SprintSummaryPanel prefab guardado en:\n{prefabPath}\n\nAsignalo al ResultPanelManager.",
+                    "OK");
         }
 
         private static GameObject CreateSprintSummaryPanel()
@@ -612,7 +613,7 @@ namespace DigitPark.Editor
             // Text
             GameObject textObj = CreateChild(face.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Button);
+            float fontSize = Mathf.Min(height * 0.35f, FontSizes.Body);
             AddText(textObj, text, fontSize, new Color(0.02f, 0.05f, 0.1f), FontStyles.Bold);
 
             // Button component

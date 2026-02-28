@@ -204,7 +204,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(400, 50));
-            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", FontSizes.SceneTitle, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(title, "QUICK MATH", FontSizes.H4, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = title.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
@@ -239,19 +239,19 @@ namespace DigitPark.Editor
 
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "00:00", Color.white, 240, timerIcon, (int)FontSizes.BodyLarge);
+                "00:00", Color.white, 240, timerIcon, (int)FontSizes.Body);
 
             // Round counter
             CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
-                "1/10", CYAN_NEON, 180, roundIcon, (int)FontSizes.Button);
+                "1/10", CYAN_NEON, 180, roundIcon, (int)FontSizes.Body);
 
             // Errors
             CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
-                "0", ERROR_COLOR, 120, errorIcon, (int)FontSizes.BodyLarge);
+                "0", ERROR_COLOR, 120, errorIcon, (int)FontSizes.Body);
         }
 
         private static void CreateStatItem(Transform parent, string containerName, string iconName,
-            string textName, string defaultText, Color color, float width, Sprite iconSprite = null, int fontSize = (int)FontSizes.Button)
+            string textName, string defaultText, Color color, float width, Sprite iconSprite = null, int fontSize = (int)FontSizes.Body)
         {
             GameObject container = CreateElement(parent, containerName);
 
@@ -448,7 +448,7 @@ namespace DigitPark.Editor
             // Answer text
             GameObject answerText = CreateElement(face.transform, $"AnswerText_{index}");
             SetupRectTransform(answerText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI answerTmp = SetupText(answerText, "?", FontSizes.SectionHeader, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI answerTmp = SetupText(answerText, "?", FontSizes.H4, CYAN_NEON, FontStyles.Bold);
             answerTmp.alignment = TextAlignmentOptions.Center;
 
             Outline textGlow = answerText.AddComponent<Outline>();
@@ -495,7 +495,7 @@ namespace DigitPark.Editor
 
             GameObject feedbackText = CreateElement(feedbackPanel.transform, "FeedbackText");
             SetupRectTransform(feedbackText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI feedbackTmp = SetupText(feedbackText, "", FontSizes.ValueMedium, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI feedbackTmp = SetupText(feedbackText, "", FontSizes.Subtitle, GREEN_NEON, FontStyles.Bold);
             feedbackTmp.alignment = TextAlignmentOptions.Center;
             feedbackTmp.enableWordWrapping = false;
 
@@ -514,7 +514,7 @@ namespace DigitPark.Editor
             SetupRectTransform(roundIndicator,
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-50, 0), new Vector2(80, 30));
-            SetupText(roundIndicator, "8/15", FontSizes.Button, Color.white, FontStyles.Bold);
+            SetupText(roundIndicator, "8/15", FontSizes.Body, Color.white, FontStyles.Bold);
 
             // Progress bar bg
             GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
@@ -573,7 +573,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -40), new Vector2(0, 55));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", FontSizes.ValueLarge, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", FontSizes.Subtitle, GREEN_NEON, FontStyles.Bold);
 
             // Divider after title
             CreateDivider(content.transform, -80);
@@ -656,7 +656,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -40), new Vector2(0, 55));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", FontSizes.ValueLarge, ERROR_COLOR, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", FontSizes.Subtitle, ERROR_COLOR, FontStyles.Bold);
 
             // Divider after title
             CreateDivider(content.transform, -80);
@@ -737,7 +737,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "QUICK MATH", FontSizes.ValueLarge, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "QUICK MATH", FontSizes.Subtitle, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = titleObj.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
@@ -763,7 +763,7 @@ namespace DigitPark.Editor
             opsHeaderBg.color = new Color(0f, 0.15f, 0.2f, 0.5f);
             GameObject opsHeaderText = CreateElement(opsHeader.transform, "OperationsHeaderText");
             SetupRectTransform(opsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(opsHeaderText, "OPERATIONS", FontSizes.Button, new Color(0.7f, 0.9f, 1f), FontStyles.Bold);
+            SetupText(opsHeaderText, "OPERATIONS", FontSizes.Body, new Color(0.7f, 0.9f, 1f), FontStyles.Bold);
 
             yPos -= 58f;
 
@@ -798,7 +798,7 @@ namespace DigitPark.Editor
             diffHeaderBg.color = new Color(0.15f, 0.1f, 0f, 0.5f);
             GameObject diffHeaderText = CreateElement(diffHeader.transform, "DifficultyHeaderText");
             SetupRectTransform(diffHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(diffHeaderText, "DIFFICULTY", FontSizes.Button, new Color(1f, 0.9f, 0.7f), FontStyles.Bold);
+            SetupText(diffHeaderText, "DIFFICULTY", FontSizes.Body, new Color(1f, 0.9f, 0.7f), FontStyles.Bold);
 
             yPos -= 58f;
 
@@ -845,7 +845,7 @@ namespace DigitPark.Editor
             roundsHeaderBg.color = new Color(0f, 0.12f, 0.08f, 0.5f);
             GameObject roundsHeaderText = CreateElement(roundsHeader.transform, "RoundsHeaderText");
             SetupRectTransform(roundsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(roundsHeaderText, "ROUNDS", FontSizes.Button, new Color(0.7f, 1f, 0.8f), FontStyles.Bold);
+            SetupText(roundsHeaderText, "ROUNDS", FontSizes.Body, new Color(0.7f, 1f, 0.8f), FontStyles.Bold);
 
             yPos -= 58f;
 
@@ -904,7 +904,7 @@ namespace DigitPark.Editor
 
             GameObject startText = CreateElement(startBtn.transform, "StartText");
             SetupRectTransform(startText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(startText, "START", FontSizes.BodyLarge, DARK_BG, FontStyles.Bold);
+            SetupText(startText, "START", FontSizes.Body, DARK_BG, FontStyles.Bold);
 
             settingsPanel.SetActive(false);
         }

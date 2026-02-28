@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Monetization;
 
 namespace DigitPark.Editor
 {
@@ -141,8 +142,40 @@ namespace DigitPark.Editor
             bbRT.anchorMin = new Vector2(0, 0.5f);
             bbRT.anchorMax = new Vector2(0, 0.5f);
             bbRT.pivot = new Vector2(0, 0.5f);
-            bbRT.anchoredPosition = new Vector2(25, 0);
+            bbRT.anchoredPosition = new Vector2(20, 0);
             bbRT.sizeDelta = new Vector2(50, 50);
+
+            // Title text (stretch between back button and pills)
+            GameObject titleObj = CreateElement(header.transform, "TitleText");
+            RectTransform titleRT = titleObj.GetComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0.07f, 0f);
+            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.pivot = new Vector2(0.5f, 0.5f);
+            titleRT.sizeDelta = Vector2.zero;
+            titleRT.anchoredPosition = Vector2.zero;
+            TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTmp.text = "SELECT MODE";
+            titleTmp.fontSize = FontSizes.H4;
+            titleTmp.color = CYAN_NEON;
+            titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.alignment = TextAlignmentOptions.Center;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTmp.fontSizeMax = FontSizes.H4;
+            titleTmp.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Glow effect
+            Outline titleOutline = titleObj.AddComponent<Outline>();
+            titleOutline.effectColor = new Color(0f, 0.5f, 0.5f, 0.5f);
+            titleOutline.effectDistance = new Vector2(2, -2);
+
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.58f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.98f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
         }
 
         private static void CreateTitleSection(Transform parent)
@@ -150,37 +183,16 @@ namespace DigitPark.Editor
             GameObject titleSection = CreateElement(parent, "TitleSection");
             SetupRectTransform(titleSection,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -180), new Vector2(700, 120));
+                new Vector2(0, -120), new Vector2(700, 50));
 
-            // Main title
-            GameObject title = CreateElement(titleSection, "TitleText");
-            SetupRectTransform(title,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -10), new Vector2(700, 60));
-            TextMeshProUGUI titleTmp = title.AddComponent<TextMeshProUGUI>();
-            titleTmp.text = "SELECT MODE";
-            titleTmp.fontSize = FontSizes.SceneTitle;
-            titleTmp.color = CYAN_NEON;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.alignment = TextAlignmentOptions.Center;
-            titleTmp.enableAutoSizing = true;
-            titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
-            titleTmp.fontSizeMax = FontSizes.SceneTitle;
-            titleTmp.overflowMode = TextOverflowModes.Ellipsis;
-
-            // Glow effect
-            Outline titleOutline = title.AddComponent<Outline>();
-            titleOutline.effectColor = new Color(0f, 0.5f, 0.5f, 0.5f);
-            titleOutline.effectDistance = new Vector2(2, -2);
-
-            // Subtitle
+            // Subtitle only (title moved to header)
             GameObject subtitle = CreateElement(titleSection, "SubtitleText");
             SetupRectTransform(subtitle,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0),
-                new Vector2(0, 20), new Vector2(500, 35));
+                new Vector2(0.5f, 0), new Vector2(0.5f, 1),
+                Vector2.zero, Vector2.zero);
             TextMeshProUGUI subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Choose how you want to play";
-            subtitleTmp.fontSize = FontSizes.Button;
+            subtitleTmp.fontSize = FontSizes.Body;
             subtitleTmp.color = TEXT_SECONDARY;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
         }
@@ -190,7 +202,7 @@ namespace DigitPark.Editor
             GameObject cardsSection = CreateElement(parent, "CardsSection");
             RectTransform cardsRT = cardsSection.GetComponent<RectTransform>();
             cardsRT.anchorMin = new Vector2(0.02f, 0.05f);
-            cardsRT.anchorMax = new Vector2(0.98f, 0.82f);
+            cardsRT.anchorMax = new Vector2(0.98f, 0.85f);
             cardsRT.offsetMin = Vector2.zero;
             cardsRT.offsetMax = Vector2.zero;
 
@@ -296,7 +308,7 @@ namespace DigitPark.Editor
                 new Vector2(-75, 0), new Vector2(90, 90));
             TextMeshProUGUI arrowTmp = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowTmp.text = ">";
-            arrowTmp.fontSize = FontSizes.CardSymbol;
+            arrowTmp.fontSize = FontSizes.Symbol;
             arrowTmp.color = accentColor;
             arrowTmp.fontStyle = FontStyles.Bold;
             arrowTmp.alignment = TextAlignmentOptions.Center;
@@ -309,7 +321,7 @@ namespace DigitPark.Editor
                 Vector2.zero, new Vector2(-300, -16));
             TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = title;
-            titleTmp.fontSize = FontSizes.AuthTitle;
+            titleTmp.fontSize = FontSizes.H2;
             titleTmp.color = accentColor;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;

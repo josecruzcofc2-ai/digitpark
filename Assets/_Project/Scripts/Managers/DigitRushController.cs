@@ -709,7 +709,7 @@ namespace DigitPark.Managers
 
             TextMeshProUGUI tmp = penaltyObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "+1";
-            tmp.fontSize = FontSizes.Penalty;
+            tmp.fontSize = FontSizes.Subtitle;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(1f, 0.3f, 0.3f, 1f); // Rojo
             tmp.alignment = TextAlignmentOptions.Center;

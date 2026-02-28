@@ -104,6 +104,12 @@ namespace DigitPark.Editor
             BuildCompleteUI();
         }
 
+        /// <summary>Called by AllScenesBatchBuilder — no dialogs.</summary>
+        public static void BuildSilent()
+        {
+            BuildCompleteUI();
+        }
+
         private static void BuildCompleteUI()
         {
             Debug.Log("[ShopPremiumUIBuilder] ========== INICIANDO CONSTRUCCION V3 ==========");
@@ -144,9 +150,10 @@ namespace DigitPark.Editor
             // Auto-assign references
             AutoAssignReferences();
 
-            EditorUtility.DisplayDialog("Completado",
-                "Shop Premium V3 UI construida y referencias asignadas automaticamente!",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Completado",
+                    "Shop Premium V3 UI construida y referencias asignadas automaticamente!",
+                    "OK");
         }
 
         // ==================== CANVAS & BASE ====================
@@ -249,8 +256,8 @@ namespace DigitPark.Editor
                     backRT.anchorMin = new Vector2(0, 0.5f);
                     backRT.anchorMax = new Vector2(0, 0.5f);
                     backRT.pivot = new Vector2(0, 0.5f);
-                    backRT.anchoredPosition = new Vector2(16, 0);
-                    backRT.sizeDelta = new Vector2(55, 55);
+                    backRT.anchoredPosition = new Vector2(20, 0);
+                    backRT.sizeDelta = new Vector2(50, 50);
                 }
             }
             else
@@ -262,8 +269,8 @@ namespace DigitPark.Editor
                 backRT.anchorMin = new Vector2(0, 0.5f);
                 backRT.anchorMax = new Vector2(0, 0.5f);
                 backRT.pivot = new Vector2(0, 0.5f);
-                backRT.anchoredPosition = new Vector2(16, 0);
-                backRT.sizeDelta = new Vector2(55, 55);
+                backRT.anchoredPosition = new Vector2(20, 0);
+                backRT.sizeDelta = new Vector2(50, 50);
 
                 Image backBg = backBtn.AddComponent<Image>();
                 backBg.color = BUTTON_SECONDARY;
@@ -275,7 +282,7 @@ namespace DigitPark.Editor
                 SetStretch(backIcon);
                 TextMeshProUGUI backText = backIcon.AddComponent<TextMeshProUGUI>();
                 backText.text = "<";
-                backText.fontSize = FontSizes.Button;
+                backText.fontSize = FontSizes.Body;
                 backText.fontStyle = FontStyles.Bold;
                 backText.color = CYAN_NEON;
                 backText.alignment = TextAlignmentOptions.Center;
@@ -284,22 +291,23 @@ namespace DigitPark.Editor
             // Title
             GameObject title = CreateChild(header, "Title");
             RectTransform titleRT = title.GetComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 0.5f);
-            titleRT.anchorMax = new Vector2(0, 0.5f);
-            titleRT.pivot = new Vector2(0, 0.5f);
-            titleRT.anchoredPosition = new Vector2(95, 0);
-            titleRT.sizeDelta = new Vector2(220, 55);
+            titleRT.anchorMin = new Vector2(0.07f, 0f);
+            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.pivot = new Vector2(0.5f, 0.5f);
+            titleRT.sizeDelta = Vector2.zero;
+            titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "SHOP";
-            titleText.fontSize = FontSizes.SceneTitle;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
-            titleText.fontSizeMax = FontSizes.SceneTitle;
+            titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
+            titleText.raycastTarget = false;
 
             // Currency Display
             CreateHeaderCurrency(header);
@@ -563,7 +571,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(info, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "STARTER PACK";
-            titleText.fontSize = FontSizes.Button;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -806,7 +814,7 @@ namespace DigitPark.Editor
             titleLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "DAILY OFFERS";
-            titleText.fontSize = FontSizes.SectionHeader;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = ORANGE_HOT;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1477,7 +1485,7 @@ namespace DigitPark.Editor
             GameObject amountObj = CreateChild(item, "Amount");
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = amount;
-            amountText.fontSize = FontSizes.LabelLarge;
+            amountText.fontSize = FontSizes.BodyLarge;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Center;
@@ -1788,7 +1796,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Confirm Purchase";
-            titleText.fontSize = FontSizes.SectionHeader;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1815,7 +1823,7 @@ namespace DigitPark.Editor
             GameObject previewAmount = CreateChild(preview, "Amount");
             TextMeshProUGUI amountText = previewAmount.AddComponent<TextMeshProUGUI>();
             amountText.text = "1,200 DigitGems";
-            amountText.fontSize = FontSizes.BodyLarge;
+            amountText.fontSize = FontSizes.Body;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
             LayoutElement amountLE = previewAmount.AddComponent<LayoutElement>();
@@ -1891,7 +1899,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(popup, "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
             titleText.text = "Insufficient DigitGems";
-            titleText.fontSize = FontSizes.SectionHeader;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GEM_COLOR;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -1941,7 +1949,7 @@ namespace DigitPark.Editor
             SetStretch(textObj);
             TextMeshProUGUI txt = textObj.AddComponent<TextMeshProUGUI>();
             txt.text = text;
-            txt.fontSize = FontSizes.Button;
+            txt.fontSize = FontSizes.Body;
             txt.fontStyle = FontStyles.Bold;
             txt.color = textColor;
             txt.alignment = TextAlignmentOptions.Center;
@@ -2006,7 +2014,7 @@ namespace DigitPark.Editor
             tLE.preferredHeight = SECTION_DIVIDER_HEIGHT;
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = FontSizes.SectionHeader;
+            titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = color;
             titleText.alignment = TextAlignmentOptions.Center;

@@ -138,7 +138,7 @@ namespace DigitPark.Editor
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
             titleTMP.maxVisibleLines = 1;
             titleTMP.enableAutoSizing = true;
-            titleTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            titleTMP.fontSizeMin = FontSizes.AutoMinBody;
             titleTMP.fontSizeMax = FontSizes.Body;
 
 
@@ -158,7 +158,7 @@ namespace DigitPark.Editor
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
             bodyTMP.maxVisibleLines = 1;
             bodyTMP.enableAutoSizing = true;
-            bodyTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            bodyTMP.fontSizeMin = FontSizes.AutoMinBody;
             bodyTMP.fontSizeMax = FontSizes.Body;
 
 
@@ -274,7 +274,7 @@ namespace DigitPark.Editor
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
             tTMP.enableAutoSizing = true;
-            tTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
             tTMP.fontSizeMax = FontSizes.Body;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
 

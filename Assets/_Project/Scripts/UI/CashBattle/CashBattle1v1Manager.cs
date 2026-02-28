@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +10,7 @@ namespace DigitPark.UI.CashBattle
 {
     /// <summary>
     /// Manager for CashBattle 1v1 scene.
-    /// Handles game selection, entry fees, online players, and matchmaking initiation.
+    /// Handles game selection via dropdown + modal, entry fees, online players, and matchmaking initiation.
     /// Supports custom entry fees up to $250 (Triumph withdrawal limit)
     /// </summary>
     public class CashBattle1v1Manager : MonoBehaviour
@@ -17,8 +18,18 @@ namespace DigitPark.UI.CashBattle
         [Header("UI References")]
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private Button backButton;
-        [SerializeField] private Transform gamesContainer;
-        [SerializeField] private GameObject gameCardPrefab;
+
+        [Header("Game Selection")]
+        [SerializeField] private TMP_Dropdown gameDropdown;
+        [SerializeField] private Button viewDetailsButton;
+        [SerializeField] private Image selectedGameIcon;
+        [SerializeField] private TextMeshProUGUI selectedGameDescription;
+
+        [Header("Game Selection Modal")]
+        [SerializeField] private GameObject gameSelectionModal;
+        [SerializeField] private Transform gameCardsContainer;
+        [SerializeField] private Button confirmGameButton;
+        [SerializeField] private Button closeModalButton;
 
         [Header("Entry Fee Selection")]
         [SerializeField] private Transform entryFeeContainer;
@@ -60,14 +71,44 @@ namespace DigitPark.UI.CashBattle
         private bool isCognitiveSprintMode = false;
         private int currentOnlinePlayers = 0;
         private int selectedFeeButtonIndex = 0;
+        private GameObject selectedModalCard;
 
         // Available entry fees (preset buttons)
         private readonly decimal[] availableFees = { 1m, 5m, 10m, 25m, 50m, 100m };
 
+        // Dropdown index to GameType mapping
+        private static readonly GameType[] dropdownGameTypes = {
+            GameType.DigitRush,
+            GameType.FlashTap,
+            GameType.MemoryPairs,
+            GameType.OddOneOut,
+            GameType.QuickMath
+        };
+
+        // Game descriptions
+        private static readonly Dictionary<GameType, string> gameDescriptions = new Dictionary<GameType, string>
+        {
+            { GameType.DigitRush, "Type numbers as fast as you can!" },
+            { GameType.FlashTap, "Tap the correct targets quickly!" },
+            { GameType.MemoryPairs, "Match pairs from memory!" },
+            { GameType.OddOneOut, "Find the different item!" },
+            { GameType.QuickMath, "Solve math problems fast!" }
+        };
+
+        // Game icon names (matching Assets/_Project/Art/Icons/Games/)
+        private static readonly Dictionary<GameType, string> gameIconNames = new Dictionary<GameType, string>
+        {
+            { GameType.DigitRush, "DigitRushIcon" },
+            { GameType.FlashTap, "FlashTapIcon" },
+            { GameType.MemoryPairs, "MemoryPairsIcon" },
+            { GameType.OddOneOut, "OddOneOutIcon" },
+            { GameType.QuickMath, "QuickMathIcon" }
+        };
+
         private void Start()
         {
             SetupListeners();
-            CreateGameCards();
+            SetupGameDropdown();
             CreateEntryFeeButtons();
             SetupCustomAmountInput();
             InitializeOnlinePlayersCounter();
@@ -84,81 +125,234 @@ namespace DigitPark.UI.CashBattle
             backButton?.onClick.AddListener(() => OnBackClicked?.Invoke());
             findOpponentButton?.onClick.AddListener(OnFindOpponentClicked);
             cognitiveSprintButton?.onClick.AddListener(ToggleCognitiveSprintMode);
+
+            // Modal button listeners
+            viewDetailsButton?.onClick.AddListener(ShowGameModal);
+            closeModalButton?.onClick.AddListener(HideGameModal);
+            confirmGameButton?.onClick.AddListener(OnModalConfirmClicked);
         }
 
-        private void CreateGameCards()
-        {
-            if (gamesContainer == null || gameCardPrefab == null) return;
+        #region Game Dropdown
 
-            // Clear existing
-            foreach (Transform child in gamesContainer)
+        private void SetupGameDropdown()
+        {
+            if (gameDropdown == null) return;
+
+            // Populate dropdown options
+            gameDropdown.ClearOptions();
+            List<string> options = new List<string>();
+            foreach (var gameType in dropdownGameTypes)
             {
-                Destroy(child.gameObject);
+                options.Add(gameType.ToString());
+            }
+            gameDropdown.AddOptions(options);
+
+            // Set default selection
+            gameDropdown.value = 0;
+            gameDropdown.onValueChanged.AddListener(OnGameDropdownChanged);
+
+            // Update initial details
+            OnGameDropdownChanged(0);
+        }
+
+        private void OnGameDropdownChanged(int index)
+        {
+            if (index < 0 || index >= dropdownGameTypes.Length) return;
+
+            GameType gameType = dropdownGameTypes[index];
+            selectedGame = gameType;
+
+            // Update selected game icon
+            if (selectedGameIcon != null && gameIconNames.TryGetValue(gameType, out string iconName))
+            {
+                Sprite iconSprite = Resources.Load<Sprite>($"Icons/Games/{iconName}");
+                if (iconSprite != null)
+                {
+                    selectedGameIcon.sprite = iconSprite;
+                    selectedGameIcon.color = Color.white;
+                }
             }
 
-            // Create cards for each game
-            var gameInfos = CognitiveSprintManager.GetAllGameInfos();
-            foreach (var info in gameInfos)
+            // Update description
+            if (selectedGameDescription != null && gameDescriptions.TryGetValue(gameType, out string desc))
             {
-                CreateGameCard(info);
+                selectedGameDescription.text = desc;
+            }
+
+            UpdateUI();
+        }
+
+        #endregion
+
+        #region Game Selection Modal
+
+        private void ShowGameModal()
+        {
+            if (gameSelectionModal == null) return;
+
+            gameSelectionModal.SetActive(true);
+
+            // Reset card selection highlights
+            if (gameCardsContainer != null)
+            {
+                foreach (Transform child in gameCardsContainer)
+                {
+                    var checkmark = child.Find("Checkmark");
+                    if (checkmark != null) checkmark.gameObject.SetActive(false);
+
+                    // Reset outline color
+                    var outline = child.GetComponent<Outline>();
+                    if (outline != null) outline.effectColor = new Color(0.4f, 0.3f, 0.55f, 0.35f);
+                }
+            }
+
+            selectedModalCard = null;
+        }
+
+        private void HideGameModal()
+        {
+            if (gameSelectionModal != null)
+            {
+                gameSelectionModal.SetActive(false);
             }
         }
 
-        private void CreateGameCard(GameInfo info)
+        private void OnModalConfirmClicked()
         {
-            GameObject card = Instantiate(gameCardPrefab, gamesContainer);
+            // If a card was selected in the modal, apply it to the dropdown
+            if (selectedModalCard != null)
+            {
+                string cardName = selectedModalCard.name;
 
-            // Setup card visuals
-            var nameText = card.transform.Find("Name")?.GetComponent<TextMeshProUGUI>();
-            var descText = card.transform.Find("Description")?.GetComponent<TextMeshProUGUI>();
-            var skillText = card.transform.Find("Skill")?.GetComponent<TextMeshProUGUI>();
-            var button = card.GetComponent<Button>();
-            var checkmark = card.transform.Find("Checkmark")?.gameObject;
+                // Check if CognitiveSprint was selected
+                if (cardName.Contains("CognitiveSprint"))
+                {
+                    // Toggle cognitive sprint mode
+                    if (!isCognitiveSprintMode)
+                    {
+                        ToggleCognitiveSprintMode();
+                    }
+                }
+                else
+                {
+                    // Find matching game type from card name
+                    for (int i = 0; i < dropdownGameTypes.Length; i++)
+                    {
+                        if (cardName.Contains(dropdownGameTypes[i].ToString()))
+                        {
+                            if (gameDropdown != null)
+                            {
+                                gameDropdown.value = i;
+                            }
+                            OnGameDropdownChanged(i);
+                            break;
+                        }
+                    }
+                }
+            }
 
-            if (nameText != null) nameText.text = info.Name;
-            if (descText != null) descText.text = info.Description;
-            if (skillText != null) skillText.text = info.Skill;
-            if (checkmark != null) checkmark.SetActive(false);
-
-            // Store game type reference
-            var gameCard = card.AddComponent<GameCardReference>();
-            gameCard.GameType = info.Type;
-            gameCard.Checkmark = checkmark;
-
-            // Click handler
-            button?.onClick.AddListener(() => OnGameCardClicked(info.Type, card));
+            HideGameModal();
         }
 
         private void OnGameCardClicked(GameType gameType, GameObject card)
         {
             if (isCognitiveSprintMode)
             {
-                // Toggle selection for sprint
                 ToggleSprintGameSelection(gameType, card);
             }
             else
             {
-                // Single game selection
-                SelectSingleGame(gameType, card);
+                SelectModalCard(card);
             }
         }
 
-        private void SelectSingleGame(GameType gameType, GameObject selectedCard)
+        private void SelectModalCard(GameObject card)
+        {
+            // Deselect previous
+            if (gameCardsContainer != null)
+            {
+                foreach (Transform child in gameCardsContainer)
+                {
+                    var checkmark = child.Find("Checkmark");
+                    if (checkmark != null) checkmark.gameObject.SetActive(false);
+
+                    var outline = child.GetComponent<Outline>();
+                    if (outline != null) outline.effectColor = new Color(0.4f, 0.3f, 0.55f, 0.35f);
+                }
+            }
+
+            // Select new card
+            selectedModalCard = card;
+            var selectedCheck = card.transform.Find("Checkmark");
+            if (selectedCheck != null) selectedCheck.gameObject.SetActive(true);
+
+            // Animate glow
+            AnimateCardGlow(card);
+        }
+
+        private void AnimateCardGlow(GameObject card)
+        {
+            var outline = card.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.effectColor = new Color(1f, 0.84f, 0f, 0.8f); // Gold glow
+                StartCoroutine(PulseOutline(outline));
+            }
+        }
+
+        private IEnumerator PulseOutline(Outline outline)
+        {
+            if (outline == null) yield break;
+
+            Color goldBright = new Color(1f, 0.84f, 0f, 0.8f);
+            Color goldDim = new Color(0.85f, 0.65f, 0.13f, 0.5f);
+
+            float duration = 0.4f;
+            float elapsed = 0f;
+
+            // Pulse from bright to dim
+            while (elapsed < duration)
+            {
+                if (outline == null) yield break;
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                outline.effectColor = Color.Lerp(goldBright, goldDim, t);
+                yield return null;
+            }
+
+            if (outline != null)
+            {
+                outline.effectColor = goldDim;
+            }
+        }
+
+        #endregion
+
+        #region Single Game Selection
+
+        private void SelectSingleGame(GameType gameType)
         {
             selectedGame = gameType;
 
-            // Update all cards visual state
-            foreach (Transform child in gamesContainer)
+            // Update dropdown to match
+            for (int i = 0; i < dropdownGameTypes.Length; i++)
             {
-                var cardRef = child.GetComponent<GameCardReference>();
-                if (cardRef != null && cardRef.Checkmark != null)
+                if (dropdownGameTypes[i] == gameType)
                 {
-                    cardRef.Checkmark.SetActive(child.gameObject == selectedCard);
+                    if (gameDropdown != null)
+                    {
+                        gameDropdown.value = i;
+                    }
+                    break;
                 }
             }
 
             UpdateUI();
         }
+
+        #endregion
+
+        #region Cognitive Sprint
 
         private void ToggleSprintGameSelection(GameType gameType, GameObject card)
         {
@@ -190,11 +384,11 @@ namespace DigitPark.UI.CashBattle
             selectedGame = null;
             selectedSprintGames.Clear();
 
-            // Reset all checkmarks
-            foreach (Transform child in gamesContainer)
+            // Reset dropdown
+            if (gameDropdown != null && !isCognitiveSprintMode)
             {
-                var cardRef = child.GetComponent<GameCardReference>();
-                if (cardRef?.Checkmark != null) cardRef.Checkmark.SetActive(false);
+                gameDropdown.value = 0;
+                OnGameDropdownChanged(0);
             }
 
             UpdateSprintSelectionText();
@@ -213,6 +407,10 @@ namespace DigitPark.UI.CashBattle
                 sprintSelectionText.color = count >= min ? Color.green : Color.yellow;
             }
         }
+
+        #endregion
+
+        #region Entry Fee
 
         private void CreateEntryFeeButtons()
         {
@@ -234,6 +432,8 @@ namespace DigitPark.UI.CashBattle
                 SelectEntryFee(availableFees[0], 0);
             }
         }
+
+        #endregion
 
         #region Custom Amount Input
 
@@ -398,7 +598,7 @@ namespace DigitPark.UI.CashBattle
 
             if (onlinePlayersText != null)
             {
-                onlinePlayersText.text = $"{count} JUGADORES EN LÍNEA";
+                onlinePlayersText.text = $"{count} JUGADORES EN LINEA";
             }
 
             // Update indicator color based on player count
@@ -479,7 +679,7 @@ namespace DigitPark.UI.CashBattle
             // Update title
             if (titleText != null)
             {
-                titleText.text = isCognitiveSprintMode ? "Cognitive Sprint" : "Selecciona un Juego";
+                titleText.text = isCognitiveSprintMode ? "Cognitive Sprint" : "Select a Game";
             }
 
             // Update find opponent button
@@ -495,8 +695,8 @@ namespace DigitPark.UI.CashBattle
             if (findOpponentText != null)
             {
                 findOpponentText.text = canProceed
-                    ? $"Buscar Oponente (${selectedEntryFee})"
-                    : "Selecciona un juego";
+                    ? $"Find Opponent (${selectedEntryFee})"
+                    : "Select a game";
             }
 
             // Show/hide sprint panel
@@ -509,7 +709,7 @@ namespace DigitPark.UI.CashBattle
             var sprintBtnText = cognitiveSprintButton?.GetComponentInChildren<TextMeshProUGUI>();
             if (sprintBtnText != null)
             {
-                sprintBtnText.text = isCognitiveSprintMode ? "Juego Individual" : "Cognitive Sprint";
+                sprintBtnText.text = isCognitiveSprintMode ? "Single Game" : "Cognitive Sprint";
             }
         }
 
@@ -536,15 +736,15 @@ namespace DigitPark.UI.CashBattle
                 SelectEntryFee(availableFees[0], 0);
             }
 
-            // Reset all game card checkmarks
-            foreach (Transform child in gamesContainer)
+            // Reset dropdown to first option
+            if (gameDropdown != null)
             {
-                var cardRef = child.GetComponent<GameCardReference>();
-                if (cardRef?.Checkmark != null)
-                {
-                    cardRef.Checkmark.SetActive(false);
-                }
+                gameDropdown.value = 0;
+                OnGameDropdownChanged(0);
             }
+
+            // Hide modal if open
+            HideGameModal();
 
             UpdateUI();
             UpdateEarningsFeedback();

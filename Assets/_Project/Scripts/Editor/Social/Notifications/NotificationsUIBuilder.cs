@@ -202,25 +202,26 @@ namespace DigitPark.Editor
             bRT.anchorMin = new Vector2(0, 0.5f);
             bRT.anchorMax = new Vector2(0, 0.5f);
             bRT.pivot = new Vector2(0, 0.5f);
-            bRT.anchoredPosition = new Vector2(15, 0);
+            bRT.anchoredPosition = new Vector2(20, 0);
             bRT.sizeDelta = new Vector2(50, 50);
 
             // Title
             var title = FindOrCreate(header.transform, "TitleText");
             var tRT = GetOrAdd<RectTransform>(title);
-            tRT.anchorMin = new Vector2(0.12f, 0);
-            tRT.anchorMax = new Vector2(0.88f, 1);
-            tRT.offsetMin = Vector2.zero;
-            tRT.offsetMax = Vector2.zero;
+            tRT.anchorMin = new Vector2(0.07f, 0f);
+            tRT.anchorMax = new Vector2(0.53f, 1f);
+            tRT.pivot = new Vector2(0.5f, 0.5f);
+            tRT.sizeDelta = Vector2.zero;
+            tRT.anchoredPosition = Vector2.zero;
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "NOTIFICATIONS";
-            tTMP.fontSize = FontSizes.SceneTitle;
+            tTMP.fontSize = FontSizes.H4;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            tTMP.fontSizeMax = FontSizes.SceneTitle;
+            tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Count Text
@@ -232,7 +233,7 @@ namespace DigitPark.Editor
             cRT.offsetMax = new Vector2(-15, 0);
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 unread";
-            cTMP.fontSize = FontSizes.BodyLarge;
+            cTMP.fontSize = FontSizes.Body;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -293,13 +294,13 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
             var lTMP = GetOrAdd<TextMeshProUGUI>(labelGO);
             lTMP.text = label;
-            lTMP.fontSize = FontSizes.TabLabel;
+            lTMP.fontSize = FontSizes.BodyLarge;
             lTMP.color = active ? Color.white : TEXT_SECONDARY;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableAutoSizing = true;
-            lTMP.fontSizeMin = FontSizes.AutoMinTab;
-            lTMP.fontSizeMax = FontSizes.TabLabel;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lTMP.fontSizeMax = FontSizes.BodyLarge;
             lTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Tab indicator bar (bottom line)
@@ -378,7 +379,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 300;
             var eTMP = GetOrAdd<TextMeshProUGUI>(emptyText);
             eTMP.text = "You have no notifications\nWe'll let you know when something important happens";
-            eTMP.fontSize = FontSizes.ValueLarge;
+            eTMP.fontSize = FontSizes.Subtitle;
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
@@ -390,7 +391,7 @@ namespace DigitPark.Editor
             GetOrAdd<LayoutElement>(loading).preferredHeight = 100;
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Loading...";
-            ldTMP.fontSize = FontSizes.ValueLarge;
+            ldTMP.fontSize = FontSizes.Subtitle;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -447,7 +448,7 @@ namespace DigitPark.Editor
             matRT.offsetMax = Vector2.zero;
             var matTMP = GetOrAdd<TextMeshProUGUI>(maText);
             matTMP.text = "Mark all as read";
-            matTMP.fontSize = FontSizes.LabelLarge;
+            matTMP.fontSize = FontSizes.BodyLarge;
             matTMP.color = CYAN_NEON;
             matTMP.fontStyle = FontStyles.Bold;
             matTMP.alignment = TextAlignmentOptions.Center;
@@ -478,8 +479,8 @@ namespace DigitPark.Editor
             cardBtn.targetGraphic = cardBg;
 
             var cardOutline = card.AddComponent<Outline>();
-            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.3f);
-            cardOutline.effectDistance = new Vector2(1, 1);
+            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.35f);
+            cardOutline.effectDistance = new Vector2(1.5f, 1.5f);
             var cardShadow = card.AddComponent<Shadow>();
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);
@@ -518,7 +519,7 @@ namespace DigitPark.Editor
             titRT.offsetMax = Vector2.zero;
             var tiTMP = tiTextGO.AddComponent<TextMeshProUGUI>();
             tiTMP.text = "🔔";
-            tiTMP.fontSize = FontSizes.DisplayMedium;
+            tiTMP.fontSize = FontSizes.H3;
             tiTMP.color = CYAN_NEON;
             tiTMP.alignment = TextAlignmentOptions.Center;
 
@@ -541,7 +542,7 @@ namespace DigitPark.Editor
             titleRT.offsetMax = Vector2.zero;
             var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Notification title";
-            titleTMP.fontSize = FontSizes.ValueLarge;
+            titleTMP.fontSize = FontSizes.Subtitle;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Left;
@@ -572,7 +573,7 @@ namespace DigitPark.Editor
             bodyRT.offsetMax = Vector2.zero;
             var bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
             bodyTMP.text = "Notification description";
-            bodyTMP.fontSize = FontSizes.BodyLarge;
+            bodyTMP.fontSize = FontSizes.Body;
             bodyTMP.color = TEXT_SECONDARY;
             bodyTMP.alignment = TextAlignmentOptions.Left;
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
@@ -654,7 +655,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-4, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = FontSizes.BodyLarge;
+            tTMP.fontSize = FontSizes.Body;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;

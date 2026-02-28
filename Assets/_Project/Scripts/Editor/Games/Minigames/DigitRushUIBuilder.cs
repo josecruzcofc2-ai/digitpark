@@ -246,7 +246,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(600, 80));
-            SetupText(title, "DIGIT RUSH", 78, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "DIGIT RUSH", (int)FontSizes.H4, CYAN_NEON, FontStyles.Bold);
         }
 
         private static void CreateStatsBar(Transform parent)
@@ -1057,7 +1057,7 @@ namespace DigitPark.Editor
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.enableAutoSizing = true;
             tmp.fontSizeMin = FontSizes.AutoMinBody;
-            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Button;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
 
             return tmp;
         }

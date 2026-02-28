@@ -57,6 +57,12 @@ namespace DigitPark.Editor
             CreateAchievementToastPrefab();
         }
 
+        /// <summary>Called by AllScenesBatchBuilder — no dialogs.</summary>
+        public static void BuildSilent()
+        {
+            CreateAchievementToastPrefab();
+        }
+
         private static void CreateAchievementToastPrefab()
         {
             Debug.Log("[AchievementToast] ========== CREANDO PREFAB ==========");
@@ -156,19 +162,20 @@ namespace DigitPark.Editor
 
             Debug.Log($"[AchievementToast] Prefab creado en: {prefabPath}");
 
-            EditorUtility.DisplayDialog("Achievement Toast Completado",
-                $"Prefab creado exitosamente en:\n{prefabPath}\n\n" +
-                "Elementos incluidos:\n" +
-                "- Toast container con fondo y bordes\n" +
-                "- Icono del logro (80x80)\n" +
-                "- Header 'LOGRO DESBLOQUEADO'\n" +
-                "- Título del logro\n" +
-                "- Descripción\n" +
-                "- Puntos ganados\n" +
-                "- Barra de progreso\n" +
-                "- Efectos de glow y partículas\n\n" +
-                "Ahora crea el AchievementNotificationManager.",
-                "OK");
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Achievement Toast Completado",
+                    $"Prefab creado exitosamente en:\n{prefabPath}\n\n" +
+                    "Elementos incluidos:\n" +
+                    "- Toast container con fondo y bordes\n" +
+                    "- Icono del logro (80x80)\n" +
+                    "- Header 'LOGRO DESBLOQUEADO'\n" +
+                    "- Título del logro\n" +
+                    "- Descripción\n" +
+                    "- Puntos ganados\n" +
+                    "- Barra de progreso\n" +
+                    "- Efectos de glow y partículas\n\n" +
+                    "Ahora crea el AchievementNotificationManager.",
+                    "OK");
         }
 
         // ==================== TOAST BACKGROUND ====================
@@ -341,7 +348,7 @@ namespace DigitPark.Editor
             headerTMP.color = CYAN_NEON;
             headerTMP.alignment = TextAlignmentOptions.MidlineLeft;
             headerTMP.enableAutoSizing = true;
-            headerTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            headerTMP.fontSizeMin = FontSizes.AutoMinBody;
             headerTMP.fontSizeMax = FontSizes.Body;
             headerTMP.overflowMode = TextOverflowModes.Ellipsis;
 
@@ -352,13 +359,13 @@ namespace DigitPark.Editor
             GameObject titleObj = CreateChild(infoSection, "AchievementTitle");
             TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "First Victory";
-            titleTMP.fontSize = FontSizes.Button;
+            titleTMP.fontSize = FontSizes.Body;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.color = GOLD;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
             titleTMP.enableAutoSizing = true;
             titleTMP.fontSizeMin = FontSizes.AutoMinBody;
-            titleTMP.fontSizeMax = FontSizes.Button;
+            titleTMP.fontSizeMax = FontSizes.Body;
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
@@ -373,7 +380,7 @@ namespace DigitPark.Editor
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.enableAutoSizing = true;
-            descTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            descTMP.fontSizeMin = FontSizes.AutoMinBody;
             descTMP.fontSizeMax = FontSizes.Body;
             descTMP.overflowMode = TextOverflowModes.Ellipsis;
 
@@ -424,7 +431,7 @@ namespace DigitPark.Editor
             completionTMP.color = SUCCESS_GREEN;
             completionTMP.alignment = TextAlignmentOptions.MidlineRight;
             completionTMP.enableAutoSizing = true;
-            completionTMP.fontSizeMin = FontSizes.AutoMinCompact;
+            completionTMP.fontSizeMin = FontSizes.AutoMinBody;
             completionTMP.fontSizeMax = FontSizes.Body;
             completionTMP.overflowMode = TextOverflowModes.Ellipsis;
         }

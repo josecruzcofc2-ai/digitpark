@@ -168,6 +168,26 @@ namespace DigitPark.Editor
             }
         }
 
+        /// <summary>
+        /// Builds the UI silently without confirmation dialogs. Used by batch builders.
+        /// </summary>
+        public static void BuildSilent()
+        {
+            CleanupOldUI();
+
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
+            if (canvas == null)
+            {
+                Debug.LogError("[CashBattleUIBuilder] Canvas not found - cannot build silently");
+                return;
+            }
+
+            BuildAllElements(canvas);
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+            Debug.Log("[CashBattleUIBuilder] UI built silently (batch mode)");
+        }
+
         private static void RebuildBackground()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
@@ -413,6 +433,7 @@ namespace DigitPark.Editor
                 rect.anchorMax = new Vector2(0, 0.5f);
                 rect.pivot = new Vector2(0, 0.5f);
                 rect.anchoredPosition = new Vector2(20, 0);
+                rect.sizeDelta = new Vector2(50, 50);
             }
             else
             {
@@ -424,7 +445,7 @@ namespace DigitPark.Editor
                 rt.anchorMin = new Vector2(0, 0.5f);
                 rt.anchorMax = new Vector2(0, 0.5f);
                 rt.pivot = new Vector2(0, 0.5f);
-                rt.sizeDelta = new Vector2(100, 80);
+                rt.sizeDelta = new Vector2(50, 50);
                 rt.anchoredPosition = new Vector2(20, 0);
 
                 Image img = backBtn.AddComponent<Image>();
@@ -448,7 +469,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
                 arrow.text = "<";
-                arrow.fontSize = FontSizes.SectionHeader;
+                arrow.fontSize = FontSizes.H4;
                 arrow.color = TEXT_GOLD;
                 arrow.alignment = TextAlignmentOptions.Center;
                 arrow.fontStyle = FontStyles.Bold;
@@ -463,19 +484,23 @@ namespace DigitPark.Editor
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.15f, 0f);
-            rt.anchorMax = new Vector2(0.70f, 1f);
+            rt.anchorMin = new Vector2(0.07f, 0f);
+            rt.anchorMax = new Vector2(0.53f, 1f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = Vector2.zero;
+            rt.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.text = "Cash Battle";
-            title.fontSize = FontSizes.SceneTitle;
+            title.fontSize = FontSizes.H4;
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;
+            title.raycastTarget = false;
             title.enableAutoSizing = true;
-            title.fontSizeMin = FontSizes.ValueLarge;
-            title.fontSizeMax = FontSizes.SceneTitle;
+            title.fontSizeMin = FontSizes.AutoMinTitle;
+            title.fontSizeMax = FontSizes.H4;
             title.fontStyle = FontStyles.Bold;
+            title.overflowMode = TextOverflowModes.Ellipsis;
 
             // Gold outline effect
             title.outlineWidth = 0.2f;
@@ -516,13 +541,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI balanceText = balanceObj.AddComponent<TextMeshProUGUI>();
             balanceText.text = "$0.00";
-            balanceText.fontSize = FontSizes.ValueLarge;
+            balanceText.fontSize = FontSizes.Subtitle;
             balanceText.color = TEXT_GOLD;
             balanceText.alignment = TextAlignmentOptions.Center;
             balanceText.fontStyle = FontStyles.Bold;
             balanceText.enableAutoSizing = true;
             balanceText.fontSizeMin = FontSizes.AutoMinBody;
-            balanceText.fontSizeMax = FontSizes.ValueLarge;
+            balanceText.fontSizeMax = FontSizes.Subtitle;
         }
 
         #endregion
@@ -702,13 +727,13 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = title;
-            titleText.fontSize = FontSizes.CardTitle;
+            titleText.fontSize = FontSizes.H3;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontStyle = FontStyles.Bold;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = FontSizes.AutoMinValue;
-            titleText.fontSizeMax = FontSizes.CardTitle;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = FontSizes.H3;
 
             // === SUBTITULO ===
             GameObject subtitleObj = new GameObject("Subtitle");
@@ -722,12 +747,12 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subText.text = subtitle;
-            subText.fontSize = FontSizes.Button;
+            subText.fontSize = FontSizes.Body;
             subText.color = TEXT_SECONDARY;
             subText.alignment = TextAlignmentOptions.Left;
             subText.enableAutoSizing = true;
             subText.fontSizeMin = FontSizes.AutoMinBody;
-            subText.fontSizeMax = FontSizes.Button;
+            subText.fontSizeMax = FontSizes.Body;
 
             // === DETALLE (badge) ===
             if (!string.IsNullOrEmpty(detail))
@@ -778,7 +803,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI arrowText = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowText.text = ">";
-            arrowText.fontSize = FontSizes.DisplayLarge;
+            arrowText.fontSize = FontSizes.H1;
             arrowText.color = TEXT_GOLD;
             arrowText.alignment = TextAlignmentOptions.Center;
             arrowText.fontStyle = FontStyles.Bold;
@@ -835,7 +860,7 @@ namespace DigitPark.Editor
 
                 TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
                 text.text = GetFallbackEmoji(iconName);
-                text.fontSize = FontSizes.SectionHeader;
+                text.fontSize = FontSizes.H4;
                 text.color = TEXT_GOLD;
                 text.alignment = TextAlignmentOptions.Center;
             }
@@ -900,7 +925,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Select a Game";
-            titleText.fontSize = FontSizes.Button;
+            titleText.fontSize = FontSizes.Body;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -1075,7 +1100,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI iconTMP = iconText.AddComponent<TextMeshProUGUI>();
             iconTMP.text = icon;
-            iconTMP.fontSize = FontSizes.BodyLarge;
+            iconTMP.fontSize = FontSizes.Body;
             iconTMP.color = TEXT_GOLD;
             iconTMP.alignment = TextAlignmentOptions.Center;
 
@@ -1239,7 +1264,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
             checkTMP.text = "V";
-            checkTMP.fontSize = FontSizes.Button;
+            checkTMP.fontSize = FontSizes.Body;
             checkTMP.color = BG_DARK; // Dark text on gold background
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
@@ -1338,7 +1363,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI dollarText = dollarSign.AddComponent<TextMeshProUGUI>();
             dollarText.text = "$";
-            dollarText.fontSize = FontSizes.BodyLarge;
+            dollarText.fontSize = FontSizes.Body;
             dollarText.color = GOLD_PRIMARY;
             dollarText.fontStyle = FontStyles.Bold;
             dollarText.alignment = TextAlignmentOptions.Center;
@@ -1523,7 +1548,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI coinText = coinIcon.AddComponent<TextMeshProUGUI>();
             coinText.text = "$";
-            coinText.fontSize = FontSizes.Button;
+            coinText.fontSize = FontSizes.Body;
             coinText.alignment = TextAlignmentOptions.Center;
         }
 
@@ -1657,7 +1682,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = "FIND OPPONENT";
-            text.fontSize = FontSizes.BodyLarge;
+            text.fontSize = FontSizes.Body;
             text.color = BG_DARK;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
@@ -1691,7 +1716,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI leftFireText = leftFire.AddComponent<TextMeshProUGUI>();
             leftFireText.text = "🔥";
-            leftFireText.fontSize = FontSizes.BodyLarge;
+            leftFireText.fontSize = FontSizes.Body;
             leftFireText.alignment = TextAlignmentOptions.Center;
 
             // Right fire icon
@@ -1707,7 +1732,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rightFireText = rightFire.AddComponent<TextMeshProUGUI>();
             rightFireText.text = "🔥";
-            rightFireText.fontSize = FontSizes.BodyLarge;
+            rightFireText.fontSize = FontSizes.Body;
             rightFireText.alignment = TextAlignmentOptions.Center;
 
             // Online indicator dot
@@ -1768,7 +1793,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Available Tournaments";
-            titleText.fontSize = FontSizes.Button;
+            titleText.fontSize = FontSizes.Body;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -1777,15 +1802,7 @@ namespace DigitPark.Editor
             GameObject scrollView = CreateScrollView(panel.transform, "TournamentsScrollView",
                 new Vector2(0, 0.05f), new Vector2(1, 0.9f));
 
-            // Create sample tournament cards
-            Transform content = scrollView.transform.Find("Viewport/Content");
-            if (content != null)
-            {
-                CreateTournamentCard(content, "Quick Math Championship", "QuickMath", 5m, 100m, "12/16");
-                CreateTournamentCard(content, "Flash Tap Masters", "FlashTap", 10m, 250m, "28/32");
-                CreateTournamentCard(content, "Cognitive Sprint Elite", "Sprint", 25m, 500m, "8/16");
-                CreateTournamentCard(content, "Memory Pairs Daily", "MemoryPairs", 1m, 20m, "18/20");
-            }
+            // Items instantiated at runtime from TournamentCardUI prefab
 
             // Note: Back button removed - user will add their own prefab
 
@@ -2033,7 +2050,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
             textTMP.text = "Bet $0.00 on DigitRush?";
-            textTMP.fontSize = FontSizes.BodyLarge;
+            textTMP.fontSize = FontSizes.Body;
             textTMP.color = TEXT_GOLD;
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
@@ -2171,7 +2188,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI iconTMP = iconText.AddComponent<TextMeshProUGUI>();
             iconTMP.text = "⚔";
-            iconTMP.fontSize = FontSizes.DisplayMedium;
+            iconTMP.fontSize = FontSizes.H3;
             iconTMP.color = BG_DARK;
             iconTMP.alignment = TextAlignmentOptions.Center;
 
@@ -2188,7 +2205,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI statusTMP = statusObj.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "Searching for opponent...";
-            statusTMP.fontSize = FontSizes.Button;
+            statusTMP.fontSize = FontSizes.Body;
             statusTMP.color = TEXT_GOLD;
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Center;
@@ -2206,7 +2223,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI timerTMP = timerObj.AddComponent<TextMeshProUGUI>();
             timerTMP.text = "00:00";
-            timerTMP.fontSize = FontSizes.ValueMedium;
+            timerTMP.fontSize = FontSizes.Subtitle;
             timerTMP.color = CYAN_ACCENT;
             timerTMP.fontStyle = FontStyles.Bold;
             timerTMP.alignment = TextAlignmentOptions.Center;
@@ -2224,7 +2241,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI opponentTMP = opponentObj.AddComponent<TextMeshProUGUI>();
             opponentTMP.text = "Searching...";
-            opponentTMP.fontSize = FontSizes.Button;
+            opponentTMP.fontSize = FontSizes.Body;
             opponentTMP.color = TEXT_PRIMARY;
             opponentTMP.fontStyle = FontStyles.Bold;
             opponentTMP.alignment = TextAlignmentOptions.Center;
@@ -2296,7 +2313,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "My Wallet";
-            titleText.fontSize = FontSizes.ValueMedium;
+            titleText.fontSize = FontSizes.Subtitle;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -2344,7 +2361,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = "$0.00";
-            amountText.fontSize = FontSizes.DisplayLarge;
+            amountText.fontSize = FontSizes.H1;
             amountText.color = GOLD_PRIMARY;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.fontStyle = FontStyles.Bold;
@@ -2423,7 +2440,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.text = text;
-            btnText.fontSize = FontSizes.BodyLarge;
+            btnText.fontSize = FontSizes.Body;
             btnText.color = Color.white;
             btnText.fontStyle = FontStyles.Bold;
             btnText.alignment = TextAlignmentOptions.Center;
@@ -2451,16 +2468,7 @@ namespace DigitPark.Editor
             GameObject scrollView = CreateScrollView(parent, "TransactionsScrollView",
                 new Vector2(0.02f, 0.08f), new Vector2(0.98f, 0.47f));
 
-            // Sample transactions
-            Transform content = scrollView.transform.Find("Viewport/Content");
-            if (content != null)
-            {
-                CreateTransactionItem(content, "+$10.00", "Earnings - QuickMath vs @Player123", "2 hours ago", true);
-                CreateTransactionItem(content, "-$5.00", "Entry - Flash Tap Tournament", "5 hours ago", false);
-                CreateTransactionItem(content, "+$50.00", "Deposit", "Yesterday", true);
-                CreateTransactionItem(content, "+$25.00", "Prize - 2nd place Tournament", "Yesterday", true);
-                CreateTransactionItem(content, "-$10.00", "Entry - Battle 1v1", "2 days ago", false);
-            }
+            // Items instantiated at runtime from TransactionItemUI prefab
         }
 
         private static void CreateTransactionItem(Transform parent, string amount, string description, string time, bool isPositive)
@@ -2571,7 +2579,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Match History";
-            titleText.fontSize = FontSizes.ValueMedium;
+            titleText.fontSize = FontSizes.Subtitle;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
@@ -2583,18 +2591,7 @@ namespace DigitPark.Editor
             GameObject scrollView = CreateScrollView(panel.transform, "HistoryScrollView",
                 new Vector2(0, 0.05f), new Vector2(1, 0.75f));
 
-            // Sample match history
-            Transform content = scrollView.transform.Find("Viewport/Content");
-            if (content != null)
-            {
-                CreateMatchHistoryItem(content, "QuickMath", "@ProGamer99", true, "+$8.50", "Today, 14:32", "1250 vs 980");
-                CreateMatchHistoryItem(content, "Flash Tap Tournament", "3rd Place", true, "+$15.00", "Today, 12:15", "8 participants");
-                CreateMatchHistoryItem(content, "MemoryPairs", "@SpeedKing", false, "-$5.00", "Yesterday, 22:45", "45s vs 38s");
-                CreateMatchHistoryItem(content, "Cognitive Sprint", "@MindMaster", true, "+$20.00", "Yesterday, 18:20", "3-2 games");
-                CreateMatchHistoryItem(content, "OddOneOut", "@EagleEye", false, "-$10.00", "2 days ago", "8/10 vs 10/10");
-                CreateMatchHistoryItem(content, "FlashTap", "@Lightning", true, "+$4.50", "2 days ago", "0.21s vs 0.28s");
-                CreateMatchHistoryItem(content, "QuickMath Tournament", "1st Place", true, "+$50.00", "3 days ago", "16 participants");
-            }
+            // Items instantiated at runtime from MatchHistoryItem prefab
 
             // Note: Back button removed - user will add their own prefab
 
@@ -2660,7 +2657,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.text = value;
-            valueText.fontSize = FontSizes.BodyLarge;
+            valueText.fontSize = FontSizes.Body;
             valueText.color = valueColor;
             valueText.fontStyle = FontStyles.Bold;
             valueText.alignment = TextAlignmentOptions.Center;

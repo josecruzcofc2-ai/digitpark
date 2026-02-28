@@ -83,7 +83,7 @@ namespace DigitPark.UI.Common
                 popupPanel.transform,
                 "Title",
                 AutoLocalizer.Get("username_popup_title"),
-                (int)FontSizes.LabelLarge,
+                (int)FontSizes.BodyLarge,
                 UIFactory.ElectricBlue,
                 TMPro.TextAlignmentOptions.Center
             );

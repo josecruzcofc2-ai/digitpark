@@ -32,6 +32,10 @@ namespace DigitPark.UI.CashBattle
             "CashBattleHub",
             "CashBattle1v1",
             "CashTournaments",
+            "CashTournamentCreate",
+            "CashTournamentLobby",
+            "CashMatchmaking",
+            "CashProfile",
             "CashWallet",
             "CashHistory",
             "AgeVerification"
@@ -303,7 +307,7 @@ namespace DigitPark.UI.CashBattle
             iconObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI iconText = iconObj.AddComponent<TextMeshProUGUI>();
             iconText.text = "📍";
-            iconText.fontSize = FontSizes.DisplayLarge;
+            iconText.fontSize = FontSizes.H1;
             iconText.alignment = TextAlignmentOptions.Center;
             LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
             iconLE.preferredHeight = 90;
@@ -313,7 +317,7 @@ namespace DigitPark.UI.CashBattle
             titleObj.transform.SetParent(content.transform, false);
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.text = AutoLocalizer.Get("location_unavailable_title");
-            title.fontSize = FontSizes.Button;
+            title.fontSize = FontSizes.Body;
             title.color = new Color(1f, 0.4f, 0.4f);
             title.alignment = TextAlignmentOptions.Center;
             title.fontStyle = FontStyles.Bold;

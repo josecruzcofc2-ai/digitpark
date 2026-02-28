@@ -198,7 +198,7 @@ namespace DigitPark.Editor
                 new Vector2(1, 1), new Vector2(1, 1),
                 new Vector2(-80, -240), new Vector2(120, 60));
 
-            TextMeshProUGUI comboTmp = SetupText(comboObj, "x2", (int)FontSizes.ValueMedium, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI comboTmp = SetupText(comboObj, "x2", (int)FontSizes.Subtitle, GREEN_NEON, FontStyles.Bold);
             comboTmp.alignment = TextAlignmentOptions.Center;
 
             Outline comboOutline = comboObj.AddComponent<Outline>();
@@ -228,7 +228,7 @@ namespace DigitPark.Editor
             // Text inside panel
             GameObject feedbackText = CreateElement(feedbackPanel.transform, "FeedbackText");
             SetupRectTransform(feedbackText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI feedbackTmp = SetupText(feedbackText, "", (int)FontSizes.ValueMedium, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI feedbackTmp = SetupText(feedbackText, "", (int)FontSizes.Subtitle, GREEN_NEON, FontStyles.Bold);
             feedbackTmp.alignment = TextAlignmentOptions.Center;
             feedbackTmp.enableWordWrapping = false;
 
@@ -259,7 +259,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 0), new Vector2(600, 70));
-            SetupText(title, "MEMORY PAIRS", (int)FontSizes.SceneTitle, CYAN_NEON, FontStyles.Bold);
+            SetupText(title, "MEMORY PAIRS", (int)FontSizes.H4, CYAN_NEON, FontStyles.Bold);
         }
 
         private static void CreateStatsBar(Transform parent)
@@ -290,19 +290,19 @@ namespace DigitPark.Editor
 
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "00:00", Color.white, 240, timerIcon, (int)FontSizes.BodyLarge);
+                "00:00", Color.white, 240, timerIcon, (int)FontSizes.Body);
 
             // Round
             CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
-                "1/1", CYAN_NEON, 180, null, (int)FontSizes.Button);
+                "1/1", CYAN_NEON, 180, null, (int)FontSizes.Body);
 
             // Pairs Found
             CreateStatItem(statsBar.transform, "PairsContainer", "PairsIcon", "PairsFoundText",
-                "0/8", GREEN_NEON, 195, pairsIcon, (int)FontSizes.BodyLarge);
+                "0/8", GREEN_NEON, 195, pairsIcon, (int)FontSizes.Body);
 
             // Errors
             CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
-                "0", ERROR_RED, 120, errorIcon, (int)FontSizes.BodyLarge);
+                "0", ERROR_RED, 120, errorIcon, (int)FontSizes.Body);
         }
 
         private static void CreateStatItem(Transform parent, string containerName, string iconName,
@@ -431,7 +431,7 @@ namespace DigitPark.Editor
             // 5. DIGIT TEXT (muestra "?" cuando oculto, dígito cuando revelado)
             GameObject digitText = CreateElement(face.transform, $"CardText_{index}");
             SetupRectTransform(digitText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI qText = SetupText(digitText, "?", (int)FontSizes.CardSymbol, new Color(0f, 1f, 1f, 0.8f), FontStyles.Bold);
+            TextMeshProUGUI qText = SetupText(digitText, "?", (int)FontSizes.Symbol, new Color(0f, 1f, 1f, 0.8f), FontStyles.Bold);
             qText.alignment = TextAlignmentOptions.Center;
 
             // Agregar outline/glow al "?"
@@ -511,7 +511,7 @@ namespace DigitPark.Editor
 
             GameObject textObj = CreateElement(playAgainBtn.transform, "Text");
             SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI tmp = SetupText(textObj, "PLAY AGAIN", (int)FontSizes.BodyLarge, DARK_BG, FontStyles.Bold);
+            TextMeshProUGUI tmp = SetupText(textObj, "PLAY AGAIN", (int)FontSizes.Body, DARK_BG, FontStyles.Bold);
             tmp.alignment = TextAlignmentOptions.Center;
 
             // Hidden by default (shown after win)
@@ -549,14 +549,14 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -50), new Vector2(0, 60));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", (int)FontSizes.ValueLarge, GREEN_NEON, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "COMPLETED!", (int)FontSizes.Subtitle, GREEN_NEON, FontStyles.Bold);
 
             // Time
             GameObject timeObj = CreateElement(content.transform, "TimeText");
             SetupRectTransform(timeObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -130), new Vector2(0, 60));
-            TextMeshProUGUI timeTmp = SetupText(timeObj, "Time: 0:00.00", (int)FontSizes.Button, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI timeTmp = SetupText(timeObj, "Time: 0:00.00", (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold);
 
             // Errors
             GameObject errorsObj = CreateElement(content.transform, "PanelErrorsText");
@@ -630,14 +630,14 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -50), new Vector2(0, 60));
-            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", (int)FontSizes.ValueLarge, ERROR_RED, FontStyles.Bold);
+            TextMeshProUGUI titleTmp = SetupText(titleObj, "TIME'S UP!", (int)FontSizes.Subtitle, ERROR_RED, FontStyles.Bold);
 
             // Time
             GameObject timeObj = CreateElement(content.transform, "TimeText");
             SetupRectTransform(timeObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -130), new Vector2(0, 60));
-            TextMeshProUGUI timeTmp = SetupText(timeObj, "Time: 0:00.00", (int)FontSizes.Button, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI timeTmp = SetupText(timeObj, "Time: 0:00.00", (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold);
 
             // Errors
             GameObject errorsObj = CreateElement(content.transform, "LosePanelErrorsText");
@@ -771,7 +771,7 @@ namespace DigitPark.Editor
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
-            SetupText(titleObj, "MEMORY PAIRS", (int)FontSizes.ValueLarge, CYAN_NEON, FontStyles.Bold);
+            SetupText(titleObj, "MEMORY PAIRS", (int)FontSizes.Subtitle, CYAN_NEON, FontStyles.Bold);
 
             Outline titleGlow = titleObj.AddComponent<Outline>();
             titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
@@ -847,7 +847,7 @@ namespace DigitPark.Editor
 
             GameObject startText = CreateElement(startBtn.transform, "StartText");
             SetupRectTransform(startText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            SetupText(startText, "START", (int)FontSizes.BodyLarge, DARK_BG, FontStyles.Bold);
+            SetupText(startText, "START", (int)FontSizes.Body, DARK_BG, FontStyles.Bold);
 
             settingsPanel.SetActive(false);
         }

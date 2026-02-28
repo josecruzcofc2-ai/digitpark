@@ -776,7 +776,7 @@ namespace DigitPark.Managers
                 ctRT.offsetMax = Vector2.zero;
                 var ctTMP = checkText.AddComponent<TextMeshProUGUI>();
                 ctTMP.text = "\u2713";
-                ctTMP.fontSize = FontSizes.Button;
+                ctTMP.fontSize = FontSizes.Body;
                 ctTMP.fontStyle = FontStyles.Bold;
                 ctTMP.color = TEXT_DARK;
                 ctTMP.alignment = TextAlignmentOptions.Center;
@@ -842,7 +842,7 @@ namespace DigitPark.Managers
                     bttRT.offsetMax = Vector2.zero;
                     var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                     bttTMP.text = L("dr_today");
-                    bttTMP.fontSize = FontSizes.Button;
+                    bttTMP.fontSize = FontSizes.Body;
                     bttTMP.fontStyle = FontStyles.Bold;
                     bttTMP.color = TEXT_DARK;
                     bttTMP.alignment = TextAlignmentOptions.Center;
@@ -951,13 +951,13 @@ namespace DigitPark.Managers
             dayLabel.AddComponent<LayoutElement>().preferredHeight = 42;
             var dlTMP = dayLabel.AddComponent<TextMeshProUGUI>();
             dlTMP.text = L("dr_day", dayIndex + 1);
-            dlTMP.fontSize = FontSizes.Button;
+            dlTMP.fontSize = FontSizes.Body;
             dlTMP.fontStyle = FontStyles.Bold;
             dlTMP.alignment = TextAlignmentOptions.Center;
             dlTMP.color = isClaimed ? GREEN_SUCCESS : (isToday ? GOLD : TEXT_WHITE);
             dlTMP.enableAutoSizing = true;
             dlTMP.fontSizeMin = FontSizes.AutoMinBody;
-            dlTMP.fontSizeMax = FontSizes.Button;
+            dlTMP.fontSizeMax = FontSizes.Body;
             dlTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Reward Icon
@@ -995,13 +995,13 @@ namespace DigitPark.Managers
             amountObj.AddComponent<LayoutElement>().preferredHeight = 42;
             var amTMP = amountObj.AddComponent<TextMeshProUGUI>();
             amTMP.text = $"+{reward.amount}";
-            amTMP.fontSize = FontSizes.Button;
+            amTMP.fontSize = FontSizes.Body;
             amTMP.fontStyle = FontStyles.Bold;
             amTMP.alignment = TextAlignmentOptions.Center;
             amTMP.overflowMode = TextOverflowModes.Ellipsis;
             amTMP.enableAutoSizing = true;
             amTMP.fontSizeMin = FontSizes.AutoMinBody;
-            amTMP.fontSizeMax = FontSizes.Button;
+            amTMP.fontSizeMax = FontSizes.Body;
             amTMP.color = isClaimed ? new Color(1f, 1f, 1f, 0.5f) : GetRewardTypeColor(reward.type);
 
             // --- Status Overlays ---
@@ -1028,7 +1028,7 @@ namespace DigitPark.Managers
                 ctRT.offsetMax = Vector2.zero;
                 var ctTMP = checkText.AddComponent<TextMeshProUGUI>();
                 ctTMP.text = "\u2713";
-                ctTMP.fontSize = FontSizes.Button;
+                ctTMP.fontSize = FontSizes.Body;
                 ctTMP.fontStyle = FontStyles.Bold;
                 ctTMP.color = TEXT_DARK;
                 ctTMP.alignment = TextAlignmentOptions.Center;
@@ -1055,7 +1055,7 @@ namespace DigitPark.Managers
                 bttRT.offsetMax = Vector2.zero;
                 var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                 bttTMP.text = L("dr_today");
-                bttTMP.fontSize = FontSizes.Button;
+                bttTMP.fontSize = FontSizes.Body;
                 bttTMP.fontStyle = FontStyles.Bold;
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;
@@ -1177,13 +1177,13 @@ namespace DigitPark.Managers
             titleObj.AddComponent<LayoutElement>().preferredHeight = 38;
             var titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = L("dr_grand_prize");
-            titleText.fontSize = FontSizes.Button;
+            titleText.fontSize = FontSizes.Body;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.color = isClaimed ? new Color(0.5f, 0.5f, 0.5f) : GOLD;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinBody;
-            titleText.fontSizeMax = FontSizes.Button;
+            titleText.fontSizeMax = FontSizes.Body;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Reward details
@@ -1193,13 +1193,13 @@ namespace DigitPark.Managers
             detailObj.AddComponent<LayoutElement>().preferredHeight = 38;
             var detailText = detailObj.AddComponent<TextMeshProUGUI>();
             detailText.text = $"+{reward.amount} {GetRewardTypeName(reward.type)}";
-            detailText.fontSize = FontSizes.Button;
+            detailText.fontSize = FontSizes.Body;
             detailText.fontStyle = FontStyles.Bold;
             detailText.alignment = TextAlignmentOptions.Left;
             detailText.color = isClaimed ? new Color(0.5f, 0.5f, 0.5f) : GetRewardTypeColor(reward.type);
             detailText.enableAutoSizing = true;
             detailText.fontSizeMin = FontSizes.AutoMinBody;
-            detailText.fontSizeMax = FontSizes.Button;
+            detailText.fontSizeMax = FontSizes.Body;
             detailText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Status / countdown
@@ -1223,11 +1223,11 @@ namespace DigitPark.Managers
                 statusText.text = L("dr_unlocks_in", daysUntil);
                 statusText.color = TEXT_SECONDARY;
             }
-            statusText.fontSize = FontSizes.Button;
+            statusText.fontSize = FontSizes.Body;
             statusText.alignment = TextAlignmentOptions.Left;
             statusText.enableAutoSizing = true;
             statusText.fontSizeMin = FontSizes.AutoMinBody;
-            statusText.fontSizeMax = FontSizes.Button;
+            statusText.fontSizeMax = FontSizes.Body;
             statusText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Shimmer effect premium (solo si no reclamado)

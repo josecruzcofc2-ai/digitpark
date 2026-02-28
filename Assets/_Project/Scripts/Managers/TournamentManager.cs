@@ -1795,7 +1795,7 @@ namespace DigitPark.Managers
 
             // Texto del título
             TextMeshProUGUI titleText = CreateItemText(titleObj.transform, "TitleText",
-                tournament.name, (int)FontSizes.BodyLarge, Color.white);
+                tournament.name, (int)FontSizes.Body, Color.white);
             RectTransform titleTextRT = titleText.GetComponent<RectTransform>();
             titleTextRT.anchorMin = new Vector2(0, 0.5f);
             titleTextRT.anchorMax = new Vector2(1, 1);

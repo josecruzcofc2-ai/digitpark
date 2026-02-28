@@ -41,6 +41,9 @@ namespace DigitPark.Monetization
             public const string CASH_WALLET = "CashWallet";
             public const string CASH_HISTORY = "CashHistory";
             public const string CASH_PROFILE = "CashProfile";
+            public const string CASH_MATCHMAKING = "CashMatchmaking";
+            public const string CASH_TOURNAMENT_CREATE = "CashTournamentCreate";
+            public const string CASH_TOURNAMENT_LOBBY = "CashTournamentLobby";
 
             // Tournaments
             public const string TOURNAMENTS_BROWSER = "TournamentsBrowser";

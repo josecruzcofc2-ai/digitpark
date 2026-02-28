@@ -660,7 +660,7 @@ namespace DigitPark.Managers
                 rankObj.transform.SetParent(item.transform, false);
                 var rankText = rankObj.AddComponent<TextMeshProUGUI>();
                 rankText.text = $"#{participant.rank}";
-                rankText.fontSize = FontSizes.LabelLarge;
+                rankText.fontSize = FontSizes.BodyLarge;
                 rankText.fontStyle = FontStyles.Bold;
                 rankText.color = new Color(0f, 1f, 1f);
                 rankText.alignment = TextAlignmentOptions.Center;
@@ -697,7 +697,7 @@ namespace DigitPark.Managers
                 timeObj.transform.SetParent(item.transform, false);
                 var timeText = timeObj.AddComponent<TextMeshProUGUI>();
                 timeText.text = participant.bestTime > 0 ? FormatTime(participant.bestTime) : "-";
-                timeText.fontSize = FontSizes.LabelLarge;
+                timeText.fontSize = FontSizes.BodyLarge;
                 timeText.fontStyle = FontStyles.Bold;
                 timeText.color = new Color(0f, 1f, 1f);
                 timeText.alignment = TextAlignmentOptions.Right;

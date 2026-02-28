@@ -25,6 +25,10 @@ namespace DigitPark.Editor
             "CashBattleHub",
             "CashHistory",
             "CashTournaments",
+            "CashTournamentCreate",
+            "CashTournamentLobby",
+            "CashMatchmaking",
+            "CashProfile",
             "CashWallet",
             "AgeVerification"
         };
