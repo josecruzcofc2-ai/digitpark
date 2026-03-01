@@ -256,7 +256,7 @@ namespace DigitPark.UI.CashBattle
             if (gameFilterDropdown != null)
             {
                 gameFilterDropdown.ClearOptions();
-                var gameOptions = new List<string> { "Todos los juegos" };
+                var gameOptions = new List<string> { "All Games" };
                 var gameInfos = CognitiveSprintManager.GetAllGameInfos();
                 foreach (var info in gameInfos)
                 {
@@ -272,7 +272,7 @@ namespace DigitPark.UI.CashBattle
                 feeFilterDropdown.ClearOptions();
                 var feeOptions = new List<string>
                 {
-                    "Todas las entradas",
+                    "All Entry Fees",
                     "$1 - $10",
                     "$11 - $50",
                     "$51 - $100",
@@ -521,7 +521,7 @@ namespace DigitPark.UI.CashBattle
             CreateLabel(infoContainer.transform, "EntryFee", "Entry: $0", (int)FontSizes.Body, true, Color.white);
 
             // Participants
-            CreateLabel(infoContainer.transform, "Participants", "0/0 jugadores", (int)FontSizes.Body, false, new Color(0.7f, 0.7f, 0.7f));
+            CreateLabel(infoContainer.transform, "Participants", "0/0 players", (int)FontSizes.Body, false, new Color(0.7f, 0.7f, 0.7f));
 
             // Join button
             GameObject joinBtn = new GameObject("JoinButton");

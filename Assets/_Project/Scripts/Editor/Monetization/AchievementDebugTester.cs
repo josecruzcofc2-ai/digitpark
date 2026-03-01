@@ -105,73 +105,73 @@ namespace DigitPark.Editor
             allAchievements = new List<AchievementTestData>
             {
                 // ==================== BEGINNER (4) ====================
-                new AchievementTestData("first_game", "Primer Paso", "Completa tu primera partida", "Beginner", 10, "Logro_Primeros_Pasos"),
-                new AchievementTestData("tutorial_complete", "Aprendiz", "Completa el tutorial", "Beginner", 10, "Logro_Graduado"),
-                new AchievementTestData("first_win", "Primera Victoria", "Gana tu primera partida", "Beginner", 15, "Logro_Primera_Victoria"),
-                new AchievementTestData("profile_complete", "Identidad", "Completa tu perfil", "Beginner", 10, "Logro_Perfil_Completo"),
+                new AchievementTestData("first_game", "First Steps", "Complete your first match", "Beginner", 10, "Logro_Primeros_Pasos"),
+                new AchievementTestData("tutorial_complete", "Apprentice", "Complete the tutorial", "Beginner", 10, "Logro_Graduado"),
+                new AchievementTestData("first_win", "First Victory", "Win your first match", "Beginner", 15, "Logro_Primera_Victoria"),
+                new AchievementTestData("profile_complete", "Identity", "Complete your profile", "Beginner", 10, "Logro_Perfil_Completo"),
 
                 // ==================== MASTERY (5) ====================
-                new AchievementTestData("digitrush_master", "Maestro de Dígitos", "Alcanza 10,000 puntos en DigitRush", "Mastery", 50, "Logro_Maestro_Numeros"),
-                new AchievementTestData("flashtap_master", "Reflejos de Luz", "Alcanza 100 taps perfectos en FlashTap", "Mastery", 50, "Logro_Reflejos_Rayo"),
-                new AchievementTestData("memorypairs_master", "Memoria Fotográfica", "Completa MemoryPairs sin errores", "Mastery", 50, "Logro_Genio"),
-                new AchievementTestData("quickmath_master", "Calculadora Humana", "Resuelve 50 problemas seguidos", "Mastery", 50, "Logro_Maestro_Matematicas"),
-                new AchievementTestData("oddoneout_master", "Ojo de Águila", "Encuentra 100 diferencias", "Mastery", 50, "Logro_Ojo_Aguila"),
+                new AchievementTestData("digitrush_master", "Digit Master", "Reach 10,000 points in DigitRush", "Mastery", 50, "Logro_Maestro_Numeros"),
+                new AchievementTestData("flashtap_master", "Lightning Reflexes", "Reach 100 perfect taps in FlashTap", "Mastery", 50, "Logro_Reflejos_Rayo"),
+                new AchievementTestData("memorypairs_master", "Photographic Memory", "Complete MemoryPairs without mistakes", "Mastery", 50, "Logro_Genio"),
+                new AchievementTestData("quickmath_master", "Human Calculator", "Solve 50 problems in a row", "Mastery", 50, "Logro_Maestro_Matematicas"),
+                new AchievementTestData("oddoneout_master", "Eagle Eye", "Find 100 differences", "Mastery", 50, "Logro_Ojo_Aguila"),
 
                 // ==================== VICTORIES (5) ====================
-                new AchievementTestData("wins_10", "Competidor", "Gana 10 partidas", "Victories", 20, "Logro_10_Victorias"),
-                new AchievementTestData("wins_50", "Veterano", "Gana 50 partidas", "Victories", 40, "Logro_50_Victorias"),
-                new AchievementTestData("wins_100", "Centurión", "Gana 100 partidas", "Victories", 60, "Logro_Centurion"),
-                new AchievementTestData("wins_500", "Leyenda", "Gana 500 partidas", "Victories", 100, "Logro_500_Victorias"),
-                new AchievementTestData("wins_1000", "Inmortal", "Gana 1,000 partidas", "Victories", 200, "Logro_1000_Victorias"),
+                new AchievementTestData("wins_10", "Competitor", "Win 10 matches", "Victories", 20, "Logro_10_Victorias"),
+                new AchievementTestData("wins_50", "Veteran", "Win 50 matches", "Victories", 40, "Logro_50_Victorias"),
+                new AchievementTestData("wins_100", "Centurion", "Win 100 matches", "Victories", 60, "Logro_Centurion"),
+                new AchievementTestData("wins_500", "Legend", "Win 500 matches", "Victories", 100, "Logro_500_Victorias"),
+                new AchievementTestData("wins_1000", "Immortal", "Win 1,000 matches", "Victories", 200, "Logro_1000_Victorias"),
 
                 // ==================== STREAKS (4) ====================
-                new AchievementTestData("streak_3", "En Racha", "Gana 3 partidas seguidas", "Streaks", 25, "Logro_Racha_Fuego"),
-                new AchievementTestData("streak_5", "Imparable", "Gana 5 partidas seguidas", "Streaks", 40, "Logro_Victoria_Racha_7"),
-                new AchievementTestData("streak_10", "Dominación", "Gana 10 partidas seguidas", "Streaks", 75, "Logro_Demoledor"),
-                new AchievementTestData("streak_20", "Invencible", "Gana 20 partidas seguidas", "Streaks", 150, "Logro_Victoria_Racha_30", true),
+                new AchievementTestData("streak_3", "On a Streak", "Win 3 matches in a row", "Streaks", 25, "Logro_Racha_Fuego"),
+                new AchievementTestData("streak_5", "Unstoppable", "Win 5 matches in a row", "Streaks", 40, "Logro_Victoria_Racha_7"),
+                new AchievementTestData("streak_10", "Domination", "Win 10 matches in a row", "Streaks", 75, "Logro_Demoledor"),
+                new AchievementTestData("streak_20", "Invincible", "Win 20 matches in a row", "Streaks", 150, "Logro_Victoria_Racha_30", true),
 
                 // ==================== CASH BATTLE (7) ====================
-                new AchievementTestData("cash_first", "Apostador", "Completa tu primera Cash Battle", "CashBattle", 25, "Logro_Ficha_Cash"),
-                new AchievementTestData("cash_first_win", "Ganador Real", "Gana tu primera Cash Battle", "CashBattle", 35, "Logro_Rey_Monedas"),
-                new AchievementTestData("cash_10_wins", "Jugador Serio", "Gana 10 Cash Battles", "CashBattle", 50, "Logro_VIP_1000"),
-                new AchievementTestData("cash_50_wins", "High Roller", "Gana 50 Cash Battles", "CashBattle", 100, "Logro_VIP_Dados"),
-                new AchievementTestData("cash_100_wins", "Tiburón", "Gana 100 Cash Battles", "CashBattle", 200, "Logro_Tiburon_Cash"),
-                new AchievementTestData("cash_earnings_100", "Primeros $100", "Acumula $100 en ganancias", "CashBattle", 75, "Logro_Bolsa_100"),
-                new AchievementTestData("cash_earnings_1000", "Club de los Mil", "Acumula $1,000 en ganancias", "CashBattle", 250, "Logro_Millonario", true),
+                new AchievementTestData("cash_first", "Bettor", "Complete your first Cash Battle", "CashBattle", 25, "Logro_Ficha_Cash"),
+                new AchievementTestData("cash_first_win", "Real Winner", "Win your first Cash Battle", "CashBattle", 35, "Logro_Rey_Monedas"),
+                new AchievementTestData("cash_10_wins", "Serious Player", "Win 10 Cash Battles", "CashBattle", 50, "Logro_VIP_1000"),
+                new AchievementTestData("cash_50_wins", "High Roller", "Win 50 Cash Battles", "CashBattle", 100, "Logro_VIP_Dados"),
+                new AchievementTestData("cash_100_wins", "Shark", "Win 100 Cash Battles", "CashBattle", 200, "Logro_Tiburon_Cash"),
+                new AchievementTestData("cash_earnings_100", "First $100", "Accumulate $100 in earnings", "CashBattle", 75, "Logro_Bolsa_100"),
+                new AchievementTestData("cash_earnings_1000", "Thousand Club", "Accumulate $1,000 in earnings", "CashBattle", 250, "Logro_Millonario", true),
 
                 // ==================== TOURNAMENTS (5) ====================
-                new AchievementTestData("tournament_first", "Participante", "Participa en tu primer torneo", "Tournaments", 20, "Logro_Torneo_Bracket"),
-                new AchievementTestData("tournament_top3", "Podio", "Termina en Top 3", "Tournaments", 50, "Logro_Coleccion_Trofeos"),
-                new AchievementTestData("tournament_win", "Campeón", "Gana un torneo", "Tournaments", 100, "Logro_Campeon_1"),
-                new AchievementTestData("tournament_5_wins", "Multicampeón", "Gana 5 torneos", "Tournaments", 200, "Logro_4_Estrellas"),
-                new AchievementTestData("tournament_create", "Organizador", "Crea tu primer torneo", "Tournaments", 30, "Logro_Organizador_Torneo"),
+                new AchievementTestData("tournament_first", "Participant", "Participate in your first tournament", "Tournaments", 20, "Logro_Torneo_Bracket"),
+                new AchievementTestData("tournament_top3", "Podium", "Finish in Top 3", "Tournaments", 50, "Logro_Coleccion_Trofeos"),
+                new AchievementTestData("tournament_win", "Champion", "Win a tournament", "Tournaments", 100, "Logro_Campeon_1"),
+                new AchievementTestData("tournament_5_wins", "Multi-Champion", "Win 5 tournaments", "Tournaments", 200, "Logro_4_Estrellas"),
+                new AchievementTestData("tournament_create", "Organizer", "Create your first tournament", "Tournaments", 30, "Logro_Organizador_Torneo"),
 
                 // ==================== SOCIAL (5) ====================
-                new AchievementTestData("friend_first", "Primer Amigo", "Añade tu primer amigo", "Social", 15, "Logro_Primer_Rival"),
-                new AchievementTestData("friends_10", "Popular", "Tiene 10 amigos", "Social", 30, "Logro_Social_10_Amigos"),
-                new AchievementTestData("friends_50", "Influencer", "Tiene 50 amigos", "Social", 75, "Logro_Influencer"),
-                new AchievementTestData("challenge_friend", "Retador", "Reta a un amigo", "Social", 20, "Logro_Versus"),
-                new AchievementTestData("beat_friend", "Rival", "Vence a un amigo", "Social", 25, "Logro_Amigo_Rival"),
+                new AchievementTestData("friend_first", "First Friend", "Add your first friend", "Social", 15, "Logro_Primer_Rival"),
+                new AchievementTestData("friends_10", "Popular", "Have 10 friends", "Social", 30, "Logro_Social_10_Amigos"),
+                new AchievementTestData("friends_50", "Influencer", "Have 50 friends", "Social", 75, "Logro_Influencer"),
+                new AchievementTestData("challenge_friend", "Challenger", "Challenge a friend", "Social", 20, "Logro_Versus"),
+                new AchievementTestData("beat_friend", "Rival", "Beat a friend", "Social", 25, "Logro_Amigo_Rival"),
 
                 // ==================== PROGRESSION (4) ====================
-                new AchievementTestData("level_10", "Nivel 10", "Alcanza el nivel 10", "Progression", 25, "Logro_Nivel_10"),
-                new AchievementTestData("level_25", "Nivel 25", "Alcanza el nivel 25", "Progression", 50, "Logro_Nivel_25"),
-                new AchievementTestData("level_50", "Nivel 50", "Alcanza el nivel 50", "Progression", 75, "Logro_Nivel50"),
-                new AchievementTestData("level_100", "Nivel 100", "Alcanza el nivel 100", "Progression", 150, "Logro_Avance_Epico"),
+                new AchievementTestData("level_10", "Level 10", "Reach level 10", "Progression", 25, "Logro_Nivel_10"),
+                new AchievementTestData("level_25", "Level 25", "Reach level 25", "Progression", 50, "Logro_Nivel_25"),
+                new AchievementTestData("level_50", "Level 50", "Reach level 50", "Progression", 75, "Logro_Nivel50"),
+                new AchievementTestData("level_100", "Level 100", "Reach level 100", "Progression", 150, "Logro_Avance_Epico"),
 
                 // ==================== TIME (6) ====================
-                new AchievementTestData("days_7", "Una Semana", "Juega 7 días", "Time", 25, "Logro_Racha_7_Dias"),
-                new AchievementTestData("days_30", "Un Mes", "Juega 30 días", "Time", 50, "Logro_Racha_30_Dias"),
-                new AchievementTestData("days_100", "100 Días", "Juega 100 días", "Time", 100, "Logro_Racha_100_Dias"),
-                new AchievementTestData("days_365", "Un Año", "Juega 365 días", "Time", 300, "Logro_Racha_365_Dias", true),
-                new AchievementTestData("daily_streak_7", "Racha Semanal", "Login 7 días seguidos", "Time", 30, "Logro_Login_Semanal"),
-                new AchievementTestData("daily_streak_30", "Racha Mensual", "Login 30 días seguidos", "Time", 75, "Logro_Login_Mensual"),
+                new AchievementTestData("days_7", "One Week", "Play for 7 days", "Time", 25, "Logro_Racha_7_Dias"),
+                new AchievementTestData("days_30", "One Month", "Play for 30 days", "Time", 50, "Logro_Racha_30_Dias"),
+                new AchievementTestData("days_100", "100 Days", "Play for 100 days", "Time", 100, "Logro_Racha_100_Dias"),
+                new AchievementTestData("days_365", "One Year", "Play for 365 days", "Time", 300, "Logro_Racha_365_Dias", true),
+                new AchievementTestData("daily_streak_7", "Weekly Streak", "Log in 7 days in a row", "Time", 30, "Logro_Login_Semanal"),
+                new AchievementTestData("daily_streak_30", "Monthly Streak", "Log in 30 days in a row", "Time", 75, "Logro_Login_Mensual"),
 
                 // ==================== SECRET (4) ====================
-                new AchievementTestData("night_owl", "Búho Nocturno", "Juega a las 3:00 AM", "Secret", 50, "Logro_Buho_Nocturno", true),
-                new AchievementTestData("perfect_game", "Perfección", "100% precisión en cualquier juego", "Secret", 100, "Logro_Perfeccionista", true),
-                new AchievementTestData("comeback_king", "Rey del Comeback", "Gana perdiendo por 50%+", "Secret", 75, "Logro_Ave_Fenix", true),
-                new AchievementTestData("speed_demon", "Demonio de Velocidad", "Completa un juego en <10 segundos", "Secret", 100, "Logro_Demonio_Velocidad", true),
+                new AchievementTestData("night_owl", "Night Owl", "Play at 3:00 AM", "Secret", 50, "Logro_Buho_Nocturno", true),
+                new AchievementTestData("perfect_game", "Perfection", "100% accuracy in any game", "Secret", 100, "Logro_Perfeccionista", true),
+                new AchievementTestData("comeback_king", "Comeback King", "Win while losing by 50%+", "Secret", 75, "Logro_Ave_Fenix", true),
+                new AchievementTestData("speed_demon", "Speed Demon", "Complete a game in <10 seconds", "Secret", 100, "Logro_Demonio_Velocidad", true),
             };
         }
 

@@ -332,15 +332,15 @@ namespace DigitPark.Editor
             tabsBg.color = new Color(0.04f, 0.07f, 0.11f, 0.9f);
 
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(tabsPanel);
-            hlg.spacing = 10f;
-            hlg.padding = new RectOffset(10, 10, 5, 5);
+            hlg.spacing = 16f;
+            hlg.padding = new RectOffset(12, 12, 5, 5);
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = true;
             hlg.childForceExpandHeight = true;
 
-            // Tab: Buscar Torneos
+            // Tab: Search Tournaments
             CreateTab(tabsPanel, "SearchTournamentsTab", "Search Tournaments", true);
 
             // Tab: Mis Torneos

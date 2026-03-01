@@ -9,7 +9,7 @@ namespace DigitPark.Editor
     public static class BackButtonBuilder
     {
         private const string PREFAB_PATH = "Assets/_Project/Prefabs/Common/BackButton.prefab";
-        private const string ICON_PATH = "Assets/_Project/Textures/UI/Icons/BackIcon.png";
+        private const string ICON_PATH = "Assets/_Project/Art/Icons/Navigation/BackIcon.png";
 
         [MenuItem("DigitPark/UI/Prefabs/Create BackButton Prefab", false, 100)]
         public static void CreateBackButtonPrefab()

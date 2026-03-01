@@ -998,16 +998,19 @@ namespace DigitPark.Editor
             emptyState.transform.SetParent(contentParent, false);
 
             RectTransform rt = emptyState.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.5f);
-            rt.anchorMax = new Vector2(1, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(0, 80);
+            rt.anchorMin = new Vector2(0.1f, 0.3f);
+            rt.anchorMax = new Vector2(0.9f, 0.7f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
 
             TextMeshProUGUI tmp = emptyState.AddComponent<TextMeshProUGUI>();
-            tmp.text = "No history";
+            tmp.text = "No matches yet.\nStart playing to see your history!";
             tmp.fontSize = FontSizes.Body;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.enableAutoSizing = true;
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableWordWrapping = true;
 
             emptyState.SetActive(false);
         }

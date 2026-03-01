@@ -1166,28 +1166,31 @@ namespace DigitPark.Editor
 
             Image feedbackBg = container.AddComponent<Image>();
             feedbackBg.color = new Color(0.03f, 0.1f, 0.05f, 0.95f);
-            // Sin Outline - el color de fondo verde oscuro es suficiente
+            // No Outline - dark green background is sufficient
 
-            // Potential earnings - MAS GRANDE Y VISIBLE
+            // Potential earnings
             GameObject earningsObj = new GameObject("PotentialEarningsText");
             earningsObj.transform.SetParent(container.transform, false);
 
             RectTransform earningsRT = earningsObj.AddComponent<RectTransform>();
             earningsRT.anchorMin = new Vector2(0, 0.45f);
-            earningsRT.anchorMax = new Vector2(0.85f, 1);
+            earningsRT.anchorMax = new Vector2(0.78f, 1);
             earningsRT.sizeDelta = Vector2.zero;
             earningsRT.offsetMin = new Vector2(20, 0);
             earningsRT.offsetMax = new Vector2(0, -5);
 
             TextMeshProUGUI earningsText = earningsObj.AddComponent<TextMeshProUGUI>();
             earningsText.text = "If you win you receive: <color=#FFD700>$0.00</color>";
-            earningsText.fontSize = FontSizes.H3;
+            earningsText.fontSize = FontSizes.H4;
+            earningsText.fontSizeMin = FontSizes.AutoMinTitle;
+            earningsText.enableAutoSizing = true;
             earningsText.color = new Color(0.5f, 1f, 0.7f, 1f);
             earningsText.fontStyle = FontStyles.Bold;
             earningsText.alignment = TextAlignmentOptions.Left;
             earningsText.richText = true;
+            earningsText.enableWordWrapping = true;
 
-            // Pool info - MAS GRANDE
+            // Pool info
             GameObject poolObj = new GameObject("PoolInfoText");
             poolObj.transform.SetParent(container.transform, false);
 

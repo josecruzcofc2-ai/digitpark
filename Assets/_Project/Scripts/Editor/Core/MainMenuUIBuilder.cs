@@ -71,21 +71,21 @@ namespace DigitPark.Editor
         #region Icon Paths
 
         private const string ICONS_BASE = "Assets/_Project/Art/Icons";
-        private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/Actions/SettingsIcon.png";
-        private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/Actions/NotificationsIcon.png";
-        private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/Actions/NotificationsIcon.png";
-        private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/Profile/AvatarDefault.png";
+        private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/SettingsIcon.png";
+        private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/NotificationsIcon.png";
+        private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/NotificationsIcon.png";
+        private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/AvatarDefault.png";
         private const string ICON_GEM = ICONS_BASE + "/Currency/icon_digitgem_single.png";
         private const string ICON_COIN = ICONS_BASE + "/Currency/icon_digitcoin_single.png";
-        private const string ICON_RANKINGS = ICONS_BASE + "/Tournaments/RankingsIcon.png";
-        private const string ICON_SEARCH = ICONS_BASE + "/Navigation/Buttons/SearchIcon.png";
+        private const string ICON_RANKINGS = ICONS_BASE + "/UI/RankingsIcon.png";
+        private const string ICON_SEARCH = ICONS_BASE + "/Navigation/SearchIcon.png";
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
         private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIcon.png";
         private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIcon.png";
         private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/icon_daily_claim.png";
-        private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/Monetization/AchievementsIcon.png";
-        private const string ICON_SHOP = ICONS_BASE + "/Monetization/ShopIcon.png";
-        private const string ICON_PREMIUM = ICONS_BASE + "/Premium/PremiumIcon.png";
+        private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/UI/AchievementsIcon.png";
+        private const string ICON_SHOP = ICONS_BASE + "/UI/ShopIcon.png";
+        private const string ICON_PREMIUM = ICONS_BASE + "/UI/PremiumIcon.png";
 
         #endregion
 
@@ -261,8 +261,12 @@ namespace DigitPark.Editor
             badgeRT.anchorMax = new Vector2(1, 1);
             badgeRT.pivot = new Vector2(0.5f, 0.5f);
             badgeRT.anchoredPosition = new Vector2(-12, -12);
-            badgeRT.sizeDelta = new Vector2(40, 40);
-            GetOrAdd<Image>(badge).color = new Color(1, 0.2f, 0.2f, 1);
+            badgeRT.sizeDelta = new Vector2(36, 36);
+            var badgeImg = GetOrAdd<Image>(badge);
+            badgeImg.color = new Color(1, 0.2f, 0.2f, 1);
+            // Use a circle sprite for round badge appearance
+            badgeImg.type = Image.Type.Sliced;
+            badgeImg.pixelsPerUnitMultiplier = 2f;
 
             var badgeText = FindOrCreate(badge.transform, "BadgeText");
             var btRT = GetOrAdd<RectTransform>(badgeText);

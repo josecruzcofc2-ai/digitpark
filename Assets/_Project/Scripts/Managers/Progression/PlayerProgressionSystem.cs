@@ -5,11 +5,11 @@ using System.Collections.Generic;
 namespace DigitPark.Progression
 {
     /// <summary>
-    /// Sistema de Nivel Permanente del Jugador.
-    /// - Solo sube, NUNCA baja
-    /// - XP ganado en: Practice Mode, Torneos gratis, 1v1 gratis
-    /// - NO incluye Cash Battles
-    /// - Desbloquea: Avatares, Títulos, Cosméticos
+    /// Permanent Player Level System.
+    /// - Only goes up, NEVER goes down
+    /// - XP earned in: Practice Mode, Free Tournaments, Free 1v1
+    /// - Does NOT include Cash Battles
+    /// - Unlocks: Avatars, Titles, Cosmetics
     /// </summary>
     public class PlayerProgressionSystem : MonoBehaviour
     {
@@ -225,38 +225,38 @@ namespace DigitPark.Progression
             _levelRewards = new Dictionary<int, LevelReward>
             {
                 // Early levels - frequent rewards
-                { 5, new LevelReward("Avatar: Principiante", RewardType.Avatar, "avatar_beginner") },
-                { 10, new LevelReward("Título: Novato", RewardType.Title, "title_novice") },
+                { 5, new LevelReward("Avatar: Beginner", RewardType.Avatar, "avatar_beginner") },
+                { 10, new LevelReward("Title: Novice", RewardType.Title, "title_novice") },
                 { 15, new LevelReward("500 DigitCoins", RewardType.DigitCoins, "500") },
-                { 20, new LevelReward("Avatar: Jugador", RewardType.Avatar, "avatar_player") },
-                { 25, new LevelReward("Título: Jugador", RewardType.Title, "title_player") },
+                { 20, new LevelReward("Avatar: Player", RewardType.Avatar, "avatar_player") },
+                { 25, new LevelReward("Title: Player", RewardType.Title, "title_player") },
 
                 // Mid levels
                 { 30, new LevelReward("1000 DigitCoins", RewardType.DigitCoins, "1000") },
-                { 40, new LevelReward("Avatar: Veterano", RewardType.Avatar, "avatar_veteran") },
-                { 50, new LevelReward("Título: Veterano", RewardType.Title, "title_veteran") },
-                { 60, new LevelReward("Marco: Bronce", RewardType.Frame, "frame_bronze") },
+                { 40, new LevelReward("Avatar: Veteran", RewardType.Avatar, "avatar_veteran") },
+                { 50, new LevelReward("Title: Veteran", RewardType.Title, "title_veteran") },
+                { 60, new LevelReward("Frame: Bronze", RewardType.Frame, "frame_bronze") },
                 { 75, new LevelReward("2000 DigitCoins", RewardType.DigitCoins, "2000") },
 
                 // High levels
-                { 100, new LevelReward("Título: Centurión", RewardType.Title, "title_centurion") },
-                { 100, new LevelReward("Avatar: Centurión", RewardType.Avatar, "avatar_centurion") },
-                { 125, new LevelReward("Marco: Plata", RewardType.Frame, "frame_silver") },
+                { 100, new LevelReward("Title: Centurion", RewardType.Title, "title_centurion") },
+                { 100, new LevelReward("Avatar: Centurion", RewardType.Avatar, "avatar_centurion") },
+                { 125, new LevelReward("Frame: Silver", RewardType.Frame, "frame_silver") },
                 { 150, new LevelReward("5000 DigitCoins", RewardType.DigitCoins, "5000") },
-                { 175, new LevelReward("Título: Experto", RewardType.Title, "title_expert") },
-                { 200, new LevelReward("Avatar: Experto", RewardType.Avatar, "avatar_expert") },
+                { 175, new LevelReward("Title: Expert", RewardType.Title, "title_expert") },
+                { 200, new LevelReward("Avatar: Expert", RewardType.Avatar, "avatar_expert") },
 
                 // Elite levels
-                { 250, new LevelReward("Marco: Oro", RewardType.Frame, "frame_gold") },
-                { 300, new LevelReward("Título: Maestro", RewardType.Title, "title_master") },
-                { 350, new LevelReward("Avatar: Maestro", RewardType.Avatar, "avatar_master") },
-                { 400, new LevelReward("Marco: Platino", RewardType.Frame, "frame_platinum") },
-                { 450, new LevelReward("Título: Gran Maestro", RewardType.Title, "title_grandmaster") },
+                { 250, new LevelReward("Frame: Gold", RewardType.Frame, "frame_gold") },
+                { 300, new LevelReward("Title: Master", RewardType.Title, "title_master") },
+                { 350, new LevelReward("Avatar: Master", RewardType.Avatar, "avatar_master") },
+                { 400, new LevelReward("Frame: Platinum", RewardType.Frame, "frame_platinum") },
+                { 450, new LevelReward("Title: Grand Master", RewardType.Title, "title_grandmaster") },
 
                 // Max level
-                { 500, new LevelReward("Título: Leyenda", RewardType.Title, "title_legend") },
-                { 500, new LevelReward("Avatar: Leyenda", RewardType.Avatar, "avatar_legend") },
-                { 500, new LevelReward("Marco: Diamante", RewardType.Frame, "frame_diamond") },
+                { 500, new LevelReward("Title: Legend", RewardType.Title, "title_legend") },
+                { 500, new LevelReward("Avatar: Legend", RewardType.Avatar, "avatar_legend") },
+                { 500, new LevelReward("Frame: Diamond", RewardType.Frame, "frame_diamond") },
             };
         }
 

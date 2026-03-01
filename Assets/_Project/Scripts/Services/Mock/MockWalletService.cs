@@ -7,8 +7,8 @@ using UnityEngine;
 namespace DigitPark.Services.Mock
 {
     /// <summary>
-    /// Implementación Mock del servicio Wallet para desarrollo y testing
-    /// Simula todas las operaciones de dinero localmente
+    /// Mock implementation of the Wallet service for development and testing.
+    /// Simulates all money operations locally.
     /// </summary>
     public class MockWalletService : IWalletService
     {
@@ -27,9 +27,9 @@ namespace DigitPark.Services.Mock
         public event Action<decimal> OnBalanceChanged;
         public event Action<WalletTransaction> OnTransactionCompleted;
 
-        // Configuración de simulación
+        // Simulation configuration
         public float SimulatedDelaySeconds { get; set; } = 1f;
-        public decimal InitialMockBalance { get; set; } = 100m; // Balance inicial para testing
+        public decimal InitialMockBalance { get; set; } = 100m; // Initial balance for testing
         public bool SimulatePaymentFailure { get; set; } = false;
 
         public MockWalletService()
@@ -39,7 +39,7 @@ namespace DigitPark.Services.Mock
 
         private void LoadState()
         {
-            // Cargar balance guardado o usar inicial
+            // Load saved balance or use initial
             string balanceStr = PlayerPrefs.GetString(PREFS_BALANCE, "");
             if (!string.IsNullOrEmpty(balanceStr) && decimal.TryParse(balanceStr, out decimal savedBalance))
             {
@@ -51,10 +51,10 @@ namespace DigitPark.Services.Mock
                 SaveState();
             }
 
-            // Cargar transacciones (simplificado - en producción usarías JSON)
+            // Load transactions (simplified - in production you'd use JSON)
             LoadTransactions();
 
-            Debug.Log($"[MockWallet] Balance cargado: ${_currentBalance:F2}");
+            Debug.Log($"[MockWallet] Balance loaded: ${_currentBalance:F2}");
         }
 
         private void SaveState()
@@ -101,7 +101,7 @@ namespace DigitPark.Services.Mock
             _currentBalance = newBalance;
             SaveState();
             OnBalanceChanged?.Invoke(newBalance);
-            Debug.Log($"[MockWallet] Balance actualizado: ${newBalance:F2}");
+            Debug.Log($"[MockWallet] Balance updated: ${newBalance:F2}");
         }
 
         private WalletTransaction CreateTransaction(TransactionType type, decimal amount, string description, string referenceId = null)
@@ -127,36 +127,36 @@ namespace DigitPark.Services.Mock
 
         public async Task<WalletResult> RefreshBalance()
         {
-            Debug.Log("[MockWallet] Refrescando balance...");
+            Debug.Log("[MockWallet] Refreshing balance...");
             await Task.Delay((int)(SimulatedDelaySeconds * 500));
             return WalletResult.Successful(_currentBalance);
         }
 
         public async Task<WalletResult> Deposit(DepositRequest request)
         {
-            Debug.Log($"[MockWallet] Procesando depósito: ${request.Amount:F2}");
+            Debug.Log($"[MockWallet] Processing deposit: ${request.Amount:F2}");
 
             await Task.Delay((int)(SimulatedDelaySeconds * 1000));
 
             if (SimulatePaymentFailure)
             {
-                Debug.Log("[MockWallet] Simulando fallo de pago");
-                return WalletResult.Failed("Error de pago simulado", "PAYMENT_FAILED");
+                Debug.Log("[MockWallet] Simulating payment failure");
+                return WalletResult.Failed("Simulated payment error", "PAYMENT_FAILED");
             }
 
             if (request.Amount <= 0)
             {
-                return WalletResult.Failed("Cantidad inválida", "INVALID_AMOUNT");
+                return WalletResult.Failed("Invalid amount", "INVALID_AMOUNT");
             }
 
             decimal bonusAmount = 0;
-            // Simular bonus por código promocional
+            // Simulate bonus for promo code
             if (!string.IsNullOrEmpty(request.PromoCode))
             {
                 if (request.PromoCode.ToUpper() == "WELCOME50")
                 {
                     bonusAmount = request.Amount * 0.5m; // 50% bonus
-                    Debug.Log($"[MockWallet] Código promocional aplicado: +${bonusAmount:F2} bonus");
+                    Debug.Log($"[MockWallet] Promo code applied: +${bonusAmount:F2} bonus");
                 }
             }
 
@@ -166,11 +166,11 @@ namespace DigitPark.Services.Mock
             var transaction = CreateTransaction(
                 TransactionType.Deposit,
                 totalDeposit,
-                bonusAmount > 0 ? $"Depósito ${request.Amount:F2} + Bonus ${bonusAmount:F2}" : $"Depósito ${request.Amount:F2}"
+                bonusAmount > 0 ? $"Deposit ${request.Amount:F2} + Bonus ${bonusAmount:F2}" : $"Deposit ${request.Amount:F2}"
             );
 
-            Debug.Log($"[MockWallet] Depósito exitoso. Nuevo balance: ${_currentBalance:F2}");
-            return WalletResult.Successful(_currentBalance, transaction.TransactionId, "Depósito exitoso");
+            Debug.Log($"[MockWallet] Deposit successful. New balance: ${_currentBalance:F2}");
+            return WalletResult.Successful(_currentBalance, transaction.TransactionId, "Deposit successful");
         }
 
         public async Task<WalletResult> QuickDeposit(decimal amount)
@@ -180,24 +180,24 @@ namespace DigitPark.Services.Mock
 
         public async Task<WalletResult> Withdraw(WithdrawalRequest request)
         {
-            Debug.Log($"[MockWallet] Procesando retiro: ${request.Amount:F2}");
+            Debug.Log($"[MockWallet] Processing withdrawal: ${request.Amount:F2}");
 
             await Task.Delay((int)(SimulatedDelaySeconds * 1500));
 
             if (SimulatePaymentFailure)
             {
-                Debug.Log("[MockWallet] Simulando fallo de retiro");
-                return WalletResult.Failed("Error de retiro simulado", "WITHDRAWAL_FAILED");
+                Debug.Log("[MockWallet] Simulating withdrawal failure");
+                return WalletResult.Failed("Simulated withdrawal error", "WITHDRAWAL_FAILED");
             }
 
             if (request.Amount <= 0)
             {
-                return WalletResult.Failed("Cantidad inválida", "INVALID_AMOUNT");
+                return WalletResult.Failed("Invalid amount", "INVALID_AMOUNT");
             }
 
             if (!HasSufficientFunds(request.Amount))
             {
-                return WalletResult.Failed("Fondos insuficientes", "INSUFFICIENT_FUNDS");
+                return WalletResult.Failed("Insufficient funds", "INSUFFICIENT_FUNDS");
             }
 
             UpdateBalance(_currentBalance - request.Amount);
@@ -205,11 +205,11 @@ namespace DigitPark.Services.Mock
             var transaction = CreateTransaction(
                 TransactionType.Withdrawal,
                 -request.Amount,
-                $"Retiro ${request.Amount:F2}"
+                $"Withdrawal ${request.Amount:F2}"
             );
 
-            Debug.Log($"[MockWallet] Retiro exitoso. Nuevo balance: ${_currentBalance:F2}");
-            return WalletResult.Successful(_currentBalance, transaction.TransactionId, "Retiro procesado. Llegará en 1-3 días hábiles.");
+            Debug.Log($"[MockWallet] Withdrawal successful. New balance: ${_currentBalance:F2}");
+            return WalletResult.Successful(_currentBalance, transaction.TransactionId, "Withdrawal processed. Will arrive in 1-3 business days.");
         }
 
         public async Task<WalletResult> WithdrawAll()
@@ -219,31 +219,31 @@ namespace DigitPark.Services.Mock
 
         public async Task<WalletResult> ReserveFunds(decimal amount, string matchId)
         {
-            Debug.Log($"[MockWallet] Reservando ${amount:F2} para partida {matchId}");
+            Debug.Log($"[MockWallet] Reserving ${amount:F2} for match {matchId}");
 
             await Task.Delay(100);
 
             if (!HasSufficientFunds(amount))
             {
-                return WalletResult.Failed("Fondos insuficientes", "INSUFFICIENT_FUNDS");
+                return WalletResult.Failed("Insufficient funds", "INSUFFICIENT_FUNDS");
             }
 
             _reservedFunds[matchId] = amount;
-            Debug.Log($"[MockWallet] Fondos reservados. Disponible: ${AvailableBalance:F2}");
+            Debug.Log($"[MockWallet] Funds reserved. Available: ${AvailableBalance:F2}");
 
             return WalletResult.Successful(AvailableBalance);
         }
 
         public async Task<WalletResult> ReleaseFunds(string matchId)
         {
-            Debug.Log($"[MockWallet] Liberando fondos de partida {matchId}");
+            Debug.Log($"[MockWallet] Releasing funds for match {matchId}");
 
             await Task.Delay(100);
 
             if (_reservedFunds.ContainsKey(matchId))
             {
                 _reservedFunds.Remove(matchId);
-                Debug.Log($"[MockWallet] Fondos liberados. Disponible: ${AvailableBalance:F2}");
+                Debug.Log($"[MockWallet] Funds released. Available: ${AvailableBalance:F2}");
             }
 
             return WalletResult.Successful(AvailableBalance);
@@ -266,14 +266,14 @@ namespace DigitPark.Services.Mock
             return _transactions.FirstOrDefault(t => t.TransactionId == transactionId);
         }
 
-        // Métodos adicionales para Mock/Testing
+        // Additional methods for Mock/Testing
         public void SetBalance(decimal amount)
         {
-            Debug.Log($"[MockWallet] Balance establecido manualmente: ${amount:F2}");
+            Debug.Log($"[MockWallet] Balance set manually: ${amount:F2}");
             UpdateBalance(amount);
         }
 
-        public void AddFunds(decimal amount, string description = "Fondos añadidos (testing)")
+        public void AddFunds(decimal amount, string description = "Funds added (testing)")
         {
             UpdateBalance(_currentBalance + amount);
             CreateTransaction(TransactionType.Bonus, amount, description);
@@ -285,14 +285,14 @@ namespace DigitPark.Services.Mock
 
             if (won)
             {
-                decimal winnings = entryFee * 1.8m; // 90% del pool (2 jugadores, 10% fee)
+                decimal winnings = entryFee * 1.8m; // 90% of the pool (2 players, 10% fee)
                 UpdateBalance(_currentBalance + winnings - entryFee);
-                CreateTransaction(TransactionType.MatchWin, winnings - entryFee, $"Victoria en partida", matchId);
+                CreateTransaction(TransactionType.MatchWin, winnings - entryFee, $"Match win", matchId);
             }
             else
             {
                 UpdateBalance(_currentBalance - entryFee);
-                CreateTransaction(TransactionType.MatchLoss, -entryFee, $"Derrota en partida", matchId);
+                CreateTransaction(TransactionType.MatchLoss, -entryFee, $"Match loss", matchId);
             }
         }
 
@@ -304,11 +304,11 @@ namespace DigitPark.Services.Mock
             _transactions.Clear();
             SaveState();
             OnBalanceChanged?.Invoke(_currentBalance);
-            Debug.Log($"[MockWallet] Wallet reseteado. Balance: ${_currentBalance:F2}");
+            Debug.Log($"[MockWallet] Wallet reset. Balance: ${_currentBalance:F2}");
         }
     }
 
-    // Clases auxiliares para serialización con JsonUtility
+    // Helper classes for serialization with JsonUtility
     [Serializable]
     public class TransactionListWrapper
     {

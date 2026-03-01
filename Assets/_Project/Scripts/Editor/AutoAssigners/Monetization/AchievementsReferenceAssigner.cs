@@ -39,7 +39,7 @@ namespace DigitPark.Editor.AutoAssigners
             "detailPanel", "detailPanelCanvasGroup", "detailBlocker", "detailCard",
             // Detail Panel Content
             "detailTrophyIcon", "detailTitleText", "detailDescriptionText",
-            "detailCategoryText", "detailProgressBar", "detailProgressText",
+            "detailCategoryText", "detailProgressBar", "detailProgressText", "detailRewardText",
             "claimRewardButton", "claimButtonText", "closeDetailButton", "cancelButton",
             // Reward Celebration
             "rewardCelebration", "rewardAmountText", "celebrationGlow"
@@ -221,6 +221,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "detailCategoryText", FindTextByName("detailcategorytext"));
             AssignReference(so, "detailProgressBar", FindByNameContains<Slider>("detailprogressbar"));
             AssignReference(so, "detailProgressText", FindTextByName("detailprogresstext"));
+            AssignReference(so, "detailRewardText", FindTextByName("rewardamount"));
             AssignReference(so, "claimRewardButton", FindButtonByName("claimrewardbutton", "claimreward"));
             AssignReference(so, "claimButtonText", FindTextByName("claimbuttontext"));
             AssignReference(so, "closeDetailButton", FindButtonByName("closebutton", "closedetail"));

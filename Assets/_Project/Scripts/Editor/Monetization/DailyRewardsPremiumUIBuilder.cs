@@ -53,10 +53,10 @@ namespace DigitPark.Editor
         private const float TOPBAR_BOT = 0.957f;
 
         private const float STREAK_TOP = 0.950f;
-        private const float STREAK_BOT = 0.910f;
+        private const float STREAK_BOT = 0.912f;
 
-        private const float WEEK_TOP = 0.903f;
-        private const float WEEK_BOT = 0.880f;
+        private const float WEEK_TOP = 0.895f;
+        private const float WEEK_BOT = 0.875f;
 
         private const float DAYS_TOP = 0.873f;
         private const float DAYS_BOT = 0.570f;
@@ -83,7 +83,7 @@ namespace DigitPark.Editor
         private const string DAILY_ICONS = ICONS_BASE + "DailyRewards/";
         private const string CURRENCY_ICONS = ICONS_BASE + "Currency/";
         private const string UI_ICONS = ICONS_BASE + "UI/";
-        private const string NAV_ICONS = ICONS_BASE + "Navigation/Actions/";
+        private const string NAV_ICONS = ICONS_BASE + "Navigation/";
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         #endregion
@@ -481,7 +481,7 @@ namespace DigitPark.Editor
                 (3, "digitgems",  25,  "DigitGems",   0),
                 (4, "digitcoins", 200, "DigitCoins", 0),
                 (5, "digitcoins", 300, "DigitCoins", 1),   // 1 = CURRENT
-                (6, "xp",    25,  "XP",      2),   // 2 = LOCKED
+                (6, "digitgems", 50, "DigitGems", 2),   // 2 = LOCKED
             };
 
             // Clear old day cards
@@ -640,13 +640,13 @@ namespace DigitPark.Editor
             }
             else if (current)
             {
-                // HOY badge
+                // TODAY badge (positioned above the card)
                 var badge = new GameObject("TodayBadge");
                 badge.transform.SetParent(card.transform, false);
                 var bdRT = badge.AddComponent<RectTransform>();
                 bdRT.anchorMin = new Vector2(0.5f, 1);
                 bdRT.anchorMax = new Vector2(0.5f, 1);
-                bdRT.pivot = new Vector2(0.5f, 1);
+                bdRT.pivot = new Vector2(0.5f, 0);
                 bdRT.anchoredPosition = new Vector2(0, 2);
                 bdRT.sizeDelta = new Vector2(80, 22);
                 badge.AddComponent<Image>().color = GOLD;
@@ -660,7 +660,7 @@ namespace DigitPark.Editor
                 bttRT.offsetMax = Vector2.zero;
                 var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                 bttTMP.text = "TODAY";
-                bttTMP.fontSize = FontSizes.Body;
+                bttTMP.fontSize = FontSizes.BodySmall;
                 bttTMP.fontStyle = FontStyles.Bold;
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;

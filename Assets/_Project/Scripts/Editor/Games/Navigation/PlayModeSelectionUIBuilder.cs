@@ -24,9 +24,9 @@ namespace DigitPark.Editor
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.65f, 0.7f, 1f);
 
         // Icon paths
-        private const string SOLO_ICON_PATH = "Assets/_Project/Art/Icons/PlayModeSelectionIcons/PlayModeSelectionSoloIcon.png";
-        private const string ONE_VS_ONE_ICON_PATH = "Assets/_Project/Art/Icons/PlayModeSelectionIcons/PlayModeSelection1v1Icon.png";
-        private const string TOURNAMENTS_ICON_PATH = "Assets/_Project/Art/Icons/PlayModeSelectionIcons/PlayModeSelectionTorunamentIcon.png";
+        private const string SOLO_ICON_PATH = "Assets/_Project/Art/Icons/PlayMode/PlayModeSelectionSoloIcon.png";
+        private const string ONE_VS_ONE_ICON_PATH = "Assets/_Project/Art/Icons/PlayMode/PlayModeSelection1v1Icon.png";
+        private const string TOURNAMENTS_ICON_PATH = "Assets/_Project/Art/Icons/PlayMode/PlayModeSelectionTorunamentIcon.png";
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         [MenuItem("DigitPark/UI Builders/Games/PlayModeSelection", false, 121)]

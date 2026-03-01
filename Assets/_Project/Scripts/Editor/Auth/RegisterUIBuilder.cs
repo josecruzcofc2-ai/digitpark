@@ -25,10 +25,10 @@ namespace DigitPark.Editor
         private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
 
         // Paths
-        private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
+        private const string WHITE_SPRITE_PATH = "Assets/_Project/Art/Icons/UI/WhiteSquare.png";
         private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
-        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeOpen.png";
-        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeClosed.png";
+        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/EyeOpen.png";
+        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/EyeClosed.png";
 
         // Prefab paths
         private const string ERROR_PANEL_PREFAB = "Assets/_Project/Prefabs/Common/ErrorPanel.prefab";

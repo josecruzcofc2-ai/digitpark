@@ -23,8 +23,8 @@ namespace DigitPark.Editor.AutoAssigners
 
         // Icon paths
         private const string ICONS_BASE = "Assets/_Project/Art/Icons/Auth";
-        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeOpen.png";
-        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeClosed.png";
+        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/EyeOpen.png";
+        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/EyeClosed.png";
 
         private struct AssignmentResult
         {

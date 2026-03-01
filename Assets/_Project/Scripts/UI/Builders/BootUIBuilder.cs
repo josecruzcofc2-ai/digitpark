@@ -464,7 +464,11 @@ namespace DigitPark.UI
             rt.anchorMax = new Vector2(0.5f, 0.14f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(2100, 150);
+            rt.sizeDelta = new Vector2(900, 120);
+            loadingText.enableWordWrapping = true;
+            loadingText.enableAutoSizing = true;
+            loadingText.fontSizeMin = FontSizes.AutoMinBody;
+            loadingText.fontSizeMax = FontSizes.Symbol;
 
             bootManager.loadingText = loadingText;
         }

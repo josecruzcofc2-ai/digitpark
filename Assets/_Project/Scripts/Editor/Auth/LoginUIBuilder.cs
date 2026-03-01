@@ -25,10 +25,10 @@ namespace DigitPark.Editor
         private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
 
         // Paths
-        private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
+        private const string WHITE_SPRITE_PATH = "Assets/_Project/Art/Icons/UI/WhiteSquare.png";
         private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
-        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeOpen.png";
-        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeClosed.png";
+        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/EyeOpen.png";
+        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/EyeClosed.png";
         private const string GOOGLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Google/google_logo_official.png";
         private const string APPLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Apple/apple_logo_black.png";
 
@@ -583,7 +583,7 @@ namespace DigitPark.Editor
             bg.sprite = WhiteSprite;
             bg.color = bgColor;
 
-            // NO outline/glow - viola las guidelines de Google/Apple
+            // No outline/glow - violates Google/Apple guidelines
 
             Button btn = button.AddComponent<Button>();
             btn.targetGraphic = bg;
@@ -594,12 +594,12 @@ namespace DigitPark.Editor
             // Horizontal layout for icon + text (según guidelines: spacing ~24px)
             HorizontalLayoutGroup hLayout = button.AddComponent<HorizontalLayoutGroup>();
             hLayout.childAlignment = TextAnchor.MiddleCenter;
-            hLayout.childControlWidth = false;
+            hLayout.childControlWidth = true;
             hLayout.childControlHeight = false;
-            hLayout.spacing = 24f; // Guidelines oficiales recomiendan 24px
-            hLayout.padding = new RectOffset(24, 24, 0, 0); // Padding horizontal adecuado
+            hLayout.spacing = 24f;
+            hLayout.padding = new RectOffset(24, 24, 0, 0);
 
-            // Icon (18x18dp según guidelines = ~24-30px en Unity)
+            // Icon (18x18dp per guidelines = ~28px in Unity)
             GameObject iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(button.transform, false);
 
@@ -608,11 +608,18 @@ namespace DigitPark.Editor
             iconImage.preserveAspect = true;
 
             RectTransform iconRect = iconObj.GetComponent<RectTransform>();
-            iconRect.sizeDelta = new Vector2(28, 28); // Tamaño apropiado según guidelines
+            iconRect.sizeDelta = new Vector2(28, 28);
+            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
+            iconLE.minWidth = 28;
+            iconLE.preferredWidth = 28;
 
             // Text
             GameObject textObj = new GameObject("Text");
             textObj.transform.SetParent(button.transform, false);
+
+            LayoutElement textLE = textObj.AddComponent<LayoutElement>();
+            textLE.flexibleWidth = 1;
+            textLE.preferredHeight = SOCIAL_BUTTON_HEIGHT;
 
             TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
             buttonText.font = DefaultFont;

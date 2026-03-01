@@ -398,13 +398,15 @@ namespace DigitPark.Editor
             iconLE.preferredWidth = 100;
             iconLE.preferredHeight = 100;
 
-            // Nombre del juego debajo
+            // Game name label below
             GameObject nameObj = new GameObject("Label");
             nameObj.transform.SetParent(btn.transform, false);
             RectTransform nameRT = nameObj.AddComponent<RectTransform>();
             TextMeshProUGUI nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
             nameTMP.text = label;
             nameTMP.fontSize = FontSizes.Body;
+            nameTMP.fontSizeMin = FontSizes.AutoMinBody;
+            nameTMP.enableAutoSizing = true;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.color = isSelected ? Color.white : new Color(0.5f, 0.5f, 0.6f, 1f);
             nameTMP.alignment = TextAlignmentOptions.Center;
@@ -412,9 +414,9 @@ namespace DigitPark.Editor
             nameTMP.raycastTarget = false;
 
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
-            nameLE.minWidth = 140;
+            nameLE.minWidth = 165;
             nameLE.minHeight = 56;
-            nameLE.preferredWidth = 140;
+            nameLE.preferredWidth = 165;
             nameLE.preferredHeight = 56;
         }
 

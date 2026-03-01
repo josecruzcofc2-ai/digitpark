@@ -583,18 +583,24 @@ namespace DigitPark.Editor
             TextMeshProUGUI contentsText = contents.AddComponent<TextMeshProUGUI>();
             contentsText.text = "500 DigitGems + Exclusive Theme + Avatar";
             contentsText.fontSize = FontSizes.Body;
+            contentsText.fontSizeMin = FontSizes.AutoMinBody;
+            contentsText.enableAutoSizing = true;
+            contentsText.enableWordWrapping = true;
             contentsText.color = TEXT_SECONDARY;
             LayoutElement contentsLE = contents.AddComponent<LayoutElement>();
-            contentsLE.minHeight = 26;
+            contentsLE.minHeight = 40;
 
             // Timer
             GameObject timer = CreateChild(info, "Timer");
             TextMeshProUGUI timerText = timer.AddComponent<TextMeshProUGUI>();
             timerText.text = "Expires in: 23:45:12";
             timerText.fontSize = FontSizes.Body;
+            timerText.fontSizeMin = FontSizes.AutoMinBody;
+            timerText.enableAutoSizing = true;
+            timerText.enableWordWrapping = true;
             timerText.color = ORANGE_HOT;
             LayoutElement timerLE = timer.AddComponent<LayoutElement>();
-            timerLE.minHeight = 26;
+            timerLE.minHeight = 30;
 
             // Right - Buy
             GameObject buyContainer = CreateChild(banner, "BuyContainer");
@@ -752,11 +758,11 @@ namespace DigitPark.Editor
             // Buy
             GameObject buyContainer = CreateChild(banner, "BuyContainer");
             LayoutElement buyContainerLE = buyContainer.AddComponent<LayoutElement>();
-            buyContainerLE.minWidth = 130;
-            buyContainerLE.preferredWidth = 130;
+            buyContainerLE.minWidth = 155;
+            buyContainerLE.preferredWidth = 155;
 
             VerticalLayoutGroup buyVlg = buyContainer.AddComponent<VerticalLayoutGroup>();
-            buyVlg.spacing = 3;
+            buyVlg.spacing = 2;
             buyVlg.childAlignment = TextAnchor.MiddleCenter;
             buyVlg.childControlWidth = true;
             buyVlg.childControlHeight = true;
@@ -765,11 +771,11 @@ namespace DigitPark.Editor
             GameObject origObj = CreateChild(buyContainer, "OriginalPrice");
             TextMeshProUGUI origText = origObj.AddComponent<TextMeshProUGUI>();
             origText.text = origPrice;
-            origText.fontSize = FontSizes.Body;
+            origText.fontSize = FontSizes.BodySmall;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
             LayoutElement origLE = origObj.AddComponent<LayoutElement>();
-            origLE.minHeight = 26;
+            origLE.minHeight = 24;
 
             CreatePriceButton(buyContainer, price, BUTTON_SUCCESS, TEXT_DARK, 52, FontSizes.Body);
         }
@@ -1107,9 +1113,9 @@ namespace DigitPark.Editor
             CreateCosmeticCard(grid, "GemFrame_Ruby", "Ruby", "200", new Color(1f, 0.2f, 0.3f, 1f), false);
             CreateCosmeticCard(grid, "GemFrame_Amethyst", "Amethyst", "250", PURPLE_LIGHT, false);
             CreateCosmeticCard(grid, "GemFrame_Topaz", "Topaz", "300", new Color(1f, 0.8f, 0.2f, 1f), false);
-            CreateCosmeticCard(grid, "GemFrame_Obsidian", "Obsidian", "500", new Color(0.3f, 0.25f, 0.35f, 1f), false);
+            CreateCosmeticCard(grid, "GemFrame_Obsidian", "Obsidian", "500", new Color(0.5f, 0.4f, 0.6f, 1f), false);
 
-            Debug.Log("[ShopPremiumUIBuilder] DigitGem Frames Section V3 creado (6 items)");
+            Debug.Log("[ShopPremiumUIBuilder] DigitGem Frames Section V3 created (6 items)");
         }
 
         // ==================== PREMIUM FRAMES SECTION ====================
@@ -1376,6 +1382,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.text = "50 levels of exclusive rewards";
             descText.fontSize = FontSizes.Body;
+            descText.fontSizeMin = FontSizes.AutoMinBody;
+            descText.enableAutoSizing = true;
+            descText.enableWordWrapping = true;
             descText.color = TEXT_SECONDARY;
             LayoutElement descLE = desc.AddComponent<LayoutElement>();
             descLE.minHeight = 22;

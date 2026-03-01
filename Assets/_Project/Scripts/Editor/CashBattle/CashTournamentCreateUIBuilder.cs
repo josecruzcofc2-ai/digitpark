@@ -335,7 +335,7 @@ namespace DigitPark.Editor
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0.07f, 0f);
-            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.anchorMax = new Vector2(0.75f, 1f);
             titleRT.pivot = new Vector2(0.5f, 0.5f);
             titleRT.sizeDelta = Vector2.zero;
             titleRT.anchoredPosition = Vector2.zero;

@@ -8,9 +8,9 @@ using DigitPark.UI;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Utilidad compartida para crear currency pills (DigitGems + DigitCoins)
-    /// en los headers de cualquier escena. Cada pill muestra icono + monto + botón "+"
-    /// y tiene CurrencyDisplayUI para auto-subscription en runtime.
+    /// Shared utility for creating currency pills (DigitGems + DigitCoins)
+    /// in scene headers. Each pill shows icon + amount + "+" button
+    /// and has CurrencyDisplayUI for auto-subscription at runtime.
     /// </summary>
     public static class CurrencyHeaderBarHelper
     {
@@ -28,9 +28,9 @@ namespace DigitPark.Editor
         private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
 
         /// <summary>
-        /// Crea un container HorizontalLayoutGroup con dos currency pills (Gems + Coins).
-        /// Retorna el container GameObject para posicionamiento por el caller.
-        /// Los pills se llaman "GemsDisplay" y "CoinsDisplay" por defecto.
+        /// Creates an HorizontalLayoutGroup container with two currency pills (Gems + Coins).
+        /// Returns the container GameObject for positioning by the caller.
+        /// Pills are named "GemsDisplay" and "CoinsDisplay" by default.
         /// </summary>
         public static GameObject CreateCurrencyPills(Transform parent, string containerName = "CurrencyPills")
         {
@@ -44,7 +44,7 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
             hlg.childForceExpandWidth = false;
             hlg.reverseArrangement = false;
-            hlg.padding = new RectOffset(0, 0, 4, 4);
+            hlg.padding = new RectOffset(0, 15, 4, 4);
 
             // Remove old children if rebuilding
             for (int i = container.transform.childCount - 1; i >= 0; i--)
@@ -60,8 +60,8 @@ namespace DigitPark.Editor
         }
 
         /// <summary>
-        /// Crea un pill individual: [Icon 30x30] [Amount TMP] [+ 20x20]
-        /// Attaches CurrencyDisplayUI component via SerializedObject para auto-subscription en runtime.
+        /// Creates a single pill: [Icon] [Amount TMP] [+ circle]
+        /// Attaches CurrencyDisplayUI component via SerializedObject for auto-subscription at runtime.
         /// </summary>
         public static GameObject CreateSingleCurrencyPill(Transform parent, string name, CurrencyType currencyType)
         {
@@ -69,7 +69,7 @@ namespace DigitPark.Editor
 
             var pill = FindOrCreate(parent, name);
             var rt = GetOrAdd<RectTransform>(pill);
-            rt.sizeDelta = new Vector2(270, 80);
+            rt.sizeDelta = new Vector2(245, 80);
 
             // Pill background
             var bg = GetOrAdd<Image>(pill);
@@ -91,8 +91,8 @@ namespace DigitPark.Editor
             pillHLG.childControlHeight = true;
 
             var le = GetOrAdd<LayoutElement>(pill);
-            le.minWidth = 270;
-            le.preferredWidth = 270;
+            le.minWidth = 245;
+            le.preferredWidth = 245;
 
             // Remove old children if rebuilding
             for (int i = pill.transform.childCount - 1; i >= 0; i--)
@@ -102,15 +102,15 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(pill.transform, false);
             var iconRT = icon.AddComponent<RectTransform>();
-            iconRT.sizeDelta = new Vector2(75, 75);
+            iconRT.sizeDelta = new Vector2(62, 62);
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
             iconImg.preserveAspect = true;
             var iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minWidth = 75;
-            iconLE.minHeight = 75;
-            iconLE.preferredWidth = 75;
-            iconLE.preferredHeight = 75;
+            iconLE.minWidth = 62;
+            iconLE.minHeight = 62;
+            iconLE.preferredWidth = 62;
+            iconLE.preferredHeight = 62;
 
             // Load icon sprite
             string iconPath = currencyType == CurrencyType.DigitGems ? ICON_GEM : ICON_COIN;
@@ -142,14 +142,14 @@ namespace DigitPark.Editor
             var plus = new GameObject("Plus");
             plus.transform.SetParent(pill.transform, false);
             var plusRT = plus.AddComponent<RectTransform>();
-            plusRT.sizeDelta = new Vector2(70, 70);
+            plusRT.sizeDelta = new Vector2(58, 58);
             var plusImg = plus.AddComponent<Image>();
             plusImg.color = color;
             var plusLE = plus.AddComponent<LayoutElement>();
-            plusLE.minWidth = 70;
-            plusLE.minHeight = 70;
-            plusLE.preferredWidth = 70;
-            plusLE.preferredHeight = 70;
+            plusLE.minWidth = 58;
+            plusLE.minHeight = 58;
+            plusLE.preferredWidth = 58;
+            plusLE.preferredHeight = 58;
 
             // "+" text inside the circle
             var plusTextObj = new GameObject("PlusText");
@@ -161,7 +161,7 @@ namespace DigitPark.Editor
             plusTextRT.offsetMax = Vector2.zero;
             var plusTMP = plusTextObj.AddComponent<TextMeshProUGUI>();
             plusTMP.text = "+";
-            plusTMP.fontSize = 36;
+            plusTMP.fontSize = 30;
             plusTMP.fontStyle = FontStyles.Bold;
             plusTMP.color = new Color(0.02f, 0.04f, 0.08f, 1f); // dark text on colored bg
             plusTMP.alignment = TextAlignmentOptions.Center;
@@ -186,7 +186,7 @@ namespace DigitPark.Editor
             return pill;
         }
 
-        // ==================== Helpers (auto-contenido) ====================
+        // ==================== Helpers ====================
 
         private static GameObject FindOrCreate(Transform parent, string name)
         {

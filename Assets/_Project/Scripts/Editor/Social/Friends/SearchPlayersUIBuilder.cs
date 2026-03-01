@@ -212,7 +212,7 @@ namespace DigitPark.Editor
             searchIconImg.preserveAspect = true;
             searchIconImg.raycastTarget = false;
             // Cargar icono de lupa neon
-            Sprite searchSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/Buttons/SearchIcon.png");
+            Sprite searchSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/SearchIcon.png");
             if (searchSprite != null)
             {
                 searchIconImg.sprite = searchSprite;
@@ -422,7 +422,7 @@ namespace DigitPark.Editor
             emptyIconImg.color = CYAN_NEON; // Cyan brillante para que destaque
             emptyIconImg.preserveAspect = true;
             // Cargar icono de TabBar para empty state
-            Sprite tabBarSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/TabBar/icon_profile.png");
+            Sprite tabBarSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/icon_profile.png");
             if (tabBarSprite != null)
             {
                 emptyIconImg.sprite = tabBarSprite;

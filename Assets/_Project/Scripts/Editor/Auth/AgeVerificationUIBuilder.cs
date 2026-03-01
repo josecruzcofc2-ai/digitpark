@@ -25,7 +25,7 @@ namespace DigitPark.Editor
         private static readonly Color CyanNeon = new Color(0f, 1f, 1f, 1f); // Para el logo
 
         // Paths
-        private const string WHITE_SPRITE_PATH = "Assets/_Project/Textures/UI/WhiteSquare.png";
+        private const string WHITE_SPRITE_PATH = "Assets/_Project/Art/Icons/UI/WhiteSquare.png";
         private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
         private const string VERIFICATION_ICON_PATH = "Assets/_Project/Art/Icons/CashBattle/UI/VerificationIcon.png";
 

@@ -69,7 +69,7 @@ namespace DigitPark.Editor
 
         private const string BACK_BTN_PREFAB           = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
         private const string ICON_AVATAR_DEFAULT_GOLD   = "Assets/_Project/Art/Icons/CashBattle/UI/AvatarDefaultGold.png";
-        private const string ICON_AVATAR_DEFAULT_NEON   = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png";
+        private const string ICON_AVATAR_DEFAULT_NEON   = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
 
         #endregion
 
@@ -613,7 +613,7 @@ namespace DigitPark.Editor
             Image enImg = editNameBtn.AddComponent<Image>();
             enImg.preserveAspect = true;
             enImg.raycastTarget = true;
-            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/Profile/EditIcon.png");
+            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/EditIcon.png");
             if (editSprite != null)
             {
                 enImg.sprite = editSprite;
@@ -767,7 +767,7 @@ namespace DigitPark.Editor
             row.transform.SetParent(parent, false);
 
             LayoutElement le = row.AddComponent<LayoutElement>();
-            le.preferredHeight = 120; le.flexibleWidth = 1;
+            le.preferredHeight = 140; le.flexibleWidth = 1;
 
             HorizontalLayoutGroup hlg = row.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 12;
@@ -810,8 +810,8 @@ namespace DigitPark.Editor
             GameObject vObj = new GameObject("Value");
             vObj.transform.SetParent(box.transform, false);
             RectTransform vRT = vObj.AddComponent<RectTransform>();
-            vRT.anchorMin = new Vector2(0, 0.35f); vRT.anchorMax = new Vector2(1, 0.95f);
-            vRT.offsetMin = new Vector2(8, 0); vRT.offsetMax = new Vector2(-8, -6);
+            vRT.anchorMin = new Vector2(0, 0.30f); vRT.anchorMax = new Vector2(1, 0.92f);
+            vRT.offsetMin = new Vector2(6, 0); vRT.offsetMax = new Vector2(-6, -4);
             TextMeshProUGUI vTmp = vObj.AddComponent<TextMeshProUGUI>();
             vTmp.text = value;
             vTmp.fontSize = FontSizes.H3; vTmp.color = accent;

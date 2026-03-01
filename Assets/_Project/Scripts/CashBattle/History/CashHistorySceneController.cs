@@ -12,8 +12,8 @@ using DigitPark.Localization;
 namespace DigitPark.CashBattle
 {
     /// <summary>
-    /// Controller principal para la escena CashHistory.
-    /// Maneja toda la UI y lógica de la pantalla de Historial.
+    /// Main controller for the CashHistory scene.
+    /// Handles all UI and logic for the History screen.
     /// </summary>
     public class CashHistorySceneController : MonoBehaviour
     {
@@ -146,11 +146,11 @@ namespace DigitPark.CashBattle
                 resultFilterDropdown.ClearOptions();
                 resultFilterDropdown.AddOptions(new List<string>
                 {
-                    "Todos los resultados",
-                    "Victorias",
-                    "Derrotas",
-                    "Empates",
-                    "En curso"
+                    "All Results",
+                    "Wins",
+                    "Losses",
+                    "Draws",
+                    "In Progress"
                 });
                 resultFilterDropdown.onValueChanged.AddListener(OnResultFilterChanged);
             }
@@ -161,11 +161,11 @@ namespace DigitPark.CashBattle
                 dateFilterDropdown.ClearOptions();
                 dateFilterDropdown.AddOptions(new List<string>
                 {
-                    "Todo el tiempo",
-                    "Hoy",
-                    "Últimos 7 días",
-                    "Últimos 30 días",
-                    "Este mes"
+                    "All Time",
+                    "Today",
+                    "Last 7 Days",
+                    "Last 30 Days",
+                    "This Month"
                 });
                 dateFilterDropdown.onValueChanged.AddListener(OnDateFilterChanged);
             }
@@ -386,11 +386,11 @@ namespace DigitPark.CashBattle
             switch (currentTab)
             {
                 case HistoryTab.Matches:
-                    return "No hay partidas registradas.\n¡Juega tu primera partida 1v1!";
+                    return "No matches recorded.\nPlay your first 1v1 match!";
                 case HistoryTab.Tournaments:
-                    return "No has participado en torneos.\n¡Únete a tu primer torneo!";
+                    return "You haven't joined any tournaments.\nJoin your first tournament!";
                 default:
-                    return "No hay historial.\n¡Comienza a jugar para ver tu progreso!";
+                    return "No history yet.\nStart playing to see your progress!";
             }
         }
 
@@ -415,7 +415,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Anima la entrada de las entradas de historial con efecto staggered
+        /// Animates the history entries entrance with a staggered effect
         /// </summary>
         private void AnimateHistoryEntriesEntrance()
         {

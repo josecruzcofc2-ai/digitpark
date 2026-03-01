@@ -6,13 +6,13 @@ using System.Linq;
 namespace DigitPark.Progression
 {
     /// <summary>
-    /// Sistema de Misiones - Tareas temporales que se reinician.
-    /// - Misiones Diarias: Se reinician cada 24h
-    /// - Misiones Semanales: Se reinician cada 7 días
-    /// - Misiones de Temporada: Duran toda la temporada (60 días)
+    /// Missions System - Temporary tasks that reset periodically.
+    /// - Daily Missions: Reset every 24h
+    /// - Weekly Missions: Reset every 7 days
+    /// - Season Missions: Last the entire season (60 days)
     ///
-    /// Diferente a Logros: Las misiones son repetibles y dan XP/monedas.
-    /// Los Logros son permanentes y dan puntos/títulos.
+    /// Different from Achievements: Missions are repeatable and grant XP/coins.
+    /// Achievements are permanent and grant points/titles.
     /// </summary>
     public class MissionsManager : MonoBehaviour
     {
@@ -45,115 +45,115 @@ namespace DigitPark.Progression
         private static readonly MissionTemplate[] DailyMissionTemplates = new MissionTemplate[]
         {
             // Play missions
-            new MissionTemplate("daily_play_1", "Jugador Casual", "Juega 1 partida", MissionType.PlayGames, 1,
+            new MissionTemplate("daily_play_1", "Casual Player", "Play 1 match", MissionType.PlayGames, 1,
                 new MissionReward(25, 50, 0)),
-            new MissionTemplate("daily_play_3", "Jugador Activo", "Juega 3 partidas", MissionType.PlayGames, 3,
+            new MissionTemplate("daily_play_3", "Active Player", "Play 3 matches", MissionType.PlayGames, 3,
                 new MissionReward(50, 100, 0)),
-            new MissionTemplate("daily_play_5", "Maratón Diario", "Juega 5 partidas", MissionType.PlayGames, 5,
+            new MissionTemplate("daily_play_5", "Daily Marathon", "Play 5 matches", MissionType.PlayGames, 5,
                 new MissionReward(75, 150, 0)),
 
             // Win missions
-            new MissionTemplate("daily_win_1", "Victoria Diaria", "Gana 1 partida", MissionType.WinGames, 1,
+            new MissionTemplate("daily_win_1", "Daily Victory", "Win 1 match", MissionType.WinGames, 1,
                 new MissionReward(50, 100, 0)),
-            new MissionTemplate("daily_win_3", "Triple Victoria", "Gana 3 partidas", MissionType.WinGames, 3,
+            new MissionTemplate("daily_win_3", "Triple Victory", "Win 3 matches", MissionType.WinGames, 3,
                 new MissionReward(100, 200, 0)),
 
             // Specific game missions
-            new MissionTemplate("daily_digitrush", "Especialista DigitRush", "Juega 2 partidas de DigitRush", MissionType.PlaySpecificGame, 2,
+            new MissionTemplate("daily_digitrush", "DigitRush Specialist", "Play 2 DigitRush matches", MissionType.PlaySpecificGame, 2,
                 new MissionReward(50, 100, 0), "DigitRush"),
-            new MissionTemplate("daily_flashtap", "Reflejos del Día", "Juega 2 partidas de FlashTap", MissionType.PlaySpecificGame, 2,
+            new MissionTemplate("daily_flashtap", "Daily Reflexes", "Play 2 FlashTap matches", MissionType.PlaySpecificGame, 2,
                 new MissionReward(50, 100, 0), "FlashTap"),
-            new MissionTemplate("daily_memorypairs", "Memoria Diaria", "Juega 2 partidas de MemoryPairs", MissionType.PlaySpecificGame, 2,
+            new MissionTemplate("daily_memorypairs", "Daily Memory", "Play 2 MemoryPairs matches", MissionType.PlaySpecificGame, 2,
                 new MissionReward(50, 100, 0), "MemoryPairs"),
-            new MissionTemplate("daily_quickmath", "Matemáticas del Día", "Juega 2 partidas de QuickMath", MissionType.PlaySpecificGame, 2,
+            new MissionTemplate("daily_quickmath", "Math of the Day", "Play 2 QuickMath matches", MissionType.PlaySpecificGame, 2,
                 new MissionReward(50, 100, 0), "QuickMath"),
-            new MissionTemplate("daily_oddoneout", "Observador Diario", "Juega 2 partidas de OddOneOut", MissionType.PlaySpecificGame, 2,
+            new MissionTemplate("daily_oddoneout", "Daily Observer", "Play 2 OddOneOut matches", MissionType.PlaySpecificGame, 2,
                 new MissionReward(50, 100, 0), "OddOneOut"),
 
             // Score missions
-            new MissionTemplate("daily_score_high", "Puntaje Alto", "Alcanza 5,000 puntos en cualquier juego", MissionType.ReachScore, 5000,
+            new MissionTemplate("daily_score_high", "High Score", "Score 5,000 points in any game", MissionType.ReachScore, 5000,
                 new MissionReward(75, 150, 0)),
 
             // Precision missions
-            new MissionTemplate("daily_precision", "Precisión", "Completa una partida con 80%+ precisión", MissionType.PrecisionGame, 1,
+            new MissionTemplate("daily_precision", "Precision", "Complete a match with 80%+ accuracy", MissionType.PrecisionGame, 1,
                 new MissionReward(75, 150, 0)),
         };
 
         private static readonly MissionTemplate[] WeeklyMissionTemplates = new MissionTemplate[]
         {
             // Play missions
-            new MissionTemplate("weekly_play_15", "Jugador Dedicado", "Juega 15 partidas esta semana", MissionType.PlayGames, 15,
+            new MissionTemplate("weekly_play_15", "Dedicated Player", "Play 15 matches this week", MissionType.PlayGames, 15,
                 new MissionReward(300, 750, 10)),
-            new MissionTemplate("weekly_play_30", "Maratón Semanal", "Juega 30 partidas esta semana", MissionType.PlayGames, 30,
+            new MissionTemplate("weekly_play_30", "Weekly Marathon", "Play 30 matches this week", MissionType.PlayGames, 30,
                 new MissionReward(500, 1500, 25)),
 
             // Win missions
-            new MissionTemplate("weekly_win_7", "Ganador Semanal", "Gana 7 partidas esta semana", MissionType.WinGames, 7,
+            new MissionTemplate("weekly_win_7", "Weekly Winner", "Win 7 matches this week", MissionType.WinGames, 7,
                 new MissionReward(400, 1000, 15)),
-            new MissionTemplate("weekly_win_15", "Dominador", "Gana 15 partidas esta semana", MissionType.WinGames, 15,
+            new MissionTemplate("weekly_win_15", "Dominator", "Win 15 matches this week", MissionType.WinGames, 15,
                 new MissionReward(600, 2000, 35)),
 
             // All games
-            new MissionTemplate("weekly_all_games", "Versatilidad", "Juega todos los minijuegos", MissionType.PlayAllGames, 5,
+            new MissionTemplate("weekly_all_games", "Versatility", "Play all mini-games", MissionType.PlayAllGames, 5,
                 new MissionReward(400, 1000, 20)),
 
             // Streak
-            new MissionTemplate("weekly_streak", "Racha Semanal", "Consigue una racha de 3 victorias", MissionType.WinStreak, 3,
+            new MissionTemplate("weekly_streak", "Weekly Streak", "Get a 3-win streak", MissionType.WinStreak, 3,
                 new MissionReward(350, 800, 15)),
 
             // Cash Battle
-            new MissionTemplate("weekly_cash_1", "Apostador Semanal", "Completa 1 Cash Battle", MissionType.PlayCashBattle, 1,
+            new MissionTemplate("weekly_cash_1", "Weekly Bettor", "Complete 1 Cash Battle", MissionType.PlayCashBattle, 1,
                 new MissionReward(300, 500, 20)),
-            new MissionTemplate("weekly_cash_3", "High Stakes", "Completa 3 Cash Battles", MissionType.PlayCashBattle, 3,
+            new MissionTemplate("weekly_cash_3", "High Stakes", "Complete 3 Cash Battles", MissionType.PlayCashBattle, 3,
                 new MissionReward(500, 1000, 40)),
 
             // Tournament
-            new MissionTemplate("weekly_tournament", "Competidor", "Participa en un torneo", MissionType.PlayTournament, 1,
+            new MissionTemplate("weekly_tournament", "Competitor", "Participate in a tournament", MissionType.PlayTournament, 1,
                 new MissionReward(400, 1000, 25)),
 
             // XP
-            new MissionTemplate("weekly_xp", "Grinder", "Gana 3,000 XP esta semana", MissionType.EarnXP, 3000,
+            new MissionTemplate("weekly_xp", "Grinder", "Earn 3,000 XP this week", MissionType.EarnXP, 3000,
                 new MissionReward(500, 1500, 30)),
 
             // Score
-            new MissionTemplate("weekly_score", "Alto Rendimiento", "Alcanza 50,000 puntos totales", MissionType.TotalScore, 50000,
+            new MissionTemplate("weekly_score", "High Performance", "Score 50,000 total points", MissionType.TotalScore, 50000,
                 new MissionReward(400, 1000, 20)),
         };
 
         private static readonly MissionTemplate[] SeasonMissionTemplates = new MissionTemplate[]
         {
             // Wins
-            new MissionTemplate("season_wins_50", "Veterano de Temporada", "Gana 50 partidas", MissionType.WinGames, 50,
+            new MissionTemplate("season_wins_50", "Season Veteran", "Win 50 matches", MissionType.WinGames, 50,
                 new MissionReward(1500, 3000, 75)),
-            new MissionTemplate("season_wins_100", "Centurión", "Gana 100 partidas", MissionType.WinGames, 100,
+            new MissionTemplate("season_wins_100", "Centurion", "Win 100 matches", MissionType.WinGames, 100,
                 new MissionReward(3000, 7500, 150)),
-            new MissionTemplate("season_wins_250", "Leyenda de Temporada", "Gana 250 partidas", MissionType.WinGames, 250,
+            new MissionTemplate("season_wins_250", "Season Legend", "Win 250 matches", MissionType.WinGames, 250,
                 new MissionReward(5000, 15000, 300)),
 
             // Cash Battle
-            new MissionTemplate("season_cash_10", "Apostador Serio", "Gana 10 Cash Battles", MissionType.WinCashBattle, 10,
+            new MissionTemplate("season_cash_10", "Serious Bettor", "Win 10 Cash Battles", MissionType.WinCashBattle, 10,
                 new MissionReward(2000, 5000, 100)),
-            new MissionTemplate("season_cash_25", "Cash Pro", "Gana 25 Cash Battles", MissionType.WinCashBattle, 25,
+            new MissionTemplate("season_cash_25", "Cash Pro", "Win 25 Cash Battles", MissionType.WinCashBattle, 25,
                 new MissionReward(4000, 10000, 200)),
 
             // Tournament
-            new MissionTemplate("season_tournament_3", "Competidor Elite", "Participa en 3 torneos", MissionType.PlayTournament, 3,
+            new MissionTemplate("season_tournament_3", "Elite Competitor", "Participate in 3 tournaments", MissionType.PlayTournament, 3,
                 new MissionReward(1500, 3000, 75)),
-            new MissionTemplate("season_tournament_win", "Campeón de Temporada", "Gana un torneo", MissionType.WinTournament, 1,
+            new MissionTemplate("season_tournament_win", "Season Champion", "Win a tournament", MissionType.WinTournament, 1,
                 new MissionReward(3000, 7500, 150)),
 
             // Social
-            new MissionTemplate("season_friends", "Social Butterfly", "Añade 5 amigos", MissionType.AddFriends, 5,
+            new MissionTemplate("season_friends", "Social Butterfly", "Add 5 friends", MissionType.AddFriends, 5,
                 new MissionReward(1000, 2500, 50)),
 
             // Login
-            new MissionTemplate("season_login_30", "Dedicación", "Inicia sesión 30 días", MissionType.LoginDays, 30,
+            new MissionTemplate("season_login_30", "Dedication", "Log in for 30 days", MissionType.LoginDays, 30,
                 new MissionReward(2000, 5000, 100)),
-            new MissionTemplate("season_login_50", "Compromiso Total", "Inicia sesión 50 días", MissionType.LoginDays, 50,
+            new MissionTemplate("season_login_50", "Total Commitment", "Log in for 50 days", MissionType.LoginDays, 50,
                 new MissionReward(3000, 7500, 150)),
 
             // Mastery
-            new MissionTemplate("season_mastery", "Polivalente", "Alcanza 10,000 puntos en cada minijuego", MissionType.MasteryAllGames, 5,
+            new MissionTemplate("season_mastery", "All-Rounder", "Score 10,000 points in each mini-game", MissionType.MasteryAllGames, 5,
                 new MissionReward(4000, 10000, 200)),
 
         };

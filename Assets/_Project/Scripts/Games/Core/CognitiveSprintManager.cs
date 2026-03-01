@@ -5,8 +5,8 @@ using UnityEngine;
 namespace DigitPark.Games
 {
     /// <summary>
-    /// Manager para configurar y gestionar Cognitive Sprints
-    /// Permite seleccionar juegos y configurar la sesion antes de iniciar
+    /// Manager to configure and manage Cognitive Sprints
+    /// Allows selecting games and configuring the session before starting
     /// </summary>
     public class CognitiveSprintManager : MonoBehaviour
     {
@@ -26,22 +26,22 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Juegos seleccionados para el sprint actual
+        /// Selected games for the current sprint
         /// </summary>
         public List<GameType> SelectedGames { get; private set; } = new List<GameType>();
 
         /// <summary>
-        /// Minimo de juegos permitidos
+        /// Minimum games allowed
         /// </summary>
         public const int MIN_GAMES = 2;
 
         /// <summary>
-        /// Maximo de juegos permitidos
+        /// Maximum games allowed
         /// </summary>
         public const int MAX_GAMES = 5;
 
         /// <summary>
-        /// Evento cuando la seleccion de juegos cambia
+        /// Event when the game selection changes
         /// </summary>
         public event Action<List<GameType>> OnSelectionChanged;
 
@@ -57,7 +57,7 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Limpia la seleccion actual
+        /// Clears the current selection
         /// </summary>
         public void ClearSelection()
         {
@@ -66,19 +66,19 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Agrega un juego a la seleccion
+        /// Adds a game to the selection
         /// </summary>
         public bool AddGame(GameType gameType)
         {
             if (SelectedGames.Count >= MAX_GAMES)
             {
-                Debug.LogWarning($"Maximo {MAX_GAMES} juegos permitidos");
+                Debug.LogWarning($"Maximum {MAX_GAMES} games allowed");
                 return false;
             }
 
             if (SelectedGames.Contains(gameType))
             {
-                Debug.LogWarning($"{gameType} ya esta seleccionado");
+                Debug.LogWarning($"{gameType} is already selected");
                 return false;
             }
 
@@ -88,7 +88,7 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Remueve un juego de la seleccion
+        /// Removes a game from the selection
         /// </summary>
         public bool RemoveGame(GameType gameType)
         {
@@ -101,7 +101,7 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Alterna la seleccion de un juego
+        /// Toggles the selection of a game
         /// </summary>
         public void ToggleGame(GameType gameType)
         {
@@ -116,7 +116,7 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Verifica si un juego esta seleccionado
+        /// Checks if a game is selected
         /// </summary>
         public bool IsSelected(GameType gameType)
         {
@@ -124,7 +124,7 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Verifica si la seleccion es valida para iniciar
+        /// Checks if the selection is valid to start
         /// </summary>
         public bool IsValidSelection()
         {
@@ -132,12 +132,12 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Obtiene el numero de juegos seleccionados
+        /// Gets the number of selected games
         /// </summary>
         public int SelectionCount => SelectedGames.Count;
 
         /// <summary>
-        /// Reordena los juegos seleccionados
+        /// Reorders the selected games
         /// </summary>
         public void ReorderGames(int fromIndex, int toIndex)
         {
@@ -154,13 +154,13 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Inicia el Cognitive Sprint con la seleccion actual
+        /// Starts the Cognitive Sprint with the current selection
         /// </summary>
         public void StartSprint(string opponentId, string opponentName, decimal entryFee, string matchId)
         {
             if (!IsValidSelection())
             {
-                Debug.LogError($"Seleccion invalida. Se requieren entre {MIN_GAMES} y {MAX_GAMES} juegos");
+                Debug.LogError($"Invalid selection. Between {MIN_GAMES} and {MAX_GAMES} games required");
                 return;
             }
 
@@ -172,22 +172,22 @@ namespace DigitPark.Games
                 matchId
             );
 
-            // Limpiar seleccion despues de iniciar
+            // Clear selection after starting
             ClearSelection();
         }
 
         /// <summary>
-        /// Inicia un Cognitive Sprint de practica (sin oponente)
+        /// Starts a practice Cognitive Sprint (no opponent)
         /// </summary>
         public void StartPracticeSprint()
         {
             if (!IsValidSelection())
             {
-                Debug.LogError($"Seleccion invalida. Se requieren entre {MIN_GAMES} y {MAX_GAMES} juegos");
+                Debug.LogError($"Invalid selection. Between {MIN_GAMES} and {MAX_GAMES} games required");
                 return;
             }
 
-            // Para practica, usar contexto especial
+            // For practice, use special context
             var context = new GameContext
             {
                 Mode = GameMode.Practice,
@@ -197,7 +197,7 @@ namespace DigitPark.Games
 
             GameSessionManager.Instance.SetContext(context);
 
-            // Cargar primer juego
+            // Load first game
             string sceneName = GameSessionManager.Instance.GetSceneNameForGame(SelectedGames[0]);
             UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
 
@@ -205,17 +205,17 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Inicia un Cognitive Sprint online (con oponente)
+        /// Starts an online Cognitive Sprint (with opponent)
         /// </summary>
         public void StartOnlineSprint()
         {
             if (!IsValidSelection())
             {
-                Debug.LogError($"Seleccion invalida. Se requieren entre {MIN_GAMES} y {MAX_GAMES} juegos");
+                Debug.LogError($"Invalid selection. Between {MIN_GAMES} and {MAX_GAMES} games required");
                 return;
             }
 
-            // Para online, usar contexto de partida online
+            // For online, use online match context
             var context = new GameContext
             {
                 Mode = GameMode.Online,
@@ -225,15 +225,15 @@ namespace DigitPark.Games
 
             GameSessionManager.Instance.SetContext(context);
 
-            // Cargar primer juego
+            // Load first game
             string sceneName = GameSessionManager.Instance.GetSceneNameForGame(SelectedGames[0]);
             UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
 
-            // No limpiar seleccion aqui porque puede necesitarse para los siguientes juegos
+            // Don't clear selection here because it may be needed for the following games
         }
 
         /// <summary>
-        /// Obtiene la lista de juegos seleccionados (para matchmaking)
+        /// Gets the list of selected games (for matchmaking)
         /// </summary>
         public List<GameType> GetSelectedGames()
         {
@@ -241,7 +241,7 @@ namespace DigitPark.Games
         }
 
         /// <summary>
-        /// Obtiene informacion de todos los juegos disponibles
+        /// Gets information for all available games
         /// </summary>
         public static GameInfo[] GetAllGameInfos()
         {
@@ -251,48 +251,48 @@ namespace DigitPark.Games
                 {
                     Type = GameType.DigitRush,
                     Name = "Digit Rush",
-                    Description = "Toca los numeros del 1 al 9 en orden lo mas rapido posible",
+                    Description = "Tap numbers 1 to 9 in order as fast as possible",
                     Icon = "icon_digit_rush",
-                    Skill = "Velocidad + Atencion"
+                    Skill = "Speed + Attention"
                 },
                 new GameInfo
                 {
                     Type = GameType.MemoryPairs,
                     Name = "Memory Pairs",
-                    Description = "Encuentra todos los pares de cartas iguales",
+                    Description = "Find all matching card pairs",
                     Icon = "icon_memory_pairs",
-                    Skill = "Memoria Visual"
+                    Skill = "Visual Memory"
                 },
                 new GameInfo
                 {
                     Type = GameType.QuickMath,
                     Name = "Quick Math",
-                    Description = "Resuelve 10 operaciones matematicas lo mas rapido posible",
+                    Description = "Solve 10 math problems as fast as possible",
                     Icon = "icon_quick_math",
-                    Skill = "Calculo Mental"
+                    Skill = "Mental Math"
                 },
                 new GameInfo
                 {
                     Type = GameType.FlashTap,
                     Name = "Flash Tap",
-                    Description = "Reacciona a la senal visual lo mas rapido posible",
+                    Description = "React to the visual signal as fast as possible",
                     Icon = "icon_flash_tap",
-                    Skill = "Reflejos"
+                    Skill = "Reflexes"
                 },
                 new GameInfo
                 {
                     Type = GameType.OddOneOut,
                     Name = "Odd One Out",
-                    Description = "Encuentra el elemento diferente en la cuadricula",
+                    Description = "Find the different element in the grid",
                     Icon = "icon_odd_one_out",
-                    Skill = "Percepcion Visual"
+                    Skill = "Visual Perception"
                 }
             };
         }
     }
 
     /// <summary>
-    /// Informacion de un juego para mostrar en UI
+    /// Game information to display in UI
     /// </summary>
     [Serializable]
     public class GameInfo

@@ -10,16 +10,16 @@ using DigitPark.UI.Components;
 namespace DigitPark.Services
 {
     /// <summary>
-    /// Servicio para gestión de avatares de usuario con Firebase Storage
-    /// - Selección de imagen desde galería (requiere NativeGallery plugin)
-    /// - Subida real a Firebase Storage
-    /// - Cache local para carga rápida
-    /// - Fallback a icono por defecto
+    /// Service for user avatar management with Firebase Storage
+    /// - Image selection from gallery (requires NativeGallery plugin)
+    /// - Real upload to Firebase Storage
+    /// - Local cache for fast loading
+    /// - Fallback to default icon
     ///
-    /// REQUISITOS:
-    /// 1. Firebase SDK instalado (com.google.firebase.storage)
+    /// REQUIREMENTS:
+    /// 1. Firebase SDK installed (com.google.firebase.storage)
     /// 2. NativeGallery plugin: https://github.com/yasirkula/UnityNativeGallery
-    /// 3. Reglas de Firebase Storage configuradas
+    /// 3. Firebase Storage rules configured
     /// </summary>
     public class AvatarService : MonoBehaviour
     {
@@ -38,7 +38,7 @@ namespace DigitPark.Services
         private StorageReference storageRoot;
         private bool isFirebaseInitialized = false;
 
-        // Eventos
+        // Events
         public event Action<Sprite> OnAvatarChanged;
         public event Action<float> OnUploadProgress;
         public event Action<string> OnError;
@@ -48,7 +48,7 @@ namespace DigitPark.Services
         private Sprite currentAvatarSprite;
         private bool isUploading = false;
 
-        // Constantes
+        // Constants
         private const string AVATAR_FILENAME = "avatar.jpg";
         private const string STORAGE_AVATARS_PATH = "avatars";
 
@@ -70,7 +70,7 @@ namespace DigitPark.Services
 
         private async void Initialize()
         {
-            // Configurar directorio de cache
+            // Configure cache directory
             cacheDirectory = Path.Combine(Application.persistentDataPath, "AvatarCache");
 
             if (!Directory.Exists(cacheDirectory))
@@ -78,17 +78,17 @@ namespace DigitPark.Services
                 Directory.CreateDirectory(cacheDirectory);
             }
 
-            // Inicializar Firebase Storage
+            // Initialize Firebase Storage
             await InitializeFirebase();
 
-            Debug.Log($"[AvatarService] Inicializado. Cache: {cacheDirectory}");
+            Debug.Log($"[AvatarService] Initialized. Cache: {cacheDirectory}");
         }
 
         private async Task InitializeFirebase()
         {
             try
             {
-                // Usar namespace completo para evitar conflicto con DigitPark.Services.Firebase
+                // Use full namespace to avoid conflict with DigitPark.Services.Firebase
                 var dependencyStatus = await global::Firebase.FirebaseApp.CheckAndFixDependenciesAsync();
 
                 if (dependencyStatus == global::Firebase.DependencyStatus.Available)
@@ -96,7 +96,7 @@ namespace DigitPark.Services
                     storage = FirebaseStorage.DefaultInstance;
                     storageRoot = storage.GetReference(STORAGE_AVATARS_PATH);
                     isFirebaseInitialized = true;
-                    Debug.Log("[AvatarService] Firebase Storage inicializado correctamente");
+                    Debug.Log("[AvatarService] Firebase Storage initialized successfully");
                 }
                 else
                 {
@@ -106,7 +106,7 @@ namespace DigitPark.Services
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error inicializando Firebase: {e.Message}");
+                Debug.LogError($"[AvatarService] Error initializing Firebase: {e.Message}");
                 isFirebaseInitialized = false;
             }
         }
@@ -116,46 +116,46 @@ namespace DigitPark.Services
         #region Public API
 
         /// <summary>
-        /// Verifica si el servicio está listo
+        /// Checks if the service is ready
         /// </summary>
         public bool IsReady => isFirebaseInitialized;
 
         /// <summary>
-        /// Abre el selector de imágenes del dispositivo
+        /// Opens the device image picker
         /// </summary>
         public void PickAvatarFromGallery()
         {
             if (!isFirebaseInitialized)
             {
-                Debug.LogError("[AvatarService] Firebase no está inicializado");
-                OnError?.Invoke("Servicio no disponible. Intenta más tarde.");
+                Debug.LogError("[AvatarService] Firebase is not initialized");
+                OnError?.Invoke("Service unavailable. Try again later.");
                 return;
             }
 
             if (isUploading)
             {
-                Debug.LogWarning("[AvatarService] Ya hay una subida en progreso");
-                OnError?.Invoke("Ya hay una subida en progreso");
+                Debug.LogWarning("[AvatarService] Upload already in progress");
+                OnError?.Invoke("An upload is already in progress");
                 return;
             }
 
 #if UNITY_ANDROID || UNITY_IOS
             PickImageNative();
 #else
-            Debug.LogWarning("[AvatarService] Selección de galería solo disponible en móviles");
-            OnError?.Invoke("Función solo disponible en dispositivos móviles");
+            Debug.LogWarning("[AvatarService] Gallery selection only available on mobile");
+            OnError?.Invoke("Feature only available on mobile devices");
 #endif
         }
 
         /// <summary>
-        /// Carga el avatar del usuario actual
+        /// Loads the current user's avatar
         /// </summary>
         public async Task<Sprite> LoadCurrentUserAvatar()
         {
             var playerData = GetCurrentPlayerData();
             if (playerData == null)
             {
-                Debug.LogWarning("[AvatarService] No hay usuario autenticado");
+                Debug.LogWarning("[AvatarService] No authenticated user");
                 return defaultAvatarSprite;
             }
 
@@ -163,7 +163,7 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Carga el avatar de cualquier usuario
+        /// Loads any user's avatar
         /// </summary>
         public async Task<Sprite> LoadAvatar(string userId, string avatarUrl, string username = null)
         {
@@ -172,13 +172,13 @@ namespace DigitPark.Services
                 return defaultAvatarSprite;
             }
 
-            // 1. Intentar cargar desde cache local
+            // 1. Try to load from local cache
             Sprite cachedSprite = LoadFromCache(userId);
             if (cachedSprite != null)
             {
-                Debug.Log($"[AvatarService] Avatar cargado desde cache: {userId}");
+                Debug.Log($"[AvatarService] Avatar loaded from cache: {userId}");
 
-                // Si es el usuario actual, actualizar referencia
+                // If current user, update reference
                 var currentPlayer = GetCurrentPlayerData();
                 if (currentPlayer != null && currentPlayer.userId == userId)
                 {
@@ -188,7 +188,7 @@ namespace DigitPark.Services
                 return cachedSprite;
             }
 
-            // 2. Si hay URL, descargar de Firebase
+            // 2. If URL exists, download from Firebase
             if (!string.IsNullOrEmpty(avatarUrl))
             {
                 Sprite downloadedSprite = await DownloadAvatar(userId, avatarUrl);
@@ -198,11 +198,11 @@ namespace DigitPark.Services
                 }
             }
 
-            // 3. Fallback: generar avatar con inicial del username
+            // 3. Fallback: generate avatar with username initial
             string displayName = username;
             if (string.IsNullOrEmpty(displayName))
             {
-                // Intentar obtener username del PlayerData actual
+                // Try to get username from current PlayerData
                 var currentPlayer = GetCurrentPlayerData();
                 if (currentPlayer != null && currentPlayer.userId == userId)
                 {
@@ -212,17 +212,17 @@ namespace DigitPark.Services
 
             if (!string.IsNullOrEmpty(displayName))
             {
-                Debug.Log($"[AvatarService] Generando avatar con inicial para: {userId} ({displayName})");
+                Debug.Log($"[AvatarService] Generating avatar with initial for: {userId} ({displayName})");
                 return AvatarInitialGenerator.GenerateAvatar(displayName, userId);
             }
 
-            // 4. Ultimo fallback: generar con userId como nombre
-            Debug.Log($"[AvatarService] Generando avatar con userId para: {userId}");
+            // 4. Last fallback: generate with userId as name
+            Debug.Log($"[AvatarService] Generating avatar with userId for: {userId}");
             return AvatarInitialGenerator.GenerateAvatar(userId, userId);
         }
 
         /// <summary>
-        /// Obtiene el sprite del avatar actual (cache en memoria)
+        /// Gets the current avatar sprite (in-memory cache)
         /// </summary>
         public Sprite GetCurrentAvatarSprite()
         {
@@ -230,7 +230,7 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Obtiene el sprite por defecto
+        /// Gets the default sprite
         /// </summary>
         public Sprite GetDefaultAvatarSprite()
         {
@@ -238,7 +238,7 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Limpia el cache de avatares
+        /// Clears the avatar cache
         /// </summary>
         public void ClearCache()
         {
@@ -250,16 +250,16 @@ namespace DigitPark.Services
                     Directory.CreateDirectory(cacheDirectory);
                 }
                 currentAvatarSprite = null;
-                Debug.Log("[AvatarService] Cache limpiado");
+                Debug.Log("[AvatarService] Cache cleared");
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error limpiando cache: {e.Message}");
+                Debug.LogError($"[AvatarService] Error clearing cache: {e.Message}");
             }
         }
 
         /// <summary>
-        /// Elimina el avatar del usuario actual de Firebase
+        /// Removes the current user's avatar from Firebase
         /// </summary>
         public async Task<bool> RemoveAvatar()
         {
@@ -268,19 +268,19 @@ namespace DigitPark.Services
 
             try
             {
-                // Eliminar de Firebase Storage
+                // Delete from Firebase Storage
                 if (isFirebaseInitialized)
                 {
                     StorageReference avatarRef = storageRoot.Child(playerData.userId).Child(AVATAR_FILENAME);
                     await avatarRef.DeleteAsync();
-                    Debug.Log("[AvatarService] Avatar eliminado de Firebase Storage");
+                    Debug.Log("[AvatarService] Avatar deleted from Firebase Storage");
                 }
 
-                // Limpiar URL en datos del jugador
+                // Clear URL in player data
                 playerData.avatarUrl = "";
                 await SavePlayerData(playerData);
 
-                // Limpiar cache local
+                // Clear local cache
                 string cachePath = GetCachePath(playerData.userId);
                 if (File.Exists(cachePath))
                 {
@@ -290,19 +290,19 @@ namespace DigitPark.Services
                 currentAvatarSprite = null;
                 OnAvatarChanged?.Invoke(defaultAvatarSprite);
 
-                Debug.Log("[AvatarService] Avatar eliminado completamente");
+                Debug.Log("[AvatarService] Avatar removed completely");
                 return true;
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error eliminando avatar: {e.Message}");
-                OnError?.Invoke("Error al eliminar el avatar");
+                Debug.LogError($"[AvatarService] Error removing avatar: {e.Message}");
+                OnError?.Invoke("Error removing avatar");
                 return false;
             }
         }
 
         /// <summary>
-        /// Invalida el cache de un usuario específico (forzar recarga)
+        /// Invalidates the cache for a specific user (force reload)
         /// </summary>
         public void InvalidateCache(string userId)
         {
@@ -310,7 +310,7 @@ namespace DigitPark.Services
             if (File.Exists(cachePath))
             {
                 File.Delete(cachePath);
-                Debug.Log($"[AvatarService] Cache invalidado para: {userId}");
+                Debug.Log($"[AvatarService] Cache invalidated for: {userId}");
             }
         }
 
@@ -325,23 +325,23 @@ namespace DigitPark.Services
             {
                 if (!string.IsNullOrEmpty(path))
                 {
-                    Debug.Log($"[AvatarService] Imagen seleccionada: {path}");
+                    Debug.Log($"[AvatarService] Image selected: {path}");
                     ProcessSelectedImage(path);
                 }
                 else
                 {
-                    Debug.Log("[AvatarService] Selección cancelada");
+                    Debug.Log("[AvatarService] Selection cancelled");
                 }
-            }, "Seleccionar Avatar", "image/*");
+            }, "Select Avatar", "image/*");
 
             if (permission == NativeGallery.Permission.Denied)
             {
-                Debug.LogWarning("[AvatarService] Permiso de galería denegado");
-                OnError?.Invoke("Permiso denegado. Habilita el acceso a fotos en Configuración.");
+                Debug.LogWarning("[AvatarService] Gallery permission denied");
+                OnError?.Invoke("Permission denied. Enable photo access in Settings.");
             }
             else if (permission == NativeGallery.Permission.ShouldAsk)
             {
-                Debug.Log("[AvatarService] Solicitando permiso de galería...");
+                Debug.Log("[AvatarService] Requesting gallery permission...");
             }
         }
 #endif
@@ -353,23 +353,23 @@ namespace DigitPark.Services
                 isUploading = true;
                 OnUploadProgress?.Invoke(0.1f);
 
-                // Cargar imagen desde archivo
+                // Load image from file
                 byte[] imageBytes = await Task.Run(() => File.ReadAllBytes(path));
                 Texture2D originalTex = new Texture2D(2, 2);
                 originalTex.LoadImage(imageBytes);
 
                 OnUploadProgress?.Invoke(0.2f);
 
-                // Procesar y subir
+                // Process and upload
                 await ProcessAndUploadTexture(originalTex);
 
-                // Limpiar
+                // Clean up
                 Destroy(originalTex);
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error procesando imagen: {e.Message}");
-                OnError?.Invoke("Error al procesar la imagen");
+                Debug.LogError($"[AvatarService] Error processing image: {e.Message}");
+                OnError?.Invoke("Error processing image");
                 isUploading = false;
             }
         }
@@ -378,15 +378,15 @@ namespace DigitPark.Services
         {
             try
             {
-                // Redimensionar y recortar a cuadrado
+                // Resize and crop to square
                 Texture2D resizedTex = ResizeAndCropToSquare(originalTex, maxAvatarSize);
                 OnUploadProgress?.Invoke(0.3f);
 
-                // Convertir a JPEG
+                // Convert to JPEG
                 byte[] jpegBytes = resizedTex.EncodeToJPG(jpegQuality);
                 OnUploadProgress?.Invoke(0.4f);
 
-                // Subir a Firebase Storage
+                // Upload to Firebase Storage
                 string avatarUrl = await UploadToFirebaseStorage(jpegBytes);
 
                 if (!string.IsNullOrEmpty(avatarUrl))
@@ -394,20 +394,20 @@ namespace DigitPark.Services
                     var playerData = GetCurrentPlayerData();
                     if (playerData != null)
                     {
-                        // Guardar en cache local
+                        // Save to local cache
                         SaveToCache(playerData.userId, jpegBytes);
 
-                        // Actualizar URL en datos del jugador
+                        // Update URL in player data
                         playerData.avatarUrl = avatarUrl;
                         await SavePlayerData(playerData);
                     }
 
-                    // Crear sprite y notificar
+                    // Create sprite and notify
                     currentAvatarSprite = CreateSprite(resizedTex);
                     OnAvatarChanged?.Invoke(currentAvatarSprite);
                     OnUploadProgress?.Invoke(1f);
 
-                    Debug.Log("[AvatarService] Avatar actualizado exitosamente");
+                    Debug.Log("[AvatarService] Avatar updated successfully");
                 }
                 else
                 {
@@ -416,8 +416,8 @@ namespace DigitPark.Services
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error en ProcessAndUploadTexture: {e.Message}");
-                OnError?.Invoke("Error al subir el avatar");
+                Debug.LogError($"[AvatarService] Error in ProcessAndUploadTexture: {e.Message}");
+                OnError?.Invoke("Error uploading avatar");
             }
             finally
             {
@@ -434,21 +434,21 @@ namespace DigitPark.Services
             var playerData = GetCurrentPlayerData();
             if (playerData == null)
             {
-                Debug.LogError("[AvatarService] No hay usuario autenticado");
-                OnError?.Invoke("Debes iniciar sesión para cambiar tu avatar");
+                Debug.LogError("[AvatarService] No authenticated user");
+                OnError?.Invoke("You must sign in to change your avatar");
                 return null;
             }
 
             if (!isFirebaseInitialized)
             {
-                Debug.LogError("[AvatarService] Firebase Storage no está inicializado");
-                OnError?.Invoke("Servicio no disponible");
+                Debug.LogError("[AvatarService] Firebase Storage is not initialized");
+                OnError?.Invoke("Service unavailable");
                 return null;
             }
 
             try
             {
-                // Referencia al archivo en Storage: avatars/{userId}/avatar.jpg
+                // Reference to file in Storage: avatars/{userId}/avatar.jpg
                 StorageReference avatarRef = storageRoot.Child(playerData.userId).Child(AVATAR_FILENAME);
 
                 // Metadata
@@ -457,28 +457,28 @@ namespace DigitPark.Services
                     ContentType = "image/jpeg"
                 };
 
-                // Subir archivo
+                // Upload file
                 OnUploadProgress?.Invoke(0.5f);
 
                 var uploadTask = avatarRef.PutBytesAsync(imageBytes, metadata);
 
-                // Esperar a que termine
+                // Wait for completion
                 await uploadTask;
 
                 OnUploadProgress?.Invoke(0.9f);
 
                 if (uploadTask.IsFaulted || uploadTask.IsCanceled)
                 {
-                    Debug.LogError($"[AvatarService] Error en subida: {uploadTask.Exception?.Message}");
-                    OnError?.Invoke("Error al subir el avatar");
+                    Debug.LogError($"[AvatarService] Upload error: {uploadTask.Exception?.Message}");
+                    OnError?.Invoke("Error uploading avatar");
                     return null;
                 }
 
-                // Obtener URL de descarga
+                // Get download URL
                 Uri downloadUri = await avatarRef.GetDownloadUrlAsync();
                 string downloadUrl = downloadUri.ToString();
 
-                Debug.Log($"[AvatarService] Avatar subido exitosamente: {downloadUrl}");
+                Debug.Log($"[AvatarService] Avatar uploaded successfully: {downloadUrl}");
                 return downloadUrl;
             }
             catch (StorageException se)
@@ -487,10 +487,10 @@ namespace DigitPark.Services
 
                 string errorMsg = se.ErrorCode switch
                 {
-                    StorageException.ErrorQuotaExceeded => "Almacenamiento lleno",
-                    StorageException.ErrorNotAuthorized => "No autorizado. Inicia sesión nuevamente.",
-                    StorageException.ErrorRetryLimitExceeded => "Error de conexión. Intenta de nuevo.",
-                    _ => "Error al subir el avatar"
+                    StorageException.ErrorQuotaExceeded => "Storage full",
+                    StorageException.ErrorNotAuthorized => "Not authorized. Please sign in again.",
+                    StorageException.ErrorRetryLimitExceeded => "Connection error. Try again.",
+                    _ => "Error uploading avatar"
                 };
 
                 OnError?.Invoke(errorMsg);
@@ -498,8 +498,8 @@ namespace DigitPark.Services
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error subiendo avatar: {e.Message}");
-                OnError?.Invoke("Error al subir el avatar");
+                Debug.LogError($"[AvatarService] Error uploading avatar: {e.Message}");
+                OnError?.Invoke("Error uploading avatar");
                 return null;
             }
         }
@@ -527,32 +527,32 @@ namespace DigitPark.Services
                     {
                         Texture2D tex = DownloadHandlerTexture.GetContent(request);
 
-                        // Guardar en cache local
+                        // Save to local cache
                         byte[] imageBytes = tex.EncodeToJPG(jpegQuality);
                         SaveToCache(userId, imageBytes);
 
                         Sprite sprite = CreateSprite(tex);
 
-                        // Si es el usuario actual, actualizar referencia
+                        // If current user, update reference
                         var currentPlayer = GetCurrentPlayerData();
                         if (currentPlayer != null && currentPlayer.userId == userId)
                         {
                             currentAvatarSprite = sprite;
                         }
 
-                        Debug.Log($"[AvatarService] Avatar descargado: {userId}");
+                        Debug.Log($"[AvatarService] Avatar downloaded: {userId}");
                         return sprite;
                     }
                     else
                     {
-                        Debug.LogWarning($"[AvatarService] Error descargando avatar: {request.error}");
+                        Debug.LogWarning($"[AvatarService] Error downloading avatar: {request.error}");
                         return null;
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error descargando avatar: {e.Message}");
+                Debug.LogError($"[AvatarService] Error downloading avatar: {e.Message}");
                 return null;
             }
         }
@@ -567,11 +567,11 @@ namespace DigitPark.Services
             {
                 string cachePath = GetCachePath(userId);
                 File.WriteAllBytes(cachePath, imageBytes);
-                Debug.Log($"[AvatarService] Avatar guardado en cache: {userId}");
+                Debug.Log($"[AvatarService] Avatar saved to cache: {userId}");
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error guardando cache: {e.Message}");
+                Debug.LogError($"[AvatarService] Error saving cache: {e.Message}");
             }
         }
 
@@ -583,7 +583,7 @@ namespace DigitPark.Services
 
                 if (File.Exists(cachePath))
                 {
-                    // Verificar que el archivo no esté corrupto (tamaño mínimo)
+                    // Verify file is not corrupt (minimum size)
                     FileInfo fileInfo = new FileInfo(cachePath);
                     if (fileInfo.Length < 100)
                     {
@@ -600,14 +600,14 @@ namespace DigitPark.Services
                     }
                     else
                     {
-                        // Archivo corrupto, eliminar
+                        // Corrupt file, delete
                         File.Delete(cachePath);
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"[AvatarService] Error cargando cache: {e.Message}");
+                Debug.LogError($"[AvatarService] Error loading cache: {e.Message}");
             }
 
             return null;
@@ -615,7 +615,7 @@ namespace DigitPark.Services
 
         private string GetCachePath(string userId)
         {
-            // Sanitizar userId para nombre de archivo seguro
+            // Sanitize userId for safe filename
             string safeUserId = string.Join("_", userId.Split(Path.GetInvalidFileNameChars()));
             return Path.Combine(cacheDirectory, $"avatar_{safeUserId}.jpg");
         }
@@ -625,11 +625,11 @@ namespace DigitPark.Services
         #region Image Processing Helpers
 
         /// <summary>
-        /// Redimensiona y recorta la imagen a un cuadrado centrado
+        /// Resizes and crops the image to a centered square
         /// </summary>
         private Texture2D ResizeAndCropToSquare(Texture2D source, int targetSize)
         {
-            // Crear textura temporal para el recorte
+            // Create temporary texture for cropping
             RenderTexture rt = RenderTexture.GetTemporary(targetSize, targetSize, 0, RenderTextureFormat.ARGB32);
             rt.filterMode = FilterMode.Bilinear;
 
@@ -640,12 +640,12 @@ namespace DigitPark.Services
             GL.Clear(true, true, Color.black);
             Graphics.Blit(source, rt);
 
-            // Leer pixels
+            // Read pixels
             Texture2D result = new Texture2D(targetSize, targetSize, TextureFormat.RGB24, false);
             result.ReadPixels(new Rect(0, 0, targetSize, targetSize), 0, 0);
             result.Apply();
 
-            // Limpiar
+            // Clean up
             RenderTexture.active = previous;
             RenderTexture.ReleaseTemporary(rt);
 

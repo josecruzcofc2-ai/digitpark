@@ -26,8 +26,8 @@ namespace DigitPark.Editor.AutoAssigners
         private const string GOOGLE_ICON = "Google/google_logo_official.png";
         private const string GOOGLE_DARK = "Google/google_icon_dark.png";
         private const string APPLE_ICON = "Apple/apple_logo_black.png";
-        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeOpen.png";
-        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/Actions/EyeClosed.png";
+        private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/EyeOpen.png";
+        private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/EyeClosed.png";
 
         private struct AssignmentResult
         {

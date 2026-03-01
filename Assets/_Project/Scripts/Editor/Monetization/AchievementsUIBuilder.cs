@@ -63,7 +63,7 @@ namespace DigitPark.Editor
         private const float TROPHY_CARD_HEIGHT = 380f;
         private const float GRID_SPACING = 15f;
         private const float CONTENT_PADDING = 15f;
-        private const float DETAIL_PANEL_HEIGHT = 720f;
+        private const float DETAIL_PANEL_HEIGHT = 880f;
 
         [MenuItem("DigitPark/UI Builders/Monetization/Achievements", false, 140)]
         public static void BuildUI()
@@ -478,8 +478,8 @@ namespace DigitPark.Editor
             tabsCSF.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(tabsContent);
-            hlg.spacing = 6f;
-            hlg.padding = new RectOffset(10, 10, 8, 8);
+            hlg.spacing = 10f;
+            hlg.padding = new RectOffset(12, 12, 8, 8);
             hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childControlWidth = false;
             hlg.childControlHeight = true;
@@ -500,7 +500,7 @@ namespace DigitPark.Editor
             CreateCategoryTab(tabsContent, "TimeTab", "TIME", false, new Color(0.5f, 0.8f, 0.9f, 1f), 110);
             CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 80);
 
-            Debug.Log("[TrophyShowcase] CategoryTabs creado con 10 categorías (V1)");
+            Debug.Log("[TrophyShowcase] CategoryTabs created with 12 categories");
         }
 
         private static void CreateCategoryTab(GameObject parent, string name, string label, bool isActive, Color color, float width = 0)
@@ -527,15 +527,15 @@ namespace DigitPark.Editor
             tabText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(textObj);
             RectTransform textRT = textObj.GetComponent<RectTransform>();
-            textRT.offsetMin = new Vector2(8, 0);
-            textRT.offsetMax = new Vector2(-8, 0);
+            textRT.offsetMin = new Vector2(12, 0);
+            textRT.offsetMax = new Vector2(-12, 0);
 
             LayoutElement le = GetOrAddComponent<LayoutElement>(tab);
             le.minHeight = 48;
             if (width > 0)
             {
-                le.minWidth = width * 1.2f;
-                le.preferredWidth = width * 1.2f;
+                le.minWidth = width * 1.35f;
+                le.preferredWidth = width * 1.35f;
             }
             else
             {
@@ -989,7 +989,7 @@ namespace DigitPark.Editor
             RectTransform panelRT = GetOrAddComponent<RectTransform>(panel);
             panelRT.anchorMin = new Vector2(0.5f, 0.5f);
             panelRT.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRT.sizeDelta = new Vector2(700, DETAIL_PANEL_HEIGHT);
+            panelRT.sizeDelta = new Vector2(780, DETAIL_PANEL_HEIGHT);
 
             Image panelBg = GetOrAddComponent<Image>(panel);
             panelBg.color = POPUP_BG;
@@ -1000,22 +1000,22 @@ namespace DigitPark.Editor
             panelCanvasGroup.alpha = 1f;
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(panel);
-            vlg.spacing = 16;
-            vlg.padding = new RectOffset(35, 35, 35, 30);
+            vlg.spacing = 14;
+            vlg.padding = new RectOffset(40, 40, 50, 30);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // ==================== RED CLOSE BUTTON (top-right, like CashWallet) ====================
+            // ==================== RED CLOSE BUTTON (top-right corner) ====================
             GameObject closeBtn = FindOrCreateChild(panel, "CloseButton");
             RectTransform closeRT = GetOrAddComponent<RectTransform>(closeBtn);
             closeRT.anchorMin = new Vector2(1, 1);
             closeRT.anchorMax = new Vector2(1, 1);
             closeRT.pivot = new Vector2(1, 1);
-            closeRT.anchoredPosition = new Vector2(-15, -15);
-            closeRT.sizeDelta = new Vector2(90, 90);
+            closeRT.anchoredPosition = new Vector2(-8, -8);
+            closeRT.sizeDelta = new Vector2(80, 80);
 
             // Ignore layout so VLG doesn't control position
             LayoutElement closeBtnLE = GetOrAddComponent<LayoutElement>(closeBtn);
@@ -1029,7 +1029,7 @@ namespace DigitPark.Editor
             ColorBlock closeColors = closeButton.colors;
             closeColors.normalColor = Color.white;
             closeColors.highlightedColor = new Color(1f, 0.85f, 0.85f, 1f);
-            closeColors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+            closeColors.pressedColor = new Color(0.6f, 0.1f, 0.1f, 1f);
             closeColors.selectedColor = Color.white;
             closeButton.colors = closeColors;
 
@@ -1040,23 +1040,23 @@ namespace DigitPark.Editor
             GameObject closeText = FindOrCreateChild(closeBtn, "Text");
             TextMeshProUGUI closeTmp = GetOrAddComponent<TextMeshProUGUI>(closeText);
             closeTmp.text = "X";
-            closeTmp.fontSize = FontSizes.H1;
+            closeTmp.fontSize = FontSizes.H2;
             closeTmp.fontStyle = FontStyles.Bold;
             closeTmp.color = TEXT_PRIMARY;
             closeTmp.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(closeText);
 
-            // ==================== TROPHY ICON (large, matching card icon size) ====================
+            // ==================== TROPHY ICON ====================
             GameObject trophyObj = FindOrCreateChild(panel, "DetailTrophyIcon");
             Image trophyBg = GetOrAddComponent<Image>(trophyObj);
             trophyBg.color = GOLD;
             LayoutElement trophyLE = GetOrAddComponent<LayoutElement>(trophyObj);
-            trophyLE.minWidth = 180;
-            trophyLE.minHeight = 180;
-            trophyLE.preferredWidth = 180;
-            trophyLE.preferredHeight = 180;
+            trophyLE.minWidth = 160;
+            trophyLE.minHeight = 160;
+            trophyLE.preferredWidth = 160;
+            trophyLE.preferredHeight = 160;
 
-            // ==================== TITLE (DisplayMedium to match Settings standard) ====================
+            // ==================== TITLE (auto-sizing to prevent truncation) ====================
             GameObject titleObj = FindOrCreateChild(panel, "DetailTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "First Victory";
@@ -1064,30 +1064,37 @@ namespace DigitPark.Editor
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.H3;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
             titleLE.minHeight = 55;
 
-            // ==================== DESCRIPTION (SectionHeader to match Settings) ====================
+            // ==================== DESCRIPTION (auto-sizing for translations) ====================
             GameObject descObj = FindOrCreateChild(panel, "DetailDescription");
             TextMeshProUGUI descText = GetOrAddComponent<TextMeshProUGUI>(descObj);
             descText.text = "Win your first game in any game mode.";
-            descText.fontSize = FontSizes.H4;
-            descText.fontStyle = FontStyles.Bold;
+            descText.fontSize = FontSizes.Body;
+            descText.fontStyle = FontStyles.Normal;
             descText.color = TEXT_SECONDARY;
             descText.alignment = TextAlignmentOptions.Center;
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = FontSizes.AutoMinBody;
+            descText.fontSizeMax = FontSizes.Body;
+            descText.enableWordWrapping = true;
             LayoutElement descLE = GetOrAddComponent<LayoutElement>(descObj);
-            descLE.minHeight = 55;
+            descLE.minHeight = 70;
 
             // ==================== CATEGORY TEXT ====================
             GameObject categoryObj = FindOrCreateChild(panel, "DetailCategoryText");
             TextMeshProUGUI categoryText = GetOrAddComponent<TextMeshProUGUI>(categoryObj);
             categoryText.text = "Category: Beginner";
-            categoryText.fontSize = FontSizes.Body;
+            categoryText.fontSize = FontSizes.BodySmall;
             categoryText.fontStyle = FontStyles.Bold;
             categoryText.color = CYAN_NEON;
             categoryText.alignment = TextAlignmentOptions.Center;
             LayoutElement categoryLE = GetOrAddComponent<LayoutElement>(categoryObj);
-            categoryLE.minHeight = 35;
+            categoryLE.minHeight = 32;
 
             // ==================== PROGRESS SECTION ====================
             GameObject progressSection = FindOrCreateChild(panel, "DetailProgressSection");
@@ -1152,26 +1159,44 @@ namespace DigitPark.Editor
             rewardSectionLE.minHeight = 70;
 
             HorizontalLayoutGroup rewardHlg = GetOrAddComponent<HorizontalLayoutGroup>(rewardSection);
-            rewardHlg.spacing = 15;
-            rewardHlg.padding = new RectOffset(20, 20, 14, 14);
+            rewardHlg.spacing = 12;
+            rewardHlg.padding = new RectOffset(25, 25, 14, 14);
             rewardHlg.childAlignment = TextAnchor.MiddleCenter;
             rewardHlg.childControlWidth = false;
             rewardHlg.childControlHeight = true;
+
+            // Reward label "Reward:"
+            GameObject rewardLabel = FindOrCreateChild(rewardSection, "RewardLabel");
+            TextMeshProUGUI rewardLabelTmp = GetOrAddComponent<TextMeshProUGUI>(rewardLabel);
+            rewardLabelTmp.text = "Reward:";
+            rewardLabelTmp.fontSize = FontSizes.BodySmall;
+            rewardLabelTmp.fontStyle = FontStyles.Bold;
+            rewardLabelTmp.color = TEXT_SECONDARY;
+            rewardLabelTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            rewardLabelTmp.enableAutoSizing = true;
+            rewardLabelTmp.fontSizeMin = FontSizes.AutoMinSmall;
+            rewardLabelTmp.fontSizeMax = FontSizes.BodySmall;
+            LayoutElement rewardLabelLE = GetOrAddComponent<LayoutElement>(rewardLabel);
+            rewardLabelLE.minWidth = 140;
+            rewardLabelLE.minHeight = 40;
 
             GameObject rewardIcon = FindOrCreateChild(rewardSection, "RewardIcon");
             Image rewardIconImage = GetOrAddComponent<Image>(rewardIcon);
             rewardIconImage.color = new Color(0.4f, 0.8f, 1f, 1f); // Gem blue
             LayoutElement rewardIconLE = GetOrAddComponent<LayoutElement>(rewardIcon);
-            rewardIconLE.minWidth = 45;
-            rewardIconLE.minHeight = 45;
+            rewardIconLE.minWidth = 42;
+            rewardIconLE.minHeight = 42;
 
             GameObject rewardAmount = FindOrCreateChild(rewardSection, "RewardAmount");
             TextMeshProUGUI rewardTmp = GetOrAddComponent<TextMeshProUGUI>(rewardAmount);
-            rewardTmp.text = "50 Gems";
-            rewardTmp.fontSize = FontSizes.H4;
+            rewardTmp.text = "50 DigitGems";
+            rewardTmp.fontSize = FontSizes.Body;
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            rewardTmp.enableAutoSizing = true;
+            rewardTmp.fontSizeMin = FontSizes.AutoMinBody;
+            rewardTmp.fontSizeMax = FontSizes.Body;
             LayoutElement rewardAmountLE = GetOrAddComponent<LayoutElement>(rewardAmount);
             rewardAmountLE.flexibleWidth = 1;
 
@@ -1182,7 +1207,7 @@ namespace DigitPark.Editor
             Button claimButton = GetOrAddComponent<Button>(claimBtn);
             SetupButtonColors(claimButton, BUTTON_SUCCESS);
             LayoutElement claimLE = GetOrAddComponent<LayoutElement>(claimBtn);
-            claimLE.minHeight = 65;
+            claimLE.minHeight = 70;
 
             GameObject claimText = FindOrCreateChild(claimBtn, "ClaimButtonText");
             TextMeshProUGUI claimTmp = GetOrAddComponent<TextMeshProUGUI>(claimText);
@@ -1191,9 +1216,12 @@ namespace DigitPark.Editor
             claimTmp.fontStyle = FontStyles.Bold;
             claimTmp.color = TEXT_DARK;
             claimTmp.alignment = TextAlignmentOptions.Center;
+            claimTmp.enableAutoSizing = true;
+            claimTmp.fontSizeMin = FontSizes.AutoMinBody;
+            claimTmp.fontSizeMax = FontSizes.BodyLarge;
             SetRectTransformStretch(claimText);
 
-            // ==================== CANCEL BUTTON (secondary, like CashWallet) ====================
+            // ==================== CANCEL BUTTON ====================
             GameObject cancelBtn = FindOrCreateChild(panel, "CancelButton");
             Image cancelBg = GetOrAddComponent<Image>(cancelBtn);
             cancelBg.color = BUTTON_SECONDARY;

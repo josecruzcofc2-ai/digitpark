@@ -55,8 +55,8 @@ namespace DigitPark.Editor
         private const float DOTS_TOP = 0.095f;
         private const float DOTS_BOT = 0.065f;
 
-        private const float NAV_TOP = 0.055f;
-        private const float NAV_BOT = 0.015f;
+        private const float NAV_TOP = 0.075f;
+        private const float NAV_BOT = 0.025f;
 
         private const float SIDE_PAD = 30f;
 

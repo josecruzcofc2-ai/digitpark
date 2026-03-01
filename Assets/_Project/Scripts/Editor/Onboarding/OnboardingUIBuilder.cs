@@ -52,7 +52,7 @@ namespace DigitPark.Editor
         private const float TITLE_BOT = 0.50f;
 
         private const float CONTENT_TOP = 0.48f;
-        private const float CONTENT_BOT = 0.12f;
+        private const float CONTENT_BOT = 0.13f;
 
         private const float DOTS_TOP = 0.095f;
         private const float DOTS_BOT = 0.065f;
@@ -69,8 +69,8 @@ namespace DigitPark.Editor
         private static readonly string[] SLIDE_ICONS =
         {
             "Assets/_Project/Art/Icons/Onboarding/WelcomeIcon.png",
-            "Assets/_Project/Art/Icons/Social/Profile/ProfileIcon.png",
-            "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png",
+            "Assets/_Project/Art/Icons/Social/ProfileIcon.png",
+            "Assets/_Project/Art/Icons/Social/AvatarDefault.png",
             "Assets/_Project/Art/Icons/Onboarding/GamesIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/CashBattleIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/TournamentsIcon.png",
@@ -407,17 +407,20 @@ namespace DigitPark.Editor
             outline.effectColor = CYAN_DARK;
             outline.effectDistance = new Vector2(1.5f, 1.5f);
 
+            // Prevent content overflow beyond the card
+            card.AddComponent<RectMask2D>();
+
             var content = new GameObject("Content");
             content.transform.SetParent(card.transform, false);
             var coRT = content.AddComponent<RectTransform>();
-            coRT.anchorMin = new Vector2(0.04f, 0.04f);
-            coRT.anchorMax = new Vector2(0.96f, 0.96f);
+            coRT.anchorMin = new Vector2(0.04f, 0.03f);
+            coRT.anchorMax = new Vector2(0.96f, 0.97f);
             coRT.offsetMin = Vector2.zero;
             coRT.offsetMax = Vector2.zero;
 
             var vlg = content.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 12;
-            vlg.padding = new RectOffset(15, 15, 10, 10);
+            vlg.spacing = 10;
+            vlg.padding = new RectOffset(15, 15, 8, 8);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -432,14 +435,16 @@ namespace DigitPark.Editor
         {
             var go = new GameObject("Text");
             go.transform.SetParent(parent, false);
-            go.AddComponent<LayoutElement>().preferredHeight = fontSize + 16;
+            go.AddComponent<LayoutElement>().preferredHeight = fontSize + 14;
             var tmp = go.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = fontSize;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.enableAutoSizing = true;
             tmp.color = color;
             tmp.alignment = align;
             tmp.enableWordWrapping = true;
-            tmp.fontStyle = FontStyles.Bold;
+            tmp.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
         }
 
         private static void AddContentSpacer(Transform parent, float height)
@@ -816,7 +821,7 @@ namespace DigitPark.Editor
             rwRT.offsetMin = new Vector2(10, 10);
             rwRT.offsetMax = new Vector2(-10, -10);
             var rwTMP = rewardText.AddComponent<TextMeshProUGUI>();
-            rwTMP.text = "+500 Coins  |  +50 Gems";
+            rwTMP.text = "+500 DigitCoins  |  +50 DigitGems";
             rwTMP.fontSize = FontSizes.Subtitle;
             rwTMP.color = GOLD;
             rwTMP.fontStyle = FontStyles.Bold;

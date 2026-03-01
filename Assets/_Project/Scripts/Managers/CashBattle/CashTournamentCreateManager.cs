@@ -252,7 +252,7 @@ namespace DigitPark.Managers
                 string[] gameIds = { "", "DigitRush", "MemoryPairs", "QuickMath", "FlashTap", "OddOneOut" };
                 if (index < gameIds.Length)
                 {
-                    string iconPath = $"Games/{gameIds[index]}Icon";
+                    string iconPath = $"Icons/Games/{gameIds[index]}Icon";
                     Sprite sprite = Resources.Load<Sprite>(iconPath);
                     if (sprite != null)
                     {

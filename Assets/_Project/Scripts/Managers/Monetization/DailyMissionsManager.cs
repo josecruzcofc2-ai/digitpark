@@ -34,6 +34,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button specialTab;
 
         [Header("UI - Progress Summary")]
+        [SerializeField] private TextMeshProUGUI progressTitleText;
         [SerializeField] private Slider dailyProgressBar;
         [SerializeField] private TextMeshProUGUI dailyProgressText;
         [SerializeField] private TextMeshProUGUI bonusRewardText;
@@ -461,7 +462,25 @@ namespace DigitPark.Managers
         {
             currentTab = tab;
             UpdateTabVisuals();
+            UpdateProgressTitle();
             PopulateUI();
+        }
+
+        private void UpdateProgressTitle()
+        {
+            if (progressTitleText == null) return;
+            switch (currentTab)
+            {
+                case MissionTab.Daily:
+                    progressTitleText.text = AutoLocalizer.Get("ms_daily_progress", "Daily Progress");
+                    break;
+                case MissionTab.Weekly:
+                    progressTitleText.text = AutoLocalizer.Get("ms_weekly_progress", "Weekly Progress");
+                    break;
+                case MissionTab.Special:
+                    progressTitleText.text = AutoLocalizer.Get("ms_special_progress", "Special Progress");
+                    break;
+            }
         }
 
         private void UpdateTabVisuals()

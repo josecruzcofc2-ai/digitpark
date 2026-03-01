@@ -750,7 +750,7 @@ namespace DigitPark.Editor
             titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleTMP = title.AddComponent<TextMeshProUGUI>();
-            titleTMP.text = "Match History";
+            titleTMP.text = "Transaction History";
             titleTMP.fontSize = FontSizes.Subtitle;
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;

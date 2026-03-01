@@ -229,7 +229,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "startingCountdownText", FindTextByExactName("StartingCountdownText"));
 
             // Configuration - Default avatar sprite
-            AssignSpriteAsset(so, "defaultAvatarSprite", "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png");
+            AssignSpriteAsset(so, "defaultAvatarSprite", "Assets/_Project/Art/Icons/Social/AvatarDefault.png");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

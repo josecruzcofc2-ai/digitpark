@@ -14,16 +14,16 @@ using DigitPark.Services;
 namespace DigitPark.Managers
 {
     /// <summary>
-    /// Manager principal del juego DigitRush
-    /// Controla la mecánica core del grid 3x3 y la secuencia de números 1-9
-    /// Con sistema de combos, partículas y vibración háptica
+    /// Main manager for the DigitRush game
+    /// Controls the core 3x3 grid mechanic and the 1-9 number sequence
+    /// With combo system, particles, and haptic vibration
     /// </summary>
     public class DigitRushController : MonoBehaviour
     {
         public static DigitRushController Instance { get; private set; }
 
         [Header("Grid")]
-        [SerializeField] public Button[] gridButtons; // 9 botones del grid 3x3
+        [SerializeField] public Button[] gridButtons; // 9 buttons of the 3x3 grid
 
         [Header("Game UI")]
         [SerializeField] public TextMeshProUGUI timerText;
@@ -98,14 +98,14 @@ namespace DigitPark.Managers
         // Player Data
         private PlayerData currentPlayer;
 
-        // Números asignados a cada botón
+        // Numbers assigned to each button
         private int[] gridNumbers = new int[9];
 
-        // Coroutines de shake
+        // Shake coroutines
         private Coroutine[] shakeCoroutines = new Coroutine[9];
         private Vector2[] shakeOriginalPositions = new Vector2[9];
 
-        // Mensajes de éxito
+        // Success messages
         private readonly string[] level1Keys = {
             "msg_godlike_focus", "msg_mind_on_fire", "msg_exceptional_reflexes",
             "msg_neural_perfection", "msg_time_master", "msg_superhuman",
@@ -142,7 +142,7 @@ namespace DigitPark.Managers
                 Destroy(gameObject);
             }
 
-            // Buscar UISparkleEffect si no está asignado
+            // Find UISparkleEffect if not assigned
             if (sparkleEffect == null)
             {
                 sparkleEffect = FindFirstObjectByType<UISparkleEffect>();
@@ -151,7 +151,7 @@ namespace DigitPark.Managers
 
         private void Start()
         {
-            Debug.Log("[Game] DigitRushController iniciado");
+            Debug.Log("[Game] DigitRushController started");
             LoadPlayerData();
             SetupListeners();
             SetupSettingsPanel();
@@ -290,7 +290,7 @@ namespace DigitPark.Managers
         {
             PremiumManager.OnPremiumStatusChanged -= UpdatePremiumBanner;
 
-            // Limpiar coroutines de shake activas
+            // Clean up active shake coroutines
             for (int i = 0; i < shakeCoroutines.Length; i++)
             {
                 if (shakeCoroutines[i] != null)
@@ -318,7 +318,7 @@ namespace DigitPark.Managers
 
         private void OnPremiumBannerClicked()
         {
-            Debug.Log("[Game] Banner premium clickeado");
+            Debug.Log("[Game] Premium banner clicked");
             Canvas canvas = UICanvasHelper.FindMainCanvas();
             if (canvas != null)
             {
@@ -328,7 +328,7 @@ namespace DigitPark.Managers
 
         public void StartNewGame()
         {
-            Debug.Log("[Game] Iniciando nuevo juego...");
+            Debug.Log("[Game] Starting new game...");
 
             currentTargetNumber = 1;
             currentTime = 0f;
@@ -367,12 +367,12 @@ namespace DigitPark.Managers
                 OnCountdownComplete();
             }
 
-            Debug.Log("[Game] Nuevo juego iniciado - Números ocultos hasta GO!");
+            Debug.Log("[Game] New game started - Numbers hidden until GO!");
         }
 
         private void OnCountdownComplete()
         {
-            Debug.Log("[Game] Countdown completado - Revelando números!");
+            Debug.Log("[Game] Countdown completed - Revealing numbers!");
 
             AssignNumbersToButtons();
             AnimateButtonsPopUp();
@@ -387,7 +387,7 @@ namespace DigitPark.Managers
             isTimerStarted = true;
             SetGridButtonsInteractable(true);
 
-            Debug.Log("[Game] ¡Juego activo! Timer corriendo...");
+            Debug.Log("[Game] Game active! Timer running...");
         }
 
         private void SetGridButtonsInteractable(bool interactable)
@@ -448,7 +448,7 @@ namespace DigitPark.Managers
                 gridNumbers[i] = numbers[i];
             }
 
-            Debug.Log($"[Game] Números generados: {string.Join(", ", gridNumbers)}");
+            Debug.Log($"[Game] Numbers generated: {string.Join(", ", gridNumbers)}");
         }
 
         private void AssignNumbersToButtons()
@@ -509,11 +509,11 @@ namespace DigitPark.Managers
             if (!isTimerStarted)
             {
                 isTimerStarted = true;
-                Debug.Log("[Game] Timer iniciado");
+                Debug.Log("[Game] Timer started");
             }
 
             int clickedNumber = gridNumbers[buttonIndex];
-            Debug.Log($"[Game] Botón {buttonIndex} clickeado - Número: {clickedNumber} | Esperado: {currentTargetNumber}");
+            Debug.Log($"[Game] Button {buttonIndex} clicked - Number: {clickedNumber} | Expected: {currentTargetNumber}");
 
             if (clickedNumber == currentTargetNumber)
             {
@@ -533,13 +533,13 @@ namespace DigitPark.Managers
 
         private void OnCorrectNumberClicked(int buttonIndex)
         {
-            Debug.Log($"[Game] ¡Correcto! Número {gridNumbers[buttonIndex]}");
+            Debug.Log($"[Game] Correct! Number {gridNumbers[buttonIndex]}");
 
-            // Incrementar combo
+            // Increment combo
             currentCombo++;
             if (currentCombo > maxCombo) maxCombo = currentCombo;
 
-            // Vibración de éxito (más fuerte con combo)
+            // Success vibration (stronger with combo)
             if (currentCombo >= 7)
                 TriggerHaptic(HapticType.Heavy);
             else if (currentCombo >= 4)
@@ -547,10 +547,10 @@ namespace DigitPark.Managers
             else
                 TriggerHaptic(HapticType.Light);
 
-            // Partículas de éxito
+            // Success particles
             PlayCorrectParticles(buttonIndex);
 
-            // Animar botón como completado
+            // Animate button as completed
             var cell3D = gridButtons[buttonIndex].GetComponent<Cell3DButton>();
             if (cell3D != null)
             {
@@ -579,26 +579,26 @@ namespace DigitPark.Managers
 
         private void OnWrongNumberClicked(int buttonIndex)
         {
-            Debug.Log($"[Game] ¡Incorrecto! Clickeó {gridNumbers[buttonIndex]}, esperaba {currentTargetNumber}");
+            Debug.Log($"[Game] Incorrect! Clicked {gridNumbers[buttonIndex]}, expected {currentTargetNumber}");
 
-            // Resetear combo
+            // Reset combo
             currentCombo = 0;
             totalErrors++;
 
-            // Penalización de +1 segundo
+            // +1 second penalty
             currentTime += 1f;
             UpdateTimerDisplay();
 
             UpdateComboDisplay();
             UpdateRoundUI();
 
-            // Vibración de error
+            // Error vibration
             TriggerHaptic(HapticType.Error);
 
-            // Partículas de error
+            // Error particles
             PlayErrorParticles(buttonIndex);
 
-            // Animación de error en Cell3DButton (flash rojo + shake + release)
+            // Error animation in Cell3DButton (red flash + shake + release)
             var cell3D = gridButtons[buttonIndex].GetComponent<Cell3DButton>();
             if (cell3D != null)
             {
@@ -606,7 +606,7 @@ namespace DigitPark.Managers
             }
             else
             {
-                // Fallback: shake del RectTransform directamente
+                // Fallback: shake the RectTransform directly
                 RectTransform rt = gridButtons[buttonIndex].GetComponent<RectTransform>();
 
                 if (shakeCoroutines[buttonIndex] != null)
@@ -619,7 +619,7 @@ namespace DigitPark.Managers
                 shakeCoroutines[buttonIndex] = StartCoroutine(ShakeButton(buttonIndex));
             }
 
-            // Mostrar "+1" flotante rojo sobre el botón
+            // Show floating red "+1" above the button
             ShowPenaltyText(buttonIndex);
         }
 
@@ -656,7 +656,7 @@ namespace DigitPark.Managers
             Vector2 pos = GetButtonPosition(buttonIndex);
             sparkleEffect.PlayMatchSparkles(pos, currentCombo);
 
-            // Estrellas extra para combo alto
+            // Extra stars for high combo
             if (currentCombo >= 5)
             {
                 sparkleEffect.PlayStarBurst(pos, currentCombo - 3);
@@ -691,7 +691,7 @@ namespace DigitPark.Managers
             RectTransform buttonRT = gridButtons[buttonIndex].GetComponent<RectTransform>();
             if (buttonRT == null) return;
 
-            // Crear texto "+1" flotante directamente en el canvas
+            // Create floating "+1" text directly on the canvas
             Canvas canvas = gridButtons[buttonIndex].GetComponentInParent<Canvas>();
             if (canvas == null) return;
 
@@ -700,7 +700,7 @@ namespace DigitPark.Managers
 
         private IEnumerator AnimatePenaltyText(RectTransform buttonRT, Canvas canvas)
         {
-            // Crear objeto de texto
+            // Create text object
             GameObject penaltyObj = new GameObject("PenaltyText");
             penaltyObj.transform.SetParent(canvas.transform, false);
 
@@ -711,28 +711,28 @@ namespace DigitPark.Managers
             tmp.text = "+1";
             tmp.fontSize = FontSizes.Subtitle;
             tmp.fontStyle = FontStyles.Bold;
-            tmp.color = new Color(1f, 0.3f, 0.3f, 1f); // Rojo
+            tmp.color = new Color(1f, 0.3f, 0.3f, 1f); // Red
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.raycastTarget = false;
 
-            // Outline negro para legibilidad
+            // Black outline for readability
             Outline outline = penaltyObj.AddComponent<Outline>();
             outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
             outline.effectDistance = new Vector2(2, -2);
 
-            // Posicionar sobre el botón
+            // Position above the button
             Vector3 buttonWorldPos = buttonRT.position;
             Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(canvas.worldCamera, buttonWorldPos);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvas.transform as RectTransform, screenPos, canvas.worldCamera, out Vector2 localPos);
             rt.anchoredPosition = localPos + new Vector2(0, 30f);
 
-            // Animación: escala punch + flotar arriba + fade out
+            // Animation: punch scale + float up + fade out
             Vector2 startPos = rt.anchoredPosition;
             float duration = 1.2f;
             float elapsed = 0f;
 
-            // Punch scale inicial
+            // Initial punch scale
             float punchDur = 0.12f;
             float punchElapsed = 0f;
             while (punchElapsed < punchDur)
@@ -747,18 +747,18 @@ namespace DigitPark.Managers
             }
             rt.localScale = Vector3.one;
 
-            // Flotar hacia arriba y fade out
+            // Float up and fade out
             Color startColor = tmp.color;
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
-                // Movimiento hacia arriba con desaceleración
+                // Upward movement with deceleration
                 float yOffset = 80f * t * (1f - t * 0.3f);
                 rt.anchoredPosition = startPos + new Vector2(0, yOffset);
 
-                // Fade out en la segunda mitad
+                // Fade out in the second half
                 if (t > 0.5f)
                 {
                     float fadeT = (t - 0.5f) / 0.5f;
@@ -856,13 +856,13 @@ namespace DigitPark.Managers
                 comboText.gameObject.SetActive(true);
                 comboText.text = $"x{currentCombo}";
 
-                // Color basado en combo
+                // Color based on combo
                 if (currentCombo >= 8)
-                    comboText.color = new Color(1f, 0.85f, 0.2f); // Dorado
+                    comboText.color = new Color(1f, 0.85f, 0.2f); // Gold
                 else if (currentCombo >= 6)
-                    comboText.color = new Color(1f, 0.5f, 0.2f); // Naranja
+                    comboText.color = new Color(1f, 0.5f, 0.2f); // Orange
                 else if (currentCombo >= 4)
-                    comboText.color = new Color(0.3f, 1f, 0.5f); // Verde
+                    comboText.color = new Color(0.3f, 1f, 0.5f); // Green
                 else
                     comboText.color = new Color(0f, 0.9f, 1f); // Cyan
             }
@@ -878,7 +878,7 @@ namespace DigitPark.Managers
 
         private void OnGameComplete()
         {
-            Debug.Log($"[Game] ¡RONDA COMPLETADA! Tiempo: {currentTime:F3}s | Max Combo: {maxCombo}");
+            Debug.Log($"[Game] ROUND COMPLETED! Time: {currentTime:F3}s | Max Combo: {maxCombo}");
 
             isGameActive = false;
             isTimerStarted = false;
@@ -889,12 +889,12 @@ namespace DigitPark.Managers
 
             if (currentRound > totalRounds)
             {
-                // Victoria final
+                // Final victory
                 FinalEndGame();
             }
             else
             {
-                // Siguiente ronda
+                // Next round
                 StartCoroutine(NextRoundSequence());
             }
         }
@@ -928,7 +928,7 @@ namespace DigitPark.Managers
             if (isNewRecord)
             {
                 bestTime = cumulativeTime;
-                Debug.Log($"[Game] ¡NUEVO RÉCORD! {bestTime:F3}s");
+                Debug.Log($"[Game] NEW RECORD! {bestTime:F3}s");
                 SaveBestTime();
             }
 
@@ -937,7 +937,7 @@ namespace DigitPark.Managers
 
             SaveScoreToDatabase();
 
-            // Registrar resultado en GameSessionManager
+            // Register result in GameSessionManager
             var result = new MinigameResult
             {
                 GameType = GameType.DigitRush,
@@ -953,10 +953,10 @@ namespace DigitPark.Managers
                 GameSessionManager.Instance.RegisterGameResult(result);
             }
 
-            // Vibración de victoria
+            // Victory vibration
             TriggerHaptic(HapticType.Heavy);
 
-            // Secuencia de victoria con panel según modo
+            // Victory sequence with panel based on mode
             StartCoroutine(PlayVictorySequence(result, isNewRecord));
         }
 
@@ -965,7 +965,7 @@ namespace DigitPark.Managers
             yield return new WaitForSeconds(0.1f);
             TriggerHaptic(HapticType.Heavy);
 
-            // Animación de "ola" de celebración en los botones
+            // Celebration "wave" animation on the buttons
             float waveDelay = 0.08f;
             for (int row = 0; row < 3; row++)
             {
@@ -984,7 +984,7 @@ namespace DigitPark.Managers
                 }
             }
 
-            // Confeti
+            // Confetti
             if (sparkleEffect != null)
             {
                 sparkleEffect.PlayVictoryConfetti();
@@ -995,7 +995,7 @@ namespace DigitPark.Managers
 
             yield return new WaitForSeconds(0.5f);
 
-            // Mostrar panel según modo de juego
+            // Show panel based on game mode
             var ctx = GameSessionManager.Instance?.CurrentContext;
 
             // 1. Online free 1v1 (no sprint)
@@ -1003,7 +1003,7 @@ namespace DigitPark.Managers
             {
                 HandleOnlineResult(result);
             }
-            // 2. Online sprint final → esperar oponente, luego SprintSummary
+            // 2. Online sprint final -> wait for opponent, then SprintSummary
             else if (IsOnlineMode() && ctx?.Mode == GameMode.CognitiveSprint)
             {
                 if (!ctx.HasMoreGames)
@@ -1021,12 +1021,12 @@ namespace DigitPark.Managers
             {
                 HandleCashBattleResult(result, ctx);
             }
-            // 5. CognitiveSprint final (practice o cash)
+            // 5. CognitiveSprint final (practice or cash)
             else if (ctx?.Mode == GameMode.CognitiveSprint && !ctx.HasMoreGames)
             {
                 ResultPanelManager.Instance.ShowSprintSummary(ctx);
             }
-            // 6. CognitiveSprint mid-game → panel normal de transición
+            // 6. CognitiveSprint mid-game -> normal transition panel
             else if (ctx?.Mode == GameMode.CognitiveSprint && ctx.HasMoreGames)
             {
                 ShowPracticeResult(isNewRecord);
@@ -1056,22 +1056,22 @@ namespace DigitPark.Managers
                 keys = level6Keys;
 
             string selectedKey = keys[Random.Range(0, keys.Length)];
-            Debug.Log($"[Game] GetSuccessMessage - Tiempo: {time:F3}s, Key seleccionada: {selectedKey}");
+            Debug.Log($"[Game] GetSuccessMessage - Time: {time:F3}s, Selected key: {selectedKey}");
 
             if (LocalizationManager.Instance != null)
             {
                 string translatedText = LocalizationManager.Instance.GetText(selectedKey);
-                Debug.Log($"[Game] Texto traducido: '{translatedText}'");
+                Debug.Log($"[Game] Translated text: '{translatedText}'");
                 return translatedText;
             }
 
-            Debug.LogWarning("[Game] LocalizationManager.Instance es NULL! Usando key como fallback.");
+            Debug.LogWarning("[Game] LocalizationManager.Instance is NULL! Using key as fallback.");
             return selectedKey;
         }
 
         private void ShowPracticeResult(bool isNewRecord)
         {
-            // Usar resultPanel (nuevo) si está disponible, sino fallback a winMessagePanel (original)
+            // Use resultPanel (new) if available, otherwise fallback to winMessagePanel (original)
             if (resultPanel != null)
             {
                 if (resultTitleText != null)
@@ -1088,7 +1088,7 @@ namespace DigitPark.Managers
                     resultMessageText.text = message;
                 }
 
-                // Localizar textos de botones
+                // Localize button texts
                 if (resultPlayAgainButton != null)
                 {
                     var btnText = resultPlayAgainButton.GetComponentInChildren<TextMeshProUGUI>();
@@ -1158,7 +1158,7 @@ namespace DigitPark.Managers
             var context = GameSessionManager.Instance?.CurrentContext;
             decimal entryFee = context?.EntryFee ?? 0;
 
-            // TODO: Obtener resultado real del oponente del servidor
+            // TODO: Get real opponent result from server
             bool playerWon = result.Completed;
 
             if (playerWon && winPanelRealMoney != null)
@@ -1174,9 +1174,9 @@ namespace DigitPark.Managers
         private void HandleOnlineResult(MinigameResult result)
         {
             string matchId = OnlineResultManager.GetCurrentMatchId();
-            string playerName = PlayerPrefs.GetString("PlayerName", "Jugador");
+            string playerName = PlayerPrefs.GetString("PlayerName", "Player");
 
-            Debug.Log($"[DigitRush] Partida online terminada. MatchId: {matchId}, Tiempo: {result.TotalTime:F3}s");
+            Debug.Log($"[DigitRush] Online match finished. MatchId: {matchId}, Time: {result.TotalTime:F3}s");
 
             OnlineResultManager.Instance.SubmitAndWaitForResult(
                 matchId,
@@ -1184,7 +1184,7 @@ namespace DigitPark.Managers
                 playerName,
                 (playerWon) =>
                 {
-                    Debug.Log($"[DigitRush] Resultado online: {(playerWon ? "VICTORIA" : "DERROTA")}");
+                    Debug.Log($"[DigitRush] Online result: {(playerWon ? "VICTORY" : "DEFEAT")}");
                 }
             );
         }
@@ -1265,14 +1265,14 @@ namespace DigitPark.Managers
             currentPlayer.bestTime = bestTime;
             await DatabaseService.Instance.SavePlayerData(currentPlayer);
 
-            Debug.Log($"[Game] Mejor tiempo guardado: {bestTime:F3}s");
+            Debug.Log($"[Game] Best time saved: {bestTime:F3}s");
         }
 
         private void SaveScoreToDatabase()
         {
             // Score saving is now handled by GameSessionManager.RegisterGameResult()
             // which correctly passes gameId. Only log here for debugging.
-            Debug.Log($"[Game] Score {cumulativeTime:F3}s será guardado por GameSessionManager");
+            Debug.Log($"[Game] Score {cumulativeTime:F3}s will be saved by GameSessionManager");
         }
 
         #endregion
@@ -1329,12 +1329,12 @@ namespace DigitPark.Managers
         {
             if (GameSessionManager.Instance != null && GameSessionManager.Instance.HasActiveSession)
             {
-                Debug.Log("[Game] Volviendo al selector de juegos");
+                Debug.Log("[Game] Returning to game selector");
                 SceneManager.LoadScene("GameSelector");
             }
             else
             {
-                Debug.Log("[Game] Volviendo al menú principal");
+                Debug.Log("[Game] Returning to main menu");
                 SceneManager.LoadScene("MainMenu");
             }
         }

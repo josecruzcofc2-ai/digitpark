@@ -5,35 +5,35 @@ using System.Collections.Generic;
 namespace DigitPark.CashBattle
 {
     /// <summary>
-    /// Tipos de transacción de wallet
+    /// Wallet transaction types
     /// </summary>
     public enum TransactionType
     {
-        Deposit,            // Depósito de dinero
-        Withdrawal,         // Retiro de dinero
-        EntryFee,           // Pago de entrada (legacy)
-        MatchEntry,         // Entrada a partida 1v1
-        Winnings,           // Ganancias (legacy)
-        MatchWinnings,      // Ganancias de partida 1v1
-        TournamentEntry,    // Entrada a torneo
-        TournamentPrize,    // Premio de torneo
-        Bonus,              // Bonus promocional
-        Refund              // Reembolso
+        Deposit,            // Money deposit
+        Withdrawal,         // Money withdrawal
+        EntryFee,           // Entry fee payment (legacy)
+        MatchEntry,         // 1v1 match entry
+        Winnings,           // Winnings (legacy)
+        MatchWinnings,      // 1v1 match winnings
+        TournamentEntry,    // Tournament entry
+        TournamentPrize,    // Tournament prize
+        Bonus,              // Promotional bonus
+        Refund              // Refund
     }
 
     /// <summary>
-    /// Estado de una transacción
+    /// Transaction status
     /// </summary>
     public enum TransactionStatus
     {
-        Pending,        // En proceso
-        Completed,      // Completada
-        Failed,         // Fallida
-        Cancelled       // Cancelada
+        Pending,        // In progress
+        Completed,      // Completed
+        Failed,         // Failed
+        Cancelled       // Cancelled
     }
 
     /// <summary>
-    /// Métodos de pago soportados
+    /// Supported payment methods
     /// </summary>
     public enum PaymentMethod
     {
@@ -46,7 +46,7 @@ namespace DigitPark.CashBattle
     }
 
     /// <summary>
-    /// Representa una transacción individual del wallet
+    /// Represents an individual wallet transaction
     /// </summary>
     [Serializable]
     public class WalletTransaction
@@ -61,7 +61,7 @@ namespace DigitPark.CashBattle
         public decimal balanceAfter;
         public DateTime timestamp;
         public string description;
-        public string referenceId;      // ID de partida/torneo si aplica
+        public string referenceId;      // Match/tournament ID if applicable
         public PaymentMethod? paymentMethod;
 
         public WalletTransaction()
@@ -72,7 +72,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Crea una transacción de depósito
+        /// Creates a deposit transaction
         /// </summary>
         public static WalletTransaction CreateDeposit(decimal amount, PaymentMethod method)
         {
@@ -81,26 +81,26 @@ namespace DigitPark.CashBattle
                 type = TransactionType.Deposit,
                 amount = amount,
                 paymentMethod = method,
-                description = $"Depósito vía {method}"
+                description = $"Deposit via {method}"
             };
         }
 
         /// <summary>
-        /// Crea una transacción de retiro
+        /// Creates a withdrawal transaction
         /// </summary>
         public static WalletTransaction CreateWithdrawal(decimal amount, PaymentMethod method)
         {
             return new WalletTransaction
             {
                 type = TransactionType.Withdrawal,
-                amount = -amount, // Negativo para retiros
+                amount = -amount, // Negative for withdrawals
                 paymentMethod = method,
-                description = $"Retiro vía {method}"
+                description = $"Withdrawal via {method}"
             };
         }
 
         /// <summary>
-        /// Crea una transacción de entry fee
+        /// Creates an entry fee transaction
         /// </summary>
         public static WalletTransaction CreateEntryFee(decimal amount, string matchId, string matchDescription)
         {
@@ -114,7 +114,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Crea una transacción de ganancias
+        /// Creates a winnings transaction
         /// </summary>
         public static WalletTransaction CreateWinnings(decimal amount, string matchId, string matchDescription)
         {
@@ -128,7 +128,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Obtiene el color asociado al tipo de transacción
+        /// Gets the color associated with the transaction type
         /// </summary>
         public Color GetTypeColor()
         {
@@ -137,19 +137,19 @@ namespace DigitPark.CashBattle
                 case TransactionType.Deposit:
                 case TransactionType.Winnings:
                 case TransactionType.Bonus:
-                    return new Color(0f, 1f, 0.5f, 1f); // Verde
+                    return new Color(0f, 1f, 0.5f, 1f); // Green
                 case TransactionType.Withdrawal:
                 case TransactionType.EntryFee:
-                    return new Color(1f, 0.4f, 0.4f, 1f); // Rojo
+                    return new Color(1f, 0.4f, 0.4f, 1f); // Red
                 case TransactionType.Refund:
-                    return new Color(1f, 0.84f, 0f, 1f); // Dorado
+                    return new Color(1f, 0.84f, 0f, 1f); // Gold
                 default:
                     return Color.white;
             }
         }
 
         /// <summary>
-        /// Obtiene el icono/símbolo para el tipo
+        /// Gets the icon/symbol for the type
         /// </summary>
         public string GetTypeSymbol()
         {
@@ -157,7 +157,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Formatea el monto para display
+        /// Formats the amount for display
         /// </summary>
         public string GetFormattedAmount()
         {
@@ -165,40 +165,40 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Formatea la fecha para display
+        /// Formats the date for display
         /// </summary>
         public string GetFormattedDate()
         {
             TimeSpan timeSince = DateTime.UtcNow - timestamp;
 
             if (timeSince.TotalMinutes < 1)
-                return "Ahora";
+                return "Now";
             if (timeSince.TotalMinutes < 60)
-                return $"Hace {(int)timeSince.TotalMinutes}m";
+                return $"{(int)timeSince.TotalMinutes}m ago";
             if (timeSince.TotalHours < 24)
-                return $"Hace {(int)timeSince.TotalHours}h";
+                return $"{(int)timeSince.TotalHours}h ago";
             if (timeSince.TotalDays < 7)
-                return $"Hace {(int)timeSince.TotalDays}d";
+                return $"{(int)timeSince.TotalDays}d ago";
 
             return timestamp.ToString("dd/MM/yyyy");
         }
     }
 
     /// <summary>
-    /// Datos del wallet del usuario
+    /// User wallet data
     /// </summary>
     [Serializable]
     public class WalletData
     {
         public string userId;
         public decimal balance;
-        public decimal pendingBalance;      // Balance en proceso (retiros pendientes)
+        public decimal pendingBalance;      // Pending balance (pending withdrawals)
         public decimal lifetimeDeposits;
         public decimal lifetimeWithdrawals;
         public decimal lifetimeWinnings;
         public decimal lifetimeLosses;
         public List<WalletTransaction> transactions;
-        public bool isVerified;             // KYC verificado
+        public bool isVerified;             // KYC verified
         public DateTime lastUpdated;
 
         public WalletData()
@@ -208,26 +208,26 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Balance disponible (total - pendiente)
+        /// Available balance (total - pending)
         /// </summary>
         public decimal AvailableBalance => balance - pendingBalance;
 
         /// <summary>
-        /// Ganancias netas totales
+        /// Total net winnings
         /// </summary>
         public decimal NetWinnings => lifetimeWinnings - lifetimeLosses;
 
         /// <summary>
-        /// Agrega una transacción y actualiza estadísticas
+        /// Adds a transaction and updates statistics
         /// </summary>
         public void AddTransaction(WalletTransaction transaction)
         {
             transaction.balanceAfter = balance + transaction.amount;
             balance = transaction.balanceAfter;
-            transactions.Insert(0, transaction); // Más reciente primero
+            transactions.Insert(0, transaction); // Most recent first
             lastUpdated = DateTime.UtcNow;
 
-            // Actualizar estadísticas
+            // Update statistics
             switch (transaction.type)
             {
                 case TransactionType.Deposit:
@@ -245,7 +245,7 @@ namespace DigitPark.CashBattle
                     break;
             }
 
-            // Limitar historial a últimas 100 transacciones en memoria
+            // Limit history to last 100 transactions in memory
             if (transactions.Count > 100)
             {
                 transactions.RemoveRange(100, transactions.Count - 100);
@@ -253,7 +253,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Obtiene transacciones filtradas por tipo
+        /// Gets transactions filtered by type
         /// </summary>
         public List<WalletTransaction> GetTransactionsByType(TransactionType type)
         {
@@ -261,7 +261,7 @@ namespace DigitPark.CashBattle
         }
 
         /// <summary>
-        /// Obtiene transacciones de un período
+        /// Gets transactions from a time period
         /// </summary>
         public List<WalletTransaction> GetTransactionsSince(DateTime since)
         {
@@ -270,13 +270,13 @@ namespace DigitPark.CashBattle
     }
 
     /// <summary>
-    /// Opciones de depósito predefinidas
+    /// Predefined deposit options
     /// </summary>
     [Serializable]
     public class DepositOption
     {
         public decimal amount;
-        public decimal bonus;           // Bonus promocional
+        public decimal bonus;           // Promotional bonus
         public bool isPopular;
         public string promoCode;
 

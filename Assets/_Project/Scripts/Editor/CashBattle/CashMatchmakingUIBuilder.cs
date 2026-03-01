@@ -47,7 +47,7 @@ namespace DigitPark.Editor
         // Asset paths
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
         private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
-        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/Profile/AvatarDefault.png";
+        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
         private const string ICON_DIGIT_RUSH = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
         private const string ICON_MEMORY_PAIRS = "Assets/_Project/Art/Icons/Games/MemoryPairsIcon.png";
         private const string ICON_QUICK_MATH = "Assets/_Project/Art/Icons/Games/QuickMathIcon.png";
@@ -624,7 +624,7 @@ namespace DigitPark.Editor
             innerRect.offsetMax = Vector2.zero;
             Image innerImg = innerRing.AddComponent<Image>();
             innerImg.color = GOLD_PRIMARY;
-            innerImg.fillAmount = 0.25f;
+            innerImg.fillAmount = 0.35f;
             innerImg.type = Image.Type.Filled;
             innerImg.fillMethod = Image.FillMethod.Radial360;
 

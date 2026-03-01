@@ -28,6 +28,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Note: refreshTimerText excluded - V2 feature
             // Note: dailyTab, weeklyTab, specialTab excluded - UI uses headers not tabs
             // Note: dailyProgressBar, dailyProgressText, claimBonusButton excluded - V2 progress system
+            "progressTitleText",
             "missionsContainer", "scrollRect",
             // Note: emptyStateText excluded - optional
             // Note: missionDetailPanel, closeDetailButton excluded - V2 detail panel
@@ -159,6 +160,9 @@ namespace DigitPark.Editor.AutoAssigners
             // Header
             AssignReference(so, "backButton", FindButtonByName("back", "return"));
             AssignReference(so, "titleText", FindTextByName("title", "header", "titulo"));
+
+            // Progress
+            AssignReference(so, "progressTitleText", FindTextByName("titleleft", "progresstitle"));
 
             // Missions List
             AssignReference(so, "missionsContainer", FindByNameContains<Transform>("missions", "container", "list", "dailymissions"));

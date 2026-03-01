@@ -73,7 +73,7 @@ namespace DigitPark.Editor
             // Content
             GameObject content = CreateContainer(item.transform, "Content",
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(80, 8), new Vector2(-100, -8));
+                new Vector2(80, 8), new Vector2(-115, -8));
 
             // TitleText (bold, white)
             CreateTextElement(content.transform, "TitleText", "Mission Title",
@@ -107,7 +107,7 @@ namespace DigitPark.Editor
             // RewardSection
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",
                 new Vector2(1, 0), new Vector2(1, 1),
-                new Vector2(-90, 8), new Vector2(-8, -8));
+                new Vector2(-110, 8), new Vector2(-8, -8));
 
             // RewardIcon (30x30)
             GameObject rewardIcon = CreateImageElement(rewardSection.transform, "RewardIcon",

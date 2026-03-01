@@ -69,6 +69,7 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI detailProgressText;
         [SerializeField] private Button claimRewardButton;
         [SerializeField] private TextMeshProUGUI claimButtonText;
+        [SerializeField] private TextMeshProUGUI detailRewardText;
         [SerializeField] private Button closeDetailButton;
         [SerializeField] private Button cancelButton;
         [SerializeField] private ParticleSystem detailParticles;
@@ -651,6 +652,12 @@ namespace DigitPark.Managers
                     detailProgressText.text = $"{data.currentProgress} / {data.targetProgress}";
                     detailProgressText.color = new Color(1f, 0.84f, 0f);
                 }
+            }
+
+            // Reward text
+            if (detailRewardText)
+            {
+                detailRewardText.text = data.points > 0 ? $"{data.points} DigitGems" : "";
             }
 
             // Claim button

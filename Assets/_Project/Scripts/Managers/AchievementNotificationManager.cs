@@ -613,27 +613,27 @@ namespace DigitPark.Managers
         [ContextMenu("Test Normal Achievement")]
         public void TestNormalAchievement()
         {
-            ShowNotification("Primera Victoria", "Gana tu primera partida");
+            ShowNotification("First Victory", "Win your first match");
         }
 
         [ContextMenu("Test Epic Achievement")]
         public void TestEpicAchievement()
         {
-            ShowNotification("Leyenda Suprema", "Alcanza el rango máximo");
+            ShowNotification("Supreme Legend", "Reach the highest rank");
         }
 
         [ContextMenu("Test Secret Achievement")]
         public void TestSecretAchievement()
         {
-            ShowNotification("Búho Nocturno", "Juega a las 3:00 AM", null, true);
+            ShowNotification("Night Owl", "Play at 3:00 AM", null, true);
         }
 
         [ContextMenu("Test Queue (3 achievements)")]
         public void TestQueue()
         {
-            ShowNotification("Logro 1", "Descripción del logro 1");
-            ShowNotification("Logro 2", "Descripción del logro 2");
-            ShowNotification("Logro 3", "Descripción del logro 3");
+            ShowNotification("Achievement 1", "Achievement 1 description");
+            ShowNotification("Achievement 2", "Achievement 2 description");
+            ShowNotification("Achievement 3", "Achievement 3 description");
         }
 
         #endregion

@@ -24,11 +24,11 @@ namespace DigitPark.Editor
         private static readonly Color ERROR_COLOR = new Color(1f, 0.3f, 0.3f, 1f);
 
         // Rutas de sprites
-        private const string ORANGE_UP_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Orange_Up.png";
-        private const string ORANGE_DOWN_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Orange_Down.png";
-        private const string RED_UP_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Red_Up.png";
-        private const string RED_DOWN_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Red_Down.png";
-        private const string GREEN_UP_PATH = "Assets/_Project/Art/Icons/Games/ButtonFlashTap_Green_Up.png";
+        private const string ORANGE_UP_PATH = "Assets/_Project/Art/Icons/Games/FlashTap/ButtonFlashTap_Orange_Up.png";
+        private const string ORANGE_DOWN_PATH = "Assets/_Project/Art/Icons/Games/FlashTap/ButtonFlashTap_Orange_Down.png";
+        private const string RED_UP_PATH = "Assets/_Project/Art/Icons/Games/FlashTap/ButtonFlashTap_Red_Up.png";
+        private const string RED_DOWN_PATH = "Assets/_Project/Art/Icons/Games/FlashTap/ButtonFlashTap_Red_Down.png";
+        private const string GREEN_UP_PATH = "Assets/_Project/Art/Icons/Games/FlashTap/ButtonFlashTap_Green_Up.png";
 
         // Stats Bar icon paths
         private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";

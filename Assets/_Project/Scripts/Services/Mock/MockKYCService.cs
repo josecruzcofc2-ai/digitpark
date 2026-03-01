@@ -5,8 +5,8 @@ using UnityEngine;
 namespace DigitPark.Services.Mock
 {
     /// <summary>
-    /// Implementación Mock del servicio KYC para desarrollo y testing
-    /// Simula todas las operaciones sin conectarse a APIs reales
+    /// Mock implementation of the KYC service for development and testing.
+    /// Simulates all operations without connecting to real APIs.
     /// </summary>
     public class MockKYCService : IKYCService
     {
@@ -24,7 +24,7 @@ namespace DigitPark.Services.Mock
 
         public event Action<KYCStatus> OnStatusChanged;
 
-        // Configuración de simulación
+        // Simulation configuration
         public float SimulatedDelaySeconds { get; set; } = 1.5f;
         public bool SimulateVerificationFailure { get; set; } = false;
         public float FailureChance { get; set; } = 0f; // 0-1
@@ -36,7 +36,7 @@ namespace DigitPark.Services.Mock
 
         private void LoadState()
         {
-            // Cargar estado guardado
+            // Load saved state
             _currentStatus = (KYCStatus)PlayerPrefs.GetInt(PREFS_KYC_STATUS, 0);
 
             _userInfo = new UserVerificationInfo
@@ -45,7 +45,7 @@ namespace DigitPark.Services.Mock
                 Status = _currentStatus
             };
 
-            // Cargar fecha de nacimiento si existe
+            // Load birth date if it exists
             string birthDateStr = PlayerPrefs.GetString(PREFS_BIRTH_DATE, "");
             if (!string.IsNullOrEmpty(birthDateStr) && DateTime.TryParse(birthDateStr, out DateTime birthDate))
             {
@@ -53,15 +53,15 @@ namespace DigitPark.Services.Mock
                 _userInfo.Age = CalculateAge(birthDate);
             }
 
-            // Cargar fecha de verificación si existe
+            // Load verification date if it exists
             string verificationDateStr = PlayerPrefs.GetString(PREFS_VERIFICATION_DATE, "");
             if (!string.IsNullOrEmpty(verificationDateStr) && DateTime.TryParse(verificationDateStr, out DateTime verificationDate))
             {
                 _userInfo.VerificationDate = verificationDate;
-                _userInfo.ExpirationDate = verificationDate.AddYears(1); // Expira en 1 año
+                _userInfo.ExpirationDate = verificationDate.AddYears(1); // Expires in 1 year
             }
 
-            Debug.Log($"[MockKYC] Estado cargado: {_currentStatus}");
+            Debug.Log($"[MockKYC] State loaded: {_currentStatus}");
         }
 
         private void SaveState()
@@ -93,7 +93,7 @@ namespace DigitPark.Services.Mock
                 _userInfo.Status = newStatus;
                 SaveState();
                 OnStatusChanged?.Invoke(newStatus);
-                Debug.Log($"[MockKYC] Estado actualizado: {newStatus}");
+                Debug.Log($"[MockKYC] Status updated: {newStatus}");
             }
         }
 
@@ -106,16 +106,16 @@ namespace DigitPark.Services.Mock
 
         public async Task<KYCResult> VerifyAge(DateTime birthDate)
         {
-            Debug.Log($"[MockKYC] Verificando edad: {birthDate:yyyy-MM-dd}");
+            Debug.Log($"[MockKYC] Verifying age: {birthDate:yyyy-MM-dd}");
 
-            // Simular delay de red
+            // Simulate network delay
             await Task.Delay((int)(SimulatedDelaySeconds * 1000));
 
-            // Simular fallo si está configurado
+            // Simulate failure if configured
             if (ShouldSimulateFailure())
             {
-                Debug.Log("[MockKYC] Simulando fallo de verificación de edad");
-                return KYCResult.Failed("Error de verificación simulado", "MOCK_FAILURE");
+                Debug.Log("[MockKYC] Simulating age verification failure");
+                return KYCResult.Failed("Simulated verification error", "MOCK_FAILURE");
             }
 
             int age = CalculateAge(birthDate);
@@ -124,63 +124,63 @@ namespace DigitPark.Services.Mock
 
             if (age < 18)
             {
-                Debug.Log($"[MockKYC] Usuario menor de edad: {age} años");
+                Debug.Log($"[MockKYC] Underage user: {age} years old");
                 UpdateStatus(KYCStatus.Rejected);
-                return KYCResult.Failed("Debes ser mayor de 18 años para usar Cash Battle", "AGE_REQUIREMENT");
+                return KYCResult.Failed("You must be 18 or older to use Cash Battle", "AGE_REQUIREMENT");
             }
 
-            Debug.Log($"[MockKYC] Edad verificada: {age} años");
+            Debug.Log($"[MockKYC] Age verified: {age} years old");
             UpdateStatus(KYCStatus.AgeVerified);
-            return KYCResult.Successful(KYCStatus.AgeVerified, "Edad verificada correctamente");
+            return KYCResult.Successful(KYCStatus.AgeVerified, "Age verified successfully");
         }
 
         public async Task<KYCResult> StartIdentityVerification()
         {
-            Debug.Log("[MockKYC] Iniciando verificación de identidad (SIMULADA)");
+            Debug.Log("[MockKYC] Starting identity verification (SIMULATED)");
 
-            // Verificar que primero se haya verificado edad
+            // Verify that age has been verified first
             if (_currentStatus == KYCStatus.NotStarted)
             {
-                return KYCResult.Failed("Primero debes verificar tu edad", "AGE_NOT_VERIFIED");
+                return KYCResult.Failed("You must verify your age first", "AGE_NOT_VERIFIED");
             }
 
             UpdateStatus(KYCStatus.DocumentPending);
 
-            // Simular proceso de verificación (en real, Triumph abre su UI)
-            Debug.Log("[MockKYC] Simulando proceso de documento + selfie...");
+            // Simulate verification process (in production, Triumph opens its UI)
+            Debug.Log("[MockKYC] Simulating document + selfie process...");
             await Task.Delay((int)(SimulatedDelaySeconds * 2 * 1000));
 
-            // Simular fallo si está configurado
+            // Simulate failure if configured
             if (ShouldSimulateFailure())
             {
-                Debug.Log("[MockKYC] Simulando fallo de verificación de identidad");
+                Debug.Log("[MockKYC] Simulating identity verification failure");
                 UpdateStatus(KYCStatus.Rejected);
-                return KYCResult.Failed("Verificación de identidad rechazada", "IDENTITY_REJECTED");
+                return KYCResult.Failed("Identity verification rejected", "IDENTITY_REJECTED");
             }
 
-            // Éxito
+            // Success
             _userInfo.VerificationDate = DateTime.UtcNow;
             _userInfo.ExpirationDate = DateTime.UtcNow.AddYears(1);
 
             UpdateStatus(KYCStatus.FullyVerified);
 
-            Debug.Log("[MockKYC] Verificación completa - Usuario puede usar Cash Battle");
-            return KYCResult.Successful(KYCStatus.FullyVerified, "Identidad verificada correctamente");
+            Debug.Log("[MockKYC] Verification complete - User can use Cash Battle");
+            return KYCResult.Successful(KYCStatus.FullyVerified, "Identity verified successfully");
         }
 
         public async Task<KYCResult> RefreshVerificationStatus()
         {
-            Debug.Log("[MockKYC] Refrescando estado de verificación...");
+            Debug.Log("[MockKYC] Refreshing verification status...");
 
             await Task.Delay((int)(SimulatedDelaySeconds * 0.5f * 1000));
 
-            // En mock, simplemente retornamos el estado actual
+            // In mock, we simply return the current status
             return KYCResult.Successful(_currentStatus);
         }
 
         public async Task<KYCResult> ResetVerification()
         {
-            Debug.Log("[MockKYC] Reseteando verificación (solo para testing)");
+            Debug.Log("[MockKYC] Resetting verification (testing only)");
 
             await Task.Delay(100);
 
@@ -198,7 +198,7 @@ namespace DigitPark.Services.Mock
 
             OnStatusChanged?.Invoke(KYCStatus.NotStarted);
 
-            return KYCResult.Successful(KYCStatus.NotStarted, "Verificación reseteada");
+            return KYCResult.Successful(KYCStatus.NotStarted, "Verification reset");
         }
     }
 }
