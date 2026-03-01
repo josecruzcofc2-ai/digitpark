@@ -50,9 +50,9 @@ namespace DigitPark.Editor
         private const float PROFILE_BOT = 0.735f;
 
         private const float DAILY_TOP = 0.725f;
-        private const float DAILY_BOT = 0.650f;
+        private const float DAILY_BOT = 0.655f;
 
-        private const float QUICK_TOP = 0.640f;
+        private const float QUICK_TOP = 0.635f;
         private const float QUICK_BOT = 0.575f;
 
         private const float PLAY_TOP = 0.565f;
@@ -233,8 +233,8 @@ namespace DigitPark.Editor
             // Logo DIGIT PARK (center-left, narrower to make room for currency)
             var logo = FindOrCreate(header.transform, "LogoText");
             var logoRT = GetOrAdd<RectTransform>(logo);
-            logoRT.anchorMin = new Vector2(0.12f, 0);
-            logoRT.anchorMax = new Vector2(0.52f, 1);
+            logoRT.anchorMin = new Vector2(0.10f, 0);
+            logoRT.anchorMax = new Vector2(0.35f, 1);
             logoRT.offsetMin = Vector2.zero;
             logoRT.offsetMax = Vector2.zero;
 
@@ -260,8 +260,8 @@ namespace DigitPark.Editor
             badgeRT.anchorMin = new Vector2(1, 1);
             badgeRT.anchorMax = new Vector2(1, 1);
             badgeRT.pivot = new Vector2(0.5f, 0.5f);
-            badgeRT.anchoredPosition = new Vector2(-5, -5);
-            badgeRT.sizeDelta = new Vector2(44, 44);
+            badgeRT.anchoredPosition = new Vector2(-12, -12);
+            badgeRT.sizeDelta = new Vector2(40, 40);
             GetOrAdd<Image>(badge).color = new Color(1, 0.2f, 0.2f, 1);
 
             var badgeText = FindOrCreate(badge.transform, "BadgeText");
@@ -289,8 +289,8 @@ namespace DigitPark.Editor
         {
             var container = CurrencyHeaderBarHelper.CreateCurrencyPills(headerTransform, "CurrencyDisplay");
             var cRT = container.GetComponent<RectTransform>();
-            cRT.anchorMin = new Vector2(0.52f, 0.1f);
-            cRT.anchorMax = new Vector2(0.88f, 0.9f);
+            cRT.anchorMin = new Vector2(0.35f, 0.05f);
+            cRT.anchorMax = new Vector2(0.88f, 0.95f);
             cRT.offsetMin = Vector2.zero;
             cRT.offsetMax = Vector2.zero;
         }
@@ -346,33 +346,33 @@ namespace DigitPark.Editor
             var btn = GetOrAdd<Button>(card);
             btn.targetGraphic = bg;
 
-            // === Avatar Section (left 30%) ===
-            var avSec = FindOrCreate(card.transform, "AvatarSection");
-            var avSecRT = GetOrAdd<RectTransform>(avSec);
-            avSecRT.anchorMin = new Vector2(0, 0);
-            avSecRT.anchorMax = new Vector2(0.30f, 1);
-            avSecRT.offsetMin = new Vector2(10, 10);
-            avSecRT.offsetMax = new Vector2(0, -10);
+            // Remove old children if rebuilding
+            for (int i = card.transform.childCount - 1; i >= 0; i--)
+                DestroyImmediate(card.transform.GetChild(i).gameObject);
 
-            // Avatar Frame (dark bg + white ring outline)
-            var frame = FindOrCreate(avSec.transform, "AvatarFrame");
-            var frameRT = GetOrAdd<RectTransform>(frame);
-            frameRT.anchorMin = new Vector2(0.5f, 0.55f);
-            frameRT.anchorMax = new Vector2(0.5f, 0.55f);
-            frameRT.sizeDelta = new Vector2(240, 240);
-            GetOrAdd<Image>(frame).color = CARD_BG;
-            var fo = GetOrAdd<Outline>(frame);
+            // === Centered layout ===
+
+            // Avatar Frame (centered, dark bg + white ring)
+            var frame = new GameObject("AvatarFrame");
+            frame.transform.SetParent(card.transform, false);
+            var frameRT = frame.AddComponent<RectTransform>();
+            frameRT.anchorMin = new Vector2(0.5f, 0.63f);
+            frameRT.anchorMax = new Vector2(0.5f, 0.63f);
+            frameRT.sizeDelta = new Vector2(200, 200);
+            frame.AddComponent<Image>().color = CARD_BG;
+            var fo = frame.AddComponent<Outline>();
             fo.effectColor = Color.white;
-            fo.effectDistance = new Vector2(4, 4);
+            fo.effectDistance = new Vector2(3, 3);
 
             // Avatar Image
-            var avImg = FindOrCreate(frame.transform, "AvatarImage");
-            var avImgRT = GetOrAdd<RectTransform>(avImg);
+            var avImg = new GameObject("AvatarImage");
+            avImg.transform.SetParent(frame.transform, false);
+            var avImgRT = avImg.AddComponent<RectTransform>();
             avImgRT.anchorMin = new Vector2(0.06f, 0.06f);
             avImgRT.anchorMax = new Vector2(0.94f, 0.94f);
             avImgRT.offsetMin = Vector2.zero;
             avImgRT.offsetMax = Vector2.zero;
-            var avImgComp = GetOrAdd<Image>(avImg);
+            var avImgComp = avImg.AddComponent<Image>();
             avImgComp.color = Color.white;
             avImgComp.preserveAspect = true;
 
@@ -389,118 +389,48 @@ namespace DigitPark.Editor
             }
             avatarSO.ApplyModifiedProperties();
 
-            // Level Badge
-            var lvlBadge = FindOrCreate(avSec.transform, "LevelBadge");
-            var lvlRT = GetOrAdd<RectTransform>(lvlBadge);
-            lvlRT.anchorMin = new Vector2(0.5f, 0.08f);
-            lvlRT.anchorMax = new Vector2(0.5f, 0.08f);
-            lvlRT.sizeDelta = new Vector2(140, 56);
-            GetOrAdd<Image>(lvlBadge).color = CYAN_NEON;
-
-            var lvlText = FindOrCreate(lvlBadge.transform, "Text");
-            var ltRT = GetOrAdd<RectTransform>(lvlText);
-            ltRT.anchorMin = Vector2.zero;
-            ltRT.anchorMax = Vector2.one;
-            ltRT.offsetMin = Vector2.zero;
-            ltRT.offsetMax = Vector2.zero;
-            var ltTMP = GetOrAdd<TextMeshProUGUI>(lvlText);
-            ltTMP.text = "Lv. 12";
-            ltTMP.fontSize = FontSizes.Body;
-            ltTMP.color = TEXT_DARK;
-            ltTMP.fontStyle = FontStyles.Bold;
-            ltTMP.alignment = TextAlignmentOptions.Center;
-
-            // === Info Section (right 70%) ===
-            var info = FindOrCreate(card.transform, "InfoSection");
-            var infoRT = GetOrAdd<RectTransform>(info);
-            infoRT.anchorMin = new Vector2(0.30f, 0);
-            infoRT.anchorMax = new Vector2(1, 1);
-            infoRT.offsetMin = new Vector2(10, 15);
-            infoRT.offsetMax = new Vector2(-15, -15);
-
-            // Username
-            var user = FindOrCreate(info.transform, "Username");
-            var userRT = GetOrAdd<RectTransform>(user);
-            userRT.anchorMin = new Vector2(0, 0.72f);
-            userRT.anchorMax = new Vector2(1, 1);
+            // Username (centered below avatar)
+            var user = new GameObject("Username");
+            user.transform.SetParent(card.transform, false);
+            var userRT = user.AddComponent<RectTransform>();
+            userRT.anchorMin = new Vector2(0.05f, 0.20f);
+            userRT.anchorMax = new Vector2(0.95f, 0.35f);
             userRT.offsetMin = Vector2.zero;
             userRT.offsetMax = Vector2.zero;
-            var userTMP = GetOrAdd<TextMeshProUGUI>(user);
+            var userTMP = user.AddComponent<TextMeshProUGUI>();
             userTMP.text = "@Username";
             userTMP.fontSize = FontSizes.H3;
             userTMP.color = TEXT_WHITE;
             userTMP.fontStyle = FontStyles.Bold;
-            userTMP.alignment = TextAlignmentOptions.Left;
+            userTMP.alignment = TextAlignmentOptions.Center;
+            userTMP.enableAutoSizing = true;
+            userTMP.fontSizeMin = FontSizes.AutoMinBody;
+            userTMP.fontSizeMax = FontSizes.H3;
 
-            // Stats Row
-            var stats = FindOrCreate(info.transform, "StatsRow");
-            var statsRT = GetOrAdd<RectTransform>(stats);
-            statsRT.anchorMin = new Vector2(0, 0.38f);
-            statsRT.anchorMax = new Vector2(1, 0.68f);
-            statsRT.offsetMin = Vector2.zero;
-            statsRT.offsetMax = Vector2.zero;
+            // Level Badge (centered below username)
+            var lvlBadge = new GameObject("LevelBadge");
+            lvlBadge.transform.SetParent(card.transform, false);
+            var lvlRT = lvlBadge.AddComponent<RectTransform>();
+            lvlRT.anchorMin = new Vector2(0.5f, 0.13f);
+            lvlRT.anchorMax = new Vector2(0.5f, 0.13f);
+            lvlRT.sizeDelta = new Vector2(140, 48);
+            lvlBadge.AddComponent<Image>().color = CYAN_NEON;
 
-            var hlg = GetOrAdd<HorizontalLayoutGroup>(stats);
-            hlg.spacing = 40;
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = false;
+            var lvlText = new GameObject("Text");
+            lvlText.transform.SetParent(lvlBadge.transform, false);
+            var ltRT = lvlText.AddComponent<RectTransform>();
+            ltRT.anchorMin = Vector2.zero;
+            ltRT.anchorMax = Vector2.one;
+            ltRT.offsetMin = Vector2.zero;
+            ltRT.offsetMax = Vector2.zero;
+            var ltTMP = lvlText.AddComponent<TextMeshProUGUI>();
+            ltTMP.text = "Lv. 12";
+            ltTMP.fontSize = FontSizes.Caption;
+            ltTMP.color = TEXT_DARK;
+            ltTMP.fontStyle = FontStyles.Bold;
+            ltTMP.alignment = TextAlignmentOptions.Center;
 
-            // Recreate stat items
-            for (int i = stats.transform.childCount - 1; i >= 0; i--)
-                DestroyImmediate(stats.transform.GetChild(i).gameObject);
-            CreateStatItem(stats.transform, "DigitGems", "500", PURPLE_ACCENT);
-            CreateStatItem(stats.transform, "DigitCoins", "2,400", CYAN_NEON);
-
-            // Streak
-            var streak = FindOrCreate(info.transform, "StreakRow");
-            var stRT = GetOrAdd<RectTransform>(streak);
-            stRT.anchorMin = new Vector2(0, 0.05f);
-            stRT.anchorMax = new Vector2(1, 0.35f);
-            stRT.offsetMin = Vector2.zero;
-            stRT.offsetMax = Vector2.zero;
-            var stTMP = GetOrAdd<TextMeshProUGUI>(streak);
-            stTMP.text = "Streak: 5 wins";
-            stTMP.fontSize = FontSizes.Body;
-            stTMP.color = GREEN_SUCCESS;
-            stTMP.alignment = TextAlignmentOptions.Left;
-
-            Debug.Log("[MainMenuUI] Profile Card creado");
-        }
-
-        private static void CreateStatItem(Transform parent, string name, string value, Color color)
-        {
-            var stat = new GameObject(name);
-            stat.transform.SetParent(parent, false);
-            stat.AddComponent<RectTransform>().sizeDelta = new Vector2(160, 100);
-            stat.AddComponent<LayoutElement>().preferredWidth = 160;
-
-            var vlg = stat.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 2;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-
-            var icon = new GameObject("Icon");
-            icon.transform.SetParent(stat.transform, false);
-            icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 104;
-            var iconImg = icon.AddComponent<Image>();
-            iconImg.color = color;
-            iconImg.preserveAspect = true;
-
-            var val = new GameObject("Value");
-            val.transform.SetParent(stat.transform, false);
-            val.AddComponent<RectTransform>();
-            val.AddComponent<LayoutElement>().preferredHeight = 40;
-            var valTMP = val.AddComponent<TextMeshProUGUI>();
-            valTMP.text = value;
-            valTMP.fontSize = FontSizes.Body;
-            valTMP.color = color;
-            valTMP.fontStyle = FontStyles.Bold;
-            valTMP.alignment = TextAlignmentOptions.Center;
+            Debug.Log("[MainMenuUI] Profile Card creado (centered layout)");
         }
 
         #endregion
@@ -966,7 +896,7 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(card.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 250;
+            icon.AddComponent<LayoutElement>().preferredHeight = 180;
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
@@ -974,7 +904,7 @@ namespace DigitPark.Editor
             var labelGO = new GameObject("Label");
             labelGO.transform.SetParent(card.transform, false);
             labelGO.AddComponent<RectTransform>();
-            labelGO.AddComponent<LayoutElement>().preferredHeight = 72;
+            labelGO.AddComponent<LayoutElement>().preferredHeight = 60;
             var lTMP = labelGO.AddComponent<TextMeshProUGUI>();
             lTMP.text = label;
             lTMP.fontSize = FontSizes.H4;
@@ -1058,7 +988,7 @@ namespace DigitPark.Editor
             SetRef(so, "cashBattleButton", FindInPath<Button>(r, "CashBattleCard"));
             SetRef(so, "settingsButton", FindInPath<Button>(r, "Header/SettingsButton"));
             SetRef(so, "userButton", FindInPath<Button>(r, "ProfileCard"));
-            SetRef(so, "userText", FindInPath<TextMeshProUGUI>(r, "ProfileCard/InfoSection/Username"));
+            SetRef(so, "userText", FindInPath<TextMeshProUGUI>(r, "ProfileCard/Username"));
             SetRef(so, "searchButton", FindInPath<Button>(r, "QuickActionsPanel/SearchCard"));
             SetRef(so, "notificationsButton", FindInPath<Button>(r, "Header/NotificationsButton"));
             SetRef(so, "notificationIconImage", FindInPath<Image>(r, "Header/NotificationsButton/Icon"));
@@ -1114,13 +1044,10 @@ namespace DigitPark.Editor
             int a = 0;
             a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
             a += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarSection/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
             // Currency Display icons in header
             a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/GemsDisplay/Icon", ICON_GEM);
             a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/CoinsDisplay/Icon", ICON_COIN);
-            // Profile stats icons
-            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/DigitGems/Icon", ICON_GEM);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/InfoSection/StatsRow/DigitCoins/Icon", ICON_COIN);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/RankingsCard/Icon", ICON_RANKINGS);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/SearchCard/Icon", ICON_SEARCH);
             a += TryAssignIcon(canvas.transform, "QuickActionsPanel/MissionsCard/Icon", ICON_MISSIONS);

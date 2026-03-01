@@ -217,7 +217,7 @@ namespace DigitPark.Editor
             tTMP.fontSize = FontSizes.H4;
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
-            tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.alignment = TextAlignmentOptions.MidlineLeft;
             tTMP.raycastTarget = false;
             tTMP.enableAutoSizing = true;
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;

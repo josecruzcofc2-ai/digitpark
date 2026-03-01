@@ -692,111 +692,51 @@ namespace DigitPark.Localization
         }
 
         /// <summary>
-        /// Centra un TextMeshProUGUI y configura Auto-Size para que el texto siempre quepa
+        /// Configura auto-sizing como red de seguridad para traducciones largas.
+        /// NUNCA cambia la alineación - respeta lo que el UIBuilder configuró.
         /// </summary>
         private void CenterTextIfNeeded(TextMeshProUGUI tmp)
         {
             if (tmp == null) return;
 
-            string name = tmp.gameObject.name.ToLower();
-
-            // Aplicar a títulos, botones, labels y placeholders
-            bool shouldProcess = name.Contains("title") ||
-                name.Contains("button") ||
-                name.Contains("label") ||
-                name.Contains("placeholder") ||
-                name.Contains("tab") ||
-                name.Contains("header") ||
-                name.Contains("text");
-
-            if (shouldProcess)
+            // Solo habilitar auto-sizing si no estaba ya configurado por el UIBuilder
+            if (!tmp.enableAutoSizing)
             {
-                // FORZAR CENTRADO para textos específicos de Settings (Change Language, Change Style)
-                // Estos textos tienen iconos al lado, solo forzar Left alignment para consistencia
-                if (name.Contains("changelanguage") || name.Contains("changestyle") ||
-                    name.Contains("changetheme"))
-                {
-                    tmp.alignment = TextAlignmentOptions.Left;
-                    return; // No aplicar más transformaciones a estos textos
-                }
-
-                // 1. CENTRAR EL TEXTO - Forzar centrado horizontal
-                TextAlignmentOptions currentAlign = tmp.alignment;
-
-                // Convertir cualquier alineación a centrado horizontal manteniendo vertical
-                if (currentAlign == TextAlignmentOptions.Left || currentAlign == TextAlignmentOptions.TopLeft)
-                    tmp.alignment = TextAlignmentOptions.Top;
-                else if (currentAlign == TextAlignmentOptions.MidlineLeft || currentAlign == TextAlignmentOptions.Midline)
-                    tmp.alignment = TextAlignmentOptions.Center;
-                else if (currentAlign == TextAlignmentOptions.BottomLeft)
-                    tmp.alignment = TextAlignmentOptions.Bottom;
-                else if (currentAlign == TextAlignmentOptions.BaselineLeft)
-                    tmp.alignment = TextAlignmentOptions.Baseline;
-                else if (currentAlign == TextAlignmentOptions.CaplineLeft)
-                    tmp.alignment = TextAlignmentOptions.Capline;
-                else if (currentAlign == TextAlignmentOptions.TopRight)
-                    tmp.alignment = TextAlignmentOptions.Top;
-                else if (currentAlign == TextAlignmentOptions.Right || currentAlign == TextAlignmentOptions.MidlineRight)
-                    tmp.alignment = TextAlignmentOptions.Center;
-                else if (currentAlign == TextAlignmentOptions.BottomRight)
-                    tmp.alignment = TextAlignmentOptions.Bottom;
-                // Si ya está centrado, dejarlo como está
-
-                // 2. HABILITAR AUTO-SIZE para que el texto se ajuste al contenedor
-                if (!tmp.enableAutoSizing)
+                float currentSize = tmp.fontSize;
+                if (currentSize > 0)
                 {
                     tmp.enableAutoSizing = true;
-                    // Configurar tamaños mínimo y máximo razonables
-                    float currentSize = tmp.fontSize;
-                    tmp.fontSizeMin = Mathf.Max(FontSizes.AutoMinBody, currentSize * 0.4f); // Mínimo 40% del tamaño original
-                    tmp.fontSizeMax = currentSize > 0 ? currentSize : FontSizes.Body; // Máximo el tamaño original
+                    tmp.fontSizeMin = Mathf.Max(FontSizes.AutoMinBody, currentSize * 0.6f);
+                    tmp.fontSizeMax = currentSize;
                 }
+            }
 
-                // 3. CONFIGURAR OVERFLOW para evitar que el texto se salga
-                tmp.overflowMode = TextOverflowModes.Ellipsis; // Mostrar ... si aún no cabe
+            // Overflow como protección - solo si está en modo predeterminado
+            if (tmp.overflowMode == TextOverflowModes.Overflow)
+            {
+                tmp.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 
         /// <summary>
-        /// Centra un Text legacy y configura para que el texto quepa
+        /// Configura best-fit como red de seguridad para traducciones largas en Text legacy.
+        /// NUNCA cambia la alineación - respeta lo que el UIBuilder configuró.
         /// </summary>
         private void CenterLegacyTextIfNeeded(Text text)
         {
             if (text == null) return;
 
-            string name = text.gameObject.name.ToLower();
-
-            // Aplicar a títulos, botones, labels y placeholders
-            bool shouldProcess = name.Contains("title") ||
-                name.Contains("button") ||
-                name.Contains("label") ||
-                name.Contains("placeholder") ||
-                name.Contains("tab") ||
-                name.Contains("header") ||
-                name.Contains("text");
-
-            if (shouldProcess)
+            // Solo habilitar best-fit si no estaba ya configurado
+            if (!text.resizeTextForBestFit)
             {
-                // 1. CENTRAR EL TEXTO - Forzar centrado horizontal
-                if (text.alignment == TextAnchor.UpperLeft || text.alignment == TextAnchor.UpperRight)
-                    text.alignment = TextAnchor.UpperCenter;
-                else if (text.alignment == TextAnchor.MiddleLeft || text.alignment == TextAnchor.MiddleRight)
-                    text.alignment = TextAnchor.MiddleCenter;
-                else if (text.alignment == TextAnchor.LowerLeft || text.alignment == TextAnchor.LowerRight)
-                    text.alignment = TextAnchor.LowerCenter;
-
-                // 2. HABILITAR BEST FIT para que el texto se ajuste al contenedor
-                if (!text.resizeTextForBestFit)
-                {
-                    text.resizeTextForBestFit = true;
-                    text.resizeTextMinSize = 8;
-                    text.resizeTextMaxSize = text.fontSize > 0 ? text.fontSize : 36;
-                }
-
-                // 3. CONFIGURAR OVERFLOW
-                text.horizontalOverflow = HorizontalWrapMode.Wrap;
-                text.verticalOverflow = VerticalWrapMode.Truncate;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 8;
+                text.resizeTextMaxSize = text.fontSize > 0 ? text.fontSize : 36;
             }
+
+            // Overflow como protección
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Truncate;
         }
 
         /// <summary>

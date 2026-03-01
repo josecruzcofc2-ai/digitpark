@@ -301,7 +301,7 @@ namespace DigitPark.Editor
             titleTmp.text = "SEARCHING...";
             titleTmp.fontSize = FontSizes.H1;
             titleTmp.color = TEXT_GOLD;
-            titleTmp.alignment = TextAlignmentOptions.Center;
+            titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
             titleTmp.fontStyle = FontStyles.Bold;
 
             // Gold glow outline

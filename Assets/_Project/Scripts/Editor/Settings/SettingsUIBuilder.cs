@@ -199,16 +199,15 @@ namespace DigitPark.Editor
             backRT.anchoredPosition = new Vector2(20, 0);
             backRT.sizeDelta = new Vector2(50, 50);
 
-            // Title
+            // Title - Left-aligned next to back button (Material Design pattern)
             GameObject titleObj = new GameObject("TitleText");
             titleObj.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0.5f, 0f);
-            titleRT.anchorMax = new Vector2(0.5f, 1f);
-            titleRT.pivot = new Vector2(0.5f, 0.5f);
-            titleRT.sizeDelta = new Vector2(600, 0);
-            titleRT.anchoredPosition = Vector2.zero;
+            titleRT.anchorMin = new Vector2(0, 0);
+            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.offsetMin = new Vector2(80, 0);  // After back button (20 + 50 + 10 margin)
+            titleRT.offsetMax = new Vector2(-20, 0);
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.font = Font;
@@ -216,7 +215,7 @@ namespace DigitPark.Editor
             titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
             titleText.fontSizeMax = FontSizes.H4;
@@ -297,9 +296,103 @@ namespace DigitPark.Editor
         {
             Transform card = CreateCard(parent, "AccountCard", "ACCOUNT", CYAN_BORDER);
 
-            CreateSettingsRow(card, "ChangeNameButton", "Change Name", "100 \u2666", CYAN_NEON, true, "ChangeNameCostText");
+            CreateChangeNameRow(card);
             CreateSeparator(card);
             CreatePlayerIDRow(card);
+        }
+
+        /// <summary>
+        /// Creates Change Name row with gem sprite icon instead of unicode diamond
+        /// </summary>
+        private static void CreateChangeNameRow(Transform parent)
+        {
+            GameObject row = new GameObject("ChangeNameButton");
+            row.transform.SetParent(parent, false);
+
+            LayoutElement layout = row.AddComponent<LayoutElement>();
+            layout.preferredHeight = ROW_HEIGHT;
+
+            Image bg = row.AddComponent<Image>();
+            bg.sprite = WhiteSprite;
+            bg.color = BUTTON_BG;
+            bg.raycastTarget = true;
+
+            Button btn = row.AddComponent<Button>();
+            btn.targetGraphic = bg;
+            ColorBlock cb = btn.colors;
+            cb.normalColor = Color.white;
+            cb.highlightedColor = new Color(1, 1, 1, 1.2f);
+            cb.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            btn.colors = cb;
+
+            // Label text (left)
+            GameObject labelObj = new GameObject("ChangeNameButtonText");
+            labelObj.transform.SetParent(row.transform, false);
+            RectTransform labelRT = labelObj.AddComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(16, 0);
+            labelRT.offsetMax = new Vector2(-120, 0);
+            TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
+            label.font = Font;
+            label.text = "Change Name";
+            label.fontSize = FontSizes.H3;
+            label.color = TEXT_WHITE;
+            label.alignment = TextAlignmentOptions.Left;
+            label.raycastTarget = false;
+
+            // Cost container (right side): "100" text + gem sprite
+            GameObject costContainer = new GameObject("CostContainer");
+            costContainer.transform.SetParent(row.transform, false);
+            RectTransform costContainerRT = costContainer.AddComponent<RectTransform>();
+            costContainerRT.anchorMin = new Vector2(0.50f, 0.1f);
+            costContainerRT.anchorMax = new Vector2(0.98f, 0.9f);
+            costContainerRT.offsetMin = Vector2.zero;
+            costContainerRT.offsetMax = Vector2.zero;
+
+            HorizontalLayoutGroup costHLG = costContainer.AddComponent<HorizontalLayoutGroup>();
+            costHLG.spacing = 6;
+            costHLG.childAlignment = TextAnchor.MiddleRight;
+            costHLG.childControlWidth = false;
+            costHLG.childControlHeight = true;
+            costHLG.childForceExpandWidth = false;
+            costHLG.padding = new RectOffset(0, 8, 0, 0);
+
+            // Cost text "100"
+            GameObject costTextObj = new GameObject("ChangeNameCostText");
+            costTextObj.transform.SetParent(costContainer.transform, false);
+            costTextObj.AddComponent<RectTransform>();
+            LayoutElement costTextLE = costTextObj.AddComponent<LayoutElement>();
+            costTextLE.preferredWidth = 60;
+            TextMeshProUGUI costText = costTextObj.AddComponent<TextMeshProUGUI>();
+            costText.font = Font;
+            costText.text = "100";
+            costText.fontSize = FontSizes.H3;
+            costText.color = CYAN_NEON;
+            costText.alignment = TextAlignmentOptions.MidlineRight;
+            costText.raycastTarget = false;
+
+            // Gem icon sprite
+            GameObject gemIconObj = new GameObject("GemIcon");
+            gemIconObj.transform.SetParent(costContainer.transform, false);
+            gemIconObj.AddComponent<RectTransform>();
+            LayoutElement gemLE = gemIconObj.AddComponent<LayoutElement>();
+            gemLE.preferredWidth = 28;
+            gemLE.preferredHeight = 28;
+            Image gemImg = gemIconObj.AddComponent<Image>();
+            gemImg.preserveAspect = true;
+            gemImg.raycastTarget = false;
+
+            Sprite gemSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Currency/icon_digitgem_single.png");
+            if (gemSprite != null)
+            {
+                gemImg.sprite = gemSprite;
+                gemImg.color = Color.white; // Show original gem colors
+            }
+            else
+            {
+                gemImg.color = CYAN_NEON; // Fallback color if sprite not found
+            }
         }
 
         private static void BuildAudioCard(Transform parent)
@@ -454,37 +547,25 @@ namespace DigitPark.Editor
         {
             Transform card = CreateCard(parent, "PremiumSection", "PREMIUM", new Color(1f, 0.84f, 0f, 0.2f));
 
-            // PRO Button with badge
-            CreatePremiumProRow(card);
-            CreateSeparator(card);
-
-            // Remove Ads
-            CreateSettingsRow(card, "RemoveAdsButton", "Remove Ads", "$10", GOLD, true, "RemoveAdsPriceText");
-            CreateSeparator(card);
-
-            // Premium Full
-            CreateSettingsRow(card, "PremiumFullButton", "Full Premium", "$20", GOLD, true, "PremiumFullPriceText");
-            CreateSeparator(card);
-
             // Shop entry
             CreateSettingsRow(card, "ShopButton", "Shop", ">", CYAN_NEON, true);
             CreateSeparator(card);
 
             // Restore Purchases
-            CreateSettingsRow(card, "RestorePurchasesButton", "Restore Purchases", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "RestorePurchasesButton", "Restore Purchases", ">", CYAN_NEON, true);
         }
 
         private static void BuildLegalCard(Transform parent)
         {
             Transform card = CreateCard(parent, "LegalCard", "LEGAL", CYAN_BORDER);
 
-            CreateSettingsRow(card, "TermsButton", "Terms and Conditions", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "TermsButton", "Terms and Conditions", ">", CYAN_NEON, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "PrivacyButton", "Privacy Policy", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "PrivacyButton", "Privacy Policy", ">", CYAN_NEON, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "ResponsibleGamingButton", "Responsible Gaming", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "ResponsibleGamingButton", "Responsible Gaming", ">", CYAN_NEON, true);
             CreateSeparator(card);
-            CreateSettingsRow(card, "TriumphTermsButton", "Triumph Terms", ">", TEXT_GRAY, true);
+            CreateSettingsRow(card, "TriumphTermsButton", "Triumph Terms", ">", CYAN_NEON, true);
             CreateSeparator(card);
             CreateSettingsRow(card, "SelfExclusionButton", "Self Exclusion", ">", DANGER_RED, true);
         }
@@ -502,9 +583,6 @@ namespace DigitPark.Editor
 
         private static void BuildOverlayPanels(Canvas canvas)
         {
-            // PremiumPanelUI overlay
-            BuildPremiumPanelOverlay(canvas.transform);
-
             // Logout ConfirmPanelUI overlay
             BuildConfirmPanelOverlay(canvas.transform, "LogoutConfirmPanel",
                 "Sign Out", "Are you sure you want to sign out?",
@@ -1200,6 +1278,8 @@ namespace DigitPark.Editor
             idText.font = Font;
             idText.text = "#ABC123XYZ";
             idText.fontSize = FontSizes.H4;
+            idText.fontSizeMin = FontSizes.AutoMinBody;
+            idText.enableAutoSizing = true;
             idText.color = TEXT_WHITE;
             idText.alignment = TextAlignmentOptions.Center;
             idText.raycastTarget = false;
@@ -1393,7 +1473,7 @@ namespace DigitPark.Editor
             toggleRT.anchorMin = new Vector2(1, 0.5f);
             toggleRT.anchorMax = new Vector2(1, 0.5f);
             toggleRT.pivot = new Vector2(1, 0.5f);
-            toggleRT.sizeDelta = new Vector2(80, 36);
+            toggleRT.sizeDelta = new Vector2(90, 40);
             toggleRT.anchoredPosition = new Vector2(-16, 0);
 
             Image toggleBg = toggleObj.AddComponent<Image>();
@@ -1411,12 +1491,13 @@ namespace DigitPark.Editor
             RectTransform checkRT = checkmark.AddComponent<RectTransform>();
             checkRT.anchorMin = Vector2.zero;
             checkRT.anchorMax = Vector2.one;
-            checkRT.sizeDelta = Vector2.zero;
+            checkRT.offsetMin = new Vector2(4, 0);
+            checkRT.offsetMax = new Vector2(-4, 0);
 
             TextMeshProUGUI checkText = checkmark.AddComponent<TextMeshProUGUI>();
             checkText.font = Font;
             checkText.text = defaultValue ? "ON" : "OFF";
-            checkText.fontSize = FontSizes.H4;
+            checkText.fontSize = FontSizes.Subtitle;
             checkText.fontStyle = FontStyles.Bold;
             checkText.color = defaultValue ? DARK_NAVY : TEXT_GRAY;
             checkText.alignment = TextAlignmentOptions.Center;
@@ -1446,8 +1527,8 @@ namespace DigitPark.Editor
             labelObj.transform.SetParent(container.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
-            labelRT.anchorMin = Vector2.zero;
-            labelRT.anchorMax = new Vector2(0.38f, 1);
+            labelRT.anchorMin = new Vector2(0, 0.05f);
+            labelRT.anchorMax = new Vector2(0.38f, 0.95f);
             labelRT.offsetMin = new Vector2(16, 0);
             labelRT.offsetMax = Vector2.zero;
 
@@ -1455,8 +1536,10 @@ namespace DigitPark.Editor
             label.font = Font;
             label.text = labelText;
             label.fontSize = FontSizes.H3;
+            label.fontSizeMin = FontSizes.AutoMinBody;
+            label.enableAutoSizing = true;
             label.color = TEXT_WHITE;
-            label.alignment = TextAlignmentOptions.Left;
+            label.alignment = TextAlignmentOptions.MidlineLeft;
             label.raycastTarget = false;
 
             // Dropdown (right)
@@ -1464,8 +1547,8 @@ namespace DigitPark.Editor
             dropdownObj.transform.SetParent(container.transform, false);
 
             RectTransform dropdownRT = dropdownObj.AddComponent<RectTransform>();
-            dropdownRT.anchorMin = new Vector2(0.40f, 0.12f);
-            dropdownRT.anchorMax = new Vector2(0.98f, 0.88f);
+            dropdownRT.anchorMin = new Vector2(0.40f, 0.10f);
+            dropdownRT.anchorMax = new Vector2(0.98f, 0.90f);
             dropdownRT.offsetMin = Vector2.zero;
             dropdownRT.offsetMax = Vector2.zero;
 

@@ -354,7 +354,7 @@ namespace DigitPark.Editor
             nameTMP.text = "QuickMath Championship";
             nameTMP.fontSize = FontSizes.H4;
             nameTMP.color = TEXT_GOLD;
-            nameTMP.alignment = TextAlignmentOptions.Center;
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.raycastTarget = false;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.enableAutoSizing = true;

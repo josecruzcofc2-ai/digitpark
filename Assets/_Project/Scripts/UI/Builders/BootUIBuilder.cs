@@ -500,11 +500,7 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateDecorations()
         {
-            Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
-
-            // Líneas decorativas inferiores
-            CreateDecoLine(canvas.transform, new Vector2(0.15f, 0.15f), new Vector2(0.35f, 0.15f), accentColor, 1f);
-            CreateDecoLine(canvas.transform, new Vector2(0.65f, 0.15f), new Vector2(0.85f, 0.15f), accentColor, 1f);
+            // Decoraciones eliminadas - diseño limpio sin líneas laterales
         }
 
         /// <summary>

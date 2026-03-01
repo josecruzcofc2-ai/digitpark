@@ -278,7 +278,7 @@ namespace DigitPark.Editor
             titleRT.pivot = new Vector2(0.5f, 0.5f);
             titleRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI titleTMP = SetupText(title, "RANKINGS", (int)FontSizes.H4, CYAN_NEON, FontStyles.Bold);
-            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
             titleTMP.raycastTarget = false;
             titleTMP.enableAutoSizing = true;
             titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
@@ -290,8 +290,8 @@ namespace DigitPark.Editor
             // Currency pills (top-right of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.55f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
         }

@@ -295,7 +295,7 @@ namespace DigitPark.Editor
             titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.raycastTarget = false;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
@@ -306,8 +306,8 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.55f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 

@@ -242,7 +242,7 @@ namespace DigitPark.Editor
             titleRT.pivot = new Vector2(0.5f, 0.5f);
             titleRT.sizeDelta = Vector2.zero;
             titleRT.anchoredPosition = Vector2.zero;
-            var titleTMP = SetText(title, "CREATE TOURNAMENT", FontSizes.H4, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.Center);
+            var titleTMP = SetText(title, "CREATE TOURNAMENT", FontSizes.H4, FontStyles.Bold, CYAN_NEON, TextAlignmentOptions.MidlineLeft);
             titleTMP.enableWordWrapping = false;
             titleTMP.raycastTarget = false;
             AddOutline(title, CYAN_GLOW, 2);
@@ -250,8 +250,8 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.55f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 

@@ -302,7 +302,7 @@ namespace DigitPark.Editor
             titleText.fontSize = FontSizes.H4;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = CYAN_NEON;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
             titleText.fontSizeMax = FontSizes.H4;

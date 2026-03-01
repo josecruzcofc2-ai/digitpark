@@ -43,6 +43,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button changeNameButton;
         [SerializeField] private TextMeshProUGUI changeNameCostText;
         [SerializeField] private Button copyIDButton;
+        [SerializeField] private TextMeshProUGUI playerIdText;
         [SerializeField] private Button logoutButton;
         [SerializeField] private Button deleteAccountButton;
         [SerializeField] private Button backButton;
@@ -131,6 +132,10 @@ namespace DigitPark.Managers
                 {
                     Debug.LogError("[Settings] No hay datos del jugador");
                     SceneManager.LoadScene("Login");
+                }
+                else if (playerIdText != null)
+                {
+                    playerIdText.text = $"#{currentPlayer.userId}";
                 }
             }
         }
@@ -657,7 +662,7 @@ namespace DigitPark.Managers
             }
             else
             {
-                changeNameCostText.text = $"{NAME_CHANGE_GEM_COST} \u2666";
+                changeNameCostText.text = $"{NAME_CHANGE_GEM_COST}";
                 changeNameCostText.color = new Color(0f, 1f, 1f); // cyan
             }
         }

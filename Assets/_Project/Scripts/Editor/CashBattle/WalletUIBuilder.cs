@@ -325,7 +325,7 @@ namespace DigitPark.Editor
             titleTMP.fontSize = FontSizes.H4;
             titleTMP.color = TEXT_GOLD;
             titleTMP.fontStyle = FontStyles.Bold;
-            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
             titleTMP.raycastTarget = false;
             titleTMP.enableAutoSizing = true;
             titleTMP.fontSizeMin = FontSizes.AutoMinTitle;

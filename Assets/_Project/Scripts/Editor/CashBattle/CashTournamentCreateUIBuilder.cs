@@ -344,7 +344,7 @@ namespace DigitPark.Editor
             title.text = "CREATE TOURNAMENT";
             title.fontSize = FontSizes.H4;
             title.color = TEXT_GOLD;
-            title.alignment = TextAlignmentOptions.Center;
+            title.alignment = TextAlignmentOptions.MidlineLeft;
             title.fontStyle = FontStyles.Bold;
             title.enableAutoSizing = true;
             title.fontSizeMin = FontSizes.AutoMinTitle;

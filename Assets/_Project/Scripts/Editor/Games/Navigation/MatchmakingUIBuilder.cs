@@ -269,7 +269,7 @@ namespace DigitPark.Editor
             titleTmp.text = "SEARCHING...";
             titleTmp.fontSize = FontSizes.H1;
             titleTmp.color = CYAN_NEON;
-            titleTmp.alignment = TextAlignmentOptions.Center;
+            titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
             titleTmp.fontStyle = FontStyles.Bold;
 
 

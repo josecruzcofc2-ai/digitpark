@@ -172,6 +172,7 @@ namespace DigitPark.Editor
             if (titleTmp != null) titleTmp.raycastTarget = false;
             if (titleTmp != null)
             {
+                titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 titleTmp.enableAutoSizing = true;
                 titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
                 titleTmp.fontSizeMax = FontSizes.H4;

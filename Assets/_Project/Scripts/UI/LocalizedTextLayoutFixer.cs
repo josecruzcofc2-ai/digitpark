@@ -106,50 +106,37 @@ namespace DigitPark.UI
         }
 
         /// <summary>
-        /// Corrige el layout de todos los Toggles con texto
+        /// Corrige el layout de toggles tipo checkbox (con Background child).
+        /// NO modifica toggles tipo switch (VibrationToggle, NotificationsToggle, etc.)
+        /// donde el texto está centrado intencionalmente dentro del switch.
         /// </summary>
         private void FixToggleLayouts()
         {
             var toggles = FindObjectsOfType<Toggle>(true);
-            Debug.Log($"[LayoutFixer] Encontrados {toggles.Length} toggles");
 
             foreach (var toggle in toggles)
             {
+                // Solo procesar toggles tipo checkbox (que tienen un child "Background")
+                // Los toggles tipo switch (ON/OFF centrado) NO deben modificarse
+                Transform checkmarkBg = toggle.transform.Find("Background");
+                if (checkmarkBg == null) continue;
+
                 var toggleText = toggle.GetComponentInChildren<TextMeshProUGUI>();
-                if (toggleText != null)
+                if (toggleText == null) continue;
+
+                // Alinear texto a la izquierda (junto al checkbox)
+                toggleText.alignment = TextAlignmentOptions.Left;
+
+                RectTransform textRect = toggleText.GetComponent<RectTransform>();
+                if (textRect != null)
                 {
-                    Debug.Log($"[LayoutFixer] Corrigiendo toggle: {toggle.name}, texto: {toggleText.text}");
+                    RectTransform bgRect = checkmarkBg.GetComponent<RectTransform>();
+                    float checkboxWidth = bgRect != null ? bgRect.sizeDelta.x + 10f : 30f;
 
-                    // Alinear texto a la izquierda (junto al checkbox)
-                    toggleText.alignment = TextAlignmentOptions.Left;
-
-                    // Ajustar posición del texto
-                    RectTransform textRect = toggleText.GetComponent<RectTransform>();
-                    RectTransform toggleRect = toggle.GetComponent<RectTransform>();
-
-                    if (textRect != null && toggleRect != null)
-                    {
-                        // Buscar el Background/Checkmark para saber el tamaño del checkbox
-                        Transform checkmarkBg = toggle.transform.Find("Background");
-                        float checkboxWidth = 30f; // Default
-
-                        if (checkmarkBg != null)
-                        {
-                            RectTransform bgRect = checkmarkBg.GetComponent<RectTransform>();
-                            if (bgRect != null)
-                            {
-                                checkboxWidth = bgRect.sizeDelta.x + 10f; // +10 de margen
-                            }
-                        }
-
-                        // Posicionar el texto justo después del checkbox
-                        textRect.anchorMin = new Vector2(0f, 0f);
-                        textRect.anchorMax = new Vector2(1f, 1f);
-                        textRect.offsetMin = new Vector2(checkboxWidth, 0f);
-                        textRect.offsetMax = new Vector2(0f, 0f);
-
-                        Debug.Log($"[LayoutFixer] Toggle '{toggle.name}' corregido - offsetMin: ({checkboxWidth}, 0)");
-                    }
+                    textRect.anchorMin = new Vector2(0f, 0f);
+                    textRect.anchorMax = new Vector2(1f, 1f);
+                    textRect.offsetMin = new Vector2(checkboxWidth, 0f);
+                    textRect.offsetMax = new Vector2(0f, 0f);
                 }
             }
         }

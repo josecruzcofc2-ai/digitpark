@@ -336,8 +336,8 @@ namespace DigitPark.Editor
             // Currency Pills
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             RectTransform pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.55f, 0.1f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.9f);
+            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
         }
@@ -410,7 +410,7 @@ namespace DigitPark.Editor
             title.text = "CASH TOURNAMENTS";
             title.fontSize = FontSizes.H4;
             title.color = TEXT_GOLD;
-            title.alignment = TextAlignmentOptions.Center;
+            title.alignment = TextAlignmentOptions.MidlineLeft;
             title.raycastTarget = false;
             title.fontStyle = FontStyles.Bold;
             title.enableAutoSizing = true;

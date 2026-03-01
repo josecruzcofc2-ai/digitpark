@@ -405,7 +405,7 @@ namespace DigitPark.Editor
             titleText.text = "History";
             titleText.fontSize = FontSizes.H4;
             titleText.color = TEXT_GOLD;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.raycastTarget = false;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;

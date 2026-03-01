@@ -391,7 +391,7 @@ namespace DigitPark.Editor
             title.text = "Battles 1v1";
             title.fontSize = FontSizes.H4;
             title.color = TEXT_GOLD;
-            title.alignment = TextAlignmentOptions.Center;
+            title.alignment = TextAlignmentOptions.MidlineLeft;
             title.raycastTarget = false;
             title.fontStyle = FontStyles.Bold;
             title.enableAutoSizing = true;

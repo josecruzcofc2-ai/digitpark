@@ -69,7 +69,7 @@ namespace DigitPark.Editor
 
             var pill = FindOrCreate(parent, name);
             var rt = GetOrAdd<RectTransform>(pill);
-            rt.sizeDelta = new Vector2(165, 46);
+            rt.sizeDelta = new Vector2(270, 80);
 
             // Pill background
             var bg = GetOrAdd<Image>(pill);
@@ -91,8 +91,8 @@ namespace DigitPark.Editor
             pillHLG.childControlHeight = true;
 
             var le = GetOrAdd<LayoutElement>(pill);
-            le.minWidth = 165;
-            le.preferredWidth = 165;
+            le.minWidth = 270;
+            le.preferredWidth = 270;
 
             // Remove old children if rebuilding
             for (int i = pill.transform.childCount - 1; i >= 0; i--)
@@ -102,15 +102,15 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(pill.transform, false);
             var iconRT = icon.AddComponent<RectTransform>();
-            iconRT.sizeDelta = new Vector2(30, 30);
+            iconRT.sizeDelta = new Vector2(75, 75);
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = color;
             iconImg.preserveAspect = true;
             var iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.minWidth = 30;
-            iconLE.minHeight = 30;
-            iconLE.preferredWidth = 30;
-            iconLE.preferredHeight = 30;
+            iconLE.minWidth = 75;
+            iconLE.minHeight = 75;
+            iconLE.preferredWidth = 75;
+            iconLE.preferredHeight = 75;
 
             // Load icon sprite
             string iconPath = currencyType == CurrencyType.DigitGems ? ICON_GEM : ICON_COIN;
@@ -125,29 +125,31 @@ namespace DigitPark.Editor
             var amountObj = new GameObject("Amount");
             amountObj.transform.SetParent(pill.transform, false);
             var amountRT = amountObj.AddComponent<RectTransform>();
-            amountRT.sizeDelta = new Vector2(45, 30);
+            amountRT.sizeDelta = new Vector2(75, 30);
             var amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = "0";
             amountText.fontSize = FontSizes.Body;
+            amountText.fontSizeMin = FontSizes.AutoMinBody;
+            amountText.enableAutoSizing = true;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_WHITE;
             amountText.alignment = TextAlignmentOptions.MidlineLeft;
             var amountLE = amountObj.AddComponent<LayoutElement>();
-            amountLE.minWidth = 45;
-            amountLE.preferredWidth = 45;
+            amountLE.minWidth = 75;
+            amountLE.preferredWidth = 75;
 
             // Plus indicator — circle with "+" text
             var plus = new GameObject("Plus");
             plus.transform.SetParent(pill.transform, false);
             var plusRT = plus.AddComponent<RectTransform>();
-            plusRT.sizeDelta = new Vector2(36, 36);
+            plusRT.sizeDelta = new Vector2(70, 70);
             var plusImg = plus.AddComponent<Image>();
             plusImg.color = color;
             var plusLE = plus.AddComponent<LayoutElement>();
-            plusLE.minWidth = 36;
-            plusLE.minHeight = 36;
-            plusLE.preferredWidth = 36;
-            plusLE.preferredHeight = 36;
+            plusLE.minWidth = 70;
+            plusLE.minHeight = 70;
+            plusLE.preferredWidth = 70;
+            plusLE.preferredHeight = 70;
 
             // "+" text inside the circle
             var plusTextObj = new GameObject("PlusText");
@@ -159,7 +161,7 @@ namespace DigitPark.Editor
             plusTextRT.offsetMax = Vector2.zero;
             var plusTMP = plusTextObj.AddComponent<TextMeshProUGUI>();
             plusTMP.text = "+";
-            plusTMP.fontSize = 24;
+            plusTMP.fontSize = 36;
             plusTMP.fontStyle = FontStyles.Bold;
             plusTMP.color = new Color(0.02f, 0.04f, 0.08f, 1f); // dark text on colored bg
             plusTMP.alignment = TextAlignmentOptions.Center;

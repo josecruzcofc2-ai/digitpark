@@ -374,7 +374,7 @@ namespace DigitPark.Editor
             ttmp.text = "My Cash Profile";
             ttmp.fontSize = FontSizes.H4;
             ttmp.color = TEXT_GOLD;
-            ttmp.alignment = TextAlignmentOptions.Center;
+            ttmp.alignment = TextAlignmentOptions.MidlineLeft;
             ttmp.raycastTarget = false;
             ttmp.fontStyle = FontStyles.Bold;
             ttmp.enableAutoSizing = true;

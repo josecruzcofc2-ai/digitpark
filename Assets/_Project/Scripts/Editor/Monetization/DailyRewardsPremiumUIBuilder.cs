@@ -270,7 +270,7 @@ namespace DigitPark.Editor
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.color = CYAN_NEON;
-            tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.alignment = TextAlignmentOptions.MidlineLeft;
             tTMP.raycastTarget = false;
 
             // --- Currency pills (right) ---

@@ -277,6 +277,7 @@ namespace DigitPark.Editor
 
             var titleTMP = CreateText("TitleText", header.transform, "CHOOSE YOUR BET",
                 (int)FontSizes.H4, NEON_CYAN, FontStyles.Bold, 80f);
+            titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
             titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
             titleTMP.raycastTarget = false;
             CreateText("GameNameText", header.transform, "",

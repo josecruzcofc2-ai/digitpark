@@ -494,7 +494,7 @@ namespace DigitPark.Editor
             title.text = "Cash Battle";
             title.fontSize = FontSizes.H4;
             title.color = TEXT_GOLD;
-            title.alignment = TextAlignmentOptions.Center;
+            title.alignment = TextAlignmentOptions.MidlineLeft;
             title.raycastTarget = false;
             title.enableAutoSizing = true;
             title.fontSizeMin = FontSizes.AutoMinTitle;
