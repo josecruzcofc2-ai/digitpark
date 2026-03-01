@@ -8,6 +8,7 @@ using DigitPark.Data;
 using DG.Tweening;
 using DigitPark.Animations;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -126,7 +127,7 @@ namespace DigitPark.Managers
             {
                 gameTypeFilter.ClearOptions();
                 gameTypeFilter.AddOptions(new List<string> {
-                    "Todos los juegos",
+                    AutoLocalizer.Get("filter_all_games"),
                     "Memory Pairs",
                     "Quick Math",
                     "Flash Tap",
@@ -140,8 +141,8 @@ namespace DigitPark.Managers
             {
                 entryFeeFilter.ClearOptions();
                 entryFeeFilter.AddOptions(new List<string> {
-                    "Cualquier entrada",
-                    "Gratis",
+                    AutoLocalizer.Get("filter_any_entry"),
+                    AutoLocalizer.Get("free_label"),
                     "$1 - $5",
                     "$5 - $10",
                     "$10 - $25",
@@ -154,10 +155,10 @@ namespace DigitPark.Managers
             {
                 statusFilter.ClearOptions();
                 statusFilter.AddOptions(new List<string> {
-                    "Todos",
-                    "Registro abierto",
-                    "En progreso",
-                    "Completados"
+                    AutoLocalizer.Get("filter_all"),
+                    AutoLocalizer.Get("filter_open_registration"),
+                    AutoLocalizer.Get("filter_in_progress"),
+                    AutoLocalizer.Get("filter_completed")
                 });
             }
         }

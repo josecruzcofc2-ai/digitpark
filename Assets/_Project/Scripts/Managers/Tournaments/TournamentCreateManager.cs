@@ -98,7 +98,7 @@ namespace DigitPark.Managers
 
             if (creationFeeText)
             {
-                creationFeeText.text = $"Costo de creación: ${creationFee:F2}";
+                creationFeeText.text = AutoLocalizer.Get("tournament_creation_fee", creationFee);
             }
 
             UpdateCreateButtonState();
@@ -151,7 +151,7 @@ namespace DigitPark.Managers
                 var options = new List<string>();
                 foreach (var fee in entryFeeOptions)
                 {
-                    options.Add(fee == 0 ? "Gratis" : $"${fee:F2}");
+                    options.Add(fee == 0 ? AutoLocalizer.Get("free_label") : $"${fee:F2}");
                 }
                 entryFeeDropdown.AddOptions(options);
             }
@@ -163,7 +163,7 @@ namespace DigitPark.Managers
                 var options = new List<string>();
                 foreach (var count in maxPlayersOptions)
                 {
-                    options.Add($"{count} jugadores");
+                    options.Add(AutoLocalizer.Get("tournament_players_count", count));
                 }
                 maxPlayersDropdown.AddOptions(options);
             }
@@ -173,12 +173,12 @@ namespace DigitPark.Managers
             {
                 startTimeDropdown.ClearOptions();
                 startTimeDropdown.AddOptions(new List<string> {
-                    "En 15 minutos",
-                    "En 30 minutos",
-                    "En 1 hora",
-                    "En 2 horas",
-                    "En 6 horas",
-                    "Mañana"
+                    AutoLocalizer.Get("tournament_in_15min"),
+                    AutoLocalizer.Get("tournament_in_30min"),
+                    AutoLocalizer.Get("tournament_in_1hour"),
+                    AutoLocalizer.Get("tournament_in_2hours"),
+                    AutoLocalizer.Get("tournament_in_6hours"),
+                    AutoLocalizer.Get("tournament_tomorrow")
                 });
             }
 
@@ -187,9 +187,9 @@ namespace DigitPark.Managers
             {
                 roundsDropdown.ClearOptions();
                 roundsDropdown.AddOptions(new List<string> {
-                    "1 ronda",
-                    "3 rondas (mejor de 3)",
-                    "5 rondas (mejor de 5)"
+                    AutoLocalizer.Get("tournament_1round"),
+                    AutoLocalizer.Get("tournament_3rounds"),
+                    AutoLocalizer.Get("tournament_5rounds")
                 });
             }
 
@@ -198,11 +198,11 @@ namespace DigitPark.Managers
             {
                 timeLimitDropdown.ClearOptions();
                 timeLimitDropdown.AddOptions(new List<string> {
-                    "30 segundos",
-                    "1 minuto",
-                    "2 minutos",
-                    "5 minutos",
-                    "Sin límite"
+                    AutoLocalizer.Get("tournament_30sec"),
+                    AutoLocalizer.Get("tournament_1min"),
+                    AutoLocalizer.Get("tournament_2min"),
+                    AutoLocalizer.Get("tournament_5min"),
+                    AutoLocalizer.Get("tournament_no_limit")
                 });
             }
 
@@ -322,7 +322,7 @@ namespace DigitPark.Managers
             if (entryFeeDisplayText)
             {
                 entryFeeDisplayText.text = currentConfig.entryFee == 0
-                    ? "GRATIS"
+                    ? AutoLocalizer.Get("free_label")
                     : $"${currentConfig.entryFee:F2}";
             }
         }
@@ -337,7 +337,7 @@ namespace DigitPark.Managers
 
             if (estimatedPrizeText)
             {
-                estimatedPrizeText.text = $"Premio estimado: ${prizePool:F2}";
+                estimatedPrizeText.text = AutoLocalizer.Get("tournament_estimated_prize", prizePool);
             }
         }
 
@@ -370,11 +370,11 @@ namespace DigitPark.Managers
 
         private void UpdatePreview()
         {
-            if (previewNameText) previewNameText.text = currentConfig.name ?? "Sin nombre";
+            if (previewNameText) previewNameText.text = currentConfig.name ?? AutoLocalizer.Get("tournament_no_name");
             if (previewGameText) previewGameText.text = currentConfig.gameType;
-            if (previewEntryText) previewEntryText.text = currentConfig.entryFee == 0 ? "Gratis" : $"${currentConfig.entryFee:F2}";
+            if (previewEntryText) previewEntryText.text = currentConfig.entryFee == 0 ? AutoLocalizer.Get("free_label") : $"${currentConfig.entryFee:F2}";
             if (previewPrizeText) previewPrizeText.text = $"${currentConfig.estimatedPrize:F2}";
-            if (previewPlayersText) previewPlayersText.text = $"{currentConfig.maxPlayers} jugadores";
+            if (previewPlayersText) previewPlayersText.text = AutoLocalizer.Get("tournament_players_count", currentConfig.maxPlayers);
         }
 
         private void OnCreateClicked()

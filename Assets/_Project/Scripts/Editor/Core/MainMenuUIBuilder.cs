@@ -392,8 +392,8 @@ namespace DigitPark.Editor
             // Level Badge
             var lvlBadge = FindOrCreate(avSec.transform, "LevelBadge");
             var lvlRT = GetOrAdd<RectTransform>(lvlBadge);
-            lvlRT.anchorMin = new Vector2(0.5f, 0.15f);
-            lvlRT.anchorMax = new Vector2(0.5f, 0.15f);
+            lvlRT.anchorMin = new Vector2(0.5f, 0.08f);
+            lvlRT.anchorMax = new Vector2(0.5f, 0.08f);
             lvlRT.sizeDelta = new Vector2(140, 56);
             GetOrAdd<Image>(lvlBadge).color = CYAN_NEON;
 

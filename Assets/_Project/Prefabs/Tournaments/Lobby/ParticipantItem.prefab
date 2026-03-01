@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5767339621832961749}
   - component: {fileID: 6009550377845228024}
   - component: {fileID: 1618247265203206733}
-  - component: {fileID: 7436303479998177525}
   m_Layer: 0
   m_Name: AvatarBorder
   m_TagString: Untagged
@@ -92,31 +91,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.3, g: 0.3, b: 0.35, a: 1}
   m_EffectDistance: {x: 2, y: 2}
   m_UseGraphicAlpha: 1
---- !u!114 &7436303479998177525
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 476205151773763816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  elementType: 24
-  applyToImage: 0
-  applyToText: 0
-  applyToOutline: 1
-  applyToShadow: 0
-  targetImage: {fileID: 0}
-  targetTMPText: {fileID: 0}
-  targetLegacyText: {fileID: 0}
-  targetOutline: {fileID: 0}
-  targetShadow: {fileID: 0}
-  targetButton: {fileID: 0}
-  animateTransition: 1
-  transitionDuration: 0.2
 --- !u!1 &976487051199806087
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,7 +655,6 @@ GameObject:
   - component: {fileID: 3708040333643752056}
   - component: {fileID: 8708993120671295490}
   - component: {fileID: 4853909826179550388}
-  - component: {fileID: 9149399469786509729}
   m_Layer: 0
   m_Name: OnlineIndicator
   m_TagString: Untagged
@@ -746,31 +719,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &9149399469786509729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4258717170942680686}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  elementType: 20
-  applyToImage: 1
-  applyToText: 0
-  applyToOutline: 0
-  applyToShadow: 0
-  targetImage: {fileID: 0}
-  targetTMPText: {fileID: 0}
-  targetLegacyText: {fileID: 0}
-  targetOutline: {fileID: 0}
-  targetShadow: {fileID: 0}
-  targetButton: {fileID: 0}
-  animateTransition: 1
-  transitionDuration: 0.2
 --- !u!1 &4757742070501964669
 GameObject:
   m_ObjectHideFlags: 0
@@ -919,7 +867,6 @@ GameObject:
   - component: {fileID: 8971014803575235395}
   - component: {fileID: 2157914889590963974}
   - component: {fileID: 3959657314721218495}
-  - component: {fileID: 3876918576974245503}
   m_Layer: 0
   m_Name: ParticipantItem
   m_TagString: Untagged
@@ -996,7 +943,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.12, g: 0.15, b: 0.2, a: 0.95}
+  m_Color: {r: 0.06, g: 0.08, b: 0.12, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1087,31 +1034,6 @@ MonoBehaviour:
   readyColor: {r: 0.3, g: 0.9, b: 0.4, a: 1}
   notReadyColor: {r: 0.9, g: 0.6, b: 0.2, a: 1}
   selfHighlightColor: {r: 0, g: 0.5, b: 0.8, a: 0.3}
---- !u!114 &3876918576974245503
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5337553723095137424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52570ee78a50bb94a9efb1e41c5fe4a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  elementType: 7
-  applyToImage: 1
-  applyToText: 1
-  applyToOutline: 0
-  applyToShadow: 0
-  targetImage: {fileID: 0}
-  targetTMPText: {fileID: 0}
-  targetLegacyText: {fileID: 0}
-  targetOutline: {fileID: 0}
-  targetShadow: {fileID: 0}
-  targetButton: {fileID: 0}
-  animateTransition: 1
-  transitionDuration: 0.2
 --- !u!1 &6437353190844239866
 GameObject:
   m_ObjectHideFlags: 0

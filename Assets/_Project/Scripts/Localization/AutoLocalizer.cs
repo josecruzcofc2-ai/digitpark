@@ -545,20 +545,20 @@ namespace DigitPark.Localization
             { "PlayerNameText", "player_name" },
             { "OpponentNameText", "opponent_name" },
             { "GetReadyText", "matchmaking_get_ready" },
-            { "CancelButtonText", "cancel" },
+            { "CashCancelButtonText", "cancel" },
             { "StatusText", "matchmaking_searching" },
-            { "TimerText", "matchmaking_timer" },
+            { "CashTimerText", "matchmaking_timer" },
 
             // ==================== CASH TOURNAMENT CREATE ====================
-            { "CreateTournamentTitle", "cash_create_tournament" },
-            { "CreateTournamentTitleText", "cash_create_tournament" },
+            { "CashTournamentCreateTitle", "cash_create_tournament" },
+            { "CashTournamentCreateTitleText", "cash_create_tournament" },
             { "TournamentNameLabel", "tournament_name" },
             { "TournamentNameLabelText", "tournament_name" },
             { "GameSelectionLabel", "select_game" },
             { "GameSelectionLabelText", "select_game" },
-            { "EntryFeeLabel", "entry_fee" },
+            // EntryFeeLabel already mapped in TOURNAMENTS section
             { "EntryFeeLabelText", "entry_fee" },
-            { "MaxPlayersLabel", "max_players" },
+            // MaxPlayersLabel already mapped in TOURNAMENTS section
             { "MaxPlayersLabelText", "max_players" },
             { "ScheduleLabel", "schedule" },
             { "ScheduleLabelText", "schedule" },
@@ -577,7 +577,7 @@ namespace DigitPark.Localization
             { "PreviewTitle", "preview" },
             { "PreviewTitleText", "preview" },
             { "CreationFeeText", "cash_creation_fee" },
-            { "CreateButtonText", "cash_create_tournament_btn" },
+            { "CashCreateButtonText", "cash_create_tournament_btn" },
 
             // ==================== CASH TOURNAMENT LOBBY ====================
             { "TournamentNameText", "tournament_name" },
@@ -587,22 +587,22 @@ namespace DigitPark.Localization
             { "PrizePoolInfoText", "prize_pool" },
             { "PlayersProgressText", "players_progress" },
             { "CountdownInfoText", "tournament_countdown" },
-            { "ParticipantsTabText", "participants" },
-            { "JoinButtonText", "tournament_join" },
+            { "CashParticipantsTabText", "participants" },
+            { "CashJoinButtonText", "tournament_join" },
             { "LeaveButtonText", "tournament_leave" },
-            { "ShareButtonText", "share" },
+            { "CashShareButtonText", "share" },
             { "StartingCountdownText", "tournament_starting" },
 
             // ==================== CASH TOURNAMENT RESULTS ====================
             { "ResultTitleText", "cash_tournament_complete" },
             { "ResultSubtitleText", "tournament_name" },
-            { "PositionLabel", "tournament_position" },
+            { "CashPositionLabel", "tournament_position" },
             { "PositionLabelText", "tournament_position" },
             { "PrizeLabel", "cash_you_won" },
             { "PrizeLabelText", "cash_you_won" },
-            { "RetryButtonText", "play_again" },
+            { "CashRetryButtonText", "play_again" },
             { "LeaderboardButtonText", "leaderboard" },
-            { "ExitButtonText", "exit" },
+            { "CashExitButtonText", "exit" },
 
             // ==================== CASH BATTLE 1V1 MODAL ====================
             { "SelectGameTitle", "cash_select_game" },

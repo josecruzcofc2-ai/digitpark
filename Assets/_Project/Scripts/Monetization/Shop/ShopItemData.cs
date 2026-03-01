@@ -1,4 +1,5 @@
 using UnityEngine;
+using DigitPark.Localization;
 
 namespace DigitPark.Monetization
 {
@@ -121,7 +122,7 @@ namespace DigitPark.Monetization
                 case PriceType.DigitCoins:
                     return coinsPrice.ToString("N0");
                 case PriceType.Free:
-                    return "GRATIS";
+                    return AutoLocalizer.Get("free_label");
                 default:
                     return "";
             }

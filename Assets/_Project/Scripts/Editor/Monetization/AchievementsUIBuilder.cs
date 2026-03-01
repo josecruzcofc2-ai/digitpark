@@ -487,16 +487,16 @@ namespace DigitPark.Editor
             hlg.childForceExpandHeight = true;
 
             // Create all 12 category tabs (widths sized for 24pt bold + 32px padding)
-            CreateCategoryTab(tabsContent, "AllTab", "ALL", true, CYAN_NEON, 120);
-            CreateCategoryTab(tabsContent, "BeginnerTab", "BEGINNER", false, CAT_BEGINNER, 150);
-            CreateCategoryTab(tabsContent, "MasteryTab", "MASTERY", false, CAT_GAMES, 145);
-            CreateCategoryTab(tabsContent, "VictoriesTab", "VICTORIES", false, new Color(0.2f, 0.8f, 0.4f, 1f), 165);
-            CreateCategoryTab(tabsContent, "StreaksTab", "STREAKS", false, new Color(1f, 0.5f, 0.2f, 1f), 140);
+            CreateCategoryTab(tabsContent, "AllTab", "ALL", true, CYAN_NEON, 100);
+            CreateCategoryTab(tabsContent, "BeginnerTab", "BEGIN", false, CAT_BEGINNER, 120);
+            CreateCategoryTab(tabsContent, "MasteryTab", "MASTER", false, CAT_GAMES, 130);
+            CreateCategoryTab(tabsContent, "VictoriesTab", "WINS", false, new Color(0.2f, 0.8f, 0.4f, 1f), 110);
+            CreateCategoryTab(tabsContent, "StreaksTab", "STREAK", false, new Color(1f, 0.5f, 0.2f, 1f), 130);
             CreateCategoryTab(tabsContent, "CashBattleTab", "CASH", false, new Color(0.4f, 0.8f, 0.2f, 1f), 110);
-            CreateCategoryTab(tabsContent, "TournamentsTab", "TOURNAMENTS", false, CAT_COMPETITION, 185);
+            CreateCategoryTab(tabsContent, "TournamentsTab", "TOURN", false, CAT_COMPETITION, 120);
             CreateCategoryTab(tabsContent, "SocialTab", "SOCIAL", false, new Color(0.4f, 0.6f, 1f, 1f), 125);
-            CreateCategoryTab(tabsContent, "ProgressionTab", "PROGRESSION", false, new Color(0.8f, 0.6f, 1f, 1f), 185);
-            CreateCategoryTab(tabsContent, "CollectorTab", "COLLECTOR", false, new Color(0.9f, 0.7f, 0.3f, 1f), 170);
+            CreateCategoryTab(tabsContent, "ProgressionTab", "PROG", false, new Color(0.8f, 0.6f, 1f, 1f), 110);
+            CreateCategoryTab(tabsContent, "CollectorTab", "COLLECT", false, new Color(0.9f, 0.7f, 0.3f, 1f), 140);
             CreateCategoryTab(tabsContent, "TimeTab", "TIME", false, new Color(0.5f, 0.8f, 0.9f, 1f), 110);
             CreateCategoryTab(tabsContent, "SecretTab", "???", false, CAT_SECRET, 80);
 
@@ -1205,7 +1205,7 @@ namespace DigitPark.Editor
 
             GameObject cancelText = FindOrCreateChild(cancelBtn, "CancelButtonText");
             TextMeshProUGUI cancelTmp = GetOrAddComponent<TextMeshProUGUI>(cancelText);
-            cancelTmp.text = "CANCELAR";
+            cancelTmp.text = "CANCEL";
             cancelTmp.fontSize = FontSizes.Body;
             cancelTmp.fontStyle = FontStyles.Bold;
             cancelTmp.color = TEXT_SECONDARY;
@@ -1323,7 +1323,7 @@ namespace DigitPark.Editor
 
             GameObject continueText = FindOrCreateChild(continueBtn, "Text");
             TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
-            continueTmp.text = "CONTINUAR";
+            continueTmp.text = "CONTINUE";
             continueTmp.fontSize = FontSizes.BodyLarge;
             continueTmp.fontStyle = FontStyles.Bold;
             continueTmp.color = TEXT_DARK;

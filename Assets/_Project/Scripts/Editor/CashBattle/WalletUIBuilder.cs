@@ -328,7 +328,7 @@ namespace DigitPark.Editor
             titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.raycastTarget = false;
             titleTMP.enableAutoSizing = true;
-            titleTMP.fontSizeMin = FontSizes.Subtitle;
+            titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
             titleTMP.fontSizeMax = FontSizes.H4;
 
             // Gold outline effect

@@ -466,8 +466,8 @@ namespace DigitPark.Editor
             SetAnchors(dgRT, NormX(SIDE_PAD), DAYS_BOT, NormX(1080 - SIDE_PAD), DAYS_TOP);
 
             var grid = GetOrAdd<GridLayoutGroup>(daysGrid);
-            grid.cellSize = new Vector2(310, 200);
-            grid.spacing = new Vector2(15, 12);
+            grid.cellSize = new Vector2(300, 200);
+            grid.spacing = new Vector2(20, 12);
             grid.padding = new RectOffset(15, 15, 15, 15);
             grid.childAlignment = TextAnchor.MiddleCenter;
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;

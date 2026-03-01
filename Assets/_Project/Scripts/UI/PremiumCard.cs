@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -190,7 +191,7 @@ namespace DigitPark.UI
             }
 
             if (_discountText != null)
-                _discountText.text = $"{discount} OFF";
+                _discountText.text = $"{discount} {AutoLocalizer.Get("discount_off")}";
         }
 
         /// <summary>

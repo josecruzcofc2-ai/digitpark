@@ -277,7 +277,7 @@ namespace DigitPark.Editor
 
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "0.000s", Color.white, 240, timerIcon, 36);
+                "0.000s", Color.white, 280, timerIcon, 36);
 
             // Round
             CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",

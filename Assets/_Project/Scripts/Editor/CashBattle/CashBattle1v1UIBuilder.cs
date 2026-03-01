@@ -395,7 +395,7 @@ namespace DigitPark.Editor
             title.raycastTarget = false;
             title.fontStyle = FontStyles.Bold;
             title.enableAutoSizing = true;
-            title.fontSizeMin = FontSizes.Subtitle;
+            title.fontSizeMin = FontSizes.AutoMinTitle;
             title.fontSizeMax = FontSizes.H4;
         }
 

@@ -189,7 +189,7 @@ namespace DigitPark.UI.CashBattle
         {
             int players = (int)value;
             if (maxPlayersText != null)
-                maxPlayersText.text = $"{players} jugadores";
+                maxPlayersText.text = AutoLocalizer.Get("tournament_players_count", players);
         }
 
         private void OnEntryFeeChanged(float value)
@@ -595,12 +595,12 @@ namespace DigitPark.UI.CashBattle
                     : tournament.GameType?.ToString() ?? "Multiple";
             }
 
-            if (prizeText != null) prizeText.text = $"Premio: ${tournament.PrizePool}";
-            if (entryText != null) entryText.text = $"Entrada: ${tournament.EntryFee}";
+            if (prizeText != null) prizeText.text = AutoLocalizer.Get("cash_prize_amount", tournament.PrizePool);
+            if (entryText != null) entryText.text = AutoLocalizer.Get("cash_entry_amount", tournament.EntryFee);
 
             if (participantsText != null)
             {
-                participantsText.text = $"{tournament.CurrentParticipants}/{tournament.MaxParticipants} jugadores";
+                participantsText.text = AutoLocalizer.Get("tournament_players_count", $"{tournament.CurrentParticipants}/{tournament.MaxParticipants}");
             }
 
             // Join button

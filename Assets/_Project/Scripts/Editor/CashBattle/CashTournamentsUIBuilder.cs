@@ -407,7 +407,7 @@ namespace DigitPark.Editor
             rt.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
-            title.text = "Cash Tournaments";
+            title.text = "CASH TOURNAMENTS";
             title.fontSize = FontSizes.H4;
             title.color = TEXT_GOLD;
             title.alignment = TextAlignmentOptions.Center;

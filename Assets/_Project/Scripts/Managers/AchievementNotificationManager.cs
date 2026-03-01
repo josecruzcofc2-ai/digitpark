@@ -465,7 +465,7 @@ namespace DigitPark.Managers
             GameObject titleObj = new GameObject("AchievementTitle");
             titleObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI titleTMP = titleObj.AddComponent<TMPro.TextMeshProUGUI>();
-            titleTMP.text = "Titulo";
+            titleTMP.text = "Title";
             titleTMP.fontSize = FontSizes.Body;
             titleTMP.fontStyle = TMPro.FontStyles.Bold;
             titleTMP.color = new Color(1f, 0.84f, 0f, 1f);
@@ -477,7 +477,7 @@ namespace DigitPark.Managers
             GameObject descObj = new GameObject("AchievementDescription");
             descObj.transform.SetParent(infoObj.transform, false);
             TMPro.TextMeshProUGUI descTMP = descObj.AddComponent<TMPro.TextMeshProUGUI>();
-            descTMP.text = "Desc";
+            descTMP.text = "Description";
             descTMP.fontSize = FontSizes.Body;
             descTMP.color = new Color(0.7f, 0.75f, 0.8f, 1f);
             descTMP.enableWordWrapping = false;

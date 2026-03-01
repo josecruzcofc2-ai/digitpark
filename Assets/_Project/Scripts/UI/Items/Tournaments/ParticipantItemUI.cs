@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Items
 {
@@ -120,7 +121,7 @@ namespace DigitPark.UI.Items
 
             if (statusText)
             {
-                statusText.text = isReady ? "Listo" : "Esperando";
+                statusText.text = isReady ? AutoLocalizer.Get("tournament_ready") : AutoLocalizer.Get("tournament_waiting");
                 statusText.color = isReady ? readyColor : notReadyColor;
             }
         }

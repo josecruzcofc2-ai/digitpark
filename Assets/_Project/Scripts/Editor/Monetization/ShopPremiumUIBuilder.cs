@@ -323,7 +323,7 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(1, 0.5f);
             rt.pivot = new Vector2(1, 0.5f);
             rt.anchoredPosition = new Vector2(-20, 0);
-            rt.sizeDelta = new Vector2(300, 50);
+            rt.sizeDelta = new Vector2(380, 50);
 
             HorizontalLayoutGroup hlg = container.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 14;

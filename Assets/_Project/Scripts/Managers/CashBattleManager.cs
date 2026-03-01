@@ -260,7 +260,7 @@ namespace DigitPark.Managers
         private void UpdateLocalizedTexts()
         {
             if (titleText != null)
-                titleText.text = "Cash Battle";
+                titleText.text = AutoLocalizer.Get("cash_battle_title");
 
         }
 
@@ -405,11 +405,11 @@ namespace DigitPark.Managers
 
             titleText.text = currentState switch
             {
-                CashBattleState.Main => "Cash Battle",
+                CashBattleState.Main => AutoLocalizer.Get("cash_battle_title"),
                 CashBattleState.GameSelection => L("cashbattle_battles_1v1"),
                 CashBattleState.TournamentList => L("cashbattle_cash_tournaments"),
                 CashBattleState.Matchmaking => L("matchmaking_searching"),
-                _ => "Cash Battle"
+                _ => AutoLocalizer.Get("cash_battle_title")
             };
         }
 

@@ -181,7 +181,7 @@ namespace DigitPark.Managers
             // Stats
             var statsText = card.transform.Find("InfoSection/StatsText")?.GetComponent<TextMeshProUGUI>();
             if (statsText != null)
-                statsText.text = $"{friend.winRate:F0}% WR \u00B7 {friend.favoriteGame}";
+                statsText.text = $"{friend.winRate:F0}% {AutoLocalizer.Get("win_rate_abbr")} \u00B7 {friend.favoriteGame}";
 
             // Status
             var statusText = card.transform.Find("InfoSection/StatusText")?.GetComponent<TextMeshProUGUI>();

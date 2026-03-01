@@ -786,7 +786,7 @@ namespace DigitPark.Editor
             labelTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement labelLE = label.GetComponent<LayoutElement>();
             if (labelLE == null) labelLE = label.AddComponent<LayoutElement>();
-            labelLE.preferredWidth = 300;
+            labelLE.preferredWidth = 420;
 
             // Número de posición
             GameObject posNumber = CreateOrFind(posPanel.transform, "PositionNumber");

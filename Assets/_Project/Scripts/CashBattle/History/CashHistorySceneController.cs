@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using DigitPark.Monetization;
 using DG.Tweening;
 using DigitPark.Animations;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -482,7 +483,7 @@ namespace DigitPark.CashBattle
             {
                 if (entry.type == HistoryEntryType.Tournament)
                 {
-                    detailScoreText.text = $"Posición: #{entry.myPosition} / {entry.totalParticipants}";
+                    detailScoreText.text = AutoLocalizer.Get("cash_position", entry.myPosition, entry.totalParticipants);
                 }
                 else
                 {
@@ -491,10 +492,10 @@ namespace DigitPark.CashBattle
             }
 
             if (detailEntryFeeText)
-                detailEntryFeeText.text = $"Entry Fee: ${entry.entryFee:F2}";
+                detailEntryFeeText.text = AutoLocalizer.Get("cash_entry_fee", entry.entryFee);
 
             if (detailPrizeText)
-                detailPrizeText.text = $"Premio: ${entry.prize:F2}";
+                detailPrizeText.text = AutoLocalizer.Get("cash_prize_amount", entry.prize);
 
             if (detailNetText)
             {

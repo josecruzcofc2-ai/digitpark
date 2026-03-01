@@ -272,7 +272,7 @@ namespace DigitPark.Editor
             CreateTab(tabs.transform, "TabAll", "All", CYAN_NEON, true);
             CreateTab(tabs.transform, "TabSocial", "Social", SOCIAL_COLOR, false);
             CreateTab(tabs.transform, "TabGames", "Games", GAMES_COLOR, false);
-            CreateTab(tabs.transform, "TabRewards", "$", REWARDS_COLOR, false);
+            CreateTab(tabs.transform, "TabRewards", "Cash", REWARDS_COLOR, false);
 
             Debug.Log("[NotificationsUI] Tabs creados");
         }

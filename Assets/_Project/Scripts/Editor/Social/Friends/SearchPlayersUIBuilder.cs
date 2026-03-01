@@ -439,7 +439,7 @@ namespace DigitPark.Editor
             GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -40), new Vector2(760, 160));
+                new Vector2(0, -80), new Vector2(760, 160));
             SetupText(emptyDesc, "Find players to\nadd as friends or challenge", (int)FontSizes.BodyLarge, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
 
             // No Results Text (se mostrará cuando no haya resultados)

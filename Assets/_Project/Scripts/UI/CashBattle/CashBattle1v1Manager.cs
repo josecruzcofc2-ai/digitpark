@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Games;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.CashBattle
 {
@@ -403,7 +404,7 @@ namespace DigitPark.UI.CashBattle
                 int min = CognitiveSprintManager.MIN_GAMES;
                 int max = CognitiveSprintManager.MAX_GAMES;
 
-                sprintSelectionText.text = $"Juegos seleccionados: {count}/{max} (min: {min})";
+                sprintSelectionText.text = AutoLocalizer.Get("cash_games_selected", count, max, min);
                 sprintSelectionText.color = count >= min ? Color.green : Color.yellow;
             }
         }
@@ -543,7 +544,7 @@ namespace DigitPark.UI.CashBattle
             if (earningsText == null) return;
 
             decimal potentialWin = CalculatePotentialWinnings(selectedEntryFee);
-            earningsText.text = $"Ganas: ${potentialWin:F2}";
+            earningsText.text = AutoLocalizer.Get("cash_win_amount", potentialWin);
             earningsText.color = new Color(0.2f, 1f, 0.33f, 1f); // Green
         }
 
@@ -553,7 +554,7 @@ namespace DigitPark.UI.CashBattle
 
             decimal clamped = ClampEntryFee(previewAmount);
             decimal potentialWin = CalculatePotentialWinnings(clamped);
-            earningsText.text = $"Ganas: ${potentialWin:F2}";
+            earningsText.text = AutoLocalizer.Get("cash_win_amount", potentialWin);
         }
 
         private decimal CalculatePotentialWinnings(decimal entryFee)
@@ -598,7 +599,7 @@ namespace DigitPark.UI.CashBattle
 
             if (onlinePlayersText != null)
             {
-                onlinePlayersText.text = $"{count} JUGADORES EN LINEA";
+                onlinePlayersText.text = AutoLocalizer.Get("cash_players_online", count);
             }
 
             // Update indicator color based on player count

@@ -522,6 +522,7 @@ namespace DigitPark.Editor
             labelText.fontSize = FontSizes.Body;
             labelText.fontStyle = FontStyles.Bold;
             labelText.color = TextWhite;
+            labelText.enableWordWrapping = false;
             LayoutElement labelLayout = label.AddComponent<LayoutElement>();
             labelLayout.preferredWidth = 500;
             labelLayout.preferredHeight = 50;

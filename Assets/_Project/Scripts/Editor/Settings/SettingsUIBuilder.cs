@@ -318,7 +318,7 @@ namespace DigitPark.Editor
             Transform card = CreateCard(parent, "AppearanceCard", "APPEARANCE", CYAN_BORDER);
 
             CreateDropdownRow(card, "LanguageDropdown", "ChangeLanguageLabel", "Language",
-                new[] { "English", "Espanol", "Francais", "Portugues", "Deutsch" }, 1);
+                new[] { "English", "Español", "Français", "Português", "Deutsch" }, 1);
             CreateSeparator(card);
 
             // Load theme names dynamically from Resources/Themes

@@ -188,7 +188,7 @@ namespace DigitPark.Editor
             // Subtitle only (title moved to header)
             GameObject subtitle = CreateElement(titleSection, "SubtitleText");
             SetupRectTransform(subtitle,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 1),
+                new Vector2(0, 0), new Vector2(1, 1),
                 Vector2.zero, Vector2.zero);
             TextMeshProUGUI subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Choose how you want to play";

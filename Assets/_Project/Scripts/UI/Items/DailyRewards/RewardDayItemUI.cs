@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Items
 {
@@ -47,7 +48,7 @@ namespace DigitPark.UI.Items
                 dayNumberText.text = data.dayNumber.ToString();
 
             if (dayLabelText)
-                dayLabelText.text = $"Dia {data.dayNumber}";
+                dayLabelText.text = AutoLocalizer.Get("dr_day_label", data.dayNumber);
 
             // Reward
             if (rewardIcon && data.rewardIcon != null)
@@ -61,7 +62,7 @@ namespace DigitPark.UI.Items
             {
                 bonusTag.SetActive(data.isBonusDay);
                 if (bonusTagText && data.isBonusDay)
-                    bonusTagText.text = "BONUS";
+                    bonusTagText.text = AutoLocalizer.Get("dr_bonus");
             }
 
             // Visual state

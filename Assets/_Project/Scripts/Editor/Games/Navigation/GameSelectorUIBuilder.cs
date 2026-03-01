@@ -123,7 +123,7 @@ namespace DigitPark.Editor
             SetupRectTransform(title,
                 new Vector2(0.07f, 0f), new Vector2(0.53f, 1f),
                 Vector2.zero, Vector2.zero);
-            SetupTitleText(title, "Select a Game");
+            SetupTitleText(title, "SELECT A GAME");
 
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
