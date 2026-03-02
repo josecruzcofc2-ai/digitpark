@@ -9,8 +9,8 @@ using DigitPark.Managers;
 namespace DigitPark.Monetization
 {
     /// <summary>
-    /// Manager principal de la escena Shop V3.
-    /// Scroll continuo sin tabs - todas las secciones visibles.
+    /// Manager principal de la escena Shop V4.
+    /// Scroll continuo estilo Clash Royale — todas las secciones visibles.
     /// </summary>
     public class ShopManager : MonoBehaviour
     {
@@ -35,7 +35,6 @@ namespace DigitPark.Monetization
 
         [Header("Entrance Animation")]
         [SerializeField] private RectTransform _headerTransform;
-        [SerializeField] private RectTransform _tabsTransform;
         [SerializeField] private RectTransform _scrollViewTransform;
 
         [Header("Currency Display")]
@@ -47,10 +46,7 @@ namespace DigitPark.Monetization
         [Header("Shop Items")]
         [SerializeField] private List<ShopItemUI> _shopItems = new List<ShopItemUI>();
 
-        // Current item being purchased
         private ShopItemUI _currentPurchaseItem;
-
-        // ScrollRect reference for programmatic scrolling
         private ScrollRect _scrollRect;
 
         // Events
@@ -69,9 +65,9 @@ namespace DigitPark.Monetization
             SetupButtons();
             SetupPopups();
             SetupCurrencyListeners();
-            HandleNavigationParams();
             RefreshCurrencyDisplay();
             ForceLayoutRebuild();
+            HandleNavigationParams();
             AnimateEntrance();
         }
 
@@ -98,6 +94,8 @@ namespace DigitPark.Monetization
 
             Debug.Log($"[ShopManager] Found {_shopItems.Count} shop items");
         }
+
+        // ==================== SETUP ====================
 
         private void SetupPopups()
         {
@@ -190,7 +188,6 @@ namespace DigitPark.Monetization
 
         private void SetupButtons()
         {
-            // Disable auto-navigation from BackButton prefab to prevent double listener
             var autoNav = _backButton?.GetComponent<DigitPark.UI.BackButton>();
             if (autoNav != null) autoNav.DisableAutoNavigation();
             if (_backButton != null)
@@ -204,7 +201,6 @@ namespace DigitPark.Monetization
 
             if (navParams != null)
             {
-                // Scroll to section based on tab param
                 if (!string.IsNullOrEmpty(navParams.TargetTab))
                 {
                     if (Enum.TryParse<ShopTab>(navParams.TargetTab, out ShopTab targetTab))
@@ -228,8 +224,8 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Scroll programatico a una seccion por ShopTab.
-        /// Mapea tabs a posiciones aproximadas del scroll.
+        /// Scroll programatico a una seccion.
+        /// Continuous scroll — maps ShopTab to approximate positions.
         /// </summary>
         public void ScrollToSection(ShopTab tab)
         {
@@ -240,10 +236,8 @@ namespace DigitPark.Monetization
             switch (tab)
             {
                 case ShopTab.Featured: pos = 1f; break;
-                case ShopTab.DigitGems: pos = 0.7f; break;
-                case ShopTab.DigitCoins: pos = 0.55f; break;
-                case ShopTab.Themes: pos = 0.4f; break;
-                case ShopTab.Cosmetics: pos = 0.2f; break;
+                case ShopTab.Currency: pos = 0.65f; break;
+                case ShopTab.Styles: pos = 0.3f; break;
             }
 
             _scrollRect.verticalNormalizedPosition = pos;
@@ -378,7 +372,7 @@ namespace DigitPark.Monetization
         private void OnGetGemsClicked()
         {
             HideNotEnoughGemsPopup();
-            ScrollToSection(ShopTab.DigitGems);
+            ScrollToSection(ShopTab.Currency);
         }
 
         // ==================== PURCHASE METHODS ====================
@@ -401,7 +395,6 @@ namespace DigitPark.Monetization
 
             if (itemData.priceType == PriceType.RealMoney)
             {
-                // IAP is async - hide popup immediately, IAP native dialog takes over
                 HidePurchasePopup();
                 ProcessIAPPurchase(itemData);
             }
@@ -423,7 +416,6 @@ namespace DigitPark.Monetization
             string productId = itemData.iapProductId;
             Debug.Log($"[ShopManager] Processing IAP: {productId}");
 
-            // Gem packs → real IAP via PremiumManager
             if (PremiumManager.IsGemPackProduct(productId))
             {
                 PremiumManager.Instance.PurchaseGemPack(productId, (success) =>
@@ -442,7 +434,6 @@ namespace DigitPark.Monetization
             }
             else
             {
-                // Non-consumable premium products (themes, bundles, etc.)
                 PremiumManager.Instance.PurchaseByProductId(productId, (success) =>
                 {
                     if (success)
@@ -509,20 +500,6 @@ namespace DigitPark.Monetization
                 _headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack);
             }
 
-            // Tabs: fade + slide up
-            if (_tabsTransform != null)
-            {
-                var cg = _tabsTransform.GetComponent<CanvasGroup>();
-                if (cg == null) cg = _tabsTransform.gameObject.AddComponent<CanvasGroup>();
-                cg.alpha = 0f;
-                Vector2 pos = _tabsTransform.anchoredPosition;
-                _tabsTransform.anchoredPosition = new Vector2(pos.x, pos.y - 50);
-                DOTween.Sequence()
-                    .AppendInterval(0.15f)
-                    .Append(_tabsTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
-            }
-
             // ScrollView: fade in + staggered items
             if (_scrollViewTransform != null)
             {
@@ -530,34 +507,34 @@ namespace DigitPark.Monetization
                 if (cg == null) cg = _scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 DOTween.Sequence()
-                    .AppendInterval(0.25f)
+                    .AppendInterval(0.2f)
                     .Append(cg.DOFade(1f, 0.4f))
-                    .OnComplete(() => AnimateShopItemsEntrance());
+                    .OnComplete(() => AnimateScrollItemsEntrance());
             }
         }
 
-        private void AnimateShopItemsEntrance()
+        private void AnimateScrollItemsEntrance()
         {
-            if (_shopItems == null || _shopItems.Count == 0) return;
+            if (_scrollRect == null || _scrollRect.content == null) return;
 
             var seq = DOTween.Sequence();
-            for (int i = 0; i < _shopItems.Count; i++)
+            int i = 0;
+            foreach (Transform child in _scrollRect.content)
             {
-                if (_shopItems[i] == null) continue;
-                var item = _shopItems[i].transform;
-                var itemCG = item.GetComponent<CanvasGroup>();
-                if (itemCG == null) itemCG = item.gameObject.AddComponent<CanvasGroup>();
+                if (!child.gameObject.activeSelf) continue;
+                var itemCG = child.GetComponent<CanvasGroup>();
+                if (itemCG == null) itemCG = child.gameObject.AddComponent<CanvasGroup>();
                 itemCG.alpha = 0f;
-                item.localScale = Vector3.one * 0.85f;
-                float delay = i * 0.05f;
-                seq.Insert(delay, itemCG.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
-                seq.Insert(delay, item.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.04f;
+                seq.Insert(delay, itemCG.DOFade(1f, 0.25f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                i++;
             }
         }
 
         private void AnimatePanelIn(Transform panel)
         {
-            // Find the inner popup (first child with an Image)
             Transform popupInner = panel.childCount > 0 ? panel.GetChild(0) : panel;
 
             popupInner.localScale = Vector3.one * 0.85f;
@@ -610,17 +587,14 @@ namespace DigitPark.Monetization
         {
             if (item == null) return;
 
-            // Punch scale on the purchased item
             item.transform.DOPunchScale(Vector3.one * 0.2f, 0.4f, 5, 0.5f);
 
-            // Particle celebration
             var particleSpawner = DigitPark.Animations.ParticleEffectSpawner.Instance;
             if (particleSpawner != null)
             {
                 particleSpawner.SpawnCenterBurst();
             }
 
-            // Screen flash
             var uiAnimManager = DigitPark.Animations.UIAnimationManager.Instance;
             if (uiAnimManager != null)
             {
@@ -641,7 +615,6 @@ namespace DigitPark.Monetization
                 }
             }
 
-            // Also rebuild all nested layout groups
             foreach (var layout in GetComponentsInChildren<LayoutGroup>(true))
             {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());

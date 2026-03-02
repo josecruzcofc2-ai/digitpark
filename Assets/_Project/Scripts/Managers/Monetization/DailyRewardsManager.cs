@@ -46,10 +46,16 @@ namespace DigitPark.Managers
         [SerializeField] private Slider streakProgressBar;
         [SerializeField] private TextMeshProUGUI streakBonusText;
 
-        [Header("UI - Claim Animation")]
+        [Header("UI - Claim Animation (Clash Royale style)")]
         [SerializeField] private GameObject claimAnimationPanel;
-        [SerializeField] private TextMeshProUGUI claimRewardText;
+        [SerializeField] private Image darkOverlayImage;
+        [SerializeField] private Image giftBoxImage;
+        [SerializeField] private Image giftGlowImage;
+        [SerializeField] private Image lightBurstImage;
+        [SerializeField] private TextMeshProUGUI celebTitleText;
         [SerializeField] private Image claimRewardIcon;
+        [SerializeField] private TextMeshProUGUI claimRewardText;
+        [SerializeField] private TextMeshProUGUI streakInfoText;
         [SerializeField] private ParticleSystem claimParticles;
         [SerializeField] private Button continueButton;
 
@@ -63,6 +69,12 @@ namespace DigitPark.Managers
         [SerializeField] private Sprite gemIcon;
         [SerializeField] private Sprite xpIcon;
         [SerializeField] private Sprite mysteryIcon;
+
+        [Header("Gift Box Icons (per-day)")]
+        [SerializeField] private Sprite[] giftDayIcons = new Sprite[7]; // day1-7
+        [SerializeField] private Sprite giftOpenBasicIcon;   // opened: days 1-4
+        [SerializeField] private Sprite giftOpenPremiumIcon;  // opened: day 5
+        [SerializeField] private Sprite giftOpenEpicIcon;     // opened: day 6
 
         [Header("Configuration")]
         [SerializeField] private List<DailyRewardConfig> rewards = new List<DailyRewardConfig>();
@@ -97,6 +109,29 @@ namespace DigitPark.Managers
         // Neon icon sprites (loaded from Resources)
         private Sprite coinIconNeon;
         private Sprite gemIconNeon;
+
+        /// <summary>Returns the gift box sprite for a given day (1-7)</summary>
+        private Sprite GetGiftIconForDay(int day)
+        {
+            int index = Mathf.Clamp(day - 1, 0, 6);
+            return giftDayIcons != null && index < giftDayIcons.Length ? giftDayIcons[index] : null;
+        }
+
+        /// <summary>Returns the opened gift sprite for claim animation</summary>
+        private Sprite GetGiftOpenIcon(int day) => day switch
+        {
+            1 or 2 or 3 or 4 => giftOpenBasicIcon,
+            5 => giftOpenPremiumIcon,
+            6 => giftOpenEpicIcon,
+            7 => GetGiftIconForDay(7), // day7 chest is already open
+            _ => giftOpenBasicIcon
+        };
+
+        /// <summary>Returns the gift state sprite (claimed days use same icon with tint, locked use same icon greyed)</summary>
+        private Sprite GetGiftStateIcon(int day, bool claimed, bool locked)
+        {
+            return GetGiftIconForDay(day);
+        }
         private PulseAnimation _claimPulse;
         private RectTransform _coinPillTarget;
         private RectTransform _gemPillTarget;
@@ -1285,8 +1320,8 @@ namespace DigitPark.Managers
             // Coin/gem fly animation hacia el currency pill
             LaunchCoinFly(todayReward.type);
 
-            // Show claim animation
-            ShowClaimAnimation(todayReward);
+            // Show claim animation (pass original day index before increment)
+            ShowClaimAnimation(todayReward, claimedDayIndex);
 
             // Check for milestone
             CheckMilestone();
@@ -1366,26 +1401,180 @@ namespace DigitPark.Managers
             );
         }
 
-        private void ShowClaimAnimation(DailyRewardConfig reward)
+        /// <summary>
+        /// Clash Royale-style gift opening animation sequence:
+        /// 1. Dark overlay fades in
+        /// 2. Gift box bounces into center (closed)
+        /// 3. Gift glow pulses behind it
+        /// 4. Gift shakes with anticipation
+        /// 5. Light burst flash + sprite swap to opened gift
+        /// 6. Rewards float in from above
+        /// 7. Particles burst
+        /// 8. "TAP TO CONTINUE" fades in
+        /// </summary>
+        private void ShowClaimAnimation(DailyRewardConfig reward, int claimedDayIndex)
         {
-            if (claimAnimationPanel)
+            if (claimAnimationPanel == null) return;
+
+            // Set reward data
+            if (claimRewardText)
+                claimRewardText.text = $"+{reward.amount} {GetRewardTypeName(reward.type)}";
+            if (claimRewardIcon)
+                claimRewardIcon.sprite = GetRewardIcon(reward.type);
+            if (streakInfoText)
+                streakInfoText.text = L("dr_streak", currentStreak);
+            if (celebTitleText)
+                celebTitleText.text = L("dr_reward_obtained");
+
+            // Set closed gift icon for the claimed day (1-indexed for icon methods)
+            int claimedDay = claimedDayIndex + 1;
+            Sprite closedGift = GetGiftIconForDay(claimedDay);
+            Sprite openedGift = GetGiftOpenIcon(claimedDay);
+            if (giftBoxImage && closedGift) giftBoxImage.sprite = closedGift;
+
+            // Prepare initial states
+            claimAnimationPanel.SetActive(true);
+
+            // Dark overlay: start invisible
+            if (darkOverlayImage)
             {
-                if (claimRewardText)
-                {
-                    claimRewardText.text = $"+{reward.amount} {GetRewardTypeName(reward.type)}";
-                }
+                var doCG = darkOverlayImage.GetComponent<CanvasGroup>();
+                if (doCG == null) doCG = darkOverlayImage.gameObject.AddComponent<CanvasGroup>();
+                doCG.alpha = 0f;
+            }
 
-                if (claimRewardIcon)
-                {
-                    claimRewardIcon.sprite = GetRewardIcon(reward.type);
-                }
+            // Gift box: start invisible and small
+            if (giftBoxImage)
+            {
+                giftBoxImage.transform.localScale = Vector3.zero;
+                giftBoxImage.color = Color.white;
+            }
 
-                AnimatePanelIn(claimAnimationPanel);
+            // Gift glow: start invisible
+            if (giftGlowImage)
+            {
+                giftGlowImage.transform.localScale = Vector3.zero;
+                giftGlowImage.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0f);
+            }
 
-                if (claimParticles)
+            // Light burst: start invisible
+            if (lightBurstImage)
+                lightBurstImage.color = new Color(1f, 0.95f, 0.8f, 0f);
+
+            // Reward container: start invisible
+            Transform rewardContainer = claimAnimationPanel.transform.Find("RewardContainer");
+            CanvasGroup rcCG = null;
+            if (rewardContainer)
+            {
+                rcCG = rewardContainer.GetComponent<CanvasGroup>();
+                if (rcCG == null) rcCG = rewardContainer.gameObject.AddComponent<CanvasGroup>();
+                rcCG.alpha = 0f;
+                rewardContainer.localScale = Vector3.one * 0.5f;
+            }
+
+            // Continue button: start invisible
+            if (continueButton)
+            {
+                var cbCG = continueButton.GetComponent<CanvasGroup>();
+                if (cbCG == null) cbCG = continueButton.gameObject.AddComponent<CanvasGroup>();
+                cbCG.alpha = 0f;
+                continueButton.interactable = false;
+            }
+
+            // === BUILD THE SEQUENCE ===
+            var seq = DOTween.Sequence();
+
+            // Phase 1 (0.0s): Dark overlay fades in
+            if (darkOverlayImage)
+            {
+                var doCG = darkOverlayImage.GetComponent<CanvasGroup>();
+                seq.Insert(0f, doCG.DOFade(1f, 0.35f).SetEase(Ease.OutQuad));
+            }
+
+            // Phase 2 (0.2s): Gift box bounces in (0 → 1.25 → 1.0)
+            if (giftBoxImage)
+            {
+                seq.Insert(0.2f, giftBoxImage.transform.DOScale(1.25f, 0.45f).SetEase(Ease.OutBack));
+                seq.Insert(0.65f, giftBoxImage.transform.DOScale(1f, 0.15f).SetEase(Ease.InOutQuad));
+            }
+
+            // Phase 2b (0.3s): Gift glow fades in and starts pulsing
+            if (giftGlowImage)
+            {
+                seq.Insert(0.3f, giftGlowImage.transform.DOScale(1f, 0.4f).SetEase(Ease.OutQuad));
+                seq.Insert(0.3f, giftGlowImage.DOFade(0.25f, 0.4f));
+                // Continuous rotation for magical feel
+                seq.InsertCallback(0.7f, () =>
                 {
-                    claimParticles.Play();
-                }
+                    if (giftGlowImage)
+                        giftGlowImage.transform.DORotate(new Vector3(0, 0, 360), 8f, RotateMode.FastBeyond360)
+                            .SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear);
+                });
+            }
+
+            // Phase 3 (1.0s): Gift shakes with anticipation
+            if (giftBoxImage)
+            {
+                seq.Insert(1.0f, giftBoxImage.transform.DOShakeRotation(0.6f, new Vector3(0, 0, 18f), 14, 90f, true));
+                // Subtle scale pumps during shake
+                seq.Insert(1.0f, giftBoxImage.transform.DOPunchScale(new Vector3(0.08f, 0.08f, 0), 0.6f, 8, 0.5f));
+            }
+
+            // Phase 4 (1.7s): Light burst flash
+            if (lightBurstImage)
+            {
+                seq.Insert(1.7f, lightBurstImage.DOFade(0.85f, 0.12f).SetEase(Ease.OutQuad));
+                seq.Insert(1.82f, lightBurstImage.DOFade(0f, 0.4f).SetEase(Ease.InQuad));
+            }
+
+            // Phase 4b (1.75s): Gift sprite swap to OPENED + scale punch
+            if (giftBoxImage)
+            {
+                seq.InsertCallback(1.75f, () =>
+                {
+                    if (giftBoxImage && openedGift)
+                        giftBoxImage.sprite = openedGift;
+                });
+                seq.Insert(1.75f, giftBoxImage.transform.DOPunchScale(new Vector3(0.3f, 0.3f, 0), 0.4f, 6, 0.5f));
+            }
+
+            // Phase 5 (2.0s): Rewards container slides in from above
+            if (rewardContainer && rcCG)
+            {
+                seq.Insert(2.0f, rcCG.DOFade(1f, 0.35f).SetEase(Ease.OutQuad));
+                seq.Insert(2.0f, rewardContainer.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
+            }
+
+            // Phase 5b (2.1s): Particles burst
+            seq.InsertCallback(2.1f, () =>
+            {
+                if (claimParticles) claimParticles.Play();
+            });
+
+            // Phase 6 (2.5s): Gift glow intensifies
+            if (giftGlowImage)
+            {
+                seq.Insert(2.0f, giftGlowImage.DOFade(0.4f, 0.3f));
+                seq.Insert(2.0f, giftGlowImage.transform.DOScale(1.2f, 0.3f).SetEase(Ease.OutQuad));
+            }
+
+            // Phase 7 (2.8s): "TAP TO CONTINUE" fades in + enable interaction
+            if (continueButton)
+            {
+                var cbCG = continueButton.GetComponent<CanvasGroup>();
+                seq.Insert(2.8f, cbCG.DOFade(1f, 0.4f));
+                // Pulse the continue text
+                seq.InsertCallback(3.2f, () =>
+                {
+                    if (continueButton)
+                    {
+                        continueButton.interactable = true;
+                        // Gentle breathing pulse on continue text
+                        continueButton.transform.DOScale(1.05f, 0.8f)
+                            .SetLoops(-1, LoopType.Yoyo)
+                            .SetEase(Ease.InOutSine);
+                    }
+                });
             }
         }
 
@@ -1440,9 +1629,73 @@ namespace DigitPark.Managers
         private void OnContinueClicked()
         {
             if (claimAnimationPanel && claimAnimationPanel.activeSelf)
-                AnimatePanelOut(claimAnimationPanel);
+                DismissClaimAnimation();
             if (milestonePanel && milestonePanel.activeSelf)
                 AnimatePanelOut(milestonePanel);
+        }
+
+        /// <summary>
+        /// Clash Royale dismiss: gift shrinks, rewards fade, overlay dims out.
+        /// </summary>
+        private void DismissClaimAnimation()
+        {
+            if (claimAnimationPanel == null) return;
+
+            // Kill all ongoing tweens on claim animation children
+            DOTween.Kill(claimAnimationPanel.transform, true);
+            if (giftBoxImage) DOTween.Kill(giftBoxImage.transform);
+            if (giftGlowImage) DOTween.Kill(giftGlowImage.transform);
+            if (continueButton) DOTween.Kill(continueButton.transform);
+
+            var dismissSeq = DOTween.Sequence();
+
+            // Gift box shrinks and fades
+            if (giftBoxImage)
+            {
+                dismissSeq.Insert(0f, giftBoxImage.transform.DOScale(0.3f, 0.3f).SetEase(Ease.InBack));
+                dismissSeq.Insert(0f, giftBoxImage.DOFade(0f, 0.25f));
+            }
+
+            // Gift glow fades
+            if (giftGlowImage)
+            {
+                dismissSeq.Insert(0f, giftGlowImage.DOFade(0f, 0.25f));
+                dismissSeq.Insert(0f, giftGlowImage.transform.DOScale(0.5f, 0.3f));
+            }
+
+            // Reward container scales down and fades
+            Transform rewardContainer = claimAnimationPanel.transform.Find("RewardContainer");
+            if (rewardContainer)
+            {
+                var rcCG = rewardContainer.GetComponent<CanvasGroup>();
+                if (rcCG == null) rcCG = rewardContainer.gameObject.AddComponent<CanvasGroup>();
+                dismissSeq.Insert(0.05f, rcCG.DOFade(0f, 0.2f));
+                dismissSeq.Insert(0.05f, rewardContainer.DOScale(0.8f, 0.25f).SetEase(Ease.InQuad));
+            }
+
+            // Continue button fades
+            if (continueButton)
+            {
+                var cbCG = continueButton.GetComponent<CanvasGroup>();
+                if (cbCG) dismissSeq.Insert(0f, cbCG.DOFade(0f, 0.15f));
+                continueButton.interactable = false;
+            }
+
+            // Dark overlay fades out last
+            if (darkOverlayImage)
+            {
+                var doCG = darkOverlayImage.GetComponent<CanvasGroup>();
+                if (doCG) dismissSeq.Insert(0.15f, doCG.DOFade(0f, 0.25f));
+            }
+
+            // Stop particles
+            if (claimParticles) claimParticles.Stop();
+
+            // Hide panel when done
+            dismissSeq.OnComplete(() =>
+            {
+                claimAnimationPanel.SetActive(false);
+            });
         }
 
         private void OnEnable()

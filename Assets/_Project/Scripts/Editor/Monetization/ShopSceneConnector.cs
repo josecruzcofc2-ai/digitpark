@@ -9,7 +9,7 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// Editor script para conectar automaticamente las referencias
-    /// de la escena Shop con el ShopManager y otros componentes.
+    /// de la escena Shop V4 (scroll continuo) con el ShopManager y otros componentes.
     /// </summary>
     public class ShopSceneConnector : EditorWindow
     {
@@ -17,7 +17,7 @@ namespace DigitPark.Editor
         public static void ConnectReferences()
         {
             if (!EditorUtility.DisplayDialog("Shop Scene Connector",
-                "Esto conectara automaticamente las referencias de la escena Shop.\nAsegurate de tener la escena Shop abierta.\n\nContinuar?",
+                "Esto conectara automaticamente las referencias de la escena Shop V4.\nAsegurate de tener la escena Shop abierta.\n\nContinuar?",
                 "Si", "No"))
                 return;
 
@@ -27,12 +27,10 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Shop/Setup Shop Manager", false, 701)]
         public static void SetupShopManager()
         {
-            // Find or create ShopManager
             ShopManager manager = Object.FindObjectOfType<ShopManager>();
 
             if (manager == null)
             {
-                // Find Canvas
                 Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
                 if (canvas == null)
                 {
@@ -40,7 +38,6 @@ namespace DigitPark.Editor
                     return;
                 }
 
-                // Create ShopManager object
                 GameObject managerObj = new GameObject("ShopManager");
                 managerObj.transform.SetParent(canvas.transform);
                 manager = managerObj.AddComponent<ShopManager>();
@@ -57,23 +54,15 @@ namespace DigitPark.Editor
         {
             string folderPath = "Assets/_Project/Data/Monetization/ShopItems";
 
-            // Create folder if not exists
             if (!AssetDatabase.IsValidFolder(folderPath))
             {
                 System.IO.Directory.CreateDirectory(Application.dataPath + "/_Project/Data/Monetization/ShopItems");
                 AssetDatabase.Refresh();
             }
 
-            // Create gem pack items
             CreateGemPackAssets(folderPath);
-
-            // Create coin pack items
             CreateCoinPackAssets(folderPath);
-
-            // V2: Create theme items
             CreateThemeAssets(folderPath);
-
-            // V2: Create featured/bundle items
             CreateFeaturedAssets(folderPath);
 
             AssetDatabase.SaveAssets();
@@ -87,7 +76,6 @@ namespace DigitPark.Editor
 
         private static void CreateGemPackAssets(string folderPath)
         {
-            // Production gem tiers - aligned with App Store / Google Play products
             var gemPacks = new (string id, string name, int gems, float price, int bonus, bool popular, bool bestValue)[]
             {
                 ("gems_100", "100 DigitGems", 100, 0.99f, 0, false, false),
@@ -104,7 +92,6 @@ namespace DigitPark.Editor
             {
                 string assetPath = $"{folderPath}/{pack.id}.asset";
 
-                // Skip if already exists
                 if (AssetDatabase.LoadAssetAtPath<ShopItemData>(assetPath) != null)
                     continue;
 
@@ -113,7 +100,7 @@ namespace DigitPark.Editor
                 item.displayName = pack.name;
                 item.description = $"Get {pack.gems} DigitGems";
                 item.itemType = ShopItemType.DigitGemsPack;
-                item.shopTab = ShopTab.DigitGems;
+                item.shopTab = ShopTab.Currency;
                 item.priceType = PriceType.RealMoney;
                 item.realMoneyPrice = pack.price;
                 item.iapProductId = $"com.matrixsoftware.digitpark.{pack.id}";
@@ -121,10 +108,9 @@ namespace DigitPark.Editor
                 item.bonusPercent = pack.bonus;
                 item.isPopular = pack.popular;
                 item.isBestValue = pack.bestValue;
-                item.accentColor = new Color(0.4f, 0.8f, 1f, 1f); // Gem blue
+                item.accentColor = new Color(0.4f, 0.8f, 1f, 1f);
                 item.sortOrder = System.Array.IndexOf(gemPacks, pack);
 
-                // Auto-load icon sprite
                 string iconPath = $"{iconBasePath}/icon_digitgem_pack_{pack.gems}.png";
                 Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
                 if (iconSprite != null)
@@ -139,7 +125,6 @@ namespace DigitPark.Editor
 
         private static void CreateCoinPackAssets(string folderPath)
         {
-            // Production: 4 coin packs (purchased with DigitGems)
             var coinPacks = new (string id, string name, int coins, int gemsPrice, int bonus, bool popular, bool bestValue)[]
             {
                 ("coins_1000", "1,000 DigitCoins", 1000, 50, 0, false, false),
@@ -154,7 +139,6 @@ namespace DigitPark.Editor
             {
                 string assetPath = $"{folderPath}/{pack.id}.asset";
 
-                // Skip if already exists
                 if (AssetDatabase.LoadAssetAtPath<ShopItemData>(assetPath) != null)
                     continue;
 
@@ -163,17 +147,16 @@ namespace DigitPark.Editor
                 item.displayName = pack.name;
                 item.description = $"Get {pack.coins} DigitCoins";
                 item.itemType = ShopItemType.DigitCoinsPack;
-                item.shopTab = ShopTab.DigitCoins;
+                item.shopTab = ShopTab.Currency;
                 item.priceType = PriceType.DigitGems;
                 item.gemsPrice = pack.gemsPrice;
                 item.coinsAmount = pack.coins;
                 item.bonusPercent = pack.bonus;
                 item.isPopular = pack.popular;
                 item.isBestValue = pack.bestValue;
-                item.accentColor = new Color(1f, 0.85f, 0.3f, 1f); // Gold
+                item.accentColor = new Color(1f, 0.85f, 0.3f, 1f);
                 item.sortOrder = System.Array.IndexOf(coinPacks, pack);
 
-                // Auto-load icon sprite
                 string iconPath = $"{iconBasePath}/icon_digitcoin_pack_{pack.coins}.png";
                 Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
                 if (iconSprite != null)
@@ -211,7 +194,7 @@ namespace DigitPark.Editor
                 item.displayName = theme.name;
                 item.description = $"Visual theme: {theme.name}";
                 item.itemType = ShopItemType.Theme;
-                item.shopTab = ShopTab.Themes;
+                item.shopTab = ShopTab.Styles;
                 item.priceType = PriceType.RealMoney;
                 item.realMoneyPrice = theme.price;
                 item.iapProductId = $"com.matrixsoftware.digitpark.{theme.id}";
@@ -286,7 +269,7 @@ namespace DigitPark.Editor
                 weekly.originalPrice = 12.99f;
                 weekly.discountPercent = 60;
                 weekly.isLimitedTime = true;
-                weekly.offerDurationHours = 168f; // 7 days
+                weekly.offerDurationHours = 168f;
                 weekly.gemsAmount = 1200;
                 weekly.coinsAmount = 10000;
                 weekly.iapProductId = "com.matrixsoftware.digitpark.weekly_deal";
@@ -310,7 +293,6 @@ namespace DigitPark.Editor
 
             ConnectShopManagerReferences(manager);
 
-            // Mark scene dirty
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
@@ -327,7 +309,7 @@ namespace DigitPark.Editor
             Transform safeArea = canvas.transform.Find("SafeArea");
             if (safeArea == null) safeArea = canvas.transform;
 
-            // ========== SCROLL VIEW (V3) ==========
+            // ========== SCROLL VIEW ==========
             ConnectScrollView(serializedManager, safeArea);
 
             // ========== HEADER ==========
@@ -338,20 +320,21 @@ namespace DigitPark.Editor
 
             serializedManager.ApplyModifiedProperties();
 
-            Debug.Log("[ShopConnector] ShopManager references connected (V3)");
+            Debug.Log("[ShopConnector] ShopManager references connected (V4 continuous scroll)");
         }
 
         private static void ConnectScrollView(SerializedObject manager, Transform root)
         {
             Transform scrollView = FindDeep(root, "ShopScrollView");
-            if (scrollView != null)
-            {
-                var prop = manager.FindProperty("_shopScrollView");
-                if (prop != null)
-                    prop.objectReferenceValue = scrollView.gameObject;
-            }
+            if (scrollView == null) { Debug.LogWarning("[ShopConnector] ShopScrollView not found"); return; }
 
-            Debug.Log("[ShopConnector] ScrollView connected (V3)");
+            var svProp = manager.FindProperty("_shopScrollView");
+            if (svProp != null) svProp.objectReferenceValue = scrollView.gameObject;
+
+            var svtProp = manager.FindProperty("_scrollViewTransform");
+            if (svtProp != null) svtProp.objectReferenceValue = scrollView.GetComponent<RectTransform>();
+
+            Debug.Log("[ShopConnector] ScrollView connected (continuous scroll)");
         }
 
         private static void ConnectHeader(SerializedObject manager, Transform root)
@@ -409,7 +392,6 @@ namespace DigitPark.Editor
                 Transform popup = purchaseBlocker.Find("PurchasePopup");
                 if (popup != null)
                 {
-                    // Preview icon
                     Transform preview = popup.Find("Preview");
                     if (preview != null)
                     {
@@ -426,14 +408,12 @@ namespace DigitPark.Editor
                         }
                     }
 
-                    // Price text
                     TextMeshProUGUI price = popup.Find("Price")?.GetComponent<TextMeshProUGUI>();
                     if (price != null)
                     {
                         manager.FindProperty("_popupItemPrice").objectReferenceValue = price;
                     }
 
-                    // Buttons
                     Transform buttons = popup.Find("Buttons");
                     if (buttons != null)
                     {
@@ -506,27 +486,18 @@ namespace DigitPark.Editor
             }
 
             Transform safeArea = canvas.transform.Find("SafeArea") ?? canvas.transform;
-            Transform scrollView = FindDeep(safeArea, "ShopScrollView");
-            if (scrollView == null)
-            {
-                Debug.LogError("[ShopConnector] No ShopScrollView found");
-                return;
-            }
 
-            Transform content = FindDeep(scrollView, "Content");
-            if (content == null)
-            {
-                Debug.LogError("[ShopConnector] No Content found");
-                return;
-            }
-
-            // Find grids and add ShopItemUI (V3: all sections)
-            string[] gridNames = { "GemsGrid", "CoinsGrid", "ThemesGrid", "FramesGrid", "GemFramesGrid", "PremiumFramesGrid", "TitlesGrid" };
-
+            // V4: Find grids inside continuous scroll
             int added = 0;
+            string[] gridNames = { "GemsGrid", "CoinsGrid", "ThemesGrid", "FramesGrid", "TitlesGrid" };
+
+            // Search in ShopScrollView
+            Transform scrollView = FindDeep(safeArea, "ShopScrollView");
+            Transform searchRoot = scrollView != null ? scrollView : safeArea;
+
             foreach (string gridName in gridNames)
             {
-                Transform grid = content.Find(gridName);
+                Transform grid = FindDeep(searchRoot, gridName);
                 if (grid == null) continue;
 
                 foreach (Transform item in grid)

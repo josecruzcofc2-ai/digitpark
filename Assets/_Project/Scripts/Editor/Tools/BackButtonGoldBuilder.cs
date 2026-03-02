@@ -11,7 +11,7 @@ namespace DigitPark.Editor
     public static class BackButtonGoldBuilder
     {
         private const string PREFAB_PATH = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
-        private const string ICON_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
+        private const string ICON_PATH = "Assets/_Project/Art/Icons/Navigation/BackIcon.png";
 
         [MenuItem("DigitPark/UI/Prefabs/Create BackButtonGold Prefab", false, 101)]
         public static void CreateBackButtonGoldPrefab()

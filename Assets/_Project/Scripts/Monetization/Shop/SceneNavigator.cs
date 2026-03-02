@@ -230,7 +230,7 @@ namespace DigitPark.Monetization
         {
             NavigateTo(Scenes.SHOP, new NavigationParams
             {
-                TargetTab = ShopTab.DigitGems.ToString(),
+                TargetTab = ShopTab.Currency.ToString(),
                 ShowPopup = true
             });
         }
@@ -254,9 +254,7 @@ namespace DigitPark.Monetization
     public enum ShopTab
     {
         Featured,
-        DigitGems,
-        DigitCoins,
-        Themes,
-        Cosmetics
+        Currency,
+        Styles
     }
 }

@@ -82,7 +82,7 @@ namespace DigitPark.Editor
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
         private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIcon.png";
         private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIcon.png";
-        private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/icon_daily_claim.png";
+        private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/icon_gift_day5.png";
         private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/UI/AchievementsIcon.png";
         private const string ICON_SHOP = ICONS_BASE + "/UI/ShopIcon.png";
         private const string ICON_PREMIUM = ICONS_BASE + "/UI/PremiumIcon.png";

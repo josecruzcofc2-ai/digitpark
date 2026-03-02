@@ -48,7 +48,7 @@ namespace DigitPark.Monetization
 
         [Header("Type")]
         public ShopItemType itemType = ShopItemType.DigitGemsPack;
-        public ShopTab shopTab = ShopTab.DigitGems;
+        public ShopTab shopTab = ShopTab.Currency;
 
         [Header("Visuals")]
         public Sprite icon;
@@ -289,15 +289,14 @@ namespace DigitPark.Monetization
             switch (itemType)
             {
                 case ShopItemType.DigitGemsPack:
-                    shopTab = ShopTab.DigitGems;
-                    break;
                 case ShopItemType.DigitCoinsPack:
-                    shopTab = ShopTab.DigitCoins;
-                    priceType = PriceType.DigitGems;
+                    shopTab = ShopTab.Currency;
+                    if (itemType == ShopItemType.DigitCoinsPack)
+                        priceType = PriceType.DigitGems;
                     break;
                 case ShopItemType.Theme:
                 case ShopItemType.Avatar:
-                    shopTab = ShopTab.Themes;
+                    shopTab = ShopTab.Styles;
                     break;
                 case ShopItemType.SpecialOffer:
                 case ShopItemType.PremiumBundle:

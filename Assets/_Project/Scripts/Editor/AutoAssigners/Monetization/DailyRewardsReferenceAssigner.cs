@@ -34,10 +34,14 @@ namespace DigitPark.Editor.AutoAssigners
             "claimButton", "claimButtonText", "claimGlow",
             // Bonus Info
             "bonusInfoText", "streakProgressBar", "streakBonusText",
-            // Claim Animation
-            "claimAnimationPanel", "claimRewardText", "claimRewardIcon", "claimParticles", "continueButton",
+            // Claim Animation (Clash Royale style)
+            "claimAnimationPanel", "darkOverlayImage", "giftBoxImage", "giftGlowImage", "lightBurstImage",
+            "celebTitleText", "claimRewardIcon", "claimRewardText", "streakInfoText",
+            "claimParticles", "continueButton",
             // Milestone
-            "milestonePanel", "milestoneText", "milestoneBonusText"
+            "milestonePanel", "milestoneText", "milestoneBonusText",
+            // Gift Box Icons (assigned via UIBuilder sprite refs, not scene objects)
+            "giftDayIcons", "giftOpenBasicIcon", "giftOpenPremiumIcon", "giftOpenEpicIcon"
         };
 
         private struct ReferenceResult

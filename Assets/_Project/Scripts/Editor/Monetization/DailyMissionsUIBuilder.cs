@@ -1376,7 +1376,7 @@ namespace DigitPark.Editor
             var ceImg = GetOrAdd<Image>(celebIcon);
             ceImg.color = GOLD;
             ceImg.preserveAspect = true;
-            Sprite claimSprite = LoadIcon("Assets/_Project/Art/Icons/DailyRewards/icon_daily_claim.png");
+            Sprite claimSprite = LoadIcon("Assets/_Project/Art/Icons/DailyRewards/icon_gift_open_basic.png");
             if (claimSprite != null) ceImg.sprite = claimSprite;
             var ceLE = GetOrAdd<LayoutElement>(celebIcon);
             ceLE.preferredWidth = 60;

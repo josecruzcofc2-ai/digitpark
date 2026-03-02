@@ -422,7 +422,7 @@ namespace DigitPark.Editor
             emptyIconImg.color = CYAN_NEON; // Cyan brillante para que destaque
             emptyIconImg.preserveAspect = true;
             // Cargar icono de TabBar para empty state
-            Sprite tabBarSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/icon_profile.png");
+            Sprite tabBarSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/ProfileIcon.png");
             if (tabBarSprite != null)
             {
                 emptyIconImg.sprite = tabBarSprite;

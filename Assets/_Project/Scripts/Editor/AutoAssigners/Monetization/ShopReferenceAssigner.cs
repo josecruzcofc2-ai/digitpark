@@ -10,9 +10,9 @@ using DigitPark.Editor;
 namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
-    /// Reference Assigner for Shop scene V3.
+    /// Reference Assigner for Shop scene V4.
     /// Automatically finds and assigns UI references to ShopManager.
-    /// Scroll continuo sin tabs.
+    /// Continuous scroll layout — all sections in one view.
     ///
     /// Menu: DigitPark/Auto Assigners/References/Monetization/Shop References
     /// </summary>
@@ -26,7 +26,7 @@ namespace DigitPark.Editor.AutoAssigners
         private static List<ReferenceResult> results = new List<ReferenceResult>();
 
         private static readonly string[] REQUIRED_REFS = {
-            // Scroll View (V3 single scroll)
+            // Scroll View
             "_shopScrollView",
             // Popups
             "_purchasePopup", "_notEnoughGemsPopup",
@@ -37,7 +37,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Navigation
             "_backButton",
             // Entrance Animation
-            "_headerTransform", "_tabsTransform", "_scrollViewTransform",
+            "_headerTransform", "_scrollViewTransform",
             // Currency
             "_headerGemsText", "_headerCoinsText"
         };
@@ -71,7 +71,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private void OnGUI()
         {
-            GUILayout.Label("Shop Scene Reference Assigner V3", EditorStyles.boldLabel);
+            GUILayout.Label("Shop Scene Reference Assigner V4 (Continuous Scroll)", EditorStyles.boldLabel);
             GUILayout.Space(10);
 
             string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
@@ -84,11 +84,11 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to ShopManager V3:\n" +
-                "• ShopScrollView (scroll continuo)\n" +
+                "Assigns UI references to ShopManager V4:\n" +
+                "• ShopScrollView (continuous scroll)\n" +
                 "• Purchase and Not Enough DigitGems popups\n" +
                 "• Currency display texts\n" +
-                "• Back button",
+                "• Back button + entrance animation transforms",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -162,7 +162,7 @@ namespace DigitPark.Editor.AutoAssigners
         /// </summary>
         internal static void AssignAllReferences()
         {
-            Log("=== ASSIGNING SHOP V3 REFERENCES ===");
+            Log("=== ASSIGNING SHOP V4 REFERENCES (CONTINUOUS SCROLL) ===");
 
             var manager = FindShopManager();
             if (manager == null)
@@ -178,14 +178,14 @@ namespace DigitPark.Editor.AutoAssigners
             Canvas canvas = FindMainCanvas();
             Transform root = canvas != null ? canvas.transform : manager.transform.root;
 
-            // ScrollView (V3: single ShopScrollView)
-            AssignReference(so, "_shopScrollView", FindGameObjectByName("shopscrollview", "shopscroll", "mainscrollview"));
+            // ========== SCROLL VIEW ==========
+            Transform scrollViewT = FindDeep(root, "ShopScrollView");
+            AssignReference(so, "_shopScrollView", scrollViewT != null ? scrollViewT.gameObject : FindGameObjectByName("shopscrollview"));
 
-            // Popups - fields are GameObject
+            // ========== POPUPS ==========
             AssignReference(so, "_purchasePopup", FindGameObjectByName("purchasepopup", "purchaseblocker", "confirmpopup", "buypopup"));
             AssignReference(so, "_notEnoughGemsPopup", FindGameObjectByName("notenoughpopup", "notenoughblocker", "notenough", "needgems"));
 
-            // Popup UI - find within popup context
             Transform purchasePopupT = FindDeep(root, "PurchasePopup");
             if (purchasePopupT != null)
             {
@@ -214,18 +214,17 @@ namespace DigitPark.Editor.AutoAssigners
                 AssignReference(so, "_notEnoughGetGemsButton", FindButtonByName("getgemsbutton", "getgems", "obtener"));
             }
 
-            // Navigation
+            // ========== NAVIGATION ==========
             AssignReference(so, "_backButton", FindButtonByName("backbutton", "back", "return", "atras"));
 
-            // Entrance Animation (RectTransform references)
+            // ========== ENTRANCE ANIMATION ==========
             Transform headerT = FindDeep(root, "Header");
-            Transform tabsT = FindDeep(root, "TabsPanel");
-            Transform scrollViewT = FindDeep(root, "ShopScrollView");
             AssignReference(so, "_headerTransform", headerT != null ? (Object)headerT.GetComponent<RectTransform>() : null);
-            AssignReference(so, "_tabsTransform", tabsT != null ? (Object)tabsT.GetComponent<RectTransform>() : null);
+            // ScrollView transform for entrance animation
+            if (scrollViewT == null) scrollViewT = FindDeep(root, "ShopScrollView");
             AssignReference(so, "_scrollViewTransform", scrollViewT != null ? (Object)scrollViewT.GetComponent<RectTransform>() : null);
 
-            // Currency Display
+            // ========== CURRENCY DISPLAY ==========
             Transform gemsDisplayT = FindDeep(root, "GemsDisplay");
             Transform coinsDisplayT = FindDeep(root, "CoinsDisplay");
             TextMeshProUGUI gemsText = gemsDisplayT != null ? FindTextInParent(gemsDisplayT, "amount", "gemstext", "gemsvalue") : null;
@@ -291,6 +290,15 @@ namespace DigitPark.Editor.AutoAssigners
         {
             var all = Object.FindObjectsOfType<Transform>(true);
             foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t.gameObject;
+            return null;
+        }
+
+        private static GameObject FindGameObjectInChildren(Transform parent, string name)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name) return child.gameObject;
+            }
             return null;
         }
 

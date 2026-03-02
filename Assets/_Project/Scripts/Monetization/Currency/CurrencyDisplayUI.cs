@@ -216,7 +216,7 @@ namespace DigitPark.Monetization
             OnClicked?.Invoke();
 
             // Navigate to shop
-            ShopTab targetTab = _currencyType == CurrencyType.DigitGems ? ShopTab.DigitGems : ShopTab.DigitCoins;
+            ShopTab targetTab = ShopTab.Currency;
             SceneNavigator.Instance.NavigateToShop(targetTab);
 
             Debug.Log($"[CurrencyDisplayUI] Clicked, navigating to Shop ({targetTab})");
