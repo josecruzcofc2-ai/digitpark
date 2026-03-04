@@ -435,6 +435,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI rewardTMP = rewardGO.AddComponent<TextMeshProUGUI>();
             rewardTMP.text = rewardText;
             rewardTMP.fontSize = FontSizes.Body;
+            rewardTMP.fontStyle = FontStyles.Bold;
             rewardTMP.color = TEXT_SECONDARY;
             rewardTMP.alignment = TextAlignmentOptions.MidlineRight;
             rewardTMP.raycastTarget = false;

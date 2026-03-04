@@ -226,10 +226,10 @@ namespace DigitPark.Editor
             AddGlow(title, ORANGE_NEON, 3);
 
             // === SUBTÍTULO motivacional ===
-            GameObject subtitle = CreateChild(face.transform, "Subtitle");
+            GameObject subtitle = CreateChild(face.transform, "LoseSubtitleText");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -210), new Vector2(0, 35));
-            AddText(subtitle, "Try again!", 22, new Color(0.8f, 0.65f, 0.5f), FontStyles.Italic);
+            AddText(subtitle, "Try again!", 22, new Color(0.8f, 0.65f, 0.5f), FontStyles.Bold);
 
             // === STATS CONTAINER ===
             GameObject statsContainer = CreateChild(face.transform, "StatsContainer");
@@ -251,7 +251,7 @@ namespace DigitPark.Editor
 
             GameObject bestTimeText = CreateChild(bestTimeContainer.transform, "BestTimeText");
             SetupRectTransform(bestTimeText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            AddText(bestTimeText, "Best: --.-s", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Normal);
+            AddText(bestTimeText, "Best: --.-s", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Bold);
 
             // === BOTONES ===
             GameObject buttonsContainer = CreateChild(face.transform, "ButtonsContainer");
@@ -365,7 +365,7 @@ namespace DigitPark.Editor
             GameObject wagerText = CreateChild(face.transform, "WagerText");
             SetupRectTransform(wagerText, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -345), new Vector2(350, 40));
-            AddText(wagerText, "Bet: $5.00", 24, new Color(0.8f, 0.7f, 0.5f), FontStyles.Normal);
+            AddText(wagerText, "Bet: $5.00", 24, new Color(0.8f, 0.7f, 0.5f), FontStyles.Bold);
 
             // === VS COMPARISON - MÁS GRANDE ===
             GameObject vsContainer = CreateChild(face.transform, "VSContainer");
@@ -410,7 +410,7 @@ namespace DigitPark.Editor
             GameObject oppValue = CreateChild(opponentScore.transform, "Value");
             SetupRectTransform(oppValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -5), new Vector2(180, 50));
-            AddText(oppValue, "15.32s", 36, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
+            AddText(oppValue, "15.32s", 36, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
 
             // === STATS (Tiempo y Errores) - MÁS ESPACIO ===
             GameObject statsContainer = CreateChild(face.transform, "StatsContainer");
@@ -500,10 +500,10 @@ namespace DigitPark.Editor
             AddGlow(title, LOSE_NEON, 4);
 
             // === SUBTÍTULO motivacional ===
-            GameObject subtitle = CreateChild(face.transform, "Subtitle");
+            GameObject subtitle = CreateChild(face.transform, "LoseRealMoneySubtitleText");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -225), new Vector2(0, 40));
-            AddText(subtitle, "Next time will be yours", 24, new Color(0.7f, 0.5f, 0.6f), FontStyles.Italic);
+            AddText(subtitle, "Next time will be yours", 24, new Color(0.7f, 0.5f, 0.6f), FontStyles.Bold);
 
             // === DINERO PERDIDO (destacado pero no agresivo) ===
             GameObject moneyContainer = CreateChild(face.transform, "MoneyContainer");
@@ -543,7 +543,7 @@ namespace DigitPark.Editor
             GameObject playerValue = CreateChild(playerScore.transform, "Value");
             SetupRectTransform(playerValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -5), new Vector2(180, 50));
-            AddText(playerValue, "15.32s", 36, new Color(0.8f, 0.6f, 0.7f), FontStyles.Normal);
+            AddText(playerValue, "15.32s", 36, new Color(0.8f, 0.6f, 0.7f), FontStyles.Bold);
 
             // VS text con glow
             GameObject vsText = CreateChild(vsContainer.transform, "VSText");
@@ -717,7 +717,7 @@ namespace DigitPark.Editor
             GameObject labelObj = CreateChild(row.transform, "Label");
             SetupRectTransform(labelObj, new Vector2(0, 0), new Vector2(0.5f, 1),
                 Vector2.zero, Vector2.zero);
-            TextMeshProUGUI labelTmp = AddText(labelObj, label, 22, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal);
+            TextMeshProUGUI labelTmp = AddText(labelObj, label, 22, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold);
             labelTmp.alignment = TextAlignmentOptions.Left;
 
             // Value

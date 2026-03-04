@@ -434,7 +434,7 @@ namespace DigitPark.UI.Panels
             badgeRT.offsetMax = Vector2.zero;
 
             // Badge
-            CreateBadge(badgeArea.transform, isFree, isPaid, isEarnable);
+            CreateBadge(badgeArea.transform, isFree, isPaid, isEarnable, isUnlocked);
 
             // Lock icon overlay (on swatch area, centered)
             if (!isUnlocked && !isFree)
@@ -486,7 +486,7 @@ namespace DigitPark.UI.Panels
             }
         }
 
-        private void CreateBadge(Transform parent, bool isFree, bool isPaid, bool isEarnable)
+        private void CreateBadge(Transform parent, bool isFree, bool isPaid, bool isEarnable, bool isUnlocked)
         {
             GameObject badge = new GameObject("Badge");
             badge.transform.SetParent(parent, false);
@@ -507,6 +507,13 @@ namespace DigitPark.UI.Panels
                 textColor = Color.white;
                 text = AutoLocalizer.Get("badge_free");
                 badgeRT.sizeDelta = new Vector2(70, 26);
+            }
+            else if (isUnlocked)
+            {
+                bgColor = GREEN_FREE;
+                textColor = Color.white;
+                text = AutoLocalizer.Get("acquired_text");
+                badgeRT.sizeDelta = new Vector2(110, 26);
             }
             else if (isEarnable)
             {

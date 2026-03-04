@@ -557,6 +557,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
             vsTmp.fontSize = FontSizes.Subtitle;
+            vsTmp.fontStyle = FontStyles.Bold;
             vsTmp.color = new Color(1, 1, 1, 0); // Invisible
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.raycastTarget = false;
@@ -627,6 +628,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI statusTmp = statusText.AddComponent<TextMeshProUGUI>();
             statusTmp.text = "Searching for opponent...";
             statusTmp.fontSize = FontSizes.H4;
+            statusTmp.fontStyle = FontStyles.Bold;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
 

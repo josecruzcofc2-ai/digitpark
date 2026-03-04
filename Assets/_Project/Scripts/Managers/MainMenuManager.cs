@@ -9,6 +9,7 @@ using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.UI.Common;
 using DigitPark.UI.Panels;
+using DigitPark.Localization;
 using DigitPark.Monetization;
 
 namespace DigitPark.Managers
@@ -201,7 +202,7 @@ namespace DigitPark.Managers
         private void UpdateUI()
         {
             // Mostrar nombre de usuario
-            string displayUsername = string.IsNullOrEmpty(currentPlayer.username) ? "Sin Usuario" : currentPlayer.username;
+            string displayUsername = string.IsNullOrEmpty(currentPlayer.username) ? AutoLocalizer.Get("no_username") : currentPlayer.username;
 
             if (userText != null)
                 userText.text = displayUsername;

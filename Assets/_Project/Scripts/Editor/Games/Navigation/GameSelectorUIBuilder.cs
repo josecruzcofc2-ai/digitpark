@@ -325,7 +325,7 @@ namespace DigitPark.Editor
             titleTmp.alignment = TextAlignmentOptions.Center;
 
             // Subtítulo
-            GameObject subtitle = CreateOrFind(innerPanel.transform, "Subtitle");
+            GameObject subtitle = CreateOrFind(innerPanel.transform, "CognitiveSprintDescText");
             SetupRectTransform(subtitle,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -120), new Vector2(-40, 40));
@@ -334,6 +334,7 @@ namespace DigitPark.Editor
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Select 3-5 games for the sprint";
             subtitleTmp.fontSize = FontSizes.Body;
+            subtitleTmp.fontStyle = FontStyles.Bold;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
@@ -371,6 +372,7 @@ namespace DigitPark.Editor
             if (selectedTmp == null) selectedTmp = selectedText.AddComponent<TextMeshProUGUI>();
             selectedTmp.text = "0/5 games selected";
             selectedTmp.fontSize = FontSizes.Body;
+            selectedTmp.fontStyle = FontStyles.Bold;
             selectedTmp.color = Color.white;
             selectedTmp.alignment = TextAlignmentOptions.Center;
 
@@ -443,7 +445,7 @@ namespace DigitPark.Editor
             titleTmp.alignment = TextAlignmentOptions.Center;
 
             // ========== SUBTÍTULO "Reglas del juego" ==========
-            GameObject subtitle = CreateOrFind(innerPanel.transform, "Subtitle");
+            GameObject subtitle = CreateOrFind(innerPanel.transform, "RulesDescText");
             SetupRectTransform(subtitle,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -100), new Vector2(-40, 40));
@@ -452,6 +454,7 @@ namespace DigitPark.Editor
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Game Rules";
             subtitleTmp.fontSize = FontSizes.Body;
+            subtitleTmp.fontStyle = FontStyles.Bold;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
 
@@ -522,6 +525,7 @@ namespace DigitPark.Editor
             if (labelTmp == null) labelTmp = toggleLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "Don't show these rules again";
             labelTmp.fontSize = FontSizes.Body;
+            labelTmp.fontStyle = FontStyles.Bold;
             labelTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -640,6 +644,7 @@ namespace DigitPark.Editor
             if (labelTmp == null) labelTmp = label.AddComponent<TextMeshProUGUI>();
             labelTmp.text = labelText;
             labelTmp.fontSize = FontSizes.Body;
+            labelTmp.fontStyle = FontStyles.Bold;
             labelTmp.color = Color.white;
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -738,6 +743,7 @@ namespace DigitPark.Editor
             if (tmp == null) tmp = arrowText.AddComponent<TextMeshProUGUI>();
             tmp.text = "<";
             tmp.fontSize = FontSizes.H4;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.color = CYAN_NEON;
             tmp.alignment = TextAlignmentOptions.Center;
         }

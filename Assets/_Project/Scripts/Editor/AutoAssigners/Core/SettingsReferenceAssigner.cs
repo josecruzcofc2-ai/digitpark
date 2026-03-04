@@ -34,6 +34,8 @@ namespace DigitPark.Editor.AutoAssigners
             // Buttons
             "changeNameButton", "changeNameCostText", "copyIDButton", "playerIdText",
             "logoutButton", "deleteAccountButton", "backButton",
+            // Vibration Toggle
+            "vibrationToggle", "vibrationToggleText", "vibrationToggleBg",
             // Shop
             "shopButton",
             // Premium Section
@@ -209,6 +211,11 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "deleteAccountButton", FindButtonByName("delete", "eliminar", "borrar"));
             AssignReference(so, "backButton", FindButtonByName("back", "return", "atras"));
 
+            // Vibration Toggle - use exact names to avoid wiring to VibrationToggleLabel instead of VibrationToggleText
+            AssignReference(so, "vibrationToggle", FindByExactName<Toggle>("VibrationToggle"));
+            AssignReference(so, "vibrationToggleText", FindTextByExactName("VibrationToggleText"));
+            AssignReference(so, "vibrationToggleBg", FindImageOnGameObject("VibrationToggle"));
+
             // Shop
             AssignReference(so, "shopButton", FindButtonByName("shop", "tienda", "store"));
 
@@ -273,10 +280,31 @@ namespace DigitPark.Editor.AutoAssigners
             return null;
         }
 
+        private static T FindByExactName<T>(string exactName) where T : Component
+        {
+            var all = Object.FindObjectsOfType<T>(true);
+            foreach (var o in all) if (o.gameObject.name == exactName) return o;
+            return null;
+        }
+
         private static TextMeshProUGUI FindTextByName(params string[] patterns)
         {
             var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
             foreach (var p in patterns) foreach (var t in all) if (t.gameObject.name.ToLower().Contains(p.ToLower())) return t;
+            return null;
+        }
+
+        private static TextMeshProUGUI FindTextByExactName(string exactName)
+        {
+            var all = Object.FindObjectsOfType<TextMeshProUGUI>(true);
+            foreach (var t in all) if (t.gameObject.name == exactName) return t;
+            return null;
+        }
+
+        private static Image FindImageOnGameObject(string exactName)
+        {
+            var all = Object.FindObjectsOfType<Image>(true);
+            foreach (var img in all) if (img.gameObject.name == exactName) return img;
             return null;
         }
 

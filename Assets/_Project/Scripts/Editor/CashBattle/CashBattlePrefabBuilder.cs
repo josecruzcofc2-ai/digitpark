@@ -177,6 +177,7 @@ namespace DigitPark.Editor
             feeText.fontSize = FontSizes.Body;
             feeText.color = TEXT_SECONDARY;
             feeText.alignment = TextAlignmentOptions.Left;
+            feeText.fontStyle = FontStyles.Bold;
 
 
             // === Date ===
@@ -195,6 +196,7 @@ namespace DigitPark.Editor
             dateText.fontSize = FontSizes.Body;
             dateText.color = TEXT_SECONDARY;
             dateText.alignment = TextAlignmentOptions.Right;
+            dateText.fontStyle = FontStyles.Bold;
 
 
             // === Result Badge ===
@@ -464,6 +466,7 @@ namespace DigitPark.Editor
             pltTMP.fontSize = FontSizes.Subtitle;
             pltTMP.color = TEXT_SECONDARY;
             pltTMP.alignment = TextAlignmentOptions.Left;
+            pltTMP.fontStyle = FontStyles.Bold;
 
 
             // Timer
@@ -503,6 +506,7 @@ namespace DigitPark.Editor
             ttTMP.fontSize = FontSizes.Subtitle;
             ttTMP.color = CYAN;
             ttTMP.alignment = TextAlignmentOptions.Left;
+            ttTMP.fontStyle = FontStyles.Bold;
 
 
             // === Entry Fee (derecha superior) ===
@@ -520,7 +524,7 @@ namespace DigitPark.Editor
             Image ebBg = entryBadge.AddComponent<Image>();
             ebBg.color = new Color(0, 0, 0, 0.4f);
 
-            GameObject entryLabel = new GameObject("Label");
+            GameObject entryLabel = new GameObject("EntryLabel");
             entryLabel.transform.SetParent(entryBadge.transform, false);
             RectTransform elRT = entryLabel.AddComponent<RectTransform>();
             elRT.anchorMin = new Vector2(0, 0.5f);
@@ -531,6 +535,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI elTMP = entryLabel.AddComponent<TextMeshProUGUI>();
             elTMP.text = "Entry";
             elTMP.fontSize = FontSizes.Body;
+            elTMP.fontStyle = FontStyles.Bold;
             elTMP.color = TEXT_SECONDARY;
             elTMP.alignment = TextAlignmentOptions.Center;
 

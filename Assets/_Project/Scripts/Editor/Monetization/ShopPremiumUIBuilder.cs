@@ -542,6 +542,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI contentsText = contents.AddComponent<TextMeshProUGUI>();
             contentsText.text = "500 DigitGems + Exclusive Theme + Avatar";
             contentsText.fontSize = FontSizes.Body;
+            contentsText.fontStyle = FontStyles.Bold;
             contentsText.fontSizeMin = FontSizes.AutoMinBody;
             contentsText.enableAutoSizing = true;
             contentsText.enableWordWrapping = true;
@@ -554,6 +555,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI timerText = timer.AddComponent<TextMeshProUGUI>();
             timerText.text = "Expires in: 23:45:12";
             timerText.fontSize = FontSizes.Body;
+            timerText.fontStyle = FontStyles.Bold;
             timerText.fontSizeMin = FontSizes.AutoMinBody;
             timerText.enableAutoSizing = true;
             timerText.enableWordWrapping = true;
@@ -579,6 +581,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI origText = origPrice.AddComponent<TextMeshProUGUI>();
             origText.text = "<s>$9.99</s>";
             origText.fontSize = FontSizes.Body;
+            origText.fontStyle = FontStyles.Bold;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
             LayoutElement origLE = origPrice.AddComponent<LayoutElement>();
@@ -677,6 +680,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI contentsText = contentsObj.AddComponent<TextMeshProUGUI>();
             contentsText.text = contents;
             contentsText.fontSize = FontSizes.BodySmall;
+            contentsText.fontStyle = FontStyles.Bold;
             contentsText.color = TEXT_SECONDARY;
             contentsText.enableAutoSizing = true;
             contentsText.fontSizeMin = FontSizes.AutoMinSmall;
@@ -704,6 +708,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI origText = origObj.AddComponent<TextMeshProUGUI>();
             origText.text = origPrice;
             origText.fontSize = FontSizes.Caption;
+            origText.fontStyle = FontStyles.Bold;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
             LayoutElement origLE = origObj.AddComponent<LayoutElement>();
@@ -764,6 +769,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI timerText = timerObj.AddComponent<TextMeshProUGUI>();
             timerText.text = "12:34:56";
             timerText.fontSize = FontSizes.BodySmall;
+            timerText.fontStyle = FontStyles.Bold;
             timerText.color = TEXT_SECONDARY;
             timerText.alignment = TextAlignmentOptions.MidlineRight;
 
@@ -909,6 +915,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.text = "50 levels of exclusive rewards";
             descText.fontSize = FontSizes.Body;
+            descText.fontStyle = FontStyles.Bold;
             descText.fontSizeMin = FontSizes.AutoMinBody;
             descText.enableAutoSizing = true;
             descText.enableWordWrapping = true;
@@ -1197,6 +1204,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
             descText.text = "9 premium visual themes";
             descText.fontSize = FontSizes.Body;
+            descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             LayoutElement descLE = desc.AddComponent<LayoutElement>();
             descLE.minHeight = 26;
@@ -1373,6 +1381,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
                 statusText.text = "IN USE";
                 statusText.fontSize = FontSizes.Body;
+                statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.Center;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
@@ -1515,6 +1524,7 @@ namespace DigitPark.Editor
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
                 statusText.text = "IN USE";
                 statusText.fontSize = FontSizes.Body;
+                statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.Center;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
@@ -1778,6 +1788,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI priceText = priceObj.AddComponent<TextMeshProUGUI>();
             priceText.text = "Price: $9.99";
             priceText.fontSize = FontSizes.Body;
+            priceText.fontStyle = FontStyles.Bold;
             priceText.color = TEXT_SECONDARY;
             priceText.alignment = TextAlignmentOptions.Center;
             LayoutElement priceLE = priceObj.AddComponent<LayoutElement>();
@@ -1855,6 +1866,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI msgText = msg.AddComponent<TextMeshProUGUI>();
             msgText.text = "You don't have enough DigitGems.\nGet more in the shop!";
             msgText.fontSize = FontSizes.Body;
+            msgText.fontStyle = FontStyles.Bold;
             msgText.color = TEXT_SECONDARY;
             msgText.alignment = TextAlignmentOptions.Center;
             LayoutElement msgLE = msg.AddComponent<LayoutElement>();

@@ -325,6 +325,7 @@ namespace DigitPark.Editor
             subtitleTMP.fontSize = FontSizes.BodyLarge;
             subtitleTMP.color = TEXT_SECONDARY;
             subtitleTMP.alignment = TextAlignmentOptions.Center;
+            subtitleTMP.fontStyle = FontStyles.Bold;
         }
 
         #endregion
@@ -407,6 +408,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTMP = labelObj.AddComponent<TextMeshProUGUI>();
             labelTMP.text = label;
             labelTMP.fontSize = FontSizes.Body;
+            labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.alignment = TextAlignmentOptions.Center;
             labelTMP.enableAutoSizing = true;
@@ -441,6 +443,7 @@ namespace DigitPark.Editor
             posLabelTMP.fontSize = FontSizes.BodyLarge;
             posLabelTMP.color = TEXT_GOLD;
             posLabelTMP.alignment = TextAlignmentOptions.Center;
+            posLabelTMP.fontStyle = FontStyles.Bold;
 
             // Attempts Text
             GameObject attemptsObj = CreateElement(posSection.transform, "AttemptsText",
@@ -450,6 +453,7 @@ namespace DigitPark.Editor
             attemptsTMP.fontSize = FontSizes.Body;
             attemptsTMP.color = TEXT_SECONDARY;
             attemptsTMP.alignment = TextAlignmentOptions.Center;
+            attemptsTMP.fontStyle = FontStyles.Bold;
 
             // Best Time Text
             GameObject bestTimeObj = CreateElement(posSection.transform, "BestTimeText",
@@ -459,6 +463,7 @@ namespace DigitPark.Editor
             bestTimeTMP.fontSize = FontSizes.Body;
             bestTimeTMP.color = TEXT_SECONDARY;
             bestTimeTMP.alignment = TextAlignmentOptions.Center;
+            bestTimeTMP.fontStyle = FontStyles.Bold;
         }
 
         #endregion

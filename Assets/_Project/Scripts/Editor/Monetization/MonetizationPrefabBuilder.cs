@@ -152,7 +152,7 @@ namespace DigitPark.Editor
 
             // Progress Text
             CreateTextElement(content.transform, "ProgressText", "50/100",
-                new Vector2(0.72f, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0.72f, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Reward Section (derecha)
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",

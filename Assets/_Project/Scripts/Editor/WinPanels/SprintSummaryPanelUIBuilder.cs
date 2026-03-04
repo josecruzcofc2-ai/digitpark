@@ -129,10 +129,10 @@ namespace DigitPark.Editor
             AddGlow(title, BLUE_NEON, 3);
 
             // Subtitle
-            GameObject subtitle = CreateChild(parent, "Subtitle");
+            GameObject subtitle = CreateChild(parent, "SprintSummarySubtitle");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -165), new Vector2(0, 35));
-            AddText(subtitle, "Sprint Summary", 22, new Color(0.6f, 0.7f, 0.9f), FontStyles.Italic);
+            AddText(subtitle, "Sprint Summary", 22, new Color(0.6f, 0.7f, 0.9f), FontStyles.Bold);
         }
 
         private static void CreateGamesTable(Transform parent)
@@ -294,7 +294,7 @@ namespace DigitPark.Editor
             labelRt.anchorMax = new Vector2(1, 1);
             labelRt.offsetMin = Vector2.zero;
             labelRt.offsetMax = Vector2.zero;
-            AddText(label, labelText, 14, new Color(0.5f, 0.6f, 0.8f), FontStyles.Normal);
+            AddText(label, labelText, 14, new Color(0.5f, 0.6f, 0.8f), FontStyles.Bold);
 
             // Value
             GameObject value = CreateChild(container.transform, valueName);
@@ -336,7 +336,7 @@ namespace DigitPark.Editor
             gwRt.anchorMax = new Vector2(0.7f, 0.5f);
             gwRt.offsetMin = Vector2.zero;
             gwRt.offsetMax = Vector2.zero;
-            AddText(gamesWon, "Games: 2 - 1", 16, new Color(0.6f, 0.7f, 0.8f), FontStyles.Normal);
+            AddText(gamesWon, "Games: 2 - 1", 16, new Color(0.6f, 0.7f, 0.8f), FontStyles.Bold);
 
             // Overall result (center top)
             GameObject overallResult = CreateChild(vsSection.transform, "OverallResult");
@@ -384,7 +384,7 @@ namespace DigitPark.Editor
             efRt.anchorMax = new Vector2(1, 0.45f);
             efRt.offsetMin = Vector2.zero;
             efRt.offsetMax = Vector2.zero;
-            AddText(entryFee, "Entry: $5.00", 16, new Color(0.7f, 0.6f, 0.4f), FontStyles.Normal);
+            AddText(entryFee, "Entry: $5.00", 16, new Color(0.7f, 0.6f, 0.4f), FontStyles.Bold);
         }
 
         private static void CreateButtons(Transform parent)

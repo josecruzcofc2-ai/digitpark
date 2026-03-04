@@ -228,7 +228,7 @@ namespace DigitPark.Editor
 
         private static void CreateTitle(Transform parent, string text)
         {
-            GameObject title = new GameObject("Title");
+            GameObject title = new GameObject("RegisterTitleText");
             title.transform.SetParent(parent, false);
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
@@ -278,8 +278,9 @@ namespace DigitPark.Editor
             textAreaRect.offsetMin = new Vector2(20, 0);
             textAreaRect.offsetMax = new Vector2(isPassword ? -100 : -20, 0);
 
-            // Placeholder
-            GameObject placeholderObj = new GameObject("Placeholder");
+            // Named for AutoLocalizer: "UsernameInput"→"UsernameInputPlaceholder", "EmailInput"→"EmailInputPlaceholder", etc.
+            string placeholderGoName = name + "Placeholder";
+            GameObject placeholderObj = new GameObject(placeholderGoName);
             placeholderObj.transform.SetParent(textArea.transform, false);
 
             RectTransform placeholderRect = placeholderObj.AddComponent<RectTransform>();
@@ -369,7 +370,8 @@ namespace DigitPark.Editor
             LayoutElement layout = btn.AddComponent<LayoutElement>();
             layout.preferredHeight = BUTTON_HEIGHT;
 
-            GameObject textObj = new GameObject("Text");
+            // Named for AutoLocalizer: "RegisterButton"→"RegisterButtonText"=>"register_button"
+            GameObject textObj = new GameObject(name + "Text");
             textObj.transform.SetParent(btn.transform, false);
 
             RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -440,6 +442,7 @@ namespace DigitPark.Editor
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
                 arrowText.fontSize = FontSizes.Body;
+                arrowText.fontStyle = FontStyles.Bold;
                 arrowText.color = CyanNeon;
                 arrowText.alignment = TextAlignmentOptions.Center;
 
@@ -473,19 +476,21 @@ namespace DigitPark.Editor
             spinnerImage.sprite = WhiteSprite;
             spinnerImage.color = CyanNeon;
 
-            GameObject loadingText = new GameObject("LoadingText");
+            // Named for AutoLocalizer: "CreatingAccountText"=>"creating_account"
+            GameObject loadingText = new GameObject("CreatingAccountText");
             loadingText.transform.SetParent(loadingPanel.transform, false);
 
             RectTransform textRect = loadingText.AddComponent<RectTransform>();
             textRect.anchorMin = new Vector2(0.5f, 0.5f);
             textRect.anchorMax = new Vector2(0.5f, 0.5f);
-            textRect.sizeDelta = new Vector2(300, 50);
+            textRect.sizeDelta = new Vector2(500, 60);
             textRect.anchoredPosition = new Vector2(0, -80);
 
             TextMeshProUGUI text = loadingText.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Creating account...";
             text.fontSize = FontSizes.Body;
+            text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
 

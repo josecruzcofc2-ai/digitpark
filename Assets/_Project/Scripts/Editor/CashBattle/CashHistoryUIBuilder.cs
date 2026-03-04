@@ -44,6 +44,7 @@ namespace DigitPark.Editor
 
         // BackButton prefab
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         #endregion
 
@@ -356,6 +357,18 @@ namespace DigitPark.Editor
                 backRT.pivot = new Vector2(0, 0.5f);
                 backRT.sizeDelta = new Vector2(50, 50);
                 backRT.anchoredPosition = new Vector2(20, 0);
+
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -391,7 +404,7 @@ namespace DigitPark.Editor
             }
 
             // Title
-            GameObject title = new GameObject("TitleText");
+            GameObject title = new GameObject("CashHistoryTitle");
             title.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = title.AddComponent<RectTransform>();
@@ -566,7 +579,7 @@ namespace DigitPark.Editor
             valueText.fontStyle = FontStyles.Bold;
 
             // Label - debajo del value
-            GameObject labelObj = new GameObject("Label");
+            GameObject labelObj = new GameObject("StatItemLabel");
             labelObj.transform.SetParent(item.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
@@ -632,7 +645,7 @@ namespace DigitPark.Editor
             button.colors = colors;
 
             // Button text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject(name + "Text");
             textObj.transform.SetParent(btn.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -1011,6 +1024,7 @@ namespace DigitPark.Editor
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = true;
+            tmp.fontStyle = FontStyles.Bold;
 
             emptyState.SetActive(false);
         }
@@ -1033,7 +1047,7 @@ namespace DigitPark.Editor
             loadMore.AddComponent<Button>();
 
             // Button text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("LoadMoreButtonText");
             textObj.transform.SetParent(loadMore.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -1121,14 +1135,14 @@ namespace DigitPark.Editor
 
             // Detail texts
             CreateDetailText(detail.transform, "DetailTitleText", "Title", FontSizes.Body, FontStyles.Bold, TEXT_PRIMARY, 60);
-            CreateDetailText(detail.transform, "DetailSubtitleText", "Subtitle", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 45);
+            CreateDetailText(detail.transform, "DetailSubtitleText", "Subtitle", FontSizes.Body, FontStyles.Bold, TEXT_SECONDARY, 45);
             CreateDetailText(detail.transform, "DetailResultText", "VICTORY", FontSizes.Subtitle, FontStyles.Bold, SUCCESS_GREEN, 65);
-            CreateDetailText(detail.transform, "DetailScoreText", "Score: 5 - 3", FontSizes.Body, FontStyles.Normal, TEXT_PRIMARY, 45);
-            CreateDetailText(detail.transform, "DetailEntryFeeText", "Entry: $5.00", FontSizes.Body, FontStyles.Normal, GOLD_PRIMARY, 45);
-            CreateDetailText(detail.transform, "DetailPrizeText", "Prize: $8.50", FontSizes.Body, FontStyles.Normal, SUCCESS_GREEN, 45);
+            CreateDetailText(detail.transform, "DetailScoreText", "Score: 5 - 3", FontSizes.Body, FontStyles.Bold, TEXT_PRIMARY, 45);
+            CreateDetailText(detail.transform, "DetailEntryFeeText", "Entry: $5.00", FontSizes.Body, FontStyles.Bold, GOLD_PRIMARY, 45);
+            CreateDetailText(detail.transform, "DetailPrizeText", "Prize: $8.50", FontSizes.Body, FontStyles.Bold, SUCCESS_GREEN, 45);
             CreateDetailText(detail.transform, "DetailNetText", "+$3.50", FontSizes.Body, FontStyles.Bold, SUCCESS_GREEN, 55);
-            CreateDetailText(detail.transform, "DetailDateText", "Today, 14:32", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 40);
-            CreateDetailText(detail.transform, "DetailDurationText", "Duration: 2m 15s", FontSizes.Body, FontStyles.Normal, TEXT_SECONDARY, 40);
+            CreateDetailText(detail.transform, "DetailDateText", "Today, 14:32", FontSizes.Body, FontStyles.Bold, TEXT_SECONDARY, 40);
+            CreateDetailText(detail.transform, "DetailDurationText", "Duration: 2m 15s", FontSizes.Body, FontStyles.Bold, TEXT_SECONDARY, 40);
 
             detail.SetActive(false);
         }
@@ -1156,7 +1170,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;

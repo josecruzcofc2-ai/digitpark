@@ -193,6 +193,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Choose how you want to play";
             subtitleTmp.fontSize = FontSizes.Body;
+            subtitleTmp.fontStyle = FontStyles.Bold;
             subtitleTmp.color = TEXT_SECONDARY;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
         }
@@ -336,6 +337,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI descTmp = descObj.AddComponent<TextMeshProUGUI>();
             descTmp.text = description;
             descTmp.fontSize = FontSizes.Body;
+            descTmp.fontStyle = FontStyles.Bold;
             descTmp.color = TEXT_SECONDARY;
             descTmp.alignment = TextAlignmentOptions.Center;
             descTmp.enableWordWrapping = true;

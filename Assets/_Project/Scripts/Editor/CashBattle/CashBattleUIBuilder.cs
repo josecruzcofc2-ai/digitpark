@@ -16,6 +16,7 @@ namespace DigitPark.Editor
     public class CashBattleUIBuilder : EditorWindow
     {
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         // Premium Color Palette
         private static readonly Color GOLD_PRIMARY = new Color(1f, 0.84f, 0f, 1f);           // #FFD700 Gold
@@ -434,6 +435,18 @@ namespace DigitPark.Editor
                 rect.pivot = new Vector2(0, 0.5f);
                 rect.anchoredPosition = new Vector2(20, 0);
                 rect.sizeDelta = new Vector2(50, 50);
+
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -716,7 +729,7 @@ namespace DigitPark.Editor
             int arrowWidth = 60;
 
             // === TITULO ===
-            GameObject titleObj = new GameObject("Title");
+            GameObject titleObj = new GameObject(name + "Title");
             titleObj.transform.SetParent(card.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -736,7 +749,7 @@ namespace DigitPark.Editor
             titleText.fontSizeMax = FontSizes.H3;
 
             // === SUBTITULO ===
-            GameObject subtitleObj = new GameObject("Subtitle");
+            GameObject subtitleObj = new GameObject(name + "Subtitle");
             subtitleObj.transform.SetParent(card.transform, false);
 
             RectTransform subRT = subtitleObj.AddComponent<RectTransform>();
@@ -748,6 +761,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subText = subtitleObj.AddComponent<TextMeshProUGUI>();
             subText.text = subtitle;
             subText.fontSize = FontSizes.Body;
+            subText.fontStyle = FontStyles.Bold;
             subText.color = TEXT_SECONDARY;
             subText.alignment = TextAlignmentOptions.Left;
             subText.enableAutoSizing = true;
@@ -913,7 +927,7 @@ namespace DigitPark.Editor
             }
 
             // Panel Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashSelectGameTitle");
             titleObj.transform.SetParent(panel.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -924,7 +938,7 @@ namespace DigitPark.Editor
             titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.text = "Select a Game";
+            titleText.text = "Select Game";
             titleText.fontSize = FontSizes.Body;
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
@@ -977,7 +991,7 @@ namespace DigitPark.Editor
             onlineText.fontSize = FontSizes.Body;
             onlineText.color = TEXT_SECONDARY;
             onlineText.alignment = TextAlignmentOptions.Left;
-            onlineText.fontStyle = FontStyles.Normal;
+            onlineText.fontStyle = FontStyles.Bold;
 
             // ========== SCROLL VIEW FOR GAME CARDS ==========
             GameObject scrollView = new GameObject("GamesScrollView");
@@ -1298,8 +1312,8 @@ namespace DigitPark.Editor
             sectionOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.4f);
             sectionOutline.effectDistance = new Vector2(2, -2);
 
-            // ========== TITLE: "Elige tu apuesta" ==========
-            GameObject titleObj = new GameObject("Title");
+            // ========== TITLE: "Choose your bet" ==========
+            GameObject titleObj = new GameObject("FeeTitleText");
             titleObj.transform.SetParent(feeSection.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -1385,7 +1399,7 @@ namespace DigitPark.Editor
             inputOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Input field text area
-            GameObject inputTextArea = new GameObject("Text");
+            GameObject inputTextArea = new GameObject("InputFieldText");
             inputTextArea.transform.SetParent(inputBg.transform, false);
 
             RectTransform inputTextRT = inputTextArea.AddComponent<RectTransform>();
@@ -1417,7 +1431,7 @@ namespace DigitPark.Editor
             placeholderText.text = "Other amount...";
             placeholderText.fontSize = FontSizes.Body;
             placeholderText.color = TEXT_SECONDARY;
-            placeholderText.fontStyle = FontStyles.Italic;
+            placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.alignment = TextAlignmentOptions.Left;
 
             // TMP_InputField component
@@ -1467,7 +1481,7 @@ namespace DigitPark.Editor
             applyOutline.effectColor = new Color(0f, 1f, 1f, 0.5f);
             applyOutline.effectDistance = new Vector2(2, -2);
 
-            GameObject applyTextObj = new GameObject("Text");
+            GameObject applyTextObj = new GameObject("OkButtonText");
             applyTextObj.transform.SetParent(applyBtn.transform, false);
 
             RectTransform applyTextRT = applyTextObj.AddComponent<RectTransform>();
@@ -1534,7 +1548,7 @@ namespace DigitPark.Editor
             poolText.text = "Pool: $0.00 | Your bet: $0.00 | Fee: 30%";
             poolText.fontSize = FontSizes.Body;
             poolText.color = TEXT_SECONDARY;
-            poolText.fontStyle = FontStyles.Normal;
+            poolText.fontStyle = FontStyles.Bold;
             poolText.alignment = TextAlignmentOptions.Left;
 
             // Coin icon for visual appeal
@@ -1582,7 +1596,7 @@ namespace DigitPark.Editor
             outline.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Amount text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("PresetAmountText");
             textObj.transform.SetParent(btnObj.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -1672,7 +1686,7 @@ namespace DigitPark.Editor
             glow3.effectDistance = new Vector2(10, -10);
 
             // Main text with fire emojis
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("FindOpponentButtonText");
             textObj.transform.SetParent(btnObj.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -1700,7 +1714,7 @@ namespace DigitPark.Editor
             subtitleText.text = "12 players searching now";
             subtitleText.fontSize = FontSizes.Body;
             subtitleText.color = new Color(0.2f, 0.15f, 0.1f, 0.9f);
-            subtitleText.fontStyle = FontStyles.Normal;
+            subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.alignment = TextAlignmentOptions.Center;
 
             // Left fire icon
@@ -1781,7 +1795,7 @@ namespace DigitPark.Editor
             }
 
             // Panel Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashAvailTournamentsTitle");
             titleObj.transform.SetParent(panel.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -1988,7 +2002,7 @@ namespace DigitPark.Editor
             colors.pressedColor = GOLD_DARK;
             btn.colors = colors;
 
-            GameObject joinText = new GameObject("Text");
+            GameObject joinText = new GameObject("JoinButtonText");
             joinText.transform.SetParent(joinBtn.transform, false);
 
             RectTransform joinTextRT = joinText.AddComponent<RectTransform>();
@@ -2074,7 +2088,7 @@ namespace DigitPark.Editor
             confirmColors.pressedColor = GOLD_DARK;
             confirmButton.colors = confirmColors;
 
-            GameObject confirmText = new GameObject("Text");
+            GameObject confirmText = new GameObject("ConfirmBetButtonText");
             confirmText.transform.SetParent(confirmBtn.transform, false);
 
             RectTransform confirmTextRT = confirmText.AddComponent<RectTransform>();
@@ -2108,7 +2122,7 @@ namespace DigitPark.Editor
             cancelColors.pressedColor = new Color(0.6f, 0.15f, 0.15f);
             cancelButton.colors = cancelColors;
 
-            GameObject cancelText = new GameObject("Text");
+            GameObject cancelText = new GameObject("CancelBetButtonText");
             cancelText.transform.SetParent(cancelBtn.transform, false);
 
             RectTransform cancelTextRT = cancelText.AddComponent<RectTransform>();
@@ -2178,7 +2192,7 @@ namespace DigitPark.Editor
             iconOutline.effectColor = new Color(1f, 0.8f, 0.3f, 0.8f);
             iconOutline.effectDistance = new Vector2(4, -4);
 
-            GameObject iconText = new GameObject("Text");
+            GameObject iconText = new GameObject("SearchIconText");
             iconText.transform.SetParent(searchIcon.transform, false);
 
             RectTransform iconTextRT = iconText.AddComponent<RectTransform>();
@@ -2265,7 +2279,7 @@ namespace DigitPark.Editor
             colors.pressedColor = new Color(0.6f, 0.15f, 0.15f);
             btn.colors = colors;
 
-            GameObject cancelText = new GameObject("Text");
+            GameObject cancelText = new GameObject("CancelMatchmakingButtonText");
             cancelText.transform.SetParent(cancelBtn.transform, false);
 
             RectTransform cancelTextRT = cancelText.AddComponent<RectTransform>();
@@ -2301,7 +2315,7 @@ namespace DigitPark.Editor
             rt.offsetMax = new Vector2(-20, -130);
 
             // Panel Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashWalletTitle");
             titleObj.transform.SetParent(panel.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -2430,7 +2444,7 @@ namespace DigitPark.Editor
             glow.effectColor = new Color(normalColor.r, normalColor.g, normalColor.b, 0.5f);
             glow.effectDistance = new Vector2(3, -3);
 
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject(name + "Text");
             textObj.transform.SetParent(btnObj.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -2567,7 +2581,7 @@ namespace DigitPark.Editor
             rt.offsetMax = new Vector2(-20, -130);
 
             // Panel Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashMatchHistoryTitle");
             titleObj.transform.SetParent(panel.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -2663,7 +2677,7 @@ namespace DigitPark.Editor
             valueText.alignment = TextAlignmentOptions.Center;
 
             // Label
-            GameObject labelObj = new GameObject("Label");
+            GameObject labelObj = new GameObject("StatCardLabel");
             labelObj.transform.SetParent(card.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
@@ -2720,7 +2734,7 @@ namespace DigitPark.Editor
             Image iconBg = iconObj.AddComponent<Image>();
             iconBg.color = new Color(0.2f, 0.15f, 0.1f, 0.9f);
 
-            GameObject iconText = new GameObject("Text");
+            GameObject iconText = new GameObject("TransactionIconText");
             iconText.transform.SetParent(iconObj.transform, false);
 
             RectTransform iconTextRT = iconText.AddComponent<RectTransform>();
@@ -2833,7 +2847,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;

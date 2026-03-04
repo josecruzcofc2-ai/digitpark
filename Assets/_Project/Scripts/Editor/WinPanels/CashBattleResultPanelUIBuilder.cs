@@ -140,11 +140,11 @@ namespace DigitPark.Editor
             AddGlow(title, accentColor, 4);
 
             // Subtitle
-            GameObject subtitle = CreateChild(parent, "Subtitle");
+            GameObject subtitle = CreateChild(parent, "ResultSubtitleText");
             SetupRectTransform(subtitle, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -110), new Vector2(0, 35));
             string subtitleStr = isWin ? "Cash Battle Victory" : "Next time will be yours";
-            AddText(subtitle, subtitleStr, 22, new Color(0.7f, 0.6f, 0.5f), FontStyles.Italic);
+            AddText(subtitle, subtitleStr, 22, new Color(0.7f, 0.6f, 0.5f), FontStyles.Bold);
         }
 
         private static void CreateMoneyDisplay(Transform parent, bool isWin, Color moneyColor, Color accentColor)
@@ -170,14 +170,14 @@ namespace DigitPark.Editor
             GameObject entryFee = CreateChild(parent, "EntryFee");
             SetupRectTransform(entryFee, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -250), new Vector2(350, 30));
-            AddText(entryFee, "Entry: $5.00", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Normal);
+            AddText(entryFee, "Entry: $5.00", 20, new Color(0.6f, 0.55f, 0.45f), FontStyles.Bold);
 
             // Winner share info
             GameObject winnerShare = CreateChild(parent, "WinnerShare");
             SetupRectTransform(winnerShare, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -278), new Vector2(350, 25));
             AddText(winnerShare, isWin ? "Winner: 90% of the pot" : "", 16,
-                new Color(0.5f, 0.5f, 0.4f), FontStyles.Normal);
+                new Color(0.5f, 0.5f, 0.4f), FontStyles.Bold);
         }
 
         private static void CreateVSSection(Transform parent, bool isWin)
@@ -269,7 +269,7 @@ namespace DigitPark.Editor
             errRt.anchorMax = new Vector2(0.9f, 0.35f);
             errRt.offsetMin = Vector2.zero;
             errRt.offsetMax = Vector2.zero;
-            AddText(errorsObj, "0 errors", 18, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
+            AddText(errorsObj, "0 errors", 18, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
         }
 
         private static void CreateFeeInfo(Transform parent, bool isWin)

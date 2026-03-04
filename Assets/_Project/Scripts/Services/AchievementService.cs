@@ -647,7 +647,7 @@ namespace DigitPark.Services
                 rewardCoins = 500,
                 rewardGems = 50,
                 points = 75,
-                iconName = "Logro_Nivel50"
+                iconName = "Logro_Nivel_50"
             });
 
             achievements.Add(new AchievementData

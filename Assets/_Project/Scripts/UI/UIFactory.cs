@@ -172,6 +172,7 @@ namespace DigitPark.UI
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = content;
             text.fontSize = fontSize;
+            text.fontStyle = FontStyles.Bold;
             text.color = color ?? Color.white;
             text.alignment = alignment;
 

@@ -245,7 +245,7 @@ namespace DigitPark.Editor
 
         private static void CreateTitle(Transform parent, string text)
         {
-            GameObject title = new GameObject("Title");
+            GameObject title = new GameObject("AgeVerificationTitle");
             title.transform.SetParent(parent, false);
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
@@ -266,7 +266,7 @@ namespace DigitPark.Editor
 
         private static void CreateDescription(Transform parent, string text)
         {
-            GameObject desc = new GameObject("Description");
+            GameObject desc = new GameObject("AgeVerificationDesc");
             desc.transform.SetParent(parent, false);
 
             TextMeshProUGUI descText = desc.AddComponent<TextMeshProUGUI>();
@@ -312,7 +312,8 @@ namespace DigitPark.Editor
             LayoutElement layout = btn.AddComponent<LayoutElement>();
             layout.preferredHeight = BUTTON_HEIGHT;
 
-            GameObject textObj = new GameObject("Text");
+            // Named for AutoLocalizer: "VerifyAgeButtonText"=>"verify_age"
+            GameObject textObj = new GameObject("VerifyAgeButtonText");
             textObj.transform.SetParent(btn.transform, false);
 
             RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -335,7 +336,8 @@ namespace DigitPark.Editor
 
         private static void CreateLegalText(Transform parent, string text)
         {
-            GameObject legal = new GameObject("LegalText");
+            // Named for AutoLocalizer: "AgeVerificationLegalText"=>"age_verification_powered"
+            GameObject legal = new GameObject("AgeVerificationLegalText");
             legal.transform.SetParent(parent, false);
 
             TextMeshProUGUI legalText = legal.AddComponent<TextMeshProUGUI>();
@@ -366,7 +368,8 @@ namespace DigitPark.Editor
 
         private static void CreateStatusText(Transform parent)
         {
-            GameObject status = new GameObject("StatusText");
+            // Named for AutoLocalizer: "AgeVerificationStatusText"=>"age_verification_tap"
+            GameObject status = new GameObject("AgeVerificationStatusText");
             status.transform.SetParent(parent, false);
 
             TextMeshProUGUI statusText = status.AddComponent<TextMeshProUGUI>();
@@ -437,6 +440,7 @@ namespace DigitPark.Editor
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
                 arrowText.fontSize = FontSizes.Body;
+                arrowText.fontStyle = FontStyles.Bold;
                 arrowText.color = GoldPremium;
                 arrowText.alignment = TextAlignmentOptions.Center;
 

@@ -55,6 +55,7 @@ namespace DigitPark.Editor
         #region Paths
 
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         #endregion
 
@@ -200,7 +201,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
@@ -330,7 +331,7 @@ namespace DigitPark.Editor
             CreateBackButton(header.transform);
 
             // Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashTournamentCreateTitle");
             titleObj.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
@@ -367,6 +368,17 @@ namespace DigitPark.Editor
                 rect.pivot = new Vector2(0, 0.5f);
                 rect.sizeDelta = new Vector2(50, 50);
                 rect.anchoredPosition = new Vector2(20, 0);
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -522,7 +534,7 @@ namespace DigitPark.Editor
             tmp.text = labelText;
             tmp.fontSize = FontSizes.Body;
             tmp.color = TEXT_SECONDARY;
-            tmp.fontStyle = FontStyles.Normal;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Left;
             tmp.raycastTarget = false;
 
@@ -565,6 +577,7 @@ namespace DigitPark.Editor
             inputText.fontSize = FontSizes.H3;
             inputText.color = TEXT_PRIMARY;
             inputText.alignment = TextAlignmentOptions.Left;
+            inputText.fontStyle = FontStyles.Bold;
 
             // Placeholder
             GameObject placeholder = new GameObject("Placeholder");
@@ -581,6 +594,7 @@ namespace DigitPark.Editor
             phText.fontSize = FontSizes.H3;
             phText.color = TEXT_SECONDARY;
             phText.alignment = TextAlignmentOptions.Left;
+            phText.fontStyle = FontStyles.Bold;
 
             TMP_InputField inputField = inputBg.AddComponent<TMP_InputField>();
             inputField.textViewport = textRT;
@@ -600,6 +614,7 @@ namespace DigitPark.Editor
             ccTMP.fontSize = FontSizes.Body;
             ccTMP.color = TEXT_SECONDARY;
             ccTMP.alignment = TextAlignmentOptions.Right;
+            ccTMP.fontStyle = FontStyles.Bold;
             ccTMP.raycastTarget = false;
         }
 
@@ -708,6 +723,7 @@ namespace DigitPark.Editor
             ciText.fontSize = FontSizes.Body;
             ciText.color = TEXT_PRIMARY;
             ciText.alignment = TextAlignmentOptions.Left;
+            ciText.fontStyle = FontStyles.Bold;
 
             GameObject ciPh = new GameObject("Placeholder");
             ciPh.transform.SetParent(customInput.transform, false);
@@ -721,6 +737,7 @@ namespace DigitPark.Editor
             ciPhText.fontSize = FontSizes.Body;
             ciPhText.color = TEXT_SECONDARY;
             ciPhText.alignment = TextAlignmentOptions.Left;
+            ciPhText.fontStyle = FontStyles.Bold;
 
             TMP_InputField ciInput = customInput.AddComponent<TMP_InputField>();
             ciInput.textViewport = ciTextRT;
@@ -806,6 +823,7 @@ namespace DigitPark.Editor
             tlTMP.fontSize = FontSizes.Body;
             tlTMP.color = TEXT_PRIMARY;
             tlTMP.alignment = TextAlignmentOptions.Left;
+            tlTMP.fontStyle = FontStyles.Bold;
 
             // TimePicker Dropdown
             CreateTMPDropdownInLayout(card.transform, "StartTimeDropdown",
@@ -822,6 +840,7 @@ namespace DigitPark.Editor
             stTMP.fontSize = FontSizes.Body;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
+            stTMP.fontStyle = FontStyles.Bold;
             stTMP.raycastTarget = false;
         }
 
@@ -873,6 +892,7 @@ namespace DigitPark.Editor
             slTMP.fontSize = FontSizes.Body;
             slTMP.color = TEXT_PRIMARY;
             slTMP.alignment = TextAlignmentOptions.Left;
+            slTMP.fontStyle = FontStyles.Bold;
 
             // Private Toggle Row
             GameObject privRow = new GameObject("PrivateRow");
@@ -897,6 +917,7 @@ namespace DigitPark.Editor
             plTMP.fontSize = FontSizes.Body;
             plTMP.color = TEXT_PRIMARY;
             plTMP.alignment = TextAlignmentOptions.Left;
+            plTMP.fontStyle = FontStyles.Bold;
 
             // Private Code Input (hidden by default)
             GameObject privateCodeBg = new GameObject("PrivateCodeInput");
@@ -925,6 +946,7 @@ namespace DigitPark.Editor
             pcText.fontSize = FontSizes.Body;
             pcText.color = TEXT_PRIMARY;
             pcText.alignment = TextAlignmentOptions.Left;
+            pcText.fontStyle = FontStyles.Bold;
 
             GameObject pcPh = new GameObject("Placeholder");
             pcPh.transform.SetParent(privateCodeBg.transform, false);
@@ -938,6 +960,7 @@ namespace DigitPark.Editor
             pcPhText.fontSize = FontSizes.Body;
             pcPhText.color = TEXT_SECONDARY;
             pcPhText.alignment = TextAlignmentOptions.Left;
+            pcPhText.fontStyle = FontStyles.Bold;
 
             TMP_InputField pcInput = privateCodeBg.AddComponent<TMP_InputField>();
             pcInput.textViewport = pcTextRT;
@@ -992,6 +1015,7 @@ namespace DigitPark.Editor
             tmp.fontSize = FontSizes.Body;
             tmp.color = TEXT_PRIMARY;
             tmp.alignment = TextAlignmentOptions.Left;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.raycastTarget = false;
         }
 
@@ -1028,6 +1052,7 @@ namespace DigitPark.Editor
             feeTMP.fontSize = FontSizes.Body;
             feeTMP.color = TEXT_SECONDARY;
             feeTMP.alignment = TextAlignmentOptions.Center;
+            feeTMP.fontStyle = FontStyles.Bold;
             feeTMP.raycastTarget = false;
 
             // CreateButton
@@ -1232,6 +1257,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI capTMP = captionObj.AddComponent<TextMeshProUGUI>();
             capTMP.text = options.Count > 0 ? options[0] : name;
             capTMP.fontSize = FontSizes.Body;
+            capTMP.fontStyle = FontStyles.Bold;
             capTMP.color = TEXT_PRIMARY;
             capTMP.alignment = TextAlignmentOptions.Left;
 
@@ -1252,6 +1278,7 @@ namespace DigitPark.Editor
             arrowTMP.fontSize = FontSizes.Body;
             arrowTMP.color = TEXT_GOLD;
             arrowTMP.alignment = TextAlignmentOptions.Center;
+            arrowTMP.fontStyle = FontStyles.Bold;
 
             // Template (hidden dropdown list)
             GameObject template = new GameObject("Template");
@@ -1333,6 +1360,7 @@ namespace DigitPark.Editor
             ilTMP.fontSize = FontSizes.Body;
             ilTMP.color = TEXT_PRIMARY;
             ilTMP.alignment = TextAlignmentOptions.Left;
+            ilTMP.fontStyle = FontStyles.Bold;
 
             itemToggle.targetGraphic = ibImg;
             itemToggle.graphic = icImg;

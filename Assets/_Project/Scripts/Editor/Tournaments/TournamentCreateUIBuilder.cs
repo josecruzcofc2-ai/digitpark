@@ -910,6 +910,7 @@ namespace DigitPark.Editor
             itemLabelRT.offsetMax = new Vector2(-8, 0);
             TextMeshProUGUI itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
             itemLabelText.fontSize = FontSizes.BodyLarge;
+            itemLabelText.fontStyle = FontStyles.Bold;
             itemLabelText.color = TEXT_PRIMARY;
             itemLabelText.alignment = TextAlignmentOptions.Left;
 

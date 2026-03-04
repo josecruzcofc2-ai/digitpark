@@ -91,7 +91,7 @@ namespace DigitPark.Editor
             GameObject wagerText = CreateChild(face, "WagerText");
             SetupRectTransform(wagerText, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -245), new Vector2(350, 35));
-            AddText(wagerText, "Wager: $5.00", 22, new Color(0.8f, 0.7f, 0.5f), FontStyles.Normal);
+            AddText(wagerText, "Wager: $5.00", 22, new Color(0.8f, 0.7f, 0.5f), FontStyles.Bold);
 
             // VS Container
             GameObject vsContainer = CreateChild(face, "VSContainer");
@@ -120,7 +120,7 @@ namespace DigitPark.Editor
             GameObject oppValue = CreateChild(oppScore.transform, "Value");
             SetupRectTransform(oppValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(180, 50));
-            AddText(oppValue, "15.32s", 34, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal);
+            AddText(oppValue, "15.32s", 34, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
 
             // Stats
             GameObject statsContainer = CreateChild(face, "StatsContainer");
@@ -192,7 +192,7 @@ namespace DigitPark.Editor
             GameObject playerValue = CreateChild(playerScore.transform, "Value");
             SetupRectTransform(playerValue, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(180, 50));
-            AddText(playerValue, "15.32s", 34, new Color(0.8f, 0.6f, 0.7f), FontStyles.Normal);
+            AddText(playerValue, "15.32s", 34, new Color(0.8f, 0.6f, 0.7f), FontStyles.Bold);
 
             // VS
             GameObject vsText = CreateChild(vsContainer.transform, "VSText");
@@ -383,7 +383,7 @@ namespace DigitPark.Editor
 
             GameObject labelObj = CreateChild(row.transform, "Label");
             SetupRectTransform(labelObj, new Vector2(0, 0), new Vector2(0.5f, 1), Vector2.zero, Vector2.zero);
-            TextMeshProUGUI labelTmp = AddText(labelObj, label, 20, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal);
+            TextMeshProUGUI labelTmp = AddText(labelObj, label, 20, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold);
             labelTmp.alignment = TextAlignmentOptions.Left;
 
             GameObject valueObj = CreateChild(row.transform, "Value");

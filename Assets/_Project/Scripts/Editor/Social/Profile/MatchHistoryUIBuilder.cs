@@ -544,8 +544,8 @@ namespace DigitPark.Editor
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.alignment = TextAlignmentOptions.Right;
 
-            // Subtitle (middle - opponent or practice)
-            var subtitle = new GameObject("Subtitle");
+            // Opponent name (middle - opponent or practice)
+            var subtitle = new GameObject("OpponentText");
             subtitle.transform.SetParent(infoSection.transform, false);
             var stRT = subtitle.AddComponent<RectTransform>();
             stRT.anchorMin = new Vector2(0, 0.33f);
@@ -555,6 +555,7 @@ namespace DigitPark.Editor
             var stTMP = subtitle.AddComponent<TextMeshProUGUI>();
             stTMP.text = "vs. Player123";
             stTMP.fontSize = FontSizes.Body;
+            stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
 

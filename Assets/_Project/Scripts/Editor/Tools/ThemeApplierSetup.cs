@@ -105,8 +105,8 @@ namespace DigitPark.Editor
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
 
-                // Skip CashBattle prefabs (gold fijo, no ThemeApplier)
-                if (path.Contains("CashBattle")) continue;
+                // Skip CashBattle prefabs and gold-themed prefabs (estilo fijo, no ThemeApplier)
+                if (path.Contains("CashBattle") || path.Contains("Gold")) continue;
                 GameObject prefabRoot = PrefabUtility.LoadPrefabContents(path);
                 bool modified = false;
 

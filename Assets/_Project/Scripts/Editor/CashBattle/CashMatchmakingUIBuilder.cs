@@ -46,6 +46,7 @@ namespace DigitPark.Editor
 
         // Asset paths
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
         private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
         private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
         private const string ICON_DIGIT_RUSH = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
@@ -163,6 +164,18 @@ namespace DigitPark.Editor
                 rt.pivot = new Vector2(0, 0.5f);
                 rt.anchoredPosition = new Vector2(20, 0);
                 rt.sizeDelta = new Vector2(50, 50);
+
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -650,6 +663,7 @@ namespace DigitPark.Editor
             statusTmp.fontSize = FontSizes.H4;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
+            statusTmp.fontStyle = FontStyles.Bold;
 
             // --- Timer Text ---
             GameObject timerText = CreateElement(searchSection.transform, "CashTimerText");
@@ -699,7 +713,7 @@ namespace DigitPark.Editor
             btn.colors = colors;
 
             // Button text
-            GameObject btnText = CreateElement(cancelBtn.transform, "Text");
+            GameObject btnText = CreateElement(cancelBtn.transform, "CashCancelButtonText");
             SetFullStretch(btnText.GetComponent<RectTransform>());
             TextMeshProUGUI textTmp = btnText.AddComponent<TextMeshProUGUI>();
             textTmp.text = "CANCEL";
@@ -903,7 +917,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;

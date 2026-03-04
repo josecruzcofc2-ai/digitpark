@@ -55,6 +55,7 @@ namespace DigitPark.Editor
         #region Paths
 
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         #endregion
 
@@ -196,7 +197,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
@@ -356,6 +357,17 @@ namespace DigitPark.Editor
                 rect.pivot = new Vector2(0, 0.5f);
                 rect.sizeDelta = new Vector2(50, 50);
                 rect.anchoredPosition = new Vector2(20, 0);
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -396,7 +408,7 @@ namespace DigitPark.Editor
 
         private static void CreateHeaderTitle(Transform parent)
         {
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashTournamentsTitle");
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
@@ -469,7 +481,7 @@ namespace DigitPark.Editor
             btn.targetGraphic = bg;
 
             // Tab text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject(goName + "Text");
             textObj.transform.SetParent(tab.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();
@@ -664,7 +676,7 @@ namespace DigitPark.Editor
             Button btn = createBtn.AddComponent<Button>();
             btn.targetGraphic = btnBg;
 
-            GameObject btnTextObj = new GameObject("Text");
+            GameObject btnTextObj = new GameObject("CreateTournamentButtonText");
             btnTextObj.transform.SetParent(createBtn.transform, false);
 
             RectTransform btnTextRT = btnTextObj.AddComponent<RectTransform>();

@@ -296,6 +296,7 @@ namespace DigitPark.UI
                 Color titleColor = GetThemeColor(t => t.textTitle, new Color(0f, 1f, 1f));
                 TextMeshProUGUI title = UIFactory.CreateTitle(logoContainer, "Title", "DIGIT PARK");
                 title.fontSize = FontSizes.Logo;
+                title.fontStyle = FontStyles.Bold;
                 title.color = titleColor;
                 title.outlineWidth = 0.25f;
                 title.outlineColor = accentColor;

@@ -109,6 +109,7 @@ namespace DigitPark.Editor
             var itTMP = iconText.AddComponent<TextMeshProUGUI>();
             itTMP.text = "🔔";
             itTMP.fontSize = FontSizes.Body;
+            itTMP.fontStyle = FontStyles.Bold;
             itTMP.color = CYAN_NEON;
             itTMP.alignment = TextAlignmentOptions.Center;
 
@@ -153,6 +154,7 @@ namespace DigitPark.Editor
             var bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
             bodyTMP.text = "Notification description";
             bodyTMP.fontSize = FontSizes.Body;
+            bodyTMP.fontStyle = FontStyles.Bold;
             bodyTMP.color = TEXT_SECONDARY;
             bodyTMP.alignment = TextAlignmentOptions.Left;
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
@@ -209,6 +211,7 @@ namespace DigitPark.Editor
             var xTMP = xText.AddComponent<TextMeshProUGUI>();
             xTMP.text = "✕";
             xTMP.fontSize = FontSizes.Body;
+            xTMP.fontStyle = FontStyles.Bold;
             xTMP.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             xTMP.alignment = TextAlignmentOptions.Center;
 

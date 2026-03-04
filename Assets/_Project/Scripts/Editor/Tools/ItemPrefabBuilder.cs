@@ -307,6 +307,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI expandTextTMP = expandText.AddComponent<TextMeshProUGUI>();
             expandTextTMP.text = "View tournament details";
             expandTextTMP.fontSize = (int)FontSizes.Body;
+            expandTextTMP.fontStyle = FontStyles.Bold;
             expandTextTMP.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             expandTextTMP.alignment = TextAlignmentOptions.Center;
             expandTextTMP.raycastTarget = false;
@@ -322,6 +323,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI arrowTMP = arrow.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = "v";
             arrowTMP.fontSize = (int)FontSizes.Body;
+            arrowTMP.fontStyle = FontStyles.Bold;
             arrowTMP.color = CYAN_NEON;
             arrowTMP.alignment = TextAlignmentOptions.Center;
 
@@ -433,6 +435,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI usernameTMP = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTMP.text = "Username";
             usernameTMP.fontSize = (int)FontSizes.Body;
+            usernameTMP.fontStyle = FontStyles.Bold;
             usernameTMP.color = Color.white;
             usernameTMP.alignment = TextAlignmentOptions.Center;
             usernameTMP.enableWordWrapping = false;
@@ -453,6 +456,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI timeTMP = timeObj.AddComponent<TextMeshProUGUI>();
             timeTMP.text = "0.000s";
             timeTMP.fontSize = (int)FontSizes.Body;
+            timeTMP.fontStyle = FontStyles.Bold;
             timeTMP.color = GREEN_TIME;
             timeTMP.alignment = TextAlignmentOptions.Center;
 

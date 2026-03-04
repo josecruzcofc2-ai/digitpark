@@ -337,6 +337,10 @@ namespace DigitPark.Editor
             label.font = Font;
             label.text = "Change Name";
             label.fontSize = FontSizes.H3;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = FontSizes.Caption;
+            label.fontSizeMax = FontSizes.H3;
+            label.fontStyle = FontStyles.Bold;
             label.color = TEXT_WHITE;
             label.alignment = TextAlignmentOptions.Left;
             label.raycastTarget = false;
@@ -346,9 +350,9 @@ namespace DigitPark.Editor
             costContainer.transform.SetParent(row.transform, false);
             RectTransform costContainerRT = costContainer.AddComponent<RectTransform>();
             costContainerRT.anchorMin = new Vector2(0.50f, 0.1f);
-            costContainerRT.anchorMax = new Vector2(0.98f, 0.9f);
+            costContainerRT.anchorMax = new Vector2(1.0f, 0.9f);
             costContainerRT.offsetMin = Vector2.zero;
-            costContainerRT.offsetMax = Vector2.zero;
+            costContainerRT.offsetMax = new Vector2(-16, 0); // aligned with separator margin
 
             HorizontalLayoutGroup costHLG = costContainer.AddComponent<HorizontalLayoutGroup>();
             costHLG.spacing = 6;
@@ -356,7 +360,7 @@ namespace DigitPark.Editor
             costHLG.childControlWidth = false;
             costHLG.childControlHeight = true;
             costHLG.childForceExpandWidth = false;
-            costHLG.padding = new RectOffset(0, 8, 0, 0);
+            costHLG.padding = new RectOffset(0, 0, 0, 0);
 
             // Cost text "100"
             GameObject costTextObj = new GameObject("ChangeNameCostText");
@@ -368,6 +372,7 @@ namespace DigitPark.Editor
             costText.font = Font;
             costText.text = "100";
             costText.fontSize = FontSizes.H3;
+            costText.fontStyle = FontStyles.Bold;
             costText.color = CYAN_NEON;
             costText.alignment = TextAlignmentOptions.MidlineRight;
             costText.raycastTarget = false;
@@ -767,6 +772,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTxtComp = inputText.AddComponent<TextMeshProUGUI>();
             inputTxtComp.font = Font;
             inputTxtComp.fontSize = FontSizes.H3;
+            inputTxtComp.fontStyle = FontStyles.Bold;
             inputTxtComp.color = TEXT_WHITE;
             inputTxtComp.alignment = TextAlignmentOptions.Left;
 
@@ -792,7 +798,7 @@ namespace DigitPark.Editor
             Button confirmBtn = confirmObj.AddComponent<Button>();
             confirmBtn.targetGraphic = confirmBg;
 
-            GameObject confirmTxtObj = new GameObject("Text");
+            GameObject confirmTxtObj = new GameObject("ConfirmButtonText");
             confirmTxtObj.transform.SetParent(confirmObj.transform, false);
             RectTransform cTxtRT = confirmTxtObj.AddComponent<RectTransform>();
             cTxtRT.anchorMin = Vector2.zero;
@@ -801,7 +807,7 @@ namespace DigitPark.Editor
             cTxtRT.offsetMax = Vector2.zero;
             TextMeshProUGUI confirmTxtComp = confirmTxtObj.AddComponent<TextMeshProUGUI>();
             confirmTxtComp.font = Font;
-            confirmTxtComp.text = "Save";
+            confirmTxtComp.text = "Confirm";
             confirmTxtComp.fontSize = FontSizes.H3;
             confirmTxtComp.fontStyle = FontStyles.Bold;
             confirmTxtComp.color = DARK_NAVY;
@@ -821,7 +827,7 @@ namespace DigitPark.Editor
             Button cancelBtn = cancelObj.AddComponent<Button>();
             cancelBtn.targetGraphic = cancelBg;
 
-            GameObject cancelTxtObj = new GameObject("Text");
+            GameObject cancelTxtObj = new GameObject("CancelButtonText");
             cancelTxtObj.transform.SetParent(cancelObj.transform, false);
             RectTransform ccTxtRT = cancelTxtObj.AddComponent<RectTransform>();
             ccTxtRT.anchorMin = Vector2.zero;
@@ -902,7 +908,7 @@ namespace DigitPark.Editor
             titleTxt.text = title;
             titleTxt.fontSize = FontSizes.H3;
             titleTxt.enableAutoSizing = true;
-            titleTxt.fontSizeMin = FontSizes.BodyLarge;
+            titleTxt.fontSizeMin = FontSizes.Caption;
             titleTxt.fontSizeMax = FontSizes.H3;
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = DANGER_RED;
@@ -923,6 +929,7 @@ namespace DigitPark.Editor
             msgTxt.enableAutoSizing = true;
             msgTxt.fontSizeMin = FontSizes.Body;
             msgTxt.fontSizeMax = FontSizes.H4;
+            msgTxt.fontStyle = FontStyles.Bold;
             msgTxt.color = TEXT_WHITE;
             msgTxt.alignment = TextAlignmentOptions.Center;
             msgTxt.enableWordWrapping = true;
@@ -941,7 +948,7 @@ namespace DigitPark.Editor
             Button confirmBtn = confirmObj.AddComponent<Button>();
             confirmBtn.targetGraphic = confirmBg;
 
-            GameObject confirmTxtObj = new GameObject("Text");
+            GameObject confirmTxtObj = new GameObject("ConfirmButtonText");
             confirmTxtObj.transform.SetParent(confirmObj.transform, false);
             RectTransform confirmTxtRT = confirmTxtObj.AddComponent<RectTransform>();
             confirmTxtRT.anchorMin = Vector2.zero;
@@ -973,7 +980,7 @@ namespace DigitPark.Editor
             Button cancelBtn = cancelObj.AddComponent<Button>();
             cancelBtn.targetGraphic = cancelBg;
 
-            GameObject cancelTxtObj = new GameObject("Text");
+            GameObject cancelTxtObj = new GameObject("CancelButtonText");
             cancelTxtObj.transform.SetParent(cancelObj.transform, false);
             RectTransform cancelTxtRT = cancelTxtObj.AddComponent<RectTransform>();
             cancelTxtRT.anchorMin = Vector2.zero;
@@ -1021,6 +1028,7 @@ namespace DigitPark.Editor
             text.font = Font;
             text.text = "v1.0.0 - Digit Park";
             text.fontSize = FontSizes.H4;
+            text.fontStyle = FontStyles.Bold;
             text.color = TEXT_GRAY;
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
@@ -1149,6 +1157,7 @@ namespace DigitPark.Editor
                 right.font = Font;
                 right.text = rightText;
                 right.fontSize = FontSizes.H3;
+                right.fontStyle = FontStyles.Bold;
                 right.color = rightColor;
                 right.alignment = TextAlignmentOptions.Right;
                 right.raycastTarget = false;
@@ -1246,42 +1255,42 @@ namespace DigitPark.Editor
             bg.color = BUTTON_BG;
             bg.raycastTarget = false;
 
-            // Label
+            // Label "ID:" - narrow, secondary gray
             GameObject labelObj = new GameObject("IDLabel");
             labelObj.transform.SetParent(row.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
             labelRT.anchorMin = new Vector2(0, 0);
-            labelRT.anchorMax = new Vector2(0.35f, 1);
+            labelRT.anchorMax = new Vector2(0.12f, 1);
             labelRT.offsetMin = new Vector2(16, 0);
             labelRT.offsetMax = Vector2.zero;
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.font = Font;
             labelText.text = "ID:";
-            labelText.fontSize = FontSizes.H3;
+            labelText.fontSize = 42f;
             labelText.color = TEXT_GRAY;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
 
-            // ID Value
+            // ID Value - sits right next to label, muted gray (secondary data)
             GameObject idObj = new GameObject("IDText");
             idObj.transform.SetParent(row.transform, false);
 
             RectTransform idRT = idObj.AddComponent<RectTransform>();
-            idRT.anchorMin = new Vector2(0.25f, 0);
-            idRT.anchorMax = new Vector2(0.72f, 1);
+            idRT.anchorMin = new Vector2(0.12f, 0);
+            idRT.anchorMax = new Vector2(0.73f, 1);
             idRT.offsetMin = Vector2.zero;
             idRT.offsetMax = Vector2.zero;
 
             TextMeshProUGUI idText = idObj.AddComponent<TextMeshProUGUI>();
             idText.font = Font;
             idText.text = "#ABC123XYZ";
-            idText.fontSize = FontSizes.H4;
-            idText.fontSizeMin = FontSizes.AutoMinBody;
-            idText.enableAutoSizing = true;
-            idText.color = TEXT_WHITE;
-            idText.alignment = TextAlignmentOptions.Center;
+            idText.fontSize = 42f;
+            idText.fontStyle = FontStyles.Bold;
+            idText.enableAutoSizing = false;      // fixed size, no auto-scale
+            idText.color = TEXT_GRAY;             // muted: ID is secondary info
+            idText.alignment = TextAlignmentOptions.Left; // flush with "ID:" label
             idText.raycastTarget = false;
 
             // Copy button
@@ -1290,9 +1299,9 @@ namespace DigitPark.Editor
 
             RectTransform copyRT = copyBtn.AddComponent<RectTransform>();
             copyRT.anchorMin = new Vector2(0.74f, 0.15f);
-            copyRT.anchorMax = new Vector2(0.98f, 0.85f);
+            copyRT.anchorMax = new Vector2(1.0f, 0.85f);
             copyRT.offsetMin = Vector2.zero;
-            copyRT.offsetMax = Vector2.zero;
+            copyRT.offsetMax = new Vector2(-16, 0); // aligned with separator margin
 
             Image copyBg = copyBtn.AddComponent<Image>();
             copyBg.sprite = WhiteSprite;
@@ -1334,6 +1343,10 @@ namespace DigitPark.Editor
             labelText.font = Font;
             labelText.text = label;
             labelText.fontSize = FontSizes.H3;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.Caption;
+            labelText.fontSizeMax = FontSizes.H3;
+            labelText.fontStyle = FontStyles.Bold;
             labelText.color = TEXT_WHITE;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
@@ -1352,6 +1365,7 @@ namespace DigitPark.Editor
             valueText.font = Font;
             valueText.text = $"{Mathf.RoundToInt(defaultValue * 100)}%";
             valueText.fontSize = FontSizes.H3;
+            valueText.fontStyle = FontStyles.Bold;
             valueText.color = CYAN_NEON;
             valueText.alignment = TextAlignmentOptions.Right;
             valueText.raycastTarget = false;
@@ -1461,6 +1475,10 @@ namespace DigitPark.Editor
             labelText.font = Font;
             labelText.text = label;
             labelText.fontSize = FontSizes.H3;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.Caption;
+            labelText.fontSizeMax = FontSizes.H3;
+            labelText.fontStyle = FontStyles.Bold;
             labelText.color = TEXT_WHITE;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
@@ -1473,7 +1491,7 @@ namespace DigitPark.Editor
             toggleRT.anchorMin = new Vector2(1, 0.5f);
             toggleRT.anchorMax = new Vector2(1, 0.5f);
             toggleRT.pivot = new Vector2(1, 0.5f);
-            toggleRT.sizeDelta = new Vector2(90, 40);
+            toggleRT.sizeDelta = new Vector2(150, 44); // wide enough for translated text (ACTIVADO/DÉSACTIVÉ/AKTIVIERT)
             toggleRT.anchoredPosition = new Vector2(-16, 0);
 
             Image toggleBg = toggleObj.AddComponent<Image>();
@@ -1484,26 +1502,30 @@ namespace DigitPark.Editor
             toggle.isOn = defaultValue;
             toggle.targetGraphic = toggleBg;
 
-            // ON/OFF text
-            GameObject checkmark = new GameObject("Label");
+            // ON/OFF text - named uniquely so auto-assigner finds THIS text, not the row label
+            GameObject checkmark = new GameObject($"{name}Text");
             checkmark.transform.SetParent(toggleObj.transform, false);
 
             RectTransform checkRT = checkmark.AddComponent<RectTransform>();
             checkRT.anchorMin = Vector2.zero;
             checkRT.anchorMax = Vector2.one;
-            checkRT.offsetMin = new Vector2(4, 0);
-            checkRT.offsetMax = new Vector2(-4, 0);
+            checkRT.offsetMin = new Vector2(6, 0);
+            checkRT.offsetMax = new Vector2(-6, 0);
 
             TextMeshProUGUI checkText = checkmark.AddComponent<TextMeshProUGUI>();
             checkText.font = Font;
             checkText.text = defaultValue ? "ON" : "OFF";
             checkText.fontSize = FontSizes.Subtitle;
+            checkText.enableAutoSizing = true;
+            checkText.fontSizeMin = FontSizes.AutoMinBody;
+            checkText.fontSizeMax = FontSizes.Subtitle;
             checkText.fontStyle = FontStyles.Bold;
             checkText.color = defaultValue ? DARK_NAVY : TEXT_GRAY;
             checkText.alignment = TextAlignmentOptions.Center;
             checkText.raycastTarget = false;
 
-            toggle.graphic = checkText;
+            // Do NOT set toggle.graphic = text: Unity hides the graphic when isOn=false,
+            // causing "OFF" label to disappear. Text is managed by SettingsManager at runtime.
         }
 
         // ==================== DROPDOWN ====================
@@ -1592,12 +1614,16 @@ namespace DigitPark.Editor
             arrowText.font = Font;
             arrowText.text = "v";
             arrowText.fontSize = FontSizes.H4;
+            arrowText.fontStyle = FontStyles.Bold;
             arrowText.color = CYAN_NEON;
             arrowText.alignment = TextAlignmentOptions.Center;
             arrowText.raycastTarget = false;
 
             // Dropdown Template (required for TMP_Dropdown to function)
             BuildDropdownTemplate(dropdownObj.transform, dropdown);
+
+            // Fix: reparent dropdown list to root Canvas to escape RectMask2D clipping
+            dropdownObj.AddComponent<DigitPark.UI.DropdownScrollFix>();
 
             // Set options
             dropdown.ClearOptions();
@@ -1616,7 +1642,7 @@ namespace DigitPark.Editor
             templateRT.anchorMin = new Vector2(0, 0);
             templateRT.anchorMax = new Vector2(1, 0);
             templateRT.pivot = new Vector2(0.5f, 1);
-            templateRT.sizeDelta = new Vector2(0, 200);
+            templateRT.sizeDelta = new Vector2(0, 500);
 
             Image templateBg = template.AddComponent<Image>();
             templateBg.sprite = WhiteSprite;
@@ -1626,6 +1652,7 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.scrollSensitivity = 6f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -1634,7 +1661,7 @@ namespace DigitPark.Editor
             RectTransform viewportRT = viewport.AddComponent<RectTransform>();
             viewportRT.anchorMin = Vector2.zero;
             viewportRT.anchorMax = Vector2.one;
-            viewportRT.sizeDelta = new Vector2(-2, -2);
+            viewportRT.sizeDelta = Vector2.zero;
             viewportRT.anchoredPosition = Vector2.zero;
 
             Mask viewportMask = viewport.AddComponent<Mask>();
@@ -1710,6 +1737,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
             itemLabelText.font = Font;
             itemLabelText.fontSize = FontSizes.H3;
+            itemLabelText.fontStyle = FontStyles.Bold;
             itemLabelText.color = TEXT_WHITE;
             itemLabelText.alignment = TextAlignmentOptions.Left;
 
@@ -1759,6 +1787,7 @@ namespace DigitPark.Editor
             tmp.font = Font;
             tmp.text = text;
             tmp.fontSize = fontSize;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = alignment;
             tmp.raycastTarget = false;

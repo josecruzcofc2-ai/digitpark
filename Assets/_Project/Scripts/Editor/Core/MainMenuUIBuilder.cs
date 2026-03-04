@@ -8,9 +8,9 @@ using DigitPark.Monetization;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// MainMenu UI Builder v3 - Rediseño 2026
-    /// Layout proporcional que llena toda la pantalla (2.5% top, 2% bottom)
-    /// Cash Battle DORADO prominente como card principal
+    /// MainMenu UI Builder v4 - Polish 2026
+    /// Avatar circular con ring CYAN, sin @ en username, íconos quick access +20%,
+    /// bottom safe area 4%, profile card más presencia visual.
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     /// </summary>
     public class MainMenuUIBuilder : EditorWindow
@@ -42,27 +42,28 @@ namespace DigitPark.Editor
 
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
-        // Sections fill screen with 1% gaps, 2.5% top padding, 2% bottom padding
-        private const float HEADER_TOP = 1.0f;
-        private const float HEADER_BOT = 0.928f;
+        // Uniform 1% (0.010) gap between every section — no overlaps, consistent spacing
+        // Heights: Header=7.2%, Profile=18.5%, Daily=7.0%, Quick=6.0%, Play=15.5%, Cash=17.5%, Extra=18.3%
+        private const float HEADER_TOP = 1.000f;
+        private const float HEADER_BOT = 0.928f;  // height 7.2%
 
-        private const float PROFILE_TOP = 0.920f;
-        private const float PROFILE_BOT = 0.735f;
+        private const float PROFILE_TOP = 0.918f; // gap 1.0%
+        private const float PROFILE_BOT = 0.733f; // height 18.5%
 
-        private const float DAILY_TOP = 0.725f;
-        private const float DAILY_BOT = 0.655f;
+        private const float DAILY_TOP = 0.726f;   // gap 1.0%
+        private const float DAILY_BOT = 0.656f;   // height 7.0%
 
-        private const float QUICK_TOP = 0.635f;
-        private const float QUICK_BOT = 0.575f;
+        private const float QUICK_TOP = 0.636f;   // gap 1.0%
+        private const float QUICK_BOT = 0.576f;   // height 6.0%
 
-        private const float PLAY_TOP = 0.565f;
-        private const float PLAY_BOT = 0.410f;
+        private const float PLAY_TOP = 0.556f;    // gap 1.0%
+        private const float PLAY_BOT = 0.401f;    // height 15.5%
 
-        private const float CASH_TOP = 0.400f;
-        private const float CASH_BOT = 0.225f;
+        private const float CASH_TOP = 0.391f;    // gap 1.0%
+        private const float CASH_BOT = 0.216f;    // height 17.5%
 
-        private const float EXTRA_TOP = 0.215f;
-        private const float EXTRA_BOT = 0.02f;
+        private const float EXTRA_TOP = 0.206f;   // gap 1.0%
+        private const float EXTRA_BOT = 0.023f;   // height 18.3% | iOS home indicator safe area
 
         private const float SIDE_PAD = 20f;
 
@@ -82,7 +83,7 @@ namespace DigitPark.Editor
         private const string ICON_MISSIONS = ICONS_BASE + "/Missions/MissionsIcon.png";
         private const string ICON_PLAY = ICONS_BASE + "/UI/PlayIcon.png";
         private const string ICON_CASH_BATTLE = ICONS_BASE + "/CashBattle/UI/CashBattleIcon.png";
-        private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/icon_gift_day5.png";
+        private const string ICON_DAILY_REWARD = ICONS_BASE + "/DailyRewards/DailyRewardIcon.png";
         private const string ICON_ACHIEVEMENTS = ICONS_BASE + "/UI/AchievementsIcon.png";
         private const string ICON_SHOP = ICONS_BASE + "/UI/ShopIcon.png";
         private const string ICON_PREMIUM = ICONS_BASE + "/UI/PremiumIcon.png";
@@ -226,14 +227,15 @@ namespace DigitPark.Editor
             SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
-            // Settings Button (left)
+            // Settings Button (left) - left edge aligned with ProfileCard SIDE_PAD (20px)
+            // center = 20 + 50 = 70px from left edge
             CreateIconButton(header.transform, "SettingsButton",
-                new Vector2(0, 0.5f), new Vector2(50, 0), new Vector2(100, 100));
+                new Vector2(0, 0.5f), new Vector2(70, 0), new Vector2(100, 100));
 
-            // Logo DIGIT PARK (center-left, narrower to make room for currency)
+            // Logo DIGIT PARK - starts after Settings button right edge (120px / 1080 = 0.111)
             var logo = FindOrCreate(header.transform, "LogoText");
             var logoRT = GetOrAdd<RectTransform>(logo);
-            logoRT.anchorMin = new Vector2(0.10f, 0);
+            logoRT.anchorMin = new Vector2(0.115f, 0);
             logoRT.anchorMax = new Vector2(0.35f, 1);
             logoRT.offsetMin = Vector2.zero;
             logoRT.offsetMax = Vector2.zero;
@@ -241,18 +243,24 @@ namespace DigitPark.Editor
             var logoTMP = GetOrAdd<TextMeshProUGUI>(logo);
             logoTMP.text = "DIGIT PARK";
             logoTMP.fontSize = FontSizes.H4;
+            logoTMP.enableAutoSizing = true;
+            logoTMP.fontSizeMin = FontSizes.Caption;
+            logoTMP.fontSizeMax = FontSizes.H3;
             logoTMP.color = CYAN_NEON;
             logoTMP.fontStyle = FontStyles.Bold;
-            logoTMP.alignment = TextAlignmentOptions.Center;
+            logoTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            logoTMP.enableWordWrapping = false;
+            logoTMP.overflowMode = TextOverflowModes.Overflow;
             logoTMP.enableVertexGradient = true;
             logoTMP.colorGradient = new VertexGradient(CYAN_NEON, CYAN_NEON, CYAN_GLOW, CYAN_GLOW);
 
             // Currency Display (between logo and notifications)
             CreateMainMenuCurrencyDisplay(header.transform);
 
-            // Notifications Button (far right)
+            // Notifications Button (far right) - right edge aligned with ProfileCard SIDE_PAD (20px)
+            // center = 1080 - 20 - 50 = 1010px from left → -70px from right anchor
             var notifBtn = CreateIconButton(header.transform, "NotificationsButton",
-                new Vector2(1, 0.5f), new Vector2(-50, 0), new Vector2(80, 80));
+                new Vector2(1, 0.5f), new Vector2(-70, 0), new Vector2(100, 100));
 
             // Notification Badge
             var badge = FindOrCreate(notifBtn.transform, "Badge");
@@ -341,10 +349,10 @@ namespace DigitPark.Editor
             SetAnchorsWithPad(rt, PROFILE_BOT, PROFILE_TOP);
 
             var bg = GetOrAdd<Image>(card);
-            bg.color = CARD_BG;
+            bg.color = CARD_BG_LIGHT;
             var outline = GetOrAdd<Outline>(card);
-            outline.effectColor = CYAN_DARK;
-            outline.effectDistance = new Vector2(2, 2);
+            outline.effectColor = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.45f);
+            outline.effectDistance = new Vector2(3, 3);
 
             // Whole card is userButton
             var btn = GetOrAdd<Button>(card);
@@ -356,24 +364,39 @@ namespace DigitPark.Editor
 
             // === Centered layout ===
 
-            // Avatar Frame (centered, dark bg + white ring)
+            // Avatar Frame (centered, circular with cyan neon ring)
             var frame = new GameObject("AvatarFrame");
             frame.transform.SetParent(card.transform, false);
             var frameRT = frame.AddComponent<RectTransform>();
             frameRT.anchorMin = new Vector2(0.5f, 0.63f);
             frameRT.anchorMax = new Vector2(0.5f, 0.63f);
-            frameRT.sizeDelta = new Vector2(200, 200);
-            frame.AddComponent<Image>().color = CARD_BG;
-            var fo = frame.AddComponent<Outline>();
-            fo.effectColor = Color.white;
-            fo.effectDistance = new Vector2(3, 3);
+            frameRT.pivot = new Vector2(0.5f, 0.5f);
+            frameRT.sizeDelta = new Vector2(220, 220);
+            // Outer cyan ring using built-in circle sprite
+            Sprite circleKnob = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
+            var frameImg = frame.AddComponent<Image>();
+            if (circleKnob != null) frameImg.sprite = circleKnob;
+            frameImg.color = CYAN_NEON;
 
-            // Avatar Image
+            // Inner mask circle - clips avatar to circle, shows as background
+            var avatarMask = new GameObject("AvatarMask");
+            avatarMask.transform.SetParent(frame.transform, false);
+            var maskRT = avatarMask.AddComponent<RectTransform>();
+            maskRT.anchorMin = new Vector2(0.07f, 0.07f);
+            maskRT.anchorMax = new Vector2(0.93f, 0.93f);
+            maskRT.offsetMin = Vector2.zero;
+            maskRT.offsetMax = Vector2.zero;
+            var maskImg = avatarMask.AddComponent<Image>();
+            if (circleKnob != null) maskImg.sprite = circleKnob;
+            maskImg.color = CARD_BG_LIGHT;
+            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
+
+            // Avatar Image (inside mask, fills circle, clipped circular)
             var avImg = new GameObject("AvatarImage");
-            avImg.transform.SetParent(frame.transform, false);
+            avImg.transform.SetParent(avatarMask.transform, false);
             var avImgRT = avImg.AddComponent<RectTransform>();
-            avImgRT.anchorMin = new Vector2(0.06f, 0.06f);
-            avImgRT.anchorMax = new Vector2(0.94f, 0.94f);
+            avImgRT.anchorMin = Vector2.zero;
+            avImgRT.anchorMax = Vector2.one;
             avImgRT.offsetMin = Vector2.zero;
             avImgRT.offsetMax = Vector2.zero;
             var avImgComp = avImg.AddComponent<Image>();
@@ -402,7 +425,7 @@ namespace DigitPark.Editor
             userRT.offsetMin = Vector2.zero;
             userRT.offsetMax = Vector2.zero;
             var userTMP = user.AddComponent<TextMeshProUGUI>();
-            userTMP.text = "@Username";
+            userTMP.text = "Username";
             userTMP.fontSize = FontSizes.H3;
             userTMP.color = TEXT_WHITE;
             userTMP.fontStyle = FontStyles.Bold;
@@ -420,7 +443,7 @@ namespace DigitPark.Editor
             lvlRT.sizeDelta = new Vector2(140, 48);
             lvlBadge.AddComponent<Image>().color = CYAN_NEON;
 
-            var lvlText = new GameObject("Text");
+            var lvlText = new GameObject("LevelText");
             lvlText.transform.SetParent(lvlBadge.transform, false);
             var ltRT = lvlText.AddComponent<RectTransform>();
             ltRT.anchorMin = Vector2.zero;
@@ -478,7 +501,7 @@ namespace DigitPark.Editor
             tcRT.offsetMin = new Vector2(155, 15);
             tcRT.offsetMax = new Vector2(0, -15);
 
-            var title = FindOrCreate(textC.transform, "Title");
+            var title = FindOrCreate(textC.transform, "DailyRewardCardTitle");
             var tRT = GetOrAdd<RectTransform>(title);
             tRT.anchorMin = new Vector2(0, 0.55f);
             tRT.anchorMax = new Vector2(1, 1);
@@ -487,11 +510,15 @@ namespace DigitPark.Editor
             var tTMP = GetOrAdd<TextMeshProUGUI>(title);
             tTMP.text = "DAILY REWARD";
             tTMP.fontSize = FontSizes.Body;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.Caption;
+            tTMP.fontSizeMax = FontSizes.Body;
             tTMP.color = GOLD;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
+            tTMP.enableWordWrapping = false;
 
-            var sub = FindOrCreate(textC.transform, "Subtitle");
+            var sub = FindOrCreate(textC.transform, "DailyRewardSubtitle");
             var sRT = GetOrAdd<RectTransform>(sub);
             sRT.anchorMin = new Vector2(0, 0);
             sRT.anchorMax = new Vector2(1, 0.5f);
@@ -499,9 +526,14 @@ namespace DigitPark.Editor
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Day 3 of 7 - Claim your reward!";
-            sTMP.fontSize = FontSizes.Body;
+            sTMP.fontSize = FontSizes.BodySmall;
+            sTMP.enableAutoSizing = true;
+            sTMP.fontSizeMin = FontSizes.Caption;
+            sTMP.fontSizeMax = FontSizes.BodySmall;
             sTMP.color = TEXT_SECONDARY;
+            sTMP.fontStyle = FontStyles.Bold;
             sTMP.alignment = TextAlignmentOptions.Left;
+            sTMP.enableWordWrapping = true;
 
             // Claim Button
             var claimBtn = FindOrCreate(card.transform, "ClaimButton");
@@ -515,7 +547,7 @@ namespace DigitPark.Editor
             cBg.color = GREEN_SUCCESS;
             GetOrAdd<Button>(claimBtn).targetGraphic = cBg;
 
-            var cText = FindOrCreate(claimBtn.transform, "Text");
+            var cText = FindOrCreate(claimBtn.transform, "ClaimButtonText");
             var ctRT = GetOrAdd<RectTransform>(cText);
             ctRT.anchorMin = Vector2.zero;
             ctRT.anchorMax = Vector2.one;
@@ -524,6 +556,9 @@ namespace DigitPark.Editor
             var ctTMP = GetOrAdd<TextMeshProUGUI>(cText);
             ctTMP.text = "Claim";
             ctTMP.fontSize = FontSizes.Body;
+            ctTMP.enableAutoSizing = true;
+            ctTMP.fontSizeMin = FontSizes.Caption;
+            ctTMP.fontSizeMax = FontSizes.Body;
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -587,12 +622,12 @@ namespace DigitPark.Editor
             var icon = new GameObject("Icon");
             icon.transform.SetParent(card.transform, false);
             icon.AddComponent<RectTransform>();
-            icon.AddComponent<LayoutElement>().preferredHeight = 72;
+            icon.AddComponent<LayoutElement>().preferredHeight = 86; // +20% tap target
             var iconImg = icon.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
 
-            var labelGO = new GameObject("Label");
+            var labelGO = new GameObject(name.Replace("Card", "") + "Label");
             labelGO.transform.SetParent(card.transform, false);
             labelGO.AddComponent<RectTransform>();
             labelGO.AddComponent<LayoutElement>().preferredHeight = 44;
@@ -665,7 +700,7 @@ namespace DigitPark.Editor
             tcRT.offsetMin = new Vector2(250, 25);
             tcRT.offsetMax = new Vector2(-60, -25);
 
-            var title = FindOrCreate(textC.transform, "Title");
+            var title = FindOrCreate(textC.transform, "PlayCardTitle");
             var tRT = GetOrAdd<RectTransform>(title);
             tRT.anchorMin = new Vector2(0, 0.5f);
             tRT.anchorMax = new Vector2(1, 1);
@@ -678,7 +713,7 @@ namespace DigitPark.Editor
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
 
-            var sub = FindOrCreate(textC.transform, "Subtitle");
+            var sub = FindOrCreate(textC.transform, "PlayCardSubtitle");
             var sRT = GetOrAdd<RectTransform>(sub);
             sRT.anchorMin = new Vector2(0, 0);
             sRT.anchorMax = new Vector2(1, 0.45f);
@@ -687,8 +722,13 @@ namespace DigitPark.Editor
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Choose a game and compete";
             sTMP.fontSize = FontSizes.H4;
+            sTMP.enableAutoSizing = true;
+            sTMP.fontSizeMin = FontSizes.Caption;
+            sTMP.fontSizeMax = FontSizes.H4;
+            sTMP.fontStyle = FontStyles.Bold;
             sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
             sTMP.alignment = TextAlignmentOptions.Left;
+            sTMP.enableWordWrapping = true;
 
             // Arrow
             var arrow = FindOrCreate(card.transform, "Arrow");
@@ -786,7 +826,7 @@ namespace DigitPark.Editor
             tcRT.offsetMax = new Vector2(-60, -20);
 
             // Title
-            var title = FindOrCreate(textC.transform, "Title");
+            var title = FindOrCreate(textC.transform, "CashBattleCardTitle");
             var tRT = GetOrAdd<RectTransform>(title);
             tRT.anchorMin = new Vector2(0, 0.50f);
             tRT.anchorMax = new Vector2(1, 1);
@@ -800,7 +840,7 @@ namespace DigitPark.Editor
             tTMP.alignment = TextAlignmentOptions.Left;
 
             // Subtitle
-            var sub = FindOrCreate(textC.transform, "Subtitle");
+            var sub = FindOrCreate(textC.transform, "CashBattleCardSubtitle");
             var sRT = GetOrAdd<RectTransform>(sub);
             sRT.anchorMin = new Vector2(0, 0.18f);
             sRT.anchorMax = new Vector2(1, 0.45f);
@@ -809,8 +849,13 @@ namespace DigitPark.Editor
             var sTMP = GetOrAdd<TextMeshProUGUI>(sub);
             sTMP.text = "Compete for real money";
             sTMP.fontSize = FontSizes.H4;
+            sTMP.enableAutoSizing = true;
+            sTMP.fontSizeMin = FontSizes.Caption;
+            sTMP.fontSizeMax = FontSizes.H4;
+            sTMP.fontStyle = FontStyles.Bold;
             sTMP.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
             sTMP.alignment = TextAlignmentOptions.Left;
+            sTMP.enableWordWrapping = true;
 
             // 18+ badge
             var age = FindOrCreate(textC.transform, "AgeBadge");
@@ -905,7 +950,7 @@ namespace DigitPark.Editor
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
 
-            var labelGO = new GameObject("Label");
+            var labelGO = new GameObject(name.Replace("Card", "") + "Label");
             labelGO.transform.SetParent(card.transform, false);
             labelGO.AddComponent<RectTransform>();
             labelGO.AddComponent<LayoutElement>().preferredHeight = 60;
@@ -1048,7 +1093,7 @@ namespace DigitPark.Editor
             int a = 0;
             a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
             a += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarFrame/AvatarImage", ICON_AVATAR_DEFAULT);
+            a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarFrame/AvatarMask/AvatarImage", ICON_AVATAR_DEFAULT);
             // Currency Display icons in header
             a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/GemsDisplay/Icon", ICON_GEM);
             a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/CoinsDisplay/Icon", ICON_COIN);

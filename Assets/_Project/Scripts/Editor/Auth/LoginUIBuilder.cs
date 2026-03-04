@@ -23,6 +23,8 @@ namespace DigitPark.Editor
         private static readonly Color InputBackground = new Color(0.078f, 0.11f, 0.22f, 1f); // Más oscuro para inputs
         private static readonly Color TextWhite = Color.white;
         private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
+        private static readonly Color GoogleBorderGray = new Color(0.455f, 0.467f, 0.459f, 1f); // #747775 Google Light theme border
+        private static readonly Color NearBlack = new Color(0.122f, 0.122f, 0.122f, 1f); // #1F1F1F Google text color
 
         // Paths
         private const string WHITE_SPRITE_PATH = "Assets/_Project/Art/Icons/UI/WhiteSquare.png";
@@ -42,7 +44,10 @@ namespace DigitPark.Editor
         private const float ELEMENT_SPACING = 20f;
         private const float INPUT_HEIGHT = 90f;
         private const float BUTTON_HEIGHT = 120f;
-        private const float SOCIAL_BUTTON_HEIGHT = 70f; // Más grandes según guidelines
+        private const float SOCIAL_BUTTON_HEIGHT = 100f; // Apple HIG: min 30pt (90px @3x), recommended 44pt
+        private const float SOCIAL_ICON_SIZE = 44f; // Icon size per Apple/Google guidelines
+        private const float SOCIAL_ICON_PADDING = 28f; // Left padding for icon
+        private const float SOCIAL_FONT_SIZE = 44f; // ~43% of button height per Apple HIG (43% of 100 = 43)
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
@@ -193,7 +198,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 500);
+            cardRect.anchoredPosition = new Vector2(0, 440); // Adjusted for taller social buttons
 
             // Card background with neon border
             Image cardBg = card.AddComponent<Image>();
@@ -231,24 +236,25 @@ namespace DigitPark.Editor
             CreateCenteredLink(content.transform, "ForgotPasswordButton", "Forgot your password?");
             CreateCenteredCheckbox(content.transform);
             CreatePrimaryButton(content.transform, "LoginButton", "Sign In");
-            CreateSpacer(content.transform, 10f); // Espacio extra antes de botones sociales
-            CreateSocialButton(content.transform, "GoogleButton", "Sign in with Google", GoogleIcon, Color.white, Color.black);
-            CreateSocialButton(content.transform, "AppleButton", "Sign in with Apple", AppleIcon, Color.black, Color.white);
+            CreateOrDivider(content.transform);
+            // Google Sign-In: Light theme (white bg, #747775 border, #1F1F1F text)
+            CreateSocialButton(content.transform, "GoogleButton", "Sign in with Google", GoogleIcon, Color.white, NearBlack, GoogleBorderGray);
+            // Apple Sign-In: White variant (white bg, black text+logo — correct for dark backgrounds per Apple HIG)
+            CreateSocialButton(content.transform, "AppleButton", "Sign in with Apple", AppleIcon, Color.white, Color.black, null);
         }
 
         private static void BuildFooter(Canvas canvas)
         {
-            GameObject footer = new GameObject("Footer");
+            GameObject footer = new GameObject("NoAccountText");
             footer.transform.SetParent(canvas.transform, false);
 
             RectTransform rect = footer.AddComponent<RectTransform>();
             rect.anchorMin = new Vector2(0.5f, 0);
             rect.anchorMax = new Vector2(0.5f, 0);
             rect.pivot = new Vector2(0.5f, 0);
-            rect.sizeDelta = new Vector2(400, 50);
-            rect.anchoredPosition = new Vector2(0, 190); // Arriba del botón "Crear cuenta"
+            rect.sizeDelta = new Vector2(600, 60);
+            rect.anchoredPosition = new Vector2(0, 190);
 
-            // "¿No tienes cuenta?"
             TextMeshProUGUI question = footer.AddComponent<TextMeshProUGUI>();
             question.font = DefaultFont;
             question.text = "Don't have an account?";
@@ -282,7 +288,8 @@ namespace DigitPark.Editor
             Button btn = registerBtn.AddComponent<Button>();
             btn.targetGraphic = btnBg;
 
-            GameObject textObj = new GameObject("Text");
+            // Named for AutoLocalizer: "RegisterButtonText"=>"register_button"
+            GameObject textObj = new GameObject("RegisterButtonText");
             textObj.transform.SetParent(registerBtn.transform, false);
 
             RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -307,7 +314,7 @@ namespace DigitPark.Editor
 
         private static void CreateTitle(Transform parent, string text)
         {
-            GameObject title = new GameObject("Title");
+            GameObject title = new GameObject("LoginTitle");
             title.transform.SetParent(parent, false);
 
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
@@ -357,8 +364,9 @@ namespace DigitPark.Editor
             textAreaRect.offsetMin = new Vector2(20, 0);
             textAreaRect.offsetMax = new Vector2(isPassword ? -100 : -20, 0);
 
-            // Placeholder
-            GameObject placeholderObj = new GameObject("Placeholder");
+            // Placeholder — named for AutoLocalizer: "EmailInput"→"EmailPlaceholder", "PasswordInput"→"PasswordPlaceholder"
+            string placeholderGoName = name.Replace("Input", "") + "Placeholder";
+            GameObject placeholderObj = new GameObject(placeholderGoName);
             placeholderObj.transform.SetParent(textArea.transform, false);
 
             RectTransform placeholderRect = placeholderObj.AddComponent<RectTransform>();
@@ -512,8 +520,8 @@ namespace DigitPark.Editor
             toggle.targetGraphic = bgImage;
             toggle.graphic = checkImage;
 
-            // Label
-            GameObject label = new GameObject("Label");
+            // Label — named for AutoLocalizer: "RememberMeText"=>"remember_me"
+            GameObject label = new GameObject("RememberMeText");
             label.transform.SetParent(row.transform, false);
 
             TextMeshProUGUI labelText = label.AddComponent<TextMeshProUGUI>();
@@ -523,9 +531,13 @@ namespace DigitPark.Editor
             labelText.fontStyle = FontStyles.Bold;
             labelText.color = TextWhite;
             labelText.enableWordWrapping = false;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.Caption;
+            labelText.fontSizeMax = FontSizes.Body;
+            labelText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement labelLayout = label.AddComponent<LayoutElement>();
             labelLayout.preferredWidth = 500;
-            labelLayout.preferredHeight = 50;
+            labelLayout.preferredHeight = 60;
         }
 
         private static void CreateSpacer(Transform parent, float height)
@@ -552,7 +564,8 @@ namespace DigitPark.Editor
             LayoutElement layout = button.AddComponent<LayoutElement>();
             layout.preferredHeight = BUTTON_HEIGHT;
 
-            GameObject textObj = new GameObject("Text");
+            // Named for AutoLocalizer: "LoginButton"→"LoginButtonText"=>"login_button"
+            GameObject textObj = new GameObject(name + "Text");
             textObj.transform.SetParent(button.transform, false);
 
             RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -574,7 +587,70 @@ namespace DigitPark.Editor
         }
 
 
-        private static void CreateSocialButton(Transform parent, string name, string text, Sprite icon, Color bgColor, Color textColor)
+        /// <summary>
+        /// Creates an "── or ──" divider between primary login and social buttons (standard App Store pattern)
+        /// </summary>
+        private static void CreateOrDivider(Transform parent)
+        {
+            GameObject divider = new GameObject("OrDivider");
+            divider.transform.SetParent(parent, false);
+
+            LayoutElement layout = divider.AddComponent<LayoutElement>();
+            layout.preferredHeight = 50f;
+
+            // Left line
+            GameObject leftLine = new GameObject("LeftLine");
+            leftLine.transform.SetParent(divider.transform, false);
+
+            RectTransform leftRect = leftLine.AddComponent<RectTransform>();
+            leftRect.anchorMin = new Vector2(0, 0.5f);
+            leftRect.anchorMax = new Vector2(0.42f, 0.5f);
+            leftRect.sizeDelta = new Vector2(0, 2);
+
+            Image leftImg = leftLine.AddComponent<Image>();
+            leftImg.sprite = WhiteSprite;
+            leftImg.color = TextGray;
+
+            // "or" text
+            GameObject orText = new GameObject("OrText");
+            orText.transform.SetParent(divider.transform, false);
+
+            RectTransform orRect = orText.AddComponent<RectTransform>();
+            orRect.anchorMin = new Vector2(0.42f, 0);
+            orRect.anchorMax = new Vector2(0.58f, 1);
+            orRect.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI text = orText.AddComponent<TextMeshProUGUI>();
+            text.font = DefaultFont;
+            text.text = "or";
+            text.fontSize = FontSizes.Body;
+            text.fontStyle = FontStyles.Bold;
+            text.color = TextGray;
+            text.alignment = TextAlignmentOptions.Center;
+
+            // Right line
+            GameObject rightLine = new GameObject("RightLine");
+            rightLine.transform.SetParent(divider.transform, false);
+
+            RectTransform rightRect = rightLine.AddComponent<RectTransform>();
+            rightRect.anchorMin = new Vector2(0.58f, 0.5f);
+            rightRect.anchorMax = new Vector2(1, 0.5f);
+            rightRect.sizeDelta = new Vector2(0, 2);
+
+            Image rightImg = rightLine.AddComponent<Image>();
+            rightImg.sprite = WhiteSprite;
+            rightImg.color = TextGray;
+        }
+
+        /// <summary>
+        /// Creates a social sign-in button compliant with Apple HIG and Google Branding Guidelines.
+        /// - Icon: left-aligned at fixed position (not centered)
+        /// - Text: centered across full button width
+        /// - Height: 100px (≈33pt, above Apple's 30pt minimum)
+        /// - Font: 43% of height per Apple HIG
+        /// - Optional border for Google Light theme (#747775)
+        /// </summary>
+        private static void CreateSocialButton(Transform parent, string name, string text, Sprite icon, Color bgColor, Color textColor, Color? borderColor)
         {
             GameObject button = new GameObject(name);
             button.transform.SetParent(parent, false);
@@ -583,7 +659,13 @@ namespace DigitPark.Editor
             bg.sprite = WhiteSprite;
             bg.color = bgColor;
 
-            // No outline/glow - violates Google/Apple guidelines
+            // Border per platform guidelines (Google Light: #747775)
+            if (borderColor.HasValue)
+            {
+                Outline outline = button.AddComponent<Outline>();
+                outline.effectColor = borderColor.Value;
+                outline.effectDistance = new Vector2(1, -1);
+            }
 
             Button btn = button.AddComponent<Button>();
             btn.targetGraphic = bg;
@@ -591,15 +673,7 @@ namespace DigitPark.Editor
             LayoutElement layout = button.AddComponent<LayoutElement>();
             layout.preferredHeight = SOCIAL_BUTTON_HEIGHT;
 
-            // Horizontal layout for icon + text (según guidelines: spacing ~24px)
-            HorizontalLayoutGroup hLayout = button.AddComponent<HorizontalLayoutGroup>();
-            hLayout.childAlignment = TextAnchor.MiddleCenter;
-            hLayout.childControlWidth = true;
-            hLayout.childControlHeight = false;
-            hLayout.spacing = 24f;
-            hLayout.padding = new RectOffset(24, 24, 0, 0);
-
-            // Icon (18x18dp per guidelines = ~28px in Unity)
+            // Icon — left-aligned per Apple HIG & Google branding guidelines
             GameObject iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(button.transform, false);
 
@@ -608,29 +682,32 @@ namespace DigitPark.Editor
             iconImage.preserveAspect = true;
 
             RectTransform iconRect = iconObj.GetComponent<RectTransform>();
-            iconRect.sizeDelta = new Vector2(28, 28);
-            LayoutElement iconLE = iconObj.AddComponent<LayoutElement>();
-            iconLE.minWidth = 28;
-            iconLE.preferredWidth = 28;
+            iconRect.anchorMin = new Vector2(0, 0.5f);
+            iconRect.anchorMax = new Vector2(0, 0.5f);
+            iconRect.pivot = new Vector2(0, 0.5f);
+            iconRect.anchoredPosition = new Vector2(SOCIAL_ICON_PADDING, 0);
+            iconRect.sizeDelta = new Vector2(SOCIAL_ICON_SIZE, SOCIAL_ICON_SIZE);
 
-            // Text
-            GameObject textObj = new GameObject("Text");
+            // Named for AutoLocalizer: "GoogleButton"→"GoogleSignInText", "AppleButton"→"AppleSignInText"
+            string textGoName = name.Replace("Button", "") + "SignInText";
+            GameObject textObj = new GameObject(textGoName);
             textObj.transform.SetParent(button.transform, false);
 
-            LayoutElement textLE = textObj.AddComponent<LayoutElement>();
-            textLE.flexibleWidth = 1;
-            textLE.preferredHeight = SOCIAL_BUTTON_HEIGHT;
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
             buttonText.font = DefaultFont;
             buttonText.text = text;
-            buttonText.fontSize = FontSizes.Body;
+            buttonText.fontSize = SOCIAL_FONT_SIZE;
             buttonText.fontStyle = FontStyles.Bold;
             buttonText.color = textColor;
-            buttonText.alignment = TextAlignmentOptions.Left;
+            buttonText.alignment = TextAlignmentOptions.Center;
             buttonText.enableAutoSizing = true;
             buttonText.fontSizeMin = FontSizes.AutoMinBody;
-            buttonText.fontSizeMax = FontSizes.Body;
+            buttonText.fontSizeMax = SOCIAL_FONT_SIZE;
             buttonText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
@@ -687,6 +764,7 @@ namespace DigitPark.Editor
                 arrowText.font = DefaultFont;
                 arrowText.text = "<";
                 arrowText.fontSize = FontSizes.Body;
+                arrowText.fontStyle = FontStyles.Bold;
                 arrowText.color = CyanNeon;
                 arrowText.alignment = TextAlignmentOptions.Center;
 
@@ -723,19 +801,21 @@ namespace DigitPark.Editor
             spinnerImage.color = CyanNeon;
 
             // Loading text
-            GameObject loadingText = new GameObject("LoadingText");
+            // Named for AutoLocalizer: "GeneralLoadingText"=>"loading"
+            GameObject loadingText = new GameObject("GeneralLoadingText");
             loadingText.transform.SetParent(loadingPanel.transform, false);
 
             RectTransform textRect = loadingText.AddComponent<RectTransform>();
             textRect.anchorMin = new Vector2(0.5f, 0.5f);
             textRect.anchorMax = new Vector2(0.5f, 0.5f);
-            textRect.sizeDelta = new Vector2(300, 50);
+            textRect.sizeDelta = new Vector2(400, 60);
             textRect.anchoredPosition = new Vector2(0, -80);
 
             TextMeshProUGUI text = loadingText.AddComponent<TextMeshProUGUI>();
             text.font = DefaultFont;
             text.text = "Loading...";
             text.fontSize = FontSizes.Body;
+            text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
 

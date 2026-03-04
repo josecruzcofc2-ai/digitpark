@@ -67,6 +67,11 @@ namespace DigitPark.Managers
         [SerializeField] private ConfirmPanelUI logoutConfirmPanel;
         [SerializeField] private ErrorPanelUI errorPanel;
 
+        [Header("UI - Vibration Toggle")]
+        [SerializeField] private Toggle vibrationToggle;
+        [SerializeField] private TextMeshProUGUI vibrationToggleText;
+        [SerializeField] private Image vibrationToggleBg;
+
         [Header("UI - Shop")]
         [SerializeField] private Button shopButton;
 
@@ -102,6 +107,7 @@ namespace DigitPark.Managers
 
             LoadPlayerData();
             LoadVolumeSettings();
+            InitVibrationToggle();
             SetupLanguageDropdown();
             SetupLanguageStyler();
             SetupThemeDropdown();
@@ -264,6 +270,7 @@ namespace DigitPark.Managers
             // Sliders
             soundVolumeSlider?.onValueChanged.AddListener(OnSoundVolumeChanged);
             effectsVolumeSlider?.onValueChanged.AddListener(OnEffectsVolumeChanged);
+            vibrationToggle?.onValueChanged.AddListener(OnVibrationToggled);
 
             // Language Dropdown - ya se configura en SetupLanguageDropdown()
 
@@ -554,6 +561,59 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
+        /// Initializes vibration toggle UI state from saved PlayerPrefs.
+        /// Must be called before SetupListeners to avoid double-fire.
+        /// </summary>
+        private void InitVibrationToggle()
+        {
+            if (vibrationToggle == null) return;
+
+            // Fallback: find toggle text dynamically if serialized ref is missing
+            if (vibrationToggleText == null)
+            {
+                var candidate = vibrationToggle.GetComponentInChildren<TextMeshProUGUI>();
+                if (candidate != null)
+                {
+                    vibrationToggleText = candidate;
+                    Debug.Log("[Settings] vibrationToggleText asignado dinámicamente via fallback");
+                }
+            }
+
+            bool isOn = IsVibrationEnabled();
+            vibrationToggle.SetIsOnWithoutNotify(isOn);
+            UpdateVibrationUI(isOn);
+        }
+
+        private void OnVibrationToggled(bool isOn)
+        {
+            SetVibrationEnabled(isOn);
+            UpdateVibrationUI(isOn);
+        }
+
+        private void UpdateVibrationUI(bool isOn)
+        {
+            if (vibrationToggleText != null)
+            {
+                vibrationToggleText.text = isOn
+                    ? AutoLocalizer.Get("toggle_on")
+                    : AutoLocalizer.Get("toggle_off");
+
+                vibrationToggleText.color = isOn
+                    ? new Color(0.02f, 0.04f, 0.08f, 1f)   // DARK_NAVY (legible on cyan)
+                    : new Color(0.6f, 0.6f, 0.65f, 1f);    // TEXT_GRAY
+            }
+            else
+            {
+                Debug.LogWarning("[Settings] vibrationToggleText es null — ejecuta SettingsReferenceAssigner");
+            }
+
+            if (vibrationToggleBg != null)
+                vibrationToggleBg.color = isOn
+                    ? new Color(0f, 1f, 1f, 1f)            // CYAN_NEON
+                    : new Color(0.25f, 0.25f, 0.3f, 1f);   // TOGGLE_OFF_BG
+        }
+
+        /// <summary>
         /// Verifica si la vibración está habilitada
         /// </summary>
         public static bool IsVibrationEnabled()
@@ -764,8 +824,8 @@ namespace DigitPark.Managers
             if (deleteConfirmPanel != null)
             {
                 deleteConfirmPanel.Show(
-                    "Eliminar Cuenta",
-                    "¿Estas seguro que deseas eliminar tu cuenta?\n\nEsta accion no se puede deshacer. Todos tus datos, progreso y compras se perderan permanentemente.",
+                    AutoLocalizer.Get("delete_account_title"),
+                    AutoLocalizer.Get("delete_account_confirm_message"),
                     OnConfirmDeleteClicked,
                     null
                 );
@@ -813,8 +873,8 @@ namespace DigitPark.Managers
             if (logoutConfirmPanel != null)
             {
                 logoutConfirmPanel.Show(
-                    "Cerrar Sesion",
-                    "¿Estas seguro que deseas cerrar sesion?\n\nTendras que iniciar sesion de nuevo.",
+                    AutoLocalizer.Get("logout_title"),
+                    AutoLocalizer.Get("logout_confirm_message"),
                     OnConfirmLogoutClicked,
                     null
                 );
@@ -1053,8 +1113,8 @@ namespace DigitPark.Managers
             if (selfExclusionConfirmPanel != null)
             {
                 selfExclusionConfirmPanel.Show(
-                    "Auto-Exclusion",
-                    "¿Deseas excluirte de Cash Battle?\n\nEsto desactivara tu acceso a todas las funciones de dinero real. Deberas contactar soporte para reactivar tu cuenta.\n\nIMPORTANTE: Retira tu saldo antes de continuar.",
+                    AutoLocalizer.Get("self_exclusion_title"),
+                    AutoLocalizer.Get("self_exclusion_message"),
                     OnConfirmSelfExclusion,
                     null
                 );
@@ -1068,7 +1128,7 @@ namespace DigitPark.Managers
             // TODO: Implementar llamada a Triumph SDK para auto-exclusion
             // Por ahora, mostrar mensaje de contacto
             selfExclusionConfirmPanel?.Hide();
-            errorPanel?.Show("Para completar la auto-exclusion, contacta a soporte:\nsupport@digitpark.com\n\nRecuerda retirar tu saldo primero.");
+            errorPanel?.Show(AutoLocalizer.Get("self_exclusion_contact_message"));
         }
 
         #endregion

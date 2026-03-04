@@ -54,6 +54,7 @@ namespace DigitPark.Editor
         #region Paths
 
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         #endregion
 
@@ -204,7 +205,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea", "LoadingOverlay", "StartingOverlay" };
+            string[] toClean = { "Background", "SafeArea", "LoadingOverlay", "StartingOverlay", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
@@ -403,6 +404,17 @@ namespace DigitPark.Editor
                 rect.pivot = new Vector2(0, 0.5f);
                 rect.anchoredPosition = new Vector2(20, 0);
                 rect.sizeDelta = new Vector2(50, 50);
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -471,6 +483,7 @@ namespace DigitPark.Editor
             gameTypeTMP.fontSize = FontSizes.Body;
             gameTypeTMP.color = TEXT_SECONDARY;
             gameTypeTMP.alignment = TextAlignmentOptions.Left;
+            gameTypeTMP.fontStyle = FontStyles.Bold;
 
             GameObject entryFeeObj = CreateElement(row1.transform, "EntryFeeText",
                 new Vector2(0.5f, 0), new Vector2(1, 1));
@@ -518,6 +531,7 @@ namespace DigitPark.Editor
             playersProgressTMP.fontSize = FontSizes.Body;
             playersProgressTMP.color = TEXT_PRIMARY;
             playersProgressTMP.alignment = TextAlignmentOptions.Center;
+            playersProgressTMP.fontStyle = FontStyles.Bold;
 
             // Countdown Text
             GameObject countdownObj = CreateElement(infoCard.transform, "CountdownText",
@@ -527,6 +541,7 @@ namespace DigitPark.Editor
             countdownTMP.fontSize = FontSizes.Body;
             countdownTMP.color = TEXT_SECONDARY;
             countdownTMP.alignment = TextAlignmentOptions.Center;
+            countdownTMP.fontStyle = FontStyles.Bold;
 
             // Rules Row
             GameObject rulesRow = CreateElement(infoCard.transform, "RulesRow",
@@ -539,6 +554,7 @@ namespace DigitPark.Editor
             attemptsTMP.fontSize = FontSizes.Body;
             attemptsTMP.color = TEXT_SECONDARY;
             attemptsTMP.alignment = TextAlignmentOptions.Left;
+            attemptsTMP.fontStyle = FontStyles.Bold;
             attemptsTMP.enableAutoSizing = true;
             attemptsTMP.fontSizeMin = FontSizes.AutoMinBody;
             attemptsTMP.fontSizeMax = FontSizes.Body;
@@ -550,6 +566,7 @@ namespace DigitPark.Editor
             timeLimitTMP.fontSize = FontSizes.Body;
             timeLimitTMP.color = TEXT_SECONDARY;
             timeLimitTMP.alignment = TextAlignmentOptions.Right;
+            timeLimitTMP.fontStyle = FontStyles.Bold;
             timeLimitTMP.enableAutoSizing = true;
             timeLimitTMP.fontSizeMin = FontSizes.AutoMinBody;
             timeLimitTMP.fontSizeMax = FontSizes.Body;
@@ -640,6 +657,7 @@ namespace DigitPark.Editor
             amountTMP.fontSize = FontSizes.Body;
             amountTMP.color = color;
             amountTMP.alignment = TextAlignmentOptions.Center;
+            amountTMP.fontStyle = FontStyles.Bold;
         }
 
         #endregion
@@ -714,7 +732,7 @@ namespace DigitPark.Editor
             btn.targetGraphic = bg;
 
             // Tab Label
-            GameObject labelObj = new GameObject("Label");
+            GameObject labelObj = new GameObject("TabLabel");
             labelObj.transform.SetParent(tab.transform, false);
 
             RectTransform labelRT = labelObj.AddComponent<RectTransform>();
@@ -860,6 +878,7 @@ namespace DigitPark.Editor
             nameTMP.fontSize = FontSizes.Body;
             nameTMP.color = TEXT_PRIMARY;
             nameTMP.alignment = TextAlignmentOptions.Left;
+            nameTMP.fontStyle = FontStyles.Bold;
 
             // Score
             GameObject scoreObj = new GameObject("Score");
@@ -877,6 +896,7 @@ namespace DigitPark.Editor
             scoreTMP.fontSize = FontSizes.Body;
             scoreTMP.color = TEXT_GOLD;
             scoreTMP.alignment = TextAlignmentOptions.Right;
+            scoreTMP.fontStyle = FontStyles.Bold;
         }
 
         private static void CreateChatContent(Transform parent)
@@ -986,9 +1006,10 @@ namespace DigitPark.Editor
             phTMP.fontSize = FontSizes.Body;
             phTMP.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
             phTMP.alignment = TextAlignmentOptions.Left;
+            phTMP.fontStyle = FontStyles.Bold;
 
             // Input Text
-            GameObject inputTextObj = new GameObject("Text");
+            GameObject inputTextObj = new GameObject("ChatInputText");
             inputTextObj.transform.SetParent(textArea.transform, false);
 
             RectTransform itRT = inputTextObj.AddComponent<RectTransform>();
@@ -997,6 +1018,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTMP = inputTextObj.AddComponent<TextMeshProUGUI>();
             inputTMP.text = "";
             inputTMP.fontSize = FontSizes.Body;
+            inputTMP.fontStyle = FontStyles.Bold;
             inputTMP.color = TEXT_PRIMARY;
             inputTMP.alignment = TextAlignmentOptions.Left;
 
@@ -1019,7 +1041,7 @@ namespace DigitPark.Editor
             Button sendButton = sendBtn.AddComponent<Button>();
             sendButton.targetGraphic = sendBg;
 
-            GameObject sendTextObj = new GameObject("Text");
+            GameObject sendTextObj = new GameObject("SendChatButtonText");
             sendTextObj.transform.SetParent(sendBtn.transform, false);
 
             RectTransform stRT = sendTextObj.AddComponent<RectTransform>();
@@ -1159,6 +1181,7 @@ namespace DigitPark.Editor
             statusTMP.fontSize = FontSizes.H4;
             statusTMP.color = TEXT_GOLD;
             statusTMP.alignment = TextAlignmentOptions.Center;
+            statusTMP.fontStyle = FontStyles.Bold;
         }
 
         #endregion

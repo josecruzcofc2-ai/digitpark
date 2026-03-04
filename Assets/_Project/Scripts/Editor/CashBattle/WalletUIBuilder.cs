@@ -39,6 +39,7 @@ namespace DigitPark.Editor
         private static readonly string WALLET_ICONS_PATH = "Assets/_Project/Art/Icons/CashBattle/Wallet/";
         private static readonly string PREFABS_PATH = "Assets/_Project/Prefabs/CashBattle/Wallet/";
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         #endregion
 
@@ -271,6 +272,17 @@ namespace DigitPark.Editor
                 backRT.pivot = new Vector2(0, 0.5f);
                 backRT.sizeDelta = new Vector2(50, 50);
                 backRT.anchoredPosition = new Vector2(20, 0);
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -310,7 +322,7 @@ namespace DigitPark.Editor
             }
 
             // Title - centered, gold color
-            GameObject title = new GameObject("TitleText");
+            GameObject title = new GameObject("CashWalletTitle");
             title.transform.SetParent(header.transform, false);
 
             RectTransform titleRT = title.AddComponent<RectTransform>();
@@ -476,7 +488,7 @@ namespace DigitPark.Editor
             containerRT.offsetMax = new Vector2(-25, -155);
 
             // Label
-            GameObject label = new GameObject("Label");
+            GameObject label = new GameObject("WeeklyLimitLabel");
             label.transform.SetParent(container.transform, false);
             RectTransform labelRT = label.AddComponent<RectTransform>();
             labelRT.anchorMin = new Vector2(0, 0.5f);
@@ -644,7 +656,7 @@ namespace DigitPark.Editor
             }
 
             // Text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject(name + "Text");
             textObj.transform.SetParent(btn.transform, false);
             LayoutElement textLE = textObj.AddComponent<LayoutElement>();
             textLE.flexibleWidth = 1;
@@ -702,7 +714,7 @@ namespace DigitPark.Editor
             btn.targetGraphic = bg;
 
             // Text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("TabText");
             textObj.transform.SetParent(tab.transform, false);
             RectTransform textRT = textObj.AddComponent<RectTransform>();
             textRT.anchorMin = Vector2.zero;
@@ -856,6 +868,7 @@ namespace DigitPark.Editor
             bonusTMP.fontSize = FontSizes.Body;
             bonusTMP.color = new Color(0.2f, 0.95f, 0.4f, 1f);
             bonusTMP.alignment = TextAlignmentOptions.Center;
+            bonusTMP.fontStyle = FontStyles.Bold;
             bonusText.SetActive(false);
 
             // B. HistoryTabButton - third tab button, hidden
@@ -871,7 +884,7 @@ namespace DigitPark.Editor
             histBg.color = TAB_INACTIVE;
             Button histBtn = historyTab.AddComponent<Button>();
             histBtn.targetGraphic = histBg;
-            GameObject histText = new GameObject("Text");
+            GameObject histText = new GameObject("HistoryTabButtonText");
             histText.transform.SetParent(historyTab.transform, false);
             RectTransform histTextRT = histText.AddComponent<RectTransform>();
             histTextRT.anchorMin = Vector2.zero;
@@ -928,7 +941,7 @@ namespace DigitPark.Editor
             dpVlg.childControlHeight = true;
 
             // Title - gold with glow
-            GameObject dpTitle = new GameObject("Title");
+            GameObject dpTitle = new GameObject("DepositPanelTitle");
             dpTitle.transform.SetParent(dpInner.transform, false);
             dpTitle.AddComponent<RectTransform>();
             LayoutElement dpTitleLE = dpTitle.AddComponent<LayoutElement>();
@@ -943,7 +956,7 @@ namespace DigitPark.Editor
             dpTitleTMP.outlineColor = new Color(0.5f, 0.35f, 0f, 0.4f);
 
             // Subtitle
-            GameObject dpSubtitle = new GameObject("Subtitle");
+            GameObject dpSubtitle = new GameObject("DepositPanelSubtitle");
             dpSubtitle.transform.SetParent(dpInner.transform, false);
             dpSubtitle.AddComponent<RectTransform>();
             LayoutElement subLE = dpSubtitle.AddComponent<LayoutElement>();
@@ -951,6 +964,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI dpSubTMP = dpSubtitle.AddComponent<TextMeshProUGUI>();
             dpSubTMP.text = "Choose the amount you want to deposit";
             dpSubTMP.fontSize = FontSizes.H3;
+            dpSubTMP.fontStyle = FontStyles.Bold;
             dpSubTMP.color = TEXT_SECONDARY;
             dpSubTMP.alignment = TextAlignmentOptions.Center;
 
@@ -1079,7 +1093,7 @@ namespace DigitPark.Editor
             wpVlg.childControlHeight = true;
 
             // Withdraw title - gold with glow
-            GameObject wpTitle = new GameObject("Title");
+            GameObject wpTitle = new GameObject("WithdrawPanelTitle");
             wpTitle.transform.SetParent(wpInner.transform, false);
             wpTitle.AddComponent<RectTransform>();
             LayoutElement wpTitleLE = wpTitle.AddComponent<LayoutElement>();
@@ -1116,7 +1130,7 @@ namespace DigitPark.Editor
             taRT.offsetMax = new Vector2(-20, 0);
 
             // Input text
-            GameObject inputText = new GameObject("Text");
+            GameObject inputText = new GameObject("InputFieldText");
             inputText.transform.SetParent(textArea.transform, false);
             RectTransform itRT = inputText.AddComponent<RectTransform>();
             itRT.anchorMin = Vector2.zero;
@@ -1124,6 +1138,7 @@ namespace DigitPark.Editor
             itRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI itTMP = inputText.AddComponent<TextMeshProUGUI>();
             itTMP.fontSize = FontSizes.H1;
+            itTMP.fontStyle = FontStyles.Bold;
             itTMP.color = TEXT_WHITE;
 
             // Placeholder
@@ -1136,7 +1151,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI phTMP = placeholder.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Enter amount...";
             phTMP.fontSize = FontSizes.H1;
-            phTMP.fontStyle = FontStyles.Italic;
+            phTMP.fontStyle = FontStyles.Bold;
             phTMP.color = new Color(0.5f, 0.5f, 0.55f, 0.5f);
 
             TMP_InputField inputField = inputObj.AddComponent<TMP_InputField>();
@@ -1155,6 +1170,7 @@ namespace DigitPark.Editor
             waTMP.fontSize = FontSizes.H3;
             waTMP.color = TEXT_WHITE;
             waTMP.alignment = TextAlignmentOptions.Left;
+            waTMP.fontStyle = FontStyles.Bold;
 
             // WithdrawMinText
             GameObject withdrawMin = new GameObject("WithdrawMinText");
@@ -1167,6 +1183,7 @@ namespace DigitPark.Editor
             wmTMP.fontSize = FontSizes.H4;
             wmTMP.color = TEXT_SECONDARY;
             wmTMP.alignment = TextAlignmentOptions.Left;
+            wmTMP.fontStyle = FontStyles.Bold;
 
             // WithdrawFeeText
             GameObject withdrawFee = new GameObject("WithdrawFeeText");
@@ -1179,6 +1196,7 @@ namespace DigitPark.Editor
             wfTMP.fontSize = FontSizes.H4;
             wfTMP.color = TEXT_SECONDARY;
             wfTMP.alignment = TextAlignmentOptions.Left;
+            wfTMP.fontStyle = FontStyles.Bold;
 
             // Confirm Withdraw button (green with gold glow)
             GameObject confirmWithdraw = new GameObject("ConfirmWithdrawButton");
@@ -1195,7 +1213,7 @@ namespace DigitPark.Editor
             cwOutline.effectColor = GOLD;
             cwOutline.effectDistance = new Vector2(2f, 2f);
 
-            GameObject cwText = new GameObject("Text");
+            GameObject cwText = new GameObject("ConfirmWithdrawButtonText");
             cwText.transform.SetParent(confirmWithdraw.transform, false);
             RectTransform cwTextRT = cwText.AddComponent<RectTransform>();
             cwTextRT.anchorMin = Vector2.zero;
@@ -1244,7 +1262,7 @@ namespace DigitPark.Editor
             vkOutline.effectColor = GREEN;
             vkOutline.effectDistance = new Vector2(2f, -2f);
 
-            GameObject vkText = new GameObject("Text");
+            GameObject vkText = new GameObject("VerifyKycButtonText");
             vkText.transform.SetParent(verifyBtn.transform, false);
             RectTransform vkTextRT = vkText.AddComponent<RectTransform>();
             vkTextRT.anchorMin = Vector2.zero;
@@ -1313,7 +1331,7 @@ namespace DigitPark.Editor
             Button lmButton = loadMoreBtn.AddComponent<Button>();
             lmButton.targetGraphic = lmBg;
 
-            GameObject lmText = new GameObject("Text");
+            GameObject lmText = new GameObject("LoadMoreButtonText");
             lmText.transform.SetParent(loadMoreBtn.transform, false);
             RectTransform lmTextRT = lmText.AddComponent<RectTransform>();
             lmTextRT.anchorMin = Vector2.zero;
@@ -1353,7 +1371,7 @@ namespace DigitPark.Editor
             closeOutline.effectColor = new Color(1f, 0.35f, 0.35f, 0.8f);
             closeOutline.effectDistance = new Vector2(2f, 2f);
 
-            GameObject closeText = new GameObject("Text");
+            GameObject closeText = new GameObject("CloseButtonText");
             closeText.transform.SetParent(closeBtn.transform, false);
             RectTransform closeTextRT = closeText.AddComponent<RectTransform>();
             closeTextRT.anchorMin = Vector2.zero;
@@ -1649,7 +1667,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea" };
+            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;

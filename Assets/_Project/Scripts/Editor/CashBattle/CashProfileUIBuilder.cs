@@ -68,6 +68,7 @@ namespace DigitPark.Editor
         #region Paths
 
         private const string BACK_BTN_PREFAB           = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH        = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
         private const string ICON_AVATAR_DEFAULT_GOLD   = "Assets/_Project/Art/Icons/CashBattle/UI/AvatarDefaultGold.png";
         private const string ICON_AVATAR_DEFAULT_NEON   = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
 
@@ -261,7 +262,7 @@ namespace DigitPark.Editor
 
         private static void Cleanup(Transform parent)
         {
-            foreach (string name in new[] { "Background", "SafeArea", "ChangeNamePanel", "ErrorPanel" })
+            foreach (string name in new[] { "Background", "SafeArea", "ChangeNamePanel", "ErrorPanel", "BackButton", "BackButtonGold" })
             {
                 Transform t = parent.Find(name);
                 if (t != null) DestroyImmediate(t.gameObject);
@@ -335,6 +336,18 @@ namespace DigitPark.Editor
                 brt.sizeDelta = new Vector2(50, 50);
                 brt.anchoredPosition = new Vector2(20, 0);
                 SetupButtonColorBlock(btn);
+
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = btn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
             }
             else
             {
@@ -361,7 +374,7 @@ namespace DigitPark.Editor
             }
 
             // === Title ===
-            GameObject title = new GameObject("TitleText");
+            GameObject title = new GameObject("CashProfileTitle");
             title.transform.SetParent(header.transform, false);
             RectTransform trt = title.AddComponent<RectTransform>();
             trt.anchorMin = new Vector2(0.07f, 0f);
@@ -639,6 +652,7 @@ namespace DigitPark.Editor
             msTmp.text = "Member since 2024";
             msTmp.fontSize = FontSizes.Body; msTmp.color = TEXT_MUTED;
             msTmp.alignment = TextAlignmentOptions.Center;
+            msTmp.fontStyle = FontStyles.Bold;
 
         }
 
@@ -689,7 +703,7 @@ namespace DigitPark.Editor
             llLE.flexibleWidth = 1; llLE.preferredHeight = 2;
             ll.AddComponent<Image>().color = GOLD_GLOW;
 
-            GameObject titObj = new GameObject("Title");
+            GameObject titObj = new GameObject("RecordCardTitle");
             titObj.transform.SetParent(divider.transform, false);
             LayoutElement titLE = titObj.AddComponent<LayoutElement>();
             titLE.flexibleWidth = 0; titLE.preferredWidth = 450;
@@ -821,7 +835,7 @@ namespace DigitPark.Editor
             vTmp.fontSizeMin = FontSizes.Body; vTmp.fontSizeMax = FontSizes.H3;
 
             // Label (bottom 35%)
-            GameObject lObj = new GameObject("Label");
+            GameObject lObj = new GameObject(name + "Label");
             lObj.transform.SetParent(box.transform, false);
             RectTransform lRT = lObj.AddComponent<RectTransform>();
             lRT.anchorMin = new Vector2(0, 0); lRT.anchorMax = new Vector2(1, 0.35f);
@@ -858,7 +872,7 @@ namespace DigitPark.Editor
 
             CreateSectionLine(row.transform, "LeftLine");
 
-            GameObject txt = new GameObject("Title");
+            GameObject txt = new GameObject("SectionTitle");
             txt.transform.SetParent(row.transform, false);
             LayoutElement tle = txt.AddComponent<LayoutElement>();
             tle.flexibleWidth = 0; tle.preferredWidth = 500;
@@ -1252,7 +1266,7 @@ namespace DigitPark.Editor
             card.AddComponent<Image>().color = CARD_BG;
 
             // Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("CashChangeNameTitle");
             titleObj.transform.SetParent(card.transform, false);
             RectTransform tRT = titleObj.AddComponent<RectTransform>();
             tRT.anchorMin = new Vector2(0, 0.78f); tRT.anchorMax = Vector2.one;
@@ -1284,16 +1298,16 @@ namespace DigitPark.Editor
             phRT.offsetMin = Vector2.zero; phRT.offsetMax = Vector2.zero;
             var phTxt = placeholder.AddComponent<TextMeshProUGUI>();
             phTxt.text = "New name...";
-            phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Italic;
+            phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Bold;
             phTxt.color = TEXT_MUTED; phTxt.alignment = TextAlignmentOptions.Left;
 
-            GameObject inputText = new GameObject("Text");
+            GameObject inputText = new GameObject("InputFieldText");
             inputText.transform.SetParent(textArea.transform, false);
             RectTransform itRT = inputText.AddComponent<RectTransform>();
             itRT.anchorMin = Vector2.zero; itRT.anchorMax = Vector2.one;
             itRT.offsetMin = Vector2.zero; itRT.offsetMax = Vector2.zero;
             var iTxt = inputText.AddComponent<TextMeshProUGUI>();
-            iTxt.fontSize = FontSizes.Body; iTxt.color = TEXT_WHITE;
+            iTxt.fontSize = FontSizes.Body; iTxt.fontStyle = FontStyles.Bold; iTxt.color = TEXT_WHITE;
             iTxt.alignment = TextAlignmentOptions.Left;
 
             TMP_InputField tmpInput = inputObj.AddComponent<TMP_InputField>();
@@ -1312,7 +1326,7 @@ namespace DigitPark.Editor
             Image cfBg = confirmObj.AddComponent<Image>(); cfBg.color = GOLD_PRIMARY;
             Button confirmBtn = confirmObj.AddComponent<Button>(); confirmBtn.targetGraphic = cfBg;
 
-            GameObject cfTxtObj = new GameObject("Text");
+            GameObject cfTxtObj = new GameObject("ConfirmButtonText");
             cfTxtObj.transform.SetParent(confirmObj.transform, false);
             RectTransform cfTxtRT = cfTxtObj.AddComponent<RectTransform>();
             cfTxtRT.anchorMin = Vector2.zero; cfTxtRT.anchorMax = Vector2.one;
@@ -1331,14 +1345,14 @@ namespace DigitPark.Editor
             Image ccBg = cancelObj.AddComponent<Image>(); ccBg.color = new Color(0.15f, 0.13f, 0.20f, 1f);
             Button cancelBtn = cancelObj.AddComponent<Button>(); cancelBtn.targetGraphic = ccBg;
 
-            GameObject ccTxtObj = new GameObject("Text");
+            GameObject ccTxtObj = new GameObject("CancelButtonText");
             ccTxtObj.transform.SetParent(cancelObj.transform, false);
             RectTransform ccTxtRT = ccTxtObj.AddComponent<RectTransform>();
             ccTxtRT.anchorMin = Vector2.zero; ccTxtRT.anchorMax = Vector2.one;
             ccTxtRT.offsetMin = Vector2.zero; ccTxtRT.offsetMax = Vector2.zero;
             var ccTxt = ccTxtObj.AddComponent<TextMeshProUGUI>();
             ccTxt.text = "Cancel"; ccTxt.fontSize = FontSizes.Body;
-            ccTxt.color = TEXT_MUTED; ccTxt.alignment = TextAlignmentOptions.Center;
+            ccTxt.fontStyle = FontStyles.Bold; ccTxt.color = TEXT_MUTED; ccTxt.alignment = TextAlignmentOptions.Center;
 
             // Wire InputPanelUI component
             var inputComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.InputPanelUI, Assembly-CSharp"));

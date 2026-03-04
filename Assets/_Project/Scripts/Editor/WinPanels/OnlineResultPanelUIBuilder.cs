@@ -188,6 +188,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTMP = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTMP.text = subtitleText;
             subtitleTMP.fontSize = FontSizes.Body;
+            subtitleTMP.fontStyle = FontStyles.Bold;
             subtitleTMP.color = new Color(0.8f, 0.8f, 0.8f);
             subtitleTMP.alignment = TextAlignmentOptions.Center;
             subtitleTMP.enableAutoSizing = true;
@@ -328,6 +329,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI errorsTMP = errorsObj.AddComponent<TextMeshProUGUI>();
             errorsTMP.text = "0 errors";
             errorsTMP.fontSize = FontSizes.Body;
+            errorsTMP.fontStyle = FontStyles.Bold;
             errorsTMP.color = new Color(0.6f, 0.6f, 0.6f);
             errorsTMP.alignment = TextAlignmentOptions.Center;
             errorsTMP.enableAutoSizing = true;
@@ -365,6 +367,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = isWin ? "Faster by" : "Slower by";
             labelTMP.fontSize = FontSizes.Body;
+            labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.color = new Color(0.7f, 0.7f, 0.7f);
             labelTMP.alignment = TextAlignmentOptions.Center;
 
