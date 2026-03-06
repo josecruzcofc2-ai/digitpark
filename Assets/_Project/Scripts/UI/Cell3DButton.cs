@@ -55,7 +55,9 @@ namespace DigitPark.UI
         [Header("State")]
         [SerializeField] private bool isPressed = false;
         [SerializeField] private bool isCompleted = false;
+        #pragma warning disable 0414
         [SerializeField] private bool isWaitingForGame = true; // Antes del countdown
+        #pragma warning restore 0414
 
         private Button button;
         private Vector2 originalPosition;

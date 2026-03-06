@@ -193,6 +193,10 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = alignment;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             return obj;
         }
@@ -212,6 +216,10 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = alignment;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             return obj;
         }

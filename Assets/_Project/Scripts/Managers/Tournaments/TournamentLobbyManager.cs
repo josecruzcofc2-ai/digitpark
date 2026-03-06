@@ -182,6 +182,13 @@ namespace DigitPark.Managers
             string message = chatInput.text.Trim();
             chatInput.text = "";
 
+            // Filter profanity
+            if (DigitPark.Services.ChatFilterService.Instance != null)
+            {
+                var result = DigitPark.Services.ChatFilterService.Instance.Filter(message);
+                message = result.FilteredMessage;
+            }
+
             string sender = "You"; // In production: PlayerData.Instance.username
             CreateChatMessage(sender, message, true);
             SaveChatMessage(sender, message);
@@ -623,7 +630,7 @@ namespace DigitPark.Managers
                         rank = participant.rank,
                         bestTime = participant.bestTime,
                         showRank = true,
-                        showScore = false,
+                        showAttempts = false,
                         showBestTime = true,
                         isOnline = true,
                         isSelf = false

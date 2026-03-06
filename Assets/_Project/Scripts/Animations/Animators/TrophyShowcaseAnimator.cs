@@ -59,7 +59,9 @@ namespace DigitPark.Animations
 
         // Events
         public event Action<int> OnTabChanged;
+        #pragma warning disable 0067
         public event Action<string> OnTrophyClicked;
+        #pragma warning restore 0067
         public event Action<string> OnTrophyUnlocked;
 
         private AudioSource audioSource;

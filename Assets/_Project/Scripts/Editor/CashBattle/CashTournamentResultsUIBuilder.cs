@@ -305,7 +305,7 @@ namespace DigitPark.Editor
             trophyImg.color = GOLD_PRIMARY;
 
             // Result Title Text
-            GameObject titleObj = CreateElement(header.transform, "ResultTitleText",
+            GameObject titleObj = CreateElement(header.transform, "CashResultTitleText",
                 new Vector2(0.05f, 0.15f), new Vector2(0.95f, 0.5f));
             TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
             titleTMP.text = "Tournament Complete!";

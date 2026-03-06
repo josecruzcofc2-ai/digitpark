@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using System.Collections.Generic;
 using DigitPark.UI;
 using DigitPark.Monetization;
 
@@ -64,12 +65,12 @@ namespace DigitPark.Editor
         {
             Debug.Log("[TournamentsBrowserUIBuilder] ========== INICIANDO CONSTRUCCION ==========");
 
-            // Limpiar UI vieja de TODOS los Canvas (especialmente TransitionCanvas)
-            CleanupOldUI();
-
             // 1. Setup base (Canvas, EventSystem, Camera)
             Canvas canvas = SetupCanvas();
             if (canvas == null) return;
+
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             // 2. Background
             CreateBackground(canvas);
@@ -197,6 +198,21 @@ namespace DigitPark.Editor
                     }
                 }
             }
+        }
+
+        private static void CleanupOldElements(Transform parent)
+        {
+            List<GameObject> toDestroy = new List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         // ==================== BACKGROUND ====================
@@ -592,6 +608,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
             subtitleText.text = "Be the first to create one\nor come back later";
             subtitleText.fontSize = FontSizes.BodyLarge;
+            subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.color = TEXT_SECONDARY;
             subtitleText.alignment = TextAlignmentOptions.Center;
 
@@ -683,6 +700,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI clearText = GetOrAddComponent<TextMeshProUGUI>(clearTextObj);
             clearText.text = "Clear Filters";
             clearText.fontSize = FontSizes.BodyLarge;
+            clearText.fontStyle = FontStyles.Bold;
             clearText.color = TEXT_SECONDARY;
             clearText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(clearTextObj);
@@ -715,6 +733,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI captionText = GetOrAddComponent<TextMeshProUGUI>(captionObj);
             captionText.text = label;
             captionText.fontSize = FontSizes.BodyLarge;
+            captionText.fontStyle = FontStyles.Bold;
             captionText.color = TEXT_PRIMARY;
             captionText.alignment = TextAlignmentOptions.Left;
             SetRectTransformStretch(captionObj);
@@ -794,6 +813,7 @@ namespace DigitPark.Editor
             itemLabelRT.offsetMax = new Vector2(-8, 0);
             TextMeshProUGUI itemLabelText = GetOrAddComponent<TextMeshProUGUI>(itemLabel);
             itemLabelText.fontSize = FontSizes.BodyLarge;
+            itemLabelText.fontStyle = FontStyles.Bold;
             itemLabelText.color = TEXT_PRIMARY;
             itemLabelText.alignment = TextAlignmentOptions.Left;
 
@@ -826,6 +846,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI refreshText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             refreshText.text = "Refreshing...";
             refreshText.fontSize = FontSizes.BodyLarge;
+            refreshText.fontStyle = FontStyles.Bold;
             refreshText.color = CYAN_NEON;
             refreshText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -858,6 +879,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI loadMoreText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadMoreText.text = "Load More";
             loadMoreText.fontSize = FontSizes.Subtitle;
+            loadMoreText.fontStyle = FontStyles.Bold;
             loadMoreText.color = TEXT_PRIMARY;
             loadMoreText.alignment = TextAlignmentOptions.Center;
             SetRectTransformStretch(textObj);
@@ -900,6 +922,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI loadingText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadingText.text = "Loading...";
             loadingText.fontSize = FontSizes.Subtitle;
+            loadingText.fontStyle = FontStyles.Bold;
             loadingText.color = TEXT_SECONDARY;
             loadingText.alignment = TextAlignmentOptions.Center;
 
@@ -988,6 +1011,7 @@ namespace DigitPark.Editor
                 GameObject textObj = FindOrCreateChild(textArea, "Text");
                 TextMeshProUGUI textComponent = GetOrAddComponent<TextMeshProUGUI>(textObj);
                 textComponent.fontSize = FontSizes.BodyLarge;
+                textComponent.fontStyle = FontStyles.Bold;
                 textComponent.color = TEXT_PRIMARY;
                 textComponent.alignment = TextAlignmentOptions.MidlineLeft;
                 SetRectTransformStretch(textObj);

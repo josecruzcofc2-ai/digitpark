@@ -31,8 +31,10 @@ namespace DigitPark.Managers
         [SerializeField] private GameObject errorIcon;
 
         [Header("URLs Legales")]
+        #pragma warning disable 0414
         [SerializeField] private string termsUrl = "https://digitpark.com/terms";
         [SerializeField] private string privacyUrl = "https://digitpark.com/privacy";
+        #pragma warning restore 0414
 
         // Events
         public static event Action<bool> OnVerificationComplete;

@@ -51,7 +51,9 @@ namespace DigitPark.UI.Items
         private bool _isUnlocked;
         private bool _isInProgress;
         private bool _isSecret;
+        #pragma warning disable 0414
         private bool _isHovering;
+        #pragma warning restore 0414
 
         // Events
         public event Action<TrophyCardUI, AchievementData> OnCardClicked;
@@ -521,7 +523,19 @@ namespace DigitPark.UI.Items
         private ScrollRect GetParentScrollRect()
         {
             if (_parentScrollRect == null)
-                _parentScrollRect = GetComponentInParent<ScrollRect>();
+            {
+                // Find specifically the TrophyShowcase ScrollRect, not the dropdown's template ScrollRect
+                foreach (var sr in GetComponentsInParent<ScrollRect>(true))
+                {
+                    if (sr.gameObject.name.Contains("TrophyShowcase") || sr.gameObject.name.Contains("Showcase"))
+                    {
+                        _parentScrollRect = sr;
+                        break;
+                    }
+                }
+                if (_parentScrollRect == null)
+                    _parentScrollRect = GetComponentInParent<ScrollRect>();
+            }
             return _parentScrollRect;
         }
 

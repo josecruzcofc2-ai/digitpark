@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DG.Tweening;
-using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -17,16 +16,10 @@ namespace DigitPark.CashBattle
         [SerializeField] private Button _button;
         [SerializeField] private Image _background;
         [SerializeField] private TextMeshProUGUI _amountText;
-        [SerializeField] private TextMeshProUGUI _bonusText;
-        [SerializeField] private GameObject _popularBadge;
-        [SerializeField] private Image _outline;
 
         [Header("Colors")]
         [SerializeField] private Color _normalBgColor = new Color(0.12f, 0.15f, 0.2f, 0.95f);
         [SerializeField] private Color _selectedBgColor = new Color(0f, 0.3f, 0.4f, 0.95f);
-        [SerializeField] private Color _popularBgColor = new Color(0.25f, 0.2f, 0.05f, 0.95f);
-        [SerializeField] private Color _bonusColor = new Color(0f, 1f, 0.5f, 1f);
-        [SerializeField] private Color _popularOutlineColor = new Color(1f, 0.84f, 0f, 1f);
 
         private DepositOption _option;
         private Action<DepositOption> _onClickCallback;
@@ -55,45 +48,8 @@ namespace DigitPark.CashBattle
                 _amountText.text = $"${option.amount:F2}";
             }
 
-            // Bonus
-            if (_bonusText != null)
-            {
-                if (option.bonus > 0)
-                {
-                    _bonusText.gameObject.SetActive(true);
-                    _bonusText.text = AutoLocalizer.Get("deposit_bonus", $"${option.bonus:F2}");
-                    _bonusText.color = _bonusColor;
-                }
-                else
-                {
-                    _bonusText.gameObject.SetActive(false);
-                }
-            }
-
-            // Popular badge
-            if (_popularBadge != null)
-            {
-                if (option.isPopular)
-                {
-                    _popularBadge.SetActive(true);
-                    _popularBadge.transform.localScale = Vector3.zero;
-                    _popularBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
-                }
-                else
-                {
-                    _popularBadge.SetActive(false);
-                }
-            }
-
             // Background color
             UpdateBackground();
-
-            // Outline para popular
-            if (_outline != null)
-            {
-                _outline.gameObject.SetActive(option.isPopular);
-                _outline.color = _popularOutlineColor;
-            }
 
             // Configurar botón
             if (_button != null)
@@ -116,18 +72,7 @@ namespace DigitPark.CashBattle
         {
             if (_background == null) return;
 
-            if (_isSelected)
-            {
-                _background.color = _selectedBgColor;
-            }
-            else if (_option?.isPopular == true)
-            {
-                _background.color = _popularBgColor;
-            }
-            else
-            {
-                _background.color = _normalBgColor;
-            }
+            _background.color = _isSelected ? _selectedBgColor : _normalBgColor;
         }
 
         private void OnClicked()
@@ -151,9 +96,6 @@ namespace DigitPark.CashBattle
             _button = GetComponent<Button>();
             _background = GetComponent<Image>();
             _amountText = transform.Find("AmountText")?.GetComponent<TextMeshProUGUI>();
-            _bonusText = transform.Find("BonusText")?.GetComponent<TextMeshProUGUI>();
-            _popularBadge = transform.Find("PopularBadge")?.gameObject;
-            _outline = transform.Find("Outline")?.GetComponent<Image>();
         }
 #endif
     }

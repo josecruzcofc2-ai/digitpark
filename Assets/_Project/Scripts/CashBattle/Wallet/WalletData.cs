@@ -276,16 +276,12 @@ namespace DigitPark.CashBattle
     public class DepositOption
     {
         public decimal amount;
-        public decimal bonus;           // Promotional bonus
-        public bool isPopular;
         public string promoCode;
 
-        public decimal TotalAmount => amount + bonus;
+        public decimal TotalAmount => amount;
 
         public string GetDisplayText()
         {
-            if (bonus > 0)
-                return $"${amount:F2} + ${bonus:F2} BONUS";
             return $"${amount:F2}";
         }
     }

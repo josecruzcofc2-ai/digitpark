@@ -22,7 +22,9 @@ namespace DigitPark.UI.Components
         [SerializeField] private Sprite lockSilverSprite;
 
         private TMP_Dropdown dropdown;
+        #pragma warning disable 0414
         private bool isInitialized = false;
+        #pragma warning restore 0414
         private int lastValidIndex = 0;
 
         // Runtime lock icon references (one per dropdown item)

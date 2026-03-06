@@ -31,6 +31,7 @@ namespace DigitPark.Editor
 
         // Prefab paths
         private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
 
         // Spacing
         private const float PADDING = 30f;
@@ -63,8 +64,6 @@ namespace DigitPark.Editor
                 }
 
                 Debug.Log("🎨 Starting AgeVerification UI Rebuild (GOLD Theme)...");
-
-                CleanupOldUI();
 
                 // Clean existing UI
                 CleanExistingUI(canvas);
@@ -405,6 +404,18 @@ namespace DigitPark.Editor
                 rect.pivot = new Vector2(0, 1);
                 rect.anchoredPosition = new Vector2(20, -20);
                 rect.sizeDelta = new Vector2(50, 50);
+
+                // Assign BackIconGold sprite to Icon child
+                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
+                if (backIcon != null)
+                {
+                    Transform iconChild = backBtn.transform.Find("Icon");
+                    if (iconChild != null)
+                    {
+                        Image iconImg = iconChild.GetComponent<Image>();
+                        if (iconImg != null) iconImg.sprite = backIcon;
+                    }
+                }
 
                 Debug.Log("✅ BackButtonGold instantiated from prefab");
             }

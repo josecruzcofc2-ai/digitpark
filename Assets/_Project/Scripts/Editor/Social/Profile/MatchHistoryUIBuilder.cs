@@ -115,7 +115,6 @@ namespace DigitPark.Editor
 
         private static void RebuildMatchHistory()
         {
-            CleanupOldUI();
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -131,15 +130,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            string[] oldNames = {
-                "Background", "Header", "GameFilters", "ScrollView",
-                "ContentPanel", "HistoryPanel"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             CreateBackground(canvas.transform);
             CreateHeader();
@@ -425,6 +417,7 @@ namespace DigitPark.Editor
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Loading...";
             ldTMP.fontSize = FontSizes.Body;
+            ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -570,6 +563,7 @@ namespace DigitPark.Editor
             var dtTMP = detail.AddComponent<TextMeshProUGUI>();
             dtTMP.text = "12.5s \u00B7 0 err";
             dtTMP.fontSize = FontSizes.Body;
+            dtTMP.fontStyle = FontStyles.Bold;
             dtTMP.color = CYAN_NEON;
             dtTMP.alignment = TextAlignmentOptions.Left;
 
@@ -584,6 +578,7 @@ namespace DigitPark.Editor
             var dateTMP = dateText.AddComponent<TextMeshProUGUI>();
             dateTMP.text = "2h ago";
             dateTMP.fontSize = FontSizes.Body;
+            dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.alignment = TextAlignmentOptions.Right;
 
@@ -700,6 +695,21 @@ namespace DigitPark.Editor
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
+        }
+
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         private static GameObject FindOrCreate(Transform parent, string name)

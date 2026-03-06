@@ -177,8 +177,6 @@ namespace DigitPark.Editor
                 return;
             }
 
-            CleanupOldUI();
-
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
             {
@@ -187,22 +185,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            // Limpiar elementos anteriores
-            string[] oldNames = {
-                "Background", "SafeArea", "StreakPanel", "WeekLabel",
-                "DaysGrid", "Day7Card", "TodayPanel", "ClaimButton",
-                "ClaimGlow", "TimerBar", "TopBar",
-                "ClaimAnimationBlocker", "MilestoneBlocker", "Day7Glow",
-                // Old names from previous version
-                "Header", "DaysContainer", "Day7Special", "TodayRewardPanel",
-                "NextRewardTimer", "ClaimCelebration", "StreakLostPopup",
-                "RewardClaimBlocker", "WeekTitle", "Inner"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             CreateBackground(canvas.transform);
             CreateTopBar();
@@ -1534,6 +1518,21 @@ namespace DigitPark.Editor
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
+        }
+
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         private static void SetRef(SerializedObject so, string propName, Object value)

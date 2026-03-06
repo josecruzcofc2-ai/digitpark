@@ -25,8 +25,10 @@ namespace DigitPark.Tools
         [SerializeField] private bool cashBattleBypassAuth = true;
 
         [Header("=== INFO ===")]
+        #pragma warning disable 0414
         [SerializeField] [TextArea(2, 4)]
         private string info = "Este objeto solo funciona en el Editor.\nSe ignora automaticamente en builds.";
+        #pragma warning restore 0414
 
         public enum TargetScene
         {

@@ -56,7 +56,6 @@ namespace DigitPark.Editor
 
         private static void RebuildSearchPlayersUI()
         {
-            CleanupOldUI();
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -415,8 +414,8 @@ namespace DigitPark.Editor
             // Empty Icon - Icono grande y prominente
             GameObject emptyIcon = CreateOrFind(emptyState.transform, "EmptyIcon");
             SetupRectTransform(emptyIcon,
-                new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -20), new Vector2(240, 240)); // Agrandado a 240x240
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0, 0), new Vector2(240, 240));
             Image emptyIconImg = emptyIcon.GetComponent<Image>();
             if (emptyIconImg == null) emptyIconImg = emptyIcon.AddComponent<Image>();
             emptyIconImg.color = CYAN_NEON; // Cyan brillante para que destaque
@@ -433,14 +432,14 @@ namespace DigitPark.Editor
             GameObject emptyTitle = CreateOrFind(emptyState.transform, "Title");
             SetupRectTransform(emptyTitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 20), new Vector2(700, 100));
+                new Vector2(0, -100), new Vector2(700, 100));
             SetupText(emptyTitle, "Search players", (int)FontSizes.H2, Color.white, FontStyles.Bold);
 
-            // Empty Description - Texto más visible
+            // Empty Description
             GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -80), new Vector2(760, 160));
+                new Vector2(0, -180), new Vector2(760, 160));
             SetupText(emptyDesc, "Find players to\nadd as friends or challenge", (int)FontSizes.BodyLarge, new Color(0.6f, 0.6f, 0.6f, 1f), FontStyles.Bold);
 
             // No Results Text (se mostrará cuando no haya resultados)
@@ -467,232 +466,221 @@ namespace DigitPark.Editor
             // Arrastra el prefab manualmente para ver el diseño
             CreatePlayerCardPrefab();
 
-            Debug.Log("PlayerCard prefab creado en: Assets/_Project/Prefabs/UI/PlayerCard.prefab");
-            Debug.Log("Arrastra el prefab al ResultsContainer para ver el diseño.");
+            InstantiateSampleCards();
+            Debug.Log("PlayerCard prefab creado con 3 sample cards en ResultsContainer.");
+        }
+
+        private static void InstantiateSampleCards()
+        {
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
+            if (canvas == null) return;
+
+            Transform container = canvas.transform.Find("ResultsPanel/ResultsScrollView/Viewport/ResultsContainer");
+            if (container == null) { Debug.LogWarning("[SearchPlayersUI] ResultsContainer no encontrado para sample cards"); return; }
+
+            string prefabPath = "Assets/_Project/Prefabs/Common/PlayerCard.prefab";
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null) { Debug.LogWarning("[SearchPlayersUI] PlayerCard prefab no encontrado"); return; }
+
+            // Remove old samples
+            for (int i = container.childCount - 1; i >= 0; i--)
+            {
+                if (container.GetChild(i).name.StartsWith("SampleCard_"))
+                    DestroyImmediate(container.GetChild(i).gameObject);
+            }
+
+            string[] names = { "StarPlayer", "QuickMind", "NeonKing" };
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                instance.transform.SetParent(container, false);
+                instance.name = $"SampleCard_{i + 1}";
+
+                var userText = instance.GetComponentInChildren<TextMeshProUGUI>();
+                if (userText != null) userText.text = names[i];
+            }
+
+            // Make ResultsPanel visible and hide EmptyState for preview
+            Transform resultsPanel = canvas.transform.Find("ResultsPanel");
+            if (resultsPanel != null) resultsPanel.gameObject.SetActive(true);
+            Transform emptyState = resultsPanel != null ? resultsPanel.Find("EmptyState") : null;
+            if (emptyState != null) emptyState.gameObject.SetActive(false);
+
+            Debug.Log("[SearchPlayersUI] 3 sample cards instanciados en ResultsContainer");
         }
 
         private static GameObject CreatePlayerCardPrefab()
         {
-            // Crear objeto temporal para el prefab
             GameObject card = new GameObject("PlayerCard");
-            card.AddComponent<RectTransform>();
+            RectTransform cardRT = card.AddComponent<RectTransform>();
 
-            // LayoutElement con altura fija
             LayoutElement cardLayout = card.AddComponent<LayoutElement>();
-            cardLayout.minHeight = 120;
-            cardLayout.preferredHeight = 120;
+            cardLayout.minHeight = 140;
+            cardLayout.preferredHeight = 140;
             cardLayout.flexibleWidth = 1;
 
-            // Card Background - Color VISIBLE que contrasta con el fondo
             Image cardBg = card.AddComponent<Image>();
             cardBg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
 
-            // Card Outline - Unified cyan dark
             Outline cardOutline = card.AddComponent<Outline>();
             cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.35f);
             cardOutline.effectDistance = new Vector2(1.5f, 1.5f);
-            var cardShadow = card.AddComponent<Shadow>();
-            cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            cardShadow.effectDistance = new Vector2(3, -4);
 
-            // ========== AVATAR ==========
-            GameObject avatarContainer = new GameObject("AvatarContainer");
-            avatarContainer.transform.SetParent(card.transform, false);
-            RectTransform avatarRect = avatarContainer.AddComponent<RectTransform>();
-            avatarRect.anchorMin = new Vector2(0, 0.5f);
-            avatarRect.anchorMax = new Vector2(0, 0.5f);
-            avatarRect.anchoredPosition = new Vector2(55, 0);
-            avatarRect.sizeDelta = new Vector2(70, 70);
-            Image avatarBg = avatarContainer.AddComponent<Image>();
-            avatarBg.color = CYAN_DARK; // Borde del avatar frame
-            // Borde neon para avatar
-            Outline avatarOutline = avatarContainer.AddComponent<Outline>();
-            avatarOutline.effectColor = new Color(0f, 1f, 1f, 0.4f);
-            avatarOutline.effectDistance = new Vector2(2, 2);
+            Sprite circleSprite = GenerateCircleSprite();
 
-            // Avatar Image - donde se mostrará el avatar con inicial o foto
+            // ========== CIRCULAR AVATAR (left, vertically centered) ==========
+            GameObject avatarFrame = new GameObject("AvatarFrame");
+            avatarFrame.transform.SetParent(card.transform, false);
+            RectTransform avatarFrameRT = avatarFrame.AddComponent<RectTransform>();
+            avatarFrameRT.anchorMin = new Vector2(0, 0.5f);
+            avatarFrameRT.anchorMax = new Vector2(0, 0.5f);
+            avatarFrameRT.anchoredPosition = new Vector2(50, 0);
+            avatarFrameRT.sizeDelta = new Vector2(64, 64);
+            Image frameImg = avatarFrame.AddComponent<Image>();
+            frameImg.sprite = circleSprite;
+            frameImg.color = CYAN_DARK;
+
+            GameObject avatarMask = new GameObject("AvatarMask");
+            avatarMask.transform.SetParent(avatarFrame.transform, false);
+            RectTransform amRT = avatarMask.AddComponent<RectTransform>();
+            amRT.anchorMin = new Vector2(0.06f, 0.06f);
+            amRT.anchorMax = new Vector2(0.94f, 0.94f);
+            amRT.offsetMin = Vector2.zero;
+            amRT.offsetMax = Vector2.zero;
+            Image amImg = avatarMask.AddComponent<Image>();
+            amImg.sprite = circleSprite;
+            amImg.color = new Color(0.08f, 0.1f, 0.14f, 1f);
+            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
+
             GameObject avatarImage = new GameObject("AvatarImage");
-            avatarImage.transform.SetParent(avatarContainer.transform, false);
-            RectTransform avatarImgRect = avatarImage.AddComponent<RectTransform>();
-            avatarImgRect.anchorMin = Vector2.zero;
-            avatarImgRect.anchorMax = Vector2.one;
-            avatarImgRect.sizeDelta = new Vector2(-8, -8);
+            avatarImage.transform.SetParent(avatarMask.transform, false);
+            RectTransform avatarImgRT = avatarImage.AddComponent<RectTransform>();
+            avatarImgRT.anchorMin = Vector2.zero;
+            avatarImgRT.anchorMax = Vector2.one;
+            avatarImgRT.offsetMin = Vector2.zero;
+            avatarImgRT.offsetMax = Vector2.zero;
             Image avatarImg = avatarImage.AddComponent<Image>();
-            avatarImg.color = Color.white; // Blanco para mostrar sprite correctamente
+            avatarImg.color = Color.white;
             avatarImg.preserveAspect = true;
+            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
+            if (defaultAvatar != null) avatarImg.sprite = defaultAvatar;
 
-            // ========== INFO SECTION ==========
-            GameObject infoSection = new GameObject("InfoSection");
-            infoSection.transform.SetParent(card.transform, false);
-            RectTransform infoRect = infoSection.AddComponent<RectTransform>();
-            infoRect.anchorMin = new Vector2(0, 0.5f);
-            infoRect.anchorMax = new Vector2(1, 0.5f);
-            infoRect.anchoredPosition = new Vector2(55, 15);
-            infoRect.sizeDelta = new Vector2(-220, 70);
+            // ========== RIGHT CONTENT (anchored right of avatar) ==========
+            GameObject content = new GameObject("ContentSection");
+            content.transform.SetParent(card.transform, false);
+            RectTransform contentRT = content.AddComponent<RectTransform>();
+            contentRT.anchorMin = new Vector2(0, 0);
+            contentRT.anchorMax = new Vector2(1, 1);
+            contentRT.offsetMin = new Vector2(90, 8);  // left padding past avatar
+            contentRT.offsetMax = new Vector2(-10, -8); // right padding
 
-            // Username
+            // --- Row 1: Username + Online status ---
+            GameObject topRow = new GameObject("TopRow");
+            topRow.transform.SetParent(content.transform, false);
+            RectTransform topRT = topRow.AddComponent<RectTransform>();
+            topRT.anchorMin = new Vector2(0, 0.7f);
+            topRT.anchorMax = new Vector2(1, 1f);
+            topRT.offsetMin = Vector2.zero;
+            topRT.offsetMax = Vector2.zero;
+
+            // Username (no @ prefix)
             GameObject usernameObj = new GameObject("Username");
-            usernameObj.transform.SetParent(infoSection.transform, false);
-            RectTransform usernameRect = usernameObj.AddComponent<RectTransform>();
-            usernameRect.anchorMin = new Vector2(0, 1);
-            usernameRect.anchorMax = new Vector2(0.7f, 1);
-            usernameRect.anchoredPosition = new Vector2(0, -8);
-            usernameRect.sizeDelta = new Vector2(0, 28);
+            usernameObj.transform.SetParent(topRow.transform, false);
+            RectTransform usernameRT = usernameObj.AddComponent<RectTransform>();
+            usernameRT.anchorMin = new Vector2(0, 0);
+            usernameRT.anchorMax = new Vector2(0.65f, 1);
+            usernameRT.offsetMin = Vector2.zero;
+            usernameRT.offsetMax = Vector2.zero;
             TextMeshProUGUI usernameTmp = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTmp.text = "Username";
-            usernameTmp.fontSize = FontSizes.Body;
+            usernameTmp.fontSize = FontSizes.BodySmall;
             usernameTmp.color = Color.white;
             usernameTmp.fontStyle = FontStyles.Bold;
             usernameTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            usernameTmp.overflowMode = TextOverflowModes.Ellipsis;
+            usernameTmp.enableAutoSizing = true;
+            usernameTmp.fontSizeMin = FontSizes.Caption;
+            usernameTmp.fontSizeMax = FontSizes.BodySmall;
 
-            // Handle
-            GameObject handleObj = new GameObject("Handle");
-            handleObj.transform.SetParent(infoSection.transform, false);
-            RectTransform handleRect = handleObj.AddComponent<RectTransform>();
-            handleRect.anchorMin = new Vector2(0, 1);
-            handleRect.anchorMax = new Vector2(0.5f, 1);
-            handleRect.anchoredPosition = new Vector2(0, -32);
-            handleRect.sizeDelta = new Vector2(0, 22);
-            TextMeshProUGUI handleTmp = handleObj.AddComponent<TextMeshProUGUI>();
-            handleTmp.text = "@handle";
-            handleTmp.fontSize = FontSizes.Body;
-            handleTmp.color = PLACEHOLDER_COLOR;
-            handleTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // Stats Row
-            GameObject statsRow = new GameObject("StatsRow");
-            statsRow.transform.SetParent(infoSection.transform, false);
-            RectTransform statsRect = statsRow.AddComponent<RectTransform>();
-            statsRect.anchorMin = new Vector2(0, 0);
-            statsRect.anchorMax = new Vector2(1, 0);
-            statsRect.anchoredPosition = new Vector2(0, 18);
-            statsRect.sizeDelta = new Vector2(0, 24);
-
-            // WinRate Icon
-            GameObject winIcon = new GameObject("WinRateIcon");
-            winIcon.transform.SetParent(statsRow.transform, false);
-            RectTransform winIconRect = winIcon.AddComponent<RectTransform>();
-            winIconRect.anchorMin = new Vector2(0, 0.5f);
-            winIconRect.anchorMax = new Vector2(0, 0.5f);
-            winIconRect.anchoredPosition = new Vector2(10, 0);
-            winIconRect.sizeDelta = new Vector2(18, 18);
-            Image winIconImg = winIcon.AddComponent<Image>();
-            winIconImg.color = new Color(1f, 0.85f, 0.2f, 1f);
-            winIconImg.preserveAspect = true;
-
-            // WinRate Text
-            GameObject winText = new GameObject("WinRateText");
-            winText.transform.SetParent(statsRow.transform, false);
-            RectTransform winTextRect = winText.AddComponent<RectTransform>();
-            winTextRect.anchorMin = new Vector2(0, 0.5f);
-            winTextRect.anchorMax = new Vector2(0, 0.5f);
-            winTextRect.anchoredPosition = new Vector2(65, 0);
-            winTextRect.sizeDelta = new Vector2(80, 24);
-            TextMeshProUGUI winTextTmp = winText.AddComponent<TextMeshProUGUI>();
-            winTextTmp.text = "0%";
-            winTextTmp.fontSize = FontSizes.Body;
-            winTextTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
-            winTextTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // Separator
-            GameObject sep = new GameObject("Separator");
-            sep.transform.SetParent(statsRow.transform, false);
-            RectTransform sepRect = sep.AddComponent<RectTransform>();
-            sepRect.anchorMin = new Vector2(0, 0.5f);
-            sepRect.anchorMax = new Vector2(0, 0.5f);
-            sepRect.anchoredPosition = new Vector2(115, 0);
-            sepRect.sizeDelta = new Vector2(20, 20);
-            TextMeshProUGUI sepTmp = sep.AddComponent<TextMeshProUGUI>();
-            sepTmp.text = "•";
-            sepTmp.fontSize = FontSizes.Body;
-            sepTmp.color = PLACEHOLDER_COLOR;
-            sepTmp.alignment = TextAlignmentOptions.Center;
-
-            // FavGame Icon
-            GameObject gameIcon = new GameObject("FavGameIcon");
-            gameIcon.transform.SetParent(statsRow.transform, false);
-            RectTransform gameIconRect = gameIcon.AddComponent<RectTransform>();
-            gameIconRect.anchorMin = new Vector2(0, 0.5f);
-            gameIconRect.anchorMax = new Vector2(0, 0.5f);
-            gameIconRect.anchoredPosition = new Vector2(135, 0);
-            gameIconRect.sizeDelta = new Vector2(18, 18);
-            Image gameIconImg = gameIcon.AddComponent<Image>();
-            gameIconImg.color = CYAN_NEON;
-            gameIconImg.preserveAspect = true;
-
-            // FavGame Text
-            GameObject gameText = new GameObject("FavGameText");
-            gameText.transform.SetParent(statsRow.transform, false);
-            RectTransform gameTextRect = gameText.AddComponent<RectTransform>();
-            gameTextRect.anchorMin = new Vector2(0, 0.5f);
-            gameTextRect.anchorMax = new Vector2(0, 0.5f);
-            gameTextRect.anchoredPosition = new Vector2(200, 0);
-            gameTextRect.sizeDelta = new Vector2(100, 24);
-            TextMeshProUGUI gameTextTmp = gameText.AddComponent<TextMeshProUGUI>();
-            gameTextTmp.text = "Game";
-            gameTextTmp.fontSize = FontSizes.Body;
-            gameTextTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
-            gameTextTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // ========== ONLINE STATUS ==========
-            GameObject onlineStatus = new GameObject("OnlineStatus");
-            onlineStatus.transform.SetParent(card.transform, false);
-            RectTransform onlineRect = onlineStatus.AddComponent<RectTransform>();
-            onlineRect.anchorMin = new Vector2(1, 1);
-            onlineRect.anchorMax = new Vector2(1, 1);
-            onlineRect.anchoredPosition = new Vector2(-25, -20);
-            onlineRect.sizeDelta = new Vector2(14, 14);
-            Image onlineImg = onlineStatus.AddComponent<Image>();
-            onlineImg.color = new Color(0.2f, 1f, 0.4f, 1f);
+            // Online indicator (dot + label, right-aligned)
+            GameObject onlineDot = new GameObject("OnlineStatus");
+            onlineDot.transform.SetParent(topRow.transform, false);
+            RectTransform dotRT = onlineDot.AddComponent<RectTransform>();
+            dotRT.anchorMin = new Vector2(1, 0.5f);
+            dotRT.anchorMax = new Vector2(1, 0.5f);
+            dotRT.anchoredPosition = new Vector2(-8, 0);
+            dotRT.sizeDelta = new Vector2(12, 12);
+            Image dotImg = onlineDot.AddComponent<Image>();
+            dotImg.sprite = circleSprite;
+            dotImg.color = new Color(0.2f, 1f, 0.4f, 1f);
 
             GameObject onlineLabel = new GameObject("OnlineLabel");
-            onlineLabel.transform.SetParent(card.transform, false);
-            RectTransform labelRect = onlineLabel.AddComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(1, 1);
-            labelRect.anchorMax = new Vector2(1, 1);
-            labelRect.anchoredPosition = new Vector2(-70, -20);
-            labelRect.sizeDelta = new Vector2(70, 20);
+            onlineLabel.transform.SetParent(topRow.transform, false);
+            RectTransform labelRT = onlineLabel.AddComponent<RectTransform>();
+            labelRT.anchorMin = new Vector2(0.65f, 0);
+            labelRT.anchorMax = new Vector2(1, 1);
+            labelRT.offsetMin = Vector2.zero;
+            labelRT.offsetMax = new Vector2(-22, 0); // space for dot
             TextMeshProUGUI labelTmp = onlineLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "Online";
-            labelTmp.fontSize = FontSizes.Body;
+            labelTmp.fontSize = FontSizes.Caption;
+            labelTmp.fontStyle = FontStyles.Bold;
             labelTmp.color = new Color(0.2f, 1f, 0.4f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineRight;
+            labelTmp.overflowMode = TextOverflowModes.Ellipsis;
 
-            // ========== BUTTONS ==========
+            // --- Row 2: Stats (WinRate + Game) ---
+            GameObject statsRow = new GameObject("StatsRow");
+            statsRow.transform.SetParent(content.transform, false);
+            RectTransform statsRT = statsRow.AddComponent<RectTransform>();
+            statsRT.anchorMin = new Vector2(0, 0.38f);
+            statsRT.anchorMax = new Vector2(1, 0.62f);
+            statsRT.offsetMin = Vector2.zero;
+            statsRT.offsetMax = Vector2.zero;
+
+            // Single stats text "65% WR · Digit Rush"
+            GameObject statsText = new GameObject("StatsText");
+            statsText.transform.SetParent(statsRow.transform, false);
+            RectTransform statsTextRT = statsText.AddComponent<RectTransform>();
+            statsTextRT.anchorMin = Vector2.zero;
+            statsTextRT.anchorMax = Vector2.one;
+            statsTextRT.offsetMin = Vector2.zero;
+            statsTextRT.offsetMax = Vector2.zero;
+            TextMeshProUGUI statsTmp = statsText.AddComponent<TextMeshProUGUI>();
+            statsTmp.text = "0% WR · Digit Rush";
+            statsTmp.fontSize = FontSizes.Caption;
+            statsTmp.fontStyle = FontStyles.Bold;
+            statsTmp.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            statsTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            statsTmp.overflowMode = TextOverflowModes.Ellipsis;
+
+            // --- Row 3: Buttons ---
             GameObject buttonsRow = new GameObject("ButtonsRow");
-            buttonsRow.transform.SetParent(card.transform, false);
-            RectTransform btnRowRect = buttonsRow.AddComponent<RectTransform>();
-            btnRowRect.anchorMin = new Vector2(0.5f, 0);
-            btnRowRect.anchorMax = new Vector2(0.5f, 0);
-            btnRowRect.anchoredPosition = new Vector2(30, 35);
-            btnRowRect.sizeDelta = new Vector2(320, 45);
+            buttonsRow.transform.SetParent(content.transform, false);
+            RectTransform btnRT = buttonsRow.AddComponent<RectTransform>();
+            btnRT.anchorMin = new Vector2(0, 0);
+            btnRT.anchorMax = new Vector2(1, 0.35f);
+            btnRT.offsetMin = Vector2.zero;
+            btnRT.offsetMax = Vector2.zero;
             HorizontalLayoutGroup btnLayout = buttonsRow.AddComponent<HorizontalLayoutGroup>();
-            btnLayout.childAlignment = TextAnchor.MiddleCenter;
-            btnLayout.spacing = 20;
-            btnLayout.childForceExpandWidth = false;
+            btnLayout.childAlignment = TextAnchor.MiddleLeft;
+            btnLayout.spacing = 10;
+            btnLayout.childForceExpandWidth = true;
             btnLayout.childForceExpandHeight = true;
-            btnLayout.childControlWidth = false;
+            btnLayout.childControlWidth = true;
             btnLayout.childControlHeight = true;
+            btnLayout.padding = new RectOffset(0, 0, 2, 2);
 
-            // Botón primario cyan brillante
-            CreatePrefabButton(buttonsRow.transform, "AddFriendButton", "+ Add", CYAN_NEON, DARK_BG, 140, false);
-            // Botón secundario con borde neón
-            CreatePrefabButton(buttonsRow.transform, "ViewProfileButton", "View Profile", new Color(0.05f, 0.1f, 0.15f, 1f), CYAN_NEON, 140, true);
+            CreatePrefabButton(buttonsRow.transform, "AddFriendButton", "+ Add", CYAN_NEON, DARK_BG, 0, false);
+            CreatePrefabButton(buttonsRow.transform, "ViewProfileButton", "View Profile", new Color(0.05f, 0.1f, 0.15f, 1f), CYAN_NEON, 0, true);
 
-            // Guardar como prefab
+            // Save prefab
             string prefabPath = "Assets/_Project/Prefabs/Common/PlayerCard.prefab";
-
-            // Asegurar que el directorio existe
             if (!System.IO.Directory.Exists("Assets/_Project/Prefabs/Common"))
-            {
                 System.IO.Directory.CreateDirectory("Assets/_Project/Prefabs/Common");
-            }
 
             PrefabUtility.SaveAsPrefabAsset(card, prefabPath);
-
-            // Destruir el objeto temporal
             DestroyImmediate(card);
-
             return null;
         }
 
@@ -801,6 +789,10 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
         }
 
@@ -810,6 +802,26 @@ namespace DigitPark.Editor
             if (layout == null) layout = obj.AddComponent<LayoutElement>();
             layout.preferredWidth = width;
             layout.preferredHeight = height;
+        }
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            // Fallback: generate at runtime (won't survive prefab save)
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
     }
 }

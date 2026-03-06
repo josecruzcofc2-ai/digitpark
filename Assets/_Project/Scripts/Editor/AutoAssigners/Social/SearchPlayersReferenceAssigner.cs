@@ -26,7 +26,7 @@ namespace DigitPark.Editor.AutoAssigners
         private static readonly string[] REQUIRED_REFS = {
             "searchInputField", "searchButton", "clearButton",
             "resultsContainer", "noResultsText", "loadingIndicator",
-            "backButton"
+            "emptyStatePanel", "backButton"
         };
 
         private struct ReferenceResult
@@ -174,6 +174,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "resultsContainer", FindByNameContains<Transform>("results", "container", "list"));
             AssignReference(so, "noResultsText", FindTextByName("noresults", "empty", "no"));
             AssignReference(so, "loadingIndicator", FindByNameContains<Transform>("loading", "spinner"));
+            AssignReference(so, "emptyStatePanel", FindByNameContains<Transform>("emptystate"));
             AssignReference(so, "backButton", FindButtonByName("back", "return"));
 
             so.ApplyModifiedProperties();

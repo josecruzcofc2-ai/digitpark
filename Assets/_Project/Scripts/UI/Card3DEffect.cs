@@ -86,7 +86,9 @@ namespace DigitPark.UI
         private Coroutine glowPulseCoroutine;
         private Outline glowOutline;
         private Shadow innerShadow;
+        #pragma warning disable 0414
         private bool isHovering = false;
+        #pragma warning restore 0414
 
         // Events
         public event Action<Card3DEffect> OnCardFlipped;

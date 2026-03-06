@@ -281,7 +281,7 @@ namespace DigitPark.Services.Mock
 
         public void SimulateMatchResult(string matchId, bool won, decimal entryFee)
         {
-            ReleaseFunds(matchId);
+            _ = ReleaseFunds(matchId);
 
             if (won)
             {

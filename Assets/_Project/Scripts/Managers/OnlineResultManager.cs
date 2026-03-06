@@ -41,7 +41,9 @@ namespace DigitPark.Managers
 
         // Datos del resultado actual
         private string currentMatchId;
+        #pragma warning disable 0414
         private bool isWaitingForOpponent = false;
+        #pragma warning restore 0414
 
         private const string PREFAB_BASE = "Prefabs/WinPanels/";
 

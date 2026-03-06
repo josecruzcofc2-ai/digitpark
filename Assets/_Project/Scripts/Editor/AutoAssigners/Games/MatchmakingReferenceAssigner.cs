@@ -29,7 +29,7 @@ namespace DigitPark.Editor.AutoAssigners
             "playerAvatar", "playerNameText", "playerLevelText", "playerCard",
             // Opponent Card
             "opponentAvatar", "opponentNameText", "opponentLevelText",
-            "opponentCard", "opponentSearchingIndicator", "opponentSearchRing",
+            "opponentCard",
             // VS Section
             "vsContainer", "vsText",
             // Search Status
@@ -37,7 +37,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Countdown
             "countdownPanel", "countdownText", "getReadyText",
             // Buttons
-            "cancelButton", "backButton",
+            "cancelButton",
             // Effects
             "screenFlash"
         };
@@ -84,7 +84,7 @@ namespace DigitPark.Editor.AutoAssigners
                 "• Opponent card (avatar, name, level, search ring)\n" +
                 "• VS section and search status\n" +
                 "• Countdown panel and effects\n" +
-                "• Buttons (cancel, back)",
+                "• Buttons (cancel)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -183,9 +183,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "opponentNameText", FindTextByName("opponentname"));
             AssignReference(so, "opponentLevelText", FindTextByName("opponentlevel"));
             AssignReference(so, "opponentCard", FindByNameContains<Transform>("opponentcard"));
-            AssignReference(so, "opponentSearchingIndicator", FindByNameContains<Transform>("searchingindicator"));
-            AssignReference(so, "opponentSearchRing", FindImageByName("searchring"));
-
             // VS Section
             AssignReference(so, "vsContainer", FindByNameContains<Transform>("vscontainer"));
             AssignReference(so, "vsText", FindTextByName("vstext"));
@@ -203,7 +200,6 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Buttons
             AssignReference(so, "cancelButton", FindButtonByName("cancelbutton", "cancel"));
-            AssignReference(so, "backButton", FindButtonByName("backbutton", "back"));
 
             // Effects
             AssignReference(so, "screenFlash", FindImageByName("screenflash", "flash"));

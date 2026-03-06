@@ -22,7 +22,9 @@ namespace DigitPark.UI
         private RectTransform _bannerRect;
 
         private Coroutine _animationCoroutine;
+        #pragma warning disable 0414
         private bool _isVisible = false;
+        #pragma warning restore 0414
 
         // Colores
         private readonly Color _offlineColor = new Color(0.9f, 0.2f, 0.2f, 0.95f);

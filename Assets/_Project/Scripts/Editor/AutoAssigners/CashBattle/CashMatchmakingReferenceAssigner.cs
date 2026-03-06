@@ -31,7 +31,6 @@ namespace DigitPark.Editor.AutoAssigners
             "playerAvatar", "playerNameText", "playerLevelText", "playerCard",
             // Opponent Card
             "opponentAvatar", "opponentNameText", "opponentLevelText", "opponentCard",
-            "opponentSearchingIndicator", "opponentSearchRing",
             // VS Section
             "vsContainer", "vsText",
             // Search Status
@@ -39,7 +38,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Countdown
             "countdownPanel", "countdownText", "getReadyText",
             // Buttons
-            "cancelButton", "backButton",
+            "cancelButton",
             // Effects
             "screenFlash"
         };
@@ -88,7 +87,7 @@ namespace DigitPark.Editor.AutoAssigners
                 "- VS section\n" +
                 "- Search status (spinner, status text, timer)\n" +
                 "- Countdown panel\n" +
-                "- Buttons (cancel, back)\n" +
+                "- Buttons (cancel)\n" +
                 "- Effects (screen flash)",
                 MessageType.Info);
 
@@ -191,9 +190,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "opponentAvatar", FindImageByName("opponentavatar"));
             AssignReference(so, "opponentNameText", FindTextByName("opponentname"));
             AssignReference(so, "opponentLevelText", FindTextByName("opponentlevel"));
-            AssignGameObject(so, "opponentSearchingIndicator", "SearchingIndicator");
-            AssignReference(so, "opponentSearchRing", FindImageByName("searchring"));
-
             // VS Section (UIBuilder: "VSContainer", "VSText")
             AssignGameObject(so, "vsContainer", "VSContainer");
             AssignReference(so, "vsText", FindTextByName("vstext"));
@@ -209,9 +205,8 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "countdownText", FindTextByName("countdowntext"));
             AssignReference(so, "getReadyText", FindTextByName("getreadytext"));
 
-            // Buttons (UIBuilder: "CancelButton", "BackButtonGold")
+            // Buttons (UIBuilder: "CancelButton")
             AssignReference(so, "cancelButton", FindButtonByName("cancelbutton"));
-            AssignReference(so, "backButton", FindButtonByName("backbuttongold"));
 
             // Effects (UIBuilder: "ScreenFlash")
             AssignReference(so, "screenFlash", FindImageByName("screenflash"));

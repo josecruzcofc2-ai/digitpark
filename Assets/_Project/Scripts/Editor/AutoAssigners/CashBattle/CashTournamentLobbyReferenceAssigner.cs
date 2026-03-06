@@ -42,7 +42,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Chat
             "chatScrollRect", "chatMessagesContainer", "chatInput", "sendChatButton",
             // Actions
-            "joinButton", "leaveButton", "shareButton", "joinButtonText",
+            "shareButton", "playButton", "playButtonText",
             // Status
             "loadingOverlay", "statusText", "startingOverlay", "startingCountdownText"
         };
@@ -238,6 +238,11 @@ namespace DigitPark.Editor.AutoAssigners
             Transform participantsContainerT = FindDeep(root, "ParticipantsContainer");
             AssignReference(so, "participantsContainer", participantsContainerT);
 
+            // Participant prefab
+            var participantPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Project/Prefabs/Tournaments/Lobby/ParticipantItem.prefab");
+            AssignReference(so, "participantItemPrefab", participantPrefab);
+
             // Chat
             Transform chatScrollT = FindDeep(root, "ChatScrollRect");
             AssignReference(so, "chatScrollRect", chatScrollT != null ? chatScrollT.GetComponent<ScrollRect>() : null);
@@ -252,21 +257,17 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "sendChatButton", sendBtnT != null ? sendBtnT.GetComponent<Button>() : null);
 
             // Actions
-            Transform joinBtnT = FindDeep(root, "JoinButton");
-            AssignReference(so, "joinButton", joinBtnT != null ? joinBtnT.GetComponent<Button>() : null);
-
-            Transform leaveBtnT = FindDeep(root, "LeaveButton");
-            AssignReference(so, "leaveButton", leaveBtnT != null ? leaveBtnT.GetComponent<Button>() : null);
-
             Transform shareBtnT = FindDeep(root, "ShareButton");
             AssignReference(so, "shareButton", shareBtnT != null ? shareBtnT.GetComponent<Button>() : null);
 
-            AssignReference(so, "joinButtonText", FindTextByDeep(root, "CashJoinButtonText"));
+            Transform playBtnT = FindDeep(root, "PlayButton");
+            AssignReference(so, "playButton", playBtnT != null ? playBtnT.GetComponent<Button>() : null);
+            AssignReference(so, "playButtonText", FindTextByDeep(root, "CashPlayButtonText"));
 
             // Status
             Transform loadingT = FindDeep(root, "LoadingOverlay");
             AssignReference(so, "loadingOverlay", loadingT != null ? loadingT.gameObject : null);
-            AssignReference(so, "statusText", FindTextByDeep(root, "StatusText"));
+            AssignReference(so, "statusText", FindTextByDeep(root, "CashLoadingStatusText"));
 
             Transform startingT = FindDeep(root, "StartingOverlay");
             AssignReference(so, "startingOverlay", startingT != null ? startingT.gameObject : null);

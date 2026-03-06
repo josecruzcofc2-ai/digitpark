@@ -141,8 +141,6 @@ namespace DigitPark.Editor
 
         private static void BuildPremiumUI()
         {
-            CleanupOldUI();
-
             // Find or create Canvas
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
@@ -174,8 +172,6 @@ namespace DigitPark.Editor
         /// </summary>
         public static void BuildSilent()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -235,134 +231,35 @@ namespace DigitPark.Editor
 
         private static void CleanupOldElements(Transform parent)
         {
-            // Destroy specific known elements
-            string[] toDestroy = {
-                "Background", "SafeArea", "MainPanel", "Header",
-                "GameSelectionPanel", "TournamentListPanel", "ConfirmBetPanel", "MatchmakingPanel",
-                "WalletPanel", "HistoryPanel"
-            };
-
-            foreach (string name in toDestroy)
+            List<GameObject> toDestroy = new List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                Transform existing = parent.Find(name);
-                if (existing != null)
-                {
-                    DestroyImmediate(existing.gameObject);
-                }
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
             }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         #region Background
 
         private static void CreatePremiumBackground(Transform parent)
         {
-            // Main background container
-            GameObject bgContainer = new GameObject("Background");
-            bgContainer.transform.SetParent(parent, false);
-            bgContainer.transform.SetAsFirstSibling();
+            GameObject bg = new GameObject("Background");
+            bg.transform.SetParent(parent, false);
+            bg.transform.SetAsFirstSibling();
 
-            RectTransform bgRT = bgContainer.AddComponent<RectTransform>();
+            RectTransform bgRT = bg.AddComponent<RectTransform>();
             bgRT.anchorMin = Vector2.zero;
             bgRT.anchorMax = Vector2.one;
             bgRT.sizeDelta = Vector2.zero;
 
-            // Base dark layer
-            GameObject baseLayer = new GameObject("BaseLayer");
-            baseLayer.transform.SetParent(bgContainer.transform, false);
-
-            RectTransform baseRT = baseLayer.AddComponent<RectTransform>();
-            baseRT.anchorMin = Vector2.zero;
-            baseRT.anchorMax = Vector2.one;
-            baseRT.sizeDelta = Vector2.zero;
-
-            Image baseImg = baseLayer.AddComponent<Image>();
+            Image baseImg = bg.AddComponent<Image>();
             baseImg.color = BG_DARK;
-
-            // Gradient overlay (simulated with multiple layers)
-            CreateGradientLayers(bgContainer.transform);
-
-            // Gold particle/glow effects (subtle)
-            CreateGoldAccents(bgContainer.transform);
-
-            // Vignette effect
-            CreateVignette(bgContainer.transform);
-        }
-
-        private static void CreateGradientLayers(Transform parent)
-        {
-            // Top gradient (gold tint)
-            GameObject topGradient = new GameObject("TopGradient");
-            topGradient.transform.SetParent(parent, false);
-
-            RectTransform topRT = topGradient.AddComponent<RectTransform>();
-            topRT.anchorMin = new Vector2(0, 0.5f);
-            topRT.anchorMax = Vector2.one;
-            topRT.sizeDelta = Vector2.zero;
-
-            Image topImg = topGradient.AddComponent<Image>();
-            topImg.color = new Color(0.2f, 0.15f, 0.05f, 0.3f); // Subtle gold tint at top
-
-            // Bottom darker area
-            GameObject bottomGradient = new GameObject("BottomGradient");
-            bottomGradient.transform.SetParent(parent, false);
-
-            RectTransform bottomRT = bottomGradient.AddComponent<RectTransform>();
-            bottomRT.anchorMin = Vector2.zero;
-            bottomRT.anchorMax = new Vector2(1, 0.3f);
-            bottomRT.sizeDelta = Vector2.zero;
-
-            Image bottomImg = bottomGradient.AddComponent<Image>();
-            bottomImg.color = new Color(0.02f, 0.01f, 0.04f, 0.5f); // Darker at bottom
-        }
-
-        private static void CreateGoldAccents(Transform parent)
-        {
-            // Subtle gold glow at top
-            GameObject goldGlow = new GameObject("GoldGlow");
-            goldGlow.transform.SetParent(parent, false);
-
-            RectTransform glowRT = goldGlow.AddComponent<RectTransform>();
-            glowRT.anchorMin = new Vector2(0.2f, 0.7f);
-            glowRT.anchorMax = new Vector2(0.8f, 1f);
-            glowRT.sizeDelta = Vector2.zero;
-
-            Image glowImg = goldGlow.AddComponent<Image>();
-            glowImg.color = new Color(1f, 0.8f, 0.3f, 0.08f); // Very subtle gold glow
-
-            // Corner accents
-            CreateCornerAccent(parent, "TopLeftAccent", new Vector2(0, 1), new Vector2(0.3f, 1), new Vector2(0, 0.7f), new Vector2(0.3f, 0.7f));
-            CreateCornerAccent(parent, "TopRightAccent", new Vector2(0.7f, 1), new Vector2(1, 1), new Vector2(0.7f, 0.7f), new Vector2(1, 0.7f));
-        }
-
-        private static void CreateCornerAccent(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 anchorMin2, Vector2 anchorMax2)
-        {
-            GameObject accent = new GameObject(name);
-            accent.transform.SetParent(parent, false);
-
-            RectTransform rt = accent.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(anchorMin.x, anchorMin2.y);
-            rt.anchorMax = new Vector2(anchorMax.x, anchorMax.y);
-            rt.sizeDelta = Vector2.zero;
-
-            Image img = accent.AddComponent<Image>();
-            img.color = new Color(0.85f, 0.65f, 0.13f, 0.03f); // Very subtle gold
-        }
-
-        private static void CreateVignette(Transform parent)
-        {
-            GameObject vignette = new GameObject("Vignette");
-            vignette.transform.SetParent(parent, false);
-
-            RectTransform rt = vignette.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-
-            Image img = vignette.AddComponent<Image>();
-            img.color = new Color(0, 0, 0, 0.4f);
-
-            // Note: For a real vignette, you'd use a radial gradient sprite
-            // This is just a simple overlay
+            baseImg.raycastTarget = false;
         }
 
         #endregion
@@ -1775,9 +1672,9 @@ namespace DigitPark.Editor
 
         #region Tournament List Panel
 
-        private static void CreateTournamentListPanel(Transform parent)
+        private static void CreateCashTournamentsManager(Transform parent)
         {
-            GameObject panel = new GameObject("TournamentListPanel");
+            GameObject panel = new GameObject("CashTournamentsManager");
             panel.transform.SetParent(parent, false);
 
             RectTransform rt = panel.AddComponent<RectTransform>();
@@ -1787,8 +1684,8 @@ namespace DigitPark.Editor
             rt.offsetMin = new Vector2(20, 20);
             rt.offsetMax = new Vector2(-20, -130);
 
-            // Add the TournamentListPanel script
-            System.Type panelType = System.Type.GetType("DigitPark.UI.CashBattle.TournamentListPanel, Assembly-CSharp");
+            // Add the CashTournamentsManager script
+            System.Type panelType = System.Type.GetType("DigitPark.UI.CashBattle.CashTournamentsManager, Assembly-CSharp");
             if (panelType != null)
             {
                 panel.AddComponent(panelType);
@@ -2911,7 +2808,7 @@ namespace DigitPark.Editor
             {
                 if (mb.GetType().Name == "CashBattle1v1Manager")
                     AssignRef(so, "gameSelectionPanel", mb);
-                if (mb.GetType().Name == "TournamentListPanel")
+                if (mb.GetType().Name == "CashTournamentsManager")
                     AssignRef(so, "tournamentListPanel", mb);
             }
 

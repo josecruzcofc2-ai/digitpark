@@ -42,9 +42,6 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI opponentNameText;
         [SerializeField] private TextMeshProUGUI opponentLevelText;
         [SerializeField] private GameObject opponentCard;
-        [SerializeField] private GameObject opponentSearchingIndicator;
-        [SerializeField] private Image opponentSearchRing;
-
         [Header("=== VS SECTION ===")]
         [SerializeField] private GameObject vsContainer;
         [SerializeField] private TextMeshProUGUI vsText;
@@ -62,7 +59,6 @@ namespace DigitPark.Managers
 
         [Header("=== BUTTONS ===")]
         [SerializeField] private Button cancelButton;
-        [SerializeField] private Button backButton;
 
         [Header("=== EFFECTS ===")]
         [SerializeField] private Image screenFlash;
@@ -71,7 +67,6 @@ namespace DigitPark.Managers
         [SerializeField] private float countdownDuration = 3f;
         [SerializeField] private float maxSearchTime = 120f;
         [SerializeField] private float spinnerSpeed = 150f;
-        [SerializeField] private float opponentRingSpeed = 100f;
 
         [Header("=== GAME ICONS ===")]
         [SerializeField] private Sprite digitRushIcon;
@@ -146,10 +141,6 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             cancelButton?.onClick.AddListener(OnCancelClicked);
-            // Disable auto-navigation from BackButton prefab to prevent double listener
-            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
-            if (autoNav != null) autoNav.DisableAutoNavigation();
-            backButton?.onClick.AddListener(OnCancelClicked);
 
             // Subscribe to avatar changes
             if (AvatarService.Instance != null)
@@ -476,11 +467,6 @@ namespace DigitPark.Managers
                 searchingRing.transform.Rotate(0, 0, -spinnerSpeed * Time.deltaTime);
             }
 
-            // Rotate opponent search ring
-            if (opponentSearchRing != null && opponentSearchingIndicator != null && opponentSearchingIndicator.activeSelf)
-            {
-                opponentSearchRing.transform.Rotate(0, 0, -opponentRingSpeed * Time.deltaTime);
-            }
         }
 
         private void UpdateTimerDisplay()
@@ -543,9 +529,6 @@ namespace DigitPark.Managers
 
         private void ShowOpponentSearching(bool searching)
         {
-            if (opponentSearchingIndicator != null)
-                opponentSearchingIndicator.SetActive(searching);
-
             if (opponentNameText != null)
                 opponentNameText.text = searching ? "???" : "";
 

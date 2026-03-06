@@ -82,7 +82,9 @@ namespace DigitPark.Services
         [SerializeField] private string _triumphApiKey = "";
 
         [Tooltip("Entorno de Triumph")]
+        #pragma warning disable 0414
         [SerializeField] private bool _triumphSandbox = true;
+        #pragma warning restore 0414
 
         [Space(20)]
         [Header("=== DEBUG ===")]
@@ -290,7 +292,7 @@ namespace DigitPark.Services
             Log("Reseteando todos los servicios Mock...");
 
             if (_kycService is MockKYCService mockKYC)
-                mockKYC.ResetVerification();
+                _ = mockKYC.ResetVerification();
 
             if (_walletService is MockWalletService mockWallet)
                 mockWallet.ResetWallet();

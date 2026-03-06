@@ -10,7 +10,7 @@ namespace DigitPark.Editor.AutoAssigners
 {
     /// <summary>
     /// Reference Assigner for CashTournaments scene.
-    /// Automatically finds and assigns UI references to TournamentListPanel.
+    /// Automatically finds and assigns UI references to CashTournamentsManager.
     ///
     /// Menu: DigitPark/Auto Assigners/References/CashBattle/CashTournaments References
     /// </summary>
@@ -79,7 +79,7 @@ namespace DigitPark.Editor.AutoAssigners
             }
 
             EditorGUILayout.HelpBox(
-                "Assigns UI references to TournamentListPanel:\n" +
+                "Assigns UI references to CashTournamentsManager:\n" +
                 "- Header (title, back button)\n" +
                 "- Tournaments container and empty text\n" +
                 "- Filter dropdowns (game, fee)\n" +
@@ -90,7 +90,7 @@ namespace DigitPark.Editor.AutoAssigners
 
             GUILayout.Space(10);
 
-            MonoBehaviour targetPanel = FindTournamentListPanel();
+            MonoBehaviour targetPanel = FindCashTournamentsManager();
             if (targetPanel != null)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -166,10 +166,10 @@ namespace DigitPark.Editor.AutoAssigners
         {
             Log("=== ASSIGNING CASHTOURNAMENTS REFERENCES ===");
 
-            var panel = FindTournamentListPanel();
+            var panel = FindCashTournamentsManager();
             if (panel == null)
             {
-                Log("ERROR: TournamentListPanel not found in scene!");
+                Log("ERROR: CashTournamentsManager not found in scene!");
                 failedCount = REQUIRED_REFS.Length;
                 return;
             }
@@ -257,10 +257,10 @@ namespace DigitPark.Editor.AutoAssigners
             Log("=== ASSIGNMENT COMPLETE ===");
         }
 
-        private static MonoBehaviour FindTournamentListPanel()
+        private static MonoBehaviour FindCashTournamentsManager()
         {
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "TournamentListPanel") return mb;
+                if (mb.GetType().Name == "CashTournamentsManager") return mb;
             return null;
         }
 

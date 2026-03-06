@@ -17,7 +17,9 @@ namespace DigitPark.Managers
         CreateTournaments,      // $3.99 USD - Crear torneos
         CashBattleCreate,       // $6.99 USD - Crear batallas con dinero real
         TournamentBundle,       // $8.99 USD - Ambos: Crear torneos + Cash Battle
-        StylesPro               // Legacy - Desbloquea todos los temas premium (backwards compat)
+        StylesPro,              // Legacy - Desbloquea todos los temas premium (backwards compat)
+        PremiumBundle,          // $26.25 USD - 15 premium themes (30% off)
+        CompleteBundle          // $30.45 USD - All 19 themes: 15 premium + 4 earnable (30% off)
     }
 
     /// <summary>
@@ -60,6 +62,8 @@ namespace DigitPark.Managers
         public const string PRODUCT_ID_CASH_BATTLE_CREATE = "com.matrixsoftware.digitpark.cashbattlecreate";
         public const string PRODUCT_ID_TOURNAMENT_BUNDLE = "com.matrixsoftware.digitpark.tournamentbundle";
         public const string PRODUCT_ID_STYLES_PRO = "com.matrixsoftware.digitpark.stylespro"; // Legacy
+        public const string PRODUCT_ID_PREMIUM_BUNDLE = "com.matrixsoftware.digitpark.premium_bundle";
+        public const string PRODUCT_ID_COMPLETE_BUNDLE = "com.matrixsoftware.digitpark.complete_bundle";
 
         [Header("=== PRODUCT IDs - Gem Packs (Consumable) ===")]
         public const string PRODUCT_ID_GEMS_100 = "com.matrixsoftware.digitpark.gems_100";
@@ -73,6 +77,15 @@ namespace DigitPark.Managers
         public const string PRICE_CREATE_TOURNAMENTS = "$3.99";
         public const string PRICE_CASH_BATTLE_CREATE = "$6.99";
         public const string PRICE_TOURNAMENT_BUNDLE = "$8.99";
+        public const string PRICE_PREMIUM_BUNDLE = "$26.25";
+        public const string PRICE_COMPLETE_BUNDLE = "$30.45";
+
+        [Header("=== Theme Pricing ===")]
+        public const float THEME_PRICE_PREMIUM = 2.50f;
+        public const float THEME_PRICE_EARNABLE = 1.50f;
+        public const int PREMIUM_THEME_COUNT = 15;
+        public const int EARNABLE_THEME_COUNT = 4;
+        public const float BUNDLE_DISCOUNT = 0.30f;
 
         // Gem pack definitions: productId → (baseGems, bonusPercent)
         private static readonly Dictionary<string, (int gems, int bonus)> GEM_PACK_MAP = new Dictionary<string, (int, int)>
@@ -153,6 +166,8 @@ namespace DigitPark.Managers
             builder.AddProduct(PRODUCT_ID_CREATE_TOURNAMENTS, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_CASH_BATTLE_CREATE, ProductType.NonConsumable);
             builder.AddProduct(PRODUCT_ID_TOURNAMENT_BUNDLE, ProductType.NonConsumable);
+            builder.AddProduct(PRODUCT_ID_PREMIUM_BUNDLE, ProductType.NonConsumable);
+            builder.AddProduct(PRODUCT_ID_COMPLETE_BUNDLE, ProductType.NonConsumable);
 
             // Consumable products - Gem Packs (can be purchased multiple times)
             builder.AddProduct(PRODUCT_ID_GEMS_100, ProductType.Consumable);
@@ -209,6 +224,16 @@ namespace DigitPark.Managers
                     _hasStylesPro = true;
                     Debug.Log("[Premium] Desbloqueado: Estilos PRO (legacy)");
                     break;
+
+                case PremiumProduct.PremiumBundle:
+                    _hasStylesPro = true;
+                    Debug.Log("[Premium] Desbloqueado: Premium Bundle (15 temas premium)");
+                    break;
+
+                case PremiumProduct.CompleteBundle:
+                    _hasStylesPro = true;
+                    Debug.Log("[Premium] Desbloqueado: Complete Bundle (19 temas)");
+                    break;
             }
 
             SavePremiumStatus();
@@ -244,6 +269,24 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Premium] Iniciando compra: Tournament Bundle");
             BuyProduct(PRODUCT_ID_TOURNAMENT_BUNDLE, PremiumProduct.TournamentBundle, onComplete);
+        }
+
+        /// <summary>
+        /// Compra: Premium Bundle - 15 premium themes ($26.25 USD, 30% off)
+        /// </summary>
+        public void PurchasePremiumBundle(Action<bool> onComplete = null)
+        {
+            Debug.Log("[Premium] Iniciando compra: Premium Bundle (15 themes)");
+            BuyProduct(PRODUCT_ID_PREMIUM_BUNDLE, PremiumProduct.PremiumBundle, onComplete);
+        }
+
+        /// <summary>
+        /// Compra: Complete Bundle - All 19 themes ($30.45 USD, 30% off)
+        /// </summary>
+        public void PurchaseCompleteBundle(Action<bool> onComplete = null)
+        {
+            Debug.Log("[Premium] Iniciando compra: Complete Bundle (19 themes)");
+            BuyProduct(PRODUCT_ID_COMPLETE_BUNDLE, PremiumProduct.CompleteBundle, onComplete);
         }
 
         /// <summary>
@@ -444,6 +487,8 @@ namespace DigitPark.Managers
                 case PremiumProduct.CreateTournaments: return PRICE_CREATE_TOURNAMENTS;
                 case PremiumProduct.CashBattleCreate: return PRICE_CASH_BATTLE_CREATE;
                 case PremiumProduct.TournamentBundle: return PRICE_TOURNAMENT_BUNDLE;
+                case PremiumProduct.PremiumBundle: return PRICE_PREMIUM_BUNDLE;
+                case PremiumProduct.CompleteBundle: return PRICE_COMPLETE_BUNDLE;
                 default: return "";
             }
         }
@@ -456,6 +501,8 @@ namespace DigitPark.Managers
                 case PremiumProduct.CashBattleCreate: return PRODUCT_ID_CASH_BATTLE_CREATE;
                 case PremiumProduct.TournamentBundle: return PRODUCT_ID_TOURNAMENT_BUNDLE;
                 case PremiumProduct.StylesPro: return PRODUCT_ID_STYLES_PRO;
+                case PremiumProduct.PremiumBundle: return PRODUCT_ID_PREMIUM_BUNDLE;
+                case PremiumProduct.CompleteBundle: return PRODUCT_ID_COMPLETE_BUNDLE;
                 default: return "";
             }
         }
@@ -484,6 +531,16 @@ namespace DigitPark.Managers
                         ? "Desbloquea todos los temas premium"
                         : "Unlock all premium themes";
 
+                case PremiumProduct.PremiumBundle:
+                    return language == "es"
+                        ? "15 temas premium con 30% de descuento"
+                        : "15 premium themes with 30% discount";
+
+                case PremiumProduct.CompleteBundle:
+                    return language == "es"
+                        ? "Los 19 temas con 30% de descuento"
+                        : "All 19 themes with 30% discount";
+
                 default:
                     return "";
             }
@@ -500,6 +557,8 @@ namespace DigitPark.Managers
                 case PremiumProduct.TournamentBundle:
                     return _canCreateTournaments && _canCreateCashBattle;
                 case PremiumProduct.StylesPro:
+                case PremiumProduct.PremiumBundle:
+                case PremiumProduct.CompleteBundle:
                     return _hasStylesPro;
                 default:
                     return false;
@@ -615,6 +674,16 @@ namespace DigitPark.Managers
             else if (productId == PRODUCT_ID_TOURNAMENT_BUNDLE)
             {
                 UnlockProduct(PremiumProduct.TournamentBundle);
+                _purchaseCallback?.Invoke(true);
+            }
+            else if (productId == PRODUCT_ID_PREMIUM_BUNDLE)
+            {
+                UnlockProduct(PremiumProduct.PremiumBundle);
+                _purchaseCallback?.Invoke(true);
+            }
+            else if (productId == PRODUCT_ID_COMPLETE_BUNDLE)
+            {
+                UnlockProduct(PremiumProduct.CompleteBundle);
                 _purchaseCallback?.Invoke(true);
             }
             else

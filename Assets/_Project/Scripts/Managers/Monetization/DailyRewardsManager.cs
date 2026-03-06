@@ -139,6 +139,9 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            if (titleText != null)
+                titleText.text = AutoLocalizer.Get("daily_rewards");
+
             EnsureServicesExist();
             LoadNeonIcons();
             InitializeRewards();

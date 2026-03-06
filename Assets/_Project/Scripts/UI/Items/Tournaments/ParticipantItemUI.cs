@@ -26,8 +26,8 @@ namespace DigitPark.UI.Items
         [SerializeField] private TextMeshProUGUI statusText;
         [SerializeField] private Image onlineIndicator;
 
-        [Header("UI - Score")]
-        [SerializeField] private TextMeshProUGUI scoreText;
+        [Header("UI - Attempts & Time")]
+        [SerializeField] private TextMeshProUGUI attemptsText;
         [SerializeField] private TextMeshProUGUI bestTimeText;
 
         [Header("UI - Actions")]
@@ -81,11 +81,11 @@ namespace DigitPark.UI.Items
             // Ready status
             UpdateReadyStatus(data.isReady);
 
-            // Score/Time
-            if (scoreText)
+            // Attempts & Time
+            if (attemptsText)
             {
-                scoreText.text = data.score > 0 ? data.score.ToString() : "-";
-                scoreText.gameObject.SetActive(data.showScore);
+                attemptsText.text = $"{data.attemptsUsed}/{data.maxAttempts}";
+                attemptsText.gameObject.SetActive(data.showAttempts);
             }
 
             if (bestTimeText)
@@ -170,13 +170,14 @@ namespace DigitPark.UI.Items
         public Sprite avatar;
         public Sprite countryFlag;
         public int rank;
-        public int score;
+        public int attemptsUsed;
+        public int maxAttempts;
         public float bestTime;
         public bool isOnline;
         public bool isReady;
         public bool isSelf;
         public bool showRank;
-        public bool showScore;
+        public bool showAttempts;
         public bool showBestTime;
     }
 }

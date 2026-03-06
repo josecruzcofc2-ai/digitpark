@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -177,12 +178,12 @@ namespace DigitPark.CashBattle
         {
             switch (result)
             {
-                case MatchResult.Win: return "VICTORIA";
-                case MatchResult.Loss: return "DERROTA";
-                case MatchResult.Draw: return "EMPATE";
-                case MatchResult.Pending: return "EN CURSO";
-                case MatchResult.Cancelled: return "CANCELADO";
-                case MatchResult.Disqualified: return "DESCALIFICADO";
+                case MatchResult.Win: return AutoLocalizer.Get("history_result_victory");
+                case MatchResult.Loss: return AutoLocalizer.Get("history_result_defeat");
+                case MatchResult.Draw: return AutoLocalizer.Get("history_result_draw");
+                case MatchResult.Pending: return AutoLocalizer.Get("history_in_progress").ToUpper();
+                case MatchResult.Cancelled: return AutoLocalizer.Get("history_result_cancelled");
+                case MatchResult.Disqualified: return AutoLocalizer.Get("history_result_disqualified");
                 default: return "";
             }
         }
@@ -197,13 +198,13 @@ namespace DigitPark.CashBattle
                 case HistoryEntryType.Match1v1:
                     return $"1v1 - {gameType}";
                 case HistoryEntryType.CognitiveSprint:
-                    return $"Cognitive Sprint ({gamesPlayed?.Length ?? 0} juegos)";
+                    return AutoLocalizer.Get("history_cognitive_sprint_games", gamesPlayed?.Length ?? 0);
                 case HistoryEntryType.Tournament:
-                    return tournamentName ?? "Torneo";
+                    return tournamentName ?? AutoLocalizer.Get("history_tournament_default");
                 case HistoryEntryType.TournamentPrize:
-                    return $"Premio - {tournamentName}";
+                    return AutoLocalizer.Get("history_tournament_prize", tournamentName);
                 default:
-                    return "Partida";
+                    return AutoLocalizer.Get("history_match_default");
             }
         }
 
@@ -216,11 +217,11 @@ namespace DigitPark.CashBattle
             {
                 case HistoryEntryType.Match1v1:
                 case HistoryEntryType.CognitiveSprint:
-                    return $"vs {opponentName ?? "Oponente"}";
+                    return $"vs {opponentName ?? AutoLocalizer.Get("history_opponent_default")}";
                 case HistoryEntryType.Tournament:
                     if (result == MatchResult.Pending)
-                        return "En progreso...";
-                    return $"Posición: #{myPosition}/{totalParticipants}";
+                        return AutoLocalizer.Get("history_in_progress_ellipsis");
+                    return AutoLocalizer.Get("history_position", myPosition, totalParticipants);
                 default:
                     return "";
             }
@@ -247,13 +248,13 @@ namespace DigitPark.CashBattle
             TimeSpan timeSince = DateTime.UtcNow - timestamp;
 
             if (timeSince.TotalMinutes < 1)
-                return "Ahora";
+                return AutoLocalizer.Get("time_now");
             if (timeSince.TotalMinutes < 60)
-                return $"Hace {(int)timeSince.TotalMinutes}m";
+                return AutoLocalizer.Get("time_ago_minutes", (int)timeSince.TotalMinutes);
             if (timeSince.TotalHours < 24)
-                return $"Hace {(int)timeSince.TotalHours}h";
+                return AutoLocalizer.Get("time_ago_hours", (int)timeSince.TotalHours);
             if (timeSince.TotalDays < 7)
-                return $"Hace {(int)timeSince.TotalDays}d";
+                return AutoLocalizer.Get("time_ago_days", (int)timeSince.TotalDays);
 
             return timestamp.ToString("dd/MM/yyyy HH:mm");
         }

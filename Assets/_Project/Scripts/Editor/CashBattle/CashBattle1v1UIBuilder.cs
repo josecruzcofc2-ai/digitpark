@@ -134,8 +134,6 @@ namespace DigitPark.Editor
 
         private static void BuildCashBattle1v1UI()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -165,8 +163,6 @@ namespace DigitPark.Editor
         /// </summary>
         public static void BuildSilent()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -227,21 +223,17 @@ namespace DigitPark.Editor
 
         private static void CleanupOldElements(Transform parent)
         {
-            string[] toDestroy = {
-                "Background", "SafeArea", "MainContentPanel", "Header",
-                "GameSelectionPanel", "EntryFeeSection", "FindOpponentContainer",
-                "CognitiveSprintPanel", "GamesScrollView", "GamesContainer",
-                "GameSelectionModal", "GameSelectorContainer"
-            };
-
-            foreach (string name in toDestroy)
+            List<GameObject> toDestroy = new List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                Transform existing = parent.Find(name);
-                if (existing != null)
-                {
-                    DestroyImmediate(existing.gameObject);
-                }
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
             }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         #endregion
@@ -262,18 +254,6 @@ namespace DigitPark.Editor
             // Base dark layer
             Image baseImg = bgContainer.AddComponent<Image>();
             baseImg.color = BG_DARK;
-
-            // Gold gradient overlay at top
-            GameObject goldGlow = new GameObject("GoldGlow");
-            goldGlow.transform.SetParent(bgContainer.transform, false);
-
-            RectTransform glowRT = goldGlow.AddComponent<RectTransform>();
-            glowRT.anchorMin = new Vector2(0, 0.7f);
-            glowRT.anchorMax = Vector2.one;
-            glowRT.sizeDelta = Vector2.zero;
-
-            Image glowImg = goldGlow.AddComponent<Image>();
-            glowImg.color = new Color(1f, 0.8f, 0.3f, 0.06f);
         }
 
         #endregion
@@ -394,10 +374,10 @@ namespace DigitPark.Editor
             titleObj.transform.SetParent(parent, false);
 
             RectTransform rt = titleObj.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.anchorMin = new Vector2(0.07f, 0f);
+            rt.anchorMax = new Vector2(0.53f, 1f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(600, 0);
+            rt.sizeDelta = Vector2.zero;
             rt.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
@@ -410,6 +390,7 @@ namespace DigitPark.Editor
             title.enableAutoSizing = true;
             title.fontSizeMin = FontSizes.AutoMinTitle;
             title.fontSizeMax = FontSizes.H4;
+            title.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateBalanceWidget(Transform parent)
@@ -486,23 +467,24 @@ namespace DigitPark.Editor
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.sizeDelta = Vector2.zero;
-            rt.offsetMin = new Vector2(20, 25); // Mas espacio abajo
+            rt.offsetMin = new Vector2(20, 25);
             rt.offsetMax = new Vector2(-20, -125);
 
-            // Title
+            // Title + Game Selector (compact top)
             CreatePanelTitle(panel.transform);
-
-            // Game Selector (dropdown + details)
             CreateGameSelector(panel.transform);
 
-            // Separador visual entre games y entry fee
-            CreateSectionSeparator(panel.transform, 0.36f);
+            CreateSectionSeparator(panel.transform, 0.78f);
 
-            // Entry Fee Section
+            // HERO: Potential Earnings (center)
+            CreateHeroEarnings(panel.transform);
+
+            CreateSectionSeparator(panel.transform, 0.48f);
+
+            // Bet Section
             CreateEntryFeeSection(panel.transform);
 
-            // Separador visual entre entry fee y boton
-            CreateSectionSeparator(panel.transform, 0.10f);
+            CreateSectionSeparator(panel.transform, 0.12f);
 
             // Find Opponent Button
             CreateFindOpponentButton(panel.transform);
@@ -534,15 +516,18 @@ namespace DigitPark.Editor
             titleRT.anchorMin = new Vector2(0, 1);
             titleRT.anchorMax = new Vector2(1, 1);
             titleRT.pivot = new Vector2(0.5f, 1);
-            titleRT.sizeDelta = new Vector2(0, 45);
+            titleRT.sizeDelta = new Vector2(0, 35);
             titleRT.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "Select Game";
-            titleText.fontSize = FontSizes.Subtitle;
-            titleText.color = TEXT_GOLD;
-            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.fontSize = FontSizes.Caption;
+            titleText.color = new Color(TEXT_GOLD.r, TEXT_GOLD.g, TEXT_GOLD.b, 0.6f);
+            titleText.alignment = TextAlignmentOptions.Left;
             titleText.fontStyle = FontStyles.Bold;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinSmall;
+            titleText.fontSizeMax = FontSizes.Caption;
         }
 
         #endregion
@@ -555,18 +540,18 @@ namespace DigitPark.Editor
             selectorContainer.transform.SetParent(parent, false);
 
             RectTransform selectorRT = selectorContainer.AddComponent<RectTransform>();
-            selectorRT.anchorMin = new Vector2(0, 0.38f);
+            selectorRT.anchorMin = new Vector2(0, 0.80f);
             selectorRT.anchorMax = new Vector2(1, 0.95f);
             selectorRT.sizeDelta = Vector2.zero;
-            selectorRT.offsetMin = new Vector2(10, 8);
-            selectorRT.offsetMax = new Vector2(-10, -75);
+            selectorRT.offsetMin = new Vector2(10, 0);
+            selectorRT.offsetMax = new Vector2(-10, -40);
 
             // ========== ROW: Dropdown + View Details Button ==========
             GameObject dropdownRow = new GameObject("DropdownRow");
             dropdownRow.transform.SetParent(selectorContainer.transform, false);
 
             RectTransform rowRT = dropdownRow.AddComponent<RectTransform>();
-            rowRT.anchorMin = new Vector2(0, 0.7f);
+            rowRT.anchorMin = new Vector2(0, 0f);
             rowRT.anchorMax = new Vector2(1, 1f);
             rowRT.sizeDelta = Vector2.zero;
 
@@ -745,18 +730,18 @@ namespace DigitPark.Editor
             vdRT.sizeDelta = Vector2.zero;
 
             Image vdBg = viewDetailsObj.AddComponent<Image>();
-            vdBg.color = BUTTON_GOLD;
+            vdBg.color = new Color(0.08f, 0.07f, 0.12f, 0.9f);
 
             Button vdBtn = viewDetailsObj.AddComponent<Button>();
             ColorBlock vdColors = vdBtn.colors;
-            vdColors.normalColor = BUTTON_GOLD;
-            vdColors.highlightedColor = GOLD_LIGHT;
-            vdColors.pressedColor = GOLD_DARK;
+            vdColors.normalColor = Color.white;
+            vdColors.highlightedColor = new Color(1f, 0.95f, 0.8f, 1f);
+            vdColors.pressedColor = new Color(0.9f, 0.8f, 0.5f, 1f);
             vdBtn.colors = vdColors;
             vdBtn.targetGraphic = vdBg;
 
             Outline vdOutline = viewDetailsObj.AddComponent<Outline>();
-            vdOutline.effectColor = new Color(1f, 0.75f, 0.2f, 0.5f);
+            vdOutline.effectColor = CARD_BORDER;
             vdOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
             GameObject vdTextObj = new GameObject("ViewDetailsButtonText");
@@ -770,79 +755,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI vdText = vdTextObj.AddComponent<TextMeshProUGUI>();
             vdText.text = "View Details";
             vdText.fontSize = FontSizes.Body;
-            vdText.color = BG_DARK;
+            vdText.color = TEXT_GOLD;
             vdText.fontStyle = FontStyles.Bold;
             vdText.alignment = TextAlignmentOptions.Center;
             vdText.enableAutoSizing = true;
             vdText.fontSizeMin = FontSizes.AutoMinBody;
             vdText.fontSizeMax = FontSizes.Body;
 
-            // ========== SELECTED GAME DETAILS (icon + description) ==========
-            GameObject detailsRow = new GameObject("SelectedGameDetails");
-            detailsRow.transform.SetParent(selectorContainer.transform, false);
-
-            RectTransform detailsRT = detailsRow.AddComponent<RectTransform>();
-            detailsRT.anchorMin = new Vector2(0, 0f);
-            detailsRT.anchorMax = new Vector2(1, 0.65f);
-            detailsRT.sizeDelta = Vector2.zero;
-
-            Image detailsBg = detailsRow.AddComponent<Image>();
-            detailsBg.color = new Color(0.08f, 0.07f, 0.12f, 0.8f);
-
-            Outline detailsOutline = detailsRow.AddComponent<Outline>();
-            detailsOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.3f);
-            detailsOutline.effectDistance = new Vector2(1, -1);
-
-            // Selected game icon (60x60)
-            GameObject iconObj2 = new GameObject("SelectedGameIcon");
-            iconObj2.transform.SetParent(detailsRow.transform, false);
-
-            RectTransform iconRT2 = iconObj2.AddComponent<RectTransform>();
-            iconRT2.anchorMin = new Vector2(0, 0.5f);
-            iconRT2.anchorMax = new Vector2(0, 0.5f);
-            iconRT2.pivot = new Vector2(0, 0.5f);
-            iconRT2.sizeDelta = new Vector2(60, 60);
-            iconRT2.anchoredPosition = new Vector2(15, 0);
-
-            Image iconImg2 = iconObj2.AddComponent<Image>();
-            iconImg2.preserveAspect = true;
-            iconImg2.raycastTarget = false;
-
-            // Load default icon
-            string defaultIconPath = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
-            Sprite defaultSprite = AssetDatabase.LoadAssetAtPath<Sprite>(defaultIconPath);
-            if (defaultSprite != null)
-            {
-                iconImg2.sprite = defaultSprite;
-                iconImg2.color = Color.white;
-            }
-            else
-            {
-                iconImg2.color = new Color(0.4f, 0.4f, 0.4f, 0.5f);
-            }
-
-            // Selected game description
-            GameObject descObj = new GameObject("SelectedGameDesc");
-            descObj.transform.SetParent(detailsRow.transform, false);
-
-            RectTransform descRT = descObj.AddComponent<RectTransform>();
-            descRT.anchorMin = new Vector2(0, 0);
-            descRT.anchorMax = new Vector2(1, 1);
-            descRT.sizeDelta = Vector2.zero;
-            descRT.offsetMin = new Vector2(90, 10);
-            descRT.offsetMax = new Vector2(-15, -10);
-
-            TextMeshProUGUI descText = descObj.AddComponent<TextMeshProUGUI>();
-            descText.text = "Type numbers as fast as you can!";
-            descText.fontSize = FontSizes.Body;
-            descText.color = TEXT_SECONDARY;
-            descText.fontStyle = FontStyles.Bold;
-            descText.alignment = TextAlignmentOptions.Left;
-            descText.enableWordWrapping = true;
-            descText.overflowMode = TextOverflowModes.Ellipsis;
-            descText.raycastTarget = false;
-
-            Debug.Log("[CashBattle1v1] Game Selector (dropdown + details) created");
+            Debug.Log("[CashBattle1v1] Game Selector created");
         }
 
         private static void BuildGameSelectorOnly()
@@ -871,6 +791,96 @@ namespace DigitPark.Editor
 
         #endregion
 
+        #region Hero Earnings
+
+        private static void CreateHeroEarnings(Transform parent)
+        {
+            GameObject hero = new GameObject("HeroEarnings");
+            hero.transform.SetParent(parent, false);
+
+            RectTransform heroRT = hero.AddComponent<RectTransform>();
+            heroRT.anchorMin = new Vector2(0, 0.50f);
+            heroRT.anchorMax = new Vector2(1, 0.77f);
+            heroRT.sizeDelta = Vector2.zero;
+            heroRT.offsetMin = new Vector2(5, 5);
+            heroRT.offsetMax = new Vector2(-5, -5);
+
+            Image heroBg = hero.AddComponent<Image>();
+            heroBg.color = new Color(0.04f, 0.08f, 0.04f, 0.95f);
+
+            Outline heroOutline = hero.AddComponent<Outline>();
+            heroOutline.effectColor = new Color(1f, 0.84f, 0f, 0.4f);
+            heroOutline.effectDistance = new Vector2(2, -2);
+
+            // Label: "IF YOU WIN"
+            GameObject labelObj = new GameObject("HeroEarningsLabel");
+            labelObj.transform.SetParent(hero.transform, false);
+
+            RectTransform labelRT = labelObj.AddComponent<RectTransform>();
+            labelRT.anchorMin = new Vector2(0, 0.7f);
+            labelRT.anchorMax = new Vector2(1, 1f);
+            labelRT.sizeDelta = Vector2.zero;
+            labelRT.offsetMin = new Vector2(10, 0);
+            labelRT.offsetMax = new Vector2(-10, -5);
+
+            TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
+            labelText.text = "If you win you receive";
+            labelText.fontSize = FontSizes.Caption;
+            labelText.color = new Color(0.5f, 1f, 0.7f, 0.7f);
+            labelText.fontStyle = FontStyles.Bold;
+            labelText.alignment = TextAlignmentOptions.Center;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.AutoMinSmall;
+            labelText.fontSizeMax = FontSizes.Caption;
+
+            // HERO amount
+            GameObject amountObj = new GameObject("PotentialEarningsText");
+            amountObj.transform.SetParent(hero.transform, false);
+
+            RectTransform amountRT = amountObj.AddComponent<RectTransform>();
+            amountRT.anchorMin = new Vector2(0, 0.2f);
+            amountRT.anchorMax = new Vector2(1, 0.72f);
+            amountRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
+            amountText.text = "$0.00";
+            amountText.fontSize = FontSizes.Symbol;
+            amountText.color = GOLD_PRIMARY;
+            amountText.fontStyle = FontStyles.Bold;
+            amountText.alignment = TextAlignmentOptions.Center;
+            amountText.enableAutoSizing = true;
+            amountText.fontSizeMin = FontSizes.H1;
+            amountText.fontSizeMax = FontSizes.Symbol;
+
+            // Glow effect on amount
+            Outline amountGlow = amountObj.AddComponent<Outline>();
+            amountGlow.effectColor = new Color(1f, 0.7f, 0f, 0.3f);
+            amountGlow.effectDistance = new Vector2(2, -2);
+
+            // Pool info (subtle)
+            GameObject poolObj = new GameObject("PoolInfoText");
+            poolObj.transform.SetParent(hero.transform, false);
+
+            RectTransform poolRT = poolObj.AddComponent<RectTransform>();
+            poolRT.anchorMin = new Vector2(0, 0f);
+            poolRT.anchorMax = new Vector2(1, 0.22f);
+            poolRT.sizeDelta = Vector2.zero;
+            poolRT.offsetMin = new Vector2(10, 3);
+            poolRT.offsetMax = new Vector2(-10, 0);
+
+            TextMeshProUGUI poolText = poolObj.AddComponent<TextMeshProUGUI>();
+            poolText.text = "Pool: $0.00 | Your bet: $0.00 | Fee: 30%";
+            poolText.fontSize = FontSizes.Caption;
+            poolText.color = new Color(0.5f, 0.5f, 0.5f, 0.8f);
+            poolText.fontStyle = FontStyles.Bold;
+            poolText.alignment = TextAlignmentOptions.Center;
+            poolText.enableAutoSizing = true;
+            poolText.fontSizeMin = FontSizes.AutoMinSmall;
+            poolText.fontSizeMax = FontSizes.Caption;
+        }
+
+        #endregion
+
         #region Entry Fee Section
 
         private static void CreateEntryFeeSection(Transform parent)
@@ -879,8 +889,8 @@ namespace DigitPark.Editor
             feeSection.transform.SetParent(parent, false);
 
             RectTransform rt = feeSection.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.11f); // Mas espacio para el boton
-            rt.anchorMax = new Vector2(1, 0.35f); // Mas espacio arriba para separacion
+            rt.anchorMin = new Vector2(0, 0.13f);
+            rt.anchorMax = new Vector2(1, 0.47f);
             rt.sizeDelta = Vector2.zero;
             rt.offsetMin = new Vector2(15, 5); // Padding
             rt.offsetMax = new Vector2(-15, -5);
@@ -904,9 +914,6 @@ namespace DigitPark.Editor
 
             // Custom input
             CreateCustomInput(feeSection.transform);
-
-            // Earnings feedback
-            CreateEarningsFeedback(feeSection.transform);
         }
 
         private static void CreateFeeTitle(Transform parent)
@@ -955,8 +962,8 @@ namespace DigitPark.Editor
             container.transform.SetParent(parent, false);
 
             RectTransform containerRT = container.AddComponent<RectTransform>();
-            containerRT.anchorMin = new Vector2(0, 0.52f);
-            containerRT.anchorMax = new Vector2(1, 0.8f);
+            containerRT.anchorMin = new Vector2(0, 0.42f);
+            containerRT.anchorMax = new Vector2(1, 0.78f);
             containerRT.sizeDelta = Vector2.zero;
             containerRT.offsetMin = new Vector2(10, 0);
             containerRT.offsetMax = new Vector2(-10, 0);
@@ -1036,8 +1043,8 @@ namespace DigitPark.Editor
             container.transform.SetParent(parent, false);
 
             RectTransform containerRT = container.AddComponent<RectTransform>();
-            containerRT.anchorMin = new Vector2(0, 0.28f);
-            containerRT.anchorMax = new Vector2(1, 0.5f);
+            containerRT.anchorMin = new Vector2(0, 0.03f);
+            containerRT.anchorMax = new Vector2(1, 0.40f);
             containerRT.sizeDelta = Vector2.zero;
             containerRT.offsetMin = new Vector2(15, 0);
             containerRT.offsetMax = new Vector2(-15, 0);
@@ -1166,92 +1173,7 @@ namespace DigitPark.Editor
             applyText.alignment = TextAlignmentOptions.Center;
         }
 
-        private static void CreateEarningsFeedback(Transform parent)
-        {
-            GameObject container = new GameObject("EarningsFeedback");
-            container.transform.SetParent(parent, false);
-
-            RectTransform containerRT = container.AddComponent<RectTransform>();
-            containerRT.anchorMin = new Vector2(0, 0);
-            containerRT.anchorMax = new Vector2(1, 0.26f);
-            containerRT.sizeDelta = Vector2.zero;
-            containerRT.offsetMin = new Vector2(15, 8);
-            containerRT.offsetMax = new Vector2(-15, -2);
-
-            Image feedbackBg = container.AddComponent<Image>();
-            feedbackBg.color = new Color(0.03f, 0.1f, 0.05f, 0.95f);
-            // No Outline - dark green background is sufficient
-
-            // Potential earnings
-            GameObject earningsObj = new GameObject("PotentialEarningsText");
-            earningsObj.transform.SetParent(container.transform, false);
-
-            RectTransform earningsRT = earningsObj.AddComponent<RectTransform>();
-            earningsRT.anchorMin = new Vector2(0, 0.45f);
-            earningsRT.anchorMax = new Vector2(0.78f, 1);
-            earningsRT.sizeDelta = Vector2.zero;
-            earningsRT.offsetMin = new Vector2(20, 0);
-            earningsRT.offsetMax = new Vector2(0, -5);
-
-            TextMeshProUGUI earningsText = earningsObj.AddComponent<TextMeshProUGUI>();
-            earningsText.text = "If you win you receive: <color=#FFD700>$0.00</color>";
-            earningsText.fontSize = FontSizes.H4;
-            earningsText.fontSizeMin = FontSizes.AutoMinTitle;
-            earningsText.enableAutoSizing = true;
-            earningsText.color = new Color(0.5f, 1f, 0.7f, 1f);
-            earningsText.fontStyle = FontStyles.Bold;
-            earningsText.alignment = TextAlignmentOptions.Left;
-            earningsText.richText = true;
-            earningsText.enableWordWrapping = true;
-
-            // Pool info
-            GameObject poolObj = new GameObject("PoolInfoText");
-            poolObj.transform.SetParent(container.transform, false);
-
-            RectTransform poolRT = poolObj.AddComponent<RectTransform>();
-            poolRT.anchorMin = new Vector2(0, 0);
-            poolRT.anchorMax = new Vector2(1, 0.5f);
-            poolRT.sizeDelta = Vector2.zero;
-            poolRT.offsetMin = new Vector2(20, 5);
-            poolRT.offsetMax = new Vector2(-20, 0);
-
-            TextMeshProUGUI poolText = poolObj.AddComponent<TextMeshProUGUI>();
-            poolText.text = "Pool: $0.00 | Your bet: $0.00 | Fee: 30%";
-            poolText.fontSize = FontSizes.Body;
-            poolText.color = new Color(0.6f, 0.6f, 0.6f, 1f);
-            poolText.fontStyle = FontStyles.Bold;
-            poolText.alignment = TextAlignmentOptions.Left;
-
-            // Coin icon - Reemplazado con simbolo de texto
-            GameObject coinIcon = new GameObject("CoinIcon");
-            coinIcon.transform.SetParent(container.transform, false);
-
-            RectTransform coinRT = coinIcon.AddComponent<RectTransform>();
-            coinRT.anchorMin = new Vector2(0.82f, 0.15f);
-            coinRT.anchorMax = new Vector2(0.98f, 0.85f);
-            coinRT.sizeDelta = Vector2.zero;
-
-            // Fondo circular dorado
-            Image coinBg = coinIcon.AddComponent<Image>();
-            coinBg.color = new Color(0.8f, 0.65f, 0.1f, 0.9f);
-            // Sin Outline - icono pequeño no necesita efecto adicional
-
-            // Texto $ en el icono
-            GameObject coinTextObj = new GameObject("CoinText");
-            coinTextObj.transform.SetParent(coinIcon.transform, false);
-
-            RectTransform coinTextRT = coinTextObj.AddComponent<RectTransform>();
-            coinTextRT.anchorMin = Vector2.zero;
-            coinTextRT.anchorMax = Vector2.one;
-            coinTextRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI coinText = coinTextObj.AddComponent<TextMeshProUGUI>();
-            coinText.text = "$";
-            coinText.fontSize = FontSizes.Subtitle;
-            coinText.color = BG_DARK;
-            coinText.fontStyle = FontStyles.Bold;
-            coinText.alignment = TextAlignmentOptions.Center;
-        }
+        // CreateEarningsFeedback removed - earnings moved to HeroEarnings section
 
         private static void BuildEntryFeeSectionOnly()
         {

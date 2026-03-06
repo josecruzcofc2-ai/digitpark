@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using System.Collections.Generic;
 using DigitPark.UI;
 
 namespace DigitPark.Editor
@@ -77,10 +78,11 @@ namespace DigitPark.Editor
         {
             Debug.Log("[TournamentLobbyUIBuilder] ========== INICIANDO CONSTRUCCION V2 ==========");
 
-            CleanupOldUI();
-
             Canvas canvas = SetupCanvas();
             if (canvas == null) return;
+
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             CreateBackground(canvas);
             GameObject safeArea = CreateSafeArea(canvas);
@@ -188,6 +190,21 @@ namespace DigitPark.Editor
                     }
                 }
             }
+        }
+
+        private static void CleanupOldElements(Transform parent)
+        {
+            List<GameObject> toDestroy = new List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         // ==================== BACKGROUND & SAFE AREA ====================
@@ -598,7 +615,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI attemptsTMP = GetOrAddComponent<TextMeshProUGUI>(attemptsObj);
             attemptsTMP.text = "3 attempts";
             attemptsTMP.fontSize = FontSizes.Body;
-            attemptsTMP.fontStyle = FontStyles.Italic;
+            attemptsTMP.fontStyle = FontStyles.Bold;
             attemptsTMP.color = TEXT_SECONDARY;
             attemptsTMP.alignment = TextAlignmentOptions.Center;
 
@@ -607,7 +624,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI timeLimitTMP = GetOrAddComponent<TextMeshProUGUI>(timeLimitObj);
             timeLimitTMP.text = "60s per round";
             timeLimitTMP.fontSize = FontSizes.Body;
-            timeLimitTMP.fontStyle = FontStyles.Italic;
+            timeLimitTMP.fontStyle = FontStyles.Bold;
             timeLimitTMP.color = TEXT_SECONDARY;
             timeLimitTMP.alignment = TextAlignmentOptions.Center;
         }
@@ -1106,7 +1123,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             inputText.text = "";
             inputText.fontSize = FontSizes.Body;
-            inputText.fontStyle = FontStyles.Normal;
+            inputText.fontStyle = FontStyles.Bold;
             inputText.color = TEXT_PRIMARY;
             inputText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -1229,6 +1246,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI statusTMP = GetOrAddComponent<TextMeshProUGUI>(statusTextObj);
             statusTMP.text = "";
             statusTMP.fontSize = FontSizes.Body;
+            statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.color = TEXT_SECONDARY;
             statusTMP.alignment = TextAlignmentOptions.Center;
 
@@ -1393,6 +1411,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI msgText = GetOrAddComponent<TextMeshProUGUI>(msgObj);
             msgText.text = "You will lose your progress and\nyour entry fee will not be refunded.";
             msgText.fontSize = FontSizes.Subtitle;
+            msgText.fontStyle = FontStyles.Bold;
             msgText.color = TEXT_PRIMARY;
             msgText.alignment = TextAlignmentOptions.Center;
             LayoutElement msgLE = GetOrAddComponent<LayoutElement>(msgObj);

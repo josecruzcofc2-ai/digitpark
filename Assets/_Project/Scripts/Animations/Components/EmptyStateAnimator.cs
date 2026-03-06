@@ -22,7 +22,9 @@ namespace DigitPark.Animations
 
         [Header("CTA Button")]
         [SerializeField] private Transform ctaButton;
+        #pragma warning disable 0414
         [SerializeField] private float breatheMin = 0.97f;
+        #pragma warning restore 0414
         [SerializeField] private float breatheMax = 1.03f;
         [SerializeField] private float breatheDuration = 2f;
         [SerializeField] private float ctaDelay = 0.6f;

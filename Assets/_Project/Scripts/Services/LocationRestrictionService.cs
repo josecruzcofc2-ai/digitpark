@@ -56,7 +56,9 @@ namespace DigitPark.Services
 
         // Eventos
         public event Action<bool, string> OnLocationChecked; // (isRestricted, stateName)
+        #pragma warning disable 0067
         public event Action OnLocationCheckFailed;
+        #pragma warning restore 0067
 
         private void Awake()
         {

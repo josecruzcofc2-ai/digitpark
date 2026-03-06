@@ -67,7 +67,9 @@ namespace DigitPark.UI
 
         [Header("Animation")]
         [SerializeField] private float revealDelay = 0.5f;
+        #pragma warning disable 0414
         [SerializeField] private float countdownDuration = 2f;
+        #pragma warning restore 0414
 
         // Events
         public event Action OnContinueClicked;

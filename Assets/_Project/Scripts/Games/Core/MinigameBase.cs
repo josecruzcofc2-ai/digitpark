@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.UI;
 using DigitPark.Managers;
 using DigitPark.Services;
+using DigitPark.Themes;
 
 namespace DigitPark.Games
 {
@@ -62,6 +63,13 @@ namespace DigitPark.Games
             {
                 var context = GameSessionManager.Instance.CurrentContext;
                 Debug.Log($"Iniciando {GameType} en modo {context.Mode}");
+
+                // Auto-apply gold theme for CashTournament mode
+                if (context.Mode == GameMode.CashTournament)
+                {
+                    var forcer = gameObject.AddComponent<CashThemeForcer>();
+                    forcer.ApplyGoldTheme();
+                }
             }
 
             Initialize(config);
@@ -221,10 +229,17 @@ namespace DigitPark.Games
                 return;
             }
 
-            // 3. Tournament
+            // 3. Tournament (free)
             if (ctx?.Mode == GameMode.Tournament)
             {
                 HandleTournamentResult(result, ctx);
+                return;
+            }
+
+            // 3b. CashTournament — submit score and return to lobby
+            if (ctx?.Mode == GameMode.CashTournament)
+            {
+                HandleCashTournamentResult(result, ctx);
                 return;
             }
 
@@ -322,6 +337,49 @@ namespace DigitPark.Games
                 ResultPanelManager.Instance.ShowTournamentResult(
                     result, 1, attemptsUsed, 3, bestTime, prize);
             }
+        }
+
+        /// <summary>
+        /// Maneja resultado de CashTournament: guarda score, actualiza best time,
+        /// muestra panel de torneo y regresa al lobby.
+        /// </summary>
+        private void HandleCashTournamentResult(MinigameResult result, GameContext ctx)
+        {
+            string tournamentId = ctx.TournamentId ?? PlayerPrefs.GetString("CashGame_TournamentId", "");
+            int attemptNumber = PlayerPrefs.GetInt("CashGame_AttemptNumber", 1);
+            int maxAttempts = PlayerPrefs.GetInt("CashGame_MaxAttempts", 3);
+
+            // Update best time
+            float bestTime = PlayerPrefs.GetFloat($"CashTournament_{tournamentId}_BestTime", float.MaxValue);
+            if (result.FinalScore < bestTime)
+            {
+                bestTime = result.FinalScore;
+                PlayerPrefs.SetFloat($"CashTournament_{tournamentId}_BestTime", bestTime);
+            }
+
+            // Save best score
+            int bestScore = PlayerPrefs.GetInt($"CashTournament_{tournamentId}_BestScore", 0);
+            int currentScore = Mathf.RoundToInt(result.FinalScore * 100f);
+            if (currentScore > bestScore)
+            {
+                bestScore = currentScore;
+                PlayerPrefs.SetInt($"CashTournament_{tournamentId}_BestScore", bestScore);
+            }
+            PlayerPrefs.Save();
+
+            // Submit to tournament service if available
+            var tournamentService = ServiceLocator.Tournament;
+            if (tournamentService != null)
+            {
+                tournamentService.SubmitTournamentScore(tournamentId, bestScore);
+            }
+
+            // Show tournament result panel then return to lobby
+            decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
+            ResultPanelManager.Instance.ShowTournamentResult(
+                result, 1, attemptNumber, maxAttempts, bestTime, prize);
+
+            Debug.Log($"[MinigameBase] CashTournament attempt {attemptNumber}/{maxAttempts} complete. Score: {currentScore}, Best: {bestScore}");
         }
 
         /// <summary>

@@ -201,10 +201,10 @@ namespace DigitPark.Services
             _ = SaveToFirebase();
         }
 
-        private async Task SaveToFirebase()
+        private Task SaveToFirebase()
         {
             var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
-            if (playerData == null) return;
+            if (playerData == null) return Task.CompletedTask;
 
             try
             {
@@ -223,6 +223,8 @@ namespace DigitPark.Services
             {
                 Debug.LogWarning($"[DailyReward] Error guardando en Firebase: {e.Message}");
             }
+
+            return Task.CompletedTask;
         }
 
         #endregion

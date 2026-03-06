@@ -145,8 +145,6 @@ namespace DigitPark.Editor
 
         private static void BuildCashTournamentCreateUI()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -169,8 +167,6 @@ namespace DigitPark.Editor
         /// </summary>
         public static void BuildSilent()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -278,19 +274,6 @@ namespace DigitPark.Editor
             Image img = bg.AddComponent<Image>();
             img.color = BG_DARK;
             img.raycastTarget = false;
-
-            // Gold glow at top
-            GameObject goldGlow = new GameObject("GoldGlow");
-            goldGlow.transform.SetParent(bg.transform, false);
-
-            RectTransform glowRT = goldGlow.AddComponent<RectTransform>();
-            glowRT.anchorMin = new Vector2(0, 0.7f);
-            glowRT.anchorMax = Vector2.one;
-            glowRT.sizeDelta = Vector2.zero;
-
-            Image glowImg = goldGlow.AddComponent<Image>();
-            glowImg.color = new Color(1f, 0.8f, 0.3f, 0.06f);
-            glowImg.raycastTarget = false;
         }
 
         #endregion
@@ -595,6 +578,9 @@ namespace DigitPark.Editor
             phText.color = TEXT_SECONDARY;
             phText.alignment = TextAlignmentOptions.Left;
             phText.fontStyle = FontStyles.Bold;
+            phText.enableAutoSizing = true;
+            phText.fontSizeMin = FontSizes.Body;
+            phText.fontSizeMax = FontSizes.H3;
 
             TMP_InputField inputField = inputBg.AddComponent<TMP_InputField>();
             inputField.textViewport = textRT;
@@ -655,8 +641,9 @@ namespace DigitPark.Editor
             iconLE.flexibleWidth = 0;
 
             Image iconImg = iconObj.AddComponent<Image>();
-            iconImg.color = new Color(0.4f, 0.4f, 0.4f, 0.3f);
+            iconImg.color = Color.white;
             iconImg.preserveAspect = true;
+            iconObj.SetActive(false); // Hidden until game is selected at runtime
         }
 
         // ==================== ENTRY FEE CARD ====================
@@ -689,7 +676,7 @@ namespace DigitPark.Editor
             customLE.preferredHeight = 40;
 
             HorizontalLayoutGroup customHLG = customRow.AddComponent<HorizontalLayoutGroup>();
-            customHLG.spacing = 10;
+            customHLG.spacing = 6;
             customHLG.childAlignment = TextAnchor.MiddleLeft;
             customHLG.childForceExpandWidth = false;
             customHLG.childForceExpandHeight = true;
@@ -751,15 +738,19 @@ namespace DigitPark.Editor
             displayObj.transform.SetParent(customRow.transform, false);
 
             LayoutElement dispLE = displayObj.AddComponent<LayoutElement>();
-            dispLE.preferredWidth = 160;
+            dispLE.preferredWidth = 100;
             dispLE.flexibleWidth = 0;
 
             TextMeshProUGUI dispTMP = displayObj.AddComponent<TextMeshProUGUI>();
             dispTMP.text = "$5.00";
-            dispTMP.fontSize = FontSizes.H4;
+            dispTMP.fontSize = FontSizes.Body;
             dispTMP.color = TEXT_GOLD;
             dispTMP.fontStyle = FontStyles.Bold;
             dispTMP.alignment = TextAlignmentOptions.Right;
+            dispTMP.enableWordWrapping = false;
+            dispTMP.enableAutoSizing = true;
+            dispTMP.fontSizeMin = 10;
+            dispTMP.fontSizeMax = FontSizes.Body;
         }
 
         // ==================== PLAYERS CARD ====================
@@ -788,6 +779,9 @@ namespace DigitPark.Editor
             prizeTMP.fontStyle = FontStyles.Bold;
             prizeTMP.alignment = TextAlignmentOptions.Left;
             prizeTMP.raycastTarget = false;
+            prizeTMP.enableAutoSizing = true;
+            prizeTMP.fontSizeMin = 10;
+            prizeTMP.fontSizeMax = FontSizes.Body;
         }
 
         // ==================== SCHEDULE CARD ====================
@@ -808,7 +802,7 @@ namespace DigitPark.Editor
             toggleHLG.spacing = 10;
             toggleHLG.childAlignment = TextAnchor.MiddleLeft;
             toggleHLG.childForceExpandWidth = false;
-            toggleHLG.childForceExpandHeight = true;
+            toggleHLG.childForceExpandHeight = false;
             toggleHLG.childControlWidth = true;
             toggleHLG.childControlHeight = true;
 
@@ -824,6 +818,9 @@ namespace DigitPark.Editor
             tlTMP.color = TEXT_PRIMARY;
             tlTMP.alignment = TextAlignmentOptions.Left;
             tlTMP.fontStyle = FontStyles.Bold;
+            tlTMP.enableAutoSizing = true;
+            tlTMP.fontSizeMin = 10;
+            tlTMP.fontSizeMax = FontSizes.Body;
 
             // TimePicker Dropdown
             CreateTMPDropdownInLayout(card.transform, "StartTimeDropdown",
@@ -836,12 +833,13 @@ namespace DigitPark.Editor
             LayoutElement stLE = scheduledObj.AddComponent<LayoutElement>();
             stLE.preferredHeight = 22;
             TextMeshProUGUI stTMP = scheduledObj.AddComponent<TextMeshProUGUI>();
-            stTMP.text = "Starts: Now";
+            stTMP.text = "";
             stTMP.fontSize = FontSizes.Body;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.raycastTarget = false;
+            scheduledObj.SetActive(false);
         }
 
         // ==================== RULES CARD ====================
@@ -878,7 +876,7 @@ namespace DigitPark.Editor
             specHLG.spacing = 10;
             specHLG.childAlignment = TextAnchor.MiddleLeft;
             specHLG.childForceExpandWidth = false;
-            specHLG.childForceExpandHeight = true;
+            specHLG.childForceExpandHeight = false;
             specHLG.childControlWidth = true;
             specHLG.childControlHeight = true;
 
@@ -893,6 +891,9 @@ namespace DigitPark.Editor
             slTMP.color = TEXT_PRIMARY;
             slTMP.alignment = TextAlignmentOptions.Left;
             slTMP.fontStyle = FontStyles.Bold;
+            slTMP.enableAutoSizing = true;
+            slTMP.fontSizeMin = 10;
+            slTMP.fontSizeMax = FontSizes.Body;
 
             // Private Toggle Row
             GameObject privRow = new GameObject("PrivateRow");
@@ -903,7 +904,7 @@ namespace DigitPark.Editor
             privHLG.spacing = 10;
             privHLG.childAlignment = TextAnchor.MiddleLeft;
             privHLG.childForceExpandWidth = false;
-            privHLG.childForceExpandHeight = true;
+            privHLG.childForceExpandHeight = false;
             privHLG.childControlWidth = true;
             privHLG.childControlHeight = true;
 
@@ -918,6 +919,9 @@ namespace DigitPark.Editor
             plTMP.color = TEXT_PRIMARY;
             plTMP.alignment = TextAlignmentOptions.Left;
             plTMP.fontStyle = FontStyles.Bold;
+            plTMP.enableAutoSizing = true;
+            plTMP.fontSizeMin = 10;
+            plTMP.fontSizeMax = FontSizes.Body;
 
             // Private Code Input (hidden by default)
             GameObject privateCodeBg = new GameObject("PrivateCodeInput");
@@ -961,6 +965,9 @@ namespace DigitPark.Editor
             pcPhText.color = TEXT_SECONDARY;
             pcPhText.alignment = TextAlignmentOptions.Left;
             pcPhText.fontStyle = FontStyles.Bold;
+            pcPhText.enableAutoSizing = true;
+            pcPhText.fontSizeMin = 10;
+            pcPhText.fontSizeMax = FontSizes.Body;
 
             TMP_InputField pcInput = privateCodeBg.AddComponent<TMP_InputField>();
             pcInput.textViewport = pcTextRT;
@@ -972,7 +979,7 @@ namespace DigitPark.Editor
         // ==================== PREVIEW PANEL ====================
         private static void CreatePreviewPanel(Transform parent)
         {
-            GameObject card = CreateFormCard(parent, "PreviewPanel", 200);
+            GameObject card = CreateFormCard(parent, "PreviewPanel", 165);
 
             // Title
             GameObject titleObj = new GameObject("PreviewTitle");
@@ -985,14 +992,9 @@ namespace DigitPark.Editor
             titleTMP.color = TEXT_GOLD;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Left;
-
-            // Separator
-            GameObject sep = new GameObject("Separator");
-            sep.transform.SetParent(card.transform, false);
-            LayoutElement sepLE = sep.AddComponent<LayoutElement>();
-            sepLE.preferredHeight = 2;
-            Image sepImg = sep.AddComponent<Image>();
-            sepImg.color = new Color(0.85f, 0.65f, 0.13f, 0.3f);
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = FontSizes.Body;
+            titleTMP.fontSizeMax = FontSizes.H3;
 
             // Preview fields
             CreatePreviewField(card.transform, "PreviewNameText", "Name: --");
@@ -1017,6 +1019,9 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Left;
             tmp.fontStyle = FontStyles.Bold;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 10;
+            tmp.fontSizeMax = FontSizes.Body;
         }
 
         #endregion
@@ -1054,6 +1059,9 @@ namespace DigitPark.Editor
             feeTMP.alignment = TextAlignmentOptions.Center;
             feeTMP.fontStyle = FontStyles.Bold;
             feeTMP.raycastTarget = false;
+            feeTMP.enableAutoSizing = true;
+            feeTMP.fontSizeMin = 10;
+            feeTMP.fontSizeMax = FontSizes.Body;
 
             // CreateButton
             GameObject createBtn = new GameObject("CreateButton");
@@ -1094,6 +1102,9 @@ namespace DigitPark.Editor
             btnTMP.color = BG_DARK;
             btnTMP.fontStyle = FontStyles.Bold;
             btnTMP.alignment = TextAlignmentOptions.Center;
+            btnTMP.enableAutoSizing = true;
+            btnTMP.fontSizeMin = 10;
+            btnTMP.fontSizeMax = FontSizes.Body;
         }
 
         #endregion
@@ -1129,6 +1140,9 @@ namespace DigitPark.Editor
             stTMP.color = TEXT_GOLD;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = FontSizes.Body;
+            stTMP.fontSizeMax = FontSizes.H4;
         }
 
         #endregion
@@ -1154,8 +1168,8 @@ namespace DigitPark.Editor
             GameObject bg = new GameObject("Background");
             bg.transform.SetParent(sliderObj.transform, false);
             RectTransform bgRT = bg.AddComponent<RectTransform>();
-            bgRT.anchorMin = new Vector2(0, 0.35f);
-            bgRT.anchorMax = new Vector2(1, 0.65f);
+            bgRT.anchorMin = new Vector2(0, 0.25f);
+            bgRT.anchorMax = new Vector2(1, 0.75f);
             bgRT.sizeDelta = Vector2.zero;
             Image bgImg = bg.AddComponent<Image>();
             bgImg.color = new Color(0.2f, 0.18f, 0.25f, 1f);
@@ -1164,8 +1178,8 @@ namespace DigitPark.Editor
             GameObject fillArea = new GameObject("Fill Area");
             fillArea.transform.SetParent(sliderObj.transform, false);
             RectTransform faRT = fillArea.AddComponent<RectTransform>();
-            faRT.anchorMin = new Vector2(0, 0.35f);
-            faRT.anchorMax = new Vector2(1, 0.65f);
+            faRT.anchorMin = new Vector2(0, 0.25f);
+            faRT.anchorMax = new Vector2(1, 0.75f);
             faRT.sizeDelta = Vector2.zero;
 
             GameObject fill = new GameObject("Fill");
@@ -1173,6 +1187,10 @@ namespace DigitPark.Editor
             Image fillImg = fill.AddComponent<Image>();
             fillImg.color = GOLD_PRIMARY;
             RectTransform fillRT = fill.GetComponent<RectTransform>();
+            fillRT.anchorMin = Vector2.zero;
+            fillRT.anchorMax = Vector2.one;
+            fillRT.offsetMin = Vector2.zero;
+            fillRT.offsetMax = Vector2.zero;
             fillRT.sizeDelta = Vector2.zero;
             slider.fillRect = fillRT;
 
@@ -1189,7 +1207,7 @@ namespace DigitPark.Editor
             Image handleImg = handle.AddComponent<Image>();
             handleImg.color = GOLD_LIGHT;
             RectTransform handleRT = handle.GetComponent<RectTransform>();
-            handleRT.sizeDelta = new Vector2(24, 24);
+            handleRT.sizeDelta = new Vector2(36, 36);
             slider.handleRect = handleRT;
         }
 
@@ -1199,21 +1217,25 @@ namespace DigitPark.Editor
             toggleObj.transform.SetParent(parent, false);
 
             LayoutElement le = toggleObj.AddComponent<LayoutElement>();
-            le.preferredWidth = 50;
-            le.preferredHeight = 30;
+            le.preferredWidth = 40;
+            le.preferredHeight = 40;
             le.flexibleWidth = 0;
 
             // Background
             Image bg = toggleObj.AddComponent<Image>();
-            bg.color = new Color(0.2f, 0.18f, 0.25f, 1f);
+            bg.color = new Color(0.25f, 0.23f, 0.30f, 1f);
 
-            // Checkmark
+            Outline toggleOutline = toggleObj.AddComponent<Outline>();
+            toggleOutline.effectColor = GOLD_DARK;
+            toggleOutline.effectDistance = new Vector2(1, -1);
+
+            // Checkmark - small gold filled square (Toggle shows/hides via graphic alpha)
             GameObject checkmark = new GameObject("Checkmark");
             checkmark.transform.SetParent(toggleObj.transform, false);
 
             RectTransform checkRT = checkmark.AddComponent<RectTransform>();
-            checkRT.anchorMin = new Vector2(0.1f, 0.1f);
-            checkRT.anchorMax = new Vector2(0.9f, 0.9f);
+            checkRT.anchorMin = new Vector2(0.2f, 0.2f);
+            checkRT.anchorMax = new Vector2(0.8f, 0.8f);
             checkRT.sizeDelta = Vector2.zero;
 
             Image checkImg = checkmark.AddComponent<Image>();

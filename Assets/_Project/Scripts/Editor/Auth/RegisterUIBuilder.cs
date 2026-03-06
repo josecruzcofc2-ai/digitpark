@@ -67,8 +67,6 @@ namespace DigitPark.Editor
 
                 Debug.Log("🎨 Starting Register UI Rebuild...");
 
-                CleanupOldUI();
-
                 // Clean existing UI
                 CleanExistingUI(canvas);
 

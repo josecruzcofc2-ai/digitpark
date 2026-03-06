@@ -75,8 +75,6 @@ namespace DigitPark.Editor
 
             Debug.Log("[SettingsUIBuilder] Building Settings UI...");
 
-            CleanupOldUI();
-
             CleanExistingUI(canvas);
             BuildBackground(canvas);
             BuildHeader(canvas);
@@ -529,7 +527,7 @@ namespace DigitPark.Editor
             lockRT.anchorMin = new Vector2(1, 0.5f);
             lockRT.anchorMax = new Vector2(1, 0.5f);
             lockRT.pivot = new Vector2(1, 0.5f);
-            lockRT.sizeDelta = new Vector2(28, 28);
+            lockRT.sizeDelta = new Vector2(56, 56);
             lockRT.anchoredPosition = new Vector2(-8, 0);
 
             Image lockImg = lockObj.AddComponent<Image>();
@@ -542,7 +540,7 @@ namespace DigitPark.Editor
             if (itemLabel != null)
             {
                 RectTransform labelRT = itemLabel.GetComponent<RectTransform>();
-                labelRT.offsetMax = new Vector2(-40, 0);
+                labelRT.offsetMax = new Vector2(-65, 0);
             }
 
             Debug.Log("[SettingsUIBuilder] Lock icon added to theme dropdown template");
@@ -1652,7 +1650,7 @@ namespace DigitPark.Editor
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            scrollRect.scrollSensitivity = 6f;
+            scrollRect.scrollSensitivity = 40f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -1685,6 +1683,16 @@ namespace DigitPark.Editor
 
             scrollRect.content = contentRT;
 
+            ContentSizeFitter csf = content.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            VerticalLayoutGroup vlg = content.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 2;
+            vlg.padding = new RectOffset(2, 2, 2, 2);
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true;
+
             // Item template
             GameObject item = new GameObject("Item");
             item.transform.SetParent(content.transform, false);
@@ -1693,6 +1701,10 @@ namespace DigitPark.Editor
             itemRT.anchorMin = new Vector2(0, 0.5f);
             itemRT.anchorMax = new Vector2(1, 0.5f);
             itemRT.sizeDelta = new Vector2(0, 40);
+
+            LayoutElement itemLE = item.AddComponent<LayoutElement>();
+            itemLE.minHeight = 40;
+            itemLE.preferredHeight = 40;
 
             Toggle itemToggle = item.AddComponent<Toggle>();
 

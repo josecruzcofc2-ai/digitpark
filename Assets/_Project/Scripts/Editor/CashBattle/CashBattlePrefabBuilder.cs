@@ -262,19 +262,18 @@ namespace DigitPark.Editor
         {
             EnsurePrefabDirectory();
 
-            // === Card x2 (300px alto) con barra dorada ===
+            // === Clean card (160px) — text-only, no icons ===
             GameObject root = new GameObject("TournamentCardUI");
             RectTransform rootRT = root.AddComponent<RectTransform>();
-            rootRT.sizeDelta = new Vector2(0, 300);
+            rootRT.sizeDelta = new Vector2(0, 160);
 
             LayoutElement rootLE = root.AddComponent<LayoutElement>();
-            rootLE.preferredHeight = 300;
-            rootLE.minHeight = 300;
+            rootLE.preferredHeight = 160;
+            rootLE.minHeight = 160;
 
             Image rootBg = root.AddComponent<Image>();
             rootBg.color = CARD_BG;
 
-            // Gold outline (unified style)
             Outline tcOutline = root.AddComponent<Outline>();
             tcOutline.effectColor = new Color(0.85f, 0.65f, 0.13f, 0.35f);
             tcOutline.effectDistance = new Vector2(1.5f, 1.5f);
@@ -285,19 +284,20 @@ namespace DigitPark.Editor
             colors.highlightedColor = CARD_BG * 1.3f;
             rootBtn.colors = colors;
 
-            // === Barra dorada inferior (identidad CashTournaments) ===
+            // === Gold bar (bottom accent) ===
             GameObject colorBar = new GameObject("ColorBar");
             colorBar.transform.SetParent(root.transform, false);
             RectTransform barRT = colorBar.AddComponent<RectTransform>();
             barRT.anchorMin = new Vector2(0, 0);
             barRT.anchorMax = new Vector2(1, 0);
             barRT.pivot = new Vector2(0.5f, 0);
-            barRT.sizeDelta = new Vector2(0, 8);
+            barRT.sizeDelta = new Vector2(0, 4);
             barRT.anchoredPosition = Vector2.zero;
             Image barImg = colorBar.AddComponent<Image>();
             barImg.color = GOLD;
+            barImg.raycastTarget = false;
 
-            // === LIVE Badge (arriba derecha) ===
+            // === LIVE Badge (top-right, hidden by default) ===
             GameObject liveBadge = new GameObject("LiveBadge");
             liveBadge.transform.SetParent(root.transform, false);
             liveBadge.SetActive(false);
@@ -306,220 +306,126 @@ namespace DigitPark.Editor
             liveRT.anchorMin = new Vector2(1, 1);
             liveRT.anchorMax = new Vector2(1, 1);
             liveRT.pivot = new Vector2(1, 1);
-            liveRT.sizeDelta = new Vector2(140, 50);
-            liveRT.anchoredPosition = new Vector2(-15, -12);
+            liveRT.sizeDelta = new Vector2(90, 32);
+            liveRT.anchoredPosition = new Vector2(-10, -8);
 
             Image liveBg = liveBadge.AddComponent<Image>();
             liveBg.color = new Color(1f, 0.3f, 0.2f, 1f);
 
-            GameObject liveIcon = new GameObject("Icon");
-            liveIcon.transform.SetParent(liveBadge.transform, false);
-            RectTransform liRT = liveIcon.AddComponent<RectTransform>();
-            liRT.anchorMin = new Vector2(0, 0.5f);
-            liRT.anchorMax = new Vector2(0, 0.5f);
-            liRT.pivot = new Vector2(0, 0.5f);
-            liRT.sizeDelta = new Vector2(36, 36);
-            liRT.anchoredPosition = new Vector2(10, 0);
-            Image liImg = liveIcon.AddComponent<Image>();
-            liImg.preserveAspect = true;
-            Sprite liveSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "TournamentLiveIcon.png");
-            if (liveSprite != null) liImg.sprite = liveSprite;
-            liImg.color = Color.white;
-
             GameObject liveText = new GameObject("Text");
             liveText.transform.SetParent(liveBadge.transform, false);
             RectTransform ltRT = liveText.AddComponent<RectTransform>();
-            ltRT.anchorMin = new Vector2(0, 0);
-            ltRT.anchorMax = new Vector2(1, 1);
-            ltRT.offsetMin = new Vector2(48, 0);
-            ltRT.offsetMax = new Vector2(-6, 0);
+            ltRT.anchorMin = Vector2.zero;
+            ltRT.anchorMax = Vector2.one;
+            ltRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI ltTMP = liveText.AddComponent<TextMeshProUGUI>();
             ltTMP.text = "LIVE";
-            ltTMP.fontSize = FontSizes.Body;
+            ltTMP.fontSize = FontSizes.Caption;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.color = Color.white;
             ltTMP.alignment = TextAlignmentOptions.Center;
 
-
-            // === Game Icon (izquierda, x2) ===
-            GameObject gameIcon = new GameObject("GameIcon");
-            gameIcon.transform.SetParent(root.transform, false);
-
-            RectTransform giRT = gameIcon.AddComponent<RectTransform>();
-            giRT.anchorMin = new Vector2(0, 0.5f);
-            giRT.anchorMax = new Vector2(0, 0.5f);
-            giRT.pivot = new Vector2(0, 0.5f);
-            giRT.sizeDelta = new Vector2(200, 200);
-            giRT.anchoredPosition = new Vector2(20, 0);
-
-            Image giBg = gameIcon.AddComponent<Image>();
-            giBg.color = new Color(0.05f, 0.05f, 0.08f, 1f);
-
-            // Child sprite para el icono del juego
-            GameObject iconSprite = new GameObject("Sprite");
-            iconSprite.transform.SetParent(gameIcon.transform, false);
-            RectTransform isRT = iconSprite.AddComponent<RectTransform>();
-            isRT.anchorMin = Vector2.zero;
-            isRT.anchorMax = Vector2.one;
-            isRT.sizeDelta = new Vector2(-16, -16);
-            isRT.anchoredPosition = Vector2.zero;
-            Image isImg = iconSprite.AddComponent<Image>();
-            isImg.preserveAspect = true;
-            Sprite gameSprite = AssetDatabase.LoadAssetAtPath<Sprite>(GAME_ICONS_PATH + "QuickMathIcon.png");
-            if (gameSprite != null) isImg.sprite = gameSprite;
-            isImg.color = Color.white;
-
-            // === Tournament Name (arriba, a la derecha del icono) ===
+            // === Tournament Name (top-left, anchor-based) ===
             GameObject nameObj = new GameObject("TournamentName");
             nameObj.transform.SetParent(root.transform, false);
 
             RectTransform nameRT = nameObj.AddComponent<RectTransform>();
             nameRT.anchorMin = new Vector2(0, 0.55f);
-            nameRT.anchorMax = new Vector2(1, 1);
-            nameRT.offsetMin = new Vector2(240, 0);
-            nameRT.offsetMax = new Vector2(-200, -12);
+            nameRT.anchorMax = new Vector2(0.65f, 1f);
+            nameRT.offsetMin = new Vector2(16, 0);
+            nameRT.offsetMax = new Vector2(0, -10);
 
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
-            nameText.text = "Quick Math Championship";
-            nameText.fontSize = FontSizes.H3;
+            nameText.text = "Tournament Name";
+            nameText.fontSize = FontSizes.Body;
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_WHITE;
             nameText.alignment = TextAlignmentOptions.Left;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = FontSizes.AutoMinBody;
+            nameText.fontSizeMax = FontSizes.Body;
             nameText.overflowMode = TextOverflowModes.Ellipsis;
+            nameText.enableWordWrapping = false;
 
+            // === Info Row (bottom-left): Prize · Players · Timer ===
+            GameObject infoRow = new GameObject("InfoRow");
+            infoRow.transform.SetParent(root.transform, false);
 
-            // === Info Row (abajo del nombre): Prize + Players + Timer ===
-            // Prize
-            GameObject prizeRow = new GameObject("PrizeRow");
-            prizeRow.transform.SetParent(root.transform, false);
-            RectTransform prRT = prizeRow.AddComponent<RectTransform>();
-            prRT.anchorMin = new Vector2(0, 0);
-            prRT.anchorMax = new Vector2(0, 0.55f);
-            prRT.pivot = new Vector2(0, 0.5f);
-            prRT.offsetMin = new Vector2(240, 15);
-            prRT.offsetMax = new Vector2(240, 0);
-            prRT.sizeDelta = new Vector2(160, 0);
+            RectTransform irRT = infoRow.AddComponent<RectTransform>();
+            irRT.anchorMin = new Vector2(0, 0);
+            irRT.anchorMax = new Vector2(0.65f, 0.55f);
+            irRT.offsetMin = new Vector2(16, 12);
+            irRT.offsetMax = new Vector2(0, 0);
 
-            GameObject prizeIcon = new GameObject("Icon");
-            prizeIcon.transform.SetParent(prizeRow.transform, false);
-            RectTransform piRT = prizeIcon.AddComponent<RectTransform>();
-            piRT.anchorMin = new Vector2(0, 0.5f);
-            piRT.anchorMax = new Vector2(0, 0.5f);
-            piRT.pivot = new Vector2(0, 0.5f);
-            piRT.sizeDelta = new Vector2(50, 50);
-            piRT.anchoredPosition = Vector2.zero;
-            Image piImg = prizeIcon.AddComponent<Image>();
-            piImg.preserveAspect = true;
-            Sprite prizeSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "TrophyPrizeIcon.png");
-            if (prizeSprite != null) piImg.sprite = prizeSprite;
-            piImg.color = Color.white;
+            HorizontalLayoutGroup irHLG = infoRow.AddComponent<HorizontalLayoutGroup>();
+            irHLG.spacing = 6;
+            irHLG.padding = new RectOffset(0, 0, 0, 0);
+            irHLG.childAlignment = TextAnchor.MiddleLeft;
+            irHLG.childForceExpandWidth = false;
+            irHLG.childForceExpandHeight = true;
+            irHLG.childControlWidth = true;
+            irHLG.childControlHeight = true;
 
-            GameObject prizeText = new GameObject("Text");
-            prizeText.transform.SetParent(prizeRow.transform, false);
-            RectTransform ptRT = prizeText.AddComponent<RectTransform>();
-            ptRT.anchorMin = new Vector2(0, 0);
-            ptRT.anchorMax = new Vector2(1, 1);
-            ptRT.offsetMin = new Vector2(58, 0);
-            ptRT.offsetMax = Vector2.zero;
+            // Prize — direct child of InfoRow
+            GameObject prizeText = new GameObject("PrizeText");
+            prizeText.transform.SetParent(infoRow.transform, false);
+            LayoutElement prLE = prizeText.AddComponent<LayoutElement>();
+            prLE.flexibleWidth = 1;
             TextMeshProUGUI ptTMP = prizeText.AddComponent<TextMeshProUGUI>();
             ptTMP.text = "$500";
-            ptTMP.fontSize = FontSizes.Subtitle;
+            ptTMP.fontSize = FontSizes.BodySmall;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GREEN;
             ptTMP.alignment = TextAlignmentOptions.Left;
+            ptTMP.enableAutoSizing = true;
+            ptTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            ptTMP.fontSizeMax = FontSizes.BodySmall;
 
+            // Separator dot 1
+            CreateSeparatorDot(infoRow.transform);
 
-            // Players
-            GameObject playersRow = new GameObject("PlayersRow");
-            playersRow.transform.SetParent(root.transform, false);
-            RectTransform plRT = playersRow.AddComponent<RectTransform>();
-            plRT.anchorMin = new Vector2(0, 0);
-            plRT.anchorMax = new Vector2(0, 0.55f);
-            plRT.pivot = new Vector2(0, 0.5f);
-            plRT.offsetMin = new Vector2(420, 15);
-            plRT.offsetMax = new Vector2(420, 0);
-            plRT.sizeDelta = new Vector2(160, 0);
-
-            GameObject playersIcon = new GameObject("Icon");
-            playersIcon.transform.SetParent(playersRow.transform, false);
-            RectTransform pliRT = playersIcon.AddComponent<RectTransform>();
-            pliRT.anchorMin = new Vector2(0, 0.5f);
-            pliRT.anchorMax = new Vector2(0, 0.5f);
-            pliRT.pivot = new Vector2(0, 0.5f);
-            pliRT.sizeDelta = new Vector2(50, 50);
-            pliRT.anchoredPosition = Vector2.zero;
-            Image pliImg = playersIcon.AddComponent<Image>();
-            pliImg.preserveAspect = true;
-            Sprite playersSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "PlayersCountIcon.png");
-            if (playersSprite != null) pliImg.sprite = playersSprite;
-            pliImg.color = Color.white;
-
-            GameObject playersText = new GameObject("Text");
-            playersText.transform.SetParent(playersRow.transform, false);
-            RectTransform pltRT = playersText.AddComponent<RectTransform>();
-            pltRT.anchorMin = new Vector2(0, 0);
-            pltRT.anchorMax = new Vector2(1, 1);
-            pltRT.offsetMin = new Vector2(58, 0);
-            pltRT.offsetMax = Vector2.zero;
+            // Players — direct child of InfoRow
+            GameObject playersText = new GameObject("PlayersText");
+            playersText.transform.SetParent(infoRow.transform, false);
+            LayoutElement plLE = playersText.AddComponent<LayoutElement>();
+            plLE.flexibleWidth = 1;
             TextMeshProUGUI pltTMP = playersText.AddComponent<TextMeshProUGUI>();
             pltTMP.text = "15/20";
-            pltTMP.fontSize = FontSizes.Subtitle;
+            pltTMP.fontSize = FontSizes.BodySmall;
             pltTMP.color = TEXT_SECONDARY;
             pltTMP.alignment = TextAlignmentOptions.Left;
             pltTMP.fontStyle = FontStyles.Bold;
+            pltTMP.enableAutoSizing = true;
+            pltTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            pltTMP.fontSizeMax = FontSizes.BodySmall;
 
+            // Separator dot 2
+            CreateSeparatorDot(infoRow.transform);
 
-            // Timer
-            GameObject timerRow = new GameObject("TimerRow");
-            timerRow.transform.SetParent(root.transform, false);
-            RectTransform trRT = timerRow.AddComponent<RectTransform>();
-            trRT.anchorMin = new Vector2(0, 0);
-            trRT.anchorMax = new Vector2(0, 0.55f);
-            trRT.pivot = new Vector2(0, 0.5f);
-            trRT.offsetMin = new Vector2(600, 15);
-            trRT.offsetMax = new Vector2(600, 0);
-            trRT.sizeDelta = new Vector2(220, 0);
-
-            GameObject timerIcon = new GameObject("Icon");
-            timerIcon.transform.SetParent(timerRow.transform, false);
-            RectTransform tiRT = timerIcon.AddComponent<RectTransform>();
-            tiRT.anchorMin = new Vector2(0, 0.5f);
-            tiRT.anchorMax = new Vector2(0, 0.5f);
-            tiRT.pivot = new Vector2(0, 0.5f);
-            tiRT.sizeDelta = new Vector2(50, 50);
-            tiRT.anchoredPosition = Vector2.zero;
-            Image tiImg = timerIcon.AddComponent<Image>();
-            tiImg.preserveAspect = true;
-            Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENT_ICONS_PATH + "TournamentTimerIcon.png");
-            if (timerSprite != null) tiImg.sprite = timerSprite;
-            tiImg.color = Color.white;
-
-            GameObject timerText = new GameObject("Text");
-            timerText.transform.SetParent(timerRow.transform, false);
-            RectTransform ttRT = timerText.AddComponent<RectTransform>();
-            ttRT.anchorMin = new Vector2(0, 0);
-            ttRT.anchorMax = new Vector2(1, 1);
-            ttRT.offsetMin = new Vector2(58, 0);
-            ttRT.offsetMax = Vector2.zero;
+            // Timer — direct child of InfoRow
+            GameObject timerText = new GameObject("TimerText");
+            timerText.transform.SetParent(infoRow.transform, false);
+            LayoutElement trLE = timerText.AddComponent<LayoutElement>();
+            trLE.flexibleWidth = 1;
             TextMeshProUGUI ttTMP = timerText.AddComponent<TextMeshProUGUI>();
             ttTMP.text = "02:45:00";
-            ttTMP.fontSize = FontSizes.Subtitle;
+            ttTMP.fontSize = FontSizes.BodySmall;
             ttTMP.color = CYAN;
             ttTMP.alignment = TextAlignmentOptions.Left;
             ttTMP.fontStyle = FontStyles.Bold;
+            ttTMP.enableAutoSizing = true;
+            ttTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            ttTMP.fontSizeMax = FontSizes.BodySmall;
 
-
-            // === Entry Fee (derecha superior) ===
+            // === Entry Fee Badge (top-right) ===
             GameObject entryBadge = new GameObject("EntryFeeBadge");
             entryBadge.transform.SetParent(root.transform, false);
 
             RectTransform ebRT = entryBadge.AddComponent<RectTransform>();
-            ebRT.anchorMin = new Vector2(1, 0.5f);
-            ebRT.anchorMax = new Vector2(1, 1);
-            ebRT.pivot = new Vector2(1, 1);
-            ebRT.sizeDelta = new Vector2(190, 0);
-            ebRT.offsetMin = new Vector2(-190, 10);
-            ebRT.offsetMax = new Vector2(-15, -12);
+            ebRT.anchorMin = new Vector2(0.65f, 0.5f);
+            ebRT.anchorMax = new Vector2(0.82f, 1f);
+            ebRT.offsetMin = new Vector2(4, 8);
+            ebRT.offsetMax = new Vector2(0, -8);
 
             Image ebBg = entryBadge.AddComponent<Image>();
             ebBg.color = new Color(0, 0, 0, 0.4f);
@@ -530,15 +436,17 @@ namespace DigitPark.Editor
             elRT.anchorMin = new Vector2(0, 0.5f);
             elRT.anchorMax = new Vector2(1, 1);
             elRT.sizeDelta = Vector2.zero;
-            elRT.offsetMin = new Vector2(8, 0);
-            elRT.offsetMax = new Vector2(-8, -4);
+            elRT.offsetMin = new Vector2(4, 0);
+            elRT.offsetMax = new Vector2(-4, -2);
             TextMeshProUGUI elTMP = entryLabel.AddComponent<TextMeshProUGUI>();
             elTMP.text = "Entry";
-            elTMP.fontSize = FontSizes.Body;
+            elTMP.fontSize = FontSizes.Caption;
             elTMP.fontStyle = FontStyles.Bold;
             elTMP.color = TEXT_SECONDARY;
             elTMP.alignment = TextAlignmentOptions.Center;
-
+            elTMP.enableAutoSizing = true;
+            elTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            elTMP.fontSizeMax = FontSizes.Caption;
 
             GameObject entryValue = new GameObject("Value");
             entryValue.transform.SetParent(entryBadge.transform, false);
@@ -546,27 +454,27 @@ namespace DigitPark.Editor
             evRT.anchorMin = new Vector2(0, 0);
             evRT.anchorMax = new Vector2(1, 0.5f);
             evRT.sizeDelta = Vector2.zero;
-            evRT.offsetMin = new Vector2(8, 4);
-            evRT.offsetMax = new Vector2(-8, 0);
+            evRT.offsetMin = new Vector2(4, 2);
+            evRT.offsetMax = new Vector2(-4, 0);
             TextMeshProUGUI evTMP = entryValue.AddComponent<TextMeshProUGUI>();
             evTMP.text = "$5";
-            evTMP.fontSize = FontSizes.H3;
+            evTMP.fontSize = FontSizes.Subtitle;
             evTMP.fontStyle = FontStyles.Bold;
             evTMP.color = GOLD;
             evTMP.alignment = TextAlignmentOptions.Center;
+            evTMP.enableAutoSizing = true;
+            evTMP.fontSizeMin = FontSizes.AutoMinBody;
+            evTMP.fontSizeMax = FontSizes.Subtitle;
 
-
-            // === Join Button (derecha inferior) ===
+            // === Join Button (right side, full height) ===
             GameObject joinBtn = new GameObject("JoinButton");
             joinBtn.transform.SetParent(root.transform, false);
 
             RectTransform jbRT = joinBtn.AddComponent<RectTransform>();
-            jbRT.anchorMin = new Vector2(1, 0);
-            jbRT.anchorMax = new Vector2(1, 0.5f);
-            jbRT.pivot = new Vector2(1, 0);
-            jbRT.sizeDelta = new Vector2(190, 0);
-            jbRT.offsetMin = new Vector2(-190, 15);
-            jbRT.offsetMax = new Vector2(-15, -10);
+            jbRT.anchorMin = new Vector2(0.82f, 0);
+            jbRT.anchorMax = new Vector2(1, 1);
+            jbRT.offsetMin = new Vector2(4, 8);
+            jbRT.offsetMax = new Vector2(-10, -8);
 
             Image jbBg = joinBtn.AddComponent<Image>();
             jbBg.color = GREEN;
@@ -582,11 +490,13 @@ namespace DigitPark.Editor
             jtRT.sizeDelta = Vector2.zero;
             TextMeshProUGUI jtTMP = joinText.AddComponent<TextMeshProUGUI>();
             jtTMP.text = "Join";
-            jtTMP.fontSize = FontSizes.H4;
+            jtTMP.fontSize = FontSizes.Body;
             jtTMP.fontStyle = FontStyles.Bold;
             jtTMP.color = Color.white;
             jtTMP.alignment = TextAlignmentOptions.Center;
-
+            jtTMP.enableAutoSizing = true;
+            jtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            jtTMP.fontSizeMax = FontSizes.Body;
 
             // Guardar prefab
             string path = $"{PREFAB_PATH}/Tournaments/TournamentCardUI.prefab";
@@ -594,7 +504,23 @@ namespace DigitPark.Editor
             PrefabUtility.SaveAsPrefabAsset(root, path);
             DestroyImmediate(root);
 
-            Debug.Log($"[CashBattlePrefabBuilder] TournamentCardUI.prefab creado (x2): {path}");
+            Debug.Log($"[CashBattlePrefabBuilder] TournamentCardUI.prefab created: {path}");
+        }
+
+        private static void CreateSeparatorDot(Transform parent)
+        {
+            GameObject dot = new GameObject("Dot");
+            dot.transform.SetParent(parent, false);
+
+            LayoutElement dotLE = dot.AddComponent<LayoutElement>();
+            dotLE.preferredWidth = 20;
+
+            TextMeshProUGUI dotTMP = dot.AddComponent<TextMeshProUGUI>();
+            dotTMP.text = "\u00B7";
+            dotTMP.fontSize = FontSizes.BodySmall;
+            dotTMP.color = TEXT_SECONDARY;
+            dotTMP.alignment = TextAlignmentOptions.Center;
+            dotTMP.fontStyle = FontStyles.Bold;
         }
 
         private static void EnsurePrefabDirectory()

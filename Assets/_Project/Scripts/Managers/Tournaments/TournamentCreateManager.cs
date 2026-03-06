@@ -84,6 +84,9 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            if (titleText != null)
+                titleText.text = AutoLocalizer.Get("create_tournament_title");
+
             SetupUI();
             SetupListeners();
             SetupDropdowns();

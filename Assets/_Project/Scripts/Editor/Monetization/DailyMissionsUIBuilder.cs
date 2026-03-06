@@ -153,8 +153,6 @@ namespace DigitPark.Editor
                 return;
             }
 
-            CleanupOldUI();
-
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
             {
@@ -163,17 +161,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            // Limpiar elementos anteriores
-            string[] oldNames = {
-                "Background", "SafeArea", "Header", "ResetTimer", "OverallProgress",
-                "MissionsScrollView", "RewardClaimBlocker", "ProgressBar", "TopBar",
-                "TimerBar", "TabBar", "ScrollView"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) Object.DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             // Crear SO system (definiciones + pools + prefab)
             CreateMissionDefinitions();
@@ -1687,6 +1676,21 @@ namespace DigitPark.Editor
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
+        }
+
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                Object.DestroyImmediate(go);
         }
 
         private static GameObject FindOrCreate(Transform parent, string name)

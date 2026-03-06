@@ -76,11 +76,11 @@ namespace DigitPark.Editor
 
             EditorGUILayout.HelpBox(
                 "Builds the Gold-themed UI for CashTournaments:\n\n" +
-                "- Header with BackButtonGold, title, CurrencyPills\n" +
+                "- Header with BackButtonGold, title\n" +
                 "- FilterBar with All/Active/Completed tabs\n" +
-                "- TournamentsList ScrollRect\n" +
-                "- FAB CreateButton (bottom-right)\n" +
-                "- EmptyState (hidden)",
+                "- TournamentsList ScrollRect (2 preview cards)\n" +
+                "- Create Tournament button (fixed bottom bar)\n" +
+                "- EmptyState (text only, hidden)",
                 MessageType.Info);
 
             EditorGUILayout.Space(10);
@@ -146,8 +146,6 @@ namespace DigitPark.Editor
 
         private static void BuildCashTournamentsUI()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -159,6 +157,7 @@ namespace DigitPark.Editor
                 "This will completely rebuild the Cash Tournaments UI with Gold theme.\n\nContinue?",
                 "Yes, Build", "Cancel"))
             {
+                CleanupOldElements(canvas.transform);
                 BuildAllElements(canvas);
                 EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
                 Debug.Log("[CashTournamentsUIBuilder] Gold UI built successfully!");
@@ -170,8 +169,6 @@ namespace DigitPark.Editor
         /// </summary>
         public static void BuildSilent()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -179,6 +176,7 @@ namespace DigitPark.Editor
                 return;
             }
 
+            CleanupOldElements(canvas.transform);
             BuildAllElements(canvas);
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 
@@ -232,11 +230,14 @@ namespace DigitPark.Editor
             // TournamentsList
             CreateTournamentsList(safeArea.transform);
 
-            // CreateButton (FAB)
-            CreateFABButton(safeArea.transform);
+            // Create Tournament Button (fixed at bottom)
+            CreateCreateTournamentButton(safeArea.transform);
 
             // EmptyState (hidden)
             CreateEmptyState(safeArea.transform);
+
+            // Premium Block Panel (hidden by default)
+            CreatePremiumBlockPanel(safeArea.transform);
 
             Debug.Log("[CashTournamentsUIBuilder] All elements created.");
         }
@@ -279,19 +280,6 @@ namespace DigitPark.Editor
             Image img = bg.AddComponent<Image>();
             img.color = BG_DARK;
             img.raycastTarget = false;
-
-            // Gold glow at top
-            GameObject goldGlow = new GameObject("GoldGlow");
-            goldGlow.transform.SetParent(bg.transform, false);
-
-            RectTransform glowRT = goldGlow.AddComponent<RectTransform>();
-            glowRT.anchorMin = new Vector2(0, 0.7f);
-            glowRT.anchorMax = Vector2.one;
-            glowRT.sizeDelta = Vector2.zero;
-
-            Image glowImg = goldGlow.AddComponent<Image>();
-            glowImg.color = new Color(1f, 0.8f, 0.3f, 0.06f);
-            glowImg.raycastTarget = false;
         }
 
         #endregion
@@ -333,14 +321,6 @@ namespace DigitPark.Editor
 
             // Title
             CreateHeaderTitle(header.transform);
-
-            // Currency Pills
-            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
-            RectTransform pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
         }
 
         private static void CreateBackButton(Transform parent)
@@ -517,7 +497,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region TournamentsList (0.02-0.98x, 0.12-0.85y)
+        #region TournamentsList (0.02-0.98x, 0.10-0.85y)
 
         private static void CreateTournamentsList(Transform parent)
         {
@@ -525,7 +505,7 @@ namespace DigitPark.Editor
             scrollView.transform.SetParent(parent, false);
 
             RectTransform svRT = scrollView.AddComponent<RectTransform>();
-            svRT.anchorMin = new Vector2(0.02f, 0.12f);
+            svRT.anchorMin = new Vector2(0.02f, 0.10f);
             svRT.anchorMax = new Vector2(0.98f, 0.85f);
             svRT.sizeDelta = Vector2.zero;
 
@@ -577,52 +557,201 @@ namespace DigitPark.Editor
             scroll.viewport = vpRT;
             scroll.content = contentRT;
 
+            // === Editor Preview: 2 sample TournamentCardUI instances ===
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/_Project/Prefabs/CashBattle/Tournaments/TournamentCardUI.prefab");
+            if (prefab != null)
+            {
+                // Card 1
+                GameObject card1 = (GameObject)PrefabUtility.InstantiatePrefab(prefab, content.transform);
+                SetCardPreviewData(card1, "QuickMath Championship", "$100", "12/16", "02:00:00", "$5");
+
+                // Card 2
+                GameObject card2 = (GameObject)PrefabUtility.InstantiatePrefab(prefab, content.transform);
+                SetCardPreviewData(card2, "Flash Tap Masters", "$250", "28/32", "01:00:00", "$10");
+            }
+            else
+            {
+                Debug.LogWarning("[CashTournamentsUIBuilder] TournamentCardUI.prefab not found — run CashBattle Prefab Builder first");
+            }
+        }
+
+        private static void SetCardPreviewData(GameObject card, string name, string prize, string players, string timer, string entry)
+        {
+            var nameText = card.transform.Find("TournamentName")?.GetComponent<TextMeshProUGUI>();
+            if (nameText != null) nameText.text = name;
+            // Flat structure: InfoRow/PrizeText, InfoRow/PlayersText, InfoRow/TimerText
+            var prizeText = card.transform.Find("InfoRow/PrizeText")?.GetComponent<TextMeshProUGUI>();
+            if (prizeText != null) prizeText.text = prize;
+            var playersText = card.transform.Find("InfoRow/PlayersText")?.GetComponent<TextMeshProUGUI>();
+            if (playersText != null) playersText.text = players;
+            var timerText = card.transform.Find("InfoRow/TimerText")?.GetComponent<TextMeshProUGUI>();
+            if (timerText != null) timerText.text = timer;
+            var entryValue = card.transform.Find("EntryFeeBadge/Value")?.GetComponent<TextMeshProUGUI>();
+            if (entryValue != null) entryValue.text = entry;
         }
 
         #endregion
 
-        #region FAB CreateButton (0.82-0.95x, 0.13-0.18y)
+        #region Create Tournament Button (fixed bottom, 0.04-0.96x, 0.02-0.08y)
 
-        private static void CreateFABButton(Transform parent)
+        private static void CreateCreateTournamentButton(Transform parent)
         {
-            GameObject fab = new GameObject("CreateButton");
-            fab.transform.SetParent(parent, false);
+            GameObject createBtn = new GameObject("CreateButton");
+            createBtn.transform.SetParent(parent, false);
 
-            RectTransform rt = fab.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.82f, 0.13f);
-            rt.anchorMax = new Vector2(0.95f, 0.18f);
-            rt.sizeDelta = Vector2.zero;
+            RectTransform btnRT = createBtn.AddComponent<RectTransform>();
+            btnRT.anchorMin = new Vector2(0.04f, 0.02f);
+            btnRT.anchorMax = new Vector2(0.96f, 0.08f);
+            btnRT.sizeDelta = Vector2.zero;
 
-            Image bg = fab.AddComponent<Image>();
-            bg.color = GOLD_PRIMARY;
+            Image btnBg = createBtn.AddComponent<Image>();
+            btnBg.color = GOLD_DARK;
 
-            Button btn = fab.AddComponent<Button>();
-            btn.targetGraphic = bg;
+            Button btn = createBtn.AddComponent<Button>();
+            btn.targetGraphic = btnBg;
             ColorBlock colors = btn.colors;
-            colors.normalColor = GOLD_PRIMARY;
-            colors.highlightedColor = GOLD_LIGHT;
-            colors.pressedColor = GOLD_DARK;
+            colors.normalColor = GOLD_DARK;
+            colors.highlightedColor = GOLD_PRIMARY;
+            colors.pressedColor = new Color(0.65f, 0.45f, 0.08f, 1f);
             btn.colors = colors;
 
-            Outline outline = fab.AddComponent<Outline>();
-            outline.effectColor = new Color(1f, 0.75f, 0.2f, 0.6f);
+            Outline outline = createBtn.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 0.75f, 0.2f, 0.4f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            // Text: "Create Tournament"
+            GameObject textObj = new GameObject("CreateButtonText");
+            textObj.transform.SetParent(createBtn.transform, false);
+
+            RectTransform textRT = textObj.AddComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+            textTMP.text = "Create Tournament";
+            textTMP.fontSize = FontSizes.Body;
+            textTMP.color = BG_DARK;
+            textTMP.fontStyle = FontStyles.Bold;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.enableAutoSizing = true;
+            textTMP.fontSizeMin = FontSizes.AutoMinBody;
+            textTMP.fontSizeMax = FontSizes.Body;
+        }
+
+        #endregion
+
+        #region Premium Block Panel (hidden)
+
+        private static void CreatePremiumBlockPanel(Transform parent)
+        {
+            GameObject panel = new GameObject("PremiumBlockPanel");
+            panel.transform.SetParent(parent, false);
+            panel.SetActive(false);
+
+            RectTransform rt = panel.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.05f, 0.25f);
+            rt.anchorMax = new Vector2(0.95f, 0.75f);
+            rt.sizeDelta = Vector2.zero;
+
+            Image bg = panel.AddComponent<Image>();
+            bg.color = new Color(0.08f, 0.06f, 0.12f, 0.98f);
+
+            Outline outline = panel.AddComponent<Outline>();
+            outline.effectColor = GOLD_DARK;
             outline.effectDistance = new Vector2(2, -2);
 
-            // "+" text
-            GameObject plusObj = new GameObject("PlusText");
-            plusObj.transform.SetParent(fab.transform, false);
+            // Title
+            GameObject titleObj = new GameObject("PremiumTitle");
+            titleObj.transform.SetParent(panel.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0.05f, 0.7f);
+            titleRT.anchorMax = new Vector2(0.95f, 0.9f);
+            titleRT.sizeDelta = Vector2.zero;
 
-            RectTransform plusRT = plusObj.AddComponent<RectTransform>();
-            plusRT.anchorMin = Vector2.zero;
-            plusRT.anchorMax = Vector2.one;
-            plusRT.sizeDelta = Vector2.zero;
+            TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = "Premium Required";
+            titleTMP.fontSize = FontSizes.H3;
+            titleTMP.color = GOLD_PRIMARY;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTMP.fontSizeMax = FontSizes.H3;
 
-            TextMeshProUGUI plusTMP = plusObj.AddComponent<TextMeshProUGUI>();
-            plusTMP.text = "+";
-            plusTMP.fontSize = FontSizes.H1;
-            plusTMP.color = BG_DARK;
-            plusTMP.fontStyle = FontStyles.Bold;
-            plusTMP.alignment = TextAlignmentOptions.Center;
+            // Message
+            GameObject msgObj = new GameObject("PremiumMessage");
+            msgObj.transform.SetParent(panel.transform, false);
+            RectTransform msgRT = msgObj.AddComponent<RectTransform>();
+            msgRT.anchorMin = new Vector2(0.08f, 0.4f);
+            msgRT.anchorMax = new Vector2(0.92f, 0.68f);
+            msgRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI msgTMP = msgObj.AddComponent<TextMeshProUGUI>();
+            msgTMP.text = "Creating tournaments requires a Premium subscription. Join existing tournaments for free!";
+            msgTMP.fontSize = FontSizes.Body;
+            msgTMP.color = TEXT_SECONDARY;
+            msgTMP.alignment = TextAlignmentOptions.Center;
+            msgTMP.enableAutoSizing = true;
+            msgTMP.fontSizeMin = FontSizes.AutoMinBody;
+            msgTMP.fontSizeMax = FontSizes.Body;
+
+            // Get Premium Button
+            GameObject getPremiumBtn = new GameObject("GetPremiumButton");
+            getPremiumBtn.transform.SetParent(panel.transform, false);
+            RectTransform gpRT = getPremiumBtn.AddComponent<RectTransform>();
+            gpRT.anchorMin = new Vector2(0.15f, 0.18f);
+            gpRT.anchorMax = new Vector2(0.55f, 0.35f);
+            gpRT.sizeDelta = Vector2.zero;
+
+            Image gpBg = getPremiumBtn.AddComponent<Image>();
+            gpBg.color = GOLD_PRIMARY;
+            Button gpBtn = getPremiumBtn.AddComponent<Button>();
+            gpBtn.targetGraphic = gpBg;
+
+            GameObject gpText = new GameObject("GetPremiumButtonText");
+            gpText.transform.SetParent(getPremiumBtn.transform, false);
+            RectTransform gpTextRT = gpText.AddComponent<RectTransform>();
+            gpTextRT.anchorMin = Vector2.zero;
+            gpTextRT.anchorMax = Vector2.one;
+            gpTextRT.sizeDelta = Vector2.zero;
+            TextMeshProUGUI gpTMP = gpText.AddComponent<TextMeshProUGUI>();
+            gpTMP.text = "Get Premium";
+            gpTMP.fontSize = FontSizes.Body;
+            gpTMP.color = BG_DARK;
+            gpTMP.fontStyle = FontStyles.Bold;
+            gpTMP.alignment = TextAlignmentOptions.Center;
+
+            // Close / Maybe Later Button
+            GameObject closeBtn = new GameObject("ClosePremiumButton");
+            closeBtn.transform.SetParent(panel.transform, false);
+            RectTransform clRT = closeBtn.AddComponent<RectTransform>();
+            clRT.anchorMin = new Vector2(0.58f, 0.18f);
+            clRT.anchorMax = new Vector2(0.85f, 0.35f);
+            clRT.sizeDelta = Vector2.zero;
+
+            Image clBg = closeBtn.AddComponent<Image>();
+            clBg.color = Color.clear;
+            Button clButton = closeBtn.AddComponent<Button>();
+            clButton.targetGraphic = clBg;
+
+            Outline clOutline = closeBtn.AddComponent<Outline>();
+            clOutline.effectColor = TEXT_SECONDARY;
+            clOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            GameObject clText = new GameObject("ClosePremiumButtonText");
+            clText.transform.SetParent(closeBtn.transform, false);
+            RectTransform clTextRT = clText.AddComponent<RectTransform>();
+            clTextRT.anchorMin = Vector2.zero;
+            clTextRT.anchorMax = Vector2.one;
+            clTextRT.sizeDelta = Vector2.zero;
+            TextMeshProUGUI clTMP = clText.AddComponent<TextMeshProUGUI>();
+            clTMP.text = "Maybe Later";
+            clTMP.fontSize = FontSizes.Body;
+            clTMP.color = TEXT_SECONDARY;
+            clTMP.fontStyle = FontStyles.Bold;
+            clTMP.alignment = TextAlignmentOptions.Center;
         }
 
         #endregion
@@ -661,35 +790,6 @@ namespace DigitPark.Editor
             emptyTMP.color = TEXT_SECONDARY;
             emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
-
-            // Create button
-            GameObject createBtn = new GameObject("CreateTournamentButton");
-            createBtn.transform.SetParent(emptyState.transform, false);
-
-            LayoutElement btnLE = createBtn.AddComponent<LayoutElement>();
-            btnLE.preferredHeight = 60;
-            btnLE.preferredWidth = 300;
-
-            Image btnBg = createBtn.AddComponent<Image>();
-            btnBg.color = BUTTON_GOLD;
-
-            Button btn = createBtn.AddComponent<Button>();
-            btn.targetGraphic = btnBg;
-
-            GameObject btnTextObj = new GameObject("CreateTournamentButtonText");
-            btnTextObj.transform.SetParent(createBtn.transform, false);
-
-            RectTransform btnTextRT = btnTextObj.AddComponent<RectTransform>();
-            btnTextRT.anchorMin = Vector2.zero;
-            btnTextRT.anchorMax = Vector2.one;
-            btnTextRT.sizeDelta = Vector2.zero;
-
-            TextMeshProUGUI btnTMP = btnTextObj.AddComponent<TextMeshProUGUI>();
-            btnTMP.text = "Create Tournament";
-            btnTMP.fontSize = FontSizes.Body;
-            btnTMP.color = BG_DARK;
-            btnTMP.fontStyle = FontStyles.Bold;
-            btnTMP.alignment = TextAlignmentOptions.Center;
         }
 
         #endregion
@@ -743,6 +843,11 @@ namespace DigitPark.Editor
             // Empty State
             AssignGORef(so, "emptyState", FindDeep(root, "EmptyState"));
             AssignRef(so, "emptyText", FindTextDeep(root, "EmptyText"));
+
+            // Premium Block Panel
+            AssignGORef(so, "premiumBlockPanel", FindDeep(root, "PremiumBlockPanel"));
+            AssignRef(so, "getPremiumButton", FindBtnDeep(root, "GetPremiumButton"));
+            AssignRef(so, "closePremiumButton", FindBtnDeep(root, "ClosePremiumButton"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

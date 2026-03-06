@@ -36,8 +36,10 @@ namespace DigitPark.DevTools
         private readonly string[] _tabNames = { "General", "Premium", "Games", "Firebase", "Themes" };
 
         // Cache de datos
+        #pragma warning disable 0414
         private string _testUserId = "";
         private string _testUsername = "";
+        #pragma warning restore 0414
         private float _testScore = 5.0f;
 
         private void Awake()

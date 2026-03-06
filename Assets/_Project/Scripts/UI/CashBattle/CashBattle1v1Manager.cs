@@ -680,7 +680,9 @@ namespace DigitPark.UI.CashBattle
             // Update title
             if (titleText != null)
             {
-                titleText.text = isCognitiveSprintMode ? "Cognitive Sprint" : "Select a Game";
+                titleText.text = isCognitiveSprintMode
+                    ? AutoLocalizer.Get("cognitive_sprint_title")
+                    : AutoLocalizer.Get("select_game");
             }
 
             // Update find opponent button

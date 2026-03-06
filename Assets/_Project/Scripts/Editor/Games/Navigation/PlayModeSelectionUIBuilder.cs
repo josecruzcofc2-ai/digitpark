@@ -169,13 +169,6 @@ namespace DigitPark.Editor
             titleOutline.effectColor = new Color(0f, 0.5f, 0.5f, 0.5f);
             titleOutline.effectDistance = new Vector2(2, -2);
 
-            // Currency pills (right side of header)
-            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
-            var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
         }
 
         private static void CreateTitleSection(Transform parent)
@@ -223,7 +216,6 @@ namespace DigitPark.Editor
             Sprite tournamentsIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TOURNAMENTS_ICON_PATH);
 
             // Create 3 mode cards - ALL with consistent CYAN NEON style
-            // All modes are FREE - no real money involved
             CreateNeonModeCard(cardsSection.transform, "SoloCard",
                 "SOLO",
                 "Train your brain at your own pace.\nNo competition, just practice.",
@@ -276,24 +268,17 @@ namespace DigitPark.Editor
             faceOutline.effectColor = accentColor;
             faceOutline.effectDistance = new Vector2(4, -4);
 
-            // ========== CONTENT - Properly Centered Layout ==========
-            // Icon on left
+            // ========== CONTENT ==========
+            // Icon on left - no background box, just the icon
             GameObject iconContainer = CreateElement(face, "IconContainer");
             SetupRectTransform(iconContainer,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
                 new Vector2(120, 0), new Vector2(140, 140));
 
-            Image iconBg = iconContainer.AddComponent<Image>();
-            iconBg.color = new Color(0.05f, 0.08f, 0.12f, 0.95f);
-
-            Outline iconOutline = iconContainer.AddComponent<Outline>();
-            iconOutline.effectColor = accentColor;
-            iconOutline.effectDistance = new Vector2(3f, -3f);
-
-            // Icon image inside - WHITE color to preserve original icon colors
+            // Icon image inside - WHITE color for ThemeApplier tinting
             GameObject icon = CreateElement(iconContainer, "Icon");
             SetupRectTransform(icon, Vector2.zero, Vector2.one,
-                Vector2.zero, new Vector2(-16, -16));
+                Vector2.zero, Vector2.zero);
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
@@ -315,7 +300,6 @@ namespace DigitPark.Editor
             arrowTmp.alignment = TextAlignmentOptions.Center;
 
             // Title text - CENTERED between icon and arrow
-            // Icon takes ~100px on left, arrow takes ~50px on right
             GameObject titleObj = CreateElement(face, "TitleText");
             SetupRectTransform(titleObj,
                 new Vector2(0, 0.55f), new Vector2(1, 1),

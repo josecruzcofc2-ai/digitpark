@@ -28,6 +28,7 @@ namespace DigitPark.Editor
 
         // Rutas de iconos para Stats Bar
         private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";
+        private const string ROUND_ICON_PATH = "Assets/_Project/Art/Icons/UI/RoundIcon.png";
         private const string PAIRS_ICON_PATH = "Assets/_Project/Art/Icons/UI/PairsIcon.png";
         private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/UI/ErrorIcon.png";
 
@@ -66,7 +67,6 @@ namespace DigitPark.Editor
 
         private static void RebuildMemoryPairsUI()
         {
-            CleanupOldUI();
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -168,9 +168,6 @@ namespace DigitPark.Editor
             // ========== FEEDBACK PANEL (Below grid - Correcto/Incorrecto toast) ==========
             CreateFeedbackPanel(safeArea.transform);
 
-            // ========== BARRA DE PROGRESO ==========
-            CreateProgressBar(safeArea.transform);
-
             // ========== ACTION BUTTON ==========
             CreateActionButton(safeArea.transform);
 
@@ -267,7 +264,7 @@ namespace DigitPark.Editor
             GameObject statsBar = CreateElement(parent, "StatsBar");
             SetupRectTransform(statsBar,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -160), new Vector2(1020, 105));
+                new Vector2(0, -160), new Vector2(1020, 130));
 
             Image statsBg = statsBar.AddComponent<Image>();
             statsBg.color = PANEL_BG;
@@ -278,66 +275,61 @@ namespace DigitPark.Editor
 
             HorizontalLayoutGroup layout = statsBar.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 90;
-            layout.padding = new RectOffset(60, 60, 15, 15);
+            layout.spacing = 15;
+            layout.padding = new RectOffset(15, 15, 10, 10);
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
             // Cargar iconos
             Sprite timerIcon = AssetDatabase.LoadAssetAtPath<Sprite>(TIMER_ICON_PATH);
+            Sprite roundIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ROUND_ICON_PATH);
             Sprite pairsIcon = AssetDatabase.LoadAssetAtPath<Sprite>(PAIRS_ICON_PATH);
             Sprite errorIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ERROR_ICON_PATH);
 
             // Timer
             CreateStatItem(statsBar.transform, "TimerContainer", "TimerIcon", "TimerText",
-                "00:00", Color.white, 240, timerIcon, (int)FontSizes.Body);
+                "00:00", Color.white, 280, timerIcon, 54, -130);
 
             // Round
             CreateStatItem(statsBar.transform, "RoundContainer", "RoundIcon", "RoundText",
-                "1/1", CYAN_NEON, 180, null, (int)FontSizes.Body);
+                "1/1", CYAN_NEON, 200, roundIcon, 54, -45);
 
             // Pairs Found
             CreateStatItem(statsBar.transform, "PairsContainer", "PairsIcon", "PairsFoundText",
-                "0/8", GREEN_NEON, 195, pairsIcon, (int)FontSizes.Body);
+                "0/8", GREEN_NEON, 210, pairsIcon, 54, 45);
 
             // Errors
             CreateStatItem(statsBar.transform, "ErrorsContainer", "ErrorsIcon", "ErrorsText",
-                "0", ERROR_RED, 120, errorIcon, (int)FontSizes.Body);
+                "0", ERROR_RED, 170, errorIcon, 54, 130);
         }
 
         private static void CreateStatItem(Transform parent, string containerName, string iconName,
-            string textName, string defaultText, Color color, float width, Sprite iconSprite = null, int fontSize = (int)FontSizes.Body)
+            string textName, string defaultText, Color color, float width, Sprite iconSprite = null, int fontSize = 54, float extraOffsetX = 0)
         {
             GameObject container = CreateElement(parent, containerName);
 
             LayoutElement le = container.AddComponent<LayoutElement>();
             le.preferredWidth = width;
-            le.preferredHeight = 75;
+            le.preferredHeight = 100;
 
-            // Icon (Image component for custom icon)
+            // Icon
             GameObject icon = CreateElement(container.transform, iconName);
             SetupRectTransform(icon,
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(22, 0), new Vector2(54, 54)); // Slightly larger icons
+                new Vector2(10 + extraOffsetX, 0), new Vector2(81, 81));
             Image iconImg = icon.AddComponent<Image>();
-
+            iconImg.color = color;
             if (iconSprite != null)
             {
                 iconImg.sprite = iconSprite;
-                iconImg.color = color;
                 iconImg.preserveAspect = true;
-            }
-            else
-            {
-                // Fallback: cuadrado de color si no hay icono
-                iconImg.color = color;
             }
 
             // Text
             GameObject text = CreateElement(container.transform, textName);
             SetupRectTransform(text,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(45, 0), new Vector2(-10, 0)); // Adjusted for larger icon
+                new Vector2(50 + extraOffsetX, 0), new Vector2(-5, 0));
             TextMeshProUGUI tmp = SetupText(text, defaultText, fontSize, color, FontStyles.Bold);
             tmp.alignment = TextAlignmentOptions.Left;
         }
@@ -886,47 +878,6 @@ namespace DigitPark.Editor
             divImg.raycastTarget = false;
         }
 
-        private static void CreateProgressBar(Transform parent)
-        {
-            GameObject progressContainer = CreateElement(parent, "ProgressContainer");
-            SetupRectTransform(progressContainer,
-                new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 100), new Vector2(-80, 50));
-
-            // Round indicator
-            GameObject roundIndicator = CreateElement(progressContainer.transform, "RoundIndicator");
-            SetupRectTransform(roundIndicator,
-                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-50, 0), new Vector2(80, 30));
-            SetupText(roundIndicator, "1/1", (int)FontSizes.Body, Color.white, FontStyles.Bold);
-
-            // Progress bar bg
-            GameObject progressBar = CreateElement(progressContainer.transform, "ProgressBar");
-            SetupRectTransform(progressBar,
-                new Vector2(0, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(0, 0), new Vector2(-100, 16));
-
-            Image progressBg = progressBar.AddComponent<Image>();
-            progressBg.color = new Color(0f, 0.2f, 0.25f, 0.8f);
-
-            Outline progressOutline = progressBar.AddComponent<Outline>();
-            progressOutline.effectColor = CYAN_NEON;
-            progressOutline.effectDistance = new Vector2(1, -1);
-
-            // Fill
-            GameObject progressFill = CreateElement(progressBar.transform, "ProgressFill");
-            SetupRectTransform(progressFill,
-                new Vector2(0, 0), new Vector2(0.5f, 1),
-                Vector2.zero, Vector2.zero);
-
-            Image fillImg = progressFill.AddComponent<Image>();
-            fillImg.color = CYAN_NEON;
-
-            Shadow fillGlow = progressFill.AddComponent<Shadow>();
-            fillGlow.effectColor = new Color(0f, 1f, 1f, 0.5f);
-            fillGlow.effectDistance = new Vector2(0, -2);
-        }
-
         private static void AssignControllerReferences()
         {
             var controller = FindFirstObjectByType<DigitPark.Games.MemoryPairsController>();
@@ -1038,15 +989,6 @@ namespace DigitPark.Editor
 
             // Round Indicator
             AssignTMPReference(so, root, "roundIndicatorText", "RoundIndicator");
-
-            // Progress Fill
-            Transform progressFillT = FindDeep(root, "ProgressFill");
-            if (progressFillT != null)
-            {
-                SerializedProperty progressProp = so.FindProperty("progressFill");
-                if (progressProp != null)
-                    progressProp.objectReferenceValue = progressFillT.GetComponent<RectTransform>();
-            }
 
             // Settings Panel
             Transform settingsPanelT = FindDeep(root, "SettingsPanel");
@@ -1184,6 +1126,10 @@ namespace DigitPark.Editor
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
             tmp.raycastTarget = false;
 
             return tmp;

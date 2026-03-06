@@ -16,7 +16,9 @@ namespace DigitPark.UI
     public class WinPanelController : MonoBehaviour
     {
         [Header("Panel Type")]
+        #pragma warning disable 0414
         [SerializeField] private bool isRealMoneyPanel = false;
+        #pragma warning restore 0414
 
         [Header("Common Elements")]
         [SerializeField] private CanvasGroup canvasGroup;

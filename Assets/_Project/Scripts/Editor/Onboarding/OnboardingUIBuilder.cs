@@ -143,12 +143,14 @@ namespace DigitPark.Editor
                 return;
             }
 
-            // Limpiar TODOS los hijos del Canvas antes de reconstruir
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
             for (int i = canvas.transform.childCount - 1; i >= 0; i--)
-                DestroyImmediate(canvas.transform.GetChild(i).gameObject);
-
-            // Limpiar Background/SafeArea de otros canvases raíz (legacy)
-            CleanupOldUI();
+            {
+                Transform child = canvas.transform.GetChild(i);
+                if (child.name == "TransitionCanvas" || child.name == "EventSystem")
+                    continue;
+                DestroyImmediate(child.gameObject);
+            }
 
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
@@ -386,7 +388,7 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = true;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = FontSizes.H4;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
             tmp.fontSizeMax = FontSizes.H4;
             return tmp;
         }
@@ -444,7 +446,7 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.alignment = align;
             tmp.enableWordWrapping = true;
-            tmp.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
+            tmp.fontStyle = FontStyles.Bold;
         }
 
         private static void AddContentSpacer(Transform parent, float height)

@@ -86,7 +86,6 @@ namespace DigitPark.Editor
 
         private static void RebuildScoresUI()
         {
-            CleanupOldUI();
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -207,7 +206,10 @@ namespace DigitPark.Editor
             // ========== EMPTY STATE ==========
             CreateEmptyState(scoresPanel.transform);
 
-            // Items instantiated at runtime from LeaderboardEntry prefab
+            // ========== SAMPLE ENTRIES (for Editor preview) ==========
+            Transform leaderboardContainer = scoresPanel.transform.Find("LeaderboardScrollView/Viewport/LeaderboardContainer");
+            if (leaderboardContainer != null)
+                CreateSampleEntries(leaderboardContainer.gameObject);
 
             // ========== TU POSICIÓN (footer fijo, 80px) ==========
             CreatePlayerPositionPanel(scoresPanel.transform);
@@ -708,16 +710,45 @@ namespace DigitPark.Editor
                 else if (i == 2) posText.color = BRONZE;
                 else posText.color = new Color(0.5f, 0.55f, 0.65f, 1f);
 
-                // Avatar placeholder (50x50, circular)
-                GameObject avatarObj = FindOrCreateChild(entry, "AvatarImage");
-                Image avatarImg = GetOrAddComponent<Image>(avatarObj);
-                avatarImg.color = new Color(0.2f, 0.25f, 0.35f, 1f);
-                avatarImg.raycastTarget = false;
-                LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
+                // Circular avatar frame
+                Sprite circleSprite = GenerateCircleSprite();
+
+                GameObject avatarFrame = FindOrCreateChild(entry, "AvatarFrame");
+                Image frameImg = GetOrAddComponent<Image>(avatarFrame);
+                frameImg.sprite = circleSprite;
+                frameImg.color = new Color(0.15f, 0.2f, 0.3f, 1f);
+                frameImg.raycastTarget = false;
+                LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarFrame);
                 avatarLE.minWidth = 100;
                 avatarLE.minHeight = 100;
                 avatarLE.preferredWidth = 100;
                 avatarLE.preferredHeight = 100;
+
+                // Circular mask
+                GameObject avatarMask = FindOrCreateChild(avatarFrame, "AvatarMask");
+                RectTransform amRT = GetOrAddComponent<RectTransform>(avatarMask);
+                amRT.anchorMin = new Vector2(0.06f, 0.06f);
+                amRT.anchorMax = new Vector2(0.94f, 0.94f);
+                amRT.offsetMin = Vector2.zero;
+                amRT.offsetMax = Vector2.zero;
+                Image amImg = GetOrAddComponent<Image>(avatarMask);
+                amImg.sprite = circleSprite;
+                amImg.color = new Color(0.2f, 0.25f, 0.35f, 1f);
+                GetOrAddComponent<Mask>(avatarMask).showMaskGraphic = true;
+
+                // Avatar image (clipped to circle)
+                GameObject avatarObj = FindOrCreateChild(avatarMask, "AvatarImage");
+                Image avatarImg = GetOrAddComponent<Image>(avatarObj);
+                avatarImg.color = Color.white;
+                avatarImg.raycastTarget = false;
+                avatarImg.preserveAspect = true;
+                RectTransform aiRT = GetOrAddComponent<RectTransform>(avatarObj);
+                aiRT.anchorMin = Vector2.zero;
+                aiRT.anchorMax = Vector2.one;
+                aiRT.offsetMin = Vector2.zero;
+                aiRT.offsetMax = Vector2.zero;
+                Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
+                if (defaultAvatar != null) avatarImg.sprite = defaultAvatar;
 
                 // Username (flex)
                 GameObject nameObj = FindOrCreateChild(entry, "UsernameText");
@@ -915,6 +946,9 @@ namespace DigitPark.Editor
             tmp.fontStyle = style;
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
             tmp.raycastTarget = false;
 
             return tmp;
@@ -926,6 +960,27 @@ namespace DigitPark.Editor
             if (shadow == null) shadow = textObj.AddComponent<Shadow>();
             shadow.effectColor = new Color(glowColor.r, glowColor.g, glowColor.b, 0.5f);
             shadow.effectDistance = new Vector2(2, -2);
+        }
+
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            // Fallback: generate at runtime (won't survive prefab save)
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
 
         #endregion

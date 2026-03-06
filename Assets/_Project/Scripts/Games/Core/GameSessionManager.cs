@@ -443,6 +443,9 @@ namespace DigitPark.Games
                 case GameMode.CognitiveSprint:
                     return result.Completed ? 30 : 10; // Win: +30, Loss: +10
 
+                case GameMode.CashTournament:
+                    return 0; // No coin rewards for cash tournaments (real money only)
+
                 default:
                     return 0;
             }

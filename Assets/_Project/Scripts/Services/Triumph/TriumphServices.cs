@@ -43,7 +43,9 @@ namespace DigitPark.Services.Triumph
         public bool CanAccessCashBattle => throw new NotImplementedException();
         public UserVerificationInfo UserInfo => throw new NotImplementedException();
 
+        #pragma warning disable 0067
         public event Action<KYCStatus> OnStatusChanged;
+        #pragma warning restore 0067
 
         public TriumphKYCService(string apiKey, bool sandbox = true)
         {
@@ -97,8 +99,10 @@ namespace DigitPark.Services.Triumph
         public decimal PendingBalance => throw new NotImplementedException();
         public decimal AvailableBalance => throw new NotImplementedException();
 
+        #pragma warning disable 0067
         public event Action<decimal> OnBalanceChanged;
         public event Action<WalletTransaction> OnTransactionCompleted;
+        #pragma warning restore 0067
 
         public TriumphWalletService(string apiKey, bool sandbox = true)
         {
@@ -175,10 +179,12 @@ namespace DigitPark.Services.Triumph
         public bool IsSearching => throw new NotImplementedException();
         public bool HasActiveMatch => throw new NotImplementedException();
 
+        #pragma warning disable 0067
         public event Action<MatchmakingStatus> OnStatusChanged;
         public event Action<MatchInfo> OnMatchFound;
         public event Action<MatchInfo> OnMatchUpdated;
         public event Action<MatchResult> OnMatchCompleted;
+        #pragma warning restore 0067
 
         public TriumphMatchmakingService(string apiKey, bool sandbox = true)
         {
@@ -239,9 +245,11 @@ namespace DigitPark.Services.Triumph
         public TournamentInfo ActiveTournament => throw new NotImplementedException();
         public bool IsInTournament => throw new NotImplementedException();
 
+        #pragma warning disable 0067
         public event Action<TournamentInfo> OnTournamentUpdated;
         public event Action<TournamentPlayerStatus> OnPlayerStatusChanged;
         public event Action<TournamentInfo, int, decimal> OnTournamentCompleted;
+        #pragma warning restore 0067
 
         public TriumphTournamentService(string apiKey, bool sandbox = true)
         {

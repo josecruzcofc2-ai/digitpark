@@ -7,6 +7,7 @@ using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DG.Tweening;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Managers
 {
@@ -71,6 +72,9 @@ namespace DigitPark.Managers
         private void Start()
         {
             Debug.Log("[Notifications] NotificationsManager iniciado");
+
+            if (titleText != null)
+                titleText.text = AutoLocalizer.Get("notifications_title");
 
             SetupListeners();
 

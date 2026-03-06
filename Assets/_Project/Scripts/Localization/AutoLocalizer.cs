@@ -84,6 +84,19 @@ namespace DigitPark.Localization
             { "HeaderText", "achievement_unlocked" },
             { "CompletionText", "completed" },
 
+            // ==================== ACHIEVEMENTS SCENE ====================
+            // Progress
+            { "AchProgressLeft", "total_progress" },
+            // Empty state
+            { "EmptyStateText", "ach_category_empty" },
+            { "AchEmptySubtitle", "ach_keep_playing" },
+            // Detail panel
+            { "DetailProgressText", "completed" },
+            { "AchRewardLabel", "reward_label" },
+            // Celebration
+            { "CelebrationTitle", "achievement_unlocked" },
+            { "CelebrationAchievementName", "ach_first_game" },
+
             // ==================== SETTINGS ====================
             { "SettingsTitle", "settings_title" },
             { "SettingsTitleText", "settings_title" },
@@ -513,6 +526,12 @@ namespace DigitPark.Localization
             { "DailyOffersText", "daily_offers" },
             { "CoinsSection", "coins_section" },
             { "ThemesSection", "themes_section" },
+            { "PremiumBundleBannerTitle", "shop_premium_bundle" },
+            { "PremiumBundleBannerDesc", "shop_premium_bundle_desc" },
+            { "CompleteBundleBannerTitle", "shop_complete_bundle" },
+            { "CompleteBundleBannerDesc", "shop_complete_bundle_desc" },
+            { "PremiumBundleTitle", "styles_premium_bundle_btn" },
+            { "CompleteBundleTitle", "styles_complete_bundle_btn" },
             { "FramesSection", "frames_section" },
             { "TitlesSection", "titles_section" },
             { "EquippedStatus", "equipped_status" },
@@ -632,7 +651,6 @@ namespace DigitPark.Localization
             { "AllFilterText", "filter_all" },
             { "ActiveFilterText", "filter_active" },
             { "CompletedFilterText", "filter_completed" },
-            { "CreateTournamentButtonText", "create_tournament" },
 
             // ==================== CASH TOURNAMENT CREATE ====================
             { "CashTournamentCreateTitle", "cash_create_tournament" },
@@ -663,6 +681,8 @@ namespace DigitPark.Localization
             { "PreviewTitleText", "preview" },
             { "CreationFeeText", "cash_creation_fee" },
             { "CashCreateButtonText", "cash_create_tournament_btn" },
+            { "PremiumMessage", "premium_cash_tournaments_message" },
+            { "ClosePremiumButtonText", "maybe_later" },
 
             // ==================== CASH TOURNAMENT LOBBY ====================
             { "TournamentNameText", "tournament_name" },
@@ -673,13 +693,21 @@ namespace DigitPark.Localization
             { "PlayersProgressText", "players_progress" },
             { "CountdownInfoText", "tournament_countdown" },
             { "CashParticipantsTabText", "participants" },
-            { "CashJoinButtonText", "tournament_join" },
-            { "LeaveButtonText", "tournament_leave" },
-            { "CashShareButtonText", "share" },
+            { "CashChatTabText", "chat_tab" },
+            { "CashPlayButtonText", "play_button" },
+            { "CashChatPlaceholder", "tournament_chat_placeholder" },
+            { "CashSendChatButtonText", "tournament_chat_send" },
+            { "CountdownText", "tournament_countdown" },
+            { "AttemptsRuleText", "tournament_max_attempts" },
+            { "TimeLimitRuleText", "tournament_rules_time_limit" },
+            { "CashStatusBadgeText", "tournament_open" },
+            { "CashLoadingStatusText", "loading" },
             { "StartingCountdownText", "tournament_starting" },
+            { "PrizeDistTitle", "prize_distribution" },
+            { "StartingTitle", "tournament_starting_title" },
 
             // ==================== CASH TOURNAMENT RESULTS ====================
-            { "ResultTitleText", "cash_tournament_complete" },
+            { "CashResultTitleText", "cash_tournament_complete" },
             { "ResultSubtitleText", "tournament_name" },
             { "CashPositionLabel", "tournament_position" },
             { "PositionLabelText", "tournament_position" },
@@ -699,6 +727,60 @@ namespace DigitPark.Localization
             { "CognitiveSprintDescText", "cognitive_sprint_desc" },
             { "RulesDescText", "game_rules_label" },
             { "ToggleLabel", "dont_show_again" },
+            { "PanelTitle", "cognitive_sprint_title" },
+            { "SelectedCountText", "sprint_selected_count" },
+            { "CancelSprintButton", "cancel_button" },
+            { "StartSprintButton", "start_sprint" },
+
+            // ==================== PLAY MODE SELECTION (extra) ====================
+            { "SubtitleText", "play_mode_subtitle" },
+
+            // ==================== BET SELECTION ====================
+            { "FreeBetCostText", "bet_free" },
+            { "FreeBetRewardText", "bet_free_reward" },
+            { "CustomRewardText", "bet_custom_reward" },
+            { "CustomSectionText", "bet_custom_section" },
+            { "CoinsSectionText", "bet_coins_section" },
+            { "GemsSectionText", "bet_gems_section" },
+            { "CoinsToggleText", "bet_coins_section" },
+            { "GemsToggleText", "bet_gems_section" },
+            { "AmountPlaceholder", "amount_placeholder" },
+
+            // ==================== GAME SELECTOR ====================
+            { "GameSelectorTitleText", "select_game" },
+
+            // ==================== MATCHMAKING ====================
+
+            // ==================== MINIGAME SETTINGS ====================
+            { "SettingsSubtitle", "game_settings_subtitle" },
+            { "RoundsHeaderText", "rounds_header" },
+            { "StartText", "start_game" },
+            { "InstructionText", "flashtap_wait" },
+            { "OperationsHeaderText", "operations_header" },
+            { "DifficultyHeaderText", "difficulty_header" },
+            { "DifficultyDescText", "difficulty_desc" },
+
+            // ==================== MINIGAME WIN/LOSE PANELS ====================
+            { "ResultTitleText", "completed" },
+            { "ResultTimeText", "result_time" },
+            { "ResultMessageText", "result_message" },
+            { "AvgTimeValue_Label", "avg_time_label" },
+            { "BestTimeValue_Label", "best_time_label" },
+            { "ErrorsValue_Label", "errors_label" },
+            { "PenaltyValue_Label", "penalty_label" },
+            { "RatingValue_Label", "rating_label" },
+            { "TimeText_Label", "time_label" },
+            { "PanelErrorsText_Label", "errors_label" },
+            { "MaxComboValue_Label", "max_combo_label" },
+            { "MaxStreakValue_Label", "max_streak_label" },
+            { "RoundsValue_Label", "rounds_label" },
+            { "LoseTimeText_Label", "time_label" },
+            { "LosePanelErrorsText_Label", "errors_label" },
+            { "LoseMaxComboValue_Label", "max_combo_label" },
+            { "LoseMaxStreakValue_Label", "max_streak_label" },
+            { "LosePenaltyValue_Label", "penalty_label" },
+            { "LoseRoundsValue_Label", "rounds_label" },
+            { "ComboText", "combo_display" },
         };
 
         private void Awake()

@@ -27,21 +27,8 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI completionText;
         [SerializeField] private Slider overallProgressBar;
 
-        [Header("Category Tabs (11 categories)")]
-        [SerializeField] private Transform tabsContainer;
-        [SerializeField] private ScrollRect tabsScrollRect;
-        [SerializeField] private Button allTab;
-        [SerializeField] private Button beginnerTab;
-        [SerializeField] private Button masteryTab;
-        [SerializeField] private Button victoriesTab;
-        [SerializeField] private Button streaksTab;
-        [SerializeField] private Button cashBattleTab;
-        [SerializeField] private Button tournamentsTab;
-        [SerializeField] private Button socialTab;
-        [SerializeField] private Button progressionTab;
-        [SerializeField] private Button collectorTab;
-        [SerializeField] private Button timeTab;
-        [SerializeField] private Button secretTab;
+        [Header("Category Filter")]
+        [SerializeField] private TMP_Dropdown categoryDropdown;
 
         [Header("Trophy Showcase")]
         [SerializeField] private Transform showcaseContainer;
@@ -85,11 +72,6 @@ namespace DigitPark.Managers
         [SerializeField] private Sprite lockedTrophyIcon;
         [SerializeField] private Sprite secretTrophyIcon;
 
-        [Header("Tab Colors")]
-        [SerializeField] private Color tabActiveColor = new Color(0f, 1f, 1f, 1f);
-        [SerializeField] private Color tabInactiveColor = new Color(0.2f, 0.25f, 0.3f, 1f);
-        [SerializeField] private Color tabActiveTextColor = new Color(0.02f, 0.05f, 0.1f, 1f);
-        [SerializeField] private Color tabInactiveTextColor = new Color(0.6f, 0.6f, 0.6f, 1f);
 
         // State
         private AchievementCategory currentCategory = AchievementCategory.All;
@@ -118,10 +100,55 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            if (titleText != null)
+                titleText.text = AutoLocalizer.Get("achievements_title");
+
+            LocalizeStaticTexts();
             InitializeAchievements();
             SetupUI();
             SetupListeners();
             LoadShowcase();
+        }
+
+        /// <summary>
+        /// Localizes all static UI text: dropdown options, buttons, etc.
+        /// </summary>
+        private void LocalizeStaticTexts()
+        {
+            // Dropdown options — localize each category name
+            if (categoryDropdown != null)
+            {
+                var options = new System.Collections.Generic.List<string>
+                {
+                    AutoLocalizer.Get("ach_category_all"),
+                    AutoLocalizer.Get("ach_category_beginner"),
+                    AutoLocalizer.Get("ach_category_mastery"),
+                    AutoLocalizer.Get("ach_category_victories"),
+                    AutoLocalizer.Get("ach_category_streaks"),
+                    AutoLocalizer.Get("ach_category_cashbattle"),
+                    AutoLocalizer.Get("ach_category_tournaments"),
+                    AutoLocalizer.Get("ach_category_social"),
+                    AutoLocalizer.Get("ach_category_progression"),
+                    AutoLocalizer.Get("ach_category_collector"),
+                    AutoLocalizer.Get("ach_category_time"),
+                    AutoLocalizer.Get("ach_category_secret")
+                };
+                categoryDropdown.ClearOptions();
+                categoryDropdown.AddOptions(options);
+                categoryDropdown.value = 0;
+            }
+
+            // Claim button
+            if (claimButtonText != null)
+                claimButtonText.text = AutoLocalizer.Get("claim_reward_button");
+
+            // Cancel button
+            if (cancelButton != null)
+            {
+                var cancelTmp = cancelButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (cancelTmp != null)
+                    cancelTmp.text = AutoLocalizer.Get("cancel_button");
+            }
         }
 
         private void OnDestroy()
@@ -215,7 +242,6 @@ namespace DigitPark.Managers
             if (emptyStateContainer) emptyStateContainer.SetActive(false);
 
             UpdateHeaderStats();
-            UpdateTabVisuals();
         }
 
         private void SetupListeners()
@@ -231,19 +257,8 @@ namespace DigitPark.Managers
             if (detailBlocker) detailBlocker.GetComponent<Button>()?.onClick.AddListener(CloseDetailPanel);
             if (claimRewardButton) claimRewardButton.onClick.AddListener(ClaimReward);
 
-            // Tabs - 11 categories with scrollable tabs
-            if (allTab) allTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.All));
-            if (beginnerTab) beginnerTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Beginner));
-            if (masteryTab) masteryTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Mastery));
-            if (victoriesTab) victoriesTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Victories));
-            if (streaksTab) streaksTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Streaks));
-            if (cashBattleTab) cashBattleTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.CashBattle));
-            if (tournamentsTab) tournamentsTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Tournaments));
-            if (socialTab) socialTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Social));
-            if (progressionTab) progressionTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Progression));
-            if (collectorTab) collectorTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Collector));
-            if (timeTab) timeTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Time));
-            if (secretTab) secretTab.onClick.AddListener(() => SwitchCategory(AchievementCategory.Secret));
+            // Category dropdown — index maps to AchievementCategory enum order
+            if (categoryDropdown) categoryDropdown.onValueChanged.AddListener(OnCategoryDropdownChanged);
 
             // Subscribe to Service events
             var service = AchievementService.Instance;
@@ -315,7 +330,8 @@ namespace DigitPark.Managers
 
             if (completionText)
             {
-                completionText.text = $"{completed}/{total}";
+                int percent = total > 0 ? Mathf.RoundToInt((float)completed / total * 100f) : 0;
+                completionText.text = $"{completed}/{total} ({percent}%)";
             }
 
             if (overallProgressBar)
@@ -327,14 +343,35 @@ namespace DigitPark.Managers
 
         #endregion
 
-        #region Category Tabs
+        #region Category Filter
 
-        private void SwitchCategory(AchievementCategory category)
+        /// <summary>
+        /// Maps dropdown index to AchievementCategory enum.
+        /// Order must match the dropdown options set in LocalizeStaticTexts().
+        /// </summary>
+        private static readonly AchievementCategory[] DropdownCategoryMap =
         {
+            AchievementCategory.All,
+            AchievementCategory.Beginner,
+            AchievementCategory.Mastery,
+            AchievementCategory.Victories,
+            AchievementCategory.Streaks,
+            AchievementCategory.CashBattle,
+            AchievementCategory.Tournaments,
+            AchievementCategory.Social,
+            AchievementCategory.Progression,
+            AchievementCategory.Collector,
+            AchievementCategory.Time,
+            AchievementCategory.Secret
+        };
+
+        private void OnCategoryDropdownChanged(int index)
+        {
+            if (index < 0 || index >= DropdownCategoryMap.Length) return;
+            var category = DropdownCategoryMap[index];
             if (currentCategory == category) return;
 
             currentCategory = category;
-            UpdateTabVisuals();
             LoadShowcase();
 
             // Scroll to top
@@ -342,43 +379,6 @@ namespace DigitPark.Managers
             {
                 scrollRect.DOVerticalNormalizedPos(1f, 0.3f);
             }
-        }
-
-        private void UpdateTabVisuals()
-        {
-            UpdateTabButton(allTab, currentCategory == AchievementCategory.All);
-            UpdateTabButton(beginnerTab, currentCategory == AchievementCategory.Beginner);
-            UpdateTabButton(masteryTab, currentCategory == AchievementCategory.Mastery);
-            UpdateTabButton(victoriesTab, currentCategory == AchievementCategory.Victories);
-            UpdateTabButton(streaksTab, currentCategory == AchievementCategory.Streaks);
-            UpdateTabButton(cashBattleTab, currentCategory == AchievementCategory.CashBattle);
-            UpdateTabButton(tournamentsTab, currentCategory == AchievementCategory.Tournaments);
-            UpdateTabButton(socialTab, currentCategory == AchievementCategory.Social);
-            UpdateTabButton(progressionTab, currentCategory == AchievementCategory.Progression);
-            UpdateTabButton(collectorTab, currentCategory == AchievementCategory.Collector);
-            UpdateTabButton(timeTab, currentCategory == AchievementCategory.Time);
-            UpdateTabButton(secretTab, currentCategory == AchievementCategory.Secret);
-        }
-
-        private void UpdateTabButton(Button button, bool isActive)
-        {
-            if (button == null) return;
-
-            var image = button.GetComponent<Image>();
-            var text = button.GetComponentInChildren<TextMeshProUGUI>();
-
-            if (image)
-            {
-                image.DOColor(isActive ? tabActiveColor : tabInactiveColor, 0.2f);
-            }
-
-            if (text)
-            {
-                text.DOColor(isActive ? tabActiveTextColor : tabInactiveTextColor, 0.2f);
-            }
-
-            // Scale animation
-            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
         }
 
         #endregion
@@ -481,14 +481,29 @@ namespace DigitPark.Managers
                 return defaultTrophyIcon;
             }
 
-            // Try to load from Resources
+            // Try from AchievementService pre-loaded icons first
+            var service = AchievementService.Instance;
+            if (service != null)
+            {
+                var svcAch = service.AllAchievements.Find(a => a.iconName == iconName);
+                if (svcAch != null && svcAch.icon != null)
+                    return svcAch.icon;
+            }
+
+            // Try to load from Resources as Sprite
             var sprite = Resources.Load<Sprite>($"Icons/Achievements/{iconName}");
             if (sprite != null) return sprite;
 
-            // Try loading from alternate path
-            sprite = Resources.Load<Sprite>($"Achievements/{iconName}");
-            if (sprite != null) return sprite;
+            // Fallback: load as Texture2D and convert to Sprite
+            var tex = Resources.Load<Texture2D>($"Icons/Achievements/{iconName}");
+            if (tex != null)
+            {
+                sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                Debug.Log($"[AchievementsManager] Icon loaded via Texture2D fallback: {iconName}");
+                return sprite;
+            }
 
+            Debug.LogWarning($"[AchievementsManager] Icon not loaded for: {iconName}. Try reimporting in Unity (right-click > Reimport).");
             return defaultTrophyIcon;
         }
 
@@ -625,7 +640,7 @@ namespace DigitPark.Managers
 
             if (detailCategoryText)
             {
-                detailCategoryText.text = data.category.ToUpper();
+                detailCategoryText.text = AutoLocalizer.Get($"ach_category_{data.category.ToLower()}");
             }
 
             if (detailProgressBar)
@@ -657,7 +672,7 @@ namespace DigitPark.Managers
             // Reward text
             if (detailRewardText)
             {
-                detailRewardText.text = data.points > 0 ? $"{data.points} DigitGems" : "";
+                detailRewardText.text = data.points > 0 ? $"{data.points} {AutoLocalizer.Get("digitgems")}" : "";
             }
 
             // Claim button

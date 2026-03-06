@@ -27,6 +27,7 @@ namespace DigitPark.Managers
         [SerializeField] private GameObject playerItemPrefab;
         [SerializeField] private TextMeshProUGUI noResultsText;
         [SerializeField] private GameObject loadingIndicator;
+        [SerializeField] private GameObject emptyStatePanel;
 
         [Header("UI - Navigation")]
         [SerializeField] private Button backButton;
@@ -140,10 +141,12 @@ namespace DigitPark.Managers
 
             Debug.Log($"[SearchPlayers] Buscando: {query}");
 
-            // Mostrar indicador de carga
+            // Mostrar indicador de carga, ocultar empty state
             ShowLoadingIndicator(true);
             if (noResultsText != null)
                 noResultsText.gameObject.SetActive(false);
+            if (emptyStatePanel != null)
+                emptyStatePanel.SetActive(false);
 
             // Buscar en Firebase
             List<PlayerSearchResult> results = null;
@@ -246,75 +249,63 @@ namespace DigitPark.Managers
 
         private void SetupBasicPlayerItem(GameObject item, PlayerSearchResult result)
         {
-            // ========== INFO SECTION ==========
-            Transform infoSection = item.transform.Find("InfoSection");
-            if (infoSection != null)
+            // ========== CONTENT SECTION ==========
+            Transform contentSection = item.transform.Find("ContentSection");
+            if (contentSection != null)
             {
                 // Username
-                Transform usernameT = infoSection.Find("Username");
-                if (usernameT != null)
+                Transform topRow = contentSection.Find("TopRow");
+                if (topRow != null)
                 {
-                    var tmp = usernameT.GetComponent<TextMeshProUGUI>();
-                    if (tmp != null) tmp.text = result.username;
+                    Transform usernameT = topRow.Find("Username");
+                    if (usernameT != null)
+                    {
+                        var tmp = usernameT.GetComponent<TextMeshProUGUI>();
+                        if (tmp != null) tmp.text = result.username;
+                    }
+
+                    // Online status
+                    bool isOnline = result.isOnline;
+                    Color statusColor = isOnline
+                        ? new Color(0.2f, 1f, 0.4f, 1f)
+                        : new Color(0.5f, 0.5f, 0.5f, 1f);
+                    string statusText = isOnline ? AutoLocalizer.Get("player_online") : AutoLocalizer.Get("player_offline");
+
+                    Transform onlineStatus = topRow.Find("OnlineStatus");
+                    if (onlineStatus != null)
+                    {
+                        var img = onlineStatus.GetComponent<Image>();
+                        if (img != null) img.color = statusColor;
+                    }
+
+                    Transform onlineLabel = topRow.Find("OnlineLabel");
+                    if (onlineLabel != null)
+                    {
+                        var tmp = onlineLabel.GetComponent<TextMeshProUGUI>();
+                        if (tmp != null)
+                        {
+                            tmp.text = statusText;
+                            tmp.color = statusColor;
+                        }
+                    }
                 }
 
-                // Handle (@username)
-                Transform handleT = infoSection.Find("Handle");
-                if (handleT != null)
-                {
-                    var tmp = handleT.GetComponent<TextMeshProUGUI>();
-                    if (tmp != null) tmp.text = $"@{result.username.ToLower()}";
-                }
-
-                // Stats Row
-                Transform statsRow = infoSection.Find("StatsRow");
+                // Stats
+                Transform statsRow = contentSection.Find("StatsRow");
                 if (statsRow != null)
                 {
-                    // Win Rate
-                    Transform winRateT = statsRow.Find("WinRateText");
-                    if (winRateT != null)
+                    Transform statsTextT = statsRow.Find("StatsText");
+                    if (statsTextT != null)
                     {
-                        var tmp = winRateT.GetComponent<TextMeshProUGUI>();
-                        if (tmp != null) tmp.text = $"{result.winRate:F0}%";
+                        var tmp = statsTextT.GetComponent<TextMeshProUGUI>();
+                        string game = result.favoriteGame ?? "QuickMath";
+                        if (tmp != null) tmp.text = $"{result.winRate:F0}% WR · {game}";
                     }
-
-                    // Favorite Game
-                    Transform favGameT = statsRow.Find("FavGameText");
-                    if (favGameT != null)
-                    {
-                        var tmp = favGameT.GetComponent<TextMeshProUGUI>();
-                        if (tmp != null) tmp.text = result.favoriteGame ?? "QuickMath";
-                    }
-                }
-            }
-
-            // ========== ONLINE STATUS ==========
-            bool isOnline = result.isOnline;
-            Color statusColor = isOnline
-                ? new Color(0.2f, 1f, 0.4f, 1f)  // Verde
-                : new Color(0.5f, 0.5f, 0.5f, 1f); // Gris
-            string statusText = isOnline ? AutoLocalizer.Get("player_online") : AutoLocalizer.Get("player_offline");
-
-            Transform onlineStatus = item.transform.Find("OnlineStatus");
-            if (onlineStatus != null)
-            {
-                var img = onlineStatus.GetComponent<Image>();
-                if (img != null) img.color = statusColor;
-            }
-
-            Transform onlineLabel = item.transform.Find("OnlineLabel");
-            if (onlineLabel != null)
-            {
-                var tmp = onlineLabel.GetComponent<TextMeshProUGUI>();
-                if (tmp != null)
-                {
-                    tmp.text = statusText;
-                    tmp.color = statusColor;
                 }
             }
 
             // ========== BUTTONS ==========
-            Transform buttonsRow = item.transform.Find("ButtonsRow");
+            Transform buttonsRow = item.transform.Find("ContentSection/ButtonsRow");
             if (buttonsRow != null)
             {
                 string playerId = result.playerId;
@@ -383,6 +374,10 @@ namespace DigitPark.Managers
 
             if (noResultsText != null)
                 noResultsText.gameObject.SetActive(false);
+
+            // Show empty state when no results displayed
+            if (emptyStatePanel != null)
+                emptyStatePanel.SetActive(true);
         }
 
         #region Item Callbacks

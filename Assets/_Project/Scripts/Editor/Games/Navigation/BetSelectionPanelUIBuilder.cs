@@ -141,8 +141,6 @@ namespace DigitPark.Editor
             // === HEADER ===
             CreateHeader(canvas.transform);
 
-            // === CURRENCY BAR ===
-            CreateCurrencyBar(canvas.transform);
 
             // === BACK BUTTON (after header so it renders on top) ===
             GameObject backPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -172,7 +170,7 @@ namespace DigitPark.Editor
                 NEON_GREEN, GREEN_GLOW);
 
             // === COIN BETS ===
-            CreateSectionDivider("CoinBetsHeader", content.transform, "DIGITCOINS", COIN_COLOR);
+            CreateSectionDivider("CoinBetsHeader", content.transform, "DIGITCOINS", COIN_COLOR, "CoinsSectionText");
 
             CreateBetCard("Coins50BetOption", content.transform,
                 "50 DigitCoins", "Win 100", null,
@@ -200,7 +198,7 @@ namespace DigitPark.Editor
                 new Color(1f, 0.7f, 0.1f), new Color(1f, 0.7f, 0.1f, 0.4f));
 
             // === GEM BETS ===
-            CreateSectionDivider("GemBetsHeader", content.transform, "DIGITGEMS", GEM_COLOR);
+            CreateSectionDivider("GemBetsHeader", content.transform, "DIGITGEMS", GEM_COLOR, "GemsSectionText");
 
             CreateBetCard("Gems10BetOption", content.transform,
                 "10 DigitGems", "Win 20", null,
@@ -228,7 +226,7 @@ namespace DigitPark.Editor
                 PURPLE, PURPLE_GLOW);
 
             // === CUSTOM BET ===
-            CreateSectionDivider("CustomBetsHeader", content.transform, "CUSTOM", CUSTOM_TEAL);
+            CreateSectionDivider("CustomBetsHeader", content.transform, "CUSTOM", CUSTOM_TEAL, "CustomSectionText");
             CreateCustomBetSection(content.transform);
 
             // === SPACER + ACTION BUTTONS ===
@@ -257,53 +255,60 @@ namespace DigitPark.Editor
 
         private static void CreateHeader(Transform parent)
         {
+            // Header: same 7.2% height as MainMenu (0.928 → 1.0)
             GameObject header = CreateUI("HeaderSection", parent);
             RectTransform hrt = header.GetComponent<RectTransform>();
-            hrt.anchorMin = new Vector2(0, 0.87f);
+            hrt.anchorMin = new Vector2(0, 0.928f);
             hrt.anchorMax = new Vector2(1, 1f);
             hrt.offsetMin = Vector2.zero;
             hrt.offsetMax = Vector2.zero;
             header.AddComponent<Image>().color = HEADER_BG;
             AddOutline(header, CYAN_DARK, 1);
 
-            var vlg = header.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(20, 20, 10, 5);
-            vlg.spacing = 2;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-
-            var titleTMP = CreateText("TitleText", header.transform, "CHOOSE YOUR BET",
-                (int)FontSizes.H4, NEON_CYAN, FontStyles.Bold, 80f);
+            // Title (left side) — wider area so full text fits
+            GameObject titleObj = new GameObject("TitleText");
+            titleObj.transform.SetParent(header.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0, 0.3f);
+            titleRT.anchorMax = new Vector2(0.5f, 1);
+            titleRT.offsetMin = new Vector2(20, 0);
+            titleRT.offsetMax = new Vector2(0, 0);
+            var titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = "CHOOSE YOUR BET";
+            titleTMP.fontSize = (int)FontSizes.H4;
+            titleTMP.color = NEON_CYAN;
+            titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            titleTMP.enableAutoSizing = true;
             titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTMP.fontSizeMax = FontSizes.H4;
+            titleTMP.enableWordWrapping = false;
+            titleTMP.overflowMode = TextOverflowModes.Overflow;
             titleTMP.raycastTarget = false;
-            CreateText("GameNameText", header.transform, "",
-                (int)FontSizes.Body, GOLD, FontStyles.Italic, 42f);
-        }
 
-        // ==================== CURRENCY BAR (prominent) ====================
+            // Game name (below title)
+            GameObject gameNameObj = new GameObject("GameNameText");
+            gameNameObj.transform.SetParent(header.transform, false);
+            RectTransform gnRT = gameNameObj.AddComponent<RectTransform>();
+            gnRT.anchorMin = new Vector2(0, 0);
+            gnRT.anchorMax = new Vector2(0.5f, 0.35f);
+            gnRT.offsetMin = new Vector2(20, 0);
+            gnRT.offsetMax = new Vector2(0, 0);
+            var gnTMP = gameNameObj.AddComponent<TextMeshProUGUI>();
+            gnTMP.text = "";
+            gnTMP.fontSize = (int)FontSizes.Body;
+            gnTMP.color = GOLD;
+            gnTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
+            gnTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            gnTMP.raycastTarget = false;
 
-        private static void CreateCurrencyBar(Transform parent)
-        {
-            GameObject bar = CreateUI("CurrencyBar", parent);
-            RectTransform brt = bar.GetComponent<RectTransform>();
-            brt.anchorMin = new Vector2(0.03f, 0.80f);
-            brt.anchorMax = new Vector2(0.97f, 0.865f);
-            brt.offsetMin = Vector2.zero;
-            brt.offsetMax = Vector2.zero;
-            bar.AddComponent<Image>().color = CURRENCY_BG;
-            AddOutline(bar, CYAN_DARK, 1);
-
-            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(bar.transform);
-            var pRT = pills.GetComponent<RectTransform>();
-            pRT.anchorMin = Vector2.zero;
-            pRT.anchorMax = Vector2.one;
-            pRT.offsetMin = Vector2.zero;
-            pRT.offsetMax = Vector2.zero;
-            pills.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+            // Currency pills (right side - exact same anchors as MainMenu, offset 120 right)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.35f, 0.05f);
+            pillsRT.anchorMax = new Vector2(0.88f, 0.95f);
+            pillsRT.offsetMin = new Vector2(120, 0);
+            pillsRT.offsetMax = new Vector2(120, 0);
         }
 
         // ==================== SCROLL AREA ====================
@@ -314,7 +319,7 @@ namespace DigitPark.Editor
             GameObject scrollArea = CreateUI("ScrollArea", parent);
             RectTransform srt = scrollArea.GetComponent<RectTransform>();
             srt.anchorMin = new Vector2(0, 0.01f);
-            srt.anchorMax = new Vector2(1, 0.795f);
+            srt.anchorMax = new Vector2(1, 0.923f);
             srt.offsetMin = Vector2.zero;
             srt.offsetMax = Vector2.zero;
 
@@ -423,6 +428,9 @@ namespace DigitPark.Editor
             costTMP.color = accentColor;
             costTMP.fontStyle = FontStyles.Bold;
             costTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            costTMP.enableAutoSizing = true;
+            costTMP.fontSizeMin = FontSizes.AutoMinBody;
+            costTMP.fontSizeMax = FontSizes.BodyLarge;
             costTMP.enableWordWrapping = false;
             costTMP.overflowMode = TextOverflowModes.Ellipsis;
             costTMP.raycastTarget = false;
@@ -438,6 +446,9 @@ namespace DigitPark.Editor
             rewardTMP.fontStyle = FontStyles.Bold;
             rewardTMP.color = TEXT_SECONDARY;
             rewardTMP.alignment = TextAlignmentOptions.MidlineRight;
+            rewardTMP.enableAutoSizing = true;
+            rewardTMP.fontSizeMin = FontSizes.AutoMinBody;
+            rewardTMP.fontSizeMax = FontSizes.Body;
             rewardTMP.raycastTarget = false;
 
 
@@ -513,8 +524,8 @@ namespace DigitPark.Editor
             trHLG.childControlWidth = true;
             trHLG.childControlHeight = true;
 
-            CreateToggleButton("CustomCoinsToggle", toggleRow.transform, "DIGITCOINS", COIN_COLOR, true);
-            CreateToggleButton("CustomGemsToggle", toggleRow.transform, "DIGITGEMS", GEM_COLOR, false);
+            CreateToggleButton("CustomCoinsToggle", toggleRow.transform, "DIGITCOINS", COIN_COLOR, true, "CoinsToggleText");
+            CreateToggleButton("CustomGemsToggle", toggleRow.transform, "DIGITGEMS", GEM_COLOR, false, "GemsToggleText");
 
             // === ROW 2: Stepper (minus, input, plus) ===
             GameObject inputRow = CreateUI("InputRow", card.transform);
@@ -553,11 +564,14 @@ namespace DigitPark.Editor
             pvTMP.color = CUSTOM_TEAL;
             pvTMP.fontStyle = FontStyles.Bold;
             pvTMP.alignment = TextAlignmentOptions.Center;
+            pvTMP.enableAutoSizing = true;
+            pvTMP.fontSizeMin = FontSizes.AutoMinBody;
+            pvTMP.fontSizeMax = FontSizes.Body;
 
         }
 
         private static void CreateToggleButton(string name, Transform parent,
-            string text, Color textColor, bool initiallyActive)
+            string text, Color textColor, bool initiallyActive, string textGoName = "Text")
         {
             GameObject go = CreateUI(name, parent);
             Image bg = go.AddComponent<Image>();
@@ -571,8 +585,8 @@ namespace DigitPark.Editor
             c.pressedColor = new Color(0.8f, 0.8f, 0.8f);
             btn.colors = c;
 
-            // Text on child
-            GameObject textGO = CreateUI("Text", go.transform);
+            // Text on child (unique name for AutoLocalizer)
+            GameObject textGO = CreateUI(textGoName, go.transform);
             SetFullStretch(textGO.GetComponent<RectTransform>());
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
@@ -580,6 +594,9 @@ namespace DigitPark.Editor
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = FontSizes.Body;
         }
 
         private static void CreateStepperButton(string name, Transform parent, string text, float width)
@@ -628,15 +645,19 @@ namespace DigitPark.Editor
             taRT.offsetMin = new Vector2(10, 0);
             taRT.offsetMax = new Vector2(-10, 0);
 
-            // Placeholder
-            GameObject phGO = CreateUI("Placeholder", textArea.transform);
+            // Placeholder (unique name for AutoLocalizer)
+            GameObject phGO = CreateUI("AmountPlaceholder", textArea.transform);
             RectTransform phRT = phGO.GetComponent<RectTransform>();
             SetFullStretch(phRT);
             TextMeshProUGUI phTMP = phGO.AddComponent<TextMeshProUGUI>();
             phTMP.text = "Amount...";
             phTMP.fontSize = FontSizes.Body;
+            phTMP.fontStyle = FontStyles.Bold;
             phTMP.color = TEXT_DIM;
             phTMP.alignment = TextAlignmentOptions.Center;
+            phTMP.enableAutoSizing = true;
+            phTMP.fontSizeMin = FontSizes.AutoMinBody;
+            phTMP.fontSizeMax = FontSizes.Body;
 
 
             // Input text
@@ -663,7 +684,8 @@ namespace DigitPark.Editor
 
         // ==================== SECTION DIVIDER ====================
 
-        private static void CreateSectionDivider(string name, Transform parent, string text, Color color)
+        private static void CreateSectionDivider(string name, Transform parent, string text, Color color,
+            string textGoName = "SectionText")
         {
             GameObject div = CreateUI(name, parent);
             var le = div.AddComponent<LayoutElement>();
@@ -685,8 +707,8 @@ namespace DigitPark.Editor
             llLE.preferredHeight = 1;
             lineL.AddComponent<Image>().color = new Color(color.r, color.g, color.b, 0.3f);
 
-            // Section text
-            GameObject textGO = CreateUI("SectionText", div.transform);
+            // Section text (unique name for AutoLocalizer mapping)
+            GameObject textGO = CreateUI(textGoName, div.transform);
             var tLE = textGO.AddComponent<LayoutElement>();
             tLE.preferredWidth = 260;
             tLE.preferredHeight = 46;
@@ -696,6 +718,9 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = FontSizes.BodyLarge;
 
             // Right line
             GameObject lineR = CreateUI("LineRight", div.transform);
@@ -721,12 +746,12 @@ namespace DigitPark.Editor
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
 
-            CreateActionButton("PlayButton", row.transform, "PLAY", BTN_PLAY, BTN_PLAY_GLOW, true);
-            CreateActionButton("CancelButton", row.transform, "CANCEL", BTN_CANCEL, Color.clear, false);
+            CreateActionButton("PlayButton", row.transform, "PLAY", BTN_PLAY, BTN_PLAY_GLOW, true, "PlayButtonText");
+            CreateActionButton("CancelButton", row.transform, "CANCEL", BTN_CANCEL, Color.clear, false, "CancelButtonText");
         }
 
         private static void CreateActionButton(string name, Transform parent, string text,
-            Color bgColor, Color glowColor, bool hasGlow)
+            Color bgColor, Color glowColor, bool hasGlow, string textGoName = "Text")
         {
             GameObject go = CreateUI(name, parent);
             go.AddComponent<Image>().color = bgColor;
@@ -744,7 +769,7 @@ namespace DigitPark.Editor
             c.pressedColor = new Color(0.75f, 0.75f, 0.75f);
             btn.colors = c;
 
-            GameObject textGO = CreateUI("Text", go.transform);
+            GameObject textGO = CreateUI(textGoName, go.transform);
             SetFullStretch(textGO.GetComponent<RectTransform>());
             TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
@@ -752,6 +777,9 @@ namespace DigitPark.Editor
             tmp.color = Color.white;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = FontSizes.Body;
         }
 
         // ==================== HELPERS ====================

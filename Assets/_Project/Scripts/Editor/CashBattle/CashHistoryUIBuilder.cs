@@ -164,8 +164,6 @@ namespace DigitPark.Editor
 
         private static void BuildCashHistoryUI()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -188,8 +186,6 @@ namespace DigitPark.Editor
         /// </summary>
         public static void BuildSilent()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -246,7 +242,7 @@ namespace DigitPark.Editor
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
-            GameObject prefab = CreateMatchHistoryItem(canvas.transform, "QuickMath", "@Opponent", true, 5f, 10f, "Today, 14:30", "5-3", "1v1");
+            GameObject prefab = CreateMatchHistoryItem(canvas.transform, "QuickMath", "Opponent", true, 5f, 10f, "Today, 14:30", "5-3", "1v1");
             Selection.activeGameObject = prefab;
             Debug.Log("[CashHistoryUIBuilder] Match Item creado. Guárdalo como prefab.");
         }
@@ -272,23 +268,17 @@ namespace DigitPark.Editor
 
         private static void CleanupOldElements(Transform parent)
         {
-            string[] toDestroy = { "Background", "SafeArea", "Header", "StatsPanel", "FiltersPanel",
-                "MatchHistoryList", "EmptyStateText", "LoadMoreButton", "LoadingIndicator", "DetailPanel" };
-            foreach (string name in toDestroy)
+            List<GameObject> toDestroy = new List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                Transform existing = parent.Find(name);
-                if (existing != null) DestroyImmediate(existing.gameObject);
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
             }
-            // Also check inside SafeArea for cleanup
-            Transform safeArea = parent.Find("SafeArea");
-            if (safeArea != null)
-            {
-                foreach (string name in new[] { "EmptyStateText", "LoadMoreButton", "LoadingIndicator" })
-                {
-                    Transform existing = safeArea.Find(name);
-                    if (existing != null) DestroyImmediate(existing.gameObject);
-                }
-            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         #endregion
@@ -595,6 +585,10 @@ namespace DigitPark.Editor
             labelText.color = TEXT_SECONDARY;
             labelText.alignment = TextAlignmentOptions.Center;
             labelText.fontStyle = FontStyles.Bold;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.AutoMinSmall;
+            labelText.fontSizeMax = FontSizes.BodyLarge;
+            labelText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -659,6 +653,9 @@ namespace DigitPark.Editor
             btnText.color = isActive ? BG_DARK : TEXT_PRIMARY;
             btnText.alignment = TextAlignmentOptions.Center;
             btnText.fontStyle = FontStyles.Bold;
+            btnText.enableAutoSizing = true;
+            btnText.fontSizeMin = FontSizes.AutoMinBody;
+            btnText.fontSizeMax = FontSizes.H3;
         }
 
         #endregion
@@ -727,7 +724,10 @@ namespace DigitPark.Editor
             scroll.viewport = vpRT;
             scroll.content = contentRT;
 
-            // Items are instantiated at runtime from historyEntryPrefab by CashHistorySceneController
+            // Sample cards for design preview (runtime replaces with real data)
+            CreateMatchHistoryItem(content.transform, "DigitRush", "PlayerOne", true, 5f, 10f, "Today, 14:30", "5-3", "1v1");
+            CreateMatchHistoryItem(content.transform, "QuickMath", "GamerPro", false, 10f, -10f, "Today, 11:20", "2-5", "1v1");
+            CreateMatchHistoryItem(content.transform, "FlashTap", "SpeedKing", true, 25f, 50f, "Yesterday", "4-1", "Tournament");
         }
 
         private static GameObject CreateMatchHistoryItem(Transform parent, string game, string opponent, bool isWin, float entryFee, float netAmount, string date, string score, string mode)
@@ -767,11 +767,11 @@ namespace DigitPark.Editor
             iconRT.anchorMin = new Vector2(0, 0.5f);
             iconRT.anchorMax = new Vector2(0, 0.5f);
             iconRT.pivot = new Vector2(0, 0.5f);
-            iconRT.sizeDelta = new Vector2(180, 180);
-            iconRT.anchoredPosition = new Vector2(30, 10);
+            iconRT.sizeDelta = new Vector2(140, 140);
+            iconRT.anchoredPosition = new Vector2(20, 10);
 
             Image iconBg = iconContainer.AddComponent<Image>();
-            iconBg.color = new Color(0.1f, 0.1f, 0.15f, 1f);
+            iconBg.color = new Color(0.08f, 0.08f, 0.12f, 0.6f);
 
             // Try to load game icon from Assets/_Project/Art/Icons/Games/
             string iconPath = GAME_ICONS_PATH + game + "Icon.png";
@@ -815,7 +815,7 @@ namespace DigitPark.Editor
                 Debug.LogWarning($"[CashHistoryUIBuilder] Game icon not found: {iconPath}, using text placeholder");
             }
 
-            // Game name + Mode badge
+            // Game name row
             GameObject gameNameRow = new GameObject("GameNameRow");
             gameNameRow.transform.SetParent(item.transform, false);
 
@@ -824,22 +824,23 @@ namespace DigitPark.Editor
             gameNameRowRT.anchorMax = new Vector2(0.65f, 1);
             gameNameRowRT.pivot = new Vector2(0, 1);
             gameNameRowRT.sizeDelta = new Vector2(0, 70);
-            gameNameRowRT.anchoredPosition = new Vector2(230, -24);
+            gameNameRowRT.anchoredPosition = new Vector2(180, -24);
 
             HorizontalLayoutGroup gameHLG = gameNameRow.AddComponent<HorizontalLayoutGroup>();
-            gameHLG.spacing = 20;
+            gameHLG.spacing = 10;
             gameHLG.childAlignment = TextAnchor.MiddleLeft;
             gameHLG.childForceExpandWidth = false;
-            gameHLG.childForceExpandHeight = true;
-            gameHLG.childControlWidth = false;
-            gameHLG.childControlHeight = true;
+            gameHLG.childForceExpandHeight = false;
+            gameHLG.childControlWidth = true;
+            gameHLG.childControlHeight = false;
 
             // Game name
             GameObject gameObj = new GameObject("GameName");
             gameObj.transform.SetParent(gameNameRow.transform, false);
 
-            LayoutElement gameLE = gameObj.AddComponent<LayoutElement>();
-            gameLE.preferredWidth = 400;
+            ContentSizeFitter gameFitter = gameObj.AddComponent<ContentSizeFitter>();
+            gameFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            gameFitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             TextMeshProUGUI gameText = gameObj.AddComponent<TextMeshProUGUI>();
             gameText.text = game;
@@ -847,33 +848,47 @@ namespace DigitPark.Editor
             gameText.color = TEXT_GOLD;
             gameText.fontStyle = FontStyles.Bold;
             gameText.alignment = TextAlignmentOptions.Left;
-            gameText.overflowMode = TextOverflowModes.Ellipsis;
+            gameText.enableAutoSizing = true;
+            gameText.fontSizeMin = FontSizes.AutoMinBody;
+            gameText.fontSizeMax = FontSizes.H4;
 
             // Mode badge
             GameObject modeBadge = new GameObject("ModeBadge");
             modeBadge.transform.SetParent(gameNameRow.transform, false);
 
+            RectTransform modeBadgeRT = modeBadge.AddComponent<RectTransform>();
+            modeBadgeRT.sizeDelta = new Vector2(0, 40);
+
             LayoutElement modeLE = modeBadge.AddComponent<LayoutElement>();
-            modeLE.preferredWidth = 130;
-            modeLE.preferredHeight = 52;
+            modeLE.preferredHeight = 40;
+
+            // Use ContentSizeFitter so badge auto-sizes to text width
+            ContentSizeFitter modeFitter = modeBadge.AddComponent<ContentSizeFitter>();
+            modeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            modeFitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             Image modeBg = modeBadge.AddComponent<Image>();
             modeBg.color = mode == "Tournament" ? new Color(0.6f, 0.2f, 0.8f, 1f) : new Color(0.2f, 0.5f, 0.7f, 1f);
 
-            GameObject modeText = new GameObject("Text");
-            modeText.transform.SetParent(modeBadge.transform, false);
+            // Horizontal padding inside badge
+            HorizontalLayoutGroup badgeHLG = modeBadge.AddComponent<HorizontalLayoutGroup>();
+            badgeHLG.padding = new RectOffset(12, 12, 4, 4);
+            badgeHLG.childAlignment = TextAnchor.MiddleCenter;
+            badgeHLG.childControlWidth = true;
+            badgeHLG.childControlHeight = true;
+            badgeHLG.childForceExpandWidth = false;
+            badgeHLG.childForceExpandHeight = true;
 
-            RectTransform modeTextRT = modeText.AddComponent<RectTransform>();
-            modeTextRT.anchorMin = Vector2.zero;
-            modeTextRT.anchorMax = Vector2.one;
-            modeTextRT.sizeDelta = Vector2.zero;
+            GameObject modeTextObj = new GameObject("Text");
+            modeTextObj.transform.SetParent(modeBadge.transform, false);
 
-            TextMeshProUGUI mt = modeText.AddComponent<TextMeshProUGUI>();
+            TextMeshProUGUI mt = modeTextObj.AddComponent<TextMeshProUGUI>();
             mt.text = mode;
-            mt.fontSize = FontSizes.Body;
+            mt.fontSize = FontSizes.Caption;
             mt.color = TEXT_PRIMARY;
             mt.alignment = TextAlignmentOptions.Center;
             mt.fontStyle = FontStyles.Bold;
+            mt.enableWordWrapping = false;
 
             // Opponent (clickeable)
             GameObject oppObj = new GameObject("Opponent");
@@ -884,7 +899,7 @@ namespace DigitPark.Editor
             oppRT.anchorMax = new Vector2(0.6f, 0.5f);
             oppRT.pivot = new Vector2(0, 0.5f);
             oppRT.sizeDelta = new Vector2(0, 50);
-            oppRT.anchoredPosition = new Vector2(230, -10);
+            oppRT.anchoredPosition = new Vector2(180, -10);
 
             TextMeshProUGUI oppText = oppObj.AddComponent<TextMeshProUGUI>();
             oppText.text = $"vs {opponent}";
@@ -892,6 +907,10 @@ namespace DigitPark.Editor
             oppText.fontStyle = FontStyles.Bold | FontStyles.Underline;
             oppText.color = CYAN_ACCENT;
             oppText.alignment = TextAlignmentOptions.Left;
+            oppText.enableAutoSizing = true;
+            oppText.fontSizeMin = FontSizes.AutoMinBody;
+            oppText.fontSizeMax = FontSizes.Body;
+            oppText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Transparent button over opponent name for click detection
             GameObject oppBtnObj = new GameObject("OpponentNameButton");
@@ -918,10 +937,10 @@ namespace DigitPark.Editor
 
             RectTransform infoRowRT = infoRow.AddComponent<RectTransform>();
             infoRowRT.anchorMin = new Vector2(0, 0);
-            infoRowRT.anchorMax = new Vector2(0.6f, 0);
+            infoRowRT.anchorMax = new Vector2(0.70f, 0);
             infoRowRT.pivot = new Vector2(0, 0);
             infoRowRT.sizeDelta = new Vector2(0, 60);
-            infoRowRT.anchoredPosition = new Vector2(230, 30);
+            infoRowRT.anchoredPosition = new Vector2(180, 30);
 
             TextMeshProUGUI infoText = infoRow.AddComponent<TextMeshProUGUI>();
             infoText.text = $"{date}  •  Score: {score}";
@@ -929,6 +948,9 @@ namespace DigitPark.Editor
             infoText.fontStyle = FontStyles.Bold;
             infoText.color = TEXT_SECONDARY;
             infoText.alignment = TextAlignmentOptions.Left;
+            infoText.enableAutoSizing = true;
+            infoText.fontSizeMin = FontSizes.AutoMinSmall;
+            infoText.fontSizeMax = FontSizes.Body;
 
             // Result label (VICTORIA/DERROTA)
             GameObject resultObj = new GameObject("Result");
@@ -947,6 +969,10 @@ namespace DigitPark.Editor
             resText.color = isWin ? SUCCESS_GREEN : ERROR_RED;
             resText.alignment = TextAlignmentOptions.Right;
             resText.fontStyle = FontStyles.Bold;
+            resText.enableAutoSizing = true;
+            resText.fontSizeMin = FontSizes.AutoMinSmall;
+            resText.fontSizeMax = FontSizes.Body;
+            resText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Amount (net gain/loss)
             GameObject amountObj = new GameObject("Amount");
@@ -984,6 +1010,10 @@ namespace DigitPark.Editor
             entryText.fontStyle = FontStyles.Bold;
             entryText.color = TEXT_SECONDARY;
             entryText.alignment = TextAlignmentOptions.Right;
+            entryText.enableAutoSizing = true;
+            entryText.fontSizeMin = FontSizes.AutoMinSmall;
+            entryText.fontSizeMax = FontSizes.Body;
+            entryText.overflowMode = TextOverflowModes.Ellipsis;
 
             return item;
         }

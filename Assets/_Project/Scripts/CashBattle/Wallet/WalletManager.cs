@@ -76,11 +76,11 @@ namespace DigitPark.CashBattle
         [Header("Deposit Options")]
         [SerializeField] private List<DepositOption> _depositOptions = new List<DepositOption>
         {
-            new DepositOption { amount = 5m, bonus = 0m, isPopular = false },
-            new DepositOption { amount = 10m, bonus = 1m, isPopular = false },
-            new DepositOption { amount = 25m, bonus = 3m, isPopular = true },
-            new DepositOption { amount = 50m, bonus = 7m, isPopular = false },
-            new DepositOption { amount = 100m, bonus = 15m, isPopular = false },
+            new DepositOption { amount = 5m },
+            new DepositOption { amount = 10m },
+            new DepositOption { amount = 25m },
+            new DepositOption { amount = 50m },
+            new DepositOption { amount = 100m },
         };
 
         public List<DepositOption> DepositOptions => _depositOptions;
@@ -246,13 +246,13 @@ namespace DigitPark.CashBattle
         /// </summary>
         public async Task<bool> InitiateDeposit(DepositOption option, PaymentMethod method)
         {
-            return await InitiateDeposit(option.amount, option.bonus, method);
+            return await InitiateDeposit(option.amount, method);
         }
 
         /// <summary>
         /// Initiates a deposit with a custom amount
         /// </summary>
-        public async Task<bool> InitiateDeposit(decimal amount, decimal bonus, PaymentMethod method)
+        public async Task<bool> InitiateDeposit(decimal amount, PaymentMethod method)
         {
             if (amount <= 0 || WalletService == null)
             {
@@ -267,8 +267,8 @@ namespace DigitPark.CashBattle
             {
                 var request = new Services.DepositRequest
                 {
-                    Amount = amount + bonus, // The service handles the total
-                    PromoCode = bonus > 0 ? "DEPOSIT_BONUS" : null
+                    Amount = amount,
+                    PromoCode = null
                 };
 
                 var result = await WalletService.Deposit(request);

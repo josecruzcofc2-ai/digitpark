@@ -152,8 +152,6 @@ namespace DigitPark.Editor
 
         private static void RebuildMainMenu()
         {
-            CleanupOldUI();
-
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -170,19 +168,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            // Limpiar elementos viejos
-            string[] oldNames = {
-                "Background", "Header", "PlayerCard", "ProfileCard",
-                "QuickActionsPanel", "MainCardsPanel", "DailyRewardsCard", "DailyRewardCard",
-                "PlayCard", "CashBattleCard", "ExtraRow", "PremiumPanel",
-                "NotificationsPanel", "PremiumBanner", "TitleSection", "UserSection",
-                "MainMenuPanel", "SafeArea"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             // Crear estructura completa
             CreateBackground(canvas.transform);
@@ -364,7 +351,9 @@ namespace DigitPark.Editor
 
             // === Centered layout ===
 
-            // Avatar Frame (centered, circular with cyan neon ring)
+            // Avatar Frame container (centered, circular matchmaking style)
+            Sprite circleSprite = GenerateCircleSprite();
+
             var frame = new GameObject("AvatarFrame");
             frame.transform.SetParent(card.transform, false);
             var frameRT = frame.AddComponent<RectTransform>();
@@ -372,22 +361,41 @@ namespace DigitPark.Editor
             frameRT.anchorMax = new Vector2(0.5f, 0.63f);
             frameRT.pivot = new Vector2(0.5f, 0.5f);
             frameRT.sizeDelta = new Vector2(220, 220);
-            // Outer cyan ring using built-in circle sprite
-            Sprite circleKnob = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
-            var frameImg = frame.AddComponent<Image>();
-            if (circleKnob != null) frameImg.sprite = circleKnob;
-            frameImg.color = CYAN_NEON;
 
-            // Inner mask circle - clips avatar to circle, shows as background
+            // Circular glow ring (outer, slightly larger)
+            var glowRing = new GameObject("GlowRing");
+            glowRing.transform.SetParent(frame.transform, false);
+            var glowRT = glowRing.AddComponent<RectTransform>();
+            glowRT.anchorMin = Vector2.zero;
+            glowRT.anchorMax = Vector2.one;
+            glowRT.offsetMin = new Vector2(-8, -8);
+            glowRT.offsetMax = new Vector2(8, 8);
+            var glowImg = glowRing.AddComponent<Image>();
+            glowImg.sprite = circleSprite;
+            glowImg.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.25f);
+
+            // Circular border ring (solid cyan frame)
+            var borderRing = new GameObject("BorderRing");
+            borderRing.transform.SetParent(frame.transform, false);
+            var borderRT = borderRing.AddComponent<RectTransform>();
+            borderRT.anchorMin = Vector2.zero;
+            borderRT.anchorMax = Vector2.one;
+            borderRT.offsetMin = Vector2.zero;
+            borderRT.offsetMax = Vector2.zero;
+            var borderImg = borderRing.AddComponent<Image>();
+            borderImg.sprite = circleSprite;
+            borderImg.color = CYAN_NEON;
+
+            // Circular mask container (clips avatar to circle)
             var avatarMask = new GameObject("AvatarMask");
             avatarMask.transform.SetParent(frame.transform, false);
             var maskRT = avatarMask.AddComponent<RectTransform>();
-            maskRT.anchorMin = new Vector2(0.07f, 0.07f);
-            maskRT.anchorMax = new Vector2(0.93f, 0.93f);
+            maskRT.anchorMin = new Vector2(0.06f, 0.06f);
+            maskRT.anchorMax = new Vector2(0.94f, 0.94f);
             maskRT.offsetMin = Vector2.zero;
             maskRT.offsetMax = Vector2.zero;
             var maskImg = avatarMask.AddComponent<Image>();
-            if (circleKnob != null) maskImg.sprite = circleKnob;
+            maskImg.sprite = circleSprite;
             maskImg.color = CARD_BG_LIGHT;
             avatarMask.AddComponent<Mask>().showMaskGraphic = true;
 
@@ -1181,6 +1189,21 @@ namespace DigitPark.Editor
             }
         }
 
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
+        }
+
         private static GameObject FindOrCreate(Transform parent, string name)
         {
             Transform existing = parent.Find(name);
@@ -1211,6 +1234,26 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(xMax, yMax);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+        }
+
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
 
         #endregion

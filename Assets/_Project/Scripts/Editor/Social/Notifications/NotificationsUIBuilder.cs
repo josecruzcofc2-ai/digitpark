@@ -116,7 +116,6 @@ namespace DigitPark.Editor
 
         private static void RebuildNotifications()
         {
-            CleanupOldUI();
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -132,15 +131,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            string[] oldNames = {
-                "Background", "Header", "Tabs", "ScrollView",
-                "Footer", "ContentPanel"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             CreateBackground(canvas.transform);
             CreateHeader();
@@ -234,6 +226,7 @@ namespace DigitPark.Editor
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 unread";
             cTMP.fontSize = FontSizes.Body;
+            cTMP.fontStyle = FontStyles.Bold;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -392,6 +385,7 @@ namespace DigitPark.Editor
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Loading...";
             ldTMP.fontSize = FontSizes.Subtitle;
+            ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
@@ -560,6 +554,7 @@ namespace DigitPark.Editor
             var tsTMP = timestamp.AddComponent<TextMeshProUGUI>();
             tsTMP.text = "5 min ago";
             tsTMP.fontSize = FontSizes.Body;
+            tsTMP.fontStyle = FontStyles.Bold;
             tsTMP.color = TEXT_SECONDARY;
             tsTMP.alignment = TextAlignmentOptions.Right;
 
@@ -574,6 +569,7 @@ namespace DigitPark.Editor
             var bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
             bodyTMP.text = "Notification description";
             bodyTMP.fontSize = FontSizes.Body;
+            bodyTMP.fontStyle = FontStyles.Bold;
             bodyTMP.color = TEXT_SECONDARY;
             bodyTMP.alignment = TextAlignmentOptions.Left;
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
@@ -766,6 +762,21 @@ namespace DigitPark.Editor
                     if (t != null) Object.DestroyImmediate(t.gameObject);
                 }
             }
+        }
+
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
         }
 
         private static GameObject FindOrCreate(Transform parent, string name)

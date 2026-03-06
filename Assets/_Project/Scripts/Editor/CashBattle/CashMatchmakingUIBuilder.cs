@@ -16,7 +16,7 @@ namespace DigitPark.Editor
     /// - Entry fee display
     /// - Search spinner + status section
     /// - Countdown overlay
-    /// - BackButtonGold integration
+    /// - Cancel button for exit
     ///
     /// Menu: DigitPark/UI Builders/CashBattle/CashMatchmaking (VS Screen)
     /// </summary>
@@ -45,8 +45,7 @@ namespace DigitPark.Editor
         private static readonly Color RED_CANCEL = new Color(1f, 0.2f, 0.4f, 1f);
 
         // Asset paths
-        private const string BACK_BUTTON_GOLD_PREFAB = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
-        private const string BACK_ICON_GOLD_PATH = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
+        // Back button removed — Cancel button handles exit
         private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
         private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
         private const string ICON_DIGIT_RUSH = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
@@ -68,8 +67,6 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/UI Builders/CashBattle/CashMatchmaking (VS Screen)", false, 182)]
         public static void BuildUI()
         {
-            CleanupOldUI();
-
             // --- Canvas ---
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
@@ -106,7 +103,6 @@ namespace DigitPark.Editor
             SetFullStretch(safeArea.GetComponent<RectTransform>());
 
             // Build all sections
-            CreateBackButtonGold(safeArea.transform);
             CreateHeader(safeArea.transform);
             CreateEntryFeeDisplay(safeArea.transform);
             CreateTitleText(safeArea.transform);
@@ -133,75 +129,9 @@ namespace DigitPark.Editor
             Image bgImg = bg.AddComponent<Image>();
             bgImg.color = BG_DARK;
             bgImg.raycastTarget = false;
-
-            // Gold glow overlay (amber gradient at top, 0.7-1.0 y range)
-            GameObject goldGlow = CreateElement(bg.transform, "GoldGlow");
-            RectTransform glowRect = goldGlow.GetComponent<RectTransform>();
-            glowRect.anchorMin = new Vector2(0f, 0.7f);
-            glowRect.anchorMax = new Vector2(1f, 1f);
-            glowRect.offsetMin = Vector2.zero;
-            glowRect.offsetMax = Vector2.zero;
-            Image glowImg = goldGlow.AddComponent<Image>();
-            glowImg.color = new Color(AMBER.r, AMBER.g, AMBER.b, 0.06f);
-            glowImg.raycastTarget = false;
         }
 
-        // ═══════════════════════════════════════════════════════════════
-        //  BACK BUTTON GOLD
-        // ═══════════════════════════════════════════════════════════════
-
-        private static void CreateBackButtonGold(Transform parent)
-        {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);
-
-            if (prefab != null)
-            {
-                GameObject backBtn = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
-                backBtn.name = "BackButtonGold";
-                RectTransform rt = backBtn.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0, 0.5f);
-                rt.anchorMax = new Vector2(0, 0.5f);
-                rt.pivot = new Vector2(0, 0.5f);
-                rt.anchoredPosition = new Vector2(20, 0);
-                rt.sizeDelta = new Vector2(50, 50);
-
-                // Assign BackIconGold sprite to Icon child
-                Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
-                if (backIcon != null)
-                {
-                    Transform iconChild = backBtn.transform.Find("Icon");
-                    if (iconChild != null)
-                    {
-                        Image iconImg = iconChild.GetComponent<Image>();
-                        if (iconImg != null) iconImg.sprite = backIcon;
-                    }
-                }
-            }
-            else
-            {
-                // Fallback: simple back button with gold styling
-                GameObject backBtn = CreateElement(parent, "BackButtonGold");
-                RectTransform rt = backBtn.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0, 0.5f);
-                rt.anchorMax = new Vector2(0, 0.5f);
-                rt.pivot = new Vector2(0, 0.5f);
-                rt.anchoredPosition = new Vector2(20, 0);
-                rt.sizeDelta = new Vector2(50, 50);
-
-                Image btnBg = backBtn.AddComponent<Image>();
-                btnBg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.2f);
-                backBtn.AddComponent<Button>();
-
-                GameObject arrow = CreateElement(backBtn.transform, "Arrow");
-                SetFullStretch(arrow.GetComponent<RectTransform>());
-                TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
-                arrowText.text = "<";
-                arrowText.fontSize = FontSizes.H2;
-                arrowText.color = GOLD_PRIMARY;
-                arrowText.alignment = TextAlignmentOptions.Center;
-                arrowText.fontStyle = FontStyles.Bold;
-            }
-        }
+        // Back button removed — Cancel button handles matchmaking exit
 
         // ═══════════════════════════════════════════════════════════════
         //  HEADER (Game Icon + Game Name)
@@ -237,7 +167,7 @@ namespace DigitPark.Editor
             Image iconBgImg = iconBg.AddComponent<Image>();
             iconBgImg.color = CARD_BG;
 
-            // Game Icon Image
+            // Game Icon Image (pre-assign DigitRush as default; Manager swaps at runtime)
             GameObject gameIcon = CreateElement(iconContainer.transform, "GameIcon");
             RectTransform gameIconRect = gameIcon.GetComponent<RectTransform>();
             gameIconRect.anchorMin = new Vector2(0.05f, 0.05f);
@@ -248,7 +178,12 @@ namespace DigitPark.Editor
             gameIconImg.color = Color.white;
             gameIconImg.preserveAspect = true;
 
-            // Placeholder text (shown when no icon)
+            // Pre-assign default game icon so it doesn't show "?" in Editor
+            Sprite defaultIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_DIGIT_RUSH);
+            if (defaultIcon != null)
+                gameIconImg.sprite = defaultIcon;
+
+            // Placeholder text (shown when no icon — hidden if default icon assigned)
             GameObject placeholder = CreateElement(gameIcon.transform, "Placeholder");
             SetFullStretch(placeholder.GetComponent<RectTransform>());
             TextMeshProUGUI placeholderTmp = placeholder.AddComponent<TextMeshProUGUI>();
@@ -257,6 +192,8 @@ namespace DigitPark.Editor
             placeholderTmp.color = GOLD_PRIMARY;
             placeholderTmp.alignment = TextAlignmentOptions.Center;
             placeholderTmp.fontStyle = FontStyles.Bold;
+            if (defaultIcon != null)
+                placeholder.SetActive(false);
 
             // --- Game Name Text (below icon) ---
             GameObject gameName = CreateElement(header.transform, "GameNameText");
@@ -281,8 +218,8 @@ namespace DigitPark.Editor
         {
             GameObject entryFeeDisplay = CreateElement(parent, "EntryFeeDisplay");
             RectTransform entryRect = entryFeeDisplay.GetComponent<RectTransform>();
-            entryRect.anchorMin = new Vector2(0.2f, 0.68f);
-            entryRect.anchorMax = new Vector2(0.8f, 0.73f);
+            entryRect.anchorMin = new Vector2(0.15f, 0.67f);
+            entryRect.anchorMax = new Vector2(0.85f, 0.72f);
             entryRect.offsetMin = Vector2.zero;
             entryRect.offsetMax = Vector2.zero;
 
@@ -291,7 +228,7 @@ namespace DigitPark.Editor
             SetFullStretch(entryFeeText.GetComponent<RectTransform>());
             TextMeshProUGUI entryTmp = entryFeeText.AddComponent<TextMeshProUGUI>();
             entryTmp.text = "Entry: $0.00";
-            entryTmp.fontSize = FontSizes.BodyLarge;
+            entryTmp.fontSize = FontSizes.H4;
             entryTmp.color = TEXT_GOLD;
             entryTmp.alignment = TextAlignmentOptions.Center;
             entryTmp.fontStyle = FontStyles.Bold;
@@ -305,8 +242,8 @@ namespace DigitPark.Editor
         {
             GameObject title = CreateElement(parent, "TitleText");
             RectTransform titleRect = title.GetComponent<RectTransform>();
-            titleRect.anchorMin = new Vector2(0.1f, 0.63f);
-            titleRect.anchorMax = new Vector2(0.9f, 0.68f);
+            titleRect.anchorMin = new Vector2(0.1f, 0.62f);
+            titleRect.anchorMax = new Vector2(0.9f, 0.67f);
             titleRect.offsetMin = Vector2.zero;
             titleRect.offsetMax = Vector2.zero;
 
@@ -314,7 +251,7 @@ namespace DigitPark.Editor
             titleTmp.text = "SEARCHING...";
             titleTmp.fontSize = FontSizes.H1;
             titleTmp.color = TEXT_GOLD;
-            titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.fontStyle = FontStyles.Bold;
 
             // Gold glow outline
@@ -388,50 +325,57 @@ namespace DigitPark.Editor
             avatarSectionRect.offsetMin = Vector2.zero;
             avatarSectionRect.offsetMax = Vector2.zero;
 
-            // Avatar container (90x90, centered in section)
+            // Force square aspect: avatar container centered in section
             GameObject avatarContainer = CreateElement(avatarSection.transform, "AvatarContainer");
             RectTransform avatarContRect = avatarContainer.GetComponent<RectTransform>();
-            avatarContRect.anchorMin = new Vector2(0.5f, 0.5f);
-            avatarContRect.anchorMax = new Vector2(0.5f, 0.5f);
-            avatarContRect.pivot = new Vector2(0.5f, 0.5f);
-            avatarContRect.sizeDelta = new Vector2(90, 90);
+            avatarContRect.anchorMin = new Vector2(0.05f, 0.05f);
+            avatarContRect.anchorMax = new Vector2(0.95f, 0.95f);
+            avatarContRect.offsetMin = Vector2.zero;
+            avatarContRect.offsetMax = Vector2.zero;
 
             // AspectRatioFitter to guarantee square
             var aspectFitter = avatarContainer.AddComponent<AspectRatioFitter>();
             aspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             aspectFitter.aspectRatio = 1f;
 
-            // Avatar glow ring
+            // Generate circle sprite for circular avatar elements
+            Sprite circleSprite = GenerateCircleSprite();
+
+            // Circular glow ring (outer, slightly larger)
             GameObject avatarGlow = CreateElement(avatarContainer.transform, "GlowRing");
             RectTransform glowRect = avatarGlow.GetComponent<RectTransform>();
             SetFullStretch(glowRect);
             glowRect.offsetMin = new Vector2(-6, -6);
             glowRect.offsetMax = new Vector2(6, 6);
             Image glowImg = avatarGlow.AddComponent<Image>();
-            glowImg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.3f);
+            glowImg.sprite = circleSprite;
+            glowImg.color = new Color(accentColor.r, accentColor.g, accentColor.b, isPlayer ? 0.25f : 0.1f);
 
-            // Avatar frame (border)
+            // Circular border ring
             GameObject avatarFrame = CreateElement(avatarContainer.transform, "AvatarFrame");
             SetFullStretch(avatarFrame.GetComponent<RectTransform>());
             Image frameImg = avatarFrame.AddComponent<Image>();
+            frameImg.sprite = circleSprite;
             frameImg.color = accentColor;
 
-            // Avatar background (inside frame)
-            GameObject avatarBg = CreateElement(avatarContainer.transform, "AvatarBackground");
-            RectTransform avatarBgRect = avatarBg.GetComponent<RectTransform>();
-            avatarBgRect.anchorMin = new Vector2(0.06f, 0.06f);
-            avatarBgRect.anchorMax = new Vector2(0.94f, 0.94f);
-            avatarBgRect.offsetMin = Vector2.zero;
-            avatarBgRect.offsetMax = Vector2.zero;
-            Image avatarBgImg = avatarBg.AddComponent<Image>();
-            avatarBgImg.color = new Color(CARD_BG.r, CARD_BG.g, CARD_BG.b, 1f);
+            // Circular mask container (clips avatar to circle)
+            GameObject maskContainer = CreateElement(avatarContainer.transform, "AvatarMask");
+            RectTransform maskRect = maskContainer.GetComponent<RectTransform>();
+            maskRect.anchorMin = new Vector2(0.06f, 0.06f);
+            maskRect.anchorMax = new Vector2(0.94f, 0.94f);
+            maskRect.offsetMin = Vector2.zero;
+            maskRect.offsetMax = Vector2.zero;
+            Image maskImg = maskContainer.AddComponent<Image>();
+            maskImg.sprite = circleSprite;
+            maskImg.color = new Color(CARD_BG.r, CARD_BG.g, CARD_BG.b, 1f);
+            maskContainer.AddComponent<Mask>().showMaskGraphic = true;
 
-            // Avatar Image
+            // Avatar Image (inside mask — clipped to circle)
             string avatarName = isPlayer ? "PlayerAvatar" : "OpponentAvatar";
-            GameObject avatar = CreateElement(avatarContainer.transform, avatarName);
+            GameObject avatar = CreateElement(maskContainer.transform, avatarName);
             RectTransform avatarRect = avatar.GetComponent<RectTransform>();
-            avatarRect.anchorMin = new Vector2(0.1f, 0.1f);
-            avatarRect.anchorMax = new Vector2(0.9f, 0.9f);
+            avatarRect.anchorMin = Vector2.zero;
+            avatarRect.anchorMax = Vector2.one;
             avatarRect.offsetMin = Vector2.zero;
             avatarRect.offsetMax = Vector2.zero;
             Image avatarImg = avatar.AddComponent<Image>();
@@ -456,48 +400,6 @@ namespace DigitPark.Editor
                 avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
             }
             avatarSO.ApplyModifiedProperties();
-
-            // "YOU" badge for player card (AMBER background)
-            if (isPlayer)
-            {
-                GameObject youBadge = CreateElement(avatarContainer.transform, "YouBadge");
-                RectTransform youRect = youBadge.GetComponent<RectTransform>();
-                youRect.anchorMin = new Vector2(0.15f, -0.15f);
-                youRect.anchorMax = new Vector2(0.85f, 0.08f);
-                youRect.offsetMin = Vector2.zero;
-                youRect.offsetMax = Vector2.zero;
-
-                Image youBg = youBadge.AddComponent<Image>();
-                youBg.color = AMBER;
-
-                GameObject youText = CreateElement(youBadge.transform, "YouText");
-                SetFullStretch(youText.GetComponent<RectTransform>());
-                TextMeshProUGUI youTmp = youText.AddComponent<TextMeshProUGUI>();
-                youTmp.text = "YOU";
-                youTmp.fontSize = FontSizes.AutoMinBody;
-                youTmp.color = BG_DARK;
-                youTmp.alignment = TextAlignmentOptions.Center;
-                youTmp.fontStyle = FontStyles.Bold;
-            }
-
-            // Opponent searching indicator (rotating ring)
-            if (!isPlayer)
-            {
-                GameObject searchIndicator = CreateElement(avatarContainer.transform, "SearchingIndicator");
-                RectTransform searchRect = searchIndicator.GetComponent<RectTransform>();
-                SetFullStretch(searchRect);
-                searchRect.offsetMin = new Vector2(-10, -10);
-                searchRect.offsetMax = new Vector2(10, 10);
-
-                // Rotating search ring (GOLD_PRIMARY)
-                GameObject ring = CreateElement(searchIndicator.transform, "SearchRing");
-                SetFullStretch(ring.GetComponent<RectTransform>());
-                Image ringImg = ring.AddComponent<Image>();
-                ringImg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.6f);
-                ringImg.fillAmount = 0.7f;
-                ringImg.type = Image.Type.Filled;
-                ringImg.fillMethod = Image.FillMethod.Radial360;
-            }
 
             // --- Info Section (right 60%) ---
             GameObject infoSection = CreateElement(card.transform, isPlayer ? "PlayerInfo" : "OpponentInfo");
@@ -549,6 +451,29 @@ namespace DigitPark.Editor
             levelTmp.color = isPlayer ? GOLD_PRIMARY : TEXT_SECONDARY;
             levelTmp.alignment = TextAlignmentOptions.Center;
             levelTmp.fontStyle = FontStyles.Bold;
+
+            // "YOU" badge for player card (in infoSection, top-right)
+            if (isPlayer)
+            {
+                GameObject youBadge = CreateElement(infoSection.transform, "YouBadge");
+                RectTransform youRect = youBadge.GetComponent<RectTransform>();
+                youRect.anchorMin = new Vector2(0.70f, 0.55f);
+                youRect.anchorMax = new Vector2(0.98f, 0.85f);
+                youRect.offsetMin = Vector2.zero;
+                youRect.offsetMax = Vector2.zero;
+
+                Image youBg = youBadge.AddComponent<Image>();
+                youBg.color = AMBER;
+
+                GameObject youText = CreateElement(youBadge.transform, "YouText");
+                SetFullStretch(youText.GetComponent<RectTransform>());
+                TextMeshProUGUI youTmp = youText.AddComponent<TextMeshProUGUI>();
+                youTmp.text = "YOU";
+                youTmp.fontSize = FontSizes.Body;
+                youTmp.color = BG_DARK;
+                youTmp.alignment = TextAlignmentOptions.Center;
+                youTmp.fontStyle = FontStyles.Bold;
+            }
         }
 
         /// <summary>
@@ -608,68 +533,30 @@ namespace DigitPark.Editor
         {
             GameObject searchSection = CreateElement(parent, "SearchSection");
             RectTransform searchRect = searchSection.GetComponent<RectTransform>();
-            searchRect.anchorMin = new Vector2(0.1f, 0.14f);
-            searchRect.anchorMax = new Vector2(0.9f, 0.28f);
+            searchRect.anchorMin = new Vector2(0.1f, 0.12f);
+            searchRect.anchorMax = new Vector2(0.9f, 0.25f);
             searchRect.offsetMin = Vector2.zero;
             searchRect.offsetMax = Vector2.zero;
 
-            // --- Search Spinner (80x80, centered) ---
-            GameObject spinner = CreateElement(searchSection.transform, "SearchSpinner");
-            RectTransform spinnerRect = spinner.GetComponent<RectTransform>();
-            spinnerRect.anchorMin = new Vector2(0.5f, 0.55f);
-            spinnerRect.anchorMax = new Vector2(0.5f, 0.55f);
-            spinnerRect.pivot = new Vector2(0.5f, 0.5f);
-            spinnerRect.sizeDelta = new Vector2(80, 80);
-            spinnerRect.anchoredPosition = new Vector2(0, 20);
-
-            // Outer ring (subtle gold glow)
-            GameObject outerRing = CreateElement(spinner.transform, "OuterRing");
-            SetFullStretch(outerRing.GetComponent<RectTransform>());
-            Image outerImg = outerRing.AddComponent<Image>();
-            outerImg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.2f);
-
-            // Inner ring (rotating, GOLD_PRIMARY, Radial360 fill 0.25)
-            GameObject innerRing = CreateElement(spinner.transform, "InnerRing");
-            RectTransform innerRect = innerRing.GetComponent<RectTransform>();
-            innerRect.anchorMin = new Vector2(0.08f, 0.08f);
-            innerRect.anchorMax = new Vector2(0.92f, 0.92f);
-            innerRect.offsetMin = Vector2.zero;
-            innerRect.offsetMax = Vector2.zero;
-            Image innerImg = innerRing.AddComponent<Image>();
-            innerImg.color = GOLD_PRIMARY;
-            innerImg.fillAmount = 0.35f;
-            innerImg.type = Image.Type.Filled;
-            innerImg.fillMethod = Image.FillMethod.Radial360;
-
-            // Center dot
-            GameObject centerDot = CreateElement(spinner.transform, "CenterDot");
-            RectTransform dotRect = centerDot.GetComponent<RectTransform>();
-            dotRect.anchorMin = new Vector2(0.35f, 0.35f);
-            dotRect.anchorMax = new Vector2(0.65f, 0.65f);
-            dotRect.offsetMin = Vector2.zero;
-            dotRect.offsetMax = Vector2.zero;
-            Image dotImg = centerDot.AddComponent<Image>();
-            dotImg.color = GOLD_PRIMARY;
-
-            // --- Status Text ---
+            // --- Status Text (centered, upper half) ---
             GameObject statusText = CreateElement(searchSection.transform, "StatusText");
             RectTransform statusRect = statusText.GetComponent<RectTransform>();
-            statusRect.anchorMin = new Vector2(0.05f, 0.18f);
-            statusRect.anchorMax = new Vector2(0.95f, 0.48f);
+            statusRect.anchorMin = new Vector2(0.05f, 0.45f);
+            statusRect.anchorMax = new Vector2(0.95f, 0.95f);
             statusRect.offsetMin = Vector2.zero;
             statusRect.offsetMax = Vector2.zero;
             TextMeshProUGUI statusTmp = statusText.AddComponent<TextMeshProUGUI>();
             statusTmp.text = "Searching for opponent...";
-            statusTmp.fontSize = FontSizes.H4;
+            statusTmp.fontSize = FontSizes.Subtitle;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
             statusTmp.fontStyle = FontStyles.Bold;
 
-            // --- Timer Text ---
+            // --- Timer Text (centered, lower half) ---
             GameObject timerText = CreateElement(searchSection.transform, "CashTimerText");
             RectTransform timerRect = timerText.GetComponent<RectTransform>();
-            timerRect.anchorMin = new Vector2(0.3f, 0f);
-            timerRect.anchorMax = new Vector2(0.7f, 0.22f);
+            timerRect.anchorMin = new Vector2(0.25f, 0f);
+            timerRect.anchorMax = new Vector2(0.75f, 0.45f);
             timerRect.offsetMin = Vector2.zero;
             timerRect.offsetMax = Vector2.zero;
             TextMeshProUGUI timerTmp = timerText.AddComponent<TextMeshProUGUI>();
@@ -813,27 +700,22 @@ namespace DigitPark.Editor
 
             // --- Player Card ---
             SetProperty(so, "playerCard", sa, "BattleArea/PlayerCard");
-            SetProperty(so, "playerAvatar", sa, "BattleArea/PlayerCard/AvatarSection/AvatarContainer/PlayerAvatar");
+            SetProperty(so, "playerAvatar", sa, "BattleArea/PlayerCard/AvatarSection/AvatarContainer/AvatarMask/PlayerAvatar");
             SetProperty(so, "playerNameText", sa, "BattleArea/PlayerCard/PlayerInfo/PlayerName");
             SetProperty(so, "playerLevelText", sa, "BattleArea/PlayerCard/PlayerInfo/PlayerLevel/LevelText");
 
             // --- Opponent Card ---
             SetProperty(so, "opponentCard", sa, "BattleArea/OpponentCard");
-            SetProperty(so, "opponentAvatar", sa, "BattleArea/OpponentCard/AvatarSection/AvatarContainer/OpponentAvatar");
+            SetProperty(so, "opponentAvatar", sa, "BattleArea/OpponentCard/AvatarSection/AvatarContainer/AvatarMask/OpponentAvatar");
             SetProperty(so, "opponentNameText", sa, "BattleArea/OpponentCard/OpponentInfo/OpponentName");
             SetProperty(so, "opponentLevelText", sa, "BattleArea/OpponentCard/OpponentInfo/OpponentLevel/LevelText");
-            SetProperty(so, "opponentSearchingIndicator", sa, "BattleArea/OpponentCard/AvatarSection/AvatarContainer/SearchingIndicator");
-            SetProperty(so, "opponentSearchRing", sa, "BattleArea/OpponentCard/AvatarSection/AvatarContainer/SearchingIndicator/SearchRing");
-
             // --- VS Section ---
             SetProperty(so, "vsContainer", sa, "BattleArea/VSContainer");
             SetProperty(so, "vsText", sa, "BattleArea/VSContainer/VSText");
 
             // --- Search Status ---
-            SetProperty(so, "searchingSpinner", sa, "SearchSection/SearchSpinner");
-            SetProperty(so, "searchingRing", sa, "SearchSection/SearchSpinner/InnerRing");
             SetProperty(so, "statusText", sa, "SearchSection/StatusText");
-            SetProperty(so, "timerText", sa, "SearchSection/TimerText");
+            SetProperty(so, "timerText", sa, "SearchSection/CashTimerText");
 
             // --- Countdown ---
             SetProperty(so, "countdownPanel", sa, "CountdownPanel");
@@ -842,7 +724,6 @@ namespace DigitPark.Editor
 
             // --- Buttons ---
             SetProperty(so, "cancelButton", sa, "CancelButtonContainer/CancelButton");
-            SetProperty(so, "backButton", sa, "BackButtonGold");
 
             // --- Effects ---
             SetProperty(so, "screenFlash", sa, "ScreenFlash");
@@ -917,7 +798,7 @@ namespace DigitPark.Editor
 
         private static void CleanupOldUI()
         {
-            string[] toClean = { "Background", "SafeArea", "BackButton", "BackButtonGold" };
+            string[] toClean = { "Background", "SafeArea" };
             foreach (var canvas in Object.FindObjectsOfType<Canvas>(true))
             {
                 if (canvas.transform.parent != null) continue;
@@ -946,6 +827,30 @@ namespace DigitPark.Editor
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+        }
+
+        /// <summary>
+        /// Generates a white filled circle sprite (128x128) for circular UI masks and frames.
+        /// </summary>
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            // Fallback: generate at runtime (won't survive prefab save)
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
     }
 }

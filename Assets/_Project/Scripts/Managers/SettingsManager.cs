@@ -105,6 +105,9 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Settings] SettingsManager iniciado");
 
+            if (titleText != null)
+                titleText.text = AutoLocalizer.Get("settings_title");
+
             LoadPlayerData();
             LoadVolumeSettings();
             InitVibrationToggle();

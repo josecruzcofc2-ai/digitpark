@@ -53,7 +53,9 @@ namespace DigitPark.Games
         [SerializeField] private float minWaitTime = 3f;
         [SerializeField] private float maxWaitTime = 6f;
         [SerializeField] private float penaltyDuration = 0.5f;
+        #pragma warning disable 0414
         [SerializeField] private float cooldownAfterError = 1f;
+        #pragma warning restore 0414
         [SerializeField] private float delayBetweenAttempts = 1.5f;
 
         // Estado del juego

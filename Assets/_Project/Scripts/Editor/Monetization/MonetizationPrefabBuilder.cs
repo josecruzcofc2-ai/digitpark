@@ -131,7 +131,7 @@ namespace DigitPark.Editor
 
             // Description
             CreateTextElement(content.transform, "DescriptionText", "Achievement description here",
-                new Vector2(0, 0.3f), new Vector2(1, 0.6f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.3f), new Vector2(1, 0.6f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Progress Bar
             GameObject progressBg = CreateImageElement(content.transform, "ProgressBar",
@@ -223,7 +223,7 @@ namespace DigitPark.Editor
 
             // Progress Text
             CreateTextElement(item.transform, "ProgressText", "5/10",
-                new Vector2(0.6f, 0), new Vector2(0.85f, 1), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Right);
+                new Vector2(0.6f, 0), new Vector2(0.85f, 1), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold, TextAlignmentOptions.Right);
 
             // Expand Button
             GameObject expandBtn = CreateContainer(item.transform, "ExpandButton",
@@ -281,7 +281,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 0.65f), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             CreateTextElement(content.transform, "DescriptionText", "Mission description",
-                new Vector2(0, 0.35f), new Vector2(1, 0.65f), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.35f), new Vector2(1, 0.65f), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Progress Bar
             GameObject progressBg = CreateImageElement(content.transform, "ProgressBar",
@@ -301,7 +301,7 @@ namespace DigitPark.Editor
             slider.fillRect = fill.GetComponent<RectTransform>();
 
             CreateTextElement(content.transform, "ProgressText", "6/10",
-                new Vector2(0.78f, 0), new Vector2(1, 0.3f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0.78f, 0), new Vector2(1, 0.3f), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Reward Section
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",
@@ -367,7 +367,7 @@ namespace DigitPark.Editor
 
             // Day Label
             CreateTextElement(item.transform, "DayLabelText", "Day 1",
-                new Vector2(0, 0.85f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0.85f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Day Number
             CreateTextElement(item.transform, "DayNumberText", "1",
@@ -481,24 +481,33 @@ namespace DigitPark.Editor
             outline.effectColor = new Color(0.3f, 0.3f, 0.35f);
             outline.effectDistance = new Vector2(2, 2);
 
-            // Avatar Image
-            GameObject avatar = CreateImageElement(item.transform, "AvatarImage",
+            // Circular Avatar Frame
+            Sprite circleSprite = GenerateCircleSprite();
+            GameObject avatarFrame = CreateImageElement(item.transform, "AvatarFrame",
                 new Vector2(0.5f, 0.55f), new Vector2(0.5f, 0.55f),
-                new Vector2(-35, -35), new Vector2(35, 35));
-            avatar.GetComponent<Image>().color = Color.white;
+                new Vector2(-37, -37), new Vector2(37, 37));
+            avatarFrame.GetComponent<Image>().sprite = circleSprite;
+            avatarFrame.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
 
-            // Avatar Border
-            GameObject avatarBorder = CreateImageElement(avatar.transform, "AvatarBorder",
-                Vector2.zero, Vector2.one,
-                new Vector2(-3, -3), new Vector2(3, 3));
-            avatarBorder.GetComponent<Image>().color = Color.clear;
-            Outline avatarOutline = avatarBorder.AddComponent<Outline>();
-            avatarOutline.effectColor = new Color(0.3f, 0.3f, 0.35f);
-            avatarOutline.effectDistance = new Vector2(2, 2);
+            // Circular mask
+            GameObject avatarMask = CreateImageElement(avatarFrame.transform, "AvatarMask",
+                new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.94f),
+                Vector2.zero, Vector2.zero);
+            avatarMask.GetComponent<Image>().sprite = circleSprite;
+            avatarMask.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f);
+            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
+
+            // Avatar Image (clipped to circle)
+            GameObject avatar = CreateImageElement(avatarMask.transform, "AvatarImage",
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            avatar.GetComponent<Image>().color = Color.white;
+            avatar.GetComponent<Image>().preserveAspect = true;
+            Sprite defAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
+            if (defAvatar != null) avatar.GetComponent<Image>().sprite = defAvatar;
 
             // Name Text
             CreateTextElement(item.transform, "NameText", "",
-                new Vector2(0, 0), new Vector2(1, 0.18f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.18f), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // Selection Ring
             GameObject ring = CreateImageElement(item.transform, "SelectionRing",
@@ -515,9 +524,9 @@ namespace DigitPark.Editor
             GameObject lockIcon = CreateTextElement(locked.transform, "LockIcon", "🔒",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(-15, -15), new Vector2(15, 15),
-                (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
             CreateTextElement(locked.transform, "UnlockRequirementText", "Level 5",
-                new Vector2(0, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold, TextAlignmentOptions.Center);
             locked.SetActive(false);
 
             // Button
@@ -537,6 +546,8 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create PrizeRowItem")]
         private static void CreatePrizeRowItemPrefab()
         {
+            // Vertical layout per prize position (shown 3 side-by-side in HLG)
+            // Layout: [Position] on top, [Amount] center, [Percentage] bottom
             GameObject item = new GameObject("PrizeRowItem");
 
             RectTransform rt = item.AddComponent<RectTransform>();
@@ -547,34 +558,37 @@ namespace DigitPark.Editor
             le.flexibleWidth = 1;
 
             Image bg = item.AddComponent<Image>();
-            bg.color = new Color(0.12f, 0.12f, 0.15f, 0.9f);
+            bg.color = new Color(0.12f, 0.12f, 0.15f, 0f); // Transparent by default
 
-            // Medal Image
+            // Medal Image (hidden by default, shown via Setup for top 3)
             GameObject medal = CreateImageElement(item.transform, "MedalImage",
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(10, -18), new Vector2(46, 18));
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(-15, -15), new Vector2(15, 15));
             medal.GetComponent<Image>().color = GOLD;
             medal.SetActive(false);
 
-            // Position Icon
+            // Position Icon (hidden by default)
             GameObject posIcon = CreateImageElement(item.transform, "PositionIcon",
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(10, -15), new Vector2(40, 15));
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(-12, -12), new Vector2(12, 12));
             posIcon.GetComponent<Image>().color = new Color(0.4f, 0.4f, 0.4f);
+            posIcon.SetActive(false);
 
-            // Position Text
-            CreateTextElement(item.transform, "PositionText", "1st Place",
-                new Vector2(0, 0), new Vector2(0.45f, 1),
-                new Vector2(55, 0), new Vector2(0, 0),
-                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+            // Position Text (top: "1st")
+            CreateTextElement(item.transform, "PositionText", "1st",
+                new Vector2(0, 0.6f), new Vector2(1, 1),
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
-            // Prize Amount Text
-            CreateTextElement(item.transform, "PrizeAmountText", "$50.00",
-                new Vector2(0.45f, 0), new Vector2(0.75f, 1), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+            // Prize Amount Text (center: "$40.00")
+            CreateTextElement(item.transform, "PrizeAmountText", "$40.00",
+                new Vector2(0, 0.2f), new Vector2(1, 0.6f),
+                (int)FontSizes.BodyLarge, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
-            // Percentage Text
-            CreateTextElement(item.transform, "PercentageText", "(50%)",
-                new Vector2(0.75f, 0), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Center);
+            // Percentage Text (bottom: hidden by default)
+            GameObject pctObj = CreateTextElement(item.transform, "PercentageText", "(50%)",
+                new Vector2(0, 0), new Vector2(1, 0.25f),
+                (int)FontSizes.Caption, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Center);
+            pctObj.SetActive(false); // Hidden — only shown if Setup enables it
 
             // Add UI Component
             PrizeRowItemUI ui = item.AddComponent<PrizeRowItemUI>();
@@ -589,6 +603,7 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create ParticipantItem")]
         private static void CreateParticipantItemPrefab()
         {
+            // Layout: [Rank 8%] [Avatar 12%] [Username 30%] [Score 16%] [Time 16%] [Status 18%]
             GameObject item = new GameObject("ParticipantItem");
 
             RectTransform rt = item.AddComponent<RectTransform>();
@@ -601,66 +616,82 @@ namespace DigitPark.Editor
             Image bg = item.AddComponent<Image>();
             bg.color = CARD_BG;
 
-            // Avatar
-            GameObject avatar = CreateImageElement(item.transform, "AvatarImage",
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(10, -25), new Vector2(60, 25));
+            // === RANK NUMBER (far left, 0-8%) ===
+            CreateTextElement(item.transform, "RankText", "#1",
+                new Vector2(0, 0.1f), new Vector2(0.08f, 0.9f),
+                (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // === AVATAR (8-20%) ===
+            Sprite pCircle = GenerateCircleSprite();
+            GameObject avatarFrame = CreateImageElement(item.transform, "AvatarFrame",
+                new Vector2(0.08f, 0.5f), new Vector2(0.08f, 0.5f),
+                new Vector2(4, -22), new Vector2(48, 22));
+            avatarFrame.GetComponent<Image>().sprite = pCircle;
+            avatarFrame.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
+
+            GameObject pMask = CreateImageElement(avatarFrame.transform, "AvatarMask",
+                new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.94f),
+                Vector2.zero, Vector2.zero);
+            pMask.GetComponent<Image>().sprite = pCircle;
+            pMask.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f);
+            pMask.AddComponent<Mask>().showMaskGraphic = true;
+
+            GameObject avatar = CreateImageElement(pMask.transform, "AvatarImage",
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             avatar.GetComponent<Image>().color = Color.white;
+            avatar.GetComponent<Image>().preserveAspect = true;
+            Sprite pDefAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
+            if (pDefAvatar != null) avatar.GetComponent<Image>().sprite = pDefAvatar;
 
-            // Avatar Border
-            GameObject avatarBorder = CreateImageElement(avatar.transform, "AvatarBorder",
-                Vector2.zero, Vector2.one,
-                new Vector2(-2, -2), new Vector2(2, 2));
-            avatarBorder.GetComponent<Image>().color = Color.clear;
-            Outline outline = avatarBorder.AddComponent<Outline>();
-            outline.effectColor = new Color(0.3f, 0.3f, 0.35f);
-            outline.effectDistance = new Vector2(2, 2);
-
-            // Online Indicator
-            GameObject online = CreateImageElement(item.transform, "OnlineIndicator",
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(50, 15), new Vector2(60, 25));
+            // Online Indicator (small green dot on avatar bottom-right)
+            GameObject online = CreateImageElement(avatarFrame.transform, "OnlineIndicator",
+                new Vector2(1, 0), new Vector2(1, 0),
+                new Vector2(-12, 0), new Vector2(0, 12));
+            online.GetComponent<Image>().sprite = pCircle;
             online.GetComponent<Image>().color = GREEN;
 
-            // Username
-            CreateTextElement(item.transform, "UsernameText", "Username",
-                new Vector2(0, 0.55f), new Vector2(0.5f, 0.9f),
-                new Vector2(70, 0), new Vector2(0, 0),
-                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+            // Avatar Border (subtle ring)
+            GameObject avatarBorder = CreateImageElement(avatarFrame.transform, "AvatarBorder",
+                Vector2.zero, Vector2.one, new Vector2(-1, -1), new Vector2(1, 1));
+            avatarBorder.GetComponent<Image>().sprite = pCircle;
+            avatarBorder.GetComponent<Image>().color = new Color(0.5f, 0.5f, 0.55f, 0.4f);
 
-            // Rank
-            CreateTextElement(item.transform, "RankText", "#1",
-                new Vector2(0, 0.15f), new Vector2(0.25f, 0.55f),
-                new Vector2(70, 0), new Vector2(0, 0),
-                (int)FontSizes.Body, GOLD, FontStyles.Normal, TextAlignmentOptions.Left);
-
-            // Country Flag
+            // Country Flag (hidden by default, overlaps avatar corner)
             GameObject flag = CreateImageElement(item.transform, "CountryFlag",
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(130, -8), new Vector2(155, 8));
+                new Vector2(0.08f, 0.5f), new Vector2(0.08f, 0.5f),
+                new Vector2(38, -22), new Vector2(54, -10));
             flag.GetComponent<Image>().color = Color.white;
             flag.SetActive(false);
 
-            // Score Text
-            CreateTextElement(item.transform, "ScoreText", "1000",
-                new Vector2(0.5f, 0.15f), new Vector2(0.7f, 0.85f), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+            // === USERNAME (20-50%) ===
+            CreateTextElement(item.transform, "UsernameText", "Username",
+                new Vector2(0.20f, 0.1f), new Vector2(0.50f, 0.9f),
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
-            // Best Time Text
-            CreateTextElement(item.transform, "BestTimeText", "2.345s",
-                new Vector2(0.65f, 0.15f), new Vector2(0.85f, 0.85f), (int)FontSizes.Body, GREEN, FontStyles.Normal, TextAlignmentOptions.Center);
+            // === ATTEMPTS (50-64%) ===
+            CreateTextElement(item.transform, "AttemptsText", "0/3",
+                new Vector2(0.50f, 0.1f), new Vector2(0.64f, 0.9f),
+                (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
-            // Ready Indicator
-            GameObject ready = CreateTextElement(item.transform, "ReadyIndicator", "V",
-                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-40, -15), new Vector2(-10, 15),
+            // === BEST TIME (64-78%) ===
+            CreateTextElement(item.transform, "BestTimeText", "2.34s",
+                new Vector2(0.64f, 0.1f), new Vector2(0.78f, 0.9f),
                 (int)FontSizes.Body, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // === STATUS (78-100%) ===
+            CreateTextElement(item.transform, "StatusText", "Waiting",
+                new Vector2(0.78f, 0.1f), new Vector2(0.98f, 0.9f),
+                (int)FontSizes.Body, ORANGE, FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // Ready Indicator (hidden, shown via DOTween animation)
+            GameObject ready = CreateImageElement(item.transform, "ReadyIndicator",
+                new Vector2(0.78f, 0.5f), new Vector2(0.78f, 0.5f),
+                new Vector2(-8, -8), new Vector2(8, 8));
+            ready.GetComponent<Image>().sprite = pCircle;
+            ready.GetComponent<Image>().color = GREEN;
             ready.SetActive(false);
 
-            // Status Text
-            CreateTextElement(item.transform, "StatusText", "Waiting",
-                new Vector2(0.85f, 0.15f), new Vector2(1, 0.85f), (int)FontSizes.Body, ORANGE, FontStyles.Normal, TextAlignmentOptions.Center);
-
-            // Button
+            // Button (whole card clickable for profile)
             Button btn = item.AddComponent<Button>();
             btn.targetGraphic = bg;
 
@@ -689,18 +720,30 @@ namespace DigitPark.Editor
             Image bg = item.AddComponent<Image>();
             bg.color = CARD_BG;
 
-            // Avatar
-            GameObject avatar = CreateImageElement(item.transform, "AvatarImage",
+            // Circular Avatar Frame
+            Sprite sCircle = GenerateCircleSprite();
+            GameObject avatarFrame3 = CreateImageElement(item.transform, "AvatarFrame",
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
                 new Vector2(10, -30), new Vector2(70, 30));
-            avatar.GetComponent<Image>().color = Color.white;
+            avatarFrame3.GetComponent<Image>().sprite = sCircle;
+            avatarFrame3.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
 
-            // Avatar Border
-            GameObject avatarBorder = CreateImageElement(avatar.transform, "AvatarBorder",
-                Vector2.zero, Vector2.one,
-                new Vector2(-2, -2), new Vector2(2, 2));
-            avatarBorder.GetComponent<Image>().color = Color.clear;
-            Outline outline = avatarBorder.AddComponent<Outline>();
+            GameObject sMask = CreateImageElement(avatarFrame3.transform, "AvatarMask",
+                new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.94f),
+                Vector2.zero, Vector2.zero);
+            sMask.GetComponent<Image>().sprite = sCircle;
+            sMask.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f);
+            sMask.AddComponent<Mask>().showMaskGraphic = true;
+
+            GameObject avatar = CreateImageElement(sMask.transform, "AvatarImage",
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            avatar.GetComponent<Image>().color = Color.white;
+            avatar.GetComponent<Image>().preserveAspect = true;
+            Sprite sDefAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
+            if (sDefAvatar != null) avatar.GetComponent<Image>().sprite = sDefAvatar;
+
+            // Avatar Glow
+            Outline outline = avatarFrame3.AddComponent<Outline>();
             outline.effectColor = new Color(0.3f, 0.3f, 0.35f);
             outline.effectDistance = new Vector2(2, 2);
 
@@ -720,7 +763,7 @@ namespace DigitPark.Editor
             CreateTextElement(item.transform, "LevelText", "Level 25",
                 new Vector2(0, 0.15f), new Vector2(0.3f, 0.55f),
                 new Vector2(80, 0), new Vector2(0, 0),
-                (int)FontSizes.Body, CYAN_NEON, FontStyles.Normal, TextAlignmentOptions.Left);
+                (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Stats Container
             GameObject stats = CreateContainer(item.transform, "StatsContainer",
@@ -728,10 +771,10 @@ namespace DigitPark.Editor
             stats.SetActive(false);
 
             CreateTextElement(stats.transform, "WinsText", "150 wins",
-                new Vector2(0, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
 
             CreateTextElement(stats.transform, "WinRateText", "65%",
-                new Vector2(0, 0), new Vector2(1, 0.5f), (int)FontSizes.Body, GREEN, FontStyles.Normal, TextAlignmentOptions.Left);
+                new Vector2(0, 0), new Vector2(1, 0.5f), (int)FontSizes.Body, GREEN, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Country Flag
             GameObject flag = CreateImageElement(item.transform, "CountryFlag",
@@ -824,6 +867,10 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = alignment;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             return obj;
         }
@@ -843,6 +890,10 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = alignment;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             return obj;
         }
@@ -911,8 +962,33 @@ namespace DigitPark.Editor
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(obj, path);
             DestroyImmediate(obj);
 
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
             Debug.Log($"[MonetizationPrefabBuilder] Prefab creado: {path}");
             Selection.activeObject = prefab;
+        }
+
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            // Fallback: generate at runtime (won't survive prefab save)
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
 
         #endregion

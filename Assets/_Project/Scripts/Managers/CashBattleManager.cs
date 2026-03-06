@@ -39,7 +39,7 @@ namespace DigitPark.Managers
 
         [Header("UI - Sub Panels")]
         [SerializeField] private CashBattle1v1Manager gameSelectionPanel;
-        [SerializeField] private TournamentListPanel tournamentListPanel;
+        [SerializeField] private CashTournamentsManager tournamentListPanel;
 
         [Header("UI - Bet Confirmation")]
         [SerializeField] private GameObject confirmBetPanel;
@@ -68,6 +68,7 @@ namespace DigitPark.Managers
         private CashGameType _pendingGameType;
         private decimal _pendingEntryFee;
         private List<GameType> _pendingSprintGames;
+        private UITournamentInfo _pendingTournament;
 
         // Propiedad para obtener balance
         private decimal CurrentBalance => _walletService?.CurrentBalance ?? 0m;
@@ -513,7 +514,41 @@ namespace DigitPark.Managers
                 return;
             }
 
-            JoinTournamentAsync(tournament);
+            _pendingTournament = tournament;
+            ShowTournamentConfirmation(tournament);
+        }
+
+        private void ShowTournamentConfirmation(UITournamentInfo tournament)
+        {
+            if (confirmBetPanel == null)
+            {
+                // No confirmation panel — join directly
+                OnConfirmTournament();
+                return;
+            }
+
+            if (confirmBetText != null)
+            {
+                confirmBetText.text = AutoLocalizer.Get("cashbattle_confirm_tournament",
+                    tournament.Name, tournament.EntryFee.ToString("F2"));
+            }
+
+            confirmBetPanel.SetActive(true);
+            AnimatePanelIn(confirmBetPanel.transform);
+        }
+
+        private void OnConfirmTournament()
+        {
+            if (_pendingTournament != null)
+            {
+                JoinTournamentAsync(_pendingTournament);
+                _pendingTournament = null;
+            }
+        }
+
+        private void OnCancelTournament()
+        {
+            _pendingTournament = null;
         }
 
         private CashGameType ConvertToCashGameType(GameType gameType)
@@ -552,6 +587,13 @@ namespace DigitPark.Managers
             if (confirmBetPanel != null)
                 AnimatePanelOut(confirmBetPanel.transform, () => confirmBetPanel.SetActive(false));
 
+            // Route to tournament or matchmaking based on pending state
+            if (_pendingTournament != null)
+            {
+                OnConfirmTournament();
+                return;
+            }
+
             StartMatchmakingAsync(_pendingGameType, _pendingEntryFee);
         }
 
@@ -559,6 +601,12 @@ namespace DigitPark.Managers
         {
             if (confirmBetPanel != null)
                 AnimatePanelOut(confirmBetPanel.transform, () => confirmBetPanel.SetActive(false));
+
+            if (_pendingTournament != null)
+            {
+                OnCancelTournament();
+                return;
+            }
 
             _pendingEntryFee = 0;
             _pendingSprintGames = null;

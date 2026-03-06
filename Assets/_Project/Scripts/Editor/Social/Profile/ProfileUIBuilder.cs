@@ -124,7 +124,6 @@ namespace DigitPark.Editor
 
         private static void RebuildProfile()
         {
-            CleanupOldUI();
             Canvas canvas = FindMainCanvas();
             if (canvas == null)
             {
@@ -142,22 +141,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            // Limpiar elementos viejos Y nuevos
-            string[] oldNames = {
-                // Nombres nuevos (del builder)
-                "Background", "Header", "AvatarCard", "GeneralStatsCard",
-                "GameStatsCard", "ActionRow", "CTASection", "GameSelectionPanel",
-                "ChangeNamePanel", "ErrorPanel",
-                "ProfilePanel", "StatsPanel", "ContentPanel",
-                // Nombres viejos (UI original de la escena)
-                "HeaderPanel", "Divider", "Divider2", "Divider3",
-                "CardStatsPanel", "CardGameStatsPanel", "CardButtons"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             CreateBackground(canvas.transform);
             CreateHeader();
@@ -303,7 +288,10 @@ namespace DigitPark.Editor
             outline.effectColor = CYAN_DARK;
             outline.effectDistance = new Vector2(2, 2);
 
-            // Avatar Frame (centered, upper area)
+            // Generate circle sprite for circular avatar elements
+            Sprite circleSprite = GenerateCircleSprite();
+
+            // Avatar Frame container (centered, upper area)
             var frame = FindOrCreate(card.transform, "AvatarFrame");
             var fRT = GetOrAdd<RectTransform>(frame);
             fRT.anchorMin = new Vector2(0.5f, 0.50f);
@@ -312,21 +300,49 @@ namespace DigitPark.Editor
             fRT.anchoredPosition = Vector2.zero;
             fRT.sizeDelta = new Vector2(225, 225);
 
-            var frameImg = GetOrAdd<Image>(frame);
-            frameImg.color = CYAN_NEON;
-            var frameOutline = GetOrAdd<Outline>(frame);
-            frameOutline.effectColor = CYAN_GLOW;
-            frameOutline.effectDistance = new Vector2(4, 4);
+            // Circular glow ring (outer, slightly larger) - matchmaking style
+            var glowRing = FindOrCreate(frame.transform, "GlowRing");
+            var glowRT = GetOrAdd<RectTransform>(glowRing);
+            glowRT.anchorMin = Vector2.zero;
+            glowRT.anchorMax = Vector2.one;
+            glowRT.offsetMin = new Vector2(-8, -8);
+            glowRT.offsetMax = new Vector2(8, 8);
+            var glowImg = GetOrAdd<Image>(glowRing);
+            glowImg.sprite = circleSprite;
+            glowImg.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.25f);
 
-            // Avatar Image (inside frame)
-            var avImg = FindOrCreate(frame.transform, "AvatarImage");
+            // Circular border ring (solid cyan frame)
+            var borderRing = FindOrCreate(frame.transform, "BorderRing");
+            var borderRT = GetOrAdd<RectTransform>(borderRing);
+            borderRT.anchorMin = Vector2.zero;
+            borderRT.anchorMax = Vector2.one;
+            borderRT.offsetMin = Vector2.zero;
+            borderRT.offsetMax = Vector2.zero;
+            var borderImg = GetOrAdd<Image>(borderRing);
+            borderImg.sprite = circleSprite;
+            borderImg.color = CYAN_NEON;
+
+            // Circular mask container (clips avatar to circle)
+            var avatarMask = FindOrCreate(frame.transform, "AvatarMask");
+            var amRT = GetOrAdd<RectTransform>(avatarMask);
+            amRT.anchorMin = new Vector2(0.06f, 0.06f);
+            amRT.anchorMax = new Vector2(0.94f, 0.94f);
+            amRT.offsetMin = Vector2.zero;
+            amRT.offsetMax = Vector2.zero;
+            var amImg = GetOrAdd<Image>(avatarMask);
+            amImg.sprite = circleSprite;
+            amImg.color = CARD_BG_LIGHT;
+            GetOrAdd<Mask>(avatarMask).showMaskGraphic = true;
+
+            // Avatar Image (inside mask — clipped to circle)
+            var avImg = FindOrCreate(avatarMask.transform, "AvatarImage");
             var avRT = GetOrAdd<RectTransform>(avImg);
-            avRT.anchorMin = new Vector2(0.06f, 0.06f);
-            avRT.anchorMax = new Vector2(0.94f, 0.94f);
+            avRT.anchorMin = Vector2.zero;
+            avRT.anchorMax = Vector2.one;
             avRT.offsetMin = Vector2.zero;
             avRT.offsetMax = Vector2.zero;
             var avImgComp = GetOrAdd<Image>(avImg);
-            avImgComp.color = CARD_BG_LIGHT;
+            avImgComp.color = Color.white;
             avImgComp.preserveAspect = true;
 
             // Set default avatar sprite on Image
@@ -437,6 +453,7 @@ namespace DigitPark.Editor
             var sTMP = GetOrAdd<TextMeshProUGUI>(status);
             sTMP.text = "Your profile";
             sTMP.fontSize = FontSizes.Body;
+            sTMP.fontStyle = FontStyles.Bold;
             sTMP.color = CYAN_NEON;
             sTMP.alignment = TextAlignmentOptions.Center;
 
@@ -571,6 +588,7 @@ namespace DigitPark.Editor
             var lTMP = GetOrAdd<TextMeshProUGUI>(lbl);
             lTMP.text = label;
             lTMP.fontSize = FontSizes.Body;
+            lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableAutoSizing = true;
@@ -696,6 +714,7 @@ namespace DigitPark.Editor
             var lTMP = GetOrAdd<TextMeshProUGUI>(lbl);
             lTMP.text = label;
             lTMP.fontSize = FontSizes.Body;
+            lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_WHITE;
             lTMP.alignment = TextAlignmentOptions.Left;
             lTMP.enableAutoSizing = true;
@@ -965,6 +984,7 @@ namespace DigitPark.Editor
             var cntTMP = GetOrAdd<TextMeshProUGUI>(cnText);
             cntTMP.text = "Cancel";
             cntTMP.fontSize = FontSizes.Body;
+            cntTMP.fontStyle = FontStyles.Bold;
             cntTMP.color = TEXT_SECONDARY;
             cntTMP.alignment = TextAlignmentOptions.Center;
 
@@ -1024,8 +1044,8 @@ namespace DigitPark.Editor
 
             // Profile Info
             SetRef(so, "usernameText", FindInPath<TextMeshProUGUI>(r, "AvatarCard/UsernameText"));
-            SetRef(so, "avatarImage", FindInPath<Image>(r, "AvatarCard/AvatarFrame/AvatarImage"));
-            SetRef(so, "avatarUI", FindInPath<DigitPark.UI.Components.AvatarUI>(r, "AvatarCard/AvatarFrame/AvatarImage"));
+            SetRef(so, "avatarImage", FindInPath<Image>(r, "AvatarCard/AvatarFrame/AvatarMask/AvatarImage"));
+            SetRef(so, "avatarUI", FindInPath<DigitPark.UI.Components.AvatarUI>(r, "AvatarCard/AvatarFrame/AvatarMask/AvatarImage"));
             SetRef(so, "editAvatarButton", FindInPath<Button>(r, "AvatarCard/AvatarFrame/EditButton"));
             SetRef(so, "editNameButton", FindInPath<Button>(r, "AvatarCard/EditNameButton"));
             SetRef(so, "statusText", FindInPath<TextMeshProUGUI>(r, "AvatarCard/StatusText"));
@@ -1118,6 +1138,21 @@ namespace DigitPark.Editor
             }
         }
 
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
+        }
+
         private static Canvas FindMainCanvas()
         {
             return UIBuilderCanvasHelper.FindMainCanvas();
@@ -1153,6 +1188,27 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(xMax, yMax);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+        }
+
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            // Fallback: generate at runtime (won't survive prefab save)
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
 
         #endregion
@@ -1270,6 +1326,7 @@ namespace DigitPark.Editor
             ccTxtRT.offsetMin = Vector2.zero; ccTxtRT.offsetMax = Vector2.zero;
             var ccTxt = ccTxtObj.AddComponent<TextMeshProUGUI>();
             ccTxt.text = "Cancel"; ccTxt.fontSize = FontSizes.Body;
+            ccTxt.fontStyle = FontStyles.Bold;
             ccTxt.color = TEXT_SECONDARY; ccTxt.alignment = TextAlignmentOptions.Center;
 
             // Wire InputPanelUI component

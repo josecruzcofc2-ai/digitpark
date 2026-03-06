@@ -100,12 +100,12 @@ namespace DigitPark.CashBattle
         // ==================== DEPOSIT OPTIONS ====================
         private readonly DepositOption[] depositOptions = new DepositOption[]
         {
-            new DepositOption { amount = 5m, bonus = 0m },
-            new DepositOption { amount = 10m, bonus = 0.50m, isPopular = true },
-            new DepositOption { amount = 25m, bonus = 2.50m },
-            new DepositOption { amount = 50m, bonus = 7.50m },
-            new DepositOption { amount = 100m, bonus = 20m, isPopular = true },
-            new DepositOption { amount = 200m, bonus = 50m }
+            new DepositOption { amount = 5m },
+            new DepositOption { amount = 10m },
+            new DepositOption { amount = 25m },
+            new DepositOption { amount = 50m },
+            new DepositOption { amount = 100m },
+            new DepositOption { amount = 200m }
         };
 
         // ==================== LIFECYCLE ====================
@@ -474,7 +474,7 @@ namespace DigitPark.CashBattle
 
         private async void OnDepositOptionSelected(DepositOption option)
         {
-            Debug.Log($"[CashWalletScene] Deposit selected: ${option.amount} with ${option.bonus} bonus");
+            Debug.Log($"[CashWalletScene] Deposit selected: ${option.amount}");
 
             // Show loading
             ShowLoading(true);

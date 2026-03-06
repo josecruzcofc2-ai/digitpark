@@ -160,13 +160,11 @@ namespace DigitPark.Editor
                 return;
             }
 
-            CleanupOldUI();
-
             // Cleanup
             var toDelete = new List<GameObject>();
             foreach (Transform child in canvas.transform)
             {
-                if (child.name != "EventSystem")
+                if (child.name != "EventSystem" && child.name != "TransitionCanvas")
                     toDelete.Add(child.gameObject);
             }
             foreach (var obj in toDelete)
@@ -198,13 +196,11 @@ namespace DigitPark.Editor
                 return;
             }
 
-            CleanupOldUI();
-
             // Cleanup canvas children
             var toDelete = new List<GameObject>();
             foreach (Transform child in canvas.transform)
             {
-                if (child.name != "EventSystem")
+                if (child.name != "EventSystem" && child.name != "TransitionCanvas")
                     toDelete.Add(child.gameObject);
             }
             foreach (var obj in toDelete)
@@ -642,8 +638,8 @@ namespace DigitPark.Editor
             GameObject icon = new GameObject("Icon");
             icon.transform.SetParent(btn.transform, false);
             LayoutElement iconLE = icon.AddComponent<LayoutElement>();
-            iconLE.preferredWidth = 50;
-            iconLE.preferredHeight = 50;
+            iconLE.preferredWidth = 90;
+            iconLE.preferredHeight = 90;
 
             Image iconImg = icon.AddComponent<Image>();
             iconImg.color = accent;
@@ -846,6 +842,191 @@ namespace DigitPark.Editor
             emptyTMP.color = TEXT_SECONDARY;
             emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
+
+            // Hide empty text - sample cards visible for design preview
+            // At runtime, LoadTransactionHistory() shows it when transactions.Count == 0
+            empty.SetActive(false);
+
+            // ── Sample Cards (design preview) ──
+            CreateSampleDepositCard(content.transform, "$10.00");
+            CreateSampleDepositCard(content.transform, "$25.00");
+            CreateSampleTransactionCard(content.transform, "Deposit via PayPal", "Mar 3, 2026 · 14:32", "+$10.00", "Completed", true);
+            CreateSampleTransactionCard(content.transform, "1v1 Battle Won", "Mar 2, 2026 · 19:15", "+$1.80", "Completed", true);
+        }
+
+        private static void CreateSampleDepositCard(Transform parent, string amount)
+        {
+            GameObject root = new GameObject("SampleDeposit_" + amount.Replace("$", ""));
+            root.transform.SetParent(parent, false);
+
+            RectTransform rootRT = root.AddComponent<RectTransform>();
+            rootRT.sizeDelta = new Vector2(0, 150);
+
+            Image bg = root.AddComponent<Image>();
+            bg.color = CARD_BG;
+
+            LayoutElement le = root.AddComponent<LayoutElement>();
+            le.preferredHeight = 150;
+            le.minHeight = 140;
+            le.flexibleWidth = 1;
+
+            // Status indicator bar (same as transaction cards)
+            GameObject indicator = new GameObject("StatusIndicator");
+            indicator.transform.SetParent(root.transform, false);
+            RectTransform indicatorRT = indicator.AddComponent<RectTransform>();
+            indicatorRT.anchorMin = new Vector2(0, 0);
+            indicatorRT.anchorMax = new Vector2(0, 1);
+            indicatorRT.pivot = new Vector2(0, 0.5f);
+            indicatorRT.sizeDelta = new Vector2(8, 0);
+            indicatorRT.anchoredPosition = Vector2.zero;
+
+            Image indicatorImg = indicator.AddComponent<Image>();
+            indicatorImg.color = GREEN;
+
+            // Description (amount as title)
+            GameObject descObj = new GameObject("Description");
+            descObj.transform.SetParent(root.transform, false);
+            RectTransform descRT = descObj.AddComponent<RectTransform>();
+            descRT.anchorMin = new Vector2(0, 0.5f);
+            descRT.anchorMax = new Vector2(1, 1);
+            descRT.pivot = new Vector2(0, 1);
+            descRT.offsetMin = new Vector2(24, 0);
+            descRT.offsetMax = new Vector2(-195, -24);
+
+            TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
+            descTMP.text = amount;
+            descTMP.fontSize = FontSizes.Subtitle;
+            descTMP.color = GREEN;
+            descTMP.fontStyle = FontStyles.Bold;
+            descTMP.alignment = TextAlignmentOptions.Left;
+
+            // Date (label)
+            GameObject dateObj = new GameObject("Date");
+            dateObj.transform.SetParent(root.transform, false);
+            RectTransform dateRT = dateObj.AddComponent<RectTransform>();
+            dateRT.anchorMin = new Vector2(0, 0);
+            dateRT.anchorMax = new Vector2(1, 0.5f);
+            dateRT.pivot = new Vector2(0, 0);
+            dateRT.offsetMin = new Vector2(24, 24);
+            dateRT.offsetMax = new Vector2(-195, 0);
+
+            TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
+            dateTMP.text = "Deposit";
+            dateTMP.fontSize = FontSizes.Body;
+            dateTMP.color = TEXT_SECONDARY;
+            dateTMP.fontStyle = FontStyles.Bold;
+            dateTMP.alignment = TextAlignmentOptions.Left;
+        }
+
+        private static void CreateSampleTransactionCard(Transform parent, string desc, string date, string amount, string status, bool isPositive)
+        {
+            Color statusColor = isPositive ? GREEN : RED;
+
+            GameObject root = new GameObject("SampleTransaction_" + desc.Replace(" ", "").Substring(0, System.Math.Min(12, desc.Length)));
+            root.transform.SetParent(parent, false);
+
+            RectTransform rootRT = root.AddComponent<RectTransform>();
+            rootRT.sizeDelta = new Vector2(0, 150);
+
+            Image bg = root.AddComponent<Image>();
+            bg.color = CARD_BG;
+
+            LayoutElement le = root.AddComponent<LayoutElement>();
+            le.preferredHeight = 150;
+            le.minHeight = 140;
+            le.flexibleWidth = 1;
+
+            // Status indicator bar
+            GameObject indicator = new GameObject("StatusIndicator");
+            indicator.transform.SetParent(root.transform, false);
+            RectTransform indicatorRT = indicator.AddComponent<RectTransform>();
+            indicatorRT.anchorMin = new Vector2(0, 0);
+            indicatorRT.anchorMax = new Vector2(0, 1);
+            indicatorRT.pivot = new Vector2(0, 0.5f);
+            indicatorRT.sizeDelta = new Vector2(8, 0);
+            indicatorRT.anchoredPosition = Vector2.zero;
+
+            Image indicatorImg = indicator.AddComponent<Image>();
+            indicatorImg.color = statusColor;
+
+            // Description
+            GameObject descObj = new GameObject("Description");
+            descObj.transform.SetParent(root.transform, false);
+            RectTransform descRT = descObj.AddComponent<RectTransform>();
+            descRT.anchorMin = new Vector2(0, 0.5f);
+            descRT.anchorMax = new Vector2(1, 1);
+            descRT.pivot = new Vector2(0, 1);
+            descRT.offsetMin = new Vector2(24, 0);
+            descRT.offsetMax = new Vector2(-195, -24);
+
+            TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
+            descTMP.text = desc;
+            descTMP.fontSize = FontSizes.Body;
+            descTMP.color = TEXT_WHITE;
+            descTMP.fontStyle = FontStyles.Bold;
+            descTMP.alignment = TextAlignmentOptions.Left;
+            descTMP.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Date
+            GameObject dateObj = new GameObject("Date");
+            dateObj.transform.SetParent(root.transform, false);
+            RectTransform dateRT = dateObj.AddComponent<RectTransform>();
+            dateRT.anchorMin = new Vector2(0, 0);
+            dateRT.anchorMax = new Vector2(1, 0.5f);
+            dateRT.pivot = new Vector2(0, 0);
+            dateRT.offsetMin = new Vector2(24, 24);
+            dateRT.offsetMax = new Vector2(-195, 0);
+
+            TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
+            dateTMP.text = date;
+            dateTMP.fontSize = FontSizes.Body;
+            dateTMP.color = TEXT_SECONDARY;
+            dateTMP.fontStyle = FontStyles.Bold;
+            dateTMP.alignment = TextAlignmentOptions.Left;
+
+            // Amount
+            GameObject amountObj = new GameObject("Amount");
+            amountObj.transform.SetParent(root.transform, false);
+            RectTransform amountRT = amountObj.AddComponent<RectTransform>();
+            amountRT.anchorMin = new Vector2(1, 0.5f);
+            amountRT.anchorMax = new Vector2(1, 1);
+            amountRT.pivot = new Vector2(1, 1);
+            amountRT.sizeDelta = new Vector2(185, 0);
+            amountRT.anchoredPosition = new Vector2(-12, -20);
+
+            TextMeshProUGUI amountTMP = amountObj.AddComponent<TextMeshProUGUI>();
+            amountTMP.text = amount;
+            amountTMP.fontSize = FontSizes.Body;
+            amountTMP.color = statusColor;
+            amountTMP.fontStyle = FontStyles.Bold;
+            amountTMP.alignment = TextAlignmentOptions.Right;
+            amountTMP.enableWordWrapping = false;
+            amountTMP.overflowMode = TextOverflowModes.Ellipsis;
+            amountTMP.enableAutoSizing = true;
+            amountTMP.fontSizeMin = FontSizes.AutoMinBody;
+            amountTMP.fontSizeMax = FontSizes.Body;
+
+            // Status text
+            GameObject statusObj = new GameObject("Status");
+            statusObj.transform.SetParent(root.transform, false);
+            RectTransform statusRT = statusObj.AddComponent<RectTransform>();
+            statusRT.anchorMin = new Vector2(1, 0);
+            statusRT.anchorMax = new Vector2(1, 0.5f);
+            statusRT.pivot = new Vector2(1, 0);
+            statusRT.sizeDelta = new Vector2(185, 0);
+            statusRT.anchoredPosition = new Vector2(-12, 20);
+
+            TextMeshProUGUI statusTMP = statusObj.AddComponent<TextMeshProUGUI>();
+            statusTMP.text = status;
+            statusTMP.fontSize = FontSizes.Body;
+            statusTMP.color = TEXT_SECONDARY;
+            statusTMP.fontStyle = FontStyles.Bold;
+            statusTMP.alignment = TextAlignmentOptions.Right;
+            statusTMP.enableWordWrapping = false;
+            statusTMP.overflowMode = TextOverflowModes.Ellipsis;
+            statusTMP.enableAutoSizing = true;
+            statusTMP.fontSizeMin = FontSizes.AutoMinBody;
+            statusTMP.fontSizeMax = FontSizes.Body;
         }
 
         #endregion

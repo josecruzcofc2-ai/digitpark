@@ -505,7 +505,7 @@ namespace DigitPark.Editor
             cRT.sizeDelta = new Vector2(0, 0);
 
             VerticalLayoutGroup vlg = content.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 16;
+            vlg.spacing = 20;
             vlg.padding = new RectOffset(12, 12, 14, 24);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childForceExpandWidth = true;
@@ -532,7 +532,7 @@ namespace DigitPark.Editor
             card.transform.SetParent(parent, false);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 340; le.flexibleWidth = 1;
+            le.preferredHeight = 450; le.flexibleWidth = 1;
 
             Image bg = card.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -549,37 +549,62 @@ namespace DigitPark.Editor
             tlRT.pivot = new Vector2(0.5f, 1); tlRT.sizeDelta = new Vector2(0, 3);
             topLine.AddComponent<Image>().color = GOLD_PRIMARY;
 
-            // === Avatar Ring (centrado, grande) ===
-            GameObject ring = new GameObject("AvatarRing");
-            ring.transform.SetParent(card.transform, false);
-            RectTransform ringRT = ring.AddComponent<RectTransform>();
-            ringRT.anchorMin = new Vector2(0.5f, 1f);
-            ringRT.anchorMax = new Vector2(0.5f, 1f);
-            ringRT.pivot = new Vector2(0.5f, 1f);
-            ringRT.sizeDelta = new Vector2(225, 225);
-            ringRT.anchoredPosition = new Vector2(0, -14);
+            // === Circular Avatar (matchmaking style) ===
+            Sprite circleSprite = GenerateCircleSprite();
 
-            Image ringImg = ring.AddComponent<Image>();
-            ringImg.color = GOLD_DARK;
-            Outline ringGlow1 = ring.AddComponent<Outline>();
-            ringGlow1.effectColor = GOLD_GLOW;
-            ringGlow1.effectDistance = new Vector2(4, -4);
-            Outline ringGlow2 = ring.AddComponent<Outline>();
-            ringGlow2.effectColor = GOLD_BORDER_OUTER;
-            ringGlow2.effectDistance = new Vector2(8, -8);
+            GameObject avatarFrame = new GameObject("AvatarFrame");
+            avatarFrame.transform.SetParent(card.transform, false);
+            RectTransform frameRT = avatarFrame.AddComponent<RectTransform>();
+            frameRT.anchorMin = new Vector2(0.5f, 1f);
+            frameRT.anchorMax = new Vector2(0.5f, 1f);
+            frameRT.pivot = new Vector2(0.5f, 1f);
+            frameRT.sizeDelta = new Vector2(225, 225);
+            frameRT.anchoredPosition = new Vector2(0, -14);
 
-            // Add GlowPulse to ring for subtle animation
-            UIBuilderAnimationUtils.AddGlowPulse(ring, 0.25f, 0.5f);
+            // Circular glow ring (outer)
+            GameObject glowRing = new GameObject("GlowRing");
+            glowRing.transform.SetParent(avatarFrame.transform, false);
+            RectTransform glowRT = glowRing.AddComponent<RectTransform>();
+            glowRT.anchorMin = Vector2.zero; glowRT.anchorMax = Vector2.one;
+            glowRT.offsetMin = new Vector2(-8, -8); glowRT.offsetMax = new Vector2(8, 8);
+            Image glowImg = glowRing.AddComponent<Image>();
+            glowImg.sprite = circleSprite;
+            glowImg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.25f);
 
-            // === Avatar Image ===
+            // Circular border ring (solid gold frame)
+            GameObject borderRing = new GameObject("BorderRing");
+            borderRing.transform.SetParent(avatarFrame.transform, false);
+            RectTransform borderRT = borderRing.AddComponent<RectTransform>();
+            borderRT.anchorMin = Vector2.zero; borderRT.anchorMax = Vector2.one;
+            borderRT.offsetMin = Vector2.zero; borderRT.offsetMax = Vector2.zero;
+            Image borderImg = borderRing.AddComponent<Image>();
+            borderImg.sprite = circleSprite;
+            borderImg.color = GOLD_DARK;
+
+            // Add GlowPulse to frame for subtle animation
+            UIBuilderAnimationUtils.AddGlowPulse(avatarFrame, 0.25f, 0.5f);
+
+            // Circular mask container (clips avatar to circle)
+            GameObject avatarMask = new GameObject("AvatarMask");
+            avatarMask.transform.SetParent(avatarFrame.transform, false);
+            RectTransform amRT = avatarMask.AddComponent<RectTransform>();
+            amRT.anchorMin = new Vector2(0.06f, 0.06f);
+            amRT.anchorMax = new Vector2(0.94f, 0.94f);
+            amRT.offsetMin = Vector2.zero; amRT.offsetMax = Vector2.zero;
+            Image amImg = avatarMask.AddComponent<Image>();
+            amImg.sprite = circleSprite;
+            amImg.color = CARD_BG;
+            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
+
+            // Avatar Image (inside mask — clipped to circle)
             GameObject avatar = new GameObject("AvatarImage");
-            avatar.transform.SetParent(ring.transform, false);
+            avatar.transform.SetParent(avatarMask.transform, false);
             RectTransform avRT = avatar.AddComponent<RectTransform>();
-            avRT.anchorMin = new Vector2(0.06f, 0.06f);
-            avRT.anchorMax = new Vector2(0.94f, 0.94f);
+            avRT.anchorMin = Vector2.zero; avRT.anchorMax = Vector2.one;
             avRT.offsetMin = Vector2.zero; avRT.offsetMax = Vector2.zero;
 
             Image avImg = avatar.AddComponent<Image>();
+            avImg.color = Color.white;
             avImg.preserveAspect = true;
 
             Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT_GOLD);
@@ -588,7 +613,6 @@ namespace DigitPark.Editor
             if (defaultAvatar != null)
             {
                 avImg.sprite = defaultAvatar;
-                avImg.color = Color.white;
             }
             else
             {
@@ -603,10 +627,10 @@ namespace DigitPark.Editor
             unRT.anchorMax = new Vector2(0.95f, 1f);
             unRT.pivot = new Vector2(0.5f, 1f);
             unRT.sizeDelta = new Vector2(0, 50);
-            unRT.anchoredPosition = new Vector2(0, -245);
+            unRT.anchoredPosition = new Vector2(0, -250);
 
             TextMeshProUGUI unTmp = uname.AddComponent<TextMeshProUGUI>();
-            unTmp.text = "@Player";
+            unTmp.text = "Player";
             unTmp.fontSize = FontSizes.H3; unTmp.color = TEXT_WHITE;
             unTmp.alignment = TextAlignmentOptions.Center;
             unTmp.fontStyle = FontStyles.Bold;
@@ -621,7 +645,7 @@ namespace DigitPark.Editor
             enRT.anchorMax = new Vector2(0.95f, 1f);
             enRT.pivot = new Vector2(0.5f, 1f);
             enRT.sizeDelta = new Vector2(40, 40);
-            enRT.anchoredPosition = new Vector2(0, -250);
+            enRT.anchoredPosition = new Vector2(0, -255);
             editNameBtn.AddComponent<Button>();
             Image enImg = editNameBtn.AddComponent<Image>();
             enImg.preserveAspect = true;
@@ -630,7 +654,7 @@ namespace DigitPark.Editor
             if (editSprite != null)
             {
                 enImg.sprite = editSprite;
-                enImg.color = new Color(1f, 0.84f, 0f, 0.7f); // Gold tint to match CashBattle theme
+                enImg.color = new Color(1f, 0.84f, 0f, 0.7f);
             }
             else
             {
@@ -646,13 +670,41 @@ namespace DigitPark.Editor
             msRT.anchorMax = new Vector2(0.9f, 1f);
             msRT.pivot = new Vector2(0.5f, 1f);
             msRT.sizeDelta = new Vector2(0, 36);
-            msRT.anchoredPosition = new Vector2(0, -300);
+            msRT.anchoredPosition = new Vector2(0, -305);
 
             TextMeshProUGUI msTmp = msince.AddComponent<TextMeshProUGUI>();
             msTmp.text = "Member since 2024";
             msTmp.fontSize = FontSizes.Body; msTmp.color = TEXT_MUTED;
             msTmp.alignment = TextAlignmentOptions.Center;
             msTmp.fontStyle = FontStyles.Bold;
+
+            // === Rank Badge (centered pill below member since) ===
+            GameObject rankBadge = new GameObject("RankBadge");
+            rankBadge.transform.SetParent(card.transform, false);
+            RectTransform rbRT = rankBadge.AddComponent<RectTransform>();
+            rbRT.anchorMin = new Vector2(0.5f, 1f);
+            rbRT.anchorMax = new Vector2(0.5f, 1f);
+            rbRT.pivot = new Vector2(0.5f, 1f);
+            rbRT.sizeDelta = new Vector2(260, 50);
+            rbRT.anchoredPosition = new Vector2(0, -350);
+            Image rbBg = rankBadge.AddComponent<Image>();
+            rbBg.color = new Color(GOLD_DARK.r * 0.25f, GOLD_DARK.g * 0.25f, GOLD_DARK.b * 0.25f, 0.9f);
+            Outline rbOutline = rankBadge.AddComponent<Outline>();
+            rbOutline.effectColor = GOLD_BORDER;
+            rbOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            GameObject rankText = new GameObject("RankText");
+            rankText.transform.SetParent(rankBadge.transform, false);
+            RectTransform rkRT = rankText.AddComponent<RectTransform>();
+            rkRT.anchorMin = Vector2.zero; rkRT.anchorMax = Vector2.one;
+            rkRT.offsetMin = new Vector2(10, 0); rkRT.offsetMax = new Vector2(-10, 0);
+            TextMeshProUGUI rkTmp = rankText.AddComponent<TextMeshProUGUI>();
+            rkTmp.text = "Lv. 1 \u00b7 Beginner";
+            rkTmp.fontSize = FontSizes.Body; rkTmp.color = GOLD_LIGHT;
+            rkTmp.alignment = TextAlignmentOptions.Center;
+            rkTmp.fontStyle = FontStyles.Bold;
+            rkTmp.enableAutoSizing = true;
+            rkTmp.fontSizeMin = FontSizes.Caption; rkTmp.fontSizeMax = FontSizes.Body;
 
         }
 
@@ -666,7 +718,7 @@ namespace DigitPark.Editor
             card.transform.SetParent(parent, false);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 180; le.flexibleWidth = 1;
+            le.preferredHeight = 300; le.flexibleWidth = 1;
 
             Image bg = card.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -781,7 +833,7 @@ namespace DigitPark.Editor
             row.transform.SetParent(parent, false);
 
             LayoutElement le = row.AddComponent<LayoutElement>();
-            le.preferredHeight = 140; le.flexibleWidth = 1;
+            le.preferredHeight = 190; le.flexibleWidth = 1;
 
             HorizontalLayoutGroup hlg = row.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 12;
@@ -859,7 +911,7 @@ namespace DigitPark.Editor
             row.transform.SetParent(parent, false);
 
             LayoutElement le = row.AddComponent<LayoutElement>();
-            le.preferredHeight = 50; le.flexibleWidth = 1;
+            le.preferredHeight = 55; le.flexibleWidth = 1;
 
             HorizontalLayoutGroup hlg = row.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 12;
@@ -905,7 +957,7 @@ namespace DigitPark.Editor
             card.transform.SetParent(parent, false);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 420; le.flexibleWidth = 1;
+            le.preferredHeight = 580; le.flexibleWidth = 1;
 
             Image bg = card.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -1188,6 +1240,26 @@ namespace DigitPark.Editor
         }
 
         // \u2500\u2500 Deep finders \u2500\u2500
+
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+        }
 
         private static Transform Deep(Transform root, string name)
         {

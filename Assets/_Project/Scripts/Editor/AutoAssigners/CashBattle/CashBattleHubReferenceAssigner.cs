@@ -205,10 +205,10 @@ namespace DigitPark.Editor.AutoAssigners
                 if (mb.GetType().Name == "CashBattle1v1Manager") { gameSelectionMB = mb; break; }
             AssignReference(so, "gameSelectionPanel", gameSelectionMB);
 
-            // tournamentListPanel - find by type TournamentListPanel
+            // tournamentListPanel - find by type CashTournamentsManager
             MonoBehaviour tournamentListMB = null;
             foreach (var mb in Object.FindObjectsOfType<MonoBehaviour>(true))
-                if (mb.GetType().Name == "TournamentListPanel") { tournamentListMB = mb; break; }
+                if (mb.GetType().Name == "CashTournamentsManager") { tournamentListMB = mb; break; }
             AssignReference(so, "tournamentListPanel", tournamentListMB);
 
             // === Confirm Bet ===

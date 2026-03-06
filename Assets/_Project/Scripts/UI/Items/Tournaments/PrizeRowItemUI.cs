@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Items
 {
@@ -54,10 +55,10 @@ namespace DigitPark.UI.Items
         {
             switch (position)
             {
-                case 1: return "1er Lugar";
-                case 2: return "2do Lugar";
-                case 3: return "3er Lugar";
-                default: return $"{position}to Lugar";
+                case 1: return AutoLocalizer.Get("prize_1st_place");
+                case 2: return AutoLocalizer.Get("prize_2nd_place");
+                case 3: return AutoLocalizer.Get("prize_3rd_place");
+                default: return AutoLocalizer.Get("prize_nth_place", position);
             }
         }
 

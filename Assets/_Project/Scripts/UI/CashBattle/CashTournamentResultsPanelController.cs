@@ -19,7 +19,6 @@ namespace DigitPark.UI.CashBattle
         public int totalParticipants;
         public float completionTime;
         public int errors;
-        public int score;
         public int attempts;
         public int maxAttempts;
         public float bestTime;
@@ -47,7 +46,6 @@ namespace DigitPark.UI.CashBattle
         [Header("=== STATS ===")]
         [SerializeField] private TextMeshProUGUI timeText;
         [SerializeField] private TextMeshProUGUI errorsText;
-        [SerializeField] private TextMeshProUGUI scoreText;
 
         [Header("=== POSITION ===")]
         [SerializeField] private TextMeshProUGUI positionText;
@@ -195,8 +193,6 @@ namespace DigitPark.UI.CashBattle
             if (errorsText != null)
                 errorsText.text = data.errors.ToString();
 
-            if (scoreText != null)
-                scoreText.text = data.score.ToString("N0");
         }
 
         private void PopulatePosition(TournamentResultData data)

@@ -26,11 +26,8 @@ namespace DigitPark.Editor.AutoAssigners
         private static readonly string[] REQUIRED_REFS = {
             // Header
             "backButton", "titleText", "completionText", "overallProgressBar",
-            // Tabs Container
-            "tabsContainer", "tabsScrollRect",
-            // Category Tabs (12)
-            "allTab", "beginnerTab", "masteryTab", "victoriesTab", "streaksTab",
-            "cashBattleTab", "tournamentsTab", "socialTab", "progressionTab", "collectorTab", "timeTab", "secretTab",
+            // Category Dropdown
+            "categoryDropdown",
             // Showcase
             "showcaseContainer", "scrollRect", "gridLayout",
             // Empty State
@@ -88,8 +85,8 @@ namespace DigitPark.Editor.AutoAssigners
 
             EditorGUILayout.HelpBox(
                 "Assigns UI references to AchievementsManager:\n" +
-                "• Header (back, title, points, completion, progress)\n" +
-                "• 11 Category Tabs (scrollable)\n" +
+                "• Header (back, title, completion, progress)\n" +
+                "• Category Dropdown (TMP_Dropdown)\n" +
                 "• Trophy showcase container\n" +
                 "• Detail panel and reward celebration",
                 MessageType.Info);
@@ -177,26 +174,11 @@ namespace DigitPark.Editor.AutoAssigners
             // Header - use exact names to avoid matching card children
             AssignReference(so, "backButton", FindButtonByName("backbutton"));
             AssignReference(so, "titleText", FindTextInParent("TitleText", "Header"));
-            AssignReference(so, "completionText", FindTextInParent("CompletionDisplay", "Header"));
+            AssignReference(so, "completionText", FindTextByName("achprogressright"));
             AssignReference(so, "overallProgressBar", FindByNameExact<Slider>("OverallProgressBar"));
 
-            // Tabs Container
-            AssignReference(so, "tabsContainer", FindByNameContains<Transform>("tabscontainer", "tabs"));
-            AssignReference(so, "tabsScrollRect", FindByNameContains<ScrollRect>("tabsscroll", "tabs"));
-
-            // Category Tabs (11)
-            AssignReference(so, "allTab", FindButtonByName("alltab", "all", "todos"));
-            AssignReference(so, "beginnerTab", FindButtonByName("beginnertab", "beginner", "principiante"));
-            AssignReference(so, "masteryTab", FindButtonByName("masterytab", "mastery", "maestria"));
-            AssignReference(so, "victoriesTab", FindButtonByName("victoriestab", "victories", "victorias"));
-            AssignReference(so, "streaksTab", FindButtonByName("streakstab", "streaks", "rachas"));
-            AssignReference(so, "cashBattleTab", FindButtonByName("cashbattletab", "cashbattle", "cash"));
-            AssignReference(so, "tournamentsTab", FindButtonByName("tournamentstab", "tournaments", "torneos"));
-            AssignReference(so, "socialTab", FindButtonByName("socialtab", "social", "amigos"));
-            AssignReference(so, "progressionTab", FindButtonByName("progressiontab", "progression", "progreso"));
-            AssignReference(so, "collectorTab", FindButtonByName("collectortab", "collector", "coleccion"));
-            AssignReference(so, "timeTab", FindButtonByName("timetab", "time", "tiempo"));
-            AssignReference(so, "secretTab", FindButtonByName("secrettab", "secret", "secretos"));
+            // Category Dropdown
+            AssignReference(so, "categoryDropdown", FindByNameContains<TMP_Dropdown>("categorydropdown", "dropdown"));
 
             // Showcase - showcaseContainer must be the Content child (with GridLayoutGroup), NOT the ScrollView parent
             AssignReference(so, "showcaseContainer", FindShowcaseContent());
@@ -204,15 +186,15 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "gridLayout", FindShowcaseGridLayout());
 
             // Empty State
-            AssignReference(so, "emptyStateContainer", FindByNameContains<Transform>("emptystatecontainer", "emptystate"));
+            AssignReference(so, "emptyStateContainer", FindGameObjectByName("emptystatecontainer"));
             AssignReference(so, "emptyStateText", FindTextByName("emptystatetext"));
             AssignReference(so, "emptyStateIcon", FindImageByName("emptystateicon"));
 
             // Detail Panel Structure
-            AssignReference(so, "detailPanel", FindByNameContains<Transform>("detailpanel"));
-            AssignReference(so, "detailPanelCanvasGroup", FindByNameContains<CanvasGroup>("detailpanel"));
+            AssignReference(so, "detailPanel", FindGameObjectByNameExact("DetailPanel"));
+            AssignReference(so, "detailPanelCanvasGroup", FindByNameExact<CanvasGroup>("DetailPanel"));
             AssignReference(so, "detailBlocker", FindImageByName("detailpanelblocker"));
-            AssignReference(so, "detailCard", FindByNameContains<RectTransform>("detailpanel"));
+            AssignReference(so, "detailCard", FindByNameExact<RectTransform>("DetailPanel"));
 
             // Detail Panel Content
             AssignReference(so, "detailTrophyIcon", FindImageByName("detailtrophyicon"));
@@ -228,7 +210,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "cancelButton", FindButtonByName("cancelbutton", "cancel"));
 
             // Reward Celebration
-            AssignReference(so, "rewardCelebration", FindByNameContains<Transform>("rewardcelebration"));
+            AssignReference(so, "rewardCelebration", FindGameObjectByName("rewardcelebration"));
             AssignReference(so, "rewardAmountText", FindTextByName("amount"));
             AssignReference(so, "celebrationGlow", FindImageByName("celebrationglow"));
 
@@ -274,6 +256,31 @@ namespace DigitPark.Editor.AutoAssigners
             var all = Object.FindObjectsOfType<T>(true);
             foreach (var o in all)
                 if (o.gameObject.name.Equals(exactName, System.StringComparison.OrdinalIgnoreCase)) return o;
+            return null;
+        }
+
+        /// <summary>
+        /// Find GameObject by name pattern (for serialized GameObject fields)
+        /// </summary>
+        private static GameObject FindGameObjectByName(params string[] patterns)
+        {
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var p in patterns)
+                foreach (var t in all)
+                    if (t.gameObject.name.ToLower().Contains(p.ToLower()))
+                        return t.gameObject;
+            return null;
+        }
+
+        /// <summary>
+        /// Find GameObject by exact name (case-insensitive, for serialized GameObject fields)
+        /// </summary>
+        private static GameObject FindGameObjectByNameExact(string exactName)
+        {
+            var all = Object.FindObjectsOfType<Transform>(true);
+            foreach (var t in all)
+                if (t.gameObject.name.Equals(exactName, System.StringComparison.OrdinalIgnoreCase))
+                    return t.gameObject;
             return null;
         }
 

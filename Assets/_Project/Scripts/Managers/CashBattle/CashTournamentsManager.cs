@@ -12,9 +12,9 @@ using DigitPark.Localization;
 namespace DigitPark.UI.CashBattle
 {
     /// <summary>
-    /// Panel showing available cash tournaments
+    /// Manager for CashTournaments scene — handles tournament listing, filtering, and creation.
     /// </summary>
-    public class TournamentListPanel : MonoBehaviour
+    public class CashTournamentsManager : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private TextMeshProUGUI titleText;
@@ -578,39 +578,46 @@ namespace DigitPark.UI.CashBattle
 
         private void SetupTournamentCard(GameObject card, TournamentInfo tournament)
         {
-            // Find and set texts
-            var nameText = card.transform.Find("Info/Name")?.GetComponent<TextMeshProUGUI>();
-            var gameTypeText = card.transform.Find("Info/GameType")?.GetComponent<TextMeshProUGUI>();
-            var prizeText = card.transform.Find("Info/PrizePool")?.GetComponent<TextMeshProUGUI>();
-            var entryText = card.transform.Find("Info/EntryFee")?.GetComponent<TextMeshProUGUI>();
-            var participantsText = card.transform.Find("Info/Participants")?.GetComponent<TextMeshProUGUI>();
+            // Match actual prefab hierarchy (TournamentCardUI from CashBattlePrefabBuilder)
+            var nameText = card.transform.Find("TournamentName")?.GetComponent<TextMeshProUGUI>();
+            var prizeText = card.transform.Find("InfoRow/PrizeText")?.GetComponent<TextMeshProUGUI>();
+            var playersText = card.transform.Find("InfoRow/PlayersText")?.GetComponent<TextMeshProUGUI>();
+            var timerText = card.transform.Find("InfoRow/TimerText")?.GetComponent<TextMeshProUGUI>();
+            var entryValue = card.transform.Find("EntryFeeBadge/Value")?.GetComponent<TextMeshProUGUI>();
             var joinButton = card.transform.Find("JoinButton")?.GetComponent<Button>();
+            var liveBadge = card.transform.Find("LiveBadge")?.gameObject;
 
             if (nameText != null) nameText.text = tournament.Name;
 
-            if (gameTypeText != null)
+            if (prizeText != null)
+                prizeText.text = $"${tournament.PrizePool:F0}";
+
+            if (playersText != null)
+                playersText.text = $"{tournament.CurrentParticipants}/{tournament.MaxParticipants}";
+
+            if (timerText != null)
             {
-                gameTypeText.text = tournament.IsCognitiveSprint
-                    ? "Cognitive Sprint"
-                    : tournament.GameType?.ToString() ?? "Multiple";
+                TimeSpan remaining = tournament.StartsAt - DateTime.Now;
+                if (remaining.TotalSeconds > 0)
+                    timerText.text = $"{(int)remaining.TotalHours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+                else
+                    timerText.text = AutoLocalizer.Get("tournament_status_active");
             }
 
-            if (prizeText != null) prizeText.text = AutoLocalizer.Get("cash_prize_amount", tournament.PrizePool);
-            if (entryText != null) entryText.text = AutoLocalizer.Get("cash_entry_amount", tournament.EntryFee);
+            if (entryValue != null)
+                entryValue.text = $"${tournament.EntryFee:F0}";
 
-            if (participantsText != null)
-            {
-                participantsText.text = AutoLocalizer.Get("tournament_players_count", $"{tournament.CurrentParticipants}/{tournament.MaxParticipants}");
-            }
+            // Show LIVE badge for in-progress tournaments
+            if (liveBadge != null)
+                liveBadge.SetActive(tournament.Status == TournamentStatus.InProgress);
 
             // Join button
             if (joinButton != null)
             {
                 joinButton.onClick.RemoveAllListeners();
                 joinButton.onClick.AddListener(() => OnTournamentSelected?.Invoke(tournament));
-
-                // Disable if full
-                joinButton.interactable = tournament.CurrentParticipants < tournament.MaxParticipants;
+                joinButton.interactable = tournament.CurrentParticipants < tournament.MaxParticipants
+                    && tournament.Status == TournamentStatus.Registration;
             }
         }
 

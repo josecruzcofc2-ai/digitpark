@@ -54,8 +54,6 @@ namespace DigitPark.Editor
 
         private static void RebuildGameSelectorUI()
         {
-            CleanupOldUI();
-
             // Buscar el Canvas existente
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
@@ -100,6 +98,14 @@ namespace DigitPark.Editor
                 DestroyImmediate(obj);
             }
 
+            // Limpiar CurrencyPills residual del Header (no pertenece a esta escena)
+            Transform existingHeader = canvasTransform.Find("Header");
+            if (existingHeader != null)
+            {
+                Transform pills = existingHeader.Find("CurrencyPills") ?? existingHeader.Find("CurrencyDisplay");
+                if (pills != null) DestroyImmediate(pills.gameObject);
+            }
+
             // Crear nueva estructura
             CreateNewGameSelectorLayout(canvasTransform);
 
@@ -119,19 +125,11 @@ namespace DigitPark.Editor
             // BackButton - NO crear, el usuario usa su propio prefab
 
             // Title - valores ajustados por el usuario
-            GameObject title = CreateOrFind(header.transform, "TitleText");
+            GameObject title = CreateOrFind(header.transform, "GameSelectorTitleText");
             SetupRectTransform(title,
                 new Vector2(0.07f, 0f), new Vector2(0.53f, 1f),
                 Vector2.zero, Vector2.zero);
             SetupTitleText(title, "SELECT A GAME");
-
-            // Currency pills (right side of header)
-            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
-            var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
 
             // ========== GAMES GRID ==========
             GameObject gamesPanel = CreateOrFind(canvasTransform, "GamesPanel");
@@ -240,32 +238,6 @@ namespace DigitPark.Editor
                 ? new Color(1f, 0.84f, 0f, 0.5f)
                 : new Color(0f, 1f, 1f, 0.5f);
             cardOutline2.effectDistance = new Vector2(8, 8);
-
-            // ========== BADGE PRO (solo para Cognitive Sprint) ==========
-            if (isGold)
-            {
-                GameObject specialBadge = CreateOrFind(card.transform, "SpecialBadge");
-                RectTransform badgeRect = SetupRectTransform(specialBadge,
-                    new Vector2(1, 1), new Vector2(1, 1),
-                    new Vector2(-15, -15), new Vector2(70, 28));
-
-                Image badgeImg = specialBadge.GetComponent<Image>();
-                if (badgeImg == null) badgeImg = specialBadge.AddComponent<Image>();
-                badgeImg.color = GOLD;
-                badgeImg.raycastTarget = false;
-
-                GameObject badgeText = CreateOrFind(specialBadge.transform, "BadgeText");
-                SetupRectTransform(badgeText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-
-                TextMeshProUGUI badgeTmp = badgeText.GetComponent<TextMeshProUGUI>();
-                if (badgeTmp == null) badgeTmp = badgeText.AddComponent<TextMeshProUGUI>();
-                badgeTmp.text = "PRO";
-                badgeTmp.fontSize = FontSizes.Body;
-                badgeTmp.fontStyle = FontStyles.Bold;
-                badgeTmp.color = DARK_BG;
-                badgeTmp.alignment = TextAlignmentOptions.Center;
-                badgeTmp.raycastTarget = false;
-            }
 
             // Agregar componente de efectos
             GameCardEffect effect = card.GetComponent<GameCardEffect>();

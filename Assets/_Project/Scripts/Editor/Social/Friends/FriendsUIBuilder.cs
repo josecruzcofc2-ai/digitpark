@@ -115,7 +115,6 @@ namespace DigitPark.Editor
 
         private static void RebuildFriends()
         {
-            CleanupOldUI();
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null)
             {
@@ -131,15 +130,8 @@ namespace DigitPark.Editor
                 scaler.matchWidthOrHeight = 0f;
             }
 
-            string[] oldNames = {
-                "Background", "Header", "SearchBar", "RequestsNav",
-                "ScrollView", "ContentPanel", "FriendsPanel"
-            };
-            foreach (var n in oldNames)
-            {
-                Transform t = canvas.transform.Find(n);
-                if (t != null) DestroyImmediate(t.gameObject);
-            }
+            // Full clean of canvas children (keep TransitionCanvas and EventSystem)
+            CleanupOldElements(canvas.transform);
 
             CreateBackground(canvas.transform);
             CreateHeader();
@@ -147,6 +139,7 @@ namespace DigitPark.Editor
             CreateRequestsNav();
             CreateScrollView();
             CreateFriendCardPrefab();
+            InstantiateSampleCards();
             SetupManagerReferences();
 
             Debug.Log("[FriendsUI] Friends RECONSTRUIDO exitosamente!");
@@ -234,6 +227,7 @@ namespace DigitPark.Editor
             var cTMP = GetOrAdd<TextMeshProUGUI>(count);
             cTMP.text = "0 friends";
             cTMP.fontSize = FontSizes.BodyLarge;
+            cTMP.fontStyle = FontStyles.Bold;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
 
@@ -306,6 +300,7 @@ namespace DigitPark.Editor
             txtRT.offsetMax = Vector2.zero;
             var txtTMP = GetOrAdd<TextMeshProUGUI>(text);
             txtTMP.fontSize = FontSizes.Subtitle;
+            txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.color = TEXT_WHITE;
             txtTMP.alignment = TextAlignmentOptions.Left;
 
@@ -362,8 +357,8 @@ namespace DigitPark.Editor
             badgeRT.anchorMin = new Vector2(1, 0.5f);
             badgeRT.anchorMax = new Vector2(1, 0.5f);
             badgeRT.pivot = new Vector2(1, 0.5f);
-            badgeRT.anchoredPosition = new Vector2(-50, 0);
-            badgeRT.sizeDelta = new Vector2(75, 75);
+            badgeRT.anchoredPosition = new Vector2(-70, 0);
+            badgeRT.sizeDelta = new Vector2(50, 50);
             var badgeBg = GetOrAdd<Image>(badge);
             badgeBg.color = RED_BADGE;
 
@@ -375,7 +370,7 @@ namespace DigitPark.Editor
             btRT.offsetMax = Vector2.zero;
             var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
             btTMP.text = "3";
-            btTMP.fontSize = FontSizes.Body;
+            btTMP.fontSize = FontSizes.Caption;
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
@@ -417,20 +412,25 @@ namespace DigitPark.Editor
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
             scrollRect.scrollSensitivity = 50;
 
-            var svImg = GetOrAdd<Image>(scrollView);
-            svImg.color = Color.clear;
-            GetOrAdd<Mask>(scrollView).showMaskGraphic = false;
+            // Remove any old Mask on ScrollView (only Viewport should clip)
+            var oldSvMask = scrollView.GetComponent<Mask>();
+            if (oldSvMask != null) DestroyImmediate(oldSvMask);
+            var oldSvImg = scrollView.GetComponent<Image>();
+            if (oldSvImg != null) DestroyImmediate(oldSvImg);
 
-            // Viewport
+            // Viewport (clips scroll content)
             var viewport = FindOrCreate(scrollView.transform, "Viewport");
             var vpRT = GetOrAdd<RectTransform>(viewport);
             vpRT.anchorMin = Vector2.zero;
             vpRT.anchorMax = Vector2.one;
             vpRT.offsetMin = Vector2.zero;
             vpRT.offsetMax = Vector2.zero;
-            var vpImg = GetOrAdd<Image>(viewport);
-            vpImg.color = Color.clear;
-            GetOrAdd<Mask>(viewport).showMaskGraphic = false;
+            // Remove old Mask if present, use RectMask2D instead
+            var oldVpMask = viewport.GetComponent<Mask>();
+            if (oldVpMask != null) DestroyImmediate(oldVpMask);
+            var oldVpImg = viewport.GetComponent<Image>();
+            if (oldVpImg != null) DestroyImmediate(oldVpImg);
+            GetOrAdd<RectMask2D>(viewport);
             scrollRect.viewport = vpRT;
 
             // Content
@@ -448,7 +448,7 @@ namespace DigitPark.Editor
             vlg.padding = new RectOffset(0, 0, 5, 20);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
+            vlg.childControlHeight = true;
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
@@ -466,6 +466,7 @@ namespace DigitPark.Editor
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
+            emptyText.SetActive(false);
 
             // Loading Indicator
             var loading = FindOrCreate(content.transform, "LoadingIndicator");
@@ -475,11 +476,48 @@ namespace DigitPark.Editor
             var ldTMP = GetOrAdd<TextMeshProUGUI>(loading);
             ldTMP.text = "Loading...";
             ldTMP.fontSize = FontSizes.Subtitle;
+            ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
             loading.SetActive(false);
 
             Debug.Log("[FriendsUI] ScrollView creado");
+        }
+
+        #endregion
+
+        #region Sample Cards
+
+        private static void InstantiateSampleCards()
+        {
+            Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
+            if (canvas == null) return;
+
+            Transform content = canvas.transform.Find("ScrollView/Viewport/Content");
+            if (content == null) { Debug.LogWarning("[FriendsUI] Content no encontrado para sample cards"); return; }
+
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(FRIEND_CARD_PREFAB_PATH);
+            if (prefab == null) { Debug.LogWarning("[FriendsUI] FriendCard prefab no encontrado"); return; }
+
+            // Remove old samples
+            for (int i = content.childCount - 1; i >= 0; i--)
+            {
+                if (content.GetChild(i).name.StartsWith("SampleCard_"))
+                    DestroyImmediate(content.GetChild(i).gameObject);
+            }
+
+            string[] names = { "ProGamer99", "NeonMaster", "SpeedKing" };
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                instance.transform.SetParent(content, false);
+                instance.name = $"SampleCard_{i + 1}";
+
+                var userText = instance.GetComponentInChildren<TextMeshProUGUI>();
+                if (userText != null) userText.text = names[i];
+            }
+
+            Debug.Log("[FriendsUI] 3 sample cards instanciados en Content");
         }
 
         #endregion
@@ -517,7 +555,9 @@ namespace DigitPark.Editor
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);
 
-            // ---- Avatar Frame (left) ----
+            // ---- Circular Avatar (left) ----
+            Sprite circleSprite = GenerateCircleSprite();
+
             var avatarFrame = new GameObject("AvatarFrame");
             avatarFrame.transform.SetParent(card.transform, false);
             var afRT = avatarFrame.AddComponent<RectTransform>();
@@ -527,19 +567,35 @@ namespace DigitPark.Editor
             afRT.anchoredPosition = new Vector2(12, 0);
             afRT.sizeDelta = new Vector2(70, 70);
             var afImg = avatarFrame.AddComponent<Image>();
+            afImg.sprite = circleSprite;
             afImg.color = CYAN_DARK;
 
-            // Avatar Image
+            // Circular mask
+            var avatarMask = new GameObject("AvatarMask");
+            avatarMask.transform.SetParent(avatarFrame.transform, false);
+            var amRT = avatarMask.AddComponent<RectTransform>();
+            amRT.anchorMin = new Vector2(0.06f, 0.06f);
+            amRT.anchorMax = new Vector2(0.94f, 0.94f);
+            amRT.offsetMin = Vector2.zero;
+            amRT.offsetMax = Vector2.zero;
+            var amImg = avatarMask.AddComponent<Image>();
+            amImg.sprite = circleSprite;
+            amImg.color = CARD_BG_LIGHT;
+            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
+
+            // Avatar Image (clipped to circle)
             var avatarImg = new GameObject("AvatarImage");
-            avatarImg.transform.SetParent(avatarFrame.transform, false);
+            avatarImg.transform.SetParent(avatarMask.transform, false);
             var aiRT = avatarImg.AddComponent<RectTransform>();
-            aiRT.anchorMin = new Vector2(0.06f, 0.06f);
-            aiRT.anchorMax = new Vector2(0.94f, 0.94f);
+            aiRT.anchorMin = Vector2.zero;
+            aiRT.anchorMax = Vector2.one;
             aiRT.offsetMin = Vector2.zero;
             aiRT.offsetMax = Vector2.zero;
             var aiImg = avatarImg.AddComponent<Image>();
-            aiImg.color = CARD_BG_LIGHT;
+            aiImg.color = Color.white;
             aiImg.preserveAspect = true;
+            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
+            if (defaultAvatar != null) aiImg.sprite = defaultAvatar;
 
             // ---- Online Indicator ----
             var onlineInd = new GameObject("OnlineIndicator");
@@ -551,6 +607,7 @@ namespace DigitPark.Editor
             oiRT.anchoredPosition = new Vector2(-5, 5);
             oiRT.sizeDelta = new Vector2(16, 16);
             var oiImg = onlineInd.AddComponent<Image>();
+            oiImg.sprite = circleSprite;
             oiImg.color = GREEN_SUCCESS;
             var oiOutline = onlineInd.AddComponent<Outline>();
             oiOutline.effectColor = DARK_BG;
@@ -575,10 +632,14 @@ namespace DigitPark.Editor
             unRT.offsetMax = Vector2.zero;
             var unTMP = username.AddComponent<TextMeshProUGUI>();
             unTMP.text = "Username";
-            unTMP.fontSize = FontSizes.H4;
+            unTMP.fontSize = FontSizes.BodySmall;
             unTMP.color = TEXT_WHITE;
             unTMP.fontStyle = FontStyles.Bold;
             unTMP.alignment = TextAlignmentOptions.Left;
+            unTMP.enableAutoSizing = true;
+            unTMP.fontSizeMin = FontSizes.Caption;
+            unTMP.fontSizeMax = FontSizes.BodySmall;
+            unTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Stats Text
             var stats = new GameObject("StatsText");
@@ -590,9 +651,11 @@ namespace DigitPark.Editor
             stRT.offsetMax = Vector2.zero;
             var stTMP = stats.AddComponent<TextMeshProUGUI>();
             stTMP.text = "65% WR \u00B7 Digit Rush";
-            stTMP.fontSize = FontSizes.Body;
+            stTMP.fontSize = FontSizes.Caption;
+            stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
+            stTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Status Text
             var status = new GameObject("StatusText");
@@ -604,7 +667,8 @@ namespace DigitPark.Editor
             statusRT.offsetMax = Vector2.zero;
             var statusTMP = status.AddComponent<TextMeshProUGUI>();
             statusTMP.text = "Online";
-            statusTMP.fontSize = FontSizes.Body;
+            statusTMP.fontSize = FontSizes.Caption;
+            statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.color = GREEN_SUCCESS;
             statusTMP.alignment = TextAlignmentOptions.Left;
 
@@ -674,7 +738,7 @@ namespace DigitPark.Editor
             tRT.offsetMax = new Vector2(-5, 0);
             var tTMP = text.AddComponent<TextMeshProUGUI>();
             tTMP.text = label;
-            tTMP.fontSize = FontSizes.Body;
+            tTMP.fontSize = FontSizes.Caption;
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
@@ -782,6 +846,21 @@ namespace DigitPark.Editor
             }
         }
 
+        private static void CleanupOldElements(Transform parent)
+        {
+            var toDestroy = new System.Collections.Generic.List<GameObject>();
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                string name = child.gameObject.name;
+                if (name == "TransitionCanvas" || name == "EventSystem")
+                    continue;
+                toDestroy.Add(child.gameObject);
+            }
+            foreach (var go in toDestroy)
+                DestroyImmediate(go);
+        }
+
         private static GameObject FindOrCreate(Transform parent, string name)
         {
             Transform existing = parent.Find(name);
@@ -812,6 +891,27 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(xMax, yMax);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+        }
+
+        private static Sprite GenerateCircleSprite()
+        {
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/CircleSprite.png");
+            if (s != null) return s;
+            // Fallback: generate at runtime (won't survive prefab save)
+            int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float radius = center - 1f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Mathf.Sqrt((x - center) * (x - center) + (y - center) * (y - center));
+                    if (dist <= radius) tex.SetPixel(x, y, Color.white);
+                    else if (dist <= radius + 1f) tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(radius + 1f - dist)));
+                    else tex.SetPixel(x, y, Color.clear);
+                }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
 
         #endregion

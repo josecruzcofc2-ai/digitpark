@@ -377,6 +377,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Win your first game";
             descTMP.fontSize = FontSizes.Body;
+            descTMP.fontStyle = FontStyles.Bold;
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.enableAutoSizing = true;

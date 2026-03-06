@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 using TMPro;
 using DigitPark.Games;
 using DigitPark.Localization;
+using DigitPark.Services;
+using DigitPark.UI.Items;
 
 namespace DigitPark.Managers
 {
@@ -56,16 +58,18 @@ namespace DigitPark.Managers
         [SerializeField] private Button sendChatButton;
 
         [Header("=== ACTIONS ===")]
-        [SerializeField] private Button joinButton;
-        [SerializeField] private Button leaveButton;
         [SerializeField] private Button shareButton;
-        [SerializeField] private TextMeshProUGUI joinButtonText;
+        [SerializeField] private Button playButton;
+        [SerializeField] private TextMeshProUGUI playButtonText;
 
         [Header("=== STATUS ===")]
         [SerializeField] private GameObject loadingOverlay;
         [SerializeField] private TextMeshProUGUI statusText;
         [SerializeField] private GameObject startingOverlay;
         [SerializeField] private TextMeshProUGUI startingCountdownText;
+
+        [Header("=== PREFABS ===")]
+        [SerializeField] private GameObject participantItemPrefab;
 
         [Header("=== SETTINGS ===")]
         [SerializeField] private float refreshInterval = 10f;
@@ -80,7 +84,9 @@ namespace DigitPark.Managers
 
         // State
         private string currentTab = "participants";
-        private bool hasJoined = false;
+        private bool hasJoined = true; // Player already joined from CashTournaments browser
+        private int attemptsUsed = 0;
+        private bool isPlaying = false;
         private Coroutine refreshCoroutine;
         private Coroutine countdownCoroutine;
 
@@ -100,6 +106,8 @@ namespace DigitPark.Managers
         {
             SetupListeners();
             LoadTournamentData();
+            LoadAttemptsState();
+            UpdatePlayButton();
             SwitchToTab("participants");
             refreshCoroutine = StartCoroutine(AutoRefreshCoroutine());
         }
@@ -114,14 +122,11 @@ namespace DigitPark.Managers
                 backButton.onClick.AddListener(OnBackClicked);
             }
 
-            if (joinButton != null)
-                joinButton.onClick.AddListener(OnJoinClicked);
-
-            if (leaveButton != null)
-                leaveButton.onClick.AddListener(OnLeaveClicked);
-
             if (shareButton != null)
                 shareButton.onClick.AddListener(OnShareClicked);
+
+            if (playButton != null)
+                playButton.onClick.AddListener(OnPlayClicked);
 
             if (participantsTabButton != null)
                 participantsTabButton.onClick.AddListener(() => SwitchToTab("participants"));
@@ -143,7 +148,9 @@ namespace DigitPark.Managers
             tournamentName = PlayerPrefs.GetString("CashTournament_Name", "QuickMath Championship");
             gameType = PlayerPrefs.GetString("CashTournament_GameType", "QuickMath");
             entryFee = (decimal)PlayerPrefs.GetFloat("CashTournament_EntryFee", 5.00f);
-            prizePool = (decimal)PlayerPrefs.GetFloat("CashTournament_PrizePool", 80.00f);
+            // Prize pool = total entries × (1 - platform fee 30%)
+            // Example: $5 × 16 players × 0.70 = $56.00
+            prizePool = (decimal)PlayerPrefs.GetFloat("CashTournament_PrizePool", 56.00f);
             currentPlayers = PlayerPrefs.GetInt("CashTournament_CurrentPlayers", 8);
             maxPlayers = PlayerPrefs.GetInt("CashTournament_MaxPlayers", 16);
             maxAttempts = PlayerPrefs.GetInt("CashTournament_MaxAttempts", 3);
@@ -154,7 +161,7 @@ namespace DigitPark.Managers
 
             PopulateTournamentInfo();
             PopulatePrizeDistribution();
-            UpdateJoinLeaveState();
+            PopulateMockParticipants();
         }
 
         private void PopulateTournamentInfo()
@@ -191,18 +198,21 @@ namespace DigitPark.Managers
 
         private void PopulatePrizeDistribution()
         {
-            // Calculate prize distribution: 50% / 30% / 20%
+            // Prize pool is already post-platform-fee (70% of total entries)
+            // Distribution: 50% / 30% / 20% of prize pool
             decimal first = prizePool * 0.50m;
             decimal second = prizePool * 0.30m;
             decimal third = prizePool * 0.20m;
 
             if (prizeDistributionContainer != null)
             {
-                // Update existing prize row texts if they exist
+                // Update existing prize row texts (supports both prefab and inline layout)
                 for (int i = 0; i < prizeDistributionContainer.childCount; i++)
                 {
                     Transform child = prizeDistributionContainer.GetChild(i);
-                    Transform amountT = child.Find("Amount");
+
+                    // Try PrizeRowItem prefab structure first, then inline fallback
+                    Transform amountT = child.Find("PrizeAmountText") ?? child.Find("Amount");
                     if (amountT != null)
                     {
                         TextMeshProUGUI amountTMP = amountT.GetComponent<TextMeshProUGUI>();
@@ -217,6 +227,109 @@ namespace DigitPark.Managers
                         }
                     }
                 }
+            }
+        }
+
+        private void PopulateMockParticipants()
+        {
+            if (participantsContainer == null) return;
+
+            // Clear existing
+            foreach (Transform child in participantsContainer)
+                Destroy(child.gameObject);
+
+            var mockParticipants = new[]
+            {
+                new ParticipantDisplayData
+                {
+                    userId = "self_001",
+                    username = "You",
+                    rank = 1,
+                    attemptsUsed = 1,
+                    maxAttempts = 3,
+                    bestTime = 12.34f,
+                    isOnline = true,
+                    isReady = true,
+                    isSelf = true,
+                    showRank = true,
+                    showAttempts = true,
+                    showBestTime = true
+                },
+                new ParticipantDisplayData
+                {
+                    userId = "player_002",
+                    username = "QuickFingers99",
+                    rank = 2,
+                    attemptsUsed = 0,
+                    maxAttempts = 3,
+                    bestTime = 14.87f,
+                    isOnline = true,
+                    isReady = false,
+                    isSelf = false,
+                    showRank = true,
+                    showAttempts = true,
+                    showBestTime = true
+                }
+            };
+
+            foreach (var data in mockParticipants)
+            {
+                CreateParticipantItem(data);
+            }
+        }
+
+        private void CreateParticipantItem(ParticipantDisplayData data)
+        {
+            if (participantsContainer == null) return;
+
+            GameObject item;
+            if (participantItemPrefab != null)
+            {
+                item = Instantiate(participantItemPrefab, participantsContainer);
+            }
+            else
+            {
+                // Fallback: create basic item
+                item = new GameObject($"Participant_{data.username}");
+                item.transform.SetParent(participantsContainer, false);
+
+                RectTransform rt = item.AddComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(0, 70);
+
+                LayoutElement le = item.AddComponent<LayoutElement>();
+                le.preferredHeight = 70;
+
+                Image bg = item.AddComponent<Image>();
+                bg.color = new Color(0.06f, 0.08f, 0.12f);
+
+                // Simple text fallback
+                GameObject textObj = new GameObject("UsernameText");
+                textObj.transform.SetParent(item.transform, false);
+                RectTransform trt = textObj.AddComponent<RectTransform>();
+                trt.anchorMin = Vector2.zero;
+                trt.anchorMax = Vector2.one;
+                trt.sizeDelta = Vector2.zero;
+                trt.offsetMin = new Vector2(80, 0);
+                TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+                tmp.text = $"#{data.rank} {data.username} — {data.attemptsUsed}/{data.maxAttempts}";
+                tmp.fontSize = 30f;
+                tmp.color = Color.white;
+                tmp.alignment = TextAlignmentOptions.MidlineLeft;
+                tmp.fontStyle = FontStyles.Bold;
+                return;
+            }
+
+            // Setup via ParticipantItemUI component
+            var ui = item.GetComponent<ParticipantItemUI>();
+            if (ui != null)
+            {
+                if (data.avatar == null && defaultAvatarSprite != null)
+                    data.avatar = defaultAvatarSprite;
+
+                ui.Setup(data,
+                    profileId => Debug.Log($"[CashTournamentLobby] View profile: {profileId}"),
+                    challengeId => Debug.Log($"[CashTournamentLobby] Challenge: {challengeId}")
+                );
             }
         }
 
@@ -252,72 +365,78 @@ namespace DigitPark.Managers
                 labelText.color = isActive ? TEXT_GOLD : TEXT_SECONDARY;
         }
 
-        private void OnJoinClicked()
-        {
-            if (hasJoined) return;
-
-            // Mock wallet check
-            float balance = PlayerPrefs.GetFloat("CashBattle_Balance", 100f);
-            if ((decimal)balance < entryFee)
-            {
-                Debug.Log($"[CashTournamentLobby] Insufficient balance: ${balance:F2} < ${entryFee:F2}");
-                if (statusText != null)
-                    statusText.text = AutoLocalizer.Get("wallet_insufficient_balance");
-                return;
-            }
-
-            // Deduct entry fee (mock)
-            PlayerPrefs.SetFloat("CashBattle_Balance", balance - (float)entryFee);
-            PlayerPrefs.Save();
-
-            hasJoined = true;
-            currentPlayers++;
-            UpdatePlayersProgress(currentPlayers, maxPlayers);
-            UpdateJoinLeaveState();
-
-            Debug.Log($"[CashTournamentLobby] Joined tournament: {tournamentName} for ${entryFee:F2}");
-
-            // Check if tournament is full and should start
-            if (currentPlayers >= maxPlayers)
-            {
-                StartCountdown();
-            }
-        }
-
-        private void OnLeaveClicked()
-        {
-            if (!hasJoined) return;
-
-            // Refund entry fee (mock)
-            float balance = PlayerPrefs.GetFloat("CashBattle_Balance", 100f);
-            PlayerPrefs.SetFloat("CashBattle_Balance", balance + (float)entryFee);
-            PlayerPrefs.Save();
-
-            hasJoined = false;
-            currentPlayers = Mathf.Max(0, currentPlayers - 1);
-            UpdatePlayersProgress(currentPlayers, maxPlayers);
-            UpdateJoinLeaveState();
-
-            Debug.Log($"[CashTournamentLobby] Left tournament: {tournamentName}");
-        }
-
-        private void UpdateJoinLeaveState()
-        {
-            if (joinButton != null)
-                joinButton.gameObject.SetActive(!hasJoined);
-
-            if (leaveButton != null)
-                leaveButton.gameObject.SetActive(hasJoined);
-
-            if (joinButtonText != null)
-                joinButtonText.text = AutoLocalizer.Get("tournament_join_fee", entryFee);
-        }
-
         private void OnShareClicked()
         {
             string shareLink = $"digitpark://tournament/{tournamentId}";
             GUIUtility.systemCopyBuffer = shareLink;
             Debug.Log($"[CashTournamentLobby] Tournament link copied: {shareLink}");
+        }
+
+        private void OnPlayClicked()
+        {
+            if (isPlaying) return;
+
+            if (attemptsUsed >= maxAttempts)
+            {
+                Debug.Log("[CashTournamentLobby] No attempts remaining.");
+                return;
+            }
+
+            isPlaying = true;
+            attemptsUsed++;
+            SaveAttemptsState();
+            UpdatePlayButton();
+
+            // Configure GameContext for CashTournament mode
+            if (GameSessionManager.Instance != null)
+            {
+                var context = new GameContext
+                {
+                    Mode = GameMode.CashTournament,
+                    TournamentId = tournamentId,
+                    EntryFee = entryFee
+                };
+
+                // Parse game type to enum
+                if (System.Enum.TryParse<GameType>(gameType, out var parsedType))
+                    context.Games.Add(parsedType);
+
+                GameSessionManager.Instance.SetContext(context);
+            }
+
+            // Store extra data for the game scene
+            PlayerPrefs.SetString("CashGame_TournamentId", tournamentId);
+            PlayerPrefs.SetInt("CashGame_AttemptNumber", attemptsUsed);
+            PlayerPrefs.SetInt("CashGame_MaxAttempts", maxAttempts);
+            PlayerPrefs.Save();
+
+            Debug.Log($"[CashTournamentLobby] Starting attempt {attemptsUsed}/{maxAttempts} — Loading {gameType}");
+
+            // Load the minigame scene (same scenes, CashTournament mode distinguishes behavior)
+            SceneManager.LoadScene(gameType);
+        }
+
+        private void LoadAttemptsState()
+        {
+            // Restore attempts used from PlayerPrefs (persists across scene loads)
+            attemptsUsed = PlayerPrefs.GetInt($"CashTournament_{tournamentId}_AttemptsUsed", 0);
+        }
+
+        private void SaveAttemptsState()
+        {
+            PlayerPrefs.SetInt($"CashTournament_{tournamentId}_AttemptsUsed", attemptsUsed);
+            PlayerPrefs.Save();
+        }
+
+        private void UpdatePlayButton()
+        {
+            int remaining = Mathf.Max(0, maxAttempts - attemptsUsed);
+
+            if (playButton != null)
+                playButton.interactable = remaining > 0;
+
+            if (playButtonText != null)
+                playButtonText.text = remaining > 0 ? AutoLocalizer.Get("play_button") : AutoLocalizer.Get("tournament_no_attempts");
         }
 
         private void OnSendChat()
@@ -326,6 +445,13 @@ namespace DigitPark.Managers
 
             string message = chatInput.text.Trim();
             chatInput.text = "";
+
+            // Filter profanity
+            if (ChatFilterService.Instance != null)
+            {
+                var result = ChatFilterService.Instance.Filter(message);
+                message = result.FilteredMessage;
+            }
 
             // Add chat message locally (mock)
             AddChatMessage("You", message);
@@ -452,11 +578,8 @@ namespace DigitPark.Managers
 
         private void OnBackClicked()
         {
-            if (hasJoined)
-            {
-                Debug.Log("[CashTournamentLobby] Warning: Player is leaving while joined in tournament.");
-            }
-
+            // Player cannot leave once joined - back just returns to tournament browser
+            // The tournament entry stays active
             SceneManager.LoadScene("CashTournaments");
         }
 

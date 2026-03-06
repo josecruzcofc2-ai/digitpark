@@ -131,13 +131,13 @@ namespace DigitPark.Editor
 
             // === CREADOR (15% - 55%) ===
             CreateTextElement(itemObj.transform, "CreatorText", "@Username",
-                0.15f, 0.55f, (int)FontSizes.Body, Color.white, FontStyles.Normal);
+                0.15f, 0.55f, (int)FontSizes.Body, Color.white, FontStyles.Bold);
 
             CreateVerticalDivider(itemObj.transform, "VerticalDivider2", 0.55f);
 
             // === TIEMPO (55% - 85%) ===
             CreateTextElement(itemObj.transform, "TimeText", "2h 30m",
-                0.55f, 0.85f, (int)FontSizes.Body, GREEN_TIME, FontStyles.Normal);
+                0.55f, 0.85f, (int)FontSizes.Body, GREEN_TIME, FontStyles.Bold);
 
             CreateVerticalDivider(itemObj.transform, "VerticalDivider3", 0.85f);
 
@@ -233,19 +233,19 @@ namespace DigitPark.Editor
 
             // Time Remaining
             CreateTextElementAnchored(header.transform, "TimeRemaining", "2d 5h",
-                new Vector2(0.7f, 0), new Vector2(0.98f, 1), (int)FontSizes.Body, GREEN_TIME, FontStyles.Normal, TextAlignmentOptions.Right);
+                new Vector2(0.7f, 0), new Vector2(0.98f, 1), (int)FontSizes.Body, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Right);
 
             // === PLAYER STATS (medio izquierda) ===
             GameObject playerStats = CreateSection(itemObj.transform, "PlayerStats", 0, 0.5f, 0.38f, 0.72f, Color.clear);
 
             CreateTextElementAnchored(playerStats.transform, "LabelMyPosition", "YOUR POSITION",
-                new Vector2(0, 0.5f), new Vector2(0.5f, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0.5f), new Vector2(0.5f, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(playerStats.transform, "MyPosition", "#3",
                 new Vector2(0, 0), new Vector2(0.5f, 0.55f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(playerStats.transform, "LabelMyTime", "YOUR BEST",
-                new Vector2(0.5f, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(playerStats.transform, "MyBestTime", "2.345s",
                 new Vector2(0.5f, 0), new Vector2(1, 0.55f), (int)FontSizes.Body, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Center);
@@ -254,13 +254,13 @@ namespace DigitPark.Editor
             GameObject creatorInfo = CreateSection(itemObj.transform, "CreatorInfo", 0.5f, 1f, 0.38f, 0.72f, Color.clear);
 
             CreateTextElementAnchored(creatorInfo.transform, "LabelCreator", "CREATOR",
-                new Vector2(0, 0.5f), new Vector2(0.5f, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0.5f), new Vector2(0.5f, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(creatorInfo.transform, "CreatorName", "@Creator",
                 new Vector2(0, 0), new Vector2(0.5f, 0.55f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(creatorInfo.transform, "LabelCreatorTime", "TIME",
-                new Vector2(0.5f, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0.5f), new Vector2(1, 1), (int)FontSizes.Body, new Color(0.5f, 0.5f, 0.5f), FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(creatorInfo.transform, "CreatorTime", "1.987s",
                 new Vector2(0.5f, 0), new Vector2(1, 0.55f), (int)FontSizes.Body, GREEN_TIME, FontStyles.Bold, TextAlignmentOptions.Center);
@@ -269,10 +269,10 @@ namespace DigitPark.Editor
             GameObject tournamentInfo = CreateSection(itemObj.transform, "TournamentInfo", 0, 0.6f, 0.18f, 0.38f, Color.clear);
 
             CreateTextElementAnchored(tournamentInfo.transform, "Participants", "45/50 participants",
-                new Vector2(0, 0), new Vector2(0.5f, 1), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0, 0), new Vector2(0.5f, 1), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
             CreateTextElementAnchored(tournamentInfo.transform, "MyAttempts", "5 attempts",
-                new Vector2(0.5f, 0), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Normal, TextAlignmentOptions.Center);
+                new Vector2(0.5f, 0), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
 
             // === ACTIONS (abajo derecha) ===
             GameObject actions = CreateSection(itemObj.transform, "Actions", 0.6f, 1f, 0.18f, 0.38f, Color.clear);
@@ -534,6 +534,9 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
             tmp.raycastTarget = false;
         }
 
@@ -557,6 +560,9 @@ namespace DigitPark.Editor
             tmp.alignment = alignment;
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
             tmp.raycastTarget = false;
         }
 

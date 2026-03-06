@@ -238,7 +238,9 @@ namespace DigitPark.Animations
     /// </summary>
     public class SimplePulse : MonoBehaviour
     {
+        #pragma warning disable 0414
         [SerializeField] private float minScale = 0.95f;
+        #pragma warning restore 0414
         [SerializeField] private float maxScale = 1.05f;
         [SerializeField] private float duration = 1f;
 
@@ -303,7 +305,9 @@ namespace DigitPark.Animations
     /// </summary>
     public class GlowPulse : MonoBehaviour
     {
+        #pragma warning disable 0414
         [SerializeField] private float minAlpha = 0.3f;
+        #pragma warning restore 0414
         [SerializeField] private float maxAlpha = 0.8f;
         [SerializeField] private float duration = 1.5f;
 

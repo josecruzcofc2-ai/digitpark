@@ -12,8 +12,9 @@ namespace DigitPark.UI.Panels
 {
     /// <summary>
     /// Panel profesional que muestra todos los temas disponibles con grid scrollable.
-    /// Candado dorado = tema de paga ($2.50 USD), candado plateado = desbloqueable por logros.
-    /// Bundle de 14 temas pagos con 30% de descuento.
+    /// Candado dorado = tema premium ($2.50 USD), candado plateado = desbloqueable ($1.50 USD).
+    /// Premium Bundle: 15 temas x $2.50 x 0.70 = $26.25
+    /// Complete Bundle: (15 x $2.50 + 4 x $1.50) x 0.70 = $30.45
     /// </summary>
     public class StylesProPromptPanel : MonoBehaviour
     {
@@ -30,9 +31,13 @@ namespace DigitPark.UI.Panels
         private Sprite lockSilverSprite;
 
         // Pricing
-        private const float PRICE_PER_THEME = 2.50f;
-        private const int PAID_THEME_COUNT = 14;
+        private const float PREMIUM_PRICE = 2.50f;
+        private const float EARNABLE_PRICE = 1.50f;
+        private const int PAID_THEME_COUNT = 15;
+        private const int EARNABLE_THEME_COUNT = 4;
         private const float BUNDLE_DISCOUNT = 0.30f;
+        // Premium Bundle: 15 x $2.50 x 0.70 = $26.25
+        // Complete Bundle: (15 x $2.50 + 4 x $1.50) x 0.70 = $30.45
 
         // Colors (matches ShopPremiumUIBuilder style)
         private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
@@ -150,8 +155,8 @@ namespace DigitPark.UI.Panels
             CreateTitle(obj.transform);
             CreateSubtitle(obj.transform);
             CreateScrollView(obj.transform);
-            CreatePriceSection(obj.transform);
-            CreateBuyButton(obj.transform);
+            CreatePremiumBundleButton(obj.transform);
+            CreateCompleteBundleButton(obj.transform);
             CreateCancelButton(obj.transform);
 
             return obj;
@@ -580,57 +585,23 @@ namespace DigitPark.UI.Panels
             lockImg.raycastTarget = false;
         }
 
-        private void CreatePriceSection(Transform parent)
+        private void CreatePremiumBundleButton(Transform parent)
         {
-            GameObject obj = new GameObject("PriceSection");
-            obj.transform.SetParent(parent, false);
+            float premiumTotal = PREMIUM_PRICE * PAID_THEME_COUNT;
+            float premiumBundle = premiumTotal * (1f - BUNDLE_DISCOUNT);
 
-            LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 55;
-
-            // Bundle price
-            float bundleTotal = PRICE_PER_THEME * PAID_THEME_COUNT;
-            float bundlePrice = bundleTotal * (1f - BUNDLE_DISCOUNT);
-            string priceText = $"${bundlePrice:F2} USD";
-
-            // Try to get real price from store
+            string priceText = $"${premiumBundle:F2}";
             if (PremiumManager.Instance != null)
             {
-                string storePrice = PremiumManager.Instance.GetProductPrice(PremiumProduct.StylesPro);
-                if (!string.IsNullOrEmpty(storePrice))
-                {
-                    priceText = storePrice;
-                }
+                string storePrice = PremiumManager.Instance.GetProductPrice(PremiumProduct.PremiumBundle);
+                if (!string.IsNullOrEmpty(storePrice)) priceText = storePrice;
             }
 
-            TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
-            tmp.text = priceText;
-            tmp.fontSize = FontSizes.Subtitle;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.color = GOLD;
-            tmp.alignment = TextAlignmentOptions.Center;
-
-            // Strikethrough original price below
-            GameObject originalObj = new GameObject("OriginalPrice");
-            originalObj.transform.SetParent(parent, false);
-
-            LayoutElement origLE = originalObj.AddComponent<LayoutElement>();
-            origLE.preferredHeight = 30;
-
-            TextMeshProUGUI origTMP = originalObj.AddComponent<TextMeshProUGUI>();
-            origTMP.text = $"<s>${bundleTotal:F2}</s>  -30%";
-            origTMP.fontSize = 28;
-            origTMP.color = TEXT_SECONDARY;
-            origTMP.alignment = TextAlignmentOptions.Center;
-        }
-
-        private void CreateBuyButton(Transform parent)
-        {
-            GameObject obj = new GameObject("BuyButton");
+            GameObject obj = new GameObject("PremiumBundleButton");
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 56;
+            le.preferredHeight = 70;
             le.flexibleWidth = 1;
 
             Image bg = obj.AddComponent<Image>();
@@ -642,7 +613,7 @@ namespace DigitPark.UI.Panels
 
             buyButton = obj.AddComponent<Button>();
             buyButton.targetGraphic = bg;
-            buyButton.onClick.AddListener(OnBuyClicked);
+            buyButton.onClick.AddListener(OnPremiumBundleClicked);
 
             ColorBlock colors = buyButton.colors;
             colors.normalColor = GOLD;
@@ -650,22 +621,112 @@ namespace DigitPark.UI.Panels
             colors.pressedColor = new Color(0.8f, 0.67f, 0f, 1f);
             buyButton.colors = colors;
 
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(obj.transform, false);
+            // Vertical layout inside button
+            VerticalLayoutGroup vlg = obj.AddComponent<VerticalLayoutGroup>();
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+            vlg.spacing = 2;
+            vlg.padding = new RectOffset(8, 8, 4, 4);
 
-            RectTransform textRT = textObj.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = Vector2.zero;
-            textRT.offsetMax = Vector2.zero;
+            GameObject titleObj = new GameObject("PremiumBundleTitle");
+            titleObj.transform.SetParent(obj.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = AutoLocalizer.Get("styles_premium_bundle_btn");
+            titleTMP.fontSize = FontSizes.Body;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.color = Color.black;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.raycastTarget = false;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = 16;
+            titleTMP.fontSizeMax = FontSizes.Body;
 
-            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = AutoLocalizer.Get("unlock_all_themes");
-            tmp.fontSize = FontSizes.Body;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.color = Color.black;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.raycastTarget = false;
+            GameObject priceObj = new GameObject("PremiumBundlePrice");
+            priceObj.transform.SetParent(obj.transform, false);
+            RectTransform priceRT = priceObj.AddComponent<RectTransform>();
+            TextMeshProUGUI priceTMP = priceObj.AddComponent<TextMeshProUGUI>();
+            priceTMP.text = $"<s>${premiumTotal:F2}</s>  {priceText}  -30%";
+            priceTMP.fontSize = 22;
+            priceTMP.fontStyle = FontStyles.Bold;
+            priceTMP.color = new Color(0.15f, 0.1f, 0f, 1f);
+            priceTMP.alignment = TextAlignmentOptions.Center;
+            priceTMP.raycastTarget = false;
+        }
+
+        private void CreateCompleteBundleButton(Transform parent)
+        {
+            float completeTotal = PREMIUM_PRICE * PAID_THEME_COUNT + EARNABLE_PRICE * EARNABLE_THEME_COUNT;
+            float completeBundle = completeTotal * (1f - BUNDLE_DISCOUNT);
+
+            string priceText = $"${completeBundle:F2}";
+            if (PremiumManager.Instance != null)
+            {
+                string storePrice = PremiumManager.Instance.GetProductPrice(PremiumProduct.CompleteBundle);
+                if (!string.IsNullOrEmpty(storePrice)) priceText = storePrice;
+            }
+
+            GameObject obj = new GameObject("CompleteBundleButton");
+            obj.transform.SetParent(parent, false);
+
+            LayoutElement le = obj.AddComponent<LayoutElement>();
+            le.preferredHeight = 70;
+            le.flexibleWidth = 1;
+
+            // Gradient effect: gold + silver tint
+            Image bg = obj.AddComponent<Image>();
+            Color gradientMix = Color.Lerp(GOLD, SILVER, 0.3f);
+            bg.color = gradientMix;
+
+            Outline outline = obj.AddComponent<Outline>();
+            outline.effectColor = new Color(SILVER.r, SILVER.g, SILVER.b, 0.6f);
+            outline.effectDistance = new Vector2(2, 2);
+
+            Button completeBtn = obj.AddComponent<Button>();
+            completeBtn.targetGraphic = bg;
+            completeBtn.onClick.AddListener(OnCompleteBundleClicked);
+
+            ColorBlock colors = completeBtn.colors;
+            colors.normalColor = gradientMix;
+            colors.highlightedColor = Color.Lerp(gradientMix, Color.white, 0.2f);
+            colors.pressedColor = Color.Lerp(gradientMix, Color.black, 0.2f);
+            completeBtn.colors = colors;
+
+            // Vertical layout inside button
+            VerticalLayoutGroup vlg = obj.AddComponent<VerticalLayoutGroup>();
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+            vlg.spacing = 2;
+            vlg.padding = new RectOffset(8, 8, 4, 4);
+
+            GameObject titleObj = new GameObject("CompleteBundleTitle");
+            titleObj.transform.SetParent(obj.transform, false);
+            RectTransform titleRT = titleObj.AddComponent<RectTransform>();
+            TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = AutoLocalizer.Get("styles_complete_bundle_btn");
+            titleTMP.fontSize = FontSizes.Body;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.color = Color.black;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.raycastTarget = false;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = 16;
+            titleTMP.fontSizeMax = FontSizes.Body;
+
+            GameObject priceObj = new GameObject("CompleteBundlePrice");
+            priceObj.transform.SetParent(obj.transform, false);
+            RectTransform priceRT = priceObj.AddComponent<RectTransform>();
+            TextMeshProUGUI priceTMP = priceObj.AddComponent<TextMeshProUGUI>();
+            priceTMP.text = $"<s>${completeTotal:F2}</s>  {priceText}  -30%";
+            priceTMP.fontSize = 22;
+            priceTMP.fontStyle = FontStyles.Bold;
+            priceTMP.color = new Color(0.15f, 0.1f, 0f, 1f);
+            priceTMP.alignment = TextAlignmentOptions.Center;
+            priceTMP.raycastTarget = false;
         }
 
         private void CreateCancelButton(Transform parent)
@@ -732,10 +793,17 @@ namespace DigitPark.UI.Panels
 
         // ── Button Callbacks ──
 
-        private void OnBuyClicked()
+        private void OnPremiumBundleClicked()
         {
-            Debug.Log("[StylesProPromptPanel] Comprar clickeado - desbloqueando todos los temas pagos");
-            PremiumManager.Instance?.UnlockProduct(PremiumProduct.StylesPro);
+            Debug.Log("[StylesProPromptPanel] Premium Bundle clickeado - 15 temas premium");
+            PremiumManager.Instance?.PurchasePremiumBundle();
+            Hide();
+        }
+
+        private void OnCompleteBundleClicked()
+        {
+            Debug.Log("[StylesProPromptPanel] Complete Bundle clickeado - 19 temas");
+            PremiumManager.Instance?.PurchaseCompleteBundle();
             Hide();
         }
 
