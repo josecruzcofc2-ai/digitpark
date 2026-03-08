@@ -103,6 +103,17 @@ nul
 Assets/Firebase/Plugins/**/*.bundle
 Assets/Firebase/Plugins/**/*.so
 Assets/Firebase/Plugins/**/*.dll
+
+# Firebase credentials (API keys - NEVER commit these)
+**/google-services.json
+**/google-services-desktop.json
+**/GoogleService-Info.plist
+**/google-services.xml
+
+# Keystores
+*.keystore
+*.jks
+
 # Python test files
 *.py
 *.py.meta

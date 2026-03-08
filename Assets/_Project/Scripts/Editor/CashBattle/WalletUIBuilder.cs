@@ -1088,9 +1088,19 @@ namespace DigitPark.Editor
             dpRT.anchorMax = Vector2.one;
             dpRT.offsetMin = Vector2.zero;
             dpRT.offsetMax = Vector2.zero;
-            Image dpBg = depositPanel.AddComponent<Image>();
-            dpBg.color = new Color(0f, 0f, 0f, 0.85f);
-            dpBg.raycastTarget = true;
+
+            // Blocker overlay
+            var dpBlocker = new GameObject("BlockerPanel");
+            dpBlocker.transform.SetParent(depositPanel.transform, false);
+            dpBlocker.transform.SetAsFirstSibling();
+            var dpBlockerRT = dpBlocker.AddComponent<RectTransform>();
+            dpBlockerRT.anchorMin = Vector2.zero;
+            dpBlockerRT.anchorMax = Vector2.one;
+            dpBlockerRT.offsetMin = Vector2.zero;
+            dpBlockerRT.offsetMax = Vector2.zero;
+            var dpBlockerImg = dpBlocker.AddComponent<Image>();
+            dpBlockerImg.color = new Color(0f, 0f, 0f, 0.7f);
+            dpBlockerImg.raycastTarget = true;
 
             // Inner panel - centered modal card with gold neon double glow
             GameObject dpInner = new GameObject("InnerPanel");
@@ -1240,9 +1250,19 @@ namespace DigitPark.Editor
             wpRT.anchorMax = Vector2.one;
             wpRT.offsetMin = Vector2.zero;
             wpRT.offsetMax = Vector2.zero;
-            Image wpBg = withdrawPanel.AddComponent<Image>();
-            wpBg.color = new Color(0f, 0f, 0f, 0.85f);
-            wpBg.raycastTarget = true;
+
+            // Blocker overlay
+            var wpBlocker = new GameObject("BlockerPanel");
+            wpBlocker.transform.SetParent(withdrawPanel.transform, false);
+            wpBlocker.transform.SetAsFirstSibling();
+            var wpBlockerRT = wpBlocker.AddComponent<RectTransform>();
+            wpBlockerRT.anchorMin = Vector2.zero;
+            wpBlockerRT.anchorMax = Vector2.one;
+            wpBlockerRT.offsetMin = Vector2.zero;
+            wpBlockerRT.offsetMax = Vector2.zero;
+            var wpBlockerImg = wpBlocker.AddComponent<Image>();
+            wpBlockerImg.color = new Color(0f, 0f, 0f, 0.7f);
+            wpBlockerImg.raycastTarget = true;
 
             // Inner panel - centered modal card with gold neon double glow
             GameObject wpInner = new GameObject("InnerPanel");
@@ -1431,10 +1451,62 @@ namespace DigitPark.Editor
             Image kycBg = kycPanel.AddComponent<Image>();
             kycBg.color = DARK_BG;
 
+            // Inner container with vertical layout
+            GameObject kycInner = new GameObject("KycInnerContainer");
+            kycInner.transform.SetParent(kycPanel.transform, false);
+            RectTransform kycInnerRT = kycInner.AddComponent<RectTransform>();
+            kycInnerRT.anchorMin = new Vector2(0.1f, 0.25f);
+            kycInnerRT.anchorMax = new Vector2(0.9f, 0.75f);
+            kycInnerRT.offsetMin = Vector2.zero;
+            kycInnerRT.offsetMax = Vector2.zero;
+            VerticalLayoutGroup kycVlg = kycInner.AddComponent<VerticalLayoutGroup>();
+            kycVlg.padding = new RectOffset(30, 30, 40, 40);
+            kycVlg.spacing = 24;
+            kycVlg.childForceExpandWidth = true;
+            kycVlg.childForceExpandHeight = false;
+            kycVlg.childControlWidth = true;
+            kycVlg.childControlHeight = true;
+            kycVlg.childAlignment = TextAnchor.MiddleCenter;
+
+            // Title
+            GameObject kycTitle = new GameObject("KycTitleText");
+            kycTitle.transform.SetParent(kycInner.transform, false);
+            kycTitle.AddComponent<RectTransform>();
+            LayoutElement kycTitleLE = kycTitle.AddComponent<LayoutElement>();
+            kycTitleLE.preferredHeight = 60;
+            TextMeshProUGUI kycTitleTMP = kycTitle.AddComponent<TextMeshProUGUI>();
+            kycTitleTMP.text = "Identity Verification";
+            kycTitleTMP.fontSize = FontSizes.H4;
+            kycTitleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            kycTitleTMP.fontSizeMax = FontSizes.H4;
+            kycTitleTMP.enableAutoSizing = true;
+            kycTitleTMP.color = CYAN;
+            kycTitleTMP.fontStyle = FontStyles.Bold;
+            kycTitleTMP.alignment = TextAlignmentOptions.Center;
+
+            // Explanation text
+            GameObject kycExplanation = new GameObject("KycExplanationText");
+            kycExplanation.transform.SetParent(kycInner.transform, false);
+            kycExplanation.AddComponent<RectTransform>();
+            LayoutElement kycExplLE = kycExplanation.AddComponent<LayoutElement>();
+            kycExplLE.preferredHeight = 80;
+            TextMeshProUGUI kycExplTMP = kycExplanation.AddComponent<TextMeshProUGUI>();
+            kycExplTMP.text = "Verify your identity to enable deposits and withdrawals";
+            kycExplTMP.fontSize = FontSizes.Body;
+            kycExplTMP.fontSizeMin = FontSizes.AutoMinBody;
+            kycExplTMP.fontSizeMax = FontSizes.Body;
+            kycExplTMP.enableAutoSizing = true;
+            kycExplTMP.color = TEXT_SECONDARY;
+            kycExplTMP.fontStyle = FontStyles.Bold;
+            kycExplTMP.alignment = TextAlignmentOptions.Center;
+
+            // Verify button
             GameObject verifyBtn = new GameObject("VerifyKycButton");
-            verifyBtn.transform.SetParent(kycPanel.transform, false);
-            RectTransform vkRT = verifyBtn.AddComponent<RectTransform>();
-            vkRT.sizeDelta = new Vector2(350, 70);
+            verifyBtn.transform.SetParent(kycInner.transform, false);
+            verifyBtn.AddComponent<RectTransform>();
+            LayoutElement vkLE = verifyBtn.AddComponent<LayoutElement>();
+            vkLE.preferredHeight = 70;
+            vkLE.preferredWidth = 350;
             Image vkBg = verifyBtn.AddComponent<Image>();
             vkBg.color = GREEN_DARK;
             Button vkButton = verifyBtn.AddComponent<Button>();
@@ -1537,7 +1609,7 @@ namespace DigitPark.Editor
             closeBtnRT.anchorMax = new Vector2(1, 1);
             closeBtnRT.pivot = new Vector2(1, 1);
             closeBtnRT.sizeDelta = new Vector2(100, 100);
-            closeBtnRT.anchoredPosition = new Vector2(-15, -15);
+            closeBtnRT.anchoredPosition = new Vector2(-30, -15);
             LayoutElement closeBtnLE = closeBtn.AddComponent<LayoutElement>();
             closeBtnLE.ignoreLayout = true;
             Image closeBg = closeBtn.AddComponent<Image>();

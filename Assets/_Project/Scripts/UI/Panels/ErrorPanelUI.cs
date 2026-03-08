@@ -21,6 +21,7 @@ namespace DigitPark.UI.Panels
 
         private Action onAccept;
         private bool listenersConfigured = false;
+        private Sequence _currentSequence;
 
         private void Awake()
         {
@@ -51,6 +52,7 @@ namespace DigitPark.UI.Panels
 
         private void OnDestroy()
         {
+            _currentSequence?.Kill();
             if (acceptButton != null)
                 acceptButton.onClick.RemoveListener(OnAcceptClicked);
         }
@@ -101,11 +103,12 @@ namespace DigitPark.UI.Panels
 
         private void AnimateIn(Transform t)
         {
+            _currentSequence?.Kill();
             t.localScale = Vector3.one * 0.85f;
             var cg = t.GetComponent<CanvasGroup>();
             if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
             cg.alpha = 0f;
-            DOTween.Sequence()
+            _currentSequence = DOTween.Sequence()
                 .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                 .Join(cg.DOFade(1f, 0.25f))
                 .SetUpdate(true);
@@ -113,9 +116,10 @@ namespace DigitPark.UI.Panels
 
         private void AnimateOut(Transform t, Action onComplete)
         {
+            _currentSequence?.Kill();
             var cg = t.GetComponent<CanvasGroup>();
             if (cg == null) { t.gameObject.SetActive(false); onComplete?.Invoke(); return; }
-            DOTween.Sequence()
+            _currentSequence = DOTween.Sequence()
                 .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                 .Join(cg.DOFade(0f, 0.2f))
                 .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })

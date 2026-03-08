@@ -22,6 +22,7 @@ namespace DigitPark.UI.CashBattle
         [SerializeField] private Transform tournamentsContainer;
         [SerializeField] private GameObject tournamentCardPrefab;
         [SerializeField] private TextMeshProUGUI noTournamentsText;
+        [SerializeField] private GameObject emptyState;
 
         [Header("Filter")]
         [SerializeField] private TMP_Dropdown gameFilterDropdown;
@@ -285,6 +286,7 @@ namespace DigitPark.UI.CashBattle
         private void LoadTournaments()
         {
             ShowLoadingIndicator(true);
+            if (emptyState != null) emptyState.SetActive(false);
             if (noTournamentsText != null) noTournamentsText.gameObject.SetActive(false);
 
             // TODO: Load from Triumph API
@@ -433,6 +435,7 @@ namespace DigitPark.UI.CashBattle
             // Show "no tournaments" message if empty
             if (filteredTournaments.Count == 0)
             {
+                if (emptyState != null) emptyState.SetActive(true);
                 if (noTournamentsText != null)
                 {
                     noTournamentsText.gameObject.SetActive(true);
@@ -447,6 +450,7 @@ namespace DigitPark.UI.CashBattle
                 return;
             }
 
+            if (emptyState != null) emptyState.SetActive(false);
             if (noTournamentsText != null) noTournamentsText.gameObject.SetActive(false);
 
             // Create cards

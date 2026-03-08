@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
 using System.Collections;
+using DigitPark.Animations;
 
 namespace DigitPark.Monetization
 {
@@ -136,7 +137,16 @@ namespace DigitPark.Monetization
             OnSceneLoadStarted?.Invoke(sceneName);
 
             Debug.Log($"[SceneNavigator] Navigating from {_previousScene} to {sceneName}");
-            SceneManager.LoadScene(sceneName);
+
+            // Use animated transition if SceneTransitionManager is available
+            if (SceneTransitionManager.Instance != null)
+            {
+                SceneTransitionManager.Instance.FadeTransition(sceneName);
+            }
+            else
+            {
+                SceneManager.LoadScene(sceneName);
+            }
         }
 
         /// <summary>
@@ -182,13 +192,18 @@ namespace DigitPark.Monetization
                 _pendingParams = null;
 
                 Debug.Log($"[SceneNavigator] Going back to {targetScene}");
-                SceneManager.LoadScene(targetScene);
+                if (SceneTransitionManager.Instance != null)
+                    SceneTransitionManager.Instance.FadeTransition(targetScene);
+                else
+                    SceneManager.LoadScene(targetScene);
             }
             else
             {
                 Debug.Log("[SceneNavigator] No previous scene, navigating to MainMenu");
-                // Default: go to main menu
-                SceneManager.LoadScene(Scenes.MAIN_MENU);
+                if (SceneTransitionManager.Instance != null)
+                    SceneTransitionManager.Instance.FadeTransition(Scenes.MAIN_MENU);
+                else
+                    SceneManager.LoadScene(Scenes.MAIN_MENU);
             }
         }
 

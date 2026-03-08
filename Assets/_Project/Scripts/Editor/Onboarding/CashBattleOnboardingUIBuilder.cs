@@ -255,6 +255,9 @@ namespace DigitPark.Editor
             tlTMP.color = GOLD;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.alignment = TextAlignmentOptions.Left;
+            tlTMP.enableAutoSizing = true;
+            tlTMP.fontSizeMin = 22;
+            tlTMP.fontSizeMax = FontSizes.Body;
 
             // Progress Text (center)
             var progressText = FindOrCreate(topBar.transform, "ProgressText");
@@ -293,6 +296,9 @@ namespace DigitPark.Editor
             stTMP.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = 22;
+            stTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[CashBattleOnboardingUI] TopBar creado (ProgressBar + Title + ProgressText + Skip)");
         }
@@ -352,7 +358,7 @@ namespace DigitPark.Editor
             AddContentText(card, "To play with real money, you must:", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
             AddContentSpacer(card, 10);
             AddContentText(card, "\u2713  Be 18 years or older", (int)FontSizes.Body, TEXT_WHITE);
-            AddContentText(card, "\u2713  Verify your identity with Triump\u2122", (int)FontSizes.Body, TEXT_WHITE);
+            AddContentText(card, "\u2713  Verify your identity with Triumph\u2122", (int)FontSizes.Body, TEXT_WHITE);
             AddContentText(card, "\u2713  Confirm your banking information", (int)FontSizes.Body, TEXT_WHITE);
             AddContentSpacer(card, 12);
             AddContentText(card, "100% secure and confidential process", (int)FontSizes.Body, TEXT_SECONDARY, TextAlignmentOptions.Center);
@@ -600,6 +606,9 @@ namespace DigitPark.Editor
             btTMP.color = TEXT_SECONDARY;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
+            btTMP.enableAutoSizing = true;
+            btTMP.fontSizeMin = 22;
+            btTMP.fontSizeMax = FontSizes.Body;
 
             // Next Button (right, gold)
             var nextBtn = FindOrCreate(navPanel.transform, "NextButton");
@@ -627,6 +636,9 @@ namespace DigitPark.Editor
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;
+            ntTMP.enableAutoSizing = true;
+            ntTMP.fontSizeMin = 22;
+            ntTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[CashBattleOnboardingUI] Navigation creado (DotsContainer + Back + Next)");
         }
@@ -648,12 +660,15 @@ namespace DigitPark.Editor
             lRT.offsetMax = Vector2.zero;
 
             var lTMP = GetOrAdd<TextMeshProUGUI>(legal);
-            lTMP.text = "Powered by Triump\u2122 \u2022 Responsible gaming \u2022 18+ only";
+            lTMP.text = "Powered by Triumph\u2122 \u2022 Responsible gaming \u2022 18+ only";
             lTMP.fontSize = FontSizes.Body;
             lTMP.color = TEXT_SECONDARY;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableWordWrapping = true;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = 22;
+            lTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[CashBattleOnboardingUI] LegalText creado");
         }

@@ -279,49 +279,56 @@ namespace DigitPark.CashBattle
 
         private async void OnConfirmNameChange(string newUsername)
         {
-            if (AuthenticationService.Instance == null) return;
-
-            var playerData = AuthenticationService.Instance.GetCurrentPlayerData();
-            if (playerData != null && newUsername == playerData.username)
+            try
             {
-                changeNamePanel?.Hide();
-                return;
-            }
+                if (AuthenticationService.Instance == null) return;
 
-            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
-
-            if (changeCount > 0)
-            {
-                bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
-                if (!spent)
+                var playerData = AuthenticationService.Instance.GetCurrentPlayerData();
+                if (playerData != null && newUsername == playerData.username)
                 {
-                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
-                    changeNamePanel?.SetButtonsInteractable(true);
+                    changeNamePanel?.Hide();
                     return;
                 }
+
+                int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
+
+                if (changeCount > 0)
+                {
+                    bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
+                    if (!spent)
+                    {
+                        errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                        changeNamePanel?.SetButtonsInteractable(true);
+                        return;
+                    }
+                }
+
+                Debug.Log($"[CashProfile] Cambiando nombre a: {newUsername}");
+
+                bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
+
+                if (success)
+                {
+                    Debug.Log("[CashProfile] Nombre actualizado exitosamente");
+                    if (playerData != null) playerData.username = newUsername;
+                    PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
+                    PlayerPrefs.SetString("DisplayName", newUsername);
+                    PlayerPrefs.Save();
+                    changeNamePanel?.Hide();
+
+                    if (usernameText != null)
+                        usernameText.text = newUsername;
+                }
+                else
+                {
+                    Debug.LogError("[CashProfile] Error al actualizar nombre");
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+                }
             }
-
-            Debug.Log($"[CashProfile] Cambiando nombre a: {newUsername}");
-
-            bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
-
-            if (success)
+            catch (System.Exception ex)
             {
-                Debug.Log("[CashProfile] Nombre actualizado exitosamente");
-                if (playerData != null) playerData.username = newUsername;
-                PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
-                PlayerPrefs.SetString("DisplayName", newUsername);
-                PlayerPrefs.Save();
-                changeNamePanel?.Hide();
-
-                if (usernameText != null)
-                    usernameText.text = newUsername;
-            }
-            else
-            {
-                Debug.LogError("[CashProfile] Error al actualizar nombre");
-                changeNamePanel?.SetButtonsInteractable(true);
-                errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+                Debug.LogException(ex);
             }
         }
 

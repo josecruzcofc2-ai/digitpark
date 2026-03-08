@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 using DigitPark.Themes;
 using DigitPark.Managers;
@@ -29,6 +30,7 @@ namespace DigitPark.UI.Components
 
         // Runtime lock icon references (one per dropdown item)
         private List<Image> lockIcons = new List<Image>();
+        private bool wasDropdownOpen = false;
 
         private void Awake()
         {
@@ -48,6 +50,43 @@ namespace DigitPark.UI.Components
         private void Start()
         {
             Initialize();
+        }
+
+        private void Update()
+        {
+            if (dropdown == null) return;
+            bool isOpen = FindDropdownList() != null;
+            if (isOpen && !wasDropdownOpen)
+            {
+                StartCoroutine(UpdateLockIconsDelayed());
+            }
+            wasDropdownOpen = isOpen;
+        }
+
+        private IEnumerator UpdateLockIconsDelayed()
+        {
+            // Wait 2 frames: DropdownScrollFix reparents on frame 1, layout settles on frame 2
+            yield return null;
+            yield return null;
+            UpdateLockIcons();
+        }
+
+        /// <summary>
+        /// Finds the Dropdown List even after DropdownScrollFix reparents it to root Canvas.
+        /// </summary>
+        private Transform FindDropdownList()
+        {
+            // First check direct child (before DropdownScrollFix runs)
+            Transform direct = dropdown.transform.Find("Dropdown List");
+            if (direct != null) return direct;
+
+            // After DropdownScrollFix, it's reparented to root Canvas
+            Canvas rootCanvas = dropdown.GetComponentInParent<Canvas>()?.rootCanvas;
+            if (rootCanvas != null)
+            {
+                return rootCanvas.transform.Find("Dropdown List");
+            }
+            return null;
         }
 
         private void OnEnable()
@@ -97,11 +136,7 @@ namespace DigitPark.UI.Components
             {
                 string displayName = theme.themeName;
 
-                // Add lock suffix for locked themes (spacing for icon)
-                if (theme.isPremium && !IsThemeUnlocked(theme))
-                {
-                    displayName += "  \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
-                }
+                // No padding needed - lock icon is positioned absolutely via RectTransform
 
                 options.Add(new TMP_Dropdown.OptionData(displayName));
             }
@@ -232,20 +267,29 @@ namespace DigitPark.UI.Components
 
             var themes = ThemeManager.Instance.AvailableThemes;
 
-            // Find all items in the dropdown list
-            Transform dropdownList = dropdown.transform.Find("Dropdown List");
+            // Find dropdown list (may be reparented to root Canvas by DropdownScrollFix)
+            Transform dropdownList = FindDropdownList();
             if (dropdownList == null) return;
 
-            Transform content = dropdownList.Find("Content");
+            // TMP_Dropdown structure: Dropdown List > Viewport > Content
+            Transform content = dropdownList.Find("Viewport/Content");
+            if (content == null)
+                content = dropdownList.Find("Content");
             if (content == null) return;
 
-            for (int i = 0; i < content.childCount && i < themes.Count; i++)
+            // TMP_Dropdown keeps the original Item template as first child (inactive).
+            // Actual option items start at index 1.
+            int themeIndex = 0;
+            for (int i = 0; i < content.childCount && themeIndex < themes.Count; i++)
             {
                 Transform item = content.GetChild(i);
                 if (item == null) continue;
 
-                bool showLock = themes[i].isPremium && !IsThemeUnlocked(themes[i]);
-                Sprite lockSprite = GetLockSpriteForTheme(themes[i]);
+                // Skip the inactive template item
+                if (!item.gameObject.activeSelf) continue;
+
+                bool showLock = themes[themeIndex].isPremium && !IsThemeUnlocked(themes[themeIndex]);
+                Sprite lockSprite = GetLockSpriteForTheme(themes[themeIndex]);
 
                 // Find or create lock icon
                 Transform lockTransform = item.Find("LockIcon");
@@ -278,6 +322,17 @@ namespace DigitPark.UI.Components
                     lockImg.sprite = lockSprite;
                     lockImg.gameObject.SetActive(showLock);
                 }
+
+                // Adjust Item Label width: shrink when lock visible, full width when hidden
+                Transform itemLabel = item.Find("Item Label");
+                if (itemLabel != null)
+                {
+                    RectTransform labelRT = itemLabel.GetComponent<RectTransform>();
+                    if (labelRT != null)
+                        labelRT.offsetMax = new Vector2(showLock ? -40 : -10, labelRT.offsetMax.y);
+                }
+
+                themeIndex++;
             }
         }
     }

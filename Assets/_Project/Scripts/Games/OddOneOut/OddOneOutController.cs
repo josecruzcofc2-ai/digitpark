@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
+using DigitPark.Animations;
 
 namespace DigitPark.Games
 {
@@ -67,6 +68,7 @@ namespace DigitPark.Games
         // Combo System
         private int currentCombo = 0;
         private int maxCombo = 0;
+        private ComboVisualController comboVisualController;
 
         // Penalty
         private float penaltyTime;
@@ -90,6 +92,11 @@ namespace DigitPark.Games
         {
             base.Start();
             SetupButtons();
+
+            // Initialize combo visual controller
+            comboVisualController = gameObject.AddComponent<ComboVisualController>();
+            Canvas canvas = GetComponentInParent<Canvas>();
+            comboVisualController.Initialize(canvas);
 
             if (IsPracticeMode())
             {
@@ -225,11 +232,12 @@ namespace DigitPark.Games
 
         private void StartGameWithCountdown()
         {
-            if (useCountdown && countdownUI != null)
+            if (useCountdown)
             {
                 ShowQuestionMarks();
                 EnableAllButtons(false);
-                countdownUI.StartCountdown(OnCountdownComplete);
+                Canvas canvas = GetComponentInParent<Canvas>();
+                CountdownAnimator.Play(canvas, OnCountdownComplete);
             }
             else
             {
@@ -423,6 +431,7 @@ namespace DigitPark.Games
 
             // Actualizar combo display
             UpdateComboDisplay();
+            comboVisualController?.OnComboChanged(currentCombo);
 
             // Show green feedback
             ShowFeedback(AutoLocalizer.Get("oddoneout_correct"), new Color(0.3f, 1f, 0.5f, 1f));
@@ -440,6 +449,7 @@ namespace DigitPark.Games
             UpdateTimer();
 
             // Resetear combo
+            comboVisualController?.OnComboReset();
             currentCombo = 0;
             UpdateComboDisplay();
 

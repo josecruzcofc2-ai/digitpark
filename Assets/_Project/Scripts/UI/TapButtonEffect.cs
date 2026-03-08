@@ -15,7 +15,6 @@ namespace DigitPark.UI
         [Header("References")]
         [SerializeField] private Image outerRing;
         [SerializeField] private Image innerBorder;
-        [SerializeField] private Image innerFill;
         [SerializeField] private TMP_Text tapText;
         [SerializeField] private RectTransform buttonTransform;
 
@@ -247,9 +246,6 @@ namespace DigitPark.UI
 
             if (innerBorder == null)
                 innerBorder = transform.Find("TapButtonImage")?.GetComponent<Image>();
-
-            if (innerFill == null)
-                innerFill = transform.Find("InnerFill")?.GetComponent<Image>();
 
             if (tapText == null)
                 tapText = transform.Find("TapText")?.GetComponent<TMP_Text>();

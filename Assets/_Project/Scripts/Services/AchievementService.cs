@@ -22,10 +22,6 @@ namespace DigitPark.Services
 
         // Estado
         private Dictionary<string, AchievementProgress> _progress = new Dictionary<string, AchievementProgress>();
-        #pragma warning disable 0414
-        private bool _isInitialized = false;
-        #pragma warning restore 0414
-
         // Eventos
         public event Action<AchievementData> OnAchievementUnlocked;
         public event Action<AchievementData, float> OnAchievementProgress; // (logro, progreso 0-1)
@@ -102,7 +98,6 @@ namespace DigitPark.Services
             // Cargar progreso
             LoadProgress();
 
-            _isInitialized = true;
             Debug.Log($"[Achievements] Inicializado con {achievements.Count} logros, {UnlockedAchievements.Count} desbloqueados");
         }
 

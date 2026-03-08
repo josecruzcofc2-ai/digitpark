@@ -32,6 +32,10 @@ namespace DigitPark.DevTools
 
         private void Awake()
         {
+#if !(UNITY_EDITOR || DEVELOPMENT_BUILD)
+            Destroy(gameObject);
+            return;
+#endif
             if (transform.parent != null)
                 transform.SetParent(null);
             DontDestroyOnLoad(gameObject);

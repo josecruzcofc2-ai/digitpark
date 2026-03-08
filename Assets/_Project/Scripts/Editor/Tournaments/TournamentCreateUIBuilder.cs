@@ -683,13 +683,13 @@ namespace DigitPark.Editor
             RectTransform popupRT = popup.GetComponent<RectTransform>();
             popupRT.anchorMin = new Vector2(0.5f, 0.5f);
             popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRT.sizeDelta = new Vector2(460, 300);
+            popupRT.sizeDelta = new Vector2(520, 320);
             SetImage(popup, POPUP_BG);
             AddOutline(popup, CYAN_DARK, 2);
 
             VerticalLayoutGroup vlg = popup.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 20;
-            vlg.padding = new RectOffset(30, 30, 25, 25);
+            vlg.padding = new RectOffset(40, 40, 25, 25);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;

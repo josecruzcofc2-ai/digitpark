@@ -158,6 +158,16 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             CancelInvoke();
+            DOTween.Kill(dailyProgressBar);
+            if (_emptyStatePanel != null)
+            {
+                var icon = _emptyStatePanel.transform.Find("Icon");
+                if (icon != null) icon.DOKill();
+            }
+            foreach (var item in spawnedItems)
+            {
+                if (item != null) DOTween.Kill(item.transform);
+            }
         }
 
         private void LoadNeonIcons()
@@ -535,10 +545,7 @@ namespace DigitPark.Managers
                 dailyProgressText.text = L("ms_progress", completedDaily, dailyMissionsRequired);
             }
 
-            if (bonusRewardText)
-            {
-                bonusRewardText.text = L("ms_bonus", dailyBonusReward);
-            }
+            // Bonus row removed from UI — markers on progress bar show rewards instead
 
             bool canClaimBonus = completedDaily >= dailyMissionsRequired &&
                                 PlayerPrefs.GetInt("DailyBonusClaimed", 0) == 0;
@@ -650,14 +657,7 @@ namespace DigitPark.Managers
             iconLE.preferredHeight = 64;
             var iconImg = iconObj.AddComponent<Image>();
             iconImg.preserveAspect = true;
-            iconImg.color = new Color(0.3f, 0.3f, 0.35f);
-
-            Sprite lockedSprite = Resources.Load<Sprite>("Icons/MissionLockedIcon");
-            if (lockedSprite != null)
-            {
-                iconImg.sprite = lockedSprite;
-                iconImg.color = Color.white;
-            }
+            iconImg.color = new Color(0.4f, 0.4f, 0.5f, 0.6f);
 
             var titleObj = new GameObject("Title");
             titleObj.transform.SetParent(_emptyStatePanel.transform, false);
@@ -673,11 +673,11 @@ namespace DigitPark.Managers
             var subObj = new GameObject("Subtitle");
             subObj.transform.SetParent(_emptyStatePanel.transform, false);
             var subLE = subObj.AddComponent<LayoutElement>();
-            subLE.preferredHeight = 22;
+            subLE.preferredHeight = 28;
             var subText = subObj.AddComponent<TMPro.TextMeshProUGUI>();
             subText.text = L("ms_refresh_in", UIPolish.FormatTimerHHMMSS(0, 0, 0));
-            subText.fontSize = FontSizes.Debug;
-            subText.color = new Color(0.4f, 0.4f, 0.45f);
+            subText.fontSize = FontSizes.BodySmall;
+            subText.color = new Color(0.55f, 0.55f, 0.6f);
             subText.alignment = TMPro.TextAlignmentOptions.Center;
 
             spawnedItems.Add(_emptyStatePanel);
@@ -766,7 +766,13 @@ namespace DigitPark.Managers
         {
             foreach (var item in spawnedItems)
             {
-                if (item) Destroy(item);
+                if (item)
+                {
+                    DOTween.Kill(item.transform);
+                    var cg = item.GetComponent<CanvasGroup>();
+                    if (cg != null) DOTween.Kill(cg);
+                    Destroy(item);
+                }
             }
             spawnedItems.Clear();
 
@@ -835,7 +841,7 @@ namespace DigitPark.Managers
             item.transform.SetParent(missionsContainer, false);
 
             var rt = item.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(350, 110);
+            rt.sizeDelta = new Vector2(350, 200);
 
             var image = item.AddComponent<Image>();
             UIPolish.ApplyRoundedCorners(image);

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Animations;
 using DigitPark.Monetization;
 
 namespace DigitPark.Editor
@@ -262,6 +263,12 @@ namespace DigitPark.Editor
             // Use a circle sprite for round badge appearance
             badgeImg.type = Image.Type.Sliced;
             badgeImg.pixelsPerUnitMultiplier = 2f;
+
+            // BadgeAnimator: pop-in entrance + continuous pulse
+            var badgeAnim = GetOrAdd<BadgeAnimator>(badge);
+            var badgeSO = new SerializedObject(badgeAnim);
+            var autoPulseProp = badgeSO.FindProperty("autoPulse");
+            if (autoPulseProp != null) { autoPulseProp.boolValue = true; badgeSO.ApplyModifiedProperties(); }
 
             var badgeText = FindOrCreate(badge.transform, "BadgeText");
             var btRT = GetOrAdd<RectTransform>(badgeText);
@@ -995,6 +1002,18 @@ namespace DigitPark.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+
+            // Blocker overlay
+            var blocker = FindOrCreate(panel.transform, "BlockerPanel");
+            blocker.transform.SetAsFirstSibling();
+            var blockerRT = GetOrAdd<RectTransform>(blocker);
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            var blockerImg = GetOrAdd<Image>(blocker);
+            blockerImg.color = new Color(0f, 0f, 0f, 0.7f);
+            blockerImg.raycastTarget = true;
 
             var overlay = FindOrCreate(panel.transform, "Overlay");
             var ovRT = GetOrAdd<RectTransform>(overlay);

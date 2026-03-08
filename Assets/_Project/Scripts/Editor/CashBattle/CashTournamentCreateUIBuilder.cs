@@ -749,7 +749,7 @@ namespace DigitPark.Editor
             dispTMP.alignment = TextAlignmentOptions.Right;
             dispTMP.enableWordWrapping = false;
             dispTMP.enableAutoSizing = true;
-            dispTMP.fontSizeMin = 10;
+            dispTMP.fontSizeMin = 22;
             dispTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -819,7 +819,7 @@ namespace DigitPark.Editor
             tlTMP.alignment = TextAlignmentOptions.Left;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.enableAutoSizing = true;
-            tlTMP.fontSizeMin = 10;
+            tlTMP.fontSizeMin = 22;
             tlTMP.fontSizeMax = FontSizes.Body;
 
             // TimePicker Dropdown
@@ -892,7 +892,7 @@ namespace DigitPark.Editor
             slTMP.alignment = TextAlignmentOptions.Left;
             slTMP.fontStyle = FontStyles.Bold;
             slTMP.enableAutoSizing = true;
-            slTMP.fontSizeMin = 10;
+            slTMP.fontSizeMin = 22;
             slTMP.fontSizeMax = FontSizes.Body;
 
             // Private Toggle Row
@@ -920,7 +920,7 @@ namespace DigitPark.Editor
             plTMP.alignment = TextAlignmentOptions.Left;
             plTMP.fontStyle = FontStyles.Bold;
             plTMP.enableAutoSizing = true;
-            plTMP.fontSizeMin = 10;
+            plTMP.fontSizeMin = 22;
             plTMP.fontSizeMax = FontSizes.Body;
 
             // Private Code Input (hidden by default)
@@ -966,7 +966,7 @@ namespace DigitPark.Editor
             pcPhText.alignment = TextAlignmentOptions.Left;
             pcPhText.fontStyle = FontStyles.Bold;
             pcPhText.enableAutoSizing = true;
-            pcPhText.fontSizeMin = 10;
+            pcPhText.fontSizeMin = 22;
             pcPhText.fontSizeMax = FontSizes.Body;
 
             TMP_InputField pcInput = privateCodeBg.AddComponent<TMP_InputField>();
@@ -1060,7 +1060,7 @@ namespace DigitPark.Editor
             feeTMP.fontStyle = FontStyles.Bold;
             feeTMP.raycastTarget = false;
             feeTMP.enableAutoSizing = true;
-            feeTMP.fontSizeMin = 10;
+            feeTMP.fontSizeMin = 22;
             feeTMP.fontSizeMax = FontSizes.Body;
 
             // CreateButton
@@ -1103,7 +1103,7 @@ namespace DigitPark.Editor
             btnTMP.fontStyle = FontStyles.Bold;
             btnTMP.alignment = TextAlignmentOptions.Center;
             btnTMP.enableAutoSizing = true;
-            btnTMP.fontSizeMin = 10;
+            btnTMP.fontSizeMin = 22;
             btnTMP.fontSizeMax = FontSizes.Body;
         }
 

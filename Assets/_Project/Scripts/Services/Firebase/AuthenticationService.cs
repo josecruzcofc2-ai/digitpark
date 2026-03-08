@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Data;
@@ -98,6 +100,22 @@ namespace DigitPark.Services.Firebase
         {
             Debug.Log("[Auth] Modo Simulación activado");
             CheckForSavedUserSimulation();
+        }
+
+        /// <summary>
+        /// Hashes password with SHA256 so it's never stored in plain text in PlayerPrefs.
+        /// Simulation-only; production uses Firebase Auth which handles hashing server-side.
+        /// </summary>
+        private static string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                var sb = new StringBuilder(64);
+                foreach (byte b in bytes)
+                    sb.Append(b.ToString("x2"));
+                return sb.ToString();
+            }
         }
 
         private void OnAuthStateChanged(object sender, EventArgs e)
@@ -730,9 +748,9 @@ namespace DigitPark.Services.Firebase
                 }
 
                 string userId = PlayerPrefs.GetString(userKey);
-                string savedPassword = PlayerPrefs.GetString($"SimPassword_{userId}", "");
+                string savedHash = PlayerPrefs.GetString($"SimPassword_{userId}", "");
 
-                if (password != savedPassword)
+                if (HashPassword(password) != savedHash)
                 {
                     OnLoginFailed?.Invoke("Contraseña incorrecta");
                     return false;
@@ -785,7 +803,7 @@ namespace DigitPark.Services.Firebase
 
                 PlayerPrefs.SetString($"SimUser_{newUserId}", JsonUtility.ToJson(currentPlayerData));
                 PlayerPrefs.SetString(emailKey, newUserId);
-                PlayerPrefs.SetString($"SimPassword_{newUserId}", password);
+                PlayerPrefs.SetString($"SimPassword_{newUserId}", HashPassword(password));
                 PlayerPrefs.SetString("SavedUserId", newUserId);
                 PlayerPrefs.SetInt("RememberMe", 1);
                 PlayerPrefs.Save();

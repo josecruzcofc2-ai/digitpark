@@ -198,6 +198,9 @@ namespace DigitPark.Editor.AutoAssigners
             if (noTournamentsT == null) noTournamentsT = FindTextByDeep(root, "EmptyStateText");
             AssignReference(so, "noTournamentsText", noTournamentsT);
 
+            Transform emptyStateT = FindDeep(root, "EmptyState");
+            AssignReference(so, "emptyState", emptyStateT != null ? emptyStateT.gameObject : null);
+
             // Filters
             Transform gameFilterT = FindDeep(root, "GameFilterDropdown");
             AssignReference(so, "gameFilterDropdown", gameFilterT != null ? gameFilterT.GetComponent<TMP_Dropdown>() : null);

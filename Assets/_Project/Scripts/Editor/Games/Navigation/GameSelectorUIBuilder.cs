@@ -445,7 +445,7 @@ namespace DigitPark.Editor
 
             TextMeshProUGUI rulesTmp = rulesText.GetComponent<TextMeshProUGUI>();
             if (rulesTmp == null) rulesTmp = rulesText.AddComponent<TextMeshProUGUI>();
-            rulesTmp.text = "• Rule 1\n• Rule 2\n• Rule 3"; // Placeholder
+            rulesTmp.text = "• Answer as many questions correctly as possible\n• Faster answers earn more points\n• Wrong answers reduce your score";
             rulesTmp.fontSize = FontSizes.Body; // Más grande para mejor legibilidad
             rulesTmp.fontStyle = FontStyles.Bold; // Negrita
             rulesTmp.color = new Color(0.9f, 0.9f, 0.9f, 1f); // Un poco más brillante

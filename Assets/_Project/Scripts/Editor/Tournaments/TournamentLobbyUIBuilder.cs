@@ -1271,7 +1271,7 @@ namespace DigitPark.Editor
             RectTransform popupRT = GetOrAddComponent<RectTransform>(popup);
             popupRT.anchorMin = new Vector2(0.5f, 0.5f);
             popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRT.sizeDelta = new Vector2(500, 450);
+            popupRT.sizeDelta = new Vector2(520, 490);
 
             Image popupBg = GetOrAddComponent<Image>(popup);
             popupBg.color = POPUP_BG;
@@ -1279,7 +1279,7 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(popup);
             vlg.spacing = 20;
-            vlg.padding = new RectOffset(30, 30, 25, 25);
+            vlg.padding = new RectOffset(35, 35, 25, 35);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
@@ -1358,8 +1358,11 @@ namespace DigitPark.Editor
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Right;
+            amountText.enableAutoSizing = true;
+            amountText.fontSizeMin = 22;
+            amountText.fontSizeMax = FontSizes.H3;
             LayoutElement amountLE = GetOrAddComponent<LayoutElement>(amountObj);
-            amountLE.minWidth = 100;
+            amountLE.minWidth = 120;
         }
 
         // ==================== LEAVE CONFIRM POPUP ====================
@@ -1380,7 +1383,7 @@ namespace DigitPark.Editor
             RectTransform popupRT = GetOrAddComponent<RectTransform>(popup);
             popupRT.anchorMin = new Vector2(0.5f, 0.5f);
             popupRT.anchorMax = new Vector2(0.5f, 0.5f);
-            popupRT.sizeDelta = new Vector2(450, 280);
+            popupRT.sizeDelta = new Vector2(510, 300);
 
             Image popupBg = GetOrAddComponent<Image>(popup);
             popupBg.color = POPUP_BG;
@@ -1388,7 +1391,7 @@ namespace DigitPark.Editor
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(popup);
             vlg.spacing = 20;
-            vlg.padding = new RectOffset(30, 30, 30, 30);
+            vlg.padding = new RectOffset(40, 40, 30, 30);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;
@@ -1403,6 +1406,9 @@ namespace DigitPark.Editor
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = BUTTON_DANGER;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.H3;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
             titleLE.minHeight = 40;
 
@@ -1414,6 +1420,9 @@ namespace DigitPark.Editor
             msgText.fontStyle = FontStyles.Bold;
             msgText.color = TEXT_PRIMARY;
             msgText.alignment = TextAlignmentOptions.Center;
+            msgText.enableAutoSizing = true;
+            msgText.fontSizeMin = FontSizes.AutoMinBody;
+            msgText.fontSizeMax = FontSizes.Subtitle;
             LayoutElement msgLE = GetOrAddComponent<LayoutElement>(msgObj);
             msgLE.minHeight = 60;
 

@@ -288,50 +288,57 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnLoginButtonClicked()
         {
-            Debug.Log("[Login] ===== BOTÓN LOGIN PRESIONADO =====");
-
-            if (isLoggingIn)
+            try
             {
-                Debug.Log("[Login] Ya está intentando login, ignorando...");
-                return;
+                Debug.Log("[Login] ===== BOTÓN LOGIN PRESIONADO =====");
+
+                if (isLoggingIn)
+                {
+                    Debug.Log("[Login] Ya está intentando login, ignorando...");
+                    return;
+                }
+
+                // Validar campos
+                if (emailInput == null || passwordInput == null)
+                {
+                    Debug.LogError("[Login] emailInput o passwordInput son NULL!");
+                    return;
+                }
+
+                string email = emailInput.text.Trim();
+                string password = passwordInput.text;
+
+                Debug.Log($"[Login] Email: {email}, Password length: {password.Length}");
+
+                if (!ValidateLoginInputs(email, password))
+                {
+                    return;
+                }
+
+                isLoggingIn = true;
+                ShowLoading(true);
+
+                Debug.Log($"[Login] Intentando login para: {email}");
+
+                // Intentar login
+                bool success = await AuthenticationService.Instance.LoginWithEmail(
+                    email,
+                    password,
+                    rememberToggle != null && rememberToggle.isOn
+                );
+
+                isLoggingIn = false;
+                ShowLoading(false);
+
+                if (!success)
+                {
+                    // El error se maneja en OnLoginFailed
+                    Debug.LogWarning("[Login] Login fallido");
+                }
             }
-
-            // Validar campos
-            if (emailInput == null || passwordInput == null)
+            catch (System.Exception ex)
             {
-                Debug.LogError("[Login] emailInput o passwordInput son NULL!");
-                return;
-            }
-
-            string email = emailInput.text.Trim();
-            string password = passwordInput.text;
-
-            Debug.Log($"[Login] Email: {email}, Password length: {password.Length}");
-
-            if (!ValidateLoginInputs(email, password))
-            {
-                return;
-            }
-
-            isLoggingIn = true;
-            ShowLoading(true);
-
-            Debug.Log($"[Login] Intentando login para: {email}");
-
-            // Intentar login
-            bool success = await AuthenticationService.Instance.LoginWithEmail(
-                email,
-                password,
-                rememberToggle != null && rememberToggle.isOn
-            );
-
-            isLoggingIn = false;
-            ShowLoading(false);
-
-            if (!success)
-            {
-                // El error se maneja en OnLoginFailed
-                Debug.LogWarning("[Login] Login fallido");
+                Debug.LogException(ex);
             }
         }
 
@@ -376,25 +383,32 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnGoogleLoginClicked()
         {
-            if (isLoggingIn) return;
-
-            isLoggingIn = true;
-            ShowLoading(true);
-
-            Debug.Log("[Login] Intentando login con Google");
-
-            bool success = await AuthenticationService.Instance.LoginWithGoogle();
-
-            isLoggingIn = false;
-            ShowLoading(false);
-
-            if (success)
+            try
             {
-                AnalyticsService.Instance?.LogLogin("google");
+                if (isLoggingIn) return;
+
+                isLoggingIn = true;
+                ShowLoading(true);
+
+                Debug.Log("[Login] Intentando login con Google");
+
+                bool success = await AuthenticationService.Instance.LoginWithGoogle();
+
+                isLoggingIn = false;
+                ShowLoading(false);
+
+                if (success)
+                {
+                    AnalyticsService.Instance?.LogLogin("google");
+                }
+                else
+                {
+                    ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+                }
             }
-            else
+            catch (System.Exception ex)
             {
-                ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+                Debug.LogException(ex);
             }
         }
 
@@ -403,25 +417,32 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnAppleLoginClicked()
         {
-            if (isLoggingIn) return;
-
-            isLoggingIn = true;
-            ShowLoading(true);
-
-            Debug.Log("[Login] Intentando login con Apple");
-
-            bool success = await AuthenticationService.Instance.LoginWithApple();
-
-            isLoggingIn = false;
-            ShowLoading(false);
-
-            if (success)
+            try
             {
-                AnalyticsService.Instance?.LogLogin("apple");
+                if (isLoggingIn) return;
+
+                isLoggingIn = true;
+                ShowLoading(true);
+
+                Debug.Log("[Login] Intentando login con Apple");
+
+                bool success = await AuthenticationService.Instance.LoginWithApple();
+
+                isLoggingIn = false;
+                ShowLoading(false);
+
+                if (success)
+                {
+                    AnalyticsService.Instance?.LogLogin("apple");
+                }
+                else
+                {
+                    ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+                }
             }
-            else
+            catch (System.Exception ex)
             {
-                ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+                Debug.LogException(ex);
             }
         }
 

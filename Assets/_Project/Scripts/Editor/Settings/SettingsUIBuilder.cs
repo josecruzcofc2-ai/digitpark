@@ -431,11 +431,14 @@ namespace DigitPark.Editor
             if (themes == null || themes.Length == 0)
                 return new[] { "Neon Dark" };
 
+            // Order: 1) Neon Dark (free), 2) Earnable (silver lock), 3) Premium (gold lock)
             var sorted = new List<DigitPark.Themes.ThemeData>(themes);
             sorted.Sort((a, b) =>
             {
-                if (a.themeId == "neon_dark") return -1;
-                if (b.themeId == "neon_dark") return 1;
+                int GroupOf(DigitPark.Themes.ThemeData t) =>
+                    t.themeId == "neon_dark" ? 0 : (!t.isPremium ? 0 : (t.isEarnable ? 1 : 2));
+                int cmp = GroupOf(a).CompareTo(GroupOf(b));
+                if (cmp != 0) return cmp;
                 return string.Compare(a.themeName, b.themeName, System.StringComparison.Ordinal);
             });
 
@@ -535,6 +538,9 @@ namespace DigitPark.Editor
             lockImg.preserveAspect = true;
             lockImg.raycastTarget = false;
 
+            // Start hidden - ThemeDropdownController.UpdateLockIcons() will show for locked themes
+            lockObj.SetActive(false);
+
             // Shrink item label to make room for lock icon
             Transform itemLabel = item.Find("Item Label");
             if (itemLabel != null)
@@ -625,7 +631,7 @@ namespace DigitPark.Editor
             blockerRT.offsetMin = Vector2.zero;
             blockerRT.offsetMax = Vector2.zero;
             Image blockerImg = blocker.AddComponent<Image>();
-            blockerImg.color = new Color(0, 0, 0, 0.7f);
+            blockerImg.color = new Color(0, 0, 0, 0.85f);
             blocker.AddComponent<Button>(); // Close on tap outside
 
             // Panel card
@@ -693,7 +699,7 @@ namespace DigitPark.Editor
             blockerRT.offsetMin = Vector2.zero;
             blockerRT.offsetMax = Vector2.zero;
             Image blockerImg = blocker.AddComponent<Image>();
-            blockerImg.color = new Color(0, 0, 0, 0.7f);
+            blockerImg.color = new Color(0, 0, 0, 0.85f);
 
             // Card
             GameObject card = new GameObject("Panel");
@@ -879,14 +885,14 @@ namespace DigitPark.Editor
             blockerRT.offsetMin = Vector2.zero;
             blockerRT.offsetMax = Vector2.zero;
             Image blockerImg = blocker.AddComponent<Image>();
-            blockerImg.color = new Color(0, 0, 0, 0.7f);
+            blockerImg.color = new Color(0, 0, 0, 0.85f);
 
             // Card (compact confirm dialog)
             GameObject card = new GameObject("Panel");
             card.transform.SetParent(panelRoot.transform, false);
             RectTransform cardRT = card.AddComponent<RectTransform>();
-            cardRT.anchorMin = new Vector2(0.06f, 0.33f);
-            cardRT.anchorMax = new Vector2(0.94f, 0.67f);
+            cardRT.anchorMin = new Vector2(0.06f, 0.28f);
+            cardRT.anchorMax = new Vector2(0.94f, 0.68f);
             cardRT.offsetMin = Vector2.zero;
             cardRT.offsetMax = Vector2.zero;
             Image cardBg = card.AddComponent<Image>();

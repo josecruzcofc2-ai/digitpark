@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections.Generic;
 using DigitPark.Data;
 using DigitPark.Localization;
 
@@ -80,9 +81,15 @@ namespace DigitPark.UI.Items
             if (titleText) titleText.text = title;
             if (descriptionText) descriptionText.text = description;
 
-            // Icon
-            if (missionIcon && definition.icon != null)
-                missionIcon.sprite = definition.icon;
+            // Icon - load by actionType category, fallback to SO icon
+            if (missionIcon)
+            {
+                Sprite categoryIcon = GetActionTypeIcon(definition.actionType);
+                if (definition.icon != null)
+                    missionIcon.sprite = definition.icon;
+                else if (categoryIcon != null)
+                    missionIcon.sprite = categoryIcon;
+            }
 
             if (iconGlow)
                 iconGlow.color = GetCategoryColor(definition.category) * new Color(1f, 1f, 1f, 0.3f);
@@ -223,6 +230,40 @@ namespace DigitPark.UI.Items
                 MissionDifficulty.Hard => HARD_COLOR,
                 _ => EASY_COLOR
             };
+        }
+
+        private static readonly Dictionary<MissionActionType, string> ActionTypeIconPaths = new Dictionary<MissionActionType, string>
+        {
+            { MissionActionType.PlayGames, "Icons/Missions/ms_play" },
+            { MissionActionType.WinGames, "Icons/Missions/ms_trophy" },
+            { MissionActionType.PlaySpecificGame, "Icons/Missions/ms_game" },
+            { MissionActionType.WinSpecificGame, "Icons/Missions/ms_trophy" },
+            { MissionActionType.ReachScore, "Icons/Missions/ms_star" },
+            { MissionActionType.AccumulateScore, "Icons/Missions/ms_star" },
+            { MissionActionType.PrecisionGame, "Icons/Missions/ms_target" },
+            { MissionActionType.PlayAllGameTypes, "Icons/Missions/ms_grid" },
+            { MissionActionType.WinStreak, "Icons/Missions/ms_flame" },
+            { MissionActionType.CompleteCognitiveSprint, "Icons/Missions/ms_brain" },
+            { MissionActionType.SpendDigitCoins, "Icons/Missions/ms_coin" },
+            { MissionActionType.EarnDigitCoins, "Icons/Missions/ms_coin" },
+            { MissionActionType.PlayTournament, "Icons/Missions/ms_cup" },
+            { MissionActionType.InviteFriend, "Icons/Missions/ms_friend" },
+        };
+
+        private static Dictionary<string, Sprite> _iconCache = new Dictionary<string, Sprite>();
+
+        private Sprite GetActionTypeIcon(MissionActionType actionType)
+        {
+            if (!ActionTypeIconPaths.TryGetValue(actionType, out string path))
+                return null;
+
+            if (_iconCache.TryGetValue(path, out Sprite cached))
+                return cached;
+
+            Sprite sprite = Resources.Load<Sprite>(path);
+            if (sprite != null)
+                _iconCache[path] = sprite;
+            return sprite;
         }
 
         private string L(string key)

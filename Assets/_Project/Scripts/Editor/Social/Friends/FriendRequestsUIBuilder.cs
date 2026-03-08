@@ -622,7 +622,7 @@ namespace DigitPark.Editor
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
             tTMP.enableAutoSizing = true;
-            tTMP.fontSizeMin = 20f;
+            tTMP.fontSizeMin = 22f;
             tTMP.fontSizeMax = FontSizes.Caption;
 
             return btn;

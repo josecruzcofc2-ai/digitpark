@@ -474,15 +474,22 @@ namespace DigitPark.CashBattle
 
         private async void OnDepositOptionSelected(DepositOption option)
         {
-            Debug.Log($"[CashWalletScene] Deposit selected: ${option.amount}");
-
-            // Show loading
-            ShowLoading(true);
-
-            // Start deposit through WalletManager (async)
-            if (WalletManager.Instance != null)
+            try
             {
-                await WalletManager.Instance.InitiateDeposit(option, selectedPaymentMethod);
+                Debug.Log($"[CashWalletScene] Deposit selected: ${option.amount}");
+
+                // Show loading
+                ShowLoading(true);
+
+                // Start deposit through WalletManager (async)
+                if (WalletManager.Instance != null)
+                {
+                    await WalletManager.Instance.InitiateDeposit(option, selectedPaymentMethod);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
             }
         }
 

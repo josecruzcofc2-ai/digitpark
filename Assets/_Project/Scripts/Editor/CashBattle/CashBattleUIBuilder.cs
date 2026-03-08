@@ -1931,8 +1931,18 @@ namespace DigitPark.Editor
             rt.offsetMin = new Vector2(0, 0);
             rt.offsetMax = new Vector2(0, -120);
 
-            Image overlay = panel.AddComponent<Image>();
-            overlay.color = new Color(0, 0, 0, 0.7f);
+            // Blocker overlay
+            var blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(panel.transform, false);
+            blocker.transform.SetAsFirstSibling();
+            var blockerRT = blocker.AddComponent<RectTransform>();
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            var blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0f, 0f, 0f, 0.7f);
+            blockerImg.raycastTarget = true;
 
             // Content box
             GameObject content = new GameObject("Content");
@@ -2053,9 +2063,18 @@ namespace DigitPark.Editor
             rt.offsetMin = new Vector2(0, 0);
             rt.offsetMax = new Vector2(0, -120);
 
-            // Semi-transparent overlay
-            Image overlay = panel.AddComponent<Image>();
-            overlay.color = new Color(0, 0, 0, 0.7f);
+            // Blocker overlay
+            var blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(panel.transform, false);
+            blocker.transform.SetAsFirstSibling();
+            var blockerRT = blocker.AddComponent<RectTransform>();
+            blockerRT.anchorMin = Vector2.zero;
+            blockerRT.anchorMax = Vector2.one;
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            var blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0f, 0f, 0f, 0.7f);
+            blockerImg.raycastTarget = true;
 
             // Content container
             GameObject content = new GameObject("Content");

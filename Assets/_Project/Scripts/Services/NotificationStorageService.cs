@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using DigitPark.Localization;
 
 namespace DigitPark.Services
 {
@@ -305,7 +306,7 @@ namespace DigitPark.Services
             if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
             if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours}h";
             if (diff.TotalDays < 2) return "Ayer";
-            if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays} días";
+            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_days_ago", (int)diff.TotalDays);
             return dt.ToString("dd/MM/yyyy");
         }
 

@@ -90,6 +90,10 @@ namespace DigitPark.UI
         {
             _currentTween?.Kill();
             _displaySequence?.Kill();
+            // Kill any orphaned snap-back or border tweens
+            if (toastContainer != null) toastContainer.DOKill();
+            if (canvasGroup != null) canvasGroup.DOKill();
+            if (borderOutline != null) DOTween.Kill(borderOutline);
         }
 
         #endregion

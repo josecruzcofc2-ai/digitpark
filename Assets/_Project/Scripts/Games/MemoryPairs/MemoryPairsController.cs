@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
+using DigitPark.Animations;
 
 namespace DigitPark.Games
 {
@@ -75,6 +76,7 @@ namespace DigitPark.Games
         private int maxCombo = 0;
         private float lastMatchTime = 0f;
         private const float COMBO_TIMEOUT = 5f;
+        private ComboVisualController comboVisualController;
 
         // Penalización
         private float penaltyTime = 0f;
@@ -99,6 +101,11 @@ namespace DigitPark.Games
             base.Start();
             SetupCards();
             SetupSettingsPanel();
+
+            // Initialize combo visual controller
+            comboVisualController = gameObject.AddComponent<ComboVisualController>();
+            Canvas canvas = GetComponentInParent<Canvas>();
+            comboVisualController.Initialize(canvas);
 
             if (IsPracticeMode() && settingsPanel != null)
             {
@@ -219,9 +226,10 @@ namespace DigitPark.Games
             SetAllCardsWaiting();
             UpdateUI();
 
-            if (useCountdown && countdownUI != null)
+            if (useCountdown)
             {
-                countdownUI.StartCountdown(OnCountdownComplete);
+                Canvas canvas = GetComponentInParent<Canvas>();
+                CountdownAnimator.Play(canvas, OnCountdownComplete);
             }
             else
             {
@@ -404,6 +412,9 @@ namespace DigitPark.Games
                 // Partículas de match
                 PlayMatchParticles(firstSelectedCard, secondSelectedCard);
 
+                // Combo visual escalation
+                comboVisualController?.OnComboChanged(currentCombo);
+
                 // Toast feedback
                 ShowFeedback(AutoLocalizer.Get("memorypairs_correct"), new Color(0.3f, 1f, 0.5f, 1f));
 
@@ -429,6 +440,7 @@ namespace DigitPark.Games
             else
             {
                 // ===== ERROR =====
+                comboVisualController?.OnComboReset();
                 currentCombo = 0; // Resetear combo
                 RegisterError();
 

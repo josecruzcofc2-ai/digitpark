@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
+using DigitPark.Animations;
 
 namespace DigitPark.Games
 {
@@ -87,6 +88,7 @@ namespace DigitPark.Games
         // Streak/Combo System
         private int currentStreak = 0;
         private int maxStreak = 0;
+        private ComboVisualController comboVisualController;
 
         // Animation state
         private Coroutine questionPulseCoroutine;
@@ -150,6 +152,11 @@ namespace DigitPark.Games
         {
             base.Start();
             SetupButtons();
+
+            // Initialize combo visual controller
+            comboVisualController = gameObject.AddComponent<ComboVisualController>();
+            Canvas canvas = GetComponentInParent<Canvas>();
+            comboVisualController.Initialize(canvas);
 
             if (IsPracticeMode())
             {
@@ -371,7 +378,8 @@ namespace DigitPark.Games
             if (settingsPanel != null)
                 settingsPanel.SetActive(false);
 
-            StartGame();
+            Canvas canvas = GetComponentInParent<Canvas>();
+            CountdownAnimator.Play(canvas, () => StartGame());
         }
 
         #endregion
@@ -571,6 +579,7 @@ namespace DigitPark.Games
             PlayCorrectParticles(buttonIndex);
             AnimateCorrectButton(buttonIndex);
             UpdateComboDisplay();
+            comboVisualController?.OnComboChanged(currentStreak);
 
             // Show green feedback
             ShowFeedback(AutoLocalizer.Get("quickmath_correct"), new Color(0.3f, 1f, 0.5f, 1f));
@@ -598,6 +607,7 @@ namespace DigitPark.Games
             currentTime += 1f;
             UpdateTimer();
 
+            comboVisualController?.OnComboReset();
             currentStreak = 0;
             UpdateComboDisplay();
 

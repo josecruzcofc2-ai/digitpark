@@ -101,8 +101,9 @@ namespace DigitPark.Themes
         {
             ThemeData[] themes = Resources.LoadAll<ThemeData>("Themes");
 
-            // Ordenar: Neon Dark primero (gratuito), luego los demás alfabéticamente
-            var sortedThemes = themes.OrderBy(t => t.themeId != "neon_dark") // neon_dark primero
+            // Orden: 1) Neon Dark (gratis), 2) Earnable/plateados, 3) Premium/dorados
+            var sortedThemes = themes.OrderBy(t => t.themeId != "neon_dark" ? 1 : 0) // neon_dark primero
+                                     .ThenBy(t => !t.isPremium ? 0 : (t.isEarnable ? 1 : 2)) // free → earnable → paid
                                      .ThenBy(t => t.themeName)
                                      .ToList();
 

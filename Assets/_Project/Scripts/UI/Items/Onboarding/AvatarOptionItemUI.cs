@@ -101,7 +101,6 @@ namespace DigitPark.UI.Items
             transform.localScale = Vector3.one * selectedScale;
         }
 
-        private void OnDisable() { }
     }
 
     [Serializable]

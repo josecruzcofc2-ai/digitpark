@@ -589,6 +589,9 @@ namespace DigitPark.Editor
             ddLabel.alignment = TextAlignmentOptions.Left;
             ddLabel.fontStyle = FontStyles.Bold;
             ddLabel.raycastTarget = false;
+            ddLabel.enableAutoSizing = true;
+            ddLabel.fontSizeMin = 22;
+            ddLabel.fontSizeMax = FontSizes.Body;
 
             // Dropdown arrow
             GameObject arrowObj = new GameObject("Arrow");
@@ -934,6 +937,9 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 22;
+            titleText.fontSizeMax = FontSizes.H3;
         }
 
         private static void CreateSelectedFeeText(Transform parent)
@@ -954,6 +960,9 @@ namespace DigitPark.Editor
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Right;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 22;
+            text.fontSizeMax = FontSizes.H3;
         }
 
         private static void CreatePresetButtons(Transform parent)
@@ -1019,6 +1028,9 @@ namespace DigitPark.Editor
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 22;
+            text.fontSizeMax = FontSizes.Body;
 
             // Selection indicator
             GameObject indicator = new GameObject("SelectedIndicator");
@@ -1137,6 +1149,9 @@ namespace DigitPark.Editor
             maxText.color = TEXT_SECONDARY;
             maxText.fontStyle = FontStyles.Bold;
             maxText.alignment = TextAlignmentOptions.Center;
+            maxText.enableAutoSizing = true;
+            maxText.fontSizeMin = 22;
+            maxText.fontSizeMax = FontSizes.Body;
 
             // Apply button
             GameObject applyBtn = new GameObject("ApplyButton");
@@ -1248,6 +1263,9 @@ namespace DigitPark.Editor
             text.color = BG_DARK;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 22;
+            text.fontSizeMax = FontSizes.H1;
 
             // Sin decoradores - diseño limpio
         }
@@ -1281,13 +1299,23 @@ namespace DigitPark.Editor
             GameObject sprintPanel = new GameObject("CognitiveSprintPanel");
             sprintPanel.transform.SetParent(parent, false);
 
-            RectTransform blockerRT = sprintPanel.AddComponent<RectTransform>();
+            RectTransform sprintPanelRT = sprintPanel.AddComponent<RectTransform>();
+            sprintPanelRT.anchorMin = Vector2.zero;
+            sprintPanelRT.anchorMax = Vector2.one;
+            sprintPanelRT.sizeDelta = Vector2.zero;
+
+            // Blocker overlay
+            var blocker = new GameObject("BlockerPanel");
+            blocker.transform.SetParent(sprintPanel.transform, false);
+            blocker.transform.SetAsFirstSibling();
+            var blockerRT = blocker.AddComponent<RectTransform>();
             blockerRT.anchorMin = Vector2.zero;
             blockerRT.anchorMax = Vector2.one;
-            blockerRT.sizeDelta = Vector2.zero;
-
-            Image blockerBg = sprintPanel.AddComponent<Image>();
-            blockerBg.color = new Color(0f, 0f, 0f, 0.75f); // Semi-transparente
+            blockerRT.offsetMin = Vector2.zero;
+            blockerRT.offsetMax = Vector2.zero;
+            var blockerImg = blocker.AddComponent<Image>();
+            blockerImg.color = new Color(0f, 0f, 0f, 0.7f);
+            blockerImg.raycastTarget = true;
 
             // === Card central (popup) ===
             GameObject card = new GameObject("SprintCard");
@@ -1399,6 +1427,9 @@ namespace DigitPark.Editor
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 22;
+            tmp.fontSizeMax = fontSize;
 
             return obj;
         }
@@ -1479,6 +1510,9 @@ namespace DigitPark.Editor
             nameText.enableWordWrapping = false;
             nameText.overflowMode = TextOverflowModes.Ellipsis;
             nameText.raycastTarget = false;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = 22;
+            nameText.fontSizeMax = FontSizes.Body;
 
             // === Circulo de seleccion (derecha) ===
             GameObject circleObj = new GameObject("SelectCircle");
@@ -1567,6 +1601,9 @@ namespace DigitPark.Editor
             text.alignment = TextAlignmentOptions.Center;
             text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Ellipsis;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 22;
+            text.fontSizeMax = FontSizes.Body;
         }
 
         #endregion
@@ -1820,6 +1857,9 @@ namespace DigitPark.Editor
             nameText.enableWordWrapping = false;
             nameText.overflowMode = TextOverflowModes.Ellipsis;
             nameText.raycastTarget = false;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = 22;
+            nameText.fontSizeMax = FontSizes.Body;
 
             // Game description
             GameObject descObj = new GameObject("Description");

@@ -203,11 +203,7 @@ namespace DigitPark.Editor
             // ========== ACTION BUTTONS ==========
             CreateActionButtons(safeArea.transform);
 
-            // ========== RESULT PANEL (Practice) ==========
-            CreateResultPanel(safeArea.transform);
-
-            // ========== REAL MONEY PANELS (Cash Battle) ==========
-            CreateRealMoneyPanels(safeArea.transform);
+            // ========== WIN/LOSE PANELS removed (now using global prefabs) ==========
 
             // ========== SETTINGS PANEL ==========
             CreateSettingsPanel(safeArea.transform);
@@ -585,98 +581,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 150), new Vector2(600, 120));
         }
 
-        private static void CreateResultPanel(Transform parent)
-        {
-            GameObject resultPanel = CreateElement(parent, "ResultPanel");
-            SetupRectTransform(resultPanel, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-
-            // Full-screen overlay
-            Image overlay = resultPanel.AddComponent<Image>();
-            overlay.color = new Color(0, 0, 0, 0.85f);
-            overlay.raycastTarget = true;
-
-            CanvasGroup cg = resultPanel.AddComponent<CanvasGroup>();
-            cg.alpha = 0;
-
-            // Content container
-            GameObject content = CreateElement(resultPanel.transform, "Content");
-            SetupRectTransform(content,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(700, 500));
-
-            Image contentBg = content.AddComponent<Image>();
-            contentBg.color = new Color(0.05f, 0.1f, 0.15f, 0.95f);
-
-            Outline contentOutline = content.AddComponent<Outline>();
-            contentOutline.effectColor = GREEN_NEON;
-            contentOutline.effectDistance = new Vector2(3, -3);
-
-            // Title
-            GameObject titleText = CreateElement(content.transform, "ResultTitleText");
-            SetupRectTransform(titleText,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 60));
-            SetupText(titleText, "COMPLETED!", 46, GREEN_NEON, FontStyles.Bold);
-
-            // Time display
-            GameObject timeText = CreateElement(content.transform, "ResultTimeText");
-            SetupRectTransform(timeText,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -130), new Vector2(0, 60));
-            SetupText(timeText, "Time: 0.000s", 38, CYAN_NEON, FontStyles.Bold);
-
-            // Message
-            GameObject messageText = CreateElement(content.transform, "ResultMessageText");
-            SetupRectTransform(messageText,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, -10), new Vector2(600, 120));
-            TextMeshProUGUI msgTmp = SetupText(messageText, "Great job!", 32, Color.white, FontStyles.Bold);
-            msgTmp.enableWordWrapping = true;
-
-            // Buttons container
-            GameObject buttonsContainer = CreateElement(content.transform, "ButtonsContainer");
-            SetupRectTransform(buttonsContainer,
-                new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 60), new Vector2(-40, 100));
-
-            HorizontalLayoutGroup btnLayout = buttonsContainer.AddComponent<HorizontalLayoutGroup>();
-            btnLayout.childAlignment = TextAnchor.MiddleCenter;
-            btnLayout.spacing = 30;
-            btnLayout.childForceExpandWidth = false;
-            btnLayout.childControlWidth = false;
-
-            // Play Again button (wider for localized text like "JUGAR DE NUEVO", "JOGAR NOVAMENTE")
-            CreateActionButton(buttonsContainer.transform, "ResultPlayAgainButton", "PLAY AGAIN", CYAN_NEON, 320, 80);
-
-            // Exit button (wider for localized text like "QUITTER", "BEENDEN")
-            CreateActionButton(buttonsContainer.transform, "ResultExitButton", "EXIT", new Color(0.6f, 0.6f, 0.6f), 220, 80);
-
-            // Hide by default
-            resultPanel.SetActive(false);
-        }
-
-        private static void CreateActionButton(Transform parent, string name, string text, Color color, float width, float height)
-        {
-            GameObject btn = CreateElement(parent, name);
-            LayoutElement layout = btn.AddComponent<LayoutElement>();
-            layout.preferredWidth = width;
-            layout.preferredHeight = height;
-
-            Image faceImg = btn.AddComponent<Image>();
-            faceImg.color = color;
-
-            GameObject textObj = CreateElement(btn.transform, "Text");
-            SetupRectTransform(textObj, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-10, -6));
-            SetupText(textObj, text, 24, DARK_BG, FontStyles.Bold);
-
-            Button button = btn.AddComponent<Button>();
-            button.targetGraphic = faceImg;
-        }
-
-        private static void CreateRealMoneyPanels(Transform parent)
-        {
-            WinPanelInlineBuilder.CreateRealMoneyPanels(parent);
-        }
+        // CreateResultPanel, CreateActionButton, CreateRealMoneyPanels removed — now using global prefabs
 
         private static void CreateCountdownPanel(Transform parent)
         {
@@ -832,42 +737,7 @@ namespace DigitPark.Editor
                 }
             }
 
-            // Result Panel (Practice) - starts inactive!
-            Transform resultPanelT = FindDeep(root, "ResultPanel");
-            if (resultPanelT != null)
-            {
-                SerializedProperty rpProp = serializedManager.FindProperty("resultPanel");
-                if (rpProp != null) rpProp.objectReferenceValue = resultPanelT.gameObject;
-
-                SerializedProperty cgProp = serializedManager.FindProperty("resultPanelCanvasGroup");
-                if (cgProp != null) cgProp.objectReferenceValue = resultPanelT.GetComponent<CanvasGroup>();
-            }
-
-            // Result texts
-            AssignTMPReference(serializedManager, root, "resultTitleText", "ResultTitleText");
-            AssignTMPReference(serializedManager, root, "resultTimeText", "ResultTimeText");
-            AssignTMPReference(serializedManager, root, "resultMessageText", "ResultMessageText");
-
-            // Result buttons
-            AssignButtonByName(serializedManager, root, "resultPlayAgainButton", "ResultPlayAgainButton");
-            AssignButtonByName(serializedManager, root, "resultExitButton", "ResultExitButton");
-
-            // Real Money Panels - start inactive!
-            Transform winPanelRM = FindDeep(root, "WinPanel_RealMoney");
-            if (winPanelRM != null)
-            {
-                SerializedProperty winRMProp = serializedManager.FindProperty("winPanelRealMoney");
-                if (winRMProp != null)
-                    winRMProp.objectReferenceValue = winPanelRM.GetComponent<WinPanelController>();
-            }
-
-            Transform losePanelRM = FindDeep(root, "LosePanel_RealMoney");
-            if (losePanelRM != null)
-            {
-                SerializedProperty loseRMProp = serializedManager.FindProperty("losePanelRealMoney");
-                if (loseRMProp != null)
-                    loseRMProp.objectReferenceValue = losePanelRM.GetComponent<WinPanelController>();
-            }
+            // Result Panel + Real Money Panels removed — now using global prefabs
 
             // Countdown UI - starts inactive!
             Transform countdownPanelT = FindDeep(root, "CountdownPanel");

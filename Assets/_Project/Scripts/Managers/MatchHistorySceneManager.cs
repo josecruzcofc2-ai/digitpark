@@ -383,7 +383,7 @@ namespace DigitPark.Managers
                 "FlashTap" => "Flash Tap",
                 "OddOneOut" => "Odd One Out",
                 "CognitiveSprint" => "Cognitive Sprint",
-                _ => gameType ?? "Desconocido"
+                _ => gameType ?? AutoLocalizer.Get("game_type_unknown")
             };
         }
 

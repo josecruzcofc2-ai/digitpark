@@ -47,31 +47,28 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Layout Anchors (Y: 0=bottom, 1=top)
+        #region Layout Anchors (Y: 0=bottom, 1=top) — Full-screen layout, zero dead space
 
         private const float TOPBAR_TOP = 0.990f;
         private const float TOPBAR_BOT = 0.960f;
 
         private const float STREAK_TOP = 0.950f;
-        private const float STREAK_BOT = 0.925f;
+        private const float STREAK_BOT = 0.920f;
 
-        private const float WEEK_TOP = 0.918f;
-        private const float WEEK_BOT = 0.888f;
+        private const float WEEK_TOP = 0.912f;
+        private const float WEEK_BOT = 0.878f;
 
-        private const float DAYS_TOP = 0.880f;
-        private const float DAYS_BOT = 0.530f;
+        private const float DAYS_TOP = 0.870f;
+        private const float DAYS_BOT = 0.480f;
 
-        private const float DAY7_TOP = 0.523f;
-        private const float DAY7_BOT = 0.370f;
+        private const float DAY7_TOP = 0.470f;
+        private const float DAY7_BOT = 0.270f;
 
-        private const float TODAY_TOP = 0.363f;
-        private const float TODAY_BOT = 0.273f;
+        private const float CLAIM_TOP = 0.195f;
+        private const float CLAIM_BOT = 0.100f;
 
-        private const float CLAIM_TOP = 0.260f;
-        private const float CLAIM_BOT = 0.195f;
-
-        private const float TIMER_TOP = 0.185f;
-        private const float TIMER_BOT = 0.153f;
+        private const float TIMER_TOP = 0.088f;
+        private const float TIMER_BOT = 0.028f;
 
         private const float SIDE_PAD = 25f;
 
@@ -152,7 +149,7 @@ namespace DigitPark.Editor
             if (GUILayout.Button("3. Week Label", GUILayout.Height(25))) CreateWeekLabel();
             if (GUILayout.Button("4. Days Grid (1-6)", GUILayout.Height(25))) CreateDaysGrid();
             if (GUILayout.Button("5. Day 7 Mega Card", GUILayout.Height(25))) CreateDay7Card();
-            if (GUILayout.Button("6. Today Panel", GUILayout.Height(25))) CreateTodayPanel();
+            if (GUILayout.Button("6. Cleanup TodayPanel (removed)", GUILayout.Height(25))) CleanupTodayPanel();
             if (GUILayout.Button("7. Claim Button", GUILayout.Height(25))) CreateClaimButton();
             if (GUILayout.Button("8. Timer", GUILayout.Height(25))) CreateTimer();
             if (GUILayout.Button("9. Claim Animation Popup", GUILayout.Height(25))) CreateClaimAnimationPopup();
@@ -194,7 +191,7 @@ namespace DigitPark.Editor
             CreateWeekLabel();
             CreateDaysGrid();
             CreateDay7Card();
-            CreateTodayPanel();
+            CleanupTodayPanel();
             CreateClaimButton();
             CreateTimer();
             CreateClaimAnimationPopup();
@@ -327,9 +324,10 @@ namespace DigitPark.Editor
             fireIcon.transform.SetParent(streak.transform, false);
             fireIcon.AddComponent<RectTransform>();
             var fireLE = fireIcon.AddComponent<LayoutElement>();
-            fireLE.minWidth = 28;
-            fireLE.preferredWidth = 28;
-            fireLE.minHeight = 28;
+            fireLE.minWidth = 56;
+            fireLE.preferredWidth = 56;
+            fireLE.minHeight = 56;
+            fireLE.preferredHeight = 56;
             Sprite fireSprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_streak.png");
             if (fireSprite != null)
             {
@@ -498,9 +496,9 @@ namespace DigitPark.Editor
             SetAnchors(dgRT, NormX(SIDE_PAD), DAYS_BOT, NormX(1080 - SIDE_PAD), DAYS_TOP);
 
             var grid = GetOrAdd<GridLayoutGroup>(daysGrid);
-            grid.cellSize = new Vector2(320, 300);
-            grid.spacing = new Vector2(15, 12);
-            grid.padding = new RectOffset(10, 10, 8, 8);
+            grid.cellSize = new Vector2(320, 345);
+            grid.spacing = new Vector2(15, 14);
+            grid.padding = new RectOffset(10, 10, 6, 6);
             grid.childAlignment = TextAnchor.MiddleCenter;
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 3;
@@ -598,9 +596,9 @@ namespace DigitPark.Editor
             iconContainer.transform.SetParent(card.transform, false);
             iconContainer.AddComponent<RectTransform>();
             var iconLE = iconContainer.AddComponent<LayoutElement>();
-            iconLE.preferredHeight = 180;
-            iconLE.preferredWidth = 180;
-            iconLE.minWidth = 180;
+            iconLE.preferredHeight = 210;
+            iconLE.preferredWidth = 210;
+            iconLE.minWidth = 210;
             iconLE.flexibleWidth = 0;
             var iconImg = iconContainer.AddComponent<Image>();
             iconImg.preserveAspect = true;
@@ -630,19 +628,7 @@ namespace DigitPark.Editor
                 iconImg.color = fallbackColor;
             }
 
-            // Gold glow behind icon for current day
-            if (current)
-            {
-                var iconGlow = new GameObject("IconGlow");
-                iconGlow.transform.SetParent(iconContainer.transform, false);
-                iconGlow.transform.SetAsFirstSibling();
-                var igRT = iconGlow.AddComponent<RectTransform>();
-                igRT.anchorMin = Vector2.zero;
-                igRT.anchorMax = Vector2.one;
-                igRT.offsetMin = new Vector2(-12, -12);
-                igRT.offsetMax = new Vector2(12, 12);
-                iconGlow.AddComponent<Image>().color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.2f);
-            }
+            // No glow behind day card icons (clean look)
 
             // Reward amount + type (compact row)
             var rewardRow = new GameObject("RewardRow");
@@ -835,24 +821,20 @@ namespace DigitPark.Editor
             // Left: Icon area (larger for legendary chest)
             var iconArea = FindOrCreate(day7.transform, "IconArea");
             var iaLE = GetOrAdd<LayoutElement>(iconArea);
-            iaLE.minWidth = 140;
-            iaLE.preferredWidth = 140;
-            iaLE.minHeight = 140;
+            iaLE.minWidth = 160;
+            iaLE.preferredWidth = 160;
+            iaLE.minHeight = 160;
 
-            // Icon glow (larger for legendary chest)
-            var iconGlow = FindOrCreate(iconArea.transform, "IconGlow");
-            var igRT = GetOrAdd<RectTransform>(iconGlow);
-            igRT.anchorMin = new Vector2(0.5f, 0.5f);
-            igRT.anchorMax = new Vector2(0.5f, 0.5f);
-            igRT.sizeDelta = new Vector2(130, 130);
-            GetOrAdd<Image>(iconGlow).color = new Color(GOLD.r, GOLD.g, GOLD.b, 0.2f);
+            // Remove old IconGlow if exists
+            var oldGlow = iconArea.transform.Find("IconGlow");
+            if (oldGlow != null) Object.DestroyImmediate(oldGlow.gameObject);
 
             // Day7 legendary chest icon (larger than regular gift boxes)
             var day7Icon = FindOrCreate(iconArea.transform, "Day7Icon");
             var d7iRT = GetOrAdd<RectTransform>(day7Icon);
             d7iRT.anchorMin = new Vector2(0.5f, 0.5f);
             d7iRT.anchorMax = new Vector2(0.5f, 0.5f);
-            d7iRT.sizeDelta = new Vector2(120, 120);
+            d7iRT.sizeDelta = new Vector2(140, 140);
             var d7iImg = GetOrAdd<Image>(day7Icon);
             d7iImg.preserveAspect = true;
             d7iImg.color = Color.white;
@@ -916,106 +898,17 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region 6. Today Panel (0.283-0.373)
+        #region 6. Cleanup TodayPanel (removed — redundant with day grid + claim animation)
 
-        private static void CreateTodayPanel()
+        private static void CleanupTodayPanel()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
-            var today = FindOrCreate(canvas.transform, "TodayPanel");
-            var tRT = GetOrAdd<RectTransform>(today);
-            SetAnchors(tRT, NormX(SIDE_PAD), TODAY_BOT, NormX(1080 - SIDE_PAD), TODAY_TOP);
+            var oldToday = canvas.transform.Find("TodayPanel");
+            if (oldToday != null) Object.DestroyImmediate(oldToday.gameObject);
 
-            var tBg = GetOrAdd<Image>(today);
-            tBg.color = CARD_BG_LIGHT;
-            var tOutline = GetOrAdd<Outline>(today);
-            tOutline.effectColor = CYAN_DARK;
-            tOutline.effectDistance = new Vector2(1, 1);
-
-            // 3D depth shadow
-            var todayShadow = today.AddComponent<Shadow>();
-            todayShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            todayShadow.effectDistance = new Vector2(3, -4);
-
-            // HLG content
-            var hlg = GetOrAdd<HorizontalLayoutGroup>(today);
-            hlg.spacing = 15;
-            hlg.padding = new RectOffset(15, 15, 12, 12);
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = true;
-            hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = false;
-
-            // Left: HOY badge (wider to fit localized text like "DIA 2", "JOUR 2", etc.)
-            var badge = FindOrCreate(today.transform, "TodayBadge");
-            var bdLE = GetOrAdd<LayoutElement>(badge);
-            bdLE.minWidth = 110;
-            bdLE.preferredWidth = 110;
-            bdLE.minHeight = 30;
-            GetOrAdd<Image>(badge).color = GOLD;
-
-            var badgeText = FindOrCreate(badge.transform, "Text");
-            var btRT = GetOrAdd<RectTransform>(badgeText);
-            btRT.anchorMin = Vector2.zero;
-            btRT.anchorMax = Vector2.one;
-            btRT.offsetMin = Vector2.zero;
-            btRT.offsetMax = Vector2.zero;
-            var btTMP = GetOrAdd<TextMeshProUGUI>(badgeText);
-            btTMP.text = "TODAY";
-            btTMP.fontSize = FontSizes.Body;
-            btTMP.fontStyle = FontStyles.Bold;
-            btTMP.color = TEXT_DARK;
-            btTMP.alignment = TextAlignmentOptions.Center;
-            btTMP.enableWordWrapping = false;
-            btTMP.overflowMode = TextOverflowModes.Overflow;
-
-            // Center: TodayRewardIcon
-            var rewardIcon = FindOrCreate(today.transform, "TodayRewardIcon");
-            var riLE = GetOrAdd<LayoutElement>(rewardIcon);
-            riLE.minWidth = 45;
-            riLE.preferredWidth = 45;
-            riLE.minHeight = 45;
-            var riImg = GetOrAdd<Image>(rewardIcon);
-            riImg.preserveAspect = true;
-            riImg.color = Color.white;
-            // Show today's gift tier icon (Day 5 = gold tier in placeholder)
-            Sprite todayGiftSprite = AssetDatabase.LoadAssetAtPath<Sprite>(GetGiftIconForDay(5));
-            if (todayGiftSprite != null) riImg.sprite = todayGiftSprite;
-            else riImg.color = GOLD;
-
-            // Right: Info VLG
-            var infoPanel = FindOrCreate(today.transform, "InfoPanel");
-            var ipVLG = GetOrAdd<VerticalLayoutGroup>(infoPanel);
-            ipVLG.spacing = 4;
-            ipVLG.childAlignment = TextAnchor.MiddleLeft;
-            ipVLG.childControlWidth = true;
-            ipVLG.childControlHeight = false;
-            ipVLG.childForceExpandWidth = true;
-            var ipLE = GetOrAdd<LayoutElement>(infoPanel);
-            ipLE.flexibleWidth = 1;
-
-            var rewardLabel = FindOrCreate(infoPanel.transform, "RewardLabel");
-            GetOrAdd<LayoutElement>(rewardLabel).preferredHeight = 30;
-            var rlTMP = GetOrAdd<TextMeshProUGUI>(rewardLabel);
-            rlTMP.text = "TODAY'S REWARD";
-            rlTMP.fontSize = FontSizes.Body;
-            rlTMP.fontStyle = FontStyles.Bold;
-            rlTMP.color = TEXT_SECONDARY;
-            rlTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            rlTMP.overflowMode = TextOverflowModes.Ellipsis;
-
-            var rewardAmount = FindOrCreate(infoPanel.transform, "RewardAmount");
-            GetOrAdd<LayoutElement>(rewardAmount).preferredHeight = 38;
-            var raTMP = GetOrAdd<TextMeshProUGUI>(rewardAmount);
-            raTMP.text = "300 DigitCoins + 25 XP";
-            raTMP.fontSize = FontSizes.Body;
-            raTMP.fontStyle = FontStyles.Bold;
-            raTMP.color = COIN_COLOR;
-            raTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            raTMP.overflowMode = TextOverflowModes.Ellipsis;
-
-            Debug.Log("[DailyRewardsUI] TodayPanel creado");
+            Debug.Log("[DailyRewardsUI] TodayPanel eliminado (redundante)");
         }
 
         #endregion
@@ -1059,7 +952,9 @@ namespace DigitPark.Editor
             ctRT.offsetMax = Vector2.zero;
             var ctTMP = GetOrAdd<TextMeshProUGUI>(claimText);
             ctTMP.text = "CLAIM REWARD";
-            ctTMP.fontSize = FontSizes.H4;
+            ctTMP.enableAutoSizing = true;
+            ctTMP.fontSizeMin = FontSizes.H4;
+            ctTMP.fontSizeMax = FontSizes.H3;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = TEXT_DARK;
             ctTMP.alignment = TextAlignmentOptions.Center;
@@ -1069,7 +964,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region 8. Timer (0.163-0.195)
+        #region 8. Timer (centered, icon 96px)
 
         private static void CreateTimer()
         {
@@ -1078,17 +973,23 @@ namespace DigitPark.Editor
 
             var timerBar = FindOrCreate(canvas.transform, "TimerBar");
             var tbRT = GetOrAdd<RectTransform>(timerBar);
-            SetAnchors(tbRT, 0.05f, TIMER_BOT, 0.95f, TIMER_TOP);
+            SetAnchors(tbRT, 0f, TIMER_BOT, 1f, TIMER_TOP);
 
             var hlg = GetOrAdd<HorizontalLayoutGroup>(timerBar);
-            hlg.spacing = 8;
+            hlg.spacing = 10;
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = true;
-            hlg.childControlHeight = true;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
             hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
 
-            // Timer icon (fallback: use text dot instead of colored square)
+            // Timer icon (96px, left of text)
             var timerIcon = FindOrCreate(timerBar.transform, "TimerIcon");
+            var tiLE = GetOrAdd<LayoutElement>(timerIcon);
+            tiLE.minWidth = 96;
+            tiLE.preferredWidth = 96;
+            tiLE.minHeight = 96;
+            tiLE.preferredHeight = 96;
             Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(UI_ICONS + "TimerIcon.png");
             if (timerSprite != null)
             {
@@ -1096,49 +997,54 @@ namespace DigitPark.Editor
                 tiImg.preserveAspect = true;
                 tiImg.color = Color.white;
                 tiImg.sprite = timerSprite;
-                var tiLE = GetOrAdd<LayoutElement>(timerIcon);
-                tiLE.minWidth = 20;
-                tiLE.preferredWidth = 20;
-                tiLE.minHeight = 20;
             }
             else
             {
-                // No icon file — hide the element entirely instead of showing a colored square
                 var tiImg = timerIcon.GetComponent<Image>();
                 if (tiImg != null) Object.DestroyImmediate(tiImg);
-                var tiLE = GetOrAdd<LayoutElement>(timerIcon);
                 tiLE.minWidth = 0;
                 tiLE.preferredWidth = 0;
             }
 
-            // Label
+            // Label "Next reward in:"
             var label = FindOrCreate(timerBar.transform, "Label");
+            var lRT = GetOrAdd<RectTransform>(label);
+            lRT.sizeDelta = new Vector2(300, 40);
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Next reward in:";
-            lTMP.fontSize = FontSizes.Body;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = FontSizes.Caption;
+            lTMP.fontSizeMax = FontSizes.Body;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.MidlineRight;
             lTMP.enableWordWrapping = false;
             lTMP.overflowMode = TextOverflowModes.Ellipsis;
             var lLE = GetOrAdd<LayoutElement>(label);
-            lLE.flexibleWidth = 1;
+            lLE.preferredWidth = 300;
+            lLE.preferredHeight = 40;
+            lLE.flexibleWidth = 0;
 
             // Time text
             var timeText = FindOrCreate(timerBar.transform, "TimeText");
+            var ttRT = GetOrAdd<RectTransform>(timeText);
+            ttRT.sizeDelta = new Vector2(250, 40);
             var ttTMP = GetOrAdd<TextMeshProUGUI>(timeText);
             ttTMP.text = "14h 32m 15s";
-            ttTMP.fontSize = FontSizes.Body;
+            ttTMP.enableAutoSizing = true;
+            ttTMP.fontSizeMin = FontSizes.Caption;
+            ttTMP.fontSizeMax = FontSizes.Body;
             ttTMP.fontStyle = FontStyles.Bold;
             ttTMP.color = CYAN_NEON;
             ttTMP.alignment = TextAlignmentOptions.MidlineLeft;
             ttTMP.enableWordWrapping = false;
             ttTMP.overflowMode = TextOverflowModes.Overflow;
             var ttLE = GetOrAdd<LayoutElement>(timeText);
-            ttLE.minWidth = 200;
-            ttLE.preferredWidth = 200;
+            ttLE.preferredWidth = 250;
+            ttLE.preferredHeight = 40;
+            ttLE.flexibleWidth = 0;
 
-            Debug.Log("[DailyRewardsUI] TimerBar creado");
+            Debug.Log("[DailyRewardsUI] TimerBar creado (centrado, icono 96px)");
         }
 
         #endregion
@@ -1214,7 +1120,13 @@ namespace DigitPark.Editor
             rcRT.anchorMax = new Vector2(0.5f, 0.55f);
             rcRT.pivot = new Vector2(0.5f, 0f);
             rcRT.anchoredPosition = new Vector2(0, 160);
-            rcRT.sizeDelta = new Vector2(500, 280);
+            rcRT.sizeDelta = new Vector2(500, 300);
+            // Background card for reward container
+            var rcBg = GetOrAdd<Image>(rewardContainer);
+            rcBg.color = new Color(0.06f, 0.09f, 0.14f, 0.95f);
+            var rcOutline = GetOrAdd<Outline>(rewardContainer);
+            rcOutline.effectColor = new Color(GOLD.r, GOLD.g, GOLD.b, 0.4f);
+            rcOutline.effectDistance = new Vector2(2, -2);
             var rcVLG = GetOrAdd<VerticalLayoutGroup>(rewardContainer);
             rcVLG.spacing = 8;
             rcVLG.padding = new RectOffset(10, 10, 10, 10);
@@ -1429,12 +1341,7 @@ namespace DigitPark.Editor
             SetRef(so, "streakText", FindInPath<TextMeshProUGUI>(r, "StreakPanel/StreakCount"));
             SetRef(so, "nextResetText", FindInPath<TextMeshProUGUI>(r, "TimerBar/TimeText"));
 
-            // UI - Current Day
-            Transform todayPanel = r.Find("TodayPanel");
-            if (todayPanel != null) SetRef(so, "currentDayHighlight", todayPanel.gameObject);
-            SetRef(so, "currentDayText", FindInPath<TextMeshProUGUI>(r, "TodayPanel/TodayBadge/Text"));
-            SetRef(so, "currentDayRewardIcon", FindInPath<Image>(r, "TodayPanel/TodayRewardIcon"));
-            SetRef(so, "currentDayRewardText", FindInPath<TextMeshProUGUI>(r, "TodayPanel/InfoPanel/RewardAmount"));
+            // UI - Current Day (TodayPanel removed — refs cleared)
 
             // UI - Rewards Grid
             Transform daysGrid = r.Find("DaysGrid");

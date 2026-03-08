@@ -49,7 +49,7 @@ namespace DigitPark.UI.Panels
         private static readonly Color TEXT_SECONDARY = new Color(0.6f, 0.7f, 0.8f, 1f);
         private static readonly Color GREEN_FREE = new Color(0.3f, 0.9f, 0.4f, 1f);
         private static readonly Color SILVER = new Color(0.7f, 0.75f, 0.82f, 1f);
-        private static readonly Color BTN_SECONDARY = new Color(0.15f, 0.2f, 0.28f, 1f);
+        private static readonly Color BTN_SECONDARY = new Color(0.7f, 0.15f, 0.15f, 1f);
 
         /// <summary>
         /// Crea y muestra el panel de Styles PRO
@@ -275,9 +275,9 @@ namespace DigitPark.UI.Panels
             ScrollRect scrollRect = scrollObj.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
             scrollRect.vertical = true;
-            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
             scrollRect.elasticity = 0.1f;
-            scrollRect.scrollSensitivity = 30f;
+            scrollRect.scrollSensitivity = 15f;
 
             // Viewport
             GameObject viewport = new GameObject("Viewport");
@@ -735,7 +735,7 @@ namespace DigitPark.UI.Panels
             obj.transform.SetParent(parent, false);
 
             LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 50;
+            le.preferredHeight = 100;
             le.flexibleWidth = 1;
 
             Image bg = obj.AddComponent<Image>();
@@ -747,8 +747,8 @@ namespace DigitPark.UI.Panels
 
             ColorBlock colors = cancelButton.colors;
             colors.normalColor = BTN_SECONDARY;
-            colors.highlightedColor = new Color(0.2f, 0.26f, 0.35f, 1f);
-            colors.pressedColor = new Color(0.1f, 0.14f, 0.2f, 1f);
+            colors.highlightedColor = new Color(0.85f, 0.2f, 0.2f, 1f);
+            colors.pressedColor = new Color(0.5f, 0.1f, 0.1f, 1f);
             cancelButton.colors = colors;
 
             GameObject textObj = new GameObject("Text");

@@ -475,6 +475,9 @@ namespace DigitPark.Editor
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = isActive ? GOLD_PRIMARY : TEXT_SECONDARY;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 22;
+            tmp.fontSizeMax = FontSizes.Body;
 
             // Gold accent underline on selected tab
             if (isActive)
@@ -651,8 +654,8 @@ namespace DigitPark.Editor
             panel.SetActive(false);
 
             RectTransform rt = panel.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.05f, 0.25f);
-            rt.anchorMax = new Vector2(0.95f, 0.75f);
+            rt.anchorMin = new Vector2(0.03f, 0.22f);
+            rt.anchorMax = new Vector2(0.97f, 0.78f);
             rt.sizeDelta = Vector2.zero;
 
             Image bg = panel.AddComponent<Image>();
@@ -684,8 +687,8 @@ namespace DigitPark.Editor
             GameObject msgObj = new GameObject("PremiumMessage");
             msgObj.transform.SetParent(panel.transform, false);
             RectTransform msgRT = msgObj.AddComponent<RectTransform>();
-            msgRT.anchorMin = new Vector2(0.08f, 0.4f);
-            msgRT.anchorMax = new Vector2(0.92f, 0.68f);
+            msgRT.anchorMin = new Vector2(0.06f, 0.38f);
+            msgRT.anchorMax = new Vector2(0.94f, 0.68f);
             msgRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI msgTMP = msgObj.AddComponent<TextMeshProUGUI>();
@@ -722,6 +725,9 @@ namespace DigitPark.Editor
             gpTMP.color = BG_DARK;
             gpTMP.fontStyle = FontStyles.Bold;
             gpTMP.alignment = TextAlignmentOptions.Center;
+            gpTMP.enableAutoSizing = true;
+            gpTMP.fontSizeMin = 22;
+            gpTMP.fontSizeMax = FontSizes.Body;
 
             // Close / Maybe Later Button
             GameObject closeBtn = new GameObject("ClosePremiumButton");
@@ -752,6 +758,9 @@ namespace DigitPark.Editor
             clTMP.color = TEXT_SECONDARY;
             clTMP.fontStyle = FontStyles.Bold;
             clTMP.alignment = TextAlignmentOptions.Center;
+            clTMP.enableAutoSizing = true;
+            clTMP.fontSizeMin = 22;
+            clTMP.fontSizeMax = FontSizes.Body;
         }
 
         #endregion
@@ -790,6 +799,9 @@ namespace DigitPark.Editor
             emptyTMP.color = TEXT_SECONDARY;
             emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
+            emptyTMP.enableAutoSizing = true;
+            emptyTMP.fontSizeMin = 22;
+            emptyTMP.fontSizeMax = FontSizes.Body;
         }
 
         #endregion

@@ -6,6 +6,7 @@ using TMPro;
 using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
+using DigitPark.Animations;
 
 namespace DigitPark.UI
 {
@@ -15,11 +16,6 @@ namespace DigitPark.UI
     /// </summary>
     public class WinPanelController : MonoBehaviour
     {
-        [Header("Panel Type")]
-        #pragma warning disable 0414
-        [SerializeField] private bool isRealMoneyPanel = false;
-        #pragma warning restore 0414
-
         [Header("Common Elements")]
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private GameObject content;
@@ -133,6 +129,10 @@ namespace DigitPark.UI
             }
 
             Show();
+
+            // Cinematic celebration for normal wins
+            Canvas canvas = GetComponentInParent<Canvas>();
+            WinCelebrationAnimator.PlayWin(canvas);
 
             // Animated score reveal for time and errors
             _revealSequence?.Kill();
@@ -373,6 +373,11 @@ namespace DigitPark.UI
             if (audioSource != null && winSound != null)
                 audioSource.PlayOneShot(winSound);
 
+            // Cinematic win celebration (flash + confetti + icon pop)
+            Canvas canvas = GetComponentInParent<Canvas>();
+            Transform iconTransform = resultIcon != null ? resultIcon.transform : null;
+            WinCelebrationAnimator.PlayWin(canvas, iconTransform);
+
             // Partículas de victoria
             if (sparkleEffect != null)
             {
@@ -389,6 +394,10 @@ namespace DigitPark.UI
             // Sonido de derrota
             if (audioSource != null && loseSound != null)
                 audioSource.PlayOneShot(loseSound);
+
+            // Subtle lose effect (red flash)
+            Canvas canvas = GetComponentInParent<Canvas>();
+            WinCelebrationAnimator.PlayLose(canvas);
         }
 
         private void TriggerHapticWin()

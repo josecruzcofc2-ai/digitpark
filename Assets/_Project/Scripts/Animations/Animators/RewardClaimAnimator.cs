@@ -60,6 +60,7 @@ namespace DigitPark.Animations
 
         private AudioSource audioSource;
         private Dictionary<RewardType, int> currentValues = new Dictionary<RewardType, int>();
+        private readonly List<Tween> _activeTweens = new List<Tween>();
 
         private void Awake()
         {
@@ -100,11 +101,18 @@ namespace DigitPark.Animations
         }
 
         /// <summary>
-        /// Generic currency claim
+        /// Generic currency claim. Automatically uses shower mode for large amounts (100+).
         /// </summary>
         public void ClaimCurrency(RewardType type, Vector3 sourcePosition, int amount, Action onComplete = null)
         {
-            StartCoroutine(ClaimCurrencyCoroutine(type, sourcePosition, amount, onComplete));
+            if (amount >= 100)
+            {
+                ClaimCurrencyShower(type, sourcePosition, amount, onComplete);
+            }
+            else
+            {
+                StartCoroutine(ClaimCurrencyCoroutine(type, sourcePosition, amount, onComplete));
+            }
         }
 
         private IEnumerator ClaimCurrencyCoroutine(RewardType type, Vector3 sourcePos, int amount, Action onComplete)
@@ -141,17 +149,18 @@ namespace DigitPark.Animations
 
                 // Animate
                 int iconIndex = i;
+                Vector3 startPos = iconRT.position;
+                Vector3 midPoint = Vector3.Lerp(startPos, target.position, 0.5f);
+                midPoint.y += 100f;
+
                 Sequence flySeq = DOTween.Sequence();
 
                 // Pop out
                 flySeq.Append(iconRT.DOScale(1.3f, flyDuration * 0.2f).SetEase(Ease.OutQuad));
 
-                // Fly to target with arc
-                Vector3 midPoint = Vector3.Lerp(iconRT.position, target.position, 0.5f);
-                midPoint.y += 100f;
-
+                // Fly to target with arc (use cached startPos)
                 flySeq.Append(iconRT.DOPath(
-                    new Vector3[] { iconRT.position, midPoint, target.position },
+                    new Vector3[] { startPos, midPoint, target.position },
                     flyDuration * 0.8f,
                     PathType.CatmullRom
                 ).SetEase(Ease.InQuad));
@@ -161,12 +170,19 @@ namespace DigitPark.Animations
 
                 flySeq.OnComplete(() =>
                 {
+                    _activeTweens.Remove(flySeq);
+
                     // Play sound
                     if (sound != null && audioSource != null)
                         audioSource.PlayOneShot(sound, 0.5f);
 
                     // Bump target
-                    target.DOPunchScale(Vector3.one * 0.2f, 0.15f, 5);
+                    if (target != null)
+                    {
+                        var bump = target.DOPunchScale(Vector3.one * 0.2f, 0.15f, 5);
+                        _activeTweens.Add(bump);
+                        bump.OnComplete(() => _activeTweens.Remove(bump));
+                    }
 
                     // Update counter
                     completedIcons++;
@@ -180,11 +196,134 @@ namespace DigitPark.Animations
                     Destroy(icon);
                 });
 
+                _activeTweens.Add(flySeq);
+
                 yield return new WaitForSeconds(iconSpawnDelay);
             }
 
             // Wait for all icons
             yield return new WaitUntil(() => completedIcons >= iconsToSpawn);
+
+            currentValues[type] = endValue;
+            OnRewardClaimed?.Invoke(type, amount);
+            onComplete?.Invoke();
+        }
+
+        // ==================== SHOWER MODE (LARGE AMOUNTS) ====================
+
+        /// <summary>
+        /// Shower mode for large currency amounts (100+).
+        /// Icons burst out in a radial pattern, then fly to target.
+        /// </summary>
+        public void ClaimCurrencyShower(RewardType type, Vector3 sourcePos, int amount, Action onComplete = null)
+        {
+            StartCoroutine(ShowerCoroutine(type, sourcePos, amount, onComplete));
+        }
+
+        private IEnumerator ShowerCoroutine(RewardType type, Vector3 sourcePos, int amount, Action onComplete)
+        {
+            GameObject prefab = GetIconPrefab(type);
+            RectTransform target = GetTarget(type);
+            TextMeshProUGUI displayText = GetDisplayText(type);
+            AudioClip sound = GetSound(type);
+
+            if (prefab == null || target == null) yield break;
+
+            // Screen flash for shower
+            if (UIAnimationManager.Instance != null)
+                UIAnimationManager.Instance.GoldFlash();
+
+            int iconsToSpawn = Mathf.Min(amount / 5, 20); // More icons for shower
+            if (iconsToSpawn < 5) iconsToSpawn = 5;
+            int completedIcons = 0;
+            int startValue = currentValues[type];
+            int endValue = startValue + amount;
+
+            // Phase 1: Burst out radially
+            List<RectTransform> spawnedIcons = new List<RectTransform>();
+
+            for (int i = 0; i < iconsToSpawn; i++)
+            {
+                GameObject icon = Instantiate(prefab, flyingIconsParent);
+                RectTransform iconRT = icon.GetComponent<RectTransform>();
+                iconRT.position = sourcePos;
+                iconRT.localScale = Vector3.zero;
+                icon.SetActive(true);
+                spawnedIcons.Add(iconRT);
+
+                // Burst outward in random direction
+                float angle = (360f / iconsToSpawn) * i + UnityEngine.Random.Range(-15f, 15f);
+                float distance = UnityEngine.Random.Range(80f, 200f);
+                Vector3 burstTarget = sourcePos + new Vector3(
+                    Mathf.Cos(angle * Mathf.Deg2Rad) * distance,
+                    Mathf.Sin(angle * Mathf.Deg2Rad) * distance,
+                    0f
+                );
+
+                var burstSeq = DOTween.Sequence();
+                burstSeq.Append(iconRT.DOScale(1.5f, 0.15f).SetEase(Ease.OutBack));
+                burstSeq.Join(iconRT.DOMove(burstTarget, 0.2f).SetEase(Ease.OutQuad));
+                burstSeq.Append(iconRT.DOScale(1f, 0.1f));
+                _activeTweens.Add(burstSeq);
+                burstSeq.OnKill(() => _activeTweens.Remove(burstSeq));
+            }
+
+            yield return new WaitForSeconds(0.35f);
+
+            // Phase 2: All fly to target with stagger
+            for (int i = 0; i < spawnedIcons.Count; i++)
+            {
+                var iconRT = spawnedIcons[i];
+                if (iconRT == null) continue;
+
+                int index = i;
+                Vector3 startPos = iconRT.position;
+                Sequence flySeq = DOTween.Sequence();
+
+                flySeq.Append(iconRT.DOMove(target.position, flyDuration * 0.6f).SetEase(Ease.InQuad));
+                flySeq.Join(iconRT.DOScale(0.4f, flyDuration * 0.6f));
+                flySeq.Join(iconRT.DORotate(new Vector3(0, 0, 720f), flyDuration * 0.6f, RotateMode.FastBeyond360));
+
+                flySeq.OnComplete(() =>
+                {
+                    _activeTweens.Remove(flySeq);
+
+                    if (sound != null && audioSource != null)
+                        audioSource.PlayOneShot(sound, 0.3f);
+
+                    // Rapid counter tick
+                    completedIcons++;
+                    int newValue = startValue + Mathf.RoundToInt((float)completedIcons / iconsToSpawn * amount);
+                    if (completedIcons >= iconsToSpawn) newValue = endValue;
+
+                    if (displayText != null)
+                        displayText.text = newValue.ToString();
+
+                    // Bump on each arrival
+                    if (target != null)
+                    {
+                        var bump = target.DOPunchScale(Vector3.one * 0.15f, 0.1f, 3);
+                        _activeTweens.Add(bump);
+                        bump.OnComplete(() => _activeTweens.Remove(bump));
+                    }
+
+                    Destroy(iconRT.gameObject);
+                });
+
+                _activeTweens.Add(flySeq);
+
+                yield return new WaitForSeconds(0.03f); // Rapid stagger
+            }
+
+            yield return new WaitUntil(() => completedIcons >= iconsToSpawn);
+
+            // Final big bump on counter
+            if (target != null)
+            {
+                var finalBump = target.DOPunchScale(Vector3.one * 0.3f, 0.3f, 6, 0.5f);
+                _activeTweens.Add(finalBump);
+                finalBump.OnKill(() => _activeTweens.Remove(finalBump));
+            }
 
             currentValues[type] = endValue;
             OnRewardClaimed?.Invoke(type, amount);
@@ -220,9 +359,12 @@ namespace DigitPark.Animations
             {
                 screenFlash.gameObject.SetActive(true);
                 screenFlash.color = new Color(1f, 0.9f, 0.3f, 0f);
-                screenFlash.DOFade(0.6f, 0.15f).OnComplete(() =>
-                    screenFlash.DOFade(0f, 0.3f).OnComplete(() =>
-                        screenFlash.gameObject.SetActive(false)));
+                var flashSeq = DOTween.Sequence();
+                flashSeq.Append(screenFlash.DOFade(0.6f, 0.15f));
+                flashSeq.Append(screenFlash.DOFade(0f, 0.3f));
+                flashSeq.OnComplete(() => screenFlash.gameObject.SetActive(false));
+                _activeTweens.Add(flashSeq);
+                flashSeq.OnKill(() => _activeTweens.Remove(flashSeq));
             }
 
             // Play sound
@@ -242,6 +384,7 @@ namespace DigitPark.Animations
             rewardPopup.localScale = Vector3.zero;
 
             Sequence popupSeq = DOTween.Sequence();
+            _activeTweens.Add(popupSeq);
             popupSeq.Append(rewardPopup.DOScale(1.2f, 0.3f).SetEase(Ease.OutBack));
             popupSeq.Append(rewardPopup.DOScale(1f, 0.2f).SetEase(Ease.InOutQuad));
 
@@ -256,6 +399,7 @@ namespace DigitPark.Animations
                 popupSeq.Insert(0.3f, rewardIcon.transform.DOPunchScale(Vector3.one * 0.3f, 0.4f, 5));
             }
 
+            popupSeq.OnKill(() => _activeTweens.Remove(popupSeq));
             yield return popupSeq.WaitForCompletion();
         }
 
@@ -270,13 +414,15 @@ namespace DigitPark.Animations
                 return;
             }
 
-            rewardPopup.DOScale(0f, 0.2f)
+            var hideTween = rewardPopup.DOScale(0f, 0.2f)
                 .SetEase(Ease.InBack)
                 .OnComplete(() =>
                 {
                     rewardPopup.gameObject.SetActive(false);
                     onComplete?.Invoke();
                 });
+            _activeTweens.Add(hideTween);
+            hideTween.OnKill(() => _activeTweens.Remove(hideTween));
         }
 
         // ==================== MULTIPLE REWARDS ====================
@@ -315,14 +461,18 @@ namespace DigitPark.Animations
 
             int startValue = currentValues[type];
 
-            DOTween.To(() => startValue, x =>
+            var counterTween = DOTween.To(() => startValue, x =>
             {
                 startValue = x;
-                text.text = x.ToString();
+                if (text != null) text.text = x.ToString();
             }, targetValue, counterAnimDuration).SetEase(Ease.OutQuad);
+            _activeTweens.Add(counterTween);
+            counterTween.OnKill(() => _activeTweens.Remove(counterTween));
 
             // Punch scale
-            text.transform.DOPunchScale(Vector3.one * 0.2f, counterAnimDuration, 5);
+            var punchTween = text.transform.DOPunchScale(Vector3.one * 0.2f, counterAnimDuration, 5);
+            _activeTweens.Add(punchTween);
+            punchTween.OnKill(() => _activeTweens.Remove(punchTween));
 
             currentValues[type] = targetValue;
         }
@@ -422,7 +572,13 @@ namespace DigitPark.Animations
 
         private void OnDestroy()
         {
+            // Kill all tracked tweens
+            for (int i = _activeTweens.Count - 1; i >= 0; i--)
+                _activeTweens[i]?.Kill();
+            _activeTweens.Clear();
+
             DOTween.Kill(rewardPopup);
+            if (screenFlash != null) screenFlash.DOKill();
         }
     }
 

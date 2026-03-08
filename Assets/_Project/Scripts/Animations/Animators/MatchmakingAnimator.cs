@@ -60,6 +60,11 @@ namespace DigitPark.Animations
         private AudioSource audioSource;
         private Tween searchRotationTween;
         private Sequence searchDotsSequence;
+        private Sequence cardSlideSequence;
+        private Sequence vsSequence;
+        private Sequence quickVSSequence;
+        private Tween vsGlowTween;
+        private Tween searchScaleTween;
         private bool isSearching;
 
         private void Awake()
@@ -86,7 +91,8 @@ namespace DigitPark.Animations
             {
                 searchIndicator.gameObject.SetActive(true);
                 searchIndicator.localScale = Vector3.zero;
-                searchIndicator.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+                searchScaleTween?.Kill();
+                searchScaleTween = searchIndicator.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
             }
 
             // Rotating search ring
@@ -270,15 +276,16 @@ namespace DigitPark.Animations
             }
 
             // Slide cards in
-            Sequence cardSlideSeq = DOTween.Sequence();
+            cardSlideSequence?.Kill();
+            cardSlideSequence = DOTween.Sequence();
 
             if (playerCard != null)
-                cardSlideSeq.Append(playerCard.DOAnchorPosX(0, cardSlideDuration).SetEase(Ease.OutBack));
+                cardSlideSequence.Append(playerCard.DOAnchorPosX(0, cardSlideDuration).SetEase(Ease.OutBack));
 
             if (opponentCard != null)
-                cardSlideSeq.Join(opponentCard.DOAnchorPosX(0, cardSlideDuration).SetEase(Ease.OutBack));
+                cardSlideSequence.Join(opponentCard.DOAnchorPosX(0, cardSlideDuration).SetEase(Ease.OutBack));
 
-            yield return cardSlideSeq.WaitForCompletion();
+            yield return cardSlideSequence.WaitForCompletion();
 
             // VS Impact
             if (vsImpactSound != null && audioSource != null)
@@ -289,10 +296,11 @@ namespace DigitPark.Animations
                 vsContainer.gameObject.SetActive(true);
 
                 // Pop in with overshoot
-                Sequence vsSeq = DOTween.Sequence();
-                vsSeq.Append(vsContainer.DOScale(1.5f, vsPopDuration * 0.4f).SetEase(Ease.OutQuad));
-                vsSeq.Append(vsContainer.DOScale(1f, vsPopDuration * 0.6f).SetEase(Ease.OutBounce));
-                vsSeq.Join(vsContainer.DOShakeRotation(vsPopDuration, new Vector3(0, 0, 15f), 10));
+                vsSequence?.Kill();
+                vsSequence = DOTween.Sequence();
+                vsSequence.Append(vsContainer.DOScale(1.5f, vsPopDuration * 0.4f).SetEase(Ease.OutQuad));
+                vsSequence.Append(vsContainer.DOScale(1f, vsPopDuration * 0.6f).SetEase(Ease.OutBounce));
+                vsSequence.Join(vsContainer.DOShakeRotation(vsPopDuration, new Vector3(0, 0, 15f), 10));
             }
 
             // VS particles
@@ -303,8 +311,13 @@ namespace DigitPark.Animations
             if (vsGlow != null)
             {
                 vsGlow.gameObject.SetActive(true);
-                vsGlow.DOFade(1f, 0.3f).OnComplete(() =>
-                    vsGlow.DOFade(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo));
+                vsGlowTween?.Kill();
+                var fadeIn = vsGlow.DOFade(1f, 0.3f);
+                fadeIn.OnComplete(() =>
+                {
+                    vsGlowTween = vsGlow.DOFade(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                });
+                vsGlowTween = fadeIn;
             }
 
             // Screen shake
@@ -327,7 +340,8 @@ namespace DigitPark.Animations
             vsContainer.gameObject.SetActive(true);
             vsContainer.localScale = Vector3.zero;
 
-            DOTween.Sequence()
+            quickVSSequence?.Kill();
+            quickVSSequence = DOTween.Sequence()
                 .Append(vsContainer.DOScale(1.3f, 0.15f).SetEase(Ease.OutQuad))
                 .Append(vsContainer.DOScale(1f, 0.25f).SetEase(Ease.OutBounce));
 
@@ -409,9 +423,17 @@ namespace DigitPark.Animations
         {
             searchRotationTween?.Kill();
             searchDotsSequence?.Kill();
+            searchScaleTween?.Kill();
+            cardSlideSequence?.Kill();
+            vsSequence?.Kill();
+            quickVSSequence?.Kill();
+            vsGlowTween?.Kill();
             DOTween.Kill(playerCard);
             DOTween.Kill(opponentCard);
             DOTween.Kill(vsContainer);
+            if (vsGlow != null) vsGlow.DOKill();
+            if (screenFlash != null) screenFlash.DOKill();
+            if (opponentSilhouette != null) DOTween.Kill(opponentSilhouette);
         }
     }
 }

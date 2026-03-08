@@ -426,7 +426,7 @@ namespace DigitPark.Managers
             switch (currentTab)
             {
                 case TournamentBrowserTab.MyTournaments:
-                    return "No estás participando en ningún torneo.\n¡Únete a uno!";
+                    return AutoLocalizer.Get("tournament_empty_state_my");
                 case TournamentBrowserTab.Featured:
                     return "No hay torneos destacados en este momento.";
                 default:

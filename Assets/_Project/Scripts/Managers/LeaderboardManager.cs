@@ -68,14 +68,21 @@ namespace DigitPark.Managers
 
         private async void Start()
         {
-            Debug.Log("[Leaderboard] LeaderboardManager iniciado");
+            try
+            {
+                Debug.Log("[Leaderboard] LeaderboardManager iniciado");
 
-            EnsureServicesExist();
-            SetupListeners();
-            await LoadPlayerDataAsync();
+                EnsureServicesExist();
+                SetupListeners();
+                await LoadPlayerDataAsync();
 
-            // Seleccionar DigitRush por defecto y cargar
-            SelectGame(0);
+                // Seleccionar DigitRush por defecto y cargar
+                SelectGame(0);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         private void EnsureServicesExist()

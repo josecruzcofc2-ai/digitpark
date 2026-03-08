@@ -191,29 +191,36 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnVerifyClicked()
         {
-            if (isVerifying || _kycService == null) return;
-
-            isVerifying = true;
-            ShowLoadingIndicator(true);
-            if (statusText) statusText.text = L("age_verification_status_pending");
-            if (verifyButton) verifyButton.interactable = false;
-
-            Debug.Log("[AgeVerification] Iniciando verificación via Triumph SDK");
-
-            // Triumph SDK maneja TODO el flujo de verificación con su propia UI
-            var result = await _kycService.StartIdentityVerification();
-
-            // Verificar que no se destruyó el objeto durante el await
-            if (this == null) return;
-
-            isVerifying = false;
-            ShowLoadingIndicator(false);
-
-            if (!result.Success)
+            try
             {
-                ShowError(result.Message ?? L("age_verification_error_generic"));
+                if (isVerifying || _kycService == null) return;
+
+                isVerifying = true;
+                ShowLoadingIndicator(true);
+                if (statusText) statusText.text = L("age_verification_status_pending");
+                if (verifyButton) verifyButton.interactable = false;
+
+                Debug.Log("[AgeVerification] Iniciando verificación via Triumph SDK");
+
+                // Triumph SDK maneja TODO el flujo de verificación con su propia UI
+                var result = await _kycService.StartIdentityVerification();
+
+                // Verificar que no se destruyó el objeto durante el await
+                if (this == null) return;
+
+                isVerifying = false;
+                ShowLoadingIndicator(false);
+
+                if (!result.Success)
+                {
+                    ShowError(result.Message ?? L("age_verification_error_generic"));
+                }
+                // Si es exitoso, OnKYCStatusChanged actualizará la UI
             }
-            // Si es exitoso, OnKYCStatusChanged actualizará la UI
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         private void ShowError(string message)
@@ -276,14 +283,21 @@ namespace DigitPark.Managers
         /// </summary>
         public static async void ResetVerification()
         {
-            if (ServiceLocator.KYC != null)
+            try
             {
-                await ServiceLocator.KYC.ResetVerification();
+                if (ServiceLocator.KYC != null)
+                {
+                    await ServiceLocator.KYC.ResetVerification();
+                }
+                // También limpiar PlayerPrefs por compatibilidad
+                PlayerPrefs.DeleteKey("AgeVerified");
+                PlayerPrefs.DeleteKey("BirthDate");
+                PlayerPrefs.Save();
             }
-            // También limpiar PlayerPrefs por compatibilidad
-            PlayerPrefs.DeleteKey("AgeVerified");
-            PlayerPrefs.DeleteKey("BirthDate");
-            PlayerPrefs.Save();
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         private void ShowLoadingIndicator(bool show)

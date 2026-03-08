@@ -49,15 +49,22 @@ namespace DigitPark.UI.Components
 
         private async void Start()
         {
-            SetupUI();
+            try
+            {
+                SetupUI();
 
-            if (loadCurrentUserOnStart)
-            {
-                await LoadCurrentUserAvatar();
+                if (loadCurrentUserOnStart)
+                {
+                    await LoadCurrentUserAvatar();
+                }
+                else if (!string.IsNullOrEmpty(targetUserId))
+                {
+                    await LoadUserAvatar(targetUserId, "");
+                }
             }
-            else if (!string.IsNullOrEmpty(targetUserId))
+            catch (System.Exception ex)
             {
-                await LoadUserAvatar(targetUserId, "");
+                Debug.LogException(ex);
             }
         }
 

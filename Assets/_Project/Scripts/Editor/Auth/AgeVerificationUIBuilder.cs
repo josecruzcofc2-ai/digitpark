@@ -461,22 +461,54 @@ namespace DigitPark.Editor
 
         private static void BuildLoadingIndicator(Canvas canvas)
         {
+            // Fullscreen overlay (blocks interaction behind it)
             GameObject loadingIndicator = new GameObject("LoadingIndicator");
             loadingIndicator.transform.SetParent(canvas.transform, false);
 
             RectTransform rect = loadingIndicator.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(60, 60);
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
 
-            Image spinnerImage = loadingIndicator.AddComponent<Image>();
+            // Dark semi-transparent background
+            Image overlayBg = loadingIndicator.AddComponent<Image>();
+            overlayBg.color = new Color(0f, 0f, 0f, 0.75f);
+            overlayBg.raycastTarget = true;
+
+            // Centered spinner container
+            GameObject spinnerContainer = new GameObject("SpinnerContainer");
+            spinnerContainer.transform.SetParent(loadingIndicator.transform, false);
+            RectTransform scRT = spinnerContainer.AddComponent<RectTransform>();
+            scRT.anchorMin = new Vector2(0.5f, 0.5f);
+            scRT.anchorMax = new Vector2(0.5f, 0.5f);
+            scRT.sizeDelta = new Vector2(80, 80);
+            Image spinnerImage = spinnerContainer.AddComponent<Image>();
             spinnerImage.sprite = WhiteSprite;
             spinnerImage.color = GoldPremium;
+
+            // "Verifying..." text below spinner
+            GameObject textObj = new GameObject("LoadingText");
+            textObj.transform.SetParent(loadingIndicator.transform, false);
+            RectTransform txtRT = textObj.AddComponent<RectTransform>();
+            txtRT.anchorMin = new Vector2(0.5f, 0.5f);
+            txtRT.anchorMax = new Vector2(0.5f, 0.5f);
+            txtRT.anchoredPosition = new Vector2(0, -70);
+            txtRT.sizeDelta = new Vector2(400, 40);
+            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "Verifying...";
+            tmp.fontSize = FontSizes.Body;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(0.95f, 0.95f, 0.95f, 1f);
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 22;
+            tmp.fontSizeMax = FontSizes.Body;
 
             // Start hidden
             loadingIndicator.SetActive(false);
 
-            Debug.Log("✅ LoadingIndicator created");
+            Debug.Log("[AgeVerificationUI] LoadingIndicator rebuilt as fullscreen overlay");
         }
 
         #endregion

@@ -10,6 +10,7 @@ using DigitPark.Localization;
 using DigitPark.UI;
 using DigitPark.Games;
 using DigitPark.Services;
+using DigitPark.Animations;
 
 namespace DigitPark.Managers
 {
@@ -94,6 +95,7 @@ namespace DigitPark.Managers
         // Combo System
         private int currentCombo = 0;
         private int maxCombo = 0;
+        private ComboVisualController comboVisualController;
 
         // Player Data
         private PlayerData currentPlayer;
@@ -155,6 +157,11 @@ namespace DigitPark.Managers
             LoadPlayerData();
             SetupListeners();
             SetupSettingsPanel();
+
+            // Initialize combo visual controller
+            comboVisualController = gameObject.AddComponent<ComboVisualController>();
+            Canvas canvas = gridButtons[0].GetComponentInParent<Canvas>();
+            comboVisualController.Initialize(canvas);
 
             if (IsPracticeMode() && settingsPanel != null)
             {
@@ -358,9 +365,10 @@ namespace DigitPark.Managers
             UpdateTimerDisplay();
             UpdateRoundUI();
 
-            if (useCountdown && countdownUI != null)
+            if (useCountdown)
             {
-                countdownUI.StartCountdown(OnCountdownComplete);
+                Canvas canvas = gridButtons[0].GetComponentInParent<Canvas>();
+                CountdownAnimator.Play(canvas, OnCountdownComplete);
             }
             else
             {
@@ -575,6 +583,7 @@ namespace DigitPark.Managers
             }
 
             UpdateComboDisplay();
+            comboVisualController?.OnComboChanged(currentCombo);
         }
 
         private void OnWrongNumberClicked(int buttonIndex)
@@ -582,6 +591,7 @@ namespace DigitPark.Managers
             Debug.Log($"[Game] Incorrect! Clicked {gridNumbers[buttonIndex]}, expected {currentTargetNumber}");
 
             // Reset combo
+            comboVisualController?.OnComboReset();
             currentCombo = 0;
             totalErrors++;
 

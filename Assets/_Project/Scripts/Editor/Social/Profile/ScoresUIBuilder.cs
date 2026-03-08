@@ -603,21 +603,21 @@ namespace DigitPark.Editor
             SetupRectTransform(icon,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -30), new Vector2(150, 150));
-            TextMeshProUGUI iconTMP = SetupText(icon, "ranking_icon", (int)FontSizes.Symbol, GOLD, FontStyles.Bold);
+            TextMeshProUGUI iconTMP = SetupText(icon, "\u2B50", (int)FontSizes.Symbol, GOLD, FontStyles.Bold);
             iconTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject title = CreateOrFind(emptyState.transform, "EmptyTitle");
             SetupRectTransform(title,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, 30), new Vector2(500, 60));
-            TextMeshProUGUI titleTMP = SetupText(title, "empty_leaderboard_title", (int)FontSizes.Body, Color.white, FontStyles.Bold);
+            TextMeshProUGUI titleTMP = SetupText(title, "No Rankings Yet", (int)FontSizes.Body, Color.white, FontStyles.Bold);
             titleTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject subtitle = CreateOrFind(emptyState.transform, "EmptySubtitle");
             SetupRectTransform(subtitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -30), new Vector2(450, 50));
-            TextMeshProUGUI subTMP = SetupText(subtitle, "empty_leaderboard_subtitle", (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
+            TextMeshProUGUI subTMP = SetupText(subtitle, "Play a game to appear on the leaderboard", (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
             subTMP.alignment = TextAlignmentOptions.Center;
 
             GameObject playBtn = CreateOrFind(emptyState.transform, "PlayButton");
@@ -863,7 +863,7 @@ namespace DigitPark.Editor
 
             GameObject loadingText = CreateOrFind(loadingPanel.transform, "LoadingText");
             SetupRectTransform(loadingText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            TextMeshProUGUI loadingTMP = SetupText(loadingText, "loading_rankings", (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold);
+            TextMeshProUGUI loadingTMP = SetupText(loadingText, "Loading Rankings...", (int)FontSizes.Body, CYAN_NEON, FontStyles.Bold);
             loadingTMP.alignment = TextAlignmentOptions.Center;
 
             loadingPanel.SetActive(false);

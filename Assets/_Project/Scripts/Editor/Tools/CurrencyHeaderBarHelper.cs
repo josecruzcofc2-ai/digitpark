@@ -23,8 +23,9 @@ namespace DigitPark.Editor
         private static readonly Color GEM_COLOR = new Color(0.4f, 0.8f, 1f, 1f);
         private static readonly Color COIN_COLOR = new Color(1f, 0.85f, 0.3f, 1f);
 
-        // Pill styling
-        private static readonly Color PILL_BG = new Color(0.08f, 0.12f, 0.18f, 0.95f);
+        // Pill styling — GREEN square pills (Clash Royale style)
+        private static readonly Color PILL_BG = new Color(0.05f, 0.22f, 0.12f, 0.95f);
+        private static readonly Color PILL_OUTLINE = new Color(0.2f, 0.85f, 0.4f, 0.7f);
         private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
 
         /// <summary>
@@ -75,8 +76,8 @@ namespace DigitPark.Editor
             var bg = GetOrAdd<Image>(pill);
             bg.color = PILL_BG;
             var outline = GetOrAdd<Outline>(pill);
-            outline.effectColor = color * 0.6f;
-            outline.effectDistance = new Vector2(1, 1);
+            outline.effectColor = PILL_OUTLINE;
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
 
             // Button for tap → navigate to shop
             var btn = GetOrAdd<Button>(pill);
@@ -144,7 +145,7 @@ namespace DigitPark.Editor
             var plusRT = plus.AddComponent<RectTransform>();
             plusRT.sizeDelta = new Vector2(58, 58);
             var plusImg = plus.AddComponent<Image>();
-            plusImg.color = color;
+            plusImg.color = new Color(0.2f, 0.85f, 0.4f, 1f); // GREEN CTA (Clash Royale style)
             var plusLE = plus.AddComponent<LayoutElement>();
             plusLE.minWidth = 58;
             plusLE.minHeight = 58;

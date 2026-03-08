@@ -585,6 +585,8 @@ namespace DigitPark.Localization
             { "DepositPanelSubtitle", "deposit_panel_subtitle" },
             { "WithdrawPanelTitle", "withdraw_funds" },
             { "ConfirmWithdrawButtonText", "withdraw_funds" },
+            { "KycTitleText", "kyc_title" },
+            { "KycExplanationText", "kyc_explanation" },
             { "VerifyKycButtonText", "verify_identity" },
             { "HistoryTabButtonText", "history" },
             // CashBattle1v1 renamed GOs

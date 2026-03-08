@@ -148,13 +148,55 @@ namespace DigitPark.Editor
         {
             string[] scenes = new string[]
             {
+                // Core
                 "Assets/_Project/Scenes/_Core/Boot.unity",
-                "Assets/_Project/Scenes/Auth/Login.unity",
-                "Assets/_Project/Scenes/Auth/Register.unity",
                 "Assets/_Project/Scenes/_Core/MainMenu.unity",
                 "Assets/_Project/Scenes/_Core/Settings.unity",
+                // Auth
+                "Assets/_Project/Scenes/Auth/Login.unity",
+                "Assets/_Project/Scenes/Auth/Register.unity",
+                "Assets/_Project/Scenes/Auth/AgeVerification.unity",
+                // Games - Navigation
+                "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity",
+                "Assets/_Project/Scenes/Games/Navigation/PlayModeSelection.unity",
+                "Assets/_Project/Scenes/Games/Navigation/BetSelection.unity",
+                "Assets/_Project/Scenes/Games/Navigation/Matchmaking.unity",
+                // Games - Minigames
+                "Assets/_Project/Scenes/Games/Minigames/DigitRush.unity",
+                "Assets/_Project/Scenes/Games/Minigames/FlashTap.unity",
+                "Assets/_Project/Scenes/Games/Minigames/MemoryPairs.unity",
+                "Assets/_Project/Scenes/Games/Minigames/OddOneOut.unity",
+                "Assets/_Project/Scenes/Games/Minigames/QuickMath.unity",
+                // Monetization
+                "Assets/_Project/Scenes/Monetization/Achievements.unity",
+                "Assets/_Project/Scenes/Monetization/DailyMissions.unity",
+                "Assets/_Project/Scenes/Monetization/DailyRewards.unity",
+                "Assets/_Project/Scenes/Monetization/Shop.unity",
+                // Social
+                "Assets/_Project/Scenes/Social/Friends/Friends.unity",
+                "Assets/_Project/Scenes/Social/Friends/FriendRequests.unity",
+                "Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",
+                "Assets/_Project/Scenes/Social/Profile/Profile.unity",
                 "Assets/_Project/Scenes/Social/Profile/Scores.unity",
-                "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity"
+                "Assets/_Project/Scenes/Social/Profile/MatchHistory.unity",
+                "Assets/_Project/Scenes/Social/Notifications/Notifications.unity",
+                // Tournaments
+                "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity",
+                "Assets/_Project/Scenes/Tournaments/TournamentCreate.unity",
+                "Assets/_Project/Scenes/Tournaments/TournamentLobby.unity",
+                // CashBattle
+                "Assets/_Project/Scenes/CashBattle/CashBattle1v1.unity",
+                "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
+                "Assets/_Project/Scenes/CashBattle/CashHistory.unity",
+                "Assets/_Project/Scenes/CashBattle/CashMatchmaking.unity",
+                "Assets/_Project/Scenes/CashBattle/CashProfile.unity",
+                "Assets/_Project/Scenes/CashBattle/CashWallet.unity",
+                "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournaments.unity",
+                "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentCreate.unity",
+                "Assets/_Project/Scenes/CashBattle/CashTournaments/CashTournamentLobby.unity",
+                // Onboarding
+                "Assets/_Project/Scenes/Onboarding/Onboarding.unity",
+                "Assets/_Project/Scenes/Onboarding/CashBattleOnboarding.unity",
             };
 
             int totalButtons = 0;
@@ -163,7 +205,7 @@ namespace DigitPark.Editor
             {
                 if (!System.IO.File.Exists(scenePath.Replace("/", "\\")))
                 {
-                    Debug.LogWarning($"Escena no encontrada: {scenePath}");
+                    Debug.LogWarning($"[EffectsSetup] Escena no encontrada: {scenePath}");
                     continue;
                 }
 
@@ -178,16 +220,9 @@ namespace DigitPark.Editor
                     {
                         ButtonEffects effects = btn.gameObject.AddComponent<ButtonEffects>();
 
-                        // Auto-detectar tipo
-                        string name = btn.gameObject.name.ToLower();
-                        if (name.Contains("play") || name.Contains("start") || name.Contains("buy"))
-                        {
-                            SetButtonEffectType(effects, ButtonEffects.ButtonEffectType.Important);
-                        }
-                        else if (name.Contains("premium") || name.Contains("pro"))
-                        {
-                            SetButtonEffectType(effects, ButtonEffects.ButtonEffectType.Premium);
-                        }
+                        // Auto-detectar tipo usando UIBuilderButtonHelper
+                        var type = UIBuilderButtonHelper.DetectType(btn.gameObject.name);
+                        SetButtonEffectType(effects, type);
 
                         EditorUtility.SetDirty(btn.gameObject);
                         sceneButtons++;
@@ -204,7 +239,7 @@ namespace DigitPark.Editor
             }
 
             EditorUtility.DisplayDialog("Setup Completado",
-                $"Se agregó ButtonEffects a {totalButtons} botones en todas las escenas.\n\n" +
+                $"Se agregó ButtonEffects a {totalButtons} botones en {scenes.Length} escenas.\n\n" +
                 "Todas las escenas han sido guardadas.",
                 "OK");
         }

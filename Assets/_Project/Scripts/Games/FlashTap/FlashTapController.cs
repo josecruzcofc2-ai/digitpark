@@ -7,6 +7,7 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Effects;
 using DigitPark.Localization;
+using DigitPark.Animations;
 
 namespace DigitPark.Games
 {
@@ -186,7 +187,7 @@ namespace DigitPark.Games
         {
             SetButtonInteractable(false);
 
-            if (useCountdown && countdownUI != null)
+            if (useCountdown)
             {
                 // Mostrar boton naranja deshabilitado durante countdown
                 if (button3D != null)
@@ -194,7 +195,8 @@ namespace DigitPark.Games
                     button3D.SetState(FlashTapButton3D.ButtonState.Wait, true);
                     button3D.SetInputEnabled(false);
                 }
-                countdownUI.StartCountdown(OnCountdownComplete);
+                Canvas canvas = GetComponentInParent<Canvas>();
+                CountdownAnimator.Play(canvas, OnCountdownComplete);
             }
             else
             {
@@ -403,14 +405,15 @@ namespace DigitPark.Games
         {
             yield return new WaitForSeconds(delayBetweenAttempts);
 
-            if (useCountdown && countdownUI != null)
+            if (useCountdown)
             {
                 if (button3D != null)
                 {
                     button3D.SetState(FlashTapButton3D.ButtonState.Wait, true);
                     button3D.SetInputEnabled(false);
                 }
-                countdownUI.StartCountdown(() => StartWaitPhase());
+                Canvas canvas = GetComponentInParent<Canvas>();
+                CountdownAnimator.Play(canvas, () => StartWaitPhase());
             }
             else
             {

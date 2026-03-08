@@ -58,9 +58,9 @@ namespace DigitPark.Editor
         private const float TABS_BOT = 0.892f;
 
         private const float OVERALL_TOP = 0.888f;
-        private const float OVERALL_BOT = 0.815f;
+        private const float OVERALL_BOT = 0.785f;
 
-        private const float SCROLL_TOP = 0.810f;
+        private const float SCROLL_TOP = 0.780f;
         private const float SCROLL_BOT = 0.015f;
 
         private const float SIDE_PAD = 30f;
@@ -515,43 +515,15 @@ namespace DigitPark.Editor
             tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Currency pills (between title and info button)
+            // Currency pills (expanded to right edge, no InfoButton)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
             pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMax = new Vector2(0.99f, 0.95f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 
-            // Info Button (right)
-            var infoBtn = FindOrCreate(topBar.transform, "InfoButton");
-            var iRT = GetOrAdd<RectTransform>(infoBtn);
-            iRT.anchorMin = new Vector2(1, 0.5f);
-            iRT.anchorMax = new Vector2(1, 0.5f);
-            iRT.pivot = new Vector2(1, 0.5f);
-            iRT.anchoredPosition = new Vector2(-SIDE_PAD, 0);
-            iRT.sizeDelta = new Vector2(40, 40);
-            var iBg = GetOrAdd<Image>(infoBtn);
-            iBg.color = CARD_BG;
-            GetOrAdd<Button>(infoBtn).targetGraphic = iBg;
-            var iOutline = GetOrAdd<Outline>(infoBtn);
-            iOutline.effectColor = CYAN_DARK;
-            iOutline.effectDistance = new Vector2(1, 1);
-
-            var infoText = FindOrCreate(infoBtn.transform, "Text");
-            var itRT = GetOrAdd<RectTransform>(infoText);
-            itRT.anchorMin = Vector2.zero;
-            itRT.anchorMax = Vector2.one;
-            itRT.offsetMin = Vector2.zero;
-            itRT.offsetMax = Vector2.zero;
-            var itTMP = GetOrAdd<TextMeshProUGUI>(infoText);
-            itTMP.text = "?";
-            itTMP.fontSize = FontSizes.Body;
-            itTMP.fontStyle = FontStyles.Bold;
-            itTMP.color = CYAN_NEON;
-            itTMP.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[DailyMissionsUI] TopBar creado (Back + MISIONES + Info)");
+            Debug.Log("[DailyMissionsUI] TopBar creado (Back + MISIONES + Currency)");
         }
 
         #endregion
@@ -596,10 +568,10 @@ namespace DigitPark.Editor
             Sprite timerSprite = LoadIcon(UI_ICONS_PATH + "TimerIcon.png");
             if (timerSprite != null) { iconImg.sprite = timerSprite; iconImg.preserveAspect = true; }
             var iconLE = GetOrAdd<LayoutElement>(timerIcon);
-            iconLE.minWidth = 24;
-            iconLE.minHeight = 24;
-            iconLE.preferredWidth = 24;
-            iconLE.preferredHeight = 24;
+            iconLE.minWidth = 96;
+            iconLE.minHeight = 96;
+            iconLE.preferredWidth = 96;
+            iconLE.preferredHeight = 96;
 
             // Label
             var label = FindOrCreate(timerBar.transform, "Label");
@@ -729,7 +701,7 @@ namespace DigitPark.Editor
 
             var vlg = GetOrAdd<VerticalLayoutGroup>(panel);
             vlg.spacing = 8;
-            vlg.padding = new RectOffset(15, 15, 10, 10);
+            vlg.padding = new RectOffset(15, 15, 10, 20);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -766,7 +738,7 @@ namespace DigitPark.Editor
             // Row 2: Progress slider
             var progressContainer = FindOrCreate(panel.transform, "ProgressContainer");
             var pcLE = GetOrAdd<LayoutElement>(progressContainer);
-            pcLE.preferredHeight = 28;
+            pcLE.preferredHeight = 50;
 
             var slider = GetOrAdd<Slider>(progressContainer);
             slider.direction = Slider.Direction.LeftToRight;
@@ -776,20 +748,20 @@ namespace DigitPark.Editor
             slider.value = 4;
             slider.interactable = false;
 
-            // Slider Background
+            // Slider Background (thin bar centered in container, markers overflow above/below)
             var sliderBg = FindOrCreate(progressContainer.transform, "Background");
             var sbRT = GetOrAdd<RectTransform>(sliderBg);
-            sbRT.anchorMin = Vector2.zero;
-            sbRT.anchorMax = Vector2.one;
+            sbRT.anchorMin = new Vector2(0, 0.3f);
+            sbRT.anchorMax = new Vector2(1, 0.7f);
             sbRT.offsetMin = Vector2.zero;
             sbRT.offsetMax = Vector2.zero;
             GetOrAdd<Image>(sliderBg).color = new Color(0.1f, 0.12f, 0.15f, 1f);
 
-            // Fill Area
+            // Fill Area (same thin bar region)
             var fillArea = FindOrCreate(progressContainer.transform, "Fill Area");
             var faRT = GetOrAdd<RectTransform>(fillArea);
-            faRT.anchorMin = Vector2.zero;
-            faRT.anchorMax = Vector2.one;
+            faRT.anchorMin = new Vector2(0, 0.3f);
+            faRT.anchorMax = new Vector2(1, 0.7f);
             faRT.offsetMin = Vector2.zero;
             faRT.offsetMax = Vector2.zero;
 
@@ -811,54 +783,7 @@ namespace DigitPark.Editor
             CreateRewardMarker(progressContainer, "Marker5", 0.833f, "100", false);
             CreateRewardMarker(progressContainer, "MarkerAll", 1.0f, "200", true);
 
-            // Row 3: Bonus reward row
-            var bonusRow = FindOrCreate(panel.transform, "BonusRow");
-            var brHlg = GetOrAdd<HorizontalLayoutGroup>(bonusRow);
-            brHlg.spacing = 8;
-            brHlg.childAlignment = TextAnchor.MiddleCenter;
-            brHlg.childControlWidth = false;
-            brHlg.childControlHeight = true;
-            brHlg.childForceExpandWidth = false;
-            brHlg.childForceExpandHeight = false;
-            var brLE = GetOrAdd<LayoutElement>(bonusRow);
-            brLE.preferredHeight = 30;
-
-            // Bonus text
-            var bonusText = FindOrCreate(bonusRow.transform, "BonusRewardText");
-            var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
-            btTMP.text = "Bonus: +100 DigitCoins";
-            btTMP.fontSize = FontSizes.Body;
-            btTMP.fontStyle = FontStyles.Bold;
-            btTMP.color = GOLD;
-            btTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            var btLE = GetOrAdd<LayoutElement>(bonusText);
-            btLE.flexibleWidth = 1;
-
-            // Claim bonus button
-            var claimBonusBtn = FindOrCreate(bonusRow.transform, "ClaimBonusButton");
-            var cbBg = GetOrAdd<Image>(claimBonusBtn);
-            cbBg.color = GOLD;
-            var cbBtn = GetOrAdd<Button>(claimBonusBtn);
-            cbBtn.targetGraphic = cbBg;
-            claimBonusBtn.SetActive(false); // Oculto hasta que se cumplan las misiones
-            var cbLE = GetOrAdd<LayoutElement>(claimBonusBtn);
-            cbLE.preferredWidth = 100;
-            cbLE.preferredHeight = 28;
-
-            var cbTextObj = FindOrCreate(claimBonusBtn.transform, "Text");
-            var cbTextRT = GetOrAdd<RectTransform>(cbTextObj);
-            cbTextRT.anchorMin = Vector2.zero;
-            cbTextRT.anchorMax = Vector2.one;
-            cbTextRT.offsetMin = Vector2.zero;
-            cbTextRT.offsetMax = Vector2.zero;
-            var cbTextTMP = GetOrAdd<TextMeshProUGUI>(cbTextObj);
-            cbTextTMP.text = "Claim";
-            cbTextTMP.fontSize = FontSizes.Body;
-            cbTextTMP.fontStyle = FontStyles.Bold;
-            cbTextTMP.color = TEXT_DARK;
-            cbTextTMP.alignment = TextAlignmentOptions.Center;
-
-            Debug.Log("[DailyMissionsUI] OverallProgress creado (con bonus)");
+            Debug.Log("[DailyMissionsUI] OverallProgress creado");
         }
 
         private static void CreateRewardMarker(GameObject parent, string name, float xPos, string reward, bool isBonus)
@@ -868,7 +793,7 @@ namespace DigitPark.Editor
             mRT.anchorMin = new Vector2(xPos, 0.5f);
             mRT.anchorMax = new Vector2(xPos, 0.5f);
             mRT.pivot = new Vector2(0.5f, 0.5f);
-            mRT.sizeDelta = new Vector2(28, 28);
+            mRT.sizeDelta = new Vector2(44, 44);
             mRT.anchoredPosition = Vector2.zero;
 
             var mImg = GetOrAdd<Image>(marker);
@@ -885,10 +810,14 @@ namespace DigitPark.Editor
             rwRT.offsetMax = Vector2.zero;
             var rwTMP = GetOrAdd<TextMeshProUGUI>(rewardText);
             rwTMP.text = reward;
-            rwTMP.fontSize = FontSizes.Body;
+            rwTMP.fontSize = 22f;
+            rwTMP.enableAutoSizing = true;
+            rwTMP.fontSizeMin = 22f;
+            rwTMP.fontSizeMax = 22f;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.color = TEXT_WHITE;
             rwTMP.alignment = TextAlignmentOptions.Center;
+            rwTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -1009,41 +938,61 @@ namespace DigitPark.Editor
         {
             var header = FindOrCreate(parent.transform, name);
 
+            // Remove old children (AccentBar, Title from previous builds)
+            for (int c = header.transform.childCount - 1; c >= 0; c--)
+                Object.DestroyImmediate(header.transform.GetChild(c).gameObject);
+
+            // Remove old TMP if it existed directly
+            var oldTMP = header.GetComponent<TextMeshProUGUI>();
+            if (oldTMP != null) Object.DestroyImmediate(oldTMP);
+
             var hlg = GetOrAdd<HorizontalLayoutGroup>(header);
-            hlg.spacing = 10;
-            hlg.padding = new RectOffset(5, 5, 8, 5);
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
+            hlg.spacing = 12;
+            hlg.padding = new RectOffset(10, 10, 8, 5);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
             hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = false;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
 
             var hLE = GetOrAdd<LayoutElement>(header);
             hLE.preferredHeight = 50;
 
-            // Icon
-            var iconGO = FindOrCreate(header.transform, "Icon");
-            var iconImg = GetOrAdd<Image>(iconGO);
-            iconImg.color = color;
-            iconImg.preserveAspect = true;
-            Sprite iconSprite = LoadIcon(MISSIONS_ICONS_PATH + "MissionsIcon.png");
-            if (iconSprite != null) iconImg.sprite = iconSprite;
-            var iconLE = GetOrAdd<LayoutElement>(iconGO);
-            iconLE.minWidth = 24;
-            iconLE.minHeight = 24;
-            iconLE.preferredWidth = 24;
-            iconLE.preferredHeight = 24;
+            // Profile-style divider: --- TITLE ---
+            Color lineColor = new Color(color.r, color.g, color.b, 0.25f);
 
-            // Title
-            var titleGO = FindOrCreate(header.transform, "Title");
-            var tTMP = GetOrAdd<TextMeshProUGUI>(titleGO);
+            // Left Line
+            var leftLine = new GameObject("LeftLine");
+            leftLine.transform.SetParent(header.transform, false);
+            var llLE = leftLine.AddComponent<LayoutElement>();
+            llLE.flexibleWidth = 1;
+            llLE.preferredHeight = 2;
+            leftLine.AddComponent<Image>().color = lineColor;
+
+            // Title Text
+            var titleGO = new GameObject("TitleText");
+            titleGO.transform.SetParent(header.transform, false);
+            var tLE = titleGO.AddComponent<LayoutElement>();
+            tLE.flexibleWidth = 0;
+            tLE.preferredWidth = 500;
+            var tTMP = titleGO.AddComponent<TextMeshProUGUI>();
             tTMP.text = title;
             tTMP.fontSize = FontSizes.Body;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.color = color;
-            tTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            var tLE = GetOrAdd<LayoutElement>(titleGO);
-            tLE.minWidth = 350;
+            tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.characterSpacing = 6;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            tTMP.fontSizeMax = FontSizes.Body;
+
+            // Right Line
+            var rightLine = new GameObject("RightLine");
+            rightLine.transform.SetParent(header.transform, false);
+            var rlLE = rightLine.AddComponent<LayoutElement>();
+            rlLE.flexibleWidth = 1;
+            rlLE.preferredHeight = 2;
+            rightLine.AddComponent<Image>().color = lineColor;
         }
 
         private static void CreateMissionCard(GameObject parent, string name,
@@ -1067,11 +1016,11 @@ namespace DigitPark.Editor
             cardShadow.effectDistance = new Vector2(3, -4);
 
             var cardLE = GetOrAdd<LayoutElement>(card);
-            cardLE.preferredHeight = 130;
+            cardLE.preferredHeight = 260;
 
             var cardHlg = GetOrAdd<HorizontalLayoutGroup>(card);
-            cardHlg.spacing = 12;
-            cardHlg.padding = new RectOffset(12, 12, 10, 10);
+            cardHlg.spacing = 24;
+            cardHlg.padding = new RectOffset(24, 24, 20, 20);
             cardHlg.childAlignment = TextAnchor.MiddleCenter;
             cardHlg.childControlWidth = true;
             cardHlg.childControlHeight = true;
@@ -1081,10 +1030,10 @@ namespace DigitPark.Editor
             // === Left Section: Mission Icon Area ===
             var iconContainer = FindOrCreate(card.transform, "IconContainer");
             var icLE = GetOrAdd<LayoutElement>(iconContainer);
-            icLE.minWidth = 60;
-            icLE.minHeight = 60;
-            icLE.preferredWidth = 60;
-            icLE.preferredHeight = 60;
+            icLE.minWidth = 120;
+            icLE.minHeight = 120;
+            icLE.preferredWidth = 120;
+            icLE.preferredHeight = 120;
 
             // Icon Glow (behind icon)
             var iconGlow = FindOrCreate(iconContainer.transform, "IconGlow");
@@ -1101,15 +1050,14 @@ namespace DigitPark.Editor
             var miRT = GetOrAdd<RectTransform>(missionIcon);
             miRT.anchorMin = new Vector2(0.5f, 0.5f);
             miRT.anchorMax = new Vector2(0.5f, 0.5f);
-            miRT.sizeDelta = new Vector2(50, 50);
+            miRT.sizeDelta = new Vector2(100, 100);
             miRT.anchoredPosition = Vector2.zero;
             var miImg = GetOrAdd<Image>(missionIcon);
             miImg.preserveAspect = true;
             miImg.color = Color.white;
 
-            string iconPath = MISSIONS_ICONS_PATH + "icon_mission_" + iconType + ".png";
-            Sprite missionSprite = LoadIcon(iconPath);
-            if (missionSprite != null) miImg.sprite = missionSprite;
+            // Icons loaded at runtime by MissionCardUI from Resources/Icons/Missions/
+            // No individual icon assignment here (category-based system)
 
             // Completed check overlay
             if (isCompleted)
@@ -1150,7 +1098,7 @@ namespace DigitPark.Editor
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
             var titleLE = GetOrAdd<LayoutElement>(titleGO);
-            titleLE.preferredHeight = 32;
+            titleLE.preferredHeight = 64;
 
             // Description
             var descGO = FindOrCreate(infoPanel.transform, "Description");
@@ -1162,29 +1110,29 @@ namespace DigitPark.Editor
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.overflowMode = TextOverflowModes.Ellipsis;
             var descLE = GetOrAdd<LayoutElement>(descGO);
-            descLE.preferredHeight = 28;
+            descLE.preferredHeight = 56;
 
             // Progress Row
             var progressRow = FindOrCreate(infoPanel.transform, "ProgressRow");
             var prHlg = GetOrAdd<HorizontalLayoutGroup>(progressRow);
-            prHlg.spacing = 8;
+            prHlg.spacing = 16;
             prHlg.childAlignment = TextAnchor.MiddleLeft;
             prHlg.childControlWidth = false;
             prHlg.childControlHeight = true;
             prHlg.childForceExpandWidth = false;
             prHlg.childForceExpandHeight = false;
             var prLE = GetOrAdd<LayoutElement>(progressRow);
-            prLE.preferredHeight = 24;
+            prLE.preferredHeight = 48;
 
             // Progress bar mini
             var progressBar = FindOrCreate(progressRow.transform, "ProgressBar");
             var pbBg = GetOrAdd<Image>(progressBar);
             pbBg.color = new Color(0.1f, 0.12f, 0.15f, 1f);
             var pbLE = GetOrAdd<LayoutElement>(progressBar);
-            pbLE.minWidth = 120;
-            pbLE.minHeight = 14;
-            pbLE.preferredWidth = 120;
-            pbLE.preferredHeight = 14;
+            pbLE.minWidth = 240;
+            pbLE.minHeight = 28;
+            pbLE.preferredWidth = 240;
+            pbLE.preferredHeight = 28;
 
             var progressFill = FindOrCreate(progressBar.transform, "Fill");
             var pfRT = GetOrAdd<RectTransform>(progressFill);
@@ -1204,32 +1152,32 @@ namespace DigitPark.Editor
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.alignment = TextAlignmentOptions.MidlineLeft;
             var ptLE = GetOrAdd<LayoutElement>(progressText);
-            ptLE.minWidth = 60;
+            ptLE.minWidth = 120;
 
             // === Right Section: Reward + Action ===
             var rewardPanel = FindOrCreate(card.transform, "RewardPanel");
             var rpVlg = GetOrAdd<VerticalLayoutGroup>(rewardPanel);
-            rpVlg.spacing = 6;
+            rpVlg.spacing = 12;
             rpVlg.childAlignment = TextAnchor.MiddleCenter;
             rpVlg.childControlWidth = true;
             rpVlg.childControlHeight = false;
             rpVlg.childForceExpandWidth = true;
             rpVlg.childForceExpandHeight = false;
             var rpLE = GetOrAdd<LayoutElement>(rewardPanel);
-            rpLE.minWidth = 80;
-            rpLE.preferredWidth = 80;
+            rpLE.minWidth = 160;
+            rpLE.preferredWidth = 160;
 
             // Reward display (HLG)
             var rewardDisplay = FindOrCreate(rewardPanel.transform, "RewardDisplay");
             var rdHlg = GetOrAdd<HorizontalLayoutGroup>(rewardDisplay);
-            rdHlg.spacing = 4;
+            rdHlg.spacing = 8;
             rdHlg.childAlignment = TextAnchor.MiddleCenter;
             rdHlg.childControlWidth = false;
             rdHlg.childControlHeight = true;
             rdHlg.childForceExpandWidth = false;
             rdHlg.childForceExpandHeight = false;
             var rdLE = GetOrAdd<LayoutElement>(rewardDisplay);
-            rdLE.preferredHeight = 24;
+            rdLE.preferredHeight = 48;
 
             // Currency icon
             Color rewardColor;
@@ -1257,10 +1205,10 @@ namespace DigitPark.Editor
             Sprite currencySprite = LoadIcon(currencyIconPath);
             if (currencySprite != null) ciImg.sprite = currencySprite;
             var ciLE = GetOrAdd<LayoutElement>(currencyIcon);
-            ciLE.minWidth = 20;
-            ciLE.minHeight = 20;
-            ciLE.preferredWidth = 20;
-            ciLE.preferredHeight = 20;
+            ciLE.minWidth = 40;
+            ciLE.minHeight = 40;
+            ciLE.preferredWidth = 40;
+            ciLE.preferredHeight = 40;
 
             // Amount text
             var amountText = FindOrCreate(rewardDisplay.transform, "Amount");
@@ -1271,7 +1219,7 @@ namespace DigitPark.Editor
             atTMP.color = rewardColor;
             atTMP.alignment = TextAlignmentOptions.MidlineLeft;
             var atLE = GetOrAdd<LayoutElement>(amountText);
-            atLE.minWidth = 50;
+            atLE.minWidth = 100;
 
             // Action button
             var actionBtn = FindOrCreate(rewardPanel.transform, "ActionButton");
@@ -1279,7 +1227,7 @@ namespace DigitPark.Editor
             var abBtn = GetOrAdd<Button>(actionBtn);
             abBtn.targetGraphic = abBg;
             var abLE = GetOrAdd<LayoutElement>(actionBtn);
-            abLE.preferredHeight = 32;
+            abLE.preferredHeight = 64;
 
             var actionText = FindOrCreate(actionBtn.transform, "Text");
             var actRT = GetOrAdd<RectTransform>(actionText);
@@ -1342,7 +1290,7 @@ namespace DigitPark.Editor
             ppRT.anchorMin = new Vector2(0.5f, 0.5f);
             ppRT.anchorMax = new Vector2(0.5f, 0.5f);
             ppRT.pivot = new Vector2(0.5f, 0.5f);
-            ppRT.sizeDelta = new Vector2(480, 530);
+            ppRT.sizeDelta = new Vector2(480, 620);
             ppRT.anchoredPosition = Vector2.zero;
 
             var ppBg = GetOrAdd<Image>(popup);
@@ -1385,7 +1333,7 @@ namespace DigitPark.Editor
             // Mission Name (detailTitleText)
             var missionName = FindOrCreate(popup.transform, "MissionName");
             var mnTMP = GetOrAdd<TextMeshProUGUI>(missionName);
-            mnTMP.text = "Mission name";
+            mnTMP.text = "Complete Mission";
             mnTMP.fontSize = FontSizes.Body;
             mnTMP.fontStyle = FontStyles.Bold;
             mnTMP.color = TEXT_SECONDARY;

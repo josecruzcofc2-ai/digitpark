@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DigitPark.Localization;
 
 namespace DigitPark.Data
 {
@@ -99,17 +100,17 @@ namespace DigitPark.Data
         /// </summary>
         public string GetLastSeenText()
         {
-            if (isOnline) return "En línea";
+            if (isOnline) return AutoLocalizer.Get("status_online");
 
             var lastSeenDate = GetLastSeen();
-            if (lastSeenDate == DateTime.MinValue) return "Desconocido";
+            if (lastSeenDate == DateTime.MinValue) return AutoLocalizer.Get("status_unknown");
 
             var diff = DateTime.Now - lastSeenDate;
 
-            if (diff.TotalMinutes < 1) return "Hace un momento";
-            if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
-            if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours} horas";
-            if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays} días";
+            if (diff.TotalMinutes < 1) return AutoLocalizer.Get("time_just_now");
+            if (diff.TotalMinutes < 60) return AutoLocalizer.Get("time_minutes_ago", (int)diff.TotalMinutes);
+            if (diff.TotalHours < 24) return AutoLocalizer.Get("time_hours_ago", (int)diff.TotalHours);
+            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_days_ago", (int)diff.TotalDays);
 
             return lastSeenDate.ToString("dd/MM/yyyy");
         }

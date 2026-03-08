@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.UI.Items;
@@ -21,8 +22,24 @@ namespace DigitPark.Editor
         private static readonly Color PROGRESS_BG = new Color(0.1f, 0.12f, 0.15f, 1f);
         private static readonly Color PROGRESS_FILL = new Color(0f, 0.8f, 0.4f, 1f);
         private static readonly Color COMPLETED_BG = new Color(0.1f, 0.25f, 0.15f, 0.95f);
+        private static readonly Color DESC_GRAY = new Color(0.6f, 0.6f, 0.65f, 1f);
+        private static readonly Color PROGRESS_TEXT_COLOR = new Color(0.55f, 0.55f, 0.6f, 1f);
 
-        private const float MISSION_CARD_HEIGHT = 100f;
+        private const float MISSION_CARD_HEIGHT = 200f;
+
+        // Font sizes for card layout (200px card)
+        private const float CARD_TITLE_SIZE = 32f;
+        private const float CARD_TITLE_MIN = 20f;
+        private const float CARD_DESC_SIZE = 26f;
+        private const float CARD_DESC_MIN = 18f;
+        private const float CARD_PROGRESS_SIZE = 24f;
+        private const float CARD_PROGRESS_MIN = 16f;
+        private const float CARD_REWARD_SIZE = 32f;
+        private const float CARD_REWARD_MIN = 20f;
+        private const float CARD_BUTTON_SIZE = 26f;
+        private const float CARD_BUTTON_MIN = 18f;
+        private const float CARD_CHECK_SIZE = 42f;
+        private const float CARD_CHECK_MIN = 30f;
 
         [MenuItem("DigitPark/Missions/Create MissionCard Prefab")]
         public static void CreateMissionCardPrefabFromScript()
@@ -46,47 +63,49 @@ namespace DigitPark.Editor
             Image bg = item.AddComponent<Image>();
             bg.color = CARD_BG;
 
-            // CategoryBorder (4px izquierda, full height, cyan)
+            // CategoryBorder (8px izquierda, full height, cyan)
             GameObject categoryBorder = CreateImageElement(item.transform, "CategoryBorder",
                 new Vector2(0, 0), new Vector2(0, 1),
-                new Vector2(0, 0), new Vector2(4, 0));
+                new Vector2(0, 0), new Vector2(8, 0));
             categoryBorder.GetComponent<Image>().color = CYAN_NEON;
 
             // IconContainer
             GameObject iconContainer = CreateContainer(item.transform, "IconContainer",
                 new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(12, -30), new Vector2(72, 30));
+                new Vector2(24, -60), new Vector2(144, 60));
 
             // IconGlow
             GameObject iconGlow = CreateImageElement(iconContainer.transform, "IconGlow",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-35, -35), new Vector2(35, 35));
+                new Vector2(-70, -70), new Vector2(70, 70));
             iconGlow.GetComponent<Image>().color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.15f);
 
-            // MissionIcon (50x50)
+            // MissionIcon (100x100)
             GameObject missionIcon = CreateImageElement(iconContainer.transform, "MissionIcon",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-25, -25), new Vector2(25, 25));
+                new Vector2(-50, -50), new Vector2(50, 50));
             missionIcon.GetComponent<Image>().color = CYAN_NEON;
             missionIcon.GetComponent<Image>().preserveAspect = true;
 
             // Content
             GameObject content = CreateContainer(item.transform, "Content",
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(80, 8), new Vector2(-115, -8));
+                new Vector2(160, 16), new Vector2(-230, -16));
 
             // TitleText (bold, white)
-            CreateTextElement(content.transform, "TitleText", "Mission Title",
-                new Vector2(0, 0.65f), new Vector2(1, 1), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+            GameObject titleObj = CreateTextElement(content.transform, "TitleText", "Mission Title",
+                new Vector2(0, 0.65f), new Vector2(1, 1), (int)CARD_TITLE_SIZE, Color.white, FontStyles.Bold, TextAlignmentOptions.Left,
+                CARD_TITLE_MIN);
 
             // DescriptionText (gray)
-            CreateTextElement(content.transform, "DescriptionText", "Mission description",
-                new Vector2(0, 0.35f), new Vector2(1, 0.65f), (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Normal, TextAlignmentOptions.Left);
+            GameObject descObj = CreateTextElement(content.transform, "DescriptionText", "Mission description",
+                new Vector2(0, 0.35f), new Vector2(1, 0.65f), (int)CARD_DESC_SIZE, DESC_GRAY, FontStyles.Normal, TextAlignmentOptions.Left,
+                CARD_DESC_MIN);
 
             // ProgressBar
             GameObject progressBg = CreateImageElement(content.transform, "ProgressBar",
                 new Vector2(0, 0), new Vector2(0.75f, 0.3f),
-                new Vector2(0, 3), new Vector2(0, -3));
+                new Vector2(0, 6), new Vector2(0, -6));
             progressBg.GetComponent<Image>().color = PROGRESS_BG;
 
             Slider slider = progressBg.AddComponent<Slider>();
@@ -101,35 +120,37 @@ namespace DigitPark.Editor
             slider.fillRect = fill.GetComponent<RectTransform>();
 
             // ProgressText ("0/3")
-            CreateTextElement(content.transform, "ProgressText", "0/3",
-                new Vector2(0.78f, 0), new Vector2(1, 0.3f), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+            GameObject progressTextObj = CreateTextElement(content.transform, "ProgressText", "0/3",
+                new Vector2(0.78f, 0), new Vector2(1, 0.3f), (int)CARD_PROGRESS_SIZE, PROGRESS_TEXT_COLOR, FontStyles.Bold, TextAlignmentOptions.Left,
+                CARD_PROGRESS_MIN);
 
             // RewardSection
             GameObject rewardSection = CreateContainer(item.transform, "RewardSection",
                 new Vector2(1, 0), new Vector2(1, 1),
-                new Vector2(-110, 8), new Vector2(-8, -8));
+                new Vector2(-220, 16), new Vector2(-16, -16));
 
-            // RewardIcon (30x30)
+            // RewardIcon (60x60)
             GameObject rewardIcon = CreateImageElement(rewardSection.transform, "RewardIcon",
                 new Vector2(0.5f, 0.6f), new Vector2(0.5f, 0.6f),
-                new Vector2(-15, -15), new Vector2(15, 15));
+                new Vector2(-30, -30), new Vector2(30, 30));
             rewardIcon.GetComponent<Image>().color = GOLD;
             rewardIcon.GetComponent<Image>().preserveAspect = true;
 
             // RewardAmountText ("+50", gold)
-            CreateTextElement(rewardSection.transform, "RewardAmountText", "+50",
-                new Vector2(0, 0), new Vector2(1, 0.4f), (int)FontSizes.Body, GOLD, FontStyles.Bold, TextAlignmentOptions.Center);
+            GameObject rewardAmountObj = CreateTextElement(rewardSection.transform, "RewardAmountText", "+50",
+                new Vector2(0, 0), new Vector2(1, 0.4f), (int)CARD_REWARD_SIZE, GOLD, FontStyles.Bold, TextAlignmentOptions.Center,
+                CARD_REWARD_MIN);
 
-            // DifficultyIndicator (3px bottom strip)
+            // DifficultyIndicator (6px bottom strip)
             GameObject diffIndicator = CreateImageElement(item.transform, "DifficultyIndicator",
                 new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 0), new Vector2(0, 3));
+                new Vector2(0, 0), new Vector2(0, 6));
             diffIndicator.GetComponent<Image>().color = GREEN;
 
-            // ClaimButton (verde, "Reclamar", hidden)
+            // ClaimButton (verde, "Claim", hidden)
             GameObject claimBtn = CreateButton(item.transform, "ClaimButton", "Claim", GREEN, Color.black,
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-85, -18), new Vector2(-8, 18));
+                new Vector2(-170, -36), new Vector2(-16, 36));
             claimBtn.SetActive(false);
 
             // CompletedOverlay (hidden)
@@ -137,14 +158,33 @@ namespace DigitPark.Editor
             completedOverlay.SetActive(false);
 
             // ClaimedCheckmark (TMP "V", hidden)
-            GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
+            GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "\u2714",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-55, -20), new Vector2(-15, 20),
-                (int)FontSizes.Body, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(-110, -40), new Vector2(-30, 40),
+                (int)CARD_CHECK_SIZE, GREEN, FontStyles.Bold, TextAlignmentOptions.Center,
+                CARD_CHECK_MIN);
             claimedCheck.SetActive(false);
 
-            // Add MissionCardUI Component
-            item.AddComponent<MissionCardUI>();
+            // Add MissionCardUI Component and wire all SerializeField references
+            MissionCardUI cardUI = item.AddComponent<MissionCardUI>();
+            SerializedObject so = new SerializedObject(cardUI);
+            so.FindProperty("backgroundImage").objectReferenceValue = bg;
+            so.FindProperty("categoryBorder").objectReferenceValue = categoryBorder.GetComponent<Image>();
+            so.FindProperty("difficultyIndicator").objectReferenceValue = diffIndicator.GetComponent<Image>();
+            so.FindProperty("missionIcon").objectReferenceValue = missionIcon.GetComponent<Image>();
+            so.FindProperty("iconGlow").objectReferenceValue = iconGlow.GetComponent<Image>();
+            so.FindProperty("titleText").objectReferenceValue = titleObj.GetComponent<TextMeshProUGUI>();
+            so.FindProperty("descriptionText").objectReferenceValue = descObj.GetComponent<TextMeshProUGUI>();
+            so.FindProperty("progressText").objectReferenceValue = progressTextObj.GetComponent<TextMeshProUGUI>();
+            so.FindProperty("progressBar").objectReferenceValue = slider;
+            so.FindProperty("progressFill").objectReferenceValue = fill.GetComponent<Image>();
+            so.FindProperty("rewardIcon").objectReferenceValue = rewardIcon.GetComponent<Image>();
+            so.FindProperty("rewardAmountText").objectReferenceValue = rewardAmountObj.GetComponent<TextMeshProUGUI>();
+            so.FindProperty("claimButton").objectReferenceValue = claimBtn.GetComponent<Button>();
+            so.FindProperty("claimButtonText").objectReferenceValue = claimBtn.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+            so.FindProperty("completedOverlay").objectReferenceValue = completedOverlay;
+            so.FindProperty("claimedCheckmark").objectReferenceValue = claimedCheck;
+            so.ApplyModifiedPropertiesWithoutUndo();
 
             // Save Prefab
             SavePrefab(item, "Assets/_Project/Prefabs/Monetization/DailyMissions/MissionCard.prefab");
@@ -178,7 +218,7 @@ namespace DigitPark.Editor
             return obj;
         }
 
-        private static GameObject CreateTextElement(Transform parent, string name, string text, Vector2 anchorMin, Vector2 anchorMax, int fontSize, Color color, FontStyles style, TextAlignmentOptions alignment)
+        private static GameObject CreateTextElement(Transform parent, string name, string text, Vector2 anchorMin, Vector2 anchorMax, int fontSize, Color color, FontStyles style, TextAlignmentOptions alignment, float minFontSize = -1f)
         {
             GameObject obj = new GameObject(name);
             obj.transform.SetParent(parent, false);
@@ -194,14 +234,14 @@ namespace DigitPark.Editor
             tmp.fontStyle = style;
             tmp.alignment = alignment;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMin = minFontSize > 0 ? minFontSize : FontSizes.AutoMinBody;
             tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             return obj;
         }
 
-        private static GameObject CreateTextElement(Transform parent, string name, string text, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax, int fontSize, Color color, FontStyles style, TextAlignmentOptions alignment)
+        private static GameObject CreateTextElement(Transform parent, string name, string text, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax, int fontSize, Color color, FontStyles style, TextAlignmentOptions alignment, float minFontSize = -1f)
         {
             GameObject obj = new GameObject(name);
             obj.transform.SetParent(parent, false);
@@ -217,7 +257,7 @@ namespace DigitPark.Editor
             tmp.fontStyle = style;
             tmp.alignment = alignment;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMin = minFontSize > 0 ? minFontSize : FontSizes.AutoMinBody;
             tmp.fontSizeMax = fontSize > 0 ? fontSize : FontSizes.Body;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
@@ -251,10 +291,13 @@ namespace DigitPark.Editor
                 textRt.offsetMax = Vector2.zero;
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = text;
-                tmp.fontSize = FontSizes.Body;
+                tmp.fontSize = CARD_BUTTON_SIZE;
                 tmp.color = textColor;
                 tmp.fontStyle = FontStyles.Bold;
                 tmp.alignment = TextAlignmentOptions.Center;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = CARD_BUTTON_MIN;
+                tmp.fontSizeMax = CARD_BUTTON_SIZE;
                 tmp.raycastTarget = false;
             }
 

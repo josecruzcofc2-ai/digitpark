@@ -451,15 +451,10 @@ namespace DigitPark.Managers
 
         private void OnThemeDropdownChanged(int index)
         {
-            if (ThemeManager.Instance == null) return;
-
-            var themes = ThemeManager.Instance.AvailableThemes;
-            if (index < 0 || index >= themes.Count) return;
-
-            ThemeData selectedTheme = themes[index];
-            Debug.Log($"[Settings] Cambiando tema a: {selectedTheme.themeName}");
-
-            ThemeManager.Instance.SetTheme(selectedTheme);
+            // Theme change is handled by ThemeDropdownController (which checks locks).
+            // This listener is intentionally empty to avoid bypassing lock checks.
+            // ThemeDropdownController.OnThemeSelected() handles lock verification,
+            // revert to last valid index, and showing the purchase panel.
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using DigitPark.Localization;
 
 namespace DigitPark.Services.Mock
 {
@@ -237,7 +238,7 @@ namespace DigitPark.Services.Mock
 
             if (_activeTournament == null || _activeTournament.TournamentId != tournamentId)
             {
-                return TournamentResult.Failed("No estás en este torneo", "NOT_IN_TOURNAMENT");
+                return TournamentResult.Failed(AutoLocalizer.Get("tournament_not_member"), "NOT_IN_TOURNAMENT");
             }
 
             if (_activeTournament.Status == TournamentStatus.InProgress)
@@ -289,7 +290,7 @@ namespace DigitPark.Services.Mock
 
             if (_activeTournament == null || _activeTournament.TournamentId != tournamentId)
             {
-                return TournamentResult.Failed("No estás en este torneo", "NOT_IN_TOURNAMENT");
+                return TournamentResult.Failed(AutoLocalizer.Get("tournament_not_member"), "NOT_IN_TOURNAMENT");
             }
 
             _activeTournament.MyScore = (_activeTournament.MyScore ?? 0) + score;

@@ -106,7 +106,7 @@ namespace DigitPark.Editor
             CreateCategoryTabs(safeArea);
             CreateProgressSection(safeArea);
             CreateTrophyShowcaseGrid(safeArea);
-            CreateEmptyState(safeArea);
+            // CreateEmptyState removed — achievements always have content once loaded
 
             CreateDetailPanel(canvas);
             CreateRewardCelebration(canvas);
@@ -754,77 +754,7 @@ namespace DigitPark.Editor
             Debug.Log("[TrophyShowcase] TrophyShowcaseGrid creado con 53 logros (V1)");
         }
 
-        // ==================== EMPTY STATE ====================
-
-        private static void CreateEmptyState(GameObject parent)
-        {
-            float topOffset = HEADER_HEIGHT + 60 + 55 + 20;
-
-            GameObject emptyState = FindOrCreateChild(parent, "EmptyStateContainer");
-            emptyState.SetActive(false); // Hidden by default, shown when no results
-
-            RectTransform emptyRT = GetOrAddComponent<RectTransform>(emptyState);
-            emptyRT.anchorMin = Vector2.zero;
-            emptyRT.anchorMax = Vector2.one;
-            emptyRT.offsetMin = new Vector2(CONTENT_PADDING, CONTENT_PADDING);
-            emptyRT.offsetMax = new Vector2(-CONTENT_PADDING, -topOffset);
-
-            // Center content
-            GameObject centerContent = FindOrCreateChild(emptyState, "CenterContent");
-            RectTransform centerRT = GetOrAddComponent<RectTransform>(centerContent);
-            centerRT.anchorMin = new Vector2(0.5f, 0.5f);
-            centerRT.anchorMax = new Vector2(0.5f, 0.5f);
-            centerRT.sizeDelta = new Vector2(300, 250);
-
-            VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(centerContent);
-            vlg.spacing = 20;
-            vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = true;
-            vlg.childForceExpandHeight = false;
-
-            // Empty Icon
-            GameObject iconObj = FindOrCreateChild(centerContent, "EmptyStateIcon");
-            Image iconImage = GetOrAddComponent<Image>(iconObj);
-            iconImage.color = TEXT_SECONDARY;
-            LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
-            iconLE.minWidth = 80;
-            iconLE.minHeight = 80;
-            iconLE.preferredWidth = 80;
-            iconLE.preferredHeight = 80;
-
-            // Empty Text
-            GameObject textObj = FindOrCreateChild(centerContent, "EmptyStateText");
-            TextMeshProUGUI emptyText = GetOrAddComponent<TextMeshProUGUI>(textObj);
-            emptyText.text = "No achievements in this category";
-            emptyText.fontSize = FontSizes.Body;
-            emptyText.fontStyle = FontStyles.Bold;
-            emptyText.color = TEXT_SECONDARY;
-            emptyText.alignment = TextAlignmentOptions.Center;
-            emptyText.enableAutoSizing = true;
-            emptyText.fontSizeMin = FontSizes.AutoMinBody;
-            emptyText.fontSizeMax = FontSizes.Body;
-            emptyText.enableWordWrapping = true;
-            LayoutElement textLE = GetOrAddComponent<LayoutElement>(textObj);
-            textLE.minHeight = 50;
-
-            // Subtitle
-            GameObject subtitleObj = FindOrCreateChild(centerContent, "AchEmptySubtitle");
-            TextMeshProUGUI subtitleText = GetOrAddComponent<TextMeshProUGUI>(subtitleObj);
-            subtitleText.text = "Keep playing to unlock more";
-            subtitleText.fontSize = FontSizes.Body;
-            subtitleText.fontStyle = FontStyles.Bold;
-            subtitleText.color = new Color(TEXT_SECONDARY.r, TEXT_SECONDARY.g, TEXT_SECONDARY.b, 0.7f);
-            subtitleText.alignment = TextAlignmentOptions.Center;
-            subtitleText.enableAutoSizing = true;
-            subtitleText.fontSizeMin = FontSizes.AutoMinBody;
-            subtitleText.fontSizeMax = FontSizes.Body;
-            subtitleText.enableWordWrapping = true;
-            LayoutElement subtitleLE = GetOrAddComponent<LayoutElement>(subtitleObj);
-            subtitleLE.minHeight = 30;
-
-            Debug.Log("[TrophyShowcase] EmptyState creado");
-        }
+        // CreateEmptyState removed — achievements always have content once loaded
 
         private static void CreateTrophyCard(GameObject parent, string name, string title, int progressPercent,
             bool isUnlocked, bool hasProgress, Color accentColor, bool isSecret = false)
@@ -1355,15 +1285,23 @@ namespace DigitPark.Editor
             celebrationBg.color = new Color(0f, 0f, 0f, 0.92f);
             celebration.transform.SetAsLastSibling();
 
-            // Center Content
+            // Center Content (with dark card background)
             GameObject centerContent = FindOrCreateChild(celebration, "CenterContent");
             RectTransform centerRT = GetOrAddComponent<RectTransform>(centerContent);
             centerRT.anchorMin = new Vector2(0.5f, 0.5f);
             centerRT.anchorMax = new Vector2(0.5f, 0.5f);
-            centerRT.sizeDelta = new Vector2(400, 450);
+            centerRT.sizeDelta = new Vector2(420, 480);
+
+            // Background card
+            Image cardBg = GetOrAddComponent<Image>(centerContent);
+            cardBg.color = new Color(0.06f, 0.09f, 0.14f, 0.95f);
+            Outline cardOutline = GetOrAddComponent<Outline>(centerContent);
+            cardOutline.effectColor = new Color(GOLD.r, GOLD.g, GOLD.b, 0.4f);
+            cardOutline.effectDistance = new Vector2(2, -2);
 
             VerticalLayoutGroup vlg = GetOrAddComponent<VerticalLayoutGroup>(centerContent);
             vlg.spacing = 25;
+            vlg.padding = new RectOffset(30, 30, 25, 25);
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = true;

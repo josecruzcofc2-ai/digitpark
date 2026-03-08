@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Panels
 {
@@ -243,19 +244,19 @@ namespace DigitPark.UI.Panels
 
             if (string.IsNullOrEmpty(text))
             {
-                errorMessage = "El campo no puede estar vacío";
+                errorMessage = AutoLocalizer.Get("validation_field_empty");
                 return false;
             }
 
             if (text.Length < minLength)
             {
-                errorMessage = $"Debe tener al menos {minLength} caracteres";
+                errorMessage = AutoLocalizer.Get("validation_min_chars", minLength);
                 return false;
             }
 
             if (text.Length > maxLength)
             {
-                errorMessage = $"Debe tener máximo {maxLength} caracteres";
+                errorMessage = AutoLocalizer.Get("validation_max_chars", maxLength);
                 return false;
             }
 
