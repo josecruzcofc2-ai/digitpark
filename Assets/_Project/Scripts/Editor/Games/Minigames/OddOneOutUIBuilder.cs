@@ -37,7 +37,7 @@ namespace DigitPark.Editor
         private const int GRID_COLUMNS = 4;
         private const float GRID_GAP = 15f;
 
-        [MenuItem("DigitPark/UI Builders/Games/OddOneOut", false, 133)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/OddOneOut", false, 133)]
         public static void ShowWindow()
         {
             GetWindow<OddOneOutUIBuilder>("OddOneOut UI Builder");
@@ -539,7 +539,7 @@ namespace DigitPark.Editor
             cardOutline.effectDistance = new Vector2(3, -3);
 
             // ====== TITLE ======
-            GameObject titleObj = CreateElement(card.transform, "SettingsTitle");
+            GameObject titleObj = CreateElement(card.transform, "OddOneOutTitle");
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
@@ -549,7 +549,7 @@ namespace DigitPark.Editor
             titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
             titleGlow.effectDistance = new Vector2(2, -2);
 
-            GameObject subtitleObj = CreateElement(card.transform, "SettingsSubtitle");
+            GameObject subtitleObj = CreateElement(card.transform, "OddOneOutSubtitle");
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));

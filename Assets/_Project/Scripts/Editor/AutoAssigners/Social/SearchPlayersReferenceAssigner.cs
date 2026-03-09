@@ -39,7 +39,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Social/SearchPlayers References", false, 151)]
+        [MenuItem("DigitPark/Scenes/Assign References/Social/SearchPlayers", false, 151)]
         public static void ShowWindow()
         {
             var window = GetWindow<SearchPlayersReferenceAssigner>("SearchPlayers Reference Assigner");

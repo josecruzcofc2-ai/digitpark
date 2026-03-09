@@ -49,7 +49,7 @@ namespace DigitPark.Editor
         private const float GLOW_LINE_HEIGHT = 2f;
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
-        [MenuItem("DigitPark/UI Builders/Tournaments/TournamentCreate", false, 161)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Tournaments/Create", false, 161)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("TournamentCreate UI Builder",
@@ -238,7 +238,7 @@ namespace DigitPark.Editor
             GameObject title = CreateChild(header, "TitleText");
             RectTransform titleRT = title.GetComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0.07f, 0f);
-            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.anchorMax = new Vector2(0.50f, 1f);
             titleRT.pivot = new Vector2(0.5f, 0.5f);
             titleRT.sizeDelta = Vector2.zero;
             titleRT.anchoredPosition = Vector2.zero;
@@ -250,8 +250,8 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 
@@ -326,7 +326,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "NameSection");
 
-            CreateSectionHeader(card, "Tournament Name");
+            CreateSectionHeader(card, "Tournament Name", "TournamentNameLabel");
 
             // Input
             GameObject inputObj = CreateChild(card, "TournamentNameInput");
@@ -347,7 +347,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "GameSelectionSection");
 
-            CreateSectionHeader(card, "Game Type");
+            CreateSectionHeader(card, "Game Type", "GameTypeLabel");
 
             // Row: Dropdown + Icon
             GameObject row = CreateChild(card, "GameRow");
@@ -384,7 +384,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "EntryFeeSection");
 
-            CreateSectionHeader(card, "Entry Fee");
+            CreateSectionHeader(card, "Entry Fee", "EntryFeeLabel");
 
             // EntryFeeDropdown
             GameObject dropObj = CreateChild(card, "EntryFeeDropdown");
@@ -436,7 +436,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "MaxPlayersSection");
 
-            CreateSectionHeader(card, "Players & Prize");
+            CreateSectionHeader(card, "Players & Prize", "PlayersAndPrizeLabel");
 
             // MaxPlayersDropdown
             GameObject dropObj = CreateChild(card, "MaxPlayersDropdown");
@@ -456,7 +456,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "ScheduleSection");
 
-            CreateSectionHeader(card, "Start Schedule");
+            CreateSectionHeader(card, "Start Schedule", "StartScheduleLabel");
 
             // StartImmediatelyToggle
             CreateStyledToggleRow(card, "StartImmediatelyToggle", "Start Immediately", true);
@@ -480,7 +480,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "RulesSection");
 
-            CreateSectionHeader(card, "Tournament Rules");
+            CreateSectionHeader(card, "Tournament Rules", "TournamentRulesLabel");
 
             // RoundsDropdown
             GameObject roundsObj = CreateChild(card, "RoundsDropdown");
@@ -510,7 +510,7 @@ namespace DigitPark.Editor
         {
             GameObject card = CreateSectionCard(parent, "PrivacySection");
 
-            CreateSectionHeader(card, "Privacy");
+            CreateSectionHeader(card, "Privacy", "PrivacyLabel");
 
             // PrivateToggle
             CreateStyledToggleRow(card, "PrivateToggle", "Private Tournament", false);
@@ -535,7 +535,7 @@ namespace DigitPark.Editor
             Outline ol = card.GetComponent<Outline>();
             if (ol) ol.effectColor = CYAN_ACCENT;
 
-            CreateSectionHeader(card, "PREVIEW");
+            CreateSectionHeader(card, "PREVIEW", "PreviewLabel");
 
             // Preview fields
             string[] fieldNames = { "PreviewNameText", "PreviewGameText", "PreviewEntryText", "PreviewPrizeText", "PreviewPlayersText" };
@@ -766,7 +766,7 @@ namespace DigitPark.Editor
             return card;
         }
 
-        private static void CreateSectionHeader(GameObject card, string label)
+        private static void CreateSectionHeader(GameObject card, string label, string labelName = "Label")
         {
             GameObject headerRow = CreateChild(card, "SectionHeader");
             HorizontalLayoutGroup hlg = headerRow.AddComponent<HorizontalLayoutGroup>();
@@ -778,7 +778,7 @@ namespace DigitPark.Editor
             SetLayoutElement(headerRow, 60);
 
             // Label
-            GameObject labelObj = CreateChild(headerRow, "Label");
+            GameObject labelObj = CreateChild(headerRow, labelName);
             SetText(labelObj, label, FontSizes.Subtitle, FontStyles.Bold, TEXT_SECONDARY, TextAlignmentOptions.Left);
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
             labelLE.minWidth = 500;

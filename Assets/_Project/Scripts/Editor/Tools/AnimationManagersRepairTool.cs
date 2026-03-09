@@ -32,7 +32,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU ITEMS ====================
 
-        [MenuItem("DigitPark/Animation/Batch/FASE 1: Repair All ANIMATION_MANAGERS", false, 590)]
+        [MenuItem("DigitPark/Polish/Animation Batch/FASE 1: Repair All ANIMATION_MANAGERS", false, 590)]
         public static void RepairAllScenes()
         {
             if (!EditorUtility.DisplayDialog("Fase 1: Repair ANIMATION_MANAGERS",
@@ -49,7 +49,7 @@ namespace DigitPark.Editor
             RunOnAllScenes(dryRun: false);
         }
 
-        [MenuItem("DigitPark/Animation/Batch/FASE 1: Repair Current Scene Only", false, 591)]
+        [MenuItem("DigitPark/Polish/Animation Batch/FASE 1: Repair Current Scene Only", false, 591)]
         public static void RepairCurrentScene()
         {
             string sceneName = SceneManager.GetActiveScene().name;
@@ -69,7 +69,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/Animation/Batch/FASE 1: Diagnose All Scenes (Preview)", false, 592)]
+        [MenuItem("DigitPark/Polish/Animation Batch/FASE 1: Diagnose All Scenes (Preview)", false, 592)]
         public static void DiagnoseAllScenes()
         {
             RunOnAllScenes(dryRun: true);

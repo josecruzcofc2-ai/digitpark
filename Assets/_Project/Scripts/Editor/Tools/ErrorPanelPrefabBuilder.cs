@@ -117,7 +117,7 @@ namespace DigitPark.Editor
             titleTMP.color = RED_ERROR;
             titleTMP.alignment = TextAlignmentOptions.Center;
             titleTMP.enableAutoSizing = true;
-            titleTMP.fontSizeMin = 22;
+            titleTMP.fontSizeMin = FontSizes.AutoMinSmall;
             titleTMP.fontSizeMax = FontSizes.H3;
 
             // --- Error Message Text ---
@@ -133,7 +133,7 @@ namespace DigitPark.Editor
             errorTMP.color = TEXT_WHITE;
             errorTMP.alignment = TextAlignmentOptions.Center;
             errorTMP.enableAutoSizing = true;
-            errorTMP.fontSizeMin = 22;
+            errorTMP.fontSizeMin = FontSizes.AutoMinSmall;
             errorTMP.fontSizeMax = FontSizes.Body;
             errorTMP.enableWordWrapping = true;
 
@@ -174,7 +174,7 @@ namespace DigitPark.Editor
             btnTMP.color = BG_DARK;
             btnTMP.alignment = TextAlignmentOptions.Center;
             btnTMP.enableAutoSizing = true;
-            btnTMP.fontSizeMin = 22;
+            btnTMP.fontSizeMin = FontSizes.AutoMinSmall;
             btnTMP.fontSizeMax = FontSizes.Body;
 
             // --- Wire ErrorPanelUI references via SerializedObject ---

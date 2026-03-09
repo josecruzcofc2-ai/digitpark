@@ -52,7 +52,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Onboarding/Onboarding References", false, 170)]
+        [MenuItem("DigitPark/Scenes/Assign References/Onboarding/Main", false, 170)]
         public static void ShowWindow()
         {
             var window = GetWindow<OnboardingReferenceAssigner>("Onboarding Reference Assigner");

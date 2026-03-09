@@ -76,7 +76,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Daily Missions", false, 142)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Monetization/Daily Missions", false, 142)]
         public static void ShowWindow()
         {
             GetWindow<DailyMissionsUIBuilder>("Daily Missions Builder");
@@ -226,18 +226,18 @@ namespace DigitPark.Editor
 
             // Daily Pool
             CreatePoolAsset("Assets/_Project/Data/Missions/DailyMissionPool.asset", "DailyPool",
-                DigitPark.UI.Items.MissionCategory.Daily, 6, dailyDefs);
+                MissionCategory.Daily, 6, dailyDefs);
 
             // Weekly Pool
             CreatePoolAsset("Assets/_Project/Data/Missions/WeeklyMissionPool.asset", "WeeklyPool",
-                DigitPark.UI.Items.MissionCategory.Weekly, 3, weeklyDefs);
+                MissionCategory.Weekly, 3, weeklyDefs);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log($"[DailyMissionsUI] Pools creados: Daily ({dailyDefs.Count} misiones), Weekly ({weeklyDefs.Count} misiones)");
         }
 
-        private static void CreatePoolAsset(string path, string poolName, DigitPark.UI.Items.MissionCategory category,
+        private static void CreatePoolAsset(string path, string poolName, MissionCategory category,
             int selectionCount, System.Collections.Generic.List<MissionDefinitionSO> missions)
         {
             var pool = AssetDatabase.LoadAssetAtPath<MissionPoolSO>(path);
@@ -280,7 +280,7 @@ namespace DigitPark.Editor
 
         private static void CreateMissionSO(string folder, string id, string titleKey, string descKey,
             MissionActionType actionType, DigitPark.Games.GameType targetGame, bool isGameSpecific, int targetAmount,
-            DigitPark.UI.Items.MissionDifficulty difficulty, DigitPark.UI.Items.MissionCategory category,
+            MissionDifficulty difficulty, MissionCategory category,
             MissionRewardType rewardType, int rewardAmount, int sortOrder)
         {
             string path = folder + id + ".asset";
@@ -309,10 +309,10 @@ namespace DigitPark.Editor
         {
             const string P = "Assets/_Project/Data/Missions/Daily/";
             var GT = typeof(DigitPark.Games.GameType);
-            var D = DigitPark.UI.Items.MissionDifficulty.Easy;
-            var DM = DigitPark.UI.Items.MissionDifficulty.Medium;
-            var DH = DigitPark.UI.Items.MissionDifficulty.Hard;
-            var CD = DigitPark.UI.Items.MissionCategory.Daily;
+            var D = MissionDifficulty.Easy;
+            var DM = MissionDifficulty.Medium;
+            var DH = MissionDifficulty.Hard;
+            var CD = MissionCategory.Daily;
             var C = MissionRewardType.DigitCoins;
             var G = MissionRewardType.DigitGems;
 
@@ -361,9 +361,9 @@ namespace DigitPark.Editor
         private static void CreateWeeklyMissionSOs()
         {
             const string P = "Assets/_Project/Data/Missions/Weekly/";
-            var DM = DigitPark.UI.Items.MissionDifficulty.Medium;
-            var DH = DigitPark.UI.Items.MissionDifficulty.Hard;
-            var CW = DigitPark.UI.Items.MissionCategory.Weekly;
+            var DM = MissionDifficulty.Medium;
+            var DH = MissionDifficulty.Hard;
+            var CW = MissionCategory.Weekly;
             var C = MissionRewardType.DigitCoins;
             var G = MissionRewardType.DigitGems;
 
@@ -518,8 +518,8 @@ namespace DigitPark.Editor
             // Currency pills (expanded to right edge, no InfoButton)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.99f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 
@@ -812,7 +812,7 @@ namespace DigitPark.Editor
             rwTMP.text = reward;
             rwTMP.fontSize = 22f;
             rwTMP.enableAutoSizing = true;
-            rwTMP.fontSizeMin = 22f;
+            rwTMP.fontSizeMin = 18f;
             rwTMP.fontSizeMax = 22f;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.color = TEXT_WHITE;
@@ -1333,7 +1333,7 @@ namespace DigitPark.Editor
             // Mission Name (detailTitleText)
             var missionName = FindOrCreate(popup.transform, "MissionName");
             var mnTMP = GetOrAdd<TextMeshProUGUI>(missionName);
-            mnTMP.text = "Complete Mission";
+            mnTMP.text = "mission_complete";
             mnTMP.fontSize = FontSizes.Body;
             mnTMP.fontStyle = FontStyles.Bold;
             mnTMP.color = TEXT_SECONDARY;
@@ -1344,7 +1344,7 @@ namespace DigitPark.Editor
             // Detail Description (detailDescriptionText)
             var detailDesc = FindOrCreate(popup.transform, "DetailDescription");
             var ddTMP = GetOrAdd<TextMeshProUGUI>(detailDesc);
-            ddTMP.text = "Mission description";
+            ddTMP.text = "";
             ddTMP.fontSize = FontSizes.Body;
             ddTMP.fontStyle = FontStyles.Bold;
             ddTMP.color = TEXT_SECONDARY;

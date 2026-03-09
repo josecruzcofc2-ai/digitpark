@@ -53,7 +53,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Core/MainMenu References", false, 110)]
+        [MenuItem("DigitPark/Scenes/Assign References/Core/MainMenu", false, 110)]
         public static void ShowWindow()
         {
             var window = GetWindow<MainMenuReferenceAssigner>("MainMenu Reference Assigner");

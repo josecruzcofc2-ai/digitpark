@@ -49,7 +49,7 @@ namespace DigitPark.Editor
 
         // ==================== DIMENSIONES ====================
         private const float HEADER_HEIGHT = 100f;
-        private const float INFO_CARD_HEIGHT = 160f;
+        private const float INFO_CARD_HEIGHT = 240f;
         private const float TAB_BAR_HEIGHT = 60f;
         private const float ACTION_BAR_HEIGHT = 80f;
         private const float MY_POSITION_HEIGHT = 80f;
@@ -57,7 +57,7 @@ namespace DigitPark.Editor
         private const float CONTENT_PADDING = 16f;
         private const float TAB_INDICATOR_HEIGHT = 3f;
 
-        [MenuItem("DigitPark/UI Builders/Tournaments/TournamentLobby", false, 162)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Tournaments/Lobby", false, 162)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("TournamentLobby UI Builder",
@@ -282,9 +282,9 @@ namespace DigitPark.Editor
             GameObject titleObj = FindOrCreateChild(header, "TournamentNameText");
             RectTransform titleRT = GetOrAddComponent<RectTransform>(titleObj);
             titleRT.anchorMin = new Vector2(0, 0);
-            titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.anchorMax = new Vector2(0.42f, 1);
             titleRT.offsetMin = new Vector2(80, 10);
-            titleRT.offsetMax = new Vector2(-130, -10);
+            titleRT.offsetMax = new Vector2(0, -10);
 
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Tournament Name";
@@ -298,60 +298,15 @@ namespace DigitPark.Editor
             titleText.overflowMode = TextOverflowModes.Ellipsis;
             AddOutline(titleObj, CYAN_GLOW, 2);
 
-            // ── StatusBadge (right of title) ──
-            GameObject statusBadge = FindOrCreateChild(header, "StatusBadge");
-            RectTransform statusBadgeRT = GetOrAddComponent<RectTransform>(statusBadge);
-            statusBadgeRT.anchorMin = new Vector2(1, 0.5f);
-            statusBadgeRT.anchorMax = new Vector2(1, 0.5f);
-            statusBadgeRT.pivot = new Vector2(1, 0.5f);
-            statusBadgeRT.anchoredPosition = new Vector2(-70, 18);
-            statusBadgeRT.sizeDelta = new Vector2(120, 32);
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
-            Image statusBadgeImage = GetOrAddComponent<Image>(statusBadge);
-            statusBadgeImage.color = BUTTON_SUCCESS;
-            statusBadge.name = "StatusBadge";
-
-            // The Image component on StatusBadge is accessed as StatusBadgeImage by the AutoAssigner
-            // We need a separate child named StatusBadgeImage OR the manager references the Image on StatusBadge.
-            // Manager field: statusBadgeImage -> Image on the StatusBadge object itself.
-            // We rename nothing - the AutoAssigner maps "StatusBadge" -> Image component = statusBadgeImage.
-
-            GameObject statusBadgeTextObj = FindOrCreateChild(statusBadge, "StatusBadgeText");
-            SetRectTransformStretch(statusBadgeTextObj);
-            TextMeshProUGUI statusBadgeTMP = GetOrAddComponent<TextMeshProUGUI>(statusBadgeTextObj);
-            statusBadgeTMP.text = "OPEN";
-            statusBadgeTMP.fontSize = FontSizes.Body;
-            statusBadgeTMP.fontStyle = FontStyles.Bold;
-            statusBadgeTMP.color = TEXT_DARK;
-            statusBadgeTMP.alignment = TextAlignmentOptions.Center;
-            statusBadgeTMP.enableAutoSizing = true;
-            statusBadgeTMP.fontSizeMin = FontSizes.AutoMinBody;
-            statusBadgeTMP.fontSizeMax = FontSizes.Body;
-
-            // ── PrizesButton (gold trophy icon, far right) ──
-            GameObject prizesBtn = FindOrCreateChild(header, "PrizesButton");
-            RectTransform prizesRT = GetOrAddComponent<RectTransform>(prizesBtn);
-            prizesRT.anchorMin = new Vector2(1, 0.5f);
-            prizesRT.anchorMax = new Vector2(1, 0.5f);
-            prizesRT.pivot = new Vector2(1, 0.5f);
-            prizesRT.anchoredPosition = new Vector2(-16, -16);
-            prizesRT.sizeDelta = new Vector2(46, 46);
-
-            Image prizesBg = GetOrAddComponent<Image>(prizesBtn);
-            prizesBg.color = GOLD;
-
-            Button prizesButton = GetOrAddComponent<Button>(prizesBtn);
-            SetupButtonColors(prizesButton, GOLD);
-            AddOutline(prizesBtn, new Color(1f, 0.84f, 0f, 0.5f));
-
-            GameObject prizesIconObj = FindOrCreateChild(prizesBtn, "Text");
-            TextMeshProUGUI prizesText = GetOrAddComponent<TextMeshProUGUI>(prizesIconObj);
-            prizesText.text = "\u2666"; // diamond/trophy symbol
-            prizesText.fontSize = FontSizes.Body;
-            prizesText.fontStyle = FontStyles.Bold;
-            prizesText.color = TEXT_DARK;
-            prizesText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(prizesIconObj);
+            // StatusBadge and PrizesButton moved to InfoCard to avoid overlap with CurrencyPills
 
             Debug.Log("[TournamentLobbyUIBuilder] Header creado");
         }
@@ -382,6 +337,9 @@ namespace DigitPark.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
+            // ── StatusRow: StatusBadge + PrizesButton ──
+            CreateInfoCardStatusRow(infoCard);
+
             // ── TopRow: GameType + Countdown ──
             CreateInfoCardTopRow(infoCard);
 
@@ -395,6 +353,83 @@ namespace DigitPark.Editor
             CreateInfoCardRulesRow(infoCard);
 
             Debug.Log("[TournamentLobbyUIBuilder] InfoCard creado");
+        }
+
+        private static void CreateInfoCardStatusRow(GameObject parent)
+        {
+            GameObject statusRow = FindOrCreateChild(parent, "StatusRow");
+
+            HorizontalLayoutGroup hlg = GetOrAddComponent<HorizontalLayoutGroup>(statusRow);
+            hlg.spacing = 10;
+            hlg.childAlignment = TextAnchor.MiddleRight;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+
+            LayoutElement rowLE = GetOrAddComponent<LayoutElement>(statusRow);
+            rowLE.minHeight = 36;
+
+            // Spacer to push items right
+            GameObject spacer = FindOrCreateChild(statusRow, "Spacer");
+            LayoutElement spacerLE = GetOrAddComponent<LayoutElement>(spacer);
+            spacerLE.flexibleWidth = 1;
+
+            // StatusBadge
+            GameObject statusBadge = FindOrCreateChild(statusRow, "StatusBadge");
+            RectTransform statusBadgeRT = GetOrAddComponent<RectTransform>(statusBadge);
+            statusBadgeRT.sizeDelta = new Vector2(120, 32);
+
+            Image statusBadgeImage = GetOrAddComponent<Image>(statusBadge);
+            statusBadgeImage.color = BUTTON_SUCCESS;
+
+            LayoutElement sbLE = GetOrAddComponent<LayoutElement>(statusBadge);
+            sbLE.minWidth = 120;
+            sbLE.preferredWidth = 120;
+            sbLE.minHeight = 32;
+            sbLE.preferredHeight = 32;
+
+            GameObject statusBadgeTextObj = FindOrCreateChild(statusBadge, "StatusBadgeText");
+            SetRectTransformStretch(statusBadgeTextObj);
+            TextMeshProUGUI statusBadgeTMP = GetOrAddComponent<TextMeshProUGUI>(statusBadgeTextObj);
+            statusBadgeTMP.text = "OPEN";
+            statusBadgeTMP.fontSize = FontSizes.Body;
+            statusBadgeTMP.fontStyle = FontStyles.Bold;
+            statusBadgeTMP.color = TEXT_DARK;
+            statusBadgeTMP.alignment = TextAlignmentOptions.Center;
+            statusBadgeTMP.enableAutoSizing = true;
+            statusBadgeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            statusBadgeTMP.fontSizeMax = FontSizes.Body;
+
+            // PrizesButton (gold diamond icon)
+            GameObject prizesBtn = FindOrCreateChild(statusRow, "PrizesButton");
+            RectTransform prizesRT = GetOrAddComponent<RectTransform>(prizesBtn);
+            prizesRT.sizeDelta = new Vector2(46, 46);
+
+            Image prizesBg = GetOrAddComponent<Image>(prizesBtn);
+            prizesBg.color = GOLD;
+
+            LayoutElement pbLE = GetOrAddComponent<LayoutElement>(prizesBtn);
+            pbLE.minWidth = 46;
+            pbLE.preferredWidth = 46;
+            pbLE.minHeight = 32;
+            pbLE.preferredHeight = 32;
+
+            Button prizesButton = GetOrAddComponent<Button>(prizesBtn);
+            SetupButtonColors(prizesButton, GOLD);
+            AddOutline(prizesBtn, new Color(1f, 0.84f, 0f, 0.5f));
+
+            GameObject prizesIconObj = FindOrCreateChild(prizesBtn, "Text");
+            TextMeshProUGUI prizesText = GetOrAddComponent<TextMeshProUGUI>(prizesIconObj);
+            prizesText.text = "\u2666"; // diamond symbol
+            prizesText.fontSize = FontSizes.Body;
+            prizesText.fontStyle = FontStyles.Bold;
+            prizesText.color = TEXT_DARK;
+            prizesText.alignment = TextAlignmentOptions.Center;
+            prizesText.enableAutoSizing = true;
+            prizesText.fontSizeMin = FontSizes.AutoMinBody;
+            prizesText.fontSizeMax = FontSizes.Body;
+            prizesText.overflowMode = TextOverflowModes.Ellipsis;
+            SetRectTransformStretch(prizesIconObj);
         }
 
         private static void CreateInfoCardTopRow(GameObject parent)
@@ -440,6 +475,10 @@ namespace DigitPark.Editor
             gameTypeTMP.fontStyle = FontStyles.Bold;
             gameTypeTMP.color = TEXT_PRIMARY;
             gameTypeTMP.alignment = TextAlignmentOptions.Left;
+            gameTypeTMP.enableAutoSizing = true;
+            gameTypeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            gameTypeTMP.fontSizeMax = FontSizes.Body;
+            gameTypeTMP.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement gtTextLE = GetOrAddComponent<LayoutElement>(gameTypeTextObj);
             gtTextLE.flexibleWidth = 1;
             gtTextLE.minHeight = 30;
@@ -473,6 +512,10 @@ namespace DigitPark.Editor
             countdownTMP.fontStyle = FontStyles.Bold;
             countdownTMP.color = CYAN_NEON;
             countdownTMP.alignment = TextAlignmentOptions.Right;
+            countdownTMP.enableAutoSizing = true;
+            countdownTMP.fontSizeMin = FontSizes.AutoMinBody;
+            countdownTMP.fontSizeMax = FontSizes.Body;
+            countdownTMP.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement cdLE = GetOrAddComponent<LayoutElement>(countdownObj);
             cdLE.minWidth = 120;
             cdLE.minHeight = 30;
@@ -517,6 +560,10 @@ namespace DigitPark.Editor
             entryFeeTMP.fontStyle = FontStyles.Bold;
             entryFeeTMP.color = BUTTON_SUCCESS;
             entryFeeTMP.alignment = TextAlignmentOptions.Left;
+            entryFeeTMP.enableAutoSizing = true;
+            entryFeeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            entryFeeTMP.fontSizeMax = FontSizes.Body;
+            entryFeeTMP.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement efTextLE = GetOrAddComponent<LayoutElement>(entryFeeTextObj);
             efTextLE.flexibleWidth = 1;
             efTextLE.minHeight = 30;
@@ -546,6 +593,10 @@ namespace DigitPark.Editor
             prizePoolTMP.fontStyle = FontStyles.Bold;
             prizePoolTMP.color = GOLD;
             prizePoolTMP.alignment = TextAlignmentOptions.Left;
+            prizePoolTMP.enableAutoSizing = true;
+            prizePoolTMP.fontSizeMin = FontSizes.AutoMinBody;
+            prizePoolTMP.fontSizeMax = FontSizes.Body;
+            prizePoolTMP.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement ppTextLE = GetOrAddComponent<LayoutElement>(prizePoolTextObj);
             ppTextLE.flexibleWidth = 1;
             ppTextLE.minHeight = 30;
@@ -591,6 +642,10 @@ namespace DigitPark.Editor
             progressTMP.fontStyle = FontStyles.Bold;
             progressTMP.color = TEXT_PRIMARY;
             progressTMP.alignment = TextAlignmentOptions.Right;
+            progressTMP.enableAutoSizing = true;
+            progressTMP.fontSizeMin = FontSizes.AutoMinBody;
+            progressTMP.fontSizeMax = FontSizes.Body;
+            progressTMP.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement ptLE = GetOrAddComponent<LayoutElement>(progressTextObj);
             ptLE.minWidth = 60;
             ptLE.minHeight = 24;
@@ -618,6 +673,10 @@ namespace DigitPark.Editor
             attemptsTMP.fontStyle = FontStyles.Bold;
             attemptsTMP.color = TEXT_SECONDARY;
             attemptsTMP.alignment = TextAlignmentOptions.Center;
+            attemptsTMP.enableAutoSizing = true;
+            attemptsTMP.fontSizeMin = FontSizes.AutoMinBody;
+            attemptsTMP.fontSizeMax = FontSizes.Body;
+            attemptsTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // TimeLimitRuleText
             GameObject timeLimitObj = FindOrCreateChild(rulesRow, "TimeLimitRuleText");
@@ -627,6 +686,10 @@ namespace DigitPark.Editor
             timeLimitTMP.fontStyle = FontStyles.Bold;
             timeLimitTMP.color = TEXT_SECONDARY;
             timeLimitTMP.alignment = TextAlignmentOptions.Center;
+            timeLimitTMP.enableAutoSizing = true;
+            timeLimitTMP.fontSizeMin = FontSizes.AutoMinBody;
+            timeLimitTMP.fontSizeMax = FontSizes.Body;
+            timeLimitTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ==================== TAB BAR (60px) ====================
@@ -685,6 +748,10 @@ namespace DigitPark.Editor
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.color = isActive ? TEXT_PRIMARY : TEXT_SECONDARY;
             textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.enableAutoSizing = true;
+            textTMP.fontSizeMin = FontSizes.AutoMinBody;
+            textTMP.fontSizeMax = FontSizes.Body;
+            textTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Indicator bar (bottom)
             GameObject indicator = FindOrCreateChild(tab, indicatorName);
@@ -723,6 +790,10 @@ namespace DigitPark.Editor
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.color = TEXT_SECONDARY;
             textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.enableAutoSizing = true;
+            textTMP.fontSizeMin = FontSizes.AutoMinBody;
+            textTMP.fontSizeMax = FontSizes.Body;
+            textTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // ChatBadge (red circle, inactive by default)
             GameObject badge = FindOrCreateChild(tab, "ChatBadge");
@@ -835,6 +906,10 @@ namespace DigitPark.Editor
             rankText.fontStyle = FontStyles.Bold;
             rankText.color = TEXT_SECONDARY;
             rankText.alignment = TextAlignmentOptions.Center;
+            rankText.enableAutoSizing = true;
+            rankText.fontSizeMin = FontSizes.AutoMinBody;
+            rankText.fontSizeMax = FontSizes.Body;
+            rankText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement rankLE = GetOrAddComponent<LayoutElement>(rankCol);
             rankLE.minWidth = 50;
             rankLE.preferredWidth = 50;
@@ -847,6 +922,10 @@ namespace DigitPark.Editor
             playerText.fontStyle = FontStyles.Bold;
             playerText.color = TEXT_SECONDARY;
             playerText.alignment = TextAlignmentOptions.Left;
+            playerText.enableAutoSizing = true;
+            playerText.fontSizeMin = FontSizes.AutoMinBody;
+            playerText.fontSizeMax = FontSizes.Body;
+            playerText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement playerLE = GetOrAddComponent<LayoutElement>(playerCol);
             playerLE.flexibleWidth = 1;
 
@@ -859,8 +938,8 @@ namespace DigitPark.Editor
             timeHlg.childControlHeight = false;
             timeHlg.childForceExpandWidth = false;
             LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeCol);
-            timeLE.minWidth = 130;
-            timeLE.preferredWidth = 130;
+            timeLE.minWidth = 230;
+            timeLE.preferredWidth = 230;
 
             // Timer icon
             GameObject timerIconObj = FindOrCreateChild(timeCol, "TimerIcon");
@@ -868,7 +947,7 @@ namespace DigitPark.Editor
             timerIcon.color = TEXT_SECONDARY;
             timerIcon.preserveAspect = true;
             RectTransform timerIconRT = GetOrAddComponent<RectTransform>(timerIconObj);
-            timerIconRT.sizeDelta = new Vector2(24, 24);
+            timerIconRT.sizeDelta = new Vector2(96, 96);
             Sprite timerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TIMER_ICON_PATH);
             if (timerSprite != null) timerIcon.sprite = timerSprite;
 
@@ -880,8 +959,12 @@ namespace DigitPark.Editor
             timeText.fontStyle = FontStyles.Bold;
             timeText.color = TEXT_SECONDARY;
             timeText.alignment = TextAlignmentOptions.Right;
+            timeText.enableAutoSizing = true;
+            timeText.fontSizeMin = FontSizes.AutoMinBody;
+            timeText.fontSizeMax = FontSizes.Body;
+            timeText.overflowMode = TextOverflowModes.Ellipsis;
             RectTransform timeLabelRT = GetOrAddComponent<RectTransform>(timeLabelObj);
-            timeLabelRT.sizeDelta = new Vector2(90, 32);
+            timeLabelRT.sizeDelta = new Vector2(130, 40);
         }
 
         private static void CreateParticipantsScrollView(GameObject parent)
@@ -965,6 +1048,10 @@ namespace DigitPark.Editor
             rankText.fontStyle = FontStyles.Bold;
             rankText.color = CYAN_NEON;
             rankText.alignment = TextAlignmentOptions.Center;
+            rankText.enableAutoSizing = true;
+            rankText.fontSizeMin = FontSizes.AutoMinBody;
+            rankText.fontSizeMax = FontSizes.BodyLarge;
+            rankText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement rankLE = GetOrAddComponent<LayoutElement>(rankObj);
             rankLE.minWidth = 50;
 
@@ -989,6 +1076,10 @@ namespace DigitPark.Editor
             nameText.fontStyle = FontStyles.Bold;
             nameText.color = TEXT_PRIMARY;
             nameText.alignment = TextAlignmentOptions.Left;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = FontSizes.AutoMinBody;
+            nameText.fontSizeMax = FontSizes.Body;
+            nameText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
             nameLE.flexibleWidth = 1;
 
@@ -1000,6 +1091,10 @@ namespace DigitPark.Editor
             myTimeText.fontStyle = FontStyles.Bold;
             myTimeText.color = TEXT_PRIMARY;
             myTimeText.alignment = TextAlignmentOptions.Right;
+            myTimeText.enableAutoSizing = true;
+            myTimeText.fontSizeMin = FontSizes.AutoMinBody;
+            myTimeText.fontSizeMax = FontSizes.BodyLarge;
+            myTimeText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeObj);
             timeLE.minWidth = 100;
         }
@@ -1113,9 +1208,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI phText = GetOrAddComponent<TextMeshProUGUI>(placeholderObj);
             phText.text = "Type a message...";
             phText.fontSize = FontSizes.Body;
-            phText.fontStyle = FontStyles.Italic;
+            phText.fontStyle = FontStyles.Bold;
             phText.color = TEXT_SECONDARY;
             phText.alignment = TextAlignmentOptions.MidlineLeft;
+            phText.enableAutoSizing = true;
+            phText.fontSizeMin = FontSizes.AutoMinBody;
+            phText.fontSizeMax = FontSizes.Body;
+            phText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Input text
             GameObject textObj = FindOrCreateChild(textArea, "Text");
@@ -1126,6 +1225,10 @@ namespace DigitPark.Editor
             inputText.fontStyle = FontStyles.Bold;
             inputText.color = TEXT_PRIMARY;
             inputText.alignment = TextAlignmentOptions.MidlineLeft;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.Body;
+            inputText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Wire TMP_InputField references
             inputField.textViewport = textAreaRT;
@@ -1155,6 +1258,10 @@ namespace DigitPark.Editor
             sendText.fontStyle = FontStyles.Bold;
             sendText.color = TEXT_DARK;
             sendText.alignment = TextAlignmentOptions.Center;
+            sendText.enableAutoSizing = true;
+            sendText.fontSizeMin = FontSizes.AutoMinBody;
+            sendText.fontSizeMax = FontSizes.Body;
+            sendText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ==================== ACTION BAR (80px bottom) ====================
@@ -1195,6 +1302,10 @@ namespace DigitPark.Editor
             joinText.fontStyle = FontStyles.Bold;
             joinText.color = TEXT_DARK;
             joinText.alignment = TextAlignmentOptions.Center;
+            joinText.enableAutoSizing = true;
+            joinText.fontSizeMin = FontSizes.AutoMinBody;
+            joinText.fontSizeMax = FontSizes.BodyLarge;
+            joinText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ── ShareButton (secondary) ──
             GameObject shareBtn = FindOrCreateChild(actionBar, "ShareButton");
@@ -1214,6 +1325,10 @@ namespace DigitPark.Editor
             shareText.fontStyle = FontStyles.Bold;
             shareText.color = TEXT_PRIMARY;
             shareText.alignment = TextAlignmentOptions.Center;
+            shareText.enableAutoSizing = true;
+            shareText.fontSizeMin = FontSizes.AutoMinBody;
+            shareText.fontSizeMax = FontSizes.Body;
+            shareText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ── LeaveButton (danger/secondary) ──
             GameObject leaveBtn = FindOrCreateChild(actionBar, "LeaveButton");
@@ -1233,6 +1348,10 @@ namespace DigitPark.Editor
             leaveText.fontStyle = FontStyles.Bold;
             leaveText.color = TEXT_PRIMARY;
             leaveText.alignment = TextAlignmentOptions.Center;
+            leaveText.enableAutoSizing = true;
+            leaveText.fontSizeMin = FontSizes.AutoMinBody;
+            leaveText.fontSizeMax = FontSizes.Body;
+            leaveText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ── StatusText (below action bar, informational) ──
             GameObject statusTextObj = FindOrCreateChild(parent, "StatusText");
@@ -1249,6 +1368,10 @@ namespace DigitPark.Editor
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.color = TEXT_SECONDARY;
             statusTMP.alignment = TextAlignmentOptions.Center;
+            statusTMP.enableAutoSizing = true;
+            statusTMP.fontSizeMin = FontSizes.AutoMinBody;
+            statusTMP.fontSizeMax = FontSizes.Body;
+            statusTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[TournamentLobbyUIBuilder] ActionBar creado");
         }
@@ -1287,20 +1410,24 @@ namespace DigitPark.Editor
             vlg.childForceExpandHeight = false;
 
             // Title
-            GameObject titleObj = FindOrCreateChild(popup, "Title");
+            GameObject titleObj = FindOrCreateChild(popup, "PrizesPopupTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "PRIZES";
             titleText.fontSize = FontSizes.H2;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.H2;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
             titleLE.minHeight = 45;
 
             // Prize Rows
-            CreatePrizeRow(popup, "1st Place", "$25", GOLD);
-            CreatePrizeRow(popup, "2nd Place", "$15", SILVER);
-            CreatePrizeRow(popup, "3rd Place", "$10", BRONZE);
+            CreatePrizeRow(popup, "1st Place", "$25", GOLD, "FirstPlaceLabel");
+            CreatePrizeRow(popup, "2nd Place", "$15", SILVER, "SecondPlaceLabel");
+            CreatePrizeRow(popup, "3rd Place", "$10", BRONZE, "ThirdPlaceLabel");
 
             // Close Button
             GameObject closeBtn = FindOrCreateChild(popup, "CloseButton");
@@ -1312,19 +1439,23 @@ namespace DigitPark.Editor
             LayoutElement closeLE = GetOrAddComponent<LayoutElement>(closeBtn);
             closeLE.minHeight = 50;
 
-            GameObject closeTextObj = FindOrCreateChild(closeBtn, "Text");
+            GameObject closeTextObj = FindOrCreateChild(closeBtn, "PrizesCloseText");
             TextMeshProUGUI closeText = GetOrAddComponent<TextMeshProUGUI>(closeTextObj);
             closeText.text = "Close";
             closeText.fontSize = FontSizes.Subtitle;
             closeText.fontStyle = FontStyles.Bold;
             closeText.color = TEXT_PRIMARY;
             closeText.alignment = TextAlignmentOptions.Center;
+            closeText.enableAutoSizing = true;
+            closeText.fontSizeMin = FontSizes.AutoMinBody;
+            closeText.fontSizeMax = FontSizes.Subtitle;
+            closeText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(closeTextObj);
 
             Debug.Log("[TournamentLobbyUIBuilder] PrizesPopup creado");
         }
 
-        private static void CreatePrizeRow(GameObject parent, string place, string amount, Color color)
+        private static void CreatePrizeRow(GameObject parent, string place, string amount, Color color, string placeLabelName = "Place")
         {
             string safeName = place.Replace(" ", "").Replace(".", "");
             GameObject row = FindOrCreateChild(parent, $"Prize_{safeName}");
@@ -1340,13 +1471,17 @@ namespace DigitPark.Editor
             rowLE.minHeight = 50;
 
             // Place
-            GameObject placeObj = FindOrCreateChild(row, "Place");
+            GameObject placeObj = FindOrCreateChild(row, placeLabelName);
             TextMeshProUGUI placeText = GetOrAddComponent<TextMeshProUGUI>(placeObj);
             placeText.text = place;
             placeText.fontSize = FontSizes.H3;
             placeText.fontStyle = FontStyles.Bold;
             placeText.color = color;
             placeText.alignment = TextAlignmentOptions.Left;
+            placeText.enableAutoSizing = true;
+            placeText.fontSizeMin = FontSizes.AutoMinBody;
+            placeText.fontSizeMax = FontSizes.H3;
+            placeText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement placeLE = GetOrAddComponent<LayoutElement>(placeObj);
             placeLE.flexibleWidth = 1;
 
@@ -1359,8 +1494,9 @@ namespace DigitPark.Editor
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Right;
             amountText.enableAutoSizing = true;
-            amountText.fontSizeMin = 22;
+            amountText.fontSizeMin = FontSizes.AutoMinBody;
             amountText.fontSizeMax = FontSizes.H3;
+            amountText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement amountLE = GetOrAddComponent<LayoutElement>(amountObj);
             amountLE.minWidth = 120;
         }
@@ -1399,7 +1535,7 @@ namespace DigitPark.Editor
             vlg.childForceExpandHeight = false;
 
             // Title
-            GameObject titleObj = FindOrCreateChild(popup, "Title");
+            GameObject titleObj = FindOrCreateChild(popup, "LeavePopupTitle");
             TextMeshProUGUI titleText = GetOrAddComponent<TextMeshProUGUI>(titleObj);
             titleText.text = "Leave Tournament?";
             titleText.fontSize = FontSizes.H3;
@@ -1413,7 +1549,7 @@ namespace DigitPark.Editor
             titleLE.minHeight = 40;
 
             // Message
-            GameObject msgObj = FindOrCreateChild(popup, "Message");
+            GameObject msgObj = FindOrCreateChild(popup, "LeavePopupMessage");
             TextMeshProUGUI msgText = GetOrAddComponent<TextMeshProUGUI>(msgObj);
             msgText.text = "You will lose your progress and\nyour entry fee will not be refunded.";
             msgText.fontSize = FontSizes.Subtitle;
@@ -1444,13 +1580,17 @@ namespace DigitPark.Editor
             SetupButtonColors(stayButton, BUTTON_PRIMARY);
             AddOutline(stayBtn, CYAN_GLOW, 2);
 
-            GameObject stayTextObj = FindOrCreateChild(stayBtn, "Text");
+            GameObject stayTextObj = FindOrCreateChild(stayBtn, "StayButtonText");
             TextMeshProUGUI stayText = GetOrAddComponent<TextMeshProUGUI>(stayTextObj);
             stayText.text = "Stay";
             stayText.fontSize = FontSizes.Subtitle;
             stayText.fontStyle = FontStyles.Bold;
             stayText.color = TEXT_DARK;
             stayText.alignment = TextAlignmentOptions.Center;
+            stayText.enableAutoSizing = true;
+            stayText.fontSizeMin = FontSizes.AutoMinBody;
+            stayText.fontSizeMax = FontSizes.Subtitle;
+            stayText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(stayTextObj);
 
             // Leave Button
@@ -1460,13 +1600,17 @@ namespace DigitPark.Editor
             Button leaveButton = GetOrAddComponent<Button>(leaveBtn);
             SetupButtonColors(leaveButton, BUTTON_DANGER);
 
-            GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "Text");
+            GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "LeaveButtonText");
             TextMeshProUGUI leaveText = GetOrAddComponent<TextMeshProUGUI>(leaveTextObj);
             leaveText.text = "Leave";
             leaveText.fontSize = FontSizes.Subtitle;
             leaveText.fontStyle = FontStyles.Bold;
             leaveText.color = TEXT_PRIMARY;
             leaveText.alignment = TextAlignmentOptions.Center;
+            leaveText.enableAutoSizing = true;
+            leaveText.fontSizeMin = FontSizes.AutoMinBody;
+            leaveText.fontSizeMax = FontSizes.Subtitle;
+            leaveText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(leaveTextObj);
 
             Debug.Log("[TournamentLobbyUIBuilder] LeaveConfirmPopup creado");
@@ -1519,6 +1663,10 @@ namespace DigitPark.Editor
             loadingTMP.fontStyle = FontStyles.Bold;
             loadingTMP.color = TEXT_PRIMARY;
             loadingTMP.alignment = TextAlignmentOptions.Center;
+            loadingTMP.enableAutoSizing = true;
+            loadingTMP.fontSizeMin = FontSizes.AutoMinBody;
+            loadingTMP.fontSizeMax = FontSizes.Body;
+            loadingTMP.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement ltLE = GetOrAddComponent<LayoutElement>(loadingText);
             ltLE.minHeight = 30;
 
@@ -1569,6 +1717,10 @@ namespace DigitPark.Editor
             subtitleTMP.fontStyle = FontStyles.Bold;
             subtitleTMP.color = TEXT_PRIMARY;
             subtitleTMP.alignment = TextAlignmentOptions.Center;
+            subtitleTMP.enableAutoSizing = true;
+            subtitleTMP.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleTMP.fontSizeMax = FontSizes.H4;
+            subtitleTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[TournamentLobbyUIBuilder] StartingOverlay creado");
         }

@@ -42,7 +42,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Auth/Login References", false, 100)]
+        [MenuItem("DigitPark/Scenes/Assign References/Auth/Login", false, 100)]
         public static void ShowWindow()
         {
             var window = GetWindow<LoginReferenceAssigner>("Login Reference Assigner");

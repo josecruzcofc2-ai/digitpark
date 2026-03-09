@@ -29,7 +29,7 @@ namespace DigitPark.Editor
 
         private const string PREFAB_PATH = "Assets/_Project/Prefabs/Common/InAppToast.prefab";
 
-        [MenuItem("DigitPark/UI Builders/Common/InApp Toast", false, 191)]
+        [MenuItem("DigitPark/Prefabs/Toasts/InApp Toast", false, 191)]
         public static void ShowWindow()
         {
             GetWindow<InAppToastUIBuilder>("InApp Toast Builder");
@@ -99,19 +99,17 @@ namespace DigitPark.Editor
             var tiBg = typeIcon.AddComponent<Image>();
             tiBg.color = new Color(1, 1, 1, 0.06f);
 
-            var iconText = new GameObject("IconText");
-            iconText.transform.SetParent(typeIcon.transform, false);
-            var itRT = iconText.AddComponent<RectTransform>();
-            itRT.anchorMin = Vector2.zero;
-            itRT.anchorMax = Vector2.one;
-            itRT.offsetMin = Vector2.zero;
-            itRT.offsetMax = Vector2.zero;
-            var itTMP = iconText.AddComponent<TextMeshProUGUI>();
-            itTMP.text = "🔔";
-            itTMP.fontSize = FontSizes.Body;
-            itTMP.fontStyle = FontStyles.Bold;
-            itTMP.color = CYAN_NEON;
-            itTMP.alignment = TextAlignmentOptions.Center;
+            var iconImage = new GameObject("IconImage");
+            iconImage.transform.SetParent(typeIcon.transform, false);
+            var iiRT = iconImage.AddComponent<RectTransform>();
+            iiRT.anchorMin = new Vector2(0.15f, 0.15f);
+            iiRT.anchorMax = new Vector2(0.85f, 0.85f);
+            iiRT.offsetMin = Vector2.zero;
+            iiRT.offsetMax = Vector2.zero;
+            var iiImg = iconImage.AddComponent<Image>();
+            iiImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/NotificationsIcon.png");
+            iiImg.preserveAspect = true;
+            iiImg.color = CYAN_NEON;
 
             // ---- Info Section (center) ----
             var infoSection = new GameObject("InfoSection");
@@ -224,7 +222,7 @@ namespace DigitPark.Editor
             SetRef(so, "canvasGroup", cg);
             SetRef(so, "background", bg);
             SetRef(so, "borderOutline", outline);
-            SetRef(so, "typeIconText", itTMP);
+            SetRef(so, "typeIconImage", iiImg);
             SetRef(so, "titleText", titleTMP);
             SetRef(so, "bodyText", bodyTMP);
             SetRef(so, "cardButton", cardBtn);

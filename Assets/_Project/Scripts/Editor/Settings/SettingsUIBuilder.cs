@@ -57,7 +57,7 @@ namespace DigitPark.Editor
 
         // ==================== MAIN ENTRY POINT ====================
 
-        [MenuItem("DigitPark/UI Builders/Core/Settings", false, 111)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Core/Settings", false, 111)]
         public static void BuildSettingsUI()
         {
             if (WhiteSprite == null || Font == null)
@@ -374,6 +374,10 @@ namespace DigitPark.Editor
             costText.color = CYAN_NEON;
             costText.alignment = TextAlignmentOptions.MidlineRight;
             costText.raycastTarget = false;
+            costText.enableAutoSizing = true;
+            costText.fontSizeMin = FontSizes.AutoMinBody;
+            costText.fontSizeMax = FontSizes.H3;
+            costText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Gem icon sprite
             GameObject gemIconObj = new GameObject("GemIcon");
@@ -647,7 +651,7 @@ namespace DigitPark.Editor
             cardBg.color = CARD_BG;
 
             // Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("PremiumPanelTitle");
             titleObj.transform.SetParent(card.transform, false);
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0, 0.9f);
@@ -661,6 +665,10 @@ namespace DigitPark.Editor
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = GOLD;
             titleTxt.alignment = TextAlignmentOptions.Center;
+            titleTxt.enableAutoSizing = true;
+            titleTxt.fontSizeMin = FontSizes.AutoMinBody;
+            titleTxt.fontSizeMax = FontSizes.Equation;
+            titleTxt.overflowMode = TextOverflowModes.Ellipsis;
 
             // Add PremiumPanelUI component
             var premiumComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.PremiumPanelUI, Assembly-CSharp"));
@@ -714,7 +722,7 @@ namespace DigitPark.Editor
             cardBg.color = CARD_BG;
 
             // Title
-            GameObject titleObj = new GameObject("TitleText");
+            GameObject titleObj = new GameObject("ChangeNameTitle");
             titleObj.transform.SetParent(card.transform, false);
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0, 0.78f);
@@ -728,6 +736,10 @@ namespace DigitPark.Editor
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = CYAN_NEON;
             titleTxt.alignment = TextAlignmentOptions.Center;
+            titleTxt.enableAutoSizing = true;
+            titleTxt.fontSizeMin = FontSizes.AutoMinBody;
+            titleTxt.fontSizeMax = FontSizes.H4;
+            titleTxt.overflowMode = TextOverflowModes.Ellipsis;
 
             // InputField
             GameObject inputObj = new GameObject("InputField");
@@ -762,9 +774,13 @@ namespace DigitPark.Editor
             placeholderTxt.font = Font;
             placeholderTxt.text = "New name...";
             placeholderTxt.fontSize = FontSizes.H3;
-            placeholderTxt.fontStyle = FontStyles.Italic;
+            placeholderTxt.fontStyle = FontStyles.Bold;
             placeholderTxt.color = TEXT_GRAY;
             placeholderTxt.alignment = TextAlignmentOptions.Left;
+            placeholderTxt.enableAutoSizing = true;
+            placeholderTxt.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderTxt.fontSizeMax = FontSizes.H3;
+            placeholderTxt.overflowMode = TextOverflowModes.Ellipsis;
 
             GameObject inputText = new GameObject("Text");
             inputText.transform.SetParent(textArea.transform, false);
@@ -816,6 +832,10 @@ namespace DigitPark.Editor
             confirmTxtComp.fontStyle = FontStyles.Bold;
             confirmTxtComp.color = DARK_NAVY;
             confirmTxtComp.alignment = TextAlignmentOptions.Center;
+            confirmTxtComp.enableAutoSizing = true;
+            confirmTxtComp.fontSizeMin = FontSizes.AutoMinBody;
+            confirmTxtComp.fontSizeMax = FontSizes.H3;
+            confirmTxtComp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Cancel Button
             GameObject cancelObj = new GameObject("CancelButton");
@@ -842,8 +862,13 @@ namespace DigitPark.Editor
             cancelTxtComp.font = Font;
             cancelTxtComp.text = "Cancel";
             cancelTxtComp.fontSize = FontSizes.H3;
+            cancelTxtComp.fontStyle = FontStyles.Bold;
             cancelTxtComp.color = TEXT_GRAY;
             cancelTxtComp.alignment = TextAlignmentOptions.Center;
+            cancelTxtComp.enableAutoSizing = true;
+            cancelTxtComp.fontSizeMin = FontSizes.AutoMinBody;
+            cancelTxtComp.fontSizeMax = FontSizes.H3;
+            cancelTxtComp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Add InputPanelUI component
             var inputComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.InputPanelUI, Assembly-CSharp"));
@@ -996,8 +1021,9 @@ namespace DigitPark.Editor
             cancelTxtComp.text = cancelText;
             cancelTxtComp.fontSize = FontSizes.Body;
             cancelTxtComp.enableAutoSizing = true;
-            cancelTxtComp.fontSizeMin = FontSizes.Body;
+            cancelTxtComp.fontSizeMin = FontSizes.AutoMinBody;
             cancelTxtComp.fontSizeMax = FontSizes.Body;
+            cancelTxtComp.fontStyle = FontStyles.Bold;
             cancelTxtComp.color = TEXT_GRAY;
             cancelTxtComp.alignment = TextAlignmentOptions.Center;
 
@@ -1036,6 +1062,10 @@ namespace DigitPark.Editor
             text.color = TEXT_GRAY;
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.H4;
+            text.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ==================== CARD CREATION ====================
@@ -1092,6 +1122,10 @@ namespace DigitPark.Editor
             title.alignment = TextAlignmentOptions.Left;
             title.characterSpacing = 4;
             title.raycastTarget = false;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = FontSizes.AutoMinBody;
+            title.fontSizeMax = FontSizes.H3;
+            title.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ==================== ROW ELEMENTS ====================
@@ -1140,9 +1174,14 @@ namespace DigitPark.Editor
             label.font = Font;
             label.text = labelText;
             label.fontSize = FontSizes.H3;
+            label.fontStyle = FontStyles.Bold;
             label.color = TEXT_WHITE;
             label.alignment = TextAlignmentOptions.Left;
             label.raycastTarget = false;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = FontSizes.AutoMinBody;
+            label.fontSizeMax = FontSizes.H3;
+            label.overflowMode = TextOverflowModes.Ellipsis;
 
             // Right text (value/arrow)
             if (!string.IsNullOrEmpty(rightText))
@@ -1165,6 +1204,10 @@ namespace DigitPark.Editor
                 right.color = rightColor;
                 right.alignment = TextAlignmentOptions.Right;
                 right.raycastTarget = false;
+                right.enableAutoSizing = true;
+                right.fontSizeMin = FontSizes.AutoMinBody;
+                right.fontSizeMax = FontSizes.H3;
+                right.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 
@@ -1273,9 +1316,14 @@ namespace DigitPark.Editor
             labelText.font = Font;
             labelText.text = "ID:";
             labelText.fontSize = 42f;
+            labelText.fontStyle = FontStyles.Bold;
             labelText.color = TEXT_GRAY;
             labelText.alignment = TextAlignmentOptions.Left;
             labelText.raycastTarget = false;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.AutoMinBody;
+            labelText.fontSizeMax = 42f;
+            labelText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ID Value - sits right next to label, muted gray (secondary data)
             GameObject idObj = new GameObject("IDText");
@@ -1314,7 +1362,7 @@ namespace DigitPark.Editor
             Button copyButton = copyBtn.AddComponent<Button>();
             copyButton.targetGraphic = copyBg;
 
-            TextMeshProUGUI copyText = CreateTextChild(copyBtn.transform, "Text", "Copy", FontSizes.Subtitle, DARK_NAVY, TextAlignmentOptions.Center);
+            TextMeshProUGUI copyText = CreateTextChild(copyBtn.transform, "CopyButtonText", "Copy", FontSizes.Subtitle, DARK_NAVY, TextAlignmentOptions.Center);
             copyText.fontStyle = FontStyles.Bold;
         }
 
@@ -1373,6 +1421,10 @@ namespace DigitPark.Editor
             valueText.color = CYAN_NEON;
             valueText.alignment = TextAlignmentOptions.Right;
             valueText.raycastTarget = false;
+            valueText.enableAutoSizing = true;
+            valueText.fontSizeMin = FontSizes.AutoMinBody;
+            valueText.fontSizeMax = FontSizes.H3;
+            valueText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Slider (bottom row)
             GameObject sliderObj = new GameObject(sliderName);
@@ -1562,11 +1614,14 @@ namespace DigitPark.Editor
             label.font = Font;
             label.text = labelText;
             label.fontSize = FontSizes.H3;
+            label.fontStyle = FontStyles.Bold;
             label.fontSizeMin = FontSizes.AutoMinBody;
+            label.fontSizeMax = FontSizes.H3;
             label.enableAutoSizing = true;
             label.color = TEXT_WHITE;
             label.alignment = TextAlignmentOptions.MidlineLeft;
             label.raycastTarget = false;
+            label.overflowMode = TextOverflowModes.Ellipsis;
 
             // Dropdown (right)
             GameObject dropdownObj = new GameObject(dropdownName);
@@ -1597,9 +1652,14 @@ namespace DigitPark.Editor
             TextMeshProUGUI captionText = captionObj.AddComponent<TextMeshProUGUI>();
             captionText.font = Font;
             captionText.fontSize = FontSizes.H3;
+            captionText.fontStyle = FontStyles.Bold;
             captionText.color = CYAN_NEON;
             captionText.alignment = TextAlignmentOptions.Left;
             captionText.raycastTarget = false;
+            captionText.enableAutoSizing = true;
+            captionText.fontSizeMin = FontSizes.AutoMinBody;
+            captionText.fontSizeMax = FontSizes.H3;
+            captionText.overflowMode = TextOverflowModes.Ellipsis;
 
             dropdown.captionText = captionText;
 
@@ -1621,6 +1681,10 @@ namespace DigitPark.Editor
             arrowText.fontStyle = FontStyles.Bold;
             arrowText.color = CYAN_NEON;
             arrowText.alignment = TextAlignmentOptions.Center;
+            arrowText.enableAutoSizing = true;
+            arrowText.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, FontSizes.H4);
+            arrowText.fontSizeMax = FontSizes.H4;
+            arrowText.overflowMode = TextOverflowModes.Ellipsis;
             arrowText.raycastTarget = false;
 
             // Dropdown Template (required for TMP_Dropdown to function)
@@ -1758,6 +1822,10 @@ namespace DigitPark.Editor
             itemLabelText.fontStyle = FontStyles.Bold;
             itemLabelText.color = TEXT_WHITE;
             itemLabelText.alignment = TextAlignmentOptions.Left;
+            itemLabelText.enableAutoSizing = true;
+            itemLabelText.fontSizeMin = FontSizes.AutoMinBody;
+            itemLabelText.fontSizeMax = FontSizes.H3;
+            itemLabelText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Wire up toggle
             itemToggle.targetGraphic = itemBgImg;
@@ -1809,6 +1877,10 @@ namespace DigitPark.Editor
             tmp.color = color;
             tmp.alignment = alignment;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, fontSize);
+            tmp.fontSizeMax = fontSize;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
 
             return tmp;
         }

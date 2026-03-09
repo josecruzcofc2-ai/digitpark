@@ -65,7 +65,7 @@ namespace DigitPark.Editor
             public Object assignedObject;
         }
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Wallet", false, 185)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Wallet", false, 185)]
         public static void ShowWindow()
         {
             GetWindow<WalletUIBuilder>("Cash Wallet Builder");
@@ -1440,98 +1440,7 @@ namespace DigitPark.Editor
             thpRT.offsetMax = Vector2.zero;
             txHistPanel.SetActive(false);
 
-            // F. KycRequiredPanel (hidden)
-            GameObject kycPanel = new GameObject("KycRequiredPanel");
-            kycPanel.transform.SetParent(parent, false);
-            RectTransform kycRT = kycPanel.AddComponent<RectTransform>();
-            kycRT.anchorMin = Vector2.zero;
-            kycRT.anchorMax = Vector2.one;
-            kycRT.offsetMin = Vector2.zero;
-            kycRT.offsetMax = Vector2.zero;
-            Image kycBg = kycPanel.AddComponent<Image>();
-            kycBg.color = DARK_BG;
-
-            // Inner container with vertical layout
-            GameObject kycInner = new GameObject("KycInnerContainer");
-            kycInner.transform.SetParent(kycPanel.transform, false);
-            RectTransform kycInnerRT = kycInner.AddComponent<RectTransform>();
-            kycInnerRT.anchorMin = new Vector2(0.1f, 0.25f);
-            kycInnerRT.anchorMax = new Vector2(0.9f, 0.75f);
-            kycInnerRT.offsetMin = Vector2.zero;
-            kycInnerRT.offsetMax = Vector2.zero;
-            VerticalLayoutGroup kycVlg = kycInner.AddComponent<VerticalLayoutGroup>();
-            kycVlg.padding = new RectOffset(30, 30, 40, 40);
-            kycVlg.spacing = 24;
-            kycVlg.childForceExpandWidth = true;
-            kycVlg.childForceExpandHeight = false;
-            kycVlg.childControlWidth = true;
-            kycVlg.childControlHeight = true;
-            kycVlg.childAlignment = TextAnchor.MiddleCenter;
-
-            // Title
-            GameObject kycTitle = new GameObject("KycTitleText");
-            kycTitle.transform.SetParent(kycInner.transform, false);
-            kycTitle.AddComponent<RectTransform>();
-            LayoutElement kycTitleLE = kycTitle.AddComponent<LayoutElement>();
-            kycTitleLE.preferredHeight = 60;
-            TextMeshProUGUI kycTitleTMP = kycTitle.AddComponent<TextMeshProUGUI>();
-            kycTitleTMP.text = "Identity Verification";
-            kycTitleTMP.fontSize = FontSizes.H4;
-            kycTitleTMP.fontSizeMin = FontSizes.AutoMinTitle;
-            kycTitleTMP.fontSizeMax = FontSizes.H4;
-            kycTitleTMP.enableAutoSizing = true;
-            kycTitleTMP.color = CYAN;
-            kycTitleTMP.fontStyle = FontStyles.Bold;
-            kycTitleTMP.alignment = TextAlignmentOptions.Center;
-
-            // Explanation text
-            GameObject kycExplanation = new GameObject("KycExplanationText");
-            kycExplanation.transform.SetParent(kycInner.transform, false);
-            kycExplanation.AddComponent<RectTransform>();
-            LayoutElement kycExplLE = kycExplanation.AddComponent<LayoutElement>();
-            kycExplLE.preferredHeight = 80;
-            TextMeshProUGUI kycExplTMP = kycExplanation.AddComponent<TextMeshProUGUI>();
-            kycExplTMP.text = "Verify your identity to enable deposits and withdrawals";
-            kycExplTMP.fontSize = FontSizes.Body;
-            kycExplTMP.fontSizeMin = FontSizes.AutoMinBody;
-            kycExplTMP.fontSizeMax = FontSizes.Body;
-            kycExplTMP.enableAutoSizing = true;
-            kycExplTMP.color = TEXT_SECONDARY;
-            kycExplTMP.fontStyle = FontStyles.Bold;
-            kycExplTMP.alignment = TextAlignmentOptions.Center;
-
-            // Verify button
-            GameObject verifyBtn = new GameObject("VerifyKycButton");
-            verifyBtn.transform.SetParent(kycInner.transform, false);
-            verifyBtn.AddComponent<RectTransform>();
-            LayoutElement vkLE = verifyBtn.AddComponent<LayoutElement>();
-            vkLE.preferredHeight = 70;
-            vkLE.preferredWidth = 350;
-            Image vkBg = verifyBtn.AddComponent<Image>();
-            vkBg.color = GREEN_DARK;
-            Button vkButton = verifyBtn.AddComponent<Button>();
-            vkButton.targetGraphic = vkBg;
-            Outline vkOutline = verifyBtn.AddComponent<Outline>();
-            vkOutline.effectColor = GREEN;
-            vkOutline.effectDistance = new Vector2(2f, -2f);
-
-            GameObject vkText = new GameObject("VerifyKycButtonText");
-            vkText.transform.SetParent(verifyBtn.transform, false);
-            RectTransform vkTextRT = vkText.AddComponent<RectTransform>();
-            vkTextRT.anchorMin = Vector2.zero;
-            vkTextRT.anchorMax = Vector2.one;
-            vkTextRT.offsetMin = Vector2.zero;
-            vkTextRT.offsetMax = Vector2.zero;
-            TextMeshProUGUI vkTextTMP = vkText.AddComponent<TextMeshProUGUI>();
-            vkTextTMP.text = "Verify Identity";
-            vkTextTMP.fontSize = FontSizes.Body;
-            vkTextTMP.color = GREEN;
-            vkTextTMP.fontStyle = FontStyles.Bold;
-            vkTextTMP.alignment = TextAlignmentOptions.Center;
-
-            kycPanel.SetActive(false);
-
-            // G. Overlay panels (all hidden)
+            // F. Overlay panels (all hidden)
             // LoadingOverlay
             GameObject loadingOverlay = CreateOverlayPanel(parent, "LoadingOverlay");
             GameObject loadingText = new GameObject("LoadingText");
@@ -1890,8 +1799,6 @@ namespace DigitPark.Editor
             AssignRef(so, "withdrawableAmountText", FindTextDeep(root, "WithdrawableAmountText"));
             AssignRef(so, "withdrawMinText", FindTextDeep(root, "WithdrawMinText"));
             AssignRef(so, "withdrawFeeText", FindTextDeep(root, "WithdrawFeeText"));
-            AssignGORef(so, "kycRequiredPanel", FindDeep(root, "KycRequiredPanel"));
-            AssignRef(so, "verifyKycButton", FindBtnDeep(root, "VerifyKycButton"));
 
             // ==================== TRANSACTION HISTORY ====================
             // Content lives inside TransactionsList/ScrollView/Viewport/Content

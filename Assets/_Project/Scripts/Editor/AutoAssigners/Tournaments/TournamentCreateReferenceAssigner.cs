@@ -59,7 +59,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Tournaments/TournamentCreate References", false, 161)]
+        [MenuItem("DigitPark/Scenes/Assign References/Tournaments/Create", false, 161)]
         public static void ShowWindow()
         {
             var window = GetWindow<TournamentCreateReferenceAssigner>("TournamentCreate Reference Assigner");

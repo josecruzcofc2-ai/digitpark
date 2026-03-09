@@ -41,7 +41,7 @@ namespace DigitPark.Editor
             new[] { "CashTournaments/CashTournamentLobby", "CashTournamentLobbyUIBuilder" },
         };
 
-        [MenuItem("DigitPark/Tools/Batch Build All CashBattle Scenes", false, 15)]
+        [MenuItem("DigitPark/Scenes/Batch/Build CashBattle Scenes", false, 15)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashBattleScenesBatchBuilder>("CashBattle Batch Builder");

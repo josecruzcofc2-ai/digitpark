@@ -80,7 +80,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Main Onboarding", false, 170)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Onboarding/Main", false, 170)]
         public static void ShowWindow()
         {
             GetWindow<OnboardingUIBuilder>("Onboarding Builder");
@@ -558,7 +558,7 @@ namespace DigitPark.Editor
             phTMP.text = "Enter your name...";
             phTMP.fontSize = FontSizes.BodyLarge;
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
-            phTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
+            phTMP.fontStyle = FontStyles.Bold;
             phTMP.alignment = TextAlignmentOptions.Left;
 
             var text = new GameObject("Text");

@@ -22,7 +22,7 @@ namespace DigitPark.Editor
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
-        [MenuItem("DigitPark/UI Builders/Social/SearchPlayers", false, 221)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/SearchPlayers", false, 221)]
         public static void ShowWindow()
         {
             GetWindow<SearchPlayersUIBuilder>("SearchPlayers UI Builder");
@@ -120,7 +120,7 @@ namespace DigitPark.Editor
             bgRT.offsetMax = Vector2.zero;
             Image bgImg = bg.GetComponent<Image>();
             if (bgImg == null) bgImg = bg.AddComponent<Image>();
-            bgImg.color = new Color(0.02f, 0.03f, 0.08f, 1f);
+            bgImg.color = DARK_BG;
             bgImg.raycastTarget = false;
 
             // ========== HEADER ==========
@@ -183,7 +183,7 @@ namespace DigitPark.Editor
             GameObject searchBar = CreateOrFind(canvasTransform, "SearchBar");
             SetupRectTransform(searchBar,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -175), new Vector2(-80, 128));
+                new Vector2(0, -180), new Vector2(0, 70));
 
             // Fondo del SearchBar con bordes redondeados simulados
             Image searchBarBg = searchBar.GetComponent<Image>();
@@ -241,6 +241,10 @@ namespace DigitPark.Editor
             placeholderTmp.color = PLACEHOLDER_COLOR;
             placeholderTmp.fontStyle = FontStyles.Bold;
             placeholderTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            placeholderTmp.enableAutoSizing = true;
+            placeholderTmp.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderTmp.fontSizeMax = FontSizes.BodyLarge;
+            placeholderTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Text
             GameObject inputText = CreateOrFind(textArea.transform, "Text");
@@ -250,7 +254,12 @@ namespace DigitPark.Editor
             inputTmp.text = "";
             inputTmp.fontSize = FontSizes.BodyLarge;
             inputTmp.color = Color.white;
+            inputTmp.fontStyle = FontStyles.Bold;
             inputTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            inputTmp.enableAutoSizing = true;
+            inputTmp.fontSizeMin = FontSizes.AutoMinBody;
+            inputTmp.fontSizeMax = FontSizes.BodyLarge;
+            inputTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Configure input field
             tmpInput.textViewport = textArea.GetComponent<RectTransform>();
@@ -287,7 +296,7 @@ namespace DigitPark.Editor
             clearGlow.effectDistance = new Vector2(2, 2);
 
             // Texto "Clear"
-            GameObject clearText = CreateOrFind(clearButton.transform, "Text");
+            GameObject clearText = CreateOrFind(clearButton.transform, "ClearSearchText");
             SetupRectTransform(clearText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             SetupText(clearText, "Clear", (int)FontSizes.Body, DARK_BG, FontStyles.Bold);
 
@@ -300,28 +309,25 @@ namespace DigitPark.Editor
             searchButton.SetActive(false); // Oculto - búsqueda en tiempo real
 
             // ========== RESULTS PANEL ==========
-            // Ajustado para el SearchBar compacto (empieza después del SearchBar a y=-250)
+            // Edge-to-edge, transparent bg (matches Friends/FriendRequests style)
             GameObject resultsPanel = CreateOrFind(canvasTransform, "ResultsPanel");
             SetupRectTransform(resultsPanel,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(0, -80), new Vector2(-80, -350));
+                new Vector2(0, -115), new Vector2(0, -230));
 
             Image resultsBg = resultsPanel.GetComponent<Image>();
             if (resultsBg == null) resultsBg = resultsPanel.AddComponent<Image>();
-            resultsBg.color = PANEL_BG;
+            resultsBg.color = Color.clear;
 
+            // Remove old outline/shadow if present
             Outline resultsOutline = resultsPanel.GetComponent<Outline>();
-            if (resultsOutline == null) resultsOutline = resultsPanel.AddComponent<Outline>();
-            resultsOutline.effectColor = CYAN_DARK;
-            resultsOutline.effectDistance = new Vector2(1, 1);
+            if (resultsOutline != null) DestroyImmediate(resultsOutline);
             Shadow resultsShadow = resultsPanel.GetComponent<Shadow>();
-            if (resultsShadow == null || resultsShadow is Outline) resultsShadow = resultsPanel.AddComponent<Shadow>();
-            resultsShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            resultsShadow.effectDistance = new Vector2(3, -4);
+            if (resultsShadow != null && !(resultsShadow is Outline)) DestroyImmediate(resultsShadow);
 
             // ========== SCROLL VIEW ==========
             GameObject scrollView = CreateOrFind(resultsPanel.transform, "ResultsScrollView");
-            SetupRectTransform(scrollView, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-20, -20));
+            SetupRectTransform(scrollView, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             ScrollRect scrollRect = scrollView.GetComponent<ScrollRect>();
             if (scrollRect == null) scrollRect = scrollView.AddComponent<ScrollRect>();
@@ -354,8 +360,8 @@ namespace DigitPark.Editor
             VerticalLayoutGroup contentLayout = resultsContainer.GetComponent<VerticalLayoutGroup>();
             if (contentLayout == null) contentLayout = resultsContainer.AddComponent<VerticalLayoutGroup>();
             contentLayout.childAlignment = TextAnchor.UpperCenter;
-            contentLayout.spacing = 15; // Espacio entre cards
-            contentLayout.padding = new RectOffset(15, 15, 15, 15);
+            contentLayout.spacing = 2;
+            contentLayout.padding = new RectOffset(0, 0, 4, 4);
             contentLayout.childForceExpandWidth = true;
             contentLayout.childForceExpandHeight = false;
             contentLayout.childControlHeight = true; // Controlar altura
@@ -429,14 +435,14 @@ namespace DigitPark.Editor
             }
 
             // Empty Title - Más grande y prominente
-            GameObject emptyTitle = CreateOrFind(emptyState.transform, "Title");
+            GameObject emptyTitle = CreateOrFind(emptyState.transform, "SearchEmptyTitle");
             SetupRectTransform(emptyTitle,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -100), new Vector2(700, 100));
             SetupText(emptyTitle, "Search players", (int)FontSizes.H2, Color.white, FontStyles.Bold);
 
             // Empty Description
-            GameObject emptyDesc = CreateOrFind(emptyState.transform, "Description");
+            GameObject emptyDesc = CreateOrFind(emptyState.transform, "SearchEmptyDesc");
             SetupRectTransform(emptyDesc,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0, -180), new Vector2(760, 160));
@@ -521,10 +527,6 @@ namespace DigitPark.Editor
 
             Image cardBg = card.AddComponent<Image>();
             cardBg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
-
-            Outline cardOutline = card.AddComponent<Outline>();
-            cardOutline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.35f);
-            cardOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
             Sprite circleSprite = GenerateCircleSprite();
 
@@ -628,6 +630,9 @@ namespace DigitPark.Editor
             labelTmp.color = new Color(0.2f, 1f, 0.4f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineRight;
             labelTmp.overflowMode = TextOverflowModes.Ellipsis;
+            labelTmp.enableAutoSizing = true;
+            labelTmp.fontSizeMin = FontSizes.AutoMinBody;
+            labelTmp.fontSizeMax = FontSizes.Caption;
 
             // --- Row 2: Stats (WinRate + Game) ---
             GameObject statsRow = new GameObject("StatsRow");
@@ -653,6 +658,9 @@ namespace DigitPark.Editor
             statsTmp.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             statsTmp.alignment = TextAlignmentOptions.MidlineLeft;
             statsTmp.overflowMode = TextOverflowModes.Ellipsis;
+            statsTmp.enableAutoSizing = true;
+            statsTmp.fontSizeMin = FontSizes.AutoMinBody;
+            statsTmp.fontSizeMax = FontSizes.Caption;
 
             // --- Row 3: Buttons ---
             GameObject buttonsRow = new GameObject("ButtonsRow");
@@ -671,8 +679,8 @@ namespace DigitPark.Editor
             btnLayout.childControlHeight = true;
             btnLayout.padding = new RectOffset(0, 0, 2, 2);
 
-            CreatePrefabButton(buttonsRow.transform, "AddFriendButton", "+ Add", CYAN_NEON, DARK_BG, 0, false);
-            CreatePrefabButton(buttonsRow.transform, "ViewProfileButton", "View Profile", new Color(0.05f, 0.1f, 0.15f, 1f), CYAN_NEON, 0, true);
+            CreatePrefabButton(buttonsRow.transform, "AddFriendButton", "+ Add", CYAN_NEON, DARK_BG, 0, false, "Text");
+            CreatePrefabButton(buttonsRow.transform, "ViewProfileButton", "View Profile", new Color(0.05f, 0.1f, 0.15f, 1f), CYAN_NEON, 0, true, "ViewProfileBtnText");
 
             // Save prefab
             string prefabPath = "Assets/_Project/Prefabs/Common/PlayerCard.prefab";
@@ -684,7 +692,7 @@ namespace DigitPark.Editor
             return null;
         }
 
-        private static void CreatePrefabButton(Transform parent, string name, string text, Color bgColor, Color textColor, float width, bool isOutline)
+        private static void CreatePrefabButton(Transform parent, string name, string text, Color bgColor, Color textColor, float width, bool isOutline, string textChildName = "Text")
         {
             GameObject button = new GameObject(name);
             button.transform.SetParent(parent, false);
@@ -719,7 +727,7 @@ namespace DigitPark.Editor
                 glow.effectDistance = new Vector2(2, 2);
             }
 
-            GameObject btnText = new GameObject("Text");
+            GameObject btnText = new GameObject(textChildName);
             btnText.transform.SetParent(button.transform, false);
             RectTransform textRect = btnText.AddComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
@@ -731,6 +739,10 @@ namespace DigitPark.Editor
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ========== UTILIDADES ==========

@@ -1,0 +1,505 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using DigitPark.Services;
+using DigitPark.Services.Firebase;
+using DigitPark.Localization;
+using DG.Tweening;
+using DigitPark.Animations;
+
+namespace DigitPark.Managers
+{
+    /// <summary>
+    /// Manager de busqueda de jugadores
+    /// Permite buscar, agregar amigos y retar jugadores
+    /// </summary>
+    public class SearchPlayersManager : MonoBehaviour
+    {
+        [Header("UI - Search")]
+        [SerializeField] private TMP_InputField searchInputField;
+        [SerializeField] private Button searchButton;
+        [SerializeField] private Button clearButton;
+
+        [Header("UI - Results")]
+        [SerializeField] private Transform resultsContainer;
+        [SerializeField] private GameObject playerItemPrefab;
+        [SerializeField] private TextMeshProUGUI noResultsText;
+        [SerializeField] private GameObject loadingIndicator;
+        [SerializeField] private GameObject emptyStatePanel;
+
+        [Header("UI - Navigation")]
+        [SerializeField] private Button backButton;
+
+        [Header("Settings")]
+        [SerializeField] private int maxResults = 20;
+        [SerializeField] private float searchDelay = 0.5f;
+
+        private List<GameObject> currentResults = new List<GameObject>();
+        private string lastSearchQuery;
+        private bool isSearching = false;
+
+        private void Start()
+        {
+            Debug.Log("[SearchPlayers] SearchPlayersManager iniciado");
+
+            SetupListeners();
+            ClearResults();
+            UpdateClearButtonVisibility();
+        }
+
+        private void SetupListeners()
+        {
+            searchButton?.onClick.AddListener(OnSearchClicked);
+            clearButton?.onClick.AddListener(OnClearClicked);
+            // Disable auto-navigation from BackButton prefab to prevent double listener
+            var autoNav = backButton?.GetComponent<DigitPark.UI.BackButton>();
+            if (autoNav != null) autoNav.DisableAutoNavigation();
+            backButton?.onClick.AddListener(OnBackClicked);
+
+            // Busqueda en tiempo real mientras escribe
+            if (searchInputField != null)
+            {
+                searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
+                searchInputField.onSubmit.AddListener(OnSearchSubmit);
+            }
+        }
+
+        private void OnSearchInputChanged(string value)
+        {
+            // Mostrar/ocultar botón X según si hay texto
+            UpdateClearButtonVisibility();
+
+            // Busqueda con delay para no sobrecargar
+            if (value.Length >= 3)
+            {
+                CancelInvoke(nameof(DelayedSearch));
+                Invoke(nameof(DelayedSearch), searchDelay);
+            }
+            else if (value.Length == 0)
+            {
+                ClearResults();
+            }
+        }
+
+        private void UpdateClearButtonVisibility()
+        {
+            if (clearButton != null && searchInputField != null)
+            {
+                // Solo mostrar el botón X cuando hay texto
+                clearButton.gameObject.SetActive(!string.IsNullOrEmpty(searchInputField.text));
+            }
+        }
+
+        private void OnSearchSubmit(string value)
+        {
+            if (value.Length >= 2)
+            {
+                PerformSearch(value);
+            }
+        }
+
+        private void DelayedSearch()
+        {
+            if (searchInputField != null && searchInputField.text.Length >= 3)
+            {
+                PerformSearch(searchInputField.text);
+            }
+        }
+
+        private void OnSearchClicked()
+        {
+            if (searchInputField != null && searchInputField.text.Length >= 2)
+            {
+                PerformSearch(searchInputField.text);
+            }
+        }
+
+        private void OnClearClicked()
+        {
+            if (searchInputField != null)
+                searchInputField.text = "";
+
+            ClearResults();
+            UpdateClearButtonVisibility();
+        }
+
+        private void OnBackClicked()
+        {
+            Debug.Log("[SearchPlayers] Volviendo al Main Menu");
+            SceneManager.LoadScene("MainMenu");
+        }
+
+        private async void PerformSearch(string query)
+        {
+            if (isSearching || query == lastSearchQuery)
+                return;
+
+            lastSearchQuery = query;
+            isSearching = true;
+
+            Debug.Log($"[SearchPlayers] Buscando: {query}");
+
+            // Mostrar indicador de carga, ocultar empty state
+            ShowLoadingIndicator(true);
+            if (noResultsText != null)
+                noResultsText.gameObject.SetActive(false);
+            if (emptyStatePanel != null)
+                emptyStatePanel.SetActive(false);
+
+            // Buscar en Firebase
+            List<PlayerSearchResult> results = null;
+
+            if (DatabaseService.Instance != null)
+            {
+                results = await DatabaseService.Instance.SearchPlayers(query, maxResults);
+            }
+            else
+            {
+                // Fallback con datos de prueba si no hay Firebase
+                Debug.LogWarning("[SearchPlayers] DatabaseService no disponible, usando datos de prueba");
+                results = GetTestResults();
+            }
+
+            OnSearchComplete(results);
+        }
+
+        private List<PlayerSearchResult> GetTestResults()
+        {
+            return new List<PlayerSearchResult>
+            {
+                new PlayerSearchResult { playerId = "player1", username = "ProGamer123", winRate = 67.5f, isFriend = false, favoriteGame = "MemoryPairs", isOnline = true },
+                new PlayerSearchResult { playerId = "player2", username = "MathWizard", winRate = 54.2f, isFriend = true, favoriteGame = "QuickMath", isOnline = false },
+                new PlayerSearchResult { playerId = "player3", username = "SpeedKing", winRate = 71.3f, isFriend = false, favoriteGame = "FlashTap", isOnline = true },
+                new PlayerSearchResult { playerId = "player4", username = "NeonMaster", winRate = 88.1f, isFriend = false, favoriteGame = "OddOneOut", isOnline = true },
+                new PlayerSearchResult { playerId = "player5", username = "DigitKing", winRate = 45.8f, isFriend = true, favoriteGame = "MemoryPairs", isOnline = false },
+            };
+        }
+
+        private void OnSearchComplete(List<PlayerSearchResult> results)
+        {
+            isSearching = false;
+
+            // Ocultar indicador de carga
+            ShowLoadingIndicator(false);
+
+            // Limpiar resultados anteriores
+            ClearResults();
+
+            if (results == null || results.Count == 0)
+            {
+                // Mostrar mensaje de no resultados
+                if (noResultsText != null)
+                {
+                    noResultsText.text = L("search_no_results");
+                    noResultsText.gameObject.SetActive(true);
+                }
+                return;
+            }
+
+            // Crear items de resultado
+            foreach (var result in results)
+            {
+                CreatePlayerItem(result);
+            }
+
+            // Animate search results entrance
+            AnimateSearchResultsEntrance();
+
+            Debug.Log($"[SearchPlayers] Encontrados {results.Count} jugadores");
+        }
+
+        /// <summary>
+        /// Anima la entrada de los resultados de búsqueda con efecto staggered
+        /// </summary>
+        private void AnimateSearchResultsEntrance()
+        {
+            if (resultsContainer == null || resultsContainer.childCount == 0) return;
+
+            var seq = DOTween.Sequence();
+            for (int i = 0; i < resultsContainer.childCount; i++)
+            {
+                var child = resultsContainer.GetChild(i);
+                if (!child.gameObject.activeSelf) continue;
+                var cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.85f;
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.3f).SetEase(Ease.OutQuad));
+                seq.Insert(delay, child.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
+            }
+        }
+
+        private void CreatePlayerItem(PlayerSearchResult result)
+        {
+            if (playerItemPrefab == null || resultsContainer == null)
+            {
+                Debug.LogWarning("[SearchPlayers] Falta prefab o container");
+                return;
+            }
+
+            GameObject item = Instantiate(playerItemPrefab, resultsContainer);
+            currentResults.Add(item);
+
+            // Configuracion basica del item
+            SetupBasicPlayerItem(item, result);
+        }
+
+        private void SetupBasicPlayerItem(GameObject item, PlayerSearchResult result)
+        {
+            // ========== CONTENT SECTION ==========
+            Transform contentSection = item.transform.Find("ContentSection");
+            if (contentSection != null)
+            {
+                // Username
+                Transform topRow = contentSection.Find("TopRow");
+                if (topRow != null)
+                {
+                    Transform usernameT = topRow.Find("Username");
+                    if (usernameT != null)
+                    {
+                        var tmp = usernameT.GetComponent<TextMeshProUGUI>();
+                        if (tmp != null) tmp.text = result.username;
+                    }
+
+                    // Online status
+                    bool isOnline = result.isOnline;
+                    Color statusColor = isOnline
+                        ? new Color(0.2f, 1f, 0.4f, 1f)
+                        : new Color(0.5f, 0.5f, 0.5f, 1f);
+                    string statusText = isOnline ? AutoLocalizer.Get("player_online") : AutoLocalizer.Get("player_offline");
+
+                    Transform onlineStatus = topRow.Find("OnlineStatus");
+                    if (onlineStatus != null)
+                    {
+                        var img = onlineStatus.GetComponent<Image>();
+                        if (img != null) img.color = statusColor;
+                    }
+
+                    Transform onlineLabel = topRow.Find("OnlineLabel");
+                    if (onlineLabel != null)
+                    {
+                        var tmp = onlineLabel.GetComponent<TextMeshProUGUI>();
+                        if (tmp != null)
+                        {
+                            tmp.text = statusText;
+                            tmp.color = statusColor;
+                        }
+                    }
+                }
+
+                // Stats
+                Transform statsRow = contentSection.Find("StatsRow");
+                if (statsRow != null)
+                {
+                    Transform statsTextT = statsRow.Find("StatsText");
+                    if (statsTextT != null)
+                    {
+                        var tmp = statsTextT.GetComponent<TextMeshProUGUI>();
+                        string game = result.favoriteGame ?? "QuickMath";
+                        if (tmp != null) tmp.text = $"{result.winRate:F0}% WR · {game}";
+                    }
+                }
+            }
+
+            // ========== BUTTONS ==========
+            Transform buttonsRow = item.transform.Find("ContentSection/ButtonsRow");
+            if (buttonsRow != null)
+            {
+                string playerId = result.playerId;
+
+                // Botón Agregar Amigo
+                Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
+                if (addFriendBtn != null)
+                {
+                    var btn = addFriendBtn.GetComponent<Button>();
+                    var btnText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
+
+                    if (btn != null)
+                    {
+                        // Ocultar si ya es amigo
+                        if (result.isFriend)
+                        {
+                            addFriendBtn.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            addFriendBtn.gameObject.SetActive(true);
+
+                            // Verificar si ya hay solicitud pendiente
+                            bool hasPendingRequest = FriendService.Instance.HasPendingRequestWith(playerId);
+                            bool sentRequest = FriendService.Instance.HasSentRequestTo(playerId);
+
+                            if (hasPendingRequest)
+                            {
+                                if (btnText != null)
+                                    btnText.text = sentRequest ? AutoLocalizer.Get("search_request_sent") : AutoLocalizer.Get("friend_requests_accept");
+                                btn.interactable = !sentRequest;
+                            }
+                            else
+                            {
+                                if (btnText != null)
+                                    btnText.text = AutoLocalizer.Get("search_add_friend");
+                                btn.interactable = true;
+                            }
+
+                            btn.onClick.AddListener(() => OnAddFriendClicked(playerId));
+                        }
+                    }
+                }
+
+                // Botón Ver Perfil
+                Transform viewProfileBtn = buttonsRow.Find("ViewProfileButton");
+                if (viewProfileBtn != null)
+                {
+                    var btn = viewProfileBtn.GetComponent<Button>();
+                    if (btn != null)
+                    {
+                        btn.onClick.AddListener(() => OnPlayerItemClicked(playerId));
+                    }
+                }
+            }
+        }
+
+        private void ClearResults()
+        {
+            foreach (var item in currentResults)
+            {
+                if (item != null)
+                    Destroy(item);
+            }
+            currentResults.Clear();
+
+            if (noResultsText != null)
+                noResultsText.gameObject.SetActive(false);
+
+            // Show empty state when no results displayed
+            if (emptyStatePanel != null)
+                emptyStatePanel.SetActive(true);
+        }
+
+        #region Item Callbacks
+
+        private void OnPlayerItemClicked(string playerId)
+        {
+            Debug.Log($"[SearchPlayers] Ver perfil de: {playerId}");
+
+            // Guardar ID y escena de retorno para navegar a perfil
+            PlayerPrefs.SetString("ViewProfileId", playerId);
+            PlayerPrefs.SetString("ProfileReturnScene", "SearchPlayers");
+            PlayerPrefs.Save();
+
+            SceneManager.LoadScene("Profile");
+        }
+
+        private async void OnAddFriendClicked(string playerId)
+        {
+            Debug.Log($"[SearchPlayers] Agregar amigo: {playerId}");
+
+            // Verificar si ya hay solicitud pendiente
+            if (FriendService.Instance.HasPendingRequestWith(playerId))
+            {
+                ShowMessage(AutoLocalizer.Get("error_pending_request"));
+                return;
+            }
+
+            // Enviar solicitud de amistad
+            var result = await FriendService.Instance.SendFriendRequest(playerId);
+
+            if (result.Success)
+            {
+                ShowMessage(result.Message);
+                // Actualizar UI del botón
+                UpdateAddFriendButton(playerId, true);
+            }
+            else
+            {
+                ShowMessage(result.Message);
+            }
+        }
+
+        private void UpdateAddFriendButton(string playerId, bool requestSent)
+        {
+            foreach (var item in currentResults)
+            {
+                // Buscar el item correspondiente a este playerId
+                Transform buttonsRow = item.transform.Find("ButtonsRow");
+                if (buttonsRow != null)
+                {
+                    Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
+                    if (addFriendBtn != null)
+                    {
+                        var btn = addFriendBtn.GetComponent<Button>();
+                        if (btn != null)
+                        {
+                            // Verificar si este es el item correcto comparando con los datos almacenados
+                            var tmpText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
+                            if (requestSent && tmpText != null)
+                            {
+                                tmpText.text = AutoLocalizer.Get("search_request_sent");
+                                btn.interactable = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ShowMessage(string message)
+        {
+            Debug.Log($"[SearchPlayers] {message}");
+            // TODO: Mostrar toast o popup con el mensaje
+            // Por ahora solo log
+        }
+
+        private void OnChallengeClicked(string playerId)
+        {
+            Debug.Log($"[SearchPlayers] Retar a: {playerId}");
+
+            // Guardar ID y navegar a setup de reto
+            PlayerPrefs.SetString("ChallengePlayerId", playerId);
+            PlayerPrefs.Save();
+
+            // TODO: Navegar a seleccion de juego
+            // SceneManager.LoadScene("ChallengeSetup");
+        }
+
+        #endregion
+
+        private void ShowLoadingIndicator(bool show)
+        {
+            if (loadingIndicator == null) return;
+
+            if (show)
+            {
+                loadingIndicator.SetActive(true);
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.DOFade(1f, 0.2f).SetUpdate(true);
+            }
+            else
+            {
+                var cg = loadingIndicator.GetComponent<CanvasGroup>();
+                if (cg != null)
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                else
+                    loadingIndicator.SetActive(false);
+            }
+        }
+
+        private string L(string key, params object[] args)
+        {
+            if (LocalizationManager.Instance == null) return key;
+            string text = LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? string.Format(text, args) : text;
+        }
+
+        private void OnDestroy()
+        {
+            transform.DOKill();
+        }
+    }
+}

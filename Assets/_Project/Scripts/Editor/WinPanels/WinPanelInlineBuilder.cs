@@ -71,7 +71,7 @@ namespace DigitPark.Editor
             Transform face = content.transform.Find("Face");
 
             // Title
-            GameObject title = CreateChild(face, "Title");
+            GameObject title = CreateChild(face, "OnlineWinTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -80), new Vector2(0, 70));
             AddText(title, "YOU WON!", 52, GOLD, FontStyles.Bold);
@@ -163,7 +163,7 @@ namespace DigitPark.Editor
             Transform face = content.transform.Find("Face");
 
             // Title
-            GameObject title = CreateChild(face, "Title");
+            GameObject title = CreateChild(face, "OnlineLoseTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -80), new Vector2(0, 70));
             AddText(title, "DEFEAT", 48, LOSE_NEON_LIGHT, FontStyles.Bold);
@@ -246,7 +246,7 @@ namespace DigitPark.Editor
             if (face != null)
             {
                 so.FindProperty("titleText").objectReferenceValue =
-                    face.Find("Title")?.GetComponent<TextMeshProUGUI>();
+                    face.Find(isWin ? "OnlineWinTitle" : "OnlineLoseTitle")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("moneyWonText").objectReferenceValue =
                     face.Find("MoneyContainer/MoneyText")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("timeText").objectReferenceValue =

@@ -39,7 +39,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/Icons/Auth/Login Icons", false, 100)]
+        [MenuItem("DigitPark/Scenes/Assign Icons/Auth/Login", false, 100)]
         public static void ShowWindow()
         {
             var window = GetWindow<LoginIconAssigner>("Login Icon Assigner");

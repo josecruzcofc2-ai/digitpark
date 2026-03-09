@@ -63,7 +63,7 @@ namespace DigitPark.Editor
             public Object assignedObject;
         }
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash History", false, 182)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/History", false, 182)]
         public static void ShowWindow()
         {
             GetWindow<CashHistoryUIBuilder>("Cash History Builder");

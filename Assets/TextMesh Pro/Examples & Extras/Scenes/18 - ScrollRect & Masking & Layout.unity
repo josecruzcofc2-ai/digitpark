@@ -545,6 +545,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 113574880}
   m_CullTransparentMesh: 0
+--- !u!115 &120734396
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: GlowPulse
+  m_Namespace: DigitPark.Animations
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &147270595
 GameObject:
   m_ObjectHideFlags: 0
@@ -1160,6 +1175,7 @@ GameObject:
   - component: {fileID: 217857663}
   - component: {fileID: 217857662}
   - component: {fileID: 217857664}
+  - component: {fileID: 217857665}
   m_Layer: 5
   m_Name: Answer C
   m_TagString: Untagged
@@ -1373,6 +1389,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 1567219426}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
+--- !u!114 &217857665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 217857655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 120734396}
   m_Name: 
   m_EditorClassIdentifier: 
   minAlpha: 0.3
@@ -1895,6 +1926,7 @@ GameObject:
   - component: {fileID: 382277102}
   - component: {fileID: 382277101}
   - component: {fileID: 382277103}
+  - component: {fileID: 382277104}
   m_Layer: 5
   m_Name: Answer D
   m_TagString: Untagged
@@ -2108,6 +2140,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 1567219426}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
+--- !u!114 &382277104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382277094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 120734396}
   m_Name: 
   m_EditorClassIdentifier: 
   minAlpha: 0.3
@@ -2333,6 +2380,7 @@ GameObject:
   - component: {fileID: 519242062}
   - component: {fileID: 519242061}
   - component: {fileID: 519242063}
+  - component: {fileID: 519242064}
   m_Layer: 5
   m_Name: Answer B
   m_TagString: Untagged
@@ -2546,6 +2594,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 1567219426}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
+--- !u!114 &519242064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519242054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 120734396}
   m_Name: 
   m_EditorClassIdentifier: 
   minAlpha: 0.3
@@ -6491,6 +6554,7 @@ GameObject:
   - component: {fileID: 1374660303}
   - component: {fileID: 1374660302}
   - component: {fileID: 1374660304}
+  - component: {fileID: 1374660305}
   m_Layer: 5
   m_Name: Question
   m_TagString: Untagged
@@ -6704,6 +6768,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 1567219426}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
+--- !u!114 &1374660305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1374660295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 120734396}
   m_Name: 
   m_EditorClassIdentifier: 
   minAlpha: 0.3
@@ -7064,6 +7143,7 @@ GameObject:
   - component: {fileID: 1519050545}
   - component: {fileID: 1519050544}
   - component: {fileID: 1519050546}
+  - component: {fileID: 1519050547}
   m_Layer: 5
   m_Name: Answer E
   m_TagString: Untagged
@@ -7277,6 +7357,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 1567219426}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minAlpha: 0.3
+  maxAlpha: 0.8
+  duration: 1.5
+--- !u!114 &1519050547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1519050537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 120734396}
   m_Name: 
   m_EditorClassIdentifier: 
   minAlpha: 0.3

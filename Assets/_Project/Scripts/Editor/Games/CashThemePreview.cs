@@ -38,7 +38,7 @@ namespace DigitPark.Editor
             "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath"
         };
 
-        [MenuItem("DigitPark/UI Builders/Games/Cash Theme Preview", false, 200)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/Cash Theme Preview", false, 200)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashThemePreview>("Cash Theme Preview");

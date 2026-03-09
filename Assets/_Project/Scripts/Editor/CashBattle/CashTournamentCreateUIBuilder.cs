@@ -59,7 +59,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashTournament Create", false, 184)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Tournament Create", false, 184)]
         public static void ShowWindow()
         {
             GetWindow<CashTournamentCreateUIBuilder>("CashTournament Create Builder");
@@ -397,6 +397,10 @@ namespace DigitPark.Editor
                 arrow.color = TEXT_GOLD;
                 arrow.alignment = TextAlignmentOptions.Center;
                 arrow.fontStyle = FontStyles.Bold;
+                arrow.enableAutoSizing = true;
+                arrow.fontSizeMin = FontSizes.AutoMinBody;
+                arrow.fontSizeMax = FontSizes.H4;
+                arrow.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 
@@ -520,6 +524,10 @@ namespace DigitPark.Editor
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Left;
             tmp.raycastTarget = false;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = FontSizes.Body;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
 
             return tmp;
         }
@@ -561,6 +569,10 @@ namespace DigitPark.Editor
             inputText.color = TEXT_PRIMARY;
             inputText.alignment = TextAlignmentOptions.Left;
             inputText.fontStyle = FontStyles.Bold;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.H3;
+            inputText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Placeholder
             GameObject placeholder = new GameObject("Placeholder");
@@ -602,6 +614,10 @@ namespace DigitPark.Editor
             ccTMP.alignment = TextAlignmentOptions.Right;
             ccTMP.fontStyle = FontStyles.Bold;
             ccTMP.raycastTarget = false;
+            ccTMP.enableAutoSizing = true;
+            ccTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ccTMP.fontSizeMax = FontSizes.Body;
+            ccTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ==================== GAME CARD ====================
@@ -711,6 +727,10 @@ namespace DigitPark.Editor
             ciText.color = TEXT_PRIMARY;
             ciText.alignment = TextAlignmentOptions.Left;
             ciText.fontStyle = FontStyles.Bold;
+            ciText.enableAutoSizing = true;
+            ciText.fontSizeMin = FontSizes.AutoMinBody;
+            ciText.fontSizeMax = FontSizes.Body;
+            ciText.overflowMode = TextOverflowModes.Ellipsis;
 
             GameObject ciPh = new GameObject("Placeholder");
             ciPh.transform.SetParent(customInput.transform, false);
@@ -725,6 +745,10 @@ namespace DigitPark.Editor
             ciPhText.color = TEXT_SECONDARY;
             ciPhText.alignment = TextAlignmentOptions.Left;
             ciPhText.fontStyle = FontStyles.Bold;
+            ciPhText.enableAutoSizing = true;
+            ciPhText.fontSizeMin = FontSizes.AutoMinBody;
+            ciPhText.fontSizeMax = FontSizes.Body;
+            ciPhText.overflowMode = TextOverflowModes.Ellipsis;
 
             TMP_InputField ciInput = customInput.AddComponent<TMP_InputField>();
             ciInput.textViewport = ciTextRT;
@@ -749,7 +773,7 @@ namespace DigitPark.Editor
             dispTMP.alignment = TextAlignmentOptions.Right;
             dispTMP.enableWordWrapping = false;
             dispTMP.enableAutoSizing = true;
-            dispTMP.fontSizeMin = 22;
+            dispTMP.fontSizeMin = FontSizes.AutoMinSmall;
             dispTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -780,7 +804,7 @@ namespace DigitPark.Editor
             prizeTMP.alignment = TextAlignmentOptions.Left;
             prizeTMP.raycastTarget = false;
             prizeTMP.enableAutoSizing = true;
-            prizeTMP.fontSizeMin = 10;
+            prizeTMP.fontSizeMin = FontSizes.AutoMinSmall;
             prizeTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -808,7 +832,7 @@ namespace DigitPark.Editor
 
             CreateToggle(toggleRow.transform, "StartImmediatelyToggle", true);
 
-            GameObject toggleLabel = new GameObject("ToggleLabel");
+            GameObject toggleLabel = new GameObject("CashToggleLabel");
             toggleLabel.transform.SetParent(toggleRow.transform, false);
             LayoutElement tlLE = toggleLabel.AddComponent<LayoutElement>();
             tlLE.flexibleWidth = 1;
@@ -819,7 +843,7 @@ namespace DigitPark.Editor
             tlTMP.alignment = TextAlignmentOptions.Left;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.enableAutoSizing = true;
-            tlTMP.fontSizeMin = 22;
+            tlTMP.fontSizeMin = FontSizes.AutoMinSmall;
             tlTMP.fontSizeMax = FontSizes.Body;
 
             // TimePicker Dropdown
@@ -839,6 +863,10 @@ namespace DigitPark.Editor
             stTMP.alignment = TextAlignmentOptions.Left;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.raycastTarget = false;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = FontSizes.AutoMinBody;
+            stTMP.fontSizeMax = FontSizes.Body;
+            stTMP.overflowMode = TextOverflowModes.Ellipsis;
             scheduledObj.SetActive(false);
         }
 
@@ -892,7 +920,7 @@ namespace DigitPark.Editor
             slTMP.alignment = TextAlignmentOptions.Left;
             slTMP.fontStyle = FontStyles.Bold;
             slTMP.enableAutoSizing = true;
-            slTMP.fontSizeMin = 22;
+            slTMP.fontSizeMin = FontSizes.AutoMinSmall;
             slTMP.fontSizeMax = FontSizes.Body;
 
             // Private Toggle Row
@@ -920,7 +948,7 @@ namespace DigitPark.Editor
             plTMP.alignment = TextAlignmentOptions.Left;
             plTMP.fontStyle = FontStyles.Bold;
             plTMP.enableAutoSizing = true;
-            plTMP.fontSizeMin = 22;
+            plTMP.fontSizeMin = FontSizes.AutoMinSmall;
             plTMP.fontSizeMax = FontSizes.Body;
 
             // Private Code Input (hidden by default)
@@ -951,6 +979,10 @@ namespace DigitPark.Editor
             pcText.color = TEXT_PRIMARY;
             pcText.alignment = TextAlignmentOptions.Left;
             pcText.fontStyle = FontStyles.Bold;
+            pcText.enableAutoSizing = true;
+            pcText.fontSizeMin = FontSizes.AutoMinBody;
+            pcText.fontSizeMax = FontSizes.Body;
+            pcText.overflowMode = TextOverflowModes.Ellipsis;
 
             GameObject pcPh = new GameObject("Placeholder");
             pcPh.transform.SetParent(privateCodeBg.transform, false);
@@ -966,7 +998,7 @@ namespace DigitPark.Editor
             pcPhText.alignment = TextAlignmentOptions.Left;
             pcPhText.fontStyle = FontStyles.Bold;
             pcPhText.enableAutoSizing = true;
-            pcPhText.fontSizeMin = 22;
+            pcPhText.fontSizeMin = FontSizes.AutoMinSmall;
             pcPhText.fontSizeMax = FontSizes.Body;
 
             TMP_InputField pcInput = privateCodeBg.AddComponent<TMP_InputField>();
@@ -1020,7 +1052,7 @@ namespace DigitPark.Editor
             tmp.fontStyle = FontStyles.Bold;
             tmp.raycastTarget = false;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 10;
+            tmp.fontSizeMin = FontSizes.AutoMinSmall;
             tmp.fontSizeMax = FontSizes.Body;
         }
 
@@ -1060,7 +1092,7 @@ namespace DigitPark.Editor
             feeTMP.fontStyle = FontStyles.Bold;
             feeTMP.raycastTarget = false;
             feeTMP.enableAutoSizing = true;
-            feeTMP.fontSizeMin = 22;
+            feeTMP.fontSizeMin = FontSizes.AutoMinSmall;
             feeTMP.fontSizeMax = FontSizes.Body;
 
             // CreateButton
@@ -1103,7 +1135,7 @@ namespace DigitPark.Editor
             btnTMP.fontStyle = FontStyles.Bold;
             btnTMP.alignment = TextAlignmentOptions.Center;
             btnTMP.enableAutoSizing = true;
-            btnTMP.fontSizeMin = 22;
+            btnTMP.fontSizeMin = FontSizes.AutoMinSmall;
             btnTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -1126,7 +1158,7 @@ namespace DigitPark.Editor
             bg.color = new Color(0, 0, 0, 0.75f);
 
             // Status text
-            GameObject statusObj = new GameObject("StatusText");
+            GameObject statusObj = new GameObject("CashCreateStatusText");
             statusObj.transform.SetParent(overlay.transform, false);
 
             RectTransform stRT = statusObj.AddComponent<RectTransform>();
@@ -1282,6 +1314,10 @@ namespace DigitPark.Editor
             capTMP.fontStyle = FontStyles.Bold;
             capTMP.color = TEXT_PRIMARY;
             capTMP.alignment = TextAlignmentOptions.Left;
+            capTMP.enableAutoSizing = true;
+            capTMP.fontSizeMin = FontSizes.AutoMinBody;
+            capTMP.fontSizeMax = FontSizes.Body;
+            capTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             dd.captionText = capTMP;
 
@@ -1301,6 +1337,10 @@ namespace DigitPark.Editor
             arrowTMP.color = TEXT_GOLD;
             arrowTMP.alignment = TextAlignmentOptions.Center;
             arrowTMP.fontStyle = FontStyles.Bold;
+            arrowTMP.enableAutoSizing = true;
+            arrowTMP.fontSizeMin = FontSizes.AutoMinBody;
+            arrowTMP.fontSizeMax = FontSizes.Body;
+            arrowTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Template (hidden dropdown list)
             GameObject template = new GameObject("Template");
@@ -1383,6 +1423,10 @@ namespace DigitPark.Editor
             ilTMP.color = TEXT_PRIMARY;
             ilTMP.alignment = TextAlignmentOptions.Left;
             ilTMP.fontStyle = FontStyles.Bold;
+            ilTMP.enableAutoSizing = true;
+            ilTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ilTMP.fontSizeMax = FontSizes.Body;
+            ilTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             itemToggle.targetGraphic = ibImg;
             itemToggle.graphic = icImg;
@@ -1476,7 +1520,7 @@ namespace DigitPark.Editor
 
             // Status
             AssignGORef(so, "loadingOverlay", FindDeep(root, "LoadingOverlay"));
-            AssignRef(so, "statusText", FindTextDeep(root, "StatusText"));
+            AssignRef(so, "statusText", FindTextDeep(root, "CashCreateStatusText"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

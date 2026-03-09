@@ -17,7 +17,7 @@ namespace DigitPark.Editor
         private const string PREFAB_PATH = "Assets/_Project/Prefabs/Animation";
         private const string MATERIAL_PATH = "Assets/_Project/Materials/UI";
 
-        [MenuItem("DigitPark/Animation/Setup Animation System", false, 400)]
+        [MenuItem("DigitPark/Polish/Animation/Setup Animation System", false, 400)]
         public static void SetupAnimationSystem()
         {
             EnsureDirectoriesExist();
@@ -28,7 +28,7 @@ namespace DigitPark.Editor
             EditorUtility.DisplayDialog("Animation System", "Animation system has been set up successfully!\n\nCreated:\n- UIAnimationManager\n- SceneTransitionManager\n- ParticleEffectSpawner\n- UI Materials", "OK");
         }
 
-        [MenuItem("DigitPark/Animation/Create Button3D Prefab", false, 401)]
+        [MenuItem("DigitPark/Polish/Animation/Create Button3D Prefab", false, 401)]
         public static void CreateButton3DPrefab()
         {
             EnsureDirectoriesExist();
@@ -121,7 +121,7 @@ namespace DigitPark.Editor
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         }
 
-        [MenuItem("DigitPark/Animation/Create Transition Canvas Prefab", false, 402)]
+        [MenuItem("DigitPark/Polish/Animation/Create Transition Canvas Prefab", false, 402)]
         public static void CreateTransitionCanvasPrefab()
         {
             EnsureDirectoriesExist();
@@ -194,7 +194,7 @@ namespace DigitPark.Editor
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         }
 
-        [MenuItem("DigitPark/Animation/Create UI Animation Manager Prefab", false, 403)]
+        [MenuItem("DigitPark/Polish/Animation/Create UI Animation Manager Prefab", false, 403)]
         public static void CreateUIAnimationManagerPrefab()
         {
             EnsureDirectoriesExist();
@@ -240,7 +240,7 @@ namespace DigitPark.Editor
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         }
 
-        [MenuItem("DigitPark/Animation/Create All Prefabs", false, 410)]
+        [MenuItem("DigitPark/Polish/Animation/Create All Prefabs", false, 410)]
         public static void CreateAllPrefabs()
         {
             CreateButton3DPrefab();
@@ -292,7 +292,7 @@ namespace DigitPark.Editor
 
         // ==================== MATERIALS ====================
 
-        [MenuItem("DigitPark/Animation/Create UI Materials", false, 420)]
+        [MenuItem("DigitPark/Polish/Animation/Create UI Materials", false, 420)]
         public static void CreateMaterials()
         {
             EnsureDirectoriesExist();
@@ -331,7 +331,7 @@ namespace DigitPark.Editor
 
         // ==================== ADD TO SCENE ====================
 
-        [MenuItem("DigitPark/Animation/Add to Current Scene", false, 430)]
+        [MenuItem("DigitPark/Polish/Animation/Add to Current Scene", false, 430)]
         public static void AddToCurrentScene()
         {
             // Check if already exists

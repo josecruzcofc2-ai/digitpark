@@ -40,7 +40,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Auth/AgeVerification References", false, 102)]
+        [MenuItem("DigitPark/Scenes/Assign References/Auth/AgeVerification", false, 102)]
         public static void ShowWindow()
         {
             var window = GetWindow<AgeVerificationReferenceAssigner>("AgeVerification Reference Assigner");

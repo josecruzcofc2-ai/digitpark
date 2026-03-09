@@ -62,7 +62,7 @@ namespace DigitPark.Editor
             "Boot"
         };
 
-        [MenuItem("DigitPark/UI/Auto-Add/Add BackButtons to All Scenes", false, 200)]
+        [MenuItem("DigitPark/Polish/UI/BackButtons to All Scenes", false, 200)]
         public static void AddBackButtonsToAllScenes()
         {
             // Load both prefabs
@@ -242,7 +242,7 @@ namespace DigitPark.Editor
             return null;
         }
 
-        [MenuItem("DigitPark/UI/Auto-Add/Remove All BackButtons from Scenes", false, 201)]
+        [MenuItem("DigitPark/Polish/UI/Remove All BackButtons", false, 201)]
         public static void RemoveBackButtonFromAllScenes()
         {
             if (!EditorUtility.DisplayDialog(
@@ -285,7 +285,7 @@ namespace DigitPark.Editor
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("DigitPark/UI/Auto-Add/Add BackButton to Current Scene", false, 202)]
+        [MenuItem("DigitPark/Polish/UI/BackButton to Current Scene", false, 202)]
         public static void AddBackButtonToCurrentScene()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();

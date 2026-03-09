@@ -132,7 +132,7 @@ namespace DigitPark.Editor
         private static void CreateHeader(Transform parent, bool isWin, Color accentColor)
         {
             // Title
-            GameObject title = CreateChild(parent, "Title");
+            GameObject title = CreateChild(parent, "CashResultTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -55), new Vector2(0, 70));
             string titleStr = isWin ? "YOU WON!" : "YOU LOST";
@@ -312,7 +312,7 @@ namespace DigitPark.Editor
             {
                 // Header
                 so.FindProperty("titleText").objectReferenceValue =
-                    face.Find("Title")?.GetComponent<TextMeshProUGUI>();
+                    face.Find("CashResultTitle")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("subtitleText").objectReferenceValue =
                     face.Find("Subtitle")?.GetComponent<TextMeshProUGUI>();
 
@@ -413,8 +413,8 @@ namespace DigitPark.Editor
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = FontSizes.AutoMinBody;
-            tmp.fontSizeMax = size;
+            tmp.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, size);
+            tmp.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, size);
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }

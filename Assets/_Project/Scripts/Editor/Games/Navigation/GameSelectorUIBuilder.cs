@@ -21,7 +21,7 @@ namespace DigitPark.Editor
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color CYAN_DARK = new Color(0f, 0.5f, 0.5f, 1f);
 
-        [MenuItem("DigitPark/UI Builders/Games/GameSelector", false, 120)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/GameSelector", false, 120)]
         public static void ShowWindow()
         {
             GetWindow<GameSelectorUIBuilder>("GameSelector UI Builder");
@@ -98,14 +98,6 @@ namespace DigitPark.Editor
                 DestroyImmediate(obj);
             }
 
-            // Limpiar CurrencyPills residual del Header (no pertenece a esta escena)
-            Transform existingHeader = canvasTransform.Find("Header");
-            if (existingHeader != null)
-            {
-                Transform pills = existingHeader.Find("CurrencyPills") ?? existingHeader.Find("CurrencyDisplay");
-                if (pills != null) DestroyImmediate(pills.gameObject);
-            }
-
             // Crear nueva estructura
             CreateNewGameSelectorLayout(canvasTransform);
 
@@ -127,9 +119,17 @@ namespace DigitPark.Editor
             // Title - valores ajustados por el usuario
             GameObject title = CreateOrFind(header.transform, "GameSelectorTitleText");
             SetupRectTransform(title,
-                new Vector2(0.07f, 0f), new Vector2(0.53f, 1f),
+                new Vector2(0.07f, 0f), new Vector2(0.42f, 1f),
                 Vector2.zero, Vector2.zero);
             SetupTitleText(title, "SELECT A GAME");
+
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
             // ========== GAMES GRID ==========
             GameObject gamesPanel = CreateOrFind(canvasTransform, "GamesPanel");
@@ -661,7 +661,7 @@ namespace DigitPark.Editor
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
             textTmp.enableAutoSizing = false;
-            textTmp.overflowMode = TextOverflowModes.Overflow;
+            textTmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateGameCardsOnly()

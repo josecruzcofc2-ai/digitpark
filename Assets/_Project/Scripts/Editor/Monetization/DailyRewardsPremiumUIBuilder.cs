@@ -104,7 +104,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Daily Rewards", false, 143)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Monetization/Daily Rewards", false, 143)]
         public static void ShowWindow()
         {
             GetWindow<DailyRewardsPremiumUIBuilder>("Daily Rewards Builder");
@@ -276,11 +276,11 @@ namespace DigitPark.Editor
             // --- Currency pills (right) ---
             var currencyRow = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform, "CurrencyRow");
             var crRT = currencyRow.GetComponent<RectTransform>();
-            crRT.anchorMin = new Vector2(1, 0.5f);
-            crRT.anchorMax = new Vector2(1, 0.5f);
-            crRT.pivot = new Vector2(1, 0.5f);
-            crRT.anchoredPosition = new Vector2(-10, 0);
-            crRT.sizeDelta = new Vector2(530, 55);
+            crRT.anchorMin = new Vector2(0.42f, 0.05f);
+            crRT.anchorMax = new Vector2(0.95f, 0.95f);
+            crRT.pivot = new Vector2(0.5f, 0.5f);
+            crRT.offsetMin = Vector2.zero;
+            crRT.offsetMax = Vector2.zero;
 
             Debug.Log("[DailyRewardsUI] TopBar creado (BackButton + Title + CurrencyPills)");
         }
@@ -348,7 +348,7 @@ namespace DigitPark.Editor
             slTMP.color = TEXT_WHITE;
             slTMP.alignment = TextAlignmentOptions.MidlineLeft;
             slTMP.enableWordWrapping = false;
-            slTMP.overflowMode = TextOverflowModes.Overflow;
+            slTMP.overflowMode = TextOverflowModes.Ellipsis;
             var slLE = streakLabel.AddComponent<LayoutElement>();
             slLE.minWidth = 130;
             slLE.preferredWidth = 130;
@@ -364,7 +364,7 @@ namespace DigitPark.Editor
             scTMP.color = ORANGE_FIRE;
             scTMP.alignment = TextAlignmentOptions.MidlineLeft;
             scTMP.enableWordWrapping = false;
-            scTMP.overflowMode = TextOverflowModes.Overflow;
+            scTMP.overflowMode = TextOverflowModes.Ellipsis;
             var scLE = streakCount.AddComponent<LayoutElement>();
             scLE.minWidth = 110;
             scLE.preferredWidth = 110;
@@ -750,7 +750,7 @@ namespace DigitPark.Editor
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;
                 bttTMP.enableWordWrapping = false;
-                bttTMP.overflowMode = TextOverflowModes.Overflow;
+                bttTMP.overflowMode = TextOverflowModes.Ellipsis;
             }
             // Locked days use their own day icon with greyed tint (no overlay needed)
         }
@@ -1038,7 +1038,7 @@ namespace DigitPark.Editor
             ttTMP.color = CYAN_NEON;
             ttTMP.alignment = TextAlignmentOptions.MidlineLeft;
             ttTMP.enableWordWrapping = false;
-            ttTMP.overflowMode = TextOverflowModes.Overflow;
+            ttTMP.overflowMode = TextOverflowModes.Ellipsis;
             var ttLE = GetOrAdd<LayoutElement>(timeText);
             ttLE.preferredWidth = 250;
             ttLE.preferredHeight = 40;

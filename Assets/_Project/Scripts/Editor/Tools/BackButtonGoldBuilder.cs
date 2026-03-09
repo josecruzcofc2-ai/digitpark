@@ -23,7 +23,7 @@ namespace DigitPark.Editor
         private static readonly Color GOLD_PRESSED = new Color(1f, 0.549f, 0f, 1f);
         private static readonly Color DARK_BG = new Color(0.08f, 0.06f, 0.12f, 0.95f);
 
-        [MenuItem("DigitPark/UI/Prefabs/Create BackButtonGold Prefab", false, 101)]
+        [MenuItem("DigitPark/Prefabs/Common/Create BackButtonGold", false, 101)]
         public static void CreateBackButtonGoldPrefab()
         {
             // Create root GameObject

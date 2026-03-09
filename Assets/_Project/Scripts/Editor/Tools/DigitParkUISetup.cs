@@ -86,7 +86,7 @@ namespace DigitPark.Editor
             { "avatarImage", new[] { "AvatarImage", "Avatar", "ProfileImage", "UserAvatar" } },
         };
 
-        [MenuItem("DigitPark/Tools/UI Setup Tool %#u", false, 1)]
+        [MenuItem("DigitPark/Setup/UI Setup Tool %#u", false, 1)]
         public static void ShowWindow()
         {
             var window = GetWindow<DigitParkUISetup>("DigitPark UI Setup");

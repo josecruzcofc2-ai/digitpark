@@ -36,7 +36,7 @@ namespace DigitPark.Editor
         private static readonly string[] GAME_IDS = { "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath" };
         private static readonly string[] GAME_LABELS = { "Digit\nRush", "Flash\nTap", "Memory\nPairs", "Odd One\nOut", "Quick\nMath" };
 
-        [MenuItem("DigitPark/UI Builders/Social/Scores", false, 157)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/Scores", false, 157)]
         public static void ShowWindow()
         {
             GetWindow<ScoresUIBuilder>("Scores UI Builder");
@@ -231,20 +231,6 @@ namespace DigitPark.Editor
             if (headerBg == null) headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0.03f, 0.08f, 0.12f, 0.98f);
 
-            // Línea neón inferior
-            GameObject headerLine = CreateOrFind(header.transform, "HeaderLine");
-            RectTransform lineRT = SetupRectTransform(headerLine,
-                new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 0), new Vector2(0, 3));
-            Image lineImg = headerLine.GetComponent<Image>();
-            if (lineImg == null) lineImg = headerLine.AddComponent<Image>();
-            lineImg.color = CYAN_NEON;
-
-            Shadow lineShadow = headerLine.GetComponent<Shadow>();
-            if (lineShadow == null) lineShadow = headerLine.AddComponent<Shadow>();
-            lineShadow.effectColor = new Color(0f, 1f, 1f, 0.5f);
-            lineShadow.effectDistance = new Vector2(0, -3);
-
             // Back Button - Neon Cyan prefab
             GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
             GameObject backBtn;
@@ -292,8 +278,8 @@ namespace DigitPark.Editor
             // Currency pills (top-right of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
         }
@@ -521,6 +507,10 @@ namespace DigitPark.Editor
             tabTMP.fontStyle = FontStyles.Bold;
             tabTMP.alignment = TextAlignmentOptions.Center;
             tabTMP.raycastTarget = false;
+            tabTMP.enableAutoSizing = true;
+            tabTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tabTMP.fontSizeMax = FontSizes.Body;
+            tabTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -701,6 +691,10 @@ namespace DigitPark.Editor
                 posText.fontSize = i < 3 ? FontSizes.H3 : FontSizes.Subtitle;
                 posText.fontStyle = FontStyles.Bold;
                 posText.alignment = TextAlignmentOptions.Center;
+                posText.enableAutoSizing = true;
+                posText.fontSizeMin = FontSizes.AutoMinBody;
+                posText.fontSizeMax = i < 3 ? FontSizes.H3 : FontSizes.Subtitle;
+                posText.overflowMode = TextOverflowModes.Ellipsis;
                 LayoutElement posLE = GetOrAddComponent<LayoutElement>(posObj);
                 posLE.minWidth = 110;
                 posLE.preferredWidth = 110;
@@ -760,6 +754,9 @@ namespace DigitPark.Editor
                 nameText.alignment = TextAlignmentOptions.MidlineLeft;
                 nameText.enableWordWrapping = false;
                 nameText.overflowMode = TextOverflowModes.Ellipsis;
+                nameText.enableAutoSizing = true;
+                nameText.fontSizeMin = FontSizes.AutoMinBody;
+                nameText.fontSizeMax = FontSizes.BodyLarge;
                 LayoutElement nameLE = GetOrAddComponent<LayoutElement>(nameObj);
                 nameLE.flexibleWidth = 1;
                 nameLE.minWidth = 240;
@@ -772,6 +769,10 @@ namespace DigitPark.Editor
                 timeText.fontStyle = FontStyles.Bold;
                 timeText.color = TIME_COLOR;
                 timeText.alignment = TextAlignmentOptions.MidlineRight;
+                timeText.enableAutoSizing = true;
+                timeText.fontSizeMin = FontSizes.AutoMinBody;
+                timeText.fontSizeMax = FontSizes.BodyLarge;
+                timeText.overflowMode = TextOverflowModes.Ellipsis;
                 LayoutElement timeLE = GetOrAddComponent<LayoutElement>(timeObj);
                 timeLE.minWidth = 200;
                 timeLE.preferredWidth = 200;
@@ -814,7 +815,7 @@ namespace DigitPark.Editor
             hlg.childForceExpandHeight = true;
 
             // Etiqueta "TU POSICIÓN"
-            GameObject label = CreateOrFind(posPanel.transform, "PositionLabel");
+            GameObject label = CreateOrFind(posPanel.transform, "ScoresPositionLabel");
             TextMeshProUGUI labelTMP = SetupText(label, "YOUR POSITION", (int)FontSizes.Body, new Color(0.6f, 0.6f, 0.6f), FontStyles.Bold);
             labelTMP.alignment = TextAlignmentOptions.Center;
             LayoutElement labelLE = label.GetComponent<LayoutElement>();

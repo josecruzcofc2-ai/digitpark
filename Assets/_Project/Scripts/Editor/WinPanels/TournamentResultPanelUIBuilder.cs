@@ -451,8 +451,8 @@ namespace DigitPark.Editor
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = FontSizes.AutoMinBody;
-            tmp.fontSizeMax = size;
+            tmp.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, size);
+            tmp.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, size);
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }

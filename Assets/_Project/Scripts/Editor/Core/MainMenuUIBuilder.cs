@@ -91,7 +91,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Core/MainMenu", false, 110)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Core/MainMenu", false, 110)]
         public static void ShowWindow()
         {
             GetWindow<MainMenuUIBuilder>("MainMenu Builder v3");
@@ -238,7 +238,7 @@ namespace DigitPark.Editor
             logoTMP.fontStyle = FontStyles.Bold;
             logoTMP.alignment = TextAlignmentOptions.MidlineLeft;
             logoTMP.enableWordWrapping = false;
-            logoTMP.overflowMode = TextOverflowModes.Overflow;
+            logoTMP.overflowMode = TextOverflowModes.Ellipsis;
             logoTMP.enableVertexGradient = true;
             logoTMP.colorGradient = new VertexGradient(CYAN_NEON, CYAN_NEON, CYAN_GLOW, CYAN_GLOW);
 
@@ -282,6 +282,10 @@ namespace DigitPark.Editor
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
+            btTMP.enableAutoSizing = true;
+            btTMP.fontSizeMin = FontSizes.AutoMinBody;
+            btTMP.fontSizeMax = FontSizes.Body;
+            btTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[MainMenuUI] Header creado");
         }
@@ -471,6 +475,10 @@ namespace DigitPark.Editor
             ltTMP.color = TEXT_DARK;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.alignment = TextAlignmentOptions.Center;
+            ltTMP.enableAutoSizing = true;
+            ltTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ltTMP.fontSizeMax = FontSizes.Caption;
+            ltTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[MainMenuUI] Profile Card creado (centered layout)");
         }
@@ -652,6 +660,10 @@ namespace DigitPark.Editor
             lTMP.color = TEXT_WHITE;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Center;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lTMP.fontSizeMax = FontSizes.Body;
+            lTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -727,6 +739,10 @@ namespace DigitPark.Editor
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            tTMP.fontSizeMax = FontSizes.H3;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             var sub = FindOrCreate(textC.transform, "PlayCardSubtitle");
             var sRT = GetOrAdd<RectTransform>(sub);
@@ -759,6 +775,10 @@ namespace DigitPark.Editor
             aTMP.color = TEXT_DARK;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
+            aTMP.enableAutoSizing = true;
+            aTMP.fontSizeMin = FontSizes.AutoMinBody;
+            aTMP.fontSizeMax = FontSizes.Branding;
+            aTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[MainMenuUI] Play Card creado");
         }
@@ -853,6 +873,10 @@ namespace DigitPark.Editor
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Left;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            tTMP.fontSizeMax = FontSizes.H3;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Subtitle
             var sub = FindOrCreate(textC.transform, "CashBattleCardSubtitle");
@@ -885,6 +909,10 @@ namespace DigitPark.Editor
             ageTMP.color = new Color(0.3f, 0.2f, 0f, 0.7f);
             ageTMP.fontStyle = FontStyles.Bold;
             ageTMP.alignment = TextAlignmentOptions.Left;
+            ageTMP.enableAutoSizing = true;
+            ageTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ageTMP.fontSizeMax = FontSizes.Body;
+            ageTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Arrow
             var arrow = FindOrCreate(card.transform, "Arrow");
@@ -900,6 +928,10 @@ namespace DigitPark.Editor
             aTMP.color = TEXT_DARK;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
+            aTMP.enableAutoSizing = true;
+            aTMP.fontSizeMin = FontSizes.AutoMinBody;
+            aTMP.fontSizeMax = FontSizes.Branding;
+            aTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[MainMenuUI] Cash Battle Card DORADO creado");
         }
@@ -987,7 +1019,6 @@ namespace DigitPark.Editor
         private static void CreatePanels()
         {
             CreateOverlayPanel("PremiumPanel", GOLD);
-            CreateOverlayPanel("NotificationsPanel", CYAN_DARK);
         }
 
         private static void CreateOverlayPanel(string name, Color borderColor)

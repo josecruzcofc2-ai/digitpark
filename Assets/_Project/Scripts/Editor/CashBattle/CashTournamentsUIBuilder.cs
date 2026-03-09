@@ -59,7 +59,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Tournaments (Premium)", false, 184)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Tournaments", false, 184)]
         public static void ShowWindow()
         {
             GetWindow<CashTournamentsUIBuilder>("Cash Tournaments Builder");
@@ -476,7 +476,7 @@ namespace DigitPark.Editor
             tmp.color = isActive ? GOLD_PRIMARY : TEXT_SECONDARY;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 22;
+            tmp.fontSizeMin = FontSizes.AutoMinSmall;
             tmp.fontSizeMax = FontSizes.Body;
 
             // Gold accent underline on selected tab
@@ -726,7 +726,7 @@ namespace DigitPark.Editor
             gpTMP.fontStyle = FontStyles.Bold;
             gpTMP.alignment = TextAlignmentOptions.Center;
             gpTMP.enableAutoSizing = true;
-            gpTMP.fontSizeMin = 22;
+            gpTMP.fontSizeMin = FontSizes.AutoMinSmall;
             gpTMP.fontSizeMax = FontSizes.Body;
 
             // Close / Maybe Later Button
@@ -759,7 +759,7 @@ namespace DigitPark.Editor
             clTMP.fontStyle = FontStyles.Bold;
             clTMP.alignment = TextAlignmentOptions.Center;
             clTMP.enableAutoSizing = true;
-            clTMP.fontSizeMin = 22;
+            clTMP.fontSizeMin = FontSizes.AutoMinSmall;
             clTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -787,7 +787,7 @@ namespace DigitPark.Editor
             vlg.childControlHeight = false;
 
             // Empty text
-            GameObject textObj = new GameObject("EmptyText");
+            GameObject textObj = new GameObject("CashTournamentsEmptyText");
             textObj.transform.SetParent(emptyState.transform, false);
 
             LayoutElement textLE = textObj.AddComponent<LayoutElement>();
@@ -800,7 +800,7 @@ namespace DigitPark.Editor
             emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
             emptyTMP.enableAutoSizing = true;
-            emptyTMP.fontSizeMin = 22;
+            emptyTMP.fontSizeMin = FontSizes.AutoMinSmall;
             emptyTMP.fontSizeMax = FontSizes.Body;
         }
 
@@ -854,7 +854,7 @@ namespace DigitPark.Editor
 
             // Empty State
             AssignGORef(so, "emptyState", FindDeep(root, "EmptyState"));
-            AssignRef(so, "emptyText", FindTextDeep(root, "EmptyText"));
+            AssignRef(so, "emptyText", FindTextDeep(root, "CashTournamentsEmptyText"));
 
             // Premium Block Panel
             AssignGORef(so, "premiumBlockPanel", FindDeep(root, "PremiumBlockPanel"));

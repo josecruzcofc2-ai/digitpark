@@ -29,7 +29,7 @@ namespace DigitPark.Editor
         private static readonly Color TEXT_WHITE = new Color(0.95f, 0.95f, 0.95f, 1f);
         private static readonly Color TEXT_SECONDARY = new Color(0.5f, 0.5f, 0.55f, 1f);
 
-        [MenuItem("DigitPark/Prefabs/CashBattle/Create All Prefabs (Premium)", false, 100)]
+        [MenuItem("DigitPark/Prefabs/CashBattle/Create All Prefabs", false, 100)]
         public static void CreateAllPrefabs()
         {
             EnsurePrefabDirectory();

@@ -37,7 +37,7 @@ namespace DigitPark.Editor
         public bool skipButtonsWithDOTween = true; // Safety check
         public bool previewMode = false; // Just show what would change
 
-        [MenuItem("DigitPark/Animation/Batch/Batch Setup All Scenes (Window)", false, 600)]
+        [MenuItem("DigitPark/Polish/Animation Batch/Batch Setup All Scenes (Window)", false, 600)]
         public static void ShowWindow()
         {
             var window = GetWindow<AnimationSystemBatchSetup>("Batch Animation Setup");
@@ -45,7 +45,7 @@ namespace DigitPark.Editor
             window.LoadAllScenes();
         }
 
-        [MenuItem("DigitPark/Animation/Batch/APPLY ALL ANIMATIONS TO ALL SCENES", false, 599)]
+        [MenuItem("DigitPark/Polish/Animation Batch/APPLY ALL ANIMATIONS TO ALL SCENES", false, 599)]
         public static void ApplyAllAnimationsToAllScenes()
         {
             if (!EditorUtility.DisplayDialog("Apply All Animations",
@@ -666,7 +666,7 @@ namespace DigitPark.Editor
         }
 
         // Quick action menus
-        [MenuItem("DigitPark/Animation/Batch/Quick: Add Managers to Current Scene", false, 610)]
+        [MenuItem("DigitPark/Polish/Animation Batch/Quick: Add Managers to Current Scene", false, 610)]
         public static void QuickAddManagersToCurrentScene()
         {
             var window = CreateInstance<AnimationSystemBatchSetup>();
@@ -691,7 +691,7 @@ namespace DigitPark.Editor
             DestroyImmediate(window);
         }
 
-        [MenuItem("DigitPark/Animation/Batch/Fix: Remove 3D from Google-Apple Buttons", false, 620)]
+        [MenuItem("DigitPark/Polish/Animation Batch/Fix: Remove 3D from Google-Apple Buttons", false, 620)]
         public static void RemoveButton3DFromBrandProtectedButtons()
         {
             string[] brandProtectedKeywords = { "google", "apple", "signin", "sign_in", "sign-in", "login_google", "login_apple", "auth_google", "auth_apple" };
@@ -748,7 +748,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/Animation/Batch/Fix: Clean Google-Apple in ALL Scenes", false, 621)]
+        [MenuItem("DigitPark/Polish/Animation Batch/Fix: Clean Google-Apple in ALL Scenes", false, 621)]
         public static void CleanBrandProtectedButtonsAllScenes()
         {
             if (!EditorUtility.DisplayDialog("Clean All Scenes",
@@ -831,7 +831,7 @@ namespace DigitPark.Editor
                 $"Removed animations from {totalCleaned} Google/Apple buttons across all scenes.", "OK");
         }
 
-        [MenuItem("DigitPark/Animation/Batch/Quick: Convert Buttons in Current Scene", false, 651)]
+        [MenuItem("DigitPark/Polish/Animation Batch/Quick: Convert Buttons in Current Scene", false, 651)]
         public static void QuickConvertButtonsInCurrentScene()
         {
             var window = CreateInstance<AnimationSystemBatchSetup>();

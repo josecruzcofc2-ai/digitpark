@@ -29,7 +29,7 @@ namespace DigitPark.Editor
         private const string TOURNAMENTS_ICON_PATH = "Assets/_Project/Art/Icons/PlayMode/PlayModeSelectionTorunamentIcon.png";
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
-        [MenuItem("DigitPark/UI Builders/Games/PlayModeSelection", false, 121)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/PlayModeSelection", false, 121)]
         public static void ShowWindow()
         {
             GetWindow<PlayModeSelectionUIBuilder>("PlayModeSelection UI");
@@ -149,7 +149,7 @@ namespace DigitPark.Editor
             GameObject titleObj = CreateElement(header.transform, "TitleText");
             RectTransform titleRT = titleObj.GetComponent<RectTransform>();
             titleRT.anchorMin = new Vector2(0.07f, 0f);
-            titleRT.anchorMax = new Vector2(0.53f, 1f);
+            titleRT.anchorMax = new Vector2(0.42f, 1f);
             titleRT.pivot = new Vector2(0.5f, 0.5f);
             titleRT.sizeDelta = Vector2.zero;
             titleRT.anchoredPosition = Vector2.zero;
@@ -168,6 +168,14 @@ namespace DigitPark.Editor
             Outline titleOutline = titleObj.AddComponent<Outline>();
             titleOutline.effectColor = new Color(0f, 0.5f, 0.5f, 0.5f);
             titleOutline.effectDistance = new Vector2(2, -2);
+
+            // Currency pills (right side of header)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
 
         }
 
@@ -311,7 +319,7 @@ namespace DigitPark.Editor
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.enableWordWrapping = false;
-            titleTmp.overflowMode = TextOverflowModes.Overflow;
+            titleTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Description text - CENTERED below title, 2 lines max
             GameObject descObj = CreateElement(face, "DescText");

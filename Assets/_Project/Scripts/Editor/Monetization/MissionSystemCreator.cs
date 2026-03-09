@@ -17,7 +17,7 @@ namespace DigitPark.Editor
         private const string WEEKLY_PATH = "Assets/_Project/Data/Missions/Weekly/";
         private const string POOLS_PATH = "Assets/_Project/Data/Missions/";
 
-        [MenuItem("DigitPark/Missions/Create Mission System")]
+        [MenuItem("DigitPark/Setup/Missions/Create Mission System")]
         public static void ShowWindow()
         {
             var window = GetWindow<MissionSystemCreator>("Mission System Creator");

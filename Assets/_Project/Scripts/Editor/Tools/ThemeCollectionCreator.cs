@@ -36,7 +36,7 @@ namespace DigitPark.Editor
     /// </summary>
     public class ThemeCollectionCreator
     {
-        [MenuItem("DigitPark/Themes/Create All Theme Assets (19 Premium)")]
+        [MenuItem("DigitPark/Polish/Themes/Create All Theme Assets")]
         public static void CreateAllThemes()
         {
             if (!EditorUtility.DisplayDialog("Crear Temas",

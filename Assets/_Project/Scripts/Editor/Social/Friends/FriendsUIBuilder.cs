@@ -66,7 +66,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Social/Friends", false, 150)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/Friends", false, 150)]
         public static void ShowWindow()
         {
             GetWindow<FriendsUIBuilder>("Friends Builder");
@@ -230,6 +230,10 @@ namespace DigitPark.Editor
             cTMP.fontStyle = FontStyles.Bold;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
+            cTMP.enableAutoSizing = true;
+            cTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cTMP.fontSizeMax = FontSizes.BodyLarge;
+            cTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[FriendsUI] Header creado");
         }
@@ -303,6 +307,10 @@ namespace DigitPark.Editor
             txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.color = TEXT_WHITE;
             txtTMP.alignment = TextAlignmentOptions.Left;
+            txtTMP.enableAutoSizing = true;
+            txtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            txtTMP.fontSizeMax = FontSizes.Subtitle;
+            txtTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Wire input field
             input.textViewport = taRT;
@@ -350,6 +358,10 @@ namespace DigitPark.Editor
             lTMP.color = PURPLE_ACCENT;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.alignment = TextAlignmentOptions.Left;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lTMP.fontSizeMax = FontSizes.Subtitle;
+            lTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Badge
             var badge = FindOrCreate(nav.transform, "RequestsBadge");
@@ -374,6 +386,10 @@ namespace DigitPark.Editor
             btTMP.color = TEXT_WHITE;
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
+            btTMP.enableAutoSizing = true;
+            btTMP.fontSizeMin = FontSizes.AutoMinBody;
+            btTMP.fontSizeMax = FontSizes.Caption;
+            btTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Arrow
             var arrow = FindOrCreate(nav.transform, "Arrow");
@@ -456,7 +472,7 @@ namespace DigitPark.Editor
             csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // Empty Text
-            var emptyText = FindOrCreate(content.transform, "EmptyText");
+            var emptyText = FindOrCreate(content.transform, "FriendsEmptyText");
             var eRT = GetOrAdd<RectTransform>(emptyText);
             eRT.sizeDelta = new Vector2(0, 200);
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
@@ -466,6 +482,10 @@ namespace DigitPark.Editor
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
+            eTMP.enableAutoSizing = true;
+            eTMP.fontSizeMin = FontSizes.AutoMinBody;
+            eTMP.fontSizeMax = FontSizes.Subtitle;
+            eTMP.overflowMode = TextOverflowModes.Ellipsis;
             emptyText.SetActive(false);
 
             // Loading Indicator
@@ -479,6 +499,10 @@ namespace DigitPark.Editor
             ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
+            ldTMP.enableAutoSizing = true;
+            ldTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ldTMP.fontSizeMax = FontSizes.Subtitle;
+            ldTMP.overflowMode = TextOverflowModes.Ellipsis;
             loading.SetActive(false);
 
             Debug.Log("[FriendsUI] ScrollView creado");
@@ -656,6 +680,9 @@ namespace DigitPark.Editor
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
             stTMP.overflowMode = TextOverflowModes.Ellipsis;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = FontSizes.AutoMinBody;
+            stTMP.fontSizeMax = FontSizes.Caption;
 
             // Status Text
             var status = new GameObject("StatusText");
@@ -671,6 +698,10 @@ namespace DigitPark.Editor
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.color = GREEN_SUCCESS;
             statusTMP.alignment = TextAlignmentOptions.Left;
+            statusTMP.enableAutoSizing = true;
+            statusTMP.fontSizeMin = FontSizes.AutoMinBody;
+            statusTMP.fontSizeMax = FontSizes.Caption;
+            statusTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // ---- Buttons Row (right side) ----
             var buttonsRow = new GameObject("ButtonsRow");
@@ -742,6 +773,10 @@ namespace DigitPark.Editor
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.Caption;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             return btn;
         }
@@ -791,7 +826,7 @@ namespace DigitPark.Editor
                 Debug.LogWarning("[FriendsUI] FriendCard prefab no encontrado. Crea el prefab primero.");
 
             // Empty text and loading
-            SetRef(so, "emptyText", FindInPath<TextMeshProUGUI>(r, "ScrollView/Viewport/Content/EmptyText"));
+            SetRef(so, "emptyText", FindInPath<TextMeshProUGUI>(r, "ScrollView/Viewport/Content/FriendsEmptyText"));
             Transform loading = r.Find("ScrollView/Viewport/Content/LoadingIndicator");
             if (loading != null) SetRef(so, "loadingIndicator", loading.gameObject);
 

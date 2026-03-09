@@ -36,7 +36,7 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity"
         };
 
-        [MenuItem("DigitPark/UI/Background/Add Background to All Scenes")]
+        [MenuItem("DigitPark/Polish/UI/Background to All Scenes")]
         public static void AddBackgroundToAllScenes()
         {
             int added = 0;
@@ -89,7 +89,7 @@ namespace DigitPark.Editor
                 "OK");
         }
 
-        [MenuItem("DigitPark/UI/Background/Add Background to Current Scene")]
+        [MenuItem("DigitPark/Polish/UI/Background to Current Scene")]
         public static void AddBackgroundToCurrentSceneMenu()
         {
             string sceneName = EditorSceneManager.GetActiveScene().name;
@@ -216,7 +216,7 @@ namespace DigitPark.Editor
             so.ApplyModifiedProperties();
         }
 
-        [MenuItem("DigitPark/UI/Background/Check Backgrounds Status")]
+        [MenuItem("DigitPark/Polish/UI/Check Backgrounds Status")]
         public static void CheckBackgroundsStatus()
         {
             string report = "=== Estado de Backgrounds ===\n\n";

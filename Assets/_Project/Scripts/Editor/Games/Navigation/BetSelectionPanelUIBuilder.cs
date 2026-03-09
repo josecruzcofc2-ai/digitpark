@@ -64,7 +64,7 @@ namespace DigitPark.Editor
         private const float BTN_H = 70f;
         private const float CUSTOM_H = 195f;
 
-        [MenuItem("DigitPark/UI Builders/Games/BetSelection", false, 123)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/BetSelection", false, 123)]
         public static void ShowWindow()
         {
             var window = GetWindow<BetSelectionUIBuilder>("BetSelection Scene Builder");
@@ -283,7 +283,7 @@ namespace DigitPark.Editor
             titleTMP.fontSizeMin = FontSizes.AutoMinTitle;
             titleTMP.fontSizeMax = FontSizes.H4;
             titleTMP.enableWordWrapping = false;
-            titleTMP.overflowMode = TextOverflowModes.Overflow;
+            titleTMP.overflowMode = TextOverflowModes.Ellipsis;
             titleTMP.raycastTarget = false;
 
             // Game name (below title)
@@ -298,17 +298,17 @@ namespace DigitPark.Editor
             gnTMP.text = "";
             gnTMP.fontSize = (int)FontSizes.Body;
             gnTMP.color = GOLD;
-            gnTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
+            gnTMP.fontStyle = FontStyles.Bold;
             gnTMP.alignment = TextAlignmentOptions.MidlineLeft;
             gnTMP.raycastTarget = false;
 
             // Currency pills (right side - exact same anchors as MainMenu, offset 120 right)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.35f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.88f, 0.95f);
-            pillsRT.offsetMin = new Vector2(120, 0);
-            pillsRT.offsetMax = new Vector2(120, 0);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
         }
 
         // ==================== SCROLL AREA ====================

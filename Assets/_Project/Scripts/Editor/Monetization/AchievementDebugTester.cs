@@ -36,7 +36,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/Tools/Achievement Debug Tester")]
+        [MenuItem("DigitPark/Debug/Achievement Debug Tester")]
         public static void ShowWindow()
         {
             var window = GetWindow<AchievementDebugTester>("Achievement Tester");

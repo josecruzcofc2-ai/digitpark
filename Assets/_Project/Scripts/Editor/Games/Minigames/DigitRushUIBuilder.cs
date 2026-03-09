@@ -28,7 +28,7 @@ namespace DigitPark.Editor
         private const string ROUND_ICON_PATH = "Assets/_Project/Art/Icons/UI/RoundIcon.png";
         private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/UI/ErrorIcon.png";
 
-        [MenuItem("DigitPark/UI Builders/Games/DigitRush", false, 130)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/DigitRush", false, 130)]
         public static void ShowWindow()
         {
             GetWindow<DigitRushUIBuilder>("DigitRush UI Builder");
@@ -455,7 +455,7 @@ namespace DigitPark.Editor
             cardOutline.effectDistance = new Vector2(3, -3);
 
             // Title
-            GameObject titleObj = CreateElement(card.transform, "SettingsTitle");
+            GameObject titleObj = CreateElement(card.transform, "DigitRushTitle");
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
@@ -466,7 +466,7 @@ namespace DigitPark.Editor
             titleGlow.effectDistance = new Vector2(2, -2);
 
             // Subtitle
-            GameObject subtitleObj = CreateElement(card.transform, "SettingsSubtitle");
+            GameObject subtitleObj = CreateElement(card.transform, "DigitRushSubtitle");
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));

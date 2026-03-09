@@ -40,7 +40,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Auth/Register References", false, 101)]
+        [MenuItem("DigitPark/Scenes/Assign References/Auth/Register", false, 101)]
         public static void ShowWindow()
         {
             var window = GetWindow<RegisterReferenceAssigner>("Register Reference Assigner");

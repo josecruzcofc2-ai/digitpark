@@ -41,13 +41,13 @@ namespace DigitPark.Editor
         private const float PARTICIPANT_ITEM_HEIGHT = 70f;
         private const float PLAYER_SEARCH_HEIGHT = 80f;
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Create All Monetization Prefabs")]
+        [MenuItem("DigitPark/Prefabs/Monetization/Create All")]
         private static void CreateAllFromMenu()
         {
             CreateAllPrefabs();
         }
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Open Prefab Builder Window")]
+        [MenuItem("DigitPark/Prefabs/Monetization/Open Builder Window")]
         public static void ShowWindow()
         {
             var window = GetWindow<MonetizationPrefabBuilder>("Monetization Prefabs");
@@ -96,7 +96,7 @@ namespace DigitPark.Editor
 
         #region Achievement Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create AchievementItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/AchievementItem")]
         private static void CreateAchievementItemPrefab()
         {
             GameObject item = new GameObject("AchievementItem");
@@ -194,7 +194,7 @@ namespace DigitPark.Editor
 
         #region Category Header Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create CategoryHeader")]
+        [MenuItem("DigitPark/Prefabs/Monetization/CategoryHeader")]
         private static void CreateCategoryHeaderPrefab()
         {
             GameObject item = new GameObject("CategoryHeader");
@@ -245,7 +245,7 @@ namespace DigitPark.Editor
 
         #region Daily Missions - Mission Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create MissionItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/MissionItem")]
         private static void CreateMissionItemPrefab()
         {
             GameObject item = new GameObject("MissionItem");
@@ -333,7 +333,7 @@ namespace DigitPark.Editor
             claimedCheck.SetActive(false);
 
             // Add UI Component
-            MissionItemUI ui = item.AddComponent<MissionItemUI>();
+            MissionCardUI ui = item.AddComponent<MissionCardUI>();
 
             SavePrefab(item, "Assets/_Project/Prefabs/Monetization/DailyMissions/MissionItem.prefab");
         }
@@ -342,7 +342,7 @@ namespace DigitPark.Editor
 
         #region Daily Rewards - Reward Day Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create RewardDayItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/RewardDayItem")]
         private static void CreateRewardDayItemPrefab()
         {
             GameObject item = new GameObject("RewardDayItem");
@@ -425,7 +425,7 @@ namespace DigitPark.Editor
 
         #region Onboarding - Step Dot Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create StepDotItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/StepDotItem")]
         private static void CreateStepDotItemPrefab()
         {
             GameObject item = new GameObject("StepDotItem");
@@ -458,7 +458,7 @@ namespace DigitPark.Editor
 
         #region Onboarding - Avatar Option Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create AvatarOptionItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/AvatarOptionItem")]
         private static void CreateAvatarOptionItemPrefab()
         {
             GameObject item = new GameObject("AvatarOptionItem");
@@ -521,10 +521,17 @@ namespace DigitPark.Editor
 
             // Locked Overlay
             GameObject locked = CreateOverlay(item.transform, "LockedOverlay", LOCKED_BG);
-            GameObject lockIcon = CreateTextElement(locked.transform, "LockIcon", "🔒",
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-15, -15), new Vector2(15, 15),
-                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
+            GameObject lockIcon = new GameObject("LockIcon");
+            lockIcon.transform.SetParent(locked.transform, false);
+            RectTransform lockRT = lockIcon.AddComponent<RectTransform>();
+            lockRT.anchorMin = new Vector2(0.5f, 0.5f);
+            lockRT.anchorMax = new Vector2(0.5f, 0.5f);
+            lockRT.sizeDelta = new Vector2(30, 30);
+            lockRT.anchoredPosition = Vector2.zero;
+            Image lockImg = lockIcon.AddComponent<Image>();
+            lockImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_lock_silver.png");
+            lockImg.preserveAspect = true;
+            lockImg.color = Color.white;
             CreateTextElement(locked.transform, "UnlockRequirementText", "Level 5",
                 new Vector2(0, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold, TextAlignmentOptions.Center);
             locked.SetActive(false);
@@ -543,7 +550,7 @@ namespace DigitPark.Editor
 
         #region Tournament Lobby - Prize Row Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create PrizeRowItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/PrizeRowItem")]
         private static void CreatePrizeRowItemPrefab()
         {
             // Vertical layout per prize position (shown 3 side-by-side in HLG)
@@ -600,7 +607,7 @@ namespace DigitPark.Editor
 
         #region Tournament Lobby - Participant Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create ParticipantItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/ParticipantItem")]
         private static void CreateParticipantItemPrefab()
         {
             // Layout: [Rank 8%] [Avatar 12%] [Username 30%] [Score 16%] [Time 16%] [Status 18%]
@@ -705,7 +712,7 @@ namespace DigitPark.Editor
 
         #region Social - Player Search Item Prefab
 
-        [MenuItem("DigitPark/Prefabs/Monetization/Prefabs/Create PlayerSearchItem")]
+        [MenuItem("DigitPark/Prefabs/Monetization/PlayerSearchItem")]
         private static void CreatePlayerSearchItemPrefab()
         {
             GameObject item = new GameObject("PlayerSearchItem");
@@ -812,9 +819,27 @@ namespace DigitPark.Editor
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-65, -18), new Vector2(-30, 18));
 
-            GameObject viewProfileBtn = CreateButton(item.transform, "ViewProfileButton", "👤", new Color(0.3f, 0.3f, 0.35f), Color.white,
-                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-25, -18), new Vector2(-2, 18));
+            GameObject viewProfileBtn = new GameObject("ViewProfileButton");
+            viewProfileBtn.transform.SetParent(item.transform, false);
+            RectTransform vpRT = viewProfileBtn.AddComponent<RectTransform>();
+            vpRT.anchorMin = new Vector2(1, 0.5f);
+            vpRT.anchorMax = new Vector2(1, 0.5f);
+            vpRT.offsetMin = new Vector2(-25, -18);
+            vpRT.offsetMax = new Vector2(-2, 18);
+            Image vpBg = viewProfileBtn.AddComponent<Image>();
+            vpBg.color = new Color(0.3f, 0.3f, 0.35f);
+            viewProfileBtn.AddComponent<Button>().targetGraphic = vpBg;
+            GameObject vpIcon = new GameObject("Icon");
+            vpIcon.transform.SetParent(viewProfileBtn.transform, false);
+            RectTransform vpIconRT = vpIcon.AddComponent<RectTransform>();
+            vpIconRT.anchorMin = new Vector2(0.15f, 0.15f);
+            vpIconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            vpIconRT.offsetMin = Vector2.zero;
+            vpIconRT.offsetMax = Vector2.zero;
+            Image vpIconImg = vpIcon.AddComponent<Image>();
+            vpIconImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/ProfileIcon.png");
+            vpIconImg.preserveAspect = true;
+            vpIconImg.color = Color.white;
 
             // Add UI Component
             PlayerSearchItemUI ui = item.AddComponent<PlayerSearchItemUI>();

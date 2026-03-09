@@ -31,7 +31,7 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/Onboarding/CashBattleOnboarding.unity",
         };
 
-        [MenuItem("DigitPark/Themes/Remove ThemeApplier from Protected Scenes (CashBattle + AgeVerification)")]
+        [MenuItem("DigitPark/Polish/Themes/Remove from Protected Scenes")]
         public static void RemoveFromProtectedScenes()
         {
             if (!EditorUtility.DisplayDialog("Confirmar",

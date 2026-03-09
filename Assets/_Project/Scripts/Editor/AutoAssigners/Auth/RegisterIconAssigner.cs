@@ -36,7 +36,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/Icons/Auth/Register Icons", false, 101)]
+        [MenuItem("DigitPark/Scenes/Assign Icons/Auth/Register", false, 101)]
         public static void ShowWindow()
         {
             var window = GetWindow<RegisterIconAssigner>("Register Icon Assigner");

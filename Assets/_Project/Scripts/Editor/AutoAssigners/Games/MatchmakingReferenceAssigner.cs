@@ -52,7 +52,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/Matchmaking References", false, 127)]
+        [MenuItem("DigitPark/Scenes/Assign References/Games/Matchmaking", false, 127)]
         public static void ShowWindow()
         {
             var window = GetWindow<MatchmakingReferenceAssigner>("Matchmaking Reference Assigner");

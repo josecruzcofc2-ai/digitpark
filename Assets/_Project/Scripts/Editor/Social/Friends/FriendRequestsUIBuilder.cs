@@ -64,7 +64,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Social/FriendRequests", false, 151)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/FriendRequests", false, 151)]
         public static void ShowWindow()
         {
             GetWindow<FriendRequestsUIBuilder>("FriendRequests Builder");
@@ -224,6 +224,10 @@ namespace DigitPark.Editor
             cTMP.fontStyle = FontStyles.Bold;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
+            cTMP.enableAutoSizing = true;
+            cTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cTMP.fontSizeMax = FontSizes.Body;
+            cTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[FriendRequestsUI] Header creado");
         }
@@ -256,15 +260,15 @@ namespace DigitPark.Editor
             hlg.childForceExpandHeight = true;
 
             // Received Tab (active by default)
-            CreateTabButton(tabsBar.transform, "ReceivedTab", "Received", true);
+            CreateTabButton(tabsBar.transform, "ReceivedTab", "Received", true, "ReceivedTabText");
 
             // Sent Tab
-            CreateTabButton(tabsBar.transform, "SentTab", "Sent", false);
+            CreateTabButton(tabsBar.transform, "SentTab", "Sent", false, "SentTabText");
 
             Debug.Log("[FriendRequestsUI] Tabs creados");
         }
 
-        private static void CreateTabButton(Transform parent, string name, string label, bool active)
+        private static void CreateTabButton(Transform parent, string name, string label, bool active, string textChildName = "Text")
         {
             var tab = FindOrCreate(parent, name);
 
@@ -277,7 +281,7 @@ namespace DigitPark.Editor
 
             GetOrAdd<Button>(tab).targetGraphic = bg;
 
-            var textGO = FindOrCreate(tab.transform, "Text");
+            var textGO = FindOrCreate(tab.transform, textChildName);
             var tRT = GetOrAdd<RectTransform>(textGO);
             tRT.anchorMin = Vector2.zero;
             tRT.anchorMax = Vector2.one;
@@ -369,7 +373,7 @@ namespace DigitPark.Editor
             csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // Empty Text
-            var emptyText = FindOrCreate(content.transform, "EmptyText");
+            var emptyText = FindOrCreate(content.transform, "RequestsEmptyText");
             var eRT = GetOrAdd<RectTransform>(emptyText);
             eRT.sizeDelta = new Vector2(0, 200);
             GetOrAdd<LayoutElement>(emptyText).preferredHeight = 200;
@@ -379,6 +383,10 @@ namespace DigitPark.Editor
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
+            eTMP.enableAutoSizing = true;
+            eTMP.fontSizeMin = FontSizes.AutoMinBody;
+            eTMP.fontSizeMax = FontSizes.Subtitle;
+            eTMP.overflowMode = TextOverflowModes.Ellipsis;
             emptyText.SetActive(false);
 
             // Loading Indicator
@@ -392,6 +400,10 @@ namespace DigitPark.Editor
             ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
+            ldTMP.enableAutoSizing = true;
+            ldTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ldTMP.fontSizeMax = FontSizes.Subtitle;
+            ldTMP.overflowMode = TextOverflowModes.Ellipsis;
             loading.SetActive(false);
 
             Debug.Log("[FriendRequestsUI] ScrollView creado");
@@ -551,6 +563,10 @@ namespace DigitPark.Editor
             tsTMP.fontStyle = FontStyles.Bold;
             tsTMP.color = TEXT_SECONDARY;
             tsTMP.alignment = TextAlignmentOptions.Left;
+            tsTMP.enableAutoSizing = true;
+            tsTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tsTMP.fontSizeMax = FontSizes.Caption;
+            tsTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // ---- Buttons Row (right side) ----
             var buttonsRow = new GameObject("ButtonsRow");
@@ -571,13 +587,13 @@ namespace DigitPark.Editor
             brHLG.childForceExpandHeight = true;
 
             // Accept Button (for received)
-            CreateActionButton(buttonsRow.transform, "AcceptButton", "Accept", GREEN_SUCCESS, TEXT_DARK);
+            CreateActionButton(buttonsRow.transform, "AcceptButton", "Accept", GREEN_SUCCESS, TEXT_DARK, "AcceptButtonText");
 
             // Reject Button (for received)
-            CreateActionButton(buttonsRow.transform, "RejectButton", "Reject", RED_REJECT, TEXT_WHITE);
+            CreateActionButton(buttonsRow.transform, "RejectButton", "Reject", RED_REJECT, TEXT_WHITE, "RejectButtonText");
 
             // Cancel Button (for sent - hidden by default)
-            var cancelBtn = CreateActionButton(buttonsRow.transform, "CancelButton", "Cancel", CARD_BG_LIGHT, ORANGE_CANCEL);
+            var cancelBtn = CreateActionButton(buttonsRow.transform, "CancelButton", "Cancel", CARD_BG_LIGHT, ORANGE_CANCEL, "CancelRequestText");
             cancelBtn.SetActive(false);
 
             // Save as prefab
@@ -595,7 +611,7 @@ namespace DigitPark.Editor
             Debug.Log("[FriendRequestsUI] RequestItem Prefab creado");
         }
 
-        private static GameObject CreateActionButton(Transform parent, string name, string label, Color bgColor, Color textColor)
+        private static GameObject CreateActionButton(Transform parent, string name, string label, Color bgColor, Color textColor, string textChildName = "Text")
         {
             var btn = new GameObject(name);
             btn.transform.SetParent(parent, false);
@@ -608,7 +624,7 @@ namespace DigitPark.Editor
             outline.effectColor = new Color(textColor.r, textColor.g, textColor.b, 0.3f);
             outline.effectDistance = new Vector2(1, 1);
 
-            var text = new GameObject("Text");
+            var text = new GameObject(textChildName);
             text.transform.SetParent(btn.transform, false);
             var tRT = text.AddComponent<RectTransform>();
             tRT.anchorMin = Vector2.zero;
@@ -622,7 +638,7 @@ namespace DigitPark.Editor
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
             tTMP.enableAutoSizing = true;
-            tTMP.fontSizeMin = 22f;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
             tTMP.fontSizeMax = FontSizes.Caption;
 
             return btn;
@@ -656,9 +672,9 @@ namespace DigitPark.Editor
             SetRef(so, "receivedTab", FindInPath<Button>(r, "TabsBar/ReceivedTab"));
             SetRef(so, "sentTab", FindInPath<Button>(r, "TabsBar/SentTab"));
             SetRef(so, "receivedTabBg", FindInPath<Image>(r, "TabsBar/ReceivedTab"));
-            SetRef(so, "receivedTabText", FindInPath<TextMeshProUGUI>(r, "TabsBar/ReceivedTab/Text"));
+            SetRef(so, "receivedTabText", FindInPath<TextMeshProUGUI>(r, "TabsBar/ReceivedTab/ReceivedTabText"));
             SetRef(so, "sentTabBg", FindInPath<Image>(r, "TabsBar/SentTab"));
-            SetRef(so, "sentTabText", FindInPath<TextMeshProUGUI>(r, "TabsBar/SentTab/Text"));
+            SetRef(so, "sentTabText", FindInPath<TextMeshProUGUI>(r, "TabsBar/SentTab/SentTabText"));
 
             // Content
             Transform scrollContent = r.Find("ScrollView/Viewport/Content");
@@ -672,7 +688,7 @@ namespace DigitPark.Editor
                 Debug.LogWarning("[FriendRequestsUI] RequestItem prefab no encontrado. Crea el prefab primero.");
 
             // Empty text and loading
-            SetRef(so, "emptyText", FindInPath<TextMeshProUGUI>(r, "ScrollView/Viewport/Content/EmptyText"));
+            SetRef(so, "emptyText", FindInPath<TextMeshProUGUI>(r, "ScrollView/Viewport/Content/RequestsEmptyText"));
             Transform loading = r.Find("ScrollView/Viewport/Content/LoadingIndicator");
             if (loading != null) SetRef(so, "loadingIndicator", loading.gameObject);
 

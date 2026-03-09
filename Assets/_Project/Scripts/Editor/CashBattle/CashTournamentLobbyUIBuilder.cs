@@ -60,7 +60,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashTournament Lobby", false, 185)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Tournament Lobby", false, 185)]
         public static void ShowWindow()
         {
             GetWindow<CashTournamentLobbyUIBuilder>("CashTournament Lobby Builder");
@@ -478,6 +478,10 @@ namespace DigitPark.Editor
                 arrowTMP.color = TEXT_GOLD;
                 arrowTMP.alignment = TextAlignmentOptions.Center;
                 arrowTMP.fontStyle = FontStyles.Bold;
+                arrowTMP.enableAutoSizing = true;
+                arrowTMP.fontSizeMin = FontSizes.AutoMinBody;
+                arrowTMP.fontSizeMax = FontSizes.H4;
+                arrowTMP.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 
@@ -789,6 +793,10 @@ namespace DigitPark.Editor
             badgeTMP.color = BG_DARK;
             badgeTMP.alignment = TextAlignmentOptions.Center;
             badgeTMP.fontStyle = FontStyles.Bold;
+            badgeTMP.enableAutoSizing = true;
+            badgeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            badgeTMP.fontSizeMax = FontSizes.Body;
+            badgeTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static GameObject CreateTab(Transform parent, string name, string label, bool isActive)
@@ -1075,6 +1083,10 @@ namespace DigitPark.Editor
             inputTMP.fontStyle = FontStyles.Bold;
             inputTMP.color = TEXT_PRIMARY;
             inputTMP.alignment = TextAlignmentOptions.Left;
+            inputTMP.enableAutoSizing = true;
+            inputTMP.fontSizeMin = FontSizes.AutoMinBody;
+            inputTMP.fontSizeMax = FontSizes.Body;
+            inputTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             inputField.textComponent = inputTMP;
             inputField.placeholder = phTMP;

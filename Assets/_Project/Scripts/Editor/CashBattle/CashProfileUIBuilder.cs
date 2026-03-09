@@ -85,7 +85,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU ====================
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/Cash Profile", false, 183)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Profile", false, 183)]
         public static void ShowWindow() => GetWindow<CashProfileUIBuilder>("Cash Profile Builder");
 
         // ==================== EDITOR WINDOW ====================

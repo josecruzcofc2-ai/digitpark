@@ -157,7 +157,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU ====================
 
-        [MenuItem("DigitPark/Tools/Batch Build All Scenes", false, 14)]
+        [MenuItem("DigitPark/Scenes/Batch/Build ALL Scenes", false, 14)]
         public static void ShowWindow()
         {
             var window = GetWindow<AllScenesBatchBuilder>("Build All Scenes");

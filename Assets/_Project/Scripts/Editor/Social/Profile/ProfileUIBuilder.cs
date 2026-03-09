@@ -71,7 +71,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Social/Profile", false, 155)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/Profile", false, 155)]
         public static void ShowWindow()
         {
             GetWindow<ProfileUIBuilder>("Profile Builder");
@@ -233,22 +233,22 @@ namespace DigitPark.Editor
             tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Currency pills (between title and addFriend)
-            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
-            var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
-
-            // Add Friend Button (right)
+            // Add Friend Button (right edge, before pills)
             var addBtn = FindOrCreate(header.transform, "AddFriendButton");
             var aRT = GetOrAdd<RectTransform>(addBtn);
             aRT.anchorMin = new Vector2(1, 0.5f);
             aRT.anchorMax = new Vector2(1, 0.5f);
             aRT.pivot = new Vector2(1, 0.5f);
-            aRT.anchoredPosition = new Vector2(-10, 0);
-            aRT.sizeDelta = new Vector2(45, 45);
+            aRT.anchoredPosition = new Vector2(-8, 0);
+            aRT.sizeDelta = new Vector2(70, 70);
+
+            // Currency pills (between title and addFriend)
+            var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
+            var pillsRT = pills.GetComponent<RectTransform>();
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.88f, 0.85f);
+            pillsRT.offsetMin = Vector2.zero;
+            pillsRT.offsetMax = Vector2.zero;
             var aBg = GetOrAdd<Image>(addBtn);
             aBg.color = new Color(1, 1, 1, 0.06f);
             GetOrAdd<Button>(addBtn).targetGraphic = aBg;
@@ -257,14 +257,16 @@ namespace DigitPark.Editor
             var aiRT = GetOrAdd<RectTransform>(addIcon);
             aiRT.anchorMin = Vector2.zero;
             aiRT.anchorMax = Vector2.one;
-            aiRT.offsetMin = new Vector2(8, 8);
-            aiRT.offsetMax = new Vector2(-8, -8);
-            var aiTMP = GetOrAdd<TextMeshProUGUI>(addIcon);
-            aiTMP.text = "+";
-            aiTMP.fontSize = FontSizes.H3;
-            aiTMP.color = GREEN_SUCCESS;
-            aiTMP.fontStyle = FontStyles.Bold;
-            aiTMP.alignment = TextAlignmentOptions.Center;
+            aiRT.offsetMin = Vector2.zero;
+            aiRT.offsetMax = Vector2.zero;
+            // Remove TMP if it exists, use Image with sprite instead
+            var oldTMP = addIcon.GetComponent<TextMeshProUGUI>();
+            if (oldTMP != null) DestroyImmediate(oldTMP);
+            var iconImg = GetOrAdd<Image>(addIcon);
+            iconImg.preserveAspect = true;
+            iconImg.color = GREEN_SUCCESS;
+            var addFriendSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AddFriendIcon.png");
+            if (addFriendSprite != null) iconImg.sprite = addFriendSprite;
 
             Debug.Log("[ProfileUI] Header creado");
         }
@@ -294,8 +296,8 @@ namespace DigitPark.Editor
             // Avatar Frame container (centered, upper area)
             var frame = FindOrCreate(card.transform, "AvatarFrame");
             var fRT = GetOrAdd<RectTransform>(frame);
-            fRT.anchorMin = new Vector2(0.5f, 0.50f);
-            fRT.anchorMax = new Vector2(0.5f, 0.50f);
+            fRT.anchorMin = new Vector2(0.5f, 0.45f);
+            fRT.anchorMax = new Vector2(0.5f, 0.45f);
             fRT.pivot = new Vector2(0.5f, 0f);
             fRT.anchoredPosition = Vector2.zero;
             fRT.sizeDelta = new Vector2(225, 225);
@@ -418,30 +420,12 @@ namespace DigitPark.Editor
             uTMP.color = TEXT_WHITE;
             uTMP.fontStyle = FontStyles.Bold;
             uTMP.alignment = TextAlignmentOptions.Center;
+            uTMP.enableAutoSizing = true;
+            uTMP.fontSizeMin = FontSizes.AutoMinBody;
+            uTMP.fontSizeMax = FontSizes.Subtitle;
+            uTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Edit Name Button (small pencil icon next to username, only visible on own profile)
-            var editNameBtn = FindOrCreate(card.transform, "EditNameButton");
-            var enRT = GetOrAdd<RectTransform>(editNameBtn);
-            enRT.anchorMin = new Vector2(0.82f, 0.25f);
-            enRT.anchorMax = new Vector2(0.92f, 0.40f);
-            enRT.offsetMin = Vector2.zero;
-            enRT.offsetMax = Vector2.zero;
-            var enBtn = GetOrAdd<Button>(editNameBtn);
-            var enImg = GetOrAdd<Image>(editNameBtn);
-            enImg.preserveAspect = true;
-            enImg.raycastTarget = true;
-            Sprite editNameSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_EDIT);
-            if (editNameSprite != null)
-            {
-                enImg.sprite = editNameSprite;
-                enImg.color = new Color(1f, 1f, 1f, 0.7f);
-            }
-            else
-            {
-                enImg.color = CYAN_NEON;
-            }
-            // Scale down slightly vs avatar edit button
-            editNameBtn.transform.localScale = Vector3.one * 0.7f;
+            // EditNameButton removed — name change only available in Settings
 
             // Status Text
             var status = FindOrCreate(card.transform, "StatusText");
@@ -456,6 +440,10 @@ namespace DigitPark.Editor
             sTMP.fontStyle = FontStyles.Bold;
             sTMP.color = CYAN_NEON;
             sTMP.alignment = TextAlignmentOptions.Center;
+            sTMP.enableAutoSizing = true;
+            sTMP.fontSizeMin = FontSizes.AutoMinBody;
+            sTMP.fontSizeMax = FontSizes.Body;
+            sTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[ProfileUI] Avatar Card creado");
         }
@@ -833,6 +821,10 @@ namespace DigitPark.Editor
             tTMP.color = accent;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.H4;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -880,6 +872,10 @@ namespace DigitPark.Editor
             tTMP.color = TEXT_DARK;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.H2;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[ProfileUI] CTA Section creado");
         }
@@ -938,6 +934,10 @@ namespace DigitPark.Editor
             tTMP.color = CYAN_NEON;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.Body;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Games List
             var list = FindOrCreate(container.transform, "GamesList");
@@ -987,6 +987,10 @@ namespace DigitPark.Editor
             cntTMP.fontStyle = FontStyles.Bold;
             cntTMP.color = TEXT_SECONDARY;
             cntTMP.alignment = TextAlignmentOptions.Center;
+            cntTMP.enableAutoSizing = true;
+            cntTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cntTMP.fontSizeMax = FontSizes.Body;
+            cntTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[ProfileUI] Game Selection Panel creado");
         }
@@ -1017,6 +1021,10 @@ namespace DigitPark.Editor
             tTMP.color = accent;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.Body;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -1047,11 +1055,7 @@ namespace DigitPark.Editor
             SetRef(so, "avatarImage", FindInPath<Image>(r, "AvatarCard/AvatarFrame/AvatarMask/AvatarImage"));
             SetRef(so, "avatarUI", FindInPath<DigitPark.UI.Components.AvatarUI>(r, "AvatarCard/AvatarFrame/AvatarMask/AvatarImage"));
             SetRef(so, "editAvatarButton", FindInPath<Button>(r, "AvatarCard/AvatarFrame/EditButton"));
-            SetRef(so, "editNameButton", FindInPath<Button>(r, "AvatarCard/EditNameButton"));
             SetRef(so, "statusText", FindInPath<TextMeshProUGUI>(r, "AvatarCard/StatusText"));
-
-            // Change Name panels
-            SetRef(so, "changeNamePanel", FindInPath<DigitPark.UI.Panels.InputPanelUI>(r, "ChangeNamePanel"));
             SetRef(so, "errorPanel", FindInPath<DigitPark.UI.Panels.ErrorPanelUI>(r, "ErrorPanel"));
 
             // General Stats
@@ -1272,7 +1276,7 @@ namespace DigitPark.Editor
             phRT.offsetMin = Vector2.zero; phRT.offsetMax = Vector2.zero;
             var phTxt = placeholder.AddComponent<TextMeshProUGUI>();
             phTxt.text = "New name...";
-            phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Italic;
+            phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Bold;
             phTxt.color = TEXT_SECONDARY; phTxt.alignment = TextAlignmentOptions.Left;
 
             GameObject inputText = new GameObject("Text");

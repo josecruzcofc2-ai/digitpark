@@ -35,7 +35,7 @@ namespace DigitPark.Editor
         private const float ANSWER_BUTTON_HEIGHT = 110f;
         private const float EQUATION_PANEL_WIDTH = 850f;
 
-        [MenuItem("DigitPark/UI Builders/Games/QuickMath", false, 134)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/QuickMath", false, 134)]
         public static void ShowWindow()
         {
             GetWindow<QuickMathUIBuilder>("QuickMath UI Builder");
@@ -524,7 +524,7 @@ namespace DigitPark.Editor
             cardOutline.effectDistance = new Vector2(3, -3);
 
             // ====== TITLE AREA ======
-            GameObject titleObj = CreateElement(card.transform, "SettingsTitle");
+            GameObject titleObj = CreateElement(card.transform, "QuickMathTitle");
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
@@ -534,7 +534,7 @@ namespace DigitPark.Editor
             titleGlow.effectColor = new Color(0f, 0.5f, 0.5f, 0.6f);
             titleGlow.effectDistance = new Vector2(2, -2);
 
-            GameObject subtitleObj = CreateElement(card.transform, "SettingsSubtitle");
+            GameObject subtitleObj = CreateElement(card.transform, "QuickMathSubtitle");
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));
@@ -734,7 +734,7 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTmp = SetupText(labelObj, label, FontSizes.Body, isOn ? DARK_BG : Color.white, FontStyles.Bold);
             labelTmp.raycastTarget = false;
             labelTmp.enableAutoSizing = true;
-            labelTmp.fontSizeMin = 22;
+            labelTmp.fontSizeMin = FontSizes.AutoMinSmall;
             labelTmp.fontSizeMax = FontSizes.Body;
             labelTmp.enableWordWrapping = false;
             labelTmp.overflowMode = TextOverflowModes.Ellipsis;

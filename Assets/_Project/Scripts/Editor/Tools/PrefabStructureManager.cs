@@ -51,7 +51,7 @@ namespace DigitPark.Editor
 
         private const string BASE_PATH = "Assets/_Project/Prefabs";
 
-        [MenuItem("DigitPark/Tools/Prefab Structure Manager", false, 50)]
+        [MenuItem("DigitPark/Setup/Prefab Structure Manager", false, 50)]
         public static void ShowWindow()
         {
             GetWindow<PrefabStructureManager>("Prefab Manager");

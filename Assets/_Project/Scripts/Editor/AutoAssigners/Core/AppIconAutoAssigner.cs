@@ -13,7 +13,7 @@ namespace DigitPark.Editor
     {
         private const string ICONS_PATH = "Assets/_Project/Art/Icons/AppIcon";
 
-        [MenuItem("DigitPark/Auto Assigners/Core/Assign App Icons (iOS)")]
+        [MenuItem("DigitPark/Scenes/Assign Icons/Core/App Icons (iOS)")]
         public static void AssignIOSIcons()
         {
             Debug.Log("=== DigitPark App Icon Auto Assigner ===");
@@ -114,7 +114,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/Auto Assigners/Core/Open App Icons Folder")]
+        [MenuItem("DigitPark/Scenes/Assign Icons/Core/Open App Icons Folder")]
         public static void OpenIconsFolder()
         {
             var folder = AssetDatabase.LoadAssetAtPath<Object>(ICONS_PATH);

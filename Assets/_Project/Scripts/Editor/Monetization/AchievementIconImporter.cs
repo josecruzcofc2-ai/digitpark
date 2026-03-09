@@ -12,7 +12,7 @@ namespace DigitPark.Editor
     {
         private const string ICONS_PATH = "Assets/_Project/Resources/Icons/Achievements";
 
-        [MenuItem("DigitPark/Tools/Setup Achievement Icons Import Settings")]
+        [MenuItem("DigitPark/Setup/Achievement Icons Import Settings")]
         public static void SetupAllIconsImportSettings()
         {
             // Find all PNG files directly

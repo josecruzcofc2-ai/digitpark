@@ -57,7 +57,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Tournaments/TournamentLobby References", false, 162)]
+        [MenuItem("DigitPark/Scenes/Assign References/Tournaments/Lobby", false, 162)]
         public static void ShowWindow()
         {
             var window = GetWindow<TournamentLobbyReferenceAssigner>("TournamentLobby Reference Assigner");

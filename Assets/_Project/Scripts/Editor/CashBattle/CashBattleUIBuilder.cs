@@ -55,7 +55,7 @@ namespace DigitPark.Editor
             public Object assignedObject;
         }
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashBattleHub (Menu Principal)", false, 180)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Hub", false, 180)]
         public static void ShowWindow()
         {
             GetWindow<CashBattleUIBuilder>("CashBattleHub Builder");
@@ -383,6 +383,10 @@ namespace DigitPark.Editor
                 arrow.color = TEXT_GOLD;
                 arrow.alignment = TextAlignmentOptions.Center;
                 arrow.fontStyle = FontStyles.Bold;
+                arrow.enableAutoSizing = true;
+                arrow.fontSizeMin = FontSizes.AutoMinBody;
+                arrow.fontSizeMax = FontSizes.H4;
+                arrow.overflowMode = TextOverflowModes.Ellipsis;
 
                 Debug.LogWarning("[CashBattleHub] BackButtonGold prefab not found, using fallback");
             }
@@ -699,6 +703,10 @@ namespace DigitPark.Editor
                 detailText.color = CYAN_ACCENT;
                 detailText.alignment = TextAlignmentOptions.Center;
                 detailText.fontStyle = FontStyles.Bold;
+                detailText.enableAutoSizing = true;
+                detailText.fontSizeMin = FontSizes.AutoMinBody;
+                detailText.fontSizeMax = FontSizes.Body;
+                detailText.overflowMode = TextOverflowModes.Ellipsis;
             }
 
             // === ARROW ">" (right side) ===
@@ -718,6 +726,10 @@ namespace DigitPark.Editor
             arrowText.color = TEXT_GOLD;
             arrowText.alignment = TextAlignmentOptions.Center;
             arrowText.fontStyle = FontStyles.Bold;
+            arrowText.enableAutoSizing = true;
+            arrowText.fontSizeMin = FontSizes.AutoMinBody;
+            arrowText.fontSizeMax = FontSizes.H1;
+            arrowText.overflowMode = TextOverflowModes.Ellipsis;
 
             return card;
         }
@@ -774,6 +786,11 @@ namespace DigitPark.Editor
                 text.fontSize = FontSizes.H4;
                 text.color = TEXT_GOLD;
                 text.alignment = TextAlignmentOptions.Center;
+                text.fontStyle = FontStyles.Bold;
+                text.enableAutoSizing = true;
+                text.fontSizeMin = FontSizes.AutoMinBody;
+                text.fontSizeMax = FontSizes.H4;
+                text.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 
@@ -840,6 +857,10 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = FontSizes.Body;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ========== ONLINE PLAYERS INDICATOR ==========
             GameObject onlineIndicator = new GameObject("OnlinePlayersIndicator");
@@ -889,6 +910,10 @@ namespace DigitPark.Editor
             onlineText.color = TEXT_SECONDARY;
             onlineText.alignment = TextAlignmentOptions.Left;
             onlineText.fontStyle = FontStyles.Bold;
+            onlineText.enableAutoSizing = true;
+            onlineText.fontSizeMin = FontSizes.AutoMinBody;
+            onlineText.fontSizeMax = FontSizes.Body;
+            onlineText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ========== SCROLL VIEW FOR GAME CARDS ==========
             GameObject scrollView = new GameObject("GamesScrollView");
@@ -1014,6 +1039,11 @@ namespace DigitPark.Editor
             iconTMP.fontSize = FontSizes.Body;
             iconTMP.color = TEXT_GOLD;
             iconTMP.alignment = TextAlignmentOptions.Center;
+            iconTMP.fontStyle = FontStyles.Bold;
+            iconTMP.enableAutoSizing = true;
+            iconTMP.fontSizeMin = FontSizes.AutoMinBody;
+            iconTMP.fontSizeMax = FontSizes.Body;
+            iconTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Name
             GameObject nameObj = new GameObject("Name");
@@ -1032,6 +1062,10 @@ namespace DigitPark.Editor
             nameTMP.color = TEXT_GOLD;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.alignment = TextAlignmentOptions.Left;
+            nameTMP.enableAutoSizing = true;
+            nameTMP.fontSizeMin = FontSizes.AutoMinBody;
+            nameTMP.fontSizeMax = FontSizes.Body;
+            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Description
             GameObject descObj = new GameObject("Description");
@@ -1050,6 +1084,10 @@ namespace DigitPark.Editor
             descTMP.color = TEXT_SECONDARY;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = FontSizes.AutoMinBody;
+            descTMP.fontSizeMax = FontSizes.Body;
+            descTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Checkmark (hidden by default)
             GameObject checkmark = new GameObject("Checkmark");
@@ -1079,6 +1117,10 @@ namespace DigitPark.Editor
             checkTMP.color = BG_DARK;
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
+            checkTMP.enableAutoSizing = true;
+            checkTMP.fontSizeMin = FontSizes.AutoMinBody;
+            checkTMP.fontSizeMax = FontSizes.Body;
+            checkTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             checkmark.SetActive(false);
         }
@@ -1179,6 +1221,10 @@ namespace DigitPark.Editor
             checkTMP.color = BG_DARK; // Dark text on gold background
             checkTMP.alignment = TextAlignmentOptions.Center;
             checkTMP.fontStyle = FontStyles.Bold;
+            checkTMP.enableAutoSizing = true;
+            checkTMP.fontSizeMin = FontSizes.AutoMinBody;
+            checkTMP.fontSizeMax = FontSizes.Body;
+            checkTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             checkmark.SetActive(false); // Hidden by default until selected
         }
@@ -1226,6 +1272,10 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = FontSizes.Body;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ========== PRESET BUTTONS ROW ==========
             GameObject presetsContainer = new GameObject("PresetsContainer");
@@ -1278,6 +1328,10 @@ namespace DigitPark.Editor
             dollarText.color = GOLD_PRIMARY;
             dollarText.fontStyle = FontStyles.Bold;
             dollarText.alignment = TextAlignmentOptions.Center;
+            dollarText.enableAutoSizing = true;
+            dollarText.fontSizeMin = FontSizes.AutoMinBody;
+            dollarText.fontSizeMax = FontSizes.Body;
+            dollarText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Input field background
             GameObject inputBg = new GameObject("CustomInputField");
@@ -1312,6 +1366,10 @@ namespace DigitPark.Editor
             inputText.color = TEXT_PRIMARY;
             inputText.fontStyle = FontStyles.Bold;
             inputText.alignment = TextAlignmentOptions.Left;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.Body;
+            inputText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Placeholder
             GameObject placeholderObj = new GameObject("Placeholder");
@@ -1330,6 +1388,10 @@ namespace DigitPark.Editor
             placeholderText.color = TEXT_SECONDARY;
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.alignment = TextAlignmentOptions.Left;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.Body;
+            placeholderText.overflowMode = TextOverflowModes.Ellipsis;
 
             // TMP_InputField component
             TMP_InputField inputField = inputBg.AddComponent<TMP_InputField>();
@@ -1354,6 +1416,10 @@ namespace DigitPark.Editor
             maxText.color = TEXT_SECONDARY;
             maxText.fontStyle = FontStyles.Bold;
             maxText.alignment = TextAlignmentOptions.Center;
+            maxText.enableAutoSizing = true;
+            maxText.fontSizeMin = FontSizes.AutoMinBody;
+            maxText.fontSizeMax = FontSizes.Body;
+            maxText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Apply button for custom amount
             GameObject applyBtn = new GameObject("ApplyButton");
@@ -1392,6 +1458,10 @@ namespace DigitPark.Editor
             applyText.color = BG_DARK;
             applyText.fontStyle = FontStyles.Bold;
             applyText.alignment = TextAlignmentOptions.Center;
+            applyText.enableAutoSizing = true;
+            applyText.fontSizeMin = FontSizes.AutoMinBody;
+            applyText.fontSizeMax = FontSizes.Body;
+            applyText.overflowMode = TextOverflowModes.Ellipsis;
 
             // ========== EARNINGS FEEDBACK SECTION ==========
             GameObject feedbackContainer = new GameObject("EarningsFeedback");
@@ -1429,6 +1499,10 @@ namespace DigitPark.Editor
             earningsText.color = new Color(0.4f, 1f, 0.6f, 1f); // Verde brillante
             earningsText.fontStyle = FontStyles.Bold;
             earningsText.alignment = TextAlignmentOptions.Left;
+            earningsText.enableAutoSizing = true;
+            earningsText.fontSizeMin = FontSizes.AutoMinBody;
+            earningsText.fontSizeMax = FontSizes.Body;
+            earningsText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Pool info text
             GameObject poolObj = new GameObject("PoolInfoText");
@@ -1447,6 +1521,10 @@ namespace DigitPark.Editor
             poolText.color = TEXT_SECONDARY;
             poolText.fontStyle = FontStyles.Bold;
             poolText.alignment = TextAlignmentOptions.Left;
+            poolText.enableAutoSizing = true;
+            poolText.fontSizeMin = FontSizes.AutoMinBody;
+            poolText.fontSizeMax = FontSizes.Body;
+            poolText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Coin icon for visual appeal
             GameObject coinIcon = new GameObject("CoinIcon");
@@ -1461,6 +1539,11 @@ namespace DigitPark.Editor
             coinText.text = "$";
             coinText.fontSize = FontSizes.Body;
             coinText.alignment = TextAlignmentOptions.Center;
+            coinText.fontStyle = FontStyles.Bold;
+            coinText.enableAutoSizing = true;
+            coinText.fontSizeMin = FontSizes.AutoMinBody;
+            coinText.fontSizeMax = FontSizes.Body;
+            coinText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         /// <summary>
@@ -1507,6 +1590,10 @@ namespace DigitPark.Editor
             text.color = TEXT_PRIMARY;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.Body;
+            text.overflowMode = TextOverflowModes.Ellipsis;
 
             // Selection indicator (hidden by default)
             GameObject selectedIndicator = new GameObject("SelectedIndicator");
@@ -1597,6 +1684,10 @@ namespace DigitPark.Editor
             text.color = BG_DARK;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.Body;
+            text.overflowMode = TextOverflowModes.Ellipsis;
 
             // Subtitle with online players count
             GameObject subtitleObj = new GameObject("OnlinePlayersText");
@@ -1613,6 +1704,10 @@ namespace DigitPark.Editor
             subtitleText.color = new Color(0.2f, 0.15f, 0.1f, 0.9f);
             subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.alignment = TextAlignmentOptions.Center;
+            subtitleText.enableAutoSizing = true;
+            subtitleText.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleText.fontSizeMax = FontSizes.Body;
+            subtitleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Left fire icon
             GameObject leftFire = new GameObject("LeftFireIcon");
@@ -1625,10 +1720,10 @@ namespace DigitPark.Editor
             leftFireRT.sizeDelta = new Vector2(50, 50);
             leftFireRT.anchoredPosition = new Vector2(15, 5);
 
-            TextMeshProUGUI leftFireText = leftFire.AddComponent<TextMeshProUGUI>();
-            leftFireText.text = "🔥";
-            leftFireText.fontSize = FontSizes.Body;
-            leftFireText.alignment = TextAlignmentOptions.Center;
+            Image leftFireImg = leftFire.AddComponent<Image>();
+            leftFireImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/CashBattle/Stats/stat_streak.png");
+            leftFireImg.preserveAspect = true;
+            leftFireImg.color = Color.white;
 
             // Right fire icon
             GameObject rightFire = new GameObject("RightFireIcon");
@@ -1641,10 +1736,10 @@ namespace DigitPark.Editor
             rightFireRT.sizeDelta = new Vector2(50, 50);
             rightFireRT.anchoredPosition = new Vector2(-15, 5);
 
-            TextMeshProUGUI rightFireText = rightFire.AddComponent<TextMeshProUGUI>();
-            rightFireText.text = "🔥";
-            rightFireText.fontSize = FontSizes.Body;
-            rightFireText.alignment = TextAlignmentOptions.Center;
+            Image rightFireImg = rightFire.AddComponent<Image>();
+            rightFireImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/CashBattle/Stats/stat_streak.png");
+            rightFireImg.preserveAspect = true;
+            rightFireImg.color = Color.white;
 
             // Online indicator dot
             GameObject onlineDot = new GameObject("OnlineDot");
@@ -1708,6 +1803,10 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = FontSizes.Body;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Tournaments Container (ScrollView)
             GameObject scrollView = CreateScrollView(panel.transform, "TournamentsScrollView",
@@ -1819,6 +1918,10 @@ namespace DigitPark.Editor
             nameTMP.fontSize = FontSizes.Body;
             nameTMP.color = TEXT_GOLD;
             nameTMP.fontStyle = FontStyles.Bold;
+            nameTMP.enableAutoSizing = true;
+            nameTMP.fontSizeMin = FontSizes.AutoMinBody;
+            nameTMP.fontSizeMax = FontSizes.Body;
+            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Game type
             GameObject gameObj = new GameObject("GameType");
@@ -1834,6 +1937,10 @@ namespace DigitPark.Editor
             gameTMP.fontSize = FontSizes.Body;
             gameTMP.color = CYAN_ACCENT;
             gameTMP.fontStyle = FontStyles.Bold;
+            gameTMP.enableAutoSizing = true;
+            gameTMP.fontSizeMin = FontSizes.AutoMinBody;
+            gameTMP.fontSizeMax = FontSizes.Body;
+            gameTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Prize
             GameObject prizeObj = new GameObject("PrizePool");
@@ -1849,6 +1956,10 @@ namespace DigitPark.Editor
             prizeTMP.fontSize = FontSizes.Body;
             prizeTMP.color = new Color(0.3f, 1f, 0.5f);
             prizeTMP.fontStyle = FontStyles.Bold;
+            prizeTMP.enableAutoSizing = true;
+            prizeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            prizeTMP.fontSizeMax = FontSizes.Body;
+            prizeTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Entry
             GameObject entryObj = new GameObject("EntryFee");
@@ -1864,6 +1975,10 @@ namespace DigitPark.Editor
             entryTMP.fontSize = FontSizes.Body;
             entryTMP.color = TEXT_PRIMARY;
             entryTMP.fontStyle = FontStyles.Bold;
+            entryTMP.enableAutoSizing = true;
+            entryTMP.fontSizeMin = FontSizes.AutoMinBody;
+            entryTMP.fontSizeMax = FontSizes.Body;
+            entryTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Participants
             GameObject partObj = new GameObject("Participants");
@@ -1879,6 +1994,10 @@ namespace DigitPark.Editor
             partTMP.fontSize = FontSizes.Body;
             partTMP.color = TEXT_SECONDARY;
             partTMP.fontStyle = FontStyles.Bold;
+            partTMP.enableAutoSizing = true;
+            partTMP.fontSizeMin = FontSizes.AutoMinBody;
+            partTMP.fontSizeMax = FontSizes.Body;
+            partTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Join button
             GameObject joinBtn = new GameObject("JoinButton");
@@ -1913,6 +2032,10 @@ namespace DigitPark.Editor
             joinTMP.color = BG_DARK;
             joinTMP.fontStyle = FontStyles.Bold;
             joinTMP.alignment = TextAlignmentOptions.Center;
+            joinTMP.enableAutoSizing = true;
+            joinTMP.fontSizeMin = FontSizes.AutoMinBody;
+            joinTMP.fontSizeMax = FontSizes.Body;
+            joinTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion
@@ -1975,6 +2098,10 @@ namespace DigitPark.Editor
             textTMP.color = TEXT_GOLD;
             textTMP.fontStyle = FontStyles.Bold;
             textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.enableAutoSizing = true;
+            textTMP.fontSizeMin = FontSizes.AutoMinBody;
+            textTMP.fontSizeMax = FontSizes.Body;
+            textTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Confirm button
             GameObject confirmBtn = new GameObject("ConfirmBetButton");
@@ -2009,6 +2136,10 @@ namespace DigitPark.Editor
             confirmTMP.color = BG_DARK;
             confirmTMP.fontStyle = FontStyles.Bold;
             confirmTMP.alignment = TextAlignmentOptions.Center;
+            confirmTMP.enableAutoSizing = true;
+            confirmTMP.fontSizeMin = FontSizes.AutoMinBody;
+            confirmTMP.fontSizeMax = FontSizes.Body;
+            confirmTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Cancel button
             GameObject cancelBtn = new GameObject("CancelBetButton");
@@ -2043,6 +2174,10 @@ namespace DigitPark.Editor
             cancelTMP.color = TEXT_PRIMARY;
             cancelTMP.fontStyle = FontStyles.Bold;
             cancelTMP.alignment = TextAlignmentOptions.Center;
+            cancelTMP.enableAutoSizing = true;
+            cancelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cancelTMP.fontSizeMax = FontSizes.Body;
+            cancelTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             panel.SetActive(false);
         }
@@ -2121,6 +2256,11 @@ namespace DigitPark.Editor
             iconTMP.fontSize = FontSizes.H3;
             iconTMP.color = BG_DARK;
             iconTMP.alignment = TextAlignmentOptions.Center;
+            iconTMP.fontStyle = FontStyles.Bold;
+            iconTMP.enableAutoSizing = true;
+            iconTMP.fontSizeMin = FontSizes.AutoMinBody;
+            iconTMP.fontSizeMax = FontSizes.H3;
+            iconTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Status text
             GameObject statusObj = new GameObject("MatchmakingStatusText");
@@ -2139,6 +2279,10 @@ namespace DigitPark.Editor
             statusTMP.color = TEXT_GOLD;
             statusTMP.fontStyle = FontStyles.Bold;
             statusTMP.alignment = TextAlignmentOptions.Center;
+            statusTMP.enableAutoSizing = true;
+            statusTMP.fontSizeMin = FontSizes.AutoMinBody;
+            statusTMP.fontSizeMax = FontSizes.Body;
+            statusTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Timer text (shows elapsed matchmaking time)
             GameObject timerObj = new GameObject("MatchmakingTimerText");
@@ -2157,6 +2301,10 @@ namespace DigitPark.Editor
             timerTMP.color = CYAN_ACCENT;
             timerTMP.fontStyle = FontStyles.Bold;
             timerTMP.alignment = TextAlignmentOptions.Center;
+            timerTMP.enableAutoSizing = true;
+            timerTMP.fontSizeMin = FontSizes.AutoMinBody;
+            timerTMP.fontSizeMax = FontSizes.Subtitle;
+            timerTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Opponent name text
             GameObject opponentObj = new GameObject("OpponentNameText");
@@ -2175,6 +2323,10 @@ namespace DigitPark.Editor
             opponentTMP.color = TEXT_PRIMARY;
             opponentTMP.fontStyle = FontStyles.Bold;
             opponentTMP.alignment = TextAlignmentOptions.Center;
+            opponentTMP.enableAutoSizing = true;
+            opponentTMP.fontSizeMin = FontSizes.AutoMinBody;
+            opponentTMP.fontSizeMax = FontSizes.Body;
+            opponentTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Cancel button
             GameObject cancelBtn = new GameObject("CancelMatchmakingButton");
@@ -2209,6 +2361,10 @@ namespace DigitPark.Editor
             cancelTMP.color = TEXT_PRIMARY;
             cancelTMP.fontStyle = FontStyles.Bold;
             cancelTMP.alignment = TextAlignmentOptions.Center;
+            cancelTMP.enableAutoSizing = true;
+            cancelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cancelTMP.fontSizeMax = FontSizes.Body;
+            cancelTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Initially hidden
             panel.SetActive(false);
@@ -2247,6 +2403,10 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = FontSizes.Subtitle;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Balance Card
             CreateBalanceCard(panel.transform);
@@ -2295,6 +2455,10 @@ namespace DigitPark.Editor
             amountText.color = GOLD_PRIMARY;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.fontStyle = FontStyles.Bold;
+            amountText.enableAutoSizing = true;
+            amountText.fontSizeMin = FontSizes.AutoMinBody;
+            amountText.fontSizeMax = FontSizes.H1;
+            amountText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Balance Label
             GameObject labelObj = new GameObject("BalanceLabel");
@@ -2311,6 +2475,10 @@ namespace DigitPark.Editor
             labelText.color = TEXT_SECONDARY;
             labelText.alignment = TextAlignmentOptions.Center;
             labelText.fontStyle = FontStyles.Bold;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.AutoMinBody;
+            labelText.fontSizeMax = FontSizes.Body;
+            labelText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateWalletActions(Transform parent)
@@ -2374,6 +2542,10 @@ namespace DigitPark.Editor
             btnText.color = Color.white;
             btnText.fontStyle = FontStyles.Bold;
             btnText.alignment = TextAlignmentOptions.Center;
+            btnText.enableAutoSizing = true;
+            btnText.fontSizeMin = FontSizes.AutoMinBody;
+            btnText.fontSizeMax = FontSizes.Body;
+            btnText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateRecentTransactions(Transform parent)
@@ -2393,6 +2565,10 @@ namespace DigitPark.Editor
             headerText.color = TEXT_PRIMARY;
             headerText.fontStyle = FontStyles.Bold;
             headerText.alignment = TextAlignmentOptions.Left;
+            headerText.enableAutoSizing = true;
+            headerText.fontSizeMin = FontSizes.AutoMinBody;
+            headerText.fontSizeMax = FontSizes.Body;
+            headerText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Transactions ScrollView
             GameObject scrollView = CreateScrollView(parent, "TransactionsScrollView",
@@ -2429,6 +2605,10 @@ namespace DigitPark.Editor
             amountText.color = isPositive ? new Color(0.3f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
             amountText.fontStyle = FontStyles.Bold;
             amountText.alignment = TextAlignmentOptions.Left;
+            amountText.enableAutoSizing = true;
+            amountText.fontSizeMin = FontSizes.AutoMinBody;
+            amountText.fontSizeMax = FontSizes.Body;
+            amountText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Description
             GameObject descObj = new GameObject("Description");
@@ -2449,6 +2629,9 @@ namespace DigitPark.Editor
             descText.alignment = TextAlignmentOptions.Left;
             descText.enableWordWrapping = true;
             descText.overflowMode = TextOverflowModes.Ellipsis;
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = FontSizes.AutoMinBody;
+            descText.fontSizeMax = FontSizes.Body;
 
             // Time
             GameObject timeObj = new GameObject("Time");
@@ -2466,6 +2649,11 @@ namespace DigitPark.Editor
             timeText.fontSize = FontSizes.Body;
             timeText.color = TEXT_SECONDARY;
             timeText.alignment = TextAlignmentOptions.Left;
+            timeText.fontStyle = FontStyles.Bold;
+            timeText.enableAutoSizing = true;
+            timeText.fontSizeMin = FontSizes.AutoMinBody;
+            timeText.fontSizeMax = FontSizes.Body;
+            timeText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Status indicator
             GameObject indicator = new GameObject("Indicator");
@@ -2513,6 +2701,10 @@ namespace DigitPark.Editor
             titleText.color = TEXT_GOLD;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.fontStyle = FontStyles.Bold;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = FontSizes.Subtitle;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Stats Summary
             CreateHistoryStats(panel.transform);
@@ -2591,6 +2783,10 @@ namespace DigitPark.Editor
             valueText.color = valueColor;
             valueText.fontStyle = FontStyles.Bold;
             valueText.alignment = TextAlignmentOptions.Center;
+            valueText.enableAutoSizing = true;
+            valueText.fontSizeMin = FontSizes.AutoMinBody;
+            valueText.fontSizeMax = FontSizes.Body;
+            valueText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Label
             GameObject labelObj = new GameObject("StatCardLabel");
@@ -2609,6 +2805,10 @@ namespace DigitPark.Editor
             labelText.color = TEXT_SECONDARY;
             labelText.fontStyle = FontStyles.Bold;
             labelText.alignment = TextAlignmentOptions.Center;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.AutoMinBody;
+            labelText.fontSizeMax = FontSizes.Body;
+            labelText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         private static void CreateMatchHistoryItem(Transform parent, string gameType, string opponent, bool isWin, string amount, string dateTime, string score)
@@ -2663,6 +2863,11 @@ namespace DigitPark.Editor
             iconTMP.fontSize = FontSizes.Body;
             iconTMP.color = TEXT_GOLD;
             iconTMP.alignment = TextAlignmentOptions.Center;
+            iconTMP.fontStyle = FontStyles.Bold;
+            iconTMP.enableAutoSizing = true;
+            iconTMP.fontSizeMin = FontSizes.AutoMinBody;
+            iconTMP.fontSizeMax = FontSizes.Body;
+            iconTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Game type
             GameObject gameObj = new GameObject("GameType");
@@ -2679,6 +2884,10 @@ namespace DigitPark.Editor
             gameTMP.color = TEXT_GOLD;
             gameTMP.fontStyle = FontStyles.Bold;
             gameTMP.alignment = TextAlignmentOptions.Left;
+            gameTMP.enableAutoSizing = true;
+            gameTMP.fontSizeMin = FontSizes.AutoMinBody;
+            gameTMP.fontSizeMax = FontSizes.Body;
+            gameTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Opponent
             GameObject oppObj = new GameObject("Opponent");
@@ -2695,6 +2904,10 @@ namespace DigitPark.Editor
             oppTMP.color = CYAN_ACCENT;
             oppTMP.fontStyle = FontStyles.Bold;
             oppTMP.alignment = TextAlignmentOptions.Left;
+            oppTMP.enableAutoSizing = true;
+            oppTMP.fontSizeMin = FontSizes.AutoMinBody;
+            oppTMP.fontSizeMax = FontSizes.Body;
+            oppTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Date/Time
             GameObject dateObj = new GameObject("DateTime");
@@ -2710,6 +2923,11 @@ namespace DigitPark.Editor
             dateTMP.fontSize = FontSizes.Body;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.alignment = TextAlignmentOptions.Left;
+            dateTMP.fontStyle = FontStyles.Bold;
+            dateTMP.enableAutoSizing = true;
+            dateTMP.fontSizeMin = FontSizes.AutoMinBody;
+            dateTMP.fontSizeMax = FontSizes.Body;
+            dateTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Result & Amount
             GameObject resultObj = new GameObject("Result");
@@ -2726,6 +2944,10 @@ namespace DigitPark.Editor
             resultTMP.color = isWin ? new Color(0.3f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
             resultTMP.fontStyle = FontStyles.Bold;
             resultTMP.alignment = TextAlignmentOptions.Right;
+            resultTMP.enableAutoSizing = true;
+            resultTMP.fontSizeMin = FontSizes.AutoMinBody;
+            resultTMP.fontSizeMax = FontSizes.Body;
+            resultTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Amount
             GameObject amountObj = new GameObject("Amount");
@@ -2742,6 +2964,10 @@ namespace DigitPark.Editor
             amountTMP.color = isWin ? new Color(0.3f, 1f, 0.5f) : new Color(1f, 0.4f, 0.4f);
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Right;
+            amountTMP.enableAutoSizing = true;
+            amountTMP.fontSizeMin = FontSizes.AutoMinBody;
+            amountTMP.fontSizeMax = FontSizes.Body;
+            amountTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Score
             GameObject scoreObj = new GameObject("Score");
@@ -2757,6 +2983,11 @@ namespace DigitPark.Editor
             scoreTMP.fontSize = FontSizes.Body;
             scoreTMP.color = TEXT_SECONDARY;
             scoreTMP.alignment = TextAlignmentOptions.Right;
+            scoreTMP.fontStyle = FontStyles.Bold;
+            scoreTMP.enableAutoSizing = true;
+            scoreTMP.fontSizeMin = FontSizes.AutoMinBody;
+            scoreTMP.fontSizeMax = FontSizes.Body;
+            scoreTMP.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         #endregion

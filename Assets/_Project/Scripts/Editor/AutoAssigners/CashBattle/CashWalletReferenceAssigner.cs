@@ -34,7 +34,7 @@ namespace DigitPark.Editor.AutoAssigners
             "depositOptionsContainer", "paymentMethodsContainer",
             // Withdraw Section
             "withdrawAmountInput", "withdrawButton", "withdrawableAmountText",
-            "withdrawMinText", "withdrawFeeText", "kycRequiredPanel", "verifyKycButton",
+            "withdrawMinText", "withdrawFeeText",
             // Transaction History
             "transactionsContainer", "emptyHistoryText", "loadMoreButton",
             // Overlays
@@ -51,7 +51,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashWallet References", false, 184)]
+        [MenuItem("DigitPark/Scenes/Assign References/CashBattle/Wallet", false, 184)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashWalletReferenceAssigner>("CashWallet Reference Assigner");
@@ -82,7 +82,7 @@ namespace DigitPark.Editor.AutoAssigners
                 "- Tab buttons (deposit, withdraw, history)\n" +
                 "- Tab panels (deposit, withdraw, transaction history)\n" +
                 "- Deposit section (options container, payment methods)\n" +
-                "- Withdraw section (input, button, texts, KYC)\n" +
+                "- Withdraw section (input, button, texts)\n" +
                 "- Transaction history (container, empty text, load more)\n" +
                 "- Overlays (loading, success, error)",
                 MessageType.Info);
@@ -236,12 +236,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "withdrawableAmountText", FindTextByDeep(root, "WithdrawableAmountText"));
             AssignReference(so, "withdrawMinText", FindTextByDeep(root, "WithdrawMinText"));
             AssignReference(so, "withdrawFeeText", FindTextByDeep(root, "WithdrawFeeText"));
-
-            Transform kycRequiredPanelT = FindDeep(root, "KycRequiredPanel");
-            AssignReference(so, "kycRequiredPanel", kycRequiredPanelT != null ? kycRequiredPanelT.gameObject : null);
-
-            Transform verifyKycButtonT = FindDeep(root, "VerifyKycButton");
-            AssignReference(so, "verifyKycButton", verifyKycButtonT != null ? verifyKycButtonT.GetComponent<Button>() : null);
 
             // ==================== TRANSACTION HISTORY ====================
             // transactionItemPrefab -> skip (prefab)

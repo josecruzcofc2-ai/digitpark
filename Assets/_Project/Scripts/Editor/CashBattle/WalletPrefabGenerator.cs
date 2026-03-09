@@ -33,7 +33,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/Prefab Generators/CashWallet Prefabs", false, 300)]
+        [MenuItem("DigitPark/Prefabs/CashBattle/CashWallet Prefabs", false, 300)]
         public static void ShowWindow()
         {
             GetWindow<WalletPrefabGenerator>("Wallet Prefabs Generator");
@@ -106,7 +106,7 @@ namespace DigitPark.Editor
 
         #region Transaction Item Prefab
 
-        [MenuItem("DigitPark/Prefab Generators/Generate TransactionItemUI", false, 301)]
+        [MenuItem("DigitPark/Prefabs/CashBattle/TransactionItemUI", false, 301)]
         public static void GenerateTransactionItemPrefab()
         {
             EnsureDirectoryExists();
@@ -239,7 +239,7 @@ namespace DigitPark.Editor
 
         #region Deposit Option Prefab
 
-        [MenuItem("DigitPark/Prefab Generators/Generate DepositOptionUI", false, 302)]
+        [MenuItem("DigitPark/Prefabs/CashBattle/DepositOptionUI", false, 302)]
         public static void GenerateDepositOptionPrefab()
         {
             EnsureDirectoryExists();

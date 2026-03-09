@@ -8,7 +8,7 @@ namespace DigitPark.Editor
     /// </summary>
     public static class CashBattleOnboardingMenuItems
     {
-        [MenuItem("DigitPark/UI Builders/Onboarding/Reset Cash Battle Onboarding", false, 173)]
+        [MenuItem("DigitPark/Debug/Onboarding/Reset CashBattle Onboarding", false, 173)]
         public static void ResetCashBattleOnboarding()
         {
             if (EditorUtility.DisplayDialog(
@@ -21,7 +21,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Check Onboarding Status", false, 174)]
+        [MenuItem("DigitPark/Debug/Onboarding/Check Status", false, 174)]
         public static void CheckOnboardingStatus()
         {
             bool isComplete = DigitPark.Managers.CashBattleOnboardingManager.IsOnboardingComplete();
@@ -41,14 +41,14 @@ namespace DigitPark.Editor
             }
             else
             {
-                message += "User can access Cash Battle Hub! 🎉";
+                message += "User can access Cash Battle Hub!";
             }
 
             EditorUtility.DisplayDialog("Onboarding Status", message, "OK");
             Debug.Log(message);
         }
 
-        [MenuItem("DigitPark/Testing/Quick Scene Access/Cash Battle Onboarding", false, 500)]
+        [MenuItem("DigitPark/Debug/Quick Scene Access/CashBattle Onboarding", false, 500)]
         public static void OpenCashBattleOnboardingScene()
         {
             string scenePath = "Assets/_Project/Scenes/Onboarding/CashBattleOnboarding.unity";

@@ -77,7 +77,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Cash Battle Onboarding", false, 171)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Onboarding/CashBattle", false, 171)]
         public static void ShowWindow()
         {
             GetWindow<CashBattleOnboardingUIBuilder>("CashBattle Onboarding Builder");
@@ -256,7 +256,7 @@ namespace DigitPark.Editor
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.alignment = TextAlignmentOptions.Left;
             tlTMP.enableAutoSizing = true;
-            tlTMP.fontSizeMin = 22;
+            tlTMP.fontSizeMin = FontSizes.AutoMinSmall;
             tlTMP.fontSizeMax = FontSizes.Body;
 
             // Progress Text (center)
@@ -297,7 +297,7 @@ namespace DigitPark.Editor
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
             stTMP.enableAutoSizing = true;
-            stTMP.fontSizeMin = 22;
+            stTMP.fontSizeMin = FontSizes.AutoMinSmall;
             stTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[CashBattleOnboardingUI] TopBar creado (ProgressBar + Title + ProgressText + Skip)");
@@ -607,7 +607,7 @@ namespace DigitPark.Editor
             btTMP.fontStyle = FontStyles.Bold;
             btTMP.alignment = TextAlignmentOptions.Center;
             btTMP.enableAutoSizing = true;
-            btTMP.fontSizeMin = 22;
+            btTMP.fontSizeMin = FontSizes.AutoMinSmall;
             btTMP.fontSizeMax = FontSizes.Body;
 
             // Next Button (right, gold)
@@ -637,7 +637,7 @@ namespace DigitPark.Editor
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;
             ntTMP.enableAutoSizing = true;
-            ntTMP.fontSizeMin = 22;
+            ntTMP.fontSizeMin = FontSizes.AutoMinSmall;
             ntTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[CashBattleOnboardingUI] Navigation creado (DotsContainer + Back + Next)");
@@ -667,7 +667,7 @@ namespace DigitPark.Editor
             lTMP.alignment = TextAlignmentOptions.Center;
             lTMP.enableWordWrapping = true;
             lTMP.enableAutoSizing = true;
-            lTMP.fontSizeMin = 22;
+            lTMP.fontSizeMin = FontSizes.AutoMinSmall;
             lTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[CashBattleOnboardingUI] LegalText creado");

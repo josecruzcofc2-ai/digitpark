@@ -41,7 +41,7 @@ namespace DigitPark.Editor
         private const float CARD_CHECK_SIZE = 42f;
         private const float CARD_CHECK_MIN = 30f;
 
-        [MenuItem("DigitPark/Missions/Create MissionCard Prefab")]
+        [MenuItem("DigitPark/Prefabs/Monetization/MissionCard")]
         public static void CreateMissionCardPrefabFromScript()
         {
             CreateMissionCardPrefab();

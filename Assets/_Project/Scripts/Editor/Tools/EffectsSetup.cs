@@ -11,7 +11,7 @@ namespace DigitPark.Editor
     /// </summary>
     public class EffectsSetup
     {
-        [MenuItem("DigitPark/Effects/Setup FeedbackManager", false, 300)]
+        [MenuItem("DigitPark/Polish/Effects/Setup FeedbackManager", false, 300)]
         public static void SetupFeedbackManager()
         {
             // Verificar si ya existe
@@ -43,7 +43,7 @@ namespace DigitPark.Editor
                 "OK");
         }
 
-        [MenuItem("DigitPark/Effects/Add ButtonEffects to All Buttons", false, 301)]
+        [MenuItem("DigitPark/Polish/Effects/Add ButtonEffects to All Buttons", false, 301)]
         public static void AddButtonEffectsToAllButtons()
         {
             Button[] buttons = Object.FindObjectsOfType<Button>(true);
@@ -99,7 +99,7 @@ namespace DigitPark.Editor
             }
         }
 
-        [MenuItem("DigitPark/Effects/Add ButtonEffects to Selected", false, 302)]
+        [MenuItem("DigitPark/Polish/Effects/Add ButtonEffects to Selected", false, 302)]
         public static void AddButtonEffectsToSelected()
         {
             GameObject[] selected = Selection.gameObjects;
@@ -121,7 +121,7 @@ namespace DigitPark.Editor
                 "OK");
         }
 
-        [MenuItem("DigitPark/Effects/Add NeonGlow to Selected", false, 303)]
+        [MenuItem("DigitPark/Polish/Effects/Add NeonGlow to Selected", false, 303)]
         public static void AddNeonGlowToSelected()
         {
             GameObject[] selected = Selection.gameObjects;
@@ -143,7 +143,7 @@ namespace DigitPark.Editor
                 "OK");
         }
 
-        [MenuItem("DigitPark/Effects/Setup All Scenes", false, 310)]
+        [MenuItem("DigitPark/Polish/Effects/Setup All Scenes", false, 310)]
         public static void SetupAllScenes()
         {
             string[] scenes = new string[]
@@ -244,7 +244,7 @@ namespace DigitPark.Editor
                 "OK");
         }
 
-        [MenuItem("DigitPark/Effects/Create Background Particles", false, 320)]
+        [MenuItem("DigitPark/Polish/Effects/Create Background Particles", false, 320)]
         public static void CreateBackgroundParticles()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();

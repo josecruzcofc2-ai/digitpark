@@ -44,7 +44,7 @@ namespace DigitPark.Editor
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
         private static Sprite VerificationIcon => AssetDatabase.LoadAssetAtPath<Sprite>(VERIFICATION_ICON_PATH);
 
-        [MenuItem("DigitPark/UI Builders/Auth/AgeVerification", false, 102)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Auth/AgeVerification", false, 102)]
         public static void RebuildAgeVerificationScene()
         {
             try
@@ -488,7 +488,7 @@ namespace DigitPark.Editor
             spinnerImage.color = GoldPremium;
 
             // "Verifying..." text below spinner
-            GameObject textObj = new GameObject("LoadingText");
+            GameObject textObj = new GameObject("VerifyingText");
             textObj.transform.SetParent(loadingIndicator.transform, false);
             RectTransform txtRT = textObj.AddComponent<RectTransform>();
             txtRT.anchorMin = new Vector2(0.5f, 0.5f);
@@ -502,7 +502,7 @@ namespace DigitPark.Editor
             tmp.color = new Color(0.95f, 0.95f, 0.95f, 1f);
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 22;
+            tmp.fontSizeMin = FontSizes.AutoMinSmall;
             tmp.fontSizeMax = FontSizes.Body;
 
             // Start hidden

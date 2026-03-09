@@ -32,7 +32,7 @@ namespace DigitPark.Editor
         private const string PAIRS_ICON_PATH = "Assets/_Project/Art/Icons/UI/PairsIcon.png";
         private const string ERROR_ICON_PATH = "Assets/_Project/Art/Icons/UI/ErrorIcon.png";
 
-        [MenuItem("DigitPark/UI Builders/Games/MemoryPairs", false, 132)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/MemoryPairs", false, 132)]
         public static void ShowWindow()
         {
             GetWindow<MemoryPairsUIBuilder>("MemoryPairs UI Builder");
@@ -543,7 +543,7 @@ namespace DigitPark.Editor
             cardOutline.effectDistance = new Vector2(3, -3);
 
             // Title
-            GameObject titleObj = CreateElement(card.transform, "SettingsTitle");
+            GameObject titleObj = CreateElement(card.transform, "MemoryPairsTitle");
             SetupRectTransform(titleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -32), new Vector2(0, 50));
@@ -554,7 +554,7 @@ namespace DigitPark.Editor
             titleGlow.effectDistance = new Vector2(2, -2);
 
             // Subtitle
-            GameObject subtitleObj = CreateElement(card.transform, "SettingsSubtitle");
+            GameObject subtitleObj = CreateElement(card.transform, "MemoryPairsSubtitle");
             SetupRectTransform(subtitleObj,
                 new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -70), new Vector2(0, 24));

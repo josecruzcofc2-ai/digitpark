@@ -54,7 +54,7 @@ namespace DigitPark.Editor
         //  MAIN BUILD
         // ═══════════════════════════════════════════════════════════════
 
-        [MenuItem("DigitPark/UI Builders/Games/Matchmaking (Premium)", false, 122)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Games/Matchmaking", false, 122)]
         public static void BuildUI()
         {
             // --- Canvas ---

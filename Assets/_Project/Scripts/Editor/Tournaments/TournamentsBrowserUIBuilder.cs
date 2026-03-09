@@ -42,9 +42,9 @@ namespace DigitPark.Editor
         private const float TABS_HEIGHT = 55f;
         private const float SEARCHBAR_HEIGHT = 80f;
         private const float CONTENT_PADDING = 20f;
-        private const float FAB_SIZE = 70f;
 
-        [MenuItem("DigitPark/UI Builders/Tournaments/TournamentsBrowser", false, 160)]
+
+        [MenuItem("DigitPark/Scenes/Build Scene/Tournaments/Browser", false, 160)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("TournamentsBrowser UI Builder",
@@ -322,8 +322,8 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 
@@ -341,7 +341,7 @@ namespace DigitPark.Editor
             tabsRT.anchorMin = new Vector2(0, 1);
             tabsRT.anchorMax = new Vector2(1, 1);
             tabsRT.pivot = new Vector2(0.5f, 1);
-            tabsRT.anchoredPosition = new Vector2(0, -HEADER_HEIGHT);
+            tabsRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + 8));
             tabsRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, TABS_HEIGHT);
 
             Image tabsBg = GetOrAddComponent<Image>(tabsPanel);
@@ -419,7 +419,7 @@ namespace DigitPark.Editor
             searchRT.anchorMin = new Vector2(0, 1);
             searchRT.anchorMax = new Vector2(1, 1);
             searchRT.pivot = new Vector2(0.5f, 1);
-            searchRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + TABS_HEIGHT + 10));
+            searchRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + TABS_HEIGHT + 18));
             searchRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, SEARCHBAR_HEIGHT);
 
             Image searchBg = GetOrAddComponent<Image>(searchBar);
@@ -483,6 +483,10 @@ namespace DigitPark.Editor
             filterText.fontStyle = FontStyles.Bold;
             filterText.color = TEXT_PRIMARY;
             filterText.alignment = TextAlignmentOptions.Center;
+            filterText.enableAutoSizing = true;
+            filterText.fontSizeMin = FontSizes.AutoMinBody;
+            filterText.fontSizeMax = FontSizes.Body;
+            filterText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(filterTextObj);
 
             EditorUtility.SetDirty(searchBar);
@@ -493,7 +497,7 @@ namespace DigitPark.Editor
 
         private static void CreateTournamentList(GameObject parent)
         {
-            float topOffset = HEADER_HEIGHT + TABS_HEIGHT + SEARCHBAR_HEIGHT + 30;
+            float topOffset = HEADER_HEIGHT + TABS_HEIGHT + SEARCHBAR_HEIGHT + 38;
 
             GameObject scrollView = FindOrCreateChild(parent, "TournamentsScrollView");
 
@@ -501,8 +505,8 @@ namespace DigitPark.Editor
             scrollRT.anchorMin = new Vector2(0, 0);
             scrollRT.anchorMax = new Vector2(1, 1);
             scrollRT.pivot = new Vector2(0.5f, 0.5f);
-            scrollRT.offsetMin = new Vector2(CONTENT_PADDING, CONTENT_PADDING);
-            scrollRT.offsetMax = new Vector2(-CONTENT_PADDING, -topOffset);
+            scrollRT.offsetMin = new Vector2(CONTENT_PADDING, 80);
+            scrollRT.offsetMax = new Vector2(-CONTENT_PADDING - 8, -topOffset);
 
             ScrollRect scrollRect = GetOrAddComponent<ScrollRect>(scrollView);
             scrollRect.horizontal = false;
@@ -599,6 +603,10 @@ namespace DigitPark.Editor
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.Center;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinTitle;
+            titleText.fontSizeMax = FontSizes.H3;
+            titleText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement titleLE = GetOrAddComponent<LayoutElement>(titleObj);
             titleLE.minHeight = 35;
@@ -611,6 +619,10 @@ namespace DigitPark.Editor
             subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.color = TEXT_SECONDARY;
             subtitleText.alignment = TextAlignmentOptions.Center;
+            subtitleText.enableAutoSizing = true;
+            subtitleText.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleText.fontSizeMax = FontSizes.BodyLarge;
+            subtitleText.overflowMode = TextOverflowModes.Ellipsis;
 
             LayoutElement subtitleLE = GetOrAddComponent<LayoutElement>(subtitleObj);
             subtitleLE.minHeight = 50;
@@ -636,6 +648,10 @@ namespace DigitPark.Editor
             createText.fontStyle = FontStyles.Bold;
             createText.color = TEXT_DARK;
             createText.alignment = TextAlignmentOptions.Center;
+            createText.enableAutoSizing = true;
+            createText.fontSizeMin = FontSizes.AutoMinBody;
+            createText.fontSizeMax = FontSizes.H4;
+            createText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(createTextObj);
 
             EditorUtility.SetDirty(emptyState);
@@ -653,7 +669,7 @@ namespace DigitPark.Editor
             filterRT.anchorMin = new Vector2(0, 1);
             filterRT.anchorMax = new Vector2(1, 1);
             filterRT.pivot = new Vector2(0.5f, 1);
-            filterRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + TABS_HEIGHT + SEARCHBAR_HEIGHT + 20));
+            filterRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + TABS_HEIGHT + SEARCHBAR_HEIGHT + 28));
             filterRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, 220);
 
             Image filterBg = GetOrAddComponent<Image>(filterPanel);
@@ -696,13 +712,17 @@ namespace DigitPark.Editor
             clearLE.minHeight = 40;
             clearLE.preferredHeight = 40;
 
-            GameObject clearTextObj = FindOrCreateChild(clearBtn, "Text");
+            GameObject clearTextObj = FindOrCreateChild(clearBtn, "ClearFiltersText");
             TextMeshProUGUI clearText = GetOrAddComponent<TextMeshProUGUI>(clearTextObj);
             clearText.text = "Clear Filters";
             clearText.fontSize = FontSizes.BodyLarge;
             clearText.fontStyle = FontStyles.Bold;
             clearText.color = TEXT_SECONDARY;
             clearText.alignment = TextAlignmentOptions.Center;
+            clearText.enableAutoSizing = true;
+            clearText.fontSizeMin = FontSizes.AutoMinBody;
+            clearText.fontSizeMax = FontSizes.BodyLarge;
+            clearText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(clearTextObj);
 
             EditorUtility.SetDirty(filterPanel);
@@ -736,6 +756,10 @@ namespace DigitPark.Editor
             captionText.fontStyle = FontStyles.Bold;
             captionText.color = TEXT_PRIMARY;
             captionText.alignment = TextAlignmentOptions.Left;
+            captionText.enableAutoSizing = true;
+            captionText.fontSizeMin = FontSizes.AutoMinBody;
+            captionText.fontSizeMax = FontSizes.BodyLarge;
+            captionText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(captionObj);
             RectTransform captionRT = captionObj.GetComponent<RectTransform>();
             captionRT.offsetMin = new Vector2(10, 0);
@@ -816,6 +840,10 @@ namespace DigitPark.Editor
             itemLabelText.fontStyle = FontStyles.Bold;
             itemLabelText.color = TEXT_PRIMARY;
             itemLabelText.alignment = TextAlignmentOptions.Left;
+            itemLabelText.enableAutoSizing = true;
+            itemLabelText.fontSizeMin = FontSizes.AutoMinBody;
+            itemLabelText.fontSizeMax = FontSizes.BodyLarge;
+            itemLabelText.overflowMode = TextOverflowModes.Ellipsis;
 
             itemToggle.targetGraphic = itemBgImg;
             itemToggle.graphic = checkImg;
@@ -849,6 +877,10 @@ namespace DigitPark.Editor
             refreshText.fontStyle = FontStyles.Bold;
             refreshText.color = CYAN_NEON;
             refreshText.alignment = TextAlignmentOptions.Center;
+            refreshText.enableAutoSizing = true;
+            refreshText.fontSizeMin = FontSizes.AutoMinBody;
+            refreshText.fontSizeMax = FontSizes.BodyLarge;
+            refreshText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(textObj);
 
             EditorUtility.SetDirty(refresh);
@@ -882,6 +914,10 @@ namespace DigitPark.Editor
             loadMoreText.fontStyle = FontStyles.Bold;
             loadMoreText.color = TEXT_PRIMARY;
             loadMoreText.alignment = TextAlignmentOptions.Center;
+            loadMoreText.enableAutoSizing = true;
+            loadMoreText.fontSizeMin = FontSizes.AutoMinBody;
+            loadMoreText.fontSizeMax = FontSizes.Subtitle;
+            loadMoreText.overflowMode = TextOverflowModes.Ellipsis;
             SetRectTransformStretch(textObj);
 
             EditorUtility.SetDirty(loadMore);
@@ -925,6 +961,10 @@ namespace DigitPark.Editor
             loadingText.fontStyle = FontStyles.Bold;
             loadingText.color = TEXT_SECONDARY;
             loadingText.alignment = TextAlignmentOptions.Center;
+            loadingText.enableAutoSizing = true;
+            loadingText.fontSizeMin = FontSizes.AutoMinBody;
+            loadingText.fontSizeMax = FontSizes.Subtitle;
+            loadingText.overflowMode = TextOverflowModes.Ellipsis;
 
             EditorUtility.SetDirty(loading);
             Debug.Log("[TournamentsBrowserUIBuilder] LoadingIndicator creado");
@@ -934,39 +974,44 @@ namespace DigitPark.Editor
 
         private static void CreateFAB(GameObject parent)
         {
-            GameObject fab = FindOrCreateChild(parent, "CreateTournamentFAB");
+            // Full-width bottom button (replaces old 70x70 FAB)
+            GameObject createBtn = FindOrCreateChild(parent, "CreateTournamentButton");
 
-            RectTransform fabRT = GetOrAddComponent<RectTransform>(fab);
-            fabRT.anchorMin = new Vector2(1, 0);
-            fabRT.anchorMax = new Vector2(1, 0);
-            fabRT.pivot = new Vector2(1, 0);
-            fabRT.anchoredPosition = new Vector2(-25, 25);
-            fabRT.sizeDelta = new Vector2(FAB_SIZE, FAB_SIZE);
+            RectTransform btnRT = GetOrAddComponent<RectTransform>(createBtn);
+            btnRT.anchorMin = new Vector2(0.04f, 0.02f);
+            btnRT.anchorMax = new Vector2(0.96f, 0.06f);
+            btnRT.pivot = new Vector2(0.5f, 0.5f);
+            btnRT.anchoredPosition = Vector2.zero;
+            btnRT.sizeDelta = Vector2.zero;
 
-            Image fabBg = GetOrAddComponent<Image>(fab);
-            fabBg.color = BUTTON_PRIMARY;
+            Image btnBg = GetOrAddComponent<Image>(createBtn);
+            btnBg.color = BUTTON_PRIMARY;
 
-            Button fabButton = GetOrAddComponent<Button>(fab);
-            SetupButtonColors(fabButton, BUTTON_PRIMARY);
-            AddOutline(fab, CYAN_GLOW, 3);
+            Button button = GetOrAddComponent<Button>(createBtn);
+            SetupButtonColors(button, BUTTON_PRIMARY);
+            AddOutline(createBtn, CYAN_GLOW, 3);
 
             // 3D depth shadow
-            Shadow fabShadow = fab.AddComponent<Shadow>();
-            fabShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
-            fabShadow.effectDistance = new Vector2(3, -4);
+            Shadow btnShadow = createBtn.AddComponent<Shadow>();
+            btnShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
+            btnShadow.effectDistance = new Vector2(3, -4);
 
-            // Plus Icon
-            GameObject plusObj = FindOrCreateChild(fab, "PlusIcon");
-            TextMeshProUGUI plusText = GetOrAddComponent<TextMeshProUGUI>(plusObj);
-            plusText.text = "+";
-            plusText.fontSize = FontSizes.H4;
-            plusText.fontStyle = FontStyles.Bold;
-            plusText.color = TEXT_DARK;
-            plusText.alignment = TextAlignmentOptions.Center;
-            SetRectTransformStretch(plusObj);
+            // Button text
+            GameObject textObj = FindOrCreateChild(createBtn, "Text");
+            TextMeshProUGUI btnText = GetOrAddComponent<TextMeshProUGUI>(textObj);
+            btnText.text = "Create Tournament";
+            btnText.fontSize = FontSizes.Subtitle;
+            btnText.fontStyle = FontStyles.Bold;
+            btnText.color = TEXT_DARK;
+            btnText.alignment = TextAlignmentOptions.Center;
+            btnText.enableAutoSizing = true;
+            btnText.fontSizeMin = FontSizes.AutoMinBody;
+            btnText.fontSizeMax = FontSizes.Subtitle;
+            btnText.overflowMode = TextOverflowModes.Ellipsis;
+            SetRectTransformStretch(textObj);
 
-            EditorUtility.SetDirty(fab);
-            Debug.Log("[TournamentsBrowserUIBuilder] FAB creado");
+            EditorUtility.SetDirty(createBtn);
+            Debug.Log("[TournamentsBrowserUIBuilder] CreateTournamentButton creado");
         }
 
         // ==================== UTILITY METHODS ====================
@@ -1006,6 +1051,10 @@ namespace DigitPark.Editor
                 placeholderText.fontStyle = FontStyles.Bold;
                 placeholderText.color = TEXT_MUTED;
                 placeholderText.alignment = TextAlignmentOptions.MidlineLeft;
+                placeholderText.enableAutoSizing = true;
+                placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+                placeholderText.fontSizeMax = FontSizes.BodyLarge;
+                placeholderText.overflowMode = TextOverflowModes.Ellipsis;
                 SetRectTransformStretch(placeholderObj);
 
                 GameObject textObj = FindOrCreateChild(textArea, "Text");
@@ -1014,6 +1063,10 @@ namespace DigitPark.Editor
                 textComponent.fontStyle = FontStyles.Bold;
                 textComponent.color = TEXT_PRIMARY;
                 textComponent.alignment = TextAlignmentOptions.MidlineLeft;
+                textComponent.enableAutoSizing = true;
+                textComponent.fontSizeMin = FontSizes.AutoMinBody;
+                textComponent.fontSizeMax = FontSizes.BodyLarge;
+                textComponent.overflowMode = TextOverflowModes.Ellipsis;
                 SetRectTransformStretch(textObj);
 
                 inputField.textViewport = textAreaRT;

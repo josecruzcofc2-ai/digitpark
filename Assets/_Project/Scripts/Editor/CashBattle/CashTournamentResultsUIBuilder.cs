@@ -53,7 +53,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashTournament Results Panel", false, 186)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Tournament Results", false, 186)]
         public static void ShowWindow()
         {
             GetWindow<CashTournamentResultsUIBuilder>("CashTournament Results Builder");

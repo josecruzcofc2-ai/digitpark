@@ -99,7 +99,7 @@ namespace DigitPark.Editor
 
         // ==================== MENU ====================
 
-        [MenuItem("DigitPark/Tools/Configure Build Scenes", false, 10)]
+        [MenuItem("DigitPark/Setup/Configure Build Scenes", false, 10)]
         public static void ShowWindow()
         {
             var window = GetWindow<BuildScenesConfigurator>("Build Scenes Config");
@@ -107,7 +107,7 @@ namespace DigitPark.Editor
             RefreshEntries();
         }
 
-        [MenuItem("DigitPark/Tools/Apply Build Scenes (Quick)", false, 11)]
+        [MenuItem("DigitPark/Setup/Apply Build Scenes (Quick)", false, 11)]
         public static void QuickApply()
         {
             RefreshEntries();

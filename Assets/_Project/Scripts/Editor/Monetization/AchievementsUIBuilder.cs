@@ -65,7 +65,7 @@ namespace DigitPark.Editor
         private const float CONTENT_PADDING = 15f;
         private const float DETAIL_PANEL_HEIGHT = 880f;
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Achievements", false, 140)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Monetization/Achievements", false, 140)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Trophy Showcase Builder",
@@ -330,8 +330,8 @@ namespace DigitPark.Editor
             // Title — centered on screen
             GameObject titleObj = FindOrCreateChild(header, "TitleText");
             RectTransform titleRowRT = GetOrAddComponent<RectTransform>(titleObj);
-            titleRowRT.anchorMin = new Vector2(0.07f, 0.45f);
-            titleRowRT.anchorMax = new Vector2(0.53f, 0.95f);
+            titleRowRT.anchorMin = new Vector2(0.07f, 0.05f);
+            titleRowRT.anchorMax = new Vector2(0.42f, 0.95f);
             titleRowRT.pivot = new Vector2(0.5f, 0.5f);
             titleRowRT.sizeDelta = Vector2.zero;
             titleRowRT.anchoredPosition = Vector2.zero;
@@ -351,8 +351,8 @@ namespace DigitPark.Editor
             // Currency pills (top-right of header, above progress section)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.45f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 

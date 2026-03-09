@@ -67,7 +67,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Social/Notifications", false, 153)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/Notifications", false, 153)]
         public static void ShowWindow()
         {
             GetWindow<NotificationsUIBuilder>("Notifications Builder");
@@ -229,6 +229,10 @@ namespace DigitPark.Editor
             cTMP.fontStyle = FontStyles.Bold;
             cTMP.color = TEXT_SECONDARY;
             cTMP.alignment = TextAlignmentOptions.Right;
+            cTMP.enableAutoSizing = true;
+            cTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cTMP.fontSizeMax = FontSizes.Body;
+            cTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[NotificationsUI] Header creado");
         }
@@ -376,6 +380,10 @@ namespace DigitPark.Editor
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
+            eTMP.enableAutoSizing = true;
+            eTMP.fontSizeMin = FontSizes.AutoMinBody;
+            eTMP.fontSizeMax = FontSizes.Subtitle;
+            eTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Loading Indicator
             var loading = FindOrCreate(content.transform, "LoadingIndicator");
@@ -388,6 +396,10 @@ namespace DigitPark.Editor
             ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
+            ldTMP.enableAutoSizing = true;
+            ldTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ldTMP.fontSizeMax = FontSizes.Subtitle;
+            ldTMP.overflowMode = TextOverflowModes.Ellipsis;
             loading.SetActive(false);
 
             Debug.Log("[NotificationsUI] ScrollView creado");
@@ -446,6 +458,10 @@ namespace DigitPark.Editor
             matTMP.color = CYAN_NEON;
             matTMP.fontStyle = FontStyles.Bold;
             matTMP.alignment = TextAlignmentOptions.Center;
+            matTMP.enableAutoSizing = true;
+            matTMP.fontSizeMin = FontSizes.AutoMinBody;
+            matTMP.fontSizeMax = FontSizes.BodyLarge;
+            matTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             Debug.Log("[NotificationsUI] Footer creado");
         }
@@ -503,19 +519,18 @@ namespace DigitPark.Editor
             // Icon background
             var tiBg = typeIcon.AddComponent<Image>();
             tiBg.color = new Color(1, 1, 1, 0.06f);
-            // Icon text (emoji)
-            var tiTextGO = new GameObject("IconText");
-            tiTextGO.transform.SetParent(typeIcon.transform, false);
-            var titRT = tiTextGO.AddComponent<RectTransform>();
-            titRT.anchorMin = Vector2.zero;
-            titRT.anchorMax = Vector2.one;
+            // Icon image (sprite instead of emoji)
+            var tiImageGO = new GameObject("IconImage");
+            tiImageGO.transform.SetParent(typeIcon.transform, false);
+            var titRT = tiImageGO.AddComponent<RectTransform>();
+            titRT.anchorMin = new Vector2(0.15f, 0.15f);
+            titRT.anchorMax = new Vector2(0.85f, 0.85f);
             titRT.offsetMin = Vector2.zero;
             titRT.offsetMax = Vector2.zero;
-            var tiTMP = tiTextGO.AddComponent<TextMeshProUGUI>();
-            tiTMP.text = "🔔";
-            tiTMP.fontSize = FontSizes.H3;
-            tiTMP.color = CYAN_NEON;
-            tiTMP.alignment = TextAlignmentOptions.Center;
+            var tiImg = tiImageGO.AddComponent<Image>();
+            tiImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/NotificationsIcon.png");
+            tiImg.preserveAspect = true;
+            tiImg.color = CYAN_NEON;
 
             // ---- Info Section (center) ----
             var infoSection = new GameObject("InfoSection");
@@ -542,6 +557,9 @@ namespace DigitPark.Editor
             titleTMP.alignment = TextAlignmentOptions.Left;
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
             titleTMP.maxVisibleLines = 1;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = FontSizes.AutoMinBody;
+            titleTMP.fontSizeMax = FontSizes.Subtitle;
 
             // Timestamp (top right)
             var timestamp = new GameObject("Timestamp");
@@ -557,6 +575,10 @@ namespace DigitPark.Editor
             tsTMP.fontStyle = FontStyles.Bold;
             tsTMP.color = TEXT_SECONDARY;
             tsTMP.alignment = TextAlignmentOptions.Right;
+            tsTMP.enableAutoSizing = true;
+            tsTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tsTMP.fontSizeMax = FontSizes.Body;
+            tsTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Body
             var bodyGO = new GameObject("Body");
@@ -574,6 +596,9 @@ namespace DigitPark.Editor
             bodyTMP.alignment = TextAlignmentOptions.Left;
             bodyTMP.overflowMode = TextOverflowModes.Ellipsis;
             bodyTMP.maxVisibleLines = 1;
+            bodyTMP.enableAutoSizing = true;
+            bodyTMP.fontSizeMin = FontSizes.AutoMinBody;
+            bodyTMP.fontSizeMax = FontSizes.Body;
 
             // Sender Name (below body, subtle)
             var senderGO = new GameObject("SenderName");
@@ -589,6 +614,10 @@ namespace DigitPark.Editor
             snTMP.color = SOCIAL_COLOR;
             snTMP.fontStyle = FontStyles.Bold;
             snTMP.alignment = TextAlignmentOptions.Left;
+            snTMP.enableAutoSizing = true;
+            snTMP.fontSizeMin = FontSizes.AutoMinBody;
+            snTMP.fontSizeMax = FontSizes.Body;
+            snTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // ---- Actions Row (bottom right) ----
             var actionsRow = new GameObject("ActionsRow");
@@ -655,6 +684,10 @@ namespace DigitPark.Editor
             tTMP.color = textColor;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.Body;
+            tTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             return btn;
         }

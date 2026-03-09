@@ -53,7 +53,7 @@ namespace DigitPark.Editor
         private static readonly Color CYAN = new Color(0f, 1f, 1f, 1f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
 
-        [MenuItem("DigitPark/UI Builders/Onboarding/Preview Slides", false, 172)]
+        [MenuItem("DigitPark/Debug/Onboarding/Preview Slides", false, 172)]
         public static void ShowWindow()
         {
             var window = GetWindow<OnboardingSlidePreview>("Onboarding Preview");

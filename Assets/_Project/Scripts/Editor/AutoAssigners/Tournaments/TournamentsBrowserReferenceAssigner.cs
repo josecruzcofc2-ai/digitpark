@@ -48,7 +48,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Tournaments/TournamentsBrowser References", false, 160)]
+        [MenuItem("DigitPark/Scenes/Assign References/Tournaments/Browser", false, 160)]
         public static void ShowWindow()
         {
             var window = GetWindow<TournamentsBrowserReferenceAssigner>("TournamentsBrowser Reference Assigner");

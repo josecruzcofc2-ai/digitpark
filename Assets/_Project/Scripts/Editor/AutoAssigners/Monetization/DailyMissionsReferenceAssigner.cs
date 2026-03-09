@@ -46,7 +46,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Monetization/DailyMissions References", false, 141)]
+        [MenuItem("DigitPark/Scenes/Assign References/Monetization/DailyMissions", false, 141)]
         public static void ShowWindow()
         {
             var window = GetWindow<DailyMissionsReferenceAssigner>("DailyMissions Reference Assigner");

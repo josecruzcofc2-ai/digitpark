@@ -51,7 +51,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/MemoryPairs References", false, 123)]
+        [MenuItem("DigitPark/Scenes/Assign References/Games/MemoryPairs", false, 123)]
         public static void ShowWindow()
         {
             var window = GetWindow<MemoryPairsReferenceAssigner>("MemoryPairs Reference Assigner");

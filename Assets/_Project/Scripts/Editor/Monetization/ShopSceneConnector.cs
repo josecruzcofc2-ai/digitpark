@@ -13,7 +13,7 @@ namespace DigitPark.Editor
     /// </summary>
     public class ShopSceneConnector : EditorWindow
     {
-        [MenuItem("DigitPark/Shop/Connect Shop References", false, 700)]
+        [MenuItem("DigitPark/Setup/Shop/Connect References", false, 700)]
         public static void ConnectReferences()
         {
             if (!EditorUtility.DisplayDialog("Shop Scene Connector",
@@ -24,7 +24,7 @@ namespace DigitPark.Editor
             ConnectShopReferences();
         }
 
-        [MenuItem("DigitPark/Shop/Setup Shop Manager", false, 701)]
+        [MenuItem("DigitPark/Setup/Shop/Setup Manager", false, 701)]
         public static void SetupShopManager()
         {
             ShopManager manager = Object.FindObjectOfType<ShopManager>();
@@ -49,7 +49,7 @@ namespace DigitPark.Editor
             Selection.activeGameObject = manager.gameObject;
         }
 
-        [MenuItem("DigitPark/Shop/Create Shop Item Data Assets", false, 702)]
+        [MenuItem("DigitPark/Setup/Shop/Create Data Assets", false, 702)]
         public static void CreateShopItemDataAssets()
         {
             string folderPath = "Assets/_Project/Data/Monetization/ShopItems";
@@ -475,7 +475,7 @@ namespace DigitPark.Editor
             return null;
         }
 
-        [MenuItem("DigitPark/Shop/Add ShopItemUI to Items", false, 703)]
+        [MenuItem("DigitPark/Setup/Shop/Add ShopItemUI", false, 703)]
         public static void AddShopItemUIToItems()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();

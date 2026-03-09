@@ -46,7 +46,7 @@ namespace DigitPark.Editor
         private static Sprite EyeOpenIcon => AssetDatabase.LoadAssetAtPath<Sprite>(EYE_OPEN_PATH);
         private static Sprite EyeClosedIcon => AssetDatabase.LoadAssetAtPath<Sprite>(EYE_CLOSED_PATH);
 
-        [MenuItem("DigitPark/UI Builders/Auth/Register", false, 101)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Auth/Register", false, 101)]
         public static void RebuildRegisterScene()
         {
             try
@@ -293,6 +293,9 @@ namespace DigitPark.Editor
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.color = TextGray;
             placeholderText.alignment = TextAlignmentOptions.Left;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.H3;
             placeholderText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Input text
@@ -310,6 +313,10 @@ namespace DigitPark.Editor
             inputText.fontStyle = FontStyles.Bold;
             inputText.color = TextWhite;
             inputText.alignment = TextAlignmentOptions.Left;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.H3;
+            inputText.overflowMode = TextOverflowModes.Ellipsis;
 
             inputField.textViewport = textAreaRect;
             inputField.textComponent = inputText;
@@ -443,6 +450,10 @@ namespace DigitPark.Editor
                 arrowText.fontStyle = FontStyles.Bold;
                 arrowText.color = CyanNeon;
                 arrowText.alignment = TextAlignmentOptions.Center;
+                arrowText.enableAutoSizing = true;
+                arrowText.fontSizeMin = FontSizes.AutoMinBody;
+                arrowText.fontSizeMax = FontSizes.Body;
+                arrowText.overflowMode = TextOverflowModes.Ellipsis;
 
                 Debug.Log("✅ BackButton created (no prefab found)");
             }
@@ -491,6 +502,10 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.Body;
+            text.overflowMode = TextOverflowModes.Ellipsis;
 
             loadingPanel.SetActive(false);
             Debug.Log("✅ LoadingPanel created");

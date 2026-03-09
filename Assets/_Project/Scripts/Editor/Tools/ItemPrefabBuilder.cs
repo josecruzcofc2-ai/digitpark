@@ -33,7 +33,7 @@ namespace DigitPark.Editor
         private const float MY_TOURNAMENT_HEIGHT = 180f; // Card más grande para "Mis Torneos"
         private const float ITEM_WIDTH = 1000f; // Casi todo el ancho con margenes
 
-        [MenuItem("DigitPark/Prefabs/Create Item Prefabs", false, 600)]
+        [MenuItem("DigitPark/Prefabs/Common/Create Item Prefabs", false, 600)]
         public static void ShowWindow()
         {
             GetWindow<ItemPrefabBuilder>("Item Prefab Builder");
@@ -158,8 +158,8 @@ namespace DigitPark.Editor
             arrowTMP.fontStyle = FontStyles.Bold;
 
             // Indicadores ocultos por defecto
-            CreateIndicator(itemObj.transform, "FullIndicator", "FULL", URGENT_RED);
-            CreateIndicator(itemObj.transform, "PrivateIndicator", "PRIV", GOLD);
+            CreateIndicator(itemObj.transform, "FullIndicator", "FULL", URGENT_RED, "FullIndicatorText");
+            CreateIndicator(itemObj.transform, "PrivateIndicator", "PRIV", GOLD, "PrivateIndicatorText");
 
             // Divisor horizontal
             CreateHorizontalDivider(itemObj.transform, "HorizontalDivider");
@@ -297,7 +297,7 @@ namespace DigitPark.Editor
             expand.targetGraphic = expandBg;
 
             // Texto "Ver datos del torneo"
-            GameObject expandText = new GameObject("Text");
+            GameObject expandText = new GameObject("ExpandButtonText");
             expandText.transform.SetParent(expandBtn.transform, false);
             RectTransform expandTextRT = expandText.AddComponent<RectTransform>();
             expandTextRT.anchorMin = new Vector2(0, 0.4f);
@@ -566,7 +566,7 @@ namespace DigitPark.Editor
             tmp.raycastTarget = false;
         }
 
-        private static void CreateIndicator(Transform parent, string name, string text, Color color)
+        private static void CreateIndicator(Transform parent, string name, string text, Color color, string textGoName = "Text")
         {
             GameObject obj = new GameObject(name);
             obj.transform.SetParent(parent, false);
@@ -581,7 +581,7 @@ namespace DigitPark.Editor
             Image bg = obj.AddComponent<Image>();
             bg.color = color;
 
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject(textGoName);
             textObj.transform.SetParent(obj.transform, false);
 
             RectTransform textRT = textObj.AddComponent<RectTransform>();

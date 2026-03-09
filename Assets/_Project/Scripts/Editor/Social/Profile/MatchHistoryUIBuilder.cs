@@ -68,7 +68,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        [MenuItem("DigitPark/UI Builders/Social/MatchHistory", false, 156)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Social/MatchHistory", false, 156)]
         public static void ShowWindow()
         {
             GetWindow<MatchHistoryUIBuilder>("MatchHistory Builder");
@@ -218,8 +218,8 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 

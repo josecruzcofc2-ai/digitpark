@@ -27,7 +27,7 @@ namespace DigitPark.Editor
         private static readonly Color PREMIUM_PANEL = new Color(0.15f, 0.12f, 0.05f, 0.95f);
         private static readonly Color LOSE_RED = new Color(1f, 0.3f, 0.3f, 1f);
 
-        [MenuItem("DigitPark/Prefabs/Games/Win Panels (Practice + RealMoney)", false, 196)]
+        [MenuItem("DigitPark/Prefabs/Games/Win Panels", false, 196)]
         public static void ShowWindow()
         {
             GetWindow<WinPanelUIBuilder>("Win Panel Builder");
@@ -130,7 +130,7 @@ namespace DigitPark.Editor
             // El usuario arrastrará el sprite de checkmark aquí
 
             // === TÍTULO ===
-            GameObject title = CreateChild(face.transform, "Title");
+            GameObject title = CreateChild(face.transform, "WinTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -170), new Vector2(0, 70));
             TextMeshProUGUI titleTmp = AddText(title, "COMPLETED!", 52, GREEN_NEON, FontStyles.Bold);
@@ -219,7 +219,7 @@ namespace DigitPark.Editor
             // Arrastrar icono de reloj, X, etc.
 
             // === TÍTULO ===
-            GameObject title = CreateChild(face.transform, "Title");
+            GameObject title = CreateChild(face.transform, "LoseTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -160), new Vector2(0, 65));
             TextMeshProUGUI titleTmp = AddText(title, "TIME'S UP", 46, ORANGE_LIGHT, FontStyles.Bold);
@@ -289,7 +289,7 @@ namespace DigitPark.Editor
             if (face != null)
             {
                 so.FindProperty("titleText").objectReferenceValue =
-                    face.Find("Title")?.GetComponent<TextMeshProUGUI>();
+                    face.Find("LoseTitle")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("timeText").objectReferenceValue =
                     face.Find("StatsContainer/TimeRow/Value")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("errorsText").objectReferenceValue =
@@ -342,7 +342,7 @@ namespace DigitPark.Editor
             // El usuario arrastrará el sprite de corona/trofeo aquí
 
             // === TÍTULO CON GLOW DORADO ===
-            GameObject title = CreateChild(face.transform, "Title");
+            GameObject title = CreateChild(face.transform, "MoneyWinTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -175), new Vector2(0, 70));
             TextMeshProUGUI titleTmp = AddText(title, "YOU WON!", 56, GOLD, FontStyles.Bold);
@@ -381,7 +381,7 @@ namespace DigitPark.Editor
             SetupRectTransform(playerScore, new Vector2(0, 0), new Vector2(0.45f, 1),
                 Vector2.zero, Vector2.zero);
 
-            GameObject playerLabel = CreateChild(playerScore.transform, "Label");
+            GameObject playerLabel = CreateChild(playerScore.transform, "PlayerScoreLabel");
             SetupRectTransform(playerLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
             AddText(playerLabel, "YOU", 22, GOLD, FontStyles.Bold);
@@ -402,7 +402,7 @@ namespace DigitPark.Editor
             SetupRectTransform(opponentScore, new Vector2(0.55f, 0), new Vector2(1, 1),
                 Vector2.zero, Vector2.zero);
 
-            GameObject oppLabel = CreateChild(opponentScore.transform, "Label");
+            GameObject oppLabel = CreateChild(opponentScore.transform, "OpponentScoreLabel");
             SetupRectTransform(oppLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
             AddText(oppLabel, "OPPONENT", 20, new Color(0.7f, 0.6f, 0.5f), FontStyles.Bold);
@@ -493,7 +493,7 @@ namespace DigitPark.Editor
             // Arrastrar icono de X, escudo roto, etc.
 
             // === TÍTULO NEÓN ===
-            GameObject title = CreateChild(face.transform, "Title");
+            GameObject title = CreateChild(face.transform, "MoneyLoseTitle");
             SetupRectTransform(title, new Vector2(0, 1), new Vector2(1, 1),
                 new Vector2(0, -170), new Vector2(0, 70));
             TextMeshProUGUI titleTmp = AddText(title, "DEFEAT", 50, LOSE_NEON_LIGHT, FontStyles.Bold);
@@ -535,7 +535,7 @@ namespace DigitPark.Editor
             SetupRectTransform(playerScore, new Vector2(0, 0), new Vector2(0.45f, 1),
                 Vector2.zero, Vector2.zero);
 
-            GameObject playerLabel = CreateChild(playerScore.transform, "Label");
+            GameObject playerLabel = CreateChild(playerScore.transform, "PlayerScoreLabel");
             SetupRectTransform(playerLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
             AddText(playerLabel, "YOU", 22, LOSE_NEON_LIGHT, FontStyles.Bold);
@@ -556,7 +556,7 @@ namespace DigitPark.Editor
             SetupRectTransform(opponentScore, new Vector2(0.55f, 0), new Vector2(1, 1),
                 Vector2.zero, Vector2.zero);
 
-            GameObject oppLabel = CreateChild(opponentScore.transform, "Label");
+            GameObject oppLabel = CreateChild(opponentScore.transform, "OpponentScoreLabel");
             SetupRectTransform(oppLabel, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(0, -15), new Vector2(180, 35));
             AddText(oppLabel, "WINNER", 20, WINNER_GREEN, FontStyles.Bold);
@@ -833,7 +833,7 @@ namespace DigitPark.Editor
             if (face != null)
             {
                 so.FindProperty("titleText").objectReferenceValue =
-                    face.Find("Title")?.GetComponent<TextMeshProUGUI>();
+                    face.Find("WinTitle")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("timeText").objectReferenceValue =
                     face.Find("StatsContainer/TimeRow/Value")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("errorsText").objectReferenceValue =
@@ -857,7 +857,7 @@ namespace DigitPark.Editor
             if (face != null)
             {
                 so.FindProperty("titleText").objectReferenceValue =
-                    face.Find("Title")?.GetComponent<TextMeshProUGUI>();
+                    face.Find("MoneyWinTitle")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("moneyWonText").objectReferenceValue =
                     face.Find("MoneyContainer/MoneyText")?.GetComponent<TextMeshProUGUI>();
                 so.FindProperty("wagerText").objectReferenceValue =

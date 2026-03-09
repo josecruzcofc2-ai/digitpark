@@ -20,7 +20,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         private const string ICONS_PATH = "Assets/_Project/Art/Icons/Achievements";
 
-        [MenuItem("DigitPark/Auto Assigners/Icons/Monetization/Achievement Icons", false, 140)]
+        [MenuItem("DigitPark/Scenes/Assign Icons/Monetization/Achievement Icons", false, 140)]
         public static void ShowWindow()
         {
             var window = GetWindow<AchievementIconAssigner>("Achievement Icon Assigner");

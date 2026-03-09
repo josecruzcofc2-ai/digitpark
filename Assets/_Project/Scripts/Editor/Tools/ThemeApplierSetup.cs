@@ -16,7 +16,7 @@ namespace DigitPark.Editor
     /// </summary>
     public class ThemeApplierSetup : EditorWindow
     {
-        [MenuItem("DigitPark/Themes/Add ThemeApplier to Current Scene")]
+        [MenuItem("DigitPark/Polish/Themes/Add to Current Scene")]
         public static void AddToCurrentScene()
         {
             int count = AddThemeAppliers();
@@ -90,7 +90,7 @@ namespace DigitPark.Editor
 
         // ==================== ADD TO PREFABS ====================
 
-        [MenuItem("DigitPark/Themes/Add ThemeApplier to Prefabs")]
+        [MenuItem("DigitPark/Polish/Themes/Add to Prefabs")]
         public static void AddToPrefabs()
         {
             int count = 0;
@@ -196,7 +196,7 @@ namespace DigitPark.Editor
 
         // ==================== ADD TO ALL SCENES ====================
 
-        [MenuItem("DigitPark/Themes/Add ThemeApplier to ALL Scenes")]
+        [MenuItem("DigitPark/Polish/Themes/Add to ALL Scenes")]
         public static void AddToAllScenes()
         {
             if (!EditorUtility.DisplayDialog("Confirmar",

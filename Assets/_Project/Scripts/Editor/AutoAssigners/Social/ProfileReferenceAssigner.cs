@@ -48,7 +48,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Social/Profile References", false, 150)]
+        [MenuItem("DigitPark/Scenes/Assign References/Social/Profile", false, 150)]
         public static void ShowWindow()
         {
             var window = GetWindow<ProfileReferenceAssigner>("Profile Reference Assigner");

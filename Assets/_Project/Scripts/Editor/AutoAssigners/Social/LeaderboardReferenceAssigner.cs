@@ -57,7 +57,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Social/Leaderboard References", false, 152)]
+        [MenuItem("DigitPark/Scenes/Assign References/Social/Leaderboard", false, 152)]
         public static void ShowWindow()
         {
             var window = GetWindow<LeaderboardReferenceAssigner>("Leaderboard Reference Assigner");

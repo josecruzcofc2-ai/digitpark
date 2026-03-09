@@ -83,7 +83,7 @@ namespace DigitPark.Editor
         private const float PRICE_BTN_HEIGHT = 50f;
         private const float BADGE_HEIGHT = 32f;
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Shop Premium (Clash Royale Style)", false, 144)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Monetization/Shop", false, 144)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Shop Premium UI Builder V5",
@@ -306,8 +306,8 @@ namespace DigitPark.Editor
             // Currency Pills (same as MainMenu)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform, "CurrencyDisplay");
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.42f, 0.05f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.95f);
+            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
             pillsRT.offsetMin = Vector2.zero;
             pillsRT.offsetMax = Vector2.zero;
 
@@ -596,7 +596,7 @@ namespace DigitPark.Editor
             titleText.color = TEXT_PRIMARY;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 22;
+            titleText.fontSizeMin = FontSizes.AutoMinSmall;
             titleText.fontSizeMax = FontSizes.Body;
             LayoutElement titleLE = titleObj.AddComponent<LayoutElement>();
             titleLE.minHeight = 36;
@@ -1001,7 +1001,7 @@ namespace DigitPark.Editor
             amountText.color = color;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.enableAutoSizing = true;
-            amountText.fontSizeMin = 22;
+            amountText.fontSizeMin = FontSizes.AutoMinSmall;
             amountText.fontSizeMax = FontSizes.Subtitle;
             LayoutElement amountLE = amountObj.AddComponent<LayoutElement>();
             amountLE.minHeight = 44;
@@ -1055,7 +1055,7 @@ namespace DigitPark.Editor
             pt.color = TEXT_DARK;
             pt.alignment = TextAlignmentOptions.Center;
             pt.enableAutoSizing = true;
-            pt.fontSizeMin = 22;
+            pt.fontSizeMin = FontSizes.AutoMinSmall;
             pt.fontSizeMax = FontSizes.Body;
             LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
             ptLE.flexibleWidth = 1;
@@ -1142,7 +1142,7 @@ namespace DigitPark.Editor
             descText.fontStyle = FontStyles.Bold;
             descText.color = TEXT_SECONDARY;
             descText.enableAutoSizing = true;
-            descText.fontSizeMin = 22;
+            descText.fontSizeMin = FontSizes.AutoMinSmall;
             descText.fontSizeMax = FontSizes.Body;
             LayoutElement descLE = desc.AddComponent<LayoutElement>();
             descLE.minHeight = 26;
@@ -1364,7 +1364,7 @@ namespace DigitPark.Editor
             nameText.color = accent1;
             nameText.alignment = TextAlignmentOptions.Center;
             nameText.enableAutoSizing = true;
-            nameText.fontSizeMin = 22;
+            nameText.fontSizeMin = FontSizes.AutoMinSmall;
             nameText.fontSizeMax = FontSizes.Body;
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
             nameLE.minHeight = 30;
@@ -1510,7 +1510,7 @@ namespace DigitPark.Editor
             nameText.color = itemColor;
             nameText.alignment = TextAlignmentOptions.Center;
             nameText.enableAutoSizing = true;
-            nameText.fontSizeMin = 22;
+            nameText.fontSizeMin = FontSizes.AutoMinSmall;
             nameText.fontSizeMax = FontSizes.Body;
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
             nameLE.minHeight = 30;
@@ -1649,7 +1649,7 @@ namespace DigitPark.Editor
             nameText.color = titleColor;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
             nameText.enableAutoSizing = true;
-            nameText.fontSizeMin = 22;
+            nameText.fontSizeMin = FontSizes.AutoMinSmall;
             nameText.fontSizeMax = FontSizes.Body;
             LayoutElement nameLE = nameObj.AddComponent<LayoutElement>();
             nameLE.flexibleWidth = 1;
@@ -1756,7 +1756,7 @@ namespace DigitPark.Editor
             titleText.color = CYAN_NEON;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 22;
+            titleText.fontSizeMin = FontSizes.AutoMinSmall;
             titleText.fontSizeMax = FontSizes.H4;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
             titleLE.minHeight = 52;
@@ -1863,7 +1863,7 @@ namespace DigitPark.Editor
             titleText.color = GEM_COLOR;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 22;
+            titleText.fontSizeMin = FontSizes.AutoMinSmall;
             titleText.fontSizeMax = FontSizes.H4;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
             titleLE.minHeight = 52;
@@ -1917,7 +1917,7 @@ namespace DigitPark.Editor
             txt.color = textColor;
             txt.alignment = TextAlignmentOptions.Center;
             txt.enableAutoSizing = true;
-            txt.fontSizeMin = 22;
+            txt.fontSizeMin = FontSizes.AutoMinSmall;
             txt.fontSizeMax = FontSizes.Body;
         }
 
@@ -2097,7 +2097,7 @@ namespace DigitPark.Editor
             pt.color = textColor;
             pt.alignment = TextAlignmentOptions.Center;
             pt.enableAutoSizing = true;
-            pt.fontSizeMin = 22;
+            pt.fontSizeMin = FontSizes.AutoMinSmall;
             pt.fontSizeMax = fontSize;
         }
 

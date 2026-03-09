@@ -55,7 +55,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Games/QuickMath References", false, 122)]
+        [MenuItem("DigitPark/Scenes/Assign References/Games/QuickMath", false, 122)]
         public static void ShowWindow()
         {
             var window = GetWindow<QuickMathReferenceAssigner>("QuickMath Reference Assigner");

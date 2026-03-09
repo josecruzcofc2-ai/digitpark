@@ -46,7 +46,7 @@ namespace DigitPark.Editor
         private static readonly Color BUTTON_GOLD = new Color(0.85f, 0.65f, 0.13f, 1f);
         private static readonly Color CYAN_ACCENT = new Color(0f, 0.9f, 1f, 1f);
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashBattle 1v1 (Game Selection)", false, 181)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/1v1", false, 181)]
         public static void ShowWindow()
         {
             GetWindow<CashBattle1v1UIBuilder>("CashBattle 1v1 Builder");
@@ -363,6 +363,10 @@ namespace DigitPark.Editor
                 arrow.color = TEXT_GOLD;
                 arrow.alignment = TextAlignmentOptions.Center;
                 arrow.fontStyle = FontStyles.Bold;
+                arrow.enableAutoSizing = true;
+                arrow.fontSizeMin = FontSizes.AutoMinBody;
+                arrow.fontSizeMax = FontSizes.H4;
+                arrow.overflowMode = TextOverflowModes.Ellipsis;
 
                 Debug.LogWarning("[CashBattle1v1] BackButtonGold prefab not found, using fallback");
             }
@@ -590,7 +594,7 @@ namespace DigitPark.Editor
             ddLabel.fontStyle = FontStyles.Bold;
             ddLabel.raycastTarget = false;
             ddLabel.enableAutoSizing = true;
-            ddLabel.fontSizeMin = 22;
+            ddLabel.fontSizeMin = FontSizes.AutoMinSmall;
             ddLabel.fontSizeMax = FontSizes.Body;
 
             // Dropdown arrow
@@ -609,6 +613,11 @@ namespace DigitPark.Editor
             arrowText.color = TEXT_GOLD;
             arrowText.alignment = TextAlignmentOptions.Center;
             arrowText.raycastTarget = false;
+            arrowText.fontStyle = FontStyles.Bold;
+            arrowText.enableAutoSizing = true;
+            arrowText.fontSizeMin = FontSizes.AutoMinBody;
+            arrowText.fontSizeMax = FontSizes.Body;
+            arrowText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Dropdown template (required by TMP_Dropdown)
             GameObject templateObj = new GameObject("Template");
@@ -694,6 +703,11 @@ namespace DigitPark.Editor
             itemLabel.fontSize = FontSizes.Body;
             itemLabel.color = TEXT_PRIMARY;
             itemLabel.alignment = TextAlignmentOptions.Left;
+            itemLabel.fontStyle = FontStyles.Bold;
+            itemLabel.enableAutoSizing = true;
+            itemLabel.fontSizeMin = FontSizes.AutoMinBody;
+            itemLabel.fontSizeMax = FontSizes.Body;
+            itemLabel.overflowMode = TextOverflowModes.Ellipsis;
 
             // Wire up toggle
             itemToggle.targetGraphic = itemBg;
@@ -938,7 +952,7 @@ namespace DigitPark.Editor
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 22;
+            titleText.fontSizeMin = FontSizes.AutoMinSmall;
             titleText.fontSizeMax = FontSizes.H3;
         }
 
@@ -961,7 +975,7 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Right;
             text.enableAutoSizing = true;
-            text.fontSizeMin = 22;
+            text.fontSizeMin = FontSizes.AutoMinSmall;
             text.fontSizeMax = FontSizes.H3;
         }
 
@@ -1029,7 +1043,7 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
             text.enableAutoSizing = true;
-            text.fontSizeMin = 22;
+            text.fontSizeMin = FontSizes.AutoMinSmall;
             text.fontSizeMax = FontSizes.Body;
 
             // Selection indicator
@@ -1076,6 +1090,10 @@ namespace DigitPark.Editor
             dollarText.color = GOLD_PRIMARY;
             dollarText.fontStyle = FontStyles.Bold;
             dollarText.alignment = TextAlignmentOptions.Center;
+            dollarText.enableAutoSizing = true;
+            dollarText.fontSizeMin = FontSizes.AutoMinBody;
+            dollarText.fontSizeMax = FontSizes.Subtitle;
+            dollarText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Input field
             GameObject inputBg = new GameObject("CustomInputField");
@@ -1107,6 +1125,10 @@ namespace DigitPark.Editor
             inputText.color = TEXT_PRIMARY;
             inputText.fontStyle = FontStyles.Bold;
             inputText.alignment = TextAlignmentOptions.Left;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.H4;
+            inputText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Placeholder
             GameObject placeholder = new GameObject("Placeholder");
@@ -1125,6 +1147,10 @@ namespace DigitPark.Editor
             placeholderText.color = TEXT_SECONDARY;
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.alignment = TextAlignmentOptions.Left;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.H4;
+            placeholderText.overflowMode = TextOverflowModes.Ellipsis;
 
             // TMP_InputField
             TMP_InputField inputField = inputBg.AddComponent<TMP_InputField>();
@@ -1150,7 +1176,7 @@ namespace DigitPark.Editor
             maxText.fontStyle = FontStyles.Bold;
             maxText.alignment = TextAlignmentOptions.Center;
             maxText.enableAutoSizing = true;
-            maxText.fontSizeMin = 22;
+            maxText.fontSizeMin = FontSizes.AutoMinSmall;
             maxText.fontSizeMax = FontSizes.Body;
 
             // Apply button
@@ -1186,6 +1212,10 @@ namespace DigitPark.Editor
             applyText.color = BG_DARK;
             applyText.fontStyle = FontStyles.Bold;
             applyText.alignment = TextAlignmentOptions.Center;
+            applyText.enableAutoSizing = true;
+            applyText.fontSizeMin = FontSizes.AutoMinBody;
+            applyText.fontSizeMax = FontSizes.Subtitle;
+            applyText.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // CreateEarningsFeedback removed - earnings moved to HeroEarnings section
@@ -1264,7 +1294,7 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
             text.enableAutoSizing = true;
-            text.fontSizeMin = 22;
+            text.fontSizeMin = FontSizes.AutoMinSmall;
             text.fontSizeMax = FontSizes.H1;
 
             // Sin decoradores - diseño limpio
@@ -1428,7 +1458,7 @@ namespace DigitPark.Editor
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 22;
+            tmp.fontSizeMin = FontSizes.AutoMinSmall;
             tmp.fontSizeMax = fontSize;
 
             return obj;
@@ -1511,7 +1541,7 @@ namespace DigitPark.Editor
             nameText.overflowMode = TextOverflowModes.Ellipsis;
             nameText.raycastTarget = false;
             nameText.enableAutoSizing = true;
-            nameText.fontSizeMin = 22;
+            nameText.fontSizeMin = FontSizes.AutoMinSmall;
             nameText.fontSizeMax = FontSizes.Body;
 
             // === Circulo de seleccion (derecha) ===
@@ -1553,6 +1583,10 @@ namespace DigitPark.Editor
             checkText.fontStyle = FontStyles.Bold;
             checkText.alignment = TextAlignmentOptions.Center;
             checkText.raycastTarget = false;
+            checkText.enableAutoSizing = true;
+            checkText.fontSizeMin = FontSizes.AutoMinBody;
+            checkText.fontSizeMax = FontSizes.Body;
+            checkText.overflowMode = TextOverflowModes.Ellipsis;
 
             checkObj.SetActive(false);
         }
@@ -1602,7 +1636,7 @@ namespace DigitPark.Editor
             text.enableWordWrapping = false;
             text.overflowMode = TextOverflowModes.Ellipsis;
             text.enableAutoSizing = true;
-            text.fontSizeMin = 22;
+            text.fontSizeMin = FontSizes.AutoMinSmall;
             text.fontSizeMax = FontSizes.Body;
         }
 
@@ -1677,6 +1711,10 @@ namespace DigitPark.Editor
             closeText.fontStyle = FontStyles.Bold;
             closeText.alignment = TextAlignmentOptions.Center;
             closeText.raycastTarget = false;
+            closeText.enableAutoSizing = true;
+            closeText.fontSizeMin = FontSizes.AutoMinBody;
+            closeText.fontSizeMax = FontSizes.Body;
+            closeText.overflowMode = TextOverflowModes.Ellipsis;
 
             // === Title ===
             GameObject titleObj = new GameObject("ModalTitle");
@@ -1779,6 +1817,10 @@ namespace DigitPark.Editor
             confirmText.color = BG_DARK;
             confirmText.fontStyle = FontStyles.Bold;
             confirmText.alignment = TextAlignmentOptions.Center;
+            confirmText.enableAutoSizing = true;
+            confirmText.fontSizeMin = FontSizes.AutoMinBody;
+            confirmText.fontSizeMax = FontSizes.Body;
+            confirmText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Hidden by default
             modal.SetActive(false);
@@ -1858,7 +1900,7 @@ namespace DigitPark.Editor
             nameText.overflowMode = TextOverflowModes.Ellipsis;
             nameText.raycastTarget = false;
             nameText.enableAutoSizing = true;
-            nameText.fontSizeMin = 22;
+            nameText.fontSizeMin = FontSizes.AutoMinSmall;
             nameText.fontSizeMax = FontSizes.Body;
 
             // Game description
@@ -1876,10 +1918,14 @@ namespace DigitPark.Editor
             descText.text = description;
             descText.fontSize = FontSizes.AutoMinBody;
             descText.color = TEXT_SECONDARY;
+            descText.fontStyle = FontStyles.Bold;
             descText.alignment = TextAlignmentOptions.Left;
             descText.enableWordWrapping = true;
             descText.overflowMode = TextOverflowModes.Ellipsis;
             descText.raycastTarget = false;
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
+            descText.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
 
             // Checkmark (hidden by default)
             GameObject checkmark = new GameObject("Checkmark");
@@ -1910,6 +1956,9 @@ namespace DigitPark.Editor
             checkText.fontStyle = FontStyles.Bold;
             checkText.alignment = TextAlignmentOptions.Center;
             checkText.raycastTarget = false;
+            checkText.enableAutoSizing = true;
+            checkText.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
+            checkText.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
 
             checkmark.SetActive(false);
         }
@@ -1998,6 +2047,9 @@ namespace DigitPark.Editor
             proText.fontStyle = FontStyles.Bold;
             proText.alignment = TextAlignmentOptions.Center;
             proText.raycastTarget = false;
+            proText.enableAutoSizing = true;
+            proText.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
+            proText.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
 
             // Name
             GameObject nameObj = new GameObject("GameName");
@@ -2017,6 +2069,10 @@ namespace DigitPark.Editor
             nameText.fontStyle = FontStyles.Bold;
             nameText.alignment = TextAlignmentOptions.Left;
             nameText.raycastTarget = false;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = FontSizes.AutoMinBody;
+            nameText.fontSizeMax = FontSizes.Body;
+            nameText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Description
             GameObject descObj = new GameObject("Description");
@@ -2037,6 +2093,9 @@ namespace DigitPark.Editor
             descText.alignment = TextAlignmentOptions.Left;
             descText.enableWordWrapping = true;
             descText.raycastTarget = false;
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
+            descText.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
         }
 
         #endregion

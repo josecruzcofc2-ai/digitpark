@@ -25,14 +25,18 @@ namespace DigitPark.Editor
         private static readonly Color TextGray = new Color(0.7f, 0.7f, 0.7f, 1f);
         private static readonly Color GoogleBorderGray = new Color(0.455f, 0.467f, 0.459f, 1f); // #747775 Google Light theme border
         private static readonly Color NearBlack = new Color(0.122f, 0.122f, 0.122f, 1f); // #1F1F1F Google text color
+        private static readonly Color GoogleDark = new Color(0.075f, 0.075f, 0.078f, 1f); // #131314 Google dark theme bg
+        private static readonly Color AppleBlack = Color.black; // Apple dark button bg
 
         // Paths
         private const string WHITE_SPRITE_PATH = "Assets/_Project/Art/Icons/UI/WhiteSquare.png";
+        private const string ROUNDED_RECT_PATH = "Assets/_Project/Art/Icons/UI/RoundedRect.png";
         private const string FONT_ASSET_PATH = "Assets/_Project/Art/Fonts/Rajdhani/Rajdhani-Medium SDF.asset";
         private const string EYE_OPEN_PATH = "Assets/_Project/Art/Icons/Navigation/EyeOpen.png";
         private const string EYE_CLOSED_PATH = "Assets/_Project/Art/Icons/Navigation/EyeClosed.png";
-        private const string GOOGLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Google/google_logo_official.png";
-        private const string APPLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Apple/apple_logo_black.png";
+        private const string GOOGLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Google/google_g_logo.png"; // Clean G on transparent (dark theme)
+        private const string GOOGLE_ICON_FALLBACK = "Assets/_Project/Art/Icons/Auth/Google/google_logo_official.png"; // Fallback
+        private const string APPLE_ICON_PATH = "Assets/_Project/Art/Icons/Auth/Apple/apple_logo_black.png"; // White logo on transparent (for dark button)
 
         // Prefab paths
         private const string ERROR_PANEL_PREFAB = "Assets/_Project/Prefabs/Common/ErrorPanel.prefab";
@@ -50,13 +54,15 @@ namespace DigitPark.Editor
         private const float SOCIAL_FONT_SIZE = 44f; // ~43% of button height per Apple HIG (43% of 100 = 43)
 
         private static Sprite WhiteSprite => AssetDatabase.LoadAssetAtPath<Sprite>(WHITE_SPRITE_PATH);
+        private static Sprite RoundedRectSprite => AssetDatabase.LoadAssetAtPath<Sprite>(ROUNDED_RECT_PATH);
         private static TMP_FontAsset DefaultFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_ASSET_PATH);
         private static Sprite EyeOpenIcon => AssetDatabase.LoadAssetAtPath<Sprite>(EYE_OPEN_PATH);
         private static Sprite EyeClosedIcon => AssetDatabase.LoadAssetAtPath<Sprite>(EYE_CLOSED_PATH);
-        private static Sprite GoogleIcon => AssetDatabase.LoadAssetAtPath<Sprite>(GOOGLE_ICON_PATH);
+        private static Sprite GoogleIcon => AssetDatabase.LoadAssetAtPath<Sprite>(GOOGLE_ICON_PATH)
+            ?? AssetDatabase.LoadAssetAtPath<Sprite>(GOOGLE_ICON_FALLBACK);
         private static Sprite AppleIcon => AssetDatabase.LoadAssetAtPath<Sprite>(APPLE_ICON_PATH);
 
-        [MenuItem("DigitPark/UI Builders/Auth/Login", false, 100)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Auth/Login", false, 100)]
         public static void RebuildLoginScene()
         {
             try
@@ -235,10 +241,10 @@ namespace DigitPark.Editor
             CreateCenteredCheckbox(content.transform);
             CreatePrimaryButton(content.transform, "LoginButton", "Sign In");
             CreateOrDivider(content.transform);
-            // Google Sign-In: Light theme (white bg, #747775 border, #1F1F1F text)
-            CreateSocialButton(content.transform, "GoogleButton", "Sign in with Google", GoogleIcon, Color.white, NearBlack, GoogleBorderGray);
-            // Apple Sign-In: White variant (white bg, black text+logo — correct for dark backgrounds per Apple HIG)
-            CreateSocialButton(content.transform, "AppleButton", "Sign in with Apple", AppleIcon, Color.white, Color.black, null);
+            // Google Sign-In: Dark theme (#131314 bg, white text, colored G — per Google branding guidelines)
+            CreateSocialButton(content.transform, "GoogleButton", "Sign in with Google", GoogleIcon, GoogleDark, Color.white, null);
+            // Apple Sign-In: Black variant (black bg, white text+logo — per Apple HIG for dark environments)
+            CreateSocialButton(content.transform, "AppleButton", "Sign in with Apple", AppleIcon, AppleBlack, Color.white, null);
         }
 
         private static void BuildFooter(Canvas canvas)
@@ -379,6 +385,9 @@ namespace DigitPark.Editor
             placeholderText.fontStyle = FontStyles.Bold;
             placeholderText.color = TextGray;
             placeholderText.alignment = TextAlignmentOptions.Left;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.H3;
             placeholderText.overflowMode = TextOverflowModes.Ellipsis;
 
             // Input text
@@ -396,6 +405,10 @@ namespace DigitPark.Editor
             inputText.fontStyle = FontStyles.Bold;
             inputText.color = TextWhite;
             inputText.alignment = TextAlignmentOptions.Left;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.H3;
+            inputText.overflowMode = TextOverflowModes.Ellipsis;
 
             inputField.textViewport = textAreaRect;
             inputField.textComponent = inputText;
@@ -625,6 +638,10 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.color = TextGray;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.Body;
+            text.overflowMode = TextOverflowModes.Ellipsis;
 
             // Right line
             GameObject rightLine = new GameObject("RightLine");
@@ -642,27 +659,45 @@ namespace DigitPark.Editor
 
         /// <summary>
         /// Creates a social sign-in button compliant with Apple HIG and Google Branding Guidelines.
+        /// - Dark theme: dark bg, white text, colored icon
+        /// - Rounded corners via 9-sliced RoundedRect sprite
         /// - Icon: left-aligned at fixed position (not centered)
         /// - Text: centered across full button width
-        /// - Height: 100px (≈33pt, above Apple's 30pt minimum)
+        /// - Height: 100px (~33pt, above Apple's 30pt minimum)
         /// - Font: 43% of height per Apple HIG
-        /// - Optional border for Google Light theme (#747775)
+        /// - Optional border color (rendered as child Image frame)
         /// </summary>
         private static void CreateSocialButton(Transform parent, string name, string text, Sprite icon, Color bgColor, Color textColor, Color? borderColor)
         {
             GameObject button = new GameObject(name);
             button.transform.SetParent(parent, false);
 
+            // Use rounded rect sprite with 9-slice for proper corner radius
+            Sprite bgSprite = RoundedRectSprite ?? WhiteSprite;
             Image bg = button.AddComponent<Image>();
-            bg.sprite = WhiteSprite;
+            bg.sprite = bgSprite;
+            bg.type = Image.Type.Sliced;
+            bg.pixelsPerUnitMultiplier = 1f;
             bg.color = bgColor;
 
-            // Border per platform guidelines (Google Light: #747775)
+            // Optional border as child frame (clean 2px border, not Unity Outline shadow)
             if (borderColor.HasValue)
             {
-                Outline outline = button.AddComponent<Outline>();
-                outline.effectColor = borderColor.Value;
-                outline.effectDistance = new Vector2(1, -1);
+                GameObject borderObj = new GameObject("Border");
+                borderObj.transform.SetParent(button.transform, false);
+                RectTransform borderRect = borderObj.AddComponent<RectTransform>();
+                borderRect.anchorMin = Vector2.zero;
+                borderRect.anchorMax = Vector2.one;
+                borderRect.sizeDelta = Vector2.zero;
+                Image borderImg = borderObj.AddComponent<Image>();
+                borderImg.sprite = bgSprite;
+                borderImg.type = Image.Type.Sliced;
+                borderImg.color = borderColor.Value;
+                // Place behind content but the bg is already solid, so this acts as outline
+                // Actually we need to make bg slightly smaller or border slightly larger
+                borderRect.offsetMin = new Vector2(-2, -2);
+                borderRect.offsetMax = new Vector2(2, 2);
+                borderObj.transform.SetAsFirstSibling();
             }
 
             Button btn = button.AddComponent<Button>();
@@ -765,6 +800,10 @@ namespace DigitPark.Editor
                 arrowText.fontStyle = FontStyles.Bold;
                 arrowText.color = CyanNeon;
                 arrowText.alignment = TextAlignmentOptions.Center;
+                arrowText.enableAutoSizing = true;
+                arrowText.fontSizeMin = FontSizes.AutoMinBody;
+                arrowText.fontSizeMax = FontSizes.Body;
+                arrowText.overflowMode = TextOverflowModes.Ellipsis;
 
                 Debug.Log("✅ BackButton created (no prefab found)");
             }
@@ -816,6 +855,10 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.Body;
+            text.overflowMode = TextOverflowModes.Ellipsis;
 
             // Start hidden
             loadingPanel.SetActive(false);

@@ -64,7 +64,7 @@ namespace DigitPark.Editor
         /// </summary>
         public static void BuildSilent() => BuildUI();
 
-        [MenuItem("DigitPark/UI Builders/CashBattle/CashMatchmaking (VS Screen)", false, 182)]
+        [MenuItem("DigitPark/Scenes/Build Scene/CashBattle/Matchmaking", false, 182)]
         public static void BuildUI()
         {
             // --- Canvas ---
@@ -192,6 +192,10 @@ namespace DigitPark.Editor
             placeholderTmp.color = GOLD_PRIMARY;
             placeholderTmp.alignment = TextAlignmentOptions.Center;
             placeholderTmp.fontStyle = FontStyles.Bold;
+            placeholderTmp.enableAutoSizing = true;
+            placeholderTmp.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderTmp.fontSizeMax = FontSizes.Symbol;
+            placeholderTmp.overflowMode = TextOverflowModes.Ellipsis;
             if (defaultIcon != null)
                 placeholder.SetActive(false);
 
@@ -208,6 +212,10 @@ namespace DigitPark.Editor
             gameNameTmp.color = TEXT_GOLD;
             gameNameTmp.alignment = TextAlignmentOptions.Center;
             gameNameTmp.fontStyle = FontStyles.Bold;
+            gameNameTmp.enableAutoSizing = true;
+            gameNameTmp.fontSizeMin = FontSizes.AutoMinBody;
+            gameNameTmp.fontSizeMax = FontSizes.H3;
+            gameNameTmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -232,6 +240,10 @@ namespace DigitPark.Editor
             entryTmp.color = TEXT_GOLD;
             entryTmp.alignment = TextAlignmentOptions.Center;
             entryTmp.fontStyle = FontStyles.Bold;
+            entryTmp.enableAutoSizing = true;
+            entryTmp.fontSizeMin = FontSizes.AutoMinBody;
+            entryTmp.fontSizeMax = FontSizes.H4;
+            entryTmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -253,6 +265,10 @@ namespace DigitPark.Editor
             titleTmp.color = TEXT_GOLD;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinBody;
+            titleTmp.fontSizeMax = FontSizes.H1;
+            titleTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Gold glow outline
             Outline glow = title.AddComponent<Outline>();
@@ -423,6 +439,10 @@ namespace DigitPark.Editor
             nameTmp.color = TEXT_PRIMARY;
             nameTmp.alignment = TextAlignmentOptions.Left;
             nameTmp.fontStyle = FontStyles.Bold;
+            nameTmp.enableAutoSizing = true;
+            nameTmp.fontSizeMin = FontSizes.AutoMinBody;
+            nameTmp.fontSizeMax = FontSizes.H1;
+            nameTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Level/Rank pill
             string levelObjName = isPlayer ? "PlayerLevel" : "OpponentLevel";
@@ -451,6 +471,10 @@ namespace DigitPark.Editor
             levelTmp.color = isPlayer ? GOLD_PRIMARY : TEXT_SECONDARY;
             levelTmp.alignment = TextAlignmentOptions.Center;
             levelTmp.fontStyle = FontStyles.Bold;
+            levelTmp.enableAutoSizing = true;
+            levelTmp.fontSizeMin = FontSizes.AutoMinBody;
+            levelTmp.fontSizeMax = FontSizes.Subtitle;
+            levelTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // "YOU" badge for player card (in infoSection, top-right)
             if (isPlayer)
@@ -473,6 +497,10 @@ namespace DigitPark.Editor
                 youTmp.color = BG_DARK;
                 youTmp.alignment = TextAlignmentOptions.Center;
                 youTmp.fontStyle = FontStyles.Bold;
+                youTmp.enableAutoSizing = true;
+                youTmp.fontSizeMin = FontSizes.AutoMinBody;
+                youTmp.fontSizeMax = FontSizes.Body;
+                youTmp.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 
@@ -520,6 +548,10 @@ namespace DigitPark.Editor
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.fontStyle = FontStyles.Bold;
             vsTmp.raycastTarget = false;
+            vsTmp.enableAutoSizing = true;
+            vsTmp.fontSizeMin = FontSizes.AutoMinBody;
+            vsTmp.fontSizeMax = FontSizes.Subtitle;
+            vsTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Initially hidden until match found
             vsContainer.SetActive(false);
@@ -551,6 +583,10 @@ namespace DigitPark.Editor
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
             statusTmp.fontStyle = FontStyles.Bold;
+            statusTmp.enableAutoSizing = true;
+            statusTmp.fontSizeMin = FontSizes.AutoMinBody;
+            statusTmp.fontSizeMax = FontSizes.Subtitle;
+            statusTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // --- Timer Text (centered, lower half) ---
             GameObject timerText = CreateElement(searchSection.transform, "CashTimerText");
@@ -565,6 +601,10 @@ namespace DigitPark.Editor
             timerTmp.color = TEXT_GOLD;
             timerTmp.alignment = TextAlignmentOptions.Center;
             timerTmp.fontStyle = FontStyles.Bold;
+            timerTmp.enableAutoSizing = true;
+            timerTmp.fontSizeMin = FontSizes.AutoMinBody;
+            timerTmp.fontSizeMax = FontSizes.H3;
+            timerTmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -608,6 +648,10 @@ namespace DigitPark.Editor
             textTmp.color = RED_CANCEL;
             textTmp.alignment = TextAlignmentOptions.Center;
             textTmp.fontStyle = FontStyles.Bold;
+            textTmp.enableAutoSizing = true;
+            textTmp.fontSizeMin = FontSizes.AutoMinBody;
+            textTmp.fontSizeMax = FontSizes.H3;
+            textTmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -636,6 +680,10 @@ namespace DigitPark.Editor
             readyTmp.color = TEXT_GOLD;
             readyTmp.alignment = TextAlignmentOptions.Center;
             readyTmp.fontStyle = FontStyles.Bold;
+            readyTmp.enableAutoSizing = true;
+            readyTmp.fontSizeMin = FontSizes.AutoMinBody;
+            readyTmp.fontSizeMax = FontSizes.Equation;
+            readyTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Countdown number (GOLD_PRIMARY, 72pt, with outline glow)
             GameObject countdownText = CreateElement(panel.transform, "CountdownText");
@@ -650,6 +698,10 @@ namespace DigitPark.Editor
             countdownTmp.color = GOLD_PRIMARY;
             countdownTmp.alignment = TextAlignmentOptions.Center;
             countdownTmp.fontStyle = FontStyles.Bold;
+            countdownTmp.enableAutoSizing = true;
+            countdownTmp.fontSizeMin = FontSizes.AutoMinBody;
+            countdownTmp.fontSizeMax = FontSizes.H4;
+            countdownTmp.overflowMode = TextOverflowModes.Ellipsis;
 
             // Countdown glow
             Outline countdownGlow = countdownText.AddComponent<Outline>();

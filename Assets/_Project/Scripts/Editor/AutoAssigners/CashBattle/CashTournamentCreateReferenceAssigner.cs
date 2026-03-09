@@ -57,7 +57,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/CashBattle/CashTournamentCreate References", false, 184)]
+        [MenuItem("DigitPark/Scenes/Assign References/CashBattle/Tournament Create", false, 184)]
         public static void ShowWindow()
         {
             var window = GetWindow<CashTournamentCreateReferenceAssigner>("CashTournamentCreate Reference Assigner");
@@ -229,7 +229,7 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Status
             AssignGameObject(so, "loadingOverlay", root, "LoadingOverlay");
-            AssignReference(so, "statusText", FindTextByName(root, "StatusText"));
+            AssignReference(so, "statusText", FindTextByName(root, "CashCreateStatusText"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

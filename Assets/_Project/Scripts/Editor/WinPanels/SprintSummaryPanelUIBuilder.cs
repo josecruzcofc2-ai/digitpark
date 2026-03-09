@@ -218,7 +218,7 @@ namespace DigitPark.Editor
             GameObject gameNameObj = CreateChild(row.transform, "GameName");
             LayoutElement gameLE = gameNameObj.AddComponent<LayoutElement>();
             gameLE.flexibleWidth = 2;
-            TextMeshProUGUI gameTmp = AddText(gameNameObj, "DigitRush", 18, Color.white, FontStyles.Normal);
+            TextMeshProUGUI gameTmp = AddText(gameNameObj, "DigitRush", 18, Color.white, FontStyles.Bold);
             gameTmp.alignment = TextAlignmentOptions.Left;
 
             // Time
@@ -232,7 +232,7 @@ namespace DigitPark.Editor
             GameObject errorsObj = CreateChild(row.transform, "Errors");
             LayoutElement errLE = errorsObj.AddComponent<LayoutElement>();
             errLE.flexibleWidth = 1;
-            TextMeshProUGUI errTmp = AddText(errorsObj, "0", 18, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal);
+            TextMeshProUGUI errTmp = AddText(errorsObj, "0", 18, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold);
             errTmp.alignment = TextAlignmentOptions.Center;
 
             // Opponent Time (hidden for practice)
@@ -247,7 +247,7 @@ namespace DigitPark.Editor
             GameObject oppErrObj = CreateChild(row.transform, "OpponentErrors");
             LayoutElement oppErrLE = oppErrObj.AddComponent<LayoutElement>();
             oppErrLE.flexibleWidth = 1;
-            TextMeshProUGUI oppErrTmp = AddText(oppErrObj, "1", 18, new Color(0.5f, 0.5f, 0.5f), FontStyles.Normal);
+            TextMeshProUGUI oppErrTmp = AddText(oppErrObj, "1", 18, new Color(0.5f, 0.5f, 0.5f), FontStyles.Bold);
             oppErrTmp.alignment = TextAlignmentOptions.Center;
             oppErrObj.SetActive(false); // Hidden by default
 
@@ -540,8 +540,8 @@ namespace DigitPark.Editor
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = FontSizes.AutoMinBody;
-            tmp.fontSizeMax = size;
+            tmp.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, size);
+            tmp.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, size);
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }

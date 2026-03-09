@@ -38,7 +38,7 @@ namespace DigitPark.Editor
         private const float TOAST_MARGIN_TOP = 80f;
         private const float BORDER_RADIUS = 12f;
 
-        [MenuItem("DigitPark/UI Builders/Common/Achievement Toast Notification", false, 190)]
+        [MenuItem("DigitPark/Prefabs/Toasts/Achievement Toast", false, 190)]
         public static void BuildUI()
         {
             if (!EditorUtility.DisplayDialog("Achievement Toast Builder",

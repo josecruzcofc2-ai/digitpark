@@ -54,7 +54,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/References/Monetization/DailyRewards References", false, 140)]
+        [MenuItem("DigitPark/Scenes/Assign References/Monetization/DailyRewards", false, 140)]
         public static void ShowWindow()
         {
             var window = GetWindow<DailyRewardsReferenceAssigner>("DailyRewards Reference Assigner");

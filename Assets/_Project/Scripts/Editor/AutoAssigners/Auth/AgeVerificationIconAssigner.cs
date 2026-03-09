@@ -38,7 +38,7 @@ namespace DigitPark.Editor.AutoAssigners
 
         #region Menu Items
 
-        [MenuItem("DigitPark/Auto Assigners/Icons/Auth/AgeVerification Icons", false, 102)]
+        [MenuItem("DigitPark/Scenes/Assign Icons/Auth/AgeVerification", false, 102)]
         public static void ShowWindow()
         {
             var window = GetWindow<AgeVerificationIconAssigner>("AgeVerification Icon Assigner");

@@ -27,7 +27,7 @@ namespace DigitPark.Editor
 
         private static readonly Color LOCKED_BORDER = new Color(0.3f, 0.3f, 0.4f, 0.3f);
 
-        [MenuItem("DigitPark/UI Builders/Monetization/Achievements Card State Toggler", false, 141)]
+        [MenuItem("DigitPark/Scenes/Build Scene/Monetization/Achievements Card State Toggler", false, 141)]
         public static void ShowWindow()
         {
             var window = GetWindow<AchievementCardStateToggler>("Card State Toggler");
