@@ -319,6 +319,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
             title.text = AutoLocalizer.Get("location_unavailable_title");
             title.fontSize = FontSizes.Body;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = FontSizes.AutoMinBody;
+            title.fontSizeMax = FontSizes.Body;
             title.color = new Color(1f, 0.4f, 0.4f);
             title.alignment = TextAlignmentOptions.Center;
             title.fontStyle = FontStyles.Bold;
@@ -332,6 +335,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI msg = msgObj.AddComponent<TextMeshProUGUI>();
             msg.text = AutoLocalizer.Get("location_unavailable_message");
             msg.fontSize = FontSizes.Body;
+            msg.enableAutoSizing = true;
+            msg.fontSizeMin = FontSizes.AutoMinBody;
+            msg.fontSizeMax = FontSizes.Body;
             msg.color = new Color(0.8f, 0.8f, 0.8f);
             msg.alignment = TextAlignmentOptions.Center;
             msg.enableWordWrapping = true;
@@ -345,6 +351,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI stateText = stateObj.AddComponent<TextMeshProUGUI>();
             stateText.text = AutoLocalizer.Get("location_current_state", "Florida");
             stateText.fontSize = FontSizes.Body;
+            stateText.enableAutoSizing = true;
+            stateText.fontSizeMin = FontSizes.AutoMinBody;
+            stateText.fontSizeMax = FontSizes.Body;
             stateText.color = new Color(1f, 0.84f, 0f);
             stateText.alignment = TextAlignmentOptions.Center;
             overlay.stateText = stateText;
@@ -379,6 +388,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI statesListTxt = statesTextObj.AddComponent<TextMeshProUGUI>();
             statesListTxt.text = string.Join("\n", LocationRestrictionService.ALLOWED_STATES);
             statesListTxt.fontSize = FontSizes.Body;
+            statesListTxt.enableAutoSizing = true;
+            statesListTxt.fontSizeMin = FontSizes.AutoMinBody;
+            statesListTxt.fontSizeMax = FontSizes.Body;
             statesListTxt.color = new Color(0.7f, 1f, 0.8f);
             statesListTxt.alignment = TextAlignmentOptions.TopLeft;
             overlay.statesListText = statesListTxt;
@@ -417,6 +429,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
             btnText.text = text;
             btnText.fontSize = FontSizes.Body;
+            btnText.enableAutoSizing = true;
+            btnText.fontSizeMin = FontSizes.AutoMinBody;
+            btnText.fontSizeMax = FontSizes.Body;
             btnText.color = Color.white;
             btnText.alignment = TextAlignmentOptions.Center;
             btnText.fontStyle = FontStyles.Bold;

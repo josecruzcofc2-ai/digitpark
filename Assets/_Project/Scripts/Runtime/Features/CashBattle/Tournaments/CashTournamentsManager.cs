@@ -181,7 +181,7 @@ namespace DigitPark.UI.CashBattle
             {
                 options.Add(info.Name);
             }
-            options.Add("Cognitive Sprint");
+            options.Add(AutoLocalizer.Get("game_cognitive_sprint"));
 
             gameTypeDropdown.AddOptions(options);
         }
@@ -206,9 +206,9 @@ namespace DigitPark.UI.CashBattle
             if (durationText != null)
             {
                 if (hours < 24)
-                    durationText.text = $"{hours}h";
+                    durationText.text = AutoLocalizer.Get("duration_hours", hours);
                 else
-                    durationText.text = $"{hours / 24}d";
+                    durationText.text = AutoLocalizer.Get("duration_days", hours / 24);
             }
         }
 
@@ -229,7 +229,9 @@ namespace DigitPark.UI.CashBattle
             var tournament = new TournamentInfo
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = isCognitiveSprint ? "Cognitive Sprint Tournament" : $"{gameType} Tournament",
+                Name = isCognitiveSprint
+                    ? AutoLocalizer.Get("cognitive_sprint_tournament")
+                    : AutoLocalizer.Get("game_tournament_name", gameType),
                 GameType = gameType,
                 IsCognitiveSprint = isCognitiveSprint,
                 EntryFee = entryFee,
@@ -257,13 +259,13 @@ namespace DigitPark.UI.CashBattle
             if (gameFilterDropdown != null)
             {
                 gameFilterDropdown.ClearOptions();
-                var gameOptions = new List<string> { "All Games" };
+                var gameOptions = new List<string> { AutoLocalizer.Get("filter_all_games") };
                 var gameInfos = CognitiveSprintManager.GetAllGameInfos();
                 foreach (var info in gameInfos)
                 {
                     gameOptions.Add(info.Name);
                 }
-                gameOptions.Add("Cognitive Sprint");
+                gameOptions.Add(AutoLocalizer.Get("game_cognitive_sprint"));
                 gameFilterDropdown.AddOptions(gameOptions);
             }
 
@@ -273,7 +275,7 @@ namespace DigitPark.UI.CashBattle
                 feeFilterDropdown.ClearOptions();
                 var feeOptions = new List<string>
                 {
-                    "All Entry Fees",
+                    AutoLocalizer.Get("filter_all_fees"),
                     "$1 - $10",
                     "$11 - $50",
                     "$51 - $100",
@@ -519,13 +521,13 @@ namespace DigitPark.UI.CashBattle
             CreateLabel(infoContainer.transform, "GameType", "Game Type", (int)FontSizes.Body, true, new Color(0f, 0.9f, 1f));
 
             // Prize pool
-            CreateLabel(infoContainer.transform, "PrizePool", "Prize: $0", (int)FontSizes.Body, true, new Color(0.3f, 1f, 0.5f));
+            CreateLabel(infoContainer.transform, "PrizePool", AutoLocalizer.Get("cash_prize_default"), (int)FontSizes.Body, true, new Color(0.3f, 1f, 0.5f));
 
             // Entry fee
-            CreateLabel(infoContainer.transform, "EntryFee", "Entry: $0", (int)FontSizes.Body, true, Color.white);
+            CreateLabel(infoContainer.transform, "EntryFee", AutoLocalizer.Get("cash_entry_default"), (int)FontSizes.Body, true, Color.white);
 
             // Participants
-            CreateLabel(infoContainer.transform, "Participants", "0/0 players", (int)FontSizes.Body, false, new Color(0.7f, 0.7f, 0.7f));
+            CreateLabel(infoContainer.transform, "Participants", AutoLocalizer.Get("cash_players_default"), (int)FontSizes.Body, false, new Color(0.7f, 0.7f, 0.7f));
 
             // Join button
             GameObject joinBtn = new GameObject("JoinButton");

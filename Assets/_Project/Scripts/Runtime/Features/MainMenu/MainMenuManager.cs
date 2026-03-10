@@ -12,6 +12,7 @@ using DigitPark.UI.Common;
 using DigitPark.UI.Panels;
 using DigitPark.Localization;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Managers
 {

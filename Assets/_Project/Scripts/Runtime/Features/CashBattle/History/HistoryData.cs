@@ -38,9 +38,9 @@ namespace DigitPark.CashBattle
         public string entryId;
         public HistoryEntryType type;
         public MatchResult result;
-        public DateTime timestamp;
+        public string timestampStr;         // ISO 8601 string for JsonUtility compatibility
 
-        [Header("Match Info")]
+        // Match Info
         public string gameType;             // Tipo de juego (Memory, Reaction, etc.)
         public string[] gamesPlayed;        // Para Cognitive Sprint
         public string opponentName;
@@ -48,32 +48,47 @@ namespace DigitPark.CashBattle
         public string tournamentName;
         public string tournamentId;
 
-        [Header("Scores")]
+        // Scores
         public float myScore;
         public float opponentScore;
         public int myPosition;              // Posición en torneo
         public int totalParticipants;
 
-        [Header("Money")]
-        public decimal entryFee;
-        public decimal prize;
-        public decimal netResult;           // prize - entryFee
+        // Money
+        public float entryFee;
+        public float prize;
+        public float netResult;           // prize - entryFee
 
-        [Header("Details")]
+        // Details
         public float matchDuration;         // Duración en segundos
         public string notes;
+
+        /// <summary>
+        /// Gets the timestamp as DateTime (parsed from timestampStr)
+        /// </summary>
+        public DateTime timestamp
+        {
+            get
+            {
+                if (DateTime.TryParse(timestampStr, System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.RoundtripKind, out DateTime dt))
+                    return dt;
+                return DateTime.UtcNow;
+            }
+            set => timestampStr = value.ToString("o");
+        }
 
         public HistoryEntry()
         {
             entryId = Guid.NewGuid().ToString();
-            timestamp = DateTime.UtcNow;
+            timestampStr = DateTime.UtcNow.ToString("o");
             result = MatchResult.Pending;
         }
 
         /// <summary>
         /// Crea una entrada para partida 1v1
         /// </summary>
-        public static HistoryEntry Create1v1Match(string gameType, string opponentName, decimal entryFee)
+        public static HistoryEntry Create1v1Match(string gameType, string opponentName, float entryFee)
         {
             return new HistoryEntry
             {
@@ -88,12 +103,12 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Crea una entrada para Cognitive Sprint
         /// </summary>
-        public static HistoryEntry CreateCognitiveSprint(string[] games, string opponentName, decimal entryFee)
+        public static HistoryEntry CreateCognitiveSprint(string[] games, string opponentName, float entryFee)
         {
             return new HistoryEntry
             {
                 type = HistoryEntryType.CognitiveSprint,
-                gameType = "Cognitive Sprint",
+                gameType = "CognitiveSprint",
                 gamesPlayed = games,
                 opponentName = opponentName,
                 entryFee = entryFee,
@@ -104,7 +119,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Crea una entrada para torneo
         /// </summary>
-        public static HistoryEntry CreateTournament(string tournamentName, string tournamentId, decimal entryFee)
+        public static HistoryEntry CreateTournament(string tournamentName, string tournamentId, float entryFee)
         {
             return new HistoryEntry
             {
@@ -119,7 +134,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Completa la entrada con el resultado
         /// </summary>
-        public void CompleteWithResult(MatchResult matchResult, float myScoreValue, float opponentScoreValue, decimal prizeAmount)
+        public void CompleteWithResult(MatchResult matchResult, float myScoreValue, float opponentScoreValue, float prizeAmount)
         {
             result = matchResult;
             myScore = myScoreValue;
@@ -131,7 +146,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Completa entrada de torneo
         /// </summary>
-        public void CompleteTournament(int position, int participants, decimal prizeAmount)
+        public void CompleteTournament(int position, int participants, float prizeAmount)
         {
             myPosition = position;
             totalParticipants = participants;
@@ -196,7 +211,7 @@ namespace DigitPark.CashBattle
             switch (type)
             {
                 case HistoryEntryType.Match1v1:
-                    return $"1v1 - {gameType}";
+                    return AutoLocalizer.Get("history_1v1_title", gameType);
                 case HistoryEntryType.CognitiveSprint:
                     return AutoLocalizer.Get("history_cognitive_sprint_games", gamesPlayed?.Length ?? 0);
                 case HistoryEntryType.Tournament:
@@ -217,7 +232,7 @@ namespace DigitPark.CashBattle
             {
                 case HistoryEntryType.Match1v1:
                 case HistoryEntryType.CognitiveSprint:
-                    return $"vs {opponentName ?? AutoLocalizer.Get("history_opponent_default")}";
+                    return AutoLocalizer.Get("history_vs_opponent", opponentName ?? AutoLocalizer.Get("history_opponent_default"));
                 case HistoryEntryType.Tournament:
                     if (result == MatchResult.Pending)
                         return AutoLocalizer.Get("history_in_progress_ellipsis");
@@ -284,16 +299,16 @@ namespace DigitPark.CashBattle
         public int losses;
         public int draws;
 
-        public decimal totalEarnings;
-        public decimal totalSpent;
-        public decimal netProfit;
+        public float totalEarnings;
+        public float totalSpent;
+        public float netProfit;
 
         public int tournamentsPlayed;
         public int tournamentWins;
         public int bestTournamentPosition;
 
         public float winRate => totalMatches > 0 ? (float)wins / totalMatches * 100f : 0f;
-        public float avgEarningsPerMatch => totalMatches > 0 ? (float)(totalEarnings / totalMatches) : 0f;
+        public float avgEarningsPerMatch => totalMatches > 0 ? totalEarnings / totalMatches : 0f;
 
         public void RecalculateFromHistory(List<HistoryEntry> entries)
         {
@@ -301,8 +316,8 @@ namespace DigitPark.CashBattle
             wins = 0;
             losses = 0;
             draws = 0;
-            totalEarnings = 0;
-            totalSpent = 0;
+            totalEarnings = 0f;
+            totalSpent = 0f;
             tournamentsPlayed = 0;
             tournamentWins = 0;
             bestTournamentPosition = int.MaxValue;

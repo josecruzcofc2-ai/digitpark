@@ -108,9 +108,9 @@ namespace DigitPark.Data
             var diff = DateTime.Now - lastSeenDate;
 
             if (diff.TotalMinutes < 1) return AutoLocalizer.Get("time_just_now");
-            if (diff.TotalMinutes < 60) return AutoLocalizer.Get("time_minutes_ago", (int)diff.TotalMinutes);
-            if (diff.TotalHours < 24) return AutoLocalizer.Get("time_hours_ago", (int)diff.TotalHours);
-            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_days_ago", (int)diff.TotalDays);
+            if (diff.TotalMinutes < 60) return AutoLocalizer.Get("time_ago_minutes", (int)diff.TotalMinutes);
+            if (diff.TotalHours < 24) return AutoLocalizer.Get("time_ago_hours", (int)diff.TotalHours);
+            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_ago_days", (int)diff.TotalDays);
 
             return lastSeenDate.ToString("dd/MM/yyyy");
         }

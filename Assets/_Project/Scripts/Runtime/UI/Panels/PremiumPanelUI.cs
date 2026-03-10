@@ -583,6 +583,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = titleObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("premium_title");
             tmp.fontSize = FontSizes.H1;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
+            tmp.fontSizeMax = FontSizes.H1;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = neonGold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -628,6 +631,8 @@ namespace DigitPark.UI.Panels
             titleHlg.childForceExpandHeight = false;
 
             Sprite starSprite = Resources.Load<Sprite>("Icons/UI/StarRecommended");
+            if (starSprite == null)
+                Debug.LogWarning("[PremiumPanelUI] Resource not found: Icons/UI/StarRecommended");
 
             // Estrella izquierda
             GameObject starL = new GameObject("StarLeft");
@@ -833,26 +838,12 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = FontSizes.H3;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
+            tmp.fontSizeMax = FontSizes.H3;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
-
-            return tmp;
-        }
-
-        private TextMeshProUGUI CreateFeatureText(Transform parent, string text)
-        {
-            GameObject obj = new GameObject("Feature");
-            obj.transform.SetParent(parent, false);
-
-            LayoutElement le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 35;
-
-            TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = FontSizes.Subtitle;
-            tmp.color = new Color(0.7f, 1f, 0.7f, 1f);
-            tmp.alignment = TextAlignmentOptions.Left;
 
             return tmp;
         }
@@ -888,51 +879,15 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("buy_button");
             tmp.fontSize = FontSizes.H4;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
+            tmp.fontSizeMax = FontSizes.H4;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.black;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.raycastTarget = false;
 
             return (btn, tmp);
-        }
-
-        private (GameObject, TextMeshProUGUI) CreateRecommendedBadge(Transform parent)
-        {
-            GameObject badge = new GameObject("RecommendedBadge");
-            badge.transform.SetParent(parent, false);
-
-            // Ignore layout so it floats as overlay on the card
-            LayoutElement badgeLe = badge.AddComponent<LayoutElement>();
-            badgeLe.ignoreLayout = true;
-
-            RectTransform rt = badge.GetComponent<RectTransform>();
-            if (rt == null) rt = badge.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(1, 1);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(1, 1);
-            rt.anchoredPosition = new Vector2(-10, -10);
-            rt.sizeDelta = new Vector2(320, 54);
-
-            Image bg = badge.AddComponent<Image>();
-            bg.color = neonGold;
-
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(badge.transform, false);
-
-            RectTransform textRt = textObj.AddComponent<RectTransform>();
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
-            textRt.offsetMin = Vector2.zero;
-            textRt.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = AutoLocalizer.Get("premium_recommended");
-            tmp.fontSize = FontSizes.Body;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.color = Color.black;
-            tmp.alignment = TextAlignmentOptions.Center;
-
-            return (badge, tmp);
         }
 
         private void CreateRestoreButton(Transform parent)

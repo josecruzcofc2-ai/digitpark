@@ -6,6 +6,7 @@ using DigitPark.Localization;
 using DigitPark.Services.Firebase;
 using DigitPark.Games;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Managers
 {

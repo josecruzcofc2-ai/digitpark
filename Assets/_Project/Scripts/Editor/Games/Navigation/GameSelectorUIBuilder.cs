@@ -62,6 +62,14 @@ namespace DigitPark.Editor
                 return;
             }
 
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             // Buscar o crear el contenedor principal
             Transform canvasTransform = canvas.transform;
 
@@ -112,30 +120,38 @@ namespace DigitPark.Editor
             GameObject header = CreateOrFind(canvasTransform, "Header");
             RectTransform headerRect = SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -60), new Vector2(0, 120)); // Header con más presencia
+                new Vector2(0, -50), new Vector2(0, 100)); // Header 100px standardized
 
             // BackButton - NO crear, el usuario usa su propio prefab
+
+            // Limpiar título viejo con nombre anterior (era "TitleText", ahora es "GameSelectorTitleText")
+            Transform oldTitle = header.transform.Find("TitleText");
+            if (oldTitle != null)
+            {
+                Debug.Log("Eliminando TitleText duplicado (renombrado a GameSelectorTitleText)");
+                DestroyImmediate(oldTitle.gameObject);
+            }
 
             // Title - valores ajustados por el usuario
             GameObject title = CreateOrFind(header.transform, "GameSelectorTitleText");
             SetupRectTransform(title,
-                new Vector2(0.07f, 0f), new Vector2(0.42f, 1f),
+                new Vector2(0.07f, 0f), new Vector2(0.50f, 1f),
                 Vector2.zero, Vector2.zero);
             SetupTitleText(title, "SELECT A GAME");
 
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             // ========== GAMES GRID ==========
             GameObject gamesPanel = CreateOrFind(canvasTransform, "GamesPanel");
             RectTransform gamesPanelRect = SetupRectTransform(gamesPanel,
                 new Vector2(0, 0), new Vector2(1, 1),
-                new Vector2(0, -40), new Vector2(-60, -120)); // Más espacio para los cards
+                new Vector2(0, -40), new Vector2(-60, -100)); // Below 100px header
 
             // Agregar Grid Layout
             GridLayoutGroup grid = gamesPanel.GetComponent<GridLayoutGroup>();
@@ -660,7 +676,9 @@ namespace DigitPark.Editor
             textTmp.fontStyle = FontStyles.Bold;
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
-            textTmp.enableAutoSizing = false;
+            textTmp.enableAutoSizing = true;
+            textTmp.fontSizeMin = FontSizes.AutoMinBody;
+            textTmp.fontSizeMax = FontSizes.Body;
             textTmp.overflowMode = TextOverflowModes.Ellipsis;
         }
 
@@ -671,6 +689,14 @@ namespace DigitPark.Editor
             {
                 Debug.LogError("No se encontró Canvas");
                 return;
+            }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             Transform gamesPanel = canvas.transform.Find("GamesPanel");

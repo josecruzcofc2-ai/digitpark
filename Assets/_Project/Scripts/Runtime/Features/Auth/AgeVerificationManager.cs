@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Services;
 using DigitPark.Localization;
 using DG.Tweening;
@@ -220,6 +221,17 @@ namespace DigitPark.Managers
             catch (System.Exception ex)
             {
                 Debug.LogException(ex);
+                if (this != null)
+                {
+                    isVerifying = false;
+                    ShowLoadingIndicator(false);
+                    if (verifyButton) verifyButton.interactable = true;
+                    if (statusText)
+                    {
+                        statusText.text = L("age_verification_error_generic");
+                        statusText.color = new Color(1f, 0.4f, 0.4f);
+                    }
+                }
             }
         }
 
@@ -324,9 +336,7 @@ namespace DigitPark.Managers
 
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            string text = LocalizationManager.Instance.GetText(key);
-            return args.Length > 0 ? string.Format(text, args) : text;
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
 
         private void OnDestroy()

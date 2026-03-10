@@ -91,6 +91,15 @@ namespace DigitPark.Editor
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) { Debug.LogError("No se encontro Canvas"); return; }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             Transform root = canvas.transform;
             CleanOldElements(root);
             CreateFlashTapLayout(root);

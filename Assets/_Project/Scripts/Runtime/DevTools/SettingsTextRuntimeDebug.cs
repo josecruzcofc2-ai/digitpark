@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine;
 using TMPro;
 using System.Collections;
@@ -128,3 +129,4 @@ namespace DigitPark.Debugging
         }
     }
 }
+#endif

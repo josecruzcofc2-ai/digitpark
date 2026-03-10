@@ -165,6 +165,15 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             if (!EditorUtility.DisplayDialog("Reconstruir UI?",
                 "Esto reconstruir\u00e1 toda la UI de CashProfile con el dise\u00f1o Competitive Gamer " +
                 "y auto-asignar\u00e1 las referencias.\n\n\u00bfContinuar?",
@@ -207,6 +216,15 @@ namespace DigitPark.Editor
             {
                 Debug.LogError("[CashProfileUIBuilder] Canvas not found - cannot build silently");
                 return;
+            }
+
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             Cleanup(canvas.transform);
@@ -636,31 +654,6 @@ namespace DigitPark.Editor
             unTmp.fontStyle = FontStyles.Bold;
             unTmp.enableAutoSizing = true;
             unTmp.fontSizeMin = FontSizes.Body; unTmp.fontSizeMax = FontSizes.H3;
-
-            // === Edit Name Button (pencil icon next to username) ===
-            GameObject editNameBtn = new GameObject("EditNameButton");
-            editNameBtn.transform.SetParent(card.transform, false);
-            RectTransform enRT = editNameBtn.AddComponent<RectTransform>();
-            enRT.anchorMin = new Vector2(0.82f, 1f);
-            enRT.anchorMax = new Vector2(0.95f, 1f);
-            enRT.pivot = new Vector2(0.5f, 1f);
-            enRT.sizeDelta = new Vector2(40, 40);
-            enRT.anchoredPosition = new Vector2(0, -255);
-            editNameBtn.AddComponent<Button>();
-            Image enImg = editNameBtn.AddComponent<Image>();
-            enImg.preserveAspect = true;
-            enImg.raycastTarget = true;
-            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/EditIcon.png");
-            if (editSprite != null)
-            {
-                enImg.sprite = editSprite;
-                enImg.color = new Color(1f, 0.84f, 0f, 0.7f);
-            }
-            else
-            {
-                enImg.color = GOLD_PRIMARY;
-            }
-            editNameBtn.transform.localScale = Vector3.one * 0.7f;
 
             // === Member Since ===
             GameObject msince = new GameObject("MemberSinceText");
@@ -1167,14 +1160,8 @@ namespace DigitPark.Editor
             Transform avT = Deep(root, "AvatarImage");
             Assign(so, "avatarImage", avT != null ? avT.GetComponent<Image>() : null);
             Assign(so, "usernameText",    FindTMP(root, "UsernameText"));
-            Assign(so, "editNameButton",  FindBtn(root, "EditNameButton"));
             Assign(so, "memberSinceText", FindTMP(root, "MemberSinceText"));
 
-            // ── Change Name panels ──
-            Transform cnp = Deep(root, "ChangeNamePanel");
-            Assign(so, "changeNamePanel", cnp != null ? cnp.GetComponent<DigitPark.UI.Panels.InputPanelUI>() : null);
-            Transform ep = Deep(root, "ErrorPanel");
-            Assign(so, "errorPanel", ep != null ? ep.GetComponent<DigitPark.UI.Panels.ErrorPanelUI>() : null);
 
             // \u2500\u2500 Record Card \u2500\u2500
             Assign(so, "recordText",      FindTMP(root, "RecordText"));

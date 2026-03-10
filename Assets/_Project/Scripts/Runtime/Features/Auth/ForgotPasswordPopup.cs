@@ -175,6 +175,9 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = AutoLocalizer.Get("placeholder_email");
             placeholderText.fontSize = FontSizes.Body;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.Body;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TextAlignmentOptions.Left;
 
@@ -189,6 +192,9 @@ namespace DigitPark.UI.Common
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
             inputText.fontSize = FontSizes.Body;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.Body;
             inputText.color = Color.white;
             inputText.alignment = TextAlignmentOptions.Left;
 
@@ -217,6 +223,9 @@ namespace DigitPark.UI.Common
             {
                 sendText.color = Color.black;
                 sendText.fontSize = FontSizes.Body;
+                sendText.enableAutoSizing = true;
+                sendText.fontSizeMin = FontSizes.AutoMinBody;
+                sendText.fontSizeMax = FontSizes.Body;
             }
 
             // Botón Cancelar (gris)
@@ -235,6 +244,9 @@ namespace DigitPark.UI.Common
             if (cancelText != null)
             {
                 cancelText.fontSize = FontSizes.Body;
+                cancelText.enableAutoSizing = true;
+                cancelText.fontSizeMin = FontSizes.AutoMinBody;
+                cancelText.fontSizeMax = FontSizes.Body;
             }
         }
 
@@ -260,10 +272,11 @@ namespace DigitPark.UI.Common
             cg.alpha = 0f;
             if (popupPanel != null)
                 popupPanel.transform.localScale = Vector3.one * 0.85f;
-            DOTween.Sequence()
-                .Join(cg.DOFade(1f, 0.25f))
-                .Join(popupPanel != null ? popupPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack) : null)
-                .SetUpdate(true);
+            var seq = DOTween.Sequence();
+            seq.Join(cg.DOFade(1f, 0.25f));
+            if (popupPanel != null)
+                seq.Join(popupPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+            seq.SetUpdate(true);
 
             emailInput.Select();
         }
@@ -276,10 +289,11 @@ namespace DigitPark.UI.Common
             var cg = GetComponent<CanvasGroup>();
             if (cg != null)
             {
-                DOTween.Sequence()
-                    .Join(cg.DOFade(0f, 0.2f))
-                    .Join(popupPanel != null ? popupPanel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad) : null)
-                    .OnComplete(() =>
+                var seq = DOTween.Sequence();
+                seq.Join(cg.DOFade(0f, 0.2f));
+                if (popupPanel != null)
+                    seq.Join(popupPanel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad));
+                seq.OnComplete(() =>
                     {
                         gameObject.SetActive(false);
                         if (popupPanel != null) popupPanel.transform.localScale = Vector3.one;
@@ -298,12 +312,13 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void ShowSuccess(string message)
         {
+            if (messageText == null) return;
             messageText.text = message;
             messageText.color = new Color(0.3f, 1f, 0.5f); // Verde
             messageText.gameObject.SetActive(true);
 
             // Deshabilitar el botón de enviar después del éxito
-            sendButton.interactable = false;
+            if (sendButton != null) sendButton.interactable = false;
         }
 
         /// <summary>
@@ -311,6 +326,7 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void ShowError(string message)
         {
+            if (messageText == null) return;
             messageText.text = message;
             messageText.color = new Color(1f, 0.4f, 0.4f); // Rojo
             messageText.gameObject.SetActive(true);
@@ -321,8 +337,8 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void HideMessage()
         {
-            messageText.gameObject.SetActive(false);
-            sendButton.interactable = true;
+            if (messageText != null) messageText.gameObject.SetActive(false);
+            if (sendButton != null) sendButton.interactable = true;
         }
 
         /// <summary>
@@ -330,7 +346,7 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void SetSendButtonInteractable(bool interactable)
         {
-            sendButton.interactable = interactable;
+            if (sendButton != null) sendButton.interactable = interactable;
         }
 
         private void OnSendClicked()
@@ -349,7 +365,7 @@ namespace DigitPark.UI.Common
                 return;
             }
 
-            Debug.Log($"[ForgotPasswordPopup] Enviando recuperación a: {email}");
+            Debug.Log("[ForgotPasswordPopup] Enviando recuperación");
             onSendCallback?.Invoke(email);
         }
 
@@ -379,6 +395,18 @@ namespace DigitPark.UI.Common
         private void OnDestroy()
         {
             transform.DOKill(true);
+            if (popupPanel != null) popupPanel.transform.DOKill(true);
+
+            // Remove overlay button listener
+            var overlay = transform.Find("Overlay");
+            if (overlay != null)
+            {
+                var overlayButton = overlay.GetComponent<Button>();
+                if (overlayButton != null) overlayButton.onClick.RemoveAllListeners();
+            }
+
+            if (sendButton != null) sendButton.onClick.RemoveAllListeners();
+            if (cancelButton != null) cancelButton.onClick.RemoveAllListeners();
         }
     }
 }

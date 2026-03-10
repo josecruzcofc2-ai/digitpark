@@ -334,12 +334,8 @@ namespace DigitPark.UI
             Color accentColor = GetThemeColor(t => t.primaryAccent, new Color(0f, 1f, 1f));
 
             // Obtener textos localizados
-            string subtitleText = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText("boot_subtitle")
-                : "ARCADE EXPERIENCE";
-            string subtitle2Text = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText("boot_subtitle2")
-                : "TRAIN YOUR MIND";
+            string subtitleText = AutoLocalizer.Get("boot_subtitle");
+            string subtitle2Text = AutoLocalizer.Get("boot_subtitle2");
 
             // Subtítulo 1: ARCADE EXPERIENCE (localizado)
             TextMeshProUGUI subtitle = UIFactory.CreateText(

@@ -266,7 +266,8 @@ namespace DigitPark.Services.Mock
             return _transactions.FirstOrDefault(t => t.TransactionId == transactionId);
         }
 
-        // Additional methods for Mock/Testing
+        // Debug/manipulation methods - only available in Editor builds (SEC-C04)
+#if UNITY_EDITOR
         public void SetBalance(decimal amount)
         {
             Debug.Log($"[MockWallet] Balance set manually: ${amount:F2}");
@@ -306,6 +307,7 @@ namespace DigitPark.Services.Mock
             OnBalanceChanged?.Invoke(_currentBalance);
             Debug.Log($"[MockWallet] Wallet reset. Balance: ${_currentBalance:F2}");
         }
+#endif
     }
 
     // Helper classes for serialization with JsonUtility
@@ -351,7 +353,7 @@ namespace DigitPark.Services.Mock
                 Amount = (decimal)amount,
                 BalanceAfter = (decimal)balanceAfter,
                 Description = description,
-                Timestamp = DateTime.Parse(timestamp),
+                Timestamp = DateTime.TryParse(timestamp, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime ts) ? ts : DateTime.UtcNow,
                 ReferenceId = referenceId
             };
         }

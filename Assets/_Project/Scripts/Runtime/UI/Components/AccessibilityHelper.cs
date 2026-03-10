@@ -131,9 +131,7 @@ namespace DigitPark.UI
         {
             if (inputField == null) return;
 
-            string label = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText(labelKey)
-                : labelKey;
+            string label = AutoLocalizer.Get(labelKey);
 
             SetLabel(inputField.gameObject, label);
             SetRole(inputField.gameObject, AccessibilityRole.InputField);
@@ -146,9 +144,7 @@ namespace DigitPark.UI
         {
             if (button == null) return;
 
-            string label = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText(labelKey)
-                : labelKey;
+            string label = AutoLocalizer.Get(labelKey);
 
             SetLabel(button.gameObject, label);
             SetRole(button.gameObject, AccessibilityRole.Button);
@@ -161,9 +157,7 @@ namespace DigitPark.UI
         {
             if (text == null) return;
 
-            string label = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText(labelKey)
-                : labelKey;
+            string label = AutoLocalizer.Get(labelKey);
 
             SetLabel(text.gameObject, label);
             SetRole(text.gameObject, AccessibilityRole.Text);
@@ -264,11 +258,8 @@ namespace DigitPark.UI
         /// </summary>
         public void UpdateLocalizedLabel(string localizationKey)
         {
-            if (LocalizationManager.Instance != null)
-            {
-                Label = LocalizationManager.Instance.GetText(localizationKey);
-                ApplyAccessibility();
-            }
+            Label = AutoLocalizer.Get(localizationKey);
+            ApplyAccessibility();
         }
     }
 }

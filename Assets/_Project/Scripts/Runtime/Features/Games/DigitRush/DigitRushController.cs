@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -24,27 +26,27 @@ namespace DigitPark.Managers
         public static DigitRushController Instance { get; private set; }
 
         [Header("Grid")]
-        [SerializeField] public Button[] gridButtons; // 9 buttons of the 3x3 grid
+        [SerializeField] private Button[] gridButtons; // 9 buttons of the 3x3 grid
 
         [Header("Game UI")]
-        [SerializeField] public TextMeshProUGUI timerText;
-        [SerializeField] public TextMeshProUGUI comboText;
-        [SerializeField] public Button playAgainButton;
-        [SerializeField] public Button backButton;
+        [SerializeField] private TextMeshProUGUI timerText;
+        [SerializeField] private TextMeshProUGUI comboText;
+        [SerializeField] private Button playAgainButton;
+        [SerializeField] private Button backButton;
 
         [Header("Stats Bar")]
-        [SerializeField] public TextMeshProUGUI roundText;
-        [SerializeField] public TextMeshProUGUI errorsText;
-        [SerializeField] public RectTransform progressFill;
-        [SerializeField] public TextMeshProUGUI roundIndicatorText;
+        [SerializeField] private TextMeshProUGUI roundText;
+        [SerializeField] private TextMeshProUGUI errorsText;
+        [SerializeField] private RectTransform progressFill;
+        [SerializeField] private TextMeshProUGUI roundIndicatorText;
 
         [Header("Settings Panel")]
-        [SerializeField] public GameObject settingsPanel;
-        [SerializeField] public Toggle toggleRounds1;
-        [SerializeField] public Toggle toggleRounds3;
-        [SerializeField] public Toggle toggleRounds5;
-        [SerializeField] public Toggle toggleRounds10;
-        [SerializeField] public Button startGameButton;
+        [SerializeField] private GameObject settingsPanel;
+        [SerializeField] private Toggle toggleRounds1;
+        [SerializeField] private Toggle toggleRounds3;
+        [SerializeField] private Toggle toggleRounds5;
+        [SerializeField] private Toggle toggleRounds10;
+        [SerializeField] private Button startGameButton;
 
         [Header("Countdown")]
         [SerializeField] private CountdownUI countdownUI;
@@ -55,27 +57,27 @@ namespace DigitPark.Managers
         [SerializeField] private bool enableHapticFeedback = true;
 
         [Header("Win Message")]
-        [SerializeField] public GameObject winMessagePanel;
-        [SerializeField] public CanvasGroup winMessageCanvasGroup;
-        [SerializeField] public TextMeshProUGUI successText;
+        [SerializeField] private GameObject winMessagePanel;
+        [SerializeField] private CanvasGroup winMessageCanvasGroup;
+        [SerializeField] private TextMeshProUGUI successText;
 
         [Header("Result Panel (Practice - new)")]
-        [SerializeField] public GameObject resultPanel;
-        [SerializeField] public CanvasGroup resultPanelCanvasGroup;
-        [SerializeField] public TextMeshProUGUI resultTitleText;
-        [SerializeField] public TextMeshProUGUI resultTimeText;
-        [SerializeField] public TextMeshProUGUI resultMessageText;
-        [SerializeField] public Button resultPlayAgainButton;
-        [SerializeField] public Button resultExitButton;
+        [SerializeField] private GameObject resultPanel;
+        [SerializeField] private CanvasGroup resultPanelCanvasGroup;
+        [SerializeField] private TextMeshProUGUI resultTitleText;
+        [SerializeField] private TextMeshProUGUI resultTimeText;
+        [SerializeField] private TextMeshProUGUI resultMessageText;
+        [SerializeField] private Button resultPlayAgainButton;
+        [SerializeField] private Button resultExitButton;
 
         [Header("Win/Lose Panels (Cash Battle)")]
-        [SerializeField] public WinPanelController winPanelRealMoney;
-        [SerializeField] public WinPanelController losePanelRealMoney;
+        [SerializeField] private WinPanelController winPanelRealMoney;
+        [SerializeField] private WinPanelController losePanelRealMoney;
 
         [Header("Premium Banner (Result Screen)")]
-        [SerializeField] public GameObject premiumBannerContainer;
-        [SerializeField] public Button premiumBannerButton;
-        [SerializeField] public TextMeshProUGUI premiumBannerText;
+        [SerializeField] private GameObject premiumBannerContainer;
+        [SerializeField] private Button premiumBannerButton;
+        [SerializeField] private TextMeshProUGUI premiumBannerText;
 
         // Game State
         private int currentTargetNumber = 1;
@@ -953,7 +955,7 @@ namespace DigitPark.Managers
                 GameType = GameType.DigitRush,
                 TotalTime = finalTime,
                 Errors = totalErrors,
-                PenaltyTime = 0,
+                PenaltyTime = totalErrors * 1f, // Each error adds 1 second penalty
                 Completed = true,
                 CompletedAt = System.DateTime.UtcNow
             };
@@ -1068,15 +1070,9 @@ namespace DigitPark.Managers
             string selectedKey = keys[Random.Range(0, keys.Length)];
             Debug.Log($"[Game] GetSuccessMessage - Time: {time:F3}s, Selected key: {selectedKey}");
 
-            if (LocalizationManager.Instance != null)
-            {
-                string translatedText = LocalizationManager.Instance.GetText(selectedKey);
-                Debug.Log($"[Game] Translated text: '{translatedText}'");
-                return translatedText;
-            }
-
-            Debug.LogWarning("[Game] LocalizationManager.Instance is NULL! Using key as fallback.");
-            return selectedKey;
+            string translatedText = AutoLocalizer.Get(selectedKey);
+            Debug.Log($"[Game] Translated text: '{translatedText}'");
+            return translatedText;
         }
 
         private void ShowPracticeResult(bool isNewRecord)
@@ -1173,11 +1169,11 @@ namespace DigitPark.Managers
 
             if (playerWon && winPanelRealMoney != null)
             {
-                winPanelRealMoney.ShowRealMoneyResult(result, null, entryFee, true, context?.OpponentName ?? "Opponent");
+                winPanelRealMoney.ShowRealMoneyResult(result, null, entryFee, true, context?.OpponentName ?? AutoLocalizer.Get("default_opponent"));
             }
             else if (!playerWon && losePanelRealMoney != null)
             {
-                losePanelRealMoney.ShowRealMoneyResult(result, null, entryFee, false, context?.OpponentName ?? "Opponent");
+                losePanelRealMoney.ShowRealMoneyResult(result, null, entryFee, false, context?.OpponentName ?? AutoLocalizer.Get("default_opponent"));
             }
         }
 
@@ -1270,12 +1266,19 @@ namespace DigitPark.Managers
 
         private async void SaveBestTime()
         {
-            if (currentPlayer == null || DatabaseService.Instance == null) return;
+            try
+            {
+                if (currentPlayer == null || DatabaseService.Instance == null) return;
 
-            currentPlayer.bestTime = bestTime;
-            await DatabaseService.Instance.SavePlayerData(currentPlayer);
+                currentPlayer.bestTime = bestTime;
+                await DatabaseService.Instance.SavePlayerData(currentPlayer);
 
-            Debug.Log($"[Game] Best time saved: {bestTime:F3}s");
+                Debug.Log($"[Game] Best time saved: {bestTime:F3}s");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[DigitRushController] {ex.Message}");
+            }
         }
 
         private void SaveScoreToDatabase()

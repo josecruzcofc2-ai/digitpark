@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -102,40 +103,56 @@ namespace DigitPark.Managers
 
         private async void LoadFriends()
         {
-            ClearCards();
-
-            ShowLoadingIndicator(true);
-            if (emptyText != null)
-                emptyText.gameObject.SetActive(false);
-
-            allFriends = await FriendService.Instance.GetFriendsList();
-
-            ShowLoadingIndicator(false);
-
-            UpdateFriendsCount();
-
-            if (allFriends == null || allFriends.Count == 0)
+            try
             {
-                if (emptyText != null)
+                if (FriendService.Instance == null)
                 {
-                    emptyText.text = AutoLocalizer.Get("friends_no_friends");
-                    emptyText.gameObject.SetActive(true);
-                    AnimateEmptyText();
+                    Debug.LogWarning("[FriendsManager] FriendService not available");
+                    return;
                 }
-                return;
+
+                ClearCards();
+
+                ShowLoadingIndicator(true);
+                if (emptyText != null)
+                    emptyText.gameObject.SetActive(false);
+
+                allFriends = await FriendService.Instance.GetFriendsList();
+
+                // Null check post-await: this MonoBehaviour may have been destroyed during await
+                if (this == null) return;
+
+                ShowLoadingIndicator(false);
+
+                UpdateFriendsCount();
+
+                if (allFriends == null || allFriends.Count == 0)
+                {
+                    if (emptyText != null)
+                    {
+                        emptyText.text = AutoLocalizer.Get("friends_no_friends");
+                        emptyText.gameObject.SetActive(true);
+                        AnimateEmptyText();
+                    }
+                    return;
+                }
+
+                // Ordenar: online primero, luego alfabeticamente
+                allFriends.Sort((a, b) =>
+                {
+                    if (a.isOnline != b.isOnline)
+                        return b.isOnline.CompareTo(a.isOnline);
+                    return a.username.CompareTo(b.username);
+                });
+
+                foreach (var friend in allFriends)
+                {
+                    CreateFriendCard(friend);
+                }
             }
-
-            // Ordenar: online primero, luego alfabeticamente
-            allFriends.Sort((a, b) =>
+            catch (Exception ex)
             {
-                if (a.isOnline != b.isOnline)
-                    return b.isOnline.CompareTo(a.isOnline);
-                return a.username.CompareTo(b.username);
-            });
-
-            foreach (var friend in allFriends)
-            {
-                CreateFriendCard(friend);
+                Debug.LogError($"[FriendsManager] {ex.Message}");
             }
         }
 
@@ -214,9 +231,9 @@ namespace DigitPark.Managers
 
         private async void LoadFriendAvatar(Image avatarImage, FriendInfo friend)
         {
-            if (AvatarService.Instance != null)
+            try
             {
-                try
+                if (AvatarService.Instance != null)
                 {
                     Sprite avatar = await AvatarService.Instance.LoadAvatar(
                         friend.odId, friend.avatarUrl, friend.username);
@@ -226,9 +243,8 @@ namespace DigitPark.Managers
                         avatarImage.color = Color.white;
                     }
                 }
-                catch (System.Exception e)
+                else
                 {
-                    Debug.LogWarning($"[Friends] Error cargando avatar: {e.Message}");
                     Sprite initial = AvatarInitialGenerator.GenerateAvatar(friend.username, friend.odId);
                     if (avatarImage != null)
                     {
@@ -237,11 +253,15 @@ namespace DigitPark.Managers
                     }
                 }
             }
-            else
+            catch (Exception ex)
             {
+                Debug.LogError($"[FriendsManager] {ex.Message}");
                 Sprite initial = AvatarInitialGenerator.GenerateAvatar(friend.username, friend.odId);
-                avatarImage.sprite = initial;
-                avatarImage.color = Color.white;
+                if (avatarImage != null)
+                {
+                    avatarImage.sprite = initial;
+                    avatarImage.color = Color.white;
+                }
             }
         }
 
@@ -343,33 +363,44 @@ namespace DigitPark.Managers
             Debug.Log($"[Friends] Retar a: {odId}");
             PlayerPrefs.SetString("ChallengePlayerId", odId);
             PlayerPrefs.Save();
-            // TODO: Navegar a seleccion de juego
+            InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info");
         }
 
         private async void OnRemoveFriendClicked(string odId, GameObject card)
         {
-            Debug.Log($"[Friends] Eliminar amigo: {odId}");
-
-            var result = await FriendService.Instance.RemoveFriend(odId);
-
-            if (result.Success)
+            try
             {
-                if (card != null)
-                {
-                    currentCards.Remove(card);
-                    card.transform.DOScale(0f, 0.2f).SetEase(Ease.InBack)
-                        .OnComplete(() => Destroy(card));
-                }
+                Debug.Log($"[Friends] Eliminar amigo: {odId}");
 
-                allFriends.RemoveAll(f => f.odId == odId);
-                UpdateFriendsCount();
+                // Disable the remove button to prevent duplicate requests
+                var removeBtn = card?.transform.Find("ButtonsRow/RemoveButton")?.GetComponent<Button>();
+                if (removeBtn != null) removeBtn.interactable = false;
 
-                if (allFriends.Count == 0 && emptyText != null)
+                var result = await FriendService.Instance.RemoveFriend(odId);
+
+                if (result.Success)
                 {
-                    emptyText.text = AutoLocalizer.Get("friends_no_friends");
-                    emptyText.gameObject.SetActive(true);
-                    AnimateEmptyText();
+                    if (card != null)
+                    {
+                        currentCards.Remove(card);
+                        card.transform.DOScale(0f, 0.2f).SetEase(Ease.InBack)
+                            .OnComplete(() => Destroy(card));
+                    }
+
+                    allFriends.RemoveAll(f => f.odId == odId);
+                    UpdateFriendsCount();
+
+                    if (allFriends.Count == 0 && emptyText != null)
+                    {
+                        emptyText.text = AutoLocalizer.Get("friends_no_friends");
+                        emptyText.gameObject.SetActive(true);
+                        AnimateEmptyText();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[FriendsManager] {ex.Message}");
             }
         }
 
@@ -426,7 +457,7 @@ namespace DigitPark.Managers
             // Search bar fade + slide
             if (searchBarTransform != null)
             {
-                var cg = searchBarTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = searchBarTransform.GetComponent<CanvasGroup>() ?? searchBarTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 Vector2 pos = searchBarTransform.anchoredPosition;
                 searchBarTransform.anchoredPosition = new Vector2(pos.x - 100, pos.y);
@@ -439,7 +470,7 @@ namespace DigitPark.Managers
             // Requests nav fade + slide
             if (requestsNavTransform != null)
             {
-                var cg = requestsNavTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = requestsNavTransform.GetComponent<CanvasGroup>() ?? requestsNavTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 Vector2 pos = requestsNavTransform.anchoredPosition;
                 requestsNavTransform.anchoredPosition = new Vector2(pos.x + 100, pos.y);
@@ -452,7 +483,7 @@ namespace DigitPark.Managers
             // ScrollView fade in
             if (scrollViewTransform != null)
             {
-                var cg = scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = scrollViewTransform.GetComponent<CanvasGroup>() ?? scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 DOTween.Sequence()
                     .AppendInterval(0.3f)
@@ -501,6 +532,17 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             transform.DOKill();
+
+            // Kill tweens on child objects (cards, indicators, etc.)
+            foreach (var card in currentCards)
+            {
+                if (card != null) card.transform.DOKill();
+            }
+            if (headerTransform != null) headerTransform.DOKill();
+            if (searchBarTransform != null) searchBarTransform.DOKill();
+            if (requestsNavTransform != null) requestsNavTransform.DOKill();
+            if (scrollViewTransform != null) scrollViewTransform.DOKill();
+            if (requestsBadge != null) requestsBadge.transform.DOKill();
         }
     }
 }

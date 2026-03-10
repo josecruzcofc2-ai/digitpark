@@ -101,6 +101,11 @@ namespace DigitPark.Themes
         private void LoadThemesFromResources()
         {
             ThemeData[] themes = Resources.LoadAll<ThemeData>("Themes");
+            if (themes == null || themes.Length == 0)
+            {
+                Debug.LogWarning("[ThemeManager] No themes found in Resources/Themes");
+                return;
+            }
 
             // Orden: 1) Neon Dark (gratis), 2) Earnable/plateados, 3) Premium/dorados
             var sortedThemes = themes.OrderBy(t => t.themeId != "neon_dark" ? 1 : 0) // neon_dark primero

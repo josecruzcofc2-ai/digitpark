@@ -62,6 +62,15 @@ namespace DigitPark.Editor
                 Debug.LogError("[PlayModeSelectionUIBuilder] No se encontró Canvas en la escena");
                 return;
             }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             Debug.Log($"[PlayModeSelectionUIBuilder] Usando Canvas: {canvas.gameObject.name}");
 
             Transform canvasTransform = canvas.transform;
@@ -172,10 +181,10 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
         }
 
@@ -197,6 +206,9 @@ namespace DigitPark.Editor
             subtitleTmp.fontStyle = FontStyles.Bold;
             subtitleTmp.color = TEXT_SECONDARY;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
+            subtitleTmp.enableAutoSizing = true;
+            subtitleTmp.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleTmp.fontSizeMax = FontSizes.Body;
         }
 
         private static void CreateModeCardsSection(Transform parent)

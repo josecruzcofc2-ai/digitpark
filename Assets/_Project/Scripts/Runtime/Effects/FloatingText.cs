@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using DigitPark.UI;
+using DigitPark.Localization;
 
 namespace DigitPark.Effects
 {
@@ -72,7 +73,7 @@ namespace DigitPark.Effects
         /// </summary>
         public void ShowCombo(int comboCount, Vector3 worldPosition)
         {
-            string text = $"COMBO x{comboCount}!";
+            string text = AutoLocalizer.Get("combo_text", comboCount);
             float scale = 1f + (comboCount - 1) * 0.1f;
             SpawnFloatingText(text, worldPosition, comboColor, FloatType.Combo, scale);
         }
@@ -82,7 +83,7 @@ namespace DigitPark.Effects
         /// </summary>
         public void ShowPerfect(Vector3 worldPosition)
         {
-            SpawnFloatingText("PERFECT!", worldPosition, perfectColor, FloatType.Special, 1.3f);
+            SpawnFloatingText(AutoLocalizer.Get("perfect_text"), worldPosition, perfectColor, FloatType.Special, 1.3f);
         }
 
         /// <summary>
@@ -90,7 +91,7 @@ namespace DigitPark.Effects
         /// </summary>
         public void ShowExcellent(Vector3 worldPosition)
         {
-            SpawnFloatingText("EXCELLENT!", worldPosition, comboColor, FloatType.Special, 1.4f);
+            SpawnFloatingText(AutoLocalizer.Get("excellent_text"), worldPosition, comboColor, FloatType.Special, 1.4f);
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace DigitPark.Effects
         /// </summary>
         public void ShowNewRecord(Vector3 worldPosition)
         {
-            SpawnFloatingText("NEW RECORD!", worldPosition, comboColor, FloatType.Record, 1.5f);
+            SpawnFloatingText(AutoLocalizer.Get("new_record"), worldPosition, comboColor, FloatType.Record, 1.5f);
         }
 
         /// <summary>
@@ -153,7 +154,9 @@ namespace DigitPark.Effects
             RectTransform rt = textObj.GetComponent<RectTransform>();
 
             // Convertir posicion mundial a posicion de canvas
-            Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
+            Camera cam = Camera.main;
+            if (cam == null) { ReturnTextObject(textObj); return; }
+            Vector2 screenPos = cam.WorldToScreenPoint(worldPosition);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvas.transform as RectTransform,
                 screenPos,
@@ -171,14 +174,9 @@ namespace DigitPark.Effects
             tmp.fontSize = GetFontSize(type);
             tmp.fontStyle = FontStyles.Bold;
 
-            // Agregar outline si no existe
-            Outline outline = textObj.GetComponent<Outline>();
-            if (outline == null)
-            {
-                outline = textObj.AddComponent<Outline>();
-            }
-            outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
-            outline.effectDistance = new Vector2(2, 2);
+            // Use TMP's built-in outline (UI Outline/Shadow components have no effect on TMP)
+            tmp.outlineWidth = 0.2f;
+            tmp.outlineColor = new Color32(0, 0, 0, 204);
 
             textObj.SetActive(true);
 
@@ -310,10 +308,7 @@ namespace DigitPark.Effects
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
 
-            // Shadow para mejor legibilidad
-            Shadow shadow = obj.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
-            shadow.effectDistance = new Vector2(3, -3);
+            // TMP has built-in outline/shadow via material — no need for UI Shadow component
 
             return obj;
         }

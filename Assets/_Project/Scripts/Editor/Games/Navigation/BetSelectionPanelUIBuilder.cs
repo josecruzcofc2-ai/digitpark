@@ -117,6 +117,14 @@ namespace DigitPark.Editor
                 return;
             }
 
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             // Ensure GraphicRaycaster (required for ALL UI events)
             if (canvas.GetComponent<GraphicRaycaster>() == null)
                 canvas.gameObject.AddComponent<GraphicRaycaster>();
@@ -255,13 +263,14 @@ namespace DigitPark.Editor
 
         private static void CreateHeader(Transform parent)
         {
-            // Header: same 7.2% height as MainMenu (0.928 → 1.0)
+            // Header: 100px standardized height
             GameObject header = CreateUI("HeaderSection", parent);
             RectTransform hrt = header.GetComponent<RectTransform>();
-            hrt.anchorMin = new Vector2(0, 0.928f);
-            hrt.anchorMax = new Vector2(1, 1f);
-            hrt.offsetMin = Vector2.zero;
-            hrt.offsetMax = Vector2.zero;
+            hrt.anchorMin = new Vector2(0, 1);
+            hrt.anchorMax = new Vector2(1, 1);
+            hrt.pivot = new Vector2(0.5f, 1);
+            hrt.anchoredPosition = Vector2.zero;
+            hrt.sizeDelta = new Vector2(0, 100);
             header.AddComponent<Image>().color = HEADER_BG;
             AddOutline(header, CYAN_DARK, 1);
 
@@ -269,8 +278,8 @@ namespace DigitPark.Editor
             GameObject titleObj = new GameObject("TitleText");
             titleObj.transform.SetParent(header.transform, false);
             RectTransform titleRT = titleObj.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 0.3f);
-            titleRT.anchorMax = new Vector2(0.5f, 1);
+            titleRT.anchorMin = new Vector2(0, 0.15f);
+            titleRT.anchorMax = new Vector2(0.5f, 0.85f);
             titleRT.offsetMin = new Vector2(20, 0);
             titleRT.offsetMax = new Vector2(0, 0);
             var titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
@@ -305,10 +314,10 @@ namespace DigitPark.Editor
             // Currency pills (right side - exact same anchors as MainMenu, offset 120 right)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
         }
 
         // ==================== SCROLL AREA ====================

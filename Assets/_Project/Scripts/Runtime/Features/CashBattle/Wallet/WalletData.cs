@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -57,8 +58,8 @@ namespace DigitPark.CashBattle
         public string id { get => transactionId; set => transactionId = value; }
         public TransactionType type;
         public TransactionStatus status;
-        public decimal amount;
-        public decimal balanceAfter;
+        public float amount;
+        public float balanceAfter;
         public DateTime timestamp;
         public string description;
         public string referenceId;      // Match/tournament ID if applicable
@@ -74,35 +75,35 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Creates a deposit transaction
         /// </summary>
-        public static WalletTransaction CreateDeposit(decimal amount, PaymentMethod method)
+        public static WalletTransaction CreateDeposit(float amount, PaymentMethod method)
         {
             return new WalletTransaction
             {
                 type = TransactionType.Deposit,
                 amount = amount,
                 paymentMethod = method,
-                description = $"Deposit via {method}"
+                description = AutoLocalizer.Get("wallet_deposit_via", method)
             };
         }
 
         /// <summary>
         /// Creates a withdrawal transaction
         /// </summary>
-        public static WalletTransaction CreateWithdrawal(decimal amount, PaymentMethod method)
+        public static WalletTransaction CreateWithdrawal(float amount, PaymentMethod method)
         {
             return new WalletTransaction
             {
                 type = TransactionType.Withdrawal,
                 amount = -amount, // Negative for withdrawals
                 paymentMethod = method,
-                description = $"Withdrawal via {method}"
+                description = AutoLocalizer.Get("wallet_withdrawal_via", method)
             };
         }
 
         /// <summary>
         /// Creates an entry fee transaction
         /// </summary>
-        public static WalletTransaction CreateEntryFee(decimal amount, string matchId, string matchDescription)
+        public static WalletTransaction CreateEntryFee(float amount, string matchId, string matchDescription)
         {
             return new WalletTransaction
             {
@@ -116,7 +117,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Creates a winnings transaction
         /// </summary>
-        public static WalletTransaction CreateWinnings(decimal amount, string matchId, string matchDescription)
+        public static WalletTransaction CreateWinnings(float amount, string matchId, string matchDescription)
         {
             return new WalletTransaction
             {
@@ -153,7 +154,7 @@ namespace DigitPark.CashBattle
         /// </summary>
         public string GetTypeSymbol()
         {
-            return amount >= 0 ? "+" : "";
+            return amount >= 0 ? "+" : "-";
         }
 
         /// <summary>
@@ -172,13 +173,13 @@ namespace DigitPark.CashBattle
             TimeSpan timeSince = DateTime.UtcNow - timestamp;
 
             if (timeSince.TotalMinutes < 1)
-                return "Now";
+                return AutoLocalizer.Get("time_now");
             if (timeSince.TotalMinutes < 60)
-                return $"{(int)timeSince.TotalMinutes}m ago";
+                return AutoLocalizer.Get("time_ago_minutes", (int)timeSince.TotalMinutes);
             if (timeSince.TotalHours < 24)
-                return $"{(int)timeSince.TotalHours}h ago";
+                return AutoLocalizer.Get("time_ago_hours", (int)timeSince.TotalHours);
             if (timeSince.TotalDays < 7)
-                return $"{(int)timeSince.TotalDays}d ago";
+                return AutoLocalizer.Get("time_ago_days", (int)timeSince.TotalDays);
 
             return timestamp.ToString("dd/MM/yyyy");
         }
@@ -191,12 +192,12 @@ namespace DigitPark.CashBattle
     public class WalletData
     {
         public string userId;
-        public decimal balance;
-        public decimal pendingBalance;      // Pending balance (pending withdrawals)
-        public decimal lifetimeDeposits;
-        public decimal lifetimeWithdrawals;
-        public decimal lifetimeWinnings;
-        public decimal lifetimeLosses;
+        public float balance;
+        public float pendingBalance;      // Pending balance (pending withdrawals)
+        public float lifetimeDeposits;
+        public float lifetimeWithdrawals;
+        public float lifetimeWinnings;
+        public float lifetimeLosses;
         public List<WalletTransaction> transactions;
         public DateTime lastUpdated;
 
@@ -209,12 +210,12 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Available balance (total - pending)
         /// </summary>
-        public decimal AvailableBalance => balance - pendingBalance;
+        public float AvailableBalance => balance - pendingBalance;
 
         /// <summary>
         /// Total net winnings
         /// </summary>
-        public decimal NetWinnings => lifetimeWinnings - lifetimeLosses;
+        public float NetWinnings => lifetimeWinnings - lifetimeLosses;
 
         /// <summary>
         /// Adds a transaction and updates statistics
@@ -274,10 +275,10 @@ namespace DigitPark.CashBattle
     [Serializable]
     public class DepositOption
     {
-        public decimal amount;
+        public float amount;
         public string promoCode;
 
-        public decimal TotalAmount => amount;
+        public float TotalAmount => amount;
 
         public string GetDisplayText()
         {

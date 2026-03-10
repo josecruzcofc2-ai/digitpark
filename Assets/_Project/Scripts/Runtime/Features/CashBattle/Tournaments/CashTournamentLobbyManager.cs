@@ -243,7 +243,7 @@ namespace DigitPark.Managers
                 new ParticipantDisplayData
                 {
                     userId = "self_001",
-                    username = "You",
+                    username = AutoLocalizer.Get("chat_you"),
                     rank = 1,
                     attemptsUsed = 1,
                     maxAttempts = 3,
@@ -454,7 +454,7 @@ namespace DigitPark.Managers
             }
 
             // Add chat message locally (mock)
-            AddChatMessage("You", message);
+            AddChatMessage(AutoLocalizer.Get("chat_you"), message);
 
             // Scroll to bottom
             if (chatScrollRect != null)

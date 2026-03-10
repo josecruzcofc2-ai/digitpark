@@ -171,6 +171,15 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             if (EditorUtility.DisplayDialog("Reconstruir UI?",
                 "Esto reconstruirá la UI de Cash History con el nuevo diseño.\n\n¿Continuar?",
                 "Sí, Construir", "Cancelar"))
@@ -193,6 +202,15 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             BuildAllElements(canvas);
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 
@@ -203,6 +221,15 @@ namespace DigitPark.Editor
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
+
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
 
             Transform safeArea = canvas.transform.Find("SafeArea");
             if (safeArea == null)
@@ -223,6 +250,15 @@ namespace DigitPark.Editor
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             Transform safeArea = canvas.transform.Find("SafeArea");
             if (safeArea == null)
             {
@@ -241,6 +277,15 @@ namespace DigitPark.Editor
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
+
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
 
             GameObject prefab = CreateMatchHistoryItem(canvas.transform, "QuickMath", "Opponent", true, 5f, 10f, "Today, 14:30", "5-3", "1v1");
             Selection.activeGameObject = prefab;

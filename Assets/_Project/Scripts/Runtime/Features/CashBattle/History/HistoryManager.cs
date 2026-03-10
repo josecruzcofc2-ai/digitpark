@@ -12,23 +12,7 @@ namespace DigitPark.CashBattle
     public class HistoryManager : MonoBehaviour
     {
         private static HistoryManager _instance;
-        public static HistoryManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<HistoryManager>();
-                    if (_instance == null)
-                    {
-                        GameObject go = new GameObject("HistoryManager");
-                        _instance = go.AddComponent<HistoryManager>();
-                        DontDestroyOnLoad(go);
-                    }
-                }
-                return _instance;
-            }
-        }
+        public static HistoryManager Instance => _instance;
 
         // ==================== ESTADO ====================
 
@@ -144,7 +128,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Registra una nueva partida 1v1
         /// </summary>
-        public HistoryEntry StartMatch1v1(string gameType, string opponentName, string opponentId, decimal entryFee)
+        public HistoryEntry StartMatch1v1(string gameType, string opponentName, string opponentId, float entryFee)
         {
             var entry = HistoryEntry.Create1v1Match(gameType, opponentName, entryFee);
             entry.opponentId = opponentId;
@@ -158,7 +142,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Registra un nuevo Cognitive Sprint
         /// </summary>
-        public HistoryEntry StartCognitiveSprint(string[] games, string opponentName, string opponentId, decimal entryFee)
+        public HistoryEntry StartCognitiveSprint(string[] games, string opponentName, string opponentId, float entryFee)
         {
             var entry = HistoryEntry.CreateCognitiveSprint(games, opponentName, entryFee);
             entry.opponentId = opponentId;
@@ -172,7 +156,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Registra participación en torneo
         /// </summary>
-        public HistoryEntry JoinTournament(string tournamentName, string tournamentId, decimal entryFee)
+        public HistoryEntry JoinTournament(string tournamentName, string tournamentId, float entryFee)
         {
             var entry = HistoryEntry.CreateTournament(tournamentName, tournamentId, entryFee);
 
@@ -201,7 +185,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Completa una partida 1v1 o Cognitive Sprint
         /// </summary>
-        public void CompleteMatch(string entryId, MatchResult result, float myScore, float opponentScore, decimal prize)
+        public void CompleteMatch(string entryId, MatchResult result, float myScore, float opponentScore, float prize)
         {
             var entry = _history.Find(e => e.entryId == entryId);
             if (entry == null)
@@ -225,7 +209,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Completa un torneo
         /// </summary>
-        public void CompleteTournament(string entryId, int position, int totalParticipants, decimal prize)
+        public void CompleteTournament(string entryId, int position, int totalParticipants, float prize)
         {
             var entry = _history.Find(e => e.entryId == entryId);
             if (entry == null)
@@ -407,7 +391,7 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Obtiene ganancias de los últimos N días
         /// </summary>
-        public decimal GetEarningsLastDays(int days)
+        public float GetEarningsLastDays(int days)
         {
             DateTime since = DateTime.UtcNow.AddDays(-days);
             return _history
@@ -421,22 +405,22 @@ namespace DigitPark.CashBattle
         [ContextMenu("Debug: Add Sample Win")]
         private void DebugAddSampleWin()
         {
-            var entry = StartMatch1v1("Memory", "TestOpponent", "test123", 5m);
-            CompleteMatch(entry.entryId, MatchResult.Win, 2500, 1800, 9.5m);
+            var entry = StartMatch1v1("Memory", "TestOpponent", "test123", 5f);
+            CompleteMatch(entry.entryId, MatchResult.Win, 2500, 1800, 9.5f);
         }
 
         [ContextMenu("Debug: Add Sample Loss")]
         private void DebugAddSampleLoss()
         {
-            var entry = StartMatch1v1("Reaction", "ProPlayer", "pro123", 10m);
-            CompleteMatch(entry.entryId, MatchResult.Loss, 1200, 1800, 0m);
+            var entry = StartMatch1v1("Reaction", "ProPlayer", "pro123", 10f);
+            CompleteMatch(entry.entryId, MatchResult.Loss, 1200, 1800, 0f);
         }
 
         [ContextMenu("Debug: Add Sample Tournament")]
         private void DebugAddSampleTournament()
         {
-            var entry = JoinTournament("Weekend Challenge", "tour123", 25m);
-            CompleteTournament(entry.entryId, 3, 64, 50m);
+            var entry = JoinTournament("Weekend Challenge", "tour123", 25f);
+            CompleteTournament(entry.entryId, 3, 64, 50f);
         }
 
         [ContextMenu("Debug: Clear History")]

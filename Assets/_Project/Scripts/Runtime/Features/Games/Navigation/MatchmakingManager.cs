@@ -152,51 +152,59 @@ namespace DigitPark.Managers
 
         private async void SetupPlayerInfo()
         {
-            // Get player name
-            string playerName = PlayerPrefs.GetString("PlayerName", "Player");
-            string playerId = PlayerPrefs.GetString("PlayerId", "");
-            if (playerNameText != null)
-                playerNameText.text = playerName;
-
-            // Get player level
-            int level = PlayerPrefs.GetInt("PlayerLevel", 1);
-            if (playerLevelText != null)
-                playerLevelText.text = AutoLocalizer.Get("level_prefix", level);
-
-            // Load player avatar
-            if (playerAvatar != null)
+            try
             {
-                if (AvatarService.Instance != null)
+                // Get player name
+                string playerName = PlayerPrefs.GetString("PlayerName", "Player");
+                string playerId = PlayerPrefs.GetString("PlayerId", "");
+                if (playerNameText != null)
+                    playerNameText.text = playerName;
+
+                // Get player level
+                int level = PlayerPrefs.GetInt("PlayerLevel", 1);
+                if (playerLevelText != null)
+                    playerLevelText.text = AutoLocalizer.Get("level_prefix", level);
+
+                // Load player avatar
+                if (playerAvatar != null)
                 {
-                    try
+                    if (AvatarService.Instance != null)
                     {
-                        Sprite avatarSprite = await AvatarService.Instance.LoadCurrentUserAvatar();
-                        if (avatarSprite != null)
+                        try
                         {
-                            playerAvatar.sprite = avatarSprite;
+                            Sprite avatarSprite = await AvatarService.Instance.LoadCurrentUserAvatar();
+                            if (this == null) return;
+                            if (avatarSprite != null)
+                            {
+                                playerAvatar.sprite = avatarSprite;
+                                playerAvatar.color = Color.white;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogWarning($"[Matchmaking] Could not load player avatar: {e.Message}");
+                            // Fallback: generar avatar con inicial
+                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
+                            playerAvatar.sprite = initialAvatar;
                             playerAvatar.color = Color.white;
                         }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Debug.LogWarning($"[Matchmaking] Could not load player avatar: {e.Message}");
-                        // Fallback: generar avatar con inicial
+                        // Sin AvatarService: generar avatar con inicial
                         Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
                         playerAvatar.sprite = initialAvatar;
                         playerAvatar.color = Color.white;
                     }
                 }
-                else
-                {
-                    // Sin AvatarService: generar avatar con inicial
-                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
-                    playerAvatar.sprite = initialAvatar;
-                    playerAvatar.color = Color.white;
-                }
-            }
 
-            // Setup opponent as searching
-            ShowOpponentSearching(true);
+                // Setup opponent as searching
+                ShowOpponentSearching(true);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MatchmakingManager] {ex.Message}");
+            }
         }
 
         private void SetupGameIcon()
@@ -419,7 +427,7 @@ namespace DigitPark.Managers
 
             if (isSearching)
             {
-                OnMatchFound("mock_match_123", "Opponent");
+                OnMatchFound("mock_match_123", AutoLocalizer.Get("default_opponent"));
             }
         }
 
@@ -508,56 +516,64 @@ namespace DigitPark.Managers
 
         private async void ShowOpponentInfo(string opponentInfo)
         {
-            ShowOpponentSearching(false);
-
-            // Parse opponent name
-            if (opponentNameText != null)
-                opponentNameText.text = opponentInfo;
-
-            // Mock opponent level
-            if (opponentLevelText != null)
-                opponentLevelText.text = AutoLocalizer.Get("level_prefix", UnityEngine.Random.Range(1, 50));
-
-            // Load opponent avatar
-            if (opponentAvatar != null)
+            try
             {
-                if (AvatarService.Instance != null && !string.IsNullOrEmpty(opponentId))
+                ShowOpponentSearching(false);
+
+                // Parse opponent name
+                if (opponentNameText != null)
+                    opponentNameText.text = opponentInfo;
+
+                // Mock opponent level
+                if (opponentLevelText != null)
+                    opponentLevelText.text = AutoLocalizer.Get("level_prefix", UnityEngine.Random.Range(1, 50));
+
+                // Load opponent avatar
+                if (opponentAvatar != null)
                 {
-                    try
+                    if (AvatarService.Instance != null && !string.IsNullOrEmpty(opponentId))
                     {
-                        // Intentar cargar avatar real del oponente desde Firebase
-                        Sprite avatarSprite = await AvatarService.Instance.LoadAvatar(
-                            opponentId, "", opponentInfo);
-                        if (avatarSprite != null)
+                        try
                         {
-                            opponentAvatar.sprite = avatarSprite;
+                            // Intentar cargar avatar real del oponente desde Firebase
+                            Sprite avatarSprite = await AvatarService.Instance.LoadAvatar(
+                                opponentId, "", opponentInfo);
+                            if (this == null) return;
+                            if (avatarSprite != null)
+                            {
+                                opponentAvatar.sprite = avatarSprite;
+                                opponentAvatar.color = Color.white;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogWarning($"[Matchmaking] Could not load opponent avatar: {e.Message}");
+                            // Fallback: generar avatar con inicial del oponente
+                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(opponentInfo, opponentId);
+                            opponentAvatar.sprite = initialAvatar;
                             opponentAvatar.color = Color.white;
                         }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Debug.LogWarning($"[Matchmaking] Could not load opponent avatar: {e.Message}");
-                        // Fallback: generar avatar con inicial del oponente
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(opponentInfo, opponentId);
+                        // Sin AvatarService o sin opponentId: generar avatar con inicial
+                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
+                            opponentInfo, opponentId ?? opponentInfo);
                         opponentAvatar.sprite = initialAvatar;
                         opponentAvatar.color = Color.white;
                     }
                 }
-                else
+
+                // Animate opponent card
+                if (opponentCard != null)
                 {
-                    // Sin AvatarService o sin opponentId: generar avatar con inicial
-                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
-                        opponentInfo, opponentId ?? opponentInfo);
-                    opponentAvatar.sprite = initialAvatar;
-                    opponentAvatar.color = Color.white;
+                    opponentCard.transform.localScale = Vector3.zero;
+                    StartCoroutine(AnimateScale(opponentCard.transform, Vector3.one, 0.4f));
                 }
             }
-
-            // Animate opponent card
-            if (opponentCard != null)
+            catch (Exception ex)
             {
-                opponentCard.transform.localScale = Vector3.zero;
-                StartCoroutine(AnimateScale(opponentCard.transform, Vector3.one, 0.4f));
+                Debug.LogError($"[MatchmakingManager] {ex.Message}");
             }
         }
 

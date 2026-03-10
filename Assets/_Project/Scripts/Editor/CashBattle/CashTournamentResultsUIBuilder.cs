@@ -141,6 +141,15 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             // Remove existing panel if present
             Transform existing = canvas.transform.Find("ResultPanel");
             if (existing != null)
@@ -169,6 +178,15 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             // Remove existing panel if present
             Transform existing = canvas.transform.Find("ResultPanel");
             if (existing != null)
@@ -185,6 +203,15 @@ namespace DigitPark.Editor
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
             if (canvas == null) return;
+
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
 
             Transform existing = canvas.transform.Find("ResultPanel");
             if (existing != null)

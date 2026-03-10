@@ -322,10 +322,10 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             EditorUtility.SetDirty(header);
             Debug.Log("[TournamentsBrowserUIBuilder] Header creado");
@@ -440,13 +440,24 @@ namespace DigitPark.Editor
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = true;
 
-            // Search Icon
+            // Search Icon (magnifying glass)
             GameObject iconObj = FindOrCreateChild(searchBar, "SearchIcon");
             RectTransform iconRT = GetOrAddComponent<RectTransform>(iconObj);
             iconRT.sizeDelta = new Vector2(35, 35);
 
             Image iconImage = GetOrAddComponent<Image>(iconObj);
-            iconImage.color = TEXT_SECONDARY;
+            Sprite searchSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Navigation/SearchIcon.png");
+            if (searchSprite != null)
+            {
+                iconImage.sprite = searchSprite;
+                iconImage.color = TEXT_SECONDARY;
+                iconImage.preserveAspect = true;
+            }
+            else
+            {
+                iconImage.color = TEXT_SECONDARY;
+                Debug.LogWarning("[TournamentsBrowserUIBuilder] SearchIcon.png not found");
+            }
 
             LayoutElement iconLE = GetOrAddComponent<LayoutElement>(iconObj);
             iconLE.minWidth = 35;
@@ -476,7 +487,7 @@ namespace DigitPark.Editor
             filterLE.minWidth = 160;
             filterLE.preferredWidth = 160;
 
-            GameObject filterTextObj = FindOrCreateChild(filterBtn, "Text");
+            GameObject filterTextObj = FindOrCreateChild(filterBtn, "FiltersButtonText");
             TextMeshProUGUI filterText = GetOrAddComponent<TextMeshProUGUI>(filterTextObj);
             filterText.text = "Filters";
             filterText.fontSize = FontSizes.Body;
@@ -641,7 +652,7 @@ namespace DigitPark.Editor
             createLE.preferredHeight = 55;
             createLE.minWidth = 220;
 
-            GameObject createTextObj = FindOrCreateChild(createBtn, "Text");
+            GameObject createTextObj = FindOrCreateChild(createBtn, "CreateTournamentText");
             TextMeshProUGUI createText = GetOrAddComponent<TextMeshProUGUI>(createTextObj);
             createText.text = "Create Tournament";
             createText.fontSize = FontSizes.H4;
@@ -907,7 +918,7 @@ namespace DigitPark.Editor
             SetupButtonColors(loadMoreBtn, BUTTON_SECONDARY);
             AddOutline(loadMore, CYAN_DARK);
 
-            GameObject textObj = FindOrCreateChild(loadMore, "Text");
+            GameObject textObj = FindOrCreateChild(loadMore, "LoadMoreText");
             TextMeshProUGUI loadMoreText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             loadMoreText.text = "Load More";
             loadMoreText.fontSize = FontSizes.Subtitle;
@@ -997,7 +1008,7 @@ namespace DigitPark.Editor
             btnShadow.effectDistance = new Vector2(3, -4);
 
             // Button text
-            GameObject textObj = FindOrCreateChild(createBtn, "Text");
+            GameObject textObj = FindOrCreateChild(createBtn, "CreateTournamentText");
             TextMeshProUGUI btnText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             btnText.text = "Create Tournament";
             btnText.fontSize = FontSizes.Subtitle;

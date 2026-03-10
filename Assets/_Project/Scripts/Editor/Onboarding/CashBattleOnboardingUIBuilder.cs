@@ -158,7 +158,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             CreateBackground(canvas.transform);
@@ -272,6 +272,9 @@ namespace DigitPark.Editor
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.alignment = TextAlignmentOptions.Center;
+            ptTMP.enableAutoSizing = true;
+            ptTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ptTMP.fontSizeMax = FontSizes.Body;
 
             // Skip Button (right)
             var skipBtn = FindOrCreate(topBar.transform, "SkipButton");

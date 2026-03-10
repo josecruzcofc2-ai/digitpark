@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -168,7 +169,10 @@ namespace DigitPark.Managers
             {
                 isOwnProfile = false;
                 viewingPlayerId = playerId;
-                _ = LoadOtherProfileAsync(playerId);
+                _ = LoadOtherProfileAsync(playerId).ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogError($"[ProfileManager] LoadOtherProfileAsync failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
 
@@ -198,7 +202,10 @@ namespace DigitPark.Managers
                 editNameButton.gameObject.SetActive(true);
 
             // Cargar avatar del usuario actual
-            _ = LoadAvatarAsync();
+            _ = LoadAvatarAsync().ContinueWith(t =>
+            {
+                if (t.IsFaulted) Debug.LogError($"[ProfileManager] LoadAvatarAsync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 
             // Mostrar botones de accion
             if (friendsButton != null)
@@ -219,6 +226,8 @@ namespace DigitPark.Managers
                 currentPlayerData = await DatabaseService.Instance.GetPlayerDataById(playerId);
             }
 
+            if (this == null) return;
+
             // Ocultar botones de edicion (no es nuestro perfil)
             if (editAvatarButton != null)
                 editAvatarButton.gameObject.SetActive(false);
@@ -226,7 +235,10 @@ namespace DigitPark.Managers
                 editNameButton.gameObject.SetActive(false);
 
             // Cargar avatar del otro jugador
-            _ = LoadAvatarAsync();
+            _ = LoadAvatarAsync().ContinueWith(t =>
+            {
+                if (t.IsFaulted) Debug.LogError($"[ProfileManager] LoadAvatarAsync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 
             // Verificar estado de amistad
             CheckFriendStatus(playerId);
@@ -367,7 +379,7 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    valueText.text = "-- | 0%";
+                    valueText.text = AutoLocalizer.Get("stats_no_data");
                 }
             }
             if (barFill != null)
@@ -534,6 +546,22 @@ namespace DigitPark.Managers
             {
                 AvatarService.Instance.OnAvatarChanged -= OnAvatarChanged;
             }
+
+            // Remove button listeners to prevent leaks
+            backButton?.onClick.RemoveAllListeners();
+            addFriendIconButton?.onClick.RemoveAllListeners();
+            editAvatarButton?.onClick.RemoveAllListeners();
+            editNameButton?.onClick.RemoveAllListeners();
+            friendsButton?.onClick.RemoveAllListeners();
+            historyButton?.onClick.RemoveAllListeners();
+            challengeButton?.onClick.RemoveAllListeners();
+            darkOverlayButton?.onClick.RemoveAllListeners();
+            cancelButton?.onClick.RemoveAllListeners();
+            digitRushButton?.onClick.RemoveAllListeners();
+            memoryPairsButton?.onClick.RemoveAllListeners();
+            quickMathButton?.onClick.RemoveAllListeners();
+            flashTapButton?.onClick.RemoveAllListeners();
+            oddOneOutButton?.onClick.RemoveAllListeners();
         }
 
         #endregion
@@ -566,45 +594,52 @@ namespace DigitPark.Managers
 
         private async void OnAddFriendClicked()
         {
-            if (string.IsNullOrEmpty(viewingPlayerId))
+            try
             {
-                Debug.LogWarning("[Profile] No hay jugador para agregar");
-                return;
-            }
-
-            // Verificar si ya hay solicitud pendiente
-            if (FriendService.Instance.HasPendingRequestWith(viewingPlayerId))
-            {
-                Debug.Log("[Profile] Ya existe solicitud pendiente");
-                SetStatusText(AutoLocalizer.Get("profile_request_pending"), new Color32(255, 204, 0, 255));
-                return;
-            }
-
-            Debug.Log($"[Profile] Enviando solicitud de amistad a: {viewingPlayerId}");
-
-            // Enviar solicitud usando FriendService
-            var result = await FriendService.Instance.SendFriendRequest(viewingPlayerId);
-
-            if (result.Success)
-            {
-                // Feedback visual - cambiar icono o desactivar
-                if (addFriendIconButton != null)
+                if (string.IsNullOrEmpty(viewingPlayerId))
                 {
-                    addFriendIconButton.interactable = false;
-
-                    // Cambiar color a gris para indicar que ya se envio
-                    var image = addFriendIconButton.GetComponent<Image>();
-                    if (image != null)
-                        image.color = new Color32(136, 136, 136, 255);
+                    Debug.LogWarning("[Profile] No hay jugador para agregar");
+                    return;
                 }
 
-                // Actualizar status
-                SetStatusText(AutoLocalizer.Get("profile_request_sent"), new Color32(255, 204, 0, 255)); // Amarillo
+                // Verificar si ya hay solicitud pendiente
+                if (FriendService.Instance.HasPendingRequestWith(viewingPlayerId))
+                {
+                    Debug.Log("[Profile] Ya existe solicitud pendiente");
+                    SetStatusText(AutoLocalizer.Get("profile_request_pending"), new Color32(255, 204, 0, 255));
+                    return;
+                }
+
+                Debug.Log($"[Profile] Enviando solicitud de amistad a: {viewingPlayerId}");
+
+                // Enviar solicitud usando FriendService
+                var result = await FriendService.Instance.SendFriendRequest(viewingPlayerId);
+
+                if (result.Success)
+                {
+                    // Feedback visual - cambiar icono o desactivar
+                    if (addFriendIconButton != null)
+                    {
+                        addFriendIconButton.interactable = false;
+
+                        // Cambiar color a gris para indicar que ya se envio
+                        var image = addFriendIconButton.GetComponent<Image>();
+                        if (image != null)
+                            image.color = new Color32(136, 136, 136, 255);
+                    }
+
+                    // Actualizar status
+                    SetStatusText(AutoLocalizer.Get("profile_request_sent"), new Color32(255, 204, 0, 255)); // Amarillo
+                }
+                else
+                {
+                    Debug.LogWarning($"[Profile] Error al enviar solicitud: {result.Message}");
+                    SetStatusText(result.Message, new Color32(255, 100, 100, 255)); // Rojo
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogWarning($"[Profile] Error al enviar solicitud: {result.Message}");
-                SetStatusText(result.Message, new Color32(255, 100, 100, 255)); // Rojo
+                Debug.LogError($"[ProfileManager] {ex.Message}");
             }
         }
 
@@ -650,8 +685,7 @@ namespace DigitPark.Managers
 
             HideGameSelectionPanel();
 
-            // TODO: Crear la partida de reto y navegar
-            // SceneManager.LoadScene("Games/" + gameName);
+            InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info");
         }
 
         public void OnGameSelectionCancelled()
@@ -697,64 +731,71 @@ namespace DigitPark.Managers
 
         private async void OnConfirmNameChange(string newUsername)
         {
-            if (currentPlayerData == null) return;
-            if (newUsername == currentPlayerData.username)
+            try
             {
-                changeNamePanel?.Hide();
-                return;
-            }
-
-            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
-
-            // Deduct gems if not first change
-            if (changeCount > 0)
-            {
-                bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
-                if (!spent)
+                if (currentPlayerData == null) return;
+                if (newUsername == currentPlayerData.username)
                 {
-                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
-                    changeNamePanel?.SetButtonsInteractable(true);
+                    changeNamePanel?.Hide();
                     return;
                 }
-            }
 
-            Debug.Log($"[Profile] Cambiando nombre a: {newUsername}");
+                int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
 
-            bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
-
-            if (success)
-            {
-                Debug.Log("[Profile] Nombre actualizado exitosamente");
-                currentPlayerData.username = newUsername;
-                PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
-                PlayerPrefs.SetString("DisplayName", newUsername);
-                PlayerPrefs.Save();
-                changeNamePanel?.Hide();
-
-                // Actualizar UI inmediatamente
-                if (usernameText != null)
-                    usernameText.text = newUsername;
-
-                // Sync nombre a Firebase (leaderboards + perfil)
-                try
+                // Deduct gems if not first change
+                if (changeCount > 0)
                 {
-                    var profilePlayerData = AuthenticationService.Instance?.GetCurrentPlayerData();
-                    if (DatabaseService.Instance != null && profilePlayerData != null)
-                        await DatabaseService.Instance.UpdatePlayerFields(profilePlayerData.userId, new System.Collections.Generic.Dictionary<string, object>
-                        {
-                            { "username", newUsername }
-                        });
+                    bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
+                    if (!spent)
+                    {
+                        errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                        changeNamePanel?.SetButtonsInteractable(true);
+                        return;
+                    }
                 }
-                catch (System.Exception e)
+
+                Debug.Log($"[Profile] Cambiando nombre a: {newUsername}");
+
+                bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
+
+                if (success)
                 {
-                    Debug.LogWarning($"[Profile] Firebase name sync failed: {e.Message}");
+                    Debug.Log("[Profile] Nombre actualizado exitosamente");
+                    currentPlayerData.username = newUsername;
+                    PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
+                    PlayerPrefs.SetString("DisplayName", newUsername);
+                    PlayerPrefs.Save();
+                    changeNamePanel?.Hide();
+
+                    // Actualizar UI inmediatamente
+                    if (usernameText != null)
+                        usernameText.text = newUsername;
+
+                    // Sync nombre a Firebase (leaderboards + perfil)
+                    try
+                    {
+                        var profilePlayerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                        if (DatabaseService.Instance != null && profilePlayerData != null)
+                            await DatabaseService.Instance.UpdatePlayerFields(profilePlayerData.userId, new System.Collections.Generic.Dictionary<string, object>
+                            {
+                                { "username", newUsername }
+                            });
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[Profile] Firebase name sync failed: {e.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("[Profile] Error al actualizar nombre");
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogError("[Profile] Error al actualizar nombre");
-                changeNamePanel?.SetButtonsInteractable(true);
-                errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+                Debug.LogError($"[ProfileManager] {ex.Message}");
             }
         }
 

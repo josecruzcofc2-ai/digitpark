@@ -5,6 +5,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DG.Tweening;
 using DigitPark.Animations;
 using DigitPark.Localization;
@@ -146,11 +147,11 @@ namespace DigitPark.CashBattle
                 resultFilterDropdown.ClearOptions();
                 resultFilterDropdown.AddOptions(new List<string>
                 {
-                    "All Results",
-                    "Wins",
-                    "Losses",
-                    "Draws",
-                    "In Progress"
+                    AutoLocalizer.Get("filter_all_results"),
+                    AutoLocalizer.Get("filter_wins"),
+                    AutoLocalizer.Get("filter_losses"),
+                    AutoLocalizer.Get("filter_draws"),
+                    AutoLocalizer.Get("filter_in_progress")
                 });
                 resultFilterDropdown.onValueChanged.AddListener(OnResultFilterChanged);
             }
@@ -161,11 +162,11 @@ namespace DigitPark.CashBattle
                 dateFilterDropdown.ClearOptions();
                 dateFilterDropdown.AddOptions(new List<string>
                 {
-                    "All Time",
-                    "Today",
-                    "Last 7 Days",
-                    "Last 30 Days",
-                    "This Month"
+                    AutoLocalizer.Get("filter_all_time"),
+                    AutoLocalizer.Get("filter_today"),
+                    AutoLocalizer.Get("filter_last_7_days"),
+                    AutoLocalizer.Get("filter_last_30_days"),
+                    AutoLocalizer.Get("filter_this_month")
                 });
                 dateFilterDropdown.onValueChanged.AddListener(OnDateFilterChanged);
             }
@@ -182,10 +183,17 @@ namespace DigitPark.CashBattle
 
         private void UnsubscribeFromEvents()
         {
-            if (HistoryManager.Instance != null)
+            try
             {
-                HistoryManager.Instance.OnEntryAdded -= OnEntryAdded;
-                HistoryManager.Instance.OnEntryUpdated -= OnEntryUpdated;
+                if (HistoryManager.Instance != null)
+                {
+                    HistoryManager.Instance.OnEntryAdded -= OnEntryAdded;
+                    HistoryManager.Instance.OnEntryUpdated -= OnEntryUpdated;
+                }
+            }
+            catch (System.Exception)
+            {
+                // Instance may already be destroyed during scene teardown
             }
         }
 
@@ -386,11 +394,11 @@ namespace DigitPark.CashBattle
             switch (currentTab)
             {
                 case HistoryTab.Matches:
-                    return "No matches recorded.\nPlay your first 1v1 match!";
+                    return AutoLocalizer.Get("history_empty_matches");
                 case HistoryTab.Tournaments:
-                    return "You haven't joined any tournaments.\nJoin your first tournament!";
+                    return AutoLocalizer.Get("history_empty_tournaments");
                 default:
-                    return "No history yet.\nStart playing to see your progress!";
+                    return AutoLocalizer.Get("history_empty_all");
             }
         }
 

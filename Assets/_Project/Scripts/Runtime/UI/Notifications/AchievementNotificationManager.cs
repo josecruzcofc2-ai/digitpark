@@ -193,21 +193,12 @@ namespace DigitPark.Managers
 
         private string GetLocalizedTitle(string key)
         {
-            // Try to get localized text
-            if (Localization.LocalizationManager.Instance != null)
-            {
-                return Localization.LocalizationManager.Instance.GetText(key);
-            }
-            return key;
+            return Localization.AutoLocalizer.Get(key);
         }
 
         private string GetLocalizedDescription(string key)
         {
-            if (Localization.LocalizationManager.Instance != null)
-            {
-                return Localization.LocalizationManager.Instance.GetText(key);
-            }
-            return key;
+            return Localization.AutoLocalizer.Get(key);
         }
 
         #endregion
@@ -610,6 +601,7 @@ namespace DigitPark.Managers
 
         #region Debug
 
+#if UNITY_EDITOR
         [ContextMenu("Test Normal Achievement")]
         public void TestNormalAchievement()
         {
@@ -635,6 +627,7 @@ namespace DigitPark.Managers
             ShowNotification("Achievement 2", "Achievement 2 description");
             ShowNotification("Achievement 3", "Achievement 3 description");
         }
+#endif
 
         #endregion
     }

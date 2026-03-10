@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.Monetization
 {
@@ -42,6 +43,7 @@ namespace DigitPark.Monetization
         [SerializeField] private Color _disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
         private AudioSource _audioSource;
+        private bool _isProcessing = false;
 
         public ShopItemData ItemData => _itemData;
 
@@ -195,7 +197,7 @@ namespace DigitPark.Monetization
                     _bonusBadge.SetActive(true);
                     _bonusBadge.transform.localScale = Vector3.zero;
                     _bonusBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
-                    _bonusText.text = $"{_itemData.GetBonusText()} BONUS";
+                    _bonusText.text = AutoLocalizer.Get("bonus_badge", _itemData.GetBonusText());
                 }
                 else
                 {
@@ -251,6 +253,8 @@ namespace DigitPark.Monetization
 
         private void OnButtonClick()
         {
+            if (_isProcessing) return;
+
             PlayClickSound();
             OnItemClicked?.Invoke(this);
             OnPurchaseRequested?.Invoke(this);
@@ -264,30 +268,39 @@ namespace DigitPark.Monetization
         public bool TryPurchase()
         {
             if (_itemData == null) return false;
+            if (_isProcessing) return false;
+            _isProcessing = true;
 
-            // For real money items, trigger IAP flow
-            if (_itemData.priceType == PriceType.RealMoney)
+            try
             {
-                // This should be handled by ShopManager with IAP
-                Debug.Log($"[ShopItemUI] IAP purchase requested: {_itemData.iapProductId}");
-                return false;
+                // For real money items, trigger IAP flow
+                if (_itemData.priceType == PriceType.RealMoney)
+                {
+                    // TODO: Implement IAP purchase flow with Unity IAP / store configuration
+                    Debug.LogWarning("[ShopItemUI] IAP not implemented yet - requires store configuration");
+                    return false;
+                }
+
+                // For in-game currency purchases
+                bool success = _itemData.TryPurchase();
+
+                if (success)
+                {
+                    PlayPurchaseAnimation();
+                    Debug.Log($"[ShopItemUI] Purchase successful: {_itemData.displayName}");
+                }
+                else
+                {
+                    PlayNotEnoughAnimation();
+                    Debug.Log($"[ShopItemUI] Purchase failed: not enough currency");
+                }
+
+                return success;
             }
-
-            // For in-game currency purchases
-            bool success = _itemData.TryPurchase();
-
-            if (success)
+            finally
             {
-                PlayPurchaseAnimation();
-                Debug.Log($"[ShopItemUI] Purchase successful: {_itemData.displayName}");
+                _isProcessing = false;
             }
-            else
-            {
-                PlayNotEnoughAnimation();
-                Debug.Log($"[ShopItemUI] Purchase failed: not enough currency");
-            }
-
-            return success;
         }
 
         private void PlayClickSound()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,6 +43,7 @@ namespace DigitPark.Managers
         [SerializeField] public Animator titleAnimator;
 
         private bool isLoggingIn = false;
+        private bool _isTransitioning = false;
         private UsernamePopup usernamePopup;
         private ForgotPasswordPopup forgotPasswordPopup;
         private PlayerData currentPlayerData;
@@ -74,9 +76,11 @@ namespace DigitPark.Managers
                 titleAnimator.SetTrigger("Show");
             }
 
-            // Suscribirse a eventos de autenticación
+            // Suscribirse a eventos de autenticación (unsubscribe first to prevent duplicates)
             if (AuthenticationService.Instance != null)
             {
+                AuthenticationService.Instance.OnLoginSuccess -= OnLoginSuccess;
+                AuthenticationService.Instance.OnLoginFailed -= OnLoginFailed;
                 AuthenticationService.Instance.OnLoginSuccess += OnLoginSuccess;
                 AuthenticationService.Instance.OnLoginFailed += OnLoginFailed;
             }
@@ -147,6 +151,15 @@ namespace DigitPark.Managers
         {
             StopAllCoroutines();
             DOTween.Kill(transform);
+
+            // Remove button listeners
+            loginButton?.onClick.RemoveAllListeners();
+            registerButton?.onClick.RemoveAllListeners();
+            googleButton?.onClick.RemoveAllListeners();
+            appleButton?.onClick.RemoveAllListeners();
+            forgotPasswordButton?.onClick.RemoveAllListeners();
+            passwordInput?.onEndEdit.RemoveAllListeners();
+
             // Desuscribirse de eventos
             if (AuthenticationService.Instance != null)
             {
@@ -184,20 +197,20 @@ namespace DigitPark.Managers
             // Actualizar placeholders con información de límites
             if (emailInput != null && emailInput.placeholder is TextMeshProUGUI emailPlaceholder)
             {
-                emailPlaceholder.text = GetLocalizedText("placeholder_email");
+                emailPlaceholder.text = AutoLocalizer.Get("placeholder_email");
                 emailPlaceholder.alignment = TextAlignmentOptions.Center;
             }
 
             if (passwordInput != null && passwordInput.placeholder is TextMeshProUGUI passPlaceholder)
             {
-                passPlaceholder.text = GetLocalizedText("placeholder_password");
+                passPlaceholder.text = AutoLocalizer.Get("placeholder_password");
                 passPlaceholder.alignment = TextAlignmentOptions.Center;
             }
 
             // Actualizar título
             if (titleText != null)
             {
-                titleText.text = GetLocalizedText("login_title");
+                titleText.text = AutoLocalizer.Get("login_title");
                 titleText.alignment = TextAlignmentOptions.Center;
             }
             // El layout de los toggles es manejado por LocalizedTextLayoutFixer global
@@ -310,7 +323,7 @@ namespace DigitPark.Managers
                 string email = emailInput.text.Trim();
                 string password = passwordInput.text;
 
-                Debug.Log($"[Login] Email: {email}, Password length: {password.Length}");
+                Debug.Log("[Login] Credenciales recibidas");
 
                 if (!ValidateLoginInputs(email, password))
                 {
@@ -320,7 +333,7 @@ namespace DigitPark.Managers
                 isLoggingIn = true;
                 ShowLoading(true);
 
-                Debug.Log($"[Login] Intentando login para: {email}");
+                Debug.Log("[Login] Intentando login");
 
                 // Intentar login
                 bool success = await AuthenticationService.Instance.LoginWithEmail(
@@ -328,6 +341,9 @@ namespace DigitPark.Managers
                     password,
                     rememberToggle != null && rememberToggle.isOn
                 );
+
+                // MonoBehaviour may have been destroyed during await
+                if (this == null) return;
 
                 isLoggingIn = false;
                 ShowLoading(false);
@@ -342,6 +358,14 @@ namespace DigitPark.Managers
             {
                 Debug.LogException(ex);
             }
+            finally
+            {
+                if (this != null)
+                {
+                    isLoggingIn = false;
+                    ShowLoading(false);
+                }
+            }
         }
 
         /// <summary>
@@ -351,25 +375,25 @@ namespace DigitPark.Managers
         {
             if (string.IsNullOrEmpty(email))
             {
-                ShowErrorMessage(GetLocalizedText("error_email_empty"));
+                ShowErrorMessage(AutoLocalizer.Get("error_email_empty"));
                 return false;
             }
 
             if (!IsValidEmail(email))
             {
-                ShowErrorMessage(GetLocalizedText("error_email_invalid"));
+                ShowErrorMessage(AutoLocalizer.Get("error_email_invalid"));
                 return false;
             }
 
             if (string.IsNullOrEmpty(password))
             {
-                ShowErrorMessage(GetLocalizedText("error_password_empty"));
+                ShowErrorMessage(AutoLocalizer.Get("error_password_empty"));
                 return false;
             }
 
             if (password.Length < 8)
             {
-                ShowErrorMessage(GetLocalizedText("error_password_too_short"));
+                ShowErrorMessage(AutoLocalizer.Get("error_password_too_short"));
                 return false;
             }
 
@@ -396,6 +420,9 @@ namespace DigitPark.Managers
 
                 bool success = await AuthenticationService.Instance.LoginWithGoogle();
 
+                // MonoBehaviour may have been destroyed during await
+                if (this == null) return;
+
                 isLoggingIn = false;
                 ShowLoading(false);
 
@@ -405,12 +432,20 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+                    ShowErrorMessage(AutoLocalizer.Get("error_auth_generic"));
                 }
             }
             catch (System.Exception ex)
             {
                 Debug.LogException(ex);
+            }
+            finally
+            {
+                if (this != null)
+                {
+                    isLoggingIn = false;
+                    ShowLoading(false);
+                }
             }
         }
 
@@ -430,6 +465,9 @@ namespace DigitPark.Managers
 
                 bool success = await AuthenticationService.Instance.LoginWithApple();
 
+                // MonoBehaviour may have been destroyed during await
+                if (this == null) return;
+
                 isLoggingIn = false;
                 ShowLoading(false);
 
@@ -439,12 +477,20 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    ShowErrorMessage(GetLocalizedText("error_auth_generic"));
+                    ShowErrorMessage(AutoLocalizer.Get("error_auth_generic"));
                 }
             }
             catch (System.Exception ex)
             {
                 Debug.LogException(ex);
+            }
+            finally
+            {
+                if (this != null)
+                {
+                    isLoggingIn = false;
+                    ShowLoading(false);
+                }
             }
         }
 
@@ -480,7 +526,7 @@ namespace DigitPark.Managers
         /// </summary>
         private async System.Threading.Tasks.Task SendPasswordResetEmail(string email)
         {
-            Debug.Log($"[Login] Enviando email de recuperación a: {email}");
+            Debug.Log("[Login] Enviando email de recuperación");
 
             forgotPasswordPopup?.SetSendButtonInteractable(false);
 
@@ -491,7 +537,7 @@ namespace DigitPark.Managers
                 if (success)
                 {
                     Debug.Log("[Login] Email de recuperación enviado exitosamente");
-                    forgotPasswordPopup?.ShowSuccess(GetLocalizedText("forgot_password_success"));
+                    forgotPasswordPopup?.ShowSuccess(AutoLocalizer.Get("forgot_password_success"));
 
                     // Cerrar popup después de 3 segundos
                     StartCoroutine(CloseForgotPasswordPopupDelayed(3f));
@@ -499,14 +545,14 @@ namespace DigitPark.Managers
                 else
                 {
                     Debug.LogWarning("[Login] Error al enviar email de recuperación");
-                    forgotPasswordPopup?.ShowError(GetLocalizedText("forgot_password_error"));
+                    forgotPasswordPopup?.ShowError(AutoLocalizer.Get("forgot_password_error"));
                     forgotPasswordPopup?.SetSendButtonInteractable(true);
                 }
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"[Login] Excepción al enviar email de recuperación: {e.Message}");
-                forgotPasswordPopup?.ShowError(GetLocalizedText("forgot_password_error"));
+                forgotPasswordPopup?.ShowError(AutoLocalizer.Get("forgot_password_error"));
                 forgotPasswordPopup?.SetSendButtonInteractable(true);
             }
         }
@@ -536,7 +582,7 @@ namespace DigitPark.Managers
             AnalyticsService.Instance?.LogLogin("email");
 
             // Verificar si es primera vez (no tiene username o es "Sin usuario")
-            if (string.IsNullOrEmpty(playerData.username) || playerData.username == "Sin usuario")
+            if (string.IsNullOrEmpty(playerData.username) || playerData.username.Equals("Player", StringComparison.OrdinalIgnoreCase))
             {
                 Debug.Log("[Login] Primera vez - mostrando popup de username");
                 ShowUsernamePopup();
@@ -544,7 +590,11 @@ namespace DigitPark.Managers
             else
             {
                 // Transición directa a MainMenu
-                StartCoroutine(TransitionToMainMenu());
+                if (!_isTransitioning)
+                {
+                    _isTransitioning = true;
+                    StartCoroutine(TransitionToMainMenu());
+                }
             }
         }
 
@@ -565,18 +615,26 @@ namespace DigitPark.Managers
                     {
                         currentPlayerData.username = username;
                         Debug.Log("[Login] Username actualizado, yendo a MainMenu");
-                        StartCoroutine(TransitionToMainMenu());
+                        if (!_isTransitioning)
+                        {
+                            _isTransitioning = true;
+                            StartCoroutine(TransitionToMainMenu());
+                        }
                     }
                     else
                     {
-                        ShowErrorMessage(GetLocalizedText("error_save_username"));
+                        ShowErrorMessage(AutoLocalizer.Get("error_save_username"));
                     }
                 },
                 onLater: () =>
                 {
                     Debug.Log("[Login] Usuario eligió 'Más tarde'");
                     // Ir a MainMenu sin username
-                    StartCoroutine(TransitionToMainMenu());
+                    if (!_isTransitioning)
+                    {
+                        _isTransitioning = true;
+                        StartCoroutine(TransitionToMainMenu());
+                    }
                 }
             );
         }
@@ -587,6 +645,9 @@ namespace DigitPark.Managers
         private void OnLoginFailed(string errorMessage)
         {
             Debug.LogError($"[Login] Login fallido: {errorMessage}");
+
+            isLoggingIn = false;
+            ShowLoading(false);
 
             // Mostrar mensaje de error amigable
             string friendlyMessage = GetFriendlyErrorMessage(errorMessage);
@@ -617,7 +678,7 @@ namespace DigitPark.Managers
         /// <summary>
         /// Muestra un mensaje de error usando el panel
         /// </summary>
-        private void ShowErrorMessage(string message, Color? color = null)
+        private void ShowErrorMessage(string message)
         {
             Debug.Log($"[Login] Mostrando error: {message}");
             errorPanel?.Show(message);
@@ -698,39 +759,27 @@ namespace DigitPark.Managers
         private string GetFriendlyErrorMessage(string technicalError)
         {
             if (technicalError.Contains("auth/user-not-found"))
-                return GetLocalizedText("error_user_not_found");
+                return AutoLocalizer.Get("error_user_not_found");
 
             if (technicalError.Contains("auth/wrong-password"))
-                return GetLocalizedText("error_wrong_password");
+                return AutoLocalizer.Get("error_wrong_password");
 
             if (technicalError.Contains("auth/email-already-in-use"))
-                return GetLocalizedText("error_email_already_registered");
+                return AutoLocalizer.Get("error_email_already_registered");
 
             if (technicalError.Contains("auth/invalid-email"))
-                return GetLocalizedText("error_email_invalid");
+                return AutoLocalizer.Get("error_email_invalid");
 
             if (technicalError.Contains("auth/weak-password"))
-                return GetLocalizedText("error_password_weak");
+                return AutoLocalizer.Get("error_password_weak");
 
             if (technicalError.Contains("auth/network-request-failed"))
-                return GetLocalizedText("error_no_connection");
+                return AutoLocalizer.Get("error_no_connection");
 
             if (technicalError.Contains("timeout"))
-                return GetLocalizedText("error_timeout");
+                return AutoLocalizer.Get("error_timeout");
 
-            return GetLocalizedText("error_auth_generic");
-        }
-
-        /// <summary>
-        /// Obtiene texto localizado usando LocalizationManager
-        /// </summary>
-        private string GetLocalizedText(string key)
-        {
-            if (LocalizationManager.Instance != null)
-            {
-                return LocalizationManager.Instance.GetText(key);
-            }
-            return key;
+            return AutoLocalizer.Get("error_auth_generic");
         }
 
         #endregion

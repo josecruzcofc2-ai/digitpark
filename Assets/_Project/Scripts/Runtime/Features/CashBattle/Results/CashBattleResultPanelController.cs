@@ -150,7 +150,7 @@ namespace DigitPark.UI
         private void PopulateVSSection(MinigameResult playerResult, MinigameResult opponentResult,
             bool playerWon, string opponentName)
         {
-            string pName = PlayerPrefs.GetString("PlayerName", "Player");
+            string pName = PlayerPrefs.GetString("PlayerName", AutoLocalizer.Get("default_player_name"));
 
             if (playerNameText != null)
             {
@@ -160,7 +160,7 @@ namespace DigitPark.UI
 
             if (opponentNameText != null)
             {
-                opponentNameText.text = opponentName ?? "Opponent";
+                opponentNameText.text = opponentName ?? AutoLocalizer.Get("default_opponent");
                 opponentNameText.color = opponentColor;
             }
 

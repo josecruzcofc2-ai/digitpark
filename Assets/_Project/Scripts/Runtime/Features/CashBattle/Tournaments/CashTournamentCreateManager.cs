@@ -177,7 +177,12 @@ namespace DigitPark.Managers
                 gameTypeDropdown.ClearOptions();
                 gameTypeDropdown.AddOptions(new System.Collections.Generic.List<string>
                 {
-                    "Select Game", "DigitRush", "MemoryPairs", "QuickMath", "FlashTap", "OddOneOut"
+                    AutoLocalizer.Get("select_game"),
+                    AutoLocalizer.Get("gameinfo_digitrush_name"),
+                    AutoLocalizer.Get("gameinfo_memorypairs_name"),
+                    AutoLocalizer.Get("gameinfo_quickmath_name"),
+                    AutoLocalizer.Get("gameinfo_flashtap_name"),
+                    AutoLocalizer.Get("gameinfo_oddoneout_name")
                 });
             }
 
@@ -226,7 +231,7 @@ namespace DigitPark.Managers
             {
                 maxAttemptsDropdown.ClearOptions();
                 maxAttemptsDropdown.AddOptions(new System.Collections.Generic.List<string>
-                    { "1", "2", "3", "5", "Unlimited" });
+                    { "1", "2", "3", "5", AutoLocalizer.Get("tournament_unlimited") });
                 maxAttemptsDropdown.value = 0;
             }
 
@@ -235,7 +240,14 @@ namespace DigitPark.Managers
             {
                 startTimeDropdown.ClearOptions();
                 startTimeDropdown.AddOptions(new System.Collections.Generic.List<string>
-                    { "Now", "In 30 min", "In 1 hour", "In 2 hours", "In 6 hours", "In 24 hours" });
+                    {
+                        AutoLocalizer.Get("schedule_now"),
+                        AutoLocalizer.Get("schedule_30min"),
+                        AutoLocalizer.Get("schedule_1hour"),
+                        AutoLocalizer.Get("schedule_2hours"),
+                        AutoLocalizer.Get("schedule_6hours"),
+                        AutoLocalizer.Get("schedule_24hours")
+                    });
                 startTimeDropdown.value = 0;
             }
         }
@@ -453,27 +465,27 @@ namespace DigitPark.Managers
             // Check tournament name
             if (tournamentNameInput == null || string.IsNullOrWhiteSpace(tournamentNameInput.text))
             {
-                ShowValidationError("Please enter a tournament name.");
+                ShowValidationError(AutoLocalizer.Get("validation_tournament_name_required"));
                 return false;
             }
 
             if (tournamentNameInput.text.Length < 3)
             {
-                ShowValidationError("Tournament name must be at least 3 characters.");
+                ShowValidationError(AutoLocalizer.Get("validation_tournament_name_min"));
                 return false;
             }
 
             // Check game selected
             if (gameTypeDropdown == null || gameTypeDropdown.value == 0)
             {
-                ShowValidationError("Please select a game.");
+                ShowValidationError(AutoLocalizer.Get("validation_select_game"));
                 return false;
             }
 
             // Check entry fee
             if (currentEntryFee <= 0)
             {
-                ShowValidationError("Entry fee must be greater than $0.");
+                ShowValidationError(AutoLocalizer.Get("validation_entry_fee_positive"));
                 return false;
             }
 

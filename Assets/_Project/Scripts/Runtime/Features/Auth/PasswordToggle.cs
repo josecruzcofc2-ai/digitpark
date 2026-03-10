@@ -44,6 +44,14 @@ namespace DigitPark.UI.Common
         }
 
         /// <summary>
+        /// Sets the password input field (used by RegisterManager for runtime wiring)
+        /// </summary>
+        public void SetPasswordInput(TMP_InputField input)
+        {
+            passwordInput = input;
+        }
+
+        /// <summary>
         /// Alterna la visibilidad de la contraseña
         /// Llamar este método desde el onClick del botón
         /// </summary>

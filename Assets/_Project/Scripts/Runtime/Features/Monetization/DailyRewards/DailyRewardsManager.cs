@@ -2,8 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Localization;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
@@ -155,6 +157,12 @@ namespace DigitPark.Managers
 
             // Analytics: screen view
             AnalyticsService.Instance?.LogScreenView("DailyRewards");
+
+            // Start countdown timer coroutine (refreshes every second)
+            if (!canClaimToday)
+            {
+                StartCoroutine(CountdownTimerCoroutine());
+            }
         }
 
         /// <summary>
@@ -228,10 +236,7 @@ namespace DigitPark.Managers
         /// </summary>
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            return args.Length > 0
-                ? LocalizationManager.Instance.GetText(key, args)
-                : LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
 
         /// <summary>
@@ -290,7 +295,7 @@ namespace DigitPark.Managers
             string lastClaimStr = PlayerPrefs.GetString("DailyRewards_LastClaim", "");
             if (!string.IsNullOrEmpty(lastClaimStr))
             {
-                lastClaimDate = DateTime.Parse(lastClaimStr);
+                lastClaimDate = DateTime.TryParse(lastClaimStr, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsed) ? parsed : DateTime.MinValue;
             }
             else
             {
@@ -330,7 +335,7 @@ namespace DigitPark.Managers
             if (claimButton == null) return;
 
             // Pulse animation
-            _claimPulse = claimButton.gameObject.AddComponent<PulseAnimation>();
+            _claimPulse = claimButton.gameObject.GetComponent<PulseAnimation>() ?? claimButton.gameObject.AddComponent<PulseAnimation>();
             if (claimGlow != null)
             {
                 _claimPulse.GlowTarget = claimGlow;
@@ -535,6 +540,31 @@ namespace DigitPark.Managers
             }
         }
 
+        /// <summary>
+        /// Coroutine that refreshes the countdown timer every second until the next reward is available.
+        /// </summary>
+        private IEnumerator CountdownTimerCoroutine()
+        {
+            var wait = new WaitForSeconds(1f);
+            while (!canClaimToday)
+            {
+                yield return wait;
+                DateTime tomorrow = DateTime.Now.Date.AddDays(1);
+                TimeSpan remaining = tomorrow - DateTime.Now;
+
+                if (remaining.TotalSeconds <= 0)
+                {
+                    // New day arrived — reward is now available
+                    canClaimToday = true;
+                    UpdateNextResetTimer();
+                    UpdateClaimButton();
+                    yield break;
+                }
+
+                UpdateNextResetTimer();
+            }
+        }
+
         private void UpdateClaimButton()
         {
             if (claimButton)
@@ -648,7 +678,7 @@ namespace DigitPark.Managers
             if (gridIndex >= 0 && gridIndex < rewardsContainer.childCount)
             {
                 var currentCard = rewardsContainer.GetChild(gridIndex).gameObject;
-                var pulse = currentCard.AddComponent<PulseAnimation>();
+                var pulse = currentCard.GetComponent<PulseAnimation>() ?? currentCard.AddComponent<PulseAnimation>();
                 // Subtle settings: min=0.98, max=1.02, speed=2
                 pulse.enabled = canClaimToday;
             }
@@ -856,7 +886,7 @@ namespace DigitPark.Managers
                     var lockOverlay = nextCard.transform.Find("LockOverlay");
                     if (lockOverlay != null)
                     {
-                        var loCG = lockOverlay.gameObject.AddComponent<CanvasGroup>();
+                        var loCG = lockOverlay.gameObject.GetComponent<CanvasGroup>() ?? lockOverlay.gameObject.AddComponent<CanvasGroup>();
                         loCG.DOFade(0f, 0.3f).OnComplete(() => Destroy(lockOverlay.gameObject));
                     }
 
@@ -1375,16 +1405,27 @@ namespace DigitPark.Managers
 
         private void ApplyReward(DailyRewardConfig reward)
         {
+            var currencyMgr = CurrencyManager.Instance;
             switch (reward.type)
             {
                 case "coins":
-                    int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                    PlayerPrefs.SetInt("PlayerCoins", currentCoins + reward.amount);
+                    if (currencyMgr != null)
+                        currencyMgr.AddCoins(reward.amount);
+                    else
+                    {
+                        int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
+                        PlayerPrefs.SetInt("PlayerCoins", currentCoins + reward.amount);
+                    }
                     break;
 
                 case "gems":
-                    int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                    PlayerPrefs.SetInt("PlayerGems", currentGems + reward.amount);
+                    if (currencyMgr != null)
+                        currencyMgr.AddGems(reward.amount);
+                    else
+                    {
+                        int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
+                        PlayerPrefs.SetInt("PlayerGems", currentGems + reward.amount);
+                    }
                     break;
 
                 case "xp":
@@ -1601,9 +1642,17 @@ namespace DigitPark.Managers
 
         private void ApplyMilestoneBonus(int gemBonus)
         {
-            int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-            PlayerPrefs.SetInt("PlayerGems", currentGems + gemBonus);
-            PlayerPrefs.Save();
+            if (CurrencyManager.Instance != null)
+            {
+                CurrencyManager.Instance.AddGems(gemBonus);
+            }
+            else
+            {
+                Debug.LogWarning("[DailyRewards] CurrencyManager not available, using PlayerPrefs fallback");
+                int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
+                PlayerPrefs.SetInt("PlayerGems", currentGems + gemBonus);
+                PlayerPrefs.Save();
+            }
 
             // Analytics
             AnalyticsService.Instance?.LogVirtualCurrencyEarned("gems", gemBonus, "daily_milestone");

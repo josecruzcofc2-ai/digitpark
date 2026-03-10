@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using DigitPark.Localization;
 
 namespace DigitPark.UI
 {
@@ -175,6 +176,11 @@ namespace DigitPark.UI
             text.fontStyle = FontStyles.Bold;
             text.color = color ?? Color.white;
             text.alignment = alignment;
+            text.enableAutoSizing = true;
+            text.fontSizeMax = fontSize;
+            text.fontSizeMin = fontSize >= 48 ? FontSizes.AutoMinTitle
+                             : fontSize >= 32 ? FontSizes.AutoMinBody
+                             : FontSizes.AutoMinSmall;
 
             return text;
         }
@@ -252,6 +258,9 @@ namespace DigitPark.UI
             if (btnText != null)
             {
                 btnText.fontSize = FontSizes.H4;
+                btnText.enableAutoSizing = true;
+                btnText.fontSizeMin = FontSizes.AutoMinTitle;
+                btnText.fontSizeMax = FontSizes.H4;
                 btnText.fontStyle = FontStyles.Bold;
             }
 
@@ -303,6 +312,9 @@ namespace DigitPark.UI
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = placeholder;
             placeholderText.fontSize = FontSizes.Body;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.Body;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -316,6 +328,9 @@ namespace DigitPark.UI
             textObj.transform.SetParent(textAreaObj.transform, false);
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.fontSize = FontSizes.Body;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = FontSizes.Body;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.MidlineLeft;
             text.richText = false;
@@ -614,6 +629,9 @@ namespace DigitPark.UI
             TextMeshProUGUI itemLabelText = itemLabelObj.AddComponent<TextMeshProUGUI>();
             itemLabelText.text = "Item";
             itemLabelText.fontSize = FontSizes.Body;
+            itemLabelText.enableAutoSizing = true;
+            itemLabelText.fontSizeMin = FontSizes.AutoMinBody;
+            itemLabelText.fontSizeMax = FontSizes.Body;
             itemLabelText.color = Color.white;
             itemLabelText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -727,7 +745,7 @@ namespace DigitPark.UI
         {
             GameObject loadingPanel = CreatePanel(parent, "LoadingPanel", new Color(0, 0, 0, 0.9f));
 
-            TextMeshProUGUI loadingText = CreateText(loadingPanel.transform, "LoadingText", "Cargando...", (int)FontSizes.Body, ElectricBlue);
+            TextMeshProUGUI loadingText = CreateText(loadingPanel.transform, "LoadingText", AutoLocalizer.Get("loading"), (int)FontSizes.Body, ElectricBlue);
             RectTransform loadingRT = loadingText.GetComponent<RectTransform>();
             loadingRT.anchoredPosition = Vector2.zero;
 

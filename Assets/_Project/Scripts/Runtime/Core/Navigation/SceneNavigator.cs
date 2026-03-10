@@ -5,7 +5,7 @@ using System.Collections;
 using DG.Tweening;
 using DigitPark.Animations;
 
-namespace DigitPark.Monetization
+namespace DigitPark.Navigation
 {
     /// <summary>
     /// Singleton para manejar la navegacion entre escenas.
@@ -136,6 +136,7 @@ namespace DigitPark.Monetization
             }
 
             DOTween.KillAll(false);
+            Resources.UnloadUnusedAssets();
             OnSceneLoadStarted?.Invoke(sceneName);
 
             Debug.Log($"[SceneNavigator] Navigating from {_previousScene} to {sceneName}");
@@ -170,6 +171,7 @@ namespace DigitPark.Monetization
             }
 
             DOTween.KillAll(false);
+            Resources.UnloadUnusedAssets();
             OnSceneLoadStarted?.Invoke(sceneName);
 
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
@@ -188,6 +190,7 @@ namespace DigitPark.Monetization
         public void GoBack()
         {
             DOTween.KillAll(false);
+            Resources.UnloadUnusedAssets();
             if (!string.IsNullOrEmpty(_previousScene))
             {
                 OnNavigationBack?.Invoke();

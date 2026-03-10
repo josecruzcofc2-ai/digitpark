@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,6 +9,7 @@ using DigitPark.UI.CashBattle;
 using DigitPark.Games;
 using DigitPark.CashBattle;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Services;
 using DG.Tweening;
 
@@ -61,6 +63,7 @@ namespace DigitPark.Managers
 
         private CashBattleState currentState = CashBattleState.Main;
         private float matchmakingTimer = 0f;
+        private bool _isProcessing = false;
 
         // Pending bet confirmation
         private CashGameType _pendingGameType;
@@ -242,12 +245,6 @@ namespace DigitPark.Managers
 
         }
 
-        private string GetLocalizedText(string key)
-        {
-            if (LocalizationManager.Instance != null)
-                return LocalizationManager.Instance.GetText(key);
-            return key;
-        }
 
         #endregion
 
@@ -384,32 +381,77 @@ namespace DigitPark.Managers
 
         private void OnBattles1v1Clicked()
         {
-            Debug.Log("[CashBattle] Navegando a escena CashBattle1v1");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_BATTLE_1V1);
+            if (_isProcessing) return;
+            try
+            {
+                _isProcessing = true;
+                Debug.Log("[CashBattle] Navegando a escena CashBattle1v1");
+                SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_BATTLE_1V1);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         private void OnCashTournamentsClicked()
         {
-            Debug.Log("[CashBattle] Navegando a escena CashTournaments");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_TOURNAMENTS);
+            if (_isProcessing) return;
+            try
+            {
+                _isProcessing = true;
+                Debug.Log("[CashBattle] Navegando a escena CashTournaments");
+                SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_TOURNAMENTS);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         private void OnWalletClicked()
         {
-            Debug.Log("[CashBattle] Navegando a escena Wallet");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
+            if (_isProcessing) return;
+            try
+            {
+                _isProcessing = true;
+                Debug.Log("[CashBattle] Navegando a escena Wallet");
+                SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_WALLET);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         private void OnCashProfileClicked()
         {
-            Debug.Log("[CashBattle] Navegando a escena CashProfile");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_PROFILE);
+            if (_isProcessing) return;
+            try
+            {
+                _isProcessing = true;
+                Debug.Log("[CashBattle] Navegando a escena CashProfile");
+                SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_PROFILE);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         private void OnHistoryClicked()
         {
-            Debug.Log("[CashBattle] Navegando a escena History");
-            SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_HISTORY);
+            if (_isProcessing) return;
+            try
+            {
+                _isProcessing = true;
+                Debug.Log("[CashBattle] Navegando a escena History");
+                SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.CASH_HISTORY);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         #endregion
@@ -447,7 +489,7 @@ namespace DigitPark.Managers
             _pendingGameType = ConvertToCashGameType(games[0]);
             _pendingEntryFee = entryFee;
             _pendingSprintGames = games;
-            ShowBetConfirmation("Cognitive Sprint", entryFee);
+            ShowBetConfirmation(AutoLocalizer.Get("game_cognitive_sprint"), entryFee);
         }
 
         private void OnTournamentSelected(UITournamentInfo tournament)
@@ -531,6 +573,9 @@ namespace DigitPark.Managers
 
         private void OnConfirmBet()
         {
+            if (_isProcessing) return;
+            _isProcessing = true;
+
             if (confirmBetPanel != null)
                 AnimatePanelOut(confirmBetPanel.transform, () => confirmBetPanel.SetActive(false));
 
@@ -581,61 +626,83 @@ namespace DigitPark.Managers
 
         private async void StartMatchmakingAsync(CashGameType gameType, decimal entryFee)
         {
-            if (_walletService == null || _matchmakingService == null)
+            try
             {
-                Debug.LogError("[CashBattle] Servicios no disponibles para matchmaking");
-                return;
+                if (_walletService == null || _matchmakingService == null)
+                {
+                    Debug.LogError("[CashBattle] Servicios no disponibles para matchmaking");
+                    _isProcessing = false;
+                    return;
+                }
+
+                NavigateTo(CashBattleState.Matchmaking);
+
+                if (matchmakingStatusText != null)
+                {
+                    matchmakingStatusText.text = L("cashbattle_reserving_funds");
+                }
+
+                // Reservar fondos
+                var reserveResult = await _walletService.ReserveFunds(entryFee, "pending_match");
+
+                // Verificar que no se destruyó el objeto durante el await
+                if (this == null) return;
+
+                if (!reserveResult.Success)
+                {
+                    Debug.LogError("[CashBattle] Error al reservar fondos");
+                    NavigateTo(CashBattleState.GameSelection);
+                    return;
+                }
+
+                if (matchmakingStatusText != null)
+                {
+                    matchmakingStatusText.text = L("matchmaking_searching");
+                }
+
+                // Iniciar matchmaking
+                var result = await _matchmakingService.FindMatch(gameType, entryFee);
+
+                // Verificar que no se destruyó el objeto durante el await
+                if (this == null) return;
+
+                if (!result.Success)
+                {
+                    Debug.LogError($"[CashBattle] Error en matchmaking: {result.Message}");
+                    await _walletService.ReleaseFunds("pending_match");
+                    NavigateTo(CashBattleState.GameSelection);
+                }
+                // Si es exitoso, OnMatchFound se encargará
             }
-
-            NavigateTo(CashBattleState.Matchmaking);
-
-            if (matchmakingStatusText != null)
+            catch (Exception ex)
             {
-                matchmakingStatusText.text = L("cashbattle_reserving_funds");
+                Debug.LogError($"[CashBattleManager] {ex.Message}");
             }
-
-            // Reservar fondos
-            var reserveResult = await _walletService.ReserveFunds(entryFee, "pending_match");
-
-            // Verificar que no se destruyó el objeto durante el await
-            if (this == null) return;
-
-            if (!reserveResult.Success)
+            finally
             {
-                Debug.LogError("[CashBattle] Error al reservar fondos");
-                NavigateTo(CashBattleState.GameSelection);
-                return;
+                _isProcessing = false;
             }
-
-            if (matchmakingStatusText != null)
-            {
-                matchmakingStatusText.text = L("matchmaking_searching");
-            }
-
-            // Iniciar matchmaking
-            var result = await _matchmakingService.FindMatch(gameType, entryFee);
-
-            // Verificar que no se destruyó el objeto durante el await
-            if (this == null) return;
-
-            if (!result.Success)
-            {
-                Debug.LogError($"[CashBattle] Error en matchmaking: {result.Message}");
-                await _walletService.ReleaseFunds("pending_match");
-                NavigateTo(CashBattleState.GameSelection);
-            }
-            // Si es exitoso, OnMatchFound se encargará
         }
 
         private async void ConfirmAndLoadGame()
         {
-            if (_matchmakingService == null || _matchmakingService.CurrentMatch == null) return;
-
-            var result = await _matchmakingService.ConfirmMatch(_matchmakingService.CurrentMatch.MatchId);
-
-            if (result.Success)
+            try
             {
-                LoadGameScene();
+                if (_matchmakingService == null || _matchmakingService.CurrentMatch == null) return;
+
+                var result = await _matchmakingService.ConfirmMatch(_matchmakingService.CurrentMatch.MatchId);
+
+                // Null check post-await: this MonoBehaviour may have been destroyed during await
+                if (this == null || _matchmakingService == null) return;
+
+                if (result.Success)
+                {
+                    LoadGameScene();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[CashBattleManager] {ex.Message}");
             }
         }
 
@@ -659,7 +726,7 @@ namespace DigitPark.Managers
 
             // Pasar contexto de Cash Battle al juego via GameSessionManager
             string opponentId = match.Opponent?.UserId ?? "";
-            string opponentName = match.Opponent?.DisplayName ?? "Opponent";
+            string opponentName = match.Opponent?.DisplayName ?? AutoLocalizer.Get("default_opponent");
 
             GameSessionManager.Instance.StartSingleGameSession(
                 gameType,
@@ -672,19 +739,26 @@ namespace DigitPark.Managers
 
         private async void CancelMatchmaking()
         {
-            Debug.Log("[CashBattle] Cancelando matchmaking...");
-
-            CancelInvoke(nameof(ConfirmAndLoadGame));
-
-            if (_matchmakingService != null && _matchmakingService.IsSearching)
+            try
             {
-                await _matchmakingService.CancelSearch();
+                Debug.Log("[CashBattle] Cancelando matchmaking...");
+
+                CancelInvoke(nameof(ConfirmAndLoadGame));
+
+                if (_matchmakingService != null && _matchmakingService.IsSearching)
+                {
+                    await _matchmakingService.CancelSearch();
+                }
+
+                if (_walletService != null)
+                    await _walletService.ReleaseFunds("pending_match");
+
+                NavigateTo(CashBattleState.GameSelection);
             }
-
-            if (_walletService != null)
-                await _walletService.ReleaseFunds("pending_match");
-
-            NavigateTo(CashBattleState.GameSelection);
+            catch (Exception ex)
+            {
+                Debug.LogError($"[CashBattleManager] {ex.Message}");
+            }
         }
 
         #endregion
@@ -693,19 +767,33 @@ namespace DigitPark.Managers
 
         private async void JoinTournamentAsync(UITournamentInfo tournament)
         {
-            Debug.Log($"[CashBattle] Unirse a torneo: {tournament.Name}");
-
-            // Usar el servicio de torneos
-            var result = await _tournamentService.JoinTournament(tournament.Id);
-
-            if (result.Success)
+            try
             {
-                Debug.Log("[CashBattle] Inscripción exitosa");
-                // TODO: Mostrar confirmación y navegar a lobby del torneo
+                if (_isProcessing) return;
+                _isProcessing = true;
+
+                Debug.Log($"[CashBattle] Unirse a torneo: {tournament.Name}");
+
+                // Usar el servicio de torneos
+                var result = await _tournamentService.JoinTournament(tournament.Id);
+
+                if (result.Success)
+                {
+                    Debug.Log("[CashBattle] Inscripción exitosa");
+                    // TODO: Mostrar confirmación y navegar a lobby del torneo
+                }
+                else
+                {
+                    Debug.LogError($"[CashBattle] Error al unirse: {result.Message}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogError($"[CashBattle] Error al unirse: {result.Message}");
+                Debug.LogError($"[CashBattleManager] {ex.Message}");
+            }
+            finally
+            {
+                _isProcessing = false;
             }
         }
 
@@ -742,9 +830,7 @@ namespace DigitPark.Managers
 
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            string text = LocalizationManager.Instance.GetText(key);
-            return args.Length > 0 ? string.Format(text, args) : text;
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
 
         private void AnimatePanelIn(Transform t)

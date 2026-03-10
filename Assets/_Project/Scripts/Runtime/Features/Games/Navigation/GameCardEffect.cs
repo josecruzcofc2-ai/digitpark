@@ -91,22 +91,33 @@ namespace DigitPark.UI
             ResetToOriginal();
         }
 
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
+
+        // Hover effects only work on desktop (mouse); on mobile touch devices
+        // OnPointerEnter/Exit fire simultaneously with Down/Up, making hover redundant.
         public void OnPointerEnter(PointerEventData eventData)
         {
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (!button.interactable) return;
 
             isHovered = true;
             AnimateHover();
+#endif
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+#if UNITY_EDITOR || UNITY_STANDALONE
             isHovered = false;
 
             if (!isPressed)
             {
                 AnimateNormal();
             }
+#endif
         }
 
         public void OnPointerDown(PointerEventData eventData)

@@ -153,6 +153,15 @@ namespace DigitPark.Editor
                 return;
             }
 
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             if (!EditorUtility.DisplayDialog("Reconstruir UI?",
                 "Esto reconstruirá la UI de CashWallet.\n\n¿Continuar?",
                 "Sí", "Cancelar"))
@@ -194,6 +203,15 @@ namespace DigitPark.Editor
             {
                 Debug.LogError("[WalletUIBuilder] Canvas not found - cannot build silently");
                 return;
+            }
+
+            // Standardize CanvasScaler
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Cleanup canvas children

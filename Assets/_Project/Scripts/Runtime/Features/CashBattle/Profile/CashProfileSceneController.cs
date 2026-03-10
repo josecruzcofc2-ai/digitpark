@@ -3,11 +3,11 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using DigitPark.Localization;
-using DigitPark.Monetization;
 using DigitPark.Animations;
 using DigitPark.Effects;
-using DigitPark.UI.Panels;
 using DigitPark.Services.Firebase;
+using DigitPark.Monetization;
+using DigitPark.Navigation;
 
 namespace DigitPark.CashBattle
 {
@@ -30,13 +30,7 @@ namespace DigitPark.CashBattle
         [Header("Avatar")]
         [SerializeField] private Image avatarImage;
         [SerializeField] private TextMeshProUGUI usernameText;
-        [SerializeField] private Button editNameButton;
         [SerializeField] private TextMeshProUGUI memberSinceText;
-
-        // ==================== CHANGE NAME ====================
-        [Header("Change Name")]
-        [SerializeField] private InputPanelUI changeNamePanel;
-        [SerializeField] private ErrorPanelUI errorPanel;
 
         // ==================== SUMMARY STATS (3 boxes) ====================
         [Header("Summary Stats")]
@@ -80,10 +74,6 @@ namespace DigitPark.CashBattle
         [SerializeField] private Image oddOneOutBarFill;
         [SerializeField] private TextMeshProUGUI oddOneOutValueText;
 
-        // ==================== NAME CHANGE ====================
-        private const string NAME_CHANGE_COUNT_KEY = "NameChangeCount";
-        private const int NAME_CHANGE_GEM_COST = 100;
-
         // ==================== ANIMATOR ====================
         private CashProfileAnimator _animator;
 
@@ -111,8 +101,6 @@ namespace DigitPark.CashBattle
             if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton)
                 backButton.onClick.AddListener(OnBackClicked);
-
-            editNameButton?.onClick.AddListener(OnEditNameClicked);
         }
 
         // ==================== BUTTON EFFECTS ====================
@@ -153,7 +141,7 @@ namespace DigitPark.CashBattle
                     displayName = playerData?.username;
                 }
                 if (string.IsNullOrEmpty(displayName))
-                    displayName = PlayerPrefs.GetString("DisplayName", "Player");
+                    displayName = PlayerPrefs.GetString("DisplayName", AutoLocalizer.Get("default_player_name"));
 
                 usernameText.text = displayName;
             }
@@ -197,7 +185,9 @@ namespace DigitPark.CashBattle
             var (currentStreak, isWinStreak) = HistoryManager.Instance.GetCurrentStreak();
             if (currentStreakText)
             {
-                currentStreakText.text = $"{currentStreak} {(isWinStreak ? "W" : "L")}";
+                currentStreakText.text = isWinStreak
+                    ? AutoLocalizer.Get("streak_wins_short", currentStreak)
+                    : AutoLocalizer.Get("streak_losses_short", currentStreak);
                 currentStreakText.color = isWinStreak
                     ? new Color(0f, 1f, 0.5f)
                     : new Color(1f, 0.4f, 0.4f);
@@ -206,7 +196,7 @@ namespace DigitPark.CashBattle
             if (bestStreakText)
             {
                 int bestStreak = HistoryManager.Instance.GetBestWinStreak();
-                bestStreakText.text = $"{bestStreak} W";
+                bestStreakText.text = AutoLocalizer.Get("streak_wins_short", bestStreak);
             }
 
             // Tournaments
@@ -225,9 +215,9 @@ namespace DigitPark.CashBattle
 
             // Record Card
             if (recordText)
-                recordText.text = $"{stats.wins}W  \u00b7  {stats.losses}L  \u00b7  {stats.draws}D";
+                recordText.text = AutoLocalizer.Get("record_format", stats.wins, stats.losses, stats.draws);
             if (winRateText)
-                winRateText.text = $"{stats.winRate:F0}% Win Rate";
+                winRateText.text = AutoLocalizer.Get("win_rate_format", $"{stats.winRate:F0}");
             if (winRateBarFill)
                 winRateBarFill.fillAmount = stats.winRate / 100f;
 
@@ -240,96 +230,11 @@ namespace DigitPark.CashBattle
 
         private string GetRank(int totalMatches, float winRate)
         {
-            if (totalMatches >= 100 && winRate >= 70) return "DIAMOND";
-            if (totalMatches >= 50 && winRate >= 60) return "PLATINUM";
-            if (totalMatches >= 25 && winRate >= 50) return "GOLD";
-            if (totalMatches >= 10) return "SILVER";
-            return "BRONZE";
-        }
-
-        // ==================== CHANGE NAME ====================
-
-        private void OnEditNameClicked()
-        {
-            int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
-
-            if (changeCount > 0)
-            {
-                int currentGems = CurrencyManager.Instance?.Gems ?? 0;
-                if (currentGems < NAME_CHANGE_GEM_COST)
-                {
-                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
-                    return;
-                }
-            }
-
-            if (changeNamePanel != null)
-            {
-                changeNamePanel.SetLengthLimits(3, 20);
-                changeNamePanel.Show(
-                    changeCount == 0
-                        ? AutoLocalizer.Get("change_name_title")
-                        : AutoLocalizer.Get("change_name_title_cost", NAME_CHANGE_GEM_COST),
-                    AutoLocalizer.Get("new_name_placeholder"),
-                    OnConfirmNameChange,
-                    null
-                );
-            }
-        }
-
-        private async void OnConfirmNameChange(string newUsername)
-        {
-            try
-            {
-                if (AuthenticationService.Instance == null) return;
-
-                var playerData = AuthenticationService.Instance.GetCurrentPlayerData();
-                if (playerData != null && newUsername == playerData.username)
-                {
-                    changeNamePanel?.Hide();
-                    return;
-                }
-
-                int changeCount = PlayerPrefs.GetInt(NAME_CHANGE_COUNT_KEY, 0);
-
-                if (changeCount > 0)
-                {
-                    bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
-                    if (!spent)
-                    {
-                        errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
-                        changeNamePanel?.SetButtonsInteractable(true);
-                        return;
-                    }
-                }
-
-                Debug.Log($"[CashProfile] Cambiando nombre a: {newUsername}");
-
-                bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
-
-                if (success)
-                {
-                    Debug.Log("[CashProfile] Nombre actualizado exitosamente");
-                    if (playerData != null) playerData.username = newUsername;
-                    PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
-                    PlayerPrefs.SetString("DisplayName", newUsername);
-                    PlayerPrefs.Save();
-                    changeNamePanel?.Hide();
-
-                    if (usernameText != null)
-                        usernameText.text = newUsername;
-                }
-                else
-                {
-                    Debug.LogError("[CashProfile] Error al actualizar nombre");
-                    changeNamePanel?.SetButtonsInteractable(true);
-                    errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
-                }
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogException(ex);
-            }
+            if (totalMatches >= 100 && winRate >= 70) return AutoLocalizer.Get("rank_diamond");
+            if (totalMatches >= 50 && winRate >= 60) return AutoLocalizer.Get("rank_platinum");
+            if (totalMatches >= 25 && winRate >= 50) return AutoLocalizer.Get("rank_gold");
+            if (totalMatches >= 10) return AutoLocalizer.Get("rank_silver");
+            return AutoLocalizer.Get("rank_bronze");
         }
 
         // ==================== NAVIGATION ====================

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
+using DigitPark.Localization;
 
 namespace DigitPark.CashBattle
 {
@@ -16,18 +17,25 @@ namespace DigitPark.CashBattle
     public class WalletManager : MonoBehaviour
     {
         private static WalletManager _instance;
+        private static readonly object _lock = new object();
         public static WalletManager Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<WalletManager>();
-                    if (_instance == null)
+                    lock (_lock)
                     {
-                        GameObject go = new GameObject("WalletManager");
-                        _instance = go.AddComponent<WalletManager>();
-                        DontDestroyOnLoad(go);
+                        if (_instance == null)
+                        {
+                            _instance = FindObjectOfType<WalletManager>();
+                            if (_instance == null)
+                            {
+                                GameObject go = new GameObject("WalletManager");
+                                _instance = go.AddComponent<WalletManager>();
+                                DontDestroyOnLoad(go);
+                            }
+                        }
                     }
                 }
                 return _instance;
@@ -54,38 +62,38 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Current user balance
         /// </summary>
-        public decimal Balance => WalletService?.CurrentBalance ?? 0m;
+        public decimal Balance => WalletService?.CurrentBalance ?? 0;
 
         /// <summary>
         /// Available balance (excluding reserved funds)
         /// </summary>
-        public decimal AvailableBalance => WalletService?.AvailableBalance ?? 0m;
+        public decimal AvailableBalance => WalletService?.AvailableBalance ?? 0;
 
         /// <summary>
         /// Pending verification balance
         /// </summary>
-        public decimal PendingBalance => WalletService?.PendingBalance ?? 0m;
+        public decimal PendingBalance => WalletService?.PendingBalance ?? 0;
 
         // ==================== CONFIGURATION ====================
 
         [Header("Deposit Options")]
         [SerializeField] private List<DepositOption> _depositOptions = new List<DepositOption>
         {
-            new DepositOption { amount = 5m },
-            new DepositOption { amount = 10m },
-            new DepositOption { amount = 25m },
-            new DepositOption { amount = 50m },
-            new DepositOption { amount = 100m },
+            new DepositOption { amount = 5f },
+            new DepositOption { amount = 10f },
+            new DepositOption { amount = 25f },
+            new DepositOption { amount = 50f },
+            new DepositOption { amount = 100f },
         };
 
         public List<DepositOption> DepositOptions => _depositOptions;
 
         [Header("Withdrawal Settings")]
-        [SerializeField] private decimal _minimumWithdrawal = 10m;
-        [SerializeField] private decimal _maximumWithdrawal = 500m;
+        [SerializeField] private float _minimumWithdrawal = 10f;
+        [SerializeField] private float _maximumWithdrawal = 500f;
 
-        public decimal MinimumWithdrawal => _minimumWithdrawal;
-        public decimal MaximumWithdrawal => _maximumWithdrawal;
+        public float MinimumWithdrawal => _minimumWithdrawal;
+        public float MaximumWithdrawal => _maximumWithdrawal;
 
         // ==================== EVENTS ====================
 
@@ -114,7 +122,12 @@ namespace DigitPark.CashBattle
         /// </summary>
         public event Action<WalletTransaction> OnWithdrawalRequested;
 
-        private decimal _lastKnownBalance = 0m;
+        private decimal _lastKnownBalance = 0;
+
+        /// <summary>
+        /// Prevents double-click double-charge on financial operations
+        /// </summary>
+        private bool _isProcessing = false;
 
         // ==================== INITIALIZATION ====================
 
@@ -140,7 +153,7 @@ namespace DigitPark.CashBattle
                 WalletService.OnBalanceChanged += HandleServiceBalanceChanged;
                 WalletService.OnTransactionCompleted += HandleServiceTransactionCompleted;
                 _lastKnownBalance = WalletService.CurrentBalance;
-                Debug.Log($"[WalletManager] Connected to service. Balance: ${Balance:F2}");
+                Debug.Log("[WalletManager] Connected to service. Balance: [REDACTED]");
             }
             else
             {
@@ -205,10 +218,10 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Gets wallet statistics
         /// </summary>
-        public (decimal deposits, decimal withdrawals, decimal net) GetStats()
+        public (float deposits, float withdrawals, float net) GetStats()
         {
             // TODO: Get from service when available
-            return (0m, 0m, 0m);
+            return (0f, 0f, 0f);
         }
 
         /// <summary>
@@ -218,8 +231,8 @@ namespace DigitPark.CashBattle
         {
             return new WalletData
             {
-                balance = Balance,
-                pendingBalance = PendingBalance
+                balance = (float)Balance,
+                pendingBalance = (float)PendingBalance
             };
         }
 
@@ -235,7 +248,7 @@ namespace DigitPark.CashBattle
         /// </summary>
         public async Task<bool> InitiateDeposit(DepositOption option, PaymentMethod method)
         {
-            return await InitiateDeposit(option.amount, method);
+            return await InitiateDeposit((decimal)option.amount, method);
         }
 
         /// <summary>
@@ -243,17 +256,20 @@ namespace DigitPark.CashBattle
         /// </summary>
         public async Task<bool> InitiateDeposit(decimal amount, PaymentMethod method)
         {
-            if (amount <= 0 || WalletService == null)
-            {
-                Debug.LogWarning("[WalletManager] Invalid deposit amount or service not available");
-                return false;
-            }
-
-            OnDepositStarted?.Invoke();
-            Debug.Log($"[WalletManager] Initiating deposit of ${amount:F2}");
+            if (_isProcessing) return false;
+            _isProcessing = true;
 
             try
             {
+                if (amount <= 0 || WalletService == null)
+                {
+                    Debug.LogWarning("[WalletManager] Invalid deposit amount or service not available");
+                    return false;
+                }
+
+                OnDepositStarted?.Invoke();
+                Debug.Log("[WalletManager] Deposit initiated");
+
                 var request = new Services.DepositRequest
                 {
                     Amount = amount,
@@ -267,13 +283,13 @@ namespace DigitPark.CashBattle
                     // Analytics
                     AnalyticsService.Instance?.LogDeposit(amount, method.ToString());
 
-                    OnDepositCompleted?.Invoke(true, "Deposit successful");
-                    Debug.Log($"[WalletManager] Deposit completed. New balance: ${Balance:F2}");
+                    OnDepositCompleted?.Invoke(true, AutoLocalizer.Get("wallet_deposit_success"));
+                    Debug.Log("[WalletManager] Deposit completed successfully");
                     return true;
                 }
                 else
                 {
-                    OnDepositCompleted?.Invoke(false, result.Message ?? "Error processing payment");
+                    OnDepositCompleted?.Invoke(false, result.Message ?? AutoLocalizer.Get("wallet_deposit_error"));
                     return false;
                 }
             }
@@ -282,6 +298,10 @@ namespace DigitPark.CashBattle
                 Debug.LogError($"[WalletManager] Deposit error: {e.Message}");
                 OnDepositCompleted?.Invoke(false, e.Message);
                 return false;
+            }
+            finally
+            {
+                _isProcessing = false;
             }
         }
 
@@ -292,34 +312,37 @@ namespace DigitPark.CashBattle
         /// </summary>
         public async Task<bool> RequestWithdrawal(decimal amount, PaymentMethod method)
         {
-            if (WalletService == null)
-            {
-                return false;
-            }
-
-            // Validations
-            if (amount < _minimumWithdrawal)
-            {
-                Debug.LogWarning($"[WalletManager] Minimum withdrawal amount: ${_minimumWithdrawal:F2}");
-                return false;
-            }
-
-            if (amount > _maximumWithdrawal)
-            {
-                Debug.LogWarning($"[WalletManager] Maximum withdrawal amount: ${_maximumWithdrawal:F2}");
-                return false;
-            }
-
-            if (!HasSufficientBalance(amount))
-            {
-                Debug.LogWarning("[WalletManager] Insufficient balance for withdrawal");
-                return false;
-            }
-
-            Debug.Log($"[WalletManager] Requesting withdrawal of ${amount:F2}");
+            if (_isProcessing) return false;
+            _isProcessing = true;
 
             try
             {
+                if (WalletService == null)
+                {
+                    return false;
+                }
+
+                // Validations
+                if (amount < (decimal)_minimumWithdrawal)
+                {
+                    Debug.LogWarning("[WalletManager] Withdrawal below minimum amount");
+                    return false;
+                }
+
+                if (amount > (decimal)_maximumWithdrawal)
+                {
+                    Debug.LogWarning("[WalletManager] Withdrawal exceeds maximum amount");
+                    return false;
+                }
+
+                if (!HasSufficientBalance(amount))
+                {
+                    Debug.LogWarning("[WalletManager] Insufficient balance for withdrawal");
+                    return false;
+                }
+
+                Debug.Log("[WalletManager] Withdrawal requested");
+
                 var request = new Services.WithdrawalRequest
                 {
                     Amount = amount,
@@ -336,9 +359,9 @@ namespace DigitPark.CashBattle
                     var transaction = new WalletTransaction
                     {
                         type = TransactionType.Withdrawal,
-                        amount = -amount,
+                        amount = (float)(-amount),
                         status = TransactionStatus.Pending,
-                        description = $"Withdrawal requested"
+                        description = AutoLocalizer.Get("wallet_withdrawal_requested")
                     };
                     OnWithdrawalRequested?.Invoke(transaction);
                     Debug.Log("[WalletManager] Withdrawal requested successfully");
@@ -355,6 +378,10 @@ namespace DigitPark.CashBattle
                 Debug.LogError($"[WalletManager] Withdrawal error: {e.Message}");
                 return false;
             }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         // ==================== GAME TRANSACTION METHODS ====================
@@ -362,19 +389,45 @@ namespace DigitPark.CashBattle
         /// <summary>
         /// Charges entry fee for a match
         /// </summary>
-        public bool ChargeEntryFee(decimal amount, string matchId, string description)
+        public async Task<bool> ChargeEntryFee(decimal amount, string matchId, string description)
         {
-            if (!HasSufficientBalance(amount))
+            if (_isProcessing) return false;
+            _isProcessing = true;
+
+            try
             {
-                Debug.LogWarning("[WalletManager] Insufficient balance for entry fee");
+                if (!HasSufficientBalance(amount))
+                {
+                    Debug.LogWarning("[WalletManager] Insufficient balance for entry fee");
+                    return false;
+                }
+
+                if (WalletService == null)
+                {
+                    Debug.LogError("[WalletManager] WalletService not available");
+                    return false;
+                }
+
+                // Reserve funds using the service and await confirmation
+                var result = await WalletService.ReserveFunds(amount, matchId);
+                if (result == null || !result.Success)
+                {
+                    Debug.LogError($"[WalletManager] Failed to reserve funds: {result?.Message ?? "unknown error"}");
+                    return false;
+                }
+
+                Debug.Log($"[WalletManager] Entry fee reserved for {description}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[WalletManager] Error reserving entry fee: {e.Message}");
                 return false;
             }
-
-            // Reserve funds using the service
-            _ = WalletService.ReserveFunds(amount, matchId);
-
-            Debug.Log($"[WalletManager] Entry fee reserved: ${amount:F2} for {description}");
-            return true;
+            finally
+            {
+                _isProcessing = false;
+            }
         }
 
         /// <summary>
@@ -384,13 +437,13 @@ namespace DigitPark.CashBattle
         {
             // In the real service, this would come from the server
             // For now, we simulate by adding funds
-            Debug.Log($"[WalletManager] Winnings credited: ${amount:F2} from {description}");
+            Debug.Log($"[WalletManager] Winnings credited from {description}");
 
             // Create local transaction for UI
             var transaction = new WalletTransaction
             {
                 type = TransactionType.MatchWinnings,
-                amount = amount,
+                amount = (float)amount,
                 status = TransactionStatus.Completed,
                 description = description,
                 referenceId = matchId
@@ -403,14 +456,14 @@ namespace DigitPark.CashBattle
         /// </summary>
         public void ProcessRefund(decimal amount, string reason)
         {
-            Debug.Log($"[WalletManager] Refund processed: ${amount:F2}");
+            Debug.Log("[WalletManager] Refund processed");
 
             var transaction = new WalletTransaction
             {
                 type = TransactionType.Refund,
-                amount = amount,
+                amount = (float)amount,
                 status = TransactionStatus.Completed,
-                description = $"Refund: {reason}"
+                description = AutoLocalizer.Get("wallet_refund_description", reason)
             };
             OnTransactionCompleted?.Invoke(transaction);
         }
@@ -466,7 +519,7 @@ namespace DigitPark.CashBattle
                 id = serviceTransaction.TransactionId,
                 type = ConvertTransactionType(serviceTransaction.Type),
                 status = ConvertTransactionStatus(serviceTransaction.Status),
-                amount = serviceTransaction.Amount,
+                amount = (float)serviceTransaction.Amount,
                 description = serviceTransaction.Description,
                 timestamp = serviceTransaction.Timestamp,
                 referenceId = serviceTransaction.ReferenceId
@@ -510,8 +563,8 @@ namespace DigitPark.CashBattle
         {
             if (WalletService != null)
             {
-                await WalletService.QuickDeposit(100m);
-                Debug.Log($"[WalletManager] Debug: Balance: ${Balance:F2}");
+                await WalletService.QuickDeposit(100);
+                Debug.Log("[WalletManager] Debug: Balance updated");
             }
         }
 

@@ -6,13 +6,14 @@ using DigitPark.Managers;
 using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Editor
 {
     /// <summary>
     /// Daily Missions UI Builder - Neon Cyan theme
     /// Layout: ProgressBar → TopBar → TimerBar → OverallProgress → ScrollView (Daily + Weekly)
-    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     /// NO SafeArea, NO tab bar, NO dialog confirmation
     ///
     /// Menu: DigitPark/UI Builders/Monetization/Daily Missions
@@ -48,19 +49,20 @@ namespace DigitPark.Editor
         private const float PROGRESS_TOP = 0.993f;
         private const float PROGRESS_BOT = 0.990f;
 
-        private const float TOPBAR_TOP = 0.988f;
-        private const float TOPBAR_BOT = 0.955f;
+        private const float TOPBAR_HEIGHT = 100f;
+        private const float TOPBAR_TOP = 0.980f;
+        private const float TOPBAR_BOT = 0.945f;  // kept for reference, topbar now uses sizeDelta
 
-        private const float TIMER_TOP = 0.952f;
-        private const float TIMER_BOT = 0.925f;
+        private const float TIMER_TOP = 0.940f;
+        private const float TIMER_BOT = 0.913f;
 
-        private const float TABS_TOP = 0.922f;
-        private const float TABS_BOT = 0.892f;
+        private const float TABS_TOP = 0.910f;
+        private const float TABS_BOT = 0.880f;
 
-        private const float OVERALL_TOP = 0.888f;
-        private const float OVERALL_BOT = 0.785f;
+        private const float OVERALL_TOP = 0.876f;
+        private const float OVERALL_BOT = 0.773f;
 
-        private const float SCROLL_TOP = 0.780f;
+        private const float SCROLL_TOP = 0.768f;
         private const float SCROLL_BOT = 0.015f;
 
         private const float SIDE_PAD = 30f;
@@ -158,7 +160,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -468,7 +470,11 @@ namespace DigitPark.Editor
 
             var topBar = FindOrCreate(canvas.transform, "TopBar");
             var tbRT = GetOrAdd<RectTransform>(topBar);
-            SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
+            tbRT.anchorMin = new Vector2(0, 1);
+            tbRT.anchorMax = new Vector2(1, 1);
+            tbRT.pivot = new Vector2(0.5f, 1);
+            tbRT.anchoredPosition = new Vector2(0, -(1920f * (1f - TOPBAR_TOP))); // below progress bar
+            tbRT.sizeDelta = new Vector2(0, TOPBAR_HEIGHT);
 
             // BackButton - Neon Cyan prefab
             var oldBackBtn = topBar.transform.Find("BackButton");
@@ -518,10 +524,10 @@ namespace DigitPark.Editor
             // Currency pills (expanded to right edge, no InfoButton)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             Debug.Log("[DailyMissionsUI] TopBar creado (Back + MISIONES + Currency)");
         }
@@ -574,13 +580,16 @@ namespace DigitPark.Editor
             iconLE.preferredHeight = 96;
 
             // Label
-            var label = FindOrCreate(timerBar.transform, "Label");
+            var label = FindOrCreate(timerBar.transform, "ResetsInLabel");
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
             lTMP.text = "Resets in:";
             lTMP.fontSize = FontSizes.Body;
             lTMP.fontStyle = FontStyles.Bold;
             lTMP.color = TEXT_SECONDARY;
             lTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            lTMP.enableAutoSizing = true;
+            lTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lTMP.fontSizeMax = FontSizes.Body;
             var lLE = GetOrAdd<LayoutElement>(label);
             lLE.flexibleWidth = 1;
 
@@ -592,6 +601,9 @@ namespace DigitPark.Editor
             cdTMP.fontStyle = FontStyles.Bold;
             cdTMP.color = ORANGE_TIMER;
             cdTMP.alignment = TextAlignmentOptions.MidlineRight;
+            cdTMP.enableAutoSizing = true;
+            cdTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cdTMP.fontSizeMax = FontSizes.Body;
             var cdLE = GetOrAdd<LayoutElement>(countdown);
             cdLE.minWidth = 120;
 
@@ -726,6 +738,9 @@ namespace DigitPark.Editor
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.color = TEXT_WHITE;
             tlTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            tlTMP.enableAutoSizing = true;
+            tlTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tlTMP.fontSizeMax = FontSizes.Body;
 
             var titleRight = FindOrCreate(titleRow.transform, "TitleRight");
             var trTMP = GetOrAdd<TextMeshProUGUI>(titleRight);
@@ -734,6 +749,9 @@ namespace DigitPark.Editor
             trTMP.fontStyle = FontStyles.Bold;
             trTMP.color = TEXT_SECONDARY;
             trTMP.alignment = TextAlignmentOptions.MidlineRight;
+            trTMP.enableAutoSizing = true;
+            trTMP.fontSizeMin = FontSizes.AutoMinBody;
+            trTMP.fontSizeMax = FontSizes.Body;
 
             // Row 2: Progress slider
             var progressContainer = FindOrCreate(panel.transform, "ProgressContainer");
@@ -812,8 +830,8 @@ namespace DigitPark.Editor
             rwTMP.text = reward;
             rwTMP.fontSize = 22f;
             rwTMP.enableAutoSizing = true;
-            rwTMP.fontSizeMin = 18f;
-            rwTMP.fontSizeMax = 22f;
+            rwTMP.fontSizeMin = 24f;
+            rwTMP.fontSizeMax = 24f;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.color = TEXT_WHITE;
             rwTMP.alignment = TextAlignmentOptions.Center;
@@ -927,6 +945,9 @@ namespace DigitPark.Editor
             esTMP.fontStyle = FontStyles.Bold;
             esTMP.color = TEXT_SECONDARY;
             esTMP.alignment = TextAlignmentOptions.Center;
+            esTMP.enableAutoSizing = true;
+            esTMP.fontSizeMin = FontSizes.AutoMinBody;
+            esTMP.fontSizeMax = FontSizes.Body;
             var esLE = GetOrAdd<LayoutElement>(emptyState);
             esLE.preferredHeight = 60;
             emptyState.SetActive(false);
@@ -1097,6 +1118,9 @@ namespace DigitPark.Editor
             titleTMP.color = isCompleted ? GREEN_SUCCESS : TEXT_WHITE;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
             titleTMP.overflowMode = TextOverflowModes.Ellipsis;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = FontSizes.AutoMinBody;
+            titleTMP.fontSizeMax = FontSizes.Body;
             var titleLE = GetOrAdd<LayoutElement>(titleGO);
             titleLE.preferredHeight = 64;
 
@@ -1109,6 +1133,9 @@ namespace DigitPark.Editor
             descTMP.color = TEXT_SECONDARY;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.overflowMode = TextOverflowModes.Ellipsis;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = FontSizes.AutoMinBody;
+            descTMP.fontSizeMax = FontSizes.Body;
             var descLE = GetOrAdd<LayoutElement>(descGO);
             descLE.preferredHeight = 56;
 
@@ -1151,6 +1178,9 @@ namespace DigitPark.Editor
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            ptTMP.enableAutoSizing = true;
+            ptTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            ptTMP.fontSizeMax = FontSizes.Body;
             var ptLE = GetOrAdd<LayoutElement>(progressText);
             ptLE.minWidth = 120;
 
@@ -1218,6 +1248,9 @@ namespace DigitPark.Editor
             atTMP.fontStyle = FontStyles.Bold;
             atTMP.color = rewardColor;
             atTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            atTMP.enableAutoSizing = true;
+            atTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            atTMP.fontSizeMax = FontSizes.Body;
             var atLE = GetOrAdd<LayoutElement>(amountText);
             atLE.minWidth = 100;
 
@@ -1229,7 +1262,7 @@ namespace DigitPark.Editor
             var abLE = GetOrAdd<LayoutElement>(actionBtn);
             abLE.preferredHeight = 64;
 
-            var actionText = FindOrCreate(actionBtn.transform, "Text");
+            var actionText = FindOrCreate(actionBtn.transform, "ActionButtonText");
             var actRT = GetOrAdd<RectTransform>(actionText);
             actRT.anchorMin = Vector2.zero;
             actRT.anchorMax = Vector2.one;
@@ -1245,6 +1278,9 @@ namespace DigitPark.Editor
                 actTMP.fontStyle = FontStyles.Bold;
                 actTMP.color = TEXT_DARK;
                 actTMP.alignment = TextAlignmentOptions.Center;
+                actTMP.enableAutoSizing = true;
+                actTMP.fontSizeMin = FontSizes.AutoMinBody;
+                actTMP.fontSizeMax = FontSizes.Body;
                 var abOutline = GetOrAdd<Outline>(actionBtn);
                 abOutline.effectColor = GREEN_SUCCESS;
                 abOutline.effectDistance = new Vector2(1, 1);
@@ -1258,6 +1294,9 @@ namespace DigitPark.Editor
                 actTMP.fontStyle = FontStyles.Bold;
                 actTMP.color = TEXT_SECONDARY;
                 actTMP.alignment = TextAlignmentOptions.Center;
+                actTMP.enableAutoSizing = true;
+                actTMP.fontSizeMin = FontSizes.AutoMinBody;
+                actTMP.fontSizeMax = FontSizes.Body;
             }
         }
 
@@ -1320,13 +1359,16 @@ namespace DigitPark.Editor
             ceLE.preferredHeight = 60;
 
             // Title
-            var popupTitle = FindOrCreate(popup.transform, "Title");
+            var popupTitle = FindOrCreate(popup.transform, "MissionCompletedTitle");
             var ptTMP = GetOrAdd<TextMeshProUGUI>(popupTitle);
             ptTMP.text = "Mission Completed!";
             ptTMP.fontSize = FontSizes.H4;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.color = GOLD;
             ptTMP.alignment = TextAlignmentOptions.Center;
+            ptTMP.enableAutoSizing = true;
+            ptTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            ptTMP.fontSizeMax = FontSizes.H4;
             var ptLE = GetOrAdd<LayoutElement>(popupTitle);
             ptLE.preferredHeight = 48;
 
@@ -1338,6 +1380,9 @@ namespace DigitPark.Editor
             mnTMP.fontStyle = FontStyles.Bold;
             mnTMP.color = TEXT_SECONDARY;
             mnTMP.alignment = TextAlignmentOptions.Center;
+            mnTMP.enableAutoSizing = true;
+            mnTMP.fontSizeMin = FontSizes.AutoMinBody;
+            mnTMP.fontSizeMax = FontSizes.Body;
             var mnLE = GetOrAdd<LayoutElement>(missionName);
             mnLE.preferredHeight = 30;
 
@@ -1349,6 +1394,9 @@ namespace DigitPark.Editor
             ddTMP.fontStyle = FontStyles.Bold;
             ddTMP.color = TEXT_SECONDARY;
             ddTMP.alignment = TextAlignmentOptions.Center;
+            ddTMP.enableAutoSizing = true;
+            ddTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ddTMP.fontSizeMax = FontSizes.Body;
             var ddLE = GetOrAdd<LayoutElement>(detailDesc);
             ddLE.preferredHeight = 28;
 
@@ -1400,6 +1448,9 @@ namespace DigitPark.Editor
             dptTMP.fontStyle = FontStyles.Bold;
             dptTMP.color = CYAN_NEON;
             dptTMP.alignment = TextAlignmentOptions.Center;
+            dptTMP.enableAutoSizing = true;
+            dptTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            dptTMP.fontSizeMax = FontSizes.Body;
             var dptLE = GetOrAdd<LayoutElement>(detailProgressText);
             dptLE.preferredHeight = 26;
 
@@ -1436,6 +1487,9 @@ namespace DigitPark.Editor
             raTMP.fontStyle = FontStyles.Bold;
             raTMP.color = COIN_COLOR;
             raTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            raTMP.enableAutoSizing = true;
+            raTMP.fontSizeMin = FontSizes.AutoMinBody;
+            raTMP.fontSizeMax = FontSizes.Subtitle;
             var raLE = GetOrAdd<LayoutElement>(rewardAmount);
             raLE.minWidth = 120;
 
@@ -1447,7 +1501,7 @@ namespace DigitPark.Editor
             var cbLE = GetOrAdd<LayoutElement>(collectBtn);
             cbLE.preferredHeight = 56;
 
-            var collectText = FindOrCreate(collectBtn.transform, "Text");
+            var collectText = FindOrCreate(collectBtn.transform, "CollectButtonText");
             var ctRT = GetOrAdd<RectTransform>(collectText);
             ctRT.anchorMin = Vector2.zero;
             ctRT.anchorMax = Vector2.one;
@@ -1459,6 +1513,9 @@ namespace DigitPark.Editor
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.color = TEXT_DARK;
             ctTMP.alignment = TextAlignmentOptions.Center;
+            ctTMP.enableAutoSizing = true;
+            ctTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ctTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[DailyMissionsUI] RewardClaimPopup creado");
         }
@@ -1571,14 +1628,14 @@ namespace DigitPark.Editor
             var backBtn = FindInPath<Button>(r, "TopBar/BackButton");
             if (backBtn != null)
             {
-                var navigator = Object.FindFirstObjectByType<DigitPark.Monetization.SceneNavigator>();
+                var navigator = Object.FindFirstObjectByType<DigitPark.Navigation.SceneNavigator>();
                 if (navigator != null)
                 {
                     backBtn.onClick.RemoveAllListeners();
                     UnityEditor.Events.UnityEventTools.AddStringPersistentListener(
                         backBtn.onClick,
                         navigator.NavigateTo,
-                        DigitPark.Monetization.SceneNavigator.Scenes.MAIN_MENU
+                        DigitPark.Navigation.SceneNavigator.Scenes.MAIN_MENU
                     );
                     Debug.Log("[DailyMissionsUI] BackButton conectado a SceneNavigator -> MainMenu");
                 }

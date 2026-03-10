@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Localization;
@@ -67,6 +68,11 @@ namespace DigitPark.Services
             string action = "", string targetId = "",
             Dictionary<string, string> extraData = null)
         {
+            // SEC-M09: Sanitize user-provided content to strip rich text / HTML / TMP tags
+            title = Regex.Replace(title ?? "", "<.*?>", "");
+            body = Regex.Replace(body ?? "", "<.*?>", "");
+            senderName = Regex.Replace(senderName ?? "", "<.*?>", "");
+
             var notification = new StoredNotification
             {
                 id = Guid.NewGuid().ToString("N"),
@@ -77,7 +83,7 @@ namespace DigitPark.Services
                 senderName = senderName,
                 action = action,
                 targetId = targetId,
-                timestamp = DateTime.Now.ToBinary(),
+                timestamp = DateTime.UtcNow.ToBinary(),
                 isRead = false,
                 extraData = extraData != null ? new SerializableDictionary(extraData) : null
             };
@@ -234,7 +240,11 @@ namespace DigitPark.Services
                 PlayerPrefs.Save();
 
                 // Sync to Firebase
-                _ = SyncNotificationsToFirebase(json);
+                _ = SyncNotificationsToFirebase(json).ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        Debug.LogWarning($"[NotificationStorage] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
             }
             catch (Exception e)
             {
@@ -330,11 +340,11 @@ namespace DigitPark.Services
             var dt = GetDateTime();
             var diff = now - dt;
 
-            if (diff.TotalMinutes < 1) return "Ahora";
-            if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
-            if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours}h";
-            if (diff.TotalDays < 2) return "Ayer";
-            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_days_ago", (int)diff.TotalDays);
+            if (diff.TotalMinutes < 1) return AutoLocalizer.Get("time_now");
+            if (diff.TotalMinutes < 60) return AutoLocalizer.Get("time_ago_minutes", (int)diff.TotalMinutes);
+            if (diff.TotalHours < 24) return AutoLocalizer.Get("time_ago_hours", (int)diff.TotalHours);
+            if (diff.TotalDays < 2) return AutoLocalizer.Get("time_yesterday");
+            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_ago_days", (int)diff.TotalDays);
             return dt.ToString("dd/MM/yyyy");
         }
 
@@ -347,10 +357,10 @@ namespace DigitPark.Services
             var dt = GetDateTime();
             var diff = now - dt;
 
-            if (dt.Date == now.Date) return "Hoy";
-            if (dt.Date == now.Date.AddDays(-1)) return "Ayer";
-            if (diff.TotalDays < 7) return "Esta semana";
-            return "Anteriores";
+            if (dt.Date == now.Date) return AutoLocalizer.Get("time_today");
+            if (dt.Date == now.Date.AddDays(-1)) return AutoLocalizer.Get("time_yesterday");
+            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_this_week");
+            return AutoLocalizer.Get("time_earlier");
         }
     }
 

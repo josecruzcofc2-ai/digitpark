@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Data;
 using DigitPark.Localization;
 using DigitPark.UI;
@@ -82,9 +83,11 @@ namespace DigitPark.Managers
         private TournamentData currentTournament;
         private List<ParticipantData> participants = new List<ParticipantData>();
         private bool hasJoined = false;
+        private bool _tournamentStarted = false;
         private bool isLoading = false;
         private int currentTab = 0; // 0 = Participants, 1 = Chat
         private int unreadChatCount = 0;
+        private float _timeDisplayTimer = 0f;
 
         // Chat colors
         private static readonly Color CHAT_COLOR_ME = new Color(0f, 1f, 1f);
@@ -190,9 +193,10 @@ namespace DigitPark.Managers
                 message = result.FilteredMessage;
             }
 
-            string sender = AutoLocalizer.Get("chat_you"); // In production: PlayerData.Instance.username
-            CreateChatMessage(sender, message, true);
-            SaveChatMessage(sender, message);
+            string displayName = AutoLocalizer.Get("chat_you");
+            string senderId = GetCurrentUserId();
+            CreateChatMessage(displayName, message, true);
+            SaveChatMessage(senderId, message);
             ScrollChatToBottom();
 
             chatInput.ActivateInputField();
@@ -255,16 +259,19 @@ namespace DigitPark.Managers
             string json = PlayerPrefs.GetString(key, "");
             if (string.IsNullOrEmpty(json)) return;
 
-            // Simple format: "sender|message\n"
+            // Simple format: "senderId|message\n"
+            string currentUserId = GetCurrentUserId();
             string[] lines = json.Split('\n');
             foreach (string line in lines)
             {
                 if (string.IsNullOrEmpty(line)) continue;
                 int sep = line.IndexOf('|');
                 if (sep < 0) continue;
-                string sender = line.Substring(0, sep);
+                string senderId = line.Substring(0, sep);
                 string msg = line.Substring(sep + 1);
-                CreateChatMessage(sender, msg, sender == AutoLocalizer.Get("chat_you"));
+                bool isMe = senderId == currentUserId;
+                string displayName = isMe ? AutoLocalizer.Get("chat_you") : senderId;
+                CreateChatMessage(displayName, msg, isMe);
             }
         }
 
@@ -330,7 +337,7 @@ namespace DigitPark.Managers
         {
             return new TournamentData
             {
-                name = "Torneo de Prueba",
+                name = AutoLocalizer.Get("mock_tournament_test"),
                 category = "Memory Pairs",
                 entryFee = 5,
                 totalPrizePool = 150,
@@ -463,8 +470,13 @@ namespace DigitPark.Managers
 
         private void Update()
         {
-            // Update countdown every frame
-            UpdateTimeDisplay();
+            // Update countdown once per second instead of every frame
+            _timeDisplayTimer += Time.deltaTime;
+            if (_timeDisplayTimer >= 1f)
+            {
+                _timeDisplayTimer = 0f;
+                UpdateTimeDisplay();
+            }
 
             // Check if tournament is starting
             if (currentTournament != null && hasJoined)
@@ -474,8 +486,9 @@ namespace DigitPark.Managers
                 {
                     ShowStartingOverlay((int)timeUntilStart.TotalSeconds);
                 }
-                else if (timeUntilStart.TotalSeconds <= 0)
+                else if (timeUntilStart.TotalSeconds <= 0 && !_tournamentStarted)
                 {
+                    _tournamentStarted = true;
                     StartTournament();
                 }
             }
@@ -815,15 +828,13 @@ namespace DigitPark.Managers
         {
             if (currentTournament == null) return;
 
-            // Parse game type from category string
+            // Parse game type from category string using enum parsing with fallback
             GameType gameType = GameType.MemoryPairs;
-            switch (currentTournament.category)
+            // Try direct enum parse first (handles "DigitRush", "MemoryPairs", etc.)
+            string normalized = currentTournament.category?.Replace(" ", "") ?? "";
+            if (!System.Enum.TryParse<GameType>(normalized, true, out gameType))
             {
-                case "Digit Rush": gameType = GameType.DigitRush; break;
-                case "Memory Pairs": gameType = GameType.MemoryPairs; break;
-                case "Quick Math": gameType = GameType.QuickMath; break;
-                case "Flash Tap": gameType = GameType.FlashTap; break;
-                case "Odd One Out": gameType = GameType.OddOneOut; break;
+                gameType = GameType.MemoryPairs; // Default fallback
             }
 
             if (GameSessionManager.Instance != null)
@@ -881,11 +892,15 @@ namespace DigitPark.Managers
             }
         }
 
+        private string GetCurrentUserId()
+        {
+            var authService = DigitPark.Services.Firebase.AuthenticationService.Instance;
+            return authService != null ? authService.GetCurrentUserId() ?? "local_user" : "local_user";
+        }
+
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            string text = LocalizationManager.Instance.GetText(key);
-            return args.Length > 0 ? string.Format(text, args) : text;
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
     }
 

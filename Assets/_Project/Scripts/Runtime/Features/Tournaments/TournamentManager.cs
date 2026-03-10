@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ using DG.Tweening;
 using DigitPark.Animations;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Managers
 {
@@ -542,7 +544,7 @@ namespace DigitPark.Managers
             }
 
             // Si NO hay filtros activos y estamos en la vista de búsqueda, ocultar torneos inscritos
-            if (!hasActiveFilters && currentView == TournamentView.Search && currentPlayer != null)
+            if (!hasActiveFilters && currentView == TournamentView.Search && currentPlayer != null && !string.IsNullOrEmpty(currentPlayer.userId))
             {
                 filteredTournaments = filteredTournaments.FindAll(t => !t.IsParticipating(currentPlayer.userId));
                 Debug.Log($"[Tournament] Ocultando torneos inscritos. Quedaron: {filteredTournaments.Count}");
@@ -552,7 +554,7 @@ namespace DigitPark.Managers
             if (!string.IsNullOrEmpty(searchUsername))
             {
                 filteredTournaments = filteredTournaments.FindAll(t =>
-                    t.creatorName.ToLower().Contains(searchUsername.ToLower()));
+                    !string.IsNullOrEmpty(t.creatorName) && t.creatorName.ToLower().Contains(searchUsername.ToLower()));
             }
 
             // Filtrar por jugadores
@@ -581,28 +583,35 @@ namespace DigitPark.Managers
         /// </summary>
         private async void LoadActiveTournaments()
         {
-            ShowLoading(true);
-            ClearTournamentsList();
-
-            // Ocultar botones contextuales (vista de lista, no leaderboard)
-            UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: true);
-
             try
             {
-                activeTournaments = await DatabaseService.Instance.GetActiveTournaments();
+                ShowLoading(true);
+                ClearTournamentsList();
 
-                Debug.Log($"[Tournament] {activeTournaments.Count} torneos activos cargados");
+                // Ocultar botones contextuales (vista de lista, no leaderboard)
+                UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: true);
 
-                // Usar FilterTournaments en lugar de DisplayTournaments para aplicar filtro de inscritos
-                FilterTournaments();
+                try
+                {
+                    activeTournaments = await DatabaseService.Instance.GetActiveTournaments();
+
+                    Debug.Log($"[Tournament] {activeTournaments.Count} torneos activos cargados");
+
+                    // Usar FilterTournaments en lugar de DisplayTournaments para aplicar filtro de inscritos
+                    FilterTournaments();
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Tournament] Error al cargar torneos: {ex.Message}");
+                }
+                finally
+                {
+                    ShowLoading(false);
+                }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Debug.LogError($"[Tournament] Error al cargar torneos: {ex.Message}");
-            }
-            finally
-            {
-                ShowLoading(false);
+                Debug.LogError($"[TournamentManager] {ex.Message}");
             }
         }
 
@@ -620,7 +629,9 @@ namespace DigitPark.Managers
             try
             {
                 // Filtrar torneos en los que participa el jugador
-                myTournaments = activeTournaments.FindAll(t => t.IsParticipating(currentPlayer.userId));
+                myTournaments = currentPlayer != null && !string.IsNullOrEmpty(currentPlayer.userId)
+                    ? activeTournaments.FindAll(t => t.IsParticipating(currentPlayer.userId))
+                    : new List<TournamentData>();
 
                 Debug.Log($"[Tournament] {myTournaments.Count} torneos propios encontrados");
 
@@ -721,6 +732,7 @@ namespace DigitPark.Managers
         private List<TournamentMyItemUI> activeMyItems = new List<TournamentMyItemUI>();
         // Legacy - se mantiene para compatibilidad
         private List<TournamentItemUI> activeTournamentItems = new List<TournamentItemUI>();
+        private float _lastTimeUpdate;
 
         /// <summary>
         /// Crea una entrada de torneo usando prefab
@@ -955,6 +967,10 @@ namespace DigitPark.Managers
         /// </summary>
         private void Update()
         {
+            // Only update time displays once per second (not every frame)
+            if (Time.unscaledTime - _lastTimeUpdate < 1f) return;
+            _lastTimeUpdate = Time.unscaledTime;
+
             // Actualizar tiempo de items de búsqueda (TournamentSearchItemUI)
             for (int i = activeSearchItems.Count - 1; i >= 0; i--)
             {
@@ -1156,35 +1172,6 @@ namespace DigitPark.Managers
             ShowCreateTournamentPanelInternal();
         }
 
-        /// <summary>
-        /// Muestra el panel de premium requerido
-        /// </summary>
-        private void ShowPremiumRequiredPanel()
-        {
-            ClearTournamentsList();
-
-            if (premiumRequiredPanel != null)
-            {
-                // Configurar textos de botones primero
-                premiumRequiredPanel.SetButtonTexts(
-                    AutoLocalizer.Get("get_premium"),
-                    AutoLocalizer.Get("maybe_later")
-                );
-
-                // Mostrar el panel
-                premiumRequiredPanel.Show(
-                    AutoLocalizer.Get("premium_required_title"),
-                    AutoLocalizer.Get("premium_required_message"),
-                    OnGetPremiumClicked,
-                    OnMaybeLaterClicked
-                );
-            }
-            else
-            {
-                // Fallback si no hay panel de premium
-                errorPanel?.Show(AutoLocalizer.Get("premium_required_message"));
-            }
-        }
 
         /// <summary>
         /// Acción cuando el usuario quiere obtener premium
@@ -1328,17 +1315,24 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnCreateTournamentClicked()
         {
-            if (currentPlayer == null) return;
+            try
+            {
+                if (currentPlayer == null) return;
 
-            // Obtener valores de los sliders
-            int maxParticipants = (int)(maxPlayersSlider?.value ?? 50);
-            int durationHours = (int)(durationSlider?.value ?? 24);
-            bool isPublic = publicToggle?.isOn ?? true;
+                // Obtener valores de los sliders
+                int maxParticipants = (int)(maxPlayersSlider?.value ?? 50);
+                int durationHours = (int)(durationSlider?.value ?? 24);
+                bool isPublic = publicToggle?.isOn ?? true;
 
-            Debug.Log($"[Tournament] Creando torneo: {maxParticipants} jugadores, {durationHours}h");
+                Debug.Log($"[Tournament] Creando torneo: {maxParticipants} jugadores, {durationHours}h");
 
-            // Crear torneo directamente
-            await CreateTournamentDirectly(maxParticipants, durationHours, isPublic);
+                // Crear torneo directamente
+                await CreateTournamentDirectly(maxParticipants, durationHours, isPublic);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[TournamentManager] {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -1398,25 +1392,32 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnConfirmClicked()
         {
-            if (currentPlayer == null) return;
-
-            // Ocultar popup
-            HideConfirmPopup();
-
-            // Ejecutar acción según el modo
-            switch (popupMode)
+            try
             {
-                case ConfirmPopupMode.JoinTournament:
-                    await JoinTournamentConfirmed();
-                    break;
+                if (currentPlayer == null) return;
 
-                case ConfirmPopupMode.ViewLeaderboard:
-                    ShowTournamentLeaderboard(selectedTournament);
-                    break;
+                // Ocultar popup
+                HideConfirmPopup();
+
+                // Ejecutar acción según el modo
+                switch (popupMode)
+                {
+                    case ConfirmPopupMode.JoinTournament:
+                        await JoinTournamentConfirmed();
+                        break;
+
+                    case ConfirmPopupMode.ViewLeaderboard:
+                        ShowTournamentLeaderboard(selectedTournament);
+                        break;
+                }
+
+                // Reset popup mode
+                popupMode = ConfirmPopupMode.None;
             }
-
-            // Reset popup mode
-            popupMode = ConfirmPopupMode.None;
+            catch (Exception ex)
+            {
+                Debug.LogError($"[TournamentManager] {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -1461,6 +1462,7 @@ namespace DigitPark.Managers
 
                     // Ocultar panel de creación y volver a Search (después de 1.5 segundos)
                     await System.Threading.Tasks.Task.Delay(1500);
+                    if (this == null) return;
                     HideCreatePanel();
 
                     // Recargar torneos activos
@@ -1503,6 +1505,7 @@ namespace DigitPark.Managers
 
                     // Recargar torneos
                     await System.Threading.Tasks.Task.Delay(1500);
+                    if (this == null) return;
                     LoadActiveTournaments();
                 }
                 else
@@ -2032,48 +2035,55 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnConfirmExitClicked()
         {
-            if (selectedTournament == null || currentPlayer == null)
-            {
-                Debug.LogError("[Tournament] No hay torneo o jugador seleccionado");
-                return;
-            }
-
-            Debug.Log($"[Tournament] Confirmando salida del torneo: {selectedTournament.tournamentId}");
-
-            // Ocultar panel de confirmación
-            exitConfirmPanel?.Hide();
-
-            ShowLoading(true);
-
             try
             {
-                bool success = await DatabaseService.Instance.LeaveTournament(selectedTournament.tournamentId, currentPlayer.userId);
-
-                if (success)
+                if (selectedTournament == null || currentPlayer == null)
                 {
-                    Debug.Log($"[Tournament] Salida exitosa del torneo: {selectedTournament.tournamentId}");
-                    ShowSuccessMessage(AutoLocalizer.Get("exit_success"));
-
-                    // Ocultar todos los botones contextuales
-                    UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: false);
-
-                    // Esperar y recargar torneos
-                    await System.Threading.Tasks.Task.Delay(1500);
-                    LoadActiveTournaments();
+                    Debug.LogError("[Tournament] No hay torneo o jugador seleccionado");
+                    return;
                 }
-                else
+
+                Debug.Log($"[Tournament] Confirmando salida del torneo: {selectedTournament.tournamentId}");
+
+                // Ocultar panel de confirmación
+                exitConfirmPanel?.Hide();
+
+                ShowLoading(true);
+
+                try
                 {
-                    ShowErrorMessage(AutoLocalizer.Get("exit_error"));
+                    bool success = await DatabaseService.Instance.LeaveTournament(selectedTournament.tournamentId, currentPlayer.userId);
+
+                    if (success)
+                    {
+                        Debug.Log($"[Tournament] Salida exitosa del torneo: {selectedTournament.tournamentId}");
+                        ShowSuccessMessage(AutoLocalizer.Get("exit_success"));
+
+                        // Ocultar todos los botones contextuales
+                        UpdateContextualButtons(showLeaderboard: false, showExit: false, showSearch: false);
+
+                        // Esperar y recargar torneos
+                        await System.Threading.Tasks.Task.Delay(1500);
+                        LoadActiveTournaments();
+                    }
+                    else
+                    {
+                        ShowErrorMessage(AutoLocalizer.Get("exit_error"));
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Tournament] Error al salir del torneo: {ex.Message}");
+                    ShowErrorMessage(AutoLocalizer.Get("error_leaving_tournament"));
+                }
+                finally
+                {
+                    ShowLoading(false);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Debug.LogError($"[Tournament] Error al salir del torneo: {ex.Message}");
-                ShowErrorMessage(AutoLocalizer.Get("error_leaving_tournament"));
-            }
-            finally
-            {
-                ShowLoading(false);
+                Debug.LogError($"[TournamentManager] {ex.Message}");
             }
         }
 
@@ -2147,6 +2157,26 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             transform.DOKill();
+
+            // Remove button listeners to prevent leaks
+            searchTab?.onClick.RemoveAllListeners();
+            myTournamentsTab?.onClick.RemoveAllListeners();
+            createTab?.onClick.RemoveAllListeners();
+            searchOptionsButton?.onClick.RemoveAllListeners();
+            closeSearchOptionsButton?.onClick.RemoveAllListeners();
+            applyButton?.onClick.RemoveAllListeners();
+            clearButton?.onClick.RemoveAllListeners();
+            createButton?.onClick.RemoveAllListeners();
+            cancelCreateButton?.onClick.RemoveAllListeners();
+            confirmButton?.onClick.RemoveAllListeners();
+            cancelButton?.onClick.RemoveAllListeners();
+            backButton?.onClick.RemoveAllListeners();
+            maxPlayersSlider?.onValueChanged.RemoveAllListeners();
+            durationSlider?.onValueChanged.RemoveAllListeners();
+            publicToggle?.onValueChanged.RemoveAllListeners();
+            privateToggle?.onValueChanged.RemoveAllListeners();
+            searchBarLeaderboardButton?.onClick.RemoveAllListeners();
+            searchBarExitButton?.onClick.RemoveAllListeners();
         }
     }
 

@@ -88,7 +88,7 @@ namespace DigitPark.UI
         /// </summary>
         public void ShowError(string localizationKey)
         {
-            string message = GetLocalizedText(localizationKey);
+            string message = AutoLocalizer.Get(localizationKey);
             ShowErrorMessage(message);
         }
 
@@ -107,7 +107,7 @@ namespace DigitPark.UI
             // Traducir el botón de aceptar
             if (acceptButtonText != null)
             {
-                acceptButtonText.text = GetLocalizedText("popup_accept_button");
+                acceptButtonText.text = AutoLocalizer.Get("popup_accept_button");
             }
 
             if (errorPanel != null)
@@ -139,7 +139,7 @@ namespace DigitPark.UI
         /// </summary>
         public void ShowConfirm(string messageKey, Action onConfirm, Action onCancel = null)
         {
-            string message = GetLocalizedText(messageKey);
+            string message = AutoLocalizer.Get(messageKey);
             ShowConfirmMessage(message, onConfirm, onCancel);
         }
 
@@ -161,12 +161,12 @@ namespace DigitPark.UI
             // Traducir los botones
             if (confirmButtonText != null)
             {
-                confirmButtonText.text = GetLocalizedText("popup_confirm_button");
+                confirmButtonText.text = AutoLocalizer.Get("popup_confirm_button");
             }
 
             if (cancelButtonText != null)
             {
-                cancelButtonText.text = GetLocalizedText("popup_cancel_button");
+                cancelButtonText.text = AutoLocalizer.Get("popup_cancel_button");
             }
 
             if (confirmPanel != null)
@@ -233,15 +233,6 @@ namespace DigitPark.UI
         #endregion
 
         #region Helper Methods
-
-        private string GetLocalizedText(string key)
-        {
-            if (LocalizationManager.Instance != null)
-            {
-                return LocalizationManager.Instance.GetText(key);
-            }
-            return key;
-        }
 
         private void AnimatePanelIn(Transform panel)
         {

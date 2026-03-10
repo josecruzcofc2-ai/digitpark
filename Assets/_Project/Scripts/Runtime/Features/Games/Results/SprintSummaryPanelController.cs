@@ -166,7 +166,12 @@ namespace DigitPark.UI
 
             if (moneySection != null) moneySection.SetActive(false);
 
-            // Botones online
+            // Botones online - restore default rematch listener (may have been overridden by ShowCashSummary)
+            if (rematchButton != null)
+            {
+                rematchButton.onClick.RemoveAllListeners();
+                rematchButton.onClick.AddListener(() => OnRematchClicked?.Invoke());
+            }
             SetButtonVisibility(continueButton, true);
             SetButtonVisibility(rematchButton, true);
             SetButtonVisibility(playAgainButton, false);
@@ -451,6 +456,8 @@ namespace DigitPark.UI
 
         private void PopulateVSSection(GameContext ctx, int winner)
         {
+            if (ctx.OpponentResults == null) return;
+
             if (playerNameText != null)
             {
                 string pName = PlayerPrefs.GetString("PlayerName", "Player");
@@ -460,7 +467,7 @@ namespace DigitPark.UI
 
             if (opponentNameText != null)
             {
-                opponentNameText.text = ctx.OpponentName ?? "Opponent";
+                opponentNameText.text = ctx.OpponentName ?? AutoLocalizer.Get("default_opponent");
                 opponentNameText.color = opponentColor;
             }
 

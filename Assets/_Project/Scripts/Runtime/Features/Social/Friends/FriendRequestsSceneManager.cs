@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -126,43 +127,52 @@ namespace DigitPark.Managers
 
         private async void LoadRequests()
         {
-            ClearItems();
-
-            ShowLoadingIndicator(true);
-            if (emptyText != null)
-                emptyText.gameObject.SetActive(false);
-
-            List<FriendRequest> requests;
-
-            if (showingReceived)
+            try
             {
-                requests = await FriendService.Instance.GetPendingReceivedRequests();
-            }
-            else
-            {
-                requests = await FriendService.Instance.GetPendingSentRequests();
-            }
+                ClearItems();
 
-            ShowLoadingIndicator(false);
-
-            UpdatePendingCount();
-
-            if (requests == null || requests.Count == 0)
-            {
+                ShowLoadingIndicator(true);
                 if (emptyText != null)
-                {
-                    emptyText.text = showingReceived
-                        ? AutoLocalizer.Get("requests_no_received")
-                        : AutoLocalizer.Get("requests_no_sent");
-                    emptyText.gameObject.SetActive(true);
-                    AnimateEmptyText();
-                }
-                return;
-            }
+                    emptyText.gameObject.SetActive(false);
 
-            foreach (var request in requests)
+                List<FriendRequest> requests;
+
+                if (showingReceived)
+                {
+                    requests = await FriendService.Instance.GetPendingReceivedRequests();
+                }
+                else
+                {
+                    requests = await FriendService.Instance.GetPendingSentRequests();
+                }
+
+                if (this == null) return;
+
+                ShowLoadingIndicator(false);
+
+                UpdatePendingCount();
+
+                if (requests == null || requests.Count == 0)
+                {
+                    if (emptyText != null)
+                    {
+                        emptyText.text = showingReceived
+                            ? AutoLocalizer.Get("requests_no_received")
+                            : AutoLocalizer.Get("requests_no_sent");
+                        emptyText.gameObject.SetActive(true);
+                        AnimateEmptyText();
+                    }
+                    return;
+                }
+
+                foreach (var request in requests)
+                {
+                    CreateRequestItem(request);
+                }
+            }
+            catch (Exception ex)
             {
-                CreateRequestItem(request);
+                Debug.LogError($"[FriendRequestsSceneManager] {ex.Message}");
             }
         }
 
@@ -254,9 +264,9 @@ namespace DigitPark.Managers
 
         private async void LoadRequestAvatar(Image avatarImage, string username, string userId, string avatarUrl)
         {
-            if (AvatarService.Instance != null && !string.IsNullOrEmpty(avatarUrl))
+            try
             {
-                try
+                if (AvatarService.Instance != null && !string.IsNullOrEmpty(avatarUrl))
                 {
                     Sprite avatar = await AvatarService.Instance.LoadAvatar(userId, avatarUrl, username);
                     if (avatar != null && avatarImage != null)
@@ -265,14 +275,14 @@ namespace DigitPark.Managers
                         avatarImage.color = Color.white;
                     }
                 }
-                catch (System.Exception e)
+                else
                 {
-                    Debug.LogWarning($"[FriendRequests] Error cargando avatar: {e.Message}");
                     SetInitialAvatar(avatarImage, username, userId);
                 }
             }
-            else
+            catch (Exception ex)
             {
+                Debug.LogError($"[FriendRequestsSceneManager] {ex.Message}");
                 SetInitialAvatar(avatarImage, username, userId);
             }
         }
@@ -327,54 +337,75 @@ namespace DigitPark.Managers
 
         private async void OnAcceptClicked(string requestId, GameObject item)
         {
-            Debug.Log($"[FriendRequests] Aceptando solicitud: {requestId}");
-
-            var result = await FriendService.Instance.AcceptFriendRequest(requestId);
-
-            if (result.Success)
+            try
             {
-                RemoveItem(item);
-                UpdatePendingCount();
-                CheckEmptyState();
+                Debug.Log($"[FriendRequests] Aceptando solicitud: {requestId}");
+
+                var result = await FriendService.Instance.AcceptFriendRequest(requestId);
+
+                if (result.Success)
+                {
+                    RemoveItem(item);
+                    UpdatePendingCount();
+                    CheckEmptyState();
+                }
+                else
+                {
+                    Debug.LogWarning($"[FriendRequests] Error: {result.Message}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogWarning($"[FriendRequests] Error: {result.Message}");
+                Debug.LogError($"[FriendRequestsSceneManager] {ex.Message}");
             }
         }
 
         private async void OnRejectClicked(string requestId, GameObject item)
         {
-            Debug.Log($"[FriendRequests] Rechazando solicitud: {requestId}");
-
-            var result = await FriendService.Instance.RejectFriendRequest(requestId);
-
-            if (result.Success)
+            try
             {
-                RemoveItem(item);
-                UpdatePendingCount();
-                CheckEmptyState();
+                Debug.Log($"[FriendRequests] Rechazando solicitud: {requestId}");
+
+                var result = await FriendService.Instance.RejectFriendRequest(requestId);
+
+                if (result.Success)
+                {
+                    RemoveItem(item);
+                    UpdatePendingCount();
+                    CheckEmptyState();
+                }
+                else
+                {
+                    Debug.LogWarning($"[FriendRequests] Error: {result.Message}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogWarning($"[FriendRequests] Error: {result.Message}");
+                Debug.LogError($"[FriendRequestsSceneManager] {ex.Message}");
             }
         }
 
         private async void OnCancelClicked(string requestId, GameObject item)
         {
-            Debug.Log($"[FriendRequests] Cancelando solicitud: {requestId}");
-
-            var result = await FriendService.Instance.CancelFriendRequest(requestId);
-
-            if (result.Success)
+            try
             {
-                RemoveItem(item);
-                CheckEmptyState();
+                Debug.Log($"[FriendRequests] Cancelando solicitud: {requestId}");
+
+                var result = await FriendService.Instance.CancelFriendRequest(requestId);
+
+                if (result.Success)
+                {
+                    RemoveItem(item);
+                    CheckEmptyState();
+                }
+                else
+                {
+                    Debug.LogWarning($"[FriendRequests] Error: {result.Message}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogWarning($"[FriendRequests] Error: {result.Message}");
+                Debug.LogError($"[FriendRequestsSceneManager] {ex.Message}");
             }
         }
 
@@ -496,6 +527,15 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             transform.DOKill();
+
+            // Kill tweens on child objects
+            foreach (var item in currentItems)
+            {
+                if (item != null) item.transform.DOKill();
+            }
+            if (headerTransform != null) headerTransform.DOKill();
+            if (tabsBarTransform != null) tabsBarTransform.DOKill();
+            if (scrollViewTransform != null) scrollViewTransform.DOKill();
         }
     }
 }

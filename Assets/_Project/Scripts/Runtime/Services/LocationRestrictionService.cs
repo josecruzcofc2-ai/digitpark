@@ -111,6 +111,7 @@ namespace DigitPark.Services
             return RESTRICTED_STATES.Contains(state);
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Forzar estado restringido (para testing)
         /// </summary>
@@ -134,6 +135,7 @@ namespace DigitPark.Services
             IsRestricted = false;
             OnLocationChecked?.Invoke(IsRestricted, CurrentState);
         }
+#endif
 
         /// <summary>
         /// Verifica si el usuario puede acceder a Cash Battle

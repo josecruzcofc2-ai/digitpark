@@ -24,7 +24,6 @@ namespace DigitPark.Managers
         [Header("Settings")]
         [SerializeField] public float minimumLoadTime = 2f;
 
-        private float loadingProgress = 0f;
         private bool servicesInitialized = false;
         private DigitPark.UI.BootAnimator bootAnimator;
 
@@ -237,36 +236,10 @@ namespace DigitPark.Managers
             // Estos managers se crearán en sus respectivas escenas
             // Aquí solo preparamos el entorno
 
-            // Inicializar el pool de objetos para optimización
-            InitializeObjectPools();
-
-            // Precargar recursos críticos
-            yield return StartCoroutine(PreloadCriticalResources());
-
-            Debug.Log("[Boot] Managers del juego inicializados");
-        }
-
-        /// <summary>
-        /// Inicializa object pools para optimización
-        /// </summary>
-        private void InitializeObjectPools()
-        {
-            // Aquí se inicializarían los pools para tiles, partículas, etc.
-            Debug.Log("[Boot] Object pools inicializados");
-        }
-
-        /// <summary>
-        /// Precarga recursos críticos
-        /// </summary>
-        private IEnumerator PreloadCriticalResources()
-        {
-            // Precargar sprites, sonidos, etc.
-            Debug.Log("[Boot] Precargando recursos críticos...");
-
             // Simular carga de recursos
             yield return new WaitForSeconds(0.3f);
 
-            Debug.Log("[Boot] Recursos precargados");
+            Debug.Log("[Boot] Managers del juego inicializados");
         }
 
         /// <summary>
@@ -326,17 +299,13 @@ namespace DigitPark.Managers
         /// </summary>
         private void UpdateLoadingProgress(float progress, string localizationKey)
         {
-            loadingProgress = progress;
-
             if (loadingBar != null)
             {
                 loadingBar.fillAmount = progress;
             }
 
             // Obtener texto localizado
-            string displayText = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText(localizationKey)
-                : localizationKey;
+            string displayText = AutoLocalizer.Get(localizationKey);
 
             // Usar BootAnimator para efectos si está disponible
             if (bootAnimator != null)
@@ -375,28 +344,5 @@ namespace DigitPark.Managers
             Debug.Log("[Boot] Preferencias del jugador cargadas");
         }
 
-        #region Error Handling
-
-        /// <summary>
-        /// Maneja errores durante el boot
-        /// </summary>
-        private void HandleBootError(string error)
-        {
-            Debug.LogError($"[Boot] Error durante inicialización: {error}");
-
-            // Mostrar mensaje de error al usuario
-            if (loadingText != null)
-            {
-                string errorMessage = LocalizationManager.Instance != null
-                    ? LocalizationManager.Instance.GetText("boot_error")
-                    : "Error initializing. Please restart.";
-                loadingText.text = errorMessage;
-                loadingText.color = Color.red;
-            }
-
-            // En producción, podrías intentar reiniciar o mostrar un diálogo
-        }
-
-        #endregion
     }
 }

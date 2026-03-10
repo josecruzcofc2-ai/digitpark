@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Firebase.Storage;
 using DigitPark.Data;
+using DigitPark.Localization;
 using DigitPark.UI.Components;
 
 namespace DigitPark.Services
@@ -128,14 +129,14 @@ namespace DigitPark.Services
             if (!isFirebaseInitialized)
             {
                 Debug.LogError("[AvatarService] Firebase is not initialized");
-                OnError?.Invoke("Service unavailable. Try again later.");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_unavailable"));
                 return;
             }
 
             if (isUploading)
             {
                 Debug.LogWarning("[AvatarService] Upload already in progress");
-                OnError?.Invoke("An upload is already in progress");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_upload_progress"));
                 return;
             }
 
@@ -143,7 +144,7 @@ namespace DigitPark.Services
             PickImageNative();
 #else
             Debug.LogWarning("[AvatarService] Gallery selection only available on mobile");
-            OnError?.Invoke("Feature only available on mobile devices");
+            OnError?.Invoke(AutoLocalizer.Get("avatar_error_mobile_only"));
 #endif
         }
 
@@ -296,7 +297,7 @@ namespace DigitPark.Services
             catch (Exception e)
             {
                 Debug.LogError($"[AvatarService] Error removing avatar: {e.Message}");
-                OnError?.Invoke("Error removing avatar");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_remove"));
                 return false;
             }
         }
@@ -337,7 +338,7 @@ namespace DigitPark.Services
             if (permission == NativeGallery.Permission.Denied)
             {
                 Debug.LogWarning("[AvatarService] Gallery permission denied");
-                OnError?.Invoke("Permission denied. Enable photo access in Settings.");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_permission"));
             }
             else if (permission == NativeGallery.Permission.ShouldAsk)
             {
@@ -353,8 +354,8 @@ namespace DigitPark.Services
                 isUploading = true;
                 OnUploadProgress?.Invoke(0.1f);
 
-                // Load image from file
-                byte[] imageBytes = await Task.Run(() => File.ReadAllBytes(path));
+                // Load image from file (keep on main thread for Texture2D safety)
+                byte[] imageBytes = File.ReadAllBytes(path);
                 Texture2D originalTex = new Texture2D(2, 2);
                 originalTex.LoadImage(imageBytes);
 
@@ -369,7 +370,7 @@ namespace DigitPark.Services
             catch (Exception e)
             {
                 Debug.LogError($"[AvatarService] Error processing image: {e.Message}");
-                OnError?.Invoke("Error processing image");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_processing"));
                 isUploading = false;
             }
         }
@@ -417,7 +418,7 @@ namespace DigitPark.Services
             catch (Exception e)
             {
                 Debug.LogError($"[AvatarService] Error in ProcessAndUploadTexture: {e.Message}");
-                OnError?.Invoke("Error uploading avatar");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_upload"));
             }
             finally
             {
@@ -435,14 +436,14 @@ namespace DigitPark.Services
             if (playerData == null)
             {
                 Debug.LogError("[AvatarService] No authenticated user");
-                OnError?.Invoke("You must sign in to change your avatar");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_sign_in"));
                 return null;
             }
 
             if (!isFirebaseInitialized)
             {
                 Debug.LogError("[AvatarService] Firebase Storage is not initialized");
-                OnError?.Invoke("Service unavailable");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_service"));
                 return null;
             }
 
@@ -470,7 +471,7 @@ namespace DigitPark.Services
                 if (uploadTask.IsFaulted || uploadTask.IsCanceled)
                 {
                     Debug.LogError($"[AvatarService] Upload error: {uploadTask.Exception?.Message}");
-                    OnError?.Invoke("Error uploading avatar");
+                    OnError?.Invoke(AutoLocalizer.Get("avatar_error_upload"));
                     return null;
                 }
 
@@ -487,10 +488,10 @@ namespace DigitPark.Services
 
                 string errorMsg = se.ErrorCode switch
                 {
-                    StorageException.ErrorQuotaExceeded => "Storage full",
-                    StorageException.ErrorNotAuthorized => "Not authorized. Please sign in again.",
-                    StorageException.ErrorRetryLimitExceeded => "Connection error. Try again.",
-                    _ => "Error uploading avatar"
+                    StorageException.ErrorQuotaExceeded => AutoLocalizer.Get("avatar_error_storage_full"),
+                    StorageException.ErrorNotAuthorized => AutoLocalizer.Get("avatar_error_not_authorized"),
+                    StorageException.ErrorRetryLimitExceeded => AutoLocalizer.Get("avatar_error_connection"),
+                    _ => AutoLocalizer.Get("avatar_error_upload")
                 };
 
                 OnError?.Invoke(errorMsg);
@@ -499,7 +500,7 @@ namespace DigitPark.Services
             catch (Exception e)
             {
                 Debug.LogError($"[AvatarService] Error uploading avatar: {e.Message}");
-                OnError?.Invoke("Error uploading avatar");
+                OnError?.Invoke(AutoLocalizer.Get("avatar_error_upload"));
                 return null;
             }
         }
@@ -510,6 +511,13 @@ namespace DigitPark.Services
 
         private async Task<Sprite> DownloadAvatar(string userId, string avatarUrl)
         {
+            // SEC-M08: Validate URL scheme before downloading
+            if (!avatarUrl.StartsWith("https://", System.StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.LogWarning("[AvatarService] Invalid URL scheme, only HTTPS is allowed. Skipping download.");
+                return null;
+            }
+
             try
             {
                 using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(avatarUrl))

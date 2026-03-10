@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Data;
+using DigitPark.Localization;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
@@ -38,6 +39,10 @@ namespace DigitPark.Services.Firebase
 
         // Datos del jugador
         private PlayerData currentPlayerData;
+
+        // Rate limiting
+        private int _loginAttempts = 0;
+        private float _loginCooldownUntil = 0f;
 
         // Propiedades públicas
         public bool IsFirebaseReal => useFirebaseReal;
@@ -75,7 +80,7 @@ namespace DigitPark.Services.Firebase
                     if (firebaseAuth.CurrentUser != null)
                     {
                         currentUser = firebaseAuth.CurrentUser;
-                        Debug.Log($"[Auth] Usuario ya logueado: {currentUser.Email}");
+                        Debug.Log($"[Auth] Usuario ya logueado: {RedactEmail(currentUser.Email)}");
                         yield return LoadOrCreatePlayerData(currentUser);
                     }
 
@@ -136,7 +141,7 @@ namespace DigitPark.Services.Firebase
 
                 if (signedIn)
                 {
-                    Debug.Log($"[Auth] Estado cambiado - Usuario: {currentUser.Email}");
+                    Debug.Log($"[Auth] Estado cambiado - Usuario: {RedactEmail(currentUser.Email)}");
                 }
             }
         }
@@ -153,6 +158,25 @@ namespace DigitPark.Services.Firebase
 
         public async Task<bool> LoginWithEmail(string email, string password, bool rememberMe)
         {
+            // Rate limiting: block after 5 failed attempts for 30 seconds
+            if (_loginAttempts >= 5)
+            {
+                if (Time.realtimeSinceStartup < _loginCooldownUntil)
+                {
+                    Debug.LogWarning("[Auth] Login rate limited");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_too_many_requests"));
+                    return false;
+                }
+                // Cooldown expired — reset attempts
+                _loginAttempts = 0;
+            }
+
+            _loginAttempts++;
+            if (_loginAttempts >= 5)
+            {
+                _loginCooldownUntil = Time.realtimeSinceStartup + 30f;
+            }
+
             if (!useFirebaseReal)
             {
                 return await LoginWithEmailSimulation(email, password, rememberMe);
@@ -160,12 +184,12 @@ namespace DigitPark.Services.Firebase
 
             try
             {
-                Debug.Log($"[Auth] Login con email: {email}");
+                Debug.Log($"[Auth] Login con email: {RedactEmail(email)}");
 
                 var authResult = await firebaseAuth.SignInWithEmailAndPasswordAsync(email, password);
                 currentUser = authResult.User;
 
-                Debug.Log($"[Auth] Login exitoso: {currentUser.Email}");
+                Debug.Log($"[Auth] Login exitoso: {RedactEmail(currentUser.Email)}");
 
                 // Cargar o crear datos del jugador
                 await LoadOrCreatePlayerData(currentUser);
@@ -177,6 +201,7 @@ namespace DigitPark.Services.Firebase
                     PlayerPrefs.Save();
                 }
 
+                _loginAttempts = 0; // Reset on success
                 AnalyticsService.Instance?.LogLogin("email");
                 OnLoginSuccess?.Invoke(currentPlayerData);
                 return true;
@@ -190,8 +215,8 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Auth] Error: {ex.Message}");
-                OnLoginFailed?.Invoke("Error de conexión. Intenta de nuevo.");
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_connection"));
                 return false;
             }
         }
@@ -209,7 +234,19 @@ namespace DigitPark.Services.Firebase
 
             try
             {
-                Debug.Log($"[Auth] Registro: {email}");
+                Debug.Log($"[Auth] Registro: {RedactEmail(email)}");
+
+                // Check username uniqueness
+                if (!string.IsNullOrEmpty(username) && DatabaseService.Instance != null)
+                {
+                    bool taken = await DatabaseService.Instance.IsUsernameTaken(username);
+                    if (taken)
+                    {
+                        Debug.LogWarning("[Auth] Username already taken");
+                        OnLoginFailed?.Invoke("username-already-taken");
+                        return false;
+                    }
+                }
 
                 var authResult = await firebaseAuth.CreateUserWithEmailAndPasswordAsync(email, password);
                 currentUser = authResult.User;
@@ -226,8 +263,8 @@ namespace DigitPark.Services.Firebase
                     userId = currentUser.UserId,
                     email = email,
                     username = username,
-                    createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now
+                    createdDate = DateTime.UtcNow,
+                    lastLoginDate = DateTime.UtcNow
                 };
 
                 // Guardar en base de datos
@@ -249,8 +286,8 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Auth] Error: {ex.Message}");
-                OnLoginFailed?.Invoke("Error de conexión. Intenta de nuevo.");
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_connection"));
                 return false;
             }
         }
@@ -288,7 +325,7 @@ namespace DigitPark.Services.Firebase
                 var authResult = await firebaseAuth.SignInWithProviderAsync(federatedProvider);
                 currentUser = authResult.User;
 
-                Debug.Log($"[Auth] Login Google exitoso: {currentUser.Email}");
+                Debug.Log($"[Auth] Login Google exitoso: {RedactEmail(currentUser.Email)}");
 
                 // Cargar o crear datos del jugador
                 await LoadOrCreatePlayerData(currentUser);
@@ -305,11 +342,11 @@ namespace DigitPark.Services.Firebase
                 // El usuario canceló el login
                 if (ex.Message.Contains("cancelled") || ex.Message.Contains("canceled"))
                 {
-                    OnLoginFailed?.Invoke("Inicio de sesión cancelado");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_login_cancelled"));
                 }
                 else
                 {
-                    OnLoginFailed?.Invoke($"Error con Google: {errorMessage}");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_google", errorMessage));
                 }
                 return false;
             }
@@ -319,11 +356,11 @@ namespace DigitPark.Services.Firebase
 
                 if (ex.Message.Contains("cancelled") || ex.Message.Contains("canceled"))
                 {
-                    OnLoginFailed?.Invoke("Inicio de sesión cancelado");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_login_cancelled"));
                 }
                 else
                 {
-                    OnLoginFailed?.Invoke("Error al iniciar sesión con Google");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_google_generic"));
                 }
                 return false;
             }
@@ -366,7 +403,7 @@ namespace DigitPark.Services.Firebase
                 var authResult = await firebaseAuth.SignInWithProviderAsync(federatedProvider);
                 currentUser = authResult.User;
 
-                Debug.Log($"[Auth] Login Apple exitoso: {currentUser.Email ?? currentUser.UserId}");
+                Debug.Log($"[Auth] Login Apple exitoso: {RedactEmail(currentUser.Email ?? currentUser.UserId)}");
 
                 // Cargar o crear datos del jugador
                 await LoadOrCreatePlayerData(currentUser);
@@ -382,11 +419,11 @@ namespace DigitPark.Services.Firebase
 
                 if (ex.Message.Contains("cancelled") || ex.Message.Contains("canceled"))
                 {
-                    OnLoginFailed?.Invoke("Inicio de sesión cancelado");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_login_cancelled"));
                 }
                 else
                 {
-                    OnLoginFailed?.Invoke($"Error con Apple: {errorMessage}");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_apple", errorMessage));
                 }
                 return false;
             }
@@ -396,11 +433,11 @@ namespace DigitPark.Services.Firebase
 
                 if (ex.Message.Contains("cancelled") || ex.Message.Contains("canceled"))
                 {
-                    OnLoginFailed?.Invoke("Inicio de sesión cancelado");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_login_cancelled"));
                 }
                 else
                 {
-                    OnLoginFailed?.Invoke("Error al iniciar sesión con Apple");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_apple_generic"));
                 }
                 return false;
             }
@@ -452,7 +489,7 @@ namespace DigitPark.Services.Firebase
                 string userId = currentUser.UserId;
                 string email = currentUser.Email ?? "";
 
-                Debug.Log($"[Auth] Eliminando cuenta de Firebase: {email}");
+                Debug.Log($"[Auth] Eliminando cuenta de Firebase: {RedactEmail(email)}");
 
                 // Eliminar datos de la base de datos primero
                 var dbService = DatabaseService.Instance;
@@ -487,18 +524,18 @@ namespace DigitPark.Services.Firebase
                 // Si requiere re-autenticación reciente
                 if ((AuthError)ex.ErrorCode == AuthError.RequiresRecentLogin)
                 {
-                    OnLoginFailed?.Invoke("Por seguridad, cierra sesión y vuelve a iniciar antes de eliminar la cuenta");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_requires_relogin"));
                 }
                 else
                 {
-                    OnLoginFailed?.Invoke($"Error al eliminar cuenta: {errorMessage}");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_delete_account", errorMessage));
                 }
                 return false;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Auth] Error: {ex.Message}");
-                OnLoginFailed?.Invoke("Error al eliminar la cuenta");
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_delete_generic"));
                 return false;
             }
         }
@@ -515,7 +552,7 @@ namespace DigitPark.Services.Firebase
                 string userId = currentPlayerData.userId;
                 string email = currentPlayerData.email?.ToLower() ?? "";
 
-                Debug.Log($"[Auth] (Simulación) Eliminando cuenta: {email}");
+                Debug.Log($"[Auth] (Simulación) Eliminando cuenta: {RedactEmail(email)}");
 
                 // Eliminar de leaderboards
                 var dbService = DatabaseService.Instance;
@@ -540,7 +577,7 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Auth] Error: {ex.Message}");
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
                 return false;
             }
         }
@@ -553,7 +590,7 @@ namespace DigitPark.Services.Firebase
         {
             if (!useFirebaseReal)
             {
-                Debug.Log($"[Auth] (Simulación) Email de reseteo enviado a: {email}");
+                Debug.Log($"[Auth] (Simulación) Email de reseteo enviado a: {RedactEmail(email)}");
                 await Task.Delay(500);
                 return true;
             }
@@ -561,7 +598,7 @@ namespace DigitPark.Services.Firebase
             try
             {
                 await firebaseAuth.SendPasswordResetEmailAsync(email);
-                Debug.Log($"[Auth] Email de reseteo enviado a: {email}");
+                Debug.Log($"[Auth] Email de reseteo enviado a: {RedactEmail(email)}");
                 return true;
             }
             catch (Exception ex)
@@ -623,9 +660,18 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Auth] Error: {ex.Message}");
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Redacts an email for safe logging (PII protection)
+        /// </summary>
+        private static string RedactEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return "***";
+            return email.Length > 2 ? email.Substring(0, 2) + "***" : "***";
         }
 
         public string GetCurrentUserId()
@@ -653,7 +699,7 @@ namespace DigitPark.Services.Firebase
                     if (existingData != null)
                     {
                         currentPlayerData = existingData;
-                        currentPlayerData.lastLoginDate = DateTime.Now;
+                        currentPlayerData.lastLoginDate = DateTime.UtcNow;
                         await SavePlayerDataToDatabase(currentPlayerData);
                         Debug.Log($"[Auth] Datos cargados: {currentPlayerData.username}");
                         return;
@@ -665,9 +711,9 @@ namespace DigitPark.Services.Firebase
                 {
                     userId = user.UserId,
                     email = user.Email ?? "",
-                    username = user.DisplayName ?? "Sin nombre",
-                    createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now
+                    username = user.DisplayName ?? AutoLocalizer.Get("auth_default_username"),
+                    createdDate = DateTime.UtcNow,
+                    lastLoginDate = DateTime.UtcNow
                 };
 
                 await SavePlayerDataToDatabase(currentPlayerData);
@@ -682,9 +728,9 @@ namespace DigitPark.Services.Firebase
                 {
                     userId = user.UserId,
                     email = user.Email ?? "",
-                    username = user.DisplayName ?? "Sin nombre",
-                    createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now
+                    username = user.DisplayName ?? AutoLocalizer.Get("auth_default_username"),
+                    createdDate = DateTime.UtcNow,
+                    lastLoginDate = DateTime.UtcNow
                 };
             }
         }
@@ -705,14 +751,14 @@ namespace DigitPark.Services.Firebase
 
             return errorCode switch
             {
-                AuthError.InvalidEmail => "Email inválido",
-                AuthError.WrongPassword => "Contraseña incorrecta",
-                AuthError.UserNotFound => "Usuario no encontrado",
-                AuthError.EmailAlreadyInUse => "Este email ya está registrado",
-                AuthError.WeakPassword => "La contraseña es muy débil (mínimo 6 caracteres)",
-                AuthError.NetworkRequestFailed => "Error de conexión. Verifica tu internet",
-                AuthError.TooManyRequests => "Demasiados intentos. Espera un momento",
-                AuthError.UserDisabled => "Esta cuenta ha sido deshabilitada",
+                AuthError.InvalidEmail => AutoLocalizer.Get("auth_error_invalid_email"),
+                AuthError.WrongPassword => AutoLocalizer.Get("auth_error_wrong_password"),
+                AuthError.UserNotFound => AutoLocalizer.Get("auth_error_user_not_found"),
+                AuthError.EmailAlreadyInUse => AutoLocalizer.Get("auth_error_email_in_use"),
+                AuthError.WeakPassword => AutoLocalizer.Get("auth_error_weak_password"),
+                AuthError.NetworkRequestFailed => AutoLocalizer.Get("auth_error_network"),
+                AuthError.TooManyRequests => AutoLocalizer.Get("auth_error_too_many_requests"),
+                AuthError.UserDisabled => AutoLocalizer.Get("auth_error_user_disabled"),
                 _ => $"Error: {ex.Message}"
             };
         }
@@ -747,7 +793,7 @@ namespace DigitPark.Services.Firebase
 
                 if (!PlayerPrefs.HasKey(userKey))
                 {
-                    OnLoginFailed?.Invoke("Usuario no encontrado. Regístrate primero.");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_user_not_found_register"));
                     return false;
                 }
 
@@ -756,13 +802,13 @@ namespace DigitPark.Services.Firebase
 
                 if (HashPassword(password) != savedHash)
                 {
-                    OnLoginFailed?.Invoke("Contraseña incorrecta");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_wrong_password"));
                     return false;
                 }
 
                 string jsonData = PlayerPrefs.GetString($"SimUser_{userId}");
                 currentPlayerData = JsonUtility.FromJson<PlayerData>(jsonData);
-                currentPlayerData.lastLoginDate = DateTime.Now;
+                currentPlayerData.lastLoginDate = DateTime.UtcNow;
 
                 if (rememberMe)
                 {
@@ -771,6 +817,7 @@ namespace DigitPark.Services.Firebase
                 }
                 PlayerPrefs.Save();
 
+                _loginAttempts = 0; // Reset on success
                 AnalyticsService.Instance?.LogLogin("email");
                 OnLoginSuccess?.Invoke(currentPlayerData);
                 return true;
@@ -791,7 +838,7 @@ namespace DigitPark.Services.Firebase
                 string emailKey = $"SimUserByEmail_{email.ToLower()}";
                 if (PlayerPrefs.HasKey(emailKey))
                 {
-                    OnLoginFailed?.Invoke("Este email ya está registrado");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_email_in_use"));
                     return false;
                 }
 
@@ -802,8 +849,8 @@ namespace DigitPark.Services.Firebase
                     userId = newUserId,
                     email = email,
                     username = username,
-                    createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now
+                    createdDate = DateTime.UtcNow,
+                    lastLoginDate = DateTime.UtcNow
                 };
 
                 PlayerPrefs.SetString($"SimUser_{newUserId}", JsonUtility.ToJson(currentPlayerData));
@@ -837,9 +884,9 @@ namespace DigitPark.Services.Firebase
                 {
                     userId = googleUserId,
                     email = googleEmail,
-                    username = "Sin nombre",
-                    createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now
+                    username = AutoLocalizer.Get("auth_default_username"),
+                    createdDate = DateTime.UtcNow,
+                    lastLoginDate = DateTime.UtcNow
                 };
 
                 PlayerPrefs.SetString($"SimUser_{googleUserId}", JsonUtility.ToJson(currentPlayerData));
@@ -873,8 +920,8 @@ namespace DigitPark.Services.Firebase
                     userId = appleUserId,
                     email = appleEmail,
                     username = Localization.AutoLocalizer.Get("auth_default_apple_username"),
-                    createdDate = DateTime.Now,
-                    lastLoginDate = DateTime.Now
+                    createdDate = DateTime.UtcNow,
+                    lastLoginDate = DateTime.UtcNow
                 };
 
                 PlayerPrefs.SetString($"SimUser_{appleUserId}", JsonUtility.ToJson(currentPlayerData));
@@ -882,7 +929,7 @@ namespace DigitPark.Services.Firebase
                 PlayerPrefs.SetInt("RememberMe", 1);
                 PlayerPrefs.Save();
 
-                Debug.Log($"[Auth] (Simulación) Login Apple exitoso: {appleEmail}");
+                Debug.Log($"[Auth] (Simulación) Login Apple exitoso: {RedactEmail(appleEmail)}");
                 AnalyticsService.Instance?.LogLogin("apple");
                 OnLoginSuccess?.Invoke(currentPlayerData);
                 return true;

@@ -67,7 +67,7 @@ namespace DigitPark.Editor
                 var scaler = canvasGO.AddComponent<CanvasScaler>();
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
                 canvasGO.AddComponent<GraphicRaycaster>();
             }
             else
@@ -77,13 +77,19 @@ namespace DigitPark.Editor
                 if (scaler != null)
                 {
                     scaler.referenceResolution = new Vector2(1080, 1920);
-                    scaler.matchWidthOrHeight = 0f;
+                    scaler.matchWidthOrHeight = 0.5f;
                 }
             }
 
-            // Clear existing UI
+            // Clear existing UI (skip EventSystem)
+            var children = new System.Collections.Generic.List<Transform>();
             foreach (Transform child in canvas.transform)
+                children.Add(child);
+            foreach (Transform child in children)
+            {
+                if (child.GetComponent<UnityEngine.EventSystems.EventSystem>() != null) continue;
                 DestroyImmediate(child.gameObject);
+            }
 
             // SafeArea container
             GameObject safeArea = CreateElement(canvas.transform, "SafeArea");
@@ -194,6 +200,9 @@ namespace DigitPark.Editor
             placeholderTmp.color = CYAN_NEON;
             placeholderTmp.alignment = TextAlignmentOptions.Center;
             placeholderTmp.fontStyle = FontStyles.Bold;
+            placeholderTmp.enableAutoSizing = true;
+            placeholderTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            placeholderTmp.fontSizeMax = FontSizes.Symbol;
             if (defaultIcon != null)
                 placeholder.SetActive(false);
 
@@ -210,6 +219,9 @@ namespace DigitPark.Editor
             gameNameTmp.color = TEXT_SECONDARY;
             gameNameTmp.alignment = TextAlignmentOptions.Center;
             gameNameTmp.fontStyle = FontStyles.Bold;
+            gameNameTmp.enableAutoSizing = true;
+            gameNameTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            gameNameTmp.fontSizeMax = FontSizes.H3;
 
         }
 
@@ -232,6 +244,9 @@ namespace DigitPark.Editor
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTmp.fontSizeMax = FontSizes.H1;
 
             // Glow
             Outline glow = title.AddComponent<Outline>();

@@ -444,9 +444,8 @@ namespace DigitPark.Games
                 currentCombo = 0; // Resetear combo
                 RegisterError();
 
-                // Penalización de +1 segundo
+                // Penalización de +1 segundo (tracked in penaltyTime only, not currentTime)
                 penaltyTime += 1f;
-                currentTime += 1f;
                 UpdateTimer();
 
                 // Vibración de error
@@ -730,14 +729,6 @@ namespace DigitPark.Games
             }
         }
 
-        private void SetCardHidden(int cardIndex)
-        {
-            if (card3DEffects != null && cardIndex < card3DEffects.Length && card3DEffects[cardIndex] != null)
-            {
-                card3DEffects[cardIndex].FlipBack();
-            }
-        }
-
         #endregion
 
         private void ResetForNextRound()
@@ -785,7 +776,9 @@ namespace DigitPark.Games
 
             if (progressFill != null)
             {
-                progressFill.transform.parent.parent.gameObject.SetActive(totalRounds > 1);
+                Transform parent = progressFill.transform.parent;
+                if (parent != null && parent.parent != null)
+                    parent.parent.gameObject.SetActive(totalRounds > 1);
                 float progress = (float)(currentRound - 1) / totalRounds;
                 progressFill.anchorMax = new Vector2(progress, 1f);
             }
@@ -922,31 +915,6 @@ namespace DigitPark.Games
             {
                 if (btn != null) btn.interactable = false;
             }
-        }
-
-        private IEnumerator ShowWinPanel()
-        {
-            // Actualizar stats
-            if (statsText != null)
-            {
-                statsText.text = $"{AutoLocalizer.Get("game_time")}: {GetFormattedTime()}\n{AutoLocalizer.Get("game_errors")}: {errorCount}\n{AutoLocalizer.Get("memorypairs_pairs_found")}: {pairsFound}/{totalPairs}\n{AutoLocalizer.Get("memory_max_combo", maxCombo)}";
-            }
-
-            // Fade in
-            if (winPanelCanvasGroup == null) yield break;
-
-            winPanelCanvasGroup.alpha = 0f;
-            float duration = 0.4f;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                winPanelCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
-                yield return null;
-            }
-
-            winPanelCanvasGroup.alpha = 1f;
         }
 
         public override void EndGame()

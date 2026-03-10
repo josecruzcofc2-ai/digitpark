@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DigitPark.Localization;
 
 namespace DigitPark.Data
 {
@@ -202,10 +203,10 @@ namespace DigitPark.Data
         {
             var diff = DateTime.Now - GetTimestamp();
 
-            if (diff.TotalMinutes < 1) return "Ahora";
-            if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
-            if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours}h";
-            if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays}d";
+            if (diff.TotalMinutes < 1) return AutoLocalizer.Get("time_now");
+            if (diff.TotalMinutes < 60) return AutoLocalizer.Get("time_ago_minutes", (int)diff.TotalMinutes);
+            if (diff.TotalHours < 24) return AutoLocalizer.Get("time_ago_hours", (int)diff.TotalHours);
+            if (diff.TotalDays < 7) return AutoLocalizer.Get("time_ago_days", (int)diff.TotalDays);
             return GetTimestamp().ToString("dd/MM/yyyy");
         }
 
@@ -216,10 +217,10 @@ namespace DigitPark.Data
         {
             return result switch
             {
-                GeneralMatchResult.Win => "WIN",
-                GeneralMatchResult.Loss => "LOSS",
-                GeneralMatchResult.Draw => "DRAW",
-                GeneralMatchResult.None => "PRACT.",
+                GeneralMatchResult.Win => AutoLocalizer.Get("result_win"),
+                GeneralMatchResult.Loss => AutoLocalizer.Get("result_loss"),
+                GeneralMatchResult.Draw => AutoLocalizer.Get("result_draw"),
+                GeneralMatchResult.None => AutoLocalizer.Get("result_practice"),
                 _ => ""
             };
         }
@@ -256,12 +257,12 @@ namespace DigitPark.Data
             {
                 string gamesText = GetSprintGamesText();
                 if (mode == MatchMode.Practice)
-                    return $"Practica \u00B7 {gamesText}";
+                    return $"{AutoLocalizer.Get("result_practice")} \u00B7 {gamesText}";
                 return $"vs. {opponentName} \u00B7 {gamesText}";
             }
 
             if (mode == MatchMode.Practice)
-                return "Practica";
+                return AutoLocalizer.Get("result_practice");
             return $"vs. {opponentName}";
         }
 
@@ -270,9 +271,9 @@ namespace DigitPark.Data
         /// </summary>
         public string GetDetailText()
         {
-            string errText = errors == 0 ? "0 err" : $"{errors} err";
+            string errText = AutoLocalizer.Get("errors_count", errors);
             if (IsCognitiveSprint && gamesPlayed != null)
-                return $"{GetFormattedTime()} \u00B7 {errText} \u00B7 {gamesPlayed.Length} juegos";
+                return $"{GetFormattedTime()} \u00B7 {errText} \u00B7 {AutoLocalizer.Get("games_count", gamesPlayed.Length)}";
             return $"{GetFormattedTime()} \u00B7 {errText}";
         }
     }

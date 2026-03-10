@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DigitPark.Games;
+using DigitPark.Localization;
 using Firebase;
 using Firebase.Database;
 using Firebase.Auth;
+using Firebase.Extensions;
 
 namespace DigitPark.Services
 {
@@ -28,10 +30,15 @@ namespace DigitPark.Services
 
         // Current matchmaking state
         private string currentQueueEntryKey;
+        private string currentGameKey;
         private string currentUserId;
         private string currentUserName;
         private bool isSearching = false;
         private Coroutine searchCoroutine;
+
+        // Opponent result listener
+        private DatabaseReference _opponentResultRef;
+        private EventHandler<ValueChangedEventArgs> _opponentResultHandler;
 
         // Callbacks
         private Action<string, string> onMatchFoundCallback;
@@ -53,7 +60,7 @@ namespace DigitPark.Services
 
         private void InitializeFirebase()
         {
-            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.Result == DependencyStatus.Available)
                 {
@@ -139,7 +146,7 @@ namespace DigitPark.Services
             // Remove from queue
             if (!string.IsNullOrEmpty(currentQueueEntryKey))
             {
-                RemoveFromQueue(currentQueueEntryKey);
+                RemoveFromQueue(currentQueueEntryKey, currentGameKey);
             }
 
             Debug.Log("[MatchmakingService] Matchmaking cancelled");
@@ -152,7 +159,8 @@ namespace DigitPark.Services
         private IEnumerator SearchForMatch(string gameKey, bool isCashMatch)
         {
             isSearching = true;
-            float searchStartTime = Time.time;
+            currentGameKey = gameKey;
+            float searchStartTime = Time.unscaledTime;
 
             Debug.Log($"[MatchmakingService] Starting search for: {gameKey}");
 
@@ -170,7 +178,7 @@ namespace DigitPark.Services
             bool checkComplete = false;
             string existingMatchKey = null;
 
-            queueQuery.GetValueAsync().ContinueWith(task =>
+            queueQuery.GetValueAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.IsCompleted && !task.IsFaulted && task.Result.Exists)
                 {
@@ -184,7 +192,7 @@ namespace DigitPark.Services
                             if (odId != currentUserId)
                             {
                                 opponentId = odId;
-                                opponentName = data.ContainsKey("userName") ? data["userName"].ToString() : "Opponent";
+                                opponentName = data.ContainsKey("userName") ? data["userName"].ToString() : AutoLocalizer.Get("default_opponent");
                                 opponentQueueKey = child.Key;
                                 existingMatchKey = child.Key;
                             }
@@ -235,7 +243,7 @@ namespace DigitPark.Services
 
                 bool matchCheckComplete = false;
 
-                matchCheck.GetValueAsync().ContinueWith(task =>
+                matchCheck.GetValueAsync().ContinueWithOnMainThread(task =>
                 {
                     if (task.IsCompleted && !task.IsFaulted && task.Result.Exists)
                     {
@@ -246,7 +254,7 @@ namespace DigitPark.Services
                             {
                                 matched = true;
                                 matchId = child.Key;
-                                matchedOpponentName = data.ContainsKey("player2Name") ? data["player2Name"].ToString() : "Opponent";
+                                matchedOpponentName = data.ContainsKey("player2Name") ? data["player2Name"].ToString() : AutoLocalizer.Get("default_opponent");
                             }
                         }
                     }
@@ -268,7 +276,7 @@ namespace DigitPark.Services
 
                     matchCheckComplete = false;
 
-                    matchCheck2.GetValueAsync().ContinueWith(task =>
+                    matchCheck2.GetValueAsync().ContinueWithOnMainThread(task =>
                     {
                         if (task.IsCompleted && !task.IsFaulted && task.Result.Exists)
                         {
@@ -279,7 +287,7 @@ namespace DigitPark.Services
                                 {
                                     matched = true;
                                     matchId = child.Key;
-                                    matchedOpponentName = data.ContainsKey("player1Name") ? data["player1Name"].ToString() : "Opponent";
+                                    matchedOpponentName = data.ContainsKey("player1Name") ? data["player1Name"].ToString() : AutoLocalizer.Get("default_opponent");
                                 }
                             }
                         }
@@ -303,11 +311,11 @@ namespace DigitPark.Services
                 }
 
                 // Check timeout
-                if (Time.time - searchStartTime >= matchTimeout)
+                if (Time.unscaledTime - searchStartTime >= matchTimeout)
                 {
                     RemoveFromQueue(currentQueueEntryKey, gameKey);
                     isSearching = false;
-                    onMatchFailedCallback?.Invoke("Search timed out. No opponents found.");
+                    onMatchFailedCallback?.Invoke(AutoLocalizer.Get("matchmaking_timeout"));
                     yield break;
                 }
 
@@ -340,6 +348,10 @@ namespace DigitPark.Services
             if (!string.IsNullOrEmpty(gameKey))
             {
                 matchmakingQueueRef.Child(gameKey).Child(entryKey).RemoveValueAsync();
+            }
+            else
+            {
+                Debug.LogWarning($"[MatchmakingService] RemoveFromQueue called without gameKey, entry {entryKey} not removed from Firebase");
             }
 
             Debug.Log($"[MatchmakingService] Removed from queue: {entryKey}");
@@ -381,7 +393,7 @@ namespace DigitPark.Services
             if (string.IsNullOrEmpty(matchId)) return;
 
             // Determine if we're player1 or player2
-            activeMatchesRef.Child(matchId).GetValueAsync().ContinueWith(task =>
+            activeMatchesRef.Child(matchId).GetValueAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.IsCompleted && !task.IsFaulted && task.Result.Exists)
                 {
@@ -412,7 +424,11 @@ namespace DigitPark.Services
         /// </summary>
         public void ListenForOpponentResult(string matchId, Action<float, float> onOpponentFinished)
         {
-            activeMatchesRef.Child(matchId).ValueChanged += (sender, args) =>
+            // Clean up any previous listener
+            UnsubscribeOpponentListener();
+
+            _opponentResultRef = activeMatchesRef.Child(matchId);
+            _opponentResultHandler = (sender, args) =>
             {
                 if (args.Snapshot.Exists)
                 {
@@ -429,21 +445,41 @@ namespace DigitPark.Services
                             float opponentScore = Convert.ToSingle(data[opponentScoreKey]);
                             float opponentTime = data.ContainsKey(opponentTimeKey) ? Convert.ToSingle(data[opponentTimeKey]) : 0f;
                             onOpponentFinished?.Invoke(opponentScore, opponentTime);
+
+                            // Unsubscribe after opponent finishes
+                            UnsubscribeOpponentListener();
                         }
                     }
                 }
             };
+
+            _opponentResultRef.ValueChanged += _opponentResultHandler;
+        }
+
+        /// <summary>
+        /// Unsubscribe from opponent result listener to prevent leaks
+        /// </summary>
+        private void UnsubscribeOpponentListener()
+        {
+            if (_opponentResultRef != null && _opponentResultHandler != null)
+            {
+                _opponentResultRef.ValueChanged -= _opponentResultHandler;
+                _opponentResultRef = null;
+                _opponentResultHandler = null;
+            }
         }
 
         #endregion
 
         private void OnDestroy()
         {
+            UnsubscribeOpponentListener();
             CancelMatchmaking();
         }
 
         private void OnApplicationQuit()
         {
+            UnsubscribeOpponentListener();
             CancelMatchmaking();
         }
     }

@@ -157,7 +157,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             CreateBackground(canvas.transform);
@@ -250,6 +250,9 @@ namespace DigitPark.Editor
             tlTMP.color = CYAN_NEON;
             tlTMP.fontStyle = FontStyles.Bold;
             tlTMP.alignment = TextAlignmentOptions.Left;
+            tlTMP.enableAutoSizing = true;
+            tlTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tlTMP.fontSizeMax = FontSizes.Body;
 
             // Step Counter (center)
             var counter = FindOrCreate(topBar.transform, "StepCounter");
@@ -264,6 +267,9 @@ namespace DigitPark.Editor
             cTMP.color = TEXT_SECONDARY;
             cTMP.fontStyle = FontStyles.Bold;
             cTMP.alignment = TextAlignmentOptions.Center;
+            cTMP.enableAutoSizing = true;
+            cTMP.fontSizeMin = FontSizes.AutoMinBody;
+            cTMP.fontSizeMax = FontSizes.Body;
 
             // Skip Button (right)
             var skipBtn = FindOrCreate(topBar.transform, "SkipButton");
@@ -287,6 +293,9 @@ namespace DigitPark.Editor
             stTMP.fontSize = FontSizes.Body;
             stTMP.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.7f);
             stTMP.fontStyle = FontStyles.Bold;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = FontSizes.AutoMinBody;
+            stTMP.fontSizeMax = FontSizes.Body;
             stTMP.alignment = TextAlignmentOptions.Center;
 
             Debug.Log("[OnboardingUI] TopBar creado (ProgressBar + DIGITPARK + StepCounter + Skip)");
@@ -560,6 +569,9 @@ namespace DigitPark.Editor
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
             phTMP.fontStyle = FontStyles.Bold;
             phTMP.alignment = TextAlignmentOptions.Left;
+            phTMP.enableAutoSizing = true;
+            phTMP.fontSizeMin = FontSizes.AutoMinBody;
+            phTMP.fontSizeMax = FontSizes.BodyLarge;
 
             var text = new GameObject("Text");
             text.transform.SetParent(textArea.transform, false);
@@ -602,6 +614,9 @@ namespace DigitPark.Editor
             ctTMP.color = TEXT_DARK;
             ctTMP.fontStyle = FontStyles.Bold;
             ctTMP.alignment = TextAlignmentOptions.Center;
+            ctTMP.enableAutoSizing = true;
+            ctTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ctTMP.fontSizeMax = FontSizes.Body;
 
             // NameErrorText
             var errorText = new GameObject("NameErrorText");
@@ -613,6 +628,9 @@ namespace DigitPark.Editor
             eTMP.color = RED_ERROR;
             eTMP.fontStyle = FontStyles.Bold;
             eTMP.alignment = TextAlignmentOptions.Center;
+            eTMP.enableAutoSizing = true;
+            eTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            eTMP.fontSizeMax = FontSizes.Body;
             errorText.SetActive(false);
         }
 
@@ -804,6 +822,9 @@ namespace DigitPark.Editor
             cmTMP.fontStyle = FontStyles.Bold;
             cmTMP.alignment = TextAlignmentOptions.Center;
             cmTMP.enableWordWrapping = true;
+            cmTMP.enableAutoSizing = true;
+            cmTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            cmTMP.fontSizeMax = FontSizes.Body;
 
             // RewardsCard
             var rewardsCard = new GameObject("RewardsCard");
@@ -828,6 +849,9 @@ namespace DigitPark.Editor
             rwTMP.color = GOLD;
             rwTMP.fontStyle = FontStyles.Bold;
             rwTMP.alignment = TextAlignmentOptions.Center;
+            rwTMP.enableAutoSizing = true;
+            rwTMP.fontSizeMin = FontSizes.AutoMinBody;
+            rwTMP.fontSizeMax = FontSizes.Subtitle;
 
             // Spacer
             var spacer = new GameObject("Spacer");
@@ -858,6 +882,9 @@ namespace DigitPark.Editor
             spTMP.color = TEXT_DARK;
             spTMP.fontStyle = FontStyles.Bold;
             spTMP.alignment = TextAlignmentOptions.Center;
+            spTMP.enableAutoSizing = true;
+            spTMP.fontSizeMin = FontSizes.AutoMinBody;
+            spTMP.fontSizeMax = FontSizes.H4;
         }
 
         #endregion
@@ -919,6 +946,9 @@ namespace DigitPark.Editor
             ptTMP.color = TEXT_SECONDARY;
             ptTMP.fontStyle = FontStyles.Bold;
             ptTMP.alignment = TextAlignmentOptions.Center;
+            ptTMP.enableAutoSizing = true;
+            ptTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ptTMP.fontSizeMax = FontSizes.Body;
 
             // Next Button (right, cyan)
             var nextBtn = FindOrCreate(navPanel.transform, "NextButton");
@@ -946,6 +976,9 @@ namespace DigitPark.Editor
             ntTMP.color = TEXT_DARK;
             ntTMP.fontStyle = FontStyles.Bold;
             ntTMP.alignment = TextAlignmentOptions.Center;
+            ntTMP.enableAutoSizing = true;
+            ntTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ntTMP.fontSizeMax = FontSizes.Body;
 
             Debug.Log("[OnboardingUI] Navigation creado (DotsContainer + PrevButton + NextButton)");
         }

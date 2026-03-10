@@ -38,7 +38,7 @@ namespace DigitPark.Editor
         private static readonly Color BLOCKER_BG = new Color(0f, 0f, 0f, 0.85f);
 
         // ==================== DIMENSIONES ====================
-        private const float HEADER_HEIGHT = 140f;
+        private const float HEADER_HEIGHT = 100f;
         private const float CONTENT_PADDING = 20f;
         private const float SECTION_SPACING = 30f;
         private const float CARD_PADDING = 30f;
@@ -250,10 +250,10 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             Debug.Log("[TournamentCreateUIBuilder] Header creado");
         }
@@ -913,6 +913,9 @@ namespace DigitPark.Editor
             itemLabelText.fontStyle = FontStyles.Bold;
             itemLabelText.color = TEXT_PRIMARY;
             itemLabelText.alignment = TextAlignmentOptions.Left;
+            itemLabelText.enableAutoSizing = true;
+            itemLabelText.fontSizeMin = FontSizes.AutoMinBody;
+            itemLabelText.fontSizeMax = FontSizes.BodyLarge;
 
             // Wire up
             itemToggle.targetGraphic = itemBgImg;

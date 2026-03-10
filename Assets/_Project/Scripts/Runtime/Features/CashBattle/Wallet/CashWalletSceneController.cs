@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DG.Tweening;
 using DigitPark.Animations;
 using DigitPark.Localization;
@@ -73,8 +74,8 @@ namespace DigitPark.CashBattle
         [SerializeField] private float withdrawFeePercentFloat = 0f;
         [SerializeField] private int transactionsPerPage = 20;
 
-        private decimal minimumWithdraw => (decimal)minimumWithdrawFloat;
-        private decimal withdrawFeePercent => (decimal)withdrawFeePercentFloat;
+        private float minimumWithdraw => minimumWithdrawFloat;
+        private float withdrawFeePercent => withdrawFeePercentFloat;
 
         // ==================== STATE ====================
         private WalletTab currentTab = WalletTab.Deposit;
@@ -86,7 +87,7 @@ namespace DigitPark.CashBattle
         private int currentTransactionPage = 0;
         private List<GameObject> spawnedDepositOptions = new List<GameObject>();
         private List<GameObject> spawnedTransactions = new List<GameObject>();
-        private decimal previousBalance = 0m;
+        private float previousBalance = 0f;
 
         private enum WalletTab
         {
@@ -98,12 +99,12 @@ namespace DigitPark.CashBattle
         // ==================== DEPOSIT OPTIONS ====================
         private readonly DepositOption[] depositOptions = new DepositOption[]
         {
-            new DepositOption { amount = 5m },
-            new DepositOption { amount = 10m },
-            new DepositOption { amount = 25m },
-            new DepositOption { amount = 50m },
-            new DepositOption { amount = 100m },
-            new DepositOption { amount = 200m }
+            new DepositOption { amount = 5f },
+            new DepositOption { amount = 10f },
+            new DepositOption { amount = 25f },
+            new DepositOption { amount = 50f },
+            new DepositOption { amount = 100f },
+            new DepositOption { amount = 200f }
         };
 
         // ==================== LIFECYCLE ====================
@@ -534,9 +535,9 @@ namespace DigitPark.CashBattle
             UpdateWithdrawButton();
 
             // Calculate fee
-            if (decimal.TryParse(value, out decimal amount))
+            if (float.TryParse(value, out float amount))
             {
-                decimal fee = amount * (withdrawFeePercent / 100m);
+                float fee = amount * (withdrawFeePercent / 100f);
                 if (withdrawFeeText)
                 {
                     withdrawFeeText.text = fee > 0 ? AutoLocalizer.Get("wallet_fee", $"${fee:F2}") : AutoLocalizer.Get("wallet_no_fee");
@@ -550,7 +551,7 @@ namespace DigitPark.CashBattle
 
             bool canWithdraw = false;
 
-            if (decimal.TryParse(withdrawAmountInput?.text, out decimal amount))
+            if (float.TryParse(withdrawAmountInput?.text, out float amount))
             {
                 var walletData = WalletManager.Instance.WalletData;
                 canWithdraw = amount >= minimumWithdraw &&
@@ -562,12 +563,12 @@ namespace DigitPark.CashBattle
 
         private void OnWithdrawClicked()
         {
-            if (!decimal.TryParse(withdrawAmountInput?.text, out decimal amount)) return;
+            if (!float.TryParse(withdrawAmountInput?.text, out float amount)) return;
 
             Debug.Log($"[CashWalletScene] Withdraw requested: ${amount}");
 
             ShowLoading(true);
-            WalletManager.Instance?.RequestWithdrawal(amount, selectedPaymentMethod);
+            WalletManager.Instance?.RequestWithdrawal((decimal)amount, selectedPaymentMethod);
         }
 
         // ==================== TRANSACTION HISTORY ====================
@@ -658,8 +659,10 @@ namespace DigitPark.CashBattle
 
         // ==================== EVENT HANDLERS ====================
 
-        private void OnBalanceChanged(decimal newBalance, decimal delta)
+        private void OnBalanceChanged(decimal newBalanceDecimal, decimal deltaDecimal)
         {
+            float newBalance = (float)newBalanceDecimal;
+            float delta = (float)deltaDecimal;
             // Animar balance text cuando hay cambio
             if (balanceText != null && delta != 0)
             {

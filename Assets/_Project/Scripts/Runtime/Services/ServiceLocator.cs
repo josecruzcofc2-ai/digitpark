@@ -250,9 +250,14 @@ namespace DigitPark.Services
 
         #region Public Methods
         /// <summary>
-        /// Cambia el modo de servicio en runtime
+        /// Cambia el modo de servicio en runtime.
+        /// Restricted to editor/tests to prevent runtime mode switching in production.
         /// </summary>
+#if UNITY_EDITOR
         public void SetServiceMode(ServiceMode mode)
+#else
+        internal void SetServiceMode(ServiceMode mode)
+#endif
         {
             if (_serviceMode != mode)
             {
@@ -263,9 +268,14 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Obtiene información de estado de todos los servicios
+        /// Obtiene información de estado de todos los servicios.
+        /// Restricted to prevent exposing internal state in production builds.
         /// </summary>
+#if UNITY_EDITOR
         public ServiceStatusInfo GetServiceStatus()
+#else
+        internal ServiceStatusInfo GetServiceStatus()
+#endif
         {
             return new ServiceStatusInfo
             {
@@ -279,9 +289,14 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Reset completo de todos los servicios Mock (solo para testing)
+        /// Reset completo de todos los servicios Mock (solo para testing).
+        /// Restricted to editor/tests to prevent runtime reset in production.
         /// </summary>
+#if UNITY_EDITOR
         public void ResetMockServices()
+#else
+        internal void ResetMockServices()
+#endif
         {
             if (_serviceMode != ServiceMode.Mock)
             {
@@ -294,8 +309,10 @@ namespace DigitPark.Services
             if (_kycService is MockKYCService mockKYC)
                 _ = mockKYC.ResetVerification();
 
+#if UNITY_EDITOR
             if (_walletService is MockWalletService mockWallet)
                 mockWallet.ResetWallet();
+#endif
 
             Log("Servicios Mock reseteados");
         }

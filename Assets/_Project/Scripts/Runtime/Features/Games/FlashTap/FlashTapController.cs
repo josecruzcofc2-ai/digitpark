@@ -69,6 +69,9 @@ namespace DigitPark.Games
         private float penaltyTime;
         private Coroutine waitCoroutine;
         private Coroutine feedbackCoroutine;
+        private float _waitStartTime;
+        private float _waitDuration;
+        private float _waitElapsed;
 
         protected override void Awake()
         {
@@ -240,6 +243,9 @@ namespace DigitPark.Games
 
             // Espera aleatoria 3-6 segundos
             float waitTime = Random.Range(minWaitTime, maxWaitTime);
+            _waitDuration = waitTime;
+            _waitElapsed = 0f;
+            _waitStartTime = Time.time;
             waitCoroutine = StartCoroutine(WaitAndShowSignal(waitTime));
         }
 
@@ -311,8 +317,8 @@ namespace DigitPark.Games
 
             yield return new WaitForSeconds(0.8f);
 
-            // Reiniciar con countdown
-            StartGameWithCountdown();
+            // Only restart the wait phase, not the entire game (preserve scores/attempt count)
+            StartWaitPhase();
         }
 
         private void OnValidTap()
@@ -501,7 +507,9 @@ namespace DigitPark.Games
 
             if (progressFill != null)
             {
-                progressFill.transform.parent.parent.gameObject.SetActive(totalAttempts > 1);
+                Transform parent = progressFill.transform.parent;
+                if (parent != null && parent.parent != null)
+                    parent.parent.gameObject.SetActive(totalAttempts > 1);
                 float progress = (float)(currentAttempt - 1) / totalAttempts;
                 progressFill.anchorMax = new Vector2(progress, 1f);
             }
@@ -552,12 +560,24 @@ namespace DigitPark.Games
 
         protected override void OnGamePaused()
         {
+            // Store elapsed wait time so resume uses remaining time (prevents exploit)
+            if (isWaiting)
+            {
+                _waitElapsed = Time.time - _waitStartTime;
+            }
             if (waitCoroutine != null) StopCoroutine(waitCoroutine);
         }
 
         protected override void OnGameResumed()
         {
-            if (isWaiting) StartWaitPhase();
+            if (isWaiting)
+            {
+                // Resume with remaining wait time instead of generating a new random duration
+                float remaining = _waitDuration - _waitElapsed;
+                if (remaining <= 0f) remaining = 0.1f; // Signal almost immediately if time expired during pause
+                _waitStartTime = Time.time - _waitElapsed;
+                waitCoroutine = StartCoroutine(WaitAndShowSignal(remaining));
+            }
         }
 
         protected override void OnGameEnded()

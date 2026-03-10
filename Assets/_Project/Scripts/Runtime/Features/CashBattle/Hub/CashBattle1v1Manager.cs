@@ -568,7 +568,7 @@ namespace DigitPark.UI.CashBattle
         {
             if (selectedFeeText != null)
             {
-                selectedFeeText.text = $"Entry: ${selectedEntryFee:F2}";
+                selectedFeeText.text = AutoLocalizer.Get("entry_fee_display", $"${selectedEntryFee:F2}");
             }
         }
 

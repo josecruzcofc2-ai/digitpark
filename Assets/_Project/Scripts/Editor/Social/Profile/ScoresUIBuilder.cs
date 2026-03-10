@@ -93,6 +93,14 @@ namespace DigitPark.Editor
                 return;
             }
 
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
+
             Transform canvasTransform = canvas.transform;
 
             // Buscar o crear Background
@@ -122,6 +130,14 @@ namespace DigitPark.Editor
             {
                 Debug.LogError("[ScoresUI] No se encontró Canvas en la escena");
                 return;
+            }
+
+            var scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1080, 1920);
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             Transform scoresPanel = canvas.transform.Find("ScoresPanel");
@@ -180,10 +196,10 @@ namespace DigitPark.Editor
             bgImage.raycastTarget = false;
         }
 
-        // Layout: Header(140) -> ScoresPanel(rest) containing GameSelector(120) -> Tabs(70) -> ScrollView -> PlayerPosition(80)
+        // Layout: Header(100) -> ScoresPanel(rest) containing GameSelector(120) -> Tabs(70) -> ScrollView -> PlayerPosition(80)
         private static void CreateScoresLayout(Transform canvasTransform)
         {
-            // ========== HEADER (140px from top) ==========
+            // ========== HEADER (100px from top) ==========
             CreateHeader(canvasTransform);
 
             // ========== SCORES PANEL (contenedor principal, debajo del header) ==========
@@ -192,7 +208,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 0), new Vector2(1, 1),
                 Vector2.zero, Vector2.zero);
             scoresPanelRT.offsetMin = new Vector2(0, 0);
-            scoresPanelRT.offsetMax = new Vector2(0, -140); // Debajo del header
+            scoresPanelRT.offsetMax = new Vector2(0, -100); // Debajo del header
 
             // ========== GAME SELECTOR (120px from top of ScoresPanel) ==========
             CreateGameSelectorPanel(scoresPanel.transform);
@@ -225,7 +241,7 @@ namespace DigitPark.Editor
             GameObject header = CreateOrFind(parent, "Header");
             RectTransform headerRT = SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -70), new Vector2(0, 140));
+                new Vector2(0, -50), new Vector2(0, 100));
 
             Image headerBg = header.GetComponent<Image>();
             if (headerBg == null) headerBg = header.AddComponent<Image>();
@@ -278,10 +294,10 @@ namespace DigitPark.Editor
             // Currency pills (top-right of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
         }
 
         #endregion

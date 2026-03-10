@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Data;
 using DG.Tweening;
 using DigitPark.Animations;
@@ -132,11 +133,11 @@ namespace DigitPark.Managers
                 gameTypeFilter.ClearOptions();
                 gameTypeFilter.AddOptions(new List<string> {
                     AutoLocalizer.Get("filter_all_games"),
-                    "Memory Pairs",
-                    "Quick Math",
-                    "Flash Tap",
-                    "Odd One Out",
-                    "Digit Rush"
+                    AutoLocalizer.Get("gameinfo_memorypairs_name"),
+                    AutoLocalizer.Get("gameinfo_quickmath_name"),
+                    AutoLocalizer.Get("gameinfo_flashtap_name"),
+                    AutoLocalizer.Get("gameinfo_oddoneout_name"),
+                    AutoLocalizer.Get("gameinfo_digitrush_name")
                 });
             }
 
@@ -288,7 +289,7 @@ namespace DigitPark.Managers
         private List<TournamentData> GenerateMockTournaments()
         {
             var tournaments = new List<TournamentData>();
-            string[] categories = { "Memory Pairs", "Quick Math", "Flash Tap", "Odd One Out" };
+            string[] categories = { AutoLocalizer.Get("gameinfo_memorypairs_name"), AutoLocalizer.Get("gameinfo_quickmath_name"), AutoLocalizer.Get("gameinfo_flashtap_name"), AutoLocalizer.Get("gameinfo_oddoneout_name") };
             TournamentStatus[] statuses = { TournamentStatus.Scheduled, TournamentStatus.Active, TournamentStatus.Completed };
 
             for (int i = 0; i < tournamentsPerPage; i++)
@@ -372,7 +373,9 @@ namespace DigitPark.Managers
 
         private GameObject CreateTournamentItemFallback(TournamentData tournament)
         {
-            var item = new GameObject($"Tournament_{tournament.tournamentId.Substring(0, 8)}");
+            string idPrefix = !string.IsNullOrEmpty(tournament.tournamentId) && tournament.tournamentId.Length >= 8
+                ? tournament.tournamentId.Substring(0, 8) : (tournament.tournamentId ?? "unknown");
+            var item = new GameObject($"Tournament_{idPrefix}");
             item.transform.SetParent(tournamentsContainer, false);
 
             var rt = item.AddComponent<RectTransform>();

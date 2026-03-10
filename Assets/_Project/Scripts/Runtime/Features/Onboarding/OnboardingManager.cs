@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Localization;
 using DigitPark.UI;
 using DG.Tweening;
@@ -96,8 +97,9 @@ namespace DigitPark.Managers
         {
             if (slidesContainer == null) return;
 
-            slideObjects = new GameObject[8];
-            for (int i = 0; i < 8; i++)
+            int slideCount = steps.Count > 0 ? steps.Count : 8;
+            slideObjects = new GameObject[slideCount];
+            for (int i = 0; i < slideCount; i++)
             {
                 Transform slide = slidesContainer.Find($"Slide{i + 1}");
                 if (slide != null)
@@ -838,7 +840,7 @@ namespace DigitPark.Managers
             // Dots fade in
             if (dotsTransform != null)
             {
-                var cg = dotsTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = dotsTransform.gameObject.GetComponent<CanvasGroup>() ?? dotsTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 cg.DOFade(1f, 0.3f).SetDelay(0.35f);
             }
@@ -899,14 +901,20 @@ namespace DigitPark.Managers
 
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            string text = LocalizationManager.Instance.GetText(key);
-            return args.Length > 0 ? string.Format(text, args) : text;
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
 
         private void OnDestroy()
         {
             transform.DOKill();
+
+            // Remove all button listeners
+            skipButton?.onClick.RemoveAllListeners();
+            nextButton?.onClick.RemoveAllListeners();
+            prevButton?.onClick.RemoveAllListeners();
+            confirmNameButton?.onClick.RemoveAllListeners();
+            startPlayingButton?.onClick.RemoveAllListeners();
+            nameInput?.onEndEdit.RemoveAllListeners();
         }
     }
 

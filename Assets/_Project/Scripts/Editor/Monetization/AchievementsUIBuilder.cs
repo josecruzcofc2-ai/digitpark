@@ -56,7 +56,7 @@ namespace DigitPark.Editor
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
 
         // ==================== DIMENSIONES ====================
-        private const float HEADER_HEIGHT = 150f;
+        private const float HEADER_HEIGHT = 100f;
         private const float TABS_HEIGHT = 65f;
         // 3 columns for mobile (1080px): (1080 - 40 padding - 30 spacing) / 3 = 336
         private const float TROPHY_CARD_WIDTH = 320f;
@@ -351,10 +351,10 @@ namespace DigitPark.Editor
             // Currency pills (top-right of header, above progress section)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             Debug.Log("[TrophyShowcase] Header creado");
         }
@@ -610,6 +610,9 @@ namespace DigitPark.Editor
             labelText.fontStyle = FontStyles.Bold;
             labelText.color = TEXT_PRIMARY;
             labelText.alignment = TextAlignmentOptions.MidlineLeft;
+            labelText.enableAutoSizing = true;
+            labelText.fontSizeMin = FontSizes.AutoMinBody;
+            labelText.fontSizeMax = FontSizes.Body;
             dropdown.itemText = labelText;
 
             // Configure dropdown template
@@ -922,6 +925,9 @@ namespace DigitPark.Editor
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = TEXT_SECONDARY;
             progressTmp.alignment = TextAlignmentOptions.Center;
+            progressTmp.enableAutoSizing = true;
+            progressTmp.fontSizeMin = FontSizes.AutoMinSmall;
+            progressTmp.fontSizeMax = FontSizes.Body;
             LayoutElement progressTextLE = GetOrAddComponent<LayoutElement>(progressTextObj);
             progressTextLE.minHeight = 22;
 
@@ -1380,6 +1386,9 @@ namespace DigitPark.Editor
             rewardTmp.fontStyle = FontStyles.Bold;
             rewardTmp.color = new Color(0.4f, 0.8f, 1f, 1f);
             rewardTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            rewardTmp.enableAutoSizing = true;
+            rewardTmp.fontSizeMin = FontSizes.AutoMinBody;
+            rewardTmp.fontSizeMax = FontSizes.H3;
             LayoutElement amountLE = GetOrAddComponent<LayoutElement>(rewardAmount);
             amountLE.minWidth = 100;
 
@@ -1393,7 +1402,7 @@ namespace DigitPark.Editor
             continueLE.minHeight = 55;
             continueLE.minWidth = 250;
 
-            GameObject continueText = FindOrCreateChild(continueBtn, "Text");
+            GameObject continueText = FindOrCreateChild(continueBtn, "ContinueButtonText");
             TextMeshProUGUI continueTmp = GetOrAddComponent<TextMeshProUGUI>(continueText);
             continueTmp.text = "CONTINUE";
             continueTmp.fontSize = FontSizes.BodyLarge;

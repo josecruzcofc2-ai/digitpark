@@ -22,10 +22,6 @@ namespace DigitPark.UI.Common
         private Action<string> onConfirmCallback;
         private Action onCancelCallback;
 
-#pragma warning disable 0414
-        private bool isFirstTime; // Para saber qué botones mostrar
-#pragma warning restore 0414
-
         /// <summary>
         /// Crea un popup de username
         /// </summary>
@@ -119,6 +115,9 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
             placeholderText.text = AutoLocalizer.Get("username_placeholder");
             placeholderText.fontSize = FontSizes.Body;
+            placeholderText.enableAutoSizing = true;
+            placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+            placeholderText.fontSizeMax = FontSizes.Body;
             placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
             placeholderText.alignment = TMPro.TextAlignmentOptions.Left;
 
@@ -135,6 +134,9 @@ namespace DigitPark.UI.Common
 
             TextMeshProUGUI inputText = textObj.AddComponent<TextMeshProUGUI>();
             inputText.fontSize = FontSizes.Body;
+            inputText.enableAutoSizing = true;
+            inputText.fontSizeMin = FontSizes.AutoMinBody;
+            inputText.fontSizeMax = FontSizes.Body;
             inputText.color = Color.white;
             inputText.alignment = TMPro.TextAlignmentOptions.Left;
 
@@ -197,7 +199,6 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void ShowForFirstTime(Action<string> onConfirm, Action onLater)
         {
-            isFirstTime = true;
             onConfirmCallback = onConfirm;
             onCancelCallback = onLater;
 
@@ -222,7 +223,6 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void ShowForUpdate(Action<string> onConfirm, Action onCancel = null)
         {
-            isFirstTime = false;
             onConfirmCallback = onConfirm;
             onCancelCallback = onCancel;
 
@@ -263,6 +263,13 @@ namespace DigitPark.UI.Common
             if (username.Length < 3)
             {
                 Debug.LogWarning("[UsernamePopup] Nombre muy corto (mínimo 3 caracteres)");
+                return;
+            }
+
+            // Validate allowed characters (letters, numbers, underscore)
+            if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+            {
+                Debug.LogWarning("[UsernamePopup] Username contains invalid characters");
                 return;
             }
 

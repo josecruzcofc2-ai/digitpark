@@ -78,7 +78,6 @@ namespace DigitPark.Managers
 
         // Gold theme colors for runtime UI updates
         private static readonly Color GOLD_PRIMARY = new Color(1f, 0.84f, 0f, 1f);
-        private static readonly Color TEXT_GOLD = new Color(1f, 0.84f, 0f, 1f);
         private static readonly Color GREEN_GO = new Color(0.24f, 1f, 0.42f, 1f);
 
         // State
@@ -168,49 +167,58 @@ namespace DigitPark.Managers
 
         private async void SetupPlayerInfo()
         {
-            // Get player name
-            string playerName = PlayerPrefs.GetString("PlayerName", "Player");
-            string playerId = PlayerPrefs.GetString("PlayerId", "");
-            if (playerNameText != null)
-                playerNameText.text = playerName;
-
-            // Get player level
-            int level = PlayerPrefs.GetInt("PlayerLevel", 1);
-            if (playerLevelText != null)
-                playerLevelText.text = AutoLocalizer.Get("player_level", level);
-
-            // Load player avatar
-            if (playerAvatar != null)
+            try
             {
-                if (AvatarService.Instance != null)
+                // Get player name
+                string playerName = PlayerPrefs.GetString("PlayerName", "Player");
+                string playerId = PlayerPrefs.GetString("PlayerId", "");
+                if (playerNameText != null)
+                    playerNameText.text = playerName;
+
+                // Get player level
+                int level = PlayerPrefs.GetInt("PlayerLevel", 1);
+                if (playerLevelText != null)
+                    playerLevelText.text = AutoLocalizer.Get("player_level", level);
+
+                // Load player avatar
+                if (playerAvatar != null)
                 {
-                    try
+                    if (AvatarService.Instance != null)
                     {
-                        Sprite avatarSprite = await AvatarService.Instance.LoadCurrentUserAvatar();
-                        if (avatarSprite != null)
+                        try
                         {
-                            playerAvatar.sprite = avatarSprite;
+                            Sprite avatarSprite = await AvatarService.Instance.LoadCurrentUserAvatar();
+                            if (this == null) return;
+                            if (avatarSprite != null && playerAvatar != null)
+                            {
+                                playerAvatar.sprite = avatarSprite;
+                                playerAvatar.color = Color.white;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogWarning($"[CashMatchmaking] Could not load player avatar: {e.Message}");
+                            if (this == null) return;
+                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
+                            playerAvatar.sprite = initialAvatar;
                             playerAvatar.color = Color.white;
                         }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Debug.LogWarning($"[CashMatchmaking] Could not load player avatar: {e.Message}");
                         Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
                         playerAvatar.sprite = initialAvatar;
                         playerAvatar.color = Color.white;
                     }
                 }
-                else
-                {
-                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
-                    playerAvatar.sprite = initialAvatar;
-                    playerAvatar.color = Color.white;
-                }
-            }
 
-            // Setup opponent as searching
-            ShowOpponentSearching(true);
+                // Setup opponent as searching
+                ShowOpponentSearching(true);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[CashMatchmakingManager] {ex.Message}");
+            }
         }
 
         private void UpdateEntryFeeDisplay()
@@ -401,21 +409,24 @@ namespace DigitPark.Managers
 
         private async void StartMatchmaking()
         {
-            // Use ServiceLocator pattern for Cash Battle matchmaking
-            if (ServiceLocator.Matchmaking != null)
+            try
             {
-                try
+                // Use ServiceLocator pattern for Cash Battle matchmaking
+                if (ServiceLocator.Matchmaking != null)
                 {
                     // Convert GameType to CashGameType
                     CashGameType cashGameType = ConvertToCashGameType(currentGameType);
 
                     var result = await ServiceLocator.Matchmaking.FindMatch(cashGameType, entryFee);
 
+                    // MonoBehaviour may have been destroyed during await
+                    if (this == null) return;
+
                     if (result.Success && result.Match != null)
                     {
                         OnMatchFound(
                             result.Match.MatchId,
-                            result.Match.Opponent?.DisplayName ?? "Opponent"
+                            result.Match.Opponent?.DisplayName ?? AutoLocalizer.Get("default_opponent")
                         );
                     }
                     else
@@ -423,16 +434,16 @@ namespace DigitPark.Managers
                         OnMatchFailed(result.Message ?? AutoLocalizer.Get("cash_matchmaking_error"));
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    Debug.LogWarning($"[CashMatchmaking] ServiceLocator matchmaking error: {e.Message}");
-                    OnMatchFailed(e.Message);
+                    Debug.LogWarning("[CashMatchmaking] ServiceLocator.Matchmaking not available. Using mock delay.");
+                    StartCoroutine(MockMatchmaking());
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogWarning("[CashMatchmaking] ServiceLocator.Matchmaking not available. Using mock delay.");
-                StartCoroutine(MockMatchmaking());
+                Debug.LogError($"[CashMatchmakingManager] {ex.Message}");
+                OnMatchFailed(ex.Message);
             }
         }
 
@@ -455,7 +466,7 @@ namespace DigitPark.Managers
 
             if (isSearching)
             {
-                OnMatchFound("cash_mock_match_123", "Opponent");
+                OnMatchFound("cash_mock_match_123", AutoLocalizer.Get("default_opponent"));
             }
         }
 
@@ -544,53 +555,62 @@ namespace DigitPark.Managers
 
         private async void ShowOpponentInfo(string opponentInfo)
         {
-            ShowOpponentSearching(false);
-
-            // Parse opponent name
-            if (opponentNameText != null)
-                opponentNameText.text = opponentInfo;
-
-            // Mock opponent level
-            if (opponentLevelText != null)
-                opponentLevelText.text = AutoLocalizer.Get("player_level", UnityEngine.Random.Range(1, 50));
-
-            // Load opponent avatar
-            if (opponentAvatar != null)
+            try
             {
-                if (AvatarService.Instance != null && !string.IsNullOrEmpty(opponentId))
+                ShowOpponentSearching(false);
+
+                // Parse opponent name
+                if (opponentNameText != null)
+                    opponentNameText.text = opponentInfo;
+
+                // Mock opponent level
+                if (opponentLevelText != null)
+                    opponentLevelText.text = AutoLocalizer.Get("player_level", UnityEngine.Random.Range(1, 50));
+
+                // Load opponent avatar
+                if (opponentAvatar != null)
                 {
-                    try
+                    if (AvatarService.Instance != null && !string.IsNullOrEmpty(opponentId))
                     {
-                        Sprite avatarSprite = await AvatarService.Instance.LoadAvatar(
-                            opponentId, "", opponentInfo);
-                        if (avatarSprite != null)
+                        try
                         {
-                            opponentAvatar.sprite = avatarSprite;
+                            Sprite avatarSprite = await AvatarService.Instance.LoadAvatar(
+                                opponentId, "", opponentInfo);
+                            if (this == null) return;
+                            if (avatarSprite != null && opponentAvatar != null)
+                            {
+                                opponentAvatar.sprite = avatarSprite;
+                                opponentAvatar.color = Color.white;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogWarning($"[CashMatchmaking] Could not load opponent avatar: {e.Message}");
+                            if (this == null) return;
+                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(opponentInfo, opponentId);
+                            opponentAvatar.sprite = initialAvatar;
                             opponentAvatar.color = Color.white;
                         }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Debug.LogWarning($"[CashMatchmaking] Could not load opponent avatar: {e.Message}");
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(opponentInfo, opponentId);
+                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
+                            opponentInfo, opponentId ?? opponentInfo);
                         opponentAvatar.sprite = initialAvatar;
                         opponentAvatar.color = Color.white;
                     }
                 }
-                else
+
+                // Animate opponent card
+                if (opponentCard != null)
                 {
-                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
-                        opponentInfo, opponentId ?? opponentInfo);
-                    opponentAvatar.sprite = initialAvatar;
-                    opponentAvatar.color = Color.white;
+                    opponentCard.transform.localScale = Vector3.zero;
+                    StartCoroutine(AnimateScale(opponentCard.transform, Vector3.one, 0.4f));
                 }
             }
-
-            // Animate opponent card
-            if (opponentCard != null)
+            catch (Exception ex)
             {
-                opponentCard.transform.localScale = Vector3.zero;
-                StartCoroutine(AnimateScale(opponentCard.transform, Vector3.one, 0.4f));
+                Debug.LogError($"[CashMatchmakingManager] {ex.Message}");
             }
         }
 
@@ -810,7 +830,18 @@ namespace DigitPark.Managers
             // Cancel via ServiceLocator if available
             if (ServiceLocator.Matchmaking != null)
             {
-                _ = ServiceLocator.Matchmaking.CancelSearch();
+                try
+                {
+                    _ = ServiceLocator.Matchmaking.CancelSearch().ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                            Debug.LogError($"[CashMatchmaking] CancelSearch failed: {t.Exception?.InnerException?.Message}");
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[CashMatchmaking] CancelSearch error: {ex.Message}");
+                }
             }
 
             SceneManager.LoadScene("CashBattle1v1");

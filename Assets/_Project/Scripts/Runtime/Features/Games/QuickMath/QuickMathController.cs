@@ -163,6 +163,11 @@ namespace DigitPark.Games
                 SetupSettingsPanel();
                 ShowSettingsPanel();
             }
+            else
+            {
+                // Non-practice mode: play countdown then start
+                CountdownAnimator.Play(canvas, () => StartGame());
+            }
         }
 
         private void SetupButtons()
@@ -602,9 +607,8 @@ namespace DigitPark.Games
 
             RegisterError();
 
-            // Track penalty time (+1s per error) - visible en timer
+            // Track penalty time (+1s per error, tracked in penaltyTime only, not currentTime)
             penaltyTime += 1f;
-            currentTime += 1f;
             UpdateTimer();
 
             comboVisualController?.OnComboReset();

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine;
 
 namespace DigitPark.Tools
@@ -217,3 +218,4 @@ namespace DigitPark.Tools
         #endif
     }
 }
+#endif

@@ -81,9 +81,11 @@ namespace DigitPark.Services
 
         private void OnDestroy()
         {
-            if (_monitorCoroutine != null)
+            StopAllCoroutines();
+
+            if (Instance == this)
             {
-                StopCoroutine(_monitorCoroutine);
+                Instance = null;
             }
         }
 

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using DigitPark.Managers;
 using DigitPark.Localization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Monetization
 {

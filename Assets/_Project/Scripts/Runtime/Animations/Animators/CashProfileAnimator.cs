@@ -4,6 +4,7 @@ using DG.Tweening;
 using TMPro;
 using System;
 using System.Collections.Generic;
+using DigitPark.CashBattle;
 
 namespace DigitPark.Animations
 {
@@ -467,18 +468,16 @@ namespace DigitPark.Animations
 
         private void AnimateCounterTexts()
         {
-            // Read stats from HistoryManager singleton
+            // Read stats from HistoryManager singleton directly (no reflection)
             var historyManager = FindHistoryManager();
             if (historyManager == null) return;
 
-            // Use reflection-free approach: invoke GetStats via the Instance
-            var statsObj = historyManager.GetType().GetMethod("GetStats")?.Invoke(historyManager, null);
-            if (statsObj == null) return;
+            var stats = historyManager.GetStats();
+            if (stats == null) return;
 
-            var statsType = statsObj.GetType();
-            int totalMatches = (int)statsType.GetField("totalMatches").GetValue(statsObj);
-            float winRate = (float)statsType.GetProperty("winRate").GetValue(statsObj);
-            decimal netProfit = (decimal)statsType.GetField("netProfit").GetValue(statsObj);
+            int totalMatches = stats.totalMatches;
+            float winRate = stats.winRate;
+            float netProfit = stats.netProfit;
 
             // Animate total matches counter
             AnimateCounter(_summaryTotalMatchesText, 0, totalMatches, counterDuration);
@@ -489,9 +488,8 @@ namespace DigitPark.Animations
             // Animate net profit counter
             if (_summaryNetProfitText != null)
             {
-                float target = (float)netProfit;
-                string prefix = target >= 0 ? "+$" : "-$";
-                float absTarget = Mathf.Abs(target);
+                string prefix = netProfit >= 0 ? "+$" : "-$";
+                float absTarget = Mathf.Abs(netProfit);
                 DOTween.To(() => 0f, x =>
                 {
                     _summaryNetProfitText.text = $"{prefix}{x:F2}";
@@ -499,21 +497,14 @@ namespace DigitPark.Animations
             }
         }
 
-        private MonoBehaviour FindHistoryManager()
+        private HistoryManager FindHistoryManager()
         {
-            // Find HistoryManager singleton via type name (avoids hard namespace coupling)
-            foreach (var mb in FindObjectsOfType<MonoBehaviour>())
-            {
-                if (mb.GetType().Name == "HistoryManager")
-                {
-                    var instanceProp = mb.GetType().GetProperty("Instance",
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                    if (instanceProp != null)
-                        return instanceProp.GetValue(null) as MonoBehaviour;
-                    return mb;
-                }
-            }
-            return null;
+            // Use singleton Instance directly instead of iterating all MonoBehaviours
+            if (HistoryManager.Instance != null)
+                return HistoryManager.Instance;
+
+            // Fallback: find in scene
+            return FindObjectOfType<HistoryManager>();
         }
 
         private void AnimateCounter(TextMeshProUGUI text, int from, int to, float duration)

@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -11,6 +13,7 @@ using DigitPark.UI.Panels;
 using DigitPark.UI.Components;
 using DigitPark.Themes;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Managers
 {
@@ -100,6 +103,8 @@ namespace DigitPark.Managers
         private const int NAME_CHANGE_GEM_COST = 100;
 
         private PlayerData currentPlayer;
+        private int _playerDataRetryCount = 0;
+        private const int MAX_PLAYER_DATA_RETRIES = 3;
 
         private void Start()
         {
@@ -139,14 +144,40 @@ namespace DigitPark.Managers
 
                 if (currentPlayer == null)
                 {
-                    Debug.LogError("[Settings] No hay datos del jugador");
-                    SceneManager.LoadScene("Login");
+                    Debug.LogWarning("[Settings] Player data not available, retrying...");
+                    StartCoroutine(RetryLoadPlayerData());
+                    return;
                 }
                 else if (playerIdText != null)
                 {
                     playerIdText.text = $"#{currentPlayer.userId}";
                 }
             }
+        }
+
+        private IEnumerator RetryLoadPlayerData()
+        {
+            while (_playerDataRetryCount < MAX_PLAYER_DATA_RETRIES)
+            {
+                _playerDataRetryCount++;
+                Debug.Log($"[Settings] Retry {_playerDataRetryCount}/{MAX_PLAYER_DATA_RETRIES} loading player data...");
+                yield return new WaitForSeconds(1f);
+
+                if (AuthenticationService.Instance != null)
+                {
+                    currentPlayer = AuthenticationService.Instance.GetCurrentPlayerData();
+                    if (currentPlayer != null)
+                    {
+                        Debug.Log("[Settings] Player data loaded successfully on retry");
+                        if (playerIdText != null)
+                            playerIdText.text = $"#{currentPlayer.userId}";
+                        yield break;
+                    }
+                }
+            }
+
+            Debug.LogError("[Settings] No hay datos del jugador after retries, navigating to Login");
+            SceneManager.LoadScene("Login");
         }
 
         private void LoadVolumeSettings()
@@ -659,7 +690,7 @@ namespace DigitPark.Managers
                     vibrator.Call("vibrate", 10L); // 10ms
                 }
             }
-            catch { }
+            catch (System.Exception ex) { Debug.LogWarning($"[SettingsManager] Android vibration failed: {ex.Message}"); }
 #elif UNITY_IOS && !UNITY_EDITOR
             Handheld.Vibrate();
 #endif
@@ -698,12 +729,22 @@ namespace DigitPark.Managers
             GUIUtility.systemCopyBuffer = playerID;
             Debug.Log($"[Settings] ID copiada al portapapeles: {playerID}");
 
+            // Clear clipboard after 10 seconds for security
+            StartCoroutine(ClearClipboardAfterDelay(10f));
+
             // Show toast notification
             if (InAppNotificationManager.Instance != null)
             {
                 InAppNotificationManager.Instance.Show(
                     AutoLocalizer.Get("id_copied"), "", "info");
             }
+        }
+
+        private IEnumerator ClearClipboardAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            GUIUtility.systemCopyBuffer = "";
+            Debug.Log("[Settings] Portapapeles limpiado por seguridad");
         }
 
         #endregion
@@ -769,46 +810,61 @@ namespace DigitPark.Managers
 
         private async void OnConfirmNameClicked(string newUsername)
         {
-            if (currentPlayer == null) return;
-
-            if (newUsername == currentPlayer.username)
+            try
             {
-                changeNamePanel?.Hide();
-                return;
-            }
+                if (currentPlayer == null) return;
 
-            int changeCount = GetNameChangeCount();
-
-            // Deduct gems if not first change
-            if (changeCount > 0)
-            {
-                bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
-                if (!spent)
+                if (newUsername == currentPlayer.username)
                 {
-                    errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
-                    changeNamePanel?.SetButtonsInteractable(true);
+                    changeNamePanel?.Hide();
                     return;
                 }
+
+                int changeCount = GetNameChangeCount();
+
+                // Deduct gems if not first change
+                if (changeCount > 0)
+                {
+                    bool spent = CurrencyManager.Instance?.SpendGems(NAME_CHANGE_GEM_COST) ?? false;
+                    if (!spent)
+                    {
+                        errorPanel?.Show(AutoLocalizer.Get("not_enough_gems_name_change", NAME_CHANGE_GEM_COST));
+                        changeNamePanel?.SetButtonsInteractable(true);
+                        return;
+                    }
+                }
+
+                Debug.Log($"[Settings] Cambiando nombre a: {newUsername}");
+
+                bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
+
+                // MonoBehaviour may have been destroyed during await
+                if (this == null) return;
+
+                if (success)
+                {
+                    Debug.Log("[Settings] Nombre actualizado exitosamente");
+                    currentPlayer.username = newUsername;
+                    PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
+                    PlayerPrefs.Save();
+                    UpdateNameChangeCost();
+                    changeNamePanel?.Hide();
+                }
+                else
+                {
+                    Debug.LogError("[Settings] Error al actualizar nombre");
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+                }
             }
-
-            Debug.Log($"[Settings] Cambiando nombre a: {newUsername}");
-
-            bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
-
-            if (success)
+            catch (Exception ex)
             {
-                Debug.Log("[Settings] Nombre actualizado exitosamente");
-                currentPlayer.username = newUsername;
-                PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
-                PlayerPrefs.Save();
-                UpdateNameChangeCost();
-                changeNamePanel?.Hide();
-            }
-            else
-            {
-                Debug.LogError("[Settings] Error al actualizar nombre");
-                changeNamePanel?.SetButtonsInteractable(true);
-                errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+                Debug.LogError($"[SettingsManager] OnConfirmNameClicked error: {ex.Message}");
+                if (this != null)
+                {
+                    changeNamePanel?.SetButtonsInteractable(true);
+                    errorPanel?.Show(AutoLocalizer.Get("error_changing_name"));
+                }
             }
         }
 
@@ -833,31 +889,41 @@ namespace DigitPark.Managers
 
         private async void OnConfirmDeleteClicked()
         {
-            Debug.Log("[Settings] Eliminando cuenta...");
-
-            if (currentPlayer == null) return;
-
-            if (AuthenticationService.Instance != null)
+            try
             {
-                bool success = await AuthenticationService.Instance.DeleteAccount();
+                Debug.Log("[Settings] Eliminando cuenta...");
 
-                if (success)
+                if (currentPlayer == null) return;
+
+                if (AuthenticationService.Instance != null)
                 {
-                    Debug.Log("[Settings] Cuenta eliminada exitosamente");
-                    SceneManager.LoadScene("Login");
+                    bool success = await AuthenticationService.Instance.DeleteAccount();
+
+                    // MonoBehaviour may have been destroyed during await
+                    if (this == null) return;
+
+                    if (success)
+                    {
+                        Debug.Log("[Settings] Cuenta eliminada exitosamente");
+                        SceneManager.LoadScene("Login");
+                    }
+                    else
+                    {
+                        Debug.LogError("[Settings] Error al eliminar la cuenta");
+                        deleteConfirmPanel?.Hide();
+                        errorPanel?.Show(AutoLocalizer.Get("error_deleting_account"));
+                    }
                 }
                 else
                 {
-                    Debug.LogError("[Settings] Error al eliminar la cuenta");
+                    Debug.LogError("[Settings] AuthenticationService no disponible");
                     deleteConfirmPanel?.Hide();
-                    errorPanel?.Show(AutoLocalizer.Get("error_deleting_account"));
+                    errorPanel?.Show(AutoLocalizer.Get("error_server"));
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogError("[Settings] AuthenticationService no disponible");
-                deleteConfirmPanel?.Hide();
-                errorPanel?.Show(AutoLocalizer.Get("error_server"));
+                Debug.LogError($"[SettingsManager] {ex.Message}");
             }
         }
 
@@ -968,6 +1034,8 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Settings] Iniciando compra: Crear Torneos");
 
+            if (PremiumManager.Instance == null) return;
+
             if (PremiumManager.Instance.CanCreateTournaments)
             {
                 errorPanel?.Show(AutoLocalizer.Get("already_purchased"));
@@ -997,6 +1065,8 @@ namespace DigitPark.Managers
         private void OnTournamentBundleClicked()
         {
             Debug.Log("[Settings] Iniciando compra: Tournament Bundle");
+
+            if (PremiumManager.Instance == null) return;
 
             bool hasBundle = PremiumManager.Instance.CanCreateTournaments && PremiumManager.Instance.CanCreateCashBattle;
             if (hasBundle)

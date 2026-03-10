@@ -42,10 +42,11 @@ namespace DigitPark.Editor
             hlg.spacing = 8;
             hlg.childAlignment = TextAnchor.MiddleRight;
             hlg.childControlWidth = false;
-            hlg.childControlHeight = true;
+            hlg.childControlHeight = false;
             hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
             hlg.reverseArrangement = false;
-            hlg.padding = new RectOffset(0, 8, 4, 4);
+            hlg.padding = new RectOffset(0, 8, 0, 0);
 
             // Remove old children if rebuilding
             for (int i = container.transform.childCount - 1; i >= 0; i--)
@@ -94,6 +95,8 @@ namespace DigitPark.Editor
             var le = GetOrAdd<LayoutElement>(pill);
             le.minWidth = 190;
             le.preferredWidth = 190;
+            le.minHeight = 65;
+            le.preferredHeight = 65;
 
             // Remove old children if rebuilding
             for (int i = pill.transform.childCount - 1; i >= 0; i--)
@@ -131,6 +134,7 @@ namespace DigitPark.Editor
             amountText.text = "0";
             amountText.fontSize = FontSizes.Body;
             amountText.fontSizeMin = FontSizes.AutoMinBody;
+            amountText.fontSizeMax = FontSizes.Body;
             amountText.enableAutoSizing = true;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_WHITE;

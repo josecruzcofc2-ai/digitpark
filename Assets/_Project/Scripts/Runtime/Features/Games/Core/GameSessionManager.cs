@@ -16,19 +16,7 @@ namespace DigitPark.Games
     public class GameSessionManager : MonoBehaviour
     {
         private static GameSessionManager _instance;
-        public static GameSessionManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    var go = new GameObject("GameSessionManager");
-                    _instance = go.AddComponent<GameSessionManager>();
-                    DontDestroyOnLoad(go);
-                }
-                return _instance;
-            }
-        }
+        public static GameSessionManager Instance => _instance;
 
         /// <summary>
         /// Contexto de la sesion actual
@@ -182,162 +170,223 @@ namespace DigitPark.Games
         }
 
         /// <summary>
+        /// Dispara OnSessionStarted manualmente (usar después de SetContext)
+        /// </summary>
+        public void NotifySessionStarted()
+        {
+            if (CurrentContext != null)
+            {
+                OnSessionStarted?.Invoke(CurrentContext);
+            }
+        }
+
+        /// <summary>
         /// Registra el resultado de un juego completado
         /// </summary>
         public async void RegisterGameResult(MinigameResult result)
         {
-            if (CurrentContext == null)
+            try
             {
-                Debug.LogError("No hay sesion activa para registrar resultado");
-                return;
-            }
-
-            // Obtener datos del jugador actual
-            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
-            bool isNewRecord = false;
-
-            if (playerData != null && CurrentContext.CurrentGame.HasValue)
-            {
-                string gameType = CurrentContext.CurrentGame.Value.ToString();
-                var gameStats = playerData.GetGameStats(gameType);
-
-                // Verificar si es nuevo record
-                if (gameStats != null && result.TotalTime < gameStats.bestTime)
+                if (CurrentContext == null)
                 {
-                    isNewRecord = true;
-                    gameStats.bestTime = result.TotalTime;
+                    Debug.LogError("No hay sesion activa para registrar resultado");
+                    return;
                 }
 
-                // Actualizar estadísticas del juego
-                if (gameStats != null)
+                // Obtener datos del jugador actual
+                var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                bool isNewRecord = false;
+
+                if (playerData != null && CurrentContext.CurrentGame.HasValue)
                 {
-                    gameStats.gamesPlayed++;
-                    if (result.Completed) gameStats.gamesWon++;
+                    string gameType = CurrentContext.CurrentGame.Value.ToString();
+                    var gameStats = playerData.GetGameStats(gameType);
 
-                    // Recalcular promedio
-                    float totalTime = gameStats.averageTime * (gameStats.gamesPlayed - 1) + result.TotalTime;
-                    gameStats.averageTime = gameStats.gamesPlayed > 0
-                        ? totalTime / gameStats.gamesPlayed
-                        : result.TotalTime;
-                }
-
-                // Actualizar estadísticas generales
-                playerData.totalGamesPlayed++;
-                if (result.Completed) playerData.totalGamesWon++;
-                if (result.TotalTime < playerData.bestTime)
-                {
-                    playerData.bestTime = result.TotalTime;
-                    isNewRecord = true;
-                }
-                playerData.AddScore(result.TotalTime);
-
-                // Guardar en Firebase
-                try
-                {
-                    await DatabaseService.Instance?.SavePlayerData(playerData);
-                    string gameId = result.GameType.ToString();
-                    await DatabaseService.Instance?.SaveScore(
-                        playerData.userId,
-                        playerData.username,
-                        result.TotalTime,
-                        playerData.countryCode,
-                        gameId
-                    );
-
-                    // Si es torneo, actualizar score en el torneo
-                    if (CurrentContext.Mode == GameMode.Tournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
+                    // Verificar si es nuevo record
+                    if (gameStats != null && result.TotalTime < gameStats.bestTime)
                     {
-                        await DatabaseService.Instance?.UpdateTournamentScore(
-                            CurrentContext.TournamentId,
-                            playerData.userId,
-                            result.TotalTime
-                        );
+                        isNewRecord = true;
+                        gameStats.bestTime = result.TotalTime;
                     }
 
-                    Debug.Log($"[GameSession] Score guardado en Firebase: {result.TotalTime}s");
+                    // Actualizar estadísticas del juego
+                    if (gameStats != null)
+                    {
+                        gameStats.gamesPlayed++;
+                        // Solo contar como victoria en Practice (completar = ganar)
+                        // En modos competitivos, la victoria se determina al comparar con oponente
+                        bool isPractice = CurrentContext.Mode == GameMode.Practice;
+                        if (result.Completed && isPractice) gameStats.gamesWon++;
+
+                        // Recalcular promedio usando double para evitar precision loss
+                        double totalTime = (double)gameStats.averageTime * (gameStats.gamesPlayed - 1) + result.TotalTime;
+                        gameStats.averageTime = gameStats.gamesPlayed > 0
+                            ? (float)(totalTime / gameStats.gamesPlayed)
+                            : result.TotalTime;
+                    }
+
+                    // Actualizar estadísticas generales
+                    playerData.totalGamesPlayed++;
+                    bool isPracticeMode = CurrentContext.Mode == GameMode.Practice;
+                    if (result.Completed && isPracticeMode) playerData.totalGamesWon++;
+                    if (result.TotalTime < playerData.bestTime)
+                    {
+                        playerData.bestTime = result.TotalTime;
+                        isNewRecord = true;
+                    }
+                    playerData.AddScore(result.TotalTime);
+
+                    // Guardar en Firebase
+                    try
+                    {
+                        if (DatabaseService.Instance != null)
+                        {
+                            await DatabaseService.Instance.SavePlayerData(playerData);
+                            string gameId = result.GameType.ToString();
+                            await DatabaseService.Instance.SaveScore(
+                                playerData.userId,
+                                playerData.username,
+                                result.TotalTime,
+                                playerData.countryCode,
+                                gameId
+                            );
+
+                            // Si es torneo, actualizar score en el torneo
+                            if (CurrentContext.Mode == GameMode.Tournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
+                            {
+                                await DatabaseService.Instance.UpdateTournamentScore(
+                                    CurrentContext.TournamentId,
+                                    playerData.userId,
+                                    result.TotalTime
+                                );
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogWarning("[GameSession] DatabaseService not available — score not saved!");
+                        }
+
+                        Debug.Log($"[GameSession] Score guardado en Firebase: {result.TotalTime}s");
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[GameSession] Error guardando score: {e.Message}");
+                    }
                 }
-                catch (System.Exception e)
+
+                // Analytics - Registrar game_complete
+                if (CurrentContext.CurrentGame.HasValue)
                 {
-                    Debug.LogWarning($"[GameSession] Error guardando score: {e.Message}");
+                    AnalyticsService.Instance?.LogGameComplete(
+                        CurrentContext.CurrentGame.Value.ToString(),
+                        result.TotalTime,
+                        (int)result.FinalScore,
+                        result.Completed,
+                        isNewRecord
+                    );
                 }
-            }
 
-            // Analytics - Registrar game_complete
-            if (CurrentContext.CurrentGame.HasValue)
-            {
-                AnalyticsService.Instance?.LogGameComplete(
-                    CurrentContext.CurrentGame.Value.ToString(),
-                    result.TotalTime,
-                    (int)result.FinalScore,
-                    result.Completed,
-                    isNewRecord
-                );
-            }
+                CurrentContext.AddResult(result);
 
-            CurrentContext.AddResult(result);
+                // === Post-game coin rewards ===
+                int coinsEarned = CalculatePostGameReward(result, CurrentContext.Mode);
+                if (coinsEarned > 0)
+                {
+                    DigitPark.Monetization.CurrencyManager.Instance?.AddCoins(coinsEarned);
+                    Debug.Log($"[GameSession] Post-game reward: +{coinsEarned} coins (mode: {CurrentContext.Mode})");
+                }
 
-            // === Post-game coin rewards ===
-            int coinsEarned = CalculatePostGameReward(result, CurrentContext.Mode);
-            if (coinsEarned > 0)
-            {
-                DigitPark.Monetization.CurrencyManager.Instance?.AddCoins(coinsEarned);
-                Debug.Log($"[GameSession] Post-game reward: +{coinsEarned} coins (mode: {CurrentContext.Mode})");
-            }
+                // === Settle bet if active ===
+                if (CurrentContext.BetAmount > 0 && CurrentContext.BetCurrencyType != DigitPark.Monetization.BetCurrencyType.None)
+                {
+                    // In competitive modes, determine win by comparing with opponent results
+                    // In practice mode, completion = win
+                    bool playerWon;
+                    if (CurrentContext.Mode == GameMode.Practice)
+                    {
+                        playerWon = result.Completed;
+                    }
+                    else if (CurrentContext.OpponentResults != null && CurrentContext.OpponentResults.Count > 0)
+                    {
+                        // Compare total time with opponent's — lower time wins
+                        float opponentTime = CurrentContext.OpponentResults[CurrentContext.OpponentResults.Count - 1].FinalScore;
+                        playerWon = result.Completed && result.TotalTime < opponentTime;
+                    }
+                    else
+                    {
+                        // No opponent results yet — fallback to completion
+                        playerWon = result.Completed;
+                    }
+                    DigitPark.Monetization.CurrencyManager.Instance?.SettleBet(playerWon);
+                    Debug.Log($"[GameSession] Bet settled: {(playerWon ? "WON" : "LOST")} {CurrentContext.BetAmount} {CurrentContext.BetCurrencyType}");
+                }
 
-            // === Settle bet if active ===
-            if (CurrentContext.BetAmount > 0 && CurrentContext.BetCurrencyType != DigitPark.Monetization.BetCurrencyType.None)
-            {
-                bool playerWon = result.Completed;
-                DigitPark.Monetization.CurrencyManager.Instance?.SettleBet(playerWon);
-                Debug.Log($"[GameSession] Bet settled: {(playerWon ? "WON" : "LOST")} {CurrentContext.BetAmount} {CurrentContext.BetCurrencyType}");
-            }
+                OnGameCompleted?.Invoke(result);
 
-            OnGameCompleted?.Invoke(result);
+                // === Achievement tracking ===
+                {
+                    string gameType = CurrentContext.CurrentGame?.ToString();
+                    int score = (int)result.FinalScore;
+                    int accuracy = result.Errors == 0 ? 100 : Mathf.Max(0, 100 - (result.Errors * 10));
 
-            // === Achievement tracking ===
-            {
-                string gameType = CurrentContext.CurrentGame?.ToString();
-                int score = (int)result.FinalScore;
-                int accuracy = result.Errors == 0 ? 100 : Mathf.Max(0, 100 - (result.Errors * 10));
+                    AchievementService.Instance?.OnGameCompleted(
+                        result.Completed,
+                        result.TotalTime,
+                        gameType,
+                        score,
+                        accuracy,
+                        wasBehind: false
+                    );
 
-                AchievementService.Instance?.OnGameCompleted(
-                    result.Completed,
-                    result.TotalTime,
-                    gameType,
-                    score,
-                    accuracy,
-                    wasBehind: false
-                );
+                    // Win streak tracking — only count actual victories in competitive modes
+                    bool isWin;
+                    if (CurrentContext.Mode == GameMode.Practice)
+                    {
+                        isWin = result.Completed;
+                    }
+                    else if (CurrentContext.OpponentResults != null && CurrentContext.OpponentResults.Count > 0)
+                    {
+                        float opTime = CurrentContext.OpponentResults[CurrentContext.OpponentResults.Count - 1].FinalScore;
+                        isWin = result.Completed && result.TotalTime < opTime;
+                    }
+                    else
+                    {
+                        isWin = result.Completed;
+                    }
 
-                // Win streak tracking
+                    if (isWin)
+                    {
+                        int currentStreak = PlayerPrefs.GetInt("CurrentWinStreak", 0) + 1;
+                        PlayerPrefs.SetInt("CurrentWinStreak", currentStreak);
+                        PlayerPrefs.Save();
+                        AchievementService.Instance?.OnWinStreakChanged(currentStreak);
+                    }
+                    else
+                    {
+                        PlayerPrefs.SetInt("CurrentWinStreak", 0);
+                        PlayerPrefs.Save();
+                    }
+                }
+
+                // Incrementar contador de partidas en ReviewService
+                ReviewService.Instance?.IncrementGamesPlayed();
+
+                // Intentar mostrar review prompt si gano (no despues de perder)
                 if (result.Completed)
                 {
-                    int currentStreak = PlayerPrefs.GetInt("CurrentWinStreak", 0) + 1;
-                    PlayerPrefs.SetInt("CurrentWinStreak", currentStreak);
-                    PlayerPrefs.Save();
-                    AchievementService.Instance?.OnWinStreakChanged(currentStreak);
+                    ReviewService.Instance?.TryRequestReview(justLost: false);
                 }
-                else
+
+                // Si hay mas juegos en Cognitive Sprint, avanzar
+                if (CurrentContext.Mode == GameMode.CognitiveSprint && CurrentContext.HasMoreGames)
                 {
-                    PlayerPrefs.SetInt("CurrentWinStreak", 0);
-                    PlayerPrefs.Save();
+                    // Mostrar pantalla de transicion o cargar siguiente juego
+                    Debug.Log($"Juego {CurrentContext.CurrentGameIndex + 1} completado. Siguiente juego...");
                 }
             }
-
-            // Incrementar contador de partidas en ReviewService
-            ReviewService.Instance?.IncrementGamesPlayed();
-
-            // Intentar mostrar review prompt si gano (no despues de perder)
-            if (result.Completed)
+            catch (Exception ex)
             {
-                ReviewService.Instance?.TryRequestReview(justLost: false);
-            }
-
-            // Si hay mas juegos en Cognitive Sprint, avanzar
-            if (CurrentContext.Mode == GameMode.CognitiveSprint && CurrentContext.HasMoreGames)
-            {
-                // Mostrar pantalla de transicion o cargar siguiente juego
-                Debug.Log($"Juego {CurrentContext.CurrentGameIndex + 1} completado. Siguiente juego...");
+                Debug.LogError($"[GameSessionManager] {ex.Message}");
             }
         }
 
@@ -366,10 +415,13 @@ namespace DigitPark.Games
 
             OnSessionEnded?.Invoke(CurrentContext);
 
-            // Guardar resultados si es necesario
-            SaveSessionResults();
-
+            // Guardar resultados con referencia local antes de nulificar
+            var contextToSave = CurrentContext;
             CurrentContext = null;
+            _ = SaveSessionResults(contextToSave).ContinueWith(t =>
+            {
+                if (t.IsFaulted) Debug.LogError($"[GameSessionManager] SaveSessionResults failed: {t.Exception?.GetBaseException().Message}");
+            });
         }
 
         /// <summary>
@@ -421,6 +473,7 @@ namespace DigitPark.Games
             switch (mode)
             {
                 case GameMode.Practice:
+                    if (!result.Completed) return 0; // No reward if abandoned
                     int reward = 15; // Base: complete practice
                     // Bonus for beating personal best
                     if (result.Completed)
@@ -456,67 +509,77 @@ namespace DigitPark.Games
         /// <summary>
         /// Guarda los resultados de la sesion
         /// </summary>
-        private async void SaveSessionResults()
+        private async Task SaveSessionResults(GameContext ctx)
         {
-            if (CurrentContext == null || CurrentContext.Results.Count == 0)
-            {
-                Debug.Log("[GameSession] Sesión terminada sin resultados que guardar");
-                return;
-            }
-
-            Debug.Log($"[GameSession] Sesion terminada. Guardando {CurrentContext.Results.Count} resultados...");
-
-            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
-            if (playerData == null) return;
-
             try
             {
-                // Guardar datos actualizados del jugador
-                await DatabaseService.Instance?.SavePlayerData(playerData);
-
-                // Si es torneo, reportar que terminó
-                if (CurrentContext.Mode == GameMode.Tournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
+                if (ctx == null || ctx.Results.Count == 0)
                 {
-                    // Calcular mejor tiempo de la sesión
-                    float bestSessionTime = float.MaxValue;
-                    foreach (var result in CurrentContext.Results)
-                    {
-                        if (result.TotalTime < bestSessionTime)
-                            bestSessionTime = result.TotalTime;
-                    }
-
-                    await DatabaseService.Instance?.UpdateTournamentScore(
-                        CurrentContext.TournamentId,
-                        playerData.userId,
-                        bestSessionTime
-                    );
+                    Debug.Log("[GameSession] Sesión terminada sin resultados que guardar");
+                    return;
                 }
 
-                Debug.Log("[GameSession] Resultados guardados exitosamente");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"[GameSession] Error guardando resultados: {e.Message}");
-            }
+                Debug.Log($"[GameSession] Sesion terminada. Guardando {ctx.Results.Count} resultados...");
 
-            // Guardar en historial de partidas generales (Practice y Online, no CashBattle)
-            RecordToMatchHistory();
+                var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                if (playerData == null) return;
+
+                try
+                {
+                    // Guardar datos actualizados del jugador
+                    if (DatabaseService.Instance != null)
+                    {
+                        await DatabaseService.Instance.SavePlayerData(playerData);
+
+                        // Si es torneo, reportar que terminó
+                        if (ctx.Mode == GameMode.Tournament && !string.IsNullOrEmpty(ctx.TournamentId))
+                        {
+                            // Calcular mejor tiempo de la sesión
+                            float bestSessionTime = float.MaxValue;
+                            foreach (var result in ctx.Results)
+                            {
+                                if (result.TotalTime < bestSessionTime)
+                                    bestSessionTime = result.TotalTime;
+                            }
+
+                            await DatabaseService.Instance.UpdateTournamentScore(
+                                ctx.TournamentId,
+                                playerData.userId,
+                                bestSessionTime
+                            );
+                        }
+                    }
+
+                    Debug.Log("[GameSession] Resultados guardados exitosamente");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[GameSession] Error guardando resultados: {e.Message}");
+                }
+
+                // Guardar en historial de partidas generales (Practice y Online, no CashBattle)
+                RecordToMatchHistory(ctx);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[GameSessionManager] {ex.Message}");
+            }
         }
 
         /// <summary>
         /// Registra la sesion en el historial de partidas generales
         /// </summary>
-        private void RecordToMatchHistory()
+        private void RecordToMatchHistory(GameContext ctx)
         {
-            if (CurrentContext == null || CurrentContext.Results.Count == 0) return;
+            if (ctx == null || ctx.Results.Count == 0) return;
 
             // Solo Practice y Online van al historial general
             // SingleGame/Tournament/CashBattle van a CashHistory
-            if (CurrentContext.Mode != GameMode.Practice && CurrentContext.Mode != GameMode.Online)
+            if (ctx.Mode != GameMode.Practice && ctx.Mode != GameMode.Online)
                 return;
 
-            bool isPractice = CurrentContext.Mode == GameMode.Practice;
-            bool isSprint = CurrentContext.Games != null && CurrentContext.Games.Count > 1;
+            bool isPractice = ctx.Mode == GameMode.Practice;
+            bool isSprint = ctx.Games != null && ctx.Games.Count > 1;
 
             if (isSprint)
             {
@@ -525,16 +588,16 @@ namespace DigitPark.Games
                 int totalErrors = 0;
                 float totalPenalty = 0f;
 
-                foreach (var r in CurrentContext.Results)
+                foreach (var r in ctx.Results)
                 {
                     totalTime += r.TotalTime;
                     totalErrors += r.Errors;
                     totalPenalty += r.PenaltyTime;
                 }
 
-                string[] gameNames = new string[CurrentContext.Games.Count];
-                for (int i = 0; i < CurrentContext.Games.Count; i++)
-                    gameNames[i] = CurrentContext.Games[i].ToString();
+                string[] gameNames = new string[ctx.Games.Count];
+                for (int i = 0; i < ctx.Games.Count; i++)
+                    gameNames[i] = ctx.Games[i].ToString();
 
                 MatchHistoryEntry entry;
                 if (isPractice)
@@ -545,12 +608,15 @@ namespace DigitPark.Games
                 else
                 {
                     float opponentTotal = 0f;
-                    foreach (var r in CurrentContext.OpponentResults)
-                        opponentTotal += r.FinalScore;
+                    if (ctx.OpponentResults != null)
+                    {
+                        foreach (var r in ctx.OpponentResults)
+                            opponentTotal += r.FinalScore;
+                    }
 
                     entry = MatchHistoryEntry.CreateCognitiveSprintOnline(
                         gameNames, totalTime, totalErrors, totalPenalty,
-                        CurrentContext.OpponentName, CurrentContext.OpponentId, opponentTotal);
+                        ctx.OpponentName, ctx.OpponentId, opponentTotal);
                 }
 
                 MatchHistoryStorage.Instance.AddEntry(entry);
@@ -558,7 +624,7 @@ namespace DigitPark.Games
             else
             {
                 // Juego individual: una entrada por resultado
-                foreach (var r in CurrentContext.Results)
+                foreach (var r in ctx.Results)
                 {
                     string gameType = r.GameType.ToString();
                     MatchHistoryEntry entry;
@@ -572,13 +638,13 @@ namespace DigitPark.Games
                     {
                         // Buscar score del oponente para este juego
                         float opScore = 0f;
-                        int idx = CurrentContext.Results.IndexOf(r);
-                        if (CurrentContext.OpponentResults != null && idx < CurrentContext.OpponentResults.Count)
-                            opScore = CurrentContext.OpponentResults[idx].FinalScore;
+                        int idx = ctx.Results.IndexOf(r);
+                        if (ctx.OpponentResults != null && idx < ctx.OpponentResults.Count)
+                            opScore = ctx.OpponentResults[idx].FinalScore;
 
                         entry = MatchHistoryEntry.CreateOnlineMatch(
                             gameType, r.TotalTime, r.Errors, r.PenaltyTime,
-                            CurrentContext.OpponentName, CurrentContext.OpponentId, opScore);
+                            ctx.OpponentName, ctx.OpponentId, opScore);
                     }
 
                     MatchHistoryStorage.Instance.AddEntry(entry);

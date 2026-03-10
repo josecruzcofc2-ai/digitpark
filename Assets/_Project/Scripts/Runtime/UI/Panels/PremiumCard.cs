@@ -34,7 +34,7 @@ namespace DigitPark.UI
 
         [Header("Offer Data")]
         [SerializeField] private string _offerId;
-        [SerializeField] private Monetization.ShopTab _targetTab = Monetization.ShopTab.Featured;
+        [SerializeField] private Navigation.ShopTab _targetTab = Navigation.ShopTab.Featured;
 
         [Header("Audio")]
         [SerializeField] private AudioClip _clickSound;
@@ -135,29 +135,29 @@ namespace DigitPark.UI
             switch (_cardType)
             {
                 case PremiumCardType.PremiumBundle:
-                    SetContent("BUNDLE PREMIUM", "1000 Gemas + Temas Exclusivos", "$14.99", "50%", true);
-                    _targetTab = Monetization.ShopTab.Featured;
+                    SetContent(AutoLocalizer.Get("premium_bundle_title"), AutoLocalizer.Get("premium_bundle_desc"), "$14.99", "50%", true);
+                    _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.StarterPack:
-                    SetContent("STARTER PACK", "500 Gemas + Tema Exclusivo", "$2.99", "70%", true);
-                    _targetTab = Monetization.ShopTab.Featured;
+                    SetContent(AutoLocalizer.Get("starter_pack_title"), AutoLocalizer.Get("starter_pack_desc"), "$2.99", "70%", true);
+                    _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.DailyDeal:
-                    SetContent("OFERTA DEL DIA", "1000 Monedas + 50 Gemas", "$1.99", "50%", true);
-                    _targetTab = Monetization.ShopTab.Featured;
+                    SetContent(AutoLocalizer.Get("daily_deal_title"), AutoLocalizer.Get("daily_deal_desc"), "$1.99", "50%", true);
+                    _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.WeeklyBundle:
-                    SetContent("BUNDLE SEMANAL", "Todo lo que necesitas", "$4.99", "40%", true);
-                    _targetTab = Monetization.ShopTab.Featured;
+                    SetContent(AutoLocalizer.Get("weekly_bundle_title"), AutoLocalizer.Get("weekly_bundle_desc"), "$4.99", "40%", true);
+                    _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.SpecialOffer:
                 default:
-                    SetContent("OFERTA ESPECIAL", "Tiempo limitado!", "$4.99", "60%", true);
-                    _targetTab = Monetization.ShopTab.Featured;
+                    SetContent(AutoLocalizer.Get("special_offer_title"), AutoLocalizer.Get("special_offer_desc"), "$4.99", "60%", true);
+                    _targetTab = Navigation.ShopTab.Featured;
                     break;
             }
         }
@@ -210,7 +210,7 @@ namespace DigitPark.UI
 
                 if (time.TotalDays >= 1)
                 {
-                    _timerText.text = $"{(int)time.TotalDays}d {time.Hours}h";
+                    _timerText.text = AutoLocalizer.Get("premium_timer_days", (int)time.TotalDays, time.Hours);
                 }
                 else
                 {
@@ -227,7 +227,12 @@ namespace DigitPark.UI
 
         private void NavigateToShop()
         {
-            var navigator = Monetization.SceneNavigator.Instance;
+            var navigator = Navigation.SceneNavigator.Instance;
+            if (navigator == null)
+            {
+                Debug.LogWarning("[PremiumCard] SceneNavigator.Instance is null, cannot navigate");
+                return;
+            }
 
             if (!string.IsNullOrEmpty(_offerId))
             {
@@ -236,7 +241,7 @@ namespace DigitPark.UI
             }
             else if (_cardType == PremiumCardType.PremiumBundle)
             {
-                navigator.NavigateToShop(Monetization.ShopTab.Featured);
+                navigator.NavigateToShop(Navigation.ShopTab.Featured);
             }
             else
             {

@@ -5,6 +5,8 @@ using TMPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DigitPark.Localization;
+using DigitPark.UI;
 
 namespace DigitPark.Animations
 {
@@ -117,7 +119,6 @@ namespace DigitPark.Animations
             // Screen shake at high combos
             if (currentCombo >= 7 && UIAnimationManager.Instance != null)
             {
-                float intensity = Mathf.Min(currentCombo * 1.5f, 25f);
                 UIAnimationManager.Instance.LightScreenShake();
             }
 
@@ -187,7 +188,9 @@ namespace DigitPark.Animations
             comboText.fontSize = 48;
             comboText.fontStyle = FontStyles.Bold;
             comboText.alignment = TextAlignmentOptions.Center;
-            comboText.enableAutoSizing = false;
+            comboText.enableAutoSizing = true;
+            comboText.fontSizeMin = FontSizes.AutoMinBody;
+            comboText.fontSizeMax = 48;
             comboText.alpha = 0f;
         }
 
@@ -206,7 +209,9 @@ namespace DigitPark.Animations
             milestoneText.fontSize = 64;
             milestoneText.fontStyle = FontStyles.Bold;
             milestoneText.alignment = TextAlignmentOptions.Center;
-            milestoneText.enableAutoSizing = false;
+            milestoneText.enableAutoSizing = true;
+            milestoneText.fontSizeMin = FontSizes.AutoMinBody;
+            milestoneText.fontSizeMax = 64;
             milestoneText.alpha = 0f;
         }
 
@@ -314,10 +319,10 @@ namespace DigitPark.Animations
         {
             switch (tier)
             {
-                case 2: return "GREAT!";
-                case 3: return "AMAZING!";
-                case 4: return "INCREDIBLE!";
-                case 5: return "GODLIKE!";
+                case 2: return AutoLocalizer.Get("milestone_great");
+                case 3: return AutoLocalizer.Get("milestone_amazing");
+                case 4: return AutoLocalizer.Get("milestone_incredible");
+                case 5: return AutoLocalizer.Get("milestone_godlike");
                 default: return "";
             }
         }
@@ -338,7 +343,7 @@ namespace DigitPark.Animations
 
         private void UpdateComboText(Color color)
         {
-            comboText.text = $"COMBO x{currentCombo}";
+            comboText.text = AutoLocalizer.Get("combo_text", currentCombo);
             comboText.color = color;
 
             // Fade in if hidden
@@ -348,10 +353,10 @@ namespace DigitPark.Animations
                 TrackTween(t);
             }
 
-            // Scale text based on tier
+            // Scale text based on tier (set fontSizeMax since autoSizing is enabled)
             int tier = GetTier(currentCombo);
             float targetSize = 48 + (tier - 1) * 8;
-            comboText.fontSize = targetSize;
+            comboText.fontSizeMax = targetSize;
         }
 
         private void AnimateComboPunch(int tier)
@@ -448,15 +453,10 @@ namespace DigitPark.Animations
             _glowSequence?.Kill();
 
             Color clear = Color.clear;
-            var t1 = glowTop.DOColor(clear, 0.3f);
-            var t2 = glowBottom.DOColor(clear, 0.3f);
-            var t3 = glowLeft.DOColor(clear, 0.3f);
-            var t4 = glowRight.DOColor(clear, 0.3f);
-
-            TrackTween(t1);
-            TrackTween(t2);
-            TrackTween(t3);
-            TrackTween(t4);
+            if (glowTop != null) TrackTween(glowTop.DOColor(clear, 0.3f));
+            if (glowBottom != null) TrackTween(glowBottom.DOColor(clear, 0.3f));
+            if (glowLeft != null) TrackTween(glowLeft.DOColor(clear, 0.3f));
+            if (glowRight != null) TrackTween(glowRight.DOColor(clear, 0.3f));
         }
 
         private void AnimateComboBreak()
@@ -464,23 +464,27 @@ namespace DigitPark.Animations
             // Flash combo text red briefly, then fade out
             var seq = DOTween.Sequence();
 
-            comboText.color = Color.red;
-            seq.Append(comboTextRT.DOShakePosition(0.3f, 10f, 20));
-            seq.Join(comboText.DOFade(0f, 0.4f));
+            if (comboText != null)
+            {
+                comboText.color = Color.red;
+                seq.Join(comboText.DOFade(0f, 0.4f));
+            }
+            if (comboTextRT != null)
+                seq.Append(comboTextRT.DOShakePosition(0.3f, 10f, 20));
 
             // Flash border red then fade
             Color redGlow = new Color(1f, 0.2f, 0.2f, 0.4f);
-            seq.Join(glowTop.DOColor(redGlow, 0.1f));
-            seq.Join(glowBottom.DOColor(redGlow, 0.1f));
-            seq.Join(glowLeft.DOColor(redGlow, 0.1f));
-            seq.Join(glowRight.DOColor(redGlow, 0.1f));
+            if (glowTop != null) seq.Join(glowTop.DOColor(redGlow, 0.1f));
+            if (glowBottom != null) seq.Join(glowBottom.DOColor(redGlow, 0.1f));
+            if (glowLeft != null) seq.Join(glowLeft.DOColor(redGlow, 0.1f));
+            if (glowRight != null) seq.Join(glowRight.DOColor(redGlow, 0.1f));
 
             seq.AppendInterval(0.1f);
 
-            seq.Append(glowTop.DOColor(Color.clear, 0.3f));
-            seq.Join(glowBottom.DOColor(Color.clear, 0.3f));
-            seq.Join(glowLeft.DOColor(Color.clear, 0.3f));
-            seq.Join(glowRight.DOColor(Color.clear, 0.3f));
+            if (glowTop != null) seq.Append(glowTop.DOColor(Color.clear, 0.3f));
+            if (glowBottom != null) seq.Join(glowBottom.DOColor(Color.clear, 0.3f));
+            if (glowLeft != null) seq.Join(glowLeft.DOColor(Color.clear, 0.3f));
+            if (glowRight != null) seq.Join(glowRight.DOColor(Color.clear, 0.3f));
 
             TrackTween(seq);
         }
@@ -513,7 +517,7 @@ namespace DigitPark.Animations
             _milestoneSequence?.Kill();
             _glowSequence?.Kill();
 
-            foreach (var t in _activeTweens)
+            foreach (var t in new List<Tween>(_activeTweens))
             {
                 t?.Kill();
             }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -43,6 +44,10 @@ namespace DigitPark.Managers
         private void Start()
         {
             Debug.Log("[SearchPlayers] SearchPlayersManager iniciado");
+
+            // Limit search input to prevent abuse
+            if (searchInputField != null)
+                searchInputField.characterLimit = 30;
 
             SetupListeners();
             ClearResults();
@@ -133,36 +138,43 @@ namespace DigitPark.Managers
 
         private async void PerformSearch(string query)
         {
-            if (isSearching || query == lastSearchQuery)
-                return;
-
-            lastSearchQuery = query;
-            isSearching = true;
-
-            Debug.Log($"[SearchPlayers] Buscando: {query}");
-
-            // Mostrar indicador de carga, ocultar empty state
-            ShowLoadingIndicator(true);
-            if (noResultsText != null)
-                noResultsText.gameObject.SetActive(false);
-            if (emptyStatePanel != null)
-                emptyStatePanel.SetActive(false);
-
-            // Buscar en Firebase
-            List<PlayerSearchResult> results = null;
-
-            if (DatabaseService.Instance != null)
+            try
             {
-                results = await DatabaseService.Instance.SearchPlayers(query, maxResults);
-            }
-            else
-            {
-                // Fallback con datos de prueba si no hay Firebase
-                Debug.LogWarning("[SearchPlayers] DatabaseService no disponible, usando datos de prueba");
-                results = GetTestResults();
-            }
+                if (isSearching || query == lastSearchQuery)
+                    return;
 
-            OnSearchComplete(results);
+                lastSearchQuery = query;
+                isSearching = true;
+
+                Debug.Log($"[SearchPlayers] Buscando: {query}");
+
+                // Mostrar indicador de carga, ocultar empty state
+                ShowLoadingIndicator(true);
+                if (noResultsText != null)
+                    noResultsText.gameObject.SetActive(false);
+                if (emptyStatePanel != null)
+                    emptyStatePanel.SetActive(false);
+
+                // Buscar en Firebase
+                List<PlayerSearchResult> results = null;
+
+                if (DatabaseService.Instance != null)
+                {
+                    results = await DatabaseService.Instance.SearchPlayers(query, maxResults);
+                }
+                else
+                {
+                    // Fallback con datos de prueba si no hay Firebase
+                    Debug.LogWarning("[SearchPlayers] DatabaseService no disponible, usando datos de prueba");
+                    results = GetTestResults();
+                }
+
+                OnSearchComplete(results);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[SearchPlayersManager] {ex.Message}");
+            }
         }
 
         private List<PlayerSearchResult> GetTestResults()
@@ -299,7 +311,7 @@ namespace DigitPark.Managers
                     {
                         var tmp = statsTextT.GetComponent<TextMeshProUGUI>();
                         string game = result.favoriteGame ?? "QuickMath";
-                        if (tmp != null) tmp.text = $"{result.winRate:F0}% WR · {game}";
+                        if (tmp != null) tmp.text = AutoLocalizer.Get("search_wr_format", $"{result.winRate:F0}", game);
                     }
                 }
             }
@@ -329,8 +341,8 @@ namespace DigitPark.Managers
                             addFriendBtn.gameObject.SetActive(true);
 
                             // Verificar si ya hay solicitud pendiente
-                            bool hasPendingRequest = FriendService.Instance.HasPendingRequestWith(playerId);
-                            bool sentRequest = FriendService.Instance.HasSentRequestTo(playerId);
+                            bool hasPendingRequest = FriendService.Instance != null && FriendService.Instance.HasPendingRequestWith(playerId);
+                            bool sentRequest = FriendService.Instance != null && FriendService.Instance.HasSentRequestTo(playerId);
 
                             if (hasPendingRequest)
                             {
@@ -396,27 +408,34 @@ namespace DigitPark.Managers
 
         private async void OnAddFriendClicked(string playerId)
         {
-            Debug.Log($"[SearchPlayers] Agregar amigo: {playerId}");
-
-            // Verificar si ya hay solicitud pendiente
-            if (FriendService.Instance.HasPendingRequestWith(playerId))
+            try
             {
-                ShowMessage(AutoLocalizer.Get("error_pending_request"));
-                return;
+                Debug.Log($"[SearchPlayers] Agregar amigo: {playerId}");
+
+                // Verificar si ya hay solicitud pendiente
+                if (FriendService.Instance != null && FriendService.Instance.HasPendingRequestWith(playerId))
+                {
+                    ShowMessage(AutoLocalizer.Get("error_pending_request"));
+                    return;
+                }
+
+                // Enviar solicitud de amistad
+                var result = await FriendService.Instance.SendFriendRequest(playerId);
+
+                if (result.Success)
+                {
+                    ShowMessage(result.Message);
+                    // Actualizar UI del botón
+                    UpdateAddFriendButton(playerId, true);
+                }
+                else
+                {
+                    ShowMessage(result.Message);
+                }
             }
-
-            // Enviar solicitud de amistad
-            var result = await FriendService.Instance.SendFriendRequest(playerId);
-
-            if (result.Success)
+            catch (Exception ex)
             {
-                ShowMessage(result.Message);
-                // Actualizar UI del botón
-                UpdateAddFriendButton(playerId, true);
-            }
-            else
-            {
-                ShowMessage(result.Message);
+                Debug.LogError($"[SearchPlayersManager] {ex.Message}");
             }
         }
 
@@ -425,7 +444,7 @@ namespace DigitPark.Managers
             foreach (var item in currentResults)
             {
                 // Buscar el item correspondiente a este playerId
-                Transform buttonsRow = item.transform.Find("ButtonsRow");
+                Transform buttonsRow = item.transform.Find("ContentSection/ButtonsRow");
                 if (buttonsRow != null)
                 {
                     Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
@@ -458,12 +477,10 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[SearchPlayers] Retar a: {playerId}");
 
-            // Guardar ID y navegar a setup de reto
             PlayerPrefs.SetString("ChallengePlayerId", playerId);
             PlayerPrefs.Save();
 
-            // TODO: Navegar a seleccion de juego
-            // SceneManager.LoadScene("ChallengeSetup");
+            InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info");
         }
 
         #endregion
@@ -492,9 +509,7 @@ namespace DigitPark.Managers
 
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            string text = LocalizationManager.Instance.GetText(key);
-            return args.Length > 0 ? string.Format(text, args) : text;
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
 
         private void OnDestroy()

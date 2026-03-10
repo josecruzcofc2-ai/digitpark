@@ -128,7 +128,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -446,7 +446,7 @@ namespace DigitPark.Editor
             maOutline.effectDistance = new Vector2(1, 1);
 
             // Button text
-            var maText = FindOrCreate(markAllBtn.transform, "Text");
+            var maText = FindOrCreate(markAllBtn.transform, "MarkAllReadText");
             var matRT = GetOrAdd<RectTransform>(maText);
             matRT.anchorMin = Vector2.zero;
             matRT.anchorMax = Vector2.one;

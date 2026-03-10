@@ -102,10 +102,7 @@ namespace DigitPark.UI
             if (string.IsNullOrEmpty(tmp.text))
             {
                 // Intentar obtener texto localizado
-                if (LocalizationManager.Instance != null)
-                {
-                    tmp.text = LocalizationManager.Instance.GetText(localizationKey);
-                }
+                tmp.text = AutoLocalizer.Get(localizationKey);
 
                 // Si aun esta vacio, usar fallback
                 if (string.IsNullOrEmpty(tmp.text))

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Localization;
 using DG.Tweening;
 

@@ -439,7 +439,7 @@ namespace DigitPark.UI
         private void NavigateToAchievements()
         {
             // Use SceneNavigator if available
-            var navigator = DigitPark.Monetization.SceneNavigator.Instance;
+            var navigator = DigitPark.Navigation.SceneNavigator.Instance;
             if (navigator != null)
             {
                 navigator.NavigateTo("Achievements");

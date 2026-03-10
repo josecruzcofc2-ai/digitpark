@@ -427,9 +427,7 @@ namespace DigitPark.DevTools
             checkText.alignment = TextAlignmentOptions.Center;
 
             // Title - use localized title from Service
-            string displayTitle = data.titleKey;
-            if (Localization.LocalizationManager.Instance != null)
-                displayTitle = Localization.LocalizationManager.Instance.GetText(data.titleKey);
+            string displayTitle = Localization.AutoLocalizer.Get(data.titleKey);
 
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(item.transform, false);

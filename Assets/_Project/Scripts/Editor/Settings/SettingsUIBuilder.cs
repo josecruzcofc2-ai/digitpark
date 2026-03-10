@@ -138,7 +138,7 @@ namespace DigitPark.Editor
             if (scaler == null) scaler = canvas.gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(SCREEN_WIDTH, SCREEN_HEIGHT);
-            scaler.matchWidthOrHeight = 0f;
+            scaler.matchWidthOrHeight = 0.5f;
         }
 
         // ==================== BACKGROUND ====================

@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Localization;
 using DigitPark.Services.Firebase;
 using DigitPark.UI;
@@ -173,15 +174,16 @@ namespace DigitPark.Managers
         private void LoadNeonIcons()
         {
             coinIconNeon = Resources.Load<Sprite>("Icons/DigitCoinIcon");
+            if (coinIconNeon == null)
+                Debug.LogWarning("[DailyMissionsManager] Resource not found: Icons/DigitCoinIcon");
             gemIconNeon = Resources.Load<Sprite>("Icons/DigitGemIcon");
+            if (gemIconNeon == null)
+                Debug.LogWarning("[DailyMissionsManager] Resource not found: Icons/DigitGemIcon");
         }
 
         private string L(string key, params object[] args)
         {
-            if (LocalizationManager.Instance == null) return key;
-            return args.Length > 0
-                ? LocalizationManager.Instance.GetText(key, args)
-                : LocalizationManager.Instance.GetText(key);
+            return args.Length > 0 ? AutoLocalizer.Get(key, args) : AutoLocalizer.Get(key);
         }
 
         #region State Persistence

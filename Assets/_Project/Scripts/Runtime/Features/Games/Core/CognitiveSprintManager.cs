@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DigitPark.Localization;
 
 namespace DigitPark.Games
 {
@@ -164,6 +165,7 @@ namespace DigitPark.Games
                 return;
             }
 
+            if (GameSessionManager.Instance == null) { Debug.LogError("[CognitiveSprintManager] GameSessionManager not found"); return; }
             GameSessionManager.Instance.StartCognitiveSprintSession(
                 new List<GameType>(SelectedGames),
                 opponentId,
@@ -187,7 +189,7 @@ namespace DigitPark.Games
                 return;
             }
 
-            // For practice, use special context
+            // For practice, use special context with Practice mode
             var context = new GameContext
             {
                 Mode = GameMode.Practice,
@@ -195,7 +197,11 @@ namespace DigitPark.Games
                 EntryFee = 0
             };
 
+            if (GameSessionManager.Instance == null) { Debug.LogError("[CognitiveSprintManager] GameSessionManager not found"); return; }
             GameSessionManager.Instance.SetContext(context);
+
+            // Fire OnSessionStarted manually since SetContext doesn't do it
+            GameSessionManager.Instance.NotifySessionStarted();
 
             // Load first game
             string sceneName = GameSessionManager.Instance.GetSceneNameForGame(SelectedGames[0]);
@@ -223,7 +229,11 @@ namespace DigitPark.Games
                 EntryFee = 0
             };
 
+            if (GameSessionManager.Instance == null) { Debug.LogError("[CognitiveSprintManager] GameSessionManager not found"); return; }
             GameSessionManager.Instance.SetContext(context);
+
+            // Fire OnSessionStarted for online sprint
+            GameSessionManager.Instance.NotifySessionStarted();
 
             // Load first game
             string sceneName = GameSessionManager.Instance.GetSceneNameForGame(SelectedGames[0]);
@@ -250,42 +260,42 @@ namespace DigitPark.Games
                 new GameInfo
                 {
                     Type = GameType.DigitRush,
-                    Name = "Digit Rush",
-                    Description = "Tap numbers 1 to 9 in order as fast as possible",
+                    Name = AutoLocalizer.Get("gameinfo_digitrush_name"),
+                    Description = AutoLocalizer.Get("gameinfo_digitrush_desc"),
                     Icon = "icon_digit_rush",
-                    Skill = "Speed + Attention"
+                    Skill = AutoLocalizer.Get("gameinfo_digitrush_skill")
                 },
                 new GameInfo
                 {
                     Type = GameType.MemoryPairs,
-                    Name = "Memory Pairs",
-                    Description = "Find all matching card pairs",
+                    Name = AutoLocalizer.Get("gameinfo_memorypairs_name"),
+                    Description = AutoLocalizer.Get("gameinfo_memorypairs_desc"),
                     Icon = "icon_memory_pairs",
-                    Skill = "Visual Memory"
+                    Skill = AutoLocalizer.Get("gameinfo_memorypairs_skill")
                 },
                 new GameInfo
                 {
                     Type = GameType.QuickMath,
-                    Name = "Quick Math",
-                    Description = "Solve 10 math problems as fast as possible",
+                    Name = AutoLocalizer.Get("gameinfo_quickmath_name"),
+                    Description = AutoLocalizer.Get("gameinfo_quickmath_desc"),
                     Icon = "icon_quick_math",
-                    Skill = "Mental Math"
+                    Skill = AutoLocalizer.Get("gameinfo_quickmath_skill")
                 },
                 new GameInfo
                 {
                     Type = GameType.FlashTap,
-                    Name = "Flash Tap",
-                    Description = "React to the visual signal as fast as possible",
+                    Name = AutoLocalizer.Get("gameinfo_flashtap_name"),
+                    Description = AutoLocalizer.Get("gameinfo_flashtap_desc"),
                     Icon = "icon_flash_tap",
-                    Skill = "Reflexes"
+                    Skill = AutoLocalizer.Get("gameinfo_flashtap_skill")
                 },
                 new GameInfo
                 {
                     Type = GameType.OddOneOut,
-                    Name = "Odd One Out",
-                    Description = "Find the different element in the grid",
+                    Name = AutoLocalizer.Get("gameinfo_oddoneout_name"),
+                    Description = AutoLocalizer.Get("gameinfo_oddoneout_desc"),
                     Icon = "icon_odd_one_out",
-                    Skill = "Visual Perception"
+                    Skill = AutoLocalizer.Get("gameinfo_oddoneout_skill")
                 }
             };
         }

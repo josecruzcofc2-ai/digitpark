@@ -41,8 +41,8 @@ namespace DigitPark.Progression
 
         private const string SAVE_KEY = "MissionsData";
 
-        // All possible missions templates
-        private static readonly MissionTemplate[] DailyMissionTemplates = new MissionTemplate[]
+        // All possible missions templates (internal for Mission.FindTemplate access)
+        internal static readonly MissionTemplate[] DailyMissionTemplates = new MissionTemplate[]
         {
             // Play missions
             new MissionTemplate("daily_play_1", "Casual Player", "Play 1 match", MissionType.PlayGames, 1,
@@ -79,7 +79,7 @@ namespace DigitPark.Progression
                 new MissionReward(75, 150, 0)),
         };
 
-        private static readonly MissionTemplate[] WeeklyMissionTemplates = new MissionTemplate[]
+        internal static readonly MissionTemplate[] WeeklyMissionTemplates = new MissionTemplate[]
         {
             // Play missions
             new MissionTemplate("weekly_play_15", "Dedicated Player", "Play 15 matches this week", MissionType.PlayGames, 15,
@@ -120,7 +120,7 @@ namespace DigitPark.Progression
                 new MissionReward(400, 1000, 20)),
         };
 
-        private static readonly MissionTemplate[] SeasonMissionTemplates = new MissionTemplate[]
+        internal static readonly MissionTemplate[] SeasonMissionTemplates = new MissionTemplate[]
         {
             // Wins
             new MissionTemplate("season_wins_50", "Season Veteran", "Win 50 matches", MissionType.WinGames, 50,
@@ -190,12 +190,10 @@ namespace DigitPark.Progression
             }
 
             // Check weekly reset (every Monday at midnight UTC)
-            DateTime lastMonday = now.AddDays(-(int)now.DayOfWeek + (int)DayOfWeek.Monday);
-            if (now.DayOfWeek == DayOfWeek.Monday && _lastWeeklyReset.Date < lastMonday.Date)
-            {
-                ResetWeeklyMissions();
-            }
-            else if (_lastWeeklyReset.AddDays(7) < now)
+            // Sunday = 0 in DayOfWeek, so we handle it specially to get last Monday
+            int daysFromMonday = now.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)now.DayOfWeek - (int)DayOfWeek.Monday;
+            DateTime lastMonday = now.AddDays(-daysFromMonday).Date;
+            if (_lastWeeklyReset.Date < lastMonday)
             {
                 ResetWeeklyMissions();
             }
@@ -224,6 +222,7 @@ namespace DigitPark.Progression
         private void ResetWeeklyMissions()
         {
             _activeWeeklyMissions.Clear();
+            _gamesPlayedThisPeriod.Clear();
 
             // Select random weekly missions
             var shuffled = WeeklyMissionTemplates.OrderBy(x => UnityEngine.Random.value).ToList();
@@ -532,9 +531,9 @@ namespace DigitPark.Progression
                 _lastWeeklyReset = DateTime.FromBinary(data.lastWeeklyReset);
                 _seasonStartDate = DateTime.FromBinary(data.seasonStartDate);
 
-                _activeDailyMissions = data.dailyMissions.Select(m => Mission.FromSaveData(m, MissionPeriod.Daily)).ToList();
-                _activeWeeklyMissions = data.weeklyMissions.Select(m => Mission.FromSaveData(m, MissionPeriod.Weekly)).ToList();
-                _activeSeasonMissions = data.seasonMissions.Select(m => Mission.FromSaveData(m, MissionPeriod.Season)).ToList();
+                _activeDailyMissions = data.dailyMissions.Select(m => Mission.FromSaveData(m, MissionPeriod.Daily)).Where(m => m != null).ToList();
+                _activeWeeklyMissions = data.weeklyMissions.Select(m => Mission.FromSaveData(m, MissionPeriod.Weekly)).Where(m => m != null).ToList();
+                _activeSeasonMissions = data.seasonMissions.Select(m => Mission.FromSaveData(m, MissionPeriod.Season)).Where(m => m != null).ToList();
                 _gamesPlayedThisPeriod = new HashSet<string>(data.gamesPlayedThisPeriod ?? new List<string>());
             }
             else
@@ -546,6 +545,7 @@ namespace DigitPark.Progression
             }
         }
 
+        #if UNITY_EDITOR
         [ContextMenu("Force Daily Reset (DEBUG)")]
         public void ForceResetDaily()
         {
@@ -557,6 +557,7 @@ namespace DigitPark.Progression
         {
             ResetWeeklyMissions();
         }
+        #endif
 
         #endregion
     }
@@ -684,10 +685,9 @@ namespace DigitPark.Progression
         {
             MissionTemplate[] templates = period switch
             {
-                MissionPeriod.Daily => MissionsManager.Instance != null ?
-                    typeof(MissionsManager).GetField("DailyMissionTemplates", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.GetValue(null) as MissionTemplate[] : null,
-                MissionPeriod.Weekly => typeof(MissionsManager).GetField("WeeklyMissionTemplates", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.GetValue(null) as MissionTemplate[],
-                MissionPeriod.Season => typeof(MissionsManager).GetField("SeasonMissionTemplates", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.GetValue(null) as MissionTemplate[],
+                MissionPeriod.Daily => MissionsManager.DailyMissionTemplates,
+                MissionPeriod.Weekly => MissionsManager.WeeklyMissionTemplates,
+                MissionPeriod.Season => MissionsManager.SeasonMissionTemplates,
                 _ => null
             };
 

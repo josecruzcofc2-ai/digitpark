@@ -202,6 +202,7 @@ namespace DigitPark.UI.Panels
         private void OnCancelClicked()
         {
             Debug.Log("[ConfirmPanelUI] Cancelar clickeado");
+            SetButtonsInteractable(false);
             onCancel?.Invoke();
             Hide();
         }

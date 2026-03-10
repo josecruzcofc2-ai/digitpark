@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.Localization;
 
 namespace DigitPark.Services
 {
@@ -105,7 +107,7 @@ namespace DigitPark.Services
                 day = 1,
                 type = RewardType.DigitCoins,
                 amount = 100,
-                description = "100 DigitCoins"
+                description = AutoLocalizer.Get("daily_reward_coins", 100)
             });
 
             // Día 2: 150 DigitCoins
@@ -114,7 +116,7 @@ namespace DigitPark.Services
                 day = 2,
                 type = RewardType.DigitCoins,
                 amount = 150,
-                description = "150 DigitCoins"
+                description = AutoLocalizer.Get("daily_reward_coins", 150)
             });
 
             // Día 3: 200 DigitCoins
@@ -123,7 +125,7 @@ namespace DigitPark.Services
                 day = 3,
                 type = RewardType.DigitCoins,
                 amount = 200,
-                description = "200 DigitCoins"
+                description = AutoLocalizer.Get("daily_reward_coins", 200)
             });
 
             // Día 4: 250 DigitCoins
@@ -132,7 +134,7 @@ namespace DigitPark.Services
                 day = 4,
                 type = RewardType.DigitCoins,
                 amount = 250,
-                description = "250 DigitCoins"
+                description = AutoLocalizer.Get("daily_reward_coins", 250)
             });
 
             // Día 5: 300 DigitCoins + bonus
@@ -141,7 +143,7 @@ namespace DigitPark.Services
                 day = 5,
                 type = RewardType.DigitCoins,
                 amount = 300,
-                description = "300 DigitCoins"
+                description = AutoLocalizer.Get("daily_reward_coins", 300)
             });
 
             // Día 6: 400 DigitCoins
@@ -150,7 +152,7 @@ namespace DigitPark.Services
                 day = 6,
                 type = RewardType.DigitCoins,
                 amount = 400,
-                description = "400 DigitCoins"
+                description = AutoLocalizer.Get("daily_reward_coins", 400)
             });
 
             // Día 7: Gran premio - 500 DigitCoins
@@ -160,7 +162,7 @@ namespace DigitPark.Services
                 type = RewardType.DigitCoins,
                 amount = 500,
                 isSpecial = true,
-                description = "500 DigitCoins (Premio Especial)"
+                description = AutoLocalizer.Get("daily_reward_special", 500)
             });
 
             cycleLength = rewards.Count;
@@ -198,7 +200,11 @@ namespace DigitPark.Services
             PlayerPrefs.Save();
 
             // También guardar en Firebase si hay usuario
-            _ = SaveToFirebase();
+            _ = SaveToFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[DailyReward] Firebase save failed: {t.Exception?.GetBaseException().Message}");
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private async Task SaveToFirebase()
@@ -239,8 +245,11 @@ namespace DigitPark.Services
                 return;
             }
 
-            DateTime lastClaim = DateTime.Parse(_data.lastClaimDate);
-            DateTime today = DateTime.Today;
+            if (!DateTime.TryParse(_data.lastClaimDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime lastClaim))
+            {
+                lastClaim = DateTime.UtcNow.Date.AddDays(-2); // Fallback: treat as expired
+            }
+            DateTime today = DateTime.UtcNow.Date;
             int daysDifference = (today - lastClaim.Date).Days;
 
             if (daysDifference == 0)
@@ -274,8 +283,11 @@ namespace DigitPark.Services
                 return true; // Primera vez
             }
 
-            DateTime lastClaim = DateTime.Parse(_data.lastClaimDate);
-            DateTime today = DateTime.Today;
+            if (!DateTime.TryParse(_data.lastClaimDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime lastClaim))
+            {
+                lastClaim = DateTime.UtcNow.Date.AddDays(-2); // Fallback: treat as expired
+            }
+            DateTime today = DateTime.UtcNow.Date;
 
             return lastClaim.Date < today;
         }
@@ -340,7 +352,7 @@ namespace DigitPark.Services
             ApplyReward(reward);
 
             // Actualizar datos
-            _data.lastClaimDate = DateTime.Today.ToString("yyyy-MM-dd");
+            _data.lastClaimDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
             _data.consecutiveDays++;
             _data.totalClaimed++;
 
@@ -369,41 +381,64 @@ namespace DigitPark.Services
         private void ApplyReward(DailyReward reward)
         {
             var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            var currency = DigitPark.Monetization.CurrencyManager.Instance;
 
             switch (reward.type)
             {
                 case RewardType.DigitCoins:
-                    // TODO: Implementar sistema de DigitCoins cuando se agregue al PlayerData
-                    Debug.Log($"[DailyReward] +{reward.amount} DigitCoins (pendiente implementar)");
-                    // Analytics para DigitCoins ganadas
+                    if (currency != null)
+                    {
+                        currency.AddCoins(reward.amount);
+                        Debug.Log($"[DailyReward] +{reward.amount} DigitCoins granted");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[DailyReward] CurrencyManager not available, could not grant {reward.amount} DigitCoins");
+                    }
                     AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", reward.amount, "daily_reward");
                     break;
 
                 case RewardType.DigitGems:
-                    // TODO: Implementar sistema de DigitGems si es necesario
-                    Debug.Log($"[DailyReward] +{reward.amount} DigitGems");
+                    if (currency != null)
+                    {
+                        currency.AddGems(reward.amount);
+                        Debug.Log($"[DailyReward] +{reward.amount} DigitGems granted");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[DailyReward] CurrencyManager not available, could not grant {reward.amount} DigitGems");
+                    }
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", reward.amount, "daily_reward");
                     break;
 
                 case RewardType.PremiumTime:
-                    // TODO: Dar tiempo premium temporal
-                    Debug.Log($"[DailyReward] +{reward.amount} horas premium");
+                    // TODO: Implement premium time grant when PremiumManager supports timed trials
+                    Debug.Log($"[DailyReward] +{reward.amount} horas premium (pendiente PremiumManager)");
                     break;
 
                 case RewardType.Multiplier:
-                    // TODO: Activar multiplicador temporal
-                    Debug.Log($"[DailyReward] Multiplicador x{reward.amount} activado");
+                    // TODO: Implement score multiplier when multiplier system is added
+                    Debug.Log($"[DailyReward] Multiplicador x{reward.amount} (pendiente implementar)");
                     break;
 
                 case RewardType.RandomBox:
-                    // TODO: Abrir caja random
-                    Debug.Log($"[DailyReward] Caja misteriosa obtenida");
+                    // TODO: Implement mystery box opening when loot box system is added
+                    Debug.Log($"[DailyReward] Caja misteriosa (pendiente implementar)");
                     break;
             }
 
             // Guardar datos del jugador
             if (playerData != null)
             {
-                _ = DatabaseService.Instance?.SavePlayerData(playerData);
+                var saveTask = DatabaseService.Instance?.SavePlayerData(playerData);
+                if (saveTask != null)
+                {
+                    _ = saveTask.ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                            Debug.LogWarning($"[DailyReward] Player data save failed: {t.Exception?.GetBaseException().Message}");
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                }
             }
         }
 
@@ -417,8 +452,8 @@ namespace DigitPark.Services
                 return TimeSpan.Zero;
             }
 
-            DateTime tomorrow = DateTime.Today.AddDays(1);
-            return tomorrow - DateTime.Now;
+            DateTime tomorrow = DateTime.UtcNow.Date.AddDays(1);
+            return tomorrow - DateTime.UtcNow;
         }
 
         /// <summary>
@@ -440,7 +475,10 @@ namespace DigitPark.Services
         {
             if (!string.IsNullOrEmpty(_data.lastClaimDate))
             {
-                DateTime lastClaim = DateTime.Parse(_data.lastClaimDate);
+                if (!DateTime.TryParse(_data.lastClaimDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime lastClaim))
+            {
+                lastClaim = DateTime.UtcNow.Date.AddDays(-2); // Fallback: treat as expired
+            }
                 _data.lastClaimDate = lastClaim.AddDays(-1).ToString("yyyy-MM-dd");
                 SaveData();
                 CheckDailyReset();

@@ -10,7 +10,7 @@ namespace DigitPark.Editor
     /// <summary>
     /// Profile UI Builder - Rediseño 2026
     /// Avatar centrado + stats en cards + game selection overlay
-    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     ///
     /// Menu: DigitPark/UI Builders/Social/Profile
     /// </summary>
@@ -41,8 +41,9 @@ namespace DigitPark.Editor
 
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
+        private const float HEADER_HEIGHT = 100f;
         private const float HEADER_TOP = 0.985f;
-        private const float HEADER_BOT = 0.945f;
+        private const float HEADER_BOT = 0.945f;  // kept for reference, header now uses sizeDelta
 
         private const float AVATAR_TOP = 0.935f;
         private const float AVATAR_BOT = 0.70f;
@@ -138,7 +139,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -186,7 +187,11 @@ namespace DigitPark.Editor
 
             var header = FindOrCreate(canvas.transform, "Header");
             var rt = GetOrAdd<RectTransform>(header);
-            SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
             // Back Button - Neon Cyan prefab
@@ -245,10 +250,10 @@ namespace DigitPark.Editor
             // Currency pills (between title and addFriend)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.88f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
             var aBg = GetOrAdd<Image>(addBtn);
             aBg.color = new Color(1, 1, 1, 0.06f);
             GetOrAdd<Button>(addBtn).targetGraphic = aBg;
@@ -860,7 +865,7 @@ namespace DigitPark.Editor
             outline.effectColor = CYAN_GLOW;
             outline.effectDistance = new Vector2(3, 3);
 
-            var text = FindOrCreate(btn.transform, "Text");
+            var text = FindOrCreate(btn.transform, "ChallengeText");
             var tRT = GetOrAdd<RectTransform>(text);
             tRT.anchorMin = Vector2.zero;
             tRT.anchorMax = Vector2.one;
@@ -922,7 +927,7 @@ namespace DigitPark.Editor
             cOutline.effectDistance = new Vector2(2, 2);
 
             // Title
-            var title = FindOrCreate(container.transform, "Title");
+            var title = FindOrCreate(container.transform, "GameSelectionTitle");
             var tRT = GetOrAdd<RectTransform>(title);
             tRT.anchorMin = new Vector2(0, 0.88f);
             tRT.anchorMax = new Vector2(1, 1);
@@ -975,7 +980,7 @@ namespace DigitPark.Editor
             cnBg.color = new Color(1, 1, 1, 0.1f);
             GetOrAdd<Button>(cancelBtn).targetGraphic = cnBg;
 
-            var cnText = FindOrCreate(cancelBtn.transform, "Text");
+            var cnText = FindOrCreate(cancelBtn.transform, "CancelButtonText");
             var cntRT = GetOrAdd<RectTransform>(cnText);
             cntRT.anchorMin = Vector2.zero;
             cntRT.anchorMax = Vector2.one;

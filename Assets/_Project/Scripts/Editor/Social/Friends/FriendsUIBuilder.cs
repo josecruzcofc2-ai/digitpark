@@ -127,7 +127,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -346,7 +346,7 @@ namespace DigitPark.Editor
             navShadow.effectDistance = new Vector2(3, -4);
 
             // Label
-            var label = FindOrCreate(nav.transform, "Label");
+            var label = FindOrCreate(nav.transform, "FriendRequestsLabel");
             var lRT = GetOrAdd<RectTransform>(label);
             lRT.anchorMin = new Vector2(0, 0);
             lRT.anchorMax = new Vector2(0.7f, 1);

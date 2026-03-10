@@ -94,6 +94,11 @@ namespace DigitPark.UI
                 buttonTransform.localScale = originalScale;
         }
 
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
+
         #region Pointer Events
 
         public void OnPointerDown(PointerEventData eventData)

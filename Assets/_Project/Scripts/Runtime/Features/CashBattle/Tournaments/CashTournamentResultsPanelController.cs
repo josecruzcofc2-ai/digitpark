@@ -174,7 +174,7 @@ namespace DigitPark.UI.CashBattle
                 titleText.text = AutoLocalizer.Get("cash_tournament_complete");
 
             if (subtitleText != null)
-                subtitleText.text = data.tournamentName ?? "Tournament";
+                subtitleText.text = data.tournamentName ?? AutoLocalizer.Get("tournament_default_name");
 
             // Tint trophy based on position
             if (trophyIcon != null)
@@ -261,14 +261,14 @@ namespace DigitPark.UI.CashBattle
         {
             // Handle 11th, 12th, 13th special cases
             if (position % 100 >= 11 && position % 100 <= 13)
-                return "th";
+                return AutoLocalizer.Get("ordinal_th");
 
             switch (position % 10)
             {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
+                case 1: return AutoLocalizer.Get("ordinal_st");
+                case 2: return AutoLocalizer.Get("ordinal_nd");
+                case 3: return AutoLocalizer.Get("ordinal_rd");
+                default: return AutoLocalizer.Get("ordinal_th");
             }
         }
 

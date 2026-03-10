@@ -148,7 +148,7 @@ namespace DigitPark.Editor
             if (scaler == null) scaler = canvas.gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(SCREEN_WIDTH, SCREEN_HEIGHT);
-            scaler.matchWidthOrHeight = 0f;
+            scaler.matchWidthOrHeight = 0.5f;
 
             Debug.Log("🧹 UI Cleaned");
         }
@@ -189,6 +189,9 @@ namespace DigitPark.Editor
             text.fontStyle = FontStyles.Bold;
             text.color = CyanNeon;
             text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinTitle;
+            text.fontSizeMax = FontSizes.Branding;
         }
 
         private static void BuildLoginCard(Canvas canvas)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -189,6 +190,13 @@ namespace DigitPark.Services
         {
             if (data == null) return;
 
+            // Validate ID before using it for navigation or storage
+            if (!IsValidId(data.Id))
+            {
+                Debug.LogWarning($"[DeepLink] ID invalido (caracteres no permitidos): {data.Id}");
+                return;
+            }
+
             Debug.Log($"[DeepLink] Navegando a: {data.Type} - {data.Id}");
 
             switch (data.Type)
@@ -305,6 +313,16 @@ namespace DigitPark.Services
             Debug.Log($"[DeepLink] iOS: Link copiado al clipboard: {url}");
         }
 #endif
+
+        /// <summary>
+        /// Validates that an ID from a deep link contains only safe characters
+        /// (alphanumeric, hyphens, underscores). Prevents injection attacks.
+        /// </summary>
+        private bool IsValidId(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return false;
+            return Regex.IsMatch(id, @"^[a-zA-Z0-9_-]+$");
+        }
 
         private bool IsUserAuthenticated()
         {

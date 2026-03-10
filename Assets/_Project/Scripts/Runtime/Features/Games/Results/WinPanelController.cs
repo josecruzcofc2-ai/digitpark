@@ -16,6 +16,9 @@ namespace DigitPark.UI
     /// </summary>
     public class WinPanelController : MonoBehaviour
     {
+        [Header("Panel Type")]
+        [SerializeField] private bool isRealMoneyPanel;
+
         [Header("Common Elements")]
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private GameObject content;
@@ -71,6 +74,11 @@ namespace DigitPark.UI
         {
             _activeSequence?.Kill();
             _revealSequence?.Kill();
+
+            if (acceptButton != null)
+                acceptButton.onClick.RemoveAllListeners();
+            if (playAgainButton != null)
+                playAgainButton.onClick.RemoveAllListeners();
         }
 
         private void SetupButtons()
@@ -112,7 +120,7 @@ namespace DigitPark.UI
             if (vsContainer != null) vsContainer.SetActive(false);
 
             // En CognitiveSprint, ocultar Play Again y cambiar texto del botón Accept
-            if (isSprint && session.CurrentContext.HasMoreGames)
+            if (isSprint && session?.CurrentContext?.HasMoreGames == true)
             {
                 if (playAgainButton != null) playAgainButton.gameObject.SetActive(false);
                 // El texto del botón Accept se actualiza si tiene un TextMeshProUGUI hijo
@@ -130,9 +138,12 @@ namespace DigitPark.UI
 
             Show();
 
-            // Cinematic celebration for normal wins
-            Canvas canvas = GetComponentInParent<Canvas>();
-            WinCelebrationAnimator.PlayWin(canvas);
+            // Cinematic celebration only for win panels (not lose panels)
+            if (result.Completed)
+            {
+                Canvas canvas = GetComponentInParent<Canvas>();
+                WinCelebrationAnimator.PlayWin(canvas);
+            }
 
             // Animated score reveal for time and errors
             _revealSequence?.Kill();
@@ -219,7 +230,7 @@ namespace DigitPark.UI
             // Countdown dramático (opcional)
             if (countdownDuration > 0)
             {
-                yield return StartCoroutine(PlayCountdownAnimation());
+                yield return new WaitForSeconds(countdownDuration);
             }
 
             // Revelar resultado
@@ -234,13 +245,6 @@ namespace DigitPark.UI
             {
                 PlayLoseEffects();
             }
-        }
-
-        private IEnumerator PlayCountdownAnimation()
-        {
-            // Implementar animación de countdown aquí
-            // Por ahora solo espera
-            yield return new WaitForSeconds(countdownDuration);
         }
 
         private void RevealRealMoneyResult(MinigameResult playerResult, MinigameResult opponentResult,

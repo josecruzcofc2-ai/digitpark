@@ -384,7 +384,8 @@ namespace DigitPark.Games
         {
             if (!isPlaying || isPaused) return;
 
-            bool isCorrect = (buttonIndex == oddButtonIndex);
+            // Only the RIGHT grid contains the different digit, so taps on the left grid are always wrong
+            bool isCorrect = (buttonIndex == oddButtonIndex && isRightGrid);
 
             if (isCorrect)
             {
@@ -443,9 +444,8 @@ namespace DigitPark.Games
 
             RegisterError();
 
-            // Penalty time +1s - visible en timer
+            // Penalty time +1s (tracked in penaltyTime only, not currentTime)
             penaltyTime += 1f;
-            currentTime += 1f;
             UpdateTimer();
 
             // Resetear combo
@@ -880,7 +880,9 @@ namespace DigitPark.Games
 
             if (progressFill != null)
             {
-                progressFill.transform.parent.parent.gameObject.SetActive(totalRounds > 1);
+                Transform parent = progressFill.transform.parent;
+                if (parent != null && parent.parent != null)
+                    parent.parent.gameObject.SetActive(totalRounds > 1);
                 float progress = (float)(currentRound - 1) / totalRounds;
                 progressFill.anchorMax = new Vector2(progress, 1f);
             }

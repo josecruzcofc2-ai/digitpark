@@ -77,7 +77,7 @@ namespace DigitPark.Editor
                 var scaler = canvasGO.AddComponent<CanvasScaler>();
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
                 canvasGO.AddComponent<GraphicRaycaster>();
             }
             else
@@ -87,7 +87,7 @@ namespace DigitPark.Editor
                 if (scaler != null)
                 {
                     scaler.referenceResolution = new Vector2(1080, 1920);
-                    scaler.matchWidthOrHeight = 0f;
+                    scaler.matchWidthOrHeight = 0.5f;
                 }
             }
 

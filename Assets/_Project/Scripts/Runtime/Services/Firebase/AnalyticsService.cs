@@ -25,6 +25,12 @@ namespace DigitPark.Services.Firebase
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
+
+                // SEC-B06: Force debugMode off in production builds
+#if !UNITY_EDITOR
+                debugMode = false;
+#endif
+
                 Initialize();
             }
             else
@@ -54,10 +60,17 @@ namespace DigitPark.Services.Firebase
 
             // Firebase Analytics se inicializa automaticamente con FirebaseApp
             // Solo habilitar coleccion si ATT lo permite
-            FirebaseAnalytics.SetAnalyticsCollectionEnabled(trackingAllowed);
-
-            _isInitialized = true;
-            Debug.Log($"[Analytics] Firebase Analytics inicializado (collection: {trackingAllowed})");
+            try
+            {
+                FirebaseAnalytics.SetAnalyticsCollectionEnabled(trackingAllowed);
+                _isInitialized = true;
+                Debug.Log($"[Analytics] Firebase Analytics inicializado (collection: {trackingAllowed})");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Analytics] Error inicializando Firebase Analytics: {e.Message}");
+                _isInitialized = false;
+            }
         }
 
         #region Screen Tracking

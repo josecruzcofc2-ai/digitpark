@@ -11,7 +11,7 @@ namespace DigitPark.Editor
     /// Daily Rewards Premium UI Builder - Neon Cyan + Gold accents
     /// Layout: TopBar -> StreakPanel -> WeekLabel -> DaysGrid(3x2) -> Day7Card -> TodayPanel -> ClaimButton -> Timer
     /// Popups: ClaimAnimationBlocker, MilestoneBlocker
-    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     ///
     /// Menu: DigitPark/UI Builders/Monetization/Daily Rewards (priority 185)
     /// </summary>
@@ -49,11 +49,12 @@ namespace DigitPark.Editor
 
         #region Layout Anchors (Y: 0=bottom, 1=top) — Full-screen layout, zero dead space
 
-        private const float TOPBAR_TOP = 0.990f;
-        private const float TOPBAR_BOT = 0.960f;
+        private const float TOPBAR_HEIGHT = 100f;
+        private const float TOPBAR_TOP = 0.985f;
+        private const float TOPBAR_BOT = 0.955f;  // kept for reference, topbar now uses sizeDelta
 
-        private const float STREAK_TOP = 0.950f;
-        private const float STREAK_BOT = 0.920f;
+        private const float STREAK_TOP = 0.945f;
+        private const float STREAK_BOT = 0.915f;
 
         private const float WEEK_TOP = 0.912f;
         private const float WEEK_BOT = 0.878f;
@@ -179,7 +180,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -217,7 +218,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region 1. TopBar (0.960-0.988)
+        #region 1. TopBar (100px height)
 
         private static void CreateTopBar()
         {
@@ -226,7 +227,11 @@ namespace DigitPark.Editor
 
             var topBar = FindOrCreate(canvas.transform, "TopBar");
             var tbRT = GetOrAdd<RectTransform>(topBar);
-            SetAnchors(tbRT, 0, TOPBAR_BOT, 1, TOPBAR_TOP);
+            tbRT.anchorMin = new Vector2(0, 1);
+            tbRT.anchorMax = new Vector2(1, 1);
+            tbRT.pivot = new Vector2(0.5f, 1);
+            tbRT.anchoredPosition = new Vector2(0, -(1920f * (1f - TOPBAR_TOP))); // below top edge
+            tbRT.sizeDelta = new Vector2(0, TOPBAR_HEIGHT);
 
             // --- BackButton (left, 50x50) - Neon Cyan prefab ---
             // Remove old manual BackButton if exists
@@ -276,11 +281,10 @@ namespace DigitPark.Editor
             // --- Currency pills (right) ---
             var currencyRow = CurrencyHeaderBarHelper.CreateCurrencyPills(topBar.transform, "CurrencyRow");
             var crRT = currencyRow.GetComponent<RectTransform>();
-            crRT.anchorMin = new Vector2(0.42f, 0.05f);
-            crRT.anchorMax = new Vector2(0.95f, 0.95f);
+            crRT.anchorMin = new Vector2(0.52f, 0.5f);
+            crRT.anchorMax = new Vector2(0.95f, 0.5f);
             crRT.pivot = new Vector2(0.5f, 0.5f);
-            crRT.offsetMin = Vector2.zero;
-            crRT.offsetMax = Vector2.zero;
+            crRT.sizeDelta = new Vector2(0, 65);
 
             Debug.Log("[DailyRewardsUI] TopBar creado (BackButton + Title + CurrencyPills)");
         }
@@ -349,6 +353,9 @@ namespace DigitPark.Editor
             slTMP.alignment = TextAlignmentOptions.MidlineLeft;
             slTMP.enableWordWrapping = false;
             slTMP.overflowMode = TextOverflowModes.Ellipsis;
+            slTMP.enableAutoSizing = true;
+            slTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            slTMP.fontSizeMax = FontSizes.Caption;
             var slLE = streakLabel.AddComponent<LayoutElement>();
             slLE.minWidth = 130;
             slLE.preferredWidth = 130;
@@ -365,6 +372,9 @@ namespace DigitPark.Editor
             scTMP.alignment = TextAlignmentOptions.MidlineLeft;
             scTMP.enableWordWrapping = false;
             scTMP.overflowMode = TextOverflowModes.Ellipsis;
+            scTMP.enableAutoSizing = true;
+            scTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            scTMP.fontSizeMax = FontSizes.Caption;
             var scLE = streakCount.AddComponent<LayoutElement>();
             scLE.minWidth = 110;
             scLE.preferredWidth = 110;
@@ -853,7 +863,7 @@ namespace DigitPark.Editor
             var infoLE = GetOrAdd<LayoutElement>(info);
             infoLE.flexibleWidth = 1;
 
-            var d7Title = FindOrCreate(info.transform, "DayLabel");
+            var d7Title = FindOrCreate(info.transform, "Day7GrandPrizeLabel");
             GetOrAdd<LayoutElement>(d7Title).preferredHeight = 40;
             var d7tTMP = GetOrAdd<TextMeshProUGUI>(d7Title);
             d7tTMP.text = "DAY 7 - GRAND PRIZE";
@@ -944,7 +954,7 @@ namespace DigitPark.Editor
             claimShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             claimShadow.effectDistance = new Vector2(3, -4);
 
-            var claimText = FindOrCreate(claimBtn.transform, "Text");
+            var claimText = FindOrCreate(claimBtn.transform, "ClaimRewardText");
             var ctRT = GetOrAdd<RectTransform>(claimText);
             ctRT.anchorMin = Vector2.zero;
             ctRT.anchorMax = Vector2.one;
@@ -1007,7 +1017,7 @@ namespace DigitPark.Editor
             }
 
             // Label "Next reward in:"
-            var label = FindOrCreate(timerBar.transform, "Label");
+            var label = FindOrCreate(timerBar.transform, "NextRewardLabel");
             var lRT = GetOrAdd<RectTransform>(label);
             lRT.sizeDelta = new Vector2(300, 40);
             var lTMP = GetOrAdd<TextMeshProUGUI>(label);
@@ -1209,7 +1219,7 @@ namespace DigitPark.Editor
             conBtn.targetGraphic = conBg;
             conBtn.transition = Selectable.Transition.None;
 
-            var conText = FindOrCreate(continueBtn.transform, "Text");
+            var conText = FindOrCreate(continueBtn.transform, "TapToContinueText");
             var cnRT = GetOrAdd<RectTransform>(conText);
             cnRT.anchorMin = Vector2.zero;
             cnRT.anchorMax = Vector2.one;
@@ -1300,7 +1310,7 @@ namespace DigitPark.Editor
             conBg.color = CYAN_NEON;
             GetOrAdd<Button>(continueBtn).targetGraphic = conBg;
 
-            var conText = FindOrCreate(continueBtn.transform, "Text");
+            var conText = FindOrCreate(continueBtn.transform, "ContinueButtonText");
             var cnRT = GetOrAdd<RectTransform>(conText);
             cnRT.anchorMin = Vector2.zero;
             cnRT.anchorMax = Vector2.one;

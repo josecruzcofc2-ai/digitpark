@@ -269,8 +269,7 @@ namespace DigitPark.UI.Items
         private string L(string key)
         {
             if (string.IsNullOrEmpty(key)) return key;
-            if (LocalizationManager.Instance == null) return key;
-            return LocalizationManager.Instance.GetText(key);
+            return AutoLocalizer.Get(key);
         }
     }
 }

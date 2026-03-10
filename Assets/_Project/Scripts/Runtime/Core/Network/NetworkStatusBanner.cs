@@ -120,18 +120,14 @@ namespace DigitPark.UI
 
         private void OnConnectionLost()
         {
-            string text = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText("net_offline")
-                : "No internet connection";
+            string text = AutoLocalizer.Get("net_offline");
 
             ShowBanner(text, _offlineColor);
         }
 
         private void OnConnectionRestored()
         {
-            string text = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetText("net_restored")
-                : "Connection restored";
+            string text = AutoLocalizer.Get("net_restored");
 
             ShowBanner(text, _restoredColor);
 

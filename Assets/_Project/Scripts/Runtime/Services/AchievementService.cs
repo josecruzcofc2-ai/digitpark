@@ -1051,7 +1051,7 @@ namespace DigitPark.Services
             if (_progress.TryGetValue(achievementId, out var progress))
             {
                 if (progress.unlocked) return 1f;
-                return (float)progress.currentValue / achievement.targetValue;
+                return achievement.targetValue > 0 ? (float)progress.currentValue / achievement.targetValue : 0f;
             }
             return 0;
         }
@@ -1086,7 +1086,7 @@ namespace DigitPark.Services
 
             progress.currentValue += amount;
 
-            float progressPercent = (float)progress.currentValue / achievement.targetValue;
+            float progressPercent = achievement.targetValue > 0 ? (float)progress.currentValue / achievement.targetValue : 0f;
             OnAchievementProgress?.Invoke(achievement, progressPercent);
 
             if (progress.currentValue >= achievement.targetValue)
@@ -1123,7 +1123,7 @@ namespace DigitPark.Services
             }
             else
             {
-                float progressPercent = (float)progress.currentValue / achievement.targetValue;
+                float progressPercent = achievement.targetValue > 0 ? (float)progress.currentValue / achievement.targetValue : 0f;
                 OnAchievementProgress?.Invoke(achievement, progressPercent);
                 SaveProgress();
             }
@@ -1420,6 +1420,7 @@ namespace DigitPark.Services
 
         #region Debug
 
+#if UNITY_EDITOR
         [ContextMenu("Debug: Reset All Achievements")]
         public void ResetAllAchievements()
         {
@@ -1438,6 +1439,7 @@ namespace DigitPark.Services
                 UnlockAchievement(achievement.id);
             }
         }
+#endif
 
         #endregion
     }

@@ -93,7 +93,11 @@ namespace DigitPark.UI.Panels
         {
             // Load lock icons
             lockGoldSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_gold");
+            if (lockGoldSprite == null)
+                Debug.LogWarning("[StylesProPromptPanel] Resource not found: UI/Icons/icon_lock_gold");
             lockSilverSprite = Resources.Load<Sprite>("UI/Icons/icon_lock_silver");
+            if (lockSilverSprite == null)
+                Debug.LogWarning("[StylesProPromptPanel] Resource not found: UI/Icons/icon_lock_silver");
 
             RectTransform rt = gameObject.AddComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;

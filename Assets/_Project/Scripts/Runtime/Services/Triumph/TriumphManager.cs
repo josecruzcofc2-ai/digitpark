@@ -195,9 +195,13 @@ namespace DigitPark.Services
             Debug.Log($"[TriumphManager] Mock: Resultado - {(isWinner ? "Victoria" : "Derrota")}, Premio: ${prize}");
         }
 
-        // Debug methods
+        #endregion
+
+#if UNITY_EDITOR
+        #region Editor-Only Debug Methods
+
         [ContextMenu("Mock: Add $50")]
-        public void MockAddBalance()
+        private void MockAddBalance()
         {
             _balance += 50m;
             OnBalanceChanged?.Invoke(_balance);
@@ -205,7 +209,7 @@ namespace DigitPark.Services
         }
 
         [ContextMenu("Mock: Toggle Verified")]
-        public void MockToggleVerified()
+        private void MockToggleVerified()
         {
             _isVerified = !_isVerified;
             OnVerificationChanged?.Invoke(_isVerified);
@@ -213,12 +217,13 @@ namespace DigitPark.Services
         }
 
         [ContextMenu("Mock: Simulate Match")]
-        public void MockSimulateMatch()
+        private void MockSimulateMatch()
         {
             SimulateMockFlow();
         }
 
         #endregion
+#endif
 
         #region Event Handlers (Para Triumph SDK real)
 

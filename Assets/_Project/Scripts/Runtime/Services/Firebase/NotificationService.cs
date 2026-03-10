@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -72,13 +73,20 @@ namespace DigitPark.Services.Firebase
 
         private async void Start()
         {
-            if (enableNotifications)
+            try
             {
-                await Initialize();
+                if (enableNotifications)
+                {
+                    await Initialize();
+                }
+                else
+                {
+                    Debug.Log("[Notifications] Notificaciones deshabilitadas en configuración");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.Log("[Notifications] Notificaciones deshabilitadas en configuración");
+                Debug.LogError($"[NotificationService] {ex.Message}");
             }
         }
 
@@ -173,7 +181,7 @@ namespace DigitPark.Services.Firebase
 
                 if (!string.IsNullOrEmpty(_fcmToken))
                 {
-                    Debug.Log($"[Notifications] FCM Token obtenido: {_fcmToken.Substring(0, 20)}...");
+                    Debug.Log("[FCM] Token received");
 
                     // Guardar localmente
                     PlayerPrefs.SetString(FCM_TOKEN_KEY, _fcmToken);
@@ -256,14 +264,17 @@ namespace DigitPark.Services.Firebase
 #if FIREBASE_MESSAGING
         private void OnFCMTokenReceived(object sender, TokenReceivedEventArgs e)
         {
-            LogDebug($"Token actualizado: {e.Token.Substring(0, 20)}...");
+            LogDebug("[FCM] Token registered");
             _fcmToken = e.Token;
 
             // Guardar nuevo token
             PlayerPrefs.SetString(FCM_TOKEN_KEY, _fcmToken);
             PlayerPrefs.Save();
 
-            _ = SaveTokenToFirebase(_fcmToken);
+            _ = SaveTokenToFirebase(_fcmToken).ContinueWith(t =>
+            {
+                if (t.IsFaulted) Debug.LogError($"[NotificationService] SaveTokenToFirebase failed: {t.Exception?.GetBaseException().Message}");
+            });
             OnTokenReceived?.Invoke(_fcmToken);
         }
 
@@ -315,10 +326,24 @@ namespace DigitPark.Services.Firebase
                         notification.Action = action;
 
                     if (message.Data.TryGetValue("targetId", out string targetId))
+                    {
+                        if (!string.IsNullOrEmpty(targetId) && !Regex.IsMatch(targetId, @"^[a-zA-Z0-9_-]+$"))
+                        {
+                            Debug.LogWarning("[Notifications] Invalid targetId, ignoring notification");
+                            return null;
+                        }
                         notification.TargetId = targetId;
+                    }
 
                     if (message.Data.TryGetValue("senderId", out string senderId))
+                    {
+                        if (!string.IsNullOrEmpty(senderId) && !Regex.IsMatch(senderId, @"^[a-zA-Z0-9_-]+$"))
+                        {
+                            Debug.LogWarning("[Notifications] Invalid senderId, ignoring notification");
+                            return null;
+                        }
                         notification.SenderId = senderId;
+                    }
 
                     if (message.Data.TryGetValue("senderName", out string senderName))
                         notification.SenderName = senderName;
@@ -581,12 +606,18 @@ namespace DigitPark.Services.Firebase
             if (!enabled && _isInitialized)
             {
                 // Desuscribirse de todos los topics
-                _ = UnsubscribeFromTopic("all_users");
+                _ = UnsubscribeFromTopic("all_users").ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogError($"[NotificationService] UnsubscribeFromTopic failed: {t.Exception?.GetBaseException().Message}");
+                });
             }
             else if (enabled && !_isInitialized)
             {
                 // Reinicializar
-                _ = Initialize();
+                _ = Initialize().ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogError($"[NotificationService] Initialize failed: {t.Exception?.GetBaseException().Message}");
+                });
             }
 
             LogDebug($"Notificaciones: {(enabled ? "habilitadas" : "deshabilitadas")}");

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -57,6 +58,9 @@ namespace DigitPark.Managers
         private List<StoredNotification> currentNotifications = new List<StoredNotification>();
         private NotificationCategory activeCategory = NotificationCategory.All;
         private string returnScene = "MainMenu";
+
+        // Icon sprite cache
+        private Dictionary<string, Sprite> _iconCache = new Dictionary<string, Sprite>();
 
         // Colors
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
@@ -461,31 +465,45 @@ namespace DigitPark.Managers
 
         private async void OnAcceptFriendRequest(string notificationId, StoredNotification notification)
         {
-            Debug.Log($"[Notifications] Aceptar solicitud de: {notification.senderName}");
-
-            if (FriendService.Instance != null && !string.IsNullOrEmpty(notification.senderId))
+            try
             {
-                var result = await FriendService.Instance.AcceptFriendRequest(notification.senderId);
-                if (result.Success)
+                Debug.Log($"[Notifications] Aceptar solicitud de: {notification.senderName}");
+
+                if (FriendService.Instance != null && !string.IsNullOrEmpty(notification.senderId))
                 {
-                    NotificationStorageService.Instance?.Delete(notificationId);
-                    Debug.Log("[Notifications] Solicitud aceptada");
+                    var result = await FriendService.Instance.AcceptFriendRequest(notification.senderId);
+                    if (result.Success)
+                    {
+                        NotificationStorageService.Instance?.Delete(notificationId);
+                        Debug.Log("[Notifications] Solicitud aceptada");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[NotificationsManager] {ex.Message}");
             }
         }
 
         private async void OnRejectFriendRequest(string notificationId, StoredNotification notification)
         {
-            Debug.Log($"[Notifications] Rechazar solicitud de: {notification.senderName}");
-
-            if (FriendService.Instance != null && !string.IsNullOrEmpty(notification.senderId))
+            try
             {
-                var result = await FriendService.Instance.RejectFriendRequest(notification.senderId);
-                if (result.Success)
+                Debug.Log($"[Notifications] Rechazar solicitud de: {notification.senderName}");
+
+                if (FriendService.Instance != null && !string.IsNullOrEmpty(notification.senderId))
                 {
-                    NotificationStorageService.Instance?.Delete(notificationId);
-                    Debug.Log("[Notifications] Solicitud rechazada");
+                    var result = await FriendService.Instance.RejectFriendRequest(notification.senderId);
+                    if (result.Success)
+                    {
+                        NotificationStorageService.Instance?.Delete(notificationId);
+                        Debug.Log("[Notifications] Solicitud rechazada");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[NotificationsManager] {ex.Message}");
             }
         }
 
@@ -648,7 +666,13 @@ namespace DigitPark.Managers
                 "promo" => "Icons/stat_earnings",
                 _ => "Icons/NotificationsIcon"
             };
-            return Resources.Load<Sprite>(iconName);
+
+            if (_iconCache.TryGetValue(iconName, out Sprite cached))
+                return cached;
+
+            Sprite sprite = Resources.Load<Sprite>(iconName);
+            _iconCache[iconName] = sprite;
+            return sprite;
         }
 
         private Color GetTypeColor(string type)
@@ -668,6 +692,16 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             transform.DOKill();
+
+            // Kill tweens on child objects
+            foreach (var card in currentCards)
+            {
+                if (card != null) card.transform.DOKill();
+            }
+            if (headerTransform != null) headerTransform.DOKill();
+            if (tabsTransform != null) tabsTransform.DOKill();
+            if (scrollViewTransform != null) scrollViewTransform.DOKill();
+            if (footerTransform != null) footerTransform.DOKill();
         }
     }
 }

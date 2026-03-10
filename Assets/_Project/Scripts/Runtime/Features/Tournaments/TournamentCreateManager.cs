@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using DigitPark.Monetization;
+using DigitPark.Navigation;
 using DigitPark.Localization;
 using DG.Tweening;
 
@@ -138,12 +139,12 @@ namespace DigitPark.Managers
             {
                 gameTypeDropdown.ClearOptions();
                 gameTypeDropdown.AddOptions(new List<string> {
-                    "Memory Pairs",
-                    "Quick Math",
-                    "Flash Tap",
-                    "Odd One Out",
-                    "Digit Rush",
-                    "Cognitive Sprint"
+                    AutoLocalizer.Get("gameinfo_memorypairs_name"),
+                    AutoLocalizer.Get("gameinfo_quickmath_name"),
+                    AutoLocalizer.Get("gameinfo_flashtap_name"),
+                    AutoLocalizer.Get("gameinfo_oddoneout_name"),
+                    AutoLocalizer.Get("gameinfo_digitrush_name"),
+                    AutoLocalizer.Get("game_cognitive_sprint")
                 });
             }
 
@@ -511,7 +512,7 @@ namespace DigitPark.Managers
     public class TournamentConfig
     {
         public string name = "";
-        public string gameType = "Memory Pairs";
+        public string gameType = "";
         public decimal entryFee = 5m;
         public int maxPlayers = 32;
         public decimal estimatedPrize = 0m;

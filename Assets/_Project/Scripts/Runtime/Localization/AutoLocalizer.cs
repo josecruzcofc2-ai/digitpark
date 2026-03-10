@@ -992,6 +992,48 @@ namespace DigitPark.Localization
             { "CashToggleLabel", "cash_start_immediately" },
             { "HeroEarningsLabel", "cash_hero_earnings" },
             { "SpectatorsLabel", "allow_spectators" },
+
+            // ==================== SHOP POPUPS (V43 AUDIT) ====================
+            { "StarterPackTitle", "starter_pack_title" },
+            { "StarterPackContents", "starter_pack_contents" },
+            { "BundlePremiumTitle", "bundle_premium_title" },
+            { "BundlePremiumDesc", "bundle_premium_desc" },
+            { "ShopConfirmTitle", "shop_confirm_purchase_title" },
+            { "ShopInsufficientTitle", "shop_insufficient_title" },
+            { "ShopInsufficientMessage", "shop_insufficient_message" },
+            { "StatusBadge", "status_in_use" },
+            { "GetGemsButtonText", "get_digitgems" },
+
+            // ==================== PROFILE (V43 AUDIT) ====================
+            { "ChallengeText", "challenge_button" },
+            { "GameSelectionTitle", "choose_game_title" },
+
+            // ==================== DAILY MISSIONS (V43 AUDIT) ====================
+            { "ResetsInLabel", "resets_in" },
+            { "TitleLeft", "daily_progress" },
+            { "ActionButtonText", "claim" },
+            { "MissionCompletedTitle", "mission_completed" },
+
+            // ==================== DAILY REWARDS (V43 AUDIT) ====================
+            { "Day7GrandPrizeLabel", "day7_grand_prize" },
+            { "Reward2", "exclusive_item_bonus" },
+            { "ClaimRewardText", "claim_reward_button" },
+            { "NextRewardLabel", "next_reward_in" },
+            { "TapToContinueText", "tap_to_continue" },
+
+            // ==================== ACHIEVEMENTS (V43 AUDIT) ====================
+            { "CategoryDropdownLabel", "all_category" },
+
+            // ==================== NOTIFICATIONS (V43 AUDIT) ====================
+
+            // ==================== FRIENDS (V43 AUDIT) ====================
+            { "FriendRequestsLabel", "friend_requests_nav" },
+
+            // ==================== TOURNAMENT LOBBY (V43 AUDIT) ====================
+
+            // ==================== TOURNAMENTS BROWSER (V43 AUDIT) ====================
+            { "CreateTournamentText", "create_tournament" },
+            { "LoadMoreText", "load_more" },
         };
 
         private void Awake()
@@ -1134,6 +1176,7 @@ namespace DigitPark.Localization
             }
 
             // Buscar sin sufijos comunes (Text, Label, Button, etc.)
+            // Only allow suffix stripping if cleaned name retains at least 80% of original length
             string cleanName = gameObjectName
                 .Replace("Text", "")
                 .Replace("Label", "")
@@ -1141,14 +1184,18 @@ namespace DigitPark.Localization
                 .Replace(" ", "")
                 .Trim();
 
-            if (!string.IsNullOrEmpty(cleanName) && TextNameToKeyMap.TryGetValue(cleanName, out key))
+            if (!string.IsNullOrEmpty(cleanName)
+                && cleanName.Length >= gameObjectName.Length * 0.8f
+                && TextNameToKeyMap.TryGetValue(cleanName, out key))
             {
+                Debug.LogWarning($"[AutoLocalizer] Fuzzy match: '{gameObjectName}' -> '{cleanName}' -> key '{key}'. Consider adding an exact mapping.");
                 return true;
             }
 
             // Buscar con sufijo Text
             if (TextNameToKeyMap.TryGetValue(gameObjectName + "Text", out key))
             {
+                Debug.LogWarning($"[AutoLocalizer] Fuzzy match: '{gameObjectName}' -> '{gameObjectName}Text' -> key '{key}'. Consider adding an exact mapping.");
                 return true;
             }
 

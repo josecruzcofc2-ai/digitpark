@@ -12,7 +12,7 @@ namespace DigitPark.Editor
     /// MainMenu UI Builder v4 - Polish 2026
     /// Avatar circular con ring CYAN, sin @ en username, íconos quick access +20%,
     /// bottom safe area 4%, profile card más presencia visual.
-    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     /// </summary>
     public class MainMenuUIBuilder : EditorWindow
     {
@@ -44,9 +44,10 @@ namespace DigitPark.Editor
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
         // Uniform 1% (0.010) gap between every section — no overlaps, consistent spacing
-        // Heights: Header=7.2%, Profile=18.5%, Daily=7.0%, Quick=6.0%, Play=15.5%, Cash=17.5%, Extra=18.3%
+        // Heights: Header=100px, Profile=18.5%, Daily=7.0%, Quick=6.0%, Play=15.5%, Cash=17.5%, Extra=18.3%
+        private const float HEADER_HEIGHT = 100f;
         private const float HEADER_TOP = 1.000f;
-        private const float HEADER_BOT = 0.928f;  // height 7.2%
+        private const float HEADER_BOT = 0.928f;  // kept for reference, header now uses sizeDelta
 
         private const float PROFILE_TOP = 0.918f; // gap 1.0%
         private const float PROFILE_BOT = 0.733f; // height 18.5%
@@ -166,7 +167,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -212,7 +213,11 @@ namespace DigitPark.Editor
 
             var header = FindOrCreate(canvas.transform, "Header");
             var rt = GetOrAdd<RectTransform>(header);
-            SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
             // Settings Button (left) - left edge aligned with ProfileCard SIDE_PAD (20px)
@@ -299,10 +304,10 @@ namespace DigitPark.Editor
         {
             var container = CurrencyHeaderBarHelper.CreateCurrencyPills(headerTransform, "CurrencyDisplay");
             var cRT = container.GetComponent<RectTransform>();
-            cRT.anchorMin = new Vector2(0.35f, 0.05f);
-            cRT.anchorMax = new Vector2(0.88f, 0.95f);
-            cRT.offsetMin = Vector2.zero;
-            cRT.offsetMax = Vector2.zero;
+            cRT.anchorMin = new Vector2(0.35f, 0.5f);
+            cRT.anchorMax = new Vector2(0.87f, 0.5f);
+            cRT.pivot = new Vector2(0.5f, 0.5f);
+            cRT.sizeDelta = new Vector2(0, 65);
         }
 
         private static GameObject CreateIconButton(Transform parent, string name,

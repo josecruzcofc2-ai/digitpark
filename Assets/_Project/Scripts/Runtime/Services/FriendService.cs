@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Data;
 using DigitPark.Services.Firebase;
+using DigitPark.Localization;
 
 namespace DigitPark.Services
 {
@@ -108,7 +109,7 @@ namespace DigitPark.Services
             var currentUser = AuthenticationService.Instance?.GetCurrentPlayerData();
             if (currentUser == null)
             {
-                return FriendOperationResult.Failed("No hay usuario autenticado", "NOT_AUTHENTICATED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "NOT_AUTHENTICATED");
             }
 
             string senderId = currentUser.userId;
@@ -116,12 +117,12 @@ namespace DigitPark.Services
             // Validaciones
             if (senderId == receiverId)
             {
-                return FriendOperationResult.Failed("No puedes enviarte una solicitud a ti mismo", "SELF_REQUEST");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_friend_self_request"), "SELF_REQUEST");
             }
 
             if (currentUser.IsFriend(receiverId))
             {
-                return FriendOperationResult.Failed("Este jugador ya es tu amigo", "ALREADY_FRIENDS");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_already_friends"), "ALREADY_FRIENDS");
             }
 
             // Verificar si ya existe una solicitud pendiente
@@ -137,12 +138,13 @@ namespace DigitPark.Services
                 {
                     return await AcceptFriendRequest(existingRequest.requestId);
                 }
-                return FriendOperationResult.Failed("Ya existe una solicitud pendiente", "REQUEST_EXISTS");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_pending"), "REQUEST_EXISTS");
             }
 
             // Obtener datos del receptor
-            var receiverData = await DatabaseService.Instance?.GetPlayerDataById(receiverId);
-            string receiverUsername = receiverData?.username ?? "Jugador";
+            if (DatabaseService.Instance == null) { Debug.LogWarning("[FriendService] DatabaseService not available"); return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "SERVICE_UNAVAILABLE"); }
+            var receiverData = await DatabaseService.Instance.GetPlayerDataById(receiverId);
+            string receiverUsername = receiverData?.username ?? AutoLocalizer.Get("default_player_name");
 
             // Crear solicitud
             var request = new FriendRequest(
@@ -166,7 +168,7 @@ namespace DigitPark.Services
 
             OnFriendRequestReceived?.Invoke(request);
 
-            return FriendOperationResult.Successful($"Solicitud enviada a {receiverUsername}");
+            return FriendOperationResult.Successful(AutoLocalizer.Get("friend_request_sent", receiverUsername));
         }
 
         /// <summary>
@@ -177,18 +179,18 @@ namespace DigitPark.Services
             var request = _allRequests.Find(r => r.requestId == requestId);
             if (request == null)
             {
-                return FriendOperationResult.Failed("Solicitud no encontrada", "NOT_FOUND");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_not_found"), "NOT_FOUND");
             }
 
             if (request.status != FriendRequestStatus.Pending)
             {
-                return FriendOperationResult.Failed("Esta solicitud ya fue respondida", "ALREADY_RESPONDED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_already_responded"), "ALREADY_RESPONDED");
             }
 
             var currentUser = AuthenticationService.Instance?.GetCurrentPlayerData();
             if (currentUser == null || currentUser.userId != request.receiverId)
             {
-                return FriendOperationResult.Failed("No tienes permiso para aceptar esta solicitud", "UNAUTHORIZED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_unauthorized_accept"), "UNAUTHORIZED");
             }
 
             // Actualizar estado de solicitud
@@ -202,15 +204,16 @@ namespace DigitPark.Services
             }
 
             // Agregar al usuario actual a la lista del remitente
-            var senderData = await DatabaseService.Instance?.GetPlayerDataById(request.senderId);
+            if (DatabaseService.Instance == null) { Debug.LogWarning("[FriendService] DatabaseService not available"); return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "SERVICE_UNAVAILABLE"); }
+            var senderData = await DatabaseService.Instance.GetPlayerDataById(request.senderId);
             if (senderData != null && !senderData.friends.Contains(currentUser.userId))
             {
                 senderData.friends.Add(currentUser.userId);
-                await DatabaseService.Instance?.SavePlayerData(senderData);
+                await DatabaseService.Instance.SavePlayerData(senderData);
             }
 
             // Guardar datos del usuario actual
-            await DatabaseService.Instance?.SavePlayerData(currentUser);
+            await DatabaseService.Instance.SavePlayerData(currentUser);
             SaveRequests();
 
             Debug.Log($"[FriendService] Solicitud de {request.senderUsername} aceptada");
@@ -221,7 +224,7 @@ namespace DigitPark.Services
             OnFriendRequestAccepted?.Invoke(request);
             OnFriendsListChanged?.Invoke();
 
-            return FriendOperationResult.Successful($"Ahora eres amigo de {request.senderUsername}");
+            return FriendOperationResult.Successful(AutoLocalizer.Get("now_friends_with", request.senderUsername));
         }
 
         /// <summary>
@@ -232,18 +235,18 @@ namespace DigitPark.Services
             var request = _allRequests.Find(r => r.requestId == requestId);
             if (request == null)
             {
-                return FriendOperationResult.Failed("Solicitud no encontrada", "NOT_FOUND");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_not_found"), "NOT_FOUND");
             }
 
             if (request.status != FriendRequestStatus.Pending)
             {
-                return FriendOperationResult.Failed("Esta solicitud ya fue respondida", "ALREADY_RESPONDED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_already_responded"), "ALREADY_RESPONDED");
             }
 
             var currentUser = AuthenticationService.Instance?.GetCurrentPlayerData();
             if (currentUser == null || currentUser.userId != request.receiverId)
             {
-                return FriendOperationResult.Failed("No tienes permiso para rechazar esta solicitud", "UNAUTHORIZED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_unauthorized_reject"), "UNAUTHORIZED");
             }
 
             request.status = FriendRequestStatus.Rejected;
@@ -256,7 +259,7 @@ namespace DigitPark.Services
 
             OnFriendRequestRejected?.Invoke(request);
 
-            return FriendOperationResult.Successful("Solicitud rechazada");
+            return FriendOperationResult.Successful(AutoLocalizer.Get("friend_request_rejected"));
         }
 
         /// <summary>
@@ -267,18 +270,18 @@ namespace DigitPark.Services
             var request = _allRequests.Find(r => r.requestId == requestId);
             if (request == null)
             {
-                return FriendOperationResult.Failed("Solicitud no encontrada", "NOT_FOUND");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_not_found"), "NOT_FOUND");
             }
 
             var currentUser = AuthenticationService.Instance?.GetCurrentPlayerData();
             if (currentUser == null || currentUser.userId != request.senderId)
             {
-                return FriendOperationResult.Failed("No tienes permiso para cancelar esta solicitud", "UNAUTHORIZED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_unauthorized_cancel"), "UNAUTHORIZED");
             }
 
             if (request.status != FriendRequestStatus.Pending)
             {
-                return FriendOperationResult.Failed("Esta solicitud ya fue respondida", "ALREADY_RESPONDED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_already_responded"), "ALREADY_RESPONDED");
             }
 
             request.status = FriendRequestStatus.Cancelled;
@@ -289,7 +292,7 @@ namespace DigitPark.Services
 
             Debug.Log($"[FriendService] Solicitud a {request.receiverUsername} cancelada");
 
-            return FriendOperationResult.Successful("Solicitud cancelada");
+            return FriendOperationResult.Successful(AutoLocalizer.Get("friend_request_cancelled"));
         }
 
         /// <summary>
@@ -386,34 +389,35 @@ namespace DigitPark.Services
             var currentUser = AuthenticationService.Instance?.GetCurrentPlayerData();
             if (currentUser == null)
             {
-                return FriendOperationResult.Failed("No hay usuario autenticado", "NOT_AUTHENTICATED");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "NOT_AUTHENTICATED");
             }
 
             if (!currentUser.friends.Contains(friendId))
             {
-                return FriendOperationResult.Failed("Este jugador no es tu amigo", "NOT_FRIENDS");
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_friends"), "NOT_FRIENDS");
             }
 
             // Eliminar de la lista del usuario actual
             currentUser.friends.Remove(friendId);
 
             // Eliminar de la lista del otro usuario
-            var friendData = await DatabaseService.Instance?.GetPlayerDataById(friendId);
+            if (DatabaseService.Instance == null) { Debug.LogWarning("[FriendService] DatabaseService not available"); return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "SERVICE_UNAVAILABLE"); }
+            var friendData = await DatabaseService.Instance.GetPlayerDataById(friendId);
             if (friendData != null)
             {
                 friendData.friends.Remove(currentUser.userId);
-                await DatabaseService.Instance?.SavePlayerData(friendData);
+                await DatabaseService.Instance.SavePlayerData(friendData);
             }
 
             // Guardar cambios
-            await DatabaseService.Instance?.SavePlayerData(currentUser);
+            await DatabaseService.Instance.SavePlayerData(currentUser);
 
             Debug.Log($"[FriendService] Amigo {friendId} eliminado");
 
             OnFriendRemoved?.Invoke(friendId);
             OnFriendsListChanged?.Invoke();
 
-            return FriendOperationResult.Successful("Amigo eliminado");
+            return FriendOperationResult.Successful(AutoLocalizer.Get("friend_removed"));
         }
 
         /// <summary>
@@ -431,15 +435,17 @@ namespace DigitPark.Services
 
             foreach (var friendId in currentUser.friends)
             {
-                var friendData = await DatabaseService.Instance?.GetPlayerDataById(friendId);
+                if (DatabaseService.Instance == null) { Debug.LogWarning("[FriendService] DatabaseService not available"); break; }
+                var friendData = await DatabaseService.Instance.GetPlayerDataById(friendId);
                 if (friendData != null)
                 {
+                    bool online = await IsPlayerOnline(friendId);
                     friendsList.Add(new FriendInfo
                     {
                         odId = friendId,
                         username = friendData.username,
                         avatarUrl = friendData.avatarUrl,
-                        isOnline = IsPlayerOnline(friendId),
+                        isOnline = online,
                         winRate = friendData.GetWinRate(),
                         favoriteGame = GetFavoriteGame(friendData)
                     });
@@ -473,13 +479,27 @@ namespace DigitPark.Services
         #region Helpers
 
         /// <summary>
-        /// Verifica si un jugador está online (simulado)
+        /// Verifica si un jugador está online usando Firebase lastLoginDate.
+        /// Considera online si estuvo activo en los últimos 5 minutos.
         /// </summary>
-        private bool IsPlayerOnline(string playerId)
+        private async Task<bool> IsPlayerOnline(string userId)
         {
-            // En producción esto vendría de Firebase Presence
-            // Por ahora simulamos con un 30% de probabilidad
-            return UnityEngine.Random.value < 0.3f;
+            if (DatabaseService.Instance == null) return false;
+            try
+            {
+                var playerData = await DatabaseService.Instance.GetPlayerDataById(userId);
+                if (playerData != null)
+                {
+                    var lastSeen = playerData.lastLoginDate;
+                    // Consider online if active in last 5 minutes
+                    return (DateTime.UtcNow - lastSeen).TotalMinutes < 5;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[FriendService] Error checking online status: {ex.Message}");
+            }
+            return false;
         }
 
         /// <summary>

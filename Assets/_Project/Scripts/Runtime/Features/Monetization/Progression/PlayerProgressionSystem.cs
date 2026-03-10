@@ -73,7 +73,11 @@ namespace DigitPark.Progression
         public int GetXPRequiredForLevel(int level)
         {
             if (level <= 1) return 0;
-            return Mathf.RoundToInt(baseXPPerLevel * Mathf.Pow(xpScalingFactor, level - 1));
+            // Cap exponent to avoid float overflow at high levels
+            float exponent = Mathf.Min(level - 1, 200);
+            float xpRequired = baseXPPerLevel * Mathf.Pow(xpScalingFactor, exponent);
+            // Clamp to prevent int overflow
+            return Mathf.RoundToInt(Mathf.Min(xpRequired, 10000000f));
         }
 
         /// <summary>
@@ -240,7 +244,7 @@ namespace DigitPark.Progression
 
                 // High levels
                 { 100, new LevelReward("Title: Centurion", RewardType.Title, "title_centurion") },
-                { 100, new LevelReward("Avatar: Centurion", RewardType.Avatar, "avatar_centurion") },
+                { 105, new LevelReward("Avatar: Centurion", RewardType.Avatar, "avatar_centurion") },
                 { 125, new LevelReward("Frame: Silver", RewardType.Frame, "frame_silver") },
                 { 150, new LevelReward("5000 DigitCoins", RewardType.DigitCoins, "5000") },
                 { 175, new LevelReward("Title: Expert", RewardType.Title, "title_expert") },
@@ -254,9 +258,9 @@ namespace DigitPark.Progression
                 { 450, new LevelReward("Title: Grand Master", RewardType.Title, "title_grandmaster") },
 
                 // Max level
+                { 475, new LevelReward("Avatar: Legend", RewardType.Avatar, "avatar_legend") },
+                { 490, new LevelReward("Frame: Diamond", RewardType.Frame, "frame_diamond") },
                 { 500, new LevelReward("Title: Legend", RewardType.Title, "title_legend") },
-                { 500, new LevelReward("Avatar: Legend", RewardType.Avatar, "avatar_legend") },
-                { 500, new LevelReward("Frame: Diamond", RewardType.Frame, "frame_diamond") },
             };
         }
 
@@ -332,6 +336,7 @@ namespace DigitPark.Progression
         /// <summary>
         /// Reset all progress (for testing only)
         /// </summary>
+        #if UNITY_EDITOR
         [ContextMenu("Reset Progress (DEBUG)")]
         public void ResetProgress()
         {
@@ -343,6 +348,7 @@ namespace DigitPark.Progression
             SaveProgress();
             Debug.Log("[PlayerProgression] Progress reset!");
         }
+        #endif
 
         #endregion
     }

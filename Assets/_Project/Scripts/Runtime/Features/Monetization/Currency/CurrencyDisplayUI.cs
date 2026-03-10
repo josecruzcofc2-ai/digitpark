@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DigitPark.Navigation;
 
 namespace DigitPark.Monetization
 {
@@ -184,7 +185,11 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
-        /// Agrega una cantidad al monto actual
+        /// Agrega una cantidad al monto actual (display/animation only).
+        /// This only updates the local display value and does NOT modify
+        /// the authoritative balance in CurrencyManager. Use
+        /// CurrencyManager.AddGems/AddCoins to change the real balance;
+        /// the display will auto-update via the OnGemsChanged/OnCoinsChanged events.
         /// </summary>
         public void AddAmount(int delta)
         {

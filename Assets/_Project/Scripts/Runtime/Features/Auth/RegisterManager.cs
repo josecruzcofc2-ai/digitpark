@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,20 +20,20 @@ namespace DigitPark.Managers
     public class RegisterManager : MonoBehaviour
     {
         [Header("UI - Title")]
-        [SerializeField] public TextMeshProUGUI titleText;
+        [SerializeField] private TextMeshProUGUI titleText;
 
         [Header("UI - Input Fields")]
-        [SerializeField] public TMP_InputField usernameInput;
-        [SerializeField] public TMP_InputField emailInput;
-        [SerializeField] public TMP_InputField passwordInput;
-        [SerializeField] public TMP_InputField confirmPasswordInput;
+        [SerializeField] private TMP_InputField usernameInput;
+        [SerializeField] private TMP_InputField emailInput;
+        [SerializeField] private TMP_InputField passwordInput;
+        [SerializeField] private TMP_InputField confirmPasswordInput;
 
         [Header("UI - Buttons")]
-        [SerializeField] public Button createAccountButton;
-        [SerializeField] public Button backButton;
+        [SerializeField] private Button createAccountButton;
+        [SerializeField] private Button backButton;
 
         [Header("UI - Loading")]
-        [SerializeField] public GameObject loadingPanel;
+        [SerializeField] private GameObject loadingPanel;
 
         [Header("UI - Panels (Prefabs)")]
         [SerializeField] private ErrorPanelUI errorPanel;
@@ -58,6 +59,9 @@ namespace DigitPark.Managers
             // Suscribirse a eventos de autenticación
             if (AuthenticationService.Instance != null)
             {
+                // Unsubscribe first to prevent duplicate subscriptions
+                AuthenticationService.Instance.OnLoginSuccess -= OnRegisterSuccess;
+                AuthenticationService.Instance.OnLoginFailed -= OnRegisterFailed;
                 AuthenticationService.Instance.OnLoginSuccess += OnRegisterSuccess;
                 AuthenticationService.Instance.OnLoginFailed += OnRegisterFailed;
             }
@@ -154,14 +158,8 @@ namespace DigitPark.Managers
 
         private void SetPasswordToggleInput(PasswordToggle toggle, TMP_InputField input)
         {
-            // Usar reflexión para asignar el campo privado
-            var field = typeof(PasswordToggle).GetField("passwordInput",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (field != null)
-            {
-                field.SetValue(toggle, input);
-                Debug.Log($"[Register] PasswordToggle configurado para: {input.name}");
-            }
+            toggle.SetPasswordInput(input);
+            Debug.Log($"[Register] PasswordToggle configurado para: {input.name}");
         }
 
         /// <summary>
@@ -185,32 +183,32 @@ namespace DigitPark.Managers
             // Actualizar placeholders con información de límites
             if (usernameInput != null && usernameInput.placeholder is TextMeshProUGUI userPlaceholder)
             {
-                userPlaceholder.text = GetLocalizedText("placeholder_username");
+                userPlaceholder.text = AutoLocalizer.Get("placeholder_username");
                 userPlaceholder.alignment = TextAlignmentOptions.Center;
             }
 
             if (emailInput != null && emailInput.placeholder is TextMeshProUGUI emailPlaceholder)
             {
-                emailPlaceholder.text = GetLocalizedText("placeholder_email");
+                emailPlaceholder.text = AutoLocalizer.Get("placeholder_email");
                 emailPlaceholder.alignment = TextAlignmentOptions.Center;
             }
 
             if (passwordInput != null && passwordInput.placeholder is TextMeshProUGUI passPlaceholder)
             {
-                passPlaceholder.text = GetLocalizedText("placeholder_password");
+                passPlaceholder.text = AutoLocalizer.Get("placeholder_password");
                 passPlaceholder.alignment = TextAlignmentOptions.Center;
             }
 
             if (confirmPasswordInput != null && confirmPasswordInput.placeholder is TextMeshProUGUI confirmPlaceholder)
             {
-                confirmPlaceholder.text = GetLocalizedText("placeholder_confirm");
+                confirmPlaceholder.text = AutoLocalizer.Get("placeholder_confirm");
                 confirmPlaceholder.alignment = TextAlignmentOptions.Center;
             }
 
             // Actualizar título
             if (titleText != null)
             {
-                titleText.text = GetLocalizedText("register_title");
+                titleText.text = AutoLocalizer.Get("register_title");
                 titleText.alignment = TextAlignmentOptions.Center;
             }
         }
@@ -257,40 +255,58 @@ namespace DigitPark.Managers
         /// </summary>
         private async void OnCreateAccountClicked()
         {
-            if (isRegistering) return;
-
-            // Obtener valores
-            string username = usernameInput?.text.Trim() ?? "";
-            string email = emailInput?.text.Trim() ?? "";
-            string password = passwordInput?.text ?? "";
-            string confirmPassword = confirmPasswordInput?.text ?? "";
-
-            // Validar todos los campos
-            if (!ValidateAllFields(username, email, password, confirmPassword))
+            try
             {
-                return;
+                if (isRegistering) return;
+
+                // Obtener valores
+                string username = usernameInput?.text.Trim() ?? "";
+                string email = emailInput?.text.Trim() ?? "";
+                string password = passwordInput?.text ?? "";
+                string confirmPassword = confirmPasswordInput?.text ?? "";
+
+                // Validar todos los campos
+                if (!ValidateAllFields(username, email, password, confirmPassword))
+                {
+                    return;
+                }
+
+                isRegistering = true;
+                ShowLoading(true);
+                HideError();
+
+                Debug.Log("[Register] Intentando registrar cuenta");
+
+                // Intentar registro
+                bool success = await AuthenticationService.Instance.RegisterWithEmail(
+                    email,
+                    password,
+                    username // Puede ser vacío si es opcional
+                );
+
+                // MonoBehaviour may have been destroyed during await
+                if (this == null) return;
+
+                isRegistering = false;
+                ShowLoading(false);
+
+                if (!success)
+                {
+                    // El error se maneja en OnRegisterFailed
+                    Debug.LogWarning("[Register] Registro fallido");
+                }
             }
-
-            isRegistering = true;
-            ShowLoading(true);
-            HideError();
-
-            Debug.Log($"[Register] Intentando registrar cuenta para: {email}");
-
-            // Intentar registro
-            bool success = await AuthenticationService.Instance.RegisterWithEmail(
-                email,
-                password,
-                username // Puede ser vacío si es opcional
-            );
-
-            isRegistering = false;
-            ShowLoading(false);
-
-            if (!success)
+            catch (Exception ex)
             {
-                // El error se maneja en OnRegisterFailed
-                Debug.LogWarning("[Register] Registro fallido");
+                Debug.LogError($"[RegisterManager] {ex.Message}");
+            }
+            finally
+            {
+                if (this != null)
+                {
+                    isRegistering = false;
+                    ShowLoading(false);
+                }
             }
         }
 
@@ -311,65 +327,65 @@ namespace DigitPark.Managers
             // Validar username primero (es requerido ahora)
             if (string.IsNullOrEmpty(username))
             {
-                ShowError(GetLocalizedText("error_username_empty"));
+                ShowError(AutoLocalizer.Get("error_username_empty"));
                 return false;
             }
 
             if (username.Length < 3)
             {
-                ShowError(GetLocalizedText("error_username_too_short"));
+                ShowError(AutoLocalizer.Get("error_username_too_short"));
                 return false;
             }
 
             if (username.Length > 20)
             {
-                ShowError(GetLocalizedText("error_username_too_long"));
+                ShowError(AutoLocalizer.Get("error_username_too_long"));
                 return false;
             }
 
             // Validar caracteres permitidos (letras, números, guión bajo)
             if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
             {
-                ShowError(GetLocalizedText("error_username_invalid_chars"));
+                ShowError(AutoLocalizer.Get("error_username_invalid_chars"));
                 return false;
             }
 
             // Validar email
             if (string.IsNullOrEmpty(email))
             {
-                ShowError(GetLocalizedText("error_email_empty"));
+                ShowError(AutoLocalizer.Get("error_email_empty"));
                 return false;
             }
 
             if (!IsValidEmail(email))
             {
-                ShowError(GetLocalizedText("error_email_invalid"));
+                ShowError(AutoLocalizer.Get("error_email_invalid"));
                 return false;
             }
 
             // Validar contraseña
             if (string.IsNullOrEmpty(password))
             {
-                ShowError(GetLocalizedText("error_password_empty"));
+                ShowError(AutoLocalizer.Get("error_password_empty"));
                 return false;
             }
 
             if (password.Length < 8)
             {
-                ShowError(GetLocalizedText("error_password_too_short"));
+                ShowError(AutoLocalizer.Get("error_password_too_short"));
                 return false;
             }
 
             // Validar confirmación de contraseña
             if (string.IsNullOrEmpty(confirmPassword))
             {
-                ShowError(GetLocalizedText("error_confirm_password_empty"));
+                ShowError(AutoLocalizer.Get("error_confirm_password_empty"));
                 return false;
             }
 
             if (password != confirmPassword)
             {
-                ShowError(GetLocalizedText("error_passwords_not_match"));
+                ShowError(AutoLocalizer.Get("error_passwords_not_match"));
                 return false;
             }
 
@@ -405,7 +421,7 @@ namespace DigitPark.Managers
         /// </summary>
         private void OnRegisterSuccess(PlayerData playerData)
         {
-            Debug.Log($"[Register] Registro exitoso para: {playerData.email}");
+            Debug.Log("[Register] Registro exitoso");
 
             // Registrar en analytics
             AnalyticsService.Instance?.SetUserId(playerData.userId);
@@ -421,6 +437,9 @@ namespace DigitPark.Managers
         private void OnRegisterFailed(string errorMessage)
         {
             Debug.LogError($"[Register] Registro fallido: {errorMessage}");
+
+            isRegistering = false;
+            ShowLoading(false);
 
             // Mostrar mensaje de error amigable
             string friendlyMessage = GetFriendlyErrorMessage(errorMessage);
@@ -500,34 +519,25 @@ namespace DigitPark.Managers
         /// </summary>
         private string GetFriendlyErrorMessage(string technicalError)
         {
+            if (technicalError.Contains("username-already-taken"))
+                return AutoLocalizer.Get("error_username_taken");
+
             if (technicalError.Contains("auth/email-already-in-use"))
-                return GetLocalizedText("error_email_already_registered");
+                return AutoLocalizer.Get("error_email_already_registered");
 
             if (technicalError.Contains("auth/invalid-email"))
-                return GetLocalizedText("error_email_invalid");
+                return AutoLocalizer.Get("error_email_invalid");
 
             if (technicalError.Contains("auth/weak-password"))
-                return GetLocalizedText("error_password_weak");
+                return AutoLocalizer.Get("error_password_weak");
 
             if (technicalError.Contains("auth/network-request-failed"))
-                return GetLocalizedText("error_no_connection");
+                return AutoLocalizer.Get("error_no_connection");
 
             if (technicalError.Contains("timeout"))
-                return GetLocalizedText("error_timeout");
+                return AutoLocalizer.Get("error_timeout");
 
-            return GetLocalizedText("error_create_account");
-        }
-
-        /// <summary>
-        /// Obtiene texto localizado usando LocalizationManager
-        /// </summary>
-        private string GetLocalizedText(string key)
-        {
-            if (LocalizationManager.Instance != null)
-            {
-                return LocalizationManager.Instance.GetText(key);
-            }
-            return key;
+            return AutoLocalizer.Get("error_create_account");
         }
 
         #endregion

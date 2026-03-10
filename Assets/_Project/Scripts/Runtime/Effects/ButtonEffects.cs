@@ -90,6 +90,8 @@ namespace DigitPark.Effects
 
         private void OnDestroy()
         {
+            StopAllCoroutines();
+
             if (button != null)
             {
                 button.onClick.RemoveListener(OnButtonClick);

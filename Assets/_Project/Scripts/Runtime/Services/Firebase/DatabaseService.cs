@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Data;
@@ -38,7 +40,11 @@ namespace DigitPark.Services.Firebase
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                _ = InitializeAsync();
+                InitializeAsync().ContinueWithOnMainThread(t =>
+                {
+                    if (t.IsFaulted)
+                        Debug.LogError($"[Database] InitializeAsync failed: {t.Exception?.InnerException?.Message}");
+                });
             }
             else
             {
@@ -146,7 +152,7 @@ namespace DigitPark.Services.Firebase
                     {
                         userId = child.Child("userId").Value?.ToString() ?? "",
                         username = child.Child("username").Value?.ToString() ?? "Player",
-                        time = float.Parse(child.Child("time").Value?.ToString() ?? "999"),
+                        time = SafeParseFloat(child.Child("time").Value?.ToString()),
                         countryCode = child.Child("countryCode").Value?.ToString() ?? "US",
                         avatarUrl = child.Child("avatarUrl").Value?.ToString() ?? "",
                         position = position++
@@ -283,7 +289,7 @@ namespace DigitPark.Services.Firebase
                             existing[wrapper.keys[i]] = wrapper.values[i];
                     }
                 }
-                catch { }
+                catch (Exception ex) { Debug.LogWarning($"[Database] Error parsing local fields: {ex.Message}"); }
             }
             foreach (var kvp in updates)
                 existing[kvp.Key] = kvp.Value;
@@ -296,6 +302,27 @@ namespace DigitPark.Services.Firebase
             }
             PlayerPrefs.SetString(key, JsonUtility.ToJson(newWrapper));
             PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// Checks if a username is already taken by any player in the database
+        /// </summary>
+        public async Task<bool> IsUsernameTaken(string username)
+        {
+            try
+            {
+                if (_databaseRef == null) return false;
+                var snapshot = await _databaseRef.Child(PLAYERS_PATH)
+                    .OrderByChild("username")
+                    .EqualTo(username)
+                    .GetValueAsync();
+                return snapshot.Exists && snapshot.ChildrenCount > 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[Database] Username check failed: {ex.Message}");
+                return false; // Allow registration to proceed if check fails
+            }
         }
 
         /// <summary>
@@ -325,40 +352,42 @@ namespace DigitPark.Services.Firebase
                 currentUser = AuthenticationService.Instance.GetCurrentPlayerData();
             }
 
-            // Buscar en el leaderboard (donde tenemos usuarios registrados)
+            // Collect matching entries first, then batch-load player data
+            var matchingEntries = new List<LeaderboardEntry>();
             foreach (var entry in globalLeaderboard)
             {
                 if (entry.username.ToLower().Contains(queryLower))
                 {
-                    // Intentar cargar datos completos del jugador
-                    var playerData = await LoadPlayerData(entry.userId);
-
-                    float winRate = 0f;
-                    bool isFriend = false;
-
-                    if (playerData != null)
-                    {
-                        winRate = playerData.GetWinRate();
-                    }
-
-                    // Verificar si es amigo
-                    if (currentUser != null)
-                    {
-                        isFriend = currentUser.IsFriend(entry.userId);
-                    }
-
-                    results.Add(new PlayerSearchResult
-                    {
-                        playerId = entry.userId,
-                        username = entry.username,
-                        winRate = winRate,
-                        isFriend = isFriend,
-                        avatarUrl = entry.avatarUrl ?? ""
-                    });
-
-                    if (results.Count >= maxResults)
+                    matchingEntries.Add(entry);
+                    if (matchingEntries.Count >= maxResults)
                         break;
                 }
+            }
+
+            // Batch load player data in parallel to avoid N+1 query problem
+            var loadTasks = new List<Task<PlayerData>>();
+            foreach (var entry in matchingEntries)
+            {
+                loadTasks.Add(LoadPlayerData(entry.userId));
+            }
+            var playerDataResults = await Task.WhenAll(loadTasks);
+
+            for (int i = 0; i < matchingEntries.Count; i++)
+            {
+                var entry = matchingEntries[i];
+                var playerData = playerDataResults[i];
+
+                float winRate = playerData != null ? playerData.GetWinRate() : 0f;
+                bool isFriend = currentUser != null && currentUser.IsFriend(entry.userId);
+
+                results.Add(new PlayerSearchResult
+                {
+                    playerId = entry.userId,
+                    username = entry.username,
+                    winRate = winRate,
+                    isFriend = isFriend,
+                    avatarUrl = entry.avatarUrl ?? ""
+                });
             }
 
             Debug.Log($"[Database] Encontrados {results.Count} jugadores");
@@ -388,14 +417,18 @@ namespace DigitPark.Services.Firebase
                 timestamp = DateTime.UtcNow.ToString("o")
             };
 
+            // Sanitize user-provided path segments
+            string safeGameId = SanitizeFirebasePath(gameId);
+            string safeCountryCode = SanitizeFirebasePath(countryCode);
+
             // Determinar paths según si hay gameId
-            bool hasGameId = !string.IsNullOrEmpty(gameId);
+            bool hasGameId = !string.IsNullOrEmpty(safeGameId);
             string globalPath = hasGameId
-                ? $"{LEADERBOARD_PATH}/{gameId}/{userId}"
+                ? $"{LEADERBOARD_PATH}/{safeGameId}/{userId}"
                 : $"{LEADERBOARD_PATH}/{userId}";
             string countryPath = hasGameId
-                ? $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}/{gameId}/{userId}"
-                : $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}/{userId}";
+                ? $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}/{safeGameId}/{userId}"
+                : $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}/{userId}";
 
             if (_isInitialized && _databaseRef != null)
             {
@@ -407,7 +440,7 @@ namespace DigitPark.Services.Firebase
                     bool shouldUpdate = true;
                     if (existingSnapshot.Exists)
                     {
-                        float existingTime = float.Parse(existingSnapshot.Child("time").Value?.ToString() ?? "999");
+                        float existingTime = SafeParseFloat(existingSnapshot.Child("time").Value?.ToString());
                         if (time >= existingTime)
                         {
                             Debug.Log($"[Database] Score no mejorado. Actual: {existingTime}s, Nuevo: {time}s");
@@ -493,8 +526,9 @@ namespace DigitPark.Services.Firebase
         {
             Debug.Log($"[Database] Obteniendo top {topCount} global (gameId: {gameId})");
 
-            bool hasGameId = !string.IsNullOrEmpty(gameId);
-            string path = hasGameId ? $"{LEADERBOARD_PATH}/{gameId}" : LEADERBOARD_PATH;
+            string safeGameId = SanitizeFirebasePath(gameId);
+            bool hasGameId = !string.IsNullOrEmpty(safeGameId);
+            string path = hasGameId ? $"{LEADERBOARD_PATH}/{safeGameId}" : LEADERBOARD_PATH;
 
             if (_isInitialized && _databaseRef != null)
             {
@@ -517,7 +551,7 @@ namespace DigitPark.Services.Firebase
                             {
                                 userId = child.Child("userId").Value?.ToString() ?? "",
                                 username = child.Child("username").Value?.ToString() ?? "Player",
-                                time = float.Parse(child.Child("time").Value?.ToString() ?? "999"),
+                                time = SafeParseFloat(child.Child("time").Value?.ToString()),
                                 countryCode = child.Child("countryCode").Value?.ToString() ?? "US",
                                 avatarUrl = child.Child("avatarUrl").Value?.ToString() ?? "",
                                 gameId = child.Child("gameId").Value?.ToString() ?? gameId,
@@ -567,10 +601,12 @@ namespace DigitPark.Services.Firebase
         {
             Debug.Log($"[Database] Obteniendo leaderboard de {countryCode} (gameId: {gameId})");
 
-            bool hasGameId = !string.IsNullOrEmpty(gameId);
+            string safeCountryCode = SanitizeFirebasePath(countryCode);
+            string safeGameId = SanitizeFirebasePath(gameId);
+            bool hasGameId = !string.IsNullOrEmpty(safeGameId);
             string path = hasGameId
-                ? $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}/{gameId}"
-                : $"{COUNTRY_LEADERBOARD_PATH}/{countryCode}";
+                ? $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}/{safeGameId}"
+                : $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}";
 
             if (_isInitialized && _databaseRef != null)
             {
@@ -590,7 +626,7 @@ namespace DigitPark.Services.Firebase
                         {
                             userId = child.Child("userId").Value?.ToString() ?? "",
                             username = child.Child("username").Value?.ToString() ?? "Player",
-                            time = float.Parse(child.Child("time").Value?.ToString() ?? "999"),
+                            time = SafeParseFloat(child.Child("time").Value?.ToString()),
                             countryCode = countryCode,
                             avatarUrl = child.Child("avatarUrl").Value?.ToString() ?? "",
                             gameId = child.Child("gameId").Value?.ToString() ?? gameId,
@@ -617,6 +653,8 @@ namespace DigitPark.Services.Firebase
         {
             Debug.Log($"[Database] Actualizando username en leaderboards: {newUsername}");
 
+            string safeCountryCode = SanitizeFirebasePath(countryCode);
+
             if (_isInitialized && _databaseRef != null)
             {
                 try
@@ -625,7 +663,7 @@ namespace DigitPark.Services.Firebase
                     await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).Child("username").SetValueAsync(newUsername);
 
                     // Actualizar en leaderboard de país
-                    await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(countryCode).Child(userId).Child("username").SetValueAsync(newUsername);
+                    await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(userId).Child("username").SetValueAsync(newUsername);
 
                     Debug.Log($"[Database] Username actualizado en Firebase");
                 }
@@ -665,7 +703,8 @@ namespace DigitPark.Services.Firebase
                     // Eliminar de leaderboard de país
                     if (!string.IsNullOrEmpty(countryCode))
                     {
-                        await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(countryCode).Child(userId).RemoveValueAsync();
+                        string safeCountryCode = SanitizeFirebasePath(countryCode);
+                        await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(userId).RemoveValueAsync();
                     }
 
                     Debug.Log($"[Database] Usuario eliminado de leaderboards en Firebase");
@@ -710,7 +749,7 @@ namespace DigitPark.Services.Firebase
                     {
                         scores.Add(new ScoreEntry
                         {
-                            time = float.Parse(child.Child("time").Value?.ToString() ?? "0"),
+                            time = SafeParseFloat(child.Child("time").Value?.ToString(), 0f),
                             timestamp = child.Child("timestamp").Value?.ToString() ?? ""
                         });
                     }
@@ -987,6 +1026,26 @@ namespace DigitPark.Services.Firebase
         public void LogGameEvent(string eventName, Dictionary<string, object> parameters)
         {
             Debug.Log($"[Database] Evento: {eventName}");
+        }
+
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Removes characters not allowed in Firebase Realtime Database paths: / . $ [ ] #
+        /// </summary>
+        private static string SanitizeFirebasePath(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            return Regex.Replace(input, @"[/.\$\[\]#]", "");
+        }
+
+        private static float SafeParseFloat(string value, float defaultValue = 999f)
+        {
+            if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
+                return result;
+            return defaultValue;
         }
 
         #endregion

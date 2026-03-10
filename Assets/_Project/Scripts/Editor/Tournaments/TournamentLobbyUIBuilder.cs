@@ -301,10 +301,10 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             // StatusBadge and PrizesButton moved to InfoCard to avoid overlap with CurrencyPills
 
@@ -1317,7 +1317,7 @@ namespace DigitPark.Editor
             LayoutElement shareLE = GetOrAddComponent<LayoutElement>(shareBtn);
             shareLE.flexibleWidth = 1;
 
-            GameObject shareTextObj = FindOrCreateChild(shareBtn, "Text");
+            GameObject shareTextObj = FindOrCreateChild(shareBtn, "ShareButtonText");
             SetRectTransformStretch(shareTextObj);
             TextMeshProUGUI shareText = GetOrAddComponent<TextMeshProUGUI>(shareTextObj);
             shareText.text = "Share";
@@ -1340,7 +1340,7 @@ namespace DigitPark.Editor
             LayoutElement leaveLE = GetOrAddComponent<LayoutElement>(leaveBtn);
             leaveLE.flexibleWidth = 1;
 
-            GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "Text");
+            GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "LeaveButtonText");
             SetRectTransformStretch(leaveTextObj);
             TextMeshProUGUI leaveText = GetOrAddComponent<TextMeshProUGUI>(leaveTextObj);
             leaveText.text = "Leave";

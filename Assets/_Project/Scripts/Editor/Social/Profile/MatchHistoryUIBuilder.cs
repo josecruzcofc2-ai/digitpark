@@ -10,7 +10,7 @@ namespace DigitPark.Editor
     /// <summary>
     /// MatchHistory UI Builder - Escena dedicada de Historial de Partidas
     /// Filtros con iconos oficiales de cada minijuego, lista de partidas
-    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
+    /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     ///
     /// Menu: DigitPark/UI Builders/Social/MatchHistory
     /// </summary>
@@ -47,8 +47,9 @@ namespace DigitPark.Editor
 
         #region Layout Anchors
 
+        private const float HEADER_HEIGHT = 100f;
         private const float HEADER_TOP = 0.985f;
-        private const float HEADER_BOT = 0.945f;
+        private const float HEADER_BOT = 0.945f;  // kept for reference, header now uses sizeDelta
 
         private const float FILTERS_TOP = 0.935f;
         private const float FILTERS_BOT = 0.87f;
@@ -127,7 +128,7 @@ namespace DigitPark.Editor
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1080, 1920);
-                scaler.matchWidthOrHeight = 0f;
+                scaler.matchWidthOrHeight = 0.5f;
             }
 
             // Full clean of canvas children (keep TransitionCanvas and EventSystem)
@@ -168,7 +169,11 @@ namespace DigitPark.Editor
 
             var header = FindOrCreate(canvas.transform, "Header");
             var rt = GetOrAdd<RectTransform>(header);
-            SetAnchors(rt, 0, HEADER_BOT, 1, HEADER_TOP);
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
             // Back Button - Neon Cyan prefab
@@ -218,10 +223,10 @@ namespace DigitPark.Editor
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);
             var pillsRT = pills.GetComponent<RectTransform>();
-            pillsRT.anchorMin = new Vector2(0.52f, 0.15f);
-            pillsRT.anchorMax = new Vector2(0.95f, 0.85f);
-            pillsRT.offsetMin = Vector2.zero;
-            pillsRT.offsetMax = Vector2.zero;
+            pillsRT.anchorMin = new Vector2(0.52f, 0.5f);
+            pillsRT.anchorMax = new Vector2(0.95f, 0.5f);
+            pillsRT.pivot = new Vector2(0.5f, 0.5f);
+            pillsRT.sizeDelta = new Vector2(0, 65);
 
             Debug.Log("[MatchHistoryUI] Header creado");
         }
@@ -292,6 +297,9 @@ namespace DigitPark.Editor
             tTMP.color = active ? TEXT_DARK : TEXT_SECONDARY;
             tTMP.fontStyle = FontStyles.Bold;
             tTMP.alignment = TextAlignmentOptions.Center;
+            tTMP.enableAutoSizing = true;
+            tTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tTMP.fontSizeMax = FontSizes.Subtitle;
         }
 
         private static void CreateIconFilterChip(Transform parent, string name, string iconFileName, Color gameColor)
@@ -337,6 +345,9 @@ namespace DigitPark.Editor
                 fallback.fontSize = FontSizes.BodyLarge;
                 fallback.color = gameColor;
                 fallback.alignment = TextAlignmentOptions.Center;
+                fallback.enableAutoSizing = true;
+                fallback.fontSizeMin = FontSizes.AutoMinBody;
+                fallback.fontSizeMax = FontSizes.BodyLarge;
             }
         }
 
@@ -408,6 +419,9 @@ namespace DigitPark.Editor
             eTMP.color = TEXT_SECONDARY;
             eTMP.alignment = TextAlignmentOptions.Center;
             eTMP.fontStyle = FontStyles.Bold;
+            eTMP.enableAutoSizing = true;
+            eTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            eTMP.fontSizeMax = FontSizes.Body;
 
             // Loading Indicator
             var loading = FindOrCreate(content.transform, "LoadingIndicator");
@@ -420,6 +434,9 @@ namespace DigitPark.Editor
             ldTMP.fontStyle = FontStyles.Bold;
             ldTMP.color = CYAN_NEON;
             ldTMP.alignment = TextAlignmentOptions.Center;
+            ldTMP.enableAutoSizing = true;
+            ldTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ldTMP.fontSizeMax = FontSizes.Body;
             loading.SetActive(false);
 
             // Load More Button
@@ -447,6 +464,9 @@ namespace DigitPark.Editor
             lmtTMP.color = CYAN_NEON;
             lmtTMP.fontStyle = FontStyles.Bold;
             lmtTMP.alignment = TextAlignmentOptions.Center;
+            lmtTMP.enableAutoSizing = true;
+            lmtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lmtTMP.fontSizeMax = FontSizes.Body;
 
             loadMore.SetActive(false);
 
@@ -521,6 +541,9 @@ namespace DigitPark.Editor
             gnTMP.color = TEXT_WHITE;
             gnTMP.fontStyle = FontStyles.Bold;
             gnTMP.alignment = TextAlignmentOptions.Left;
+            gnTMP.enableAutoSizing = true;
+            gnTMP.fontSizeMin = FontSizes.AutoMinBody;
+            gnTMP.fontSizeMax = FontSizes.Body;
 
             // Result Badge (top right of info)
             var resultBadge = new GameObject("ResultBadge");
@@ -536,6 +559,9 @@ namespace DigitPark.Editor
             rbTMP.color = GREEN_WIN;
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.alignment = TextAlignmentOptions.Right;
+            rbTMP.enableAutoSizing = true;
+            rbTMP.fontSizeMin = FontSizes.AutoMinBody;
+            rbTMP.fontSizeMax = FontSizes.Body;
 
             // Opponent name (middle - opponent or practice)
             var subtitle = new GameObject("OpponentText");
@@ -551,6 +577,9 @@ namespace DigitPark.Editor
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.color = TEXT_SECONDARY;
             stTMP.alignment = TextAlignmentOptions.Left;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            stTMP.fontSizeMax = FontSizes.Body;
 
             // Detail Text (bottom - time + errors)
             var detail = new GameObject("DetailText");
@@ -566,6 +595,9 @@ namespace DigitPark.Editor
             dtTMP.fontStyle = FontStyles.Bold;
             dtTMP.color = CYAN_NEON;
             dtTMP.alignment = TextAlignmentOptions.Left;
+            dtTMP.enableAutoSizing = true;
+            dtTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            dtTMP.fontSizeMax = FontSizes.Body;
 
             // ---- Date Text (right side) ----
             var dateText = new GameObject("DateText");
@@ -581,6 +613,9 @@ namespace DigitPark.Editor
             dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.alignment = TextAlignmentOptions.Right;
+            dateTMP.enableAutoSizing = true;
+            dateTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            dateTMP.fontSizeMax = FontSizes.Body;
 
             // Save as prefab
             string prefabDir = "Assets/_Project/Prefabs/Social";
