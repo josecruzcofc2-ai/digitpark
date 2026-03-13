@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
+using DigitPark.Progression;
 
 namespace DigitPark.Games
 {
@@ -308,8 +309,10 @@ namespace DigitPark.Games
                     }
                     else if (CurrentContext.OpponentResults != null && CurrentContext.OpponentResults.Count > 0)
                     {
-                        // Compare total time with opponent's — lower time wins
-                        float opponentTime = CurrentContext.OpponentResults[CurrentContext.OpponentResults.Count - 1].FinalScore;
+                        // Compare total time with opponent's — lower time wins.
+                        // Use TotalTime (not FinalScore) for consistent comparison — FinalScore includes penalties
+                        // which are already factored into TotalTime for the local player's result.TotalTime.
+                        float opponentTime = CurrentContext.OpponentResults[CurrentContext.OpponentResults.Count - 1].TotalTime;
                         playerWon = result.Completed && result.TotalTime < opponentTime;
                     }
                     else
@@ -346,7 +349,8 @@ namespace DigitPark.Games
                     }
                     else if (CurrentContext.OpponentResults != null && CurrentContext.OpponentResults.Count > 0)
                     {
-                        float opTime = CurrentContext.OpponentResults[CurrentContext.OpponentResults.Count - 1].FinalScore;
+                        // Use TotalTime consistently (not FinalScore) for win determination
+                        float opTime = CurrentContext.OpponentResults[CurrentContext.OpponentResults.Count - 1].TotalTime;
                         isWin = result.Completed && result.TotalTime < opTime;
                     }
                     else
@@ -365,6 +369,28 @@ namespace DigitPark.Games
                     {
                         PlayerPrefs.SetInt("CurrentWinStreak", 0);
                         PlayerPrefs.Save();
+                    }
+
+                    // XP — cosmético, no afecta matchmaking. CashBattle da 50% del rate normal.
+                    bool isCashMode = CurrentContext.Mode == GameMode.CashTournament;
+                    // scorePercentile requiere datos comparativos reales (ranking backend).
+                    // Se mantiene en 0 hasta tener esos datos — sin bonus especulativo.
+                    const float scorePercentile = 0f;
+
+                    var xpResult = new GameResult
+                    {
+                        gameId     = CurrentContext.CurrentGame?.ToString() ?? "",
+                        isWin      = isWin,
+                        isPerfect  = result.Errors == 0 && result.Completed,
+                        score      = (int)result.FinalScore,
+                        scorePercentile = scorePercentile,
+                        isCashBattle = isCashMode
+                    };
+                    if (PlayerProgressionSystem.Instance != null)
+                    {
+                        int xpGained = PlayerProgressionSystem.Instance.AddGameXP(xpResult);
+                        if (xpGained > 0)
+                            MissionsManager.Instance?.ReportXPEarned(xpGained);
                     }
                 }
 

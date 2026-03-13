@@ -208,7 +208,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 0), new Vector2(1, 1),
                 Vector2.zero, Vector2.zero);
             scoresPanelRT.offsetMin = new Vector2(0, 0);
-            scoresPanelRT.offsetMax = new Vector2(0, -100); // Debajo del header
+            scoresPanelRT.offsetMax = new Vector2(0, -130); // Debajo del header (29px margin + 100px header + 1px gap)
 
             // ========== GAME SELECTOR (120px from top of ScoresPanel) ==========
             CreateGameSelectorPanel(scoresPanel.transform);
@@ -241,7 +241,7 @@ namespace DigitPark.Editor
             GameObject header = CreateOrFind(parent, "Header");
             RectTransform headerRT = SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 100));
+                new Vector2(0, -79), new Vector2(0, 100));
 
             Image headerBg = header.GetComponent<Image>();
             if (headerBg == null) headerBg = header.AddComponent<Image>();
@@ -728,6 +728,8 @@ namespace DigitPark.Editor
                 frameImg.sprite = circleSprite;
                 frameImg.color = new Color(0.15f, 0.2f, 0.3f, 1f);
                 frameImg.raycastTarget = false;
+                var fr_scores = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
+                fr_scores.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Reduced);
                 LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarFrame);
                 avatarLE.minWidth = 100;
                 avatarLE.minHeight = 100;

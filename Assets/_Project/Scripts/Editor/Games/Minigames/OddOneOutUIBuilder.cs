@@ -197,7 +197,7 @@ namespace DigitPark.Editor
             GameObject header = CreateElement(parent, "Header");
             SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 100));
+                new Vector2(0, -79), new Vector2(0, 100));
 
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0f, 0f, 0f, 0.3f);

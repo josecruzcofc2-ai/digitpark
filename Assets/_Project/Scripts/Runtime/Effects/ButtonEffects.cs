@@ -398,8 +398,10 @@ namespace DigitPark.Effects
             if (outline == null) yield break;
 
             Color baseColor = outline.effectColor;
+            // Throttle to ~30fps to avoid marking layout dirty every frame
+            var wait = new WaitForSeconds(0.033f);
 
-            while (true)
+            while (isActiveAndEnabled)
             {
                 float pulse = (Mathf.Sin(Time.time * glowPulseSpeed) + 1f) / 2f;
                 pulse = Mathf.Lerp(0.5f, 1f, pulse);
@@ -407,11 +409,9 @@ namespace DigitPark.Effects
                 var glowColor = baseColor;
                 glowColor.a = pulse;
                 outline.effectColor = glowColor;
-
-                // Tambien pulsar el tamaño del outline
                 outline.effectDistance = Vector2.one * Mathf.Lerp(2f, 4f, pulse);
 
-                yield return null;
+                yield return wait;
             }
         }
 

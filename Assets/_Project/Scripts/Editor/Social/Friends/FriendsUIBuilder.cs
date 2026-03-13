@@ -593,6 +593,8 @@ namespace DigitPark.Editor
             var afImg = avatarFrame.AddComponent<Image>();
             afImg.sprite = circleSprite;
             afImg.color = CYAN_DARK;
+            var fr_friends = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
+            fr_friends.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Reduced);
 
             // Circular mask
             var avatarMask = new GameObject("AvatarMask");

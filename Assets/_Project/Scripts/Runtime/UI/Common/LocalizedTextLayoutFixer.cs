@@ -68,6 +68,7 @@ namespace DigitPark.UI
 
         private void OnDisable()
         {
+            StopAllCoroutines();
             LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
         }
@@ -112,10 +113,11 @@ namespace DigitPark.UI
         /// </summary>
         private void FixToggleLayouts()
         {
-            var toggles = FindObjectsOfType<Toggle>(true);
+            var toggles = FindObjectsByType<Toggle>(FindObjectsSortMode.None);
 
             foreach (var toggle in toggles)
             {
+                if (toggle == null) continue;
                 // Solo procesar toggles tipo checkbox (que tienen un child "Background")
                 // Los toggles tipo switch (ON/OFF centrado) NO deben modificarse
                 Transform checkmarkBg = toggle.transform.Find("Background");
@@ -146,10 +148,10 @@ namespace DigitPark.UI
         /// </summary>
         private void FixContentSizeFitters()
         {
-            var fitters = FindObjectsOfType<ContentSizeFitter>(true);
+            var fitters = FindObjectsByType<ContentSizeFitter>(FindObjectsSortMode.None);
             foreach (var fitter in fitters)
             {
-                if (fitter.enabled)
+                if (fitter != null && fitter.enabled)
                 {
                     // Forzar actualización del ContentSizeFitter
                     fitter.SetLayoutHorizontal();
@@ -164,24 +166,30 @@ namespace DigitPark.UI
         private void ForceLayoutRebuild()
         {
             // HorizontalLayoutGroup
-            var hLayouts = FindObjectsOfType<HorizontalLayoutGroup>(true);
+            var hLayouts = FindObjectsByType<HorizontalLayoutGroup>(FindObjectsSortMode.None);
             foreach (var layout in hLayouts)
             {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
+                if (layout == null) continue;
+                var rt = layout.GetComponent<RectTransform>();
+                if (rt != null) LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
             }
 
             // VerticalLayoutGroup
-            var vLayouts = FindObjectsOfType<VerticalLayoutGroup>(true);
+            var vLayouts = FindObjectsByType<VerticalLayoutGroup>(FindObjectsSortMode.None);
             foreach (var layout in vLayouts)
             {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
+                if (layout == null) continue;
+                var rt = layout.GetComponent<RectTransform>();
+                if (rt != null) LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
             }
 
             // GridLayoutGroup
-            var gLayouts = FindObjectsOfType<GridLayoutGroup>(true);
+            var gLayouts = FindObjectsByType<GridLayoutGroup>(FindObjectsSortMode.None);
             foreach (var layout in gLayouts)
             {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(layout.GetComponent<RectTransform>());
+                if (layout == null) continue;
+                var rt = layout.GetComponent<RectTransform>();
+                if (rt != null) LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
             }
         }
 

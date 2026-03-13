@@ -1,0 +1,122 @@
+{
+  "rules": {
+    // AUDIT-FIXED [2026-03-10] B-04/B-05: Reglas de seguridad para Firebase Realtime Database
+    // Copiar este contenido al panel de Rules en Firebase Console:
+    // https://console.firebase.google.com/project/digitpark-7d772/database/rules
+
+    "players": {
+      "$uid": {
+        // Solo el usuario autenticado puede leer/escribir su propio perfil
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "leaderboards": {
+      // Cualquier usuario autenticado puede leer leaderboards
+      ".read": "auth != null",
+
+      "global": {
+        "$gameId": {
+          "$uid": {
+            // El usuario solo puede escribir su propio score
+            // NOTA: Para real-money, mover escritura a Cloud Functions
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['userId', 'username', 'time', 'countryCode'])"
+          }
+        }
+      },
+
+      "country": {
+        "$countryCode": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['userId', 'username', 'time', 'countryCode'])"
+          }
+        }
+      }
+    },
+
+    "scores": {
+      "$uid": {
+        // Solo el usuario puede leer/escribir su historial de scores
+        ".read": "auth != null && auth.uid === $uid",
+        "$scoreId": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['userId', 'time', 'timestamp'])"
+        }
+      }
+    },
+
+    "tournaments": {
+      // Cualquier usuario autenticado puede leer torneos
+      ".read": "auth != null",
+
+      "$tournamentId": {
+        // Solo el creador puede modificar su torneo (creación o actualización)
+        // AUDIT-FIXED [2026-03-10] P1: era auth != null (cualquier usuario podía sobreescribir torneos ajenos)
+        ".write": "auth != null && (!data.exists() && newData.child('creatorId').val() === auth.uid || data.child('creatorId').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['tournamentId', 'name', 'status', 'creatorId'])"
+      }
+    },
+
+    "notifications": {
+      "$uid": {
+        // Solo el usuario puede leer/escribir sus notificaciones
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "friendRequests": {
+      "$uid": {
+        // El usuario puede leer sus propias solicitudes
+        ".read": "auth != null && auth.uid === $uid",
+        // Cualquier usuario autenticado puede crear una solicitud dirigida a otro (para enviar)
+        // El receptor puede actualizar (aceptar/rechazar) sus propias solicitudes
+        "$requestId": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['fromUid', 'toUid', 'status'])"
+        }
+      }
+    },
+
+    "matchmaking": {
+      "$uid": {
+        // Solo el usuario puede leer/escribir su propio slot de matchmaking
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "matchmaking_queue": {
+      // Cualquier usuario autenticado puede leer la queue (para buscar oponentes)
+      ".read": "auth != null",
+      "$gameKey": {
+        "$entryId": {
+          // Cualquier usuario autenticado puede crear/eliminar entradas
+          // (necesario para que el oponente pueda borrar la entrada al hacer match)
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['userId', 'userName', 'timestamp', 'status']) && newData.child('battleCardId').exists()"
+        }
+      }
+    },
+
+    "active_matches": {
+      // Cualquier usuario autenticado puede leer matches (para polling)
+      ".read": "auth != null",
+      "$matchId": {
+        // Cualquier usuario autenticado puede crear/actualizar matches
+        // (player1 crea, player2 actualiza su score)
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['gameKey', 'player1Id', 'player2Id', 'status'])"
+      }
+    },
+
+    // Bloquear acceso por defecto a cualquier otra ruta
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

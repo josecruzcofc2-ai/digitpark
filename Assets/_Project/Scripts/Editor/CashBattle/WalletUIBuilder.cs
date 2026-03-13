@@ -271,8 +271,8 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.offsetMin = new Vector2(0, -HEADER_HEIGHT);
-            rt.offsetMax = Vector2.zero;
+            rt.anchoredPosition = new Vector2(0, -29); // consistent top margin across all scenes
+            rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
 
             // Back Button - try prefab first
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PREFAB);

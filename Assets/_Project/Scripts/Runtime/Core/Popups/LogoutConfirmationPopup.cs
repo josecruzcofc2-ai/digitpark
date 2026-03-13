@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using DigitPark.Localization;
 
 namespace DigitPark.UI.Common
 {
@@ -25,6 +26,16 @@ namespace DigitPark.UI.Common
         /// </summary>
         public void Show(Action onConfirmCallback)
         {
+            // Update texts via localization (supports runtime language changes)
+            if (titleText != null) titleText.text = AutoLocalizer.Get("logout_title");
+            if (messageText != null) messageText.text = AutoLocalizer.Get("logout_confirm_message");
+
+            // Update button texts
+            var confirmTmp = confirmButton?.GetComponentInChildren<TextMeshProUGUI>();
+            if (confirmTmp != null) confirmTmp.text = AutoLocalizer.Get("popup_confirm_button");
+            var cancelTmp = cancelButton?.GetComponentInChildren<TextMeshProUGUI>();
+            if (cancelTmp != null) cancelTmp.text = AutoLocalizer.Get("popup_cancel_button");
+
             if (panel != null)
             {
                 panel.SetActive(true);
@@ -37,7 +48,8 @@ namespace DigitPark.UI.Common
                 DOTween.Sequence()
                     .Join(panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                     .Join(cg.DOFade(1f, 0.25f))
-                    .SetUpdate(true);
+                    .SetUpdate(true)
+                    .SetLink(panel);
             }
 
             onConfirm = onConfirmCallback;
@@ -57,7 +69,8 @@ namespace DigitPark.UI.Common
                         .Join(panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                         .Join(cg.DOFade(0f, 0.2f))
                         .OnComplete(() => { panel.SetActive(false); Destroy(gameObject); })
-                        .SetUpdate(true);
+                        .SetUpdate(true)
+                        .SetLink(panel);
                 }
                 else
                 {
@@ -130,7 +143,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI title = UIFactory.CreateText(
                 panelObj.transform,
                 "Title",
-                "CERRAR SESIÓN",
+                "LOG OUT",
                 36,
                 UIFactory.CoralRed,
                 TMPro.TextAlignmentOptions.Center
@@ -146,7 +159,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI message = UIFactory.CreateText(
                 panelObj.transform,
                 "Message",
-                "Estás a punto de cerrar sesión\nen tu cuenta",
+                "You are about to sign out of your account",
                 28,
                 Color.white,
                 TMPro.TextAlignmentOptions.Center
@@ -160,7 +173,7 @@ namespace DigitPark.UI.Common
             Button confirmBtn = UIFactory.CreateButton(
                 panelObj.transform,
                 "ConfirmButton",
-                "CONFIRMAR",
+                "CONFIRM",
                 new Vector2(300, 70),
                 UIFactory.BrightGreen
             );
@@ -173,7 +186,7 @@ namespace DigitPark.UI.Common
             Button cancelBtn = UIFactory.CreateButton(
                 panelObj.transform,
                 "CancelButton",
-                "CANCELAR",
+                "CANCEL",
                 new Vector2(300, 70),
                 new Color(0.5f, 0.2f, 0.2f)
             );

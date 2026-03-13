@@ -169,7 +169,7 @@ namespace DigitPark.Editor
             GameObject header = CreateElement(safeArea.transform, "Header");
             SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 100));
+                new Vector2(0, -79), new Vector2(0, 100));
 
             GameObject title = CreateElement(header.transform, "TitleText");
             SetupRectTransform(title,

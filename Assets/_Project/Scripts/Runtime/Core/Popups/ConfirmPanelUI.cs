@@ -144,7 +144,7 @@ namespace DigitPark.UI.Panels
             {
                 var blockerCG = blockerPanel.GetComponent<CanvasGroup>();
                 if (blockerCG == null) blockerCG = blockerPanel.AddComponent<CanvasGroup>();
-                blockerCG.DOFade(0f, 0.2f).OnComplete(() => blockerPanel.SetActive(false)).SetUpdate(true);
+                blockerCG.DOFade(0f, 0.2f).OnComplete(() => blockerPanel.SetActive(false)).SetUpdate(true).SetLink(blockerPanel);
             }
 
             onConfirm = null;
@@ -160,7 +160,8 @@ namespace DigitPark.UI.Panels
             DOTween.Sequence()
                 .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                 .Join(cg.DOFade(1f, 0.25f))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
 
         private void AnimateOut(Transform t, Action onComplete)
@@ -171,7 +172,8 @@ namespace DigitPark.UI.Panels
                 .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                 .Join(cg.DOFade(0f, 0.2f))
                 .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
 
         /// <summary>

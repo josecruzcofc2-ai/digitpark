@@ -495,7 +495,7 @@ namespace DigitPark.Managers
                 {
                     var cg = loadingPanel.GetComponent<CanvasGroup>();
                     if (cg != null)
-                        cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingPanel.SetActive(false));
+                        cg.DOFade(0f, 0.2f).SetUpdate(true).SetLink(loadingPanel).OnComplete(() => { if (loadingPanel != null) loadingPanel.SetActive(false); });
                     else
                         loadingPanel.SetActive(false);
                 }

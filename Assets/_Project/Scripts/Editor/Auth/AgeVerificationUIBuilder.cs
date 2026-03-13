@@ -166,7 +166,7 @@ namespace DigitPark.Editor
             text.text = "Digit Park";
             text.fontSize = FontSizes.Branding;
             text.fontStyle = FontStyles.Bold;
-            text.color = CyanNeon;
+            text.color = GoldPremium;
             text.alignment = TextAlignmentOptions.Center;
             text.enableAutoSizing = true;
             text.fontSizeMin = FontSizes.AutoMinTitle;

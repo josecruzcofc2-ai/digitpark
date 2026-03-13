@@ -347,7 +347,7 @@ namespace DigitPark.Editor
 
             RectTransform rt = header.AddComponent<RectTransform>();
             rt.anchorMin = new Vector2(0, 0.93f);
-            rt.anchorMax = new Vector2(1, 1f);
+            rt.anchorMax = new Vector2(1, 0.985f);
             rt.sizeDelta = Vector2.zero;
 
             Image bg = header.AddComponent<Image>();

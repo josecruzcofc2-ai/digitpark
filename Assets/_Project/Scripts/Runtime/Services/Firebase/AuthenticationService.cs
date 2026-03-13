@@ -139,10 +139,39 @@ namespace DigitPark.Services.Firebase
 
                 currentUser = firebaseAuth.CurrentUser;
 
+                // AUDIT-FIXED [2026-03-10] H-02: Si Firebase restaura sesión automáticamente
+                // y currentPlayerData es null, cargar datos del jugador desde la DB
                 if (signedIn)
                 {
                     Debug.Log($"[Auth] Estado cambiado - Usuario: {RedactEmail(currentUser.Email)}");
+                    if (currentPlayerData == null)
+                    {
+                        _ = LoadOrCreatePlayerData(currentUser).ContinueWith(t =>
+                        {
+                            if (this == null) return;
+                            if (t.IsFaulted)
+                                Debug.LogError($"[Auth] Error cargando datos en StateChanged: {t.Exception?.GetBaseException().Message}");
+                            else
+                                OnLoginSuccess?.Invoke(currentPlayerData);
+                        }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
+                    }
                 }
+            }
+        }
+
+        // AUDIT-FIXED [2026-03-10] H-01: Refrescar token al volver al foreground
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus && useFirebaseReal && currentUser != null)
+            {
+                _ = currentUser.ReloadAsync().ContinueWithOnMainThread(t =>
+                {
+                    if (this == null) return;
+                    if (t.IsFaulted)
+                        Debug.LogWarning($"[Auth] Token refresh falló: {t.Exception?.GetBaseException().Message}");
+                    else
+                        Debug.Log("[Auth] Token refrescado al volver al foreground");
+                });
             }
         }
 
@@ -243,7 +272,8 @@ namespace DigitPark.Services.Firebase
                     if (taken)
                     {
                         Debug.LogWarning("[Auth] Username already taken");
-                        OnLoginFailed?.Invoke("username-already-taken");
+                        // AUDIT-FIXED [2026-03-10] M-06: usar AutoLocalizer en lugar de string hardcodeada
+                        OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_username_taken"));
                         return false;
                     }
                 }
@@ -759,7 +789,8 @@ namespace DigitPark.Services.Firebase
                 AuthError.NetworkRequestFailed => AutoLocalizer.Get("auth_error_network"),
                 AuthError.TooManyRequests => AutoLocalizer.Get("auth_error_too_many_requests"),
                 AuthError.UserDisabled => AutoLocalizer.Get("auth_error_user_disabled"),
-                _ => $"Error: {ex.Message}"
+                // AUDIT-FIXED [2026-03-10] H-03: usar clave localizada en lugar de mensaje raw de Firebase
+                _ => AutoLocalizer.Get("auth_error_generic")
             };
         }
 
@@ -778,6 +809,7 @@ namespace DigitPark.Services.Firebase
                 {
                     string jsonData = PlayerPrefs.GetString(userDataKey);
                     currentPlayerData = JsonUtility.FromJson<PlayerData>(jsonData);
+                    if (currentPlayerData == null) { Debug.LogWarning("[Auth] (Sim) Auto-login: malformed PlayerData JSON, skipping."); return; }
                     Debug.Log($"[Auth] (Sim) Auto-login: {currentPlayerData.username}");
                 }
             }
@@ -808,6 +840,12 @@ namespace DigitPark.Services.Firebase
 
                 string jsonData = PlayerPrefs.GetString($"SimUser_{userId}");
                 currentPlayerData = JsonUtility.FromJson<PlayerData>(jsonData);
+                if (currentPlayerData == null)
+                {
+                    Debug.LogError("[Auth] (Sim) Login: malformed PlayerData JSON.");
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_generic"));
+                    return false;
+                }
                 currentPlayerData.lastLoginDate = DateTime.UtcNow;
 
                 if (rememberMe)
@@ -824,7 +862,8 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                OnLoginFailed?.Invoke(ex.Message);
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_generic"));
                 return false;
             }
         }
@@ -866,7 +905,8 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                OnLoginFailed?.Invoke(ex.Message);
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_generic"));
                 return false;
             }
         }
@@ -900,7 +940,8 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                OnLoginFailed?.Invoke(ex.Message);
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_generic"));
                 return false;
             }
         }
@@ -936,7 +977,8 @@ namespace DigitPark.Services.Firebase
             }
             catch (Exception ex)
             {
-                OnLoginFailed?.Invoke(ex.Message);
+                Debug.LogError($"[Auth] Unexpected error ({ex.GetType().Name}): {ex.Message}");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_generic"));
                 return false;
             }
         }

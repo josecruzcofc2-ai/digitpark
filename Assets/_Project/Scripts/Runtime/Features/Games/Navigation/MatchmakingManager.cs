@@ -97,6 +97,7 @@ namespace DigitPark.Managers
             LoadMatchParameters();
             SetupPlayerInfo();
             SetupGameIcon();
+            ApplyPlayerBattleCard();
             StartSearching();
         }
 
@@ -361,6 +362,36 @@ namespace DigitPark.Managers
             };
         }
 
+        private void ApplyPlayerBattleCard()
+        {
+            var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
+            if (bcService == null) return;
+
+            var card = bcService.GetEquippedCard();
+            if (card == null) return;
+
+            // Find BattleCardApplier on player card
+            if (playerCard != null)
+            {
+                var applier = playerCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
+                if (applier != null)
+                    applier.ApplyCard(card);
+            }
+        }
+
+        private void ApplyOpponentBattleCard(string battleCardId)
+        {
+            var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
+            if (bcService == null || opponentCard == null) return;
+
+            var card = bcService.GetCardById(battleCardId) ?? bcService.GetDefault();
+            if (card == null) return;
+
+            var applier = opponentCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
+            if (applier != null)
+                applier.ApplyCard(card);
+        }
+
         #endregion
 
         #region Searching
@@ -519,6 +550,11 @@ namespace DigitPark.Managers
             try
             {
                 ShowOpponentSearching(false);
+
+                // Apply opponent BattleCard cosmetic
+                string opponentBcId = MatchmakingService.Instance?.OpponentBattleCardId;
+                if (!string.IsNullOrEmpty(opponentBcId))
+                    ApplyOpponentBattleCard(opponentBcId);
 
                 // Parse opponent name
                 if (opponentNameText != null)
@@ -689,6 +725,9 @@ namespace DigitPark.Managers
             if (getReadyText != null)
                 getReadyText.text = AutoLocalizer.Get("matchmaking_get_ready");
 
+            // Pause BattleCard animations during countdown
+            PauseBattleCardAnimations();
+
             for (int i = 3; i > 0; i--)
             {
                 if (countdownText != null)
@@ -715,6 +754,7 @@ namespace DigitPark.Managers
 
             yield return new WaitForSeconds(0.5f);
 
+            ResumeBattleCardAnimations();
             StartOnlineGame();
         }
 
@@ -828,6 +868,30 @@ namespace DigitPark.Managers
             }
 
             target.localScale = targetScale;
+        }
+
+        private void PauseBattleCardAnimations()
+        {
+            ForEachBattleCardApplier(a => a.PauseAnimation());
+        }
+
+        private void ResumeBattleCardAnimations()
+        {
+            ForEachBattleCardApplier(a => a.ResumeAnimation());
+        }
+
+        private void ForEachBattleCardApplier(System.Action<DigitPark.Cosmetics.BattleCardApplier> action)
+        {
+            if (playerCard != null)
+            {
+                var applier = playerCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
+                if (applier != null) action(applier);
+            }
+            if (opponentCard != null)
+            {
+                var applier = opponentCard.GetComponentInChildren<DigitPark.Cosmetics.BattleCardApplier>();
+                if (applier != null) action(applier);
+            }
         }
 
         private float EaseOutBack(float t)

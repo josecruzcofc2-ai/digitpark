@@ -339,19 +339,23 @@ namespace DigitPark.Animations
         private static Vector2 GetOffscreenPosition(RectTransform target, Direction direction)
         {
             Vector2 pos = target.anchoredPosition;
-            float screenWidth = Screen.width;
-            float screenHeight = Screen.height;
+
+            // Use canvas reference size to compute offscreen offsets in canvas units
+            Canvas canvas = target.GetComponentInParent<Canvas>();
+            RectTransform canvasRT = canvas != null ? canvas.GetComponent<RectTransform>() : null;
+            float canvasWidth = canvasRT != null ? canvasRT.rect.width : Screen.width;
+            float canvasHeight = canvasRT != null ? canvasRT.rect.height : Screen.height;
 
             switch (direction)
             {
                 case Direction.Left:
-                    return new Vector2(-screenWidth, pos.y);
+                    return new Vector2(-canvasWidth, pos.y);
                 case Direction.Right:
-                    return new Vector2(screenWidth, pos.y);
+                    return new Vector2(canvasWidth, pos.y);
                 case Direction.Up:
-                    return new Vector2(pos.x, screenHeight);
+                    return new Vector2(pos.x, canvasHeight);
                 case Direction.Down:
-                    return new Vector2(pos.x, -screenHeight);
+                    return new Vector2(pos.x, -canvasHeight);
                 default:
                     return pos;
             }

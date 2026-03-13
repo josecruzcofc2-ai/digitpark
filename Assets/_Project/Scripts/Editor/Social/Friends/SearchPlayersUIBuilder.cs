@@ -136,7 +136,7 @@ namespace DigitPark.Editor
             GameObject header = CreateOrFind(canvasTransform, "Header");
             SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -70), new Vector2(0, 140));
+                new Vector2(0, -99), new Vector2(0, 140));
 
             Image headerBg = header.GetComponent<Image>();
             if (headerBg == null) headerBg = header.AddComponent<Image>();
@@ -550,6 +550,8 @@ namespace DigitPark.Editor
             Image frameImg = avatarFrame.AddComponent<Image>();
             frameImg.sprite = circleSprite;
             frameImg.color = CYAN_DARK;
+            var fr_search = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
+            fr_search.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Reduced);
 
             GameObject avatarMask = new GameObject("AvatarMask");
             avatarMask.transform.SetParent(avatarFrame.transform, false);

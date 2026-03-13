@@ -185,6 +185,12 @@ namespace DigitPark.Managers
             if (MatchmakingService.Instance != null)
             {
                 // Enviar el último resultado del sprint
+                if (sprintContext.Results == null || sprintContext.Results.Count == 0)
+                {
+                    Debug.LogError("[OnlineResultManager] Sprint results list is empty — cannot submit!");
+                    ResultPanelManager.Instance?.ShowSprintSummary(sprintContext);
+                    return;
+                }
                 var lastResult = sprintContext.Results[sprintContext.Results.Count - 1];
                 MatchmakingService.Instance.SubmitMatchResult(
                     matchId,
@@ -343,6 +349,17 @@ namespace DigitPark.Managers
             PlayerPrefs.Save();
 
             ReturnToSelector();
+        }
+
+        private void OnDestroy()
+        {
+            CancelInvoke();
+            if (currentController != null)
+            {
+                currentController.OnContinueClicked -= OnContinueClicked;
+                currentController.OnRematchClicked -= OnRematchClicked;
+            }
+            if (_instance == this) _instance = null;
         }
 
         private void ReturnToSelector()

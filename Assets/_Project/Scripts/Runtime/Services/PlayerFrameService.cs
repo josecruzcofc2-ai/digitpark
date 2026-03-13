@@ -8,7 +8,7 @@ namespace DigitPark.Services
 {
     /// <summary>
     /// Servicio singleton que gestiona marcos de perfil.
-    /// 25 marcos con diferentes metodos de obtencion.
+    /// 34 marcos con diferentes metodos de obtencion (8 coin, 6 gem, 12 real money, 5 achievement, 3 secret).
     /// Persistencia via PlayerPrefs.
     /// </summary>
     public class PlayerFrameService : MonoBehaviour
@@ -144,8 +144,8 @@ namespace DigitPark.Services
                 rarity = FrameRarity.Epic,
                 priceType = FramePriceType.DigitCoins,
                 coinPrice = 12000,
-                primaryColor = new Color(0.8f, 0.6f, 1f),
-                secondaryColor = new Color(0.5f, 0.2f, 0.8f)
+                primaryColor = new Color(0.702f, 1f, 1f),
+                secondaryColor = new Color(0.4f, 1f, 0.933f)
             });
 
             _allFrames.Add(new FrameData
@@ -156,7 +156,10 @@ namespace DigitPark.Services
                 priceType = FramePriceType.DigitCoins,
                 coinPrice = 15000,
                 primaryColor = new Color(0.9f, 0.95f, 1f),
-                secondaryColor = new Color(0.7f, 0.75f, 0.85f)
+                secondaryColor = new Color(0.7f, 0.75f, 0.85f),
+                isAnimated = true,
+                animationType = FrameAnimationType.Shimmer,
+                animationIntensity = 1
             });
 
             // ==================== GEMS (6 frames) ====================
@@ -211,8 +214,8 @@ namespace DigitPark.Services
                 rarity = FrameRarity.Epic,
                 priceType = FramePriceType.DigitGems,
                 gemPrice = 750,
-                primaryColor = new Color(1f, 0.75f, 0f),
-                secondaryColor = new Color(1f, 0.5f, 0f)
+                primaryColor = new Color(0.8f, 0.533f, 0f),
+                secondaryColor = new Color(1f, 0.6f, 0f)
             });
 
             _allFrames.Add(new FrameData
@@ -223,7 +226,11 @@ namespace DigitPark.Services
                 priceType = FramePriceType.DigitGems,
                 gemPrice = 1000,
                 primaryColor = new Color(0.1f, 0.1f, 0.15f),
-                secondaryColor = new Color(0.3f, 0.05f, 0.4f)
+                secondaryColor = new Color(0.3f, 0.05f, 0.4f),
+                accentColor = new Color(0.1f, 0f, 0.15f),
+                isAnimated = true,
+                animationType = FrameAnimationType.StarParticles,
+                animationIntensity = 1
             });
 
             // ==================== REAL MONEY (3 frames) ====================
@@ -234,21 +241,27 @@ namespace DigitPark.Services
                 rarity = FrameRarity.Epic,
                 priceType = FramePriceType.RealMoney,
                 realMoneyPrice = 1.99f,
-                primaryColor = new Color(0.8f, 0.9f, 1f),
-                secondaryColor = new Color(1f, 0.6f, 0.8f),
-                isAnimated = true
+                primaryColor = new Color(1f, 1f, 1f),
+                secondaryColor = new Color(1f, 0.84f, 0f),
+                accentColor = new Color(0.941f, 0.973f, 1f),
+                isAnimated = true,
+                animationType = FrameAnimationType.SpectrumCycle,
+                animationIntensity = 2
             });
 
             _allFrames.Add(new FrameData
             {
                 frameId = "animated_fire",
-                nameKey = "frame_animated_fire",
-                rarity = FrameRarity.Legendary,
+                nameKey = "frame_quantum_fire",
+                rarity = FrameRarity.Epic,
                 priceType = FramePriceType.RealMoney,
                 realMoneyPrice = 2.99f,
-                primaryColor = new Color(1f, 0.4f, 0f),
-                secondaryColor = new Color(1f, 0.8f, 0f),
-                isAnimated = true
+                primaryColor = new Color(0f, 0.533f, 1f),
+                secondaryColor = new Color(0f, 1f, 1f),
+                accentColor = new Color(1f, 1f, 1f),
+                isAnimated = true,
+                animationType = FrameAnimationType.PlasmaFire,
+                animationIntensity = 3
             });
 
             _allFrames.Add(new FrameData
@@ -258,9 +271,147 @@ namespace DigitPark.Services
                 rarity = FrameRarity.Legendary,
                 priceType = FramePriceType.RealMoney,
                 realMoneyPrice = 4.99f,
-                primaryColor = new Color(1f, 0.84f, 0f),
-                secondaryColor = new Color(0.6f, 0.2f, 0.8f),
-                isAnimated = true
+                primaryColor = new Color(0.176f, 0f, 0.349f),
+                secondaryColor = new Color(1f, 0.84f, 0f),
+                accentColor = new Color(1f, 0.549f, 0f),
+                isAnimated = true,
+                animationType = FrameAnimationType.CrownPulse,
+                animationIntensity = 2
+            });
+
+            // ==================== REAL MONEY — nuevos 9 frames ====================
+            _allFrames.Add(new FrameData
+            {
+                frameId = "plasma_spark",
+                nameKey = "frame_plasma_spark",
+                rarity = FrameRarity.Rare,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 0.99f,
+                primaryColor = new Color(0f, 0.749f, 1f),
+                secondaryColor = new Color(1f, 1f, 1f),
+                accentColor = new Color(0.251f, 0.878f, 0.816f),
+                isAnimated = true,
+                animationType = FrameAnimationType.ElectricArcs,
+                animationIntensity = 2
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "prism_shift",
+                nameKey = "frame_prism_shift",
+                rarity = FrameRarity.Rare,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 0.99f,
+                primaryColor = new Color(1f, 0f, 0f),
+                secondaryColor = new Color(1f, 1f, 1f),
+                isAnimated = true,
+                animationType = FrameAnimationType.HueRotation,
+                animationIntensity = 2
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "aurora_borealis",
+                nameKey = "frame_aurora_borealis",
+                rarity = FrameRarity.Epic,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 3.99f,
+                primaryColor = new Color(0f, 1f, 0.8f),
+                secondaryColor = new Color(0.482f, 0.184f, 0.745f),
+                accentColor = new Color(0f, 0.808f, 0.82f),
+                isAnimated = true,
+                animationType = FrameAnimationType.AuroraRibbons,
+                animationIntensity = 2
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "void_walker",
+                nameKey = "frame_void_walker",
+                rarity = FrameRarity.Legendary,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 5.99f,
+                primaryColor = new Color(0.02f, 0.02f, 0.188f),
+                secondaryColor = new Color(0.251f, 0.376f, 1f),
+                accentColor = new Color(1f, 1f, 1f),
+                isAnimated = true,
+                animationType = FrameAnimationType.StarParticles,
+                animationIntensity = 1
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "storm_surge",
+                nameKey = "frame_storm_surge",
+                rarity = FrameRarity.Legendary,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 5.99f,
+                primaryColor = new Color(0.055f, 0.102f, 0.239f),
+                secondaryColor = new Color(0.878f, 0.878f, 1f),
+                accentColor = new Color(1f, 0.843f, 0f),
+                isAnimated = true,
+                animationType = FrameAnimationType.LightningFlash,
+                animationIntensity = 3
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "cosmic_rift",
+                nameKey = "frame_cosmic_rift",
+                rarity = FrameRarity.Legendary,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 9.99f,
+                primaryColor = new Color(0.039f, 0f, 0.082f),
+                secondaryColor = new Color(1f, 0f, 1f),
+                accentColor = new Color(1f, 0.502f, 1f),
+                isAnimated = true,
+                animationType = FrameAnimationType.CrackGlow,
+                animationIntensity = 3
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "infernal_god",
+                nameKey = "frame_infernal_god",
+                rarity = FrameRarity.Legendary,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 9.99f,
+                primaryColor = new Color(0.102f, 0f, 0f),
+                secondaryColor = new Color(1f, 0.133f, 0f),
+                accentColor = new Color(1f, 0.533f, 0f),
+                isAnimated = true,
+                animationType = FrameAnimationType.LayeredFire,
+                animationIntensity = 3
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "divine_light",
+                nameKey = "frame_divine_light",
+                rarity = FrameRarity.Legendary,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 14.99f,
+                primaryColor = new Color(1f, 0.843f, 0f),
+                secondaryColor = new Color(1f, 1f, 1f),
+                accentColor = new Color(1f, 0.961f, 0.667f),
+                isAnimated = true,
+                animationType = FrameAnimationType.GodRays,
+                animationIntensity = 2
+            });
+
+            _allFrames.Add(new FrameData
+            {
+                frameId = "quantum_break",
+                nameKey = "frame_quantum_break",
+                rarity = FrameRarity.Legendary,
+                priceType = FramePriceType.RealMoney,
+                realMoneyPrice = 14.99f,
+                primaryColor = new Color(0f, 1f, 0.255f),
+                secondaryColor = new Color(0.051f, 0.051f, 0.051f),
+                accentColor = new Color(1f, 0f, 0.267f),
+                isAnimated = true,
+                animationType = FrameAnimationType.GlitchBurst,
+                animationIntensity = 3
             });
 
             // ==================== ACHIEVEMENT (5 frames) ====================
@@ -282,8 +433,8 @@ namespace DigitPark.Services
                 rarity = FrameRarity.Rare,
                 priceType = FramePriceType.Achievement,
                 achievementId = "games_100",
-                primaryColor = new Color(0.8f, 0.6f, 0.2f),
-                secondaryColor = new Color(0.6f, 0.4f, 0.1f)
+                primaryColor = new Color(0.439f, 0.502f, 0.565f),
+                secondaryColor = new Color(0.69f, 0.769f, 0.871f)
             });
 
             _allFrames.Add(new FrameData
@@ -305,7 +456,10 @@ namespace DigitPark.Services
                 priceType = FramePriceType.Achievement,
                 achievementId = "friends_50",
                 primaryColor = new Color(1f, 0.4f, 0.7f),
-                secondaryColor = new Color(0.8f, 0.2f, 0.5f)
+                secondaryColor = new Color(0.8f, 0.2f, 0.5f),
+                isAnimated = true,
+                animationType = FrameAnimationType.Shimmer,
+                animationIntensity = 1
             });
 
             _allFrames.Add(new FrameData
@@ -317,7 +471,9 @@ namespace DigitPark.Services
                 achievementId = "streak_20",
                 primaryColor = new Color(1f, 0.5f, 0f),
                 secondaryColor = new Color(1f, 0.2f, 0f),
-                isAnimated = true
+                isAnimated = true,
+                animationType = FrameAnimationType.Shimmer,
+                animationIntensity = 1
             });
 
             // ==================== SECRET (3 frames) ====================
@@ -353,7 +509,9 @@ namespace DigitPark.Services
                 achievementId = "speed_demon",
                 primaryColor = new Color(1f, 0f, 0.3f),
                 secondaryColor = new Color(0.8f, 0f, 0.6f),
-                isAnimated = true
+                isAnimated = true,
+                animationType = FrameAnimationType.LightningFlash,
+                animationIntensity = 2
             });
         }
 
@@ -392,7 +550,11 @@ namespace DigitPark.Services
             PlayerPrefs.Save();
 
             // Sync to Firebase
-            _ = SyncFramesToFirebase(_equippedFrameId, ownedJson);
+            SyncFramesToFirebase(_equippedFrameId, ownedJson).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[PlayerFrameService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void SaveEquippedFrame()
@@ -403,7 +565,11 @@ namespace DigitPark.Services
             // Sync to Firebase
             var data = new StringListWrapper { items = new List<string>(_ownedFrames) };
             string ownedJson = JsonUtility.ToJson(data);
-            _ = SyncFramesToFirebase(_equippedFrameId, ownedJson);
+            SyncFramesToFirebase(_equippedFrameId, ownedJson).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[PlayerFrameService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private async Task SyncFramesToFirebase(string equippedFrame, string ownedFramesJson)

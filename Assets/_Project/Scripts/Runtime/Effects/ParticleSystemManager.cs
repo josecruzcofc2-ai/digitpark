@@ -444,12 +444,20 @@ namespace DigitPark.Effects
         private Material particleMaterial;
         private Material rippleMaterial;
 
+        private static Shader GetParticleShader()
+        {
+            return Shader.Find("Particles/Standard Unlit")
+                ?? Shader.Find("Particles/Alpha Blended")
+                ?? Shader.Find("Sprites/Default");
+        }
+
         private Material GetParticleMaterial()
         {
             if (particleMaterial == null)
             {
-                // Crear material basico de particulas
-                particleMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+                var shader = GetParticleShader();
+                if (shader == null) { Debug.LogError("[ParticleSystemManager] No particle shader found"); return null; }
+                particleMaterial = new Material(shader);
                 particleMaterial.SetFloat("_Mode", 2); // Fade
                 particleMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 particleMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
@@ -466,7 +474,9 @@ namespace DigitPark.Effects
         {
             if (rippleMaterial == null)
             {
-                rippleMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+                var shader = GetParticleShader();
+                if (shader == null) { Debug.LogError("[ParticleSystemManager] No particle shader found"); return null; }
+                rippleMaterial = new Material(shader);
                 rippleMaterial.SetFloat("_Mode", 2);
                 rippleMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 rippleMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);

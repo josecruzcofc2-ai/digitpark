@@ -6,7 +6,7 @@ using DigitPark.Themes;
 namespace DigitPark.Editor
 {
     /// <summary>
-    /// Creates all 19 premium theme assets for DigitPark.
+    /// Creates all 27 premium theme assets for DigitPark.
     /// Run from: DigitPark > Themes > Create All Theme Assets
     ///
     /// Theme catalog (sorted by exoticism, most exotic first):
@@ -29,10 +29,20 @@ namespace DigitPark.Editor
     /// 17. Electric Blue    - Royal blue racing/sports
     /// 18. Arctic           - Ice cold sky blue
     /// 19. Monochrome       - Pure black and white minimal
+    /// --- NEW 8 ---
+    /// 20. Synthwave        - 80s retrowave: hot pink + purple + cyan
+    /// 21. Obsidian         - Ultra-premium near-black + cold pearl/white chrome glow
+    /// 22. Aurora           - Northern lights: teal + purple bicolor
+    /// 23. Blaze            - Pure electric orange (#FF6B00, hue ~27 deg, NOT gold/money)
+    /// 24. Copper           - Rose gold / copper metallic warm tones
+    /// 25. Midnight         - Near-black navy with soft steel blue, minimal glow
+    /// 26. Holo             - Holographic: cyan + hot pink + gold tricolor max glow
+    /// 27. Desert Dusk      - Terracotta + warm earth organic tones
     /// (Base: Neon Dark - cyan, not premium)
     ///
-    /// PROHIBITED ZONE: No gold/amber/yellow themes (45-65 hue).
-    /// Gold is reserved for CashBattle (real money) to avoid confusion.
+    /// PROHIBITED ZONE: No gold/amber/yellow themes (hue 45-65 deg).
+    /// Gold/yellow = money psychology. MUST stay exclusive to CashBattle UI.
+    /// Removed: Gold Rush (#C9A227 gold) and Solar Flare (#FFE000 yellow) — both prohibited.
     /// </summary>
     public class ThemeCollectionCreator
     {
@@ -40,14 +50,16 @@ namespace DigitPark.Editor
         public static void CreateAllThemes()
         {
             if (!EditorUtility.DisplayDialog("Crear Temas",
-                "Esto creara 19 temas premium en Resources/Themes/.\n\n" +
-                "Originales:\n" +
+                "Esto creara 27 temas premium en Resources/Themes/.\n\n" +
+                "Existentes (19):\n" +
                 "- Electric Violet, Crimson Blaze, Sakura, Emerald\n" +
-                "- Sunset, Arctic, Monochrome, Deep Ocean\n\n" +
-                "Nuevos:\n" +
+                "- Sunset, Arctic, Monochrome, Deep Ocean\n" +
                 "- Toxic Lime, Matrix, Cyber Fuchsia, Plasma Indigo\n" +
                 "- Electric Blue, Coral Surge, Infrared, Phantom\n" +
                 "- Titanium, Nebula, Volcanic\n\n" +
+                "Nuevos (8):\n" +
+                "- Synthwave, Obsidian, Aurora, Blaze\n" +
+                "- Copper, Midnight, Holo, Desert Dusk\n\n" +
                 "Los temas existentes con el mismo nombre seran reemplazados.\n" +
                 "Midnight Gold sera eliminado (conflicto con CashBattle gold).",
                 "Crear", "Cancelar"))
@@ -91,6 +103,15 @@ namespace DigitPark.Editor
             count += CreateTheme(BuildTitanium()) ? 1 : 0;
             count += CreateTheme(BuildNebula()) ? 1 : 0;
             count += CreateTheme(BuildVolcanic()) ? 1 : 0;
+            // === 8 Nuevos ===
+            count += CreateTheme(BuildSynthwave()) ? 1 : 0;
+            count += CreateTheme(BuildObsidian()) ? 1 : 0;
+            count += CreateTheme(BuildAurora()) ? 1 : 0;
+            count += CreateTheme(BuildBlaze()) ? 1 : 0;
+            count += CreateTheme(BuildCopper()) ? 1 : 0;
+            count += CreateTheme(BuildMidnight()) ? 1 : 0;
+            count += CreateTheme(BuildHolo()) ? 1 : 0;
+            count += CreateTheme(BuildDesertDusk()) ? 1 : 0;
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -1306,6 +1327,566 @@ namespace DigitPark.Editor
 
             t.rowEven = Hex("#24120E", 0.5f);
             t.rowOdd = Hex("#2E1A14", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 20. SYNTHWAVE (#FF2D9B) - 80s retrowave hot pink + purple + cyan
+        // ============================================================
+        private static ThemeData BuildSynthwave()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Synthwave";
+            t.themeName = "Synthwave";
+            t.themeDescription = "80s retrowave neon. Hot pink meets electric purple and cyan in a Miami night.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#0D0A14");
+            t.secondaryBackground = Hex("#160F22");
+            t.tertiaryBackground = Hex("#1E1530");
+            t.overlayColor = Hex("#000000", 0.88f);
+
+            t.primaryAccent = Hex("#FF2D9B");
+            t.secondaryAccent = Hex("#BF00FF");
+            t.tertiaryAccent = Hex("#00D4FF");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#C8A0CC");
+            t.textDisabled = Hex("#5A3D6B");
+            t.textTitle = Hex("#FF2D9B");
+            t.textOnPrimary = Color.white;
+
+            t.buttonPrimary = Hex("#FF2D9B");
+            t.buttonPrimaryHover = Hex("#FF5CB5");
+            t.buttonPrimaryPressed = Hex("#CC1A7A");
+            t.buttonSecondary = Hex("#281840");
+            t.buttonSecondaryHover = Hex("#35224F");
+
+            t.inputBackground = Hex("#160F22");
+            t.inputBorder = Hex("#4A2860");
+            t.inputBorderFocused = Hex("#FF2D9B");
+            t.inputPlaceholder = Hex("#5A3D6B");
+
+            t.glowColor = Hex("#FF2D9B", 0.55f);
+            t.glowIntensity = 0.55f;
+
+            t.cardBackground = Hex("#1A1030");
+            t.cardBorder = Hex("#FF2D9B", 0.35f);
+
+            t.headerPurple = Hex("#2E1250");
+            t.headerNavy = Hex("#150A2A");
+            t.backgroundNavy = Hex("#0D0A14");
+            t.backgroundPurple = Hex("#1C0D30");
+
+            t.tabActive = Hex("#FF2D9B");
+            t.tabInactive = Hex("#281840");
+            t.tabTextActive = Color.white;
+            t.tabTextInactive = Hex("#7A5A8A");
+
+            t.scrollbarTrack = Hex("#160F22");
+            t.scrollbarHandle = Hex("#FF2D9B", 0.5f);
+
+            t.toggleOn = Hex("#FF2D9B");
+            t.toggleOff = Hex("#281840");
+            t.toggleCheckmark = Color.white;
+
+            t.sliderTrack = Hex("#281840");
+            t.sliderFill = Hex("#FF2D9B");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#160F22", 0.5f);
+            t.rowOdd = Hex("#1E1530", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 21. OBSIDIAN (#D8DCE8) - Ultra-premium near-black + cold pearl white chrome
+        // ============================================================
+        private static ThemeData BuildObsidian()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Obsidian";
+            t.themeName = "Obsidian";
+            t.themeDescription = "Volcanic glass. Near-pure black with cold pearl-white chrome glow. The darkest premium.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#030305");
+            t.secondaryBackground = Hex("#080810");
+            t.tertiaryBackground = Hex("#0E0E18");
+            t.overlayColor = Hex("#000000", 0.95f);
+
+            t.primaryAccent = Hex("#D8DCE8");
+            t.secondaryAccent = Hex("#A8B0C0");
+            t.tertiaryAccent = Hex("#F0F2F8");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#9098A8");
+            t.textDisabled = Hex("#404858");
+            t.textTitle = Hex("#D8DCE8");
+            t.textOnPrimary = Hex("#030305");
+
+            t.buttonPrimary = Hex("#D8DCE8");
+            t.buttonPrimaryHover = Hex("#E8ECF4");
+            t.buttonPrimaryPressed = Hex("#A8B0C0");
+            t.buttonSecondary = Hex("#141420");
+            t.buttonSecondaryHover = Hex("#1C1C28");
+
+            t.inputBackground = Hex("#080810");
+            t.inputBorder = Hex("#282838");
+            t.inputBorderFocused = Hex("#D8DCE8");
+            t.inputPlaceholder = Hex("#404858");
+
+            t.glowColor = Hex("#D8DCE8", 0.35f);
+            t.glowIntensity = 0.32f;
+
+            t.cardBackground = Hex("#0C0C16");
+            t.cardBorder = Hex("#D8DCE8", 0.2f);
+
+            t.headerPurple = Hex("#101020");
+            t.headerNavy = Hex("#030308");
+            t.backgroundNavy = Hex("#030305");
+            t.backgroundPurple = Hex("#0A0A14");
+
+            t.tabActive = Hex("#D8DCE8");
+            t.tabInactive = Hex("#141420");
+            t.tabTextActive = Hex("#030305");
+            t.tabTextInactive = Hex("#404858");
+
+            t.scrollbarTrack = Hex("#080810");
+            t.scrollbarHandle = Hex("#D8DCE8", 0.4f);
+
+            t.toggleOn = Hex("#D8DCE8");
+            t.toggleOff = Hex("#141420");
+            t.toggleCheckmark = Hex("#030305");
+
+            t.sliderTrack = Hex("#141420");
+            t.sliderFill = Hex("#D8DCE8");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#080810", 0.5f);
+            t.rowOdd = Hex("#0E0E18", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 22. AURORA (#00E5CC) - Northern lights: teal + purple bicolor
+        // ============================================================
+        private static ThemeData BuildAurora()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Aurora";
+            t.themeName = "Aurora";
+            t.themeDescription = "Northern lights in the palm of your hand. Teal and violet dancing across dark skies.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#050F0F");
+            t.secondaryBackground = Hex("#0A1A1A");
+            t.tertiaryBackground = Hex("#0F2222");
+            t.overlayColor = Hex("#000000", 0.88f);
+
+            t.primaryAccent = Hex("#00E5CC");
+            t.secondaryAccent = Hex("#9B59B6");
+            t.tertiaryAccent = Hex("#1ABC9C");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#90C8C0");
+            t.textDisabled = Hex("#3A6660");
+            t.textTitle = Hex("#00E5CC");
+            t.textOnPrimary = Hex("#050F0F");
+
+            t.buttonPrimary = Hex("#00E5CC");
+            t.buttonPrimaryHover = Hex("#26EDD6");
+            t.buttonPrimaryPressed = Hex("#00B8A2");
+            t.buttonSecondary = Hex("#0E2828");
+            t.buttonSecondaryHover = Hex("#163434");
+
+            t.inputBackground = Hex("#0A1A1A");
+            t.inputBorder = Hex("#1E4A48");
+            t.inputBorderFocused = Hex("#00E5CC");
+            t.inputPlaceholder = Hex("#3A6660");
+
+            t.glowColor = Hex("#00E5CC", 0.5f);
+            t.glowIntensity = 0.48f;
+
+            t.cardBackground = Hex("#0C1E1E");
+            t.cardBorder = Hex("#00E5CC", 0.3f);
+
+            t.headerPurple = Hex("#1E0C30");
+            t.headerNavy = Hex("#050F18");
+            t.backgroundNavy = Hex("#050F0F");
+            t.backgroundPurple = Hex("#120820");
+
+            t.tabActive = Hex("#00E5CC");
+            t.tabInactive = Hex("#0E2828");
+            t.tabTextActive = Hex("#050F0F");
+            t.tabTextInactive = Hex("#3A8080");
+
+            t.scrollbarTrack = Hex("#0A1A1A");
+            t.scrollbarHandle = Hex("#00E5CC", 0.5f);
+
+            t.toggleOn = Hex("#00E5CC");
+            t.toggleOff = Hex("#0E2828");
+            t.toggleCheckmark = Hex("#050F0F");
+
+            t.sliderTrack = Hex("#0E2828");
+            t.sliderFill = Hex("#00E5CC");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#0A1A1A", 0.5f);
+            t.rowOdd = Hex("#0F2222", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 23. BLAZE (#FF6B00) - Pure electric orange, hue ~27 deg, NOT gold/money
+        // ============================================================
+        private static ThemeData BuildBlaze()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Blaze";
+            t.themeName = "Blaze";
+            t.themeDescription = "Pure fire energy. Electric orange blazes against the void. Speed and aggression.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#0C0804");
+            t.secondaryBackground = Hex("#181006");
+            t.tertiaryBackground = Hex("#22180A");
+            t.overlayColor = Hex("#000000", 0.88f);
+
+            t.primaryAccent = Hex("#FF6B00");
+            t.secondaryAccent = Hex("#FF9040");
+            t.tertiaryAccent = Hex("#FFD0A0");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#C89060");
+            t.textDisabled = Hex("#6B4A28");
+            t.textTitle = Hex("#FF6B00");
+            t.textOnPrimary = Color.white;
+
+            t.buttonPrimary = Hex("#FF6B00");
+            t.buttonPrimaryHover = Hex("#FF8830");
+            t.buttonPrimaryPressed = Hex("#CC5500");
+            t.buttonSecondary = Hex("#2A1A08");
+            t.buttonSecondaryHover = Hex("#38240E");
+
+            t.inputBackground = Hex("#181006");
+            t.inputBorder = Hex("#4A2E10");
+            t.inputBorderFocused = Hex("#FF6B00");
+            t.inputPlaceholder = Hex("#6B4A28");
+
+            t.glowColor = Hex("#FF6B00", 0.5f);
+            t.glowIntensity = 0.5f;
+
+            t.cardBackground = Hex("#1C1208");
+            t.cardBorder = Hex("#FF6B00", 0.3f);
+
+            t.headerPurple = Hex("#2E1A08");
+            t.headerNavy = Hex("#181006");
+            t.backgroundNavy = Hex("#0C0804");
+            t.backgroundPurple = Hex("#20120A");
+
+            t.tabActive = Hex("#FF6B00");
+            t.tabInactive = Hex("#2A1A08");
+            t.tabTextActive = Color.white;
+            t.tabTextInactive = Hex("#806040");
+
+            t.scrollbarTrack = Hex("#181006");
+            t.scrollbarHandle = Hex("#FF6B00", 0.5f);
+
+            t.toggleOn = Hex("#FF6B00");
+            t.toggleOff = Hex("#2A1A08");
+            t.toggleCheckmark = Color.white;
+
+            t.sliderTrack = Hex("#2A1A08");
+            t.sliderFill = Hex("#FF6B00");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#181006", 0.5f);
+            t.rowOdd = Hex("#22180A", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 24. COPPER (#B87333) - Rose gold / warm copper metallic
+        // ============================================================
+        private static ThemeData BuildCopper()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Copper";
+            t.themeName = "Copper";
+            t.themeDescription = "Warm copper metallics. Rose gold elegance meets industrial strength.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#0C0806");
+            t.secondaryBackground = Hex("#18100C");
+            t.tertiaryBackground = Hex("#22180E");
+            t.overlayColor = Hex("#000000", 0.88f);
+
+            t.primaryAccent = Hex("#B87333");
+            t.secondaryAccent = Hex("#C07850");
+            t.tertiaryAccent = Hex("#E8C4A2");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#C09878");
+            t.textDisabled = Hex("#6B4A38");
+            t.textTitle = Hex("#B87333");
+            t.textOnPrimary = Color.white;
+
+            t.buttonPrimary = Hex("#B87333");
+            t.buttonPrimaryHover = Hex("#CA8A4A");
+            t.buttonPrimaryPressed = Hex("#8F5A26");
+            t.buttonSecondary = Hex("#2A1C14");
+            t.buttonSecondaryHover = Hex("#38261C");
+
+            t.inputBackground = Hex("#18100C");
+            t.inputBorder = Hex("#4A3020");
+            t.inputBorderFocused = Hex("#B87333");
+            t.inputPlaceholder = Hex("#6B4A38");
+
+            t.glowColor = Hex("#B87333", 0.45f);
+            t.glowIntensity = 0.38f;
+
+            t.cardBackground = Hex("#1C1208");
+            t.cardBorder = Hex("#B87333", 0.3f);
+
+            t.headerPurple = Hex("#301C10");
+            t.headerNavy = Hex("#181008");
+            t.backgroundNavy = Hex("#0C0806");
+            t.backgroundPurple = Hex("#20100A");
+
+            t.tabActive = Hex("#B87333");
+            t.tabInactive = Hex("#2A1C14");
+            t.tabTextActive = Color.white;
+            t.tabTextInactive = Hex("#80604A");
+
+            t.scrollbarTrack = Hex("#18100C");
+            t.scrollbarHandle = Hex("#B87333", 0.5f);
+
+            t.toggleOn = Hex("#B87333");
+            t.toggleOff = Hex("#2A1C14");
+            t.toggleCheckmark = Color.white;
+
+            t.sliderTrack = Hex("#2A1C14");
+            t.sliderFill = Hex("#B87333");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#18100C", 0.5f);
+            t.rowOdd = Hex("#22180E", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 25. MIDNIGHT (#4A9FD4) - Near-black navy, soft steel blue, minimal glow
+        // ============================================================
+        private static ThemeData BuildMidnight()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Midnight";
+            t.themeName = "Midnight";
+            t.themeDescription = "The darkest hour. Near-black navy with a whisper of steel blue. Silence and depth.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#04060F");
+            t.secondaryBackground = Hex("#070A16");
+            t.tertiaryBackground = Hex("#0B0F1E");
+            t.overlayColor = Hex("#000000", 0.92f);
+
+            t.primaryAccent = Hex("#4A9FD4");
+            t.secondaryAccent = Hex("#B8D4E8");
+            t.tertiaryAccent = Hex("#E8F0F8");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#8AAAC0");
+            t.textDisabled = Hex("#384A5A");
+            t.textTitle = Hex("#4A9FD4");
+            t.textOnPrimary = Color.white;
+
+            t.buttonPrimary = Hex("#4A9FD4");
+            t.buttonPrimaryHover = Hex("#62B0E0");
+            t.buttonPrimaryPressed = Hex("#3480A8");
+            t.buttonSecondary = Hex("#0E1828");
+            t.buttonSecondaryHover = Hex("#162030");
+
+            t.inputBackground = Hex("#070A16");
+            t.inputBorder = Hex("#1A2A3A");
+            t.inputBorderFocused = Hex("#4A9FD4");
+            t.inputPlaceholder = Hex("#384A5A");
+
+            t.glowColor = Hex("#4A9FD4", 0.3f);
+            t.glowIntensity = 0.28f;
+
+            t.cardBackground = Hex("#0A0E1A");
+            t.cardBorder = Hex("#4A9FD4", 0.2f);
+
+            t.headerPurple = Hex("#0C1028");
+            t.headerNavy = Hex("#04060F");
+            t.backgroundNavy = Hex("#04060F");
+            t.backgroundPurple = Hex("#080A18");
+
+            t.tabActive = Hex("#4A9FD4");
+            t.tabInactive = Hex("#0E1828");
+            t.tabTextActive = Color.white;
+            t.tabTextInactive = Hex("#384A5A");
+
+            t.scrollbarTrack = Hex("#070A16");
+            t.scrollbarHandle = Hex("#4A9FD4", 0.4f);
+
+            t.toggleOn = Hex("#4A9FD4");
+            t.toggleOff = Hex("#0E1828");
+            t.toggleCheckmark = Color.white;
+
+            t.sliderTrack = Hex("#0E1828");
+            t.sliderFill = Hex("#4A9FD4");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#070A16", 0.5f);
+            t.rowOdd = Hex("#0B0F1E", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 26. HOLO (#00FFFF / #FF00C8 / #FFE566) - Holographic tricolor max glow
+        // ============================================================
+        private static ThemeData BuildHolo()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "Holo";
+            t.themeName = "Holo";
+            t.themeDescription = "Holographic iridescence. Cyan, hot pink and gold shift like oil on water. Ultra-rare.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#060810");
+            t.secondaryBackground = Hex("#0A0C18");
+            t.tertiaryBackground = Hex("#10121E");
+            t.overlayColor = Hex("#000000", 0.88f);
+
+            t.primaryAccent = Hex("#00FFFF");
+            t.secondaryAccent = Hex("#FF00C8");
+            t.tertiaryAccent = Hex("#FFE566");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#A0C8D8");
+            t.textDisabled = Hex("#3A5060");
+            t.textTitle = Hex("#00FFFF");
+            t.textOnPrimary = Hex("#060810");
+
+            t.buttonPrimary = Hex("#00FFFF");
+            t.buttonPrimaryHover = Hex("#33FFFF");
+            t.buttonPrimaryPressed = Hex("#00C8C8");
+            t.buttonSecondary = Hex("#121828");
+            t.buttonSecondaryHover = Hex("#1A2230");
+
+            t.inputBackground = Hex("#0A0C18");
+            t.inputBorder = Hex("#1A3040");
+            t.inputBorderFocused = Hex("#00FFFF");
+            t.inputPlaceholder = Hex("#3A5060");
+
+            t.glowColor = Hex("#00FFFF", 0.6f);
+            t.glowIntensity = 0.6f;
+
+            t.cardBackground = Hex("#0E1020");
+            t.cardBorder = Hex("#00FFFF", 0.4f);
+
+            t.headerPurple = Hex("#140830");
+            t.headerNavy = Hex("#060810");
+            t.backgroundNavy = Hex("#060810");
+            t.backgroundPurple = Hex("#0C0820");
+
+            t.tabActive = Hex("#00FFFF");
+            t.tabInactive = Hex("#121828");
+            t.tabTextActive = Hex("#060810");
+            t.tabTextInactive = Hex("#3A5060");
+
+            t.scrollbarTrack = Hex("#0A0C18");
+            t.scrollbarHandle = Hex("#00FFFF", 0.5f);
+
+            t.toggleOn = Hex("#00FFFF");
+            t.toggleOff = Hex("#121828");
+            t.toggleCheckmark = Hex("#060810");
+
+            t.sliderTrack = Hex("#121828");
+            t.sliderFill = Hex("#00FFFF");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#0A0C18", 0.5f);
+            t.rowOdd = Hex("#10121E", 0.5f);
+
+            return t;
+        }
+
+        // ============================================================
+        // 27. DESERT DUSK (#C2603A) - Terracotta + warm earth organic tones
+        // ============================================================
+        private static ThemeData BuildDesertDusk()
+        {
+            var t = ScriptableObject.CreateInstance<ThemeData>();
+            t.themeId = "DesertDusk";
+            t.themeName = "Desert Dusk";
+            t.themeDescription = "The warmth of terracotta at golden hour. Earth and dust for those who reject the neon.";
+            ApplyFixedColors(t);
+
+            t.primaryBackground = Hex("#0E0A07");
+            t.secondaryBackground = Hex("#181208");
+            t.tertiaryBackground = Hex("#221A0E");
+            t.overlayColor = Hex("#000000", 0.88f);
+
+            t.primaryAccent = Hex("#C2603A");
+            t.secondaryAccent = Hex("#E8925A");
+            t.tertiaryAccent = Hex("#F2D2A4");
+
+            t.textPrimary = Color.white;
+            t.textSecondary = Hex("#C8A080");
+            t.textDisabled = Hex("#6B4A38");
+            t.textTitle = Hex("#C2603A");
+            t.textOnPrimary = Color.white;
+
+            t.buttonPrimary = Hex("#C2603A");
+            t.buttonPrimaryHover = Hex("#D47050");
+            t.buttonPrimaryPressed = Hex("#9A4A2C");
+            t.buttonSecondary = Hex("#2A1A10");
+            t.buttonSecondaryHover = Hex("#382418");
+
+            t.inputBackground = Hex("#181208");
+            t.inputBorder = Hex("#4A3020");
+            t.inputBorderFocused = Hex("#C2603A");
+            t.inputPlaceholder = Hex("#6B4A38");
+
+            t.glowColor = Hex("#C2603A", 0.4f);
+            t.glowIntensity = 0.35f;
+
+            t.cardBackground = Hex("#1C1408");
+            t.cardBorder = Hex("#C2603A", 0.3f);
+
+            t.headerPurple = Hex("#2E1A0E");
+            t.headerNavy = Hex("#181008");
+            t.backgroundNavy = Hex("#0E0A07");
+            t.backgroundPurple = Hex("#201408");
+
+            t.tabActive = Hex("#C2603A");
+            t.tabInactive = Hex("#2A1A10");
+            t.tabTextActive = Color.white;
+            t.tabTextInactive = Hex("#806050");
+
+            t.scrollbarTrack = Hex("#181208");
+            t.scrollbarHandle = Hex("#C2603A", 0.5f);
+
+            t.toggleOn = Hex("#C2603A");
+            t.toggleOff = Hex("#2A1A10");
+            t.toggleCheckmark = Color.white;
+
+            t.sliderTrack = Hex("#2A1A10");
+            t.sliderFill = Hex("#C2603A");
+            t.sliderHandle = Color.white;
+
+            t.rowEven = Hex("#181208", 0.5f);
+            t.rowOdd = Hex("#221A0E", 0.5f);
 
             return t;
         }

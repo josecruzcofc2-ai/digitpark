@@ -191,7 +191,7 @@ namespace DigitPark.Managers
                     var cg = emptyText.GetComponent<CanvasGroup>();
                     if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
-                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(emptyText.gameObject);
                 }
                 if (loadMoreButton != null)
                     loadMoreButton.gameObject.SetActive(false);
@@ -329,7 +329,8 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.15f)
                     .Append(gameFiltersTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
 
             // ScrollView fade in
@@ -339,7 +340,8 @@ namespace DigitPark.Managers
                 cg.alpha = 0f;
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
-                    .Append(cg.DOFade(1f, 0.4f));
+                    .Append(cg.DOFade(1f, 0.4f))
+                    .SetLink(gameObject);
             }
         }
 

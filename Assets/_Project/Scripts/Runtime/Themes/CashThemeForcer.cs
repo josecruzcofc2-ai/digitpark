@@ -104,6 +104,8 @@ namespace DigitPark.Themes
         {
             foreach (var img in FindObjectsOfType<Image>(true))
             {
+                if (img.CompareTag("FrameLayer")) continue; // excluir frames de perfil
+                if (img.gameObject.name == "AvatarFrame") continue; // fallback si el tag no existe
                 if (ColorsMatch(img.color, CYAN_NEON)) img.color = GOLD_PRIMARY;
                 else if (ColorsMatch(img.color, GREEN_NEON)) img.color = GOLD_LIGHT;
                 else if (ColorsMatch(img.color, MAGENTA_NEON)) img.color = GOLD_ACCENT;

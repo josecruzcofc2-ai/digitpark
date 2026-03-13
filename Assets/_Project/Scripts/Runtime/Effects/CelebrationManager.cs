@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using DigitPark.Themes;
 
 namespace DigitPark.Effects
 {
@@ -30,17 +31,46 @@ namespace DigitPark.Effects
         private Transform celebrationContainer;
         private Camera mainCamera;
 
+        /// <summary>
+        /// Si esta habilitado, reduce efectos de particulas (accesibilidad).
+        /// </summary>
+        private bool ReducedMotionEnabled => PlayerPrefs.GetInt("ReducedMotion", 0) == 1;
+
         private void Awake()
         {
             celebrationContainer = new GameObject("CelebrationContainer").transform;
             celebrationContainer.SetParent(transform);
             mainCamera = Camera.main;
+            ApplyThemePalette();
+        }
+
+        /// <summary>
+        /// Aplica la paleta de confetti del tema activo si tiene una definida.
+        /// </summary>
+        private void ApplyThemePalette()
+        {
+            if (ThemeManager.Instance == null) return;
+            var theme = ThemeManager.Instance.CurrentTheme;
+            if (theme != null && theme.confettiPalette != null && theme.confettiPalette.Length >= 3)
+            {
+                confettiColors = theme.confettiPalette;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            if (celebrationContainer != null)
+                Destroy(celebrationContainer.gameObject);
         }
 
         #region Confetti
 
         public void PlayConfetti(CelebrationType type)
         {
+            if (ReducedMotionEnabled && type != CelebrationType.Small)
+                type = CelebrationType.Small;
+
             int burstCount = type switch
             {
                 CelebrationType.Small => 50,
@@ -166,6 +196,7 @@ namespace DigitPark.Effects
 
         public void PlayFireworks()
         {
+            if (ReducedMotionEnabled) return;
             StartCoroutine(FireworksSequence());
         }
 
@@ -264,7 +295,7 @@ namespace DigitPark.Effects
 
         public void PlayStarBurst()
         {
-            if (mainCamera == null) return;
+            if (ReducedMotionEnabled || mainCamera == null) return;
 
             Vector3 center = mainCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 10f));
             CreateStarBurst(center);
@@ -337,9 +368,18 @@ namespace DigitPark.Effects
 
         #region Materials
 
+        private static Shader GetParticleShader()
+        {
+            return Shader.Find("Particles/Standard Unlit")
+                ?? Shader.Find("Particles/Alpha Blended")
+                ?? Shader.Find("Sprites/Default");
+        }
+
         private Material CreateConfettiMaterial()
         {
-            Material mat = new Material(Shader.Find("Particles/Standard Unlit"));
+            var shader = GetParticleShader();
+            if (shader == null) { Debug.LogError("[CelebrationManager] No particle shader found"); return new Material(Shader.Find("Hidden/InternalErrorShader")); }
+            Material mat = new Material(shader);
             mat.SetFloat("_Mode", 2);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -354,7 +394,9 @@ namespace DigitPark.Effects
 
         private Material CreateParticleMaterial()
         {
-            Material mat = new Material(Shader.Find("Particles/Standard Unlit"));
+            var shader = GetParticleShader();
+            if (shader == null) { Debug.LogError("[CelebrationManager] No particle shader found"); return new Material(Shader.Find("Hidden/InternalErrorShader")); }
+            Material mat = new Material(shader);
             mat.SetFloat("_Mode", 2);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
@@ -368,7 +410,9 @@ namespace DigitPark.Effects
 
         private Material CreateTrailMaterial(Color color)
         {
-            Material mat = new Material(Shader.Find("Particles/Standard Unlit"));
+            var shader = GetParticleShader();
+            if (shader == null) { Debug.LogError("[CelebrationManager] No particle shader found"); return new Material(Shader.Find("Hidden/InternalErrorShader")); }
+            Material mat = new Material(shader);
             mat.SetFloat("_Mode", 2);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
@@ -380,7 +424,9 @@ namespace DigitPark.Effects
 
         private Material CreateStarMaterial()
         {
-            Material mat = new Material(Shader.Find("Particles/Standard Unlit"));
+            var shader = GetParticleShader();
+            if (shader == null) { Debug.LogError("[CelebrationManager] No particle shader found"); return new Material(Shader.Find("Hidden/InternalErrorShader")); }
+            Material mat = new Material(shader);
             mat.SetFloat("_Mode", 2);
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);

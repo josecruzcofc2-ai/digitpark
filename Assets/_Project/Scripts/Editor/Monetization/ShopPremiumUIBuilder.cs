@@ -229,7 +229,7 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchoredPosition = new Vector2(0, -29); // consistent top margin across all scenes
             rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
 
             Image headerBg = header.AddComponent<Image>();
@@ -1451,32 +1451,41 @@ namespace DigitPark.Editor
             glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = GRID_COSMETIC_H * 9 + GRID_SPACING * 8; // 17 items in 2-col = 9 rows
+            gridLE.minHeight = GRID_COSMETIC_H * 17 + GRID_SPACING * 16; // 34 items en 2-col = 17 rows
 
-            // 8 Coin frames
-            CreateCosmeticCardV4(grid, "Frame_Basic", "Basic", "EQUIPPED", FRAME_COLOR, true, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Bronze", "Bronze", "200", new Color(0.8f, 0.5f, 0.2f, 1f), false, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Silver", "Silver", "400", new Color(0.75f, 0.75f, 0.8f, 1f), false, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Gold", "Gold", "800", GOLD, false, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Platinum", "Platinum", "1,200", new Color(0.8f, 0.85f, 0.9f, 1f), false, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Diamond", "Diamond", "2,000", GEM_COLOR, false, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Fire", "Fire", "1,500", new Color(1f, 0.35f, 0.1f, 1f), false, "coin");
-            CreateCosmeticCardV4(grid, "Frame_Ice", "Ice", "1,500", new Color(0.5f, 0.8f, 1f, 1f), false, "coin");
+            // 8 Coin frames — precios corregidos (fuente de verdad: PlayerFrameService)
+            CreateCosmeticCardV4(grid, "Frame_Basic",    "Basic",    "EQUIPPED", new Color(0.5f, 0.5f, 0.5f, 1f),    true,  "coin");
+            CreateCosmeticCardV4(grid, "Frame_Bronze",   "Bronze",   "1,000",    new Color(0.8f, 0.5f, 0.2f, 1f),    false, "coin");
+            CreateCosmeticCardV4(grid, "Frame_Silver",   "Silver",   "2,500",    new Color(0.75f, 0.75f, 0.8f, 1f),  false, "coin");
+            CreateCosmeticCardV4(grid, "Frame_Gold",     "Gold",     "5,000",    GOLD,                                false, "coin");
+            CreateCosmeticCardV4(grid, "Frame_Neon",     "Neon",     "7,500",    new Color(0f, 1f, 0.5f, 1f),        false, "coin");
+            CreateCosmeticCardV4(grid, "Frame_Diamond",  "Diamond",  "10,000",   new Color(0.7f, 0.9f, 1f, 1f),      false, "coin");
+            CreateCosmeticCardV4(grid, "Frame_Crystal",  "Crystal",  "12,000",   new Color(0.7f, 1f, 1f, 1f),        false, "coin");
+            CreateCosmeticCardV4(grid, "Frame_Platinum", "Platinum", "15,000",   new Color(0.9f, 0.95f, 1f, 1f),     false, "coin");
 
-            // 6 Gem frames
-            CreateCosmeticCardV4(grid, "GemFrame_Sapphire", "Sapphire", "100", new Color(0.2f, 0.4f, 1f, 1f), false, "gem");
-            CreateCosmeticCardV4(grid, "GemFrame_Emerald", "Emerald", "150", new Color(0.2f, 0.8f, 0.4f, 1f), false, "gem");
-            CreateCosmeticCardV4(grid, "GemFrame_Ruby", "Ruby", "200", new Color(1f, 0.2f, 0.3f, 1f), false, "gem");
-            CreateCosmeticCardV4(grid, "GemFrame_Amethyst", "Amethyst", "250", PURPLE_LIGHT, false, "gem");
-            CreateCosmeticCardV4(grid, "GemFrame_Topaz", "Topaz", "300", new Color(1f, 0.8f, 0.2f, 1f), false, "gem");
-            CreateCosmeticCardV4(grid, "GemFrame_Obsidian", "Obsidian", "500", new Color(0.5f, 0.4f, 0.6f, 1f), false, "gem");
+            // 6 Gem frames — precios corregidos
+            CreateCosmeticCardV4(grid, "GemFrame_Sapphire",  "Sapphire",  "50",    new Color(0.05f, 0.2f, 0.8f, 1f),  false, "gem");
+            CreateCosmeticCardV4(grid, "GemFrame_Ruby",      "Ruby",      "100",   new Color(0.9f, 0.1f, 0.2f, 1f),   false, "gem");
+            CreateCosmeticCardV4(grid, "GemFrame_Emerald",   "Emerald",   "300",   new Color(0.1f, 0.8f, 0.3f, 1f),   false, "gem");
+            CreateCosmeticCardV4(grid, "GemFrame_Amethyst",  "Amethyst",  "500",   PURPLE_LIGHT,                       false, "gem");
+            CreateCosmeticCardV4(grid, "GemFrame_Topaz",     "Topaz",     "750",   new Color(0.8f, 0.53f, 0f, 1f),    false, "gem");
+            CreateCosmeticCardV4(grid, "GemFrame_Obsidian",  "Obsidian",  "1,000", new Color(0.1f, 0.1f, 0.15f, 1f),  false, "gem");
 
-            // 3 Premium frames ($)
-            CreateCosmeticCardV4(grid, "PremFrame_Legendary", "Legendary", "$1.99", GOLD, false, "real");
-            CreateCosmeticCardV4(grid, "PremFrame_Mythic", "Mythic", "$2.99", PURPLE_PREMIUM, false, "real");
-            CreateCosmeticCardV4(grid, "PremFrame_Celestial", "Celestial", "$4.99", CYAN_NEON, false, "real");
+            // 12 Real Money frames — orden por precio
+            CreateCosmeticCardV4(grid, "PremFrame_PlasmaSparkA",    "Plasma Spark",     "$0.99",  new Color(0f, 0.75f, 1f, 1f),      false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_PrismShift",      "Prism Shift",      "$0.99",  new Color(1f, 0.5f, 0f, 1f),       false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_Holographic",     "Holographic",      "$1.99",  new Color(1f, 1f, 1f, 1f),         false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_QuantumFire",     "Quantum Fire",     "$2.99",  new Color(0f, 0.53f, 1f, 1f),      false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_AuroraBorealis",  "Aurora Borealis",  "$3.99",  new Color(0f, 1f, 0.8f, 1f),       false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_LegendaryCrown",  "Legendary Crown",  "$4.99",  new Color(0.18f, 0f, 0.35f, 1f),   false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_VoidWalker",      "Void Walker",      "$5.99",  new Color(0.02f, 0.02f, 0.19f, 1f), false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_StormSurge",      "Storm Surge",      "$5.99",  new Color(0.06f, 0.1f, 0.24f, 1f),  false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_CosmicRift",      "Cosmic Rift",      "$9.99",  new Color(0.04f, 0f, 0.08f, 1f),    false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_InfernalGod",     "Infernal God",     "$9.99",  new Color(0.1f, 0f, 0f, 1f),        false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_DivineLight",     "Divine Light",     "$14.99", GOLD,                               false, "real");
+            CreateCosmeticCardV4(grid, "PremFrame_QuantumBreak",    "Quantum Break",    "$14.99", new Color(0f, 1f, 0.26f, 1f),       false, "real");
 
-            Debug.Log("[ShopPremiumUIBuilder] Frames Section V5 creado (17 items merged)");
+            Debug.Log("[ShopPremiumUIBuilder] Frames Section V6 creado (34 items: 8 coin + 6 gem + 12 real)");
         }
 
         private static void CreateCosmeticCardV4(GameObject parent, string name, string displayName,

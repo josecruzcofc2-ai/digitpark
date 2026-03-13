@@ -441,7 +441,7 @@ namespace DigitPark.Games
                 case 3: // Division (integer results, divisor >= 2)
                     int divisor = Random.Range(2, MaxDivisor + 1);
                     int maxQuotient = Mathf.Max(1, MaxNumber / divisor);
-                    int quotient = Random.Range(1, maxQuotient + 1);
+                    int quotient = Random.Range(1, Mathf.Max(2, maxQuotient + 1));
                     numberA = divisor * quotient;
                     numberB = divisor;
                     correctAnswer = quotient;
@@ -482,6 +482,7 @@ namespace DigitPark.Games
 
             while (true)
             {
+                if (questionMarkText == null) yield break;
                 time += Time.deltaTime * pulseSpeed;
                 float pulse = (Mathf.Sin(time) + 1f) * 0.5f;
 

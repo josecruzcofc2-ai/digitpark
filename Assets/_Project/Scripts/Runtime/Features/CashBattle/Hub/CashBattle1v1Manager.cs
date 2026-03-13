@@ -63,7 +63,7 @@ namespace DigitPark.UI.CashBattle
         // Constants - Triumph SDK limits
         private const decimal MIN_ENTRY_FEE = 1m;
         private const decimal MAX_ENTRY_FEE = 250m;
-        private const float WINNER_PERCENTAGE = 0.70f; // 70% to winner (Triumph takes 20%, platform 10%)
+        private const decimal WINNER_PERCENTAGE = 0.70m; // 70% to winner (Triumph takes 20%, platform 10%)
 
         // State
         private GameType? selectedGame;
@@ -561,7 +561,7 @@ namespace DigitPark.UI.CashBattle
         {
             // Winner gets 70% of total pot (entry fee x 2)
             // Triumph takes 20%, platform takes 10%
-            return entryFee * 2 * (decimal)WINNER_PERCENTAGE;
+            return entryFee * 2 * WINNER_PERCENTAGE;
         }
 
         private void UpdateSelectedFeeDisplay()

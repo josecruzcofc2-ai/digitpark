@@ -47,7 +47,6 @@ namespace DigitPark.Editor
         private const string ICON_FLASH_TAP = "Assets/_Project/Art/Icons/Games/FlashTapIcon.png";
         private const string ICON_ODD_ONE_OUT = "Assets/_Project/Art/Icons/Games/OddOneOutIcon.png";
         private const string ICON_COGNITIVE_SPRINT = "Assets/_Project/Art/Icons/Games/CognitiveSprintIcon.png";
-        private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
         private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
 
         // ═══════════════════════════════════════════════════════════════
@@ -291,9 +290,9 @@ namespace DigitPark.Editor
             string cardName = isPlayer ? "PlayerCard" : "OpponentCard";
             Color accentColor = isPlayer ? CYAN_NEON : new Color(0.6f, 0.65f, 0.7f, 1f);
 
-            // Card position: player on top, opponent on bottom
-            float yMin = isPlayer ? 0.55f : 0.05f;
-            float yMax = isPlayer ? 0.95f : 0.45f;
+            // Card position: player on top, opponent on bottom — gap 0.43–0.57 reserved for VS text
+            float yMin = isPlayer ? 0.57f : 0.03f;
+            float yMax = isPlayer ? 0.97f : 0.43f;
 
             // --- Card Container ---
             GameObject card = CreateElement(parent, cardName);
@@ -354,6 +353,8 @@ namespace DigitPark.Editor
             Image frameImg = avatarFrame.AddComponent<Image>();
             frameImg.sprite = circleSprite;
             frameImg.color = accentColor;
+            var fr_matchmaking = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
+            fr_matchmaking.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Full);
 
             // Circular mask container (clips avatar to circle)
             GameObject maskContainer = CreateElement(avatarContainer.transform, "AvatarMask");
@@ -478,10 +479,22 @@ namespace DigitPark.Editor
                 youTmp.fontStyle = FontStyles.Bold;
 
             }
+
+            // --- BattleCardApplier --- wire visual refs for runtime card theming
+            var bcApplier = card.AddComponent<DigitPark.Cosmetics.BattleCardApplier>();
+            SerializedObject bcSO = new SerializedObject(bcApplier);
+            bcSO.FindProperty("cardBackground").objectReferenceValue = cardBgImg;
+            bcSO.FindProperty("outlineBorder").objectReferenceValue = cardBorder;
+            bcSO.FindProperty("avatarGlow").objectReferenceValue = glowImg;
+            bcSO.FindProperty("avatarFrame").objectReferenceValue = frameImg;
+            bcSO.FindProperty("levelPillBg").objectReferenceValue = levelBg;
+            bcSO.FindProperty("playerNameText").objectReferenceValue = nameTmp;
+            bcSO.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>
-        /// Creates the VS badge between player cards using custom icon
+        /// Creates the VS text label between player cards.
+        /// Hidden by default; MatchmakingAnimator reveals it when opponent is found.
         /// </summary>
         private static void CreateVSBadge(Transform parent)
         {
@@ -490,44 +503,22 @@ namespace DigitPark.Editor
             vsRect.anchorMin = new Vector2(0.5f, 0.5f);
             vsRect.anchorMax = new Vector2(0.5f, 0.5f);
             vsRect.pivot = new Vector2(0.5f, 0.5f);
-            vsRect.sizeDelta = new Vector2(200, 200);
+            vsRect.sizeDelta = new Vector2(160, 60);
             vsRect.anchoredPosition = Vector2.zero;
 
-            // VS Icon Image (custom neon icon)
-            GameObject vsIconObj = CreateElement(vsContainer.transform, "VSIcon");
-            SetFullStretch(vsIconObj.GetComponent<RectTransform>());
-            Image vsIconImg = vsIconObj.AddComponent<Image>();
-            vsIconImg.preserveAspect = true;
-            vsIconImg.raycastTarget = false;
-
-            // Load VS icon sprite
-            Sprite vsSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_VS);
-            if (vsSprite != null)
-            {
-                vsIconImg.sprite = vsSprite;
-                vsIconImg.color = Color.white;
-            }
-            else
-            {
-                // Fallback: orange tint placeholder
-                vsIconImg.color = new Color(ORANGE_NEON.r, ORANGE_NEON.g, ORANGE_NEON.b, 0.3f);
-                Debug.LogWarning("[MatchmakingUIBuilder] VSIcon.png not found at: " + ICON_VS);
-            }
-
-            // VSText (hidden - kept for manager animation reference)
+            // VS Text — tintable, no icon
             GameObject vsText = CreateElement(vsContainer.transform, "VSText");
             SetFullStretch(vsText.GetComponent<RectTransform>());
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
-            vsTmp.fontSize = FontSizes.Subtitle;
+            vsTmp.fontSize = 64;
             vsTmp.fontStyle = FontStyles.Bold;
-            vsTmp.color = new Color(1, 1, 1, 0); // Invisible
+            vsTmp.color = Color.white;
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.raycastTarget = false;
+            vsTmp.enableAutoSizing = false;
 
-
-            // Initially hidden until match found
-            vsContainer.SetActive(false);
+            vsContainer.SetActive(true);
         }
 
         // ═══════════════════════════════════════════════════════════════

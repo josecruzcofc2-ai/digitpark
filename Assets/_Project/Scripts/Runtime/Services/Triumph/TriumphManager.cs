@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+#if UNITY_EDITOR || HAS_TRIUMPH
 namespace DigitPark.Services
 {
     /// <summary>
@@ -51,6 +52,11 @@ namespace DigitPark.Services
         public static decimal Balance => Instance?._balance ?? 0m;
         public static bool IsVerified => Instance?._isVerified ?? false;
         public static bool CanPlayCash => IsVerified && Balance > 0;
+
+        /// <summary>
+        /// Prefijo para identificar transacciones de Triumph (nunca deben aparecer en el sistema cosmético)
+        /// </summary>
+        public const string TRANSACTION_PREFIX = "triumph_";
 
         private void Awake()
         {
@@ -250,5 +256,11 @@ namespace DigitPark.Services
         }
 
         #endregion
+
+        private void OnDestroy()
+        {
+            CancelInvoke();
+        }
     }
 }
+#endif

@@ -78,6 +78,10 @@ namespace DigitPark.UI
         private AudioSource audioSource;
         private bool isWinner;
         private Sequence _revealSequence;
+        private Sequence _playerTimeSeq;
+        private Sequence _playerErrorsSeq;
+        private Sequence _opponentTimeSeq;
+        private Sequence _opponentErrorsSeq;
 
         private void Awake()
         {
@@ -92,6 +96,10 @@ namespace DigitPark.UI
         private void OnDestroy()
         {
             _revealSequence?.Kill();
+            _playerTimeSeq?.Kill();
+            _playerErrorsSeq?.Kill();
+            _opponentTimeSeq?.Kill();
+            _opponentErrorsSeq?.Kill();
         }
 
         private void SetupButtons()
@@ -179,6 +187,10 @@ namespace DigitPark.UI
             {
                 if (playerNameText != null) playerNameText.text = name;
 
+                // Kill previous sequences before re-showing (handles ShowOnlineResult re-entry)
+                _playerTimeSeq?.Kill();
+                _playerErrorsSeq?.Kill();
+
                 // Animated time counter for player
                 if (playerTimeText != null)
                 {
@@ -188,12 +200,12 @@ namespace DigitPark.UI
                     playerTimeText.transform.localScale = Vector3.one * 0.9f;
                     playerTimeText.text = FormatTime(0f);
                     float displayTime = 0f;
-                    DOTween.Sequence()
+                    _playerTimeSeq = DOTween.Sequence()
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(playerTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
                         .Append(DOTween.To(() => displayTime, x => { displayTime = x; playerTimeText.text = FormatTime(x); },
                             time, 1.2f).SetEase(Ease.OutQuad))
-                        .AppendCallback(() => playerTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .AppendCallback(() => { if (playerTimeText != null) playerTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); })
                         .SetLink(gameObject).SetUpdate(true);
                 }
 
@@ -205,7 +217,7 @@ namespace DigitPark.UI
                     cg.alpha = 0f;
                     playerErrorsText.transform.localScale = Vector3.one * 0.9f;
                     playerErrorsText.text = AutoLocalizer.Get("result_errors", errors);
-                    DOTween.Sequence()
+                    _playerErrorsSeq = DOTween.Sequence()
                         .AppendInterval(0.25f)
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(playerErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
@@ -216,6 +228,10 @@ namespace DigitPark.UI
             {
                 if (opponentNameText != null) opponentNameText.text = name;
 
+                // Kill previous sequences before re-showing
+                _opponentTimeSeq?.Kill();
+                _opponentErrorsSeq?.Kill();
+
                 // Animated time counter for opponent
                 if (opponentTimeText != null)
                 {
@@ -225,12 +241,12 @@ namespace DigitPark.UI
                     opponentTimeText.transform.localScale = Vector3.one * 0.9f;
                     opponentTimeText.text = FormatTime(0f);
                     float displayTime = 0f;
-                    DOTween.Sequence()
+                    _opponentTimeSeq = DOTween.Sequence()
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(opponentTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
                         .Append(DOTween.To(() => displayTime, x => { displayTime = x; opponentTimeText.text = FormatTime(x); },
                             time, 1.2f).SetEase(Ease.OutQuad))
-                        .AppendCallback(() => opponentTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .AppendCallback(() => { if (opponentTimeText != null) opponentTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f).SetLink(opponentTimeText.gameObject); })
                         .SetLink(gameObject).SetUpdate(true);
                 }
 
@@ -242,7 +258,7 @@ namespace DigitPark.UI
                     cg.alpha = 0f;
                     opponentErrorsText.transform.localScale = Vector3.one * 0.9f;
                     opponentErrorsText.text = AutoLocalizer.Get("result_errors", errors);
-                    DOTween.Sequence()
+                    _opponentErrorsSeq = DOTween.Sequence()
                         .AppendInterval(0.25f)
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(opponentErrorsText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
@@ -315,7 +331,7 @@ namespace DigitPark.UI
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                     DOTween.To(() => displayDiff, x => { displayDiff = x; timeDifferenceText.text = $"{sign}{FormatTime(x)}"; },
                         timeDiff, 1.0f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => timeDifferenceText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (timeDifferenceText != null) timeDifferenceText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 

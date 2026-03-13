@@ -331,22 +331,21 @@ namespace DigitPark.UI.Components
         /// </summary>
         private void OnUnlockButtonClicked()
         {
-            if (PremiumManager.Instance != null)
-            {
-                // StylesPro is legacy - unlock directly since there is no IAP purchase flow for it
-                PremiumManager.Instance.UnlockProduct(PremiumProduct.StylesPro);
-                Debug.Log("[ThemeSelector] Styles PRO desbloqueado!");
-                HideLockedPanel();
+            // Route through the premium purchase panel — never unlock directly without IAP verification
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = FindFirstObjectByType<Canvas>();
+            if (canvas == null) return;
 
-                // Aplicar el tema ahora que esta desbloqueado
-                if (previewTheme != null)
+            var panel = DigitPark.UI.Panels.PremiumPanelUI.CreateAndShow(canvas.transform);
+            panel?.Show(
+                onStylesProCallback: () =>
                 {
-                    ThemeManager.Instance.SetTheme(previewTheme);
+                    HideLockedPanel();
+                    if (previewTheme != null)
+                        ThemeManager.Instance?.SetTheme(previewTheme);
+                    RefreshThemeItems();
                 }
-
-                // Actualizar UI de todos los items
-                RefreshThemeItems();
-            }
+            );
         }
 
         /// <summary>

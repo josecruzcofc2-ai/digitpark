@@ -174,6 +174,7 @@ namespace DigitPark.Services
                 while (!requestOperation.IsDone)
                 {
                     await System.Threading.Tasks.Task.Yield();
+                    if (this == null) return; // Object destroyed while waiting
                 }
 
                 if (requestOperation.Error != ReviewErrorCode.NoError)
@@ -189,6 +190,7 @@ namespace DigitPark.Services
                 while (!launchOperation.IsDone)
                 {
                     await System.Threading.Tasks.Task.Yield();
+                    if (this == null) return; // Object destroyed while waiting
                 }
 
                 if (launchOperation.Error != ReviewErrorCode.NoError)

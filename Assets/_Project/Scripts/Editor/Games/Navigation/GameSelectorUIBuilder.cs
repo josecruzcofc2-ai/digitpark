@@ -120,7 +120,7 @@ namespace DigitPark.Editor
             GameObject header = CreateOrFind(canvasTransform, "Header");
             RectTransform headerRect = SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 100)); // Header 100px standardized
+                new Vector2(0, -79), new Vector2(0, 100)); // Header 100px, 29px top margin
 
             // BackButton - NO crear, el usuario usa su propio prefab
 

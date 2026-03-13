@@ -85,6 +85,8 @@ namespace DigitPark.Games
         {
             base.Awake();
             int gridSize = config?.TotalGridElements ?? 16;
+            if (gridSize % 2 != 0) gridSize--; // Must be even — odd grid has an orphan card with no pair
+            if (gridSize < 2) gridSize = 2;
             totalPairs = gridSize / 2;
             cardValues = new int[gridSize];
             cardRevealed = new bool[gridSize];
@@ -596,7 +598,7 @@ namespace DigitPark.Games
                 yield return null;
             }
 
-            Destroy(penaltyObj);
+            if (penaltyObj != null) Destroy(penaltyObj);
         }
 
         #endregion
@@ -968,6 +970,14 @@ namespace DigitPark.Games
         private void OnDestroy()
         {
             StopAllCoroutines();
+            toggleRounds1?.onValueChanged.RemoveAllListeners();
+            toggleRounds3?.onValueChanged.RemoveAllListeners();
+            toggleRounds5?.onValueChanged.RemoveAllListeners();
+            toggleRounds10?.onValueChanged.RemoveAllListeners();
+            startGameButton?.onClick.RemoveAllListeners();
+            if (cardButtons != null)
+                foreach (var btn in cardButtons)
+                    btn?.onClick.RemoveAllListeners();
         }
     }
 }

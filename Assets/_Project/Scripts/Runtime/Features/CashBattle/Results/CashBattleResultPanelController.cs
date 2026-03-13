@@ -6,6 +6,7 @@ using TMPro;
 using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
+using DigitPark.Progression;
 
 namespace DigitPark.UI
 {
@@ -64,6 +65,9 @@ namespace DigitPark.UI
         private AudioSource audioSource;
         private bool isWinner;
         private Sequence _revealSequence;
+        private Sequence _moneySeq;
+        private Sequence _entryFeeSeq;
+        private Sequence _winnerShareSeq;
 
         private void Awake()
         {
@@ -78,6 +82,9 @@ namespace DigitPark.UI
         private void OnDestroy()
         {
             _revealSequence?.Kill();
+            _moneySeq?.Kill();
+            _entryFeeSeq?.Kill();
+            _winnerShareSeq?.Kill();
         }
 
         private void SetupButtons()
@@ -95,6 +102,24 @@ namespace DigitPark.UI
             decimal entryFee, bool playerWon, string opponentName)
         {
             isWinner = playerWon;
+
+            // XP cosmético al 50% por ser CashBattle (no afecta matchmaking)
+            var xpResult = new GameResult
+            {
+                gameId       = "CashBattle",
+                isWin        = playerWon,
+                isPerfect    = playerResult.Errors == 0 && playerResult.Completed,
+                score        = (int)playerResult.FinalScore,
+                scorePercentile = 0f,
+                isCashBattle = true
+            };
+            if (PlayerProgressionSystem.Instance != null)
+            {
+                int xpGained = PlayerProgressionSystem.Instance.AddGameXP(xpResult);
+                if (xpGained > 0)
+                    MissionsManager.Instance?.ReportXPEarned(xpGained);
+            }
+
             StartCoroutine(ShowResultSequence(playerResult, opponentResult, entryFee, playerWon, opponentName));
         }
 
@@ -190,7 +215,7 @@ namespace DigitPark.UI
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                     DOTween.To(() => displayPTime, x => { displayPTime = x; playerTimeText.text = FormatTime(x); },
                         playerResult.TotalTime, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => playerTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (playerTimeText != null) playerTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 
@@ -225,7 +250,7 @@ namespace DigitPark.UI
                     _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                         DOTween.To(() => displayOTime, x => { displayOTime = x; opponentTimeText.text = FormatTime(x); },
                             opponentResult.TotalTime, 1.2f).SetEase(Ease.OutQuad)
-                        .OnComplete(() => opponentTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                        .OnComplete(() => { if (opponentTimeText != null) opponentTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                     statIndex++;
                 }
 
@@ -245,6 +270,11 @@ namespace DigitPark.UI
 
         private void PopulateMoneySection(decimal entryFee, bool playerWon)
         {
+            // Kill any previous money sequences before starting new ones (handles ShowCashResult re-entry)
+            _moneySeq?.Kill();
+            _entryFeeSeq?.Kill();
+            _winnerShareSeq?.Kill();
+
             decimal prize = playerWon ? entryFee * 1.8m : 0;
 
             // Animate money result with counter
@@ -261,13 +291,13 @@ namespace DigitPark.UI
                 string moneyPrefix = playerWon ? "+$" : "-$";
                 moneyResultText.text = $"{moneyPrefix}0.00";
 
-                DOTween.Sequence()
+                _moneySeq = DOTween.Sequence()
                     .AppendInterval(1.8f)
                     .Append(cg.DOFade(1f, 0.25f))
                     .Join(moneyResultText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
                     .Append(DOTween.To(() => displayMoney, x => { displayMoney = x; moneyResultText.text = $"{moneyPrefix}{x:F2}"; },
                         targetMoney, 1.2f).SetEase(Ease.OutQuad))
-                    .AppendCallback(() => moneyResultText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                    .AppendCallback(() => { if (moneyResultText != null) moneyResultText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); })
                     .SetLink(gameObject)
                     .SetUpdate(true);
             }
@@ -280,7 +310,7 @@ namespace DigitPark.UI
                 if (cg == null) cg = entryFeeText.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 entryFeeText.transform.localScale = Vector3.one * 0.9f;
-                DOTween.Sequence()
+                _entryFeeSeq = DOTween.Sequence()
                     .AppendInterval(2.0f)
                     .Append(cg.DOFade(1f, 0.25f))
                     .Join(entryFeeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
@@ -298,7 +328,7 @@ namespace DigitPark.UI
                     if (cg == null) cg = winnerShareText.gameObject.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
                     winnerShareText.transform.localScale = Vector3.one * 0.9f;
-                    DOTween.Sequence()
+                    _winnerShareSeq = DOTween.Sequence()
                         .AppendInterval(2.2f)
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(winnerShareText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))

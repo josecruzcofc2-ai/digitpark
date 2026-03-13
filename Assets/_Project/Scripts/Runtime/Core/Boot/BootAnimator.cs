@@ -174,8 +174,9 @@ namespace DigitPark.UI
         {
             if (loadingBarGlow == null) yield break;
 
-            while (true)
+            while (isActiveAndEnabled)
             {
+                if (loadingBarGlow == null) yield break;
                 float elapsed = 0f;
                 while (elapsed < glowPulseDuration)
                 {

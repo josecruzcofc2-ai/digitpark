@@ -225,9 +225,16 @@ namespace DigitPark.UI
             var renderer = particlesObj.GetComponent<ParticleSystemRenderer>();
             renderer.sortingOrder = 1;
 
-            // Usar material por defecto de partículas
-            renderer.material = new Material(Shader.Find("Particles/Standard Unlit"));
-            renderer.material.SetColor("_Color", accent1);
+            // Usar material por defecto de partículas (null guard para mobile)
+            Shader particleShader = Shader.Find("Particles/Standard Unlit")
+                ?? Shader.Find("Particles/Additive")
+                ?? Shader.Find("Legacy Shaders/Particles/Additive")
+                ?? Shader.Find("UI/Default");
+            if (particleShader != null)
+            {
+                renderer.material = new Material(particleShader);
+                renderer.material.SetColor("_Color", accent1);
+            }
         }
 
         /// <summary>

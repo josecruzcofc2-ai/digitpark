@@ -46,23 +46,22 @@ namespace DigitPark.Editor
 
         #region Layout Anchors (Y: 0=bottom, 1=top)
 
-        private const float PROGRESS_TOP = 0.993f;
-        private const float PROGRESS_BOT = 0.990f;
-
         private const float TOPBAR_HEIGHT = 100f;
-        private const float TOPBAR_TOP = 0.980f;
-        private const float TOPBAR_BOT = 0.945f;  // kept for reference, topbar now uses sizeDelta
+        private const float TOPBAR_TOP = 0.985f;   // ~29px from top edge (consistent with all scenes)
 
-        private const float TIMER_TOP = 0.940f;
-        private const float TIMER_BOT = 0.913f;
+        private const float TIMER_TOP = 0.918f;    // ~157px from top (~9px gap below TopBar)
+        private const float TIMER_BOT = 0.891f;    // ~209px from top
 
-        private const float TABS_TOP = 0.910f;
-        private const float TABS_BOT = 0.880f;
+        private const float TABS_TOP = 0.886f;     // ~219px from top (~10px gap below TimerBar)
+        private const float TABS_BOT = 0.856f;     // ~276px from top
 
-        private const float OVERALL_TOP = 0.876f;
-        private const float OVERALL_BOT = 0.773f;
+        private const float PROGRESS_TOP = 0.998f;  // thin progress line at very top
+        private const float PROGRESS_BOT = 0.993f;
 
-        private const float SCROLL_TOP = 0.768f;
+        private const float OVERALL_TOP = 0.851f;  // overall progress bar above scroll
+        private const float OVERALL_BOT = 0.810f;
+
+        private const float SCROLL_TOP = 0.805f;   // ~375px from top (~5px gap below OverallProgress)
         private const float SCROLL_BOT = 0.015f;
 
         private const float SIDE_PAD = 30f;
@@ -134,12 +133,12 @@ namespace DigitPark.Editor
             if (GUILayout.Button("1. Background + Progress Bar", GUILayout.Height(25)))
             {
                 Canvas c = UIBuilderCanvasHelper.FindMainCanvas();
-                if (c != null) { CreateBackground(c.transform); CreateProgressBar(); }
+                if (c != null) { CreateBackground(c.transform); }
             }
             if (GUILayout.Button("2. Top Bar", GUILayout.Height(25))) CreateTopBar();
             if (GUILayout.Button("3. Timer Bar", GUILayout.Height(25))) CreateTimerBar();
             if (GUILayout.Button("3b. Tab Bar (Daily/Weekly/Special)", GUILayout.Height(25))) CreateTabBar();
-            if (GUILayout.Button("4. Overall Progress", GUILayout.Height(25))) CreateOverallProgress();
+            // OverallProgress removed
             if (GUILayout.Button("5. Missions ScrollView", GUILayout.Height(25))) CreateMissionsScrollView();
             if (GUILayout.Button("6. Reward Claim Popup", GUILayout.Height(25))) CreateRewardClaimPopup();
         }
@@ -173,11 +172,9 @@ namespace DigitPark.Editor
 
             // Crear UI
             CreateBackground(canvas.transform);
-            CreateProgressBar();
             CreateTopBar();
             CreateTimerBar();
             CreateTabBar();
-            CreateOverallProgress();
             CreateMissionsScrollView();
             CreateRewardClaimPopup();
             SetupManagerReferences();
@@ -1542,18 +1539,10 @@ namespace DigitPark.Editor
                 assigned += SetRef(so, "backButton", FindInPath<Button>(r, "TopBar/BackButton"));
                 assigned += SetRef(so, "titleText", FindInPath<TextMeshProUGUI>(r, "TopBar/TitleText"));
                 assigned += SetRef(so, "refreshTimerText", FindInPath<TextMeshProUGUI>(r, "TimerBar/CountdownText"));
-                assigned += SetRef(so, "totalPointsText", FindInPath<TextMeshProUGUI>(r, "OverallProgress/TitleRow/TitleRight"));
-
                 // UI - Tabs
                 assigned += SetRef(so, "dailyTab", FindInPath<Button>(r, "TabBar/DailyTab"));
                 assigned += SetRef(so, "weeklyTab", FindInPath<Button>(r, "TabBar/WeeklyTab"));
                 assigned += SetRef(so, "specialTab", FindInPath<Button>(r, "TabBar/SpecialTab"));
-
-                // UI - Progress Summary
-                assigned += SetRef(so, "dailyProgressBar", FindInPath<Slider>(r, "OverallProgress/ProgressContainer"));
-                assigned += SetRef(so, "dailyProgressText", FindInPath<TextMeshProUGUI>(r, "OverallProgress/TitleRow/TitleRight"));
-                assigned += SetRef(so, "bonusRewardText", FindInPath<TextMeshProUGUI>(r, "OverallProgress/BonusRow/BonusRewardText"));
-                assigned += SetRef(so, "claimBonusButton", FindInPath<Button>(r, "OverallProgress/BonusRow/ClaimBonusButton"));
 
                 // UI - Missions List
                 assigned += SetRef(so, "missionsContainer", FindInPath<Transform>(r, "ScrollView/Viewport/Content"));

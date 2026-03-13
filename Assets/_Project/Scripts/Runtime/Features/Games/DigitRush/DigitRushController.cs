@@ -298,6 +298,7 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             PremiumManager.OnPremiumStatusChanged -= UpdatePremiumBanner;
+            StopAllCoroutines();
 
             // Clean up active shake coroutines
             for (int i = 0; i < shakeCoroutines.Length; i++)

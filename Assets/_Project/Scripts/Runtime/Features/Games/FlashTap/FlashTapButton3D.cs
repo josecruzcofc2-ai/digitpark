@@ -97,6 +97,8 @@ namespace DigitPark.UI
         private void OnDestroy()
         {
             StopAllCoroutines();
+            animationCoroutine = null;
+            glowCoroutine = null;
         }
 
         #region Pointer Events
@@ -210,6 +212,7 @@ namespace DigitPark.UI
         {
             while (true)
             {
+                if (buttonTransform == null) yield break;
                 if (!isPressed)
                 {
                     float t = (Mathf.Sin(Time.time * breathingSpeed * Mathf.PI) + 1f) / 2f;
@@ -231,6 +234,7 @@ namespace DigitPark.UI
             float effectiveMin = Mathf.Max(pulseMinScale, 1f);
             while (true)
             {
+                if (buttonTransform == null) yield break;
                 if (!isPressed)
                 {
                     float t = (Mathf.Sin(Time.time * pulseSpeed * Mathf.PI) + 1f) / 2f;
@@ -252,11 +256,13 @@ namespace DigitPark.UI
 
         private IEnumerator GlowPulseLoop()
         {
+            if (glowRing == null) yield break;
             RectTransform glowTransform = glowRing.GetComponent<RectTransform>();
             Vector3 glowOriginalScale = glowTransform != null ? glowTransform.localScale : Vector3.one;
 
             while (true)
             {
+                if (glowRing == null) yield break;
                 float t = (Mathf.Sin(Time.time * glowPulseSpeed * Mathf.PI) + 1f) / 2f;
 
                 Color c = glowRing.color;

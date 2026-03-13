@@ -76,6 +76,8 @@ namespace DigitPark.UI
 
         private AudioSource audioSource;
         private Sequence _revealSequence;
+        private Sequence _moneySeq;
+        private Sequence _entryFeeSeq;
 
         private void Awake()
         {
@@ -90,6 +92,8 @@ namespace DigitPark.UI
         private void OnDestroy()
         {
             _revealSequence?.Kill();
+            _moneySeq?.Kill();
+            _entryFeeSeq?.Kill();
         }
 
         private void SetupButtons()
@@ -220,6 +224,10 @@ namespace DigitPark.UI
             {
                 moneySection.SetActive(true);
 
+                // Kill previous money sequences before re-showing (handles ShowCashSummary re-entry)
+                _moneySeq?.Kill();
+                _entryFeeSeq?.Kill();
+
                 if (moneyResultText != null)
                 {
                     moneyResultText.color = playerWon ? winColor : loseColor;
@@ -233,13 +241,13 @@ namespace DigitPark.UI
                     string moneyPrefix = playerWon ? "+$" : "-$";
                     moneyResultText.text = $"{moneyPrefix}0.00";
 
-                    DOTween.Sequence()
+                    _moneySeq = DOTween.Sequence()
                         .AppendInterval(0.5f)
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(moneyResultText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
                         .Append(DOTween.To(() => displayMoney, x => { displayMoney = x; moneyResultText.text = $"{moneyPrefix}{x:F2}"; },
                             targetMoney, 1.2f).SetEase(Ease.OutQuad))
-                        .AppendCallback(() => moneyResultText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .AppendCallback(() => { if (moneyResultText != null) moneyResultText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); })
                         .SetLink(gameObject)
                         .SetUpdate(true);
                 }
@@ -251,7 +259,7 @@ namespace DigitPark.UI
                     if (cg == null) cg = entryFeeText.gameObject.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
                     entryFeeText.transform.localScale = Vector3.one * 0.9f;
-                    DOTween.Sequence()
+                    _entryFeeSeq = DOTween.Sequence()
                         .AppendInterval(0.8f)
                         .Append(cg.DOFade(1f, 0.25f))
                         .Join(entryFeeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
@@ -404,9 +412,9 @@ namespace DigitPark.UI
                     totalTimeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
                 float displayTotalTime = 0f;
                 _revealSequence.Insert(totalsDelay + statIndex * 0.25f + 0.25f,
-                    DOTween.To(() => displayTotalTime, x => { displayTotalTime = x; totalTimeText.text = FormatTime(x); },
+                    DOTween.To(() => displayTotalTime, x => { displayTotalTime = x; if (totalTimeText != null) totalTimeText.text = FormatTime(x); },
                         totalTime, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => totalTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (totalTimeText != null) totalTimeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 

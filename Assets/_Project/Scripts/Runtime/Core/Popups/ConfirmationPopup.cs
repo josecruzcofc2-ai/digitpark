@@ -30,7 +30,7 @@ namespace DigitPark.UI.Common
         /// <summary>
         /// Muestra el popup de confirmación
         /// </summary>
-        public void Show(string title, string message, Action onConfirmCallback, Action onCancelCallback = null, string confirmText = "CONFIRMAR")
+        public void Show(string title, string message, Action onConfirmCallback, Action onCancelCallback = null, string confirmText = null)
         {
             if (panel != null)
             {
@@ -45,7 +45,8 @@ namespace DigitPark.UI.Common
                 DOTween.Sequence()
                     .Join(panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                     .Join(cg.DOFade(1f, 0.25f))
-                    .SetUpdate(true);
+                    .SetUpdate(true)
+                    .SetLink(panel);
             }
 
             if (titleText != null)
@@ -55,7 +56,7 @@ namespace DigitPark.UI.Common
                 messageText.text = message;
 
             if (confirmButtonText != null)
-                confirmButtonText.text = confirmText;
+                confirmButtonText.text = confirmText ?? AutoLocalizer.Get("popup_confirm_button");
 
             // Ocultar textos de valores (solo para cambio de nombre)
             if (currentValueText != null)
@@ -103,7 +104,8 @@ namespace DigitPark.UI.Common
                         .Join(panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                         .Join(cg.DOFade(0f, 0.2f))
                         .OnComplete(() => { panel.transform.localScale = Vector3.one; cg.alpha = 1f; panel.SetActive(false); })
-                        .SetUpdate(true);
+                        .SetUpdate(true)
+                        .SetLink(panel);
                 }
                 else
                 {
@@ -168,7 +170,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI title = UIFactory.CreateText(
                 panelObj.transform,
                 "Title",
-                "CONFIRMACIÓN",
+                "CONFIRMATION",
                 36,
                 UIFactory.ElectricBlue,
                 TMPro.TextAlignmentOptions.Center
@@ -182,7 +184,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI message = UIFactory.CreateText(
                 panelObj.transform,
                 "Message",
-                "¿Estás seguro?",
+                "Are you sure?",
                 28,
                 Color.white,
                 TMPro.TextAlignmentOptions.Center
@@ -196,7 +198,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI currentValue = UIFactory.CreateText(
                 panelObj.transform,
                 "CurrentValue",
-                "Actual: ",
+                "Current: ",
                 24,
                 new Color(0.7f, 0.7f, 0.7f),
                 TMPro.TextAlignmentOptions.Center
@@ -210,7 +212,7 @@ namespace DigitPark.UI.Common
             TextMeshProUGUI newValue = UIFactory.CreateText(
                 panelObj.transform,
                 "NewValue",
-                "Nuevo: ",
+                "New: ",
                 24,
                 UIFactory.NeonYellow,
                 TMPro.TextAlignmentOptions.Center
@@ -224,7 +226,7 @@ namespace DigitPark.UI.Common
             Button confirmBtn = UIFactory.CreateButton(
                 panelObj.transform,
                 "ConfirmButton",
-                "CONFIRMAR",
+                "CONFIRM",
                 new Vector2(300, 70),
                 UIFactory.BrightGreen
             );
@@ -237,7 +239,7 @@ namespace DigitPark.UI.Common
             Button cancelBtn = UIFactory.CreateButton(
                 panelObj.transform,
                 "CancelButton",
-                "CANCELAR",
+                "CANCEL",
                 new Vector2(300, 70),
                 new Color(0.5f, 0.2f, 0.2f)
             );

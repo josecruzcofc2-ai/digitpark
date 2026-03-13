@@ -498,7 +498,7 @@ namespace DigitPark.Managers
             {
                 nameInputPanel.SetActive(true);
                 nameInputPanel.transform.localScale = Vector3.one * 0.85f;
-                nameInputPanel.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack);
+                nameInputPanel.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack).SetLink(nameInputPanel);
 
                 if (nameInput)
                 {
@@ -774,7 +774,7 @@ namespace DigitPark.Managers
                 newSlide.transform.localScale = Vector3.one * 0.95f;
             }
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             float fadeDuration = transitionDuration * 0.6f;
 
             // Fade out old slide

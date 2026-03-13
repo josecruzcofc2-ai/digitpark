@@ -305,7 +305,7 @@ namespace DigitPark.Editor
             headerRT.anchorMax = new Vector2(1, 1);
             headerRT.pivot = new Vector2(0.5f, 1);
             headerRT.sizeDelta = new Vector2(0, 120);
-            headerRT.anchoredPosition = Vector2.zero;
+            headerRT.anchoredPosition = new Vector2(0, -29);
 
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = new Color(0, 0, 0, 0.3f);

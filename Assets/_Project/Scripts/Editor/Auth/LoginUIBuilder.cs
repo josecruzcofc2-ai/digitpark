@@ -205,7 +205,7 @@ namespace DigitPark.Editor
             cardRect.anchorMax = new Vector2(0.5f, 0.5f);
             cardRect.pivot = new Vector2(0.5f, 0.5f);
             cardRect.sizeDelta = new Vector2(SCREEN_WIDTH - (PADDING * 2), 0);
-            cardRect.anchoredPosition = new Vector2(0, 440); // Adjusted for taller social buttons
+            cardRect.anchoredPosition = new Vector2(0, 500);
 
             // Card background with neon border
             Image cardBg = card.AddComponent<Image>();

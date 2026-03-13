@@ -273,8 +273,10 @@ namespace DigitPark.Themes
             if (!theme.isPremium) return true;
 
             // Debug controller override
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (PremiumDebugController.Instance != null && PremiumDebugController.Instance.AllowThemeChange)
                 return true;
+#endif
 
             // Check individual theme ownership
             if (IsThemeOwned(theme.themeId))

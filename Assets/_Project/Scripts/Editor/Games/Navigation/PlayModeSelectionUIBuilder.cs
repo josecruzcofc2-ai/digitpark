@@ -126,7 +126,7 @@ namespace DigitPark.Editor
             GameObject header = CreateElement(parent, "Header");
             SetupRectTransform(header,
                 new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, -50), new Vector2(0, 100));
+                new Vector2(0, -79), new Vector2(0, 100));
 
             // Back Button - Neon prefab (same as rest of the app)
             var oldBackBtn = header.transform.Find("BackButton");

@@ -7,6 +7,8 @@ using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Localization;
 using DigitPark.UI;
+using DigitPark.Payments;
+using DigitPark.Payments.Entitlements;
 
 namespace DigitPark.Managers
 {
@@ -62,6 +64,12 @@ namespace DigitPark.Managers
             // Paso 3: Inicializar servicios de Firebase
             yield return StartCoroutine(InitializeFirebaseServices());
             UpdateLoadingProgress(0.5f, "boot_connecting_services");
+
+            // Paso 3.5: Inicializar sistema de pagos
+            DigitPark.Services.PaymentBridgeWiring.Wire();
+            DigitPark.Services.AppleIAPBridge.WireDelegate();
+            yield return StartCoroutine(InitializePaymentSystem());
+            UpdateLoadingProgress(0.6f, "boot_loading_payments");
 
             // Paso 4: Inicializar managers del juego
             yield return StartCoroutine(InitializeGameManagers());
@@ -227,16 +235,88 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
+        /// Inicializa el sistema de pagos (Stripe + AppleIAP + FeatureFlags + Entitlements)
+        /// </summary>
+        private IEnumerator InitializePaymentSystem()
+        {
+            Debug.Log("[Boot] Inicializando sistema de pagos...");
+
+            // 1. Crear RemoteConfigService
+            if (RemoteConfigService.Instance == null)
+            {
+                GameObject remoteConfigObj = new GameObject("RemoteConfigService");
+                remoteConfigObj.AddComponent<RemoteConfigService>();
+                Debug.Log("[Boot] RemoteConfigService creado");
+            }
+
+            // Esperar a que RemoteConfig esté listo (máximo 5 segundos, usa cache si offline)
+            float timeout = 5f;
+            float elapsed = 0f;
+            while (RemoteConfigService.Instance != null &&
+                   !RemoteConfigService.Instance.IsReady && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            // 2. Inicializar PaymentFeatureFlag
+            PaymentFeatureFlag.Initialize(RemoteConfigService.Instance?.GetCurrentConfig());
+            Debug.Log($"[Boot] FeatureFlag inicializado. Provider: {PaymentFeatureFlag.ActiveCosmeticProvider}");
+
+            // 3. Crear PaymentManager
+            if (PaymentManager.Instance == null)
+            {
+                GameObject paymentObj = new GameObject("PaymentManager");
+                paymentObj.AddComponent<PaymentManager>();
+                Debug.Log("[Boot] PaymentManager creado");
+            }
+
+            // 4. Crear EntitlementService
+            if (EntitlementService.Instance == null)
+            {
+                GameObject entitlementObj = new GameObject("EntitlementService");
+                entitlementObj.AddComponent<EntitlementService>();
+                Debug.Log("[Boot] EntitlementService creado");
+            }
+
+#if DIGIT_PARK_PRO || UNITY_EDITOR
+            // 5. Crear TriumphIsolationGuard (solo en versión Pro)
+            if (DigitPark.Payments.Compliance.TriumphIsolationGuard.Instance == null)
+            {
+                GameObject guardObj = new GameObject("TriumphIsolationGuard");
+                guardObj.AddComponent<DigitPark.Payments.Compliance.TriumphIsolationGuard>();
+                Debug.Log("[Boot] TriumphIsolationGuard creado");
+            }
+#endif
+
+            // 6. Sync entitlements en background (no bloquea el boot)
+            if (EntitlementService.Instance != null)
+            {
+                _ = EntitlementService.Instance.SyncWithServer();
+            }
+
+            yield return new WaitForSeconds(0.1f);
+            Debug.Log("[Boot] Sistema de pagos inicializado correctamente");
+        }
+
+        /// <summary>
         /// Inicializa los managers principales del juego
         /// </summary>
         private IEnumerator InitializeGameManagers()
         {
             Debug.Log("[Boot] Inicializando managers del juego...");
 
+            // BattleCardService — cosmético de matchmaking (independiente de ThemeManager)
+            if (DigitPark.Cosmetics.BattleCardService.Instance == null)
+            {
+                GameObject bcObj = new GameObject("BattleCardService");
+                bcObj.AddComponent<DigitPark.Cosmetics.BattleCardService>();
+                Debug.Log("[Boot] BattleCardService creado");
+            }
+
             // Estos managers se crearán en sus respectivas escenas
             // Aquí solo preparamos el entorno
 
-            // Simular carga de recursos
             yield return new WaitForSeconds(0.3f);
 
             Debug.Log("[Boot] Managers del juego inicializados");

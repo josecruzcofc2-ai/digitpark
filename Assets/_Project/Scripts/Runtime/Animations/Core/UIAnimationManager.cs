@@ -27,6 +27,7 @@ namespace DigitPark.Animations
         // Cache for active animations
         private Dictionary<int, Tween> activeTweens = new Dictionary<int, Tween>();
         private bool isActiveInstance;
+        private Sequence _screenFlashSeq;
 
         private void Awake()
         {
@@ -88,10 +89,11 @@ namespace DigitPark.Animations
             screenFlashImage.gameObject.SetActive(true);
             screenFlashImage.color = new Color(color.r, color.g, color.b, 0f);
 
-            DOTween.Sequence()
+            _screenFlashSeq?.Kill();
+            _screenFlashSeq = DOTween.Sequence()
                 .Append(screenFlashImage.DOFade(0.8f, duration * 0.3f))
                 .Append(screenFlashImage.DOFade(0f, duration * 0.7f))
-                .OnComplete(() => screenFlashImage.gameObject.SetActive(false));
+                .OnComplete(() => { if (screenFlashImage != null) screenFlashImage.gameObject.SetActive(false); });
         }
 
         /// <summary>
@@ -171,7 +173,8 @@ namespace DigitPark.Animations
                 {
                     Destroy(clone);
                     onComplete?.Invoke();
-                });
+                })
+                .SetLink(clone);
         }
 
         /// <summary>
@@ -259,6 +262,7 @@ namespace DigitPark.Animations
 
         private void OnDestroy()
         {
+            _screenFlashSeq?.Kill();
             if (isActiveInstance)
             {
                 DOTween.KillAll();

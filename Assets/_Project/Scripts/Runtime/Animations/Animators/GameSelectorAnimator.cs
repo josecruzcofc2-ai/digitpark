@@ -79,6 +79,7 @@ namespace DigitPark.Animations
         /// </summary>
         public void PlayEntranceAnimation(Action onComplete = null)
         {
+            if (isAnimating) return;
             StartCoroutine(EntranceCoroutine(onComplete));
         }
 
@@ -101,7 +102,7 @@ namespace DigitPark.Animations
             {
                 if (gameCards[i] == null) continue;
 
-                Sequence cardSeq = DOTween.Sequence();
+                Sequence cardSeq = DOTween.Sequence().SetLink(gameCards[i].gameObject);
 
                 // Scale up
                 cardSeq.Append(gameCards[i].DOScale(i == currentIndex ? selectedScale : unselectedScale, 0.3f)
@@ -178,7 +179,7 @@ namespace DigitPark.Animations
             currentIndex = targetIndex;
 
             // Animate all cards
-            Sequence scrollSeq = DOTween.Sequence();
+            Sequence scrollSeq = DOTween.Sequence().SetLink(gameObject);
 
             for (int i = 0; i < gameCards.Count; i++)
             {
@@ -329,7 +330,8 @@ namespace DigitPark.Animations
 
             selectionGlow.DOFade(0.8f, 0.8f)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(selectionGlow.gameObject);
         }
 
         /// <summary>
@@ -342,7 +344,8 @@ namespace DigitPark.Animations
             DOTween.Sequence()
                 .Append(gameCards[index].DOScale(gameCards[index].localScale.x * 1.1f, 0.2f).SetEase(Ease.OutQuad))
                 .Append(gameCards[index].DOScale(gameCards[index].localScale.x, 0.3f).SetEase(Ease.OutBounce))
-                .SetLoops(2);
+                .SetLoops(2)
+                .SetLink(gameCards[index].gameObject);
         }
 
         /// <summary>
@@ -355,10 +358,12 @@ namespace DigitPark.Animations
             badge.localScale = Vector3.zero;
             badge.gameObject.SetActive(true);
 
+            badge.DOKill();
             DOTween.Sequence()
                 .Append(badge.DOScale(1.2f, 0.2f).SetEase(Ease.OutBack))
                 .Append(badge.DOScale(1f, 0.1f))
-                .Append(badge.DOScale(1.05f, 0.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo));
+                .Append(badge.DOScale(1.05f, 0.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo))
+                .SetLink(badge.gameObject);
         }
 
         // ==================== UTILITY ====================

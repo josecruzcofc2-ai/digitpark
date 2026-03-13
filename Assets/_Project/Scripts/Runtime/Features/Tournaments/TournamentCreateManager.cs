@@ -495,15 +495,16 @@ namespace DigitPark.Managers
             panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
             cg.DOFade(0f, 0.2f).OnComplete(() =>
             {
-                panel.SetActive(false);
-                cg.alpha = 1f;
-                panel.transform.localScale = Vector3.one;
+                if (panel != null) panel.SetActive(false);
+                if (cg != null) { cg.alpha = 1f; }
+                if (panel != null) panel.transform.localScale = Vector3.one;
                 onComplete?.Invoke();
             });
         }
 
         private void OnDestroy()
         {
+            CancelInvoke();
             transform.DOKill();
         }
     }

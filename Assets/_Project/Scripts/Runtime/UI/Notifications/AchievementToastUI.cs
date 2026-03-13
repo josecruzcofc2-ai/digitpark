@@ -499,10 +499,12 @@ namespace DigitPark.UI
                 // Snap back
                 if (toastContainer != null)
                 {
-                    toastContainer.DOAnchorPos(_shownPosition, 0.2f).SetEase(Ease.OutCubic);
+                    toastContainer.DOKill();
+                    toastContainer.DOAnchorPos(_shownPosition, 0.2f).SetEase(Ease.OutCubic).SetLink(gameObject);
                 }
                 if (canvasGroup != null)
                 {
+                    canvasGroup.DOKill();
                     canvasGroup.DOFade(1f, 0.2f);
                 }
             }

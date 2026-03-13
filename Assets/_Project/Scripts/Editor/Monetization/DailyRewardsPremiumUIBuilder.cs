@@ -53,23 +53,23 @@ namespace DigitPark.Editor
         private const float TOPBAR_TOP = 0.985f;
         private const float TOPBAR_BOT = 0.955f;  // kept for reference, topbar now uses sizeDelta
 
-        private const float STREAK_TOP = 0.945f;
-        private const float STREAK_BOT = 0.915f;
+        private const float STREAK_TOP = 0.925f;
+        private const float STREAK_BOT = 0.890f;
 
-        private const float WEEK_TOP = 0.912f;
-        private const float WEEK_BOT = 0.878f;
+        private const float WEEK_TOP = 0.885f;
+        private const float WEEK_BOT = 0.855f;
 
-        private const float DAYS_TOP = 0.870f;
-        private const float DAYS_BOT = 0.480f;
+        private const float DAYS_TOP = 0.848f;
+        private const float DAYS_BOT = 0.460f;
 
-        private const float DAY7_TOP = 0.470f;
-        private const float DAY7_BOT = 0.270f;
+        private const float DAY7_TOP = 0.450f;
+        private const float DAY7_BOT = 0.255f;
 
-        private const float CLAIM_TOP = 0.195f;
-        private const float CLAIM_BOT = 0.100f;
+        private const float CLAIM_TOP = 0.185f;
+        private const float CLAIM_BOT = 0.092f;
 
-        private const float TIMER_TOP = 0.088f;
-        private const float TIMER_BOT = 0.028f;
+        private const float TIMER_TOP = 0.080f;
+        private const float TIMER_BOT = 0.022f;
 
         private const float SIDE_PAD = 25f;
 
@@ -328,10 +328,10 @@ namespace DigitPark.Editor
             fireIcon.transform.SetParent(streak.transform, false);
             fireIcon.AddComponent<RectTransform>();
             var fireLE = fireIcon.AddComponent<LayoutElement>();
-            fireLE.minWidth = 56;
-            fireLE.preferredWidth = 56;
-            fireLE.minHeight = 56;
-            fireLE.preferredHeight = 56;
+            fireLE.minWidth = 40;
+            fireLE.preferredWidth = 40;
+            fireLE.minHeight = 40;
+            fireLE.preferredHeight = 40;
             Sprite fireSprite = AssetDatabase.LoadAssetAtPath<Sprite>(DAILY_ICONS + "icon_daily_streak.png");
             if (fireSprite != null)
             {
@@ -352,13 +352,13 @@ namespace DigitPark.Editor
             slTMP.color = TEXT_WHITE;
             slTMP.alignment = TextAlignmentOptions.MidlineLeft;
             slTMP.enableWordWrapping = false;
-            slTMP.overflowMode = TextOverflowModes.Ellipsis;
+            slTMP.overflowMode = TextOverflowModes.Overflow;
             slTMP.enableAutoSizing = true;
             slTMP.fontSizeMin = FontSizes.AutoMinSmall;
             slTMP.fontSizeMax = FontSizes.Caption;
             var slLE = streakLabel.AddComponent<LayoutElement>();
-            slLE.minWidth = 130;
-            slLE.preferredWidth = 130;
+            slLE.minWidth = 160;
+            slLE.preferredWidth = 160;
 
             // StreakCount
             var streakCount = new GameObject("StreakCount");
@@ -478,18 +478,11 @@ namespace DigitPark.Editor
             wtTMP.color = GOLD;
             wtTMP.alignment = TextAlignmentOptions.Center;
 
-            // Line 2: Day 7 bonus (moved from StreakPanel)
-            var bonusText = FindOrCreate(weekLabel.transform, "BonusText");
-            GetOrAdd<LayoutElement>(bonusText).preferredHeight = 24;
-            var btTMP = GetOrAdd<TextMeshProUGUI>(bonusText);
-            btTMP.text = "Day 7 bonus: +100 DigitGems";
-            btTMP.fontSize = FontSizes.BodySmall;
-            btTMP.fontStyle = FontStyles.Bold;
-            btTMP.color = GEM_COLOR;
-            btTMP.alignment = TextAlignmentOptions.Center;
-            btTMP.overflowMode = TextOverflowModes.Ellipsis;
+            // Destroy leftover BonusText if present from older builds
+            var oldBonus = weekLabel.transform.Find("BonusText");
+            if (oldBonus != null) Object.DestroyImmediate(oldBonus.gameObject);
 
-            Debug.Log("[DailyRewardsUI] WeekLabel + BonusText creado");
+            Debug.Log("[DailyRewardsUI] WeekLabel creado");
         }
 
         #endregion

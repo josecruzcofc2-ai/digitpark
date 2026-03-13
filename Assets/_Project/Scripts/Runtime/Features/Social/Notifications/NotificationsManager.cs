@@ -280,6 +280,10 @@ namespace DigitPark.Managers
 
             if (actionsRow == null) return;
 
+            // Clear previous listeners before assigning new ones to prevent duplicates on list refresh
+            primaryBtn?.onClick.RemoveAllListeners();
+            secondaryBtn?.onClick.RemoveAllListeners();
+
             string nId = notification.id;
 
             switch (notification.type)
@@ -615,37 +619,40 @@ namespace DigitPark.Managers
             // Tabs fade + slide
             if (tabsTransform != null)
             {
-                var cg = tabsTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = tabsTransform.gameObject.GetComponent<CanvasGroup>() ?? tabsTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 Vector2 pos = tabsTransform.anchoredPosition;
                 tabsTransform.anchoredPosition = new Vector2(pos.x, pos.y - 50);
                 DOTween.Sequence()
                     .AppendInterval(0.15f)
                     .Append(tabsTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
 
             // ScrollView fade in
             if (scrollViewTransform != null)
             {
-                var cg = scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = scrollViewTransform.gameObject.GetComponent<CanvasGroup>() ?? scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
-                    .Append(cg.DOFade(1f, 0.4f));
+                    .Append(cg.DOFade(1f, 0.4f))
+                    .SetLink(gameObject);
             }
 
             // Footer slide from bottom
             if (footerTransform != null)
             {
-                var cg = footerTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = footerTransform.gameObject.GetComponent<CanvasGroup>() ?? footerTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 Vector2 pos = footerTransform.anchoredPosition;
                 footerTransform.anchoredPosition = new Vector2(pos.x, pos.y - 100);
                 DOTween.Sequence()
                     .AppendInterval(0.3f)
                     .Append(footerTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
         }
 

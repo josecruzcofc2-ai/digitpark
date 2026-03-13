@@ -78,9 +78,9 @@ namespace DigitPark.Animations
                         .SetEase(Ease.InQuad)
                         .OnComplete(() =>
                         {
-                            oldContent.SetActive(false);
-                            oldRT.anchoredPosition = oldOriginalPos;
-                            oldCG.alpha = 1f;
+                            if (oldContent != null) oldContent.SetActive(false);
+                            if (oldRT != null) oldRT.anchoredPosition = oldOriginalPos;
+                            if (oldCG != null) oldCG.alpha = 1f;
                         }));
                 }
             }

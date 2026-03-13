@@ -361,7 +361,8 @@ namespace DigitPark.Animations
             DOTween.Sequence()
                 .Append(button.DOScale(1.1f, 0.2f).SetEase(Ease.OutQuad))
                 .Append(button.DOScale(1f, 0.3f).SetEase(Ease.OutBounce))
-                .SetLoops(2);
+                .SetLoops(2)
+                .SetLink(button.gameObject);
         }
 
         /// <summary>
@@ -377,13 +378,20 @@ namespace DigitPark.Animations
             Image buttonImage = button.GetComponent<Image>();
             if (buttonImage != null)
             {
-                buttonImage.DOColor(Color.white, 0.3f)
-                    .SetLoops(-1, LoopType.Yoyo);
+                // Track in continuousTweens so StopContinuousAnimations() can kill them
+                continuousTweens.Add(
+                    buttonImage.DOColor(Color.white, 0.3f)
+                        .SetLoops(-1, LoopType.Yoyo)
+                        .SetLink(button.gameObject)
+                );
             }
 
-            button.DOScale(1.05f, 0.5f)
-                .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+            continuousTweens.Add(
+                button.DOScale(1.05f, 0.5f)
+                    .SetEase(Ease.InOutSine)
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetLink(button.gameObject)
+            );
         }
 
         // ==================== EXIT ANIMATIONS ====================

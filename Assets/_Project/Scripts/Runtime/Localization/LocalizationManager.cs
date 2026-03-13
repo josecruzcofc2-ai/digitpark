@@ -1236,6 +1236,8 @@ namespace DigitPark.Localization
 
         private void AddTranslation(string key, string english, string spanish, string french, string portuguese, string german)
         {
+            // Only add if not already loaded from Translations.txt (file is the authoritative source)
+            if (textDictionary.ContainsKey(key)) return;
             textDictionary[key] = new LocalizedText
             {
                 key = key,

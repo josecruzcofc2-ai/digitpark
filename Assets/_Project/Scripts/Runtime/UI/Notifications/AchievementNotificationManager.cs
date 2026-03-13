@@ -30,6 +30,8 @@ namespace DigitPark.Managers
         private AchievementToastUI _currentToast;
         private Queue<AchievementToastData> _notificationQueue = new Queue<AchievementToastData>();
         private bool _isShowingToast;
+        private int _subscriptionRetries = 0;
+        private const int MAX_SUBSCRIPTION_RETRIES = 5;
 
         private void Awake()
         {
@@ -140,14 +142,19 @@ namespace DigitPark.Managers
         {
             if (AchievementService.Instance != null)
             {
+                _subscriptionRetries = 0;
                 AchievementService.Instance.OnAchievementUnlocked -= OnAchievementUnlocked;
                 AchievementService.Instance.OnAchievementUnlocked += OnAchievementUnlocked;
                 Debug.Log("[AchievementNotification] Subscribed to AchievementService (delayed)");
             }
+            else if (_subscriptionRetries < MAX_SUBSCRIPTION_RETRIES)
+            {
+                _subscriptionRetries++;
+                Invoke(nameof(TrySubscribeToAchievementService), 2f);
+            }
             else
             {
-                // Keep trying
-                Invoke(nameof(TrySubscribeToAchievementService), 2f);
+                Debug.LogWarning("[AchievementNotification] AchievementService not found after max retries. Stopping.");
             }
         }
 

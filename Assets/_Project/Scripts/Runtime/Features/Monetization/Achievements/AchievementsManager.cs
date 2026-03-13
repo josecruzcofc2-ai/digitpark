@@ -583,7 +583,8 @@ namespace DigitPark.Managers
                     _emptyIconFloatTween = icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
-                        .SetDelay(0.4f);
+                        .SetDelay(0.4f)
+                        .SetLink(gameObject);
                 }
             }
         }
@@ -727,7 +728,7 @@ namespace DigitPark.Managers
             }
 
             // Animate out
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetLink(gameObject);
 
             if (detailCard)
             {

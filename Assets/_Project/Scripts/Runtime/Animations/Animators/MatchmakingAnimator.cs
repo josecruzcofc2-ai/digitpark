@@ -66,6 +66,7 @@ namespace DigitPark.Animations
         private Tween vsGlowTween;
         private Tween searchScaleTween;
         private bool isSearching;
+        private Coroutine searchTextCoroutine;
 
         private void Awake()
         {
@@ -111,7 +112,9 @@ namespace DigitPark.Animations
             if (searchingText != null)
             {
                 searchingText.gameObject.SetActive(true);
-                StartCoroutine(AnimateSearchingText());
+                if (searchTextCoroutine != null)
+                    StopCoroutine(searchTextCoroutine);
+                searchTextCoroutine = StartCoroutine(AnimateSearchingText());
             }
 
             // Play searching sound (looping)
@@ -129,6 +132,12 @@ namespace DigitPark.Animations
         public void StopSearchAnimation()
         {
             isSearching = false;
+
+            if (searchTextCoroutine != null)
+            {
+                StopCoroutine(searchTextCoroutine);
+                searchTextCoroutine = null;
+            }
 
             searchRotationTween?.Kill();
             searchDotsSequence?.Kill();
@@ -153,11 +162,12 @@ namespace DigitPark.Animations
             for (int i = 0; i < searchDots.Length; i++)
             {
                 int index = i;
+                if (searchDots[index] == null) continue;
                 searchDotsSequence.Insert(i * 0.2f, searchDots[index].DOFade(1f, 0.3f));
                 searchDotsSequence.Insert(i * 0.2f + 0.5f, searchDots[index].DOFade(0.3f, 0.3f));
             }
 
-            searchDotsSequence.SetLoops(-1);
+            searchDotsSequence.SetLoops(-1).SetLink(gameObject);
         }
 
         private IEnumerator AnimateSearchingText()
@@ -199,9 +209,10 @@ namespace DigitPark.Animations
             {
                 screenFlash.gameObject.SetActive(true);
                 screenFlash.color = new Color(1, 1, 1, 0);
-                screenFlash.DOFade(0.8f, 0.1f).OnComplete(() =>
-                    screenFlash.DOFade(0f, 0.3f).OnComplete(() =>
-                        screenFlash.gameObject.SetActive(false)));
+                var flashSeq = DOTween.Sequence().SetLink(gameObject);
+                flashSeq.Append(screenFlash.DOFade(0.8f, 0.1f))
+                        .Append(screenFlash.DOFade(0f, 0.3f))
+                        .OnComplete(() => { if (screenFlash != null) screenFlash.gameObject.SetActive(false); });
             }
 
             yield return new WaitForSeconds(0.2f);
@@ -312,12 +323,14 @@ namespace DigitPark.Animations
             {
                 vsGlow.gameObject.SetActive(true);
                 vsGlowTween?.Kill();
-                var fadeIn = vsGlow.DOFade(1f, 0.3f);
-                fadeIn.OnComplete(() =>
+                // Assign before OnComplete to avoid race condition where 0.3f tween
+                // finishes in same frame before the outer assignment runs
+                vsGlowTween = vsGlow.DOFade(1f, 0.3f);
+                vsGlowTween.OnComplete(() =>
                 {
-                    vsGlowTween = vsGlow.DOFade(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                    if (vsGlow != null)
+                        vsGlowTween = vsGlow.DOFade(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
                 });
-                vsGlowTween = fadeIn;
             }
 
             // Screen shake
@@ -359,7 +372,7 @@ namespace DigitPark.Animations
             if (battleStartSound != null && audioSource != null)
                 audioSource.PlayOneShot(battleStartSound);
 
-            Sequence exitSeq = DOTween.Sequence();
+            Sequence exitSeq = DOTween.Sequence().SetLink(gameObject);
 
             // Cards fly out
             if (playerCard != null)
@@ -421,6 +434,8 @@ namespace DigitPark.Animations
 
         private void OnDestroy()
         {
+            if (searchTextCoroutine != null)
+                StopCoroutine(searchTextCoroutine);
             searchRotationTween?.Kill();
             searchDotsSequence?.Kill();
             searchScaleTween?.Kill();

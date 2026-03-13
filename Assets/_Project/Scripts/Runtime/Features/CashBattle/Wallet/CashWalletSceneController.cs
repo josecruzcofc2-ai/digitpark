@@ -499,6 +499,7 @@ namespace DigitPark.CashBattle
                 {
                     await WalletManager.Instance.InitiateDeposit(option, selectedPaymentMethod);
                 }
+                if (this == null) return;
             }
             catch (System.Exception ex)
             {
@@ -568,7 +569,7 @@ namespace DigitPark.CashBattle
             Debug.Log($"[CashWalletScene] Withdraw requested: ${amount}");
 
             ShowLoading(true);
-            WalletManager.Instance?.RequestWithdrawal((decimal)amount, selectedPaymentMethod);
+            _ = WalletManager.Instance?.RequestWithdrawal((decimal)amount, selectedPaymentMethod);
         }
 
         // ==================== TRANSACTION HISTORY ====================
@@ -671,10 +672,10 @@ namespace DigitPark.CashBattle
                 int endVal = (int)(newBalance * 100);
                 DOTween.To(() => startVal, x => {
                     startVal = x;
-                    balanceText.text = $"${x / 100f:F2}";
+                    if (balanceText != null) balanceText.text = $"${x / 100f:F2}";
                 }, endVal, 0.8f).SetEase(Ease.OutQuad).OnComplete(() => {
-                    balanceText.text = $"${newBalance:F2}";
-                });
+                    if (balanceText != null) balanceText.text = $"${newBalance:F2}";
+                }).SetLink(gameObject);
 
                 // Punch scale para feedback visual
                 UIAnimations.TextPunch(balanceText.transform, 0.15f, 0.3f);

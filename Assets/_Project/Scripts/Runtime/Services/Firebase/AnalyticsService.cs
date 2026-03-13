@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Firebase;
 using Firebase.Analytics;
 using DigitPark.Services;
 
@@ -44,6 +45,27 @@ namespace DigitPark.Services.Firebase
             if (!enableAnalytics)
             {
                 Debug.Log("[Analytics] Analytics deshabilitado");
+                return;
+            }
+
+            // AUDIT-FIXED [2026-03-10] H-06: Verificar que Firebase esté listo antes de SetAnalyticsCollectionEnabled
+            _ = InitializeAsync();
+        }
+
+        private async System.Threading.Tasks.Task InitializeAsync()
+        {
+            try
+            {
+                var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
+                if (dependencyStatus != DependencyStatus.Available)
+                {
+                    Debug.LogError($"[Analytics] Firebase no disponible: {dependencyStatus}");
+                    return;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Analytics] Error verificando dependencias Firebase: {e.Message}");
                 return;
             }
 
@@ -336,12 +358,13 @@ namespace DigitPark.Services.Firebase
 
         #region User Properties
 
-        public void SetUserId(string odId)
+        // AUDIT-FIXED [2026-03-10] M-05: corregido typo "odId" → "userId"
+        public void SetUserId(string userId)
         {
             if (!_isInitialized) return;
 
-            FirebaseAnalytics.SetUserId(odId);
-            LogDebug($"set_user_id: {odId}");
+            FirebaseAnalytics.SetUserId(userId);
+            LogDebug($"set_user_id: (redacted)");
         }
 
         public void SetUserProperty(string name, string value)
@@ -484,6 +507,38 @@ namespace DigitPark.Services.Firebase
             FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
             _isInitialized = true;
             Debug.Log("[Analytics] Analytics habilitado");
+        }
+
+        /// <summary>
+        /// Loga un evento personalizado con parametros arbitrarios.
+        /// Usado por sistemas externos (ej: StripeAbortProtocol) que no tienen metodo especifico.
+        /// </summary>
+        public void LogCustomEvent(string eventName, Dictionary<string, object> parameters = null)
+        {
+            if (!_isInitialized) return;
+
+            if (parameters == null || parameters.Count == 0)
+            {
+                FirebaseAnalytics.LogEvent(eventName);
+            }
+            else
+            {
+                var firebaseParams = new List<Parameter>();
+                foreach (var kvp in parameters)
+                {
+                    if (kvp.Value is string s)
+                        firebaseParams.Add(new Parameter(kvp.Key, s));
+                    else if (kvp.Value is long l)
+                        firebaseParams.Add(new Parameter(kvp.Key, l));
+                    else if (kvp.Value is double d)
+                        firebaseParams.Add(new Parameter(kvp.Key, d));
+                    else
+                        firebaseParams.Add(new Parameter(kvp.Key, kvp.Value?.ToString() ?? ""));
+                }
+                FirebaseAnalytics.LogEvent(eventName, firebaseParams.ToArray());
+            }
+
+            LogDebug(eventName);
         }
 
         #endregion

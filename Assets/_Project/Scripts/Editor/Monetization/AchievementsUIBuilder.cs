@@ -294,7 +294,7 @@ namespace DigitPark.Editor
             headerRT.anchorMin = new Vector2(0, 1);
             headerRT.anchorMax = new Vector2(1, 1);
             headerRT.pivot = new Vector2(0.5f, 1);
-            headerRT.anchoredPosition = Vector2.zero;
+            headerRT.anchoredPosition = new Vector2(0, -29); // consistent top margin across all scenes
             headerRT.sizeDelta = new Vector2(0, HEADER_HEIGHT);
 
             Image headerBg = GetOrAddComponent<Image>(header);

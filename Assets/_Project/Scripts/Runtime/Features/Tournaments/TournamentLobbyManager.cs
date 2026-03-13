@@ -279,9 +279,14 @@ namespace DigitPark.Managers
         {
             if (currentTournament == null) return;
 
+            // Sanitize: replace pipe separator to avoid breaking the parse format
+            string safeMessage = message.Replace("|", "\u2758");
+            string safeSender = sender.Replace("|", "");
             string key = $"chat_{currentTournament.tournamentId}";
             string existing = PlayerPrefs.GetString(key, "");
-            existing += $"{sender}|{message}\n";
+            // Enforce size limit (~50KB) to avoid PlayerPrefs overflow
+            if (existing.Length > 50000) existing = existing.Substring(existing.Length - 40000);
+            existing += $"{safeSender}|{safeMessage}\n";
             PlayerPrefs.SetString(key, existing);
             PlayerPrefs.Save();
         }
@@ -481,7 +486,7 @@ namespace DigitPark.Managers
             // Check if tournament is starting
             if (currentTournament != null && hasJoined)
             {
-                TimeSpan timeUntilStart = currentTournament.startTime - DateTime.Now;
+                TimeSpan timeUntilStart = currentTournament.startTime.ToUniversalTime() - DateTime.UtcNow;
                 if (timeUntilStart.TotalSeconds <= 10 && timeUntilStart.TotalSeconds > 0)
                 {
                     ShowStartingOverlay((int)timeUntilStart.TotalSeconds);
@@ -489,7 +494,8 @@ namespace DigitPark.Managers
                 else if (timeUntilStart.TotalSeconds <= 0 && !_tournamentStarted)
                 {
                     _tournamentStarted = true;
-                    StartTournament();
+                    if (!StartTournament())
+                        _tournamentStarted = false; // Reset to allow retry if dependencies not ready
                 }
             }
         }
@@ -526,7 +532,7 @@ namespace DigitPark.Managers
         {
             if (prizeDistributionContainer == null || prizeDistributionContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             for (int i = 0; i < prizeDistributionContainer.childCount; i++)
             {
                 var child = prizeDistributionContainer.GetChild(i);
@@ -611,7 +617,7 @@ namespace DigitPark.Managers
         {
             if (participantsContainer == null || participantsContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             for (int i = 0; i < participantsContainer.childCount; i++)
             {
                 var child = participantsContainer.GetChild(i);
@@ -824,9 +830,15 @@ namespace DigitPark.Managers
                 startingCountdownText.text = L("tournament_starting_in", seconds);
         }
 
-        private void StartTournament()
+        private bool StartTournament()
         {
-            if (currentTournament == null) return;
+            if (currentTournament == null) return false;
+
+            if (GameSessionManager.Instance == null)
+            {
+                Debug.LogWarning("[TournamentLobby] GameSessionManager not ready — will retry");
+                return false;
+            }
 
             // Parse game type from category string using enum parsing with fallback
             GameType gameType = GameType.MemoryPairs;
@@ -837,15 +849,13 @@ namespace DigitPark.Managers
                 gameType = GameType.MemoryPairs; // Default fallback
             }
 
-            if (GameSessionManager.Instance != null)
-            {
-                GameSessionManager.Instance.StartTournamentSession(
-                    gameType,
-                    currentTournament.tournamentId,
-                    Guid.NewGuid().ToString(),
-                    "", "" // no opponent in leaderboard tournaments
-                );
-            }
+            GameSessionManager.Instance.StartTournamentSession(
+                gameType,
+                currentTournament.tournamentId,
+                Guid.NewGuid().ToString(),
+                "", "" // no opponent in leaderboard tournaments
+            );
+            return true;
         }
 
         // ── Status & Overlays ──

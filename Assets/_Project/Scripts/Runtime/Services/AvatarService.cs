@@ -61,7 +61,11 @@ namespace DigitPark.Services
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                _ = InitializeAsync();
+                InitializeAsync().ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        Debug.LogError($"[AvatarService] Initialization failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
             }
             else
             {
@@ -379,13 +383,18 @@ namespace DigitPark.Services
         {
             try
             {
-                // Resize and crop to square
+                // Resize and crop to square (must run on main thread — Unity API)
                 Texture2D resizedTex = ResizeAndCropToSquare(originalTex, maxAvatarSize);
                 OnUploadProgress?.Invoke(0.3f);
 
-                // Convert to JPEG
+                // Convert to JPEG (must run on main thread — Unity API)
                 byte[] jpegBytes = resizedTex.EncodeToJPG(jpegQuality);
                 OnUploadProgress?.Invoke(0.4f);
+
+                // Create sprite now while we are guaranteed to be on the main thread.
+                // Firebase await continuations may not preserve Unity's SynchronizationContext,
+                // so Sprite.Create must not be called after the upload await.
+                Sprite preparedSprite = CreateSprite(resizedTex);
 
                 // Upload to Firebase Storage
                 string avatarUrl = await UploadToFirebaseStorage(jpegBytes);
@@ -403,8 +412,8 @@ namespace DigitPark.Services
                         await SavePlayerData(playerData);
                     }
 
-                    // Create sprite and notify
-                    currentAvatarSprite = CreateSprite(resizedTex);
+                    // Use pre-created sprite (safe — created before the Firebase await)
+                    currentAvatarSprite = preparedSprite;
                     OnAvatarChanged?.Invoke(currentAvatarSprite);
                     OnUploadProgress?.Invoke(1f);
 

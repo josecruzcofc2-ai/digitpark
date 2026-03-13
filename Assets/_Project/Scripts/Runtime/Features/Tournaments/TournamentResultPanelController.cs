@@ -6,6 +6,7 @@ using TMPro;
 using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
+using DigitPark.Progression;
 
 namespace DigitPark.UI
 {
@@ -98,6 +99,15 @@ namespace DigitPark.UI
         public void ShowTournamentResult(MinigameResult result, int position,
             int attemptsUsed, int maxAttempts, float bestTime, decimal prize)
         {
+            // XP de torneo — prize > 0 indica torneo de dinero real (50% rate)
+            var xpResult = new TournamentResult
+            {
+                placement        = position,
+                totalParticipants = 0, // desconocido en este punto
+                isCashTournament  = prize > 0m
+            };
+            PlayerProgressionSystem.Instance?.AddTournamentXP(xpResult);
+
             StartCoroutine(ShowResultSequence(result, position, attemptsUsed, maxAttempts, bestTime, prize));
         }
 
@@ -174,7 +184,7 @@ namespace DigitPark.UI
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                     DOTween.To(() => displayTime, x => { displayTime = x; timeText.text = FormatTime(x); },
                         result.TotalTime, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (timeText != null) timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 
@@ -195,7 +205,7 @@ namespace DigitPark.UI
                     _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                         DOTween.To(() => displayErrors, x => { displayErrors = x; errorsText.text = x.ToString(); },
                             result.Errors, 0.8f).SetEase(Ease.OutQuad)
-                        .OnComplete(() => errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                        .OnComplete(() => { if (errorsText != null) errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 }
                 statIndex++;
             }
@@ -215,7 +225,7 @@ namespace DigitPark.UI
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                     DOTween.To(() => displayScore, x => { displayScore = x; scoreText.text = FormatTime(x); },
                         result.FinalScore, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => scoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (scoreText != null) scoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
             }
         }
 
@@ -277,7 +287,7 @@ namespace DigitPark.UI
                         .Join(prizeText.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
                         .Append(DOTween.To(() => displayPrize, x => { displayPrize = x; prizeText.text = $"${x:F2}"; },
                             targetPrize, 1.2f).SetEase(Ease.OutQuad))
-                        .AppendCallback(() => prizeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f))
+                        .AppendCallback(() => { if (prizeText != null) prizeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); })
                         .SetLink(gameObject)
                         .SetUpdate(true);
                 }

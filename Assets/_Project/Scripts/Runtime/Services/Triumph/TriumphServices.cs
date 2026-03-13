@@ -38,10 +38,10 @@ namespace DigitPark.Services.Triumph
         private readonly string _apiKey;
         private readonly bool _sandbox;
 
-        public KYCStatus CurrentStatus => throw new NotImplementedException("Implementar con Triumph SDK");
-        public bool IsFullyVerified => throw new NotImplementedException();
-        public bool CanAccessCashBattle => throw new NotImplementedException();
-        public UserVerificationInfo UserInfo => throw new NotImplementedException();
+        public KYCStatus CurrentStatus => KYCStatus.NotStarted;
+        public bool IsFullyVerified => false;
+        public bool CanAccessCashBattle => false;
+        public UserVerificationInfo UserInfo => null;
 
         #pragma warning disable 0067
         public event Action<KYCStatus> OnStatusChanged;
@@ -59,30 +59,28 @@ namespace DigitPark.Services.Triumph
 
         public Task<KYCResult> VerifyAge(DateTime birthDate)
         {
-            // TODO: Implementar con Triumph
-            // return Triumph.KYC.VerifyAge(birthDate);
-            throw new NotImplementedException("Implementar con Triumph SDK - Triumph.KYC.VerifyAge()");
+            // TODO: return Triumph.KYC.VerifyAge(birthDate);
+            Debug.LogError("[TriumphKYC] Triumph SDK not integrated. Returning failure instead of crashing.");
+            return Task.FromResult(KYCResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<KYCResult> StartIdentityVerification()
         {
-            // TODO: Implementar con Triumph
-            // Triumph abrirá su propia UI para verificación de documento + selfie
-            // return Triumph.KYC.StartVerification();
-            throw new NotImplementedException("Implementar con Triumph SDK - Triumph.KYC.StartVerification()");
+            // TODO: return Triumph.KYC.StartVerification();
+            Debug.LogError("[TriumphKYC] Triumph SDK not integrated. Returning failure instead of crashing.");
+            return Task.FromResult(KYCResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<KYCResult> RefreshVerificationStatus()
         {
             // TODO: return Triumph.KYC.GetStatus();
-            throw new NotImplementedException();
+            return Task.FromResult(KYCResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<KYCResult> ResetVerification()
         {
-            // Solo disponible en Sandbox
             // TODO: return Triumph.KYC.Reset();
-            throw new NotImplementedException();
+            return Task.FromResult(KYCResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
     }
 
@@ -95,9 +93,9 @@ namespace DigitPark.Services.Triumph
         private readonly string _apiKey;
         private readonly bool _sandbox;
 
-        public decimal CurrentBalance => throw new NotImplementedException();
-        public decimal PendingBalance => throw new NotImplementedException();
-        public decimal AvailableBalance => throw new NotImplementedException();
+        public decimal CurrentBalance => 0m;
+        public decimal PendingBalance => 0m;
+        public decimal AvailableBalance => 0m;
 
         #pragma warning disable 0067
         public event Action<decimal> OnBalanceChanged;
@@ -111,19 +109,18 @@ namespace DigitPark.Services.Triumph
             Debug.Log($"[TriumphWallet] Inicializado en modo {(sandbox ? "SANDBOX" : "PRODUCTION")}");
         }
 
-        public bool HasSufficientFunds(decimal amount) => throw new NotImplementedException();
+        public bool HasSufficientFunds(decimal amount) => false;
 
         public Task<WalletResult> RefreshBalance()
         {
-            // TODO: return Triumph.Wallet.GetBalance();
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphWallet] Triumph SDK not integrated.");
+            return Task.FromResult(WalletResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<WalletResult> Deposit(DepositRequest request)
         {
-            // TODO: Triumph abrirá su UI de pago
-            // return Triumph.Wallet.Deposit(request.Amount);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphWallet] Triumph SDK not integrated.");
+            return Task.FromResult(WalletResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<WalletResult> QuickDeposit(decimal amount)
@@ -133,35 +130,33 @@ namespace DigitPark.Services.Triumph
 
         public Task<WalletResult> Withdraw(WithdrawalRequest request)
         {
-            // TODO: return Triumph.Wallet.Withdraw(request.Amount);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphWallet] Triumph SDK not integrated.");
+            return Task.FromResult(WalletResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<WalletResult> WithdrawAll()
         {
-            throw new NotImplementedException();
+            return Task.FromResult(WalletResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<WalletResult> ReserveFunds(decimal amount, string matchId)
         {
-            // Triumph maneja esto internamente al unirse a un match
-            throw new NotImplementedException();
+            return Task.FromResult(WalletResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<WalletResult> ReleaseFunds(string matchId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(WalletResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<List<WalletTransaction>> GetTransactionHistory(int limit = 50, int offset = 0)
         {
-            // TODO: return Triumph.Wallet.GetHistory(limit, offset);
-            throw new NotImplementedException();
+            return Task.FromResult(new List<WalletTransaction>());
         }
 
         public Task<WalletTransaction> GetTransaction(string transactionId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<WalletTransaction>(null);
         }
     }
 
@@ -174,10 +169,10 @@ namespace DigitPark.Services.Triumph
         private readonly string _apiKey;
         private readonly bool _sandbox;
 
-        public MatchmakingStatus CurrentStatus => throw new NotImplementedException();
-        public MatchInfo CurrentMatch => throw new NotImplementedException();
-        public bool IsSearching => throw new NotImplementedException();
-        public bool HasActiveMatch => throw new NotImplementedException();
+        public MatchmakingStatus CurrentStatus => MatchmakingStatus.Idle;
+        public MatchInfo CurrentMatch => null;
+        public bool IsSearching => false;
+        public bool HasActiveMatch => false;
 
         #pragma warning disable 0067
         public event Action<MatchmakingStatus> OnStatusChanged;
@@ -195,41 +190,40 @@ namespace DigitPark.Services.Triumph
 
         public decimal[] GetAvailableEntryFees(CashGameType gameType)
         {
-            // TODO: return Triumph.GetEntryFees(gameType);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphMatchmaking] Triumph SDK not integrated.");
+            return new decimal[0];
         }
 
         public Task<MatchmakingResult> FindMatch(CashGameType gameType, decimal entryFee)
         {
-            // TODO: return Triumph.Matchmaking.FindMatch(gameType, entryFee);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphMatchmaking] Triumph SDK not integrated.");
+            return Task.FromResult(MatchmakingResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<MatchmakingResult> CancelSearch()
         {
-            // TODO: return Triumph.Matchmaking.Cancel();
-            throw new NotImplementedException();
+            return Task.FromResult(MatchmakingResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<MatchmakingResult> ConfirmMatch(string matchId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(MatchmakingResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<MatchResult> SubmitScore(string matchId, int score)
         {
-            // TODO: return Triumph.Match.SubmitScore(matchId, score);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphMatchmaking] Triumph SDK not integrated.");
+            return Task.FromResult(new MatchResult()); // SDK_NOT_INTEGRATED — returns default (IsWinner=false, scores=0)
         }
 
         public Task<MatchInfo> GetMatchStatus(string matchId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<MatchInfo>(null);
         }
 
         public Task<MatchInfo[]> GetMatchHistory(int limit = 20, int offset = 0)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new MatchInfo[0]);
         }
     }
 
@@ -242,8 +236,8 @@ namespace DigitPark.Services.Triumph
         private readonly string _apiKey;
         private readonly bool _sandbox;
 
-        public TournamentInfo ActiveTournament => throw new NotImplementedException();
-        public bool IsInTournament => throw new NotImplementedException();
+        public TournamentInfo ActiveTournament => null;
+        public bool IsInTournament => false;
 
         #pragma warning disable 0067
         public event Action<TournamentInfo> OnTournamentUpdated;
@@ -260,44 +254,44 @@ namespace DigitPark.Services.Triumph
 
         public Task<List<TournamentInfo>> GetAvailableTournaments(CashGameType? gameType = null)
         {
-            // TODO: return Triumph.Tournaments.GetAvailable(gameType);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphTournament] Triumph SDK not integrated.");
+            return Task.FromResult(new List<TournamentInfo>());
         }
 
         public Task<List<TournamentInfo>> GetUpcomingTournaments(int limit = 10)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new List<TournamentInfo>());
         }
 
         public Task<TournamentInfo> GetTournamentDetails(string tournamentId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<TournamentInfo>(null);
         }
 
         public Task<TournamentResult> JoinTournament(string tournamentId)
         {
-            // TODO: return Triumph.Tournaments.Join(tournamentId);
-            throw new NotImplementedException();
+            Debug.LogError("[TriumphTournament] Triumph SDK not integrated.");
+            return Task.FromResult(TournamentResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<TournamentResult> LeaveTournament(string tournamentId)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(TournamentResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<List<TournamentLeaderboardEntry>> GetLeaderboard(string tournamentId, int limit = 100)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new List<TournamentLeaderboardEntry>());
         }
 
         public Task<TournamentResult> SubmitTournamentScore(string tournamentId, int score)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(TournamentResult.Failed("Triumph SDK not integrated", "SDK_NOT_INTEGRATED"));
         }
 
         public Task<List<TournamentInfo>> GetTournamentHistory(int limit = 20, int offset = 0)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new List<TournamentInfo>());
         }
     }
 }

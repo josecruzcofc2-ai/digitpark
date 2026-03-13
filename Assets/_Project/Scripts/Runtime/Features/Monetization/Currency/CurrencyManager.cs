@@ -55,6 +55,11 @@ namespace DigitPark.Monetization
 
         private const string GEMS_KEY = "Currency_Gems";
         private const string COINS_KEY = "Currency_Coins";
+        // Obfuscated keys — new storage uses XOR-masked values under different keys
+        private const string GEMS_KEY_V2 = "dp_cg_v2";
+        private const string COINS_KEY_V2 = "dp_cc_v2";
+        // XOR salt — obscures raw balance from casual memory editors (not cryptographic)
+        private const int CURRENCY_XOR_SALT = 0x4D50_3A21;
 
         // Valores iniciales para nuevos jugadores
         private const int DEFAULT_GEMS = 100;
@@ -110,14 +115,25 @@ namespace DigitPark.Monetization
 
         private void LoadCurrency()
         {
-            _gems = PlayerPrefs.GetInt(GEMS_KEY, DEFAULT_GEMS);
-            _coins = PlayerPrefs.GetInt(COINS_KEY, DEFAULT_COINS);
+            // Try new obfuscated keys first; fall back to legacy plain keys for migration
+            if (PlayerPrefs.HasKey(GEMS_KEY_V2))
+                _gems = PlayerPrefs.GetInt(GEMS_KEY_V2, DEFAULT_GEMS) ^ CURRENCY_XOR_SALT;
+            else
+                _gems = PlayerPrefs.GetInt(GEMS_KEY, DEFAULT_GEMS);
+
+            if (PlayerPrefs.HasKey(COINS_KEY_V2))
+                _coins = PlayerPrefs.GetInt(COINS_KEY_V2, DEFAULT_COINS) ^ CURRENCY_XOR_SALT;
+            else
+                _coins = PlayerPrefs.GetInt(COINS_KEY, DEFAULT_COINS);
         }
 
         private void SaveCurrency()
         {
-            PlayerPrefs.SetInt(GEMS_KEY, _gems);
-            PlayerPrefs.SetInt(COINS_KEY, _coins);
+            PlayerPrefs.SetInt(GEMS_KEY_V2, _gems ^ CURRENCY_XOR_SALT);
+            PlayerPrefs.SetInt(COINS_KEY_V2, _coins ^ CURRENCY_XOR_SALT);
+            // Remove legacy plain-text keys after migration
+            if (PlayerPrefs.HasKey(GEMS_KEY)) PlayerPrefs.DeleteKey(GEMS_KEY);
+            if (PlayerPrefs.HasKey(COINS_KEY)) PlayerPrefs.DeleteKey(COINS_KEY);
             PlayerPrefs.Save();
 
             // Sync to Firebase
@@ -182,7 +198,7 @@ namespace DigitPark.Monetization
         {
             if (amount <= 0) return true;
 
-            int newGems;
+            int newGems = 0;
             int deficit = 0;
             bool success;
             lock (_currencyLock)
@@ -203,8 +219,9 @@ namespace DigitPark.Monetization
             if (success)
             {
                 SaveCurrency();
-                OnGemsChanged?.Invoke(_gems, -amount);
-                Debug.Log($"[CurrencyManager] -{amount} gemas (Total: {_gems})");
+                // Use captured newGems (read inside lock) to avoid race condition
+                OnGemsChanged?.Invoke(newGems, -amount);
+                Debug.Log($"[CurrencyManager] -{amount} gemas (Total: {newGems})");
             }
             else
             {

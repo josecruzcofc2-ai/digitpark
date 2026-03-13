@@ -306,6 +306,7 @@ namespace DigitPark.UI.Builders
         {
             while (true)
             {
+                if (timerText == null) yield break;
                 UpdateTimer();
                 yield return new WaitForSeconds(1f);
             }

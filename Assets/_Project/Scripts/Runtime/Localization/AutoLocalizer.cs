@@ -1034,6 +1034,24 @@ namespace DigitPark.Localization
             // ==================== TOURNAMENTS BROWSER (V43 AUDIT) ====================
             { "CreateTournamentText", "create_tournament" },
             { "LoadMoreText", "load_more" },
+
+            // ==================== WIN EFFECTS (V50) ====================
+            { "WinEffectsTabTitle", "win_effects_tab_title" },
+            { "WinEffectEquippedLabel", "win_effect_equipped_label" },
+            { "WinEffectPreviewButton", "win_effect_preview_button" },
+            { "WinEffectEquipButton", "win_effect_equip_button" },
+            { "WinEffectFreeLabel", "win_effect_free_label" },
+            { "WinEffectAlreadyOwned", "win_effect_already_owned" },
+            { "ReducedMotionLabel", "setting_reduced_motion" },
+
+            // ==================== LEVEL UP PANEL ====================
+            { "LevelUpLabel", "levelup_title" },
+            { "MilestoneLabel", "levelup_milestone" },
+            { "ExperienceTitle", "experience_label" },
+            { "NextRewardHint", "levelup_next_reward" },
+            { "RewardHintText", "levelup_equip_hint" },
+            { "ContinueButtonText", "btn_continue" },
+            { "RewardUnlockedLabel", "reward_unlocked_title" },
         };
 
         private void Awake()

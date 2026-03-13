@@ -150,5 +150,10 @@ namespace DigitPark.Services
 
             return true;
         }
+
+        private void OnDestroy()
+        {
+            CancelInvoke();
+        }
     }
 }

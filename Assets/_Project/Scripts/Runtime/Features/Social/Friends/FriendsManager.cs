@@ -169,7 +169,8 @@ namespace DigitPark.Managers
             card.transform.localScale = Vector3.zero;
             card.transform.DOScale(1f, 0.3f)
                 .SetDelay(index * 0.06f)
-                .SetEase(Ease.OutBack);
+                .SetEase(Ease.OutBack)
+                .SetLink(card);
         }
 
         private void SetupFriendCard(GameObject card, FriendInfo friend)
@@ -384,7 +385,7 @@ namespace DigitPark.Managers
                     {
                         currentCards.Remove(card);
                         card.transform.DOScale(0f, 0.2f).SetEase(Ease.InBack)
-                            .OnComplete(() => Destroy(card));
+                            .OnComplete(() => { if (card != null) Destroy(card); });
                     }
 
                     allFriends.RemoveAll(f => f.odId == odId);
@@ -464,7 +465,8 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.15f)
                     .Append(searchBarTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
 
             // Requests nav fade + slide
@@ -477,7 +479,8 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
                     .Append(requestsNavTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
 
             // ScrollView fade in
@@ -487,7 +490,8 @@ namespace DigitPark.Managers
                 cg.alpha = 0f;
                 DOTween.Sequence()
                     .AppendInterval(0.3f)
-                    .Append(cg.DOFade(1f, 0.4f));
+                    .Append(cg.DOFade(1f, 0.4f))
+                    .SetLink(gameObject);
             }
         }
 
@@ -532,6 +536,9 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             transform.DOKill();
+
+            // Unsubscribe input listener to prevent leak
+            searchInput?.onValueChanged.RemoveListener(OnSearchChanged);
 
             // Kill tweens on child objects (cards, indicators, etc.)
             foreach (var card in currentCards)

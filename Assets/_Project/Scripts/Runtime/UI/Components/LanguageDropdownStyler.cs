@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using DigitPark.UI.Theme;
 using DigitPark.Themes;
 
 namespace DigitPark.UI.Components

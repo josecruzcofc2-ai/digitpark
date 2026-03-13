@@ -46,7 +46,6 @@ namespace DigitPark.Editor
 
         // Asset paths
         // Back button removed — Cancel button handles exit
-        private const string ICON_VS = "Assets/_Project/Art/Icons/Games/VSIcon.png";
         private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
         private const string ICON_DIGIT_RUSH = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
         private const string ICON_MEMORY_PAIRS = "Assets/_Project/Art/Icons/Games/MemoryPairsIcon.png";
@@ -161,11 +160,11 @@ namespace DigitPark.Editor
             iconGlow.effectColor = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.5f);
             iconGlow.effectDistance = new Vector2(3, -3);
 
-            // Icon background (circle-like dark card)
+            // Icon background — Classic Gold #FFD700
             GameObject iconBg = CreateElement(iconContainer.transform, "IconBackground");
             SetFullStretch(iconBg.GetComponent<RectTransform>());
             Image iconBgImg = iconBg.AddComponent<Image>();
-            iconBgImg.color = CARD_BG;
+            iconBgImg.color = new Color(1f, 0.84f, 0f, 1f); // Classic Gold #FFD700
 
             // Game Icon Image (pre-assign DigitRush as default; Manager swaps at runtime)
             GameObject gameIcon = CreateElement(iconContainer.transform, "GameIcon");
@@ -310,9 +309,9 @@ namespace DigitPark.Editor
             string cardName = isPlayer ? "PlayerCard" : "OpponentCard";
             Color accentColor = isPlayer ? GOLD_PRIMARY : new Color(0.6f, 0.65f, 0.7f, 1f);
 
-            // Card position: player on top, opponent on bottom
-            float yMin = isPlayer ? 0.55f : 0.05f;
-            float yMax = isPlayer ? 0.95f : 0.45f;
+            // Card position: player on top, opponent on bottom — gap 0.43–0.57 reserved for VS text
+            float yMin = isPlayer ? 0.57f : 0.03f;
+            float yMax = isPlayer ? 0.97f : 0.43f;
 
             // --- Card Container ---
             GameObject card = CreateElement(parent, cardName);
@@ -505,7 +504,8 @@ namespace DigitPark.Editor
         }
 
         /// <summary>
-        /// Creates the VS container between player cards (hidden by default)
+        /// Creates the VS text label between player cards.
+        /// Hidden by default; CashMatchmakingAnimator reveals it when opponent is found.
         /// </summary>
         private static void CreateVSContainer(Transform parent)
         {
@@ -514,47 +514,22 @@ namespace DigitPark.Editor
             vsRect.anchorMin = new Vector2(0.5f, 0.5f);
             vsRect.anchorMax = new Vector2(0.5f, 0.5f);
             vsRect.pivot = new Vector2(0.5f, 0.5f);
-            vsRect.sizeDelta = new Vector2(200, 200);
+            vsRect.sizeDelta = new Vector2(160, 60);
             vsRect.anchoredPosition = Vector2.zero;
 
-            // VS Icon Image
-            GameObject vsIconObj = CreateElement(vsContainer.transform, "VSIcon");
-            SetFullStretch(vsIconObj.GetComponent<RectTransform>());
-            Image vsIconImg = vsIconObj.AddComponent<Image>();
-            vsIconImg.preserveAspect = true;
-            vsIconImg.raycastTarget = false;
-
-            // Load VS icon sprite
-            Sprite vsSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_VS);
-            if (vsSprite != null)
-            {
-                vsIconImg.sprite = vsSprite;
-                vsIconImg.color = Color.white;
-            }
-            else
-            {
-                // Fallback: gold tint placeholder
-                vsIconImg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.3f);
-                Debug.LogWarning("[CashMatchmakingUIBuilder] VSIcon.png not found at: " + ICON_VS);
-            }
-
-            // VSText (for manager animation reference)
+            // VS Text — Gold, no icon
             GameObject vsText = CreateElement(vsContainer.transform, "VSText");
             SetFullStretch(vsText.GetComponent<RectTransform>());
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
-            vsTmp.fontSize = FontSizes.Subtitle;
+            vsTmp.fontSize = 64;
+            vsTmp.fontStyle = FontStyles.Bold;
             vsTmp.color = GOLD_PRIMARY;
             vsTmp.alignment = TextAlignmentOptions.Center;
-            vsTmp.fontStyle = FontStyles.Bold;
             vsTmp.raycastTarget = false;
-            vsTmp.enableAutoSizing = true;
-            vsTmp.fontSizeMin = FontSizes.AutoMinBody;
-            vsTmp.fontSizeMax = FontSizes.Subtitle;
-            vsTmp.overflowMode = TextOverflowModes.Ellipsis;
+            vsTmp.enableAutoSizing = false;
 
-            // Initially hidden until match found
-            vsContainer.SetActive(false);
+            vsContainer.SetActive(true);
         }
 
         // ═══════════════════════════════════════════════════════════════

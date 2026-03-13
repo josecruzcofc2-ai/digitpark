@@ -276,7 +276,7 @@ namespace DigitPark.UI.Common
             seq.Join(cg.DOFade(1f, 0.25f));
             if (popupPanel != null)
                 seq.Join(popupPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
-            seq.SetUpdate(true);
+            seq.SetLink(gameObject).SetUpdate(true);
 
             emailInput.Select();
         }
@@ -299,7 +299,8 @@ namespace DigitPark.UI.Common
                         if (popupPanel != null) popupPanel.transform.localScale = Vector3.one;
                         cg.alpha = 1f;
                     })
-                    .SetUpdate(true);
+                    .SetUpdate(true)
+                    .SetLink(gameObject);
             }
             else
             {

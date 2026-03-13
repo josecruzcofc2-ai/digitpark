@@ -55,6 +55,7 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
+            CancelInvoke();
             if (_instance == this)
             {
                 _instance = null;
@@ -323,10 +324,17 @@ namespace DigitPark.Managers
 
         private async void AcceptFriendRequest(string senderId)
         {
-            if (FriendService.Instance != null && !string.IsNullOrEmpty(senderId))
+            try
             {
-                var result = await FriendService.Instance.AcceptFriendRequest(senderId);
-                Debug.Log($"[InAppNotification] Friend request accept: {result.Success}");
+                if (FriendService.Instance != null && !string.IsNullOrEmpty(senderId))
+                {
+                    var result = await FriendService.Instance.AcceptFriendRequest(senderId);
+                    Debug.Log($"[InAppNotification] Friend request accept: {result.Success}");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[InAppNotification] AcceptFriendRequest error: {ex.Message}");
             }
         }
 

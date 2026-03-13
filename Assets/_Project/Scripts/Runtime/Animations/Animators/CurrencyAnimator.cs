@@ -108,7 +108,7 @@ namespace DigitPark.Animations
             if (amountText != null)
             {
                 amountText.DOColor(flashColor, countDuration * 0.3f)
-                    .OnComplete(() => amountText.DOColor(normalColor, countDuration * 0.7f));
+                    .OnComplete(() => { if (amountText != null) amountText.DOColor(normalColor, countDuration * 0.7f); });
             }
 
             // Scale punch
@@ -132,8 +132,11 @@ namespace DigitPark.Animations
                 glowEffect.gameObject.SetActive(true);
                 glowEffect.color = new Color(flashColor.r, flashColor.g, flashColor.b, 0f);
                 glowEffect.DOFade(0.8f, countDuration * 0.3f)
-                    .OnComplete(() => glowEffect.DOFade(0f, countDuration * 0.7f)
-                        .OnComplete(() => glowEffect.gameObject.SetActive(false)));
+                    .OnComplete(() => {
+                        if (glowEffect != null)
+                            glowEffect.DOFade(0f, countDuration * 0.7f)
+                                .OnComplete(() => { if (glowEffect != null) glowEffect.gameObject.SetActive(false); });
+                    });
             }
 
             // Count animation
@@ -180,6 +183,7 @@ namespace DigitPark.Animations
                 flashSeq.Append(amountText.DOColor(insufficientColor, 0.1f));
                 flashSeq.Append(amountText.DOColor(normalColor, 0.1f));
                 flashSeq.SetLoops(3);
+                flashSeq.SetLink(amountText.gameObject);
             }
 
             // Icon shake
@@ -202,10 +206,12 @@ namespace DigitPark.Animations
             DOTween.Sequence()
                 .Append(plusButton.DOScale(1.2f, 0.2f).SetEase(Ease.OutQuad))
                 .Append(plusButton.DOScale(1f, 0.3f).SetEase(Ease.OutBounce))
-                .SetLoops(3);
+                .SetLoops(3)
+                .SetLink(plusButton.gameObject);
 
             if (plusButtonGlow != null)
             {
+                DOTween.Kill(plusButtonGlow);
                 plusButtonGlow.gameObject.SetActive(true);
                 plusButtonGlow.DOFade(1f, 0.3f)
                     .SetLoops(6, LoopType.Yoyo)
@@ -328,7 +334,8 @@ namespace DigitPark.Animations
             DOTween.Sequence()
                 .Append(multiplierBadge.DOScale(1.3f, 0.2f).SetEase(Ease.OutBack))
                 .Append(multiplierBadge.DOScale(1f, 0.15f))
-                .Append(multiplierBadge.DOScale(1.05f, 0.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo));
+                .Append(multiplierBadge.DOScale(1.05f, 0.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo))
+                .SetLink(multiplierBadge.gameObject);
         }
 
         // ==================== HELPERS ====================

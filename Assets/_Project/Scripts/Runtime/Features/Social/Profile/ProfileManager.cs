@@ -248,10 +248,17 @@ namespace DigitPark.Managers
 
         private void CheckFriendStatus(string playerId)
         {
+            var friendService = FriendService.Instance;
+            if (friendService == null)
+            {
+                Debug.LogWarning("[ProfileManager] FriendService not available — skipping friend status check");
+                return;
+            }
+
             // Usar FriendService para verificar estado
-            isFriend = FriendService.Instance.IsFriend(playerId);
-            bool hasPendingRequest = FriendService.Instance.HasPendingRequestWith(playerId);
-            bool sentRequest = FriendService.Instance.HasSentRequestTo(playerId);
+            isFriend = friendService.IsFriend(playerId);
+            bool hasPendingRequest = friendService.HasPendingRequestWith(playerId);
+            bool sentRequest = friendService.HasSentRequestTo(playerId);
 
             if (isFriend)
             {
@@ -415,8 +422,8 @@ namespace DigitPark.Managers
                 float val = 0f;
                 DOTween.To(() => val, x => {
                     val = x;
-                    winRateText.text = $"{x:F1}%";
-                }, winRate, 0.8f).SetEase(Ease.OutQuad);
+                    if (winRateText != null) winRateText.text = $"{x:F1}%";
+                }, winRate, 0.8f).SetEase(Ease.OutQuad).SetLink(gameObject);
             }
 
             // Best time y average time (valores directos, sin counter)

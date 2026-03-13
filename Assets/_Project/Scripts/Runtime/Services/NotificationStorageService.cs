@@ -336,8 +336,9 @@ namespace DigitPark.Services
         /// </summary>
         public string GetRelativeTime()
         {
-            var now = DateTime.Now;
-            var dt = GetDateTime();
+            // Use UTC consistently — GetDateTime() returns UTC (stored via UtcNow.ToBinary())
+            var now = DateTime.UtcNow;
+            var dt = GetDateTime(); // Kind=Utc
             var diff = now - dt;
 
             if (diff.TotalMinutes < 1) return AutoLocalizer.Get("time_now");
@@ -345,7 +346,7 @@ namespace DigitPark.Services
             if (diff.TotalHours < 24) return AutoLocalizer.Get("time_ago_hours", (int)diff.TotalHours);
             if (diff.TotalDays < 2) return AutoLocalizer.Get("time_yesterday");
             if (diff.TotalDays < 7) return AutoLocalizer.Get("time_ago_days", (int)diff.TotalDays);
-            return dt.ToString("dd/MM/yyyy");
+            return dt.ToLocalTime().ToString("dd/MM/yyyy");
         }
 
         /// <summary>
@@ -353,8 +354,9 @@ namespace DigitPark.Services
         /// </summary>
         public string GetTimeGroup()
         {
+            // Compare local dates for human-readable groups ("Today", "Yesterday")
             var now = DateTime.Now;
-            var dt = GetDateTime();
+            var dt = GetDateTime().ToLocalTime(); // Convert UTC→Local for date comparison
             var diff = now - dt;
 
             if (dt.Date == now.Date) return AutoLocalizer.Get("time_today");

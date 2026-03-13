@@ -378,6 +378,7 @@ namespace DigitPark.UI.Panels
             onStylesProPurchase = null;
             onRestorePurchases = null;
             onClose = null;
+            listenersConfigured = false;
 
             // Si el padre es un canvas creado dinámicamente (PremiumPanelCanvas), destruirlo
             if (transform.parent != null && transform.parent.name == "PremiumPanelCanvas")
@@ -405,6 +406,7 @@ namespace DigitPark.UI.Panels
             DOTween.Sequence()
                 .Join(t.DOScale(1f, 0.35f).SetEase(Ease.OutBack))
                 .Join(cg.DOFade(1f, 0.3f))
+                .SetLink(t.gameObject)
                 .SetUpdate(true);
         }
 
@@ -415,8 +417,9 @@ namespace DigitPark.UI.Panels
             DOTween.Sequence()
                 .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                 .Join(cg.DOFade(0f, 0.2f))
-                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
-                .SetUpdate(true);
+                .OnComplete(() => { if (t != null) t.localScale = Vector3.one; if (cg != null) cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
 
         #region Button Handlers

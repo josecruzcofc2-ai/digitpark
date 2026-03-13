@@ -575,6 +575,7 @@ namespace DigitPark.UI
 
             while (enableBreathing && !isCorrect && !isHovering)
             {
+                if (this == null || buttonFace == null) yield break;
                 float t = (Mathf.Sin(Time.time * breathingSpeed + randomOffset) + 1f) * 0.5f;
 
                 // Escala sutil

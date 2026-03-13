@@ -15,7 +15,10 @@ namespace DigitPark.Monetization
         Avatar,         // Avatar
         SpecialOffer,   // Oferta especial (bundle)
         PremiumBundle,  // Bundle premium
-        StarterPack     // Paquete de inicio
+        StarterPack,    // Paquete de inicio
+        WinEffect,      // Efecto de victoria
+        WinEffectBundle, // Bundle de efectos de victoria
+        BattleCard      // BattleCard cosmético de matchmaking
     }
 
     /// <summary>
@@ -252,6 +255,25 @@ namespace DigitPark.Monetization
                     Debug.Log($"[ShopItemData] Avatar desbloqueado: {avatarId}");
                     break;
 
+                case ShopItemType.WinEffect:
+                case ShopItemType.WinEffectBundle:
+                    if (!string.IsNullOrEmpty(itemId))
+                    {
+                        var effectService = DigitPark.Services.VictoryEffectService.Instance;
+                        if (effectService != null)
+                            effectService.UnlockEffect(itemId);
+                    }
+                    break;
+
+                case ShopItemType.BattleCard:
+                    if (!string.IsNullOrEmpty(itemId))
+                    {
+                        var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
+                        if (bcService != null)
+                            bcService.UnlockCard(itemId);
+                    }
+                    break;
+
                 case ShopItemType.SpecialOffer:
                 case ShopItemType.StarterPack:
                     // Bundle - grant multiple rewards
@@ -303,6 +325,13 @@ namespace DigitPark.Monetization
                 case ShopItemType.PremiumBundle:
                 case ShopItemType.StarterPack:
                     shopTab = ShopTab.Featured;
+                    break;
+                case ShopItemType.WinEffect:
+                case ShopItemType.WinEffectBundle:
+                    shopTab = ShopTab.Effects;
+                    break;
+                case ShopItemType.BattleCard:
+                    shopTab = ShopTab.BattleCards;
                     break;
             }
         }

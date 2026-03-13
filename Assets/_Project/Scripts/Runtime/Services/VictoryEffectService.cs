@@ -276,28 +276,38 @@ namespace DigitPark.Services
         }
 
         /// <summary>
-        /// Plays the equipped victory effect at the specified position
+        /// Plays the equipped victory effect at the specified position.
+        /// Returns true if the effect was successfully instantiated.
         /// </summary>
-        public void PlayEquippedEffect(Vector3 position)
+        public bool PlayEquippedEffect(Vector3 position)
         {
             var effect = GetEquippedEffect();
-            if (effect == null) return;
+            if (effect == null) return false;
 
-            // Try to load and instantiate particle prefab
-            if (!string.IsNullOrEmpty(effect.particlePrefabName))
+            if (string.IsNullOrEmpty(effect.particlePrefabName)) return false;
+
+            var prefab = Resources.Load<GameObject>(effect.particlePrefabName);
+            if (prefab == null)
             {
-                var prefab = Resources.Load<GameObject>(effect.particlePrefabName);
-                if (prefab != null)
-                {
-                    var instance = Instantiate(prefab, position, Quaternion.identity);
-                    Destroy(instance, 5f); // Auto-cleanup after 5 seconds
-                    Debug.Log($"[VictoryEffectService] Playing effect: {effect.effectId}");
-                }
-                else
-                {
-                    Debug.Log($"[VictoryEffectService] Effect prefab not found: {effect.particlePrefabName} (will be created later)");
-                }
+                Debug.LogWarning($"[VictoryEffectService] Effect prefab not found: {effect.particlePrefabName}");
+                return false;
             }
+
+            var instance = Instantiate(prefab, position, Quaternion.identity);
+
+            // Initialize VictoryEffectPlayer with colors if present
+            var player = instance.GetComponent<DigitPark.Effects.VictoryEffectPlayer>();
+            if (player != null)
+            {
+                player.Initialize(effect);
+            }
+            else
+            {
+                Destroy(instance, 5f); // Fallback auto-cleanup
+            }
+
+            Debug.Log($"[VictoryEffectService] Playing effect: {effect.effectId}");
+            return true;
         }
 
         // ==================== DEBUG ====================

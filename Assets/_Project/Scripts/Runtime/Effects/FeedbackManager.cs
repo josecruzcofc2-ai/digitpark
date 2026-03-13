@@ -59,6 +59,7 @@ namespace DigitPark.Effects
 
         private void Initialize()
         {
+            LoadSettings();
             mainCamera = Camera.main;
             if (mainCamera != null)
             {
@@ -265,6 +266,8 @@ namespace DigitPark.Effects
 
             while (elapsed < duration)
             {
+                if (mainCamera == null) yield break;
+
                 float x = Random.Range(-1f, 1f) * intensity * (1f - elapsed / duration);
                 float y = Random.Range(-1f, 1f) * intensity * (1f - elapsed / duration);
 
@@ -274,7 +277,8 @@ namespace DigitPark.Effects
                 yield return null;
             }
 
-            mainCamera.transform.localPosition = originalCameraPosition;
+            if (mainCamera != null)
+                mainCamera.transform.localPosition = originalCameraPosition;
             shakeCoroutine = null;
         }
 

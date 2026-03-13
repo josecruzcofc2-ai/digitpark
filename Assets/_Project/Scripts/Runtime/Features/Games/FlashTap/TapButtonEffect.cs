@@ -193,6 +193,7 @@ namespace DigitPark.UI
 
         private IEnumerator AnimateScale(Vector3 targetScale, float duration)
         {
+            if (buttonTransform == null) yield break;
             Vector3 startScale = buttonTransform.localScale;
             float elapsed = 0f;
 

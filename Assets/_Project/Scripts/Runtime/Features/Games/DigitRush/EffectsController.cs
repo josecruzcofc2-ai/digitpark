@@ -263,6 +263,7 @@ namespace DigitPark.Controllers
         /// </summary>
         private IEnumerator ReturnParticleAfterPlay(ParticleSystem ps, Queue<ParticleSystem> pool)
         {
+            if (ps == null) yield break;
             yield return new WaitForSeconds(ps.main.duration + ps.main.startLifetime.constantMax);
             ReturnParticleToPool(ps, pool);
         }

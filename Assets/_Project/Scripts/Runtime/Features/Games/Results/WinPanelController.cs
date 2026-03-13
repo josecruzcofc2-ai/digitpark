@@ -165,9 +165,9 @@ namespace DigitPark.UI
                 float targetTime = result.TotalTime;
                 timeText.text = FormatTime(0f);
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
-                    DOTween.To(() => displayTime, x => { displayTime = x; timeText.text = FormatTime(x); },
+                    DOTween.To(() => displayTime, x => { displayTime = x; if (timeText != null) timeText.text = FormatTime(x); },
                         targetTime, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (timeText != null) timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 
@@ -188,9 +188,9 @@ namespace DigitPark.UI
                 if (targetErrors > 0)
                 {
                     _revealSequence.Insert(statIndex * 0.25f + 0.55f,
-                        DOTween.To(() => displayErrors, x => { displayErrors = x; errorsText.text = x.ToString(); },
+                        DOTween.To(() => displayErrors, x => { displayErrors = x; if (errorsText != null) errorsText.text = x.ToString(); },
                             targetErrors, 0.8f).SetEase(Ease.OutQuad)
-                        .OnComplete(() => errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                        .OnComplete(() => { if (errorsText != null) errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 }
                 else
                 {
@@ -222,6 +222,7 @@ namespace DigitPark.UI
             float elapsed = 0f;
             while (elapsed < 0.3f)
             {
+                if (this == null) yield break;
                 elapsed += Time.deltaTime;
                 if (canvasGroup != null) canvasGroup.alpha = elapsed / 0.3f;
                 yield return null;
@@ -292,7 +293,7 @@ namespace DigitPark.UI
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                     DOTween.To(() => displayMoney, x => { displayMoney = x; moneyWonText.text = $"{moneyPrefix}{x:F2}"; },
                         targetMoney, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => moneyWonText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (moneyWonText != null) moneyWonText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 
@@ -326,7 +327,7 @@ namespace DigitPark.UI
                 _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                     DOTween.To(() => displayTime, x => { displayTime = x; timeText.text = FormatTime(x); },
                         playerResult.TotalTime, 1.2f).SetEase(Ease.OutQuad)
-                    .OnComplete(() => timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                    .OnComplete(() => { if (timeText != null) timeText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 statIndex++;
             }
 
@@ -347,7 +348,7 @@ namespace DigitPark.UI
                     _revealSequence.Insert(statIndex * 0.25f + 0.55f,
                         DOTween.To(() => displayErrors, x => { displayErrors = x; errorsText.text = x.ToString(); },
                             playerResult.Errors, 0.8f).SetEase(Ease.OutQuad)
-                        .OnComplete(() => errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f)));
+                        .OnComplete(() => { if (errorsText != null) errorsText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f); }));
                 }
                 statIndex++;
             }
@@ -382,8 +383,16 @@ namespace DigitPark.UI
             Transform iconTransform = resultIcon != null ? resultIcon.transform : null;
             WinCelebrationAnimator.PlayWin(canvas, iconTransform);
 
-            // Partículas de victoria
-            if (sparkleEffect != null)
+            // Custom victory effect (from VictoryEffectService)
+            bool customEffectPlayed = false;
+            if (DigitPark.Services.VictoryEffectService.Instance != null)
+            {
+                customEffectPlayed = DigitPark.Services.VictoryEffectService.Instance
+                    .PlayEquippedEffect(transform.position);
+            }
+
+            // Fallback to default sparkle effect if no custom effect
+            if (!customEffectPlayed && sparkleEffect != null)
             {
                 sparkleEffect.PlayVictoryConfetti();
                 sparkleEffect.PlayCoinExplosion(Vector2.zero);

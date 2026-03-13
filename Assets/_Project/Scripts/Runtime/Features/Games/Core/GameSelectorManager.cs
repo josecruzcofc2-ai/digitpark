@@ -489,7 +489,8 @@ namespace DigitPark.Games
             DOTween.Sequence()
                 .Join(t.DOScale(1f, UIAnimations.DURATION_NORMAL).SetEase(AnimConstants.ENTER))
                 .Join(cg.DOFade(1f, AnimConstants.DURATION_MEDIUM))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
 
         private void AnimatePanelOut(Transform t, System.Action onComplete)
@@ -499,8 +500,9 @@ namespace DigitPark.Games
             DOTween.Sequence()
                 .Join(t.DOScale(0.9f, UIAnimations.DURATION_FAST).SetEase(AnimConstants.EXIT))
                 .Join(cg.DOFade(0f, UIAnimations.DURATION_FAST))
-                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
-                .SetUpdate(true);
+                .OnComplete(() => { if (t != null) t.localScale = Vector3.one; if (cg != null) cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
     }
 

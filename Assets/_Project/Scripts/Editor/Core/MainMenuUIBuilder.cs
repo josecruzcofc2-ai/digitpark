@@ -46,7 +46,7 @@ namespace DigitPark.Editor
         // Uniform 1% (0.010) gap between every section — no overlaps, consistent spacing
         // Heights: Header=100px, Profile=18.5%, Daily=7.0%, Quick=6.0%, Play=15.5%, Cash=17.5%, Extra=18.3%
         private const float HEADER_HEIGHT = 100f;
-        private const float HEADER_TOP = 1.000f;
+        private const float HEADER_TOP = 0.985f;  // consistent with all scenes
         private const float HEADER_BOT = 0.928f;  // kept for reference, header now uses sizeDelta
 
         private const float PROFILE_TOP = 0.918f; // gap 1.0%
@@ -216,7 +216,7 @@ namespace DigitPark.Editor
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchoredPosition = new Vector2(0, -29); // consistent top margin across all scenes
             rt.sizeDelta = new Vector2(0, HEADER_HEIGHT);
             GetOrAdd<Image>(header).color = HEADER_BG;
 
@@ -261,7 +261,7 @@ namespace DigitPark.Editor
             badgeRT.anchorMin = new Vector2(1, 1);
             badgeRT.anchorMax = new Vector2(1, 1);
             badgeRT.pivot = new Vector2(0.5f, 0.5f);
-            badgeRT.anchoredPosition = new Vector2(-12, -12);
+            badgeRT.anchoredPosition = new Vector2(-12, -20);
             badgeRT.sizeDelta = new Vector2(36, 36);
             var badgeImg = GetOrAdd<Image>(badge);
             badgeImg.color = new Color(1, 0.2f, 0.2f, 1);
@@ -401,6 +401,8 @@ namespace DigitPark.Editor
             var borderImg = borderRing.AddComponent<Image>();
             borderImg.sprite = circleSprite;
             borderImg.color = CYAN_NEON;
+            var fr_mainmenu = borderRing.AddComponent<DigitPark.Services.FrameRenderer>();
+            fr_mainmenu.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Full);
 
             // Circular mask container (clips avatar to circle)
             var avatarMask = new GameObject("AvatarMask");

@@ -303,7 +303,7 @@ namespace DigitPark.Managers
                 newCG.alpha = 0f;
             }
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
 
             // Cross-fade slides
             if (oldSlide != null)
@@ -371,15 +371,16 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.15f)
                     .Append(slides[0].transform.DOScale(1f, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
 
             // Dots fade in
             if (dotsRectTransform != null)
             {
-                var cg = dotsRectTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = dotsRectTransform.gameObject.GetComponent<CanvasGroup>() ?? dotsRectTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.3f).SetDelay(0.3f);
+                cg.DOFade(1f, 0.3f).SetDelay(0.3f).SetLink(gameObject);
             }
 
             // Navigation from bottom

@@ -113,6 +113,9 @@ namespace DigitPark.Games
 
             if (feedbackCoroutine != null)
                 StopCoroutine(feedbackCoroutine);
+
+            if (waitCoroutine != null)
+                StopCoroutine(waitCoroutine);
         }
 
         #region Settings Panel
@@ -256,7 +259,7 @@ namespace DigitPark.Games
             // Boton pasa de naranja a rojo - AHORA!
             isWaiting = false;
             isSignalActive = true;
-            signalStartTime = Time.time;
+            signalStartTime = Time.realtimeSinceStartup; // Use realtime to avoid timeScale cheats and pause distortion
 
             if (button3D != null)
             {
@@ -325,8 +328,8 @@ namespace DigitPark.Games
         {
             isSignalActive = false;
 
-            // Capturar tiempo de reacción INMEDIATAMENTE para precisión
-            float reactionTime = (Time.time - signalStartTime) * 1000f;
+            // Capturar tiempo de reacción INMEDIATAMENTE para precisión (realtimeSinceStartup = unaffected by timeScale)
+            float reactionTime = (Time.realtimeSinceStartup - signalStartTime) * 1000f;
             reactionTimes.Add(reactionTime);
 
             if (reactionTime < bestTime)

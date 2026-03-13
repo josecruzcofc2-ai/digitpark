@@ -306,6 +306,7 @@ namespace DigitPark.Managers
             if (_storeController == null)
             {
                 Debug.LogError("[Premium] Store no inicializado");
+                _purchaseCallback = null;
                 onComplete?.Invoke(false);
                 return;
             }
@@ -326,6 +327,7 @@ namespace DigitPark.Managers
             else
             {
                 Debug.LogError($"[Premium] Gem pack no disponible: {iapProductId}");
+                _purchaseCallback = null;
                 onComplete?.Invoke(false);
             }
         }
@@ -382,6 +384,7 @@ namespace DigitPark.Managers
             if (_storeController == null)
             {
                 Debug.LogError("[Premium] Store no inicializado");
+                _purchaseCallback = null;
                 onComplete?.Invoke(false);
                 return;
             }
@@ -402,6 +405,7 @@ namespace DigitPark.Managers
             else
             {
                 Debug.LogError($"[Premium] Producto no disponible: {productId}");
+                _purchaseCallback = null;
                 onComplete?.Invoke(false);
             }
         }
@@ -413,6 +417,7 @@ namespace DigitPark.Managers
             if (_storeController == null)
             {
                 Debug.LogError("[Premium] Store no inicializado");
+                _purchaseCallback = null; // Clear before direct invoke to prevent double-call from IAP restore
                 onComplete?.Invoke(false);
                 return;
             }
@@ -434,6 +439,7 @@ namespace DigitPark.Managers
             else
             {
                 Debug.LogError($"[Premium] Producto no disponible: {productId}");
+                _purchaseCallback = null; // Clear before direct invoke to prevent double-call from IAP restore
                 onComplete?.Invoke(false);
             }
         }
@@ -657,6 +663,8 @@ namespace DigitPark.Managers
                 ProcessGemPackPurchase(productId);
                 _purchaseCallback?.Invoke(true);
                 _purchaseCallback = null;
+                _pendingPurchaseExtCallback?.Invoke(true, args.purchasedProduct.transactionID ?? "");
+                _pendingPurchaseExtCallback = null;
                 return PurchaseProcessingResult.Complete;
             }
 
@@ -692,6 +700,8 @@ namespace DigitPark.Managers
             }
 
             _purchaseCallback = null;
+            _pendingPurchaseExtCallback?.Invoke(true, args.purchasedProduct.transactionID ?? "");
+            _pendingPurchaseExtCallback = null;
             return PurchaseProcessingResult.Complete;
         }
 
@@ -737,6 +747,8 @@ namespace DigitPark.Managers
 
             _purchaseCallback?.Invoke(false);
             _purchaseCallback = null;
+            _pendingPurchaseExtCallback?.Invoke(false, "");
+            _pendingPurchaseExtCallback = null;
         }
 
         public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
@@ -748,7 +760,37 @@ namespace DigitPark.Managers
 
             _purchaseCallback?.Invoke(false);
             _purchaseCallback = null;
+            _pendingPurchaseExtCallback?.Invoke(false, "");
+            _pendingPurchaseExtCallback = null;
         }
+
+        #endregion
+
+        #region PaymentManager Bridge
+
+        /// <summary>
+        /// Bridge para que AppleIAPProvider llame compras IAP programáticamente.
+        /// Retorna via callback porque Unity IAP es asíncrono basado en callbacks.
+        /// </summary>
+        public void PurchaseProductWithCallback(string appleProductId,
+            System.Action<bool, string> onComplete)
+        {
+            _pendingPurchaseExtCallback = onComplete;
+            PurchaseByProductId(appleProductId);
+        }
+
+        private System.Action<bool, string> _pendingPurchaseExtCallback;
+
+        /// <summary>
+        /// Bridge para restaurar compras con callback de finalización.
+        /// </summary>
+        public void RestorePurchases(System.Action onComplete)
+        {
+            _pendingRestoreCallback = onComplete;
+            RestorePurchases();
+        }
+
+        private System.Action _pendingRestoreCallback;
 
         #endregion
 

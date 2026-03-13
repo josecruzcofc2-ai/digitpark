@@ -33,12 +33,16 @@ namespace DigitPark.Services
         private string currentGameKey;
         private string currentUserId;
         private string currentUserName;
+        private string currentUserBattleCardId;
         private bool isSearching = false;
         private Coroutine searchCoroutine;
 
         // Opponent result listener
         private DatabaseReference _opponentResultRef;
         private EventHandler<ValueChangedEventArgs> _opponentResultHandler;
+
+        /// <summary>BattleCardId del oponente encontrado (leído de la queue o match data)</summary>
+        public string OpponentBattleCardId { get; private set; }
 
         // Callbacks
         private Action<string, string> onMatchFoundCallback;
@@ -103,6 +107,9 @@ namespace DigitPark.Services
                 return;
             }
 
+            // Clean up any dangling opponent listener from a previous match session
+            UnsubscribeOpponentListener();
+
             onMatchFoundCallback = onFound;
             onMatchFailedCallback = onFailed;
 
@@ -119,6 +126,9 @@ namespace DigitPark.Services
                 Debug.LogWarning("[MatchmakingService] Already searching for a match");
                 return;
             }
+
+            // Clean up any dangling opponent listener from a previous match session
+            UnsubscribeOpponentListener();
 
             onMatchFoundCallback = onFound;
             onMatchFailedCallback = onFailed;
@@ -161,6 +171,17 @@ namespace DigitPark.Services
             isSearching = true;
             currentGameKey = gameKey;
             float searchStartTime = Time.unscaledTime;
+            OpponentBattleCardId = null;
+
+            // Leer battleCardId del jugador actual
+            currentUserBattleCardId = "battlecard_neon_core";
+            try
+            {
+                var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
+                if (bcService != null)
+                    currentUserBattleCardId = bcService.EquippedCardId ?? "battlecard_neon_core";
+            }
+            catch { /* fallback */ }
 
             Debug.Log($"[MatchmakingService] Starting search for: {gameKey}");
 
@@ -168,6 +189,7 @@ namespace DigitPark.Services
             string opponentId = null;
             string opponentName = null;
             string opponentQueueKey = null;
+            string opponentBcId = null;
 
             // Query the queue for the same game type
             var queueQuery = matchmakingQueueRef
@@ -195,6 +217,7 @@ namespace DigitPark.Services
                                 opponentName = data.ContainsKey("userName") ? data["userName"].ToString() : AutoLocalizer.Get("default_opponent");
                                 opponentQueueKey = child.Key;
                                 existingMatchKey = child.Key;
+                                opponentBcId = data.ContainsKey("battleCardId") ? data["battleCardId"].ToString() : "battlecard_neon_core";
                             }
                         }
                     }
@@ -212,6 +235,7 @@ namespace DigitPark.Services
             {
                 // Found an opponent! Create match
                 Debug.Log($"[MatchmakingService] Found waiting opponent: {opponentName}");
+                OpponentBattleCardId = opponentBcId;
 
                 // Remove opponent from queue
                 RemoveFromQueue(opponentQueueKey, gameKey);
@@ -231,10 +255,12 @@ namespace DigitPark.Services
             // Poll for match
             while (isSearching)
             {
+                if (this == null) yield break;
                 // Check if we've been matched
                 bool matched = false;
                 string matchId = null;
                 string matchedOpponentName = null;
+                string matchedOpponentBcId = null;
 
                 var matchCheck = activeMatchesRef
                     .OrderByChild("player1Id")
@@ -255,6 +281,7 @@ namespace DigitPark.Services
                                 matched = true;
                                 matchId = child.Key;
                                 matchedOpponentName = data.ContainsKey("player2Name") ? data["player2Name"].ToString() : AutoLocalizer.Get("default_opponent");
+                                matchedOpponentBcId = data.ContainsKey("player2BattleCardId") ? data["player2BattleCardId"].ToString() : "battlecard_neon_core";
                             }
                         }
                     }
@@ -288,6 +315,7 @@ namespace DigitPark.Services
                                     matched = true;
                                     matchId = child.Key;
                                     matchedOpponentName = data.ContainsKey("player1Name") ? data["player1Name"].ToString() : AutoLocalizer.Get("default_opponent");
+                                    matchedOpponentBcId = data.ContainsKey("player1BattleCardId") ? data["player1BattleCardId"].ToString() : "battlecard_neon_core";
                                 }
                             }
                         }
@@ -304,6 +332,7 @@ namespace DigitPark.Services
                 {
                     // Remove from queue
                     RemoveFromQueue(currentQueueEntryKey, gameKey);
+                    OpponentBattleCardId = matchedOpponentBcId;
 
                     isSearching = false;
                     onMatchFoundCallback?.Invoke(matchId, matchedOpponentName);
@@ -331,11 +360,16 @@ namespace DigitPark.Services
                 { "userName", currentUserName },
                 { "timestamp", ServerValue.Timestamp },
                 { "isCashMatch", isCashMatch },
-                { "status", "searching" }
+                { "status", "searching" },
+                { "battleCardId", currentUserBattleCardId ?? "battlecard_neon_core" }
             };
 
             var newEntryRef = matchmakingQueueRef.Child(gameKey).Push();
-            newEntryRef.SetValueAsync(queueEntry);
+            newEntryRef.SetValueAsync(queueEntry).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogError($"[MatchmakingService] Failed to add to queue: {t.Exception?.GetBaseException().Message}");
+            });
 
             Debug.Log($"[MatchmakingService] Added to queue: {newEntryRef.Key}");
             return newEntryRef.Key;
@@ -359,13 +393,16 @@ namespace DigitPark.Services
 
         private string CreateMatch(string gameKey, string player1Id, string player1Name, string player2Id, string player2Name)
         {
+            // Player1 = quien crea el match (nosotros), Player2 = oponente de la queue
             var matchData = new Dictionary<string, object>
             {
                 { "gameKey", gameKey },
                 { "player1Id", player1Id },
                 { "player1Name", player1Name },
+                { "player1BattleCardId", currentUserBattleCardId ?? "battlecard_neon_core" },
                 { "player2Id", player2Id },
                 { "player2Name", player2Name },
+                { "player2BattleCardId", OpponentBattleCardId ?? "battlecard_neon_core" },
                 { "status", "ready" },
                 { "createdAt", ServerValue.Timestamp },
                 { "player1Score", 0 },
@@ -375,7 +412,11 @@ namespace DigitPark.Services
             };
 
             var newMatchRef = activeMatchesRef.Push();
-            newMatchRef.SetValueAsync(matchData);
+            newMatchRef.SetValueAsync(matchData).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogError($"[MatchmakingService] Failed to create match: {t.Exception?.GetBaseException().Message}");
+            });
 
             Debug.Log($"[MatchmakingService] Match created: {newMatchRef.Key}");
             return newMatchRef.Key;
@@ -412,8 +453,13 @@ namespace DigitPark.Services
                             { finishedKey, true }
                         };
 
-                        activeMatchesRef.Child(matchId).UpdateChildrenAsync(updates);
-                        Debug.Log($"[MatchmakingService] Result submitted for match: {matchId}");
+                        activeMatchesRef.Child(matchId).UpdateChildrenAsync(updates).ContinueWith(t =>
+                        {
+                            if (t.IsFaulted)
+                                Debug.LogError($"[MatchmakingService] Failed to submit result: {t.Exception?.GetBaseException().Message}");
+                            else
+                                Debug.Log($"[MatchmakingService] Result submitted for match: {matchId}");
+                        });
                     }
                 }
             });
@@ -440,7 +486,7 @@ namespace DigitPark.Services
                         string opponentScoreKey = isPlayer1 ? "player2Score" : "player1Score";
                         string opponentTimeKey = isPlayer1 ? "player2Time" : "player1Time";
 
-                        if (data.ContainsKey(opponentFinishedKey) && (bool)data[opponentFinishedKey])
+                        if (data.ContainsKey(opponentFinishedKey) && System.Convert.ToBoolean(data[opponentFinishedKey]))
                         {
                             float opponentScore = Convert.ToSingle(data[opponentScoreKey]);
                             float opponentTime = data.ContainsKey(opponentTimeKey) ? Convert.ToSingle(data[opponentTimeKey]) : 0f;

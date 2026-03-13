@@ -39,17 +39,20 @@ namespace DigitPark.Animations
         /// </summary>
         public Tween AnimateScore(TextMeshProUGUI scoreText, int targetScore, string format = "{0}")
         {
+            if (scoreText == null) return null;
             int current = 0;
             return DOTween.To(() => current, x =>
             {
                 current = x;
-                scoreText.text = string.Format(format, x);
+                if (scoreText != null) scoreText.text = string.Format(format, x);
             }, targetScore, countUpDuration)
             .SetEase(countUpEase)
+            .SetLink(scoreText.gameObject)
             .OnComplete(() =>
             {
                 // Punch on complete
-                scoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f);
+                if (scoreText != null)
+                    scoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f).SetLink(scoreText.gameObject);
             });
         }
 
@@ -107,13 +110,17 @@ namespace DigitPark.Animations
                 {
                     case ResultType.Win:
                         if (scoreText != null)
+                        {
                             scoreText.color = winColor;
-                        scoreText?.transform.DOPunchScale(Vector3.one * (scorePunchScale - 1f), 0.4f, 8, 0.5f);
+                            scoreText.transform.DOPunchScale(Vector3.one * (scorePunchScale - 1f), 0.4f, 8, 0.5f).SetLink(scoreText.gameObject);
+                        }
                         break;
                     case ResultType.Loss:
                         if (scoreText != null)
+                        {
                             scoreText.color = loseColor;
-                        scoreText?.transform.DOShakePosition(0.3f, 5f, 15, 90, false, true);
+                            scoreText.transform.DOShakePosition(0.3f, 5f, 15, 90, false, true).SetLink(scoreText.gameObject);
+                        }
                         break;
                     case ResultType.Draw:
                         if (scoreText != null)
@@ -139,7 +146,8 @@ namespace DigitPark.Animations
             return DOTween.Sequence()
                 .AppendInterval(delay)
                 .Append(cg.DOFade(1f, 0.25f).SetEase(Ease.OutQuad))
-                .Join(statRow.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+                .Join(statRow.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack))
+                .SetLink(statRow);
         }
 
         /// <summary>

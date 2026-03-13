@@ -229,11 +229,11 @@ namespace DigitPark.Managers
         {
             if (resultsContainer == null || resultsContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             for (int i = 0; i < resultsContainer.childCount; i++)
             {
                 var child = resultsContainer.GetChild(i);
-                if (!child.gameObject.activeSelf) continue;
+                if (child == null || !child.gameObject.activeSelf) continue;
                 var cg = child.GetComponent<CanvasGroup>();
                 if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;

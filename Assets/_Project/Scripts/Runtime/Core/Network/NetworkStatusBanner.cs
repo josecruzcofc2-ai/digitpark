@@ -159,9 +159,9 @@ namespace DigitPark.UI
             float elapsed = 0f;
             _canvasGroup.alpha = 0f;
 
-            // Safe area offset para notch
-            float safeAreaOffset = Screen.safeArea.y > 0 ? (Screen.height - Screen.safeArea.yMax) : 0;
-            float targetY = 0;
+            // Safe area offset para notch — en iPhone X/12/14 el banner debe bajar por el notch superior
+            float topInset = Screen.height - Screen.safeArea.yMax;
+            float targetY = -topInset;
             float startY = 80;
 
             _bannerRect.anchoredPosition = new Vector2(0, startY);

@@ -269,7 +269,7 @@ namespace DigitPark.Editor
             hrt.anchorMin = new Vector2(0, 1);
             hrt.anchorMax = new Vector2(1, 1);
             hrt.pivot = new Vector2(0.5f, 1);
-            hrt.anchoredPosition = Vector2.zero;
+            hrt.anchoredPosition = new Vector2(0, -29);
             hrt.sizeDelta = new Vector2(0, 100);
             header.AddComponent<Image>().color = HEADER_BG;
             AddOutline(header, CYAN_DARK, 1);

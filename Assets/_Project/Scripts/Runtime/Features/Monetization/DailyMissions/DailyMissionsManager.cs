@@ -739,7 +739,7 @@ namespace DigitPark.Managers
         {
             if (missionsContainer == null || missionsContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             for (int i = 0; i < missionsContainer.childCount; i++)
             {
                 var child = missionsContainer.GetChild(i);
@@ -1210,9 +1210,9 @@ namespace DigitPark.Managers
             panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
             cg.DOFade(0f, 0.2f).OnComplete(() =>
             {
-                panel.SetActive(false);
-                cg.alpha = 1f;
-                panel.transform.localScale = Vector3.one;
+                if (panel != null) panel.SetActive(false);
+                if (cg != null) cg.alpha = 1f;
+                if (panel != null) panel.transform.localScale = Vector3.one;
                 onComplete?.Invoke();
             });
         }

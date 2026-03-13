@@ -341,6 +341,7 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
+            CancelInvoke();
             transform.DOKill();
         }
     }

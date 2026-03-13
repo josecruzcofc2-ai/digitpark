@@ -277,6 +277,8 @@ namespace DigitPark.Navigation
     {
         Featured,
         Currency,
-        Styles
+        Styles,
+        Effects,
+        BattleCards
     }
 }

@@ -37,6 +37,8 @@ namespace DigitPark.Effects
             if (Instance == null)
             {
                 Instance = this;
+                DontDestroyOnLoad(gameObject);
+                UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
             }
             else
             {
@@ -322,8 +324,15 @@ namespace DigitPark.Effects
 
         #endregion
 
+        private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            // Refresh canvas reference after scene transition (old canvas gets destroyed)
+            canvas = UICanvasHelper.FindMainCanvas();
+        }
+
         private void OnDestroy()
         {
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
             StopAllCoroutines();
             if (Instance == this) Instance = null;
         }

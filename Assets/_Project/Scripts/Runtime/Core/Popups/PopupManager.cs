@@ -244,7 +244,8 @@ namespace DigitPark.UI
             DOTween.Sequence()
                 .Join(panel.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                 .Join(cg.DOFade(1f, 0.25f).SetEase(Ease.OutQuad))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(panel.gameObject);
         }
 
         private void AnimatePanelOut(Transform panel, Action onComplete)
@@ -261,7 +262,8 @@ namespace DigitPark.UI
                     cg.alpha = 1f;
                     onComplete?.Invoke();
                 })
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(panel.gameObject);
         }
 
         /// <summary>

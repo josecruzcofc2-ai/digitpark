@@ -49,6 +49,8 @@ namespace DigitPark.UI
         private Canvas parentCanvas;
         private List<GameObject> activeParticles = new List<GameObject>();
 
+        private bool ReducedMotionEnabled => PlayerPrefs.GetInt("ReducedMotion", 0) == 1;
+
         private void Awake()
         {
             rectTransform = GetComponent<RectTransform>();
@@ -83,6 +85,7 @@ namespace DigitPark.UI
         /// </summary>
         public void PlayVictoryConfetti()
         {
+            if (ReducedMotionEnabled) return;
             StartCoroutine(SpawnConfetti());
         }
 
@@ -91,6 +94,7 @@ namespace DigitPark.UI
         /// </summary>
         public void PlayConfettiExplosion(Vector2 position)
         {
+            if (ReducedMotionEnabled) return;
             StartCoroutine(SpawnConfettiExplosion(position));
         }
 
@@ -175,6 +179,7 @@ namespace DigitPark.UI
 
             while (elapsed < lifetime)
             {
+                if (rt == null || img == null) yield break;
                 elapsed += Time.deltaTime;
                 float t = elapsed / lifetime;
 
@@ -275,6 +280,7 @@ namespace DigitPark.UI
 
             while (elapsed < confettiLifetime)
             {
+                if (rt == null || img == null) yield break;
                 elapsed += Time.deltaTime;
                 float t = elapsed / confettiLifetime;
 
@@ -348,6 +354,7 @@ namespace DigitPark.UI
 
             while (elapsed < duration)
             {
+                if (rt == null || img == null) yield break;
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
@@ -435,6 +442,7 @@ namespace DigitPark.UI
 
             while (elapsed < duration)
             {
+                if (rt == null || img == null) yield break;
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 

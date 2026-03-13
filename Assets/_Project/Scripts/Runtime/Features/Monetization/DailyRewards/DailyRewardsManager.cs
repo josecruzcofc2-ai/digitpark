@@ -712,7 +712,7 @@ namespace DigitPark.Managers
         {
             if (rewardsContainer == null || rewardsContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             float lastDelay = 0f;
 
             for (int i = 0; i < rewardsContainer.childCount; i++)
@@ -1526,7 +1526,7 @@ namespace DigitPark.Managers
             }
 
             // === BUILD THE SEQUENCE ===
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
 
             // Phase 1 (0.0s): Dark overlay fades in
             if (darkOverlayImage)
@@ -1699,7 +1699,7 @@ namespace DigitPark.Managers
             if (giftGlowImage) DOTween.Kill(giftGlowImage.transform);
             if (continueButton) DOTween.Kill(continueButton.transform);
 
-            var dismissSeq = DOTween.Sequence();
+            var dismissSeq = DOTween.Sequence().SetLink(gameObject);
 
             // Gift box shrinks and fades
             if (giftBoxImage)
@@ -1782,9 +1782,9 @@ namespace DigitPark.Managers
             panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
             cg.DOFade(0f, 0.2f).OnComplete(() =>
             {
-                panel.SetActive(false);
-                cg.alpha = 1f;
-                panel.transform.localScale = Vector3.one;
+                if (panel != null) panel.SetActive(false);
+                if (cg != null) cg.alpha = 1f;
+                if (panel != null) panel.transform.localScale = Vector3.one;
                 onComplete?.Invoke();
             });
         }

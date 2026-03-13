@@ -53,7 +53,7 @@ namespace DigitPark.Animations
                 loadingPanel.SetActive(true);
                 var cg = GetOrAddCanvasGroup(loadingPanel);
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.2f);
+                cg.DOFade(1f, 0.2f).SetLink(loadingPanel);
             }
 
             // Hide content
@@ -76,14 +76,14 @@ namespace DigitPark.Animations
             StopSpinner();
             StopShimmer();
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
 
             // Fade out loading
             if (loadingPanel != null)
             {
                 var loadingCG = GetOrAddCanvasGroup(loadingPanel);
                 seq.Append(loadingCG.DOFade(0f, transitionDuration * 0.5f)
-                    .OnComplete(() => loadingPanel.SetActive(false)));
+                    .OnComplete(() => { if (loadingPanel != null) loadingPanel.SetActive(false); }));
             }
 
             // Fade in content

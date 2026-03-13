@@ -181,8 +181,9 @@ namespace DigitPark.UI
                 if (showDiscount && !string.IsNullOrEmpty(discount))
                 {
                     _discountBadge.SetActive(true);
+                    _discountBadge.transform.DOKill();
                     _discountBadge.transform.localScale = Vector3.zero;
-                    _discountBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                    _discountBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetLink(_discountBadge);
                 }
                 else
                 {

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using DigitPark.Managers;
 using DigitPark.Localization;
 using DigitPark.Navigation;
+using DigitPark.Payments;
 
 namespace DigitPark.Monetization
 {
@@ -240,8 +241,10 @@ namespace DigitPark.Monetization
             switch (tab)
             {
                 case ShopTab.Featured: pos = 1f; break;
-                case ShopTab.Currency: pos = 0.65f; break;
-                case ShopTab.Styles: pos = 0.3f; break;
+                case ShopTab.Currency: pos = 0.75f; break;
+                case ShopTab.Styles: pos = 0.45f; break;
+                case ShopTab.Effects: pos = 0.15f; break;
+                case ShopTab.BattleCards: pos = 0f; break;
             }
 
             _scrollRect.verticalNormalizedPosition = pos;
@@ -415,10 +418,38 @@ namespace DigitPark.Monetization
             }
         }
 
-        private void ProcessIAPPurchase(ShopItemData itemData)
+        private async void ProcessIAPPurchase(ShopItemData itemData)
         {
+            try
+            {
             string productId = itemData.iapProductId;
-            Debug.Log($"[ShopManager] Processing IAP: {productId}");
+            Debug.Log($"[ShopManager] Processing payment: {productId}");
+
+            // Usar PaymentManager si está disponible (Stripe + AppleIAP con fallback)
+            if (PaymentManager.Instance != null && PaymentManager.Instance.IsInitialized)
+            {
+                var result = await PaymentManager.Instance.PurchaseCosmetic(productId);
+
+                if (result.Success)
+                {
+                    itemData.GrantRewards();
+                    OnItemPurchased?.Invoke(itemData.itemId);
+                    PlayPurchaseCelebration(_currentPurchaseItem);
+
+                    if (result.WasProviderSwitched)
+                        Debug.Log($"[ShopManager] Compra exitosa via fallback ({result.ProviderUsed}): {itemData.displayName}");
+                    else
+                        Debug.Log($"[ShopManager] Compra exitosa via {result.ProviderUsed}: {itemData.displayName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[ShopManager] Compra fallida: {itemData.displayName} — {result.ErrorMessage}");
+                }
+                return;
+            }
+
+            // Fallback legacy: usar PremiumManager directamente si PaymentManager no está listo
+            Debug.LogWarning("[ShopManager] PaymentManager no disponible, usando PremiumManager legacy");
 
             if (PremiumManager.IsGemPackProduct(productId))
             {
@@ -428,11 +459,11 @@ namespace DigitPark.Monetization
                     {
                         OnItemPurchased?.Invoke(itemData.itemId);
                         PlayPurchaseCelebration(_currentPurchaseItem);
-                        Debug.Log($"[ShopManager] Gem pack IAP completed: {itemData.displayName}");
+                        Debug.Log($"[ShopManager] Gem pack IAP completado: {itemData.displayName}");
                     }
                     else
                     {
-                        Debug.LogWarning($"[ShopManager] Gem pack IAP failed: {itemData.displayName}");
+                        Debug.LogWarning($"[ShopManager] Gem pack IAP fallido: {itemData.displayName}");
                     }
                 });
             }
@@ -445,13 +476,18 @@ namespace DigitPark.Monetization
                         itemData.GrantRewards();
                         OnItemPurchased?.Invoke(itemData.itemId);
                         PlayPurchaseCelebration(_currentPurchaseItem);
-                        Debug.Log($"[ShopManager] IAP completed: {itemData.displayName}");
+                        Debug.Log($"[ShopManager] IAP completado: {itemData.displayName}");
                     }
                     else
                     {
-                        Debug.LogWarning($"[ShopManager] IAP failed: {itemData.displayName}");
+                        Debug.LogWarning($"[ShopManager] IAP fallido: {itemData.displayName}");
                     }
                 });
+            }
+            } // end try
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[ShopManager] ProcessIAPPurchase exception: {ex.Message}");
             }
         }
 
@@ -513,7 +549,8 @@ namespace DigitPark.Monetization
                 DOTween.Sequence()
                     .AppendInterval(0.2f)
                     .Append(cg.DOFade(1f, 0.4f))
-                    .OnComplete(() => AnimateScrollItemsEntrance());
+                    .OnComplete(() => AnimateScrollItemsEntrance())
+                    .SetLink(gameObject);
             }
         }
 
@@ -521,7 +558,7 @@ namespace DigitPark.Monetization
         {
             if (_scrollRect == null || _scrollRect.content == null) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             int i = 0;
             foreach (Transform child in _scrollRect.content)
             {
@@ -549,7 +586,8 @@ namespace DigitPark.Monetization
             DOTween.Sequence()
                 .Join(popupInner.DOScale(1f, UIAnimations.DURATION_NORMAL).SetEase(AnimConstants.ENTER))
                 .Join(cg.DOFade(1f, AnimConstants.DURATION_MEDIUM).SetEase(AnimConstants.SMOOTH))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         private void AnimatePanelOut(Transform panel, Action onComplete)
@@ -564,11 +602,12 @@ namespace DigitPark.Monetization
                 .Join(cg.DOFade(0f, UIAnimations.DURATION_FAST).SetEase(AnimConstants.EXIT))
                 .OnComplete(() =>
                 {
-                    popupInner.localScale = Vector3.one;
-                    cg.alpha = 1f;
+                    if (popupInner != null) popupInner.localScale = Vector3.one;
+                    if (cg != null) cg.alpha = 1f;
                     onComplete?.Invoke();
                 })
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         private void AnimateCurrencyChange(CurrencyDisplayUI display, TextMeshProUGUI headerText, bool isGain)

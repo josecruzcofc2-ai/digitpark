@@ -69,6 +69,8 @@ namespace DigitPark.Animations
         private List<RectTransform> cardTransforms = new List<RectTransform>();
         private Sequence entranceSequence;
         private Sequence celebrationSequence;
+        private Tween _headerFloatTween;
+        private Tween _celebrationGlowTween;
 
         private void Awake()
         {
@@ -96,7 +98,7 @@ namespace DigitPark.Animations
             // Play header trophy floating animation
             if (headerTrophyIcon != null)
             {
-                headerTrophyIcon.DOAnchorPosY(headerTrophyIcon.anchoredPosition.y + 8f, 2f)
+                _headerFloatTween = headerTrophyIcon.DOAnchorPosY(headerTrophyIcon.anchoredPosition.y + 8f, 2f)
                     .SetEase(Ease.InOutSine)
                     .SetLoops(-1, LoopType.Yoyo);
             }
@@ -172,7 +174,7 @@ namespace DigitPark.Animations
             card.localScale = Vector3.zero;
             cg.alpha = 0f;
 
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetLink(card.gameObject);
             seq.SetDelay(delay);
             seq.Append(card.DOScale(1.1f, cardEntranceDuration).SetEase(Ease.OutBack));
             seq.Join(cg.DOFade(1f, cardEntranceDuration * 0.7f));
@@ -212,7 +214,7 @@ namespace DigitPark.Animations
 
         private void FadeOutCards(Action onComplete)
         {
-            Sequence fadeOut = DOTween.Sequence();
+            Sequence fadeOut = DOTween.Sequence().SetLink(gameObject);
 
             for (int i = 0; i < cardTransforms.Count; i++)
             {
@@ -264,9 +266,10 @@ namespace DigitPark.Animations
             {
                 screenFlash.gameObject.SetActive(true);
                 screenFlash.color = new Color(1f, 0.95f, 0.7f, 0f);
-                screenFlash.DOFade(0.7f, 0.15f).OnComplete(() =>
-                    screenFlash.DOFade(0f, 0.4f).OnComplete(() =>
-                        screenFlash.gameObject.SetActive(false)));
+                var celebFlashSeq = DOTween.Sequence().SetLink(gameObject);
+                celebFlashSeq.Append(screenFlash.DOFade(0.7f, 0.15f))
+                             .Append(screenFlash.DOFade(0f, 0.4f))
+                             .OnComplete(() => { if (screenFlash != null) screenFlash.gameObject.SetActive(false); });
             }
 
             yield return new WaitForSeconds(0.1f);
@@ -292,11 +295,14 @@ namespace DigitPark.Animations
                         .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo));
                 }
 
-                // Glow pulse
+                // Glow pulse — stored so it can be killed when panel closes
                 if (celebrationGlow != null)
                 {
                     celebrationGlow.color = new Color(1f, 0.9f, 0.5f, 0f);
-                    celebrationGlow.DOFade(0.5f, 0.4f).SetLoops(-1, LoopType.Yoyo);
+                    _celebrationGlowTween?.Kill();
+                    _celebrationGlowTween = celebrationGlow.DOFade(0.5f, 0.4f)
+                        .SetLoops(-1, LoopType.Yoyo)
+                        .SetLink(gameObject);
                 }
             }
 
@@ -335,6 +341,7 @@ namespace DigitPark.Animations
             }
 
             celebrationSequence?.Kill();
+            _celebrationGlowTween?.Kill();
 
             // Stop particles
             if (confettiParticles != null)
@@ -343,11 +350,13 @@ namespace DigitPark.Animations
             if (sparkleParticles != null)
                 sparkleParticles.Stop();
 
-            celebrationOverlay.DOFade(0f, 0.3f).OnComplete(() =>
-            {
-                celebrationOverlay.gameObject.SetActive(false);
-                onComplete?.Invoke();
-            });
+            celebrationOverlay.DOFade(0f, 0.3f)
+                .SetLink(celebrationOverlay.gameObject)
+                .OnComplete(() =>
+                {
+                    if (celebrationOverlay != null) celebrationOverlay.gameObject.SetActive(false);
+                    onComplete?.Invoke();
+                });
         }
 
         private IEnumerator AnimatePointsIncrease(int pointsToAdd)
@@ -369,7 +378,7 @@ namespace DigitPark.Animations
                 return;
             }
 
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetLink(card.gameObject);
 
             // Scale up
             seq.Append(card.DOScale(1.2f, 0.3f).SetEase(Ease.OutBack));
@@ -417,7 +426,7 @@ namespace DigitPark.Animations
             detailPanel.anchoredPosition = startPos;
             detailPanel.localScale = Vector3.one * 0.5f;
 
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetLink(detailPanel.gameObject);
             seq.Append(detailPanel.DOScale(1f, 0.35f).SetEase(Ease.OutBack));
             seq.Join(detailPanel.DOAnchorPos(Vector2.zero, 0.3f).SetEase(Ease.OutQuad));
 
@@ -442,7 +451,7 @@ namespace DigitPark.Animations
                 return;
             }
 
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetLink(detailPanel.gameObject);
             seq.Append(detailPanel.DOScale(0.8f, 0.2f).SetEase(Ease.InBack));
 
             if (detailPanelCanvasGroup != null)
@@ -450,7 +459,7 @@ namespace DigitPark.Animations
 
             seq.OnComplete(() =>
             {
-                detailPanel.gameObject.SetActive(false);
+                if (detailPanel != null) detailPanel.gameObject.SetActive(false);
                 onComplete?.Invoke();
             });
         }
@@ -479,7 +488,7 @@ namespace DigitPark.Animations
             Vector3 targetPos = target != null ? target.position : Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.9f, Screen.height * 0.95f, 0));
 
             // Animate
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetLink(gameObject);
 
             // Pop up
             seq.Append(flyingRT.DOScale(1.5f, 0.2f).SetEase(Ease.OutBack));
@@ -503,7 +512,7 @@ namespace DigitPark.Animations
                 if (target != null)
                     target.DOPunchScale(Vector3.one * 0.3f, 0.2f, 5);
 
-                Destroy(flyingReward);
+                if (flyingReward != null) Destroy(flyingReward);
                 onComplete?.Invoke();
             });
         }
@@ -524,9 +533,10 @@ namespace DigitPark.Animations
             {
                 screenFlash.gameObject.SetActive(true);
                 screenFlash.color = new Color(1f, 0.95f, 0.7f, 0f);
-                screenFlash.DOFade(0.2f, 0.1f).OnComplete(() =>
-                    screenFlash.DOFade(0f, 0.2f).OnComplete(() =>
-                        screenFlash.gameObject.SetActive(false)));
+                var flashSeq = DOTween.Sequence().SetLink(gameObject);
+                flashSeq.Append(screenFlash.DOFade(0.2f, 0.1f))
+                        .Append(screenFlash.DOFade(0f, 0.2f))
+                        .OnComplete(() => { if (screenFlash != null) screenFlash.gameObject.SetActive(false); });
             }
         }
 
@@ -577,7 +587,8 @@ namespace DigitPark.Animations
             // Sweep across
             shineRT.DOAnchorPosX(card.rect.width, 0.8f)
                 .SetEase(Ease.Linear)
-                .OnComplete(() => shineImage.gameObject.SetActive(false));
+                .SetLink(shineImage.gameObject)
+                .OnComplete(() => { if (shineImage != null) shineImage.gameObject.SetActive(false); });
         }
 
         // ==================== UTILITY ====================
@@ -600,6 +611,8 @@ namespace DigitPark.Animations
         {
             entranceSequence?.Kill();
             celebrationSequence?.Kill();
+            _headerFloatTween?.Kill();
+            _celebrationGlowTween?.Kill();
         }
     }
 }

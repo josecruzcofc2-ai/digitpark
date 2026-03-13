@@ -593,7 +593,7 @@ namespace DigitPark.Managers
 
                 try
                 {
-                    activeTournaments = await DatabaseService.Instance.GetActiveTournaments();
+                    activeTournaments = await DatabaseService.Instance.GetActiveTournaments() ?? new List<TournamentData>();
 
                     Debug.Log($"[Tournament] {activeTournaments.Count} torneos activos cargados");
 
@@ -712,7 +712,7 @@ namespace DigitPark.Managers
         {
             if (tournamentsContainer == null || tournamentsContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             for (int i = 0; i < tournamentsContainer.childCount; i++)
             {
                 var child = tournamentsContainer.GetChild(i);
@@ -2138,7 +2138,8 @@ namespace DigitPark.Managers
             DG.Tweening.DOTween.Sequence()
                 .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                 .Join(cg.DOFade(1f, 0.25f))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
 
         private void AnimatePanelOut(Transform t, System.Action onComplete)
@@ -2148,8 +2149,9 @@ namespace DigitPark.Managers
             DG.Tweening.DOTween.Sequence()
                 .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                 .Join(cg.DOFade(0f, 0.2f))
-                .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
-                .SetUpdate(true);
+                .OnComplete(() => { if (t != null) t.localScale = Vector3.one; if (cg != null) cg.alpha = 1f; onComplete?.Invoke(); })
+                .SetUpdate(true)
+                .SetLink(t.gameObject);
         }
 
         #endregion

@@ -650,6 +650,7 @@ namespace DigitPark.Games
             float punchElapsed = 0f;
             while (punchElapsed < punchDur)
             {
+                if (this == null || rt == null) yield break;
                 punchElapsed += Time.deltaTime;
                 float t = punchElapsed / punchDur;
                 float scale = t < 0.5f
@@ -667,6 +668,7 @@ namespace DigitPark.Games
 
             while (elapsed < duration)
             {
+                if (this == null || rt == null) { if (penaltyObj != null) Destroy(penaltyObj); yield break; }
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
@@ -856,7 +858,6 @@ namespace DigitPark.Games
 
         public override void EndGame()
         {
-            currentResult.PenaltyTime = penaltyTime;
             base.EndGame();
             currentResult.PenaltyTime = penaltyTime;
         }
@@ -972,6 +973,10 @@ namespace DigitPark.Games
                 StopCoroutine(feedbackCoroutine);
                 feedbackCoroutine = null;
             }
+            toggleRounds1?.onValueChanged.RemoveAllListeners();
+            toggleRounds3?.onValueChanged.RemoveAllListeners();
+            toggleRounds5?.onValueChanged.RemoveAllListeners();
+            toggleRounds10?.onValueChanged.RemoveAllListeners();
         }
     }
 }

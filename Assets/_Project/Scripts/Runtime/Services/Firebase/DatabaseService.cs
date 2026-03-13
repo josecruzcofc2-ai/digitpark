@@ -785,10 +785,17 @@ namespace DigitPark.Services.Firebase
                 catch (Exception e)
                 {
                     Debug.LogWarning($"[Database] Error creando torneo en Firebase: {e.Message}");
+                    // AUDIT-FIXED [2026-03-10] M-02: Retornar false si Firebase falla para torneos reales
+                    // Solo continuar con cache local en modo offline/simulación
+                    tournaments[tournament.tournamentId] = tournament;
+                    string keyFail = $"SimTournament_{tournament.tournamentId}";
+                    PlayerPrefs.SetString(keyFail, JsonUtility.ToJson(tournament));
+                    PlayerPrefs.Save();
+                    return false;
                 }
             }
 
-            // Guardar localmente también
+            // Guardar localmente también como cache
             tournaments[tournament.tournamentId] = tournament;
             string key = $"SimTournament_{tournament.tournamentId}";
             PlayerPrefs.SetString(key, JsonUtility.ToJson(tournament));
@@ -814,6 +821,11 @@ namespace DigitPark.Services.Firebase
                     {
                         string json = snapshot.GetRawJsonValue();
                         var tournament = JsonUtility.FromJson<TournamentData>(json);
+                        if (tournament == null)
+                        {
+                            Debug.LogWarning($"[Database] GetTournament: malformed JSON for tournamentId={tournamentId}");
+                            return null;
+                        }
                         tournaments[tournamentId] = tournament;
                         return tournament;
                     }
@@ -844,8 +856,13 @@ namespace DigitPark.Services.Firebase
             {
                 try
                 {
+                    // AUDIT-FIXED [2026-03-10] H-04: Limitar la consulta para evitar descargar
+                    // toda la colección de torneos. Firebase RTDB no filtra por valor, solo ordena.
+                    // La reestructura ideal sería tournaments/active/{id} vs tournaments/completed/{id}.
+                    // Como mitigation: limitar a 200 torneos más recientes por status.
                     var snapshot = await _databaseRef.Child(TOURNAMENTS_PATH)
                         .OrderByChild("status")
+                        .LimitToLast(200)
                         .GetValueAsync();
 
                     var active = new List<TournamentData>();
@@ -855,6 +872,7 @@ namespace DigitPark.Services.Firebase
                         string json = child.GetRawJsonValue();
                         var tournament = JsonUtility.FromJson<TournamentData>(json);
 
+                        if (tournament == null) continue;
                         if (tournament.status == Data.TournamentStatus.Scheduled ||
                             tournament.status == Data.TournamentStatus.Active)
                         {
@@ -980,16 +998,24 @@ namespace DigitPark.Services.Firebase
         }
 
         /// <summary>
-        /// Obtiene los torneos activos en los que participa un jugador
+        /// Obtiene los torneos activos en los que participa un jugador.
+        /// AUDIT-FIXED [2026-03-10] H-05: Consulta Firebase si el cache local está vacío (ej. tras reinicio de app).
         /// </summary>
         public async Task<List<TournamentData>> GetPlayerActiveTournaments(string userId)
         {
-            await Task.Delay(50);
+            // Si el cache en memoria está vacío, recargar desde Firebase primero
+            if (tournaments.Count == 0)
+            {
+                Debug.Log("[Database] Cache de torneos vacío — recargando desde Firebase");
+                var allActive = await GetActiveTournaments();
+                foreach (var t in allActive)
+                    tournaments[t.tournamentId] = t;
+            }
+
             var playerTournaments = new List<TournamentData>();
 
             foreach (var t in tournaments.Values)
             {
-                // Solo torneos activos o programados donde el jugador participa
                 if ((t.status == Data.TournamentStatus.Scheduled || t.status == Data.TournamentStatus.Active)
                     && t.IsParticipating(userId))
                 {

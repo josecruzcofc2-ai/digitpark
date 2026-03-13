@@ -129,7 +129,7 @@ namespace DigitPark.Animations
         public Tween QuickFadeIn(float duration = 0.3f)
         {
             return fadeImage.DOFade(0f, duration)
-                .OnComplete(() => fadeImage.gameObject.SetActive(false));
+                .OnComplete(() => { if (fadeImage != null) fadeImage.gameObject.SetActive(false); });
         }
 
         /// <summary>
@@ -156,10 +156,7 @@ namespace DigitPark.Animations
             // Midpoint callback
             onMidpoint?.Invoke();
 
-            // Kill all active tweens before loading new scene
-            DOTween.KillAll(false);
-
-            // Load scene
+            // Load scene (scene unload kills all linked tweens via SetLink/OnDestroy)
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             while (!asyncLoad.isDone)
             {
@@ -184,16 +181,13 @@ namespace DigitPark.Animations
 
                 // Animate circle closing
                 float progress = 0;
-                DOTween.To(() => progress, x =>
+                var wipeInTween = DOTween.To(() => progress, x =>
                 {
                     progress = x;
-                    circleWipeMaterial.SetFloat("_Progress", x);
-                }, 1f, duration / 2);
+                    if (circleWipeMaterial != null) circleWipeMaterial.SetFloat("_Progress", x);
+                }, 1f, duration / 2).SetLink(gameObject);
 
                 yield return new WaitForSeconds(duration / 2);
-
-                // Kill all active tweens before loading new scene
-                DOTween.KillAll(false);
 
                 // Load scene
                 AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
@@ -203,11 +197,11 @@ namespace DigitPark.Animations
                 }
 
                 // Animate circle opening
-                DOTween.To(() => progress, x =>
+                var wipeOutTween = DOTween.To(() => progress, x =>
                 {
                     progress = x;
-                    circleWipeMaterial.SetFloat("_Progress", x);
-                }, 0f, duration / 2);
+                    if (circleWipeMaterial != null) circleWipeMaterial.SetFloat("_Progress", x);
+                }, 0f, duration / 2).SetLink(gameObject);
 
                 yield return new WaitForSeconds(duration / 2);
 
@@ -244,9 +238,6 @@ namespace DigitPark.Animations
             // Slide in
             yield return slidePanel.DOAnchorPos(coverPos, duration / 2).SetEase(Ease.InQuad).WaitForCompletion();
 
-            // Kill all active tweens before loading new scene
-            DOTween.KillAll(false);
-
             // Load scene
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             while (!asyncLoad.isDone)
@@ -271,9 +262,6 @@ namespace DigitPark.Animations
             // Flash to white
             yield return fadeImage.DOFade(1f, duration * 0.3f).SetEase(Ease.OutQuad).WaitForCompletion();
 
-            // Kill all active tweens before loading new scene
-            DOTween.KillAll(false);
-
             // Load scene
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             while (!asyncLoad.isDone)
@@ -292,30 +280,32 @@ namespace DigitPark.Animations
 
         private Vector2 GetSlideStartPosition(Direction direction)
         {
-            float screenWidth = Screen.width;
-            float screenHeight = Screen.height;
+            RectTransform canvasRT = transitionCanvas != null ? transitionCanvas.GetComponent<RectTransform>() : null;
+            float w = canvasRT != null ? canvasRT.rect.width : Screen.width;
+            float h = canvasRT != null ? canvasRT.rect.height : Screen.height;
 
             switch (direction)
             {
-                case Direction.Left: return new Vector2(-screenWidth, 0);
-                case Direction.Right: return new Vector2(screenWidth, 0);
-                case Direction.Up: return new Vector2(0, screenHeight);
-                case Direction.Down: return new Vector2(0, -screenHeight);
+                case Direction.Left: return new Vector2(-w, 0);
+                case Direction.Right: return new Vector2(w, 0);
+                case Direction.Up: return new Vector2(0, h);
+                case Direction.Down: return new Vector2(0, -h);
                 default: return Vector2.zero;
             }
         }
 
         private Vector2 GetSlideEndPosition(Direction direction)
         {
-            float screenWidth = Screen.width;
-            float screenHeight = Screen.height;
+            RectTransform canvasRT = transitionCanvas != null ? transitionCanvas.GetComponent<RectTransform>() : null;
+            float w = canvasRT != null ? canvasRT.rect.width : Screen.width;
+            float h = canvasRT != null ? canvasRT.rect.height : Screen.height;
 
             switch (direction)
             {
-                case Direction.Left: return new Vector2(screenWidth, 0);
-                case Direction.Right: return new Vector2(-screenWidth, 0);
-                case Direction.Up: return new Vector2(0, -screenHeight);
-                case Direction.Down: return new Vector2(0, screenHeight);
+                case Direction.Left: return new Vector2(w, 0);
+                case Direction.Right: return new Vector2(-w, 0);
+                case Direction.Up: return new Vector2(0, -h);
+                case Direction.Down: return new Vector2(0, h);
                 default: return Vector2.zero;
             }
         }
@@ -324,6 +314,12 @@ namespace DigitPark.Animations
         /// Check if currently transitioning
         /// </summary>
         public bool IsTransitioning => isTransitioning;
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            DOTween.Kill(gameObject);
+        }
 
         /// <summary>
         /// Set fade color

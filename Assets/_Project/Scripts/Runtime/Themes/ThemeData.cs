@@ -197,6 +197,10 @@ namespace DigitPark.Themes
         [Tooltip("Color de filas impares")]
         public Color rowOdd = new Color(0.15f, 0.15f, 0.2f, 0.5f);
 
+        [Header("=== CELEBRATION ===")]
+        [Tooltip("Paleta de colores para confetti (6 colores). Si vacio, usa colores por defecto.")]
+        public Color[] confettiPalette = new Color[0];
+
         [Header("=== EFFECTS ===")]
         [Tooltip("Intensidad del efecto glow (0-1)")]
         [Range(0f, 1f)]

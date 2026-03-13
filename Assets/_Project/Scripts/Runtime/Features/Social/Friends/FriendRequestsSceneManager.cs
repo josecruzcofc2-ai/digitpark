@@ -189,7 +189,8 @@ namespace DigitPark.Managers
             item.transform.localScale = Vector3.zero;
             item.transform.DOScale(1f, 0.3f)
                 .SetDelay(index * 0.06f)
-                .SetEase(Ease.OutBack);
+                .SetEase(Ease.OutBack)
+                .SetLink(item);
         }
 
         private void SetupRequestItem(GameObject item, FriendRequest request)
@@ -415,7 +416,7 @@ namespace DigitPark.Managers
             {
                 currentItems.Remove(item);
                 item.transform.DOScale(0f, 0.2f).SetEase(Ease.InBack)
-                    .OnComplete(() => Destroy(item));
+                    .OnComplete(() => { if (item != null) Destroy(item); });
             }
         }
 
@@ -464,7 +465,8 @@ namespace DigitPark.Managers
                 DOTween.Sequence()
                     .AppendInterval(0.15f)
                     .Append(tabsBarTransform.DOAnchorPos(pos, 0.35f).SetEase(Ease.OutCubic))
-                    .Join(cg.DOFade(1f, 0.35f));
+                    .Join(cg.DOFade(1f, 0.35f))
+                    .SetLink(gameObject);
             }
 
             // ScrollView fade in
@@ -474,7 +476,8 @@ namespace DigitPark.Managers
                 cg.alpha = 0f;
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
-                    .Append(cg.DOFade(1f, 0.4f));
+                    .Append(cg.DOFade(1f, 0.4f))
+                    .SetLink(gameObject);
             }
         }
 

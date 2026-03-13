@@ -235,8 +235,10 @@ namespace DigitPark.UI
         {
             while (true)
             {
+                if (borderImage == null) yield break;
                 // Fade out
                 yield return StartCoroutine(AnimateAlpha(minGlowAlpha, glowPulseDuration));
+                if (borderImage == null) yield break;
                 // Fade in
                 yield return StartCoroutine(AnimateAlpha(maxGlowAlpha, glowPulseDuration));
             }
@@ -244,6 +246,7 @@ namespace DigitPark.UI
 
         private IEnumerator AnimateAlpha(float targetAlpha, float duration)
         {
+            if (borderImage == null) yield break;
             float startAlpha = borderImage.color.a;
             float elapsed = 0f;
 

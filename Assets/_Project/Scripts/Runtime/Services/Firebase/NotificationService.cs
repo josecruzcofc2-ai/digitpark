@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Firebase;
+using Firebase.Extensions;
 #if FIREBASE_MESSAGING
 using Firebase.Messaging;
 #endif
@@ -63,6 +64,11 @@ namespace DigitPark.Services.Firebase
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
+
+                // AUDIT-FIXED [2026-03-10] H-07: forzar debugMode=false en builds de producción
+#if !UNITY_EDITOR
+                debugMode = false;
+#endif
             }
             else
             {
@@ -78,6 +84,13 @@ namespace DigitPark.Services.Firebase
                 if (enableNotifications)
                 {
                     await Initialize();
+
+                    // AUDIT-FIXED [2026-03-10] H-08: Suscribirse a OnLoginSuccess para guardar
+                    // el token FCM si auth no estaba lista cuando FCM se inicializó
+                    if (AuthenticationService.Instance != null)
+                    {
+                        AuthenticationService.Instance.OnLoginSuccess += OnAuthLoginSuccess;
+                    }
                 }
                 else
                 {
@@ -90,6 +103,22 @@ namespace DigitPark.Services.Firebase
             }
         }
 
+        // AUDIT-FIXED [2026-03-10] H-08: Re-intentar guardar token cuando auth completa
+        private void OnAuthLoginSuccess(DigitPark.Data.PlayerData playerData)
+        {
+            if (!string.IsNullOrEmpty(_fcmToken))
+            {
+                _ = SaveTokenToFirebase(_fcmToken).ContinueWithOnMainThread(t =>
+                {
+                    if (this == null) return;
+                    if (t.IsFaulted)
+                        Debug.LogWarning($"[Notifications] Error guardando token post-login: {t.Exception?.GetBaseException().Message}");
+                    else
+                        LogDebug("Token FCM guardado correctamente post-login");
+                });
+            }
+        }
+
         private void OnDestroy()
         {
             if (Instance == this)
@@ -99,6 +128,11 @@ namespace DigitPark.Services.Firebase
                 FirebaseMessaging.TokenReceived -= OnFCMTokenReceived;
                 FirebaseMessaging.MessageReceived -= OnFCMMessageReceived;
 #endif
+                // AUDIT-FIXED [2026-03-10] H-08: Limpiar suscripción a OnLoginSuccess
+                if (AuthenticationService.Instance != null)
+                {
+                    AuthenticationService.Instance.OnLoginSuccess -= OnAuthLoginSuccess;
+                }
                 Instance = null;
             }
         }
@@ -264,45 +298,46 @@ namespace DigitPark.Services.Firebase
 #if FIREBASE_MESSAGING
         private void OnFCMTokenReceived(object sender, TokenReceivedEventArgs e)
         {
-            LogDebug("[FCM] Token registered");
-            _fcmToken = e.Token;
-
-            // Guardar nuevo token
-            PlayerPrefs.SetString(FCM_TOKEN_KEY, _fcmToken);
-            PlayerPrefs.Save();
-
-            _ = SaveTokenToFirebase(_fcmToken).ContinueWith(t =>
+            // FCM callback fires on a background thread — marshal everything to main thread
+            var token = e.Token;
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                if (t.IsFaulted) Debug.LogError($"[NotificationService] SaveTokenToFirebase failed: {t.Exception?.GetBaseException().Message}");
+                LogDebug("[FCM] Token registered");
+                _fcmToken = token;
+                PlayerPrefs.SetString(FCM_TOKEN_KEY, _fcmToken);
+                PlayerPrefs.Save();
+                _ = SaveTokenToFirebase(_fcmToken).ContinueWithOnMainThread(t =>
+                {
+                    if (this == null) return;
+                    if (t.IsFaulted) Debug.LogError($"[NotificationService] SaveTokenToFirebase failed: {t.Exception?.GetBaseException().Message}");
+                });
+                OnTokenReceived?.Invoke(_fcmToken);
             });
-            OnTokenReceived?.Invoke(_fcmToken);
         }
 
         private void OnFCMMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            LogDebug($"Mensaje recibido - From: {e.Message.From}");
-
-            var notification = ParseNotification(e.Message);
-
-            if (notification != null)
+            // FCM callback fires on a background thread — marshal everything to main thread
+            var message = e.Message;
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                // Verificar si la app está en primer plano
-                bool isAppInForeground = Application.isFocused;
-
-                if (isAppInForeground)
+                LogDebug($"Mensaje recibido - From: {message.From}");
+                var notification = ParseNotification(message);
+                if (notification != null)
                 {
-                    // App en primer plano: mostrar notificación in-app
-                    OnNotificationReceived?.Invoke(notification);
-                    HandleForegroundNotification(notification);
+                    bool isAppInForeground = Application.isFocused;
+                    if (isAppInForeground)
+                    {
+                        OnNotificationReceived?.Invoke(notification);
+                        HandleForegroundNotification(notification);
+                    }
+                    else
+                    {
+                        OnNotificationOpened?.Invoke(notification);
+                        HandleNotificationOpen(notification);
+                    }
                 }
-                else
-                {
-                    // App en background: el sistema ya muestra la notificación
-                    // Este callback se ejecuta cuando el usuario abre la notificación
-                    OnNotificationOpened?.Invoke(notification);
-                    HandleNotificationOpen(notification);
-                }
-            }
+            });
         }
 
         private NotificationData ParseNotification(FirebaseMessage message)
@@ -606,16 +641,18 @@ namespace DigitPark.Services.Firebase
             if (!enabled && _isInitialized)
             {
                 // Desuscribirse de todos los topics
-                _ = UnsubscribeFromTopic("all_users").ContinueWith(t =>
+                _ = UnsubscribeFromTopic("all_users").ContinueWithOnMainThread(t =>
                 {
+                    if (this == null) return;
                     if (t.IsFaulted) Debug.LogError($"[NotificationService] UnsubscribeFromTopic failed: {t.Exception?.GetBaseException().Message}");
                 });
             }
             else if (enabled && !_isInitialized)
             {
                 // Reinicializar
-                _ = Initialize().ContinueWith(t =>
+                _ = Initialize().ContinueWithOnMainThread(t =>
                 {
+                    if (this == null) return;
                     if (t.IsFaulted) Debug.LogError($"[NotificationService] Initialize failed: {t.Exception?.GetBaseException().Message}");
                 });
             }

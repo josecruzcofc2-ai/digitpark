@@ -8,8 +8,8 @@ namespace DigitPark.Progression
     /// Permanent Player Level System.
     /// - Only goes up, NEVER goes down
     /// - XP earned in: Practice Mode, Free Tournaments, Free 1v1
-    /// - Does NOT include Cash Battles
-    /// - Unlocks: Avatars, Titles, Cosmetics
+    /// - CashBattle gives XP at 50% rate (cosmetic-only, no gameplay advantage)
+    /// - Unlocks: Avatars, Titles, Frames, Cosmetics
     /// </summary>
     public class PlayerProgressionSystem : MonoBehaviour
     {
@@ -27,6 +27,7 @@ namespace DigitPark.Progression
         [SerializeField] private int xpTournamentParticipation = 75;
         [SerializeField] private int xpTournamentTop3 = 200;
         [SerializeField] private int xpTournamentWin = 500;
+        [SerializeField] [Range(0f, 1f)] private float cashBattleXPMultiplier = 0.5f;
 
         // Player Data
         private int _currentLevel = 1;
@@ -65,37 +66,26 @@ namespace DigitPark.Progression
         /// <summary>
         /// Calculate XP required for a specific level
         /// Formula: baseXP * (scalingFactor ^ (level - 1))
-        /// Level 1: 100 XP
-        /// Level 10: ~350 XP
-        /// Level 50: ~3,500 XP
-        /// Level 100: ~45,000 XP
+        /// Level 1: 100 XP | Level 10: ~350 XP | Level 50: ~3,500 XP | Level 100: ~45,000 XP
         /// </summary>
         public int GetXPRequiredForLevel(int level)
         {
             if (level <= 1) return 0;
-            // Cap exponent to avoid float overflow at high levels
             float exponent = Mathf.Min(level - 1, 200);
             float xpRequired = baseXPPerLevel * Mathf.Pow(xpScalingFactor, exponent);
-            // Clamp to prevent int overflow
             return Mathf.RoundToInt(Mathf.Min(xpRequired, 10000000f));
         }
 
-        /// <summary>
-        /// Get total XP required to reach a level from level 1
-        /// </summary>
+        /// <summary>Get total XP required to reach a level from level 1</summary>
         public int GetTotalXPForLevel(int level)
         {
             int total = 0;
             for (int i = 1; i <= level; i++)
-            {
                 total += GetXPRequiredForLevel(i);
-            }
             return total;
         }
 
-        /// <summary>
-        /// Get XP progress within current level (0.0 to 1.0)
-        /// </summary>
+        /// <summary>Get XP progress within current level (0.0 to 1.0)</summary>
         public float GetLevelProgress()
         {
             int xpForCurrentLevel = GetXPRequiredForLevel(_currentLevel);
@@ -108,36 +98,31 @@ namespace DigitPark.Progression
         #region XP Gaining
 
         /// <summary>
-        /// Add XP from completing a game (Practice/Free modes only)
+        /// Add XP from completing a game. Returns the XP actually awarded (after multipliers).
+        /// CashBattle gives XP at reduced rate (cosmetic only — no gameplay advantage).
         /// </summary>
-        public void AddGameXP(GameResult result)
+        public int AddGameXP(GameResult result)
         {
-            if (result.isCashBattle)
-            {
-                Debug.LogWarning("[PlayerProgression] Cash Battles don't give permanent XP.");
-                return;
-            }
-
             int xpGained = CalculateGameXP(result);
+
+            if (result.isCashBattle)
+                xpGained = Mathf.RoundToInt(xpGained * cashBattleXPMultiplier);
+
             AddXP(xpGained);
 
             _gamesPlayed++;
             if (result.isWin) _gamesWon++;
 
             SaveProgress();
+            return xpGained;
         }
 
         /// <summary>
-        /// Add XP from tournament participation
+        /// Add XP from tournament participation.
+        /// CashBattle tournaments give XP at reduced rate.
         /// </summary>
         public void AddTournamentXP(TournamentResult result)
         {
-            if (result.isCashTournament)
-            {
-                Debug.LogWarning("[PlayerProgression] Cash Tournaments don't give permanent XP.");
-                return;
-            }
-
             int xpGained = xpTournamentParticipation;
 
             if (result.placement == 1)
@@ -145,13 +130,14 @@ namespace DigitPark.Progression
             else if (result.placement <= 3)
                 xpGained += xpTournamentTop3;
 
+            if (result.isCashTournament)
+                xpGained = Mathf.RoundToInt(xpGained * cashBattleXPMultiplier);
+
             AddXP(xpGained);
             SaveProgress();
         }
 
-        /// <summary>
-        /// Add raw XP (for missions, achievements, etc.)
-        /// </summary>
+        /// <summary>Add raw XP (for missions, achievements, etc.)</summary>
         public void AddXP(int amount)
         {
             if (amount <= 0) return;
@@ -162,7 +148,6 @@ namespace DigitPark.Progression
 
             OnXPGained?.Invoke(amount, _totalXPEarned);
 
-            // Check for level ups
             CheckLevelUp();
         }
 
@@ -171,24 +156,15 @@ namespace DigitPark.Progression
             int xp = xpPerGamePlayed;
 
             if (result.isWin)
-            {
                 xp += xpPerWin;
-            }
 
             if (result.isPerfect)
-            {
                 xp += xpPerPerfectGame;
-            }
 
-            // Bonus for high scores
             if (result.scorePercentile >= 90)
-            {
                 xp = Mathf.RoundToInt(xp * 1.25f);
-            }
             else if (result.scorePercentile >= 75)
-            {
                 xp = Mathf.RoundToInt(xp * 1.1f);
-            }
 
             return xp;
         }
@@ -207,11 +183,8 @@ namespace DigitPark.Progression
                     Debug.Log($"[PlayerProgression] LEVEL UP! Now level {_currentLevel}");
                     OnLevelUp?.Invoke(_currentLevel);
 
-                    // Check for rewards
                     if (_levelRewards.TryGetValue(_currentLevel, out LevelReward reward))
-                    {
                         OnRewardUnlocked?.Invoke(reward);
-                    }
                 }
                 else
                 {
@@ -228,51 +201,47 @@ namespace DigitPark.Progression
         {
             _levelRewards = new Dictionary<int, LevelReward>
             {
-                // Early levels - frequent rewards
-                { 5, new LevelReward("Avatar: Beginner", RewardType.Avatar, "avatar_beginner") },
-                { 10, new LevelReward("Title: Novice", RewardType.Title, "title_novice") },
-                { 15, new LevelReward("500 DigitCoins", RewardType.DigitCoins, "500") },
-                { 20, new LevelReward("Avatar: Player", RewardType.Avatar, "avatar_player") },
-                { 25, new LevelReward("Title: Player", RewardType.Title, "title_player") },
+                // Early levels
+                { 5,   new LevelReward("Avatar: Beginner",      RewardType.Avatar,      "avatar_beginner") },
+                { 10,  new LevelReward("Title: Novice",         RewardType.Title,       "title_novice") },
+                { 15,  new LevelReward("500 DigitCoins",        RewardType.DigitCoins,  "500") },
+                { 20,  new LevelReward("Avatar: Player",        RewardType.Avatar,      "avatar_player") },
+                { 25,  new LevelReward("Title: Player",         RewardType.Title,       "title_player") },
 
                 // Mid levels
-                { 30, new LevelReward("1000 DigitCoins", RewardType.DigitCoins, "1000") },
-                { 40, new LevelReward("Avatar: Veteran", RewardType.Avatar, "avatar_veteran") },
-                { 50, new LevelReward("Title: Veteran", RewardType.Title, "title_veteran") },
-                { 60, new LevelReward("Frame: Bronze", RewardType.Frame, "frame_bronze") },
-                { 75, new LevelReward("2000 DigitCoins", RewardType.DigitCoins, "2000") },
+                { 30,  new LevelReward("1000 DigitCoins",       RewardType.DigitCoins,  "1000") },
+                { 40,  new LevelReward("Avatar: Veteran",       RewardType.Avatar,      "avatar_veteran") },
+                { 50,  new LevelReward("Title: Veteran",        RewardType.Title,       "title_veteran") },
+                { 60,  new LevelReward("Frame: Bronze",         RewardType.Frame,       "frame_bronze") },
+                { 75,  new LevelReward("2000 DigitCoins",       RewardType.DigitCoins,  "2000") },
 
                 // High levels
-                { 100, new LevelReward("Title: Centurion", RewardType.Title, "title_centurion") },
-                { 105, new LevelReward("Avatar: Centurion", RewardType.Avatar, "avatar_centurion") },
-                { 125, new LevelReward("Frame: Silver", RewardType.Frame, "frame_silver") },
-                { 150, new LevelReward("5000 DigitCoins", RewardType.DigitCoins, "5000") },
-                { 175, new LevelReward("Title: Expert", RewardType.Title, "title_expert") },
-                { 200, new LevelReward("Avatar: Expert", RewardType.Avatar, "avatar_expert") },
+                { 100, new LevelReward("Title: Centurion",      RewardType.Title,       "title_centurion") },
+                { 105, new LevelReward("Avatar: Centurion",     RewardType.Avatar,      "avatar_centurion") },
+                { 125, new LevelReward("Frame: Silver",         RewardType.Frame,       "frame_silver") },
+                { 150, new LevelReward("5000 DigitCoins",       RewardType.DigitCoins,  "5000") },
+                { 175, new LevelReward("Title: Expert",         RewardType.Title,       "title_expert") },
+                { 200, new LevelReward("Avatar: Expert",        RewardType.Avatar,      "avatar_expert") },
 
                 // Elite levels
-                { 250, new LevelReward("Frame: Gold", RewardType.Frame, "frame_gold") },
-                { 300, new LevelReward("Title: Master", RewardType.Title, "title_master") },
-                { 350, new LevelReward("Avatar: Master", RewardType.Avatar, "avatar_master") },
-                { 400, new LevelReward("Frame: Platinum", RewardType.Frame, "frame_platinum") },
-                { 450, new LevelReward("Title: Grand Master", RewardType.Title, "title_grandmaster") },
+                { 250, new LevelReward("Frame: Gold",           RewardType.Frame,       "frame_gold") },
+                { 300, new LevelReward("Title: Master",         RewardType.Title,       "title_master") },
+                { 350, new LevelReward("Avatar: Master",        RewardType.Avatar,      "avatar_master") },
+                { 400, new LevelReward("Frame: Platinum",       RewardType.Frame,       "frame_platinum") },
+                { 450, new LevelReward("Title: Grand Master",   RewardType.Title,       "title_grandmaster") },
 
                 // Max level
-                { 475, new LevelReward("Avatar: Legend", RewardType.Avatar, "avatar_legend") },
-                { 490, new LevelReward("Frame: Diamond", RewardType.Frame, "frame_diamond") },
-                { 500, new LevelReward("Title: Legend", RewardType.Title, "title_legend") },
+                { 475, new LevelReward("Avatar: Legend",        RewardType.Avatar,      "avatar_legend") },
+                { 490, new LevelReward("Frame: Diamond",        RewardType.Frame,       "frame_diamond") },
+                { 500, new LevelReward("Title: Legend",         RewardType.Title,       "title_legend") },
             };
         }
 
-        public LevelReward GetRewardForLevel(int level)
-        {
-            return _levelRewards.TryGetValue(level, out LevelReward reward) ? reward : null;
-        }
+        public LevelReward GetRewardForLevel(int level) =>
+            _levelRewards.TryGetValue(level, out LevelReward reward) ? reward : null;
 
-        public List<LevelReward> GetAllRewards()
-        {
-            return new List<LevelReward>(_levelRewards.Values);
-        }
+        public List<LevelReward> GetAllRewards() =>
+            new List<LevelReward>(_levelRewards.Values);
 
         #endregion
 
@@ -285,13 +254,9 @@ namespace DigitPark.Progression
         public int GamesPlayed => _gamesPlayed;
         public int GamesWon => _gamesWon;
         public float WinRate => _gamesPlayed > 0 ? (float)_gamesWon / _gamesPlayed : 0f;
-
         public int XPToNextLevel => GetXPRequiredForLevel(_currentLevel) - _currentXP;
         public bool IsMaxLevel => _currentLevel >= maxLevel;
 
-        /// <summary>
-        /// Get display string for current level progress
-        /// </summary>
         public string GetProgressString()
         {
             if (IsMaxLevel) return "MAX";
@@ -333,9 +298,6 @@ namespace DigitPark.Progression
             }
         }
 
-        /// <summary>
-        /// Reset all progress (for testing only)
-        /// </summary>
         #if UNITY_EDITOR
         [ContextMenu("Reset Progress (DEBUG)")]
         public void ResetProgress()
@@ -372,17 +334,17 @@ namespace DigitPark.Progression
         public bool isWin;
         public bool isPerfect;
         public int score;
-        public float scorePercentile; // 0-100, how this score compares to others
-        public bool isCashBattle; // If true, doesn't give permanent XP
+        public float scorePercentile; // 0-100
+        public bool isCashBattle;
     }
 
     [Serializable]
     public class TournamentResult
     {
         public string tournamentId;
-        public int placement; // 1 = first, 2 = second, etc.
+        public int placement;
         public int totalParticipants;
-        public bool isCashTournament; // If true, doesn't give permanent XP
+        public bool isCashTournament;
     }
 
     [Serializable]

@@ -488,6 +488,8 @@ namespace DigitPark.Editor
                 new Vector2(-37, -37), new Vector2(37, 37));
             avatarFrame.GetComponent<Image>().sprite = circleSprite;
             avatarFrame.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
+            var fr_monetization = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
+            fr_monetization.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Full);
 
             // Circular mask
             GameObject avatarMask = CreateImageElement(avatarFrame.transform, "AvatarMask",
