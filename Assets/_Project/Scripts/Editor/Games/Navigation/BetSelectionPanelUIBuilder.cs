@@ -309,6 +309,9 @@ namespace DigitPark.Editor
             gnTMP.color = GOLD;
             gnTMP.fontStyle = FontStyles.Bold;
             gnTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            gnTMP.enableAutoSizing = true;
+            gnTMP.fontSizeMin = FontSizes.AutoMinBody;
+            gnTMP.fontSizeMax = gnTMP.fontSize;
             gnTMP.raycastTarget = false;
 
             // Currency pills (right side - exact same anchors as MainMenu, offset 120 right)
@@ -480,6 +483,9 @@ namespace DigitPark.Editor
                 badgeTMP.color = accentColor;
                 badgeTMP.fontStyle = FontStyles.Bold;
                 badgeTMP.alignment = TextAlignmentOptions.Center;
+                badgeTMP.enableAutoSizing = true;
+                badgeTMP.fontSizeMin = FontSizes.AutoMinBody;
+                badgeTMP.fontSizeMax = badgeTMP.fontSize;
                 badgeTMP.raycastTarget = false;
 
             }
@@ -632,6 +638,9 @@ namespace DigitPark.Editor
             tmp.color = NEON_CYAN;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
         }
 
         private static void CreateAmountInputField(string name, Transform parent)
@@ -679,6 +688,9 @@ namespace DigitPark.Editor
             txtTMP.color = TEXT_PRIMARY;
             txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.alignment = TextAlignmentOptions.Center;
+            txtTMP.enableAutoSizing = true;
+            txtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            txtTMP.fontSizeMax = txtTMP.fontSize;
 
 
             // Wire up

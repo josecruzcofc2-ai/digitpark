@@ -250,6 +250,7 @@ namespace DigitPark.Editor
             var rt = GetOrAdd<RectTransform>(tabs);
             SetAnchorsWithPad(rt, TABS_BOT, TABS_TOP);
             GetOrAdd<Image>(tabs).color = TABS_BG;
+            GetOrAdd<CanvasGroup>(tabs); // Required by NotificationsManager.AnimateEntrance()
 
             var outline = GetOrAdd<Outline>(tabs);
             outline.effectColor = new Color(CYAN_DARK.r, CYAN_DARK.g, CYAN_DARK.b, 0.3f);

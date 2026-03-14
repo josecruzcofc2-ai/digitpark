@@ -24,8 +24,13 @@ namespace DigitPark.Services.Firebase
         public static AuthenticationService Instance { get; private set; }
 
         [Header("Configuración")]
-        [Tooltip("Activar para usar Firebase real, desactivar para modo simulación")]
+#if UNITY_EDITOR
+        [Tooltip("Activar para usar Firebase real, desactivar para modo simulación (solo Editor)")]
         [SerializeField] private bool useFirebaseReal = true;
+#else
+        // PRODUCTION: Firebase siempre activo, no configurable desde Inspector
+        private readonly bool useFirebaseReal = true;
+#endif
 
         // Eventos
         public event Action<PlayerData> OnLoginSuccess;
@@ -46,7 +51,12 @@ namespace DigitPark.Services.Firebase
 
         // Propiedades públicas
         public bool IsFirebaseReal => useFirebaseReal;
+#if UNITY_EDITOR
         public bool IsInitialized => isFirebaseInitialized || !useFirebaseReal;
+#else
+        // En producción, solo Firebase real cuenta como inicializado
+        public bool IsInitialized => isFirebaseInitialized;
+#endif
 
         private void Awake()
         {
@@ -90,15 +100,22 @@ namespace DigitPark.Services.Firebase
                 else
                 {
                     Debug.LogError($"[Auth] Error al inicializar Firebase: {dependencyTask.Result}");
-                    // Fallback a simulación
+#if UNITY_EDITOR
+                    // Fallback a simulación solo en Editor
                     useFirebaseReal = false;
                     InitializeSimulation();
+#else
+                    // En producción, NO caer a simulación — reportar error
+                    Debug.LogError("[Auth] PRODUCCIÓN: Firebase no disponible. La autenticación no funcionará.");
+#endif
                 }
             }
+#if UNITY_EDITOR
             else
             {
                 InitializeSimulation();
             }
+#endif
         }
 
         private void InitializeSimulation()
@@ -188,16 +205,18 @@ namespace DigitPark.Services.Firebase
         public async Task<bool> LoginWithEmail(string email, string password, bool rememberMe)
         {
             // Rate limiting: block after 5 failed attempts for 30 seconds
+            // Check and reset cooldown BEFORE incrementing to avoid off-by-one
+            if (_loginAttempts >= 5 && Time.realtimeSinceStartup >= _loginCooldownUntil)
+            {
+                // Cooldown expired — reset attempts before incrementing
+                _loginAttempts = 0;
+            }
+
             if (_loginAttempts >= 5)
             {
-                if (Time.realtimeSinceStartup < _loginCooldownUntil)
-                {
-                    Debug.LogWarning("[Auth] Login rate limited");
-                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_too_many_requests"));
-                    return false;
-                }
-                // Cooldown expired — reset attempts
-                _loginAttempts = 0;
+                Debug.LogWarning("[Auth] Login rate limited");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_too_many_requests"));
+                return false;
             }
 
             _loginAttempts++;
@@ -737,11 +756,15 @@ namespace DigitPark.Services.Firebase
                 }
 
                 // Crear nuevos datos
+                // D-37: Fallback if AutoLocalizer not yet initialized (returns key as-is)
+                string defaultUsername = AutoLocalizer.Get("auth_default_username");
+                if (defaultUsername == "auth_default_username") defaultUsername = "Player";
+
                 currentPlayerData = new PlayerData
                 {
                     userId = user.UserId,
                     email = user.Email ?? "",
-                    username = user.DisplayName ?? AutoLocalizer.Get("auth_default_username"),
+                    username = user.DisplayName ?? defaultUsername,
                     createdDate = DateTime.UtcNow,
                     lastLoginDate = DateTime.UtcNow
                 };
@@ -754,11 +777,15 @@ namespace DigitPark.Services.Firebase
                 Debug.LogError($"[Auth] Error cargando datos: {ex.Message}");
 
                 // Fallback - crear datos locales
+                // D-37: Fallback if AutoLocalizer not yet initialized (returns key as-is)
+                string fallbackUsername = AutoLocalizer.Get("auth_default_username");
+                if (fallbackUsername == "auth_default_username") fallbackUsername = "Player";
+
                 currentPlayerData = new PlayerData
                 {
                     userId = user.UserId,
                     email = user.Email ?? "",
-                    username = user.DisplayName ?? AutoLocalizer.Get("auth_default_username"),
+                    username = user.DisplayName ?? fallbackUsername,
                     createdDate = DateTime.UtcNow,
                     lastLoginDate = DateTime.UtcNow
                 };

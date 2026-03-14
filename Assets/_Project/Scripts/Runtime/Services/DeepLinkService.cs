@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using DigitPark.Navigation;
 
 namespace DigitPark.Services
 {
@@ -205,25 +205,25 @@ namespace DigitPark.Services
                     // Navegar a perfil del usuario
                     // TODO: Pasar userId al ProfileManager
                     PlayerPrefs.SetString("DeepLink_ProfileId", data.Id);
-                    SceneManager.LoadScene("Profile");
+                    SceneNavigator.Instance.NavigateTo("Profile");
                     break;
 
                 case DeepLinkType.Tournament:
                     // Navegar al lobby del torneo
                     PlayerPrefs.SetString("DeepLink_TournamentId", data.Id);
-                    SceneManager.LoadScene("TournamentLobby");
+                    SceneNavigator.Instance.NavigateTo("TournamentLobby");
                     break;
 
                 case DeepLinkType.Match:
                     // Navegar al historial de partida
                     PlayerPrefs.SetString("DeepLink_MatchId", data.Id);
-                    SceneManager.LoadScene("MatchHistory");
+                    SceneNavigator.Instance.NavigateTo("MatchHistory");
                     break;
 
                 case DeepLinkType.Invite:
                     // Ir a registro con codigo de referido
                     PlayerPrefs.SetString("DeepLink_ReferralCode", data.Id);
-                    SceneManager.LoadScene("Login");
+                    SceneNavigator.Instance.NavigateTo("Login");
                     break;
 
                 default:

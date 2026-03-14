@@ -15,7 +15,7 @@ namespace DigitPark.UI
         [SerializeField] private bool applySides = true;
 
         [Header("Debug")]
-        [SerializeField] private bool showDebugLogs = true;
+        [SerializeField] private bool showDebugLogs = false;
 
         private void Awake()
         {

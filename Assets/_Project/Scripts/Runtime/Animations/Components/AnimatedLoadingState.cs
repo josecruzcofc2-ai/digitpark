@@ -125,7 +125,8 @@ namespace DigitPark.Animations
             spinner.localRotation = Quaternion.identity;
             spinnerTween = spinner.DORotate(new Vector3(0, 0, -360f), 360f / spinSpeed, RotateMode.FastBeyond360)
                 .SetEase(Ease.Linear)
-                .SetLoops(-1);
+                .SetLoops(-1)
+                .SetLink(spinner.gameObject);
         }
 
         private void StopSpinner()
@@ -138,7 +139,7 @@ namespace DigitPark.Animations
             if (skeletonPlaceholders == null || skeletonPlaceholders.Count == 0) return;
 
             shimmerSequence?.Kill();
-            shimmerSequence = DOTween.Sequence();
+            shimmerSequence = DOTween.Sequence().SetLink(gameObject);
 
             foreach (var placeholder in skeletonPlaceholders)
             {

@@ -27,8 +27,8 @@ namespace DigitPark.Editor
             "effect_neon_explosion", "effect_rainbow", "effect_crown_drop", "effect_fire_ring"
         };
         private static readonly string[] EFFECT_PRICES = {
-            "Free", "2,000 DC", "5,000 DC", "300 DG",
-            "500 DG", "750 DG", "$1.99", "$2.99"
+            "Free", "2,000 DC", "5,000 DC", "250 DG",
+            "400 DG", "750 DG", "$1.99", "$2.99"
         };
         private static readonly Color[] EFFECT_PRIMARY = {
             new Color(1f, 0.8f, 0f), new Color(1f, 0.3f, 0.1f), new Color(0.3f, 0.6f, 1f), new Color(1f, 0.84f, 0f),

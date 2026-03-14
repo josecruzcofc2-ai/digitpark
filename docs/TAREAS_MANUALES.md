@@ -1,5 +1,5 @@
 # TAREAS MANUALES - Pasos que debe hacer el usuario
-**Ultima actualizacion**: 2026-03-10 (V49)
+**Ultima actualizacion**: 2026-03-13 (V52 Audit)
 
 Estas tareas NO se pueden automatizar con codigo. Requieren accion manual tuya.
 
@@ -250,7 +250,61 @@ Receipt Validation:
   - DigitPark > Monetization > Build Shop Premium UI
 - **Por que**: Los builders ahora agregan `FrameRenderer` — las escenas existentes no tienen el componente hasta regenerarlas.
 
-### 30. TODOs de features incompletas
+### 30. Unity IAP Localized Prices (C-66, B-59, B-68)
+- **Archivos**: `PremiumManager.cs`, `WelcomePackService.cs`, `ShopPremiumUIBuilder.cs`, `ShopEffectsTabBuilder.cs`
+- **Que hacer**: Reemplazar precios hardcodeados en USD ("$3.99", "$7.99", etc.) con `product.metadata.localizedPriceString` de Unity IAP
+- **Por que**: Usuarios fuera de USA ven precios en dolares cuando la tienda cobra en su moneda local — confuso y potencialmente ilegal en EU
+- **Requisito**: Las tareas #5 y #6 (PaymentConfig + IAP en tiendas) deben estar completadas primero
+- **Impacto**: 4+ archivos, ~20 strings de precio a reemplazar
+
+### 31. Google Sign-In SDK nativo (D-34)
+- **Archivo**: `AuthenticationService.cs:341`
+- **Que hacer**: Reemplazar `FederatedOAuthProvider` con el SDK nativo de Google Sign-In
+  - Android: Integrar `com.google.android.gms:play-services-auth`
+  - iOS: Integrar Google Sign-In SDK via CocoaPods
+- **Estado actual**: Usa Firebase Auth federated provider que abre WebView — puede fallar en dispositivos reales
+- **Riesgo**: Login con Google puede no funcionar en produccion en algunos dispositivos
+
+### 32. Server-Side Time Validation (D-68, D-69, D-77)
+- **Archivos**: `DailyRewardsManager.cs`, `DailyMissionsManager.cs`, `DailyOfferService.cs`
+- **Que hacer**: Implementar Firebase Cloud Function que retorne `serverTimestamp` y usarlo para:
+  - Validar claims de daily rewards (en vez de `DateTime.UtcNow` del dispositivo)
+  - Validar resets de daily missions
+  - Validar streak shield cooldown (14 dias)
+- **Por que**: Con `DateTime.UtcNow` local, el jugador puede adelantar el reloj para reclamar recompensas multiples veces
+- **Complejidad**: Media — requiere nuevo endpoint en Cloud Functions + modificar 3 managers
+- **Mitigacion actual**: Ya se cambio a `DateTime.UtcNow` (consistente), pero sigue siendo manipulable
+
+### 33. Client-Side Grant Validation (C-65)
+- **Archivos**: `DailyOfferService.cs`, `WelcomePackService.cs`, `RotatingContentService.cs`
+- **Que hacer**: Los grants de items (frames, temas, efectos) ocurren client-side sin validacion server.
+  Un jugador puede modificar PlayerPrefs para "comprar" items sin pagar.
+  Para items IAP: usar Cloud Function `iapValidateReceipt` (ya existe) ANTES de otorgar.
+  Para items DG: aceptable client-side (DG es moneda virtual no-comprable con dinero real... wait, DG SI se compra con IAP)
+- **Solucion**: Mover toda la logica de grant detras de una Cloud Function que valide recibo + deduzca balance server-side
+- **Prioridad**: Alta para items de dinero real, media para items de moneda virtual
+
+### 34. DailyOfferService Seed Predecible (B-70) — DECISION TUYA
+- **Archivo**: `DailyOfferService.cs:190`
+- **Estado**: El seed es `Year * 10000 + Month * 100 + Day` — cualquier jugador puede calcular ofertas futuras
+- **Opciones**:
+  - A) Dejarlo asi (las ofertas son iguales para todos = justo, aunque predecible)
+  - B) Anadir userId al seed (ofertas personalizadas, no predecibles)
+  - C) Generar ofertas server-side via Cloud Function
+- **Riesgo**: Bajo — solo afecta planificacion de gasto de DG, no seguridad
+
+### 35. RotatingContentService Catalogo Vacio (B-75)
+- **Archivo**: `RotatingContentService.cs:107-151`
+- **Estado**: Todas las entradas del catalogo estan comentadas — intencional para post-launch
+- **Que hacer**: Cuando estes listo para activar contenido rotativo:
+  1. Descomentar las entradas del catalogo
+  2. Asegurarse de que los items referenciados (frames, themes, battle cards) existen
+  3. Verificar que `BattleCardService.UnlockCard()` exista para grants de tipo `SeasonalBattleCard`
+
+### 36. ~~Regenerar 3 Iconos Pendientes~~ COMPLETADO (V52)
+- Los 3 iconos (stat_earnings, DepositIcon, WithdrawIcon) ya estan integrados con .meta files
+
+### 37. TODOs de features incompletas
 - `ShopItemData.cs:250` - Compra avatar no hace nada
 - `MainMenuManager.cs:420,433` - Perfil/busqueda sin abrir
 - `LocationRestrictionService.cs:83` - Verificacion ubicacion real

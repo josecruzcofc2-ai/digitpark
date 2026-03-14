@@ -559,6 +559,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI joinText = joinTextObj.AddComponent<TextMeshProUGUI>();
             joinText.text = AutoLocalizer.Get("tournament_join");
             joinText.fontSize = FontSizes.Body;
+            joinText.enableAutoSizing = true;
+            joinText.fontSizeMin = FontSizes.AutoMinBody;
+            joinText.fontSizeMax = joinText.fontSize;
             joinText.color = new Color(0.08f, 0.06f, 0.12f);
             joinText.alignment = TextAlignmentOptions.Center;
             joinText.fontStyle = FontStyles.Bold;
@@ -578,6 +581,9 @@ namespace DigitPark.UI.CashBattle
             TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
             text.text = defaultText;
             text.fontSize = fontSize;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = text.fontSize;
             text.color = color;
             text.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
         }

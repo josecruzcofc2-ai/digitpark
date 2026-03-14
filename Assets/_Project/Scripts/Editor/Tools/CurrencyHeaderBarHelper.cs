@@ -167,6 +167,9 @@ namespace DigitPark.Editor
             var plusTMP = plusTextObj.AddComponent<TextMeshProUGUI>();
             plusTMP.text = "+";
             plusTMP.fontSize = 30;
+            plusTMP.enableAutoSizing = true;
+            plusTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            plusTMP.fontSizeMax = plusTMP.fontSize;
             plusTMP.fontStyle = FontStyles.Bold;
             plusTMP.color = new Color(0.02f, 0.04f, 0.08f, 1f); // dark text on colored bg
             plusTMP.alignment = TextAlignmentOptions.Center;

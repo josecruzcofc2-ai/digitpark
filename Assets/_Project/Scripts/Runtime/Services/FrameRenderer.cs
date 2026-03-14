@@ -25,11 +25,17 @@ namespace DigitPark.Services
 
         private void Awake()
         {
-            // Tag usado por CashThemeForcer para excluir este GO del recolor
-            if (!gameObject.CompareTag("FrameLayer"))
+            // Tag usado por CashThemeForcer para excluir este GO del recolor.
+            // CompareTag throws if tag doesn't exist, so use string comparison instead.
+            try
             {
-                try { gameObject.tag = "FrameLayer"; }
-                catch { /* Tag no creado en TagManager — usar alternativa por nombre */ }
+                if (gameObject.tag != "FrameLayer")
+                    gameObject.tag = "FrameLayer";
+            }
+            catch
+            {
+                // Tag "FrameLayer" not defined in TagManager — skip silently.
+                // CashThemeForcer will use gameObject.name fallback instead.
             }
         }
 

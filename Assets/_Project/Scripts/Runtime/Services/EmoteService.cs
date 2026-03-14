@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Services
 {
@@ -208,15 +210,59 @@ namespace DigitPark.Services
         private void SaveOwnedPacks()
         {
             var data = new StringListWrapper { items = new List<string>(_ownedPacks) };
-            PlayerPrefs.SetString(OWNED_PACKS_KEY, JsonUtility.ToJson(data));
+            string ownedJson = JsonUtility.ToJson(data);
+            PlayerPrefs.SetString(OWNED_PACKS_KEY, ownedJson);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            var equippedData = new StringListWrapper { items = new List<string>(_equippedEmotes) };
+            string equippedJson = JsonUtility.ToJson(equippedData);
+            SyncEmotesToFirebase(ownedJson, equippedJson).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[EmoteService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void SaveEquippedEmotes()
         {
             var data = new StringListWrapper { items = new List<string>(_equippedEmotes) };
-            PlayerPrefs.SetString(EQUIPPED_EMOTES_KEY, JsonUtility.ToJson(data));
+            string equippedJson = JsonUtility.ToJson(data);
+            PlayerPrefs.SetString(EQUIPPED_EMOTES_KEY, equippedJson);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            var ownedData = new StringListWrapper { items = new List<string>(_ownedPacks) };
+            string ownedJson = JsonUtility.ToJson(ownedData);
+            SyncEmotesToFirebase(ownedJson, equippedJson).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[EmoteService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private async Task SyncEmotesToFirebase(string ownedPacksJson, string equippedEmotesJson)
+        {
+            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            if (playerData == null) return;
+
+            try
+            {
+                var updates = new Dictionary<string, object>
+                {
+                    { "ownedEmotePacks", ownedPacksJson },
+                    { "equippedEmotes", equippedEmotesJson }
+                };
+
+                if (DatabaseService.Instance != null)
+                {
+                    await DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[EmoteService] Error syncing to Firebase: {e.Message}");
+            }
         }
 
         // ==================== PUBLIC API ====================

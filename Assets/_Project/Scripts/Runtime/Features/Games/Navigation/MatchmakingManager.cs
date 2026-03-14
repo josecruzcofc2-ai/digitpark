@@ -290,6 +290,9 @@ namespace DigitPark.Managers
                 placeholderText = placeholderGO.AddComponent<TextMeshProUGUI>();
                 placeholderText.alignment = TextAlignmentOptions.Center;
                 placeholderText.fontSize = FontSizes.Body;
+                placeholderText.enableAutoSizing = true;
+                placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+                placeholderText.fontSizeMax = placeholderText.fontSize;
                 placeholderText.fontStyle = FontStyles.Bold;
             }
 
@@ -446,19 +449,8 @@ namespace DigitPark.Managers
             }
             else
             {
-                Debug.LogWarning("[Matchmaking] MatchmakingService not found. Using mock delay.");
-                // Mock: simulate finding opponent after delay
-                StartCoroutine(MockMatchmaking());
-            }
-        }
-
-        private IEnumerator MockMatchmaking()
-        {
-            yield return new WaitForSeconds(UnityEngine.Random.Range(2f, 5f));
-
-            if (isSearching)
-            {
-                OnMatchFound("mock_match_123", AutoLocalizer.Get("default_opponent"));
+                Debug.LogError("[Matchmaking] MatchmakingService not found. Cannot search for opponents.");
+                OnMatchFailed("Matchmaking service unavailable");
             }
         }
 

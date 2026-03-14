@@ -515,6 +515,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI arrowText = GetOrAddComponent<TextMeshProUGUI>(arrowObj);
             arrowText.text = "▼";
             arrowText.fontSize = FontSizes.Body;
+            arrowText.enableAutoSizing = true;
+            arrowText.fontSizeMin = FontSizes.AutoMinBody;
+            arrowText.fontSizeMax = arrowText.fontSize;
             arrowText.fontStyle = FontStyles.Bold;
             arrowText.color = CYAN_NEON;
             arrowText.alignment = TextAlignmentOptions.Center;
@@ -876,6 +879,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI questionText = GetOrAddComponent<TextMeshProUGUI>(questionMark);
             questionText.text = "?";
             questionText.fontSize = FontSizes.Subtitle;
+            questionText.enableAutoSizing = true;
+            questionText.fontSizeMin = FontSizes.AutoMinBody;
+            questionText.fontSizeMax = questionText.fontSize;
             questionText.fontStyle = FontStyles.Bold;
             questionText.color = CAT_SECRET;
             questionText.alignment = TextAlignmentOptions.Center;
@@ -969,13 +975,19 @@ namespace DigitPark.Editor
             badgeImage.raycastTarget = false;
 
             GameObject checkmark = FindOrCreateChild(completedBadge, "Checkmark");
-            SetRectTransformStretch(checkmark);
-            TextMeshProUGUI checkText = GetOrAddComponent<TextMeshProUGUI>(checkmark);
-            checkText.text = "V";
-            checkText.fontSize = FontSizes.Body;
-            checkText.fontStyle = FontStyles.Bold;
-            checkText.color = TEXT_DARK;
-            checkText.alignment = TextAlignmentOptions.Center;
+            RectTransform checkmarkRT = GetOrAddComponent<RectTransform>(checkmark);
+            checkmarkRT.anchorMin = new Vector2(0.15f, 0.15f);
+            checkmarkRT.anchorMax = new Vector2(0.85f, 0.85f);
+            checkmarkRT.sizeDelta = Vector2.zero;
+            // Remove any leftover TMP component
+            var oldTMP = checkmark.GetComponent<TextMeshProUGUI>();
+            if (oldTMP != null) DestroyImmediate(oldTMP);
+            Image checkImg = GetOrAddComponent<Image>(checkmark);
+            Sprite checkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSprite != null) checkImg.sprite = checkSprite;
+            checkImg.color = TEXT_DARK;
+            checkImg.preserveAspect = true;
+            checkImg.raycastTarget = false;
             completedBadge.SetActive(isUnlocked);
 
             // ── ShineEffect (inactive, for animations) ──
@@ -1064,13 +1076,14 @@ namespace DigitPark.Editor
             closeOutline.effectColor = new Color(1f, 0.35f, 0.35f, 0.8f);
             closeOutline.effectDistance = new Vector2(2f, 2f);
 
+            // Sprite close icon
             GameObject closeText = FindOrCreateChild(closeBtn, "Text");
-            TextMeshProUGUI closeTmp = GetOrAddComponent<TextMeshProUGUI>(closeText);
-            closeTmp.text = "X";
-            closeTmp.fontSize = FontSizes.H2;
-            closeTmp.fontStyle = FontStyles.Bold;
-            closeTmp.color = TEXT_PRIMARY;
-            closeTmp.alignment = TextAlignmentOptions.Center;
+            Image closeImg = GetOrAddComponent<Image>(closeText);
+            Sprite closeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_close_x.png");
+            if (closeSprite != null) closeImg.sprite = closeSprite;
+            closeImg.color = TEXT_PRIMARY;
+            closeImg.preserveAspect = true;
+            closeImg.raycastTarget = false;
             SetRectTransformStretch(closeText);
 
             // ==================== TROPHY ICON ====================
@@ -1528,6 +1541,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI questionText = questionMark.AddComponent<TextMeshProUGUI>();
             questionText.text = "?";
             questionText.fontSize = FontSizes.Subtitle;
+            questionText.enableAutoSizing = true;
+            questionText.fontSizeMin = FontSizes.AutoMinBody;
+            questionText.fontSizeMax = questionText.fontSize;
             questionText.fontStyle = FontStyles.Bold;
             questionText.color = CAT_SECRET;
             questionText.alignment = TextAlignmentOptions.Center;
@@ -1580,6 +1596,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI progressTmp = progressText.AddComponent<TextMeshProUGUI>();
             progressTmp.text = "50%";
             progressTmp.fontSize = FontSizes.Body;
+            progressTmp.enableAutoSizing = true;
+            progressTmp.fontSizeMin = FontSizes.AutoMinBody;
+            progressTmp.fontSizeMax = progressTmp.fontSize;
             progressTmp.fontStyle = FontStyles.Bold;
             progressTmp.color = TEXT_SECONDARY;
             progressTmp.alignment = TextAlignmentOptions.Center;
@@ -1631,12 +1650,12 @@ namespace DigitPark.Editor
             checkRT.anchorMax = Vector2.one;
             checkRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI checkTmp = checkmark.AddComponent<TextMeshProUGUI>();
-            checkTmp.text = "V";
-            checkTmp.fontSize = FontSizes.Body;
-            checkTmp.fontStyle = FontStyles.Bold;
-            checkTmp.color = TEXT_DARK;
-            checkTmp.alignment = TextAlignmentOptions.Center;
+            var checkImg = checkmark.AddComponent<Image>();
+            Sprite checkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSprite != null) checkImg.sprite = checkSprite;
+            checkImg.color = TEXT_DARK;
+            checkImg.preserveAspect = true;
+            checkImg.raycastTarget = false;
 
             completedBadge.SetActive(false);
 

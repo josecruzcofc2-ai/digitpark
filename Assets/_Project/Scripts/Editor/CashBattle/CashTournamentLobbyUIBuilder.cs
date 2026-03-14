@@ -499,16 +499,12 @@ namespace DigitPark.Editor
                 RectTransform arrowRT = arrowObj.AddComponent<RectTransform>();
                 SetFullStretch(arrowRT);
 
-                TextMeshProUGUI arrowTMP = arrowObj.AddComponent<TextMeshProUGUI>();
-                arrowTMP.text = "<";
-                arrowTMP.fontSize = FontSizes.H4;
+                Image arrowTMP = arrowObj.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrowTMP.sprite = arrowSprite;
                 arrowTMP.color = TEXT_GOLD;
-                arrowTMP.alignment = TextAlignmentOptions.Center;
-                arrowTMP.fontStyle = FontStyles.Bold;
-                arrowTMP.enableAutoSizing = true;
-                arrowTMP.fontSizeMin = FontSizes.AutoMinBody;
-                arrowTMP.fontSizeMax = FontSizes.H4;
-                arrowTMP.overflowMode = TextOverflowModes.Ellipsis;
+                arrowTMP.preserveAspect = true;
+                arrowTMP.raycastTarget = false;
             }
         }
 

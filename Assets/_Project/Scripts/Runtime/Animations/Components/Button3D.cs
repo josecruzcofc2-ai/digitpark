@@ -324,7 +324,7 @@ namespace DigitPark.Animations
         public void TriggerPress()
         {
             PlayPressAnimation();
-            DOVirtual.DelayedCall(pressDuration + 0.05f, () => PlayReleaseAnimation());
+            DOVirtual.DelayedCall(pressDuration + 0.05f, () => PlayReleaseAnimation()).SetLink(gameObject);
         }
 
         /// <summary>
@@ -372,6 +372,7 @@ namespace DigitPark.Animations
         public void PlayAttentionAnimation()
         {
             DOTween.Sequence()
+                .SetLink(gameObject)
                 .Append(transform.DOScale(1.1f, 0.15f).SetEase(Ease.OutQuad))
                 .Append(transform.DOScale(1f, 0.3f).SetEase(Ease.OutBounce))
                 .SetLoops(3);

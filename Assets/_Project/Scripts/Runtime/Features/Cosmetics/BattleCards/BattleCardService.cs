@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FirebaseDB = global::Firebase.Database;
 
 namespace DigitPark.Cosmetics
 {
@@ -85,7 +86,10 @@ namespace DigitPark.Cosmetics
             Debug.Log($"[BattleCardService] Initialized: {_allCards.Length} cards loaded, {_ownedCardIds.Count} owned, equipped={_equippedCardId}");
 
             // Pull data from Firebase after local init
-            _ = LoadFromFirebase();
+            if (DigitPark.Services.Firebase.DatabaseService.Instance != null && DigitPark.Services.Firebase.AuthenticationService.Instance?.GetCurrentPlayerData() != null)
+            {
+                _ = LoadFromFirebase();
+            }
         }
 
         #region Public API
@@ -212,8 +216,8 @@ namespace DigitPark.Cosmetics
         {
             try
             {
-                var db = DigitPark.Services.DatabaseService.Instance;
-                var auth = DigitPark.Services.AuthenticationService.Instance;
+                var db = DigitPark.Services.Firebase.DatabaseService.Instance;
+                var auth = DigitPark.Services.Firebase.AuthenticationService.Instance;
                 if (db == null || auth == null) return;
 
                 string uid = auth.GetCurrentUserId();
@@ -236,13 +240,13 @@ namespace DigitPark.Cosmetics
         {
             try
             {
-                var auth = DigitPark.Services.AuthenticationService.Instance;
+                var auth = DigitPark.Services.Firebase.AuthenticationService.Instance;
                 if (auth == null) return;
 
                 string uid = auth.GetCurrentUserId();
                 if (string.IsNullOrEmpty(uid)) return;
 
-                var dbRef = Firebase.Database.FirebaseDatabase.DefaultInstance?.RootReference;
+                var dbRef = FirebaseDB.FirebaseDatabase.DefaultInstance?.RootReference;
                 if (dbRef == null) return;
 
                 var snapshot = await dbRef.Child("players").Child(uid).GetValueAsync();

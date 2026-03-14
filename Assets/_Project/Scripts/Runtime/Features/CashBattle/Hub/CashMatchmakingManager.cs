@@ -307,6 +307,9 @@ namespace DigitPark.Managers
                 placeholderText = placeholderGO.AddComponent<TextMeshProUGUI>();
                 placeholderText.alignment = TextAlignmentOptions.Center;
                 placeholderText.fontSize = FontSizes.Body;
+                placeholderText.enableAutoSizing = true;
+                placeholderText.fontSizeMin = FontSizes.AutoMinBody;
+                placeholderText.fontSizeMax = placeholderText.fontSize;
                 placeholderText.fontStyle = FontStyles.Bold;
             }
 

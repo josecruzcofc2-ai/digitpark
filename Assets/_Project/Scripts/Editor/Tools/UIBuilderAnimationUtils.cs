@@ -206,6 +206,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;

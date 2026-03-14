@@ -128,7 +128,7 @@ namespace DigitPark.Animations
             {
                 selectionFrame.gameObject.SetActive(true);
                 selectionFrame.localScale = Vector3.zero;
-                selectionFrame.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+                selectionFrame.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetLink(selectionFrame.gameObject);
             }
 
             // Start selection glow
@@ -219,7 +219,7 @@ namespace DigitPark.Animations
             // Pulse selected card
             if (gameCards[currentIndex] != null)
             {
-                gameCards[currentIndex].DOPunchScale(Vector3.one * 0.05f, 0.2f, 3);
+                gameCards[currentIndex].DOPunchScale(Vector3.one * 0.05f, 0.2f, 3).SetLink(gameCards[currentIndex].gameObject);
             }
 
             isAnimating = false;
@@ -237,7 +237,7 @@ namespace DigitPark.Animations
                 if (parallaxLayers[i] == null) continue;
 
                 float parallaxX = baseOffset * parallaxFactors[i];
-                parallaxLayers[i].DOAnchorPosX(parallaxX, scrollDuration).SetEase(Ease.OutQuad);
+                parallaxLayers[i].DOAnchorPosX(parallaxX, scrollDuration).SetEase(Ease.OutQuad).SetLink(parallaxLayers[i].gameObject);
             }
         }
 
@@ -271,7 +271,7 @@ namespace DigitPark.Animations
             // Zoom selected card
             if (currentIndex < gameCards.Count && gameCards[currentIndex] != null)
             {
-                Sequence confirmSeq = DOTween.Sequence();
+                Sequence confirmSeq = DOTween.Sequence().SetLink(gameCards[currentIndex].gameObject);
                 confirmSeq.Append(gameCards[currentIndex].DOScale(selectedScale * 1.3f, selectDuration).SetEase(Ease.OutQuad));
                 confirmSeq.Join(gameCards[currentIndex].DOPunchRotation(new Vector3(0, 0, 5f), selectDuration * 2, 10));
 
@@ -301,13 +301,13 @@ namespace DigitPark.Animations
         {
             if (index < 0 || index >= gameCards.Count || gameCards[index] == null) return;
 
-            gameCards[index].DOScale(gameCards[index].localScale.x * 1.05f, 0.15f).SetEase(Ease.OutQuad);
+            gameCards[index].DOScale(gameCards[index].localScale.x * 1.05f, 0.15f).SetEase(Ease.OutQuad).SetLink(gameCards[index].gameObject);
 
             Image cardImage = gameCards[index].GetComponent<Image>();
             if (cardImage != null)
             {
                 Color original = cardImage.color;
-                cardImage.DOColor(Color.white, 0.15f);
+                cardImage.DOColor(Color.white, 0.15f).SetLink(cardImage.gameObject);
             }
         }
 
@@ -319,7 +319,7 @@ namespace DigitPark.Animations
             if (index < 0 || index >= gameCards.Count || gameCards[index] == null) return;
 
             float targetScale = (index == currentIndex) ? selectedScale : unselectedScale;
-            gameCards[index].DOScale(targetScale, 0.15f).SetEase(Ease.OutQuad);
+            gameCards[index].DOScale(targetScale, 0.15f).SetEase(Ease.OutQuad).SetLink(gameCards[index].gameObject);
         }
 
         // ==================== CONTINUOUS EFFECTS ====================

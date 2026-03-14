@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Firebase;
 using Firebase.Extensions;
 #if FIREBASE_MESSAGING
@@ -11,6 +10,7 @@ using Firebase.Messaging;
 #endif
 using DigitPark.Data;
 using DigitPark.Managers;
+using DigitPark.Navigation;
 using DigitPark.Services;
 
 namespace DigitPark.Services.Firebase
@@ -449,7 +449,7 @@ namespace DigitPark.Services.Firebase
 
                 default:
                     // Ir al menú principal
-                    SceneManager.LoadScene("MainMenu");
+                    SceneNavigator.Instance.NavigateTo("MainMenu");
                     break;
             }
         }
@@ -508,14 +508,14 @@ namespace DigitPark.Services.Firebase
         {
             // Navegar a Notifications con filtro social
             PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
-            SceneManager.LoadScene("Notifications");
+            SceneNavigator.Instance.NavigateTo("Notifications");
         }
 
         private void NavigateToFriends()
         {
             // Navegar a Notifications con filtro social
             PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
-            SceneManager.LoadScene("Notifications");
+            SceneNavigator.Instance.NavigateTo("Notifications");
         }
 
         private void NavigateToChallenge(string challengeId)
@@ -524,7 +524,7 @@ namespace DigitPark.Services.Firebase
             {
                 PlayerPrefs.SetString("ChallengeId", challengeId);
             }
-            SceneManager.LoadScene("PlayModeSelection");
+            SceneNavigator.Instance.NavigateTo("PlayModeSelection");
         }
 
         private void NavigateToTournament(string tournamentId)
@@ -533,13 +533,13 @@ namespace DigitPark.Services.Firebase
             {
                 PlayerPrefs.SetString("OpenTournamentId", tournamentId);
             }
-            SceneManager.LoadScene("CashBattleHub");
+            SceneNavigator.Instance.NavigateTo("CashBattleHub");
         }
 
         private void NavigateToDailyRewards()
         {
             PlayerPrefs.SetString("OpenPanel", "DailyRewards");
-            SceneManager.LoadScene("MainMenu");
+            SceneNavigator.Instance.NavigateTo("MainMenu");
         }
 
         private void NavigateToPromo(string promoAction)
@@ -548,15 +548,15 @@ namespace DigitPark.Services.Firebase
             {
                 case "premium":
                     PlayerPrefs.SetString("OpenPanel", "Premium");
-                    SceneManager.LoadScene("MainMenu");
+                    SceneNavigator.Instance.NavigateTo("MainMenu");
                     break;
 
                 case "deposit":
-                    SceneManager.LoadScene("CashWallet");
+                    SceneNavigator.Instance.NavigateTo("CashWallet");
                     break;
 
                 default:
-                    SceneManager.LoadScene("MainMenu");
+                    SceneNavigator.Instance.NavigateTo("MainMenu");
                     break;
             }
         }

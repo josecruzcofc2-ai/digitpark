@@ -4,6 +4,7 @@ using DG.Tweening;
 using TMPro;
 using System;
 using System.Collections;
+using DigitPark.Localization;
 
 namespace DigitPark.Animations
 {
@@ -93,7 +94,7 @@ namespace DigitPark.Animations
                 searchIndicator.gameObject.SetActive(true);
                 searchIndicator.localScale = Vector3.zero;
                 searchScaleTween?.Kill();
-                searchScaleTween = searchIndicator.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+                searchScaleTween = searchIndicator.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetLink(searchIndicator.gameObject);
             }
 
             // Rotating search ring
@@ -102,7 +103,8 @@ namespace DigitPark.Animations
                 searchRotationTween = searchRing.transform
                     .DORotate(new Vector3(0, 0, -360f), searchRotationSpeed, RotateMode.FastBeyond360)
                     .SetEase(Ease.Linear)
-                    .SetLoops(-1);
+                    .SetLoops(-1)
+                    .SetLink(searchRing.gameObject);
             }
 
             // Animate dots
@@ -146,7 +148,7 @@ namespace DigitPark.Animations
                 audioSource.Stop();
 
             if (searchIndicator != null)
-                searchIndicator.DOScale(0f, 0.2f).OnComplete(() =>
+                searchIndicator.DOScale(0f, 0.2f).SetLink(searchIndicator.gameObject).OnComplete(() =>
                     searchIndicator.gameObject.SetActive(false));
 
             if (searchingText != null)
@@ -172,15 +174,18 @@ namespace DigitPark.Animations
 
         private IEnumerator AnimateSearchingText()
         {
-            string[] states = { "Searching", "Searching.", "Searching..", "Searching..." };
             int index = 0;
+            string[] dotSuffixes = { "", ".", "..", "..." };
 
             while (isSearching)
             {
                 if (searchingText != null)
-                    searchingText.text = states[index];
+                {
+                    string baseText = AutoLocalizer.Get("matchmaking_search_dots");
+                    searchingText.text = baseText + dotSuffixes[index];
+                }
 
-                index = (index + 1) % states.Length;
+                index = (index + 1) % dotSuffixes.Length;
                 yield return new WaitForSeconds(0.3f);
             }
         }
@@ -223,7 +228,7 @@ namespace DigitPark.Animations
                 opponentSilhouette.gameObject.SetActive(true);
                 opponentSilhouette.color = Color.black;
                 opponentSilhouette.transform.localScale = Vector3.zero;
-                opponentSilhouette.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+                opponentSilhouette.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetLink(opponentSilhouette.gameObject);
             }
 
             yield return new WaitForSeconds(0.5f);
@@ -233,7 +238,7 @@ namespace DigitPark.Animations
                 revealParticles.Play();
 
             if (opponentSilhouette != null)
-                opponentSilhouette.DOFade(0f, 0.3f).OnComplete(() =>
+                opponentSilhouette.DOFade(0f, 0.3f).SetLink(opponentSilhouette.gameObject).OnComplete(() =>
                     opponentSilhouette.gameObject.SetActive(false));
 
             // Show actual opponent card
@@ -247,7 +252,7 @@ namespace DigitPark.Animations
 
                 opponentCard.gameObject.SetActive(true);
                 opponentCard.localScale = Vector3.zero;
-                opponentCard.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
+                opponentCard.DOScale(1f, 0.4f).SetEase(Ease.OutBack).SetLink(opponentCard.gameObject);
             }
 
             OnMatchFound?.Invoke();
@@ -288,7 +293,7 @@ namespace DigitPark.Animations
 
             // Slide cards in
             cardSlideSequence?.Kill();
-            cardSlideSequence = DOTween.Sequence();
+            cardSlideSequence = DOTween.Sequence().SetLink(gameObject);
 
             if (playerCard != null)
                 cardSlideSequence.Append(playerCard.DOAnchorPosX(0, cardSlideDuration).SetEase(Ease.OutBack));
@@ -308,7 +313,7 @@ namespace DigitPark.Animations
 
                 // Pop in with overshoot
                 vsSequence?.Kill();
-                vsSequence = DOTween.Sequence();
+                vsSequence = DOTween.Sequence().SetLink(vsContainer.gameObject);
                 vsSequence.Append(vsContainer.DOScale(1.5f, vsPopDuration * 0.4f).SetEase(Ease.OutQuad));
                 vsSequence.Append(vsContainer.DOScale(1f, vsPopDuration * 0.6f).SetEase(Ease.OutBounce));
                 vsSequence.Join(vsContainer.DOShakeRotation(vsPopDuration, new Vector3(0, 0, 15f), 10));
@@ -325,11 +330,11 @@ namespace DigitPark.Animations
                 vsGlowTween?.Kill();
                 // Assign before OnComplete to avoid race condition where 0.3f tween
                 // finishes in same frame before the outer assignment runs
-                vsGlowTween = vsGlow.DOFade(1f, 0.3f);
+                vsGlowTween = vsGlow.DOFade(1f, 0.3f).SetLink(vsGlow.gameObject);
                 vsGlowTween.OnComplete(() =>
                 {
                     if (vsGlow != null)
-                        vsGlowTween = vsGlow.DOFade(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                        vsGlowTween = vsGlow.DOFade(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo).SetLink(vsGlow.gameObject);
                 });
             }
 
@@ -356,7 +361,8 @@ namespace DigitPark.Animations
             quickVSSequence?.Kill();
             quickVSSequence = DOTween.Sequence()
                 .Append(vsContainer.DOScale(1.3f, 0.15f).SetEase(Ease.OutQuad))
-                .Append(vsContainer.DOScale(1f, 0.25f).SetEase(Ease.OutBounce));
+                .Append(vsContainer.DOScale(1f, 0.25f).SetEase(Ease.OutBounce))
+                .SetLink(vsContainer.gameObject);
 
             if (vsImpactSound != null && audioSource != null)
                 audioSource.PlayOneShot(vsImpactSound);

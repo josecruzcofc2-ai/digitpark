@@ -89,8 +89,10 @@ namespace DigitPark.UI
             rectTransform.offsetMin = Vector2.zero;
             rectTransform.offsetMax = Vector2.zero;
 
+#if UNITY_EDITOR
             Debug.Log($"[SafeArea] Aplicado - SafeArea: {safeArea}, Screen: {Screen.width}x{Screen.height}, " +
                      $"Anchors: ({anchorMin.x:F2}, {anchorMin.y:F2}) - ({anchorMax.x:F2}, {anchorMax.y:F2})");
+#endif
         }
 
         /// <summary>

@@ -387,9 +387,12 @@ namespace DigitPark.Editor
                 arrow.transform.SetParent(btn.transform, false);
                 RectTransform art = arrow.AddComponent<RectTransform>();
                 art.anchorMin = Vector2.zero; art.anchorMax = Vector2.one; art.sizeDelta = Vector2.zero;
-                TextMeshProUGUI atmp = arrow.AddComponent<TextMeshProUGUI>();
-                atmp.text = "\u2190"; atmp.fontSize = FontSizes.Subtitle; atmp.color = TEXT_WHITE;
-                atmp.alignment = TextAlignmentOptions.Center; atmp.fontStyle = FontStyles.Bold;
+                Image atmp = arrow.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) atmp.sprite = arrowSprite;
+                atmp.color = TEXT_WHITE;
+                atmp.preserveAspect = true;
+                atmp.raycastTarget = false;
             }
 
             // === Title ===
@@ -671,6 +674,9 @@ namespace DigitPark.Editor
             msTmp.fontSize = FontSizes.Body; msTmp.color = TEXT_MUTED;
             msTmp.alignment = TextAlignmentOptions.Center;
             msTmp.fontStyle = FontStyles.Bold;
+            msTmp.enableAutoSizing = true;
+            msTmp.fontSizeMin = FontSizes.AutoMinBody;
+            msTmp.fontSizeMax = msTmp.fontSize;
 
             // === Rank Badge (centered pill below member since) ===
             GameObject rankBadge = new GameObject("RankBadge");
@@ -759,6 +765,9 @@ namespace DigitPark.Editor
             titTmp.alignment = TextAlignmentOptions.Center;
             titTmp.fontStyle = FontStyles.Bold;
             titTmp.characterSpacing = 6;
+            titTmp.enableAutoSizing = true;
+            titTmp.fontSizeMin = FontSizes.AutoMinBody;
+            titTmp.fontSizeMax = titTmp.fontSize;
 
             GameObject rl = new GameObject("RightLine");
             rl.transform.SetParent(divider.transform, false);
@@ -815,6 +824,9 @@ namespace DigitPark.Editor
             rateTmp.fontSize = FontSizes.Body; rateTmp.color = GOLD_LIGHT;
             rateTmp.alignment = TextAlignmentOptions.Center;
             rateTmp.fontStyle = FontStyles.Bold;
+            rateTmp.enableAutoSizing = true;
+            rateTmp.fontSizeMin = FontSizes.AutoMinBody;
+            rateTmp.fontSizeMax = rateTmp.fontSize;
         }
 
         // ================================================================
@@ -928,6 +940,9 @@ namespace DigitPark.Editor
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
             tmp.characterSpacing = 6;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
 
             CreateSectionLine(row.transform, "RightLine");
         }
@@ -1335,6 +1350,9 @@ namespace DigitPark.Editor
             titleTxt.text = "Change Name";
             titleTxt.fontSize = FontSizes.H4; titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = GOLD_PRIMARY; titleTxt.alignment = TextAlignmentOptions.Center;
+            titleTxt.enableAutoSizing = true;
+            titleTxt.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTxt.fontSizeMax = titleTxt.fontSize;
 
             // Input Field
             GameObject inputObj = new GameObject("InputField");
@@ -1360,6 +1378,9 @@ namespace DigitPark.Editor
             phTxt.text = "New name...";
             phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Bold;
             phTxt.color = TEXT_MUTED; phTxt.alignment = TextAlignmentOptions.Left;
+            phTxt.enableAutoSizing = true;
+            phTxt.fontSizeMin = FontSizes.AutoMinBody;
+            phTxt.fontSizeMax = phTxt.fontSize;
 
             GameObject inputText = new GameObject("InputFieldText");
             inputText.transform.SetParent(textArea.transform, false);
@@ -1369,6 +1390,9 @@ namespace DigitPark.Editor
             var iTxt = inputText.AddComponent<TextMeshProUGUI>();
             iTxt.fontSize = FontSizes.Body; iTxt.fontStyle = FontStyles.Bold; iTxt.color = TEXT_WHITE;
             iTxt.alignment = TextAlignmentOptions.Left;
+            iTxt.enableAutoSizing = true;
+            iTxt.fontSizeMin = FontSizes.AutoMinBody;
+            iTxt.fontSizeMax = iTxt.fontSize;
 
             TMP_InputField tmpInput = inputObj.AddComponent<TMP_InputField>();
             tmpInput.textViewport = taRT;
@@ -1395,6 +1419,9 @@ namespace DigitPark.Editor
             cfTxt.text = "Save"; cfTxt.fontSize = FontSizes.Body;
             cfTxt.fontStyle = FontStyles.Bold; cfTxt.color = new Color(0.1f, 0.1f, 0.1f, 1f);
             cfTxt.alignment = TextAlignmentOptions.Center;
+            cfTxt.enableAutoSizing = true;
+            cfTxt.fontSizeMin = FontSizes.AutoMinBody;
+            cfTxt.fontSizeMax = cfTxt.fontSize;
 
             // Cancel Button
             GameObject cancelObj = new GameObject("CancelButton");
@@ -1413,6 +1440,9 @@ namespace DigitPark.Editor
             var ccTxt = ccTxtObj.AddComponent<TextMeshProUGUI>();
             ccTxt.text = "Cancel"; ccTxt.fontSize = FontSizes.Body;
             ccTxt.fontStyle = FontStyles.Bold; ccTxt.color = TEXT_MUTED; ccTxt.alignment = TextAlignmentOptions.Center;
+            ccTxt.enableAutoSizing = true;
+            ccTxt.fontSizeMin = FontSizes.AutoMinBody;
+            ccTxt.fontSizeMax = ccTxt.fontSize;
 
             // Wire InputPanelUI component
             var inputComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.InputPanelUI, Assembly-CSharp"));

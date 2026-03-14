@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using DigitPark.Games;
 using DigitPark.Services;
+using DigitPark.Services.Firebase;
 using DigitPark.UI;
 
 namespace DigitPark.Managers
@@ -18,11 +19,17 @@ namespace DigitPark.Managers
         {
             get
             {
-                if (_instance == null)
+                // C-67: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
+                if (!_instance)
                 {
-                    var go = new GameObject("OnlineResultManager");
-                    _instance = go.AddComponent<OnlineResultManager>();
-                    DontDestroyOnLoad(go);
+                    _instance = FindObjectOfType<OnlineResultManager>();
+                    if (!_instance)
+                    {
+                        var go = new GameObject("OnlineResultManager");
+                        DontDestroyOnLoad(go);
+                        // Set _instance BEFORE AddComponent to prevent Awake race condition
+                        _instance = go.AddComponent<OnlineResultManager>();
+                    }
                 }
                 return _instance;
             }
@@ -65,9 +72,17 @@ namespace DigitPark.Managers
         private void LoadPrefabsFromResources()
         {
             if (onlineWinPanelPrefab == null)
+            {
                 onlineWinPanelPrefab = Resources.Load<GameObject>(PREFAB_BASE + "OnlineWinPanel");
+                if (onlineWinPanelPrefab == null)
+                    Debug.LogError($"[OnlineResultManager] Failed to load prefab: {PREFAB_BASE}OnlineWinPanel");
+            }
             if (onlineLosePanelPrefab == null)
+            {
                 onlineLosePanelPrefab = Resources.Load<GameObject>(PREFAB_BASE + "OnlineLosePanel");
+                if (onlineLosePanelPrefab == null)
+                    Debug.LogError($"[OnlineResultManager] Failed to load prefab: {PREFAB_BASE}OnlineLosePanel");
+            }
 
             int loaded = 0;
             if (onlineWinPanelPrefab != null) loaded++;
@@ -93,7 +108,10 @@ namespace DigitPark.Managers
             // Si hay empate en tiempo, el que tenga menos errores gana
             if (Mathf.Approximately(playerTime, opponentTime))
             {
-                playerWon = playerErrors < opponentErrors;
+                if (playerErrors != opponentErrors)
+                    playerWon = playerErrors < opponentErrors;
+                else
+                    playerWon = true; // Perfect tie: benefit of the doubt goes to player
             }
 
             ShowResultPanel(playerWon, playerName, playerTime, playerErrors,
@@ -283,6 +301,59 @@ namespace DigitPark.Managers
             }
 
             Debug.Log($"[OnlineResultManager] Showing {(playerWon ? "WIN" : "LOSE")} panel");
+
+            // Economy Rebalance V55 — DC rewards per ranked match
+            // Win=15 DC, Loss=5 DC, Perfect=+25 DC, FWOTD=+50 DC
+            GrantRankedRewards(playerWon, playerErrors == 0);
+        }
+
+        /// <summary>
+        /// Economy Rebalance V55: Grant DC rewards for ranked 1v1 matches.
+        /// Win=15 DC, Loss=5 DC, Perfect Score=+25 DC bonus, First Win of the Day=+50 DC.
+        /// Target: ~185 DC/day for active player (10 games, 6 wins).
+        /// </summary>
+        private void GrantRankedRewards(bool playerWon, bool isPerfect)
+        {
+            var currency = DigitPark.Monetization.CurrencyManager.Instance;
+            if (currency == null) return;
+
+            int dcReward = playerWon ? 15 : 5;
+            string reason = playerWon ? "ranked_win" : "ranked_loss";
+
+            // Perfect score bonus
+            if (isPerfect && playerWon)
+            {
+                dcReward += 25;
+                reason = "ranked_perfect_win";
+            }
+
+            // First Win of the Day (FWOTD)
+            if (playerWon)
+            {
+                string todayKey = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
+                string lastFWOTD = PlayerPrefs.GetString("FWOTD_LastDate", "");
+                if (lastFWOTD != todayKey)
+                {
+                    dcReward += 50;
+                    PlayerPrefs.SetString("FWOTD_LastDate", todayKey);
+                    PlayerPrefs.Save();
+                    reason = isPerfect ? "ranked_fwotd_perfect" : "ranked_fwotd";
+                    Debug.Log("[OnlineResultManager] First Win of the Day! +50 DC bonus");
+                }
+            }
+
+            currency.AddCoins(dcReward);
+            DigitPark.Services.Firebase.AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", dcReward, reason);
+            Debug.Log($"[OnlineResultManager] Ranked reward: +{dcReward} DC ({reason})");
+
+            // Economy Rebalance V55 — Currency tutorial tooltip (shows once after first win)
+            if (playerWon && PlayerPrefs.GetInt("tutorial_currency_shown", 0) == 0)
+            {
+                PlayerPrefs.SetInt("tutorial_currency_shown", 1);
+                PlayerPrefs.Save();
+                // The tooltip is shown by the UI layer (OnlineResultPanelController checks this flag)
+                Debug.Log("[OnlineResultManager] Currency tutorial flag set — UI will show tooltip");
+            }
         }
 
         private void CreateFallbackPanel(bool playerWon, string playerName, float playerTime,

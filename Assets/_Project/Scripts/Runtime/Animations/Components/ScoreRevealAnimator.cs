@@ -68,7 +68,7 @@ namespace DigitPark.Animations
             int targetScore = 0, ResultType resultType = ResultType.Win, Action onComplete = null)
         {
             revealSequence?.Kill();
-            revealSequence = DOTween.Sequence();
+            revealSequence = DOTween.Sequence().SetLink(gameObject);
 
             // Prepare all elements
             foreach (var element in elements)
@@ -155,7 +155,7 @@ namespace DigitPark.Animations
         /// </summary>
         public Sequence AnimateVSSection(Transform playerCard, Transform vsText, Transform opponentCard)
         {
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
 
             // Player card slides in from left
             if (playerCard != null)

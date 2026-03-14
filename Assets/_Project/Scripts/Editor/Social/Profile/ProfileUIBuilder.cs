@@ -1260,6 +1260,9 @@ namespace DigitPark.Editor
             titleTxt.text = "Change Name";
             titleTxt.fontSize = FontSizes.H4; titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = CYAN_NEON; titleTxt.alignment = TextAlignmentOptions.Center;
+            titleTxt.enableAutoSizing = true;
+            titleTxt.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTxt.fontSizeMax = titleTxt.fontSize;
 
             // Input Field
             GameObject inputObj = new GameObject("InputField");
@@ -1285,6 +1288,9 @@ namespace DigitPark.Editor
             phTxt.text = "New name...";
             phTxt.fontSize = FontSizes.Body; phTxt.fontStyle = FontStyles.Bold;
             phTxt.color = TEXT_SECONDARY; phTxt.alignment = TextAlignmentOptions.Left;
+            phTxt.enableAutoSizing = true;
+            phTxt.fontSizeMin = FontSizes.AutoMinBody;
+            phTxt.fontSizeMax = phTxt.fontSize;
 
             GameObject inputText = new GameObject("Text");
             inputText.transform.SetParent(textArea.transform, false);
@@ -1294,6 +1300,9 @@ namespace DigitPark.Editor
             var iTxt = inputText.AddComponent<TextMeshProUGUI>();
             iTxt.fontSize = FontSizes.Body; iTxt.color = TEXT_WHITE;
             iTxt.alignment = TextAlignmentOptions.Left;
+            iTxt.enableAutoSizing = true;
+            iTxt.fontSizeMin = FontSizes.AutoMinBody;
+            iTxt.fontSizeMax = iTxt.fontSize;
 
             TMP_InputField tmpInput = inputObj.AddComponent<TMP_InputField>();
             tmpInput.textViewport = taRT;
@@ -1320,6 +1329,9 @@ namespace DigitPark.Editor
             cfTxt.text = "Save"; cfTxt.fontSize = FontSizes.Body;
             cfTxt.fontStyle = FontStyles.Bold; cfTxt.color = TEXT_DARK;
             cfTxt.alignment = TextAlignmentOptions.Center;
+            cfTxt.enableAutoSizing = true;
+            cfTxt.fontSizeMin = FontSizes.AutoMinBody;
+            cfTxt.fontSizeMax = cfTxt.fontSize;
 
             // Cancel Button
             GameObject cancelObj = new GameObject("CancelButton");
@@ -1339,6 +1351,9 @@ namespace DigitPark.Editor
             ccTxt.text = "Cancel"; ccTxt.fontSize = FontSizes.Body;
             ccTxt.fontStyle = FontStyles.Bold;
             ccTxt.color = TEXT_SECONDARY; ccTxt.alignment = TextAlignmentOptions.Center;
+            ccTxt.enableAutoSizing = true;
+            ccTxt.fontSizeMin = FontSizes.AutoMinBody;
+            ccTxt.fontSizeMax = ccTxt.fontSize;
 
             // Wire InputPanelUI component
             var inputComp = panelRoot.AddComponent(System.Type.GetType("DigitPark.UI.Panels.InputPanelUI, Assembly-CSharp"));

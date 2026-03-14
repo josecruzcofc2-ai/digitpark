@@ -313,6 +313,9 @@ namespace DigitPark.Managers
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = $"#{data.rank} {data.username} — {data.attemptsUsed}/{data.maxAttempts}";
                 tmp.fontSize = 30f;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = FontSizes.AutoMinSmall;
+                tmp.fontSizeMax = tmp.fontSize;
                 tmp.color = Color.white;
                 tmp.alignment = TextAlignmentOptions.MidlineLeft;
                 tmp.fontStyle = FontStyles.Bold;
@@ -477,6 +480,9 @@ namespace DigitPark.Managers
             TextMeshProUGUI msgText = msgObj.AddComponent<TextMeshProUGUI>();
             msgText.text = $"<color=#FFD700>{sender}:</color> {message}";
             msgText.fontSize = 32f;
+            msgText.enableAutoSizing = true;
+            msgText.fontSizeMin = FontSizes.AutoMinBody;
+            msgText.fontSizeMax = msgText.fontSize;
             msgText.color = Color.white;
             msgText.alignment = TextAlignmentOptions.Left;
         }

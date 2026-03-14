@@ -1050,7 +1050,7 @@ namespace DigitPark.Localization
             { "ExperienceTitle", "experience_label" },
             { "NextRewardHint", "levelup_next_reward" },
             { "RewardHintText", "levelup_equip_hint" },
-            { "ContinueButtonText", "btn_continue" },
+            // "ContinueButtonText" already mapped at line 516 → "continue_button"
             { "RewardUnlockedLabel", "reward_unlocked_title" },
         };
 

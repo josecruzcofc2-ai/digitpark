@@ -98,6 +98,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.text = "BUTTON";
             text.fontSize = FontSizes.Body;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = text.fontSize;
             text.alignment = TextAlignmentOptions.Center;
             text.color = Color.white;
 

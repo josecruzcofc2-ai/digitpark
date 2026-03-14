@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
 using DG.Tweening;
 using DigitPark.Animations;
 using DigitPark.Services;
@@ -192,7 +191,7 @@ namespace DigitPark.Managers
             {
                 Debug.LogError("[MainMenu] No hay datos del jugador");
                 // Volver al login
-                SceneManager.LoadScene("Login");
+                SceneNavigator.Instance?.NavigateTo("Login");
                 return;
             }
 

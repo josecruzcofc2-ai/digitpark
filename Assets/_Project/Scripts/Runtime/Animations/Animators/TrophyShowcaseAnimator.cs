@@ -100,7 +100,8 @@ namespace DigitPark.Animations
             {
                 _headerFloatTween = headerTrophyIcon.DOAnchorPosY(headerTrophyIcon.anchoredPosition.y + 8f, 2f)
                     .SetEase(Ease.InOutSine)
-                    .SetLoops(-1, LoopType.Yoyo);
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetLink(headerTrophyIcon.gameObject);
             }
         }
 
@@ -127,7 +128,7 @@ namespace DigitPark.Animations
             }
 
             // Create staggered entrance
-            entranceSequence = DOTween.Sequence();
+            entranceSequence = DOTween.Sequence().SetLink(gameObject);
 
             for (int i = 0; i < cardTransforms.Count; i++)
             {
@@ -208,7 +209,7 @@ namespace DigitPark.Animations
                 OnTabChanged?.Invoke(tabIndex);
 
                 // Fade in new cards
-                DOVirtual.DelayedCall(0.1f, () => PlayEntranceAnimation());
+                DOVirtual.DelayedCall(0.1f, () => PlayEntranceAnimation()).SetLink(gameObject);
             });
         }
 
@@ -238,14 +239,14 @@ namespace DigitPark.Animations
                 if (tabImage == null) continue;
 
                 // Animate tab scale
-                categoryTabs[i].transform.DOScale(i == tabIndex ? 1.1f : 1f, 0.2f);
+                categoryTabs[i].transform.DOScale(i == tabIndex ? 1.1f : 1f, 0.2f).SetLink(categoryTabs[i].gameObject);
             }
 
             // Move indicator if present
             if (tabIndicator != null && categoryTabs.Count > tabIndex)
             {
                 RectTransform tabRT = categoryTabs[tabIndex].GetComponent<RectTransform>();
-                tabIndicator.rectTransform.DOAnchorPosX(tabRT.anchoredPosition.x, tabTransitionDuration);
+                tabIndicator.rectTransform.DOAnchorPosX(tabRT.anchoredPosition.x, tabTransitionDuration).SetLink(tabIndicator.gameObject);
             }
         }
 
@@ -279,14 +280,14 @@ namespace DigitPark.Animations
             {
                 celebrationOverlay.gameObject.SetActive(true);
                 celebrationOverlay.alpha = 0f;
-                celebrationOverlay.DOFade(1f, 0.3f);
+                celebrationOverlay.DOFade(1f, 0.3f).SetLink(celebrationOverlay.gameObject);
 
                 // Trophy icon animation
                 if (celebrationTrophyIcon != null)
                 {
                     celebrationTrophyIcon.localScale = Vector3.zero;
 
-                    celebrationSequence = DOTween.Sequence();
+                    celebrationSequence = DOTween.Sequence().SetLink(celebrationTrophyIcon.gameObject);
                     celebrationSequence.Append(celebrationTrophyIcon.DOScale(1.3f, 0.4f).SetEase(Ease.OutBack));
                     celebrationSequence.Append(celebrationTrophyIcon.DOScale(1f, 0.2f));
 
@@ -526,7 +527,7 @@ namespace DigitPark.Animations
         {
             if (overallProgressFill == null) return;
 
-            overallProgressFill.DOFillAmount(targetFill, duration).SetEase(Ease.OutQuad);
+            overallProgressFill.DOFillAmount(targetFill, duration).SetEase(Ease.OutQuad).SetLink(overallProgressFill.gameObject);
 
             // Flash at current progress point
             if (screenFlash != null && targetFill > overallProgressFill.fillAmount + 0.1f)
@@ -548,7 +549,7 @@ namespace DigitPark.Animations
         public void PlayCardHover(RectTransform card)
         {
             if (card == null) return;
-            card.DOScale(1.08f, 0.15f).SetEase(Ease.OutCubic);
+            card.DOScale(1.08f, 0.15f).SetEase(Ease.OutCubic).SetLink(card.gameObject);
         }
 
         /// <summary>
@@ -557,7 +558,7 @@ namespace DigitPark.Animations
         public void ResetCardHover(RectTransform card)
         {
             if (card == null) return;
-            card.DOScale(1f, 0.15f).SetEase(Ease.OutCubic);
+            card.DOScale(1f, 0.15f).SetEase(Ease.OutCubic).SetLink(card.gameObject);
         }
 
         /// <summary>
@@ -566,7 +567,7 @@ namespace DigitPark.Animations
         public void PlayCardPress(RectTransform card)
         {
             if (card == null) return;
-            card.DOPunchScale(Vector3.one * 0.05f, 0.2f, 5, 0.5f);
+            card.DOPunchScale(Vector3.one * 0.05f, 0.2f, 5, 0.5f).SetLink(card.gameObject);
         }
 
         // ==================== SHINE EFFECT ====================

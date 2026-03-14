@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,7 +41,7 @@ namespace DigitPark.Managers
         private Dictionary<string, AudioClip> sfxDictionary;
 
         // Crossfade
-        private AudioClip targetMusicClip;
+        private AudioSource _crossfadeSource;
         private float crossfadeTimer = 0f;
         private bool isCrossfading = false;
 
@@ -92,6 +93,16 @@ namespace DigitPark.Managers
                 sfxSource = sfxObj.AddComponent<AudioSource>();
                 sfxSource.loop = false;
                 sfxSource.playOnAwake = false;
+            }
+
+            // Create secondary AudioSource for crossfading
+            {
+                GameObject crossfadeObj = new GameObject("CrossfadeSource");
+                crossfadeObj.transform.SetParent(transform);
+                _crossfadeSource = crossfadeObj.AddComponent<AudioSource>();
+                _crossfadeSource.loop = true;
+                _crossfadeSource.playOnAwake = false;
+                _crossfadeSource.volume = 0f;
             }
 
             // Inicializar diccionario de SFX
@@ -150,6 +161,10 @@ namespace DigitPark.Managers
             if (musicSource.isPlaying && musicSource.clip == clip)
                 return;
 
+            // Also skip if we're already crossfading to this clip
+            if (isCrossfading && _crossfadeSource != null && _crossfadeSource.clip == clip)
+                return;
+
             if (crossfade && musicSource.isPlaying)
             {
                 // Crossfade
@@ -170,6 +185,14 @@ namespace DigitPark.Managers
         /// </summary>
         public void StopMusic(bool fade = true)
         {
+            // Cancel any in-progress crossfade
+            if (isCrossfading)
+            {
+                isCrossfading = false;
+                _crossfadeSource.Stop();
+                _crossfadeSource.volume = 0f;
+            }
+
             if (fade)
             {
                 StartCoroutine(FadeOutMusic());
@@ -186,6 +209,8 @@ namespace DigitPark.Managers
         public void PauseMusic()
         {
             musicSource.Pause();
+            if (isCrossfading && _crossfadeSource != null)
+                _crossfadeSource.Pause();
         }
 
         /// <summary>
@@ -194,6 +219,8 @@ namespace DigitPark.Managers
         public void ResumeMusic()
         {
             musicSource.UnPause();
+            if (isCrossfading && _crossfadeSource != null)
+                _crossfadeSource.UnPause();
         }
 
         /// <summary>
@@ -241,16 +268,35 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Reproduce SFX con pitch aleatorio (variación)
+        /// Reproduce SFX con pitch aleatorio (variación).
+        /// Uses a dedicated AudioSource to avoid pitch affecting other SFX via PlayOneShot.
         /// </summary>
         public void PlaySFXWithRandomPitch(string sfxName, float minPitch = 0.9f, float maxPitch = 1.1f)
         {
             if (sfxDictionary.ContainsKey(sfxName))
             {
-                sfxSource.pitch = Random.Range(minPitch, maxPitch);
-                PlaySFX(sfxDictionary[sfxName]);
-                sfxSource.pitch = 1f; // Resetear
+                AudioClip clip = sfxDictionary[sfxName];
+                if (clip == null) return;
+
+                EnsurePitchedSFXSource();
+                _pitchedSfxSource.pitch = Random.Range(minPitch, maxPitch);
+                _pitchedSfxSource.clip = clip;
+                _pitchedSfxSource.volume = sfxVolume;
+                _pitchedSfxSource.Play();
             }
+        }
+
+        /// <summary>Dedicated AudioSource for pitched SFX, so pitch changes don't affect the main sfxSource.</summary>
+        private AudioSource _pitchedSfxSource;
+
+        private void EnsurePitchedSFXSource()
+        {
+            if (_pitchedSfxSource != null) return;
+            GameObject pitchedObj = new GameObject("PitchedSFXSource");
+            pitchedObj.transform.SetParent(transform);
+            _pitchedSfxSource = pitchedObj.AddComponent<AudioSource>();
+            _pitchedSfxSource.loop = false;
+            _pitchedSfxSource.playOnAwake = false;
         }
 
         #endregion
@@ -306,11 +352,15 @@ namespace DigitPark.Managers
         #region Crossfade
 
         /// <summary>
-        /// Inicia un crossfade a una nueva música
+        /// Inicia un crossfade a una nueva música using two AudioSources
         /// </summary>
         private void StartCrossfade(AudioClip newClip)
         {
-            targetMusicClip = newClip;
+            // Set the new clip on _crossfadeSource and start playing at volume 0
+            _crossfadeSource.clip = newClip;
+            _crossfadeSource.volume = 0f;
+            _crossfadeSource.Play();
+
             crossfadeTimer = 0f;
             isCrossfading = true;
 
@@ -318,41 +368,32 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Actualiza el crossfade
+        /// Actualiza el crossfade interpolando volumes between both sources
         /// </summary>
         private void UpdateCrossfade()
         {
             crossfadeTimer += Time.deltaTime;
-            float progress = crossfadeTimer / crossfadeDuration;
+            float progress = Mathf.Clamp01(crossfadeTimer / crossfadeDuration);
+
+            // Fade old source down, fade new source up
+            musicSource.volume = Mathf.Lerp(musicVolume, 0f, progress);
+            _crossfadeSource.volume = Mathf.Lerp(0f, musicVolume, progress);
 
             if (progress >= 1f)
             {
-                // Completar crossfade
+                // Crossfade complete — stop the old source and swap references
+                musicSource.Stop();
+                musicSource.volume = 0f;
+
+                // Swap: _crossfadeSource becomes the active musicSource
+                AudioSource oldSource = musicSource;
+                musicSource = _crossfadeSource;
+                _crossfadeSource = oldSource;
+
                 musicSource.volume = musicVolume;
-                musicSource.clip = targetMusicClip;
-                musicSource.Play();
-
                 isCrossfading = false;
-                targetMusicClip = null;
-            }
-            else
-            {
-                // Fade out actual
-                musicSource.volume = Mathf.Lerp(musicVolume, 0f, progress);
 
-                // A mitad de camino, cambiar al nuevo clip
-                if (progress >= 0.5f && musicSource.clip != targetMusicClip)
-                {
-                    musicSource.clip = targetMusicClip;
-                    musicSource.Play();
-                }
-
-                // Fade in nuevo
-                if (musicSource.clip == targetMusicClip)
-                {
-                    float fadeInProgress = (progress - 0.5f) * 2f;
-                    musicSource.volume = Mathf.Lerp(0f, musicVolume, fadeInProgress);
-                }
+                Debug.Log($"[Audio] Crossfade completado: {musicSource.clip.name}");
             }
         }
 
@@ -406,6 +447,8 @@ namespace DigitPark.Managers
         {
             musicSource.mute = mute;
             sfxSource.mute = mute;
+            if (_crossfadeSource != null) _crossfadeSource.mute = mute;
+            if (_pitchedSfxSource != null) _pitchedSfxSource.mute = mute;
 
             Debug.Log($"[Audio] Audio muteado: {mute}");
         }

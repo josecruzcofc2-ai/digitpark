@@ -101,25 +101,25 @@ namespace DigitPark.Services
 
         private void SetupDefaultRewards()
         {
-            // Día 1: 100 DigitCoins
+            // Día 1: 50 DC
             rewards.Add(new DailyReward
             {
                 day = 1,
                 type = RewardType.DigitCoins,
-                amount = 100,
-                description = AutoLocalizer.Get("daily_reward_coins", 100)
+                amount = 50,
+                description = AutoLocalizer.Get("daily_reward_coins", 50)
             });
 
-            // Día 2: 150 DigitCoins
+            // Día 2: 75 DC
             rewards.Add(new DailyReward
             {
                 day = 2,
                 type = RewardType.DigitCoins,
-                amount = 150,
-                description = AutoLocalizer.Get("daily_reward_coins", 150)
+                amount = 75,
+                description = AutoLocalizer.Get("daily_reward_coins", 75)
             });
 
-            // Día 3: 200 DigitCoins
+            // Día 3: 200 DC (era 5 DG — DG eliminado de daily rewards)
             rewards.Add(new DailyReward
             {
                 day = 3,
@@ -128,34 +128,34 @@ namespace DigitPark.Services
                 description = AutoLocalizer.Get("daily_reward_coins", 200)
             });
 
-            // Día 4: 250 DigitCoins
+            // Día 4: 100 DC
             rewards.Add(new DailyReward
             {
                 day = 4,
                 type = RewardType.DigitCoins,
-                amount = 250,
-                description = AutoLocalizer.Get("daily_reward_coins", 250)
+                amount = 100,
+                description = AutoLocalizer.Get("daily_reward_coins", 100)
             });
 
-            // Día 5: 300 DigitCoins + bonus
+            // Día 5: 125 DC (era 200 XP — XP eliminado de daily rewards)
             rewards.Add(new DailyReward
             {
                 day = 5,
                 type = RewardType.DigitCoins,
-                amount = 300,
-                description = AutoLocalizer.Get("daily_reward_coins", 300)
+                amount = 125,
+                description = AutoLocalizer.Get("daily_reward_coins", 125)
             });
 
-            // Día 6: 400 DigitCoins
+            // Día 6: 150 DC
             rewards.Add(new DailyReward
             {
                 day = 6,
                 type = RewardType.DigitCoins,
-                amount = 400,
-                description = AutoLocalizer.Get("daily_reward_coins", 400)
+                amount = 150,
+                description = AutoLocalizer.Get("daily_reward_coins", 150)
             });
 
-            // Día 7: Gran premio - 500 DigitCoins
+            // Día 7: 500 DC — gran premio semanal (era 25 DG — DG eliminado)
             rewards.Add(new DailyReward
             {
                 day = 7,

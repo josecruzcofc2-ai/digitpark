@@ -90,7 +90,7 @@ namespace DigitPark.Animations
             if (backgroundImage != null)
             {
                 backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g, backgroundImage.color.b, 0f);
-                backgroundImage.DOFade(1f, 0.5f);
+                backgroundImage.DOFade(1f, 0.5f).SetLink(backgroundImage.gameObject);
             }
 
             yield return new WaitForSeconds(0.3f);
@@ -130,7 +130,7 @@ namespace DigitPark.Animations
                 foreach (var button in menuButtons)
                 {
                     if (button != null)
-                        button.DOPunchScale(Vector3.one * 0.1f, 0.3f, 3);
+                        button.DOPunchScale(Vector3.one * 0.1f, 0.3f, 3).SetLink(button.gameObject);
                 }
             }
 
@@ -198,7 +198,7 @@ namespace DigitPark.Animations
                 audioSource.PlayOneShot(logoSound);
 
             // Drop with bounce
-            Sequence logoSeq = DOTween.Sequence();
+            Sequence logoSeq = DOTween.Sequence().SetLink(logo.gameObject);
             logoSeq.Append(logo.DOAnchorPosY(0, logoDropDuration).SetEase(Ease.OutBounce));
             logoSeq.Join(logo.DOScale(1f, logoDropDuration).SetEase(Ease.OutBack));
 
@@ -209,7 +209,7 @@ namespace DigitPark.Animations
             {
                 logoGlow.gameObject.SetActive(true);
                 logoGlow.color = new Color(logoGlow.color.r, logoGlow.color.g, logoGlow.color.b, 0f);
-                logoGlow.DOFade(0.8f, 0.3f);
+                logoGlow.DOFade(0.8f, 0.3f).SetLink(logoGlow.gameObject);
             }
 
             // Logo particles
@@ -219,7 +219,7 @@ namespace DigitPark.Animations
 
         private IEnumerator AnimateHeaderEntrance()
         {
-            Sequence headerSeq = DOTween.Sequence();
+            Sequence headerSeq = DOTween.Sequence().SetLink(gameObject);
 
             if (headerBar != null)
                 headerSeq.Append(headerBar.DOAnchorPosY(0, headerSlideDuration).SetEase(Ease.OutQuad));
@@ -250,7 +250,7 @@ namespace DigitPark.Animations
                 if (buttonAppearSound != null && audioSource != null)
                     audioSource.PlayOneShot(buttonAppearSound, 0.5f);
 
-                menuButtons[i].DOScale(1f, buttonEntranceDuration).SetEase(Ease.OutBack);
+                menuButtons[i].DOScale(1f, buttonEntranceDuration).SetEase(Ease.OutBack).SetLink(menuButtons[i].gameObject);
                 yield return new WaitForSeconds(buttonStaggerDelay);
             }
         }
@@ -259,7 +259,7 @@ namespace DigitPark.Animations
         {
             if (featuredBanner != null)
             {
-                featuredBanner.DOAnchorPosX(0, 0.4f).SetEase(Ease.OutQuad);
+                featuredBanner.DOAnchorPosX(0, 0.4f).SetEase(Ease.OutQuad).SetLink(featuredBanner.gameObject);
                 yield return new WaitForSeconds(0.2f);
             }
 
@@ -269,7 +269,7 @@ namespace DigitPark.Animations
             {
                 if (featuredCards[i] == null) continue;
 
-                featuredCards[i].DOScale(1f, 0.25f).SetEase(Ease.OutBack);
+                featuredCards[i].DOScale(1f, 0.25f).SetEase(Ease.OutBack).SetLink(featuredCards[i].gameObject);
                 yield return new WaitForSeconds(0.08f);
             }
         }
@@ -278,7 +278,7 @@ namespace DigitPark.Animations
         {
             if (bottomNavBar != null)
             {
-                bottomNavBar.DOAnchorPosY(0, 0.3f).SetEase(Ease.OutQuad);
+                bottomNavBar.DOAnchorPosY(0, 0.3f).SetEase(Ease.OutQuad).SetLink(bottomNavBar.gameObject);
                 yield return new WaitForSeconds(0.1f);
             }
 
@@ -288,7 +288,7 @@ namespace DigitPark.Animations
             {
                 if (navItems[i] == null) continue;
 
-                navItems[i].DOScale(1f, 0.2f).SetEase(Ease.OutBack);
+                navItems[i].DOScale(1f, 0.2f).SetEase(Ease.OutBack).SetLink(navItems[i].gameObject);
                 yield return new WaitForSeconds(0.05f);
             }
         }
@@ -304,6 +304,7 @@ namespace DigitPark.Animations
                     logo.DOScale(1.02f, 2f)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
+                        .SetLink(logo.gameObject)
                 );
             }
 
@@ -314,6 +315,7 @@ namespace DigitPark.Animations
                     logoGlow.DOFade(0.5f, 1.5f)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
+                        .SetLink(logoGlow.gameObject)
                 );
             }
 
@@ -332,6 +334,7 @@ namespace DigitPark.Animations
                             .SetEase(Ease.InOutSine)
                             .SetLoops(-1, LoopType.Yoyo)
                             .SetDelay(randomOffset)
+                            .SetLink(element.gameObject)
                     );
                 }
             }
@@ -403,7 +406,7 @@ namespace DigitPark.Animations
         {
             StopContinuousAnimations();
 
-            Sequence exitSeq = DOTween.Sequence();
+            Sequence exitSeq = DOTween.Sequence().SetLink(gameObject);
 
             // Buttons scale out
             if (menuButtons != null)

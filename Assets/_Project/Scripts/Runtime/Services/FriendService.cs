@@ -38,14 +38,16 @@ namespace DigitPark.Services
         {
             get
             {
-                if (_instance == null)
+                // C-67: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
+                if (!_instance)
                 {
                     _instance = FindObjectOfType<FriendService>();
-                    if (_instance == null)
+                    if (!_instance)
                     {
                         GameObject go = new GameObject("FriendService");
-                        _instance = go.AddComponent<FriendService>();
                         DontDestroyOnLoad(go);
+                        // Set _instance BEFORE AddComponent to prevent Awake race condition
+                        _instance = go.AddComponent<FriendService>();
                     }
                 }
                 return _instance;
@@ -69,7 +71,8 @@ namespace DigitPark.Services
             {
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
-                LoadRequests();
+                LoadRequestsLocal(); // Immediate local load
+                _ = LoadRequestsAsync(); // Async Firebase load (overwrites if available)
                 Debug.Log("[FriendService] Inicializado");
             }
             else if (_instance != this)
@@ -78,7 +81,33 @@ namespace DigitPark.Services
             }
         }
 
-        private void LoadRequests()
+        private async Task LoadRequestsAsync()
+        {
+            // Try Firebase first
+            try
+            {
+                var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                if (playerData != null && DatabaseService.Instance != null)
+                {
+                    var firebaseRequests = await DatabaseService.Instance.LoadFriendRequests(playerData.userId);
+                    if (firebaseRequests != null && firebaseRequests.Count > 0)
+                    {
+                        _allRequests = firebaseRequests;
+                        SaveRequestsLocal(); // Update local cache
+                        Debug.Log($"[FriendService] Cargadas {_allRequests.Count} solicitudes desde Firebase");
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[FriendService] Firebase load failed, using local: {e.Message}");
+            }
+
+            // Fallback: local data already loaded in LoadRequestsLocal()
+        }
+
+        private void LoadRequestsLocal()
         {
             if (PlayerPrefs.HasKey(FRIEND_REQUESTS_KEY))
             {
@@ -89,10 +118,16 @@ namespace DigitPark.Services
                     _allRequests = wrapper.requests;
                 }
             }
-            Debug.Log($"[FriendService] Cargadas {_allRequests.Count} solicitudes");
+            Debug.Log($"[FriendService] Cargadas {_allRequests.Count} solicitudes locales");
         }
 
         private void SaveRequests()
+        {
+            SaveRequestsLocal();
+            // Firebase sync happens per-operation in Send/Accept/Reject/Cancel
+        }
+
+        private void SaveRequestsLocal()
         {
             var wrapper = new FriendRequestsWrapper { requests = _allRequests };
             PlayerPrefs.SetString(FRIEND_REQUESTS_KEY, JsonUtility.ToJson(wrapper));
@@ -158,13 +193,20 @@ namespace DigitPark.Services
             _allRequests.Add(request);
             SaveRequests();
 
+            // Sync to Firebase
+            if (DatabaseService.Instance != null)
+            {
+                _ = DatabaseService.Instance.SaveFriendRequest(request);
+            }
+
             Debug.Log($"[FriendService] Solicitud enviada a {receiverUsername}");
 
             // Analytics
             AnalyticsService.Instance?.LogFriendRequestSent();
 
-            // Simular delay de red
-            await Task.Delay(100);
+#if UNITY_EDITOR
+            await Task.Delay(100); // Simular latencia de red
+#endif
 
             OnFriendRequestReceived?.Invoke(request);
 
@@ -216,6 +258,12 @@ namespace DigitPark.Services
             await DatabaseService.Instance.SavePlayerData(currentUser);
             SaveRequests();
 
+            // Sync status to Firebase
+            if (DatabaseService.Instance != null)
+            {
+                _ = DatabaseService.Instance.UpdateFriendRequestStatus(request);
+            }
+
             Debug.Log($"[FriendService] Solicitud de {request.senderUsername} aceptada");
 
             // Analytics
@@ -253,7 +301,15 @@ namespace DigitPark.Services
             request.SetRespondedAt(DateTime.Now);
             SaveRequests();
 
-            await Task.Delay(50);
+            // Sync status to Firebase
+            if (DatabaseService.Instance != null)
+            {
+                _ = DatabaseService.Instance.UpdateFriendRequestStatus(request);
+            }
+
+#if UNITY_EDITOR
+            await Task.Delay(50); // Simular latencia de red
+#endif
 
             Debug.Log($"[FriendService] Solicitud de {request.senderUsername} rechazada");
 
@@ -288,7 +344,15 @@ namespace DigitPark.Services
             request.SetRespondedAt(DateTime.Now);
             SaveRequests();
 
-            await Task.Delay(50);
+            // Delete from Firebase (cancelled requests don't need to persist)
+            if (DatabaseService.Instance != null)
+            {
+                _ = DatabaseService.Instance.DeleteFriendRequest(request);
+            }
+
+#if UNITY_EDITOR
+            await Task.Delay(50); // Simular latencia de red
+#endif
 
             Debug.Log($"[FriendService] Solicitud a {request.receiverUsername} cancelada");
 
@@ -306,7 +370,9 @@ namespace DigitPark.Services
                 return new List<FriendRequest>();
             }
 
-            await Task.Delay(50);
+#if UNITY_EDITOR
+            await Task.Delay(50); // Simular latencia de red
+#endif
 
             return _allRequests.FindAll(r =>
                 r.receiverId == currentUser.userId &&
@@ -325,7 +391,9 @@ namespace DigitPark.Services
                 return new List<FriendRequest>();
             }
 
-            await Task.Delay(50);
+#if UNITY_EDITOR
+            await Task.Delay(50); // Simular latencia de red
+#endif
 
             return _allRequests.FindAll(r =>
                 r.senderId == currentUser.userId &&

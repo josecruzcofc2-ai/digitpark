@@ -326,10 +326,14 @@ namespace DigitPark.Editor
             GameObject completedOverlay = CreateOverlay(item.transform, "CompletedOverlay", COMPLETED_BG);
             completedOverlay.SetActive(false);
 
-            GameObject claimedCheck = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
+            GameObject claimedCheck = CreateImageElement(item.transform, "ClaimedCheckmark",
                 new Vector2(1, 0.5f), new Vector2(1, 0.5f),
-                new Vector2(-55, -20), new Vector2(-15, 20),
-                (int)FontSizes.Body, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(-55, -20), new Vector2(-15, 20));
+            Image claimedCheckImg = claimedCheck.GetComponent<Image>();
+            Sprite claimedCheckSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (claimedCheckSprite != null) claimedCheckImg.sprite = claimedCheckSprite;
+            claimedCheckImg.color = GREEN;
+            claimedCheckImg.preserveAspect = true;
             claimedCheck.SetActive(false);
 
             // Add UI Component
@@ -395,10 +399,14 @@ namespace DigitPark.Editor
             locked.SetActive(false);
 
             // Claimed Checkmark
-            GameObject check = CreateTextElement(item.transform, "ClaimedCheckmark", "V",
+            GameObject check = CreateImageElement(item.transform, "ClaimedCheckmark",
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-25, -25), new Vector2(25, 25),
-                (int)FontSizes.BodyLarge, GREEN, FontStyles.Bold, TextAlignmentOptions.Center);
+                new Vector2(-25, -25), new Vector2(25, 25));
+            Image checkImgComp = check.GetComponent<Image>();
+            Sprite checkSpriteAsset = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSpriteAsset != null) checkImgComp.sprite = checkSpriteAsset;
+            checkImgComp.color = GREEN;
+            checkImgComp.preserveAspect = true;
             check.SetActive(false);
 
             // Bonus Tag
@@ -953,6 +961,9 @@ namespace DigitPark.Editor
                 TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = text;
                 tmp.fontSize = (int)FontSizes.Body;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = FontSizes.AutoMinBody;
+                tmp.fontSizeMax = tmp.fontSize;
                 tmp.color = textColor;
                 tmp.fontStyle = FontStyles.Bold;
                 tmp.alignment = TextAlignmentOptions.Center;

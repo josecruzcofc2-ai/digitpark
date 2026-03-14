@@ -61,7 +61,7 @@ namespace DigitPark.UI
                 var audioManager = FindFirstObjectByType<DigitPark.Managers.AudioManager>();
                 if (audioManager != null)
                 {
-                    audioManager.PlaySFX("button_click_gold");
+                    audioManager.PlaySFX("ButtonClick");
                 }
             }
 

@@ -113,6 +113,9 @@ namespace DigitPark.UI
 
             _statusText = textObj.AddComponent<TextMeshProUGUI>();
             _statusText.fontSize = FontSizes.Body;
+            _statusText.enableAutoSizing = true;
+            _statusText.fontSizeMin = FontSizes.AutoMinBody;
+            _statusText.fontSizeMax = _statusText.fontSize;
             _statusText.alignment = TextAlignmentOptions.Center;
             _statusText.color = Color.white;
             _statusText.fontStyle = FontStyles.Bold;

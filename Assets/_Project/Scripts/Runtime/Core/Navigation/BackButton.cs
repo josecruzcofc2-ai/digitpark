@@ -61,7 +61,7 @@ namespace DigitPark.UI
                 if (audioManager != null)
                 {
                     // Try to play button click sound (scenes can define this in their audio library)
-                    audioManager.PlaySFX("button_click");
+                    audioManager.PlaySFX("ButtonClick");
                 }
             }
 

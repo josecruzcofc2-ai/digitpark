@@ -108,7 +108,8 @@ namespace DigitPark.Animations
             if (amountText != null)
             {
                 amountText.DOColor(flashColor, countDuration * 0.3f)
-                    .OnComplete(() => { if (amountText != null) amountText.DOColor(normalColor, countDuration * 0.7f); });
+                    .SetLink(amountText.gameObject)
+                    .OnComplete(() => { if (amountText != null) amountText.DOColor(normalColor, countDuration * 0.7f).SetLink(amountText.gameObject); });
             }
 
             // Scale punch
@@ -116,14 +117,14 @@ namespace DigitPark.Animations
             {
                 container.DOKill();
                 container.localScale = Vector3.one;
-                container.DOPunchScale(Vector3.one * punchScale, countDuration, 5);
+                container.DOPunchScale(Vector3.one * punchScale, countDuration, 5).SetLink(container.gameObject);
             }
 
             // Icon bounce
             if (currencyIcon != null)
             {
                 currencyIcon.transform.DOKill();
-                currencyIcon.transform.DOPunchRotation(new Vector3(0, 0, isGain ? 15f : -15f), countDuration, 5);
+                currencyIcon.transform.DOPunchRotation(new Vector3(0, 0, isGain ? 15f : -15f), countDuration, 5).SetLink(currencyIcon.gameObject);
             }
 
             // Glow effect
@@ -132,9 +133,11 @@ namespace DigitPark.Animations
                 glowEffect.gameObject.SetActive(true);
                 glowEffect.color = new Color(flashColor.r, flashColor.g, flashColor.b, 0f);
                 glowEffect.DOFade(0.8f, countDuration * 0.3f)
+                    .SetLink(glowEffect.gameObject)
                     .OnComplete(() => {
                         if (glowEffect != null)
                             glowEffect.DOFade(0f, countDuration * 0.7f)
+                                .SetLink(glowEffect.gameObject)
                                 .OnComplete(() => { if (glowEffect != null) glowEffect.gameObject.SetActive(false); });
                     });
             }
@@ -152,6 +155,7 @@ namespace DigitPark.Animations
 
             }, targetValue, countDuration)
             .SetEase(Ease.OutQuad)
+            .SetLink(gameObject)
             .OnComplete(() =>
             {
                 currentValue = targetValue;
@@ -173,7 +177,7 @@ namespace DigitPark.Animations
             if (container != null)
             {
                 container.DOKill();
-                container.DOShakePosition(0.4f, shakeIntensity, 20, 90, false, true);
+                container.DOShakePosition(0.4f, shakeIntensity, 20, 90, false, true).SetLink(container.gameObject);
             }
 
             // Red flash
@@ -189,7 +193,7 @@ namespace DigitPark.Animations
             // Icon shake
             if (currencyIcon != null)
             {
-                currencyIcon.transform.DOShakeRotation(0.4f, new Vector3(0, 0, 20f), 20);
+                currencyIcon.transform.DOShakeRotation(0.4f, new Vector3(0, 0, 20f), 20).SetLink(currencyIcon.gameObject);
             }
 
             // Highlight plus button
@@ -215,6 +219,7 @@ namespace DigitPark.Animations
                 plusButtonGlow.gameObject.SetActive(true);
                 plusButtonGlow.DOFade(1f, 0.3f)
                     .SetLoops(6, LoopType.Yoyo)
+                    .SetLink(plusButtonGlow.gameObject)
                     .OnComplete(() => plusButtonGlow.gameObject.SetActive(false));
             }
         }
@@ -226,7 +231,7 @@ namespace DigitPark.Animations
         {
             if (container != null)
             {
-                container.DOPunchScale(Vector3.one * 0.3f, 0.4f, 10);
+                container.DOPunchScale(Vector3.one * 0.3f, 0.4f, 10).SetLink(container.gameObject);
             }
 
             if (glowEffect != null)
@@ -237,6 +242,7 @@ namespace DigitPark.Animations
                 DOTween.Sequence()
                     .Append(glowEffect.DOFade(1f, 0.2f))
                     .Append(glowEffect.DOFade(0f, 0.4f))
+                    .SetLink(glowEffect.gameObject)
                     .OnComplete(() => glowEffect.gameObject.SetActive(false));
             }
         }
@@ -257,7 +263,8 @@ namespace DigitPark.Animations
 
             glowTween = glowEffect.DOFade(0.5f, 0.8f)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(glowEffect.gameObject);
         }
 
         /// <summary>
@@ -270,6 +277,7 @@ namespace DigitPark.Animations
             if (glowEffect != null)
             {
                 glowEffect.DOFade(0f, 0.3f)
+                    .SetLink(glowEffect.gameObject)
                     .OnComplete(() => glowEffect.gameObject.SetActive(false));
             }
         }
@@ -281,12 +289,12 @@ namespace DigitPark.Animations
         {
             if (container != null)
             {
-                container.DOPunchScale(Vector3.one * 0.15f, 0.3f, 5);
+                container.DOPunchScale(Vector3.one * 0.15f, 0.3f, 5).SetLink(container.gameObject);
             }
 
             if (currencyIcon != null)
             {
-                currencyIcon.transform.DOPunchRotation(new Vector3(0, 0, 10f), 0.3f, 5);
+                currencyIcon.transform.DOPunchRotation(new Vector3(0, 0, 10f), 0.3f, 5).SetLink(currencyIcon.gameObject);
             }
         }
 
@@ -304,7 +312,7 @@ namespace DigitPark.Animations
             }
 
             // Animate icon to this position
-            Sequence flySeq = DOTween.Sequence();
+            Sequence flySeq = DOTween.Sequence().SetLink(flyingIcon.gameObject);
             flySeq.Append(flyingIcon.DOMove(container.position, 0.4f).SetEase(Ease.InBack));
             flySeq.Join(flyingIcon.DOScale(0.5f, 0.4f));
             flySeq.Join(flyingIcon.DORotate(new Vector3(0, 0, 360f), 0.4f, RotateMode.FastBeyond360));

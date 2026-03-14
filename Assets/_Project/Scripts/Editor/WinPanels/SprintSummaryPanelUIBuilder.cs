@@ -21,7 +21,7 @@ namespace DigitPark.Editor
         private static readonly Color WIN_GREEN = new Color(0.2f, 1f, 0.4f);
         private static readonly Color LOSE_RED = new Color(1f, 0.3f, 0.3f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.03f, 0.08f, 0.95f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 0.95f);
         private static readonly Color PANEL_BG = new Color(0.04f, 0.06f, 0.14f, 0.95f);
         private static readonly Color ROW_BG_EVEN = new Color(0.06f, 0.08f, 0.16f, 0.8f);
         private static readonly Color ROW_BG_ODD = new Color(0.04f, 0.06f, 0.12f, 0.8f);

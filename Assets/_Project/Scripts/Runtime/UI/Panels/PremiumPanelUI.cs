@@ -747,6 +747,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("acquired_text");
             tmp.fontSize = FontSizes.H3;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = accentColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -906,6 +909,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = btnObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("restore_purchases");
             tmp.fontSize = FontSizes.Subtitle;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = neonCyan;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
@@ -961,13 +967,13 @@ namespace DigitPark.UI.Panels
             textRt.offsetMin = Vector2.zero;
             textRt.offsetMax = Vector2.zero;
 
-            TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = "X";
-            tmp.fontSize = FontSizes.H3;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.color = Color.white;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.raycastTarget = false;
+            // Sprite close icon
+            Image closeImg = textObj.AddComponent<Image>();
+            Sprite closeSprite = Resources.Load<Sprite>("Icons/UI/icon_close_x");
+            if (closeSprite != null) closeImg.sprite = closeSprite;
+            closeImg.color = Color.white;
+            closeImg.preserveAspect = true;
+            closeImg.raycastTarget = false;
 
             // Asegurar que el botón esté al frente
             btnObj.transform.SetAsLastSibling();

@@ -233,6 +233,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI vsTMP = vsText.AddComponent<TextMeshProUGUI>();
             vsTMP.text = "VS";
             vsTMP.fontSize = FontSizes.Subtitle;
+            vsTMP.enableAutoSizing = true;
+            vsTMP.fontSizeMin = FontSizes.AutoMinBody;
+            vsTMP.fontSizeMax = vsTMP.fontSize;
             vsTMP.color = ORANGE_NEON;
             vsTMP.alignment = TextAlignmentOptions.Center;
             vsTMP.fontStyle = FontStyles.Bold;
@@ -367,6 +370,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTMP = label.AddComponent<TextMeshProUGUI>();
             labelTMP.text = isWin ? "Faster by" : "Slower by";
             labelTMP.fontSize = FontSizes.Body;
+            labelTMP.enableAutoSizing = true;
+            labelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            labelTMP.fontSizeMax = labelTMP.fontSize;
             labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.color = new Color(0.7f, 0.7f, 0.7f);
             labelTMP.alignment = TextAlignmentOptions.Center;
@@ -382,6 +388,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI diffTMP = diffValue.AddComponent<TextMeshProUGUI>();
             diffTMP.text = isWin ? "-2.35s" : "+2.35s";
             diffTMP.fontSize = FontSizes.Subtitle;
+            diffTMP.enableAutoSizing = true;
+            diffTMP.fontSizeMin = FontSizes.AutoMinBody;
+            diffTMP.fontSizeMax = diffTMP.fontSize;
             diffTMP.color = mainColor;
             diffTMP.alignment = TextAlignmentOptions.Center;
             diffTMP.fontStyle = FontStyles.Bold;

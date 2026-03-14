@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
 using DG.Tweening;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
@@ -177,7 +176,7 @@ namespace DigitPark.Managers
             }
 
             Debug.LogError("[Settings] No hay datos del jugador after retries, navigating to Login");
-            SceneManager.LoadScene("Login");
+            SceneNavigator.Instance?.NavigateTo("Login");
         }
 
         private void LoadVolumeSettings()
@@ -905,7 +904,7 @@ namespace DigitPark.Managers
                     if (success)
                     {
                         Debug.Log("[Settings] Cuenta eliminada exitosamente");
-                        SceneManager.LoadScene("Login");
+                        SceneNavigator.Instance?.NavigateTo("Login");
                     }
                     else
                     {
@@ -952,7 +951,7 @@ namespace DigitPark.Managers
 
             logoutConfirmPanel?.Hide();
             AuthenticationService.Instance?.Logout();
-            SceneManager.LoadScene("Login");
+            SceneNavigator.Instance?.NavigateTo("Login");
         }
 
         #endregion

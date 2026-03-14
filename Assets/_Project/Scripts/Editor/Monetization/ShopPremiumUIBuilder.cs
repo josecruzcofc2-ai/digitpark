@@ -91,7 +91,8 @@ namespace DigitPark.Editor
                 "Scroll continuo con todas las secciones:\n" +
                 "- Hero Banner, Special Offers, Daily Deals\n" +
                 "- DigitGems (6), DigitCoins (4)\n" +
-                "- 2 Bundle Banners, Themes (15 premium + 4 earnable), Frames (17), Titles (10)\n" +
+                "- 2 Bundle Banners, Themes (15 premium + 4 earnable), Frames (42), Titles (21)\n" +
+                "- Victory Effects (10), BattleCards (19)\n" +
                 "- VIP Bundle\n\n" +
                 "2 columnas, grids anchos.\n" +
                 "Asegurate de tener la escena Shop abierta.\n\nContinuar?",
@@ -274,15 +275,12 @@ namespace DigitPark.Editor
 
                 GameObject backIcon = CreateChild(backBtn, "Icon");
                 SetStretch(backIcon);
-                TextMeshProUGUI backText = backIcon.AddComponent<TextMeshProUGUI>();
-                backText.text = "<";
-                backText.fontSize = FontSizes.Body;
-                backText.fontStyle = FontStyles.Bold;
+                Image backText = backIcon.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) backText.sprite = arrowSprite;
                 backText.color = CYAN_NEON;
-                backText.alignment = TextAlignmentOptions.Center;
-                backText.enableAutoSizing = true;
-                backText.fontSizeMin = FontSizes.AutoMinBody;
-                backText.fontSizeMax = FontSizes.Body;
+                backText.preserveAspect = true;
+                backText.raycastTarget = false;
             }
 
             // Title
@@ -377,6 +375,9 @@ namespace DigitPark.Editor
             CreateSpecialOffersSection(content);
             CreateDailyDealsSection(content);
 
+            // Limited/Rotating Content — whale ceiling expansion (13F)
+            CreateLimitedContentSection(content);
+
             // Currency
             CreateGemsSection(content);
             CreateCoinsSection(content);
@@ -386,6 +387,15 @@ namespace DigitPark.Editor
             CreateFramesSection(content);
             CreateTitlesSection(content);
 
+            // Victory Effects (economy rebalance V55)
+            CreateEffectsSection(content);
+
+            // BattleCards (economy rebalance V55)
+            CreateBattleCardsSection(content);
+
+            // Cosmetic disclaimer (Economy Rebalance V55 — anti-P2W perception)
+            CreateCosmeticDisclaimer(content);
+
             // VIP (bottom)
             CreateVIPBanner(content);
 
@@ -394,21 +404,58 @@ namespace DigitPark.Editor
 
         // ==================== FEATURED SECTIONS ====================
 
+        /// <summary>
+        /// Welcome Packs section — Economy Rebalance V55
+        /// 2 banners: Starter Pack ($2.99, D1-D3) + Premium Welcome ($9.99, D1-D5)
+        /// Controlled at runtime by WelcomePackService (visibility, timer, purchase)
+        /// </summary>
         private static void CreateHeroBanner(GameObject parent)
         {
-            GameObject banner = CreateChild(parent, "HeroBanner");
+            // Container for both packs (WelcomePackUIController manages visibility at runtime)
+            GameObject container = CreateChild(parent, "WelcomePacksContainer");
+            VerticalLayoutGroup containerVlg = container.AddComponent<VerticalLayoutGroup>();
+            containerVlg.spacing = 14;
+            containerVlg.childControlWidth = true;
+            containerVlg.childControlHeight = true;
+            containerVlg.childForceExpandHeight = false;
+
+            // === PACK 1: Starter Pack ($2.99) ===
+            CreateWelcomePackBanner(container, "StarterPackBanner",
+                "57% OFF", "STARTER PACK",
+                "1 Theme + Ruby Frame + Title + 200 DG",
+                "Value: 700 DG", "$2.99",
+                GOLD, new Color(0.12f, 0.06f, 0.22f, 1f));
+
+            // === PACK 2: Premium Welcome ($9.99) ===
+            CreateWelcomePackBanner(container, "PremiumWelcomeBanner",
+                "50% OFF", "PREMIUM WELCOME",
+                "Aurora Borealis + Holographic + Gold Rain + 500 DG",
+                "Value: 1,350 DG", "$9.99",
+                PURPLE_PREMIUM, new Color(0.08f, 0.04f, 0.16f, 1f));
+
+            // Add runtime controller
+            container.AddComponent<DigitPark.Monetization.WelcomePackUIController>();
+
+            Debug.Log("[ShopPremiumUIBuilder] Welcome Packs V7 created (2 packs with timer)");
+        }
+
+        private static void CreateWelcomePackBanner(GameObject parent, string goName,
+            string badgeText, string titleStr, string contentsStr,
+            string valueStr, string priceStr,
+            Color accentColor, Color bgColor)
+        {
+            GameObject banner = CreateChild(parent, goName);
 
             LayoutElement le = banner.AddComponent<LayoutElement>();
             le.minHeight = HERO_BANNER_HEIGHT;
             le.preferredHeight = HERO_BANNER_HEIGHT;
 
             Image bannerBg = banner.AddComponent<Image>();
-            bannerBg.color = new Color(0.12f, 0.06f, 0.22f, 1f);
-            AddOutline(banner, PURPLE_PREMIUM, 3);
+            bannerBg.color = bgColor;
+            AddOutline(banner, accentColor, 3);
 
-            // Shadow
             CreateBannerShadow(banner);
-            CreateBannerSide(banner, PURPLE_PREMIUM);
+            CreateBannerSide(banner, accentColor);
 
             HorizontalLayoutGroup hlg = banner.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 20;
@@ -431,7 +478,7 @@ namespace DigitPark.Editor
             iconRT.anchorMax = new Vector2(0.5f, 0.5f);
             iconRT.sizeDelta = new Vector2(150, 150);
             Image iconImg = icon.AddComponent<Image>();
-            iconImg.color = GOLD;
+            iconImg.color = accentColor;
 
             // Center - Info
             GameObject info = CreateChild(banner, "Info");
@@ -445,27 +492,24 @@ namespace DigitPark.Editor
             infoVlg.childControlHeight = true;
             infoVlg.childForceExpandHeight = false;
 
-            // Badge
-            CreateInlineBadge(info, "70% OFF", BADGE_DEAL, 110);
+            CreateInlineBadge(info, badgeText, BADGE_DEAL, 110);
 
-            // Title
-            GameObject title = CreateChild(info, "StarterPackTitle");
+            GameObject title = CreateChild(info, goName + "Title");
             TextMeshProUGUI titleText = title.AddComponent<TextMeshProUGUI>();
-            titleText.text = "STARTER PACK";
+            titleText.text = titleStr;
             titleText.fontSize = FontSizes.H3;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = GOLD;
+            titleText.color = accentColor;
             titleText.alignment = TextAlignmentOptions.MidlineLeft;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
             titleText.fontSizeMax = FontSizes.H3;
             LayoutElement titleLE = title.AddComponent<LayoutElement>();
-            titleLE.minHeight = 48;
+            titleLE.minHeight = 44;
 
-            // Contents
-            GameObject contents = CreateChild(info, "StarterPackContents");
+            GameObject contents = CreateChild(info, goName + "Contents");
             TextMeshProUGUI contentsText = contents.AddComponent<TextMeshProUGUI>();
-            contentsText.text = "500 DigitGems + Exclusive Theme + Avatar";
+            contentsText.text = contentsStr;
             contentsText.fontSize = FontSizes.Body;
             contentsText.fontStyle = FontStyles.Bold;
             contentsText.fontSizeMin = FontSizes.AutoMinBody;
@@ -473,20 +517,18 @@ namespace DigitPark.Editor
             contentsText.enableWordWrapping = true;
             contentsText.color = TEXT_SECONDARY;
             LayoutElement contentsLE = contents.AddComponent<LayoutElement>();
-            contentsLE.minHeight = 40;
+            contentsLE.minHeight = 36;
 
-            // Timer
-            GameObject timer = CreateChild(info, "Timer");
+            GameObject timer = CreateChild(info, goName + "Timer");
             TextMeshProUGUI timerText = timer.AddComponent<TextMeshProUGUI>();
-            timerText.text = "Expires in: 23:45:12";
+            timerText.text = "Expires in: --:--:--";
             timerText.fontSize = FontSizes.Body;
             timerText.fontStyle = FontStyles.Bold;
             timerText.fontSizeMin = FontSizes.AutoMinBody;
             timerText.enableAutoSizing = true;
-            timerText.enableWordWrapping = true;
             timerText.color = ORANGE_HOT;
             LayoutElement timerLE = timer.AddComponent<LayoutElement>();
-            timerLE.minHeight = 30;
+            timerLE.minHeight = 28;
 
             // Right - Buy
             GameObject buyContainer = CreateChild(banner, "BuyContainer");
@@ -501,10 +543,10 @@ namespace DigitPark.Editor
             buyVlg.childControlHeight = true;
             buyVlg.childForceExpandHeight = false;
 
-            // Original price
+            // Value (strikethrough)
             GameObject origPrice = CreateChild(buyContainer, "OriginalPrice");
             TextMeshProUGUI origText = origPrice.AddComponent<TextMeshProUGUI>();
-            origText.text = "<s>$9.99</s>";
+            origText.text = $"<s>{valueStr}</s>";
             origText.fontSize = FontSizes.Body;
             origText.fontStyle = FontStyles.Bold;
             origText.color = TEXT_MUTED;
@@ -516,9 +558,7 @@ namespace DigitPark.Editor
             origLE.minHeight = 26;
 
             // Buy button
-            CreatePriceButton(buyContainer, "$2.99", BUTTON_SUCCESS, TEXT_DARK, 58, FontSizes.Body);
-
-            Debug.Log("[ShopPremiumUIBuilder] Hero Banner V5 creado");
+            CreatePriceButton(buyContainer, priceStr, BUTTON_SUCCESS, TEXT_DARK, 58, FontSizes.Body);
         }
 
         private static void CreateSpecialOffersSection(GameObject parent)
@@ -696,7 +736,10 @@ namespace DigitPark.Editor
             CreateDailyItem(itemsContainer, "Daily_Gems", "25 DigitGems", "100", GEM_COLOR, false);
             CreateDailyItem(itemsContainer, "Daily_Coins", "5,000 DigitCoins", "50", COIN_COLOR, false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Daily Deals V5 creado");
+            // Add DailyOfferUIController component to connect with DailyOfferService at runtime
+            section.AddComponent<DigitPark.Monetization.DailyOfferUIController>();
+
+            Debug.Log("[ShopPremiumUIBuilder] Daily Deals V7 created (connected to DailyOfferService)");
         }
 
         private static void CreateDailyItem(GameObject parent, string name, string itemName,
@@ -902,17 +945,18 @@ namespace DigitPark.Editor
             glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = GRID_CURRENCY_H * 3 + GRID_SPACING * 2;
+            gridLE.minHeight = GRID_CURRENCY_H * 4 + GRID_SPACING * 3; // 7 packs in 2-col = 4 rows
 
-            // 6 DigitGem packs — V4: only BEST VALUE + POPULAR badges
+            // 7 DigitGem packs — Economy Rebalance V55: added $1.99 Mini pack
             CreateCurrencyCardV4(grid, "Gems_100", "100", "$0.99", "", GEM_COLOR, "", false);
+            CreateCurrencyCardV4(grid, "Gems_220", "220", "$1.99", "+10%", GEM_COLOR, "NEW", false);
             CreateCurrencyCardV4(grid, "Gems_500", "500", "$4.99", "+10%", GEM_COLOR, "", false);
             CreateCurrencyCardV4(grid, "Gems_1200", "1,200", "$9.99", "+20%", GEM_COLOR, "BEST VALUE", false);
             CreateCurrencyCardV4(grid, "Gems_2500", "2,500", "$19.99", "+25%", GEM_COLOR, "", false);
             CreateCurrencyCardV4(grid, "Gems_6500", "6,500", "$49.99", "+30%", GEM_COLOR, "POPULAR", false);
             CreateCurrencyCardV4(grid, "Gems_14000", "14,000", "$99.99", "+35%", GEM_COLOR, "", false);
 
-            Debug.Log("[ShopPremiumUIBuilder] DigitGems Section V5 creado");
+            Debug.Log("[ShopPremiumUIBuilder] DigitGems Section V7 created (7 packs incl. $1.99 Mini)");
         }
 
         private static void CreateCoinsSection(GameObject parent)
@@ -1083,20 +1127,16 @@ namespace DigitPark.Editor
 
         private static void CreateThemeBundleBanners(GameObject parent)
         {
-            // === Premium Bundle Banner (15 themes, gold accent) ===
+            // === Premium Bundle Banner (19 premium themes, DG pricing — economy rebalance V55) ===
+            // Total: 5S×400 + 8A×250 + 6B×150 = 4,900 DG → 30% off = 3,430 DG
             CreateBundleBanner(parent, "PremiumBundleBanner",
                 "PREMIUM BUNDLE", "shop_premium_bundle", "shop_premium_bundle_desc",
-                "15 premium themes", "<s>$37.50</s>", "$26.25",
+                "19 premium themes", "<s>4,900 DG</s>", "3,430 DG",
                 GOLD, new Color(0.12f, 0.08f, 0.02f, 1f));
 
-            // === Complete Collection Banner (19 themes, gold+silver gradient) ===
-            Color gradientMix = Color.Lerp(GOLD, new Color(0.7f, 0.75f, 0.82f, 1f), 0.3f);
-            CreateBundleBanner(parent, "CompleteBundleBanner",
-                "COMPLETE COLLECTION", "shop_complete_bundle", "shop_complete_bundle_desc",
-                "All 19 themes", "<s>$43.50</s>", "$30.45",
-                gradientMix, new Color(0.08f, 0.08f, 0.1f, 1f));
+            // Complete Bundle ELIMINATED — earnable themes are trophies, not purchasable
 
-            Debug.Log("[ShopPremiumUIBuilder] 2 Bundle Banners creados");
+            Debug.Log("[ShopPremiumUIBuilder] Premium Bundle Banner created (DG pricing, Complete Bundle removed)");
         }
 
         private static void CreateBundleBanner(GameObject parent, string goName,
@@ -1185,6 +1225,9 @@ namespace DigitPark.Editor
             origText.fontStyle = FontStyles.Bold;
             origText.color = TEXT_MUTED;
             origText.alignment = TextAlignmentOptions.Center;
+            origText.enableAutoSizing = true;
+            origText.fontSizeMin = FontSizes.AutoMinSmall;
+            origText.fontSizeMax = origText.fontSize;
             LayoutElement origLE = origObj.AddComponent<LayoutElement>();
             origLE.minHeight = 22;
 
@@ -1204,7 +1247,8 @@ namespace DigitPark.Editor
             // Theme bundle banners at the top of themes section
             CreateThemeBundleBanners(section);
 
-            // === Premium Themes ($2.50, gold lock) ===
+            // === Premium Themes — DG pricing by tier (Economy Rebalance V55) ===
+            // Tier S = 400 DG, Tier A = 250 DG, Tier B = 150 DG
             CreateSectionDividerV5(section, "PREMIUM THEMES", PURPLE_PREMIUM);
 
             GameObject premiumGrid = CreateChild(section, "PremiumThemesGrid");
@@ -1215,72 +1259,92 @@ namespace DigitPark.Editor
             pGlg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             pGlg.constraintCount = GRID_COLUMNS;
             LayoutElement pGridLE = premiumGrid.AddComponent<LayoutElement>();
-            pGridLE.minHeight = GRID_THEME_H * 8 + GRID_SPACING * 7;
+            pGridLE.minHeight = GRID_THEME_H * 10 + GRID_SPACING * 9; // 19 themes in 2-col = 10 rows
 
-            // 15 Premium themes — real colors from .asset files
-            CreateThemeCardV4(premiumGrid, "Theme_CrimsonBlaze", "Crimson Blaze", "$2.50",
-                new Color(0.102f, 0.039f, 0.039f, 1f),
-                new Color(0.937f, 0.267f, 0.267f, 1f), new Color(0.976f, 0.451f, 0.086f, 1f), new Color(0.988f, 0.647f, 0.647f, 1f),
+            // ── TIER S (400 DG) — Top visual appeal ──
+            CreateThemeCardV4(premiumGrid, "Theme_AuroraBorealis", "Aurora Borealis", "400 DG",
+                new Color(0.02f, 0.06f, 0.12f, 1f),
+                new Color(0.1f, 0.9f, 0.6f, 1f), new Color(0.2f, 0.5f, 0.9f, 1f), new Color(0.7f, 0.95f, 0.8f, 1f),
                 false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Sakura", "Sakura", "$2.50",
-                new Color(0.102f, 0.059f, 0.078f, 1f),
-                new Color(0.957f, 0.447f, 0.714f, 1f), new Color(0.925f, 0.282f, 0.6f, 1f), new Color(0.984f, 0.812f, 0.91f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Arctic", "Arctic", "$2.50",
-                new Color(0.047f, 0.098f, 0.161f, 1f),
-                new Color(0.22f, 0.741f, 0.973f, 1f), new Color(0.49f, 0.827f, 0.988f, 1f), new Color(0.878f, 0.949f, 0.996f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_DeepOcean", "Deep Ocean", "$2.50",
-                new Color(0.039f, 0.082f, 0.125f, 1f),
-                new Color(0.078f, 0.722f, 0.651f, 1f), new Color(0.176f, 0.831f, 0.749f, 1f), new Color(0.6f, 0.965f, 0.894f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_ToxicLime", "Toxic Lime", "$2.50",
-                new Color(0.047f, 0.102f, 0.031f, 1f),
-                new Color(0.518f, 0.8f, 0.086f, 1f), new Color(0.639f, 0.902f, 0.208f, 1f), new Color(0.851f, 0.976f, 0.616f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Matrix", "Matrix", "$2.50",
-                new Color(0.031f, 0.059f, 0.031f, 1f),
-                new Color(0.133f, 0.773f, 0.369f, 1f), new Color(0.29f, 0.871f, 0.502f, 1f), new Color(0.733f, 0.969f, 0.816f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_CyberFuchsia", "Cyber Fuchsia", "$2.50",
-                new Color(0.102f, 0.039f, 0.102f, 1f),
-                new Color(0.851f, 0.275f, 0.937f, 1f), new Color(0.91f, 0.475f, 0.976f, 1f), new Color(0.961f, 0.816f, 0.996f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_PlasmaIndigo", "Plasma Indigo", "$2.50",
-                new Color(0.039f, 0.039f, 0.118f, 1f),
-                new Color(0.388f, 0.4f, 0.945f, 1f), new Color(0.506f, 0.549f, 0.973f, 1f), new Color(0.78f, 0.824f, 0.996f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_CoralSurge", "Coral Surge", "$2.50",
-                new Color(0.102f, 0.047f, 0.063f, 1f),
-                new Color(0.984f, 0.443f, 0.522f, 1f), new Color(0.992f, 0.643f, 0.686f, 1f), new Color(1f, 0.894f, 0.902f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Infrared", "Infrared", "$2.50",
-                new Color(0.102f, 0.031f, 0.031f, 1f),
-                new Color(0.882f, 0.114f, 0.282f, 1f), new Color(0.984f, 0.443f, 0.522f, 1f), new Color(1f, 0.894f, 0.902f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Phantom", "Phantom", "$2.50",
-                new Color(0.031f, 0.024f, 0.055f, 1f),
-                new Color(0.486f, 0.227f, 0.929f, 1f), new Color(0.427f, 0.157f, 0.851f, 1f), new Color(0.655f, 0.545f, 0.98f, 1f),
-                false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Nebula", "Nebula", "$2.50",
+            CreateThemeCardV4(premiumGrid, "Theme_Nebula", "Nebula", "400 DG",
                 new Color(0.047f, 0.031f, 0.086f, 1f),
                 new Color(0.545f, 0.361f, 0.965f, 1f), new Color(0.925f, 0.282f, 0.6f, 1f), new Color(0.769f, 0.71f, 0.992f, 1f),
                 false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Volcanic", "Volcanic", "$2.50",
-                new Color(0.102f, 0.047f, 0.031f, 1f),
-                new Color(0.957f, 0.247f, 0.369f, 1f), new Color(0.984f, 0.573f, 0.235f, 1f), new Color(0.988f, 0.647f, 0.647f, 1f),
+            CreateThemeCardV4(premiumGrid, "Theme_IceFire", "Ice x Fire", "400 DG",
+                new Color(0.04f, 0.06f, 0.1f, 1f),
+                new Color(0.2f, 0.7f, 1f, 1f), new Color(1f, 0.3f, 0.1f, 1f), new Color(0.85f, 0.9f, 1f, 1f),
                 false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Sunset", "Sunset", "$2.50",
+            CreateThemeCardV4(premiumGrid, "Theme_CyberFuchsia", "Cyber Fuchsia", "400 DG",
+                new Color(0.102f, 0.039f, 0.102f, 1f),
+                new Color(0.851f, 0.275f, 0.937f, 1f), new Color(0.91f, 0.475f, 0.976f, 1f), new Color(0.961f, 0.816f, 0.996f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Vaporwave", "Vaporwave", "400 DG",
                 new Color(0.102f, 0.063f, 0.031f, 1f),
                 new Color(0.984f, 0.573f, 0.235f, 1f), new Color(0.984f, 0.749f, 0.141f, 1f), new Color(0.992f, 0.902f, 0.541f, 1f),
                 false, false);
-            CreateThemeCardV4(premiumGrid, "Theme_Titanium", "Titanium", "$2.50",
+
+            // ── TIER A (250 DG) — Strong visual appeal ──
+            CreateThemeCardV4(premiumGrid, "Theme_Glitch", "Glitch", "250 DG",
+                new Color(0.102f, 0.039f, 0.039f, 1f),
+                new Color(0.937f, 0.267f, 0.267f, 1f), new Color(0.976f, 0.451f, 0.086f, 1f), new Color(0.988f, 0.647f, 0.647f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Bioluminescence", "Bioluminescence", "250 DG",
+                new Color(0.102f, 0.059f, 0.078f, 1f),
+                new Color(0.957f, 0.447f, 0.714f, 1f), new Color(0.925f, 0.282f, 0.6f, 1f), new Color(0.984f, 0.812f, 0.91f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Volcanic", "Volcanic", "250 DG",
+                new Color(0.102f, 0.047f, 0.031f, 1f),
+                new Color(0.957f, 0.247f, 0.369f, 1f), new Color(0.984f, 0.573f, 0.235f, 1f), new Color(0.988f, 0.647f, 0.647f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Matrix", "Matrix", "250 DG",
+                new Color(0.031f, 0.059f, 0.031f, 1f),
+                new Color(0.133f, 0.773f, 0.369f, 1f), new Color(0.29f, 0.871f, 0.502f, 1f), new Color(0.733f, 0.969f, 0.816f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Infrared", "Infrared", "250 DG",
+                new Color(0.102f, 0.031f, 0.031f, 1f),
+                new Color(0.882f, 0.114f, 0.282f, 1f), new Color(0.984f, 0.443f, 0.522f, 1f), new Color(1f, 0.894f, 0.902f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_BloodMoon", "Blood Moon", "250 DG",
+                new Color(0.08f, 0.02f, 0.02f, 1f),
+                new Color(0.8f, 0.1f, 0.15f, 1f), new Color(0.6f, 0.05f, 0.1f, 1f), new Color(0.95f, 0.5f, 0.5f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Phantom", "Phantom", "250 DG",
+                new Color(0.031f, 0.024f, 0.055f, 1f),
+                new Color(0.486f, 0.227f, 0.929f, 1f), new Color(0.427f, 0.157f, 0.851f, 1f), new Color(0.655f, 0.545f, 0.98f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Ultraviolet", "Ultraviolet", "250 DG",
                 new Color(0.063f, 0.075f, 0.102f, 1f),
                 new Color(0.58f, 0.639f, 0.722f, 1f), new Color(0.796f, 0.835f, 0.882f, 1f), new Color(0.886f, 0.91f, 0.941f, 1f),
                 false, false);
 
-            // === Earnable Themes ($1.50, silver lock, also purchasable) ===
-            CreateSectionDividerV5(section, "EARNABLE THEMES", SILVER);
+            // ── TIER B (150 DG) — Entry-level premium ──
+            CreateThemeCardV4(premiumGrid, "Theme_PlasmaIndigo", "Plasma Indigo", "150 DG",
+                new Color(0.039f, 0.039f, 0.118f, 1f),
+                new Color(0.388f, 0.4f, 0.945f, 1f), new Color(0.506f, 0.549f, 0.973f, 1f), new Color(0.78f, 0.824f, 0.996f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_Arctic", "Arctic", "150 DG",
+                new Color(0.047f, 0.098f, 0.161f, 1f),
+                new Color(0.22f, 0.741f, 0.973f, 1f), new Color(0.49f, 0.827f, 0.988f, 1f), new Color(0.878f, 0.949f, 0.996f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_DeepOcean", "Deep Ocean", "150 DG",
+                new Color(0.039f, 0.082f, 0.125f, 1f),
+                new Color(0.078f, 0.722f, 0.651f, 1f), new Color(0.176f, 0.831f, 0.749f, 1f), new Color(0.6f, 0.965f, 0.894f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_CoralSurge", "Coral Surge", "150 DG",
+                new Color(0.102f, 0.047f, 0.063f, 1f),
+                new Color(0.984f, 0.443f, 0.522f, 1f), new Color(0.992f, 0.643f, 0.686f, 1f), new Color(1f, 0.894f, 0.902f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_ToxicLime", "Toxic Lime", "150 DG",
+                new Color(0.047f, 0.102f, 0.031f, 1f),
+                new Color(0.518f, 0.8f, 0.086f, 1f), new Color(0.639f, 0.902f, 0.208f, 1f), new Color(0.851f, 0.976f, 0.616f, 1f),
+                false, false);
+            CreateThemeCardV4(premiumGrid, "Theme_ElectricOrange", "Electric Orange", "150 DG",
+                new Color(0.1f, 0.05f, 0.01f, 1f),
+                new Color(1f, 0.5f, 0f, 1f), new Color(1f, 0.7f, 0.2f, 1f), new Color(1f, 0.9f, 0.6f, 1f),
+                false, false);
+
+            // === Earnable Themes — TROPHY ONLY (not purchasable, achievement-locked) ===
+            CreateSectionDividerV5(section, "EARNABLE THEMES (TROPHY)", SILVER);
 
             GameObject earnableGrid = CreateChild(section, "EarnableThemesGrid");
             GridLayoutGroup eGlg = earnableGrid.AddComponent<GridLayoutGroup>();
@@ -1292,25 +1356,25 @@ namespace DigitPark.Editor
             LayoutElement eGridLE = earnableGrid.AddComponent<LayoutElement>();
             eGridLE.minHeight = GRID_THEME_H * 2 + GRID_SPACING;
 
-            // 4 Earnable themes — real colors from .asset files
-            CreateThemeCardV4(earnableGrid, "Theme_Emerald", "Emerald", "$1.50",
+            // 4 Earnable themes — TROPHY ONLY, NOT purchasable (economy rebalance V55)
+            CreateThemeCardV4(earnableGrid, "Theme_Emerald", "Emerald", "365d LOGIN",
                 new Color(0.039f, 0.102f, 0.078f, 1f),
                 new Color(0.063f, 0.725f, 0.506f, 1f), new Color(0.204f, 0.827f, 0.6f, 1f), new Color(0.655f, 0.953f, 0.816f, 1f),
                 false, false);
-            CreateThemeCardV4(earnableGrid, "Theme_ElectricBlue", "Electric Blue", "$1.50",
+            CreateThemeCardV4(earnableGrid, "Theme_ElectricBlue", "Electric Blue", "1,000 WINS",
                 new Color(0.031f, 0.063f, 0.118f, 1f),
                 new Color(0.231f, 0.51f, 0.965f, 1f), new Color(0.376f, 0.647f, 0.98f, 1f), new Color(0.749f, 0.859f, 0.996f, 1f),
                 false, false);
-            CreateThemeCardV4(earnableGrid, "Theme_ElectricViolet", "Electric Violet", "$1.50",
+            CreateThemeCardV4(earnableGrid, "Theme_ElectricViolet", "Electric Violet", "100 PERFECTS",
                 new Color(0.059f, 0.039f, 0.102f, 1f),
                 new Color(0.659f, 0.333f, 0.969f, 1f), new Color(0.753f, 0.518f, 0.988f, 1f), new Color(0.914f, 0.835f, 1f, 1f),
                 false, false);
-            CreateThemeCardV4(earnableGrid, "Theme_Monochrome", "Monochrome", "$1.50",
+            CreateThemeCardV4(earnableGrid, "Theme_Monochrome", "Monochrome", "LEVEL 50",
                 new Color(0.094f, 0.094f, 0.106f, 1f),
                 new Color(0.82f, 0.835f, 0.859f, 1f), new Color(0.976f, 0.98f, 0.984f, 1f), new Color(1f, 1f, 1f, 1f),
                 false, false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Themes Section V5 creado (15 premium + 4 earnable)");
+            Debug.Log("[ShopPremiumUIBuilder] Themes Section V7 created (19 premium DG-priced: 5S+8A+6B + 4 earnable trophy-only)");
         }
 
         private static void CreateThemeCardV4(GameObject parent, string name, string displayName,
@@ -1397,6 +1461,9 @@ namespace DigitPark.Editor
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.Center;
+                statusText.enableAutoSizing = true;
+                statusText.fontSizeMin = FontSizes.AutoMinBody;
+                statusText.fontSizeMax = statusText.fontSize;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
                 statusLE.minHeight = PRICE_BTN_HEIGHT;
             }
@@ -1451,7 +1518,7 @@ namespace DigitPark.Editor
             glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = GRID_COSMETIC_H * 17 + GRID_SPACING * 16; // 34 items en 2-col = 17 rows
+            gridLE.minHeight = GRID_COSMETIC_H * 21 + GRID_SPACING * 20; // 42 items in 2-col = 21 rows
 
             // 8 Coin frames — precios corregidos (fuente de verdad: PlayerFrameService)
             CreateCosmeticCardV4(grid, "Frame_Basic",    "Basic",    "EQUIPPED", new Color(0.5f, 0.5f, 0.5f, 1f),    true,  "coin");
@@ -1465,7 +1532,7 @@ namespace DigitPark.Editor
 
             // 6 Gem frames — precios corregidos
             CreateCosmeticCardV4(grid, "GemFrame_Sapphire",  "Sapphire",  "50",    new Color(0.05f, 0.2f, 0.8f, 1f),  false, "gem");
-            CreateCosmeticCardV4(grid, "GemFrame_Ruby",      "Ruby",      "100",   new Color(0.9f, 0.1f, 0.2f, 1f),   false, "gem");
+            CreateCosmeticCardV4(grid, "GemFrame_Ruby",      "Ruby",      "150",   new Color(0.9f, 0.1f, 0.2f, 1f),   false, "gem");
             CreateCosmeticCardV4(grid, "GemFrame_Emerald",   "Emerald",   "300",   new Color(0.1f, 0.8f, 0.3f, 1f),   false, "gem");
             CreateCosmeticCardV4(grid, "GemFrame_Amethyst",  "Amethyst",  "500",   PURPLE_LIGHT,                       false, "gem");
             CreateCosmeticCardV4(grid, "GemFrame_Topaz",     "Topaz",     "750",   new Color(0.8f, 0.53f, 0f, 1f),    false, "gem");
@@ -1485,7 +1552,19 @@ namespace DigitPark.Editor
             CreateCosmeticCardV4(grid, "PremFrame_DivineLight",     "Divine Light",     "$14.99", GOLD,                               false, "real");
             CreateCosmeticCardV4(grid, "PremFrame_QuantumBreak",    "Quantum Break",    "$14.99", new Color(0f, 1f, 0.26f, 1f),       false, "real");
 
-            Debug.Log("[ShopPremiumUIBuilder] Frames Section V6 creado (34 items: 8 coin + 6 gem + 12 real)");
+            // 5 Achievement frames (shown as locked)
+            CreateCosmeticCardV4(grid, "Frame_FirstWin",        "First Win",        "LOCKED",  GOLD,                               false, "earn");
+            CreateCosmeticCardV4(grid, "Frame_Centurion",       "Centurion",        "LOCKED",  new Color(0.7f, 0.3f, 0.1f, 1f),   false, "earn");
+            CreateCosmeticCardV4(grid, "Frame_Master",          "Master",           "LOCKED",  new Color(0.9f, 0.2f, 0.3f, 1f),   false, "earn");
+            CreateCosmeticCardV4(grid, "Frame_SocialButterfly", "Social Butterfly", "LOCKED",  new Color(1f, 0.5f, 0.8f, 1f),     false, "earn");
+            CreateCosmeticCardV4(grid, "Frame_StreakKing",      "Streak King",      "LOCKED",  ORANGE_HOT,                         false, "earn");
+
+            // 3 Secret frames (shown as locked with ??? hint)
+            CreateCosmeticCardV4(grid, "Frame_NightOwl",        "???",              "LOCKED",  new Color(0.2f, 0.1f, 0.4f, 1f),   false, "earn");
+            CreateCosmeticCardV4(grid, "Frame_PerfectFrame",    "???",              "LOCKED",  CYAN_NEON,                          false, "earn");
+            CreateCosmeticCardV4(grid, "Frame_SpeedDemon",      "???",              "LOCKED",  new Color(1f, 0.3f, 0f, 1f),       false, "earn");
+
+            Debug.Log("[ShopPremiumUIBuilder] Frames Section V7 created (34 purchasable + 8 earn/secret = 42 total)");
         }
 
         private static void CreateCosmeticCardV4(GameObject parent, string name, string displayName,
@@ -1552,6 +1631,9 @@ namespace DigitPark.Editor
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.Center;
+                statusText.enableAutoSizing = true;
+                statusText.fontSizeMin = FontSizes.AutoMinBody;
+                statusText.fontSizeMax = statusText.fontSize;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
                 statusLE.minHeight = 40;
             }
@@ -1597,6 +1679,9 @@ namespace DigitPark.Editor
                 pt.fontStyle = FontStyles.Bold;
                 pt.color = TEXT_DARK;
                 pt.alignment = TextAlignmentOptions.Center;
+                pt.enableAutoSizing = true;
+                pt.fontSizeMin = FontSizes.AutoMinBody;
+                pt.fontSizeMax = pt.fontSize;
                 LayoutElement ptLE = priceTextObj.AddComponent<LayoutElement>();
                 ptLE.flexibleWidth = 1;
             }
@@ -1625,21 +1710,39 @@ namespace DigitPark.Editor
             glg.constraintCount = GRID_COLUMNS;
 
             LayoutElement gridLE = grid.AddComponent<LayoutElement>();
-            gridLE.minHeight = TITLE_CELL_H * 5 + GRID_SPACING * 4;
+            gridLE.minHeight = TITLE_CELL_H * 11 + GRID_SPACING * 10; // 21 items in 2-col = 11 rows
 
-            // 10 Title items
-            CreateTitleCardV4(grid, "Title_Novato", "Rookie", "EQUIPPED", TEXT_SECONDARY, true);
-            CreateTitleCardV4(grid, "Title_Veterano", "Veteran", "500", new Color(0.6f, 0.8f, 0.6f, 1f), false);
-            CreateTitleCardV4(grid, "Title_Campeon", "Champion", "1,000", GOLD, false);
-            CreateTitleCardV4(grid, "Title_Leyenda", "Legend", "2,000", PURPLE_LIGHT, false);
-            CreateTitleCardV4(grid, "Title_Maestro", "Grand Master", "3,000", ORANGE_HOT, false);
-            CreateTitleCardV4(grid, "Title_Genio", "Digital Genius", "150", GEM_COLOR, false);
-            CreateTitleCardV4(grid, "Title_Flash", "Speedster", "100", new Color(1f, 0.9f, 0.2f, 1f), false);
-            CreateTitleCardV4(grid, "Title_Memoria", "Bright Mind", "200", new Color(0.5f, 1f, 0.8f, 1f), false);
-            CreateTitleCardV4(grid, "Title_Elite", "Elite", "$0.99", new Color(1f, 0.25f, 0.25f, 1f), false);
-            CreateTitleCardV4(grid, "Title_Inmortal", "Immortal", "$1.99", new Color(1f, 0.85f, 0.5f, 1f), false);
+            // DC Titles (4) + Free (1)
+            CreateTitleCardV4(grid, "Title_Novato",     "Novato",         "EQUIPPED",  TEXT_SECONDARY,                     true);
+            CreateTitleCardV4(grid, "Title_Jugador",    "Jugador",        "500",       new Color(0.6f, 0.8f, 0.6f, 1f),   false);
+            CreateTitleCardV4(grid, "Title_Veterano",   "Veterano",       "3,000",     new Color(0.8f, 0.7f, 0.3f, 1f),   false);
+            CreateTitleCardV4(grid, "Title_Leyenda",    "Leyenda",        "10,000",    PURPLE_LIGHT,                       false);
+            CreateTitleCardV4(grid, "Title_Inmortal",   "Inmortal",       "25,000",    GOLD,                               false);
 
-            Debug.Log("[ShopPremiumUIBuilder] Titles Section V5 creado (10 items)");
+            // DG Titles (4)
+            CreateTitleCardV4(grid, "Title_Estratega",  "Estratega",      "100",       GEM_COLOR,                          false);
+            CreateTitleCardV4(grid, "Title_Genio",      "Genio",          "300",       new Color(0.5f, 1f, 0.8f, 1f),     false);
+            CreateTitleCardV4(grid, "Title_Maestro",    "Maestro",        "600",       ORANGE_HOT,                         false);
+            CreateTitleCardV4(grid, "Title_Iluminado",  "Iluminado",      "1,000",     new Color(1f, 0.9f, 0.4f, 1f),     false);
+
+            // IAP Title (1)
+            CreateTitleCardV4(grid, "Title_Custom",     "Custom Title",   "$1.99",     new Color(1f, 0.25f, 0.25f, 1f),   false);
+
+            // Achievement Titles (6)
+            CreateTitleCardV4(grid, "Title_PrimerPaso",  "Primer Paso",   "LOCKED",    new Color(0.5f, 0.8f, 0.5f, 1f),   false);
+            CreateTitleCardV4(grid, "Title_Imparable",   "Imparable",     "LOCKED",    ORANGE_HOT,                         false);
+            CreateTitleCardV4(grid, "Title_Madrugador",  "Madrugador",    "LOCKED",    new Color(0.3f, 0.2f, 0.6f, 1f),   false);
+            CreateTitleCardV4(grid, "Title_Perfeccionista","Perfeccionista","LOCKED",   CYAN_NEON,                          false);
+            CreateTitleCardV4(grid, "Title_CampeonT",    "Campeon",       "LOCKED",    GOLD,                               false);
+            CreateTitleCardV4(grid, "Title_Coleccionista","Coleccionista", "LOCKED",    SILVER,                             false);
+
+            // Secret Titles (4)
+            CreateTitleCardV4(grid, "Title_Fantasma",    "???",           "LOCKED",    new Color(0.2f, 0.1f, 0.3f, 1f),   false);
+            CreateTitleCardV4(grid, "Title_Velocista",   "???",           "LOCKED",    new Color(1f, 0.3f, 0f, 1f),       false);
+            CreateTitleCardV4(grid, "Title_ReyComeback", "???",           "LOCKED",    new Color(0.9f, 0.2f, 0.2f, 1f),   false);
+            CreateTitleCardV4(grid, "Title_Completo",    "???",           "LOCKED",    PURPLE_PREMIUM,                     false);
+
+            Debug.Log("[ShopPremiumUIBuilder] Titles Section V7 created (21 titles: 1 free + 4 DC + 4 DG + 1 IAP + 6 achievement + 4 secret)");
         }
 
         private static void CreateTitleCardV4(GameObject parent, string name, string displayName,
@@ -1691,6 +1794,9 @@ namespace DigitPark.Editor
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
                 statusText.alignment = TextAlignmentOptions.MidlineRight;
+                statusText.enableAutoSizing = true;
+                statusText.fontSizeMin = FontSizes.AutoMinBody;
+                statusText.fontSizeMax = statusText.fontSize;
                 LayoutElement statusLE = statusObj.AddComponent<LayoutElement>();
                 statusLE.minWidth = 100;
             }
@@ -1737,6 +1843,9 @@ namespace DigitPark.Editor
                 pt.fontStyle = FontStyles.Bold;
                 pt.color = TEXT_DARK;
                 pt.alignment = TextAlignmentOptions.Center;
+                pt.enableAutoSizing = true;
+                pt.fontSizeMin = FontSizes.AutoMinBody;
+                pt.fontSizeMax = pt.fontSize;
                 LayoutElement ptLE = priceText.AddComponent<LayoutElement>();
                 ptLE.flexibleWidth = 1;
             }
@@ -1811,6 +1920,9 @@ namespace DigitPark.Editor
             amountText.fontSize = FontSizes.Body;
             amountText.fontStyle = FontStyles.Bold;
             amountText.color = TEXT_PRIMARY;
+            amountText.enableAutoSizing = true;
+            amountText.fontSizeMin = FontSizes.AutoMinBody;
+            amountText.fontSizeMax = amountText.fontSize;
             LayoutElement amountLE = previewAmount.AddComponent<LayoutElement>();
             amountLE.minWidth = 220;
 
@@ -1822,6 +1934,9 @@ namespace DigitPark.Editor
             priceText.fontStyle = FontStyles.Bold;
             priceText.color = TEXT_SECONDARY;
             priceText.alignment = TextAlignmentOptions.Center;
+            priceText.enableAutoSizing = true;
+            priceText.fontSizeMin = FontSizes.AutoMinBody;
+            priceText.fontSizeMax = priceText.fontSize;
             LayoutElement priceLE = priceObj.AddComponent<LayoutElement>();
             priceLE.minHeight = 28;
 
@@ -1903,6 +2018,9 @@ namespace DigitPark.Editor
             msgText.fontStyle = FontStyles.Bold;
             msgText.color = TEXT_SECONDARY;
             msgText.alignment = TextAlignmentOptions.Center;
+            msgText.enableAutoSizing = true;
+            msgText.fontSizeMin = FontSizes.AutoMinBody;
+            msgText.fontSizeMax = msgText.fontSize;
             LayoutElement msgLE = msg.AddComponent<LayoutElement>();
             msgLE.minHeight = 48;
 
@@ -1969,6 +2087,192 @@ namespace DigitPark.Editor
             ShopReferenceAssigner.ResetLog();
             ShopReferenceAssigner.AssignAllReferences();
             Debug.Log("[ShopPremiumUIBuilder] Referencias auto-asignadas");
+        }
+
+        // ==================== VICTORY EFFECTS SECTION (Economy Rebalance V55) ====================
+
+        private static readonly Color EFFECT_COLOR = new Color(0f, 1f, 0.6f, 1f);
+
+        private static void CreateEffectsSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "EffectsSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionDividerV5(section, "VICTORY EFFECTS", EFFECT_COLOR);
+
+            // Grid — 2 columns
+            GameObject grid = CreateChild(section, "EffectsGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_COSMETIC_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = GRID_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = GRID_COSMETIC_H * 5 + GRID_SPACING * 4; // 10 items in 2-col = 5 rows
+
+            // 8 effects + 2 bundles = 10 items
+            CreateCosmeticCardV4(grid, "Effect_Confetti",       "Confetti",        "EQUIPPED",  new Color(1f, 0.8f, 0f, 1f),   true,  "free");
+            CreateCosmeticCardV4(grid, "Effect_Fireworks",      "Fireworks",       "2,000",     new Color(1f, 0.3f, 0.1f, 1f), false, "coin");
+            CreateCosmeticCardV4(grid, "Effect_Lightning",      "Lightning",       "5,000",     new Color(0.3f, 0.6f, 1f, 1f), false, "coin");
+            CreateCosmeticCardV4(grid, "Effect_GoldRain",       "Gold Rain",       "250",       GOLD,                           false, "gem");
+            CreateCosmeticCardV4(grid, "Effect_NeonExplosion",  "Neon Explosion",  "400",       CYAN_NEON,                      false, "gem");
+            CreateCosmeticCardV4(grid, "Effect_Rainbow",        "Rainbow",         "750",       new Color(1f, 0f, 0.5f, 1f),   false, "gem");
+            CreateCosmeticCardV4(grid, "Effect_CrownDrop",      "Crown Drop",      "$1.99",     GOLD,                           false, "real");
+            CreateCosmeticCardV4(grid, "Effect_FireRing",       "Fire Ring",       "$2.99",     ORANGE_HOT,                     false, "real");
+            // Bundles
+            CreateCosmeticCardV4(grid, "EffectBundle_DC",       "DC Bundle",       "5,000",     COIN_COLOR,                     false, "coin");
+            CreateCosmeticCardV4(grid, "EffectBundle_DG",       "DG Bundle",       "1,000",     GEM_COLOR,                      false, "gem");
+
+            Debug.Log("[ShopPremiumUIBuilder] Effects Section created (8 effects + 2 bundles)");
+        }
+
+        // ==================== BATTLE CARDS SECTION (Economy Rebalance V55) ====================
+
+        private static readonly Color BATTLECARD_COLOR = new Color(0.4f, 0.7f, 1f, 1f);
+
+        private static void CreateBattleCardsSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "BattleCardsSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionDividerV5(section, "BATTLE CARDS", BATTLECARD_COLOR);
+
+            // Grid — 2 columns
+            GameObject grid = CreateChild(section, "BattleCardsGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_COSMETIC_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = GRID_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = GRID_COSMETIC_H * 10 + GRID_SPACING * 9; // 19 items in 2-col = 10 rows
+
+            // Free (1)
+            CreateCosmeticCardV4(grid, "Card_NeonCore",     "Neon Core",      "EQUIPPED",  CYAN_NEON,                      true,  "free");
+
+            // DC (4)
+            CreateCosmeticCardV4(grid, "Card_Circuit",      "Circuit",        "500",       new Color(0.3f, 0.8f, 0.3f),    false, "coin");
+            CreateCosmeticCardV4(grid, "Card_DataGrid",     "Data Grid",      "1,500",     new Color(0.2f, 0.6f, 0.8f),    false, "coin");
+            CreateCosmeticCardV4(grid, "Card_Chromatic",    "Chromatic",      "3,000",     new Color(0.8f, 0.4f, 0.9f),    false, "coin");
+            CreateCosmeticCardV4(grid, "Card_Titan",        "Titan",          "6,000",     new Color(0.9f, 0.7f, 0.2f),    false, "coin");
+
+            // DG Standard (5)
+            CreateCosmeticCardV4(grid, "Card_Frost",        "Frost",          "75",        new Color(0.7f, 0.9f, 1f),      false, "gem");
+            CreateCosmeticCardV4(grid, "Card_Shadow",       "Shadow",         "150",       new Color(0.2f, 0.15f, 0.3f),   false, "gem");
+            CreateCosmeticCardV4(grid, "Card_Prism",        "Prism",          "250",       new Color(0.9f, 0.3f, 0.8f),    false, "gem");
+            CreateCosmeticCardV4(grid, "Card_NebulaCard",   "Nebula Card",    "350",       new Color(0.3f, 0.1f, 0.6f),    false, "gem");
+            CreateCosmeticCardV4(grid, "Card_Quantum",      "Quantum",        "500",       new Color(0f, 0.8f, 0.9f),      false, "gem");
+
+            // DG Premium animated (5)
+            CreateCosmeticCardV4(grid, "Card_Phoenix",      "Phoenix",        "200",       new Color(1f, 0.4f, 0.1f),      false, "gem");
+            CreateCosmeticCardV4(grid, "Card_Inferno",      "Inferno",        "400",       new Color(1f, 0.2f, 0f),        false, "gem");
+            CreateCosmeticCardV4(grid, "Card_Storm",        "Storm",          "600",       new Color(0.3f, 0.5f, 1f),      false, "gem");
+            CreateCosmeticCardV4(grid, "Card_VoidWalker",   "Void Walker",    "800",       new Color(0.1f, 0f, 0.2f),      false, "gem");
+            CreateCosmeticCardV4(grid, "Card_CosmicKing",   "Cosmic King",    "1,200",     GOLD,                            false, "gem");
+
+            // Earn (4) — shown as locked with achievement hint
+            CreateCosmeticCardV4(grid, "Card_Champion",     "Champion",       "LOCKED",    GOLD,                            false, "earn");
+            CreateCosmeticCardV4(grid, "Card_Perfectionist","Perfectionist",  "LOCKED",    PURPLE_PREMIUM,                  false, "earn");
+            CreateCosmeticCardV4(grid, "Card_Veteran",      "Veteran",        "LOCKED",    SILVER,                          false, "earn");
+            CreateCosmeticCardV4(grid, "Card_Legend",        "Legend",         "LOCKED",    ORANGE_HOT,                      false, "earn");
+
+            Debug.Log("[ShopPremiumUIBuilder] BattleCards Section created (19 cards: 1 free + 4 DC + 5 DG Std + 5 DG Premium + 4 Earn)");
+        }
+
+        // ==================== HELPER: COSMETIC DISCLAIMER ====================
+
+        /// <summary>
+        /// Economy Rebalance V55: Anti-P2W disclaimer before VIP banner.
+        /// </summary>
+        // ==================== LIMITED CONTENT SECTION (13F — Whale Ceiling) ====================
+
+        private static readonly Color LIMITED_COLOR = new Color(1f, 0.3f, 0.6f, 1f);
+
+        /// <summary>
+        /// Economy Rebalance V55 / 13F — Limited/Rotating Content Section
+        /// Populated at runtime by RotatingContentService.ActiveItems.
+        /// Shows: Seasonal BattleCards, Monthly IAP Frames, Limited Theme Variants.
+        /// Hidden when no active content exists (RotatingContentUIController manages visibility).
+        /// </summary>
+        private static void CreateLimitedContentSection(GameObject parent)
+        {
+            GameObject section = CreateChild(parent, "LimitedContentSection");
+
+            VerticalLayoutGroup vlg = section.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 14;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandHeight = false;
+
+            CreateSectionDividerV5(section, "LIMITED TIME", LIMITED_COLOR);
+
+            // Placeholder slots — populated at runtime by RotatingContentUIController
+            GameObject grid = CreateChild(section, "LimitedGrid");
+
+            GridLayoutGroup glg = grid.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(GRID_CELL_W, GRID_COSMETIC_H);
+            glg.spacing = new Vector2(GRID_SPACING, GRID_SPACING);
+            glg.childAlignment = TextAnchor.UpperCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = GRID_COLUMNS;
+
+            LayoutElement gridLE = grid.AddComponent<LayoutElement>();
+            gridLE.minHeight = GRID_COSMETIC_H; // Will be adjusted at runtime
+
+            // 3 placeholder slots (replaced at runtime with actual active items)
+            CreateCosmeticCardV4(grid, "Limited_Slot1", "Seasonal Card",    "COMING SOON", LIMITED_COLOR,  false, "limited");
+            CreateCosmeticCardV4(grid, "Limited_Slot2", "Monthly Frame",    "COMING SOON", GOLD,           false, "limited");
+            CreateCosmeticCardV4(grid, "Limited_Slot3", "Theme Variant",    "COMING SOON", PURPLE_PREMIUM, false, "limited");
+
+            // Timer for limited content
+            GameObject timerObj = CreateChild(section, "LimitedTimer");
+            LayoutElement timerLE = timerObj.AddComponent<LayoutElement>();
+            timerLE.minHeight = 30;
+            TextMeshProUGUI timerText = timerObj.AddComponent<TextMeshProUGUI>();
+            timerText.text = "Ends in: --d --:--:--";
+            timerText.fontSize = FontSizes.BodySmall;
+            timerText.fontStyle = FontStyles.Bold;
+            timerText.color = LIMITED_COLOR;
+            timerText.alignment = TextAlignmentOptions.Center;
+            timerText.enableAutoSizing = true;
+            timerText.fontSizeMin = FontSizes.AutoMinSmall;
+            timerText.fontSizeMax = FontSizes.BodySmall;
+
+            Debug.Log("[ShopPremiumUIBuilder] Limited Content Section created (runtime-populated by RotatingContentService)");
+        }
+
+        private static void CreateCosmeticDisclaimer(GameObject parent)
+        {
+            GameObject disclaimer = CreateChild(parent, "CosmeticDisclaimer");
+            LayoutElement le = disclaimer.AddComponent<LayoutElement>();
+            le.minHeight = 40;
+            le.preferredHeight = 40;
+
+            TextMeshProUGUI text = disclaimer.AddComponent<TextMeshProUGUI>();
+            text.text = "All items are cosmetic only. They do not affect gameplay.";
+            text.fontSize = FontSizes.Caption;
+            text.fontStyle = FontStyles.Italic;
+            text.color = TEXT_MUTED;
+            text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinSmall;
+            text.fontSizeMax = FontSizes.Caption;
         }
 
         // ==================== HELPER: SECTION DIVIDER V5 ====================
@@ -2099,6 +2403,9 @@ namespace DigitPark.Editor
             bt.fontStyle = FontStyles.Bold;
             bt.color = accentColor;
             bt.alignment = TextAlignmentOptions.Center;
+            bt.enableAutoSizing = true;
+            bt.fontSizeMin = FontSizes.AutoMinBody;
+            bt.fontSizeMax = bt.fontSize;
         }
 
         // ==================== HELPER: PRICE BUTTON ====================

@@ -26,10 +26,23 @@ namespace DigitPark.UI
 
         private void Awake()
         {
-            // Obtener tema actual (o usar colores por defecto)
-            LoadTheme();
+            // Si la UI ya fue construida por el Editor UIBuilder, solo iniciar animaciones
+            bootAnimator = FindObjectOfType<BootAnimator>();
+            bootManager = FindObjectOfType<DigitPark.Managers.BootManager>();
 
-            BuildUI();
+            bool uiAlreadyBuilt = bootManager != null && bootManager.loadingBar != null;
+
+            if (!uiAlreadyBuilt)
+            {
+                // Fallback: construir UI en runtime (para cuando no se usó el Editor builder)
+                LoadTheme();
+                BuildUI();
+                Debug.Log("[BootUI] UI construida en runtime (fallback)");
+            }
+            else
+            {
+                Debug.Log("[BootUI] UI ya existe (construida por Editor UIBuilder)");
+            }
 
             // Iniciar animaciones
             if (bootAnimator != null)
@@ -106,25 +119,9 @@ namespace DigitPark.UI
         /// </summary>
         private void CreateBackground()
         {
-            Color bgColor = GetThemeColor(t => t.primaryBackground, new Color(0.03f, 0.03f, 0.08f));
-            Color bgColor2 = GetThemeColor(t => t.secondaryBackground, new Color(0.08f, 0.08f, 0.15f));
-
-            GameObject bg = UIFactory.CreatePanel(canvas.transform, "Background", bgColor);
-
-            // Efecto de gradiente superior
-            GameObject gradientTop = new GameObject("GradientTop");
-            gradientTop.transform.SetParent(bg.transform, false);
-
-            RectTransform rt = gradientTop.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 0.6f);
-            rt.anchorMax = Vector2.one;
-            rt.sizeDelta = Vector2.zero;
-
-            Image img = gradientTop.AddComponent<Image>();
-            img.color = bgColor2;
-
-            // Efecto de viñeta en las esquinas
-            CreateVignetteEffect(bg.transform);
+            // Unified solid background — same as all normal (non-CashBattle) scenes
+            Color bgColor = GetThemeColor(t => t.primaryBackground, new Color(0.02f, 0.04f, 0.08f));
+            UIFactory.CreatePanel(canvas.transform, "Background", bgColor);
         }
 
         /// <summary>

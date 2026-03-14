@@ -315,6 +315,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI arrowTmp = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowTmp.text = ">";
             arrowTmp.fontSize = FontSizes.Symbol;
+            arrowTmp.enableAutoSizing = true;
+            arrowTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            arrowTmp.fontSizeMax = arrowTmp.fontSize;
             arrowTmp.color = accentColor;
             arrowTmp.fontStyle = FontStyles.Bold;
             arrowTmp.alignment = TextAlignmentOptions.Center;
@@ -327,6 +330,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = title;
             titleTmp.fontSize = FontSizes.H2;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTmp.fontSizeMax = titleTmp.fontSize;
             titleTmp.color = accentColor;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -341,6 +347,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI descTmp = descObj.AddComponent<TextMeshProUGUI>();
             descTmp.text = description;
             descTmp.fontSize = FontSizes.Body;
+            descTmp.enableAutoSizing = true;
+            descTmp.fontSizeMin = FontSizes.AutoMinBody;
+            descTmp.fontSizeMax = descTmp.fontSize;
             descTmp.fontStyle = FontStyles.Bold;
             descTmp.color = TEXT_SECONDARY;
             descTmp.alignment = TextAlignmentOptions.Center;

@@ -294,6 +294,9 @@ namespace DigitPark.Editor
             phTMP.color = new Color(0.4f, 0.4f, 0.45f, 1f);
             phTMP.fontStyle = FontStyles.Bold;
             phTMP.alignment = TextAlignmentOptions.Left;
+            phTMP.enableAutoSizing = true;
+            phTMP.fontSizeMin = FontSizes.AutoMinBody;
+            phTMP.fontSizeMax = phTMP.fontSize;
 
             // Text
             var text = FindOrCreate(textArea.transform, "Text");
@@ -405,6 +408,9 @@ namespace DigitPark.Editor
             aTMP.color = PURPLE_ACCENT;
             aTMP.fontStyle = FontStyles.Bold;
             aTMP.alignment = TextAlignmentOptions.Center;
+            aTMP.enableAutoSizing = true;
+            aTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            aTMP.fontSizeMax = aTMP.fontSize;
 
             Debug.Log("[FriendsUI] Requests Nav creado");
         }

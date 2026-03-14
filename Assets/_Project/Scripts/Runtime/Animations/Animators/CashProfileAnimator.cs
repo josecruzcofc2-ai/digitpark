@@ -105,7 +105,7 @@ namespace DigitPark.Animations
                 for (int i = 0; i < _heroStats.childCount; i++)
                 {
                     Transform child = _heroStats.GetChild(i);
-                    child.DOPunchScale(Vector3.one * 0.08f, 0.3f, 3);
+                    child.DOPunchScale(Vector3.one * 0.08f, 0.3f, 3).SetLink(child.gameObject);
                 }
             }
 
@@ -119,7 +119,7 @@ namespace DigitPark.Animations
         {
             StopContinuousEffects();
 
-            Sequence exitSeq = DOTween.Sequence();
+            Sequence exitSeq = DOTween.Sequence().SetLink(gameObject);
 
             // Stats grid scales out (reverse cascade)
             if (_statsGrid != null)
@@ -238,7 +238,7 @@ namespace DigitPark.Animations
 
         private void BuildEntranceSequence()
         {
-            _entranceSeq = DOTween.Sequence();
+            _entranceSeq = DOTween.Sequence().SetLink(gameObject);
 
             // 0.0s — Header slides down from above
             if (_headerRect)
@@ -417,6 +417,7 @@ namespace DigitPark.Animations
                     _avatarRing.DOScale(avatarBreathScale, avatarBreathDuration)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
+                        .SetLink(_avatarRing.gameObject)
                 );
             }
 
@@ -428,6 +429,7 @@ namespace DigitPark.Animations
                     _goldSepImage.DOFade(baseAlpha + goldSepPulseExtra, goldSepPulseDuration)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
+                        .SetLink(_goldSepImage.gameObject)
                 );
             }
 
@@ -450,6 +452,7 @@ namespace DigitPark.Animations
                                     .SetEase(Ease.InOutSine)
                                     .SetLoops(-1, LoopType.Yoyo)
                                     .SetDelay(startDelay)
+                                    .SetLink(accent.gameObject)
                             );
                         }
                     }
@@ -493,7 +496,7 @@ namespace DigitPark.Animations
                 DOTween.To(() => 0f, x =>
                 {
                     _summaryNetProfitText.text = $"{prefix}{x:F2}";
-                }, absTarget, counterDuration).SetEase(Ease.OutQuad);
+                }, absTarget, counterDuration).SetEase(Ease.OutQuad).SetLink(gameObject);
             }
         }
 
@@ -511,14 +514,14 @@ namespace DigitPark.Animations
         {
             if (text == null) return;
             DOTween.To(() => from, x => text.text = x.ToString(), to, duration)
-                .SetEase(Ease.OutQuad);
+                .SetEase(Ease.OutQuad).SetLink(gameObject);
         }
 
         private void AnimateCounter(TextMeshProUGUI text, float from, float to, float duration, string format)
         {
             if (text == null) return;
             DOTween.To(() => from, x => text.text = string.Format(format, x), to, duration)
-                .SetEase(Ease.OutQuad);
+                .SetEase(Ease.OutQuad).SetLink(gameObject);
         }
 
         // ==================== HELPERS ====================

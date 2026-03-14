@@ -144,11 +144,9 @@ namespace DigitPark.Services
         /// </summary>
         private void RequestReview()
         {
-            // Registrar que se pidio
+            // Record that we asked (date tracking for cooldown)
             PlayerPrefs.SetString(KEY_LAST_ASKED, DateTime.Now.ToString("yyyy-MM-dd"));
-            PlayerPrefs.SetInt(KEY_REVIEW_GIVEN, 1); // Asumir que se dio (no hay callback confiable)
             PlayerPrefs.Save();
-            HasGivenReview = true;
 
             Debug.Log("[Review] Solicitando review...");
 
@@ -160,6 +158,11 @@ namespace DigitPark.Services
 #else
             Debug.Log("[Review] Review no disponible en esta plataforma (Editor)");
 #endif
+
+            // Mark as given AFTER initiating the review request (no reliable callback exists)
+            PlayerPrefs.SetInt(KEY_REVIEW_GIVEN, 1);
+            PlayerPrefs.Save();
+            HasGivenReview = true;
         }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -219,8 +222,14 @@ namespace DigitPark.Services
 #if UNITY_ANDROID
             Application.OpenURL($"market://details?id={Application.identifier}");
 #elif UNITY_IOS
-            // Reemplazar XXXXXXXXXX con el App Store ID real
-            Application.OpenURL("itms-apps://itunes.apple.com/app/idXXXXXXXXXX?action=write-review");
+            // Replace XXXXXXXXXX with the real App Store ID
+            string url = "itms-apps://itunes.apple.com/app/idXXXXXXXXXX?action=write-review";
+            if (url.Contains("XXXXXXXX"))
+            {
+                Debug.LogError("[ReviewService] App Store ID not configured! Cannot open store fallback.");
+                return;
+            }
+            Application.OpenURL(url);
 #endif
             Debug.Log("[Review] Fallback: abriendo store");
         }

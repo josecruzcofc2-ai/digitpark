@@ -35,6 +35,12 @@ namespace DigitPark.Data
         [Tooltip("Meta numerica")]
         public int targetAmount = 1;
 
+        // Economy Rebalance V55: PlayAllGameTypes missions (play 3 of 5 games)
+        // MUST be MissionCategory.Weekly, never Daily.
+        // Daily would trivialize it; weekly makes it a meaningful engagement driver.
+        // Enforced at runtime by MissionService — if actionType == PlayAllGameTypes && category != Weekly,
+        // the mission is auto-promoted to Weekly.
+
         [Header("Classification")]
         [Tooltip("Dificultad de la mision")]
         public MissionDifficulty difficulty;

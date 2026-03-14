@@ -64,6 +64,7 @@ namespace DigitPark.Editor
         private static readonly Entry[] ALL_ENTRIES = new Entry[]
         {
             // ── CORE ──
+            E("Core",       S + "_Core/Boot.unity",            "Boot",             "BootUIBuilder",                "RebuildBootScene"),
             E("Core",       S + "_Core/MainMenu.unity",        "MainMenu",         "MainMenuUIBuilder",            "RebuildMainMenu"),
             E("Core",       S + "_Core/Settings.unity",        "Settings",         "SettingsUIBuilder",            "BuildSettingsUI"),
 

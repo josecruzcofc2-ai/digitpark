@@ -214,6 +214,9 @@ namespace DigitPark.Managers
             var text = msgObj.AddComponent<TextMeshProUGUI>();
             text.text = $"<b>[{sender}]</b> {message}";
             text.fontSize = FontSizes.Body;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = text.fontSize;
             text.color = isMe ? CHAT_COLOR_ME : CHAT_COLOR_OTHER;
             text.alignment = TextAlignmentOptions.Left;
             text.enableWordWrapping = true;
@@ -563,6 +566,9 @@ namespace DigitPark.Managers
                 var text = row.AddComponent<TextMeshProUGUI>();
                 text.text = $"{place}: ${prize} ({percent}%)";
                 text.fontSize = FontSizes.Body;
+                text.enableAutoSizing = true;
+                text.fontSizeMin = FontSizes.AutoMinBody;
+                text.fontSizeMax = text.fontSize;
             }
         }
 
@@ -688,6 +694,9 @@ namespace DigitPark.Managers
                 var rankText = rankObj.AddComponent<TextMeshProUGUI>();
                 rankText.text = $"#{participant.rank}";
                 rankText.fontSize = FontSizes.BodyLarge;
+                rankText.enableAutoSizing = true;
+                rankText.fontSizeMin = FontSizes.AutoMinBody;
+                rankText.fontSizeMax = rankText.fontSize;
                 rankText.fontStyle = FontStyles.Bold;
                 rankText.color = new Color(0f, 1f, 1f);
                 rankText.alignment = TextAlignmentOptions.Center;
@@ -713,6 +722,9 @@ namespace DigitPark.Managers
                 var nameText = nameObj.AddComponent<TextMeshProUGUI>();
                 nameText.text = participant.username;
                 nameText.fontSize = FontSizes.Body;
+                nameText.enableAutoSizing = true;
+                nameText.fontSizeMin = FontSizes.AutoMinBody;
+                nameText.fontSizeMax = nameText.fontSize;
                 nameText.fontStyle = FontStyles.Bold;
                 nameText.color = Color.white;
                 nameText.alignment = TextAlignmentOptions.Left;
@@ -725,6 +737,9 @@ namespace DigitPark.Managers
                 var timeText = timeObj.AddComponent<TextMeshProUGUI>();
                 timeText.text = participant.bestTime > 0 ? FormatTime(participant.bestTime) : "-";
                 timeText.fontSize = FontSizes.BodyLarge;
+                timeText.enableAutoSizing = true;
+                timeText.fontSizeMin = FontSizes.AutoMinBody;
+                timeText.fontSizeMax = timeText.fontSize;
                 timeText.fontStyle = FontStyles.Bold;
                 timeText.color = new Color(0f, 1f, 1f);
                 timeText.alignment = TextAlignmentOptions.Right;

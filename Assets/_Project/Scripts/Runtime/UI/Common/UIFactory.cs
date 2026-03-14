@@ -515,6 +515,9 @@ namespace DigitPark.UI
             TextMeshProUGUI arrowText = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowText.text = "▼";
             arrowText.fontSize = FontSizes.Body;
+            arrowText.enableAutoSizing = true;
+            arrowText.fontSizeMin = FontSizes.AutoMinBody;
+            arrowText.fontSizeMax = arrowText.fontSize;
             arrowText.color = Color.white;
             arrowText.alignment = TextAlignmentOptions.Center;
 
@@ -609,11 +612,12 @@ namespace DigitPark.UI
             checkmarkRT.anchoredPosition = new Vector2(10, 0);
             checkmarkRT.sizeDelta = new Vector2(30, 30);
 
-            TextMeshProUGUI checkmarkText = checkmarkObj.AddComponent<TextMeshProUGUI>();
-            checkmarkText.text = "V";
-            checkmarkText.fontSize = FontSizes.Body;
-            checkmarkText.color = ElectricBlue;
-            checkmarkText.alignment = TextAlignmentOptions.Center;
+            Image checkmarkImage = checkmarkObj.AddComponent<Image>();
+            Sprite checkmarkSprite = Resources.Load<Sprite>("Icons/UI/icon_checkmark");
+            if (checkmarkSprite != null) checkmarkImage.sprite = checkmarkSprite;
+            checkmarkImage.color = ElectricBlue;
+            checkmarkImage.preserveAspect = true;
+            checkmarkImage.raycastTarget = false;
 
             // Label del item
             GameObject itemLabelObj = new GameObject("Item Label");

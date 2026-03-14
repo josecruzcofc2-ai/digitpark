@@ -307,6 +307,9 @@ namespace DigitPark.Effects
 
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinSmall;
+            tmp.fontSizeMax = 56f;
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
 

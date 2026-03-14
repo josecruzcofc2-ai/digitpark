@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
 using UnityEngine.Purchasing.Security;
+using System.Threading.Tasks;
 using DigitPark.Services.Firebase;
 using DigitPark.Monetization;
 
@@ -16,10 +17,10 @@ namespace DigitPark.Managers
     {
         CreateTournaments,      // $3.99 USD - Crear torneos
         CashBattleCreate,       // $6.99 USD - Crear batallas con dinero real
-        TournamentBundle,       // $8.99 USD - Ambos: Crear torneos + Cash Battle
+        TournamentBundle,       // $7.99 USD - Ambos: Crear torneos + Cash Battle (Economy Rebalance V55)
         StylesPro,              // Legacy - Desbloquea todos los temas premium (backwards compat)
-        PremiumBundle,          // $26.25 USD - 15 premium themes (30% off)
-        CompleteBundle          // $30.45 USD - All 19 themes: 15 premium + 4 earnable (30% off)
+        PremiumBundle,          // 3,430 DG - 19 premium themes (30% off) — Economy Rebalance V55: DG pricing
+        CompleteBundle          // ELIMINATED — earnable themes are trophies, not purchasable
     }
 
     /// <summary>
@@ -42,10 +43,16 @@ namespace DigitPark.Managers
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<PremiumManager>();
-                    if (_instance == null)
+                    if (_instance != null)
+                    {
+                        // Found existing instance — ensure it persists across scenes
+                        DontDestroyOnLoad(_instance.gameObject);
+                    }
+                    else
                     {
                         GameObject go = new GameObject("PremiumManager");
                         _instance = go.AddComponent<PremiumManager>();
+                        DontDestroyOnLoad(go);
                     }
                 }
                 return _instance;
@@ -76,7 +83,7 @@ namespace DigitPark.Managers
         [Header("=== PRECIOS (Solo para mostrar en UI) ===")]
         public const string PRICE_CREATE_TOURNAMENTS = "$3.99";
         public const string PRICE_CASH_BATTLE_CREATE = "$6.99";
-        public const string PRICE_TOURNAMENT_BUNDLE = "$8.99";
+        public const string PRICE_TOURNAMENT_BUNDLE = "$7.99"; // Economy Rebalance V55: was $8.99 (27% off vs individual $10.98)
         public const string PRICE_PREMIUM_BUNDLE = "$26.25";
         public const string PRICE_COMPLETE_BUNDLE = "$30.45";
 
@@ -145,6 +152,7 @@ namespace DigitPark.Managers
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
                 LoadPremiumStatus();
+                RestoreFromFirebaseAsync();
                 InitializePurchasing();
                 Debug.Log($"[Premium] Manager iniciado - Tournaments: {_canCreateTournaments}, CashBattle: {_canCreateCashBattle}");
             }
@@ -237,7 +245,98 @@ namespace DigitPark.Managers
             }
 
             SavePremiumStatus();
+            SyncPremiumToFirebase();
             OnPremiumStatusChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Sincroniza estado premium a Firebase para que no se pierda al reinstalar
+        /// </summary>
+        private async void SyncPremiumToFirebase()
+        {
+            try
+            {
+                var auth = AuthenticationService.Instance;
+                var db = DatabaseService.Instance;
+                if (auth == null || db == null) return;
+
+                string userId = auth.GetCurrentPlayerData()?.userId;
+                if (string.IsNullOrEmpty(userId)) return;
+
+                var updates = new Dictionary<string, object>
+                {
+                    { "premium_createTournaments", _canCreateTournaments },
+                    { "premium_cashBattleCreate", _canCreateCashBattle },
+                    { "premium_stylesPro", _hasStylesPro }
+                };
+
+                await db.UpdatePlayerFields(userId, updates);
+                Debug.Log("[Premium] Estado premium sincronizado a Firebase");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Premium] Error sincronizando premium a Firebase: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Restaura estado premium desde Firebase al iniciar.
+        /// Toma OR de local vs Firebase (si alguno dice true, es true) para no perder compras.
+        /// </summary>
+        private async void RestoreFromFirebaseAsync()
+        {
+            try
+            {
+                var auth = AuthenticationService.Instance;
+                var db = DatabaseService.Instance;
+                if (auth == null || db == null) return;
+
+                // Esperar a que auth esté listo
+                int retries = 0;
+                while (!auth.IsInitialized && retries < 50)
+                {
+                    await Task.Delay(100);
+                    retries++;
+                }
+
+                string userId = auth.GetCurrentPlayerData()?.userId;
+                if (string.IsNullOrEmpty(userId)) return;
+
+                // Leer cada campo premium directamente de Firebase
+                bool changed = false;
+
+                string fbTournaments = await db.GetPlayerField(userId, "premium_createTournaments");
+                if (string.Equals(fbTournaments, "True", StringComparison.OrdinalIgnoreCase) && !_canCreateTournaments)
+                {
+                    _canCreateTournaments = true;
+                    changed = true;
+                }
+
+                string fbCashBattle = await db.GetPlayerField(userId, "premium_cashBattleCreate");
+                if (string.Equals(fbCashBattle, "True", StringComparison.OrdinalIgnoreCase) && !_canCreateCashBattle)
+                {
+                    _canCreateCashBattle = true;
+                    changed = true;
+                }
+
+                string fbStylesPro = await db.GetPlayerField(userId, "premium_stylesPro");
+                if (string.Equals(fbStylesPro, "True", StringComparison.OrdinalIgnoreCase) && !_hasStylesPro)
+                {
+                    _hasStylesPro = true;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    SavePremiumStatus();
+                    OnPremiumStatusChanged?.Invoke();
+                    Debug.Log($"[Premium] Restaurado desde Firebase - Tournaments: {_canCreateTournaments}, CashBattle: {_canCreateCashBattle}, StylesPro: {_hasStylesPro}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Premium] Error restaurando premium desde Firebase: {e.Message}");
+            }
         }
 
         #endregion

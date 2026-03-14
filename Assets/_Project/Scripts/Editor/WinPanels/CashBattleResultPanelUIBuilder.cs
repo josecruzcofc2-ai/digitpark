@@ -30,7 +30,7 @@ namespace DigitPark.Editor
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f);
         private static readonly Color PURPLE_NEON = new Color(0.7f, 0.3f, 1f);
         private static readonly Color WIN_GREEN = new Color(0.2f, 1f, 0.4f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.01f, 0.01f, 0.95f);
+        private static readonly Color DARK_BG = new Color(0.06f, 0.05f, 0.10f, 0.95f); // CashBattle BG
         private static readonly Color CARD_BG = new Color(0.05f, 0.07f, 0.12f);
 
         private const string PREFAB_PATH = "Assets/_Project/Resources/Prefabs/WinPanels";

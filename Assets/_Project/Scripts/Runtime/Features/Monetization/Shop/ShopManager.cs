@@ -77,7 +77,9 @@ namespace DigitPark.Monetization
 
         private void OnDestroy()
         {
-            DOTween.Kill(transform);
+            DOTween.Kill(gameObject);
+            if (_headerGemsText != null) DOTween.Kill(_headerGemsText.gameObject);
+            if (_headerCoinsText != null) DOTween.Kill(_headerCoinsText.gameObject);
             RemoveCurrencyListeners();
         }
 
@@ -622,7 +624,9 @@ namespace DigitPark.Monetization
                 Color flashColor = isGain ? new Color(0.3f, 1f, 0.5f, 1f) : new Color(1f, 0.3f, 0.3f, 1f);
                 Color originalColor = headerText.color;
                 headerText.DOColor(flashColor, 0.15f).SetUpdate(true)
-                    .OnComplete(() => headerText.DOColor(originalColor, 0.3f).SetUpdate(true));
+                    .SetLink(headerText.gameObject)
+                    .OnComplete(() => headerText.DOColor(originalColor, 0.3f).SetUpdate(true)
+                        .SetLink(headerText.gameObject));
             }
         }
 

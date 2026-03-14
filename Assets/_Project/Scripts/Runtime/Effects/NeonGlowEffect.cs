@@ -132,7 +132,7 @@ namespace DigitPark.Effects
                 glowCoroutine = null;
             }
 
-            // Restaurar
+            // Restore
             if (outline != null)
             {
                 outline.effectColor = glowColor;
@@ -222,7 +222,7 @@ namespace DigitPark.Effects
 
                 ApplyGlowIntensity(intensity);
 
-                // Tambien variar ligeramente el tamaño del outline
+                // Also slightly vary the outline size
                 if (outline != null)
                 {
                     float distMult = Mathf.Lerp(0.8f, 1.2f, intensity);

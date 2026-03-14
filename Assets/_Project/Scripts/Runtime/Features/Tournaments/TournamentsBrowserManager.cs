@@ -398,6 +398,9 @@ namespace DigitPark.Managers
             var tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = $"{tournament.name}\n{tournament.category} - ${tournament.entryFee}";
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.alignment = TextAlignmentOptions.Left;
 
             return item;

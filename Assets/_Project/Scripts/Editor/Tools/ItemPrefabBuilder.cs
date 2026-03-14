@@ -153,6 +153,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI arrowTMP = arrowObj.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = ">";
             arrowTMP.fontSize = (int)FontSizes.Body;
+            arrowTMP.enableAutoSizing = true;
+            arrowTMP.fontSizeMin = FontSizes.AutoMinBody;
+            arrowTMP.fontSizeMax = arrowTMP.fontSize;
             arrowTMP.color = CYAN_NEON;
             arrowTMP.alignment = TextAlignmentOptions.Center;
             arrowTMP.fontStyle = FontStyles.Bold;
@@ -307,6 +310,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI expandTextTMP = expandText.AddComponent<TextMeshProUGUI>();
             expandTextTMP.text = "View tournament details";
             expandTextTMP.fontSize = (int)FontSizes.Body;
+            expandTextTMP.enableAutoSizing = true;
+            expandTextTMP.fontSizeMin = FontSizes.AutoMinBody;
+            expandTextTMP.fontSizeMax = expandTextTMP.fontSize;
             expandTextTMP.fontStyle = FontStyles.Bold;
             expandTextTMP.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             expandTextTMP.alignment = TextAlignmentOptions.Center;
@@ -323,6 +329,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI arrowTMP = arrow.AddComponent<TextMeshProUGUI>();
             arrowTMP.text = "v";
             arrowTMP.fontSize = (int)FontSizes.Body;
+            arrowTMP.enableAutoSizing = true;
+            arrowTMP.fontSizeMin = FontSizes.AutoMinBody;
+            arrowTMP.fontSizeMax = arrowTMP.fontSize;
             arrowTMP.fontStyle = FontStyles.Bold;
             arrowTMP.color = CYAN_NEON;
             arrowTMP.alignment = TextAlignmentOptions.Center;
@@ -416,6 +425,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI positionTMP = positionObj.AddComponent<TextMeshProUGUI>();
             positionTMP.text = "1";
             positionTMP.fontSize = (int)FontSizes.Body;
+            positionTMP.enableAutoSizing = true;
+            positionTMP.fontSizeMin = FontSizes.AutoMinBody;
+            positionTMP.fontSizeMax = positionTMP.fontSize;
             positionTMP.color = GOLD;
             positionTMP.alignment = TextAlignmentOptions.Center;
             positionTMP.fontStyle = FontStyles.Bold;
@@ -435,6 +447,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI usernameTMP = usernameObj.AddComponent<TextMeshProUGUI>();
             usernameTMP.text = "Username";
             usernameTMP.fontSize = (int)FontSizes.Body;
+            usernameTMP.enableAutoSizing = true;
+            usernameTMP.fontSizeMin = FontSizes.AutoMinBody;
+            usernameTMP.fontSizeMax = usernameTMP.fontSize;
             usernameTMP.fontStyle = FontStyles.Bold;
             usernameTMP.color = Color.white;
             usernameTMP.alignment = TextAlignmentOptions.Center;
@@ -456,6 +471,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI timeTMP = timeObj.AddComponent<TextMeshProUGUI>();
             timeTMP.text = "0.000s";
             timeTMP.fontSize = (int)FontSizes.Body;
+            timeTMP.enableAutoSizing = true;
+            timeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            timeTMP.fontSizeMax = timeTMP.fontSize;
             timeTMP.fontStyle = FontStyles.Bold;
             timeTMP.color = GREEN_TIME;
             timeTMP.alignment = TextAlignmentOptions.Center;
@@ -592,6 +610,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = (int)FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = Color.black;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -655,6 +676,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = (int)FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = textColor;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

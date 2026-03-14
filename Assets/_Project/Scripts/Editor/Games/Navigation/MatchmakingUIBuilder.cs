@@ -421,6 +421,9 @@ namespace DigitPark.Editor
             nameTmp.color = TEXT_WHITE;
             nameTmp.alignment = TextAlignmentOptions.Left;
             nameTmp.fontStyle = FontStyles.Bold;
+            nameTmp.enableAutoSizing = true;
+            nameTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            nameTmp.fontSizeMax = nameTmp.fontSize;
 
 
             // Level/Rank
@@ -450,6 +453,9 @@ namespace DigitPark.Editor
             levelTmp.color = isPlayer ? CYAN_NEON : TEXT_MUTED;
             levelTmp.alignment = TextAlignmentOptions.Center;
             levelTmp.fontStyle = FontStyles.Bold;
+            levelTmp.enableAutoSizing = true;
+            levelTmp.fontSizeMin = FontSizes.AutoMinBody;
+            levelTmp.fontSizeMax = levelTmp.fontSize;
 
 
             // "YOU" badge for player card
@@ -477,6 +483,9 @@ namespace DigitPark.Editor
                 youTmp.color = CYAN_NEON;
                 youTmp.alignment = TextAlignmentOptions.Center;
                 youTmp.fontStyle = FontStyles.Bold;
+                youTmp.enableAutoSizing = true;
+                youTmp.fontSizeMin = FontSizes.AutoMinBody;
+                youTmp.fontSizeMax = youTmp.fontSize;
 
             }
 
@@ -547,6 +556,9 @@ namespace DigitPark.Editor
             statusTmp.fontStyle = FontStyles.Bold;
             statusTmp.color = TEXT_SECONDARY;
             statusTmp.alignment = TextAlignmentOptions.Center;
+            statusTmp.enableAutoSizing = true;
+            statusTmp.fontSizeMin = FontSizes.AutoMinBody;
+            statusTmp.fontSizeMax = statusTmp.fontSize;
 
             // --- Timer Text (centered, lower half) ---
             GameObject timerText = CreateElement(searchSection.transform, "TimerText");
@@ -561,6 +573,9 @@ namespace DigitPark.Editor
             timerTmp.color = CYAN_NEON;
             timerTmp.alignment = TextAlignmentOptions.Center;
             timerTmp.fontStyle = FontStyles.Bold;
+            timerTmp.enableAutoSizing = true;
+            timerTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            timerTmp.fontSizeMax = timerTmp.fontSize;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -604,6 +619,9 @@ namespace DigitPark.Editor
             textTmp.color = RED_NEON;
             textTmp.alignment = TextAlignmentOptions.Center;
             textTmp.fontStyle = FontStyles.Bold;
+            textTmp.enableAutoSizing = true;
+            textTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            textTmp.fontSizeMax = textTmp.fontSize;
 
         }
 
@@ -633,6 +651,9 @@ namespace DigitPark.Editor
             readyTmp.color = TEXT_WHITE;
             readyTmp.alignment = TextAlignmentOptions.Center;
             readyTmp.fontStyle = FontStyles.Bold;
+            readyTmp.enableAutoSizing = true;
+            readyTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            readyTmp.fontSizeMax = readyTmp.fontSize;
 
 
             // Countdown number (center, big)
@@ -648,6 +669,9 @@ namespace DigitPark.Editor
             countdownTmp.color = GREEN_NEON;
             countdownTmp.alignment = TextAlignmentOptions.Center;
             countdownTmp.fontStyle = FontStyles.Bold;
+            countdownTmp.enableAutoSizing = true;
+            countdownTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            countdownTmp.fontSizeMax = countdownTmp.fontSize;
 
 
             // Countdown glow

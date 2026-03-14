@@ -55,7 +55,7 @@ namespace DigitPark.Animations
         public void PlayEntrance()
         {
             KillAll();
-            entranceSequence = DOTween.Sequence();
+            entranceSequence = DOTween.Sequence().SetLink(gameObject);
 
             // Icon entrance: scale pop + start float
             if (icon != null)
@@ -104,7 +104,8 @@ namespace DigitPark.Animations
             Vector3 startPos = icon.localPosition;
             floatTween = icon.DOLocalMoveY(startPos.y + floatDistance, floatDuration / 2f)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(icon.gameObject);
         }
 
         private void StartBreathe()
@@ -114,7 +115,8 @@ namespace DigitPark.Animations
             breatheTween?.Kill();
             breatheTween = ctaButton.DOScale(breatheMax, breatheDuration / 2f)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(ctaButton.gameObject);
         }
 
         private void ResetState()

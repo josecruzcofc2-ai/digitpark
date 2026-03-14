@@ -585,6 +585,9 @@ namespace DigitPark.Editor
             txtTMP.color = TEXT_WHITE;
             txtTMP.fontStyle = FontStyles.Bold;
             txtTMP.alignment = TextAlignmentOptions.Left;
+            txtTMP.enableAutoSizing = true;
+            txtTMP.fontSizeMin = FontSizes.AutoMinBody;
+            txtTMP.fontSizeMax = txtTMP.fontSize;
 
             input.textViewport = taRT;
             input.textComponent = txtTMP;

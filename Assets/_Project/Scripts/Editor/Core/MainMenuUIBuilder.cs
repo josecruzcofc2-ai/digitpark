@@ -184,6 +184,7 @@ namespace DigitPark.Editor
             CreateExtraRow();
             CreatePanels();
             SetupManagerReferences();
+            AssignAllIcons();
 
             Debug.Log("[MainMenuUI] ¡MainMenu v3 REDISEÑADO exitosamente!");
             EditorUtility.SetDirty(canvas.gameObject);
@@ -1150,10 +1151,23 @@ namespace DigitPark.Editor
 
         #region Icon Assignment
 
+        /// <summary>
+        /// Button handler — assigns icons and shows dialog
+        /// </summary>
         private static void AssignNeonIcons()
         {
+            int a = AssignAllIcons();
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/14\nVer Console para detalles.", "OK");
+        }
+
+        /// <summary>
+        /// Core icon assignment logic — called by RebuildMainMenu() and AssignNeonIcons()
+        /// </summary>
+        private static int AssignAllIcons()
+        {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
-            if (canvas == null) { Debug.LogError("[MainMenuUI] No Canvas"); return; }
+            if (canvas == null) { Debug.LogError("[MainMenuUI] No Canvas"); return 0; }
 
             int a = 0;
             a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
@@ -1174,10 +1188,10 @@ namespace DigitPark.Editor
 
             AssignNotificationSprites();
 
-            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/17");
+            Debug.Log($"[MainMenuUI] Iconos asignados: {a}/14");
             EditorUtility.SetDirty(canvas.gameObject);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
-            EditorUtility.DisplayDialog("Iconos", $"Asignados: {a}/17\nVer Console para detalles.", "OK");
+            return a;
         }
 
         private static void AssignNotificationSprites()

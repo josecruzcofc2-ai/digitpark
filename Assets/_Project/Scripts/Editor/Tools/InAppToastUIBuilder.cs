@@ -209,6 +209,9 @@ namespace DigitPark.Editor
             var xTMP = xText.AddComponent<TextMeshProUGUI>();
             xTMP.text = "✕";
             xTMP.fontSize = FontSizes.Body;
+            xTMP.enableAutoSizing = true;
+            xTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            xTMP.fontSizeMax = xTMP.fontSize;
             xTMP.fontStyle = FontStyles.Bold;
             xTMP.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             xTMP.alignment = TextAlignmentOptions.Center;

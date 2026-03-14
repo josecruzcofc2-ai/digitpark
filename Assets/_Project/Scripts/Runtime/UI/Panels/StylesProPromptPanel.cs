@@ -194,39 +194,20 @@ namespace DigitPark.UI.Panels
             colors.pressedColor = new Color(0f, 0.7f, 0.8f, 1f);
             closeButton.colors = colors;
 
-            // Try icon, fallback to X text
-            Sprite closeIcon = Resources.Load<Sprite>("Icons/CloseIcon");
-            if (closeIcon != null)
-            {
-                GameObject iconObj = new GameObject("Icon");
-                iconObj.transform.SetParent(obj.transform, false);
-                RectTransform iconRt = iconObj.AddComponent<RectTransform>();
-                iconRt.anchorMin = new Vector2(0.15f, 0.15f);
-                iconRt.anchorMax = new Vector2(0.85f, 0.85f);
-                iconRt.offsetMin = Vector2.zero;
-                iconRt.offsetMax = Vector2.zero;
-                Image iconImg = iconObj.AddComponent<Image>();
-                iconImg.sprite = closeIcon;
-                iconImg.color = Color.black;
-                iconImg.raycastTarget = false;
-            }
-            else
-            {
-                GameObject textObj = new GameObject("X");
-                textObj.transform.SetParent(obj.transform, false);
-                RectTransform textRt = textObj.AddComponent<RectTransform>();
-                textRt.anchorMin = Vector2.zero;
-                textRt.anchorMax = Vector2.one;
-                textRt.offsetMin = Vector2.zero;
-                textRt.offsetMax = Vector2.zero;
-                TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
-                tmp.text = "X";
-                tmp.fontSize = FontSizes.Body;
-                tmp.fontStyle = FontStyles.Bold;
-                tmp.color = Color.black;
-                tmp.alignment = TextAlignmentOptions.Center;
-                tmp.raycastTarget = false;
-            }
+            // Sprite close icon
+            GameObject iconObj = new GameObject("Icon");
+            iconObj.transform.SetParent(obj.transform, false);
+            RectTransform iconRt = iconObj.AddComponent<RectTransform>();
+            iconRt.anchorMin = new Vector2(0.15f, 0.15f);
+            iconRt.anchorMax = new Vector2(0.85f, 0.85f);
+            iconRt.offsetMin = Vector2.zero;
+            iconRt.offsetMax = Vector2.zero;
+            Image closeImg = iconObj.AddComponent<Image>();
+            Sprite closeSprite = Resources.Load<Sprite>("Icons/UI/icon_close_x");
+            if (closeSprite != null) closeImg.sprite = closeSprite;
+            closeImg.color = Color.black;
+            closeImg.preserveAspect = true;
+            closeImg.raycastTarget = false;
         }
 
         private void CreateTitle(Transform parent)
@@ -240,6 +221,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("styles_pro_title");
             tmp.fontSize = FontSizes.H4;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = GOLD;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -256,6 +240,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("styles_pro_subtitle");
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = TEXT_SECONDARY;
             tmp.alignment = TextAlignmentOptions.Center;
         }
@@ -554,6 +541,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = 22;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinSmall;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = textColor;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -654,6 +644,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI priceTMP = priceObj.AddComponent<TextMeshProUGUI>();
             priceTMP.text = $"<s>${premiumTotal:F2}</s>  {priceText}  -30%";
             priceTMP.fontSize = 22;
+            priceTMP.enableAutoSizing = true;
+            priceTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            priceTMP.fontSizeMax = priceTMP.fontSize;
             priceTMP.fontStyle = FontStyles.Bold;
             priceTMP.color = new Color(0.15f, 0.1f, 0f, 1f);
             priceTMP.alignment = TextAlignmentOptions.Center;
@@ -727,6 +720,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI priceTMP = priceObj.AddComponent<TextMeshProUGUI>();
             priceTMP.text = $"<s>${completeTotal:F2}</s>  {priceText}  -30%";
             priceTMP.fontSize = 22;
+            priceTMP.enableAutoSizing = true;
+            priceTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            priceTMP.fontSizeMax = priceTMP.fontSize;
             priceTMP.fontStyle = FontStyles.Bold;
             priceTMP.color = new Color(0.15f, 0.1f, 0f, 1f);
             priceTMP.alignment = TextAlignmentOptions.Center;
@@ -767,6 +763,9 @@ namespace DigitPark.UI.Panels
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = AutoLocalizer.Get("cancel");
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = TEXT_PRIMARY;
             tmp.alignment = TextAlignmentOptions.Center;

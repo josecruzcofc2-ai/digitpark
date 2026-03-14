@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Progression;
+using DigitPark.Navigation;
 
 namespace DigitPark.Games
 {
@@ -364,11 +364,17 @@ namespace DigitPark.Games
                         PlayerPrefs.SetInt("CurrentWinStreak", currentStreak);
                         PlayerPrefs.Save();
                         AchievementService.Instance?.OnWinStreakChanged(currentStreak);
+
+                        // Sync win streak to Firebase
+                        SyncWinStreakToFirebase(currentStreak);
                     }
                     else
                     {
                         PlayerPrefs.SetInt("CurrentWinStreak", 0);
                         PlayerPrefs.Save();
+
+                        // Sync reset streak to Firebase
+                        SyncWinStreakToFirebase(0);
                     }
 
                     // XP — cosmético, no afecta matchmaking. CashBattle da 50% del rate normal.
@@ -456,7 +462,7 @@ namespace DigitPark.Games
         public void CancelSession()
         {
             CurrentContext = null;
-            SceneManager.LoadScene("MainMenu");
+            SceneNavigator.Instance.NavigateTo("MainMenu");
         }
 
         /// <summary>
@@ -472,7 +478,7 @@ namespace DigitPark.Games
 
             string sceneName = GetSceneNameForGame(CurrentContext.CurrentGame.Value);
             Debug.Log($"Cargando escena: {sceneName}");
-            SceneManager.LoadScene(sceneName);
+            SceneNavigator.Instance.NavigateTo(sceneName);
         }
 
         /// <summary>
@@ -489,6 +495,25 @@ namespace DigitPark.Games
                 GameType.OddOneOut => "OddOneOut",
                 _ => "MainMenu"
             };
+        }
+
+        /// <summary>
+        /// Syncs the current win streak value to Firebase
+        /// </summary>
+        private void SyncWinStreakToFirebase(int currentStreak)
+        {
+            if (DatabaseService.Instance != null)
+            {
+                var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                if (playerData != null)
+                {
+                    var updates = new Dictionary<string, object> { { "currentWinStreak", currentStreak } };
+                    DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates).ContinueWith(t =>
+                    {
+                        if (t.IsFaulted) Debug.LogWarning($"[GameSessionManager] Win streak sync failed: {t.Exception?.GetBaseException().Message}");
+                    }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+                }
+            }
         }
 
         /// <summary>

@@ -502,11 +502,25 @@ namespace DigitPark.Services.Firebase
         /// <summary>
         /// Reactiva la coleccion de analytics
         /// </summary>
-        public void EnableAnalytics()
+        public async void EnableAnalytics()
         {
-            FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
-            _isInitialized = true;
-            Debug.Log("[Analytics] Analytics habilitado");
+            try
+            {
+                var dependencyStatus = await FirebaseApp.CheckAndFixDependenciesAsync();
+                if (dependencyStatus != DependencyStatus.Available)
+                {
+                    Debug.LogError($"[Analytics] Cannot enable analytics — Firebase not available: {dependencyStatus}");
+                    return;
+                }
+
+                FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
+                _isInitialized = true;
+                Debug.Log("[Analytics] Analytics habilitado");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Analytics] Error enabling analytics: {e.Message}");
+            }
         }
 
         /// <summary>
@@ -528,10 +542,14 @@ namespace DigitPark.Services.Firebase
                 {
                     if (kvp.Value is string s)
                         firebaseParams.Add(new Parameter(kvp.Key, s));
+                    else if (kvp.Value is int i)
+                        firebaseParams.Add(new Parameter(kvp.Key, i));
                     else if (kvp.Value is long l)
                         firebaseParams.Add(new Parameter(kvp.Key, l));
                     else if (kvp.Value is double d)
                         firebaseParams.Add(new Parameter(kvp.Key, d));
+                    else if (kvp.Value is float f)
+                        firebaseParams.Add(new Parameter(kvp.Key, (double)f));
                     else
                         firebaseParams.Add(new Parameter(kvp.Key, kvp.Value?.ToString() ?? ""));
                 }

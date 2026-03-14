@@ -33,14 +33,7 @@ namespace DigitPark.Localization
         private static LocalizationManager _instance;
         public static LocalizationManager Instance
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<LocalizationManager>();
-                }
-                return _instance;
-            }
+            get { return _instance; }
             private set { _instance = value; }
         }
 
@@ -152,10 +145,12 @@ namespace DigitPark.Localization
                 {
                     // Intentar cargar desde StreamingAssets o ruta directa
                     string path = System.IO.Path.Combine(Application.streamingAssetsPath, "Translations.txt");
+#if UNITY_EDITOR
                     if (!System.IO.File.Exists(path))
                     {
                         path = "Assets/_Project/Localization/Translations.txt";
                     }
+#endif
 
                     if (System.IO.File.Exists(path))
                     {
@@ -215,26 +210,27 @@ namespace DigitPark.Localization
 
                 string trimmed = line.Trim();
 
-                // Detectar líneas de idioma
-                if (trimmed.StartsWith("EN:"))
+                // Detectar líneas de idioma (soporta "EN:" y "EN " formatos)
+                string langValue = TryExtractLangValue(trimmed, "EN");
+                if (langValue != null)
                 {
-                    en = trimmed.Substring(3).Trim();
+                    en = langValue;
                 }
-                else if (trimmed.StartsWith("ES:"))
+                else if ((langValue = TryExtractLangValue(trimmed, "ES")) != null)
                 {
-                    es = trimmed.Substring(3).Trim();
+                    es = langValue;
                 }
-                else if (trimmed.StartsWith("FR:"))
+                else if ((langValue = TryExtractLangValue(trimmed, "FR")) != null)
                 {
-                    fr = trimmed.Substring(3).Trim();
+                    fr = langValue;
                 }
-                else if (trimmed.StartsWith("PT:"))
+                else if ((langValue = TryExtractLangValue(trimmed, "PT")) != null)
                 {
-                    pt = trimmed.Substring(3).Trim();
+                    pt = langValue;
                 }
-                else if (trimmed.StartsWith("DE:"))
+                else if ((langValue = TryExtractLangValue(trimmed, "DE")) != null)
                 {
-                    de = trimmed.Substring(3).Trim();
+                    de = langValue;
                 }
                 // Si no empieza con espacio/tab y no es línea de idioma, es una nueva key
                 else if (!line.StartsWith(" ") && !line.StartsWith("\t") && !trimmed.Contains(":") && !trimmed.Contains("|"))
@@ -258,6 +254,27 @@ namespace DigitPark.Localization
             }
 
             Debug.Log($"[Localization] {textDictionary.Count} traducciones cargadas desde archivo");
+        }
+
+        /// <summary>
+        /// Extracts the value for a language prefix. Supports both "EN:" and "EN " (space) formats.
+        /// Returns null if the line doesn't match the given language prefix.
+        /// </summary>
+        private static string TryExtractLangValue(string trimmedLine, string lang)
+        {
+            // Format 1: "EN: value" or "EN:value"
+            if (trimmedLine.StartsWith(lang + ":"))
+                return trimmedLine.Substring(lang.Length + 1).Trim();
+
+            // Format 2: "EN value" (space-separated, must be exactly the lang code followed by space)
+            if (trimmedLine.StartsWith(lang + " ") && trimmedLine.Length > lang.Length + 1)
+            {
+                string rest = trimmedLine.Substring(lang.Length).Trim();
+                if (!string.IsNullOrEmpty(rest))
+                    return rest;
+            }
+
+            return null;
         }
 
         private void SaveParsedTranslation(string key, string en, string es, string fr, string pt, string de)

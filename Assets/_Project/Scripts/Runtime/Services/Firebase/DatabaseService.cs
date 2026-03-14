@@ -99,30 +99,11 @@ namespace DigitPark.Services.Firebase
                 }
             }
 
+            // No crear datos fake si el leaderboard está vacío — se mostrará empty state en UI
             if (globalLeaderboard.Count == 0)
             {
-                CreateSampleData();
+                Debug.LogWarning("[Database] Leaderboard vacío en modo offline. Se mostrará empty state.");
             }
-        }
-
-        private void CreateSampleData()
-        {
-            string[] names = { "ProGamer99", "SpeedRunner", "ChampionX", "FastFingers", "GoldMaster" };
-            string[] countries = { "US", "MX", "ES", "AR", "CO" };
-
-            for (int i = 0; i < 5; i++)
-            {
-                globalLeaderboard.Add(new LeaderboardEntry
-                {
-                    userId = $"sample_{i}",
-                    username = names[i],
-                    time = 10f + (i * 2.5f) + UnityEngine.Random.Range(0f, 1f),
-                    countryCode = countries[i],
-                    position = i + 1
-                });
-            }
-
-            SaveLeaderboardLocal();
         }
 
         private void SaveLeaderboardLocal()
@@ -134,16 +115,25 @@ namespace DigitPark.Services.Firebase
 
         private async Task LoadLeaderboardFromFirebase()
         {
+            await LoadLeaderboardFromFirebase("");
+        }
+
+        private async Task LoadLeaderboardFromFirebase(string gameType)
+        {
             if (!_isInitialized) return;
+
+            string safeGameType = SanitizeFirebasePath(gameType);
+            bool hasGameType = !string.IsNullOrEmpty(safeGameType);
+            string path = hasGameType ? $"{LEADERBOARD_PATH}/{safeGameType}" : LEADERBOARD_PATH;
 
             try
             {
-                var snapshot = await _databaseRef.Child(LEADERBOARD_PATH)
+                var snapshot = await _databaseRef.Child(path)
                     .OrderByChild("time")
                     .LimitToFirst(200)
                     .GetValueAsync();
 
-                globalLeaderboard.Clear();
+                var entries = new List<LeaderboardEntry>();
                 int position = 1;
 
                 foreach (var child in snapshot.Children)
@@ -155,12 +145,19 @@ namespace DigitPark.Services.Firebase
                         time = SafeParseFloat(child.Child("time").Value?.ToString()),
                         countryCode = child.Child("countryCode").Value?.ToString() ?? "US",
                         avatarUrl = child.Child("avatarUrl").Value?.ToString() ?? "",
+                        gameId = child.Child("gameId").Value?.ToString() ?? gameType,
                         position = position++
                     };
-                    globalLeaderboard.Add(entry);
+                    entries.Add(entry);
                 }
 
-                Debug.Log($"[Database] Leaderboard cargado desde Firebase: {globalLeaderboard.Count} entradas");
+                // Only update the global cache for the default (all games) query
+                if (!hasGameType)
+                {
+                    globalLeaderboard = entries;
+                }
+
+                Debug.Log($"[Database] Leaderboard cargado desde Firebase: {entries.Count} entradas (gameType: {(hasGameType ? safeGameType : "all")})");
 
                 // Guardar cache local
                 SaveLeaderboardLocal();
@@ -305,6 +302,46 @@ namespace DigitPark.Services.Firebase
         }
 
         /// <summary>
+        /// Lee un campo específico del jugador en Firebase. Retorna null si no existe.
+        /// </summary>
+        public async Task<string> GetPlayerField(string userId, string fieldName)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(fieldName)) return null;
+
+            if (_isInitialized && _databaseRef != null)
+            {
+                try
+                {
+                    var snapshot = await _databaseRef.Child(PLAYERS_PATH).Child(userId).Child(fieldName).GetValueAsync();
+                    if (snapshot.Exists)
+                        return snapshot.Value?.ToString();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Database] Error leyendo campo {fieldName}: {e.Message}");
+                }
+            }
+
+            // Fallback local
+            string key = $"SimUser_{userId}_fields";
+            if (PlayerPrefs.HasKey(key))
+            {
+                try
+                {
+                    var wrapper = JsonUtility.FromJson<FieldsWrapper>(PlayerPrefs.GetString(key));
+                    if (wrapper?.keys != null)
+                    {
+                        int idx = wrapper.keys.IndexOf(fieldName);
+                        if (idx >= 0) return wrapper.values[idx];
+                    }
+                }
+                catch { /* ignore */ }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Checks if a username is already taken by any player in the database
         /// </summary>
         public async Task<bool> IsUsernameTaken(string username)
@@ -321,7 +358,7 @@ namespace DigitPark.Services.Firebase
             catch (Exception ex)
             {
                 Debug.LogWarning($"[Database] Username check failed: {ex.Message}");
-                return false; // Allow registration to proceed if check fails
+                return true; // Fail-closed: if we can't check, assume taken to prevent duplicates
             }
         }
 
@@ -340,7 +377,9 @@ namespace DigitPark.Services.Firebase
         public async Task<List<PlayerSearchResult>> SearchPlayers(string query, int maxResults = 20)
         {
             Debug.Log($"[Database] Buscando jugadores: {query}");
+#if UNITY_EDITOR
             await Task.Delay(100); // Simular latencia de red
+#endif
 
             var results = new List<PlayerSearchResult>();
             string queryLower = query.ToLower();
@@ -649,6 +688,9 @@ namespace DigitPark.Services.Firebase
             return count > 0 ? filtered.GetRange(0, count) : new List<LeaderboardEntry>();
         }
 
+        // All known game types for per-game leaderboard operations
+        private static readonly string[] ALL_GAME_TYPES = { "DigitRush", "MemoryPairs", "QuickMath", "FlashTap", "OddOneOut" };
+
         public async Task UpdateUsernameInLeaderboards(string userId, string newUsername, string countryCode)
         {
             Debug.Log($"[Database] Actualizando username en leaderboards: {newUsername}");
@@ -659,11 +701,27 @@ namespace DigitPark.Services.Firebase
             {
                 try
                 {
-                    // Actualizar en leaderboard global
+                    // Actualizar en leaderboard global (legacy flat path)
                     await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).Child("username").SetValueAsync(newUsername);
 
-                    // Actualizar en leaderboard de país
+                    // Actualizar en leaderboard de país (legacy flat path)
                     await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(userId).Child("username").SetValueAsync(newUsername);
+
+                    // Actualizar en per-game leaderboard paths
+                    foreach (string gameType in ALL_GAME_TYPES)
+                    {
+                        var gameSnap = await _databaseRef.Child(LEADERBOARD_PATH).Child(gameType).Child(userId).GetValueAsync();
+                        if (gameSnap.Exists)
+                        {
+                            await _databaseRef.Child(LEADERBOARD_PATH).Child(gameType).Child(userId).Child("username").SetValueAsync(newUsername);
+                        }
+
+                        var countryGameSnap = await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(gameType).Child(userId).GetValueAsync();
+                        if (countryGameSnap.Exists)
+                        {
+                            await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(gameType).Child(userId).Child("username").SetValueAsync(newUsername);
+                        }
+                    }
 
                     Debug.Log($"[Database] Username actualizado en Firebase");
                 }
@@ -697,14 +755,29 @@ namespace DigitPark.Services.Firebase
                     var userSnapshot = await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).GetValueAsync();
                     string countryCode = userSnapshot.Child("countryCode").Value?.ToString() ?? "";
 
-                    // Eliminar de leaderboard global
+                    // Eliminar de leaderboard global (legacy flat path)
                     await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).RemoveValueAsync();
 
-                    // Eliminar de leaderboard de país
+                    // Eliminar de leaderboard de país (legacy flat path)
                     if (!string.IsNullOrEmpty(countryCode))
                     {
                         string safeCountryCode = SanitizeFirebasePath(countryCode);
                         await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(userId).RemoveValueAsync();
+
+                        // Eliminar de per-game leaderboard paths
+                        foreach (string gameType in ALL_GAME_TYPES)
+                        {
+                            await _databaseRef.Child(LEADERBOARD_PATH).Child(gameType).Child(userId).RemoveValueAsync();
+                            await _databaseRef.Child(COUNTRY_LEADERBOARD_PATH).Child(safeCountryCode).Child(gameType).Child(userId).RemoveValueAsync();
+                        }
+                    }
+                    else
+                    {
+                        // No country code — still remove per-game global entries
+                        foreach (string gameType in ALL_GAME_TYPES)
+                        {
+                            await _databaseRef.Child(LEADERBOARD_PATH).Child(gameType).Child(userId).RemoveValueAsync();
+                        }
                     }
 
                     Debug.Log($"[Database] Usuario eliminado de leaderboards en Firebase");
@@ -1052,6 +1125,95 @@ namespace DigitPark.Services.Firebase
         public void LogGameEvent(string eventName, Dictionary<string, object> parameters)
         {
             Debug.Log($"[Database] Evento: {eventName}");
+        }
+
+        #endregion
+
+        #region Friend Requests
+
+        public async Task SaveFriendRequest(FriendRequest request)
+        {
+            if (!_isInitialized || request == null) return;
+
+            try
+            {
+                string json = JsonUtility.ToJson(request);
+                // Store under receiver's node so they can load their incoming requests
+                await _databaseRef.Child("friend_requests").Child(request.receiverId).Child(request.requestId).SetRawJsonValueAsync(json);
+                // Also store under sender's node for sent requests tracking
+                await _databaseRef.Child("friend_requests").Child(request.senderId).Child(request.requestId).SetRawJsonValueAsync(json);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DatabaseService] SaveFriendRequest failed: {e.Message}");
+            }
+        }
+
+        public async Task UpdateFriendRequestStatus(FriendRequest request)
+        {
+            if (!_isInitialized || request == null) return;
+
+            try
+            {
+                string json = JsonUtility.ToJson(request);
+                // Update in both sender and receiver nodes
+                await _databaseRef.Child("friend_requests").Child(request.receiverId).Child(request.requestId).SetRawJsonValueAsync(json);
+                await _databaseRef.Child("friend_requests").Child(request.senderId).Child(request.requestId).SetRawJsonValueAsync(json);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DatabaseService] UpdateFriendRequestStatus failed: {e.Message}");
+            }
+        }
+
+        public async Task DeleteFriendRequest(FriendRequest request)
+        {
+            if (!_isInitialized || request == null) return;
+
+            try
+            {
+                await _databaseRef.Child("friend_requests").Child(request.receiverId).Child(request.requestId).RemoveValueAsync();
+                await _databaseRef.Child("friend_requests").Child(request.senderId).Child(request.requestId).RemoveValueAsync();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DatabaseService] DeleteFriendRequest failed: {e.Message}");
+            }
+        }
+
+        public async Task<List<FriendRequest>> LoadFriendRequests(string userId)
+        {
+            var requests = new List<FriendRequest>();
+            if (!_isInitialized || string.IsNullOrEmpty(userId)) return requests;
+
+            try
+            {
+                var snapshot = await _databaseRef.Child("friend_requests").Child(userId).GetValueAsync();
+
+                if (snapshot != null && snapshot.Exists)
+                {
+                    foreach (var child in snapshot.Children)
+                    {
+                        try
+                        {
+                            string json = child.GetRawJsonValue();
+                            var request = JsonUtility.FromJson<FriendRequest>(json);
+                            if (request != null)
+                                requests.Add(request);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogWarning($"[DatabaseService] Failed to parse friend request {child.Key}: {e.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DatabaseService] LoadFriendRequests failed: {e.Message}");
+            }
+
+            return requests;
         }
 
         #endregion

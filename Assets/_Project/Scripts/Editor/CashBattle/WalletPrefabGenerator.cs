@@ -154,6 +154,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = "Description";
             descTMP.fontSize = FontSizes.Body;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = FontSizes.AutoMinBody;
+            descTMP.fontSizeMax = descTMP.fontSize;
             descTMP.color = TEXT_WHITE;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
@@ -171,6 +174,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI dateTMP = dateObj.AddComponent<TextMeshProUGUI>();
             dateTMP.text = "Date";
             dateTMP.fontSize = FontSizes.Body;
+            dateTMP.enableAutoSizing = true;
+            dateTMP.fontSizeMin = FontSizes.AutoMinBody;
+            dateTMP.fontSizeMax = dateTMP.fontSize;
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.alignment = TextAlignmentOptions.Left;
@@ -315,6 +321,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI labelTMP = labelObj.AddComponent<TextMeshProUGUI>();
             labelTMP.text = "Deposit";
             labelTMP.fontSize = FontSizes.Body;
+            labelTMP.enableAutoSizing = true;
+            labelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            labelTMP.fontSizeMax = labelTMP.fontSize;
             labelTMP.color = TEXT_SECONDARY;
             labelTMP.fontStyle = FontStyles.Bold;
             labelTMP.alignment = TextAlignmentOptions.Left;

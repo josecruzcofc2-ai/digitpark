@@ -327,12 +327,12 @@ namespace DigitPark.Editor
                 arrowRT.offsetMin = Vector2.zero;
                 arrowRT.offsetMax = Vector2.zero;
 
-                TextMeshProUGUI arrowTMP = backArrow.AddComponent<TextMeshProUGUI>();
-                arrowTMP.text = "<";
-                arrowTMP.fontSize = FontSizes.Subtitle;
+                Image arrowTMP = backArrow.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrowTMP.sprite = arrowSprite;
                 arrowTMP.color = TEXT_WHITE;
-                arrowTMP.fontStyle = FontStyles.Bold;
-                arrowTMP.alignment = TextAlignmentOptions.Center;
+                arrowTMP.preserveAspect = true;
+                arrowTMP.raycastTarget = false;
             }
 
             // Title - centered, gold color
@@ -480,6 +480,9 @@ namespace DigitPark.Editor
             amountTMP.fontStyle = FontStyles.Bold;
             amountTMP.alignment = TextAlignmentOptions.Left;
             amountTMP.verticalAlignment = VerticalAlignmentOptions.Middle;
+            amountTMP.enableAutoSizing = true;
+            amountTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            amountTMP.fontSizeMax = FontSizes.H3;
 
             // Weekly limit section
             CreateWeeklyLimit(card.transform);
@@ -781,6 +784,9 @@ namespace DigitPark.Editor
             titleTMP.color = TEXT_WHITE;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.alignment = TextAlignmentOptions.Center;
+            titleTMP.enableAutoSizing = true;
+            titleTMP.fontSizeMin = FontSizes.AutoMinBody;
+            titleTMP.fontSizeMax = FontSizes.Subtitle;
 
             // ScrollView
             CreateScrollView(section.transform);
@@ -860,6 +866,9 @@ namespace DigitPark.Editor
             emptyTMP.color = TEXT_SECONDARY;
             emptyTMP.fontStyle = FontStyles.Bold;
             emptyTMP.alignment = TextAlignmentOptions.Center;
+            emptyTMP.enableAutoSizing = true;
+            emptyTMP.fontSizeMin = FontSizes.AutoMinBody;
+            emptyTMP.fontSizeMax = FontSizes.Body;
 
             // Hide empty text - sample cards visible for design preview
             // At runtime, LoadTransactionHistory() shows it when transactions.Count == 0
@@ -917,6 +926,9 @@ namespace DigitPark.Editor
             descTMP.color = GREEN;
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = FontSizes.AutoMinBody;
+            descTMP.fontSizeMax = FontSizes.Subtitle;
 
             // Date (label)
             GameObject dateObj = new GameObject("Date");
@@ -934,6 +946,9 @@ namespace DigitPark.Editor
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.alignment = TextAlignmentOptions.Left;
+            dateTMP.enableAutoSizing = true;
+            dateTMP.fontSizeMin = FontSizes.AutoMinBody;
+            dateTMP.fontSizeMax = FontSizes.Body;
         }
 
         private static void CreateSampleTransactionCard(Transform parent, string desc, string date, string amount, string status, bool isPositive)
@@ -984,6 +999,9 @@ namespace DigitPark.Editor
             descTMP.fontStyle = FontStyles.Bold;
             descTMP.alignment = TextAlignmentOptions.Left;
             descTMP.overflowMode = TextOverflowModes.Ellipsis;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = FontSizes.AutoMinBody;
+            descTMP.fontSizeMax = FontSizes.Body;
 
             // Date
             GameObject dateObj = new GameObject("Date");
@@ -1001,6 +1019,9 @@ namespace DigitPark.Editor
             dateTMP.color = TEXT_SECONDARY;
             dateTMP.fontStyle = FontStyles.Bold;
             dateTMP.alignment = TextAlignmentOptions.Left;
+            dateTMP.enableAutoSizing = true;
+            dateTMP.fontSizeMin = FontSizes.AutoMinBody;
+            dateTMP.fontSizeMax = FontSizes.Body;
 
             // Amount
             GameObject amountObj = new GameObject("Amount");
@@ -1068,6 +1089,9 @@ namespace DigitPark.Editor
             bonusTMP.color = new Color(0.2f, 0.95f, 0.4f, 1f);
             bonusTMP.alignment = TextAlignmentOptions.Center;
             bonusTMP.fontStyle = FontStyles.Bold;
+            bonusTMP.enableAutoSizing = true;
+            bonusTMP.fontSizeMin = FontSizes.AutoMinBody;
+            bonusTMP.fontSizeMax = FontSizes.Body;
             bonusText.SetActive(false);
 
             // B. HistoryTabButton - third tab button, hidden
@@ -1096,6 +1120,9 @@ namespace DigitPark.Editor
             histTextTMP.color = TEXT_SECONDARY;
             histTextTMP.fontStyle = FontStyles.Bold;
             histTextTMP.alignment = TextAlignmentOptions.Center;
+            histTextTMP.enableAutoSizing = true;
+            histTextTMP.fontSizeMin = FontSizes.AutoMinBody;
+            histTextTMP.fontSizeMax = FontSizes.Body;
             historyTab.SetActive(false);
 
             // C. DepositPanel (modal overlay - shown when DEPOSITAR button pressed)
@@ -1161,6 +1188,9 @@ namespace DigitPark.Editor
             dpTitleTMP.color = TEXT_GOLD;
             dpTitleTMP.fontStyle = FontStyles.Bold;
             dpTitleTMP.alignment = TextAlignmentOptions.Center;
+            dpTitleTMP.enableAutoSizing = true;
+            dpTitleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            dpTitleTMP.fontSizeMax = FontSizes.H4;
             dpTitleTMP.outlineWidth = 0.15f;
             dpTitleTMP.outlineColor = new Color(0.5f, 0.35f, 0f, 0.4f);
 
@@ -1176,6 +1206,9 @@ namespace DigitPark.Editor
             dpSubTMP.fontStyle = FontStyles.Bold;
             dpSubTMP.color = TEXT_SECONDARY;
             dpSubTMP.alignment = TextAlignmentOptions.Center;
+            dpSubTMP.enableAutoSizing = true;
+            dpSubTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            dpSubTMP.fontSizeMax = FontSizes.H3;
 
             // Deposit options card with gold neon border
             GameObject optionsCard = new GameObject("OptionsCard");
@@ -1244,6 +1277,9 @@ namespace DigitPark.Editor
             pmtTMP.color = TEXT_WHITE;
             pmtTMP.fontStyle = FontStyles.Bold;
             pmtTMP.alignment = TextAlignmentOptions.Left;
+            pmtTMP.enableAutoSizing = true;
+            pmtTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            pmtTMP.fontSizeMax = FontSizes.H2;
 
             GameObject paymentMethods = new GameObject("PaymentMethodsContainer");
             paymentMethods.transform.SetParent(paymentCard.transform, false);
@@ -1323,6 +1359,9 @@ namespace DigitPark.Editor
             wpTitleTMP.color = TEXT_GOLD;
             wpTitleTMP.fontStyle = FontStyles.Bold;
             wpTitleTMP.alignment = TextAlignmentOptions.Center;
+            wpTitleTMP.enableAutoSizing = true;
+            wpTitleTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            wpTitleTMP.fontSizeMax = FontSizes.H4;
             wpTitleTMP.outlineWidth = 0.15f;
             wpTitleTMP.outlineColor = new Color(0.5f, 0.35f, 0f, 0.4f);
 
@@ -1359,6 +1398,9 @@ namespace DigitPark.Editor
             itTMP.fontSize = FontSizes.H1;
             itTMP.fontStyle = FontStyles.Bold;
             itTMP.color = TEXT_WHITE;
+            itTMP.enableAutoSizing = true;
+            itTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            itTMP.fontSizeMax = FontSizes.H1;
 
             // Placeholder
             GameObject placeholder = new GameObject("Placeholder");
@@ -1372,6 +1414,9 @@ namespace DigitPark.Editor
             phTMP.fontSize = FontSizes.H1;
             phTMP.fontStyle = FontStyles.Bold;
             phTMP.color = new Color(0.5f, 0.5f, 0.55f, 0.5f);
+            phTMP.enableAutoSizing = true;
+            phTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            phTMP.fontSizeMax = FontSizes.H1;
 
             TMP_InputField inputField = inputObj.AddComponent<TMP_InputField>();
             inputField.textComponent = itTMP;
@@ -1390,6 +1435,9 @@ namespace DigitPark.Editor
             waTMP.color = TEXT_WHITE;
             waTMP.alignment = TextAlignmentOptions.Left;
             waTMP.fontStyle = FontStyles.Bold;
+            waTMP.enableAutoSizing = true;
+            waTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            waTMP.fontSizeMax = FontSizes.H3;
 
             // WithdrawMinText
             GameObject withdrawMin = new GameObject("WithdrawMinText");
@@ -1403,6 +1451,9 @@ namespace DigitPark.Editor
             wmTMP.color = TEXT_SECONDARY;
             wmTMP.alignment = TextAlignmentOptions.Left;
             wmTMP.fontStyle = FontStyles.Bold;
+            wmTMP.enableAutoSizing = true;
+            wmTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            wmTMP.fontSizeMax = FontSizes.H4;
 
             // WithdrawFeeText
             GameObject withdrawFee = new GameObject("WithdrawFeeText");
@@ -1416,6 +1467,9 @@ namespace DigitPark.Editor
             wfTMP.color = TEXT_SECONDARY;
             wfTMP.alignment = TextAlignmentOptions.Left;
             wfTMP.fontStyle = FontStyles.Bold;
+            wfTMP.enableAutoSizing = true;
+            wfTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            wfTMP.fontSizeMax = FontSizes.H4;
 
             // Confirm Withdraw button (green with gold glow)
             GameObject confirmWithdraw = new GameObject("ConfirmWithdrawButton");
@@ -1445,6 +1499,9 @@ namespace DigitPark.Editor
             cwTextTMP.color = GREEN;
             cwTextTMP.fontStyle = FontStyles.Bold;
             cwTextTMP.alignment = TextAlignmentOptions.Center;
+            cwTextTMP.enableAutoSizing = true;
+            cwTextTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            cwTextTMP.fontSizeMax = FontSizes.H1;
 
             withdrawPanel.SetActive(false);
 
@@ -1471,6 +1528,9 @@ namespace DigitPark.Editor
             ltTMP.color = TEXT_WHITE;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.alignment = TextAlignmentOptions.Center;
+            ltTMP.enableAutoSizing = true;
+            ltTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ltTMP.fontSizeMax = FontSizes.Body;
             loadingOverlay.SetActive(false);
 
             // SuccessOverlay
@@ -1485,6 +1545,9 @@ namespace DigitPark.Editor
             stTMP.color = GREEN;
             stTMP.fontStyle = FontStyles.Bold;
             stTMP.alignment = TextAlignmentOptions.Center;
+            stTMP.enableAutoSizing = true;
+            stTMP.fontSizeMin = FontSizes.AutoMinBody;
+            stTMP.fontSizeMax = FontSizes.Body;
             successOverlay.SetActive(false);
 
             // ErrorOverlay
@@ -1499,6 +1562,9 @@ namespace DigitPark.Editor
             etTMP.color = RED;
             etTMP.fontStyle = FontStyles.Bold;
             etTMP.alignment = TextAlignmentOptions.Center;
+            etTMP.enableAutoSizing = true;
+            etTMP.fontSizeMin = FontSizes.AutoMinBody;
+            etTMP.fontSizeMax = FontSizes.Body;
             errorOverlay.SetActive(false);
 
             // H. LoadMoreButton (hidden)
@@ -1524,6 +1590,9 @@ namespace DigitPark.Editor
             lmTextTMP.color = TEXT_WHITE;
             lmTextTMP.fontStyle = FontStyles.Bold;
             lmTextTMP.alignment = TextAlignmentOptions.Center;
+            lmTextTMP.enableAutoSizing = true;
+            lmTextTMP.fontSizeMin = FontSizes.AutoMinBody;
+            lmTextTMP.fontSizeMax = FontSizes.Body;
             loadMoreBtn.SetActive(false);
         }
 
@@ -1558,12 +1627,13 @@ namespace DigitPark.Editor
             closeTextRT.anchorMax = Vector2.one;
             closeTextRT.offsetMin = Vector2.zero;
             closeTextRT.offsetMax = Vector2.zero;
-            TextMeshProUGUI closeTMP = closeText.AddComponent<TextMeshProUGUI>();
-            closeTMP.text = "X";
-            closeTMP.fontSize = FontSizes.H1;
-            closeTMP.color = TEXT_WHITE;
-            closeTMP.fontStyle = FontStyles.Bold;
-            closeTMP.alignment = TextAlignmentOptions.Center;
+            // Sprite close icon
+            Image closeImg = closeText.AddComponent<Image>();
+            Sprite closeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_close_x.png");
+            if (closeSprite != null) closeImg.sprite = closeSprite;
+            closeImg.color = TEXT_WHITE;
+            closeImg.preserveAspect = true;
+            closeImg.raycastTarget = false;
         }
 
         private static GameObject CreateOverlayPanel(Transform parent, string name)

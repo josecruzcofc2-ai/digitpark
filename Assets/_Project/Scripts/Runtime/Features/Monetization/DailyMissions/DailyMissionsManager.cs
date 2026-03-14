@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DigitPark.Monetization;
 using DigitPark.Navigation;
 using DigitPark.Localization;
@@ -13,6 +14,7 @@ using DigitPark.Data;
 using DigitPark.Games;
 using DG.Tweening;
 using DigitPark.Animations;
+using FirebaseDB = global::Firebase.Database;
 
 namespace DigitPark.Managers
 {
@@ -72,7 +74,7 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField] private int dailyMissionsRequired = 3;
-        [SerializeField] private int dailyBonusReward = 100;
+        [SerializeField] private int dailyBonusReward = 75; // Economy Rebalance V55: was 100
         [SerializeField] private float refreshCheckInterval = 60f;
 
         // Neon theme colors
@@ -146,6 +148,13 @@ namespace DigitPark.Managers
             SetupScrollFade();
 
             AnalyticsService.Instance?.LogScreenView("DailyMissions");
+
+            // Fire-and-forget Firebase restore
+            _ = RestoreFromFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[DailyMissions] Firebase restore failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void SetupScrollFade()
@@ -224,6 +233,82 @@ namespace DigitPark.Managers
             string json = JsonUtility.ToJson(state);
             PlayerPrefs.SetString(STATE_KEY, json);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            SyncMissionsToFirebase(json).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[DailyMissions] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private async Task SyncMissionsToFirebase(string stateJson)
+        {
+            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            if (playerData == null) return;
+
+            try
+            {
+                var updates = new Dictionary<string, object>
+                {
+                    { "dailyMissions", stateJson }
+                };
+
+                if (DatabaseService.Instance != null)
+                {
+                    await DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DailyMissions] Error syncing to Firebase: {e.Message}");
+            }
+        }
+
+        private async Task RestoreFromFirebase()
+        {
+            try
+            {
+                var auth = AuthenticationService.Instance;
+                if (auth == null || !auth.IsUserAuthenticated()) return;
+
+                string uid = auth.GetCurrentUserId();
+                if (string.IsNullOrEmpty(uid)) return;
+
+                var dbRef = FirebaseDB.FirebaseDatabase.DefaultInstance?.RootReference;
+                if (dbRef == null) return;
+
+                var snapshot = await dbRef.Child("players").Child(uid).GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                var data = snapshot.Value as Dictionary<string, object>;
+                if (data == null || !data.ContainsKey("dailyMissions")) return;
+
+                string fbJson = data["dailyMissions"]?.ToString();
+                if (string.IsNullOrEmpty(fbJson)) return;
+
+                string localJson = PlayerPrefs.GetString(STATE_KEY, "");
+
+                // If no local state, use Firebase state
+                if (string.IsNullOrEmpty(localJson))
+                {
+                    PlayerPrefs.SetString(STATE_KEY, fbJson);
+                    PlayerPrefs.Save();
+
+                    // Reload state from the restored data
+                    LoadState();
+                    CheckResets();
+                    Debug.Log("[DailyMissions] Firebase restore: loaded state from Firebase (no local data)");
+                }
+                else
+                {
+                    Debug.Log("[DailyMissions] Firebase restore: local state exists, keeping local");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DailyMissions] Firebase restore failed: {e.Message}");
+            }
         }
 
         private void RelinkDefinitions(List<ActiveMission> missions, MissionPoolSO pool)
@@ -888,6 +973,9 @@ namespace DigitPark.Managers
             var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
             titleTmp.text = L(mission.definition.titleLocKey);
             titleTmp.fontSize = FontSizes.Debug;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinSmall;
+            titleTmp.fontSizeMax = titleTmp.fontSize;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = mission.isClaimed ? new Color(0.45f, 0.45f, 0.45f) : Color.white;
 
@@ -903,6 +991,9 @@ namespace DigitPark.Managers
             var descText = descObj.AddComponent<TextMeshProUGUI>();
             descText.text = L(mission.definition.descriptionLocKey);
             descText.fontSize = FontSizes.Debug;
+            descText.enableAutoSizing = true;
+            descText.fontSizeMin = FontSizes.AutoMinSmall;
+            descText.fontSizeMax = descText.fontSize;
             descText.color = new Color(0.6f, 0.6f, 0.65f);
 
             // Progress text
@@ -931,6 +1022,9 @@ namespace DigitPark.Managers
                 progressTmp.color = new Color(0.55f, 0.55f, 0.6f);
             }
             progressTmp.fontSize = FontSizes.Debug;
+            progressTmp.enableAutoSizing = true;
+            progressTmp.fontSizeMin = FontSizes.AutoMinSmall;
+            progressTmp.fontSizeMax = progressTmp.fontSize;
             progressTmp.alignment = TextAlignmentOptions.Left;
 
             // Reward
@@ -945,6 +1039,9 @@ namespace DigitPark.Managers
             var rewardAmountTmp = rewardAmountObj.AddComponent<TextMeshProUGUI>();
             rewardAmountTmp.text = $"+{mission.definition.rewardAmount}";
             rewardAmountTmp.fontSize = FontSizes.Debug;
+            rewardAmountTmp.enableAutoSizing = true;
+            rewardAmountTmp.fontSizeMin = FontSizes.AutoMinSmall;
+            rewardAmountTmp.fontSizeMax = rewardAmountTmp.fontSize;
             rewardAmountTmp.fontStyle = FontStyles.Bold;
             rewardAmountTmp.alignment = TextAlignmentOptions.Center;
             rewardAmountTmp.color = mission.isClaimed

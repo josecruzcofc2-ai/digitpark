@@ -126,6 +126,7 @@ namespace DigitPark.Animations
             shine.shineTransform.anchoredPosition = new Vector2(shine.startX, shine.shineTransform.anchoredPosition.y);
 
             shineTween = DOTween.Sequence()
+                .SetLink(gameObject)
                 .AppendInterval(shine.delay)
                 .Append(shine.shineTransform.DOAnchorPosX(shine.endX, shine.duration).SetEase(Ease.InOutQuad))
                 .AppendCallback(() => shine.shineTransform.anchoredPosition = new Vector2(shine.startX, shine.shineTransform.anchoredPosition.y))
@@ -137,7 +138,7 @@ namespace DigitPark.Animations
             if (shine.shineTransform == null) return;
 
             shine.shineTransform.anchoredPosition = new Vector2(shine.startX, shine.shineTransform.anchoredPosition.y);
-            shine.shineTransform.DOAnchorPosX(shine.endX, shine.duration).SetEase(Ease.InOutQuad);
+            shine.shineTransform.DOAnchorPosX(shine.endX, shine.duration).SetEase(Ease.InOutQuad).SetLink(gameObject);
         }
 
         // ==================== PULSE ====================
@@ -146,7 +147,8 @@ namespace DigitPark.Animations
         {
             pulseTween = transform.DOScale(pulse.maxScale, pulse.duration / 2)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         // ==================== FLOAT ====================
@@ -156,7 +158,8 @@ namespace DigitPark.Animations
             Vector3 startPos = transform.localPosition;
             floatTween = transform.DOLocalMoveY(startPos.y + floatEffect.distance, floatEffect.duration / 2)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         // ==================== GLOW PULSE ====================
@@ -167,7 +170,8 @@ namespace DigitPark.Animations
 
             glowTween = glowPulse.glowImage.DOFade(glowPulse.maxAlpha, glowPulse.duration / 2)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         // ==================== ROTATION ====================
@@ -178,7 +182,8 @@ namespace DigitPark.Animations
             {
                 rotationTween = transform.DORotate(new Vector3(0, 0, 360), 360f / rotation.speed, RotateMode.FastBeyond360)
                     .SetEase(Ease.Linear)
-                    .SetLoops(-1);
+                    .SetLoops(-1)
+                    .SetLink(gameObject);
             }
         }
 
@@ -190,10 +195,11 @@ namespace DigitPark.Animations
 
             int currentIndex = 0;
             colorTween = DOTween.Sequence()
+                .SetLink(gameObject)
                 .AppendCallback(() =>
                 {
                     int nextIndex = (currentIndex + 1) % colorCycle.colors.Length;
-                    colorCycle.targetImage.DOColor(colorCycle.colors[nextIndex], colorCycle.cycleDuration / colorCycle.colors.Length);
+                    colorCycle.targetImage.DOColor(colorCycle.colors[nextIndex], colorCycle.cycleDuration / colorCycle.colors.Length).SetLink(gameObject);
                     currentIndex = nextIndex;
                 })
                 .AppendInterval(colorCycle.cycleDuration / colorCycle.colors.Length)
@@ -250,7 +256,8 @@ namespace DigitPark.Animations
         {
             tween = transform.DOScale(maxScale, duration / 2)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         private void OnDisable()
@@ -276,7 +283,8 @@ namespace DigitPark.Animations
             startPos = transform.localPosition;
             tween = transform.DOLocalMoveY(startPos.y + distance, duration / 2)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         private void OnDisable()
@@ -325,7 +333,8 @@ namespace DigitPark.Animations
 
             tween = image.DOFade(maxAlpha, duration / 2)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         private void OnDisable()

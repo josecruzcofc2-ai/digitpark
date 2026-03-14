@@ -373,6 +373,9 @@ namespace DigitPark.UI
                 col.AddComponent<RectTransform>();
                 var tmp = col.AddComponent<TextMeshProUGUI>();
                 tmp.fontSize = FontSizes.Body;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = FontSizes.AutoMinBody;
+                tmp.fontSizeMax = tmp.fontSize;
                 tmp.color = Color.white;
                 tmp.alignment = TextAlignmentOptions.Center;
             }

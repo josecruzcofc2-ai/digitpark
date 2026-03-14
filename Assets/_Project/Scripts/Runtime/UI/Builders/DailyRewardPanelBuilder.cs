@@ -160,6 +160,9 @@ namespace DigitPark.UI.Builders
             TextMeshProUGUI dayText = dayObj.AddComponent<TextMeshProUGUI>();
             dayText.text = AutoLocalizer.Get("dr_day", 1);
             dayText.fontSize = FontSizes.Body;
+            dayText.enableAutoSizing = true;
+            dayText.fontSizeMin = FontSizes.AutoMinBody;
+            dayText.fontSizeMax = dayText.fontSize;
             dayText.alignment = TextAlignmentOptions.Center;
             dayText.color = Color.white;
 
@@ -176,6 +179,9 @@ namespace DigitPark.UI.Builders
             TextMeshProUGUI amountText = amountObj.AddComponent<TextMeshProUGUI>();
             amountText.text = "100";
             amountText.fontSize = FontSizes.Body;
+            amountText.enableAutoSizing = true;
+            amountText.fontSizeMin = FontSizes.AutoMinBody;
+            amountText.fontSizeMax = amountText.fontSize;
             amountText.fontStyle = FontStyles.Bold;
             amountText.alignment = TextAlignmentOptions.Center;
             amountText.color = Color.cyan;
@@ -480,8 +486,9 @@ namespace DigitPark.UI.Builders
             if (dayText != null)
                 dayText.text = AutoLocalizer.Get("dr_day", day);
 
+            // Amount text removed — surprise reveal in claim animation
             if (amountText != null)
-                amountText.text = reward.amount.ToString();
+                amountText.gameObject.SetActive(false);
         }
 
         public void SetState(DayItemState state, Color color)
@@ -498,10 +505,10 @@ namespace DigitPark.UI.Builders
                 amountText.color = color;
             }
 
-            // Checkmark para reclamados
+            // Checkmark removed — claimed state shown by background/opacity/border
             if (checkmark != null)
             {
-                checkmark.SetActive(state == DayItemState.Claimed);
+                checkmark.SetActive(false);
             }
 
             // Lock para futuros

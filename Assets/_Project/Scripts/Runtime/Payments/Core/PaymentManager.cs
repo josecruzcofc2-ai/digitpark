@@ -22,7 +22,8 @@ namespace DigitPark.Payments
         {
             get
             {
-                if (_instance == null)
+                // D-49: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
+                if (!_instance)
                     _instance = FindObjectOfType<PaymentManager>();
                 return _instance;
             }

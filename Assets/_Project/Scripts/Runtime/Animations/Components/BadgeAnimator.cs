@@ -71,6 +71,7 @@ namespace DigitPark.Animations
             KillTweens();
             transform.DOScale(0f, 0.15f)
                 .SetEase(Ease.InBack)
+                .SetLink(gameObject)
                 .OnComplete(() =>
                 {
                     gameObject.SetActive(false);
@@ -105,6 +106,7 @@ namespace DigitPark.Animations
             transform.localScale = Vector3.one;
 
             transform.DOPunchScale(Vector3.one * 0.25f, flashDuration, 8, 0.5f)
+                .SetLink(gameObject)
                 .OnComplete(() => StartPulseIfEnabled());
         }
 
@@ -119,6 +121,7 @@ namespace DigitPark.Animations
             {
                 Color original = targetImage.color;
                 DOTween.Sequence()
+                    .SetLink(targetImage.gameObject)
                     .Append(targetImage.DOColor(flashColor, flashDuration * 0.3f))
                     .Append(targetImage.DOColor(original, flashDuration * 0.7f));
             }
@@ -133,7 +136,8 @@ namespace DigitPark.Animations
             transform.localScale = Vector3.one * pulseMinScale;
             pulseTween = transform.DOScale(pulseMaxScale, pulseDuration / 2f)
                 .SetEase(Ease.InOutSine)
-                .SetLoops(-1, LoopType.Yoyo);
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
         }
 
         /// <summary>
@@ -152,6 +156,7 @@ namespace DigitPark.Animations
             transform.localScale = Vector3.zero;
 
             entranceTween = DOTween.Sequence()
+                .SetLink(gameObject)
                 .Append(transform.DOScale(entranceOvershoot, entranceDuration * 0.6f).SetEase(Ease.OutQuad))
                 .Append(transform.DOScale(1f, entranceDuration * 0.4f).SetEase(Ease.OutBack))
                 .OnComplete(() => StartPulseIfEnabled());

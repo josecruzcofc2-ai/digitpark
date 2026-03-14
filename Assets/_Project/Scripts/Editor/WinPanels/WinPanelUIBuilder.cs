@@ -16,7 +16,7 @@ namespace DigitPark.Editor
         // Colores Neón (Normal)
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
         private static readonly Color GREEN_NEON = new Color(0.3f, 1f, 0.5f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 0.98f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 0.98f);
         private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.95f);
 
         // Colores Dorados (Real Money)

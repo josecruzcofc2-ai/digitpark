@@ -136,6 +136,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI modeTMP = modeText.AddComponent<TextMeshProUGUI>();
             modeTMP.text = "1v1";
             modeTMP.fontSize = FontSizes.Body;
+            modeTMP.enableAutoSizing = true;
+            modeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            modeTMP.fontSizeMax = modeTMP.fontSize;
             modeTMP.fontStyle = FontStyles.Bold;
             modeTMP.color = CYAN;
             modeTMP.alignment = TextAlignmentOptions.Center;
@@ -155,6 +158,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = "QuickMath vs @Player123";
             titleText.fontSize = FontSizes.Body;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = FontSizes.AutoMinBody;
+            titleText.fontSizeMax = titleText.fontSize;
             titleText.fontStyle = FontStyles.Bold;
             titleText.color = TEXT_WHITE;
             titleText.alignment = TextAlignmentOptions.Left;
@@ -175,6 +181,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI feeText = feeObj.AddComponent<TextMeshProUGUI>();
             feeText.text = "Entry: $5.00";
             feeText.fontSize = FontSizes.Body;
+            feeText.enableAutoSizing = true;
+            feeText.fontSizeMin = FontSizes.AutoMinBody;
+            feeText.fontSizeMax = feeText.fontSize;
             feeText.color = TEXT_SECONDARY;
             feeText.alignment = TextAlignmentOptions.Left;
             feeText.fontStyle = FontStyles.Bold;
@@ -194,6 +203,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI dateText = dateObj.AddComponent<TextMeshProUGUI>();
             dateText.text = "2h ago";
             dateText.fontSize = FontSizes.Body;
+            dateText.enableAutoSizing = true;
+            dateText.fontSizeMin = FontSizes.AutoMinBody;
+            dateText.fontSizeMax = dateText.fontSize;
             dateText.color = TEXT_SECONDARY;
             dateText.alignment = TextAlignmentOptions.Right;
             dateText.fontStyle = FontStyles.Bold;
@@ -224,6 +236,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI rbTMP = rbText.AddComponent<TextMeshProUGUI>();
             rbTMP.text = "VICTORY";
             rbTMP.fontSize = FontSizes.Body;
+            rbTMP.enableAutoSizing = true;
+            rbTMP.fontSizeMin = FontSizes.AutoMinBody;
+            rbTMP.fontSizeMax = rbTMP.fontSize;
             rbTMP.fontStyle = FontStyles.Bold;
             rbTMP.color = GREEN;
             rbTMP.alignment = TextAlignmentOptions.Center;
@@ -243,6 +258,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI netText = netObj.AddComponent<TextMeshProUGUI>();
             netText.text = "+$4.50";
             netText.fontSize = FontSizes.Body;
+            netText.enableAutoSizing = true;
+            netText.fontSizeMin = FontSizes.AutoMinBody;
+            netText.fontSizeMax = netText.fontSize;
             netText.fontStyle = FontStyles.Bold;
             netText.color = GREEN;
             netText.alignment = TextAlignmentOptions.Center;
@@ -321,6 +339,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI ltTMP = liveText.AddComponent<TextMeshProUGUI>();
             ltTMP.text = "LIVE";
             ltTMP.fontSize = FontSizes.Caption;
+            ltTMP.enableAutoSizing = true;
+            ltTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            ltTMP.fontSizeMax = ltTMP.fontSize;
             ltTMP.fontStyle = FontStyles.Bold;
             ltTMP.color = Color.white;
             ltTMP.alignment = TextAlignmentOptions.Center;
@@ -518,6 +539,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI dotTMP = dot.AddComponent<TextMeshProUGUI>();
             dotTMP.text = "\u00B7";
             dotTMP.fontSize = FontSizes.BodySmall;
+            dotTMP.enableAutoSizing = true;
+            dotTMP.fontSizeMin = FontSizes.AutoMinBody;
+            dotTMP.fontSizeMax = dotTMP.fontSize;
             dotTMP.color = TEXT_SECONDARY;
             dotTMP.alignment = TextAlignmentOptions.Center;
             dotTMP.fontStyle = FontStyles.Bold;

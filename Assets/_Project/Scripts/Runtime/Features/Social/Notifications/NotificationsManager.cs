@@ -178,6 +178,9 @@ namespace DigitPark.Managers
             var tmp = separator.AddComponent<TextMeshProUGUI>();
             tmp.text = $"— {groupName} —";
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;

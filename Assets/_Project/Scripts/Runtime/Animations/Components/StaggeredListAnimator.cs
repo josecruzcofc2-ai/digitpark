@@ -59,7 +59,7 @@ namespace DigitPark.Animations
             if (items == null || items.Count == 0) return;
 
             currentSequence?.Kill();
-            currentSequence = DOTween.Sequence();
+            currentSequence = DOTween.Sequence().SetLink(gameObject);
 
             for (int i = 0; i < items.Count; i++)
             {
@@ -108,7 +108,7 @@ namespace DigitPark.Animations
             }
 
             currentSequence?.Kill();
-            currentSequence = DOTween.Sequence();
+            currentSequence = DOTween.Sequence().SetLink(gameObject);
 
             for (int i = 0; i < items.Count; i++)
             {

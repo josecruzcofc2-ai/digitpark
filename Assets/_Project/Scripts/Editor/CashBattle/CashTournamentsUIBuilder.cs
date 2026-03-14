@@ -404,12 +404,12 @@ namespace DigitPark.Editor
                 arrowRT.anchorMax = Vector2.one;
                 arrowRT.sizeDelta = Vector2.zero;
 
-                TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
-                arrow.text = "<";
-                arrow.fontSize = FontSizes.H4;
+                Image arrow = arrowObj.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrow.sprite = arrowSprite;
                 arrow.color = TEXT_GOLD;
-                arrow.alignment = TextAlignmentOptions.Center;
-                arrow.fontStyle = FontStyles.Bold;
+                arrow.preserveAspect = true;
+                arrow.raycastTarget = false;
             }
         }
 

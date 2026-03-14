@@ -375,16 +375,12 @@ namespace DigitPark.Editor
                 arrowRT.anchorMax = Vector2.one;
                 arrowRT.sizeDelta = Vector2.zero;
 
-                TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
-                arrow.text = "<";
-                arrow.fontSize = FontSizes.H4;
+                Image arrow = arrowObj.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrow.sprite = arrowSprite;
                 arrow.color = TEXT_GOLD;
-                arrow.alignment = TextAlignmentOptions.Center;
-                arrow.fontStyle = FontStyles.Bold;
-                arrow.enableAutoSizing = true;
-                arrow.fontSizeMin = FontSizes.AutoMinBody;
-                arrow.fontSizeMax = FontSizes.H4;
-                arrow.overflowMode = TextOverflowModes.Ellipsis;
+                arrow.preserveAspect = true;
+                arrow.raycastTarget = false;
 
                 Debug.LogWarning("[CashBattle1v1] BackButtonGold prefab not found, using fallback");
             }
@@ -1622,25 +1618,20 @@ namespace DigitPark.Editor
             Image checkBg = checkObj.AddComponent<Image>();
             checkBg.color = new Color(0.2f, 0.9f, 0.4f, 1f);
 
-            GameObject checkTextObj = new GameObject("CheckText");
-            checkTextObj.transform.SetParent(checkObj.transform, false);
+            GameObject checkIconObj = new GameObject("CheckIcon");
+            checkIconObj.transform.SetParent(checkObj.transform, false);
 
-            RectTransform checkTextRT = checkTextObj.AddComponent<RectTransform>();
-            checkTextRT.anchorMin = Vector2.zero;
-            checkTextRT.anchorMax = Vector2.one;
-            checkTextRT.sizeDelta = Vector2.zero;
+            RectTransform checkIconRT = checkIconObj.AddComponent<RectTransform>();
+            checkIconRT.anchorMin = new Vector2(0.15f, 0.15f);
+            checkIconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            checkIconRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI checkText = checkTextObj.AddComponent<TextMeshProUGUI>();
-            checkText.text = "\u2713";
-            checkText.fontSize = FontSizes.Body;
-            checkText.color = Color.white;
-            checkText.fontStyle = FontStyles.Bold;
-            checkText.alignment = TextAlignmentOptions.Center;
-            checkText.raycastTarget = false;
-            checkText.enableAutoSizing = true;
-            checkText.fontSizeMin = FontSizes.AutoMinBody;
-            checkText.fontSizeMax = FontSizes.Body;
-            checkText.overflowMode = TextOverflowModes.Ellipsis;
+            var checkImg = checkIconObj.AddComponent<Image>();
+            Sprite checkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSprite != null) checkImg.sprite = checkSprite;
+            checkImg.color = Color.white;
+            checkImg.preserveAspect = true;
+            checkImg.raycastTarget = false;
 
             checkObj.SetActive(false);
         }
@@ -1758,17 +1749,13 @@ namespace DigitPark.Editor
             closeTextRT.anchorMax = Vector2.one;
             closeTextRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI closeText = closeTextObj.AddComponent<TextMeshProUGUI>();
-            closeText.text = "X";
-            closeText.fontSize = FontSizes.Body;
-            closeText.color = TEXT_PRIMARY;
-            closeText.fontStyle = FontStyles.Bold;
-            closeText.alignment = TextAlignmentOptions.Center;
-            closeText.raycastTarget = false;
-            closeText.enableAutoSizing = true;
-            closeText.fontSizeMin = FontSizes.AutoMinBody;
-            closeText.fontSizeMax = FontSizes.Body;
-            closeText.overflowMode = TextOverflowModes.Ellipsis;
+            // Sprite close icon
+            Image closeImg = closeTextObj.AddComponent<Image>();
+            Sprite closeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_close_x.png");
+            if (closeSprite != null) closeImg.sprite = closeSprite;
+            closeImg.color = TEXT_PRIMARY;
+            closeImg.preserveAspect = true;
+            closeImg.raycastTarget = false;
 
             // === Title ===
             GameObject titleObj = new GameObject("ModalTitle");
@@ -1995,24 +1982,20 @@ namespace DigitPark.Editor
             Image checkBg = checkmark.AddComponent<Image>();
             checkBg.color = new Color(0.2f, 0.95f, 0.4f, 1f);
 
-            GameObject checkTextObj = new GameObject("CheckText");
-            checkTextObj.transform.SetParent(checkmark.transform, false);
+            GameObject checkIconObj = new GameObject("CheckIcon");
+            checkIconObj.transform.SetParent(checkmark.transform, false);
 
-            RectTransform checkTextRT = checkTextObj.AddComponent<RectTransform>();
-            checkTextRT.anchorMin = Vector2.zero;
-            checkTextRT.anchorMax = Vector2.one;
-            checkTextRT.sizeDelta = Vector2.zero;
+            RectTransform checkIconRT = checkIconObj.AddComponent<RectTransform>();
+            checkIconRT.anchorMin = new Vector2(0.15f, 0.15f);
+            checkIconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            checkIconRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI checkText = checkTextObj.AddComponent<TextMeshProUGUI>();
-            checkText.text = "\u2713";
-            checkText.fontSize = FontSizes.AutoMinBody;
-            checkText.color = Color.white;
-            checkText.fontStyle = FontStyles.Bold;
-            checkText.alignment = TextAlignmentOptions.Center;
-            checkText.raycastTarget = false;
-            checkText.enableAutoSizing = true;
-            checkText.fontSizeMin = Mathf.Min(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
-            checkText.fontSizeMax = Mathf.Max(FontSizes.AutoMinBody, FontSizes.AutoMinBody);
+            var checkImg = checkIconObj.AddComponent<Image>();
+            Sprite checkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSprite != null) checkImg.sprite = checkSprite;
+            checkImg.color = Color.white;
+            checkImg.preserveAspect = true;
+            checkImg.raycastTarget = false;
 
             checkmark.SetActive(false);
         }

@@ -1,13 +1,13 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using DigitPark.UI;
 using DigitPark.Managers;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Themes;
 using DigitPark.Localization;
+using DigitPark.Navigation;
 
 namespace DigitPark.Games
 {
@@ -69,7 +69,11 @@ namespace DigitPark.Games
                 // Auto-apply gold theme for CashTournament mode
                 if (context.Mode == GameMode.CashTournament)
                 {
-                    var forcer = gameObject.AddComponent<CashThemeForcer>();
+                    var forcer = GetComponent<CashThemeForcer>();
+                    if (forcer == null)
+                    {
+                        forcer = gameObject.AddComponent<CashThemeForcer>();
+                    }
                     forcer.ApplyGoldTheme();
                 }
             }
@@ -98,7 +102,7 @@ namespace DigitPark.Games
         protected virtual void OnBackClicked()
         {
             Debug.Log($"[{GameType}] Volviendo a GameSelector");
-            SceneManager.LoadScene("GameSelector");
+            SceneNavigator.Instance.NavigateTo("GameSelector");
         }
 
         /// <summary>
@@ -394,9 +398,15 @@ namespace DigitPark.Games
 
             // Show tournament result panel then return to lobby
             decimal prize = ctx.EntryFee > 0 ? ctx.EntryFee * 5m : 0;
+            // TODO: D-20 — retrieve actual position from tournament leaderboard once
+            // SubmitTournamentScore returns it; for now use the service if available
+            int position = 1;
+            var ts = ServiceLocator.Tournament;
+            if (ts?.ActiveTournament?.MyPosition != null)
+                position = ts.ActiveTournament.MyPosition.Value;
             if (ResultPanelManager.Instance == null) { Debug.LogWarning("[MinigameBase] ResultPanelManager not found"); return; }
             ResultPanelManager.Instance.ShowTournamentResult(
-                result, 1, attemptNumber, maxAttempts, bestTime, prize);
+                result, position, attemptNumber, maxAttempts, bestTime, prize);
 
             Debug.Log($"[MinigameBase] CashTournament attempt {attemptNumber}/{maxAttempts} complete. Score: {currentScore}, Best: {bestScore}");
         }
@@ -503,7 +513,7 @@ namespace DigitPark.Games
             }
 
             Debug.Log($"[{GameType}] Accept clicked - returning to selector");
-            SceneManager.LoadScene("GameSelector");
+            SceneNavigator.Instance.NavigateTo("GameSelector");
         }
 
         /// <summary>

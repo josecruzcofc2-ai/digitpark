@@ -3,13 +3,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
 using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI;
 using DigitPark.UI.Common;
 using DigitPark.UI.Panels;
 using DigitPark.Localization;
+using DigitPark.Navigation;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -293,7 +293,7 @@ namespace DigitPark.Managers
         private void GoToRegisterScene()
         {
             Debug.Log("[Login] Navegando a Register");
-            SceneManager.LoadScene("Register");
+            SceneNavigator.Instance?.NavigateTo("Register");
         }
 
         #region Login
@@ -668,7 +668,7 @@ namespace DigitPark.Managers
             yield return new WaitForSeconds(0.5f);
 
             // Cargar escena
-            SceneManager.LoadScene("MainMenu");
+            SceneNavigator.Instance?.NavigateTo("MainMenu");
         }
 
         #endregion

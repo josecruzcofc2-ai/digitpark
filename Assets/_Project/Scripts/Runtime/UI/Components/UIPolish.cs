@@ -13,6 +13,20 @@ namespace DigitPark.UI
     {
         private static readonly Dictionary<int, Sprite> _roundedSpriteCache = new Dictionary<int, Sprite>();
 
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        static void ClearCacheOnPlayModeChange()
+        {
+            UnityEditor.EditorApplication.playModeStateChanged += (state) =>
+            {
+                if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode)
+                {
+                    _roundedSpriteCache?.Clear();
+                }
+            };
+        }
+#endif
+
         /// <summary>
         /// Genera un sprite 9-slice con esquinas redondeadas.
         /// Cachea por radio para reutilizar.

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,6 +10,8 @@ using DigitPark.Localization;
 using DigitPark.UI;
 using DigitPark.Payments;
 using DigitPark.Payments.Entitlements;
+using Firebase.Database;
+using DigitPark.Navigation;
 
 namespace DigitPark.Managers
 {
@@ -232,6 +235,189 @@ namespace DigitPark.Managers
 
             servicesInitialized = true;
             Debug.Log("[Boot] Todos los servicios inicializados");
+
+            // One-time PlayerPrefs → Firebase migration (economy rebalance V55)
+            yield return StartCoroutine(MigratePlayerPrefsToFirebase());
+        }
+
+        /// <summary>
+        /// One-time migration: reads currency, cosmetics, achievements, progression from PlayerPrefs
+        /// and syncs to Firebase as source-of-truth. After migration, Firebase is master, PlayerPrefs is cache.
+        ///
+        /// D-23/D-25/D-75 FIX: On reinstall, PlayerPrefs are empty so local values are defaults (gems=0).
+        /// Before pushing, we check if Firebase already has real data. If it does, this is a reinstall
+        /// and we RESTORE from Firebase instead of overwriting with zeroes.
+        /// </summary>
+        private IEnumerator MigratePlayerPrefsToFirebase()
+        {
+            const string MIGRATION_FLAG = "playerprefs_migrated_to_firebase";
+            if (PlayerPrefs.GetInt(MIGRATION_FLAG, 0) == 1)
+            {
+                yield break; // Already migrated
+            }
+
+            var auth = AuthenticationService.Instance;
+            if (auth == null || !auth.IsUserAuthenticated())
+            {
+                Debug.Log("[Boot] Migration skipped — no authenticated user");
+                yield break;
+            }
+
+            var playerData = auth.GetCurrentPlayerData();
+            if (playerData == null)
+            {
+                Debug.Log("[Boot] Migration skipped — no player data");
+                yield break;
+            }
+
+            Debug.Log("[Boot] Starting one-time PlayerPrefs → Firebase migration...");
+
+            // ── D-23 FIX: Check Firebase for existing data BEFORE deciding to push ──
+            // On reinstall, PlayerPrefs are wiped → CurrencyManager.Gems == 0 (DEFAULT_GEMS).
+            // If Firebase already has real data, this is a REINSTALL — restore, don't overwrite.
+            bool firebaseHasData = false;
+            int firebaseGems = 0;
+            int firebaseCoins = 0;
+
+            var dbRef = FirebaseDatabase.DefaultInstance?.RootReference;
+            if (dbRef != null)
+            {
+                // Read gems from Firebase
+                var gemsTask = dbRef.Child("players").Child(playerData.userId).Child("gems").GetValueAsync();
+                while (!gemsTask.IsCompleted)
+                    yield return null;
+
+                if (!gemsTask.IsFaulted && gemsTask.Result != null && gemsTask.Result.Exists)
+                {
+                    try { firebaseGems = System.Convert.ToInt32(gemsTask.Result.Value); }
+                    catch { firebaseGems = 0; }
+                }
+
+                // Read coins from Firebase
+                var coinsTask = dbRef.Child("players").Child(playerData.userId).Child("coins").GetValueAsync();
+                while (!coinsTask.IsCompleted)
+                    yield return null;
+
+                if (!coinsTask.IsFaulted && coinsTask.Result != null && coinsTask.Result.Exists)
+                {
+                    try { firebaseCoins = System.Convert.ToInt32(coinsTask.Result.Value); }
+                    catch { firebaseCoins = 0; }
+                }
+
+                if (firebaseGems > 0 || firebaseCoins > 0)
+                {
+                    firebaseHasData = true;
+                }
+
+                // Also check totalGamesPlayed / username as proxy for "real account"
+                if (!firebaseHasData)
+                {
+                    var loadTask = DatabaseService.Instance?.LoadPlayerData(playerData.userId);
+                    if (loadTask != null)
+                    {
+                        while (!loadTask.IsCompleted)
+                            yield return null;
+
+                        if (!loadTask.IsFaulted && loadTask.Result != null)
+                        {
+                            var existing = loadTask.Result;
+                            if (existing.totalGamesPlayed > 0 ||
+                                (!string.IsNullOrEmpty(existing.username) && existing.username != "Player"))
+                            {
+                                firebaseHasData = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── REINSTALL PATH: Firebase has real data, PlayerPrefs are empty ──
+            if (firebaseHasData)
+            {
+                Debug.Log($"[Boot] Reinstall detected — Firebase has data (gems={firebaseGems}, coins={firebaseCoins}). Restoring instead of migrating.");
+
+                try
+                {
+                    var currency = DigitPark.Monetization.CurrencyManager.Instance;
+                    if (currency != null)
+                    {
+                        currency.RestoreFromFirebaseValues(firebaseGems, firebaseCoins);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[Boot] Reinstall restore error: {e.Message}");
+                }
+
+                PlayerPrefs.SetInt(MIGRATION_FLAG, 1);
+                PlayerPrefs.Save();
+                Debug.Log("[Boot] Reinstall restore complete — Firebase data preserved");
+                yield break;
+            }
+
+            // ── FIRST-TIME PATH: No Firebase data — push local values (fresh account) ──
+            Debug.Log("[Boot] First-time migration — pushing local data to Firebase...");
+
+            var updates = new Dictionary<string, object>();
+
+            try
+            {
+                // Currency
+                var currencyMgr = DigitPark.Monetization.CurrencyManager.Instance;
+                if (currencyMgr != null)
+                {
+                    updates["gems"] = currencyMgr.Gems;
+                    updates["coins"] = currencyMgr.Coins;
+                }
+
+                // Daily Rewards
+                string dailyData = PlayerPrefs.GetString("DailyReward_Data", "");
+                if (!string.IsNullOrEmpty(dailyData))
+                {
+                    updates["dailyReward/localData"] = dailyData;
+                }
+
+                // Daily Rewards Manager streak
+                int streak = PlayerPrefs.GetInt("DailyRewards_Streak", 0);
+                int currentDay = PlayerPrefs.GetInt("DailyRewards_CurrentDay", 0);
+                if (streak > 0 || currentDay > 0)
+                {
+                    updates["dailyRewardsManager/streak"] = streak;
+                    updates["dailyRewardsManager/currentDay"] = currentDay;
+                    updates["dailyRewardsManager/lastClaim"] = PlayerPrefs.GetString("DailyRewards_LastClaim", "");
+                }
+
+                // XP / Level
+                int xp = PlayerPrefs.GetInt("PlayerXP", 0);
+                int level = PlayerPrefs.GetInt("PlayerLevel", 1);
+                if (xp > 0 || level > 1)
+                {
+                    updates["progression/xp"] = xp;
+                    updates["progression/level"] = level;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Boot] Migration data collection error: {e.Message}");
+            }
+
+            // Push to Firebase (outside try-catch so yield works)
+            if (updates.Count > 0 && DatabaseService.Instance != null)
+            {
+                var task = DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates);
+                while (!task.IsCompleted)
+                    yield return null;
+
+                if (task.IsFaulted)
+                {
+                    Debug.LogWarning($"[Boot] Migration failed: {task.Exception?.GetBaseException().Message}");
+                    yield break; // Don't set flag — retry next boot
+                }
+            }
+
+            PlayerPrefs.SetInt(MIGRATION_FLAG, 1);
+            PlayerPrefs.Save();
+            Debug.Log($"[Boot] Migration complete — {updates.Count} fields synced to Firebase");
         }
 
         /// <summary>
@@ -314,6 +500,31 @@ namespace DigitPark.Managers
                 Debug.Log("[Boot] BattleCardService creado");
             }
 
+            // DailyOfferService — daily rotating offers (Economy Rebalance V55)
+            if (DailyOfferService.Instance == null)
+            {
+                GameObject doObj = new GameObject("DailyOfferService");
+                doObj.AddComponent<DailyOfferService>();
+                Debug.Log("[Boot] DailyOfferService creado");
+            }
+
+            // WelcomePackService — new player conversion packs (Economy Rebalance V55)
+            if (DigitPark.Monetization.WelcomePackService.Instance == null)
+            {
+                GameObject wpObj = new GameObject("WelcomePackService");
+                wpObj.AddComponent<DigitPark.Monetization.WelcomePackService>();
+                Debug.Log("[Boot] WelcomePackService creado");
+            }
+
+            // RotatingContentService — whale ceiling expansion (Economy Rebalance V55 / 13F)
+            // Seasonal BattleCards + Monthly Frames + Limited Theme Variants
+            if (RotatingContentService.Instance == null)
+            {
+                GameObject rcObj = new GameObject("RotatingContentService");
+                rcObj.AddComponent<RotatingContentService>();
+                Debug.Log("[Boot] RotatingContentService creado");
+            }
+
             // Estos managers se crearán en sus respectivas escenas
             // Aquí solo preparamos el entorno
 
@@ -370,8 +581,11 @@ namespace DigitPark.Managers
                 targetScene = "Login";
             }
 
-            // Cargar escena de destino
-            SceneManager.LoadScene(targetScene);
+            // Cargar escena de destino (SceneNavigator may not be initialized at boot time)
+            if (SceneNavigator.Instance != null)
+                SceneNavigator.Instance.NavigateTo(targetScene);
+            else
+                SceneManager.LoadScene(targetScene);
         }
 
         /// <summary>

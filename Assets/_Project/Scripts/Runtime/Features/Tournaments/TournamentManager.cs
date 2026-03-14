@@ -1057,6 +1057,11 @@ namespace DigitPark.Managers
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = fontSize;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = fontSize >= 48 ? FontSizes.AutoMinTitle
+                             : fontSize >= 32 ? FontSizes.AutoMinBody
+                             : FontSizes.AutoMinSmall;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;

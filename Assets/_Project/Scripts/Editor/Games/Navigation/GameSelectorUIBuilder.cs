@@ -308,6 +308,9 @@ namespace DigitPark.Editor
             if (titleTmp == null) titleTmp = panelTitle.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "Cognitive Sprint";
             titleTmp.fontSize = FontSizes.H4;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            titleTmp.fontSizeMax = titleTmp.fontSize;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -322,6 +325,9 @@ namespace DigitPark.Editor
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Select 3-5 games for the sprint";
             subtitleTmp.fontSize = FontSizes.Body;
+            subtitleTmp.enableAutoSizing = true;
+            subtitleTmp.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleTmp.fontSizeMax = subtitleTmp.fontSize;
             subtitleTmp.fontStyle = FontStyles.Bold;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
@@ -360,6 +366,9 @@ namespace DigitPark.Editor
             if (selectedTmp == null) selectedTmp = selectedText.AddComponent<TextMeshProUGUI>();
             selectedTmp.text = "0/5 games selected";
             selectedTmp.fontSize = FontSizes.Body;
+            selectedTmp.enableAutoSizing = true;
+            selectedTmp.fontSizeMin = FontSizes.AutoMinBody;
+            selectedTmp.fontSizeMax = selectedTmp.fontSize;
             selectedTmp.fontStyle = FontStyles.Bold;
             selectedTmp.color = Color.white;
             selectedTmp.alignment = TextAlignmentOptions.Center;
@@ -428,6 +437,9 @@ namespace DigitPark.Editor
             if (titleTmp == null) titleTmp = gameTitle.AddComponent<TextMeshProUGUI>();
             titleTmp.text = "DIGIT RUSH"; // Se cambia dinámicamente
             titleTmp.fontSize = FontSizes.Body;
+            titleTmp.enableAutoSizing = true;
+            titleTmp.fontSizeMin = FontSizes.AutoMinBody;
+            titleTmp.fontSizeMax = titleTmp.fontSize;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.color = CYAN_NEON;
             titleTmp.alignment = TextAlignmentOptions.Center;
@@ -442,6 +454,9 @@ namespace DigitPark.Editor
             if (subtitleTmp == null) subtitleTmp = subtitle.AddComponent<TextMeshProUGUI>();
             subtitleTmp.text = "Game Rules";
             subtitleTmp.fontSize = FontSizes.Body;
+            subtitleTmp.enableAutoSizing = true;
+            subtitleTmp.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleTmp.fontSizeMax = subtitleTmp.fontSize;
             subtitleTmp.fontStyle = FontStyles.Bold;
             subtitleTmp.color = Color.white;
             subtitleTmp.alignment = TextAlignmentOptions.Center;
@@ -463,6 +478,9 @@ namespace DigitPark.Editor
             if (rulesTmp == null) rulesTmp = rulesText.AddComponent<TextMeshProUGUI>();
             rulesTmp.text = "• Answer as many questions correctly as possible\n• Faster answers earn more points\n• Wrong answers reduce your score";
             rulesTmp.fontSize = FontSizes.Body; // Más grande para mejor legibilidad
+            rulesTmp.enableAutoSizing = true;
+            rulesTmp.fontSizeMin = FontSizes.AutoMinBody;
+            rulesTmp.fontSizeMax = rulesTmp.fontSize;
             rulesTmp.fontStyle = FontStyles.Bold; // Negrita
             rulesTmp.color = new Color(0.9f, 0.9f, 0.9f, 1f); // Un poco más brillante
             rulesTmp.alignment = TextAlignmentOptions.TopLeft;
@@ -513,6 +531,9 @@ namespace DigitPark.Editor
             if (labelTmp == null) labelTmp = toggleLabel.AddComponent<TextMeshProUGUI>();
             labelTmp.text = "Don't show these rules again";
             labelTmp.fontSize = FontSizes.Body;
+            labelTmp.enableAutoSizing = true;
+            labelTmp.fontSizeMin = FontSizes.AutoMinBody;
+            labelTmp.fontSizeMax = labelTmp.fontSize;
             labelTmp.fontStyle = FontStyles.Bold;
             labelTmp.color = new Color(0.7f, 0.7f, 0.7f, 1f);
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -572,6 +593,9 @@ namespace DigitPark.Editor
             if (textTmp == null) textTmp = textObj.AddComponent<TextMeshProUGUI>();
             textTmp.text = text;
             textTmp.fontSize = FontSizes.Body;
+            textTmp.enableAutoSizing = true;
+            textTmp.fontSizeMin = FontSizes.AutoMinBody;
+            textTmp.fontSizeMax = textTmp.fontSize;
             textTmp.fontStyle = FontStyles.Bold;
             textTmp.color = isPrimary ? DARK_BG : Color.white;
             textTmp.alignment = TextAlignmentOptions.Center;
@@ -632,6 +656,9 @@ namespace DigitPark.Editor
             if (labelTmp == null) labelTmp = label.AddComponent<TextMeshProUGUI>();
             labelTmp.text = labelText;
             labelTmp.fontSize = FontSizes.Body;
+            labelTmp.enableAutoSizing = true;
+            labelTmp.fontSizeMin = FontSizes.AutoMinBody;
+            labelTmp.fontSizeMax = labelTmp.fontSize;
             labelTmp.fontStyle = FontStyles.Bold;
             labelTmp.color = Color.white;
             labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -737,13 +764,16 @@ namespace DigitPark.Editor
             GameObject arrowText = CreateOrFind(obj.transform, "ArrowText");
             SetupRectTransform(arrowText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
-            TextMeshProUGUI tmp = arrowText.GetComponent<TextMeshProUGUI>();
-            if (tmp == null) tmp = arrowText.AddComponent<TextMeshProUGUI>();
-            tmp.text = "<";
-            tmp.fontSize = FontSizes.H4;
-            tmp.fontStyle = FontStyles.Bold;
+            // Remove old TMP if present
+            TextMeshProUGUI oldTmp = arrowText.GetComponent<TextMeshProUGUI>();
+            if (oldTmp != null) Object.DestroyImmediate(oldTmp);
+            Image tmp = arrowText.GetComponent<Image>();
+            if (tmp == null) tmp = arrowText.AddComponent<Image>();
+            Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+            if (arrowSprite != null) tmp.sprite = arrowSprite;
             tmp.color = CYAN_NEON;
-            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.preserveAspect = true;
+            tmp.raycastTarget = false;
         }
 
         private static void SetupTitleText(GameObject obj, string text)

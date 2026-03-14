@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Services
 {
@@ -307,12 +309,54 @@ namespace DigitPark.Services
             var data = new StringListWrapper { items = new List<string>(_ownedTitles) };
             PlayerPrefs.SetString(OWNED_TITLES_KEY, JsonUtility.ToJson(data));
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            SyncTitlesToFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[PlayerTitleService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void SaveEquippedTitle()
         {
             PlayerPrefs.SetString(EQUIPPED_TITLE_KEY, _equippedTitleId);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            SyncTitlesToFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[PlayerTitleService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private async Task SyncTitlesToFirebase()
+        {
+            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            if (playerData == null) return;
+
+            try
+            {
+                var ownedData = new StringListWrapper { items = new List<string>(_ownedTitles) };
+                string ownedJson = JsonUtility.ToJson(ownedData);
+
+                var updates = new Dictionary<string, object>
+                {
+                    { "equippedTitle", _equippedTitleId },
+                    { "ownedTitles", ownedJson },
+                    { "customTitle", _customTitleText }
+                };
+
+                if (DatabaseService.Instance != null)
+                {
+                    await DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[PlayerTitleService] Error syncing to Firebase: {e.Message}");
+            }
         }
 
         // ==================== PUBLIC API ====================
@@ -407,6 +451,13 @@ namespace DigitPark.Services
             _customTitleText = text.Trim();
             PlayerPrefs.SetString(CUSTOM_TITLE_KEY, _customTitleText);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            SyncTitlesToFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[PlayerTitleService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
 
             Debug.Log($"[PlayerTitleService] Custom title set: {_customTitleText}");
 

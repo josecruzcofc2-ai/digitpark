@@ -450,16 +450,12 @@ namespace DigitPark.Editor
                 arrowRect.anchorMax = Vector2.one;
                 arrowRect.sizeDelta = Vector2.zero;
 
-                TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
-                arrowText.font = DefaultFont;
-                arrowText.text = "<";
-                arrowText.fontSize = FontSizes.Body;
-                arrowText.fontStyle = FontStyles.Bold;
+                Image arrowText = arrow.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrowText.sprite = arrowSprite;
                 arrowText.color = GoldPremium;
-                arrowText.alignment = TextAlignmentOptions.Center;
-                arrowText.enableAutoSizing = true;
-                arrowText.fontSizeMin = FontSizes.AutoMinBody;
-                arrowText.fontSizeMax = FontSizes.Body;
+                arrowText.preserveAspect = true;
+                arrowText.raycastTarget = false;
 
                 Debug.Log("✅ BackButton created (no prefab found)");
             }

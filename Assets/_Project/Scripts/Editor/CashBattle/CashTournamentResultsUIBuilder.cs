@@ -350,6 +350,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI subtitleTMP = subtitleObj.AddComponent<TextMeshProUGUI>();
             subtitleTMP.text = "QuickMath Championship";
             subtitleTMP.fontSize = FontSizes.BodyLarge;
+            subtitleTMP.enableAutoSizing = true;
+            subtitleTMP.fontSizeMin = FontSizes.AutoMinBody;
+            subtitleTMP.fontSizeMax = subtitleTMP.fontSize;
             subtitleTMP.color = TEXT_SECONDARY;
             subtitleTMP.alignment = TextAlignmentOptions.Center;
             subtitleTMP.fontStyle = FontStyles.Bold;
@@ -419,6 +422,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI valueTMP = valueObj.AddComponent<TextMeshProUGUI>();
             valueTMP.text = defaultValue;
             valueTMP.fontSize = FontSizes.Body;
+            valueTMP.enableAutoSizing = true;
+            valueTMP.fontSizeMin = FontSizes.AutoMinBody;
+            valueTMP.fontSizeMax = valueTMP.fontSize;
             valueTMP.color = TEXT_PRIMARY;
             valueTMP.alignment = TextAlignmentOptions.Center;
             valueTMP.fontStyle = FontStyles.Bold;
@@ -458,6 +464,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI posTMP = posTextObj.AddComponent<TextMeshProUGUI>();
             posTMP.text = "#1";
             posTMP.fontSize = FontSizes.H2;
+            posTMP.enableAutoSizing = true;
+            posTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            posTMP.fontSizeMax = posTMP.fontSize;
             posTMP.color = GOLD_PRIMARY;
             posTMP.alignment = TextAlignmentOptions.Center;
             posTMP.fontStyle = FontStyles.Bold;
@@ -468,6 +477,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI posLabelTMP = posLabelObj.AddComponent<TextMeshProUGUI>();
             posLabelTMP.text = "1st Place";
             posLabelTMP.fontSize = FontSizes.BodyLarge;
+            posLabelTMP.enableAutoSizing = true;
+            posLabelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            posLabelTMP.fontSizeMax = posLabelTMP.fontSize;
             posLabelTMP.color = TEXT_GOLD;
             posLabelTMP.alignment = TextAlignmentOptions.Center;
             posLabelTMP.fontStyle = FontStyles.Bold;
@@ -478,6 +490,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI attemptsTMP = attemptsObj.AddComponent<TextMeshProUGUI>();
             attemptsTMP.text = "Attempts: 2/3";
             attemptsTMP.fontSize = FontSizes.Body;
+            attemptsTMP.enableAutoSizing = true;
+            attemptsTMP.fontSizeMin = FontSizes.AutoMinBody;
+            attemptsTMP.fontSizeMax = attemptsTMP.fontSize;
             attemptsTMP.color = TEXT_SECONDARY;
             attemptsTMP.alignment = TextAlignmentOptions.Center;
             attemptsTMP.fontStyle = FontStyles.Bold;
@@ -488,6 +503,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI bestTimeTMP = bestTimeObj.AddComponent<TextMeshProUGUI>();
             bestTimeTMP.text = "Best: 1:23.45";
             bestTimeTMP.fontSize = FontSizes.Body;
+            bestTimeTMP.enableAutoSizing = true;
+            bestTimeTMP.fontSizeMin = FontSizes.AutoMinBody;
+            bestTimeTMP.fontSizeMax = bestTimeTMP.fontSize;
             bestTimeTMP.color = TEXT_SECONDARY;
             bestTimeTMP.alignment = TextAlignmentOptions.Center;
             bestTimeTMP.fontStyle = FontStyles.Bold;
@@ -514,6 +532,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI prizeLabelTMP = prizeLabelObj.AddComponent<TextMeshProUGUI>();
             prizeLabelTMP.text = "You Won!";
             prizeLabelTMP.fontSize = FontSizes.BodyLarge;
+            prizeLabelTMP.enableAutoSizing = true;
+            prizeLabelTMP.fontSizeMin = FontSizes.AutoMinBody;
+            prizeLabelTMP.fontSizeMax = prizeLabelTMP.fontSize;
             prizeLabelTMP.color = TEXT_GOLD;
             prizeLabelTMP.alignment = TextAlignmentOptions.Center;
             prizeLabelTMP.fontStyle = FontStyles.Bold;

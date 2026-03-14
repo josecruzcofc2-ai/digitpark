@@ -101,6 +101,9 @@ namespace DigitPark.Editor
             var iconTMP = iconObj.AddComponent<TextMeshProUGUI>();
             iconTMP.text = "\u26A0"; // ⚠
             iconTMP.fontSize = 42;
+            iconTMP.enableAutoSizing = true;
+            iconTMP.fontSizeMin = FontSizes.AutoMinBody;
+            iconTMP.fontSizeMax = iconTMP.fontSize;
             iconTMP.fontStyle = FontStyles.Bold;
             iconTMP.color = RED_ERROR;
             iconTMP.alignment = TextAlignmentOptions.Center;

@@ -92,6 +92,9 @@ namespace DigitPark.Editor
                 if (font != null) arrowTMP.font = font;
                 arrowTMP.text = "\u2039";
                 arrowTMP.fontSize = FontSizes.H1;
+                arrowTMP.enableAutoSizing = true;
+                arrowTMP.fontSizeMin = FontSizes.AutoMinTitle;
+                arrowTMP.fontSizeMax = arrowTMP.fontSize;
                 arrowTMP.color = GOLD;
                 arrowTMP.alignment = TextAlignmentOptions.Center;
                 arrowTMP.fontStyle = FontStyles.Bold;

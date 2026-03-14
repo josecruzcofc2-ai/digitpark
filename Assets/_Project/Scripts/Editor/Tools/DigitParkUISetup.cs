@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Linq;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
+using DigitPark.UI;
 
 namespace DigitPark.Editor
 {
@@ -654,6 +655,10 @@ namespace DigitPark.Editor
                 textRt.sizeDelta = Vector2.zero;
                 var tmp = textGo.AddComponent<TextMeshProUGUI>();
                 tmp.text = name.Replace("Button", "").Replace("Btn", "");
+                tmp.fontSize = FontSizes.Body;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = FontSizes.AutoMinBody;
+                tmp.fontSizeMax = tmp.fontSize;
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.color = Color.white;
             }
@@ -663,6 +668,10 @@ namespace DigitPark.Editor
                 rt.sizeDelta = new Vector2(300, 50);
                 var tmp = go.AddComponent<TextMeshProUGUI>();
                 tmp.text = name;
+                tmp.fontSize = FontSizes.Body;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = FontSizes.AutoMinBody;
+                tmp.fontSizeMax = tmp.fontSize;
                 tmp.alignment = TextAlignmentOptions.Center;
             }
             else if (fieldType == typeof(TMP_InputField))
@@ -686,6 +695,10 @@ namespace DigitPark.Editor
                 tRt.anchorMax = Vector2.one;
                 tRt.sizeDelta = Vector2.zero;
                 var tmp = text.AddComponent<TextMeshProUGUI>();
+                tmp.fontSize = FontSizes.Body;
+                tmp.enableAutoSizing = true;
+                tmp.fontSizeMin = FontSizes.AutoMinBody;
+                tmp.fontSizeMax = tmp.fontSize;
                 input.textComponent = tmp;
             }
             else if (fieldType == typeof(Image))

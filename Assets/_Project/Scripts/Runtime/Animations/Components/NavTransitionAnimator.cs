@@ -59,7 +59,7 @@ namespace DigitPark.Animations
             isTransitioning = true;
 
             contentSequence?.Kill();
-            contentSequence = DOTween.Sequence();
+            contentSequence = DOTween.Sequence().SetLink(gameObject);
 
             // Animate out old content
             if (oldContent != null)

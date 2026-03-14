@@ -153,7 +153,7 @@ namespace DigitPark.Animations
                 Vector3 midPoint = Vector3.Lerp(startPos, target.position, 0.5f);
                 midPoint.y += 100f;
 
-                Sequence flySeq = DOTween.Sequence();
+                Sequence flySeq = DOTween.Sequence().SetLink(icon);
 
                 // Pop out
                 flySeq.Append(iconRT.DOScale(1.3f, flyDuration * 0.2f).SetEase(Ease.OutQuad));
@@ -260,7 +260,7 @@ namespace DigitPark.Animations
                     0f
                 );
 
-                var burstSeq = DOTween.Sequence();
+                var burstSeq = DOTween.Sequence().SetLink(icon);
                 burstSeq.Append(iconRT.DOScale(1.5f, 0.15f).SetEase(Ease.OutBack));
                 burstSeq.Join(iconRT.DOMove(burstTarget, 0.2f).SetEase(Ease.OutQuad));
                 burstSeq.Append(iconRT.DOScale(1f, 0.1f));
@@ -278,7 +278,7 @@ namespace DigitPark.Animations
 
                 int index = i;
                 Vector3 startPos = iconRT.position;
-                Sequence flySeq = DOTween.Sequence();
+                Sequence flySeq = DOTween.Sequence().SetLink(iconRT.gameObject);
 
                 flySeq.Append(iconRT.DOMove(target.position, flyDuration * 0.6f).SetEase(Ease.InQuad));
                 flySeq.Join(iconRT.DOScale(0.4f, flyDuration * 0.6f));
@@ -359,7 +359,7 @@ namespace DigitPark.Animations
             {
                 screenFlash.gameObject.SetActive(true);
                 screenFlash.color = new Color(1f, 0.9f, 0.3f, 0f);
-                var flashSeq = DOTween.Sequence();
+                var flashSeq = DOTween.Sequence().SetLink(screenFlash.gameObject);
                 flashSeq.Append(screenFlash.DOFade(0.6f, 0.15f));
                 flashSeq.Append(screenFlash.DOFade(0f, 0.3f));
                 flashSeq.OnComplete(() => screenFlash.gameObject.SetActive(false));
@@ -383,7 +383,7 @@ namespace DigitPark.Animations
             rewardPopup.gameObject.SetActive(true);
             rewardPopup.localScale = Vector3.zero;
 
-            Sequence popupSeq = DOTween.Sequence();
+            Sequence popupSeq = DOTween.Sequence().SetLink(rewardPopup.gameObject);
             _activeTweens.Add(popupSeq);
             popupSeq.Append(rewardPopup.DOScale(1.2f, 0.3f).SetEase(Ease.OutBack));
             popupSeq.Append(rewardPopup.DOScale(1f, 0.2f).SetEase(Ease.InOutQuad));
@@ -416,6 +416,7 @@ namespace DigitPark.Animations
 
             var hideTween = rewardPopup.DOScale(0f, 0.2f)
                 .SetEase(Ease.InBack)
+                .SetLink(rewardPopup.gameObject)
                 .OnComplete(() =>
                 {
                     rewardPopup.gameObject.SetActive(false);

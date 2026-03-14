@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DigitPark.Monetization;
 using DigitPark.Navigation;
 using DigitPark.Localization;
@@ -12,6 +13,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.UI;
 using DG.Tweening;
 using DigitPark.Animations;
+using FirebaseDB = global::Firebase.Database;
 
 namespace DigitPark.Managers
 {
@@ -148,6 +150,14 @@ namespace DigitPark.Managers
             LoadNeonIcons();
             InitializeRewards();
             LoadProgress();
+
+            // Fire-and-forget Firebase restore (merges higher streak / more recent claim)
+            _ = RestoreFromFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[DailyRewards] Firebase restore failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+
             SetupUI();
             SetupListeners();
             CheckClaimStatus();
@@ -276,11 +286,11 @@ namespace DigitPark.Managers
                 {
                     new DailyRewardConfig { day = 1, type = "coins", amount = 50, name = "reward_coins" },
                     new DailyRewardConfig { day = 2, type = "coins", amount = 75, name = "reward_coins" },
-                    new DailyRewardConfig { day = 3, type = "gems", amount = 5, name = "reward_gems" },
+                    new DailyRewardConfig { day = 3, type = "coins", amount = 200, name = "reward_coins" },
                     new DailyRewardConfig { day = 4, type = "coins", amount = 100, name = "reward_coins" },
-                    new DailyRewardConfig { day = 5, type = "xp", amount = 200, name = "reward_xp" },
+                    new DailyRewardConfig { day = 5, type = "coins", amount = 125, name = "reward_coins" },
                     new DailyRewardConfig { day = 6, type = "coins", amount = 150, name = "reward_coins" },
-                    new DailyRewardConfig { day = 7, type = "gems", amount = 25, name = "reward_gems", isSpecial = true },
+                    new DailyRewardConfig { day = 7, type = "coins", amount = 500, name = "reward_coins", isSpecial = true },
                 };
 
                 daysInCycle = rewards.Count;
@@ -309,6 +319,117 @@ namespace DigitPark.Managers
             PlayerPrefs.SetInt("DailyRewards_CurrentDay", currentDayInCycle);
             PlayerPrefs.SetString("DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            SyncRewardsToFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[DailyRewards] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private async Task SyncRewardsToFirebase()
+        {
+            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            if (playerData == null) return;
+
+            try
+            {
+                var updates = new Dictionary<string, object>
+                {
+                    { "dailyRewardStreak", currentStreak },
+                    { "dailyRewardDay", currentDayInCycle },
+                    { "dailyRewardLastClaim", lastClaimDate.ToString("yyyy-MM-dd") }
+                };
+
+                if (DatabaseService.Instance != null)
+                {
+                    await DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DailyRewards] Error syncing to Firebase: {e.Message}");
+            }
+        }
+
+        private async Task RestoreFromFirebase()
+        {
+            try
+            {
+                var auth = AuthenticationService.Instance;
+                if (auth == null || !auth.IsUserAuthenticated()) return;
+
+                string uid = auth.GetCurrentUserId();
+                if (string.IsNullOrEmpty(uid)) return;
+
+                var dbRef = FirebaseDB.FirebaseDatabase.DefaultInstance?.RootReference;
+                if (dbRef == null) return;
+
+                var snapshot = await dbRef.Child("players").Child(uid).GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                var data = snapshot.Value as Dictionary<string, object>;
+                if (data == null) return;
+
+                bool changed = false;
+
+                // Restore streak — use Firebase if higher
+                if (data.ContainsKey("dailyRewardStreak"))
+                {
+                    int fbStreak = Convert.ToInt32(data["dailyRewardStreak"]);
+                    if (fbStreak > currentStreak)
+                    {
+                        currentStreak = fbStreak;
+                        changed = true;
+                    }
+                }
+
+                // Restore day in cycle
+                if (data.ContainsKey("dailyRewardDay"))
+                {
+                    int fbDay = Convert.ToInt32(data["dailyRewardDay"]);
+                    // Only use Firebase day if we also took the streak
+                    if (changed)
+                    {
+                        currentDayInCycle = fbDay;
+                    }
+                }
+
+                // Restore last claim date — use Firebase if more recent
+                if (data.ContainsKey("dailyRewardLastClaim"))
+                {
+                    string fbLastClaim = data["dailyRewardLastClaim"]?.ToString();
+                    if (!string.IsNullOrEmpty(fbLastClaim) &&
+                        DateTime.TryParse(fbLastClaim, System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out DateTime fbDate))
+                    {
+                        if (fbDate > lastClaimDate)
+                        {
+                            lastClaimDate = fbDate;
+                            changed = true;
+                        }
+                    }
+                }
+
+                if (changed)
+                {
+                    // Save merged values back to PlayerPrefs
+                    PlayerPrefs.SetInt("DailyRewards_Streak", currentStreak);
+                    PlayerPrefs.SetInt("DailyRewards_CurrentDay", currentDayInCycle);
+                    PlayerPrefs.SetString("DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
+                    PlayerPrefs.Save();
+                    Debug.Log($"[DailyRewards] Firebase restore merged — streak:{currentStreak}, day:{currentDayInCycle}, lastClaim:{lastClaimDate:yyyy-MM-dd}");
+                }
+                else
+                {
+                    Debug.Log("[DailyRewards] Firebase restore: no changes needed");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DailyRewards] Firebase restore failed: {e.Message}");
+            }
         }
 
         private void SetupUI()
@@ -370,7 +491,7 @@ namespace DigitPark.Managers
 
         private void CheckClaimStatus()
         {
-            DateTime today = DateTime.Now.Date;
+            DateTime today = DateTime.UtcNow.Date;
             DateTime lastClaim = lastClaimDate.Date;
 
             // Check if already claimed today
@@ -381,11 +502,34 @@ namespace DigitPark.Managers
             // Check if missed a day (streak broken)
             else if (lastClaim < today.AddDays(-1) && currentStreak > 0)
             {
-                // Streak broken, reset
-                currentStreak = 0;
-                currentDayInCycle = 0;
+                int daysMissed = (today - lastClaim).Days - 1;
+
+                // Economy Rebalance V55 — Streak Shield: 1 free use every 14 days
+                bool shieldUsed = false;
+                if (daysMissed == 1) // Only protect 1-day gaps
+                {
+                    string lastShieldDate = PlayerPrefs.GetString("StreakShield_LastUsed", "");
+                    bool shieldAvailable = true;
+                    if (!string.IsNullOrEmpty(lastShieldDate) && DateTime.TryParse(lastShieldDate, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime lastUsed))
+                    {
+                        shieldAvailable = (DateTime.UtcNow - lastUsed).TotalDays >= 14;
+                    }
+                    if (shieldAvailable)
+                    {
+                        PlayerPrefs.SetString("StreakShield_LastUsed", DateTime.UtcNow.ToString("yyyy-MM-dd"));
+                        PlayerPrefs.Save();
+                        shieldUsed = true;
+                        Debug.Log("[DailyRewards] Streak Shield activated! Streak preserved.");
+                    }
+                }
+                if (!shieldUsed)
+                {
+                    // Streak broken, reset
+                    currentStreak = 0;
+                    currentDayInCycle = 0;
+                    Debug.Log("[DailyRewards] Streak broken, resetting");
+                }
                 canClaimToday = true;
-                Debug.Log("[DailyRewards] Streak broken, resetting");
             }
             else
             {
@@ -529,8 +673,8 @@ namespace DigitPark.Managers
 
         private void UpdateNextResetTimer()
         {
-            DateTime tomorrow = DateTime.Now.Date.AddDays(1);
-            TimeSpan timeUntilReset = tomorrow - DateTime.Now;
+            DateTime tomorrow = DateTime.UtcNow.Date.AddDays(1);
+            TimeSpan timeUntilReset = tomorrow - DateTime.UtcNow;
 
             if (nextResetText)
             {
@@ -549,8 +693,8 @@ namespace DigitPark.Managers
             while (!canClaimToday)
             {
                 yield return wait;
-                DateTime tomorrow = DateTime.Now.Date.AddDays(1);
-                TimeSpan remaining = tomorrow - DateTime.Now;
+                DateTime tomorrow = DateTime.UtcNow.Date.AddDays(1);
+                TimeSpan remaining = tomorrow - DateTime.UtcNow;
 
                 if (remaining.TotalSeconds <= 0)
                 {
@@ -614,17 +758,187 @@ namespace DigitPark.Managers
 
         private void PopulateRewardsGrid()
         {
+            // Strategy: reuse UIBuilder-created cards if they exist, only update visual states.
+            // This keeps the editor-quality visuals (gift icons, layout, colors) intact.
+
+            if (rewardsContainer != null && rewardsContainer.childCount > 0)
+            {
+                // UIBuilder cards exist — update their states in-place
+                UpdateExistingDayCards();
+            }
+            else
+            {
+                // No UIBuilder cards — fallback: create from code
+                CreateFallbackDayCards();
+            }
+
+            // Update Day7Card if it exists (UIBuilder creates it as "Day7Card" canvas sibling)
+            UpdateDay7Card();
+
+            // Add PulseAnimation to current day card (subtle breathing effect)
+            AddPulseToCurrentDayCard();
+
+            // Animate rewards grid entrance
+            AnimateRewardsGridEntrance();
+        }
+
+        /// <summary>
+        /// Updates the UIBuilder-created day cards (Day1-Day6) in the DaysGrid
+        /// to reflect the current state (claimed/today/locked) without destroying them.
+        /// </summary>
+        private void UpdateExistingDayCards()
+        {
+            for (int i = 0; i < rewardsContainer.childCount && i < rewards.Count; i++)
+            {
+                if (rewards[i].isSpecial) continue;
+
+                var card = rewardsContainer.GetChild(i).gameObject;
+                bool isClaimed = i < currentDayInCycle;
+                bool isToday = i == currentDayInCycle;
+
+                // Update card background color
+                var cardBg = card.GetComponent<Image>();
+                if (cardBg != null)
+                {
+                    if (isClaimed) cardBg.color = new Color(0.04f, 0.06f, 0.09f, 1f);
+                    else if (isToday) cardBg.color = CARD_BG;
+                    else cardBg.color = CARD_BG_LOCKED;
+                }
+
+                // Update outline
+                var outline = card.GetComponent<Outline>();
+                if (outline != null)
+                {
+                    if (isClaimed)
+                    {
+                        outline.effectColor = GREEN_SUCCESS;
+                        outline.effectDistance = new Vector2(1, 1);
+                    }
+                    else if (isToday)
+                    {
+                        outline.effectColor = GOLD;
+                        outline.effectDistance = new Vector2(2, 2);
+                    }
+                    else
+                    {
+                        outline.effectColor = new Color(0.15f, 0.15f, 0.2f, 0.4f);
+                        outline.effectDistance = new Vector2(1, 1);
+                    }
+                }
+
+                // Update day label color
+                var dayLabel = card.transform.Find("DayLabel")?.GetComponent<TextMeshProUGUI>();
+                if (dayLabel != null)
+                {
+                    dayLabel.text = L("dr_day", i + 1);
+                    dayLabel.color = isClaimed ? GREEN_SUCCESS : (isToday ? GOLD : new Color(0.6f, 0.6f, 0.65f));
+                }
+
+                // Update reward amount text
+                var amountText = card.transform.Find("RewardRow/AmountText")?.GetComponent<TextMeshProUGUI>();
+                if (amountText != null)
+                {
+                    amountText.text = $"+{rewards[i].amount}";
+                    if (isClaimed) amountText.alpha = 0.5f;
+                }
+
+                // Update gift icon opacity
+                var giftIcon = card.transform.Find("GiftIcon")?.GetComponent<Image>();
+                if (giftIcon != null)
+                {
+                    if (isClaimed) giftIcon.color = new Color(1f, 1f, 1f, 0.4f);
+                    else giftIcon.color = Color.white;
+                }
+
+                // Remove existing status overlays (editor creates them for sample state)
+                var existingCheck = card.transform.Find("CheckOverlay");
+                if (existingCheck != null) Destroy(existingCheck.gameObject);
+                var existingBadge = card.transform.Find("TodayBadge");
+                if (existingBadge != null) Destroy(existingBadge.gameObject);
+                var existingLock = card.transform.Find("LockedOverlay");
+                if (existingLock != null) Destroy(existingLock.gameObject);
+
+                // Add correct status overlay
+                if (isClaimed)
+                {
+                    CreateCheckOverlay(card.transform);
+                }
+                else if (isToday)
+                {
+                    CreateTodayBadge(card.transform);
+                }
+
+                spawnedDayItems.Add(card);
+            }
+        }
+
+        private void CreateCheckOverlay(Transform cardParent)
+        {
+            var check = new GameObject("CheckOverlay");
+            check.transform.SetParent(cardParent, false);
+            var chRT = check.AddComponent<RectTransform>();
+            chRT.anchorMin = new Vector2(1, 1);
+            chRT.anchorMax = new Vector2(1, 1);
+            chRT.pivot = new Vector2(1, 1);
+            chRT.anchoredPosition = new Vector2(-4, -4);
+            chRT.sizeDelta = new Vector2(28, 28);
+            check.AddComponent<LayoutElement>().ignoreLayout = true;
+            check.AddComponent<Image>().color = GREEN_SUCCESS;
+
+            var checkIcon = new GameObject("CheckIcon");
+            checkIcon.transform.SetParent(check.transform, false);
+            var ctRT = checkIcon.AddComponent<RectTransform>();
+            ctRT.anchorMin = new Vector2(0.15f, 0.15f);
+            ctRT.anchorMax = new Vector2(0.85f, 0.85f);
+            ctRT.offsetMin = Vector2.zero;
+            ctRT.offsetMax = Vector2.zero;
+            var ctImg = checkIcon.AddComponent<Image>();
+            Sprite ctSprite = Resources.Load<Sprite>("Icons/UI/icon_checkmark");
+            if (ctSprite != null) ctImg.sprite = ctSprite;
+            ctImg.color = new Color(0.05f, 0.05f, 0.08f);
+            ctImg.preserveAspect = true;
+            ctImg.raycastTarget = false;
+        }
+
+        private void CreateTodayBadge(Transform cardParent)
+        {
+            var badge = new GameObject("TodayBadge");
+            badge.transform.SetParent(cardParent, false);
+            var bdRT = badge.AddComponent<RectTransform>();
+            bdRT.anchorMin = new Vector2(0.5f, 1);
+            bdRT.anchorMax = new Vector2(0.5f, 1);
+            bdRT.pivot = new Vector2(0.5f, 0);
+            bdRT.anchoredPosition = new Vector2(0, 2);
+            bdRT.sizeDelta = new Vector2(180, 28);
+            badge.AddComponent<LayoutElement>().ignoreLayout = true;
+            badge.AddComponent<Image>().color = GOLD;
+
+            var badgeText = new GameObject("Text");
+            badgeText.transform.SetParent(badge.transform, false);
+            var bttRT = badgeText.AddComponent<RectTransform>();
+            bttRT.anchorMin = Vector2.zero;
+            bttRT.anchorMax = Vector2.one;
+            bttRT.offsetMin = new Vector2(4, 0);
+            bttRT.offsetMax = new Vector2(-4, 0);
+            var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
+            bttTMP.text = AutoLocalizer.Get("dr_today");
+            bttTMP.fontSize = FontSizes.BodySmall;
+            bttTMP.fontStyle = FontStyles.Bold;
+            bttTMP.color = new Color(0.05f, 0.05f, 0.08f);
+            bttTMP.alignment = TextAlignmentOptions.Center;
+            bttTMP.enableAutoSizing = true;
+            bttTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            bttTMP.fontSizeMax = FontSizes.BodySmall;
+            bttTMP.enableWordWrapping = false;
+        }
+
+        /// <summary>
+        /// Fallback: creates day cards from code when UIBuilder cards don't exist
+        /// </summary>
+        private void CreateFallbackDayCards()
+        {
             // Clean up UIBuilder static elements that cause overlap
             CleanupUIBuilderStaticElements();
-
-            // Clear ALL children of the grid (including editor-created placeholders)
-            if (rewardsContainer != null)
-            {
-                for (int i = rewardsContainer.childCount - 1; i >= 0; i--)
-                {
-                    Destroy(rewardsContainer.GetChild(i).gameObject);
-                }
-            }
 
             // Destroy previously spawned Day7 card (canvas sibling)
             if (_spawnedDay7Card != null)
@@ -639,12 +953,10 @@ namespace DigitPark.Managers
             }
             spawnedDayItems.Clear();
 
-            // Create day items (days 1-6)
             for (int i = 0; i < rewards.Count; i++)
             {
                 if (rewards[i].isSpecial)
                 {
-                    // Day 7 se crea con layout especial
                     CreateDay7Card(i, rewards[i]);
                 }
                 else
@@ -652,12 +964,52 @@ namespace DigitPark.Managers
                     CreateDayItem(i, rewards[i]);
                 }
             }
+        }
 
-            // Add PulseAnimation to current day card (subtle breathing effect)
-            AddPulseToCurrentDayCard();
+        /// <summary>
+        /// Updates the UIBuilder Day7Card if it exists, instead of creating a new one.
+        /// </summary>
+        private void UpdateDay7Card()
+        {
+            var canvas = UICanvasHelper.FindMainCanvas();
+            if (canvas == null) return;
 
-            // Animate rewards grid entrance
-            AnimateRewardsGridEntrance();
+            Transform day7 = canvas.transform.Find("Day7Card");
+            if (day7 == null) return; // No UIBuilder Day7Card — fallback already created one
+
+            // Find the Day7 reward
+            int day7Index = -1;
+            for (int i = 0; i < rewards.Count; i++)
+            {
+                if (rewards[i].isSpecial) { day7Index = i; break; }
+            }
+            if (day7Index < 0) return;
+
+            bool isClaimed = day7Index < currentDayInCycle;
+            int daysUntil = day7Index - currentDayInCycle;
+
+            // Update title text
+            var titleTMP = day7.GetComponentInChildren<TextMeshProUGUI>();
+            // Update unlock text
+            var unlockText = FindDeepChild(day7, "UnlockText");
+            if (unlockText != null)
+            {
+                var tmp = unlockText.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    if (isClaimed) tmp.text = AutoLocalizer.Get("dr_claimed");
+                    else if (daysUntil <= 0) tmp.text = AutoLocalizer.Get("dr_available_today");
+                    else tmp.text = L("dr_unlocks_in", daysUntil);
+                }
+            }
+
+            // Update card visual state
+            var cardBg = day7.GetComponent<Image>();
+            if (cardBg != null && isClaimed)
+                cardBg.color = GREEN_CLAIMED;
+
+            // Keep Day7Card visible (don't destroy it)
+            _spawnedDay7Card = day7.gameObject;
         }
 
         /// <summary>
@@ -687,6 +1039,10 @@ namespace DigitPark.Managers
         /// <summary>
         /// Elimina elementos estaticos del UIBuilder que causan overlap con el contenido dinamico.
         /// Incluye Day7Card, Day7Glow, y WeekLabel.
+        /// </summary>
+        /// <summary>
+        /// Only used in fallback path — removes UIBuilder static elements when
+        /// creating day cards from code. NOT called when reusing editor cards.
         /// </summary>
         private void CleanupUIBuilderStaticElements()
         {
@@ -911,6 +1267,9 @@ namespace DigitPark.Managers
                     var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                     bttTMP.text = L("dr_today");
                     bttTMP.fontSize = FontSizes.Body;
+                    bttTMP.enableAutoSizing = true;
+                    bttTMP.fontSizeMin = FontSizes.AutoMinBody;
+                    bttTMP.fontSizeMax = bttTMP.fontSize;
                     bttTMP.fontStyle = FontStyles.Bold;
                     bttTMP.color = TEXT_DARK;
                     bttTMP.alignment = TextAlignmentOptions.Center;
@@ -1033,8 +1392,8 @@ namespace DigitPark.Managers
             iconContainer.transform.SetParent(card.transform, false);
             iconContainer.AddComponent<RectTransform>();
             var iconLE = iconContainer.AddComponent<LayoutElement>();
-            iconLE.preferredHeight = 60;
-            iconLE.preferredWidth = 60;
+            iconLE.preferredHeight = 110;
+            iconLE.preferredWidth = 110;
             var iconImg = iconContainer.AddComponent<Image>();
             iconImg.sprite = GetRewardIcon(reward.type);
             iconImg.preserveAspect = true;
@@ -1056,52 +1415,15 @@ namespace DigitPark.Managers
                 igImg.raycastTarget = false;
             }
 
-            // Amount Text
-            var amountObj = new GameObject("AmountText");
-            amountObj.transform.SetParent(card.transform, false);
-            amountObj.AddComponent<RectTransform>();
-            amountObj.AddComponent<LayoutElement>().preferredHeight = 42;
-            var amTMP = amountObj.AddComponent<TextMeshProUGUI>();
-            amTMP.text = $"+{reward.amount}";
-            amTMP.fontSize = FontSizes.Body;
-            amTMP.fontStyle = FontStyles.Bold;
-            amTMP.alignment = TextAlignmentOptions.Center;
-            amTMP.overflowMode = TextOverflowModes.Ellipsis;
-            amTMP.enableAutoSizing = true;
-            amTMP.fontSizeMin = FontSizes.AutoMinBody;
-            amTMP.fontSizeMax = FontSizes.Body;
-            amTMP.color = isClaimed ? new Color(1f, 1f, 1f, 0.5f) : GetRewardTypeColor(reward.type);
+            // Amount Text — REMOVED per economy rebalance (surprise reveal in claim animation)
+            // Gift box icon is now the visual protagonist without text clutter
 
             // --- Status Overlays ---
 
-            if (isClaimed)
-            {
-                // Green check overlay (top-right)
-                var check = new GameObject("CheckOverlay");
-                check.transform.SetParent(card.transform, false);
-                var chRT = check.AddComponent<RectTransform>();
-                chRT.anchorMin = new Vector2(1, 1);
-                chRT.anchorMax = new Vector2(1, 1);
-                chRT.pivot = new Vector2(1, 1);
-                chRT.anchoredPosition = new Vector2(-4, -4);
-                chRT.sizeDelta = new Vector2(26, 26);
-                check.AddComponent<Image>().color = GREEN_SUCCESS;
+            // Checkmark overlay REMOVED — claimed state already indicated by
+            // green background + icon 40% opacity + green border (3 visual indicators)
 
-                var checkText = new GameObject("Text");
-                checkText.transform.SetParent(check.transform, false);
-                var ctRT = checkText.AddComponent<RectTransform>();
-                ctRT.anchorMin = Vector2.zero;
-                ctRT.anchorMax = Vector2.one;
-                ctRT.offsetMin = Vector2.zero;
-                ctRT.offsetMax = Vector2.zero;
-                var ctTMP = checkText.AddComponent<TextMeshProUGUI>();
-                ctTMP.text = "\u2713";
-                ctTMP.fontSize = FontSizes.Body;
-                ctTMP.fontStyle = FontStyles.Bold;
-                ctTMP.color = TEXT_DARK;
-                ctTMP.alignment = TextAlignmentOptions.Center;
-            }
-            else if (isToday)
+            if (isToday)
             {
                 // TODAY badge (top-center)
                 var badge = new GameObject("TodayBadge");
@@ -1124,6 +1446,9 @@ namespace DigitPark.Managers
                 var bttTMP = badgeText.AddComponent<TextMeshProUGUI>();
                 bttTMP.text = L("dr_today");
                 bttTMP.fontSize = FontSizes.Body;
+                bttTMP.enableAutoSizing = true;
+                bttTMP.fontSizeMin = FontSizes.AutoMinBody;
+                bttTMP.fontSizeMax = bttTMP.fontSize;
                 bttTMP.fontStyle = FontStyles.Bold;
                 bttTMP.color = TEXT_DARK;
                 bttTMP.alignment = TextAlignmentOptions.Center;
@@ -1174,10 +1499,10 @@ namespace DigitPark.Managers
             var item = new GameObject("Day7_GrandPrize");
             item.transform.SetParent(canvas.transform, false);
 
-            // Anchors matching UIBuilder DAY7 region
+            // Anchors matching UIBuilder DAY7 region (DAY7_BOT=0.255, DAY7_TOP=0.450)
             var rt = item.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.023f, 0.455f);
-            rt.anchorMax = new Vector2(0.977f, 0.558f);
+            rt.anchorMin = new Vector2(0.023f, 0.255f);
+            rt.anchorMax = new Vector2(0.977f, 0.450f);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
@@ -1640,24 +1965,25 @@ namespace DigitPark.Managers
             }
         }
 
-        private void ApplyMilestoneBonus(int gemBonus)
+        private void ApplyMilestoneBonus(int coinBonus)
         {
+            // Milestones now give DC (economy rebalance V55 — DG is purchase-only)
             if (CurrencyManager.Instance != null)
             {
-                CurrencyManager.Instance.AddGems(gemBonus);
+                CurrencyManager.Instance.AddCoins(coinBonus);
             }
             else
             {
                 Debug.LogWarning("[DailyRewards] CurrencyManager not available, using PlayerPrefs fallback");
-                int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                PlayerPrefs.SetInt("PlayerGems", currentGems + gemBonus);
+                int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
+                PlayerPrefs.SetInt("PlayerCoins", currentCoins + coinBonus);
                 PlayerPrefs.Save();
             }
 
             // Analytics
-            AnalyticsService.Instance?.LogVirtualCurrencyEarned("gems", gemBonus, "daily_milestone");
+            AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", coinBonus, "daily_milestone");
 
-            Debug.Log($"[DailyRewards] Milestone bonus applied: +{gemBonus} gems");
+            Debug.Log($"[DailyRewards] Milestone bonus applied: +{coinBonus} DC");
         }
 
         private void ShowMilestonePopup(int days, int bonus)

@@ -68,8 +68,8 @@ namespace DigitPark.Managers
         [SerializeField] private List<AvatarOption> avatarOptions = new List<AvatarOption>();
 
         [Header("Configuration")]
-        [SerializeField] private int completionRewardCoins = 500;
-        [SerializeField] private int completionRewardGems = 50;
+        [SerializeField, Range(0, 1000)] private int completionRewardCoins = 500;
+        [SerializeField, Range(0, 1000)] private int completionRewardGems = 50;
         [SerializeField] private float autoAdvanceDelay = 0f;
         [SerializeField] private bool allowSkip = true;
         [SerializeField] private float transitionDuration = 0.35f;
@@ -647,6 +647,9 @@ namespace DigitPark.Managers
             var nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = option.name;
             nameText.fontSize = FontSizes.Body;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = FontSizes.AutoMinBody;
+            nameText.fontSizeMax = nameText.fontSize;
             nameText.alignment = TextAlignmentOptions.Center;
             nameText.color = Color.white;
 

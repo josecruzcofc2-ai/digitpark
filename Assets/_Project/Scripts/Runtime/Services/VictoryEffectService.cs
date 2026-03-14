@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Services
 {
@@ -129,7 +131,7 @@ namespace DigitPark.Services
                 effectId = "gold_rain",
                 nameKey = "effect_gold_rain",
                 priceType = EffectPriceType.DigitGems,
-                gemPrice = 300,
+                gemPrice = 250, // Economy rebalance V55: was 300
                 primaryColor = new Color(1f, 0.84f, 0f),
                 secondaryColor = new Color(0.85f, 0.65f, 0f),
                 particlePrefabName = "Effects/GoldRain"
@@ -140,7 +142,7 @@ namespace DigitPark.Services
                 effectId = "neon_explosion",
                 nameKey = "effect_neon_explosion",
                 priceType = EffectPriceType.DigitGems,
-                gemPrice = 500,
+                gemPrice = 400, // Economy rebalance V55: was 500
                 primaryColor = new Color(0f, 1f, 1f),
                 secondaryColor = new Color(1f, 0f, 1f),
                 particlePrefabName = "Effects/NeonExplosion"
@@ -208,14 +210,55 @@ namespace DigitPark.Services
         private void SaveOwnedEffects()
         {
             var data = new StringListWrapper { items = new List<string>(_ownedEffects) };
-            PlayerPrefs.SetString(OWNED_EFFECTS_KEY, JsonUtility.ToJson(data));
+            string ownedJson = JsonUtility.ToJson(data);
+            PlayerPrefs.SetString(OWNED_EFFECTS_KEY, ownedJson);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            SyncEffectsToFirebase(_equippedEffectId, ownedJson).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[VictoryEffectService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void SaveEquippedEffect()
         {
             PlayerPrefs.SetString(EQUIPPED_EFFECT_KEY, _equippedEffectId);
             PlayerPrefs.Save();
+
+            // Sync to Firebase
+            var data = new StringListWrapper { items = new List<string>(_ownedEffects) };
+            string ownedJson = JsonUtility.ToJson(data);
+            SyncEffectsToFirebase(_equippedEffectId, ownedJson).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[VictoryEffectService] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private async Task SyncEffectsToFirebase(string equippedEffect, string ownedEffectsJson)
+        {
+            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            if (playerData == null) return;
+
+            try
+            {
+                var updates = new Dictionary<string, object>
+                {
+                    { "equippedEffect", equippedEffect },
+                    { "ownedEffects", ownedEffectsJson }
+                };
+
+                if (DatabaseService.Instance != null)
+                {
+                    await DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[VictoryEffectService] Error syncing to Firebase: {e.Message}");
+            }
         }
 
         // ==================== PUBLIC API ====================

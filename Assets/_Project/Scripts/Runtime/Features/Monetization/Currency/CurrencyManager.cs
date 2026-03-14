@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Navigation;
+using Firebase.Database;
 
 namespace DigitPark.Monetization
 {
@@ -29,14 +30,21 @@ namespace DigitPark.Monetization
         {
             get
             {
-                if (_instance == null)
+                // C-67: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
+                if (!_instance)
                 {
                     _instance = FindObjectOfType<CurrencyManager>();
-                    if (_instance == null)
+                    if (_instance)
+                    {
+                        // Found existing instance — ensure it persists across scenes
+                        DontDestroyOnLoad(_instance.gameObject);
+                    }
+                    else
                     {
                         GameObject go = new GameObject("CurrencyManager");
-                        _instance = go.AddComponent<CurrencyManager>();
                         DontDestroyOnLoad(go);
+                        // Set _instance BEFORE AddComponent to prevent Awake race condition
+                        _instance = go.AddComponent<CurrencyManager>();
                     }
                 }
                 return _instance;
@@ -61,8 +69,12 @@ namespace DigitPark.Monetization
         // XOR salt — obscures raw balance from casual memory editors (not cryptographic)
         private const int CURRENCY_XOR_SALT = 0x4D50_3A21;
 
+        // D-8: Escrow persistence keys — survive app crashes between escrow and settle
+        private const string ESCROW_GEMS_KEY = "dp_escrow_gems";
+        private const string ESCROW_COINS_KEY = "dp_escrow_coins";
+
         // Valores iniciales para nuevos jugadores
-        private const int DEFAULT_GEMS = 100;
+        private const int DEFAULT_GEMS = 0;
         private const int DEFAULT_COINS = 1000;
 
         // ==================== ESTADO ====================
@@ -98,6 +110,13 @@ namespace DigitPark.Monetization
 
         // ==================== INICIALIZACION ====================
 
+        private bool _firebaseRestoreCompleted = false;
+
+        /// <summary>
+        /// Whether the Firebase restore has completed (used by BootManager to wait if needed)
+        /// </summary>
+        public bool FirebaseRestoreCompleted => _firebaseRestoreCompleted;
+
         private void Awake()
         {
             if (_instance == null)
@@ -106,6 +125,11 @@ namespace DigitPark.Monetization
                 DontDestroyOnLoad(gameObject);
                 LoadCurrency();
                 Debug.Log($"[CurrencyManager] Iniciado - Gemas: {_gems}, Monedas: {_coins}");
+
+                // D-9 FIX: Async restore from Firebase after loading local cache.
+                // If Firebase has higher values (e.g., reinstall scenario before BootManager migration runs),
+                // we take the max of local vs Firebase to prevent data loss.
+                _ = RestoreFromFirebaseAsync();
             }
             else if (_instance != this)
             {
@@ -125,6 +149,124 @@ namespace DigitPark.Monetization
                 _coins = PlayerPrefs.GetInt(COINS_KEY_V2, DEFAULT_COINS) ^ CURRENCY_XOR_SALT;
             else
                 _coins = PlayerPrefs.GetInt(COINS_KEY, DEFAULT_COINS);
+
+            // D-8 FIX: Restore persisted escrow state. If escrow > 0 on boot,
+            // a crash happened mid-escrow — refund the escrowed amount back to balance.
+            _escrowedGems = PlayerPrefs.GetInt(ESCROW_GEMS_KEY, 0);
+            _escrowedCoins = PlayerPrefs.GetInt(ESCROW_COINS_KEY, 0);
+            if (_escrowedGems > 0 || _escrowedCoins > 0)
+            {
+                Debug.LogWarning($"[CurrencyManager] Crash recovery: refunding escrowed currency " +
+                    $"(Gems: {_escrowedGems}, Coins: {_escrowedCoins})");
+                _gems += _escrowedGems;
+                _coins += _escrowedCoins;
+                _escrowedGems = 0;
+                _escrowedCoins = 0;
+                _escrowType = BetCurrencyType.None;
+                ClearEscrowPrefs();
+                // Save the refunded balance immediately
+                SaveCurrency();
+            }
+        }
+
+        /// <summary>
+        /// D-23 FIX: Called by BootManager when a reinstall is detected.
+        /// Sets local currency to the Firebase values and saves to PlayerPrefs.
+        /// </summary>
+        public void RestoreFromFirebaseValues(int gems, int coins)
+        {
+            lock (_currencyLock)
+            {
+                _gems = Mathf.Max(gems, 0);
+                _coins = Mathf.Max(coins, 0);
+            }
+
+            SaveCurrency();
+            OnGemsChanged?.Invoke(_gems, 0);
+            OnCoinsChanged?.Invoke(_coins, 0);
+            Debug.Log($"[CurrencyManager] Restored from Firebase — Gems: {_gems}, Coins: {_coins}");
+        }
+
+        /// <summary>
+        /// D-9 FIX: Async Firebase restore on init.
+        /// After loading from PlayerPrefs, checks Firebase for the authoritative balance.
+        /// Takes the MAX of local vs Firebase to prevent data loss in any direction.
+        /// Only runs if the user is authenticated and Firebase is reachable.
+        /// </summary>
+        private async Task RestoreFromFirebaseAsync()
+        {
+            try
+            {
+                // Wait briefly for auth to be ready (CurrencyManager may init before AuthService)
+                await Task.Delay(2000);
+
+                var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                if (playerData == null || string.IsNullOrEmpty(playerData.userId))
+                {
+                    _firebaseRestoreCompleted = true;
+                    return;
+                }
+
+                var dbRef = FirebaseDatabase.DefaultInstance?.RootReference;
+                if (dbRef == null)
+                {
+                    _firebaseRestoreCompleted = true;
+                    return;
+                }
+
+                int firebaseGems = 0;
+                int firebaseCoins = 0;
+
+                var gemsSnapshot = await dbRef.Child("players").Child(playerData.userId).Child("gems").GetValueAsync();
+                if (gemsSnapshot != null && gemsSnapshot.Exists)
+                {
+                    try { firebaseGems = Convert.ToInt32(gemsSnapshot.Value); }
+                    catch { firebaseGems = 0; }
+                }
+
+                var coinsSnapshot = await dbRef.Child("players").Child(playerData.userId).Child("coins").GetValueAsync();
+                if (coinsSnapshot != null && coinsSnapshot.Exists)
+                {
+                    try { firebaseCoins = Convert.ToInt32(coinsSnapshot.Value); }
+                    catch { firebaseCoins = 0; }
+                }
+
+                // Take the MAX of local vs Firebase to prevent data loss in either direction
+                bool changed = false;
+                lock (_currencyLock)
+                {
+                    if (firebaseGems > _gems)
+                    {
+                        _gems = firebaseGems;
+                        changed = true;
+                    }
+                    if (firebaseCoins > _coins)
+                    {
+                        _coins = firebaseCoins;
+                        changed = true;
+                    }
+                }
+
+                if (changed)
+                {
+                    SaveCurrency();
+                    OnGemsChanged?.Invoke(_gems, 0);
+                    OnCoinsChanged?.Invoke(_coins, 0);
+                    Debug.Log($"[CurrencyManager] Firebase restore applied — Gems: {_gems}, Coins: {_coins}");
+                }
+                else
+                {
+                    Debug.Log("[CurrencyManager] Firebase restore — local values are current, no change needed");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[CurrencyManager] Firebase restore failed (non-fatal): {e.Message}");
+            }
+            finally
+            {
+                _firebaseRestoreCompleted = true;
+            }
         }
 
         private void SaveCurrency()
@@ -289,6 +431,7 @@ namespace DigitPark.Monetization
         {
             if (amount <= 0) return true;
 
+            int newCoins = 0;
             int deficit = 0;
             bool success;
             lock (_currencyLock)
@@ -301,6 +444,7 @@ namespace DigitPark.Monetization
                 else
                 {
                     _coins -= amount;
+                    newCoins = _coins;
                     success = true;
                 }
             }
@@ -308,8 +452,9 @@ namespace DigitPark.Monetization
             if (success)
             {
                 SaveCurrency();
-                OnCoinsChanged?.Invoke(_coins, -amount);
-                Debug.Log($"[CurrencyManager] -{amount} monedas (Total: {_coins})");
+                // Use captured newCoins (read inside lock) to avoid race condition
+                OnCoinsChanged?.Invoke(newCoins, -amount);
+                Debug.Log($"[CurrencyManager] -{amount} monedas (Total: {newCoins})");
             }
             else
             {
@@ -331,19 +476,13 @@ namespace DigitPark.Monetization
         // ==================== PURCHASE METHODS ====================
 
         /// <summary>
-        /// Compra monedas con gemas
+        /// [DISABLED] DG es moneda solo-compra. Exchange DG→DC eliminado para preservar valor de DG.
         /// </summary>
-        /// <returns>true si la compra fue exitosa</returns>
+        [System.Obsolete("DG→DC exchange disabled. DG is purchase-only currency.")]
         public bool PurchaseCoinsWithGems(int coinsAmount, int gemsPrice)
         {
-            if (!SpendGems(gemsPrice))
-            {
-                return false;
-            }
-
-            AddCoins(coinsAmount);
-            Debug.Log($"[CurrencyManager] Compra exitosa: {coinsAmount} monedas por {gemsPrice} gemas");
-            return true;
+            Debug.LogWarning("[CurrencyManager] PurchaseCoinsWithGems is DISABLED. DG is purchase-only currency.");
+            return false;
         }
 
         /// <summary>
@@ -413,7 +552,7 @@ namespace DigitPark.Monetization
         {
             if (amount <= 0) return true;
 
-            int newGems;
+            int newGems = 0;
             int deficit = 0;
             bool success;
             lock (_currencyLock)
@@ -437,7 +576,9 @@ namespace DigitPark.Monetization
             if (success)
             {
                 SaveCurrency();
-                OnGemsChanged?.Invoke(_gems, -amount);
+                SaveEscrowPrefs(); // D-8: Persist escrow to survive crashes
+                // Use captured newGems (read inside lock) to avoid race condition
+                OnGemsChanged?.Invoke(newGems, -amount);
                 Debug.Log($"[CurrencyManager] Escrow: {amount} DigitGems held for bet");
             }
             else
@@ -456,6 +597,7 @@ namespace DigitPark.Monetization
         {
             if (amount <= 0) return true;
 
+            int newCoins = 0;
             int deficit = 0;
             bool success;
             lock (_currencyLock)
@@ -471,6 +613,7 @@ namespace DigitPark.Monetization
                     _escrowedCoins = amount;
                     _escrowedGems = 0;
                     _escrowType = BetCurrencyType.DigitCoins;
+                    newCoins = _coins;
                     success = true;
                 }
             }
@@ -478,7 +621,9 @@ namespace DigitPark.Monetization
             if (success)
             {
                 SaveCurrency();
-                OnCoinsChanged?.Invoke(_coins, -amount);
+                SaveEscrowPrefs(); // D-8: Persist escrow to survive crashes
+                // Use captured newCoins (read inside lock) to avoid race condition
+                OnCoinsChanged?.Invoke(newCoins, -amount);
                 Debug.Log($"[CurrencyManager] Escrow: {amount} DigitCoins held for bet");
             }
             else
@@ -620,6 +765,27 @@ namespace DigitPark.Monetization
             _escrowedGems = 0;
             _escrowedCoins = 0;
             _escrowType = BetCurrencyType.None;
+            ClearEscrowPrefs();
+        }
+
+        /// <summary>
+        /// D-8: Persist escrow state to PlayerPrefs so it survives app crashes
+        /// </summary>
+        private void SaveEscrowPrefs()
+        {
+            PlayerPrefs.SetInt(ESCROW_GEMS_KEY, _escrowedGems);
+            PlayerPrefs.SetInt(ESCROW_COINS_KEY, _escrowedCoins);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// D-8: Clear persisted escrow state from PlayerPrefs
+        /// </summary>
+        private void ClearEscrowPrefs()
+        {
+            PlayerPrefs.DeleteKey(ESCROW_GEMS_KEY);
+            PlayerPrefs.DeleteKey(ESCROW_COINS_KEY);
+            PlayerPrefs.Save();
         }
 
         // ==================== DEBUG ====================

@@ -21,6 +21,7 @@ namespace DigitPark.UI.Common
 
         private Action<string> onConfirmCallback;
         private Action onCancelCallback;
+        private TextMeshProUGUI errorText;
 
         /// <summary>
         /// Crea un popup de username
@@ -144,6 +145,23 @@ namespace DigitPark.UI.Common
             usernameInput.placeholder = placeholderText;
             usernameInput.characterLimit = 20;
 
+            // Error text (hidden by default)
+            errorText = UIFactory.CreateText(
+                popupPanel.transform,
+                "ErrorText",
+                "",
+                (int)FontSizes.Caption,
+                new Color(1f, 0.3f, 0.3f),
+                TMPro.TextAlignmentOptions.Center
+            );
+            RectTransform errorRT = errorText.GetComponent<RectTransform>();
+            errorRT.anchoredPosition = new Vector2(0, -30);
+            errorRT.sizeDelta = new Vector2(500, 40);
+            errorText.enableAutoSizing = true;
+            errorText.fontSizeMin = FontSizes.AutoMinSmall;
+            errorText.fontSizeMax = FontSizes.Caption;
+            errorText.gameObject.SetActive(false);
+
             CreateButtons();
         }
 
@@ -257,12 +275,16 @@ namespace DigitPark.UI.Common
             if (string.IsNullOrEmpty(username))
             {
                 Debug.LogWarning("[UsernamePopup] Nombre vacío");
+                ShowError(AutoLocalizer.Get("username_error_empty", "Username cannot be empty"));
+                SetButtonsInteractable(true);
                 return;
             }
 
             if (username.Length < 3)
             {
                 Debug.LogWarning("[UsernamePopup] Nombre muy corto (mínimo 3 caracteres)");
+                ShowError(AutoLocalizer.Get("username_error_too_short", "Username must be at least 3 characters"));
+                SetButtonsInteractable(true);
                 return;
             }
 
@@ -270,12 +292,40 @@ namespace DigitPark.UI.Common
             if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
             {
                 Debug.LogWarning("[UsernamePopup] Username contains invalid characters");
+                ShowError(AutoLocalizer.Get("username_error_invalid_chars", "Only letters, numbers and underscores allowed"));
+                SetButtonsInteractable(true);
                 return;
             }
 
+            HideError();
             Debug.Log($"[UsernamePopup] Usuario confirmado: {username}");
             onConfirmCallback?.Invoke(username);
             Hide();
+        }
+
+        private void ShowError(string message)
+        {
+            if (errorText != null)
+            {
+                errorText.text = message;
+                errorText.gameObject.SetActive(true);
+            }
+        }
+
+        private void HideError()
+        {
+            if (errorText != null)
+            {
+                errorText.text = "";
+                errorText.gameObject.SetActive(false);
+            }
+        }
+
+        private void SetButtonsInteractable(bool interactable)
+        {
+            if (confirmButton != null) confirmButton.interactable = interactable;
+            if (laterButton != null) laterButton.interactable = interactable;
+            if (cancelButton != null) cancelButton.interactable = interactable;
         }
 
         private void OnLaterClicked()

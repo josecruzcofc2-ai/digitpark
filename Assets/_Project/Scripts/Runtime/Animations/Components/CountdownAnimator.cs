@@ -90,9 +90,11 @@ namespace DigitPark.Animations
             countdownText = textGO.AddComponent<TextMeshProUGUI>();
             countdownText.text = "";
             countdownText.fontSize = 180;
+            countdownText.enableAutoSizing = true;
+            countdownText.fontSizeMin = FontSizes.AutoMinTitle;
+            countdownText.fontSizeMax = countdownText.fontSize;
             countdownText.fontStyle = FontStyles.Bold;
             countdownText.alignment = TextAlignmentOptions.Center;
-            countdownText.enableAutoSizing = false;
             countdownText.color = Color.white;
         }
 
@@ -100,7 +102,7 @@ namespace DigitPark.Animations
         {
             // Fade in overlay
             overlayImage.color = new Color(0, 0, 0, 0);
-            overlayImage.DOFade(OVERLAY_COLOR.a, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_FADE_IN));
+            overlayImage.DOFade(OVERLAY_COLOR.a, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_FADE_IN)).SetLink(gameObject);
             yield return new WaitForSeconds(0.25f);
 
             // 3
@@ -113,7 +115,7 @@ namespace DigitPark.Animations
             yield return ShowGO();
 
             // Fade out and destroy
-            canvasGroup.DOFade(0f, 0.2f).OnComplete(() =>
+            canvasGroup.DOFade(0f, 0.2f).SetLink(gameObject).OnComplete(() =>
             {
                 onComplete?.Invoke();
                 Destroy(gameObject);
@@ -129,7 +131,7 @@ namespace DigitPark.Animations
 
             // Zoom in + fade in
             _activeSequence?.Kill();
-            _activeSequence = DOTween.Sequence();
+            _activeSequence = DOTween.Sequence().SetLink(gameObject);
             _activeSequence.Append(countdownText.transform.DOScale(1f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_NUMBER_IN)).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)));
             _activeSequence.Join(countdownText.DOFade(1f, AccessibilityHelper.AnimDuration(AnimConstants.DURATION_QUICK)));
 
@@ -141,7 +143,7 @@ namespace DigitPark.Animations
 
             // Explode out
             _activeSequence?.Kill();
-            _activeSequence = DOTween.Sequence();
+            _activeSequence = DOTween.Sequence().SetLink(gameObject);
             _activeSequence.Append(countdownText.transform.DOScale(0.5f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_NUMBER_OUT)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.EXIT)));
             _activeSequence.Join(countdownText.DOFade(0f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_FADE_IN)));
 
@@ -156,7 +158,7 @@ namespace DigitPark.Animations
             countdownText.alpha = 1f;
 
             // Pop in with overshoot
-            countdownText.transform.DOScale(AnimConstants.SCALE_GO_POP, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_GO_POP)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.ENTER));
+            countdownText.transform.DOScale(AnimConstants.SCALE_GO_POP, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_GO_POP)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.ENTER)).SetLink(gameObject);
 
             yield return new WaitForSeconds(0.2f);
 
@@ -164,20 +166,20 @@ namespace DigitPark.Animations
             shockwaveImage.gameObject.SetActive(true);
             shockwaveImage.color = new Color(COLOR_GO_GLOW.r, COLOR_GO_GLOW.g, COLOR_GO_GLOW.b, 0.6f);
             shockwaveImage.rectTransform.localScale = Vector3.one;
-            shockwaveImage.rectTransform.DOScale(15f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_SHOCKWAVE)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH));
-            shockwaveImage.DOFade(0f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_SHOCKWAVE));
+            shockwaveImage.rectTransform.DOScale(15f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_SHOCKWAVE)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH)).SetLink(gameObject);
+            shockwaveImage.DOFade(0f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_SHOCKWAVE)).SetLink(gameObject);
 
             // Screen shake
             if (UIAnimationManager.Instance != null)
                 UIAnimationManager.Instance.ScreenShake(20f, 0.3f);
 
             // Settle text
-            countdownText.transform.DOScale(1f, AccessibilityHelper.AnimDuration(AnimConstants.DURATION_QUICK)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH));
+            countdownText.transform.DOScale(1f, AccessibilityHelper.AnimDuration(AnimConstants.DURATION_QUICK)).SetEase(AccessibilityHelper.AnimEase(AnimConstants.SMOOTH)).SetLink(gameObject);
 
             yield return new WaitForSeconds(0.5f);
 
             // Fade text out
-            countdownText.DOFade(0f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_FADE_IN));
+            countdownText.DOFade(0f, AccessibilityHelper.AnimDuration(AnimConstants.COUNTDOWN_FADE_IN)).SetLink(gameObject);
             yield return new WaitForSeconds(0.25f);
         }
 

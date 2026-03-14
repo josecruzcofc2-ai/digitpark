@@ -285,6 +285,9 @@ namespace DigitPark.Animations
             var text = textGO.AddComponent<TextMeshProUGUI>();
             text.text = AutoLocalizer.Get("new_high_score");
             text.fontSize = 52;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinTitle;
+            text.fontSizeMax = text.fontSize;
             text.fontStyle = FontStyles.Bold;
             text.alignment = TextAlignmentOptions.Center;
             text.color = HIGH_SCORE_COLOR;

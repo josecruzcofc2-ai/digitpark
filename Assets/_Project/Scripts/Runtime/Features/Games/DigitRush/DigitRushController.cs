@@ -723,6 +723,9 @@ namespace DigitPark.Managers
             TextMeshProUGUI tmp = penaltyObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "+1";
             tmp.fontSize = FontSizes.Subtitle;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(1f, 0.3f, 0.3f, 1f); // Red
             tmp.alignment = TextAlignmentOptions.Center;

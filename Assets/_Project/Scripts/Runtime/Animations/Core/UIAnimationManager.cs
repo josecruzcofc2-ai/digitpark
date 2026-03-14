@@ -28,6 +28,7 @@ namespace DigitPark.Animations
         private Dictionary<int, Tween> activeTweens = new Dictionary<int, Tween>();
         private bool isActiveInstance;
         private Sequence _screenFlashSeq;
+        private static bool _dotweenInitialized;
 
         private void Awake()
         {
@@ -46,9 +47,17 @@ namespace DigitPark.Animations
             }
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void EarlyInitDOTween()
+        {
+            if (_dotweenInitialized) return;
+            DOTween.Init(true, true, LogBehaviour.ErrorsOnly);
+            _dotweenInitialized = true;
+        }
+
         private void InitializeDOTween()
         {
-            DOTween.Init(true, true, LogBehaviour.ErrorsOnly);
+            EarlyInitDOTween();
             DOTween.defaultAutoPlay = AutoPlay.All;
             DOTween.defaultUpdateType = UpdateType.Normal;
             DOTween.defaultTimeScaleIndependent = false;

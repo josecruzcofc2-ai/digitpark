@@ -274,7 +274,9 @@ namespace DigitPark.Services
         private StringBuilder CensorEvasion(StringBuilder current, string original, string bannedWord)
         {
             // Find which original words contribute to the banned substring
-            string[] words = original.Split(' ', '\t');
+            // Use same split chars as Filter() to avoid IndexOutOfRange
+            string[] words = original.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] currentWords = current.ToString().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
             var result = new StringBuilder();
 
             for (int i = 0; i < words.Length; i++)
@@ -292,7 +294,7 @@ namespace DigitPark.Services
                 else
                 {
                     // Preserve what we already have from Phase A
-                    result.Append(current.ToString().Split(' ')[i < words.Length ? i : words.Length - 1]);
+                    result.Append(i < currentWords.Length ? currentWords[i] : word);
                 }
             }
 

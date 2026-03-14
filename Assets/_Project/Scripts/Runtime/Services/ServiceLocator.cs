@@ -60,7 +60,7 @@ namespace DigitPark.Services
         [Space(10)]
 
         [Tooltip("Modo de operación de los servicios")]
-        [SerializeField] private ServiceMode _serviceMode = ServiceMode.Mock;
+        [SerializeField] private ServiceMode _serviceMode = ServiceMode.Production;
 
         [Space(20)]
         [Header("=== CONFIGURACIÓN MOCK ===")]

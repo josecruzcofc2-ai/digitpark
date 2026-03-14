@@ -18,7 +18,7 @@ namespace DigitPark.Editor
         private static readonly Color MAGENTA_NEON = new Color(1f, 0f, 0.8f, 1f);
         private static readonly Color GREEN_NEON = new Color(0.3f, 1f, 0.5f, 1f);
         private static readonly Color GOLD = new Color(1f, 0.84f, 0f, 1f);
-        private static readonly Color DARK_BG = new Color(0.02f, 0.05f, 0.1f, 1f);
+        private static readonly Color DARK_BG = new Color(0.02f, 0.04f, 0.08f, 1f);
         private static readonly Color PANEL_BG = new Color(0.05f, 0.1f, 0.15f, 0.95f);
         private static readonly Color CELL_BG = new Color(0.08f, 0.12f, 0.2f, 1f);
         private static readonly Color CELL_PRESSED = new Color(0.2f, 0.7f, 0.3f, 0.5f);

@@ -431,12 +431,12 @@ namespace DigitPark.Editor
                 arrowRT.anchorMax = Vector2.one;
                 arrowRT.sizeDelta = Vector2.zero;
 
-                TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
-                arrowText.text = "\u2190";
-                arrowText.fontSize = FontSizes.Subtitle;
+                Image arrowText = arrow.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrowText.sprite = arrowSprite;
                 arrowText.color = TEXT_PRIMARY;
-                arrowText.alignment = TextAlignmentOptions.Center;
-                arrowText.fontStyle = FontStyles.Bold;
+                arrowText.preserveAspect = true;
+                arrowText.raycastTarget = false;
             }
 
             // Title
@@ -610,6 +610,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.text = value;
             valueText.fontSize = FontSizes.H4;
+            valueText.enableAutoSizing = true;
+            valueText.fontSizeMin = FontSizes.AutoMinTitle;
+            valueText.fontSizeMax = valueText.fontSize;
             valueText.color = valueColor;
             valueText.alignment = TextAlignmentOptions.Center;
             valueText.fontStyle = FontStyles.Bold;
@@ -854,6 +857,9 @@ namespace DigitPark.Editor
                 TextMeshProUGUI placeholderText = placeholder.AddComponent<TextMeshProUGUI>();
                 placeholderText.text = game.Substring(0, 2).ToUpper();
                 placeholderText.fontSize = FontSizes.H3;
+                placeholderText.enableAutoSizing = true;
+                placeholderText.fontSizeMin = FontSizes.AutoMinTitle;
+                placeholderText.fontSizeMax = placeholderText.fontSize;
                 placeholderText.fontStyle = FontStyles.Bold;
                 placeholderText.color = TEXT_GOLD;
                 placeholderText.alignment = TextAlignmentOptions.Center;
@@ -931,6 +937,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI mt = modeTextObj.AddComponent<TextMeshProUGUI>();
             mt.text = mode;
             mt.fontSize = FontSizes.Caption;
+            mt.enableAutoSizing = true;
+            mt.fontSizeMin = FontSizes.AutoMinSmall;
+            mt.fontSizeMax = mt.fontSize;
             mt.color = TEXT_PRIMARY;
             mt.alignment = TextAlignmentOptions.Center;
             mt.fontStyle = FontStyles.Bold;
@@ -1035,6 +1044,9 @@ namespace DigitPark.Editor
             string amountStr = netAmount >= 0 ? $"+${netAmount:F2}" : $"-${Mathf.Abs(netAmount):F2}";
             amtText.text = amountStr;
             amtText.fontSize = FontSizes.H3;
+            amtText.enableAutoSizing = true;
+            amtText.fontSizeMin = FontSizes.AutoMinTitle;
+            amtText.fontSizeMax = amtText.fontSize;
             amtText.color = isWin ? SUCCESS_GREEN : ERROR_RED;
             amtText.alignment = TextAlignmentOptions.Right;
             amtText.fontStyle = FontStyles.Bold;
@@ -1134,6 +1146,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = textObj.AddComponent<TextMeshProUGUI>();
             tmp.text = "Load More";
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = GOLD_PRIMARY;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
@@ -1202,12 +1217,13 @@ namespace DigitPark.Editor
             closeTextRT.anchorMin = Vector2.zero;
             closeTextRT.anchorMax = Vector2.one;
             closeTextRT.sizeDelta = Vector2.zero;
-            TextMeshProUGUI closeTMP = closeText.AddComponent<TextMeshProUGUI>();
-            closeTMP.text = "X";
-            closeTMP.fontSize = FontSizes.Body;
-            closeTMP.color = TEXT_PRIMARY;
-            closeTMP.alignment = TextAlignmentOptions.Center;
-            closeTMP.fontStyle = FontStyles.Bold;
+            // Sprite close icon
+            Image closeImg = closeText.AddComponent<Image>();
+            Sprite closeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_close_x.png");
+            if (closeSprite != null) closeImg.sprite = closeSprite;
+            closeImg.color = TEXT_PRIMARY;
+            closeImg.preserveAspect = true;
+            closeImg.raycastTarget = false;
 
             // Detail texts
             CreateDetailText(detail.transform, "DetailTitleText", "Title", FontSizes.Body, FontStyles.Bold, TEXT_PRIMARY, 60);
@@ -1235,6 +1251,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
             tmp.fontSize = fontSize;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = fontSize >= 48 ? FontSizes.AutoMinTitle : fontSize < 32 ? FontSizes.AutoMinSmall : FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.fontStyle = style;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;

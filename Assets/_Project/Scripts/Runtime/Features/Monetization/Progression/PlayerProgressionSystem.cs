@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Progression
 {
@@ -68,12 +70,27 @@ namespace DigitPark.Progression
         /// Formula: baseXP * (scalingFactor ^ (level - 1))
         /// Level 1: 100 XP | Level 10: ~350 XP | Level 50: ~3,500 XP | Level 100: ~45,000 XP
         /// </summary>
+        /// <summary>
+        /// Economy Rebalance V55: x1.15 for levels 1-50, x1.12 for 51+.
+        /// This makes level 100 achievable in ~1.5 years (was 3.3 years with flat x1.15).
+        /// </summary>
         public int GetXPRequiredForLevel(int level)
         {
             if (level <= 1) return 0;
-            float exponent = Mathf.Min(level - 1, 200);
-            float xpRequired = baseXPPerLevel * Mathf.Pow(xpScalingFactor, exponent);
-            return Mathf.RoundToInt(Mathf.Min(xpRequired, 10000000f));
+            float exponent;
+            if (level <= 50)
+            {
+                exponent = level - 1;
+            }
+            else
+            {
+                // First 49 levels at x1.15, then remaining at x1.12
+                float xpAt50 = baseXPPerLevel * Mathf.Pow(xpScalingFactor, 49);
+                float xpRequired = xpAt50 * Mathf.Pow(1.12f, level - 50);
+                return Mathf.RoundToInt(Mathf.Min(xpRequired, 10000000f));
+            }
+            float result = baseXPPerLevel * Mathf.Pow(xpScalingFactor, exponent);
+            return Mathf.RoundToInt(Mathf.Min(result, 10000000f));
         }
 
         /// <summary>Get total XP required to reach a level from level 1</summary>
@@ -143,12 +160,32 @@ namespace DigitPark.Progression
             if (amount <= 0) return;
             if (_currentLevel >= maxLevel) return;
 
+            // Economy Rebalance V55 — XP boost x1.25 for 30-day streak (7 days duration)
+            if (IsXPBoostActive())
+                amount = Mathf.RoundToInt(amount * 1.25f);
+
             _currentXP += amount;
             _totalXPEarned += amount;
 
             OnXPGained?.Invoke(amount, _totalXPEarned);
 
             CheckLevelUp();
+        }
+
+        /// <summary>
+        /// Economy Rebalance V55: Check if XP boost is active.
+        /// Sources: 30-day streak milestone (x1.25 for 7 days) OR Daily Offer XP boost.
+        /// </summary>
+        private bool IsXPBoostActive()
+        {
+            string expiryStr = PlayerPrefs.GetString("XPBoost_Expiry", "");
+            if (string.IsNullOrEmpty(expiryStr)) return false;
+            if (System.DateTime.TryParse(expiryStr, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.RoundtripKind, out System.DateTime expiry))
+            {
+                return System.DateTime.UtcNow < expiry;
+            }
+            return false;
         }
 
         private int CalculateGameXP(GameResult result)
@@ -234,6 +271,22 @@ namespace DigitPark.Progression
                 { 475, new LevelReward("Avatar: Legend",        RewardType.Avatar,      "avatar_legend") },
                 { 490, new LevelReward("Frame: Diamond",        RewardType.Frame,       "frame_diamond") },
                 { 500, new LevelReward("Title: Legend",         RewardType.Title,       "title_legend") },
+
+                // Economy Rebalance V55 — Micro-rewards to fill gaps (~1,400 DC extra lifetime)
+                { 65,  new LevelReward("50 DigitCoins",         RewardType.DigitCoins,  "50") },
+                { 70,  new LevelReward("75 DigitCoins",         RewardType.DigitCoins,  "75") },
+                { 85,  new LevelReward("100 DigitCoins",        RewardType.DigitCoins,  "100") },
+                { 90,  new LevelReward("100 DigitCoins",        RewardType.DigitCoins,  "100") },
+                { 95,  new LevelReward("100 DigitCoins",        RewardType.DigitCoins,  "100") },
+                { 110, new LevelReward("100 DigitCoins",        RewardType.DigitCoins,  "100") },
+                { 115, new LevelReward("100 DigitCoins",        RewardType.DigitCoins,  "100") },
+                { 120, new LevelReward("150 DigitCoins",        RewardType.DigitCoins,  "150") },
+                { 130, new LevelReward("150 DigitCoins",        RewardType.DigitCoins,  "150") },
+                { 140, new LevelReward("150 DigitCoins",        RewardType.DigitCoins,  "150") },
+                { 160, new LevelReward("150 DigitCoins",        RewardType.DigitCoins,  "150") },
+                { 170, new LevelReward("200 DigitCoins",        RewardType.DigitCoins,  "200") },
+                { 180, new LevelReward("200 DigitCoins",        RewardType.DigitCoins,  "200") },
+                { 190, new LevelReward("200 DigitCoins",        RewardType.DigitCoins,  "200") },
             };
         }
 
@@ -263,6 +316,27 @@ namespace DigitPark.Progression
             return $"{_currentXP:N0} / {GetXPRequiredForLevel(_currentLevel):N0} XP";
         }
 
+        /// <summary>
+        /// Economy Rebalance V55 — Level badge tier.
+        /// Bronze (1-25), Silver (26-75), Gold (76-200), Diamond (200+).
+        /// Visible in profile and pre-match. Does NOT show numeric level.
+        /// </summary>
+        public string GetBadgeTier()
+        {
+            if (_currentLevel >= 200) return "DIAMOND";
+            if (_currentLevel >= 76) return "GOLD";
+            if (_currentLevel >= 26) return "SILVER";
+            return "BRONZE";
+        }
+
+        public Color GetBadgeColor()
+        {
+            if (_currentLevel >= 200) return new Color(0.7f, 0.9f, 1f, 1f);   // Diamond
+            if (_currentLevel >= 76) return new Color(1f, 0.84f, 0f, 1f);     // Gold
+            if (_currentLevel >= 26) return new Color(0.75f, 0.75f, 0.82f, 1f); // Silver
+            return new Color(0.8f, 0.5f, 0.2f, 1f);                            // Bronze
+        }
+
         #endregion
 
         #region Save/Load
@@ -281,6 +355,28 @@ namespace DigitPark.Progression
             string json = JsonUtility.ToJson(data);
             PlayerPrefs.SetString(SAVE_KEY, json);
             PlayerPrefs.Save();
+
+            SyncProgressionToFirebase();
+        }
+
+        private void SyncProgressionToFirebase()
+        {
+            var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+            if (playerData == null || DatabaseService.Instance == null) return;
+
+            var updates = new Dictionary<string, object>
+            {
+                { "playerLevel", _currentLevel },
+                { "playerXP", _currentXP },
+                { "gamesPlayed", _gamesPlayed },
+                { "gamesWon", _gamesWon }
+            };
+
+            DatabaseService.Instance.UpdatePlayerFields(playerData.userId, updates).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Debug.LogWarning($"[PlayerProgression] Firebase sync failed: {t.Exception?.GetBaseException().Message}");
+            }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void LoadProgress()

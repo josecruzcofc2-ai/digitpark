@@ -404,16 +404,12 @@ namespace DigitPark.Editor
                 arrowRT.anchorMax = Vector2.one;
                 arrowRT.sizeDelta = Vector2.zero;
 
-                TextMeshProUGUI arrow = arrowObj.AddComponent<TextMeshProUGUI>();
-                arrow.text = "<";
-                arrow.fontSize = FontSizes.H4;
+                Image arrow = arrowObj.AddComponent<Image>();
+                Sprite arrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_back_arrow.png");
+                if (arrowSprite != null) arrow.sprite = arrowSprite;
                 arrow.color = TEXT_GOLD;
-                arrow.alignment = TextAlignmentOptions.Center;
-                arrow.fontStyle = FontStyles.Bold;
-                arrow.enableAutoSizing = true;
-                arrow.fontSizeMin = FontSizes.AutoMinBody;
-                arrow.fontSizeMax = FontSizes.H4;
-                arrow.overflowMode = TextOverflowModes.Ellipsis;
+                arrow.preserveAspect = true;
+                arrow.raycastTarget = false;
 
                 Debug.LogWarning("[CashBattleHub] BackButtonGold prefab not found, using fallback");
             }
@@ -1130,24 +1126,20 @@ namespace DigitPark.Editor
             Image checkBg = checkmark.AddComponent<Image>();
             checkBg.color = new Color(0.3f, 1f, 0.5f, 1f); // Green
 
-            GameObject checkText = new GameObject("CheckText");
-            checkText.transform.SetParent(checkmark.transform, false);
+            GameObject checkIcon = new GameObject("CheckIcon");
+            checkIcon.transform.SetParent(checkmark.transform, false);
 
-            RectTransform checkTextRT = checkText.AddComponent<RectTransform>();
-            checkTextRT.anchorMin = Vector2.zero;
-            checkTextRT.anchorMax = Vector2.one;
-            checkTextRT.sizeDelta = Vector2.zero;
+            RectTransform checkIconRT = checkIcon.AddComponent<RectTransform>();
+            checkIconRT.anchorMin = new Vector2(0.15f, 0.15f);
+            checkIconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            checkIconRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
-            checkTMP.text = "V";
-            checkTMP.fontSize = FontSizes.Body;
-            checkTMP.color = BG_DARK;
-            checkTMP.alignment = TextAlignmentOptions.Center;
-            checkTMP.fontStyle = FontStyles.Bold;
-            checkTMP.enableAutoSizing = true;
-            checkTMP.fontSizeMin = FontSizes.AutoMinBody;
-            checkTMP.fontSizeMax = FontSizes.Body;
-            checkTMP.overflowMode = TextOverflowModes.Ellipsis;
+            var checkImg = checkIcon.AddComponent<Image>();
+            Sprite checkSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSprite != null) checkImg.sprite = checkSprite;
+            checkImg.color = BG_DARK;
+            checkImg.preserveAspect = true;
+            checkImg.raycastTarget = false;
 
             checkmark.SetActive(false);
         }
@@ -1233,25 +1225,21 @@ namespace DigitPark.Editor
             checkOutline.effectColor = new Color(1f, 1f, 1f, 0.8f);
             checkOutline.effectDistance = new Vector2(2, 2);
 
-            // Checkmark text
-            GameObject checkText = new GameObject("CheckText");
-            checkText.transform.SetParent(checkmark.transform, false);
+            // Checkmark icon
+            GameObject checkIcon = new GameObject("CheckIcon");
+            checkIcon.transform.SetParent(checkmark.transform, false);
 
-            RectTransform checkTextRT = checkText.AddComponent<RectTransform>();
-            checkTextRT.anchorMin = Vector2.zero;
-            checkTextRT.anchorMax = Vector2.one;
-            checkTextRT.sizeDelta = Vector2.zero;
+            RectTransform checkIconRT = checkIcon.AddComponent<RectTransform>();
+            checkIconRT.anchorMin = new Vector2(0.15f, 0.15f);
+            checkIconRT.anchorMax = new Vector2(0.85f, 0.85f);
+            checkIconRT.sizeDelta = Vector2.zero;
 
-            TextMeshProUGUI checkTMP = checkText.AddComponent<TextMeshProUGUI>();
-            checkTMP.text = "V";
-            checkTMP.fontSize = FontSizes.Body;
-            checkTMP.color = BG_DARK; // Dark text on gold background
-            checkTMP.alignment = TextAlignmentOptions.Center;
-            checkTMP.fontStyle = FontStyles.Bold;
-            checkTMP.enableAutoSizing = true;
-            checkTMP.fontSizeMin = FontSizes.AutoMinBody;
-            checkTMP.fontSizeMax = FontSizes.Body;
-            checkTMP.overflowMode = TextOverflowModes.Ellipsis;
+            var checkImg2 = checkIcon.AddComponent<Image>();
+            Sprite checkSprite2 = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_checkmark.png");
+            if (checkSprite2 != null) checkImg2.sprite = checkSprite2;
+            checkImg2.color = BG_DARK; // Dark icon on gold background
+            checkImg2.preserveAspect = true;
+            checkImg2.raycastTarget = false;
 
             checkmark.SetActive(false); // Hidden by default until selected
         }

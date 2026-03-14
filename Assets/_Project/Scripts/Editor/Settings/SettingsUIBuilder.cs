@@ -793,6 +793,9 @@ namespace DigitPark.Editor
             TextMeshProUGUI inputTxtComp = inputText.AddComponent<TextMeshProUGUI>();
             inputTxtComp.font = Font;
             inputTxtComp.fontSize = FontSizes.H3;
+            inputTxtComp.enableAutoSizing = true;
+            inputTxtComp.fontSizeMin = FontSizes.AutoMinTitle;
+            inputTxtComp.fontSizeMax = inputTxtComp.fontSize;
             inputTxtComp.fontStyle = FontStyles.Bold;
             inputTxtComp.color = TEXT_WHITE;
             inputTxtComp.alignment = TextAlignmentOptions.Left;
@@ -1341,7 +1344,9 @@ namespace DigitPark.Editor
             idText.text = "#ABC123XYZ";
             idText.fontSize = 42f;
             idText.fontStyle = FontStyles.Bold;
-            idText.enableAutoSizing = false;      // fixed size, no auto-scale
+            idText.enableAutoSizing = true;
+            idText.fontSizeMin = FontSizes.AutoMinBody;
+            idText.fontSizeMax = idText.fontSize;
             idText.color = TEXT_GRAY;             // muted: ID is secondary info
             idText.alignment = TextAlignmentOptions.Left; // flush with "ID:" label
             idText.raycastTarget = false;

@@ -431,6 +431,9 @@ namespace DigitPark.UI.Items
             string timeStr = participant.bestTime < float.MaxValue ? $"{participant.bestTime:F3}s" : "--";
             tmp.text = $"  #{position}  {participant.username}  {timeStr}  ({participant.attempts})";
             tmp.fontSize = FontSizes.Body;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = tmp.fontSize;
             tmp.color = isMe ? cyanColor : Color.white;
             tmp.alignment = TextAlignmentOptions.Left;
             tmp.verticalAlignment = VerticalAlignmentOptions.Middle;

@@ -20,6 +20,11 @@ namespace DigitPark.Cosmetics
         [SerializeField] private Image levelPillBg;
         [SerializeField] private TextMeshProUGUI playerNameText;
 
+        [Header("Pre-Match Cosmetics (Economy Rebalance V55)")]
+        [SerializeField] private TextMeshProUGUI playerTitleText;
+        [SerializeField] private Image levelBadgeIcon;
+        [SerializeField] private TextMeshProUGUI levelBadgeText;
+
         private BattleCardData _currentCard;
         private string _tweenId;
 
@@ -90,6 +95,60 @@ namespace DigitPark.Cosmetics
             // Start animations if needed
             if (card.isAnimatedBorder || card.isAnimatedAvatarFrame)
                 StartAnimation();
+        }
+
+        /// <summary>
+        /// Apply pre-match cosmetics: player title + level badge (Economy Rebalance V55).
+        /// Call after ApplyCard. Frame is already handled by FrameRenderer.
+        /// Badge: Bronce (1-25), Plata (26-75), Oro (76-200), Diamante (200+).
+        /// Does NOT show numeric level — only badge tier.
+        /// </summary>
+        public void ApplyPreMatchCosmetics(string title, int level)
+        {
+            // Player title below name
+            if (playerTitleText != null)
+            {
+                playerTitleText.text = title ?? "";
+                playerTitleText.gameObject.SetActive(!string.IsNullOrEmpty(title));
+            }
+
+            // Level badge tier (no numeric level shown)
+            if (levelBadgeText != null || levelBadgeIcon != null)
+            {
+                string badgeName;
+                Color badgeColor;
+
+                if (level >= 200)
+                {
+                    badgeName = "DIAMOND";
+                    badgeColor = new Color(0.7f, 0.9f, 1f, 1f);
+                }
+                else if (level >= 76)
+                {
+                    badgeName = "GOLD";
+                    badgeColor = new Color(1f, 0.84f, 0f, 1f);
+                }
+                else if (level >= 26)
+                {
+                    badgeName = "SILVER";
+                    badgeColor = new Color(0.75f, 0.75f, 0.82f, 1f);
+                }
+                else
+                {
+                    badgeName = "BRONZE";
+                    badgeColor = new Color(0.8f, 0.5f, 0.2f, 1f);
+                }
+
+                if (levelBadgeText != null)
+                {
+                    levelBadgeText.text = badgeName;
+                    levelBadgeText.color = badgeColor;
+                }
+                if (levelBadgeIcon != null)
+                {
+                    levelBadgeIcon.color = badgeColor;
+                }
+            }
         }
 
         /// <summary>

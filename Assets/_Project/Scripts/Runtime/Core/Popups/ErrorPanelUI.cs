@@ -111,7 +111,8 @@ namespace DigitPark.UI.Panels
             _currentSequence = DOTween.Sequence()
                 .Join(t.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
                 .Join(cg.DOFade(1f, 0.25f))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         private void AnimateOut(Transform t, Action onComplete)
@@ -123,7 +124,8 @@ namespace DigitPark.UI.Panels
                 .Join(t.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
                 .Join(cg.DOFade(0f, 0.2f))
                 .OnComplete(() => { t.localScale = Vector3.one; cg.alpha = 1f; onComplete?.Invoke(); })
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         /// <summary>

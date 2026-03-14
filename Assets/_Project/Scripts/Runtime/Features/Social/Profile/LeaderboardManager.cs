@@ -558,6 +558,9 @@ namespace DigitPark.Managers
             TextMeshProUGUI posText = posObj.AddComponent<TextMeshProUGUI>();
             posText.text = entry.position <= 3 ? $"{entry.position}" : $"#{entry.position}";
             posText.fontSize = entry.position <= 3 ? FontSizes.Body : FontSizes.Body;
+            posText.enableAutoSizing = true;
+            posText.fontSizeMin = FontSizes.AutoMinBody;
+            posText.fontSizeMax = posText.fontSize;
             posText.color = entry.position <= 3 ? GetMedalColor(entry.position) : new Color(0.5f, 0.55f, 0.65f);
             posText.fontStyle = FontStyles.Bold;
             posText.alignment = TextAlignmentOptions.Center;
@@ -586,6 +589,9 @@ namespace DigitPark.Managers
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
             nameText.text = entry.username;
             nameText.fontSize = FontSizes.Body;
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = FontSizes.AutoMinBody;
+            nameText.fontSizeMax = nameText.fontSize;
             nameText.color = isCurrentPlayer ? new Color(0f, 1f, 1f) : Color.white;
             nameText.fontStyle = FontStyles.Bold;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -603,6 +609,9 @@ namespace DigitPark.Managers
             TextMeshProUGUI timeText = timeObj.AddComponent<TextMeshProUGUI>();
             timeText.text = $"{entry.time:F3}s";
             timeText.fontSize = FontSizes.Body;
+            timeText.enableAutoSizing = true;
+            timeText.fontSizeMin = FontSizes.AutoMinBody;
+            timeText.fontSizeMax = timeText.fontSize;
             timeText.color = new Color(0f, 1f, 0.53f);
             timeText.fontStyle = FontStyles.Bold;
             timeText.alignment = TextAlignmentOptions.MidlineRight;
@@ -779,6 +788,9 @@ namespace DigitPark.Managers
             text.text = message;
             text.alignment = TextAlignmentOptions.Center;
             text.fontSize = FontSizes.Body;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = FontSizes.AutoMinBody;
+            text.fontSizeMax = text.fontSize;
             text.color = Color.red;
         }
 

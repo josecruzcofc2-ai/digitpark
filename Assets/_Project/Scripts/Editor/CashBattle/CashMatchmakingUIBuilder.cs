@@ -523,11 +523,13 @@ namespace DigitPark.Editor
             TextMeshProUGUI vsTmp = vsText.AddComponent<TextMeshProUGUI>();
             vsTmp.text = "VS";
             vsTmp.fontSize = 64;
+            vsTmp.enableAutoSizing = true;
+            vsTmp.fontSizeMin = FontSizes.AutoMinTitle;
+            vsTmp.fontSizeMax = vsTmp.fontSize;
             vsTmp.fontStyle = FontStyles.Bold;
             vsTmp.color = GOLD_PRIMARY;
             vsTmp.alignment = TextAlignmentOptions.Center;
             vsTmp.raycastTarget = false;
-            vsTmp.enableAutoSizing = false;
 
             vsContainer.SetActive(true);
         }
