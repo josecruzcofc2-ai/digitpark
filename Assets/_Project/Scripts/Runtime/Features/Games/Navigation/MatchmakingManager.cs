@@ -86,6 +86,7 @@ namespace DigitPark.Managers
         // Keys
         private const string MATCH_GAME_TYPE_KEY = "DigitPark_MatchGameType";
         private const string MATCH_IS_SPRINT_KEY = "DigitPark_MatchIsSprint";
+        private const string MATCH_ROUNDS_KEY = "DigitPark_MatchRounds";
 
         #region Unity Lifecycle
 
@@ -142,13 +143,16 @@ namespace DigitPark.Managers
             }
         }
 
+        private int matchRounds = 1;
+
         private void LoadMatchParameters()
         {
             int gameTypeInt = PlayerPrefs.GetInt(MATCH_GAME_TYPE_KEY, 0);
             currentGameType = (GameType)gameTypeInt;
             isCognitiveSprint = PlayerPrefs.GetInt(MATCH_IS_SPRINT_KEY, 0) == 1;
+            matchRounds = PlayerPrefs.GetInt(MATCH_ROUNDS_KEY, 1);
 
-            Debug.Log($"[Matchmaking] Game: {currentGameType}, IsSprint: {isCognitiveSprint}");
+            Debug.Log($"[Matchmaking] Game: {currentGameType}, IsSprint: {isCognitiveSprint}, Rounds: {matchRounds}");
         }
 
         private async void SetupPlayerInfo()
@@ -900,12 +904,18 @@ namespace DigitPark.Managers
         /// <summary>
         /// Sets the game type before loading matchmaking scene
         /// </summary>
-        public static void SetMatchGameType(GameType gameType, bool isCognitiveSprint = false)
+        public static void SetMatchGameType(GameType gameType, bool isCognitiveSprint = false, int rounds = 1)
         {
             PlayerPrefs.SetInt(MATCH_GAME_TYPE_KEY, (int)gameType);
             PlayerPrefs.SetInt(MATCH_IS_SPRINT_KEY, isCognitiveSprint ? 1 : 0);
+            PlayerPrefs.SetInt(MATCH_ROUNDS_KEY, rounds);
             PlayerPrefs.Save();
-            Debug.Log($"[Matchmaking] Set game type: {gameType}, IsSprint: {isCognitiveSprint}");
+            Debug.Log($"[Matchmaking] Set game type: {gameType}, IsSprint: {isCognitiveSprint}, Rounds: {rounds}");
+        }
+
+        public static int GetMatchRounds()
+        {
+            return PlayerPrefs.GetInt(MATCH_ROUNDS_KEY, 1);
         }
 
         #endregion

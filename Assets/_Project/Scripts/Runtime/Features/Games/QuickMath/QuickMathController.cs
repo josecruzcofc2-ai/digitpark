@@ -60,7 +60,6 @@ namespace DigitPark.Games
         [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
-        [SerializeField] private Toggle toggleRounds10;
         [SerializeField] private Button startGameButton;
         [SerializeField] private TextMeshProUGUI difficultyDescText;
 
@@ -75,7 +74,7 @@ namespace DigitPark.Games
         // Settings state
         private QuickMathDifficulty currentDifficulty = QuickMathDifficulty.Normal;
         private QuickMathOperations enabledOperations = QuickMathOperations.Addition | QuickMathOperations.Subtraction;
-        private int totalRounds = 10;
+        private int totalRounds = 5;
 
         // Game state
         private int currentRound;
@@ -165,6 +164,9 @@ namespace DigitPark.Games
             }
             else
             {
+                var ctx = GameSessionManager.Instance?.CurrentContext;
+                if (ctx != null && ctx.Rounds > 0)
+                    totalRounds = ctx.Rounds;
                 // Non-practice mode: play countdown then start
                 CountdownAnimator.Play(canvas, () => StartGame());
             }
@@ -213,23 +215,19 @@ namespace DigitPark.Games
             if (toggleRounds1 != null)
                 toggleRounds1.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds1, on);
-                    if (on) SetRadio(toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10);
+                    if (on) SetRadio(toggleRounds1, toggleRounds3, toggleRounds5);
                 });
             if (toggleRounds3 != null)
                 toggleRounds3.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds3, on);
-                    if (on) SetRadio(toggleRounds3, toggleRounds1, toggleRounds5, toggleRounds10);
+                    if (on) SetRadio(toggleRounds3, toggleRounds1, toggleRounds5);
                 });
             if (toggleRounds5 != null)
                 toggleRounds5.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds5, on);
-                    if (on) SetRadio(toggleRounds5, toggleRounds1, toggleRounds3, toggleRounds10);
+                    if (on) SetRadio(toggleRounds5, toggleRounds1, toggleRounds3);
                 });
-            if (toggleRounds10 != null)
-                toggleRounds10.onValueChanged.AddListener(on => {
-                    UpdateToggleVisual(toggleRounds10, on);
-                    if (on) SetRadio(toggleRounds10, toggleRounds1, toggleRounds3, toggleRounds5);
-                });
+
 
             // Wire operation toggles with visual updates
             if (toggleAddition != null)
@@ -255,8 +253,7 @@ namespace DigitPark.Games
             SetToggleDefault(toggleHard, false);
             SetToggleDefault(toggleRounds1, false);
             SetToggleDefault(toggleRounds3, false);
-            SetToggleDefault(toggleRounds5, false);
-            SetToggleDefault(toggleRounds10, true);
+            SetToggleDefault(toggleRounds5, true);
 
             // Apply initial difficulty
             OnDifficultyChanged(QuickMathDifficulty.Normal);
@@ -373,7 +370,7 @@ namespace DigitPark.Games
             else if (toggleRounds5 != null && toggleRounds5.isOn)
                 totalRounds = 5;
             else
-                totalRounds = 10;
+                totalRounds = 5;
         }
 
         private void OnStartGameClicked()

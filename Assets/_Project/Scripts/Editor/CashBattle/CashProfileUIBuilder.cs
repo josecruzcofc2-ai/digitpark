@@ -257,9 +257,6 @@ namespace DigitPark.Editor
             // Header (FIJO arriba, fuera del scroll)
             CreateHeader(sa);
 
-            // Gold glow separator line debajo del header
-            CreateGoldSeparator(sa, -100f);
-
             // ScrollView que contiene TODO el contenido debajo del header
             GameObject scrollContent = CreateMainScrollView(sa);
             Transform content = scrollContent.transform;

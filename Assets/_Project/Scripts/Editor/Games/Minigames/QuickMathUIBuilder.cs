@@ -121,8 +121,7 @@ namespace DigitPark.Editor
         {
             string[] keepElements = {
                 "Main Camera", "EventSystem",
-                "Directional Light", "SceneTransition",
-                "Background"
+                "Directional Light", "SceneTransition"
             };
 
             for (int i = canvasTransform.childCount - 1; i >= 0; i--)
@@ -216,7 +215,7 @@ namespace DigitPark.Editor
             GameObject statsBar = CreateElement(parent, "StatsBar");
             SetupRectTransform(statsBar,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, -160), new Vector2(1020, 130));
+                new Vector2(0, -190), new Vector2(1020, 130));
 
             Image statsBg = statsBar.AddComponent<Image>();
             statsBg.color = PANEL_BG;
@@ -523,7 +522,7 @@ namespace DigitPark.Editor
             GameObject card = CreateElement(settingsPanel.transform, "SettingsCard");
             SetupRectTransform(card,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0, 20), new Vector2(700, 820));
+                new Vector2(0, 20), new Vector2(850, 750));
 
             Image cardBg = card.AddComponent<Image>();
             cardBg.color = new Color(0.04f, 0.08f, 0.14f, 0.98f);
@@ -553,24 +552,24 @@ namespace DigitPark.Editor
             CreateDivider(card.transform, -95);
 
             // ====== OPERATIONS SECTION ======
-            float yPos = -115f;
+            float yPos = -120f;
 
             GameObject opsHeader = CreateElement(card.transform, "OperationsHeader");
             SetupRectTransform(opsHeader,
                 new Vector2(0.05f, 1), new Vector2(0.95f, 1),
-                new Vector2(0, yPos), new Vector2(0, 34));
+                new Vector2(0, yPos), new Vector2(0, 36));
             Image opsHeaderBg = opsHeader.AddComponent<Image>();
             opsHeaderBg.color = new Color(0f, 0.15f, 0.2f, 0.5f);
             GameObject opsHeaderText = CreateElement(opsHeader.transform, "OperationsHeaderText");
             SetupRectTransform(opsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             SetupText(opsHeaderText, "OPERATIONS", FontSizes.Body, new Color(0.7f, 0.9f, 1f), FontStyles.Bold);
 
-            yPos -= 58f;
+            yPos -= 62f;
 
             GameObject opsContainer = CreateElement(card.transform, "OperationsContainer");
             SetupRectTransform(opsContainer,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, yPos), new Vector2(620, 58));
+                new Vector2(0, yPos), new Vector2(700, 70));
 
             HorizontalLayoutGroup opsLayout = opsContainer.AddComponent<HorizontalLayoutGroup>();
             opsLayout.childAlignment = TextAnchor.MiddleCenter;
@@ -584,28 +583,28 @@ namespace DigitPark.Editor
             CreateSettingsToggle(opsContainer.transform, "ToggleDivision", "\u00F7", false);
 
             // Divider
-            yPos -= 38f;
+            yPos -= 48f;
             CreateDivider(card.transform, yPos);
 
             // ====== DIFFICULTY SECTION ======
-            yPos -= 22f;
+            yPos -= 28f;
 
             GameObject diffHeader = CreateElement(card.transform, "DifficultyHeader");
             SetupRectTransform(diffHeader,
                 new Vector2(0.05f, 1), new Vector2(0.95f, 1),
-                new Vector2(0, yPos), new Vector2(0, 34));
+                new Vector2(0, yPos), new Vector2(0, 36));
             Image diffHeaderBg = diffHeader.AddComponent<Image>();
             diffHeaderBg.color = new Color(0.15f, 0.1f, 0f, 0.5f);
             GameObject diffHeaderText = CreateElement(diffHeader.transform, "DifficultyHeaderText");
             SetupRectTransform(diffHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             SetupText(diffHeaderText, "DIFFICULTY", FontSizes.Body, new Color(1f, 0.9f, 0.7f), FontStyles.Bold);
 
-            yPos -= 58f;
+            yPos -= 62f;
 
             GameObject diffContainer = CreateElement(card.transform, "DifficultyContainer");
             SetupRectTransform(diffContainer,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, yPos), new Vector2(580, 58));
+                new Vector2(0, yPos), new Vector2(700, 70));
 
             HorizontalLayoutGroup diffLayout = diffContainer.AddComponent<HorizontalLayoutGroup>();
             diffLayout.childAlignment = TextAnchor.MiddleCenter;
@@ -621,7 +620,7 @@ namespace DigitPark.Editor
             CreateSettingsToggle(diffContainer.transform, "ToggleHard", "HARD", false, diffGroup);
 
             // Difficulty description
-            yPos -= 42f;
+            yPos -= 65f;
 
             GameObject diffDesc = CreateElement(card.transform, "DifficultyDescText");
             SetupRectTransform(diffDesc,
@@ -631,32 +630,32 @@ namespace DigitPark.Editor
             descTmp.enableWordWrapping = true;
 
             // Divider
-            yPos -= 28f;
+            yPos -= 38f;
             CreateDivider(card.transform, yPos);
 
             // ====== ROUNDS SECTION ======
-            yPos -= 22f;
+            yPos -= 28f;
 
             GameObject roundsHeader = CreateElement(card.transform, "RoundsHeader");
             SetupRectTransform(roundsHeader,
                 new Vector2(0.05f, 1), new Vector2(0.95f, 1),
-                new Vector2(0, yPos), new Vector2(0, 34));
+                new Vector2(0, yPos), new Vector2(0, 36));
             Image roundsHeaderBg = roundsHeader.AddComponent<Image>();
             roundsHeaderBg.color = new Color(0f, 0.12f, 0.08f, 0.5f);
             GameObject roundsHeaderText = CreateElement(roundsHeader.transform, "RoundsHeaderText");
             SetupRectTransform(roundsHeaderText, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             SetupText(roundsHeaderText, "ROUNDS", FontSizes.Body, new Color(0.7f, 1f, 0.8f), FontStyles.Bold);
 
-            yPos -= 58f;
+            yPos -= 75f;
 
             GameObject roundsContainer = CreateElement(card.transform, "RoundsContainer");
             SetupRectTransform(roundsContainer,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, yPos), new Vector2(450, 58));
+                new Vector2(0, yPos), new Vector2(680, 80));
 
             HorizontalLayoutGroup roundsLayout = roundsContainer.AddComponent<HorizontalLayoutGroup>();
             roundsLayout.childAlignment = TextAnchor.MiddleCenter;
-            roundsLayout.spacing = 15;
+            roundsLayout.spacing = 20;
             roundsLayout.childForceExpandWidth = true;
             roundsLayout.childForceExpandHeight = true;
 
@@ -665,22 +664,19 @@ namespace DigitPark.Editor
 
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds1", "1", false, roundsGroup);
             CreateSettingsToggle(roundsContainer.transform, "ToggleRounds3", "3", false, roundsGroup);
-            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", false, roundsGroup);
-            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds10", "10", true, roundsGroup);
+            CreateSettingsToggle(roundsContainer.transform, "ToggleRounds5", "5", true, roundsGroup);
 
             // ====== START BUTTON ======
-            yPos -= 78f;
-
             GameObject startBtn = CreateElement(card.transform, "StartGameButton");
             SetupRectTransform(startBtn,
                 new Vector2(0.5f, 1), new Vector2(0.5f, 1),
-                new Vector2(0, yPos), new Vector2(500, 68));
+                new Vector2(0, -670), new Vector2(700, 68));
 
             // Button shadow
             GameObject startShadow = CreateElement(startBtn.transform, "Shadow");
             SetupRectTransform(startShadow,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(3, -6), new Vector2(500, 68));
+                new Vector2(3, -6), new Vector2(700, 68));
             Image startShadowImg = startShadow.AddComponent<Image>();
             startShadowImg.color = new Color(0f, 0.3f, 0.15f, 0.6f);
             startShadowImg.raycastTarget = false;
@@ -888,7 +884,6 @@ namespace DigitPark.Editor
                 AssignToggle(so, "toggleRounds1", FindDeep(settingsPanelT, "ToggleRounds1"));
                 AssignToggle(so, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
                 AssignToggle(so, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
-                AssignToggle(so, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));
 
                 Transform startBtn = FindDeep(settingsPanelT, "StartGameButton");
                 if (startBtn != null)

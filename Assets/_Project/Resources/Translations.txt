@@ -192,13 +192,6 @@ language
     PT: Idioma
     DE: Sprache
 
-ChangueLanguageText
-    EN: Change Language
-    ES: Cambiar Idioma
-    FR: Changer la langue
-    PT: Mudar Idioma
-    DE: Sprache ändern
-
 change_style
     EN: Change Style
     ES: Cambiar Estilo
@@ -410,13 +403,6 @@ cancel
                       DELETE ACCOUNT (DeleteConfirmPanel)
 ================================================================================
 
-DeleteConfirmTitleText
-    EN: Delete Account?
-    ES: ¿Eliminar Cuenta?
-    FR: Supprimer le compte?
-    PT: Excluir Conta?
-    DE: Konto löschen?
-
 delete_confirm_message
     EN: This action cannot be undone
     ES: Esta acción no se puede deshacer
@@ -430,31 +416,6 @@ delete_button
     FR: Supprimer
     PT: Excluir
     DE: Löschen
-
-================================================================================
-                      LOGOUT CONFIRM (LogoutConfirmPanel)
-================================================================================
-
-LogoutConfirmTitleText
-    EN: Are you sure you want to logout?
-    ES: ¿Estás seguro de que quieres cerrar sesión?
-    FR: Etes-vous sur de vouloir vous deconnecter?
-    PT: Tem certeza de que deseja sair?
-    DE: Bist du sicher, dass du dich abmelden möchtest?
-
-ConfirmLogoutButton
-    EN: Confirm
-    ES: Confirmar
-    FR: Confirmer
-    PT: Confirmar
-    DE: Bestätigen
-
-CancelLogoutButton
-    EN: Cancel
-    ES: Cancelar
-    FR: Annuler
-    PT: Cancelar
-    DE: Abbrechen
 
 ================================================================================
                                     GAME
@@ -2156,49 +2117,6 @@ error_no_ads_available
     DE: Werbung nicht verfügbar. Versuche es spater
 
 ================================================================================
-                      ERROR PANEL PREFAB (Reutilizable)
-================================================================================
-
-ErrorText
-    EN: Error
-    ES: Error
-    FR: Erreur
-    PT: Erro
-    DE: Fehler
-
-AcceptButtonText
-    EN: Accept
-    ES: Aceptar
-    FR: Accepter
-    PT: Aceitar
-    DE: Akzeptieren
-
-================================================================================
-                     CONFIRM PANEL PREFAB (Reutilizable)
-================================================================================
-
-ConfirmText
-    EN: Are you sure?
-    ES: ¿Estás seguro?
-    FR: Êtes-vous sûr ?
-    PT: Tem certeza?
-    DE: Bist du sicher?
-
-CancelButton
-    EN: Cancel
-    ES: Cancelar
-    FR: Annuler
-    PT: Cancelar
-    DE: Abbrechen
-
-ConfirmButton
-    EN: Confirm
-    ES: Confirmar
-    FR: Confirmer
-    PT: Confirmar
-    DE: Bestatigen
-
-================================================================================
                             REGISTER SCREEN
 ================================================================================
 
@@ -2250,7 +2168,7 @@ delete_confirm_title
 
 logout_confirm_title
     EN: Are you sure you want to logout?
-    ES: Estas seguro de que quieres cerrar sesión?
+    ES: ¿Estás seguro de que quieres cerrar sesión?
     FR: Êtes-vous sûr de vouloir vous deconnecter?
     PT: Tem certeza de que deseja sair?
     DE: Bist du sicher, dass du dich abmelden möchtest?
@@ -3066,6 +2984,13 @@ dr_available_now
     FR: Disponible maintenant!
     PT: Disponivel agora!
     DE: Jetzt verfügbar!
+
+dr_available_today
+    EN: Available today!
+    ES: Disponible hoy!
+    FR: Disponible aujourd'hui!
+    PT: Disponivel hoje!
+    DE: Heute verfügbar!
 
 dr_next_in
     EN: Next in {0}
@@ -4033,14 +3958,14 @@ tournament_join_fee
 tournament_ready
     EN: Ready
     ES: Listo
-    FR: Pret
+    FR: Prêt
     PT: Pronto
     DE: Bereit
 
 tournament_mark_ready
     EN: Mark Ready
     ES: Marcar Listo
-    FR: Se Declarer Pret
+    FR: Se Déclarer Prêt
     PT: Marcar Pronto
     DE: Bereit Melden
 
@@ -4491,7 +4416,7 @@ flashtap_tap
 flashtap_too_early
     EN: TOO EARLY!
     ES: MUY PRONTO!
-    FR: TROP TOT!
+    FR: TROP TÔT!
     PT: MUITO CEDO!
     DE: ZU FRUH!
 
@@ -4582,7 +4507,7 @@ flashtap_rating_average
 flashtap_rating_practice
     EN: Keep practicing
     ES: Sigue practicando
-    FR: Continue a t'entrainer
+    FR: Continuez à vous entraîner
     PT: Continue praticando
     DE: Weiter uben
 
@@ -4670,7 +4595,7 @@ oddoneout_correct
 oddoneout_try_again
     EN: TRY AGAIN!
     ES: INTENTA DE NUEVO!
-    FR: REESSAYEZ!
+    FR: RÉESSAYEZ!
     PT: TENTE NOVAMENTE!
     DE: NOCHMAL VERSUCHEN!
 
@@ -5796,8 +5721,8 @@ ach_cash_10_wins_desc
 ach_cash_50_wins
     EN: High Roller
     ES: High Roller
-    FR: Flambeur
-    PT: Apostador Alto
+    FR: High Roller
+    PT: High Roller
     DE: High Roller
 
 ach_cash_50_wins_desc
@@ -5927,20 +5852,6 @@ ach_tournament_create_desc
                           ACHIEVEMENTS - SOCIAL
 --------------------------------------------------------------------------------
 
-ach_first_friend
-    EN: First Friend
-    ES: Primer Amigo
-    FR: Premier Ami
-    PT: Primeiro Amigo
-    DE: Erster Freund
-
-ach_first_friend_desc
-    EN: Add your first friend
-    ES: Añade tu primer amigo
-    FR: Ajoutez votre premier ami
-    PT: Adicione seu primeiro amigo
-    DE: Füge deinen ersten Freund hinzu
-
 ach_friend_first
     EN: First Friend
     ES: Primer Amigo
@@ -6053,7 +5964,7 @@ ach_level_25
 ach_level_25_desc
     EN: Reach level 25
     ES: Alcanza el nivel 25
-    FR: Atteins le niveau 25
+    FR: Atteignez le niveau 25
     PT: Alcance o nivel 25
     DE: Erreiche Stufe 25
 
@@ -6067,7 +5978,7 @@ ach_level_50
 ach_level_50_desc
     EN: Reach level 50
     ES: Alcanza el nivel 50
-    FR: Atteins le niveau 50
+    FR: Atteignez le niveau 50
     PT: Alcance o nivel 50
     DE: Erreiche Stufe 50
 
@@ -6592,6 +6503,41 @@ free_label
     FR: GRATUIT
     PT: GRÁTIS
     DE: KOSTENLOS
+
+free
+    EN: Free
+    ES: Gratis
+    FR: Gratuit
+    PT: Gratis
+    DE: Kostenlos
+
+purchased
+    EN: Purchased
+    ES: Comprado
+    FR: Acheté
+    PT: Comprado
+    DE: Gekauft
+
+shop_owned
+    EN: Owned
+    ES: Obtenido
+    FR: Obtenu
+    PT: Obtido
+    DE: Erhalten
+
+welcome_pack_last_chance
+    EN: Last Chance
+    ES: Ultima Oportunidad
+    FR: Dernière Chance
+    PT: Última Chance
+    DE: Letzte Chance
+
+welcome_pack_expires_in
+    EN: Expires in
+    ES: Expira en
+    FR: Expire dans
+    PT: Expira em
+    DE: Läuft ab in
 
 tournament_players_count
     EN: Players
@@ -11844,26 +11790,12 @@ stats_no_data
                           CASH TOURNAMENT CREATE (V44)
 ================================================================================
 
-cashTournamentCreate_title
-  EN  Create Tournament
-  ES  Crear Torneo
-  FR  Creer un Tournoi
-  PT  Criar Torneio
-  DE  Turnier erstellen
-
 cashTournamentCreate_createButton
   EN  Create Tournament
   ES  Crear Torneo
   FR  Creer le Tournoi
   PT  Criar Torneio
   DE  Turnier erstellen
-
-cashTournamentCreate_creationFee
-  EN  Creation fee: $5.00
-  ES  Tarifa de creacion: $5.00
-  FR  Frais de creation: 5,00 $
-  PT  Taxa de criacao: $5,00
-  DE  Erstellungsgebuehr: 5,00 $
 
 ================================================================================
                               FRIEND SERVICE
@@ -12436,9 +12368,9 @@ win_effect_purchase_confirm_body
 
 win_effect_already_owned
     EN: Already owned
-    ES: Ya disponible
+    ES: Ya lo tienes
     FR: Deja possede
-    PT: Ja disponivel
+    PT: Já obtido
     DE: Bereits erworben
 
 win_effect_free_label

@@ -69,7 +69,7 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField, Range(0, 1000)] private int completionRewardCoins = 500;
-        [SerializeField, Range(0, 1000)] private int completionRewardGems = 50;
+        [SerializeField, Range(0, 50)] private int completionRewardGems = 10; // Economy Rebalance: welcome bonus 10 DG
         [SerializeField] private float autoAdvanceDelay = 0f;
         [SerializeField] private bool allowSkip = true;
         [SerializeField] private float transitionDuration = 0.35f;
@@ -872,19 +872,32 @@ namespace DigitPark.Managers
         private void CompleteOnboarding(bool giveRewards = true)
         {
             PlayerPrefs.SetInt("OnboardingComplete", 1);
+            PlayerPrefs.Save();
 
             if (giveRewards)
             {
-                int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                PlayerPrefs.SetInt("PlayerCoins", currentCoins + completionRewardCoins);
+                // Economy Rebalance: use CurrencyManager to grant welcome rewards properly
+                var currency = CurrencyManager.Instance;
+                if (currency != null)
+                {
+                    if (completionRewardCoins > 0) currency.AddCoins(completionRewardCoins);
+                    if (completionRewardGems > 0) currency.AddGems(completionRewardGems);
+                }
+                else
+                {
+                    // Fallback if CurrencyManager not yet initialized
+                    int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
+                    PlayerPrefs.SetInt("PlayerCoins", currentCoins + completionRewardCoins);
+                    int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
+                    PlayerPrefs.SetInt("PlayerGems", currentGems + completionRewardGems);
+                    PlayerPrefs.Save();
+                }
 
-                int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                PlayerPrefs.SetInt("PlayerGems", currentGems + completionRewardGems);
+                // Mark tutorial_complete achievement (triggers GiveReward: +75 DC +2 DG)
+                DigitPark.Services.AchievementService.Instance?.AddProgress("tutorial_complete", 1);
             }
 
-            PlayerPrefs.Save();
-
-            Debug.Log($"[Onboarding] Completed. Rewards given: {giveRewards}");
+            Debug.Log($"[Onboarding] Completed. Rewards given: {giveRewards} ({completionRewardCoins} DC + {completionRewardGems} DG)");
 
             SceneNavigator.Instance?.NavigateTo(SceneNavigator.Scenes.MAIN_MENU);
         }

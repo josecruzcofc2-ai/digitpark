@@ -32,7 +32,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Stats Bar
             "roundText", "errorsText", "progressFill", "roundIndicatorText",
             // Settings Panel
-            "settingsPanel", "toggleRounds1", "toggleRounds3", "toggleRounds5", "toggleRounds10",
+            "settingsPanel", "toggleRounds1", "toggleRounds3", "toggleRounds5",
             "startGameButton",
             // Countdown & Effects
             "countdownUI", "sparkleEffect",
@@ -204,7 +204,6 @@ namespace DigitPark.Editor.AutoAssigners
                 AssignToggleReference(so, "toggleRounds1", FindDeep(settingsPanelT, "ToggleRounds1"));
                 AssignToggleReference(so, "toggleRounds3", FindDeep(settingsPanelT, "ToggleRounds3"));
                 AssignToggleReference(so, "toggleRounds5", FindDeep(settingsPanelT, "ToggleRounds5"));
-                AssignToggleReference(so, "toggleRounds10", FindDeep(settingsPanelT, "ToggleRounds10"));
 
                 Transform startBtn = FindDeep(settingsPanelT, "StartGameButton");
                 AssignReference(so, "startGameButton", startBtn != null ? startBtn.GetComponent<Button>() : null);
@@ -215,7 +214,6 @@ namespace DigitPark.Editor.AutoAssigners
                 AssignReference(so, "toggleRounds1", (Object)null);
                 AssignReference(so, "toggleRounds3", (Object)null);
                 AssignReference(so, "toggleRounds5", (Object)null);
-                AssignReference(so, "toggleRounds10", (Object)null);
                 AssignReference(so, "startGameButton", (Object)null);
             }
 

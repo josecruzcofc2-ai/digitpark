@@ -44,7 +44,6 @@ namespace DigitPark.Games
         [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
-        [SerializeField] private Toggle toggleRounds10;
         [SerializeField] private Button startGameButton;
 
         [Header("Feedback")]
@@ -105,6 +104,9 @@ namespace DigitPark.Games
             }
             else
             {
+                var ctx = GameSessionManager.Instance?.CurrentContext;
+                if (ctx != null && ctx.Rounds > 0)
+                    totalRounds = ctx.Rounds;
                 StartGameWithCountdown();
             }
         }
@@ -142,24 +144,18 @@ namespace DigitPark.Games
             if (toggleRounds1 != null)
                 toggleRounds1.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds1, on);
-                    if (on) SetRadio(toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10);
+                    if (on) SetRadio(toggleRounds1, toggleRounds3, toggleRounds5);
                 });
             if (toggleRounds3 != null)
                 toggleRounds3.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds3, on);
-                    if (on) SetRadio(toggleRounds3, toggleRounds1, toggleRounds5, toggleRounds10);
+                    if (on) SetRadio(toggleRounds3, toggleRounds1, toggleRounds5);
                 });
             if (toggleRounds5 != null)
                 toggleRounds5.onValueChanged.AddListener(on => {
                     UpdateToggleVisual(toggleRounds5, on);
-                    if (on) SetRadio(toggleRounds5, toggleRounds1, toggleRounds3, toggleRounds10);
+                    if (on) SetRadio(toggleRounds5, toggleRounds1, toggleRounds3);
                 });
-            if (toggleRounds10 != null)
-                toggleRounds10.onValueChanged.AddListener(on => {
-                    UpdateToggleVisual(toggleRounds10, on);
-                    if (on) SetRadio(toggleRounds10, toggleRounds1, toggleRounds3, toggleRounds5);
-                });
-
             // Wire start button
             if (startGameButton != null)
                 startGameButton.onClick.AddListener(OnStartGameClicked);
@@ -168,7 +164,6 @@ namespace DigitPark.Games
             SetToggleDefault(toggleRounds1, false);
             SetToggleDefault(toggleRounds3, false);
             SetToggleDefault(toggleRounds5, true);
-            SetToggleDefault(toggleRounds10, false);
         }
 
         private void ShowSettingsPanel()
@@ -185,8 +180,6 @@ namespace DigitPark.Games
                 totalRounds = 1;
             else if (toggleRounds3 != null && toggleRounds3.isOn)
                 totalRounds = 3;
-            else if (toggleRounds10 != null && toggleRounds10.isOn)
-                totalRounds = 10;
             else
                 totalRounds = 5;
 
@@ -979,7 +972,6 @@ namespace DigitPark.Games
             toggleRounds1?.onValueChanged.RemoveAllListeners();
             toggleRounds3?.onValueChanged.RemoveAllListeners();
             toggleRounds5?.onValueChanged.RemoveAllListeners();
-            toggleRounds10?.onValueChanged.RemoveAllListeners();
         }
     }
 }

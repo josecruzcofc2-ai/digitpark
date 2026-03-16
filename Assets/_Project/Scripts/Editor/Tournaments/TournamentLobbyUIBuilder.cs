@@ -253,7 +253,7 @@ namespace DigitPark.Editor
             Image headerBg = GetOrAddComponent<Image>(header);
             headerBg.color = HEADER_BG;
 
-            CreateBottomGlow(header);
+            // BottomGlow removed — user request: no separator between header and InfoCard
 
             // ── BackButton (prefab) ──
             GameObject backBtnPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_PREFAB);
@@ -321,7 +321,7 @@ namespace DigitPark.Editor
             infoRT.anchorMin = new Vector2(0, 1);
             infoRT.anchorMax = new Vector2(1, 1);
             infoRT.pivot = new Vector2(0.5f, 1);
-            infoRT.anchoredPosition = new Vector2(0, -HEADER_HEIGHT - 6);
+            infoRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + 29f) - 6); // +29f accounts for header's own top offset
             infoRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, INFO_CARD_HEIGHT);
 
             Image infoBg = GetOrAddComponent<Image>(infoCard);
@@ -696,7 +696,7 @@ namespace DigitPark.Editor
 
         private static void CreateTabBar(GameObject parent)
         {
-            float topOffset = HEADER_HEIGHT + INFO_CARD_HEIGHT + 12;
+            float topOffset = HEADER_HEIGHT + 29f + INFO_CARD_HEIGHT + 12; // +29f: header top offset
 
             GameObject tabBar = FindOrCreateChild(parent, "TabBar");
 
@@ -838,7 +838,7 @@ namespace DigitPark.Editor
 
         private static void CreateContentArea(GameObject parent)
         {
-            float topOffset = HEADER_HEIGHT + INFO_CARD_HEIGHT + TAB_BAR_HEIGHT + 18;
+            float topOffset = HEADER_HEIGHT + 29f + INFO_CARD_HEIGHT + TAB_BAR_HEIGHT + 18; // +29f: header top offset
             float bottomOffset = ACTION_BAR_HEIGHT + CONTENT_PADDING;
 
             GameObject contentArea = FindOrCreateChild(parent, "ContentArea");
@@ -1025,7 +1025,7 @@ namespace DigitPark.Editor
             myPosRT.anchorMin = new Vector2(0, 0);
             myPosRT.anchorMax = new Vector2(1, 0);
             myPosRT.pivot = new Vector2(0.5f, 0);
-            myPosRT.anchoredPosition = Vector2.zero;
+            myPosRT.anchoredPosition = new Vector2(0, 4); // 4px gap prevents Outline bleeding into ActionBar
             myPosRT.sizeDelta = new Vector2(0, MY_POSITION_HEIGHT);
 
             Image myPosBg = GetOrAddComponent<Image>(myPos);

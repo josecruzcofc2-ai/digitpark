@@ -112,7 +112,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 10,
                 iconName = "Logro_Primeros_Pasos"
             });
@@ -125,7 +125,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 10,
                 iconName = "Logro_Graduado"
             });
@@ -138,7 +138,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 15,
                 iconName = "Logro_Primera_Victoria"
             });
@@ -151,7 +151,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 10,
                 iconName = "Logro_Perfil_Completo"
             });
@@ -165,7 +165,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 10000,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Maestro_Numeros"
             });
@@ -178,7 +178,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 100,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Reflejos_Rayo"
             });
@@ -191,7 +191,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 1,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Genio"
             });
@@ -204,7 +204,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 50,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Maestro_Matematicas"
             });
@@ -217,7 +217,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Mastery,
                 targetValue = 100,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Ojo_Aguila"
             });
@@ -231,7 +231,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Beginner,
                 targetValue = 10,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 15,
                 iconName = "Logro_10_Partidas"
             });
@@ -244,7 +244,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 50,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 30,
                 iconName = "Logro_50_Partidas"
             });
@@ -257,7 +257,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 100,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_100_Partidas"
             });
@@ -271,7 +271,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 10,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 20,
                 iconName = "Logro_10_Victorias"
             });
@@ -284,7 +284,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 50,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 40,
                 iconName = "Logro_50_Victorias"
             });
@@ -297,7 +297,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 100,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 60,
                 iconName = "Logro_Centurion"
             });
@@ -310,7 +310,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 500,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 100,
                 iconName = "Logro_500_Victorias"
             });
@@ -323,7 +323,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Victories,
                 targetValue = 1000,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 200,
                 iconName = "Logro_1000_Victorias"
             });
@@ -337,7 +337,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 3,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 25,
                 iconName = "Logro_Racha_Fuego"
             });
@@ -350,7 +350,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 5,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 40,
                 iconName = "Logro_Victoria_Racha_7"
             });
@@ -363,7 +363,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 10,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 75,
                 iconName = "Logro_Demoledor"
             });
@@ -376,7 +376,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Streaks,
                 targetValue = 20,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 150,
                 iconName = "Logro_Victoria_Racha_30",
                 isHidden = true
@@ -391,7 +391,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 2, // Economy Rebalance: gem drip
                 points = 25,
                 iconName = "Logro_Ficha_Cash"
             });
@@ -404,7 +404,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 1,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 35,
                 iconName = "Logro_Rey_Monedas"
             });
@@ -417,7 +417,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 10,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_VIP_1000"
             });
@@ -430,7 +430,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 50,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 100,
                 iconName = "Logro_VIP_Dados"
             });
@@ -443,7 +443,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 100,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 200,
                 iconName = "Logro_Tiburon_Cash"
             });
@@ -456,7 +456,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 100,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 75,
                 iconName = "Logro_Bolsa_100"
             });
@@ -469,7 +469,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.CashBattle,
                 targetValue = 1000,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 250,
                 iconName = "Logro_Millonario",
                 isHidden = true
@@ -484,7 +484,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 20,
                 iconName = "Logro_Torneo_Bracket"
             });
@@ -497,7 +497,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Coleccion_Trofeos"
             });
@@ -510,7 +510,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 100,
                 iconName = "Logro_Campeon_1"
             });
@@ -523,7 +523,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 5,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 200,
                 iconName = "Logro_4_Estrellas"
             });
@@ -536,7 +536,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Tournaments,
                 targetValue = 1,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 30,
                 iconName = "Logro_Organizador_Torneo"
             });
@@ -550,7 +550,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 15,
                 iconName = "Logro_Primer_Rival"
             });
@@ -563,7 +563,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 10,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 30,
                 iconName = "Logro_Social_10_Amigos"
             });
@@ -576,7 +576,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 50,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 75,
                 iconName = "Logro_Influencer"
             });
@@ -589,7 +589,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 20,
                 iconName = "Logro_Versus"
             });
@@ -602,7 +602,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Social,
                 targetValue = 1,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 25,
                 iconName = "Logro_Amigo_Rival"
             });
@@ -616,7 +616,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 10,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 25,
                 iconName = "Logro_Nivel_10"
             });
@@ -629,7 +629,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 25,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Nivel_25"
             });
@@ -642,7 +642,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 50,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 75,
                 iconName = "Logro_Nivel_50"
             });
@@ -655,7 +655,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Progression,
                 targetValue = 100,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 150,
                 iconName = "Logro_Avance_Epico"
             });
@@ -669,7 +669,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 7,
                 rewardCoins = 75,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 25,
                 iconName = "Logro_Racha_7_Dias"
             });
@@ -682,7 +682,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 30,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Racha_30_Dias"
             });
@@ -695,7 +695,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 100,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 100,
                 iconName = "Logro_Racha_100_Dias"
             });
@@ -708,7 +708,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 365,
                 rewardCoins = 600,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 12, // Economy Rebalance: gem drip
                 points = 300,
                 iconName = "Logro_Racha_365_Dias",
                 isHidden = true
@@ -722,7 +722,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 7,
                 rewardCoins = 175,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 4, // Economy Rebalance: gem drip
                 points = 30,
                 iconName = "Logro_Login_Semanal"
             });
@@ -735,7 +735,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Time,
                 targetValue = 30,
                 rewardCoins = 400,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 7, // Economy Rebalance: gem drip
                 points = 75,
                 iconName = "Logro_Login_Mensual"
             });
@@ -749,7 +749,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 500,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 10, // Economy Rebalance: gem drip
                 points = 50,
                 iconName = "Logro_Buho_Nocturno",
                 isHidden = true
@@ -763,7 +763,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 500,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 10, // Economy Rebalance: gem drip
                 points = 100,
                 iconName = "Logro_Perfeccionista",
                 isHidden = true
@@ -777,7 +777,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 500,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 10, // Economy Rebalance: gem drip
                 points = 75,
                 iconName = "Logro_Ave_Fenix",
                 isHidden = true
@@ -791,7 +791,7 @@ namespace DigitPark.Services
                 category = AchievementCategory.Secret,
                 targetValue = 1,
                 rewardCoins = 500,
-                rewardGems = 0, // DG eliminated — DG is purchase-only
+                rewardGems = 10, // Economy Rebalance: gem drip
                 points = 100,
                 iconName = "Logro_Demonio_Velocidad",
                 isHidden = true
@@ -1176,8 +1176,13 @@ namespace DigitPark.Services
                     currency.AddCoins(achievement.rewardCoins);
                     AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", achievement.rewardCoins, "achievement");
                 }
-                // DG rewards eliminated — DG is purchase-only currency (economy rebalance V55)
-                Debug.Log($"[Achievements] Reward: +{achievement.rewardCoins} DigitCoins for {achievement.id}");
+                // Economy Rebalance: gem drip via achievements (~310 DG lifetime)
+                if (achievement.rewardGems > 0)
+                {
+                    currency.AddGems(achievement.rewardGems);
+                    AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", achievement.rewardGems, "achievement");
+                }
+                Debug.Log($"[Achievements] Reward: +{achievement.rewardCoins} DC, +{achievement.rewardGems} DG for {achievement.id}");
             }
         }
 

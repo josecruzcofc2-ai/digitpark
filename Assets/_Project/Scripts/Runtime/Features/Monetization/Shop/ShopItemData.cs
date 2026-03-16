@@ -13,6 +13,8 @@ namespace DigitPark.Monetization
         DigitCoinsPack, // Paquete de DigitCoins (compra con DigitGems)
         Theme,          // Tema visual
         Avatar,         // Avatar
+        Frame,          // Marco de perfil (DC, DG o USD)
+        Title,          // Título de jugador (DC, DG o USD)
         SpecialOffer,   // Oferta especial (bundle)
         PremiumBundle,  // Bundle premium
         StarterPack,    // Paquete de inicio
@@ -265,6 +267,24 @@ namespace DigitPark.Monetization
                     }
                     break;
 
+                case ShopItemType.Frame:
+                    if (!string.IsNullOrEmpty(itemId))
+                    {
+                        var frameService = DigitPark.Services.PlayerFrameService.Instance;
+                        if (frameService != null)
+                            frameService.UnlockFrame(itemId);
+                    }
+                    break;
+
+                case ShopItemType.Title:
+                    if (!string.IsNullOrEmpty(itemId))
+                    {
+                        var titleService = DigitPark.Services.PlayerTitleService.Instance;
+                        if (titleService != null)
+                            titleService.UnlockTitle(itemId);
+                    }
+                    break;
+
                 case ShopItemType.BattleCard:
                     if (!string.IsNullOrEmpty(itemId))
                     {
@@ -319,6 +339,8 @@ namespace DigitPark.Monetization
                     break;
                 case ShopItemType.Theme:
                 case ShopItemType.Avatar:
+                case ShopItemType.Frame:
+                case ShopItemType.Title:
                     shopTab = ShopTab.Styles;
                     break;
                 case ShopItemType.SpecialOffer:

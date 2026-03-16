@@ -77,6 +77,9 @@ namespace DigitPark.Monetization
         private const int DEFAULT_GEMS = 0;
         private const int DEFAULT_COINS = 1000;
 
+        // Economy Rebalance: 5% rake on bets (winner gets 1.9x instead of 2x)
+        private const float BET_MULTIPLIER = 1.9f;
+
         // ==================== ESTADO ====================
 
         [Header("Current Balance (Read Only)")]
@@ -656,7 +659,7 @@ namespace DigitPark.Monetization
                     switch (_escrowType)
                     {
                         case BetCurrencyType.DigitGems:
-                            winAmount = _escrowedGems * 2;
+                            winAmount = Mathf.RoundToInt(_escrowedGems * BET_MULTIPLIER);
                             escrowedAmount = _escrowedGems;
                             // SEC-M13: Overflow protection on winnings
                             if (_gems > int.MaxValue - winAmount)
@@ -666,7 +669,7 @@ namespace DigitPark.Monetization
                             newBalance = _gems;
                             break;
                         case BetCurrencyType.DigitCoins:
-                            winAmount = _escrowedCoins * 2;
+                            winAmount = Mathf.RoundToInt(_escrowedCoins * BET_MULTIPLIER);
                             escrowedAmount = _escrowedCoins;
                             // SEC-M13: Overflow protection on winnings
                             if (_coins > int.MaxValue - winAmount)

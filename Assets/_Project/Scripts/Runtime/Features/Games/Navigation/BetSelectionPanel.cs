@@ -13,7 +13,7 @@ namespace DigitPark.Monetization.Betting
     /// Manager de la escena BetSelection.
     /// Pantalla de seleccion de apuesta antes de Matchmaking.
     /// Flujo: GameSelector -> BetSelection -> Matchmaking -> Game
-    /// Soporta apuestas preset (DigitCoins/DigitGems) y personalizada (multiplos de 5).
+    /// Soporta apuestas preset (DigitCoins) y personalizada (multiplos de 5).
     /// </summary>
     public class BetSelectionPanel : MonoBehaviour
     {
@@ -52,31 +52,19 @@ namespace DigitPark.Monetization.Betting
         [SerializeField] private TextMeshProUGUI _coins1000CostText;
         [SerializeField] private TextMeshProUGUI _coins1000RewardText;
 
-        [Header("=== DIGITGEM BETS ===")]
-        [SerializeField] private Button _gems10Button;
-        [SerializeField] private TextMeshProUGUI _gems10CostText;
-        [SerializeField] private TextMeshProUGUI _gems10RewardText;
-        [SerializeField] private Button _gems50Button;
-        [SerializeField] private TextMeshProUGUI _gems50CostText;
-        [SerializeField] private TextMeshProUGUI _gems50RewardText;
-        [SerializeField] private Button _gems100Button;
-        [SerializeField] private TextMeshProUGUI _gems100CostText;
-        [SerializeField] private TextMeshProUGUI _gems100RewardText;
-        [SerializeField] private Button _gems250Button;
-        [SerializeField] private TextMeshProUGUI _gems250CostText;
-        [SerializeField] private TextMeshProUGUI _gems250RewardText;
-        [SerializeField] private Button _gems500Button;
-        [SerializeField] private TextMeshProUGUI _gems500CostText;
-        [SerializeField] private TextMeshProUGUI _gems500RewardText;
-
         [Header("=== CUSTOM BET ===")]
         [SerializeField] private Image _customBetCardBg;
         [SerializeField] private Button _customCoinsToggle;
-        [SerializeField] private Button _customGemsToggle;
         [SerializeField] private TMP_InputField _customAmountInput;
         [SerializeField] private Button _customMinusButton;
         [SerializeField] private Button _customPlusButton;
         [SerializeField] private TextMeshProUGUI _customRewardText;
+
+        [Header("=== ROUNDS SELECTION ===")]
+        [SerializeField] private GameObject _roundsPanel;
+        [SerializeField] private Button _rounds1Button;
+        [SerializeField] private Button _rounds3Button;
+        [SerializeField] private Button _rounds5Button;
 
         [Header("=== ACTION BUTTONS ===")]
         [SerializeField] private Button _playButton;
@@ -95,10 +83,11 @@ namespace DigitPark.Monetization.Betting
         private bool _isCustomBetSelected = false;
 
         // Custom bet state
-        private bool _customIsGems = false;
         private int _customAmount = 10;
+        private int _selectedRounds = 1;
         private const int STEP = 5;
         private const int MIN_CUSTOM = 5;
+        private const int MAX_CUSTOM_BET = 5000; // Economy Rebalance: cap custom bets
 
         // Visual colors
         private static readonly Color CARD_BG = new Color(0.06f, 0.08f, 0.14f, 1f);
@@ -145,25 +134,23 @@ namespace DigitPark.Monetization.Betting
             _coins500Button?.onClick.AddListener(() => SelectPresetBet(_coins500Button, 500, BetCurrencyType.DigitCoins));
             _coins1000Button?.onClick.AddListener(() => SelectPresetBet(_coins1000Button, 1000, BetCurrencyType.DigitCoins));
 
-            _gems10Button?.onClick.AddListener(() => SelectPresetBet(_gems10Button, 10, BetCurrencyType.DigitGems));
-            _gems50Button?.onClick.AddListener(() => SelectPresetBet(_gems50Button, 50, BetCurrencyType.DigitGems));
-            _gems100Button?.onClick.AddListener(() => SelectPresetBet(_gems100Button, 100, BetCurrencyType.DigitGems));
-            _gems250Button?.onClick.AddListener(() => SelectPresetBet(_gems250Button, 250, BetCurrencyType.DigitGems));
-            _gems500Button?.onClick.AddListener(() => SelectPresetBet(_gems500Button, 500, BetCurrencyType.DigitGems));
-
-            _customCoinsToggle?.onClick.AddListener(() => SetCustomCurrency(false));
-            _customGemsToggle?.onClick.AddListener(() => SetCustomCurrency(true));
+            _customCoinsToggle?.onClick.AddListener(() => ActivateCustomBet());
             _customMinusButton?.onClick.AddListener(OnCustomMinus);
             _customPlusButton?.onClick.AddListener(OnCustomPlus);
             if (_customAmountInput != null)
                 _customAmountInput.onEndEdit.AddListener(OnCustomAmountEdited);
+
+            // Rounds selection
+            _rounds1Button?.onClick.AddListener(() => SelectRounds(1));
+            _rounds3Button?.onClick.AddListener(() => SelectRounds(3));
+            _rounds5Button?.onClick.AddListener(() => SelectRounds(5));
+            SelectRounds(1); // Default
 
             _playButton?.onClick.AddListener(OnPlayClicked);
             _cancelButton?.onClick.AddListener(OnCancelClicked);
 
             if (CurrencyManager.Instance != null)
             {
-                CurrencyManager.Instance.OnGemsChanged += OnCurrencyChanged;
                 CurrencyManager.Instance.OnCoinsChanged += OnCurrencyChanged;
             }
         }
@@ -177,13 +164,7 @@ namespace DigitPark.Monetization.Betting
             _coins250Button?.onClick.RemoveAllListeners();
             _coins500Button?.onClick.RemoveAllListeners();
             _coins1000Button?.onClick.RemoveAllListeners();
-            _gems10Button?.onClick.RemoveAllListeners();
-            _gems50Button?.onClick.RemoveAllListeners();
-            _gems100Button?.onClick.RemoveAllListeners();
-            _gems250Button?.onClick.RemoveAllListeners();
-            _gems500Button?.onClick.RemoveAllListeners();
             _customCoinsToggle?.onClick.RemoveAllListeners();
-            _customGemsToggle?.onClick.RemoveAllListeners();
             _customMinusButton?.onClick.RemoveAllListeners();
             _customPlusButton?.onClick.RemoveAllListeners();
             if (_customAmountInput != null)
@@ -193,7 +174,6 @@ namespace DigitPark.Monetization.Betting
 
             if (CurrencyManager.Instance != null)
             {
-                CurrencyManager.Instance.OnGemsChanged -= OnCurrencyChanged;
                 CurrencyManager.Instance.OnCoinsChanged -= OnCurrencyChanged;
             }
         }
@@ -226,27 +206,18 @@ namespace DigitPark.Monetization.Betting
             SetText(_freeBetCostText, AutoLocalizer.Get("bet_free"));
             SetText(_freeBetRewardText, AutoLocalizer.Get("bet_free_desc"));
 
+            // Economy Rebalance: 1.9x multiplier (5% rake)
             SetText(_coins50CostText, AutoLocalizer.Get("bet_coins_cost", "50"));
-            SetText(_coins50RewardText, AutoLocalizer.Get("bet_coins_wager", "100"));
+            SetText(_coins50RewardText, AutoLocalizer.Get("bet_coins_wager", "95"));
             SetText(_coins100CostText, AutoLocalizer.Get("bet_coins_cost", "100"));
-            SetText(_coins100RewardText, AutoLocalizer.Get("bet_coins_wager", "200"));
+            SetText(_coins100RewardText, AutoLocalizer.Get("bet_coins_wager", "190"));
             SetText(_coins250CostText, AutoLocalizer.Get("bet_coins_cost", "250"));
-            SetText(_coins250RewardText, AutoLocalizer.Get("bet_coins_wager", "500"));
+            SetText(_coins250RewardText, AutoLocalizer.Get("bet_coins_wager", "475"));
             SetText(_coins500CostText, AutoLocalizer.Get("bet_coins_cost", "500"));
-            SetText(_coins500RewardText, AutoLocalizer.Get("bet_coins_wager", "1,000"));
+            SetText(_coins500RewardText, AutoLocalizer.Get("bet_coins_wager", "950"));
             SetText(_coins1000CostText, AutoLocalizer.Get("bet_coins_cost", "1,000"));
-            SetText(_coins1000RewardText, AutoLocalizer.Get("bet_coins_wager", "2,000"));
+            SetText(_coins1000RewardText, AutoLocalizer.Get("bet_coins_wager", "1,900"));
 
-            SetText(_gems10CostText, AutoLocalizer.Get("bet_gems_cost", "10"));
-            SetText(_gems10RewardText, AutoLocalizer.Get("bet_gems_wager", "20"));
-            SetText(_gems50CostText, AutoLocalizer.Get("bet_gems_cost", "50"));
-            SetText(_gems50RewardText, AutoLocalizer.Get("bet_gems_wager", "100"));
-            SetText(_gems100CostText, AutoLocalizer.Get("bet_gems_cost", "100"));
-            SetText(_gems100RewardText, AutoLocalizer.Get("bet_gems_wager", "200"));
-            SetText(_gems250CostText, AutoLocalizer.Get("bet_gems_cost", "250"));
-            SetText(_gems250RewardText, AutoLocalizer.Get("bet_gems_wager", "500"));
-            SetText(_gems500CostText, AutoLocalizer.Get("bet_gems_cost", "500"));
-            SetText(_gems500RewardText, AutoLocalizer.Get("bet_gems_wager", "1,000"));
         }
 
         private void UpdateCurrencyDisplay()
@@ -268,11 +239,6 @@ namespace DigitPark.Monetization.Betting
             SetBtnState(_coins500Button, c.HasEnoughCoins(500));
             SetBtnState(_coins1000Button, c.HasEnoughCoins(1000));
 
-            SetBtnState(_gems10Button, c.HasEnoughGems(10));
-            SetBtnState(_gems50Button, c.HasEnoughGems(50));
-            SetBtnState(_gems100Button, c.HasEnoughGems(100));
-            SetBtnState(_gems250Button, c.HasEnoughGems(250));
-            SetBtnState(_gems500Button, c.HasEnoughGems(500));
         }
 
         private void OnCurrencyChanged(int newAmount, int delta)
@@ -310,7 +276,7 @@ namespace DigitPark.Monetization.Betting
 
             _isCustomBetSelected = true;
             _selectedBetAmount = _customAmount;
-            _selectedCurrencyType = _customIsGems ? BetCurrencyType.DigitGems : BetCurrencyType.DigitCoins;
+            _selectedCurrencyType = BetCurrencyType.DigitCoins;
             SetCustomHighlight(true);
         }
 
@@ -360,7 +326,6 @@ namespace DigitPark.Monetization.Betting
 
         private void InitCustomBet()
         {
-            _customIsGems = false;
             _customAmount = 10;
             UpdateCustomToggles();
             UpdateCustomInput();
@@ -370,16 +335,6 @@ namespace DigitPark.Monetization.Betting
                 _customAmountInput.contentType = TMP_InputField.ContentType.IntegerNumber;
                 _customAmountInput.characterLimit = 6;
             }
-        }
-
-        private void SetCustomCurrency(bool isGems)
-        {
-            _customIsGems = isGems;
-            ClampCustom();
-            UpdateCustomToggles();
-            UpdateCustomInput();
-            UpdateCustomPreview();
-            ActivateCustomBet();
         }
 
         private void OnCustomMinus()
@@ -421,8 +376,8 @@ namespace DigitPark.Monetization.Betting
         {
             var c = CurrencyManager.Instance;
             if (c == null) return MIN_CUSTOM;
-            int bal = _customIsGems ? c.Gems : c.Coins;
-            return (bal / STEP) * STEP;
+            int bal = c.Coins;
+            return Mathf.Min((bal / STEP) * STEP, MAX_CUSTOM_BET);
         }
 
         private int Snap5(int v)
@@ -432,8 +387,7 @@ namespace DigitPark.Monetization.Betting
 
         private void UpdateCustomToggles()
         {
-            SetToggleVisual(_customCoinsToggle, !_customIsGems);
-            SetToggleVisual(_customGemsToggle, _customIsGems);
+            SetToggleVisual(_customCoinsToggle, true);
         }
 
         private void SetToggleVisual(Button btn, bool active)
@@ -452,10 +406,8 @@ namespace DigitPark.Monetization.Betting
         private void UpdateCustomPreview()
         {
             if (_customRewardText == null) return;
-            int reward = _customAmount * 2;
-            string curr = _customIsGems
-                ? AutoLocalizer.Get("currency_gems")
-                : AutoLocalizer.Get("currency_coins");
+            int reward = Mathf.RoundToInt(_customAmount * 1.9f); // Economy Rebalance: 5% rake
+            string curr = AutoLocalizer.Get("currency_coins");
             _customRewardText.text = AutoLocalizer.Get("bet_custom_reward", reward.ToString("N0"), curr);
         }
 
@@ -463,12 +415,25 @@ namespace DigitPark.Monetization.Betting
 
         #region Actions
 
+        private void SelectRounds(int rounds)
+        {
+            _selectedRounds = rounds;
+
+            // Update button visuals
+            Color active = new Color(1f, 0.84f, 0f, 1f); // Gold
+            Color inactive = new Color(0.15f, 0.15f, 0.2f, 1f);
+
+            if (_rounds1Button != null) _rounds1Button.GetComponent<Image>().color = rounds == 1 ? active : inactive;
+            if (_rounds3Button != null) _rounds3Button.GetComponent<Image>().color = rounds == 3 ? active : inactive;
+            if (_rounds5Button != null) _rounds5Button.GetComponent<Image>().color = rounds == 5 ? active : inactive;
+        }
+
         private void OnPlayClicked()
         {
             if (_isCustomBetSelected)
             {
                 _selectedBetAmount = _customAmount;
-                _selectedCurrencyType = _customIsGems ? BetCurrencyType.DigitGems : BetCurrencyType.DigitCoins;
+                _selectedCurrencyType = BetCurrencyType.DigitCoins;
             }
 
             if (_selectedBetAmount > 0)
@@ -481,9 +446,6 @@ namespace DigitPark.Monetization.Betting
                 {
                     case BetCurrencyType.DigitCoins:
                         ok = currency.EscrowCoins(_selectedBetAmount);
-                        break;
-                    case BetCurrencyType.DigitGems:
-                        ok = currency.EscrowGems(_selectedBetAmount);
                         break;
                     default:
                         ok = true;
@@ -499,6 +461,8 @@ namespace DigitPark.Monetization.Betting
 
             PlayerPrefs.SetInt(BET_AMOUNT_KEY, _selectedBetAmount);
             PlayerPrefs.SetInt(BET_CURRENCY_KEY, (int)_selectedCurrencyType);
+            // Pass rounds to matchmaking
+            PlayerPrefs.SetInt("DigitPark_MatchRounds", _selectedRounds);
             PlayerPrefs.Save();
 
             SceneManager.LoadScene("Matchmaking");

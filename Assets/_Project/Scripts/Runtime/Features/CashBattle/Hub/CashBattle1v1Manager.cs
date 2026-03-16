@@ -42,6 +42,11 @@ namespace DigitPark.UI.CashBattle
         [SerializeField] private TextMeshProUGUI earningsText;
         [SerializeField] private TextMeshProUGUI minMaxText;
 
+        [Header("Rounds Selection")]
+        [SerializeField] private Button rounds1Button;
+        [SerializeField] private Button rounds3Button;
+        [SerializeField] private Button rounds5Button;
+
         [Header("Online Players")]
         [SerializeField] private TextMeshProUGUI onlinePlayersText;
         [SerializeField] private Image onlineIndicator;
@@ -68,6 +73,7 @@ namespace DigitPark.UI.CashBattle
         // State
         private GameType? selectedGame;
         private decimal selectedEntryFee = 1m;
+        private int selectedRounds = 1;
         private List<GameType> selectedSprintGames = new List<GameType>();
         private bool isCognitiveSprintMode = false;
         private int currentOnlinePlayers = 0;
@@ -126,6 +132,12 @@ namespace DigitPark.UI.CashBattle
             backButton?.onClick.AddListener(() => OnBackClicked?.Invoke());
             findOpponentButton?.onClick.AddListener(OnFindOpponentClicked);
             cognitiveSprintButton?.onClick.AddListener(ToggleCognitiveSprintMode);
+
+            // Rounds selection
+            rounds1Button?.onClick.AddListener(() => SelectRounds(1));
+            rounds3Button?.onClick.AddListener(() => SelectRounds(3));
+            rounds5Button?.onClick.AddListener(() => SelectRounds(5));
+            SelectRounds(1); // Default
 
             // Modal button listeners
             viewDetailsButton?.onClick.AddListener(ShowGameModal);
@@ -193,21 +205,64 @@ namespace DigitPark.UI.CashBattle
 
             gameSelectionModal.SetActive(true);
 
-            // Reset card selection highlights
-            if (gameCardsContainer != null)
+            // Populate with current game info
+            int currentIndex = gameDropdown != null ? gameDropdown.value : 0;
+            if (currentIndex >= 0 && currentIndex < dropdownGameTypes.Length)
             {
-                foreach (Transform child in gameCardsContainer)
-                {
-                    var checkmark = child.Find("Checkmark");
-                    if (checkmark != null) checkmark.gameObject.SetActive(false);
+                GameType game = dropdownGameTypes[currentIndex];
+                UpdateGameInfoPanel(game);
+            }
+        }
 
-                    // Reset outline color
-                    var outline = child.GetComponent<Outline>();
-                    if (outline != null) outline.effectColor = new Color(0.4f, 0.3f, 0.55f, 0.35f);
-                }
+        private void UpdateGameInfoPanel(GameType game)
+        {
+            if (gameSelectionModal == null) return;
+            Transform panel = gameSelectionModal.transform.Find("ModalPanel");
+            if (panel == null) return;
+
+            // Update icon
+            var iconImg = panel.Find("GameIcon")?.GetComponent<Image>();
+            if (iconImg != null && gameIconNames.ContainsKey(game))
+            {
+                Sprite icon = Resources.Load<Sprite>($"Icons/Games/{gameIconNames[game]}");
+                if (icon != null) iconImg.sprite = icon;
             }
 
-            selectedModalCard = null;
+            // Update name
+            var nameTMP = panel.Find("GameName")?.GetComponent<TextMeshProUGUI>();
+            if (nameTMP != null) nameTMP.text = game.ToString().ToUpper();
+
+            // Update description
+            var descTMP = panel.Find("GameDescription")?.GetComponent<TextMeshProUGUI>();
+            if (descTMP != null)
+            {
+                string roundsInfo = $"~{selectedRounds} min ({selectedRounds} round{(selectedRounds > 1 ? "s" : "")})";
+                string desc = game switch
+                {
+                    GameType.DigitRush => "Type the numbers that appear on screen as fast as you can.\n\n" +
+                                          $"<color=#FFD700>Duration:</color> {roundsInfo}\n" +
+                                          "<color=#FFD700>Scoring:</color> Speed + accuracy\n" +
+                                          "<color=#FFD700>Tip:</color> Focus on accuracy first!",
+                    GameType.FlashTap => "Tap the highlighted targets as quickly as possible.\n\n" +
+                                         $"<color=#FFD700>Duration:</color> {roundsInfo}\n" +
+                                         "<color=#FFD700>Scoring:</color> Correct taps - wrong taps\n" +
+                                         "<color=#FFD700>Tip:</color> Watch for color changes!",
+                    GameType.MemoryPairs => "Find all matching card pairs from memory.\n\n" +
+                                            $"<color=#FFD700>Duration:</color> {roundsInfo}\n" +
+                                            "<color=#FFD700>Scoring:</color> Pairs found + speed bonus\n" +
+                                            "<color=#FFD700>Tip:</color> Remember positions!",
+                    GameType.OddOneOut => "Find the item that doesn't belong in each group.\n\n" +
+                                          $"<color=#FFD700>Duration:</color> {roundsInfo}\n" +
+                                          "<color=#FFD700>Scoring:</color> Correct answers + speed\n" +
+                                          "<color=#FFD700>Tip:</color> Look for subtle differences!",
+                    GameType.QuickMath => "Solve math problems as fast as you can.\n\n" +
+                                          $"<color=#FFD700>Duration:</color> {roundsInfo}\n" +
+                                          "<color=#FFD700>Scoring:</color> Correct answers + speed\n" +
+                                          "<color=#FFD700>Tip:</color> Mental math wins!",
+                    _ => "Select a game to see details."
+                };
+                descTMP.text = desc;
+            }
         }
 
         private void HideGameModal()
@@ -220,38 +275,6 @@ namespace DigitPark.UI.CashBattle
 
         private void OnModalConfirmClicked()
         {
-            // If a card was selected in the modal, apply it to the dropdown
-            if (selectedModalCard != null)
-            {
-                string cardName = selectedModalCard.name;
-
-                // Check if CognitiveSprint was selected
-                if (cardName.Contains("CognitiveSprint"))
-                {
-                    // Toggle cognitive sprint mode
-                    if (!isCognitiveSprintMode)
-                    {
-                        ToggleCognitiveSprintMode();
-                    }
-                }
-                else
-                {
-                    // Find matching game type from card name
-                    for (int i = 0; i < dropdownGameTypes.Length; i++)
-                    {
-                        if (cardName.Contains(dropdownGameTypes[i].ToString()))
-                        {
-                            if (gameDropdown != null)
-                            {
-                                gameDropdown.value = i;
-                            }
-                            OnGameDropdownChanged(i);
-                            break;
-                        }
-                    }
-                }
-            }
-
             HideGameModal();
         }
 
@@ -420,6 +443,8 @@ namespace DigitPark.UI.CashBattle
             {
                 for (int i = 0; i < entryFeeButtons.Length && i < availableFees.Length; i++)
                 {
+                    if (entryFeeButtons[i] == null) continue;
+
                     decimal fee = availableFees[i];
                     int index = i;
 
@@ -641,6 +666,7 @@ namespace DigitPark.UI.CashBattle
             {
                 for (int i = 0; i < entryFeeButtons.Length; i++)
                 {
+                    if (entryFeeButtons[i] == null) continue;
                     var img = entryFeeButtons[i].GetComponent<Image>();
                     if (img != null)
                     {
@@ -655,6 +681,17 @@ namespace DigitPark.UI.CashBattle
             UpdateSelectedFeeDisplay();
             UpdateEarningsFeedback();
             UpdateUI();
+        }
+
+        private void SelectRounds(int rounds)
+        {
+            selectedRounds = rounds;
+            Color active = new Color(1f, 0.84f, 0f, 1f);
+            Color inactive = new Color(0.2f, 0.18f, 0.25f, 1f);
+
+            if (rounds1Button != null) rounds1Button.GetComponent<Image>().color = rounds == 1 ? active : inactive;
+            if (rounds3Button != null) rounds3Button.GetComponent<Image>().color = rounds == 3 ? active : inactive;
+            if (rounds5Button != null) rounds5Button.GetComponent<Image>().color = rounds == 5 ? active : inactive;
         }
 
         private void OnFindOpponentClicked()

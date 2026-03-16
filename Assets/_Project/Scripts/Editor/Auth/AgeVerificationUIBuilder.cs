@@ -235,11 +235,13 @@ namespace DigitPark.Editor
 
             RectTransform rect = icon.AddComponent<RectTransform>();
             rect.sizeDelta = new Vector2(ICON_SIZE, ICON_SIZE);
+            rect.localScale = new Vector3(1.5f, 1.5f, 1f); // Visual 450px sin afectar layout
 
             // Use the premium verification icon (18+ shield)
             Image iconImage = icon.AddComponent<Image>();
             iconImage.sprite = VerificationIcon;
             iconImage.preserveAspect = true;
+            iconImage.color = GoldPremium;
 
             LayoutElement layout = icon.AddComponent<LayoutElement>();
             layout.preferredHeight = ICON_SIZE;

@@ -61,6 +61,13 @@ namespace DigitPark.Games
         public DigitPark.Monetization.BetCurrencyType BetCurrencyType { get; set; }
 
         /// <summary>
+        /// Cantidad de rondas a jugar (1, 3, o 5). Default 1.
+        /// En Practice: usuario elige. En 1v1/CashBattle: matchmaking empareja por rondas iguales.
+        /// En Torneos: definido por el creador. En CognitiveSprint: siempre 1.
+        /// </summary>
+        public int Rounds { get; set; } = 1;
+
+        /// <summary>
         /// Resultados de cada juego jugado en esta sesion
         /// </summary>
         public List<MinigameResult> Results { get; set; }

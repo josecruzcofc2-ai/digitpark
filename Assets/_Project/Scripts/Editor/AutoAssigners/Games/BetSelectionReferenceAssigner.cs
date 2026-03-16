@@ -10,7 +10,7 @@ namespace DigitPark.Editor.AutoAssigners
     /// <summary>
     /// Reference Assigner for BetSelection scene.
     /// Automatically finds and assigns UI references to BetSelectionPanel.
-    /// Supports: Free + 5 DigitCoin tiers + 5 DigitGem tiers + Custom bet section + Action buttons.
+    /// Supports: Free + 5 DigitCoin tiers + Custom bet section + Action buttons.
     ///
     /// Menu: DigitPark/Auto Assigners/References/Games/BetSelection References
     /// </summary>
@@ -38,16 +38,12 @@ namespace DigitPark.Editor.AutoAssigners
             "_coins250Button", "_coins250CostText", "_coins250RewardText",
             "_coins500Button", "_coins500CostText", "_coins500RewardText",
             "_coins1000Button", "_coins1000CostText", "_coins1000RewardText",
-            // Gem Bets
-            "_gems10Button", "_gems10CostText", "_gems10RewardText",
-            "_gems50Button", "_gems50CostText", "_gems50RewardText",
-            "_gems100Button", "_gems100CostText", "_gems100RewardText",
-            "_gems250Button", "_gems250CostText", "_gems250RewardText",
-            "_gems500Button", "_gems500CostText", "_gems500RewardText",
             // Custom Bet
-            "_customBetCardBg", "_customCoinsToggle", "_customGemsToggle",
+            "_customBetCardBg", "_customCoinsToggle",
             "_customAmountInput", "_customMinusButton", "_customPlusButton",
             "_customRewardText",
+            // Rounds Selection
+            "_roundsPanel", "_rounds1Button", "_rounds3Button", "_rounds5Button",
             // Action Buttons
             "_playButton", "_cancelButton"
         };
@@ -99,8 +95,7 @@ namespace DigitPark.Editor.AutoAssigners
                 "- Currency display (DigitGems, DigitCoins labels + values)\n" +
                 "- Free bet (button, cost, reward)\n" +
                 "- DigitCoin bets: 50, 100, 250, 500, 1000\n" +
-                "- DigitGem bets: 10, 50, 100, 250, 500\n" +
-                "- Custom bet (card bg, toggles, input, stepper, preview)\n" +
+                "- Custom bet (card bg, input, stepper, preview)\n" +
                 "- Action buttons (play, cancel)",
                 MessageType.Info);
 
@@ -234,39 +229,19 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "_coins1000CostText", FindTextByName("coins1000costtext", "coins1000cost"));
             AssignReference(so, "_coins1000RewardText", FindTextByName("coins1000rewardtext", "coins1000reward"));
 
-            // Gem 10
-            AssignReference(so, "_gems10Button", FindButtonByParentName("gems10bet", "gems10"));
-            AssignReference(so, "_gems10CostText", FindTextByName("gems10costtext", "gems10cost"));
-            AssignReference(so, "_gems10RewardText", FindTextByName("gems10rewardtext", "gems10reward"));
-
-            // Gem 50
-            AssignReference(so, "_gems50Button", FindButtonByParentName("gems50bet", "gems50"));
-            AssignReference(so, "_gems50CostText", FindTextByName("gems50costtext", "gems50cost"));
-            AssignReference(so, "_gems50RewardText", FindTextByName("gems50rewardtext", "gems50reward"));
-
-            // Gem 100
-            AssignReference(so, "_gems100Button", FindButtonByParentName("gems100bet", "gems100"));
-            AssignReference(so, "_gems100CostText", FindTextByName("gems100costtext", "gems100cost"));
-            AssignReference(so, "_gems100RewardText", FindTextByName("gems100rewardtext", "gems100reward"));
-
-            // Gem 250
-            AssignReference(so, "_gems250Button", FindButtonByParentName("gems250bet", "gems250"));
-            AssignReference(so, "_gems250CostText", FindTextByName("gems250costtext", "gems250cost"));
-            AssignReference(so, "_gems250RewardText", FindTextByName("gems250rewardtext", "gems250reward"));
-
-            // Gem 500
-            AssignReference(so, "_gems500Button", FindButtonByParentName("gems500bet", "gems500"));
-            AssignReference(so, "_gems500CostText", FindTextByName("gems500costtext", "gems500cost"));
-            AssignReference(so, "_gems500RewardText", FindTextByName("gems500rewardtext", "gems500reward"));
-
             // Custom Bet
             AssignReference(so, "_customBetCardBg", FindImageByName("custombetcard"));
             AssignReference(so, "_customCoinsToggle", FindButtonByName("customcoinstoggle"));
-            AssignReference(so, "_customGemsToggle", FindButtonByName("customgemstoggle"));
             AssignReference(so, "_customAmountInput", FindInputFieldByName("customamountinput"));
             AssignReference(so, "_customMinusButton", FindButtonByName("customminusbutton", "customminus"));
             AssignReference(so, "_customPlusButton", FindButtonByName("customplusbutton", "customplus"));
             AssignReference(so, "_customRewardText", FindTextByName("customrewardtext"));
+
+            // Rounds Selection
+            AssignReference(so, "_roundsPanel", FindImageByName("roundspanel"));
+            AssignReference(so, "_rounds1Button", FindButtonByName("rounds1button"));
+            AssignReference(so, "_rounds3Button", FindButtonByName("rounds3button"));
+            AssignReference(so, "_rounds5Button", FindButtonByName("rounds5button"));
 
             // Action Buttons
             AssignReference(so, "_playButton", FindButtonByName("playbutton", "play"));

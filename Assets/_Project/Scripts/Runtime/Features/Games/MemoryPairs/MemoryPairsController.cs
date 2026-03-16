@@ -39,7 +39,6 @@ namespace DigitPark.Games
         [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
-        [SerializeField] private Toggle toggleRounds10;
         [SerializeField] private Button startGameButton;
 
         [Header("Countdown")]
@@ -115,6 +114,9 @@ namespace DigitPark.Games
             }
             else
             {
+                var ctx = GameSessionManager.Instance?.CurrentContext;
+                if (ctx != null && ctx.Rounds > 0)
+                    totalRounds = ctx.Rounds;
                 StartGame();
             }
         }
@@ -127,21 +129,17 @@ namespace DigitPark.Games
                 toggleRounds3.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds3, v); if (v) SetRadio(toggleRounds3); });
             if (toggleRounds5 != null)
                 toggleRounds5.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds5, v); if (v) SetRadio(toggleRounds5); });
-            if (toggleRounds10 != null)
-                toggleRounds10.onValueChanged.AddListener(v => { UpdateToggleVisual(toggleRounds10, v); if (v) SetRadio(toggleRounds10); });
-
             if (startGameButton != null)
                 startGameButton.onClick.AddListener(OnStartGameClicked);
 
             SetToggleDefault(toggleRounds1, true);
             SetToggleDefault(toggleRounds3, false);
             SetToggleDefault(toggleRounds5, false);
-            SetToggleDefault(toggleRounds10, false);
         }
 
         private void SetRadio(Toggle active)
         {
-            Toggle[] all = { toggleRounds1, toggleRounds3, toggleRounds5, toggleRounds10 };
+            Toggle[] all = { toggleRounds1, toggleRounds3, toggleRounds5 };
             foreach (var t in all)
             {
                 if (t != null && t != active) { t.isOn = false; UpdateToggleVisual(t, false); }
@@ -173,7 +171,6 @@ namespace DigitPark.Games
             if (toggleRounds1 != null && toggleRounds1.isOn) totalRounds = 1;
             else if (toggleRounds3 != null && toggleRounds3.isOn) totalRounds = 3;
             else if (toggleRounds5 != null && toggleRounds5.isOn) totalRounds = 5;
-            else if (toggleRounds10 != null && toggleRounds10.isOn) totalRounds = 10;
             else totalRounds = 1;
 
             currentRound = 1;
@@ -976,7 +973,6 @@ namespace DigitPark.Games
             toggleRounds1?.onValueChanged.RemoveAllListeners();
             toggleRounds3?.onValueChanged.RemoveAllListeners();
             toggleRounds5?.onValueChanged.RemoveAllListeners();
-            toggleRounds10?.onValueChanged.RemoveAllListeners();
             startGameButton?.onClick.RemoveAllListeners();
             if (cardButtons != null)
                 foreach (var btn in cardButtons)

@@ -501,7 +501,9 @@ namespace DigitPark.Editor
             CreatePanelTitle(panel.transform);
             CreateGameSelector(panel.transform);
 
-            CreateSectionSeparator(panel.transform, 0.78f);
+            CreateRoundsSelector(panel.transform);
+
+            CreateSectionSeparator(panel.transform, 0.70f);
 
             // HERO: Potential Earnings (center)
             CreateHeroEarnings(panel.transform);
@@ -650,12 +652,16 @@ namespace DigitPark.Editor
             templateRT.anchorMin = new Vector2(0, 0);
             templateRT.anchorMax = new Vector2(1, 0);
             templateRT.pivot = new Vector2(0.5f, 1);
-            templateRT.sizeDelta = new Vector2(0, 250);
+            templateRT.sizeDelta = new Vector2(0, 280); // 5 items × 50px + padding
 
             Image templateBg = templateObj.AddComponent<Image>();
             templateBg.color = new Color(0.1f, 0.08f, 0.13f, 0.98f);
 
             ScrollRect scrollRect = templateObj.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.scrollSensitivity = 30f;
 
             // Viewport
             GameObject viewportObj = new GameObject("Viewport");
@@ -664,13 +670,12 @@ namespace DigitPark.Editor
             RectTransform viewportRT = viewportObj.AddComponent<RectTransform>();
             viewportRT.anchorMin = Vector2.zero;
             viewportRT.anchorMax = Vector2.one;
-            viewportRT.sizeDelta = Vector2.zero;
+            viewportRT.offsetMin = new Vector2(0, 2);
+            viewportRT.offsetMax = new Vector2(0, -2);
 
-            Image viewportImg = viewportObj.AddComponent<Image>();
-            viewportImg.color = Color.white;
-
-            Mask viewportMask = viewportObj.AddComponent<Mask>();
-            viewportMask.showMaskGraphic = false;
+            viewportObj.AddComponent<RectMask2D>();
+            Image vpImage = viewportObj.AddComponent<Image>();
+            vpImage.color = new Color(0, 0, 0, 0); // transparent, needed for RectMask2D
 
             // Content
             GameObject contentObj = new GameObject("Content");
@@ -680,7 +685,7 @@ namespace DigitPark.Editor
             contentRT.anchorMin = new Vector2(0, 1);
             contentRT.anchorMax = new Vector2(1, 1);
             contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.sizeDelta = new Vector2(0, 0);
+            contentRT.sizeDelta = new Vector2(0, 28); // TMP_Dropdown calculates actual height
 
             // Item template
             GameObject itemObj = new GameObject("Item");
@@ -758,6 +763,9 @@ namespace DigitPark.Editor
             dropdown.value = 0;
             dropdown.RefreshShownValue();
 
+            // DropdownScrollFix: reparents dropdown list to root Canvas to avoid clipping
+            dropdownObj.AddComponent<DigitPark.UI.DropdownScrollFix>();
+
             templateObj.SetActive(false);
 
             // --- View Details Button ---
@@ -793,7 +801,7 @@ namespace DigitPark.Editor
             vdTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI vdText = vdTextObj.AddComponent<TextMeshProUGUI>();
-            vdText.text = "View Details";
+            vdText.text = "Game Info";
             vdText.fontSize = FontSizes.Body;
             vdText.color = TEXT_GOLD;
             vdText.fontStyle = FontStyles.Bold;
@@ -840,6 +848,75 @@ namespace DigitPark.Editor
 
         #endregion
 
+        #region Rounds Selector
+
+        private static void CreateRoundsSelector(Transform parent)
+        {
+            GameObject container = new GameObject("RoundsSelectorContainer");
+            container.transform.SetParent(parent, false);
+
+            RectTransform rt = container.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 0.71f);
+            rt.anchorMax = new Vector2(1, 0.78f);
+            rt.sizeDelta = Vector2.zero;
+            rt.offsetMin = new Vector2(20, 0);
+            rt.offsetMax = new Vector2(-20, 0);
+
+            HorizontalLayoutGroup hlg = container.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 12;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.padding = new RectOffset(8, 8, 4, 4);
+
+            // 3 round buttons: 1, 3, 5 — default "3" selected
+            CreateRoundButton("Rounds1Button", container.transform, "1", false);
+            CreateRoundButton("Rounds3Button", container.transform, "3", true);
+            CreateRoundButton("Rounds5Button", container.transform, "5", false);
+        }
+
+        private static void CreateRoundButton(string name, Transform parent, string text, bool selected)
+        {
+            GameObject go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.AddComponent<RectTransform>();
+
+            Image bg = go.AddComponent<Image>();
+            bg.color = selected ? BUTTON_GOLD : CARD_BG;
+
+            Outline outline = go.AddComponent<Outline>();
+            outline.effectColor = selected ? new Color(1f, 0.84f, 0f, 0.6f) : new Color(1f, 1f, 1f, 0.1f);
+            outline.effectDistance = new Vector2(1, -1);
+
+            Button btn = go.AddComponent<Button>();
+            var c = btn.colors;
+            c.normalColor = Color.white;
+            c.highlightedColor = new Color(1, 1, 1, 0.9f);
+            c.pressedColor = new Color(0.75f, 0.75f, 0.75f);
+            btn.colors = c;
+
+            GameObject textGO = new GameObject(name + "Text");
+            textGO.transform.SetParent(go.transform, false);
+            RectTransform textRT = textGO.AddComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.sizeDelta = Vector2.zero;
+
+            TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = 28;
+            tmp.color = selected ? Color.white : new Color(0.6f, 0.6f, 0.7f);
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 18;
+            tmp.fontSizeMax = 28;
+        }
+
+        #endregion
+
         #region Hero Earnings
 
         private static void CreateHeroEarnings(Transform parent)
@@ -849,7 +926,7 @@ namespace DigitPark.Editor
 
             RectTransform heroRT = hero.AddComponent<RectTransform>();
             heroRT.anchorMin = new Vector2(0, 0.50f);
-            heroRT.anchorMax = new Vector2(1, 0.77f);
+            heroRT.anchorMax = new Vector2(1, 0.70f);
             heroRT.sizeDelta = Vector2.zero;
             heroRT.offsetMin = new Vector2(5, 5);
             heroRT.offsetMax = new Vector2(-5, -5);
@@ -1769,7 +1846,7 @@ namespace DigitPark.Editor
             titleRT.offsetMax = new Vector2(-60, -5);
 
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
-            titleText.text = "Select Game";
+            titleText.text = "Game Info";
             titleText.fontSize = FontSizes.H4;
             titleText.color = TEXT_GOLD;
             titleText.fontStyle = FontStyles.Bold;
@@ -1778,54 +1855,68 @@ namespace DigitPark.Editor
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
             titleText.fontSizeMax = FontSizes.H4;
 
-            // === Games Grid Container ===
-            GameObject gridContainer = new GameObject("GameCardsContainer");
-            gridContainer.transform.SetParent(panel.transform, false);
+            // === Game Icon (large, centered) ===
+            GameObject iconObj = new GameObject("GameIcon");
+            iconObj.transform.SetParent(panel.transform, false);
+            var iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = new Vector2(0.2f, 0.55f);
+            iconRT.anchorMax = new Vector2(0.8f, 0.88f);
+            iconRT.offsetMin = Vector2.zero;
+            iconRT.offsetMax = Vector2.zero;
+            var iconImg = iconObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.color = Color.white;
+            // Load default game icon
+            Sprite defaultIcon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Games/DigitRushIcon.png");
+            if (defaultIcon != null) iconImg.sprite = defaultIcon;
 
-            RectTransform gridRT = gridContainer.AddComponent<RectTransform>();
-            gridRT.anchorMin = new Vector2(0, 0.12f);
-            gridRT.anchorMax = new Vector2(1, 0.9f);
-            gridRT.sizeDelta = Vector2.zero;
-            gridRT.offsetMin = new Vector2(10, 5);
-            gridRT.offsetMax = new Vector2(-10, -5);
+            // === Game Name ===
+            GameObject nameObj = new GameObject("GameName");
+            nameObj.transform.SetParent(panel.transform, false);
+            var nameRT = nameObj.AddComponent<RectTransform>();
+            nameRT.anchorMin = new Vector2(0, 0.42f);
+            nameRT.anchorMax = new Vector2(1, 0.55f);
+            nameRT.offsetMin = new Vector2(20, 0);
+            nameRT.offsetMax = new Vector2(-20, 0);
+            var nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
+            nameTMP.text = "DIGIT RUSH";
+            nameTMP.fontSize = FontSizes.H2;
+            nameTMP.fontStyle = FontStyles.Bold;
+            nameTMP.color = TEXT_GOLD;
+            nameTMP.alignment = TextAlignmentOptions.Center;
+            nameTMP.enableAutoSizing = true;
+            nameTMP.fontSizeMin = FontSizes.AutoMinTitle;
+            nameTMP.fontSizeMax = FontSizes.H2;
 
-            GridLayoutGroup gridLayout = gridContainer.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(280, 130);
-            gridLayout.spacing = new Vector2(12, 12);
-            gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
-            gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
-            gridLayout.childAlignment = TextAnchor.UpperCenter;
-            gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gridLayout.constraintCount = 2;
-            gridLayout.padding = new RectOffset(8, 8, 8, 8);
+            // === Game Description ===
+            GameObject descObj = new GameObject("GameDescription");
+            descObj.transform.SetParent(panel.transform, false);
+            var descRT = descObj.AddComponent<RectTransform>();
+            descRT.anchorMin = new Vector2(0, 0.18f);
+            descRT.anchorMax = new Vector2(1, 0.42f);
+            descRT.offsetMin = new Vector2(25, 0);
+            descRT.offsetMax = new Vector2(-25, 0);
+            var descTMP = descObj.AddComponent<TextMeshProUGUI>();
+            descTMP.text = "Type the numbers that appear on screen as fast as you can.\n\n" +
+                           "<color=#FFD700>Duration:</color> 60 seconds\n" +
+                           "<color=#FFD700>Scoring:</color> Speed + accuracy\n" +
+                           "<color=#FFD700>Tip:</color> Focus on accuracy first!";
+            descTMP.fontSize = FontSizes.Body;
+            descTMP.fontStyle = FontStyles.Normal;
+            descTMP.color = TEXT_PRIMARY;
+            descTMP.alignment = TextAlignmentOptions.Left;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = FontSizes.AutoMinSmall;
+            descTMP.fontSizeMax = FontSizes.Body;
+            descTMP.enableWordWrapping = true;
 
-            // === Create 5 game cards ===
-            string[] gameIds = { "DigitRush", "FlashTap", "MemoryPairs", "OddOneOut", "QuickMath" };
-            string[] gameNames = { "Digit Rush", "Flash Tap", "Memory Pairs", "Odd One Out", "Quick Math" };
-            string[] gameDescs = {
-                "Type numbers as fast as you can!",
-                "Tap the correct targets quickly!",
-                "Match pairs from memory!",
-                "Find the different item!",
-                "Solve math problems fast!"
-            };
-            string[] gameIcons = { "DigitRushIcon", "FlashTapIcon", "MemoryPairsIcon", "OddOneOutIcon", "QuickMathIcon" };
-
-            for (int i = 0; i < gameIds.Length; i++)
-            {
-                CreateModalGameCard(gridContainer.transform, gameIds[i], gameNames[i], gameDescs[i], gameIcons[i]);
-            }
-
-            // === CognitiveSprint card (full width, last) ===
-            CreateModalCognitiveSprintCard(gridContainer.transform);
-
-            // === Confirm button ===
+            // === Close button (bottom, replaces Confirm) ===
             GameObject confirmObj = new GameObject("ConfirmGameButton");
             confirmObj.transform.SetParent(panel.transform, false);
 
             RectTransform confirmRT = confirmObj.AddComponent<RectTransform>();
-            confirmRT.anchorMin = new Vector2(0.15f, 0.01f);
-            confirmRT.anchorMax = new Vector2(0.85f, 0.1f);
+            confirmRT.anchorMin = new Vector2(0.15f, 0.03f);
+            confirmRT.anchorMax = new Vector2(0.85f, 0.14f);
             confirmRT.sizeDelta = Vector2.zero;
 
             Image confirmBg = confirmObj.AddComponent<Image>();
@@ -1836,7 +1927,6 @@ namespace DigitPark.Editor
             confirmColors.normalColor = BUTTON_GOLD;
             confirmColors.highlightedColor = GOLD_LIGHT;
             confirmColors.pressedColor = GOLD_DARK;
-            confirmColors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
             confirmBtn.colors = confirmColors;
             confirmBtn.targetGraphic = confirmBg;
 
@@ -1853,7 +1943,7 @@ namespace DigitPark.Editor
             confirmTextRT.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI confirmText = confirmTextObj.AddComponent<TextMeshProUGUI>();
-            confirmText.text = "Confirm";
+            confirmText.text = "GOT IT";
             confirmText.fontSize = FontSizes.Body;
             confirmText.color = BG_DARK;
             confirmText.fontStyle = FontStyles.Bold;
@@ -1861,7 +1951,13 @@ namespace DigitPark.Editor
             confirmText.enableAutoSizing = true;
             confirmText.fontSizeMin = FontSizes.AutoMinBody;
             confirmText.fontSizeMax = FontSizes.Body;
-            confirmText.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Container for game cards (hidden, used by runtime)
+            GameObject cardsContainer = new GameObject("GameCardsContainer");
+            cardsContainer.transform.SetParent(panel.transform, false);
+            var ccRT = cardsContainer.AddComponent<RectTransform>();
+            ccRT.sizeDelta = Vector2.zero;
+            cardsContainer.SetActive(false);
 
             // Hidden by default
             modal.SetActive(false);
@@ -2195,6 +2291,11 @@ namespace DigitPark.Editor
             // Action Button
             AssignRef(so, "findOpponentButton", FindBtn("findopponentbutton"));
             AssignRef(so, "findOpponentText", FindText("findopponenttext"));
+
+            // Rounds Selection
+            AssignRef(so, "rounds1Button", FindBtn("rounds1button"));
+            AssignRef(so, "rounds3Button", FindBtn("rounds3button"));
+            AssignRef(so, "rounds5Button", FindBtn("rounds5button"));
 
             // Cognitive Sprint
             AssignRef(so, "cognitiveSprintButton", FindBtn("gamecard_cognitivesprint"));

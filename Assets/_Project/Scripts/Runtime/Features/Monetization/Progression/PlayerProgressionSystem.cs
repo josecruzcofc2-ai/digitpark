@@ -221,7 +221,10 @@ namespace DigitPark.Progression
                     OnLevelUp?.Invoke(_currentLevel);
 
                     if (_levelRewards.TryGetValue(_currentLevel, out LevelReward reward))
+                    {
+                        GrantLevelReward(reward);
                         OnRewardUnlocked?.Invoke(reward);
+                    }
                 }
                 else
                 {
@@ -232,37 +235,65 @@ namespace DigitPark.Progression
 
         #endregion
 
+        /// <summary>
+        /// Grants currency rewards for level-up milestones
+        /// </summary>
+        private void GrantLevelReward(LevelReward reward)
+        {
+            var currency = DigitPark.Monetization.CurrencyManager.Instance;
+            if (currency == null) return;
+
+            // Grant coins if reward type is DigitCoins
+            if (reward.type == RewardType.DigitCoins && int.TryParse(reward.rewardId, out int coinAmount))
+            {
+                currency.AddCoins(coinAmount);
+                AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", coinAmount, "level_reward");
+            }
+
+            // Economy Rebalance: grant bonus gems on milestone levels
+            if (reward.bonusGems > 0)
+            {
+                currency.AddGems(reward.bonusGems);
+                AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", reward.bonusGems, "level_reward_gems");
+            }
+
+            Debug.Log($"[PlayerProgression] Granted reward: {reward.name}" +
+                      (reward.bonusGems > 0 ? $" + {reward.bonusGems} DG" : ""));
+        }
+
         #region Level Rewards
 
         private void InitializeLevelRewards()
         {
+            // Economy Rebalance: bonusGems added to milestone levels (~225 DG lifetime)
             _levelRewards = new Dictionary<int, LevelReward>
             {
                 // Early levels
-                { 5,   new LevelReward("Avatar: Beginner",      RewardType.Avatar,      "avatar_beginner") },
-                { 10,  new LevelReward("Title: Novice",         RewardType.Title,       "title_novice") },
-                { 15,  new LevelReward("500 DigitCoins",        RewardType.DigitCoins,  "500") },
+                // Economy Rebalance: DG es premium — drip muy pequeño en milestones (~67 DG lifetime total)
+                { 5,   new LevelReward("Avatar: Beginner",      RewardType.Avatar,      "avatar_beginner",  3) },
+                { 10,  new LevelReward("Title: Novice",         RewardType.Title,       "title_novice",     3) },
+                { 15,  new LevelReward("500 DigitCoins",        RewardType.DigitCoins,  "500",              2) },
                 { 20,  new LevelReward("Avatar: Player",        RewardType.Avatar,      "avatar_player") },
-                { 25,  new LevelReward("Title: Player",         RewardType.Title,       "title_player") },
+                { 25,  new LevelReward("Title: Player",         RewardType.Title,       "title_player",     5) },
 
                 // Mid levels
-                { 30,  new LevelReward("1000 DigitCoins",       RewardType.DigitCoins,  "1000") },
+                { 30,  new LevelReward("1000 DigitCoins",       RewardType.DigitCoins,  "1000",             3) },
                 { 40,  new LevelReward("Avatar: Veteran",       RewardType.Avatar,      "avatar_veteran") },
-                { 50,  new LevelReward("Title: Veteran",        RewardType.Title,       "title_veteran") },
+                { 50,  new LevelReward("Title: Veteran",        RewardType.Title,       "title_veteran",    7) },
                 { 60,  new LevelReward("Frame: Bronze",         RewardType.Frame,       "frame_bronze") },
-                { 75,  new LevelReward("2000 DigitCoins",       RewardType.DigitCoins,  "2000") },
+                { 75,  new LevelReward("2000 DigitCoins",       RewardType.DigitCoins,  "2000",             8) },
 
                 // High levels
-                { 100, new LevelReward("Title: Centurion",      RewardType.Title,       "title_centurion") },
+                { 100, new LevelReward("Title: Centurion",      RewardType.Title,       "title_centurion",  10) },
                 { 105, new LevelReward("Avatar: Centurion",     RewardType.Avatar,      "avatar_centurion") },
                 { 125, new LevelReward("Frame: Silver",         RewardType.Frame,       "frame_silver") },
-                { 150, new LevelReward("5000 DigitCoins",       RewardType.DigitCoins,  "5000") },
+                { 150, new LevelReward("5000 DigitCoins",       RewardType.DigitCoins,  "5000",             8) },
                 { 175, new LevelReward("Title: Expert",         RewardType.Title,       "title_expert") },
-                { 200, new LevelReward("Avatar: Expert",        RewardType.Avatar,      "avatar_expert") },
+                { 200, new LevelReward("Avatar: Expert",        RewardType.Avatar,      "avatar_expert",    10) },
 
                 // Elite levels
                 { 250, new LevelReward("Frame: Gold",           RewardType.Frame,       "frame_gold") },
-                { 300, new LevelReward("Title: Master",         RewardType.Title,       "title_master") },
+                { 300, new LevelReward("Title: Master",         RewardType.Title,       "title_master",     8) },
                 { 350, new LevelReward("Avatar: Master",        RewardType.Avatar,      "avatar_master") },
                 { 400, new LevelReward("Frame: Platinum",       RewardType.Frame,       "frame_platinum") },
                 { 450, new LevelReward("Title: Grand Master",   RewardType.Title,       "title_grandmaster") },
@@ -272,7 +303,7 @@ namespace DigitPark.Progression
                 { 490, new LevelReward("Frame: Diamond",        RewardType.Frame,       "frame_diamond") },
                 { 500, new LevelReward("Title: Legend",         RewardType.Title,       "title_legend") },
 
-                // Economy Rebalance V55 — Micro-rewards to fill gaps (~1,400 DC extra lifetime)
+                // Micro-rewards to fill gaps (~1,400 DC extra lifetime)
                 { 65,  new LevelReward("50 DigitCoins",         RewardType.DigitCoins,  "50") },
                 { 70,  new LevelReward("75 DigitCoins",         RewardType.DigitCoins,  "75") },
                 { 85,  new LevelReward("100 DigitCoins",        RewardType.DigitCoins,  "100") },
@@ -449,12 +480,14 @@ namespace DigitPark.Progression
         public string name;
         public RewardType type;
         public string rewardId;
+        public int bonusGems; // Economy Rebalance: gem drip on level milestones
 
-        public LevelReward(string name, RewardType type, string rewardId)
+        public LevelReward(string name, RewardType type, string rewardId, int bonusGems = 0)
         {
             this.name = name;
             this.type = type;
             this.rewardId = rewardId;
+            this.bonusGems = bonusGems;
         }
     }
 

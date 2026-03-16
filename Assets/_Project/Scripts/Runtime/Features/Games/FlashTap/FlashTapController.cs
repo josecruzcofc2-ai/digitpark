@@ -40,7 +40,6 @@ namespace DigitPark.Games
         [SerializeField] private Toggle toggleRounds1;
         [SerializeField] private Toggle toggleRounds3;
         [SerializeField] private Toggle toggleRounds5;
-        [SerializeField] private Toggle toggleRounds10;
         [SerializeField] private Button startGameButton;
 
         [Header("Flash Tap - Feedback")]
@@ -101,7 +100,9 @@ namespace DigitPark.Games
             }
             else
             {
-                totalAttempts = config?.rounds ?? 5;
+                // Read rounds from GameContext for competitive modes
+                var ctx = GameSessionManager.Instance?.CurrentContext;
+                totalAttempts = (ctx != null && ctx.Rounds > 0) ? ctx.Rounds : (config?.rounds ?? 5);
                 StartGameWithCountdown();
             }
         }
@@ -128,9 +129,6 @@ namespace DigitPark.Games
                 toggleRounds3.onValueChanged.AddListener(v => { if (v) SetRadio(toggleRounds3); });
             if (toggleRounds5 != null)
                 toggleRounds5.onValueChanged.AddListener(v => { if (v) SetRadio(toggleRounds5); });
-            if (toggleRounds10 != null)
-                toggleRounds10.onValueChanged.AddListener(v => { if (v) SetRadio(toggleRounds10); });
-
             if (startGameButton != null)
                 startGameButton.onClick.AddListener(OnStartGameClicked);
 
@@ -143,7 +141,6 @@ namespace DigitPark.Games
             if (active != toggleRounds1 && toggleRounds1 != null) { toggleRounds1.isOn = false; UpdateToggleVisual(toggleRounds1, false); }
             if (active != toggleRounds3 && toggleRounds3 != null) { toggleRounds3.isOn = false; UpdateToggleVisual(toggleRounds3, false); }
             if (active != toggleRounds5 && toggleRounds5 != null) { toggleRounds5.isOn = false; UpdateToggleVisual(toggleRounds5, false); }
-            if (active != toggleRounds10 && toggleRounds10 != null) { toggleRounds10.isOn = false; UpdateToggleVisual(toggleRounds10, false); }
             UpdateToggleVisual(active, true);
         }
 
@@ -178,7 +175,7 @@ namespace DigitPark.Games
             // Leer rondas del toggle activo
             if (toggleRounds1 != null && toggleRounds1.isOn) totalAttempts = 1;
             else if (toggleRounds3 != null && toggleRounds3.isOn) totalAttempts = 3;
-            else if (toggleRounds10 != null && toggleRounds10.isOn) totalAttempts = 10;
+            else if (toggleRounds5 != null && toggleRounds5.isOn) totalAttempts = 5;
             else totalAttempts = 5;
 
             if (settingsPanel != null) settingsPanel.SetActive(false);

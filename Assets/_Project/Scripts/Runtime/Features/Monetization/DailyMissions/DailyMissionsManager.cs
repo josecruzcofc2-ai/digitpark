@@ -74,7 +74,8 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField] private int dailyMissionsRequired = 3;
-        [SerializeField] private int dailyBonusReward = 75; // Economy Rebalance V55: was 100
+        [SerializeField] private int dailyBonusReward = 100; // Economy Rebalance
+        [SerializeField] private int dailyBonusGems = 1; // Economy Rebalance: 1 DG/día max — premium currency drip lento
         [SerializeField] private float refreshCheckInterval = 60f;
 
         // Neon theme colors
@@ -1193,20 +1194,30 @@ namespace DigitPark.Managers
             if (CurrencyManager.Instance != null)
             {
                 CurrencyManager.Instance.GrantMissionReward(0, dailyBonusReward);
+                // Economy Rebalance: gem drip from daily missions
+                if (dailyBonusGems > 0)
+                    CurrencyManager.Instance.AddGems(dailyBonusGems);
             }
             else
             {
                 int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
                 PlayerPrefs.SetInt("PlayerCoins", currentCoins + dailyBonusReward);
+                if (dailyBonusGems > 0)
+                {
+                    int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
+                    PlayerPrefs.SetInt("PlayerGems", currentGems + dailyBonusGems);
+                }
                 PlayerPrefs.Save();
             }
 
             ShowRewardPopup("digitcoins", dailyBonusReward);
 
             AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", dailyBonusReward, "daily_missions_bonus");
+            if (dailyBonusGems > 0)
+                AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", dailyBonusGems, "daily_missions_bonus_gems");
 
             UpdateDailyProgress();
-            Debug.Log($"[DailyMissions] Claimed daily bonus: {dailyBonusReward} DigitCoins");
+            Debug.Log($"[DailyMissions] Claimed daily bonus: {dailyBonusReward} DC + {dailyBonusGems} DG");
         }
 
         #endregion

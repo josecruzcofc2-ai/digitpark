@@ -205,37 +205,13 @@ namespace DigitPark.Editor
                 "Coins1000CostText", "Coins1000RewardText",
                 new Color(1f, 0.7f, 0.1f), new Color(1f, 0.7f, 0.1f, 0.4f));
 
-            // === GEM BETS ===
-            CreateSectionDivider("GemBetsHeader", content.transform, "DIGITGEMS", GEM_COLOR, "GemsSectionText");
-
-            CreateBetCard("Gems10BetOption", content.transform,
-                "10 DigitGems", "Win 20", null,
-                "Gems10CostText", "Gems10RewardText",
-                GEM_COLOR, GEM_GLOW);
-
-            CreateBetCard("Gems50BetOption", content.transform,
-                "50 DigitGems", "Win 100", null,
-                "Gems50CostText", "Gems50RewardText",
-                GEM_COLOR, GEM_GLOW);
-
-            CreateBetCard("Gems100BetOption", content.transform,
-                "100 DigitGems", "Win 200", null,
-                "Gems100CostText", "Gems100RewardText",
-                GEM_COLOR, GEM_GLOW);
-
-            CreateBetCard("Gems250BetOption", content.transform,
-                "250 DigitGems", "Win 500", "x2",
-                "Gems250CostText", "Gems250RewardText",
-                GEM_COLOR, GEM_GLOW);
-
-            CreateBetCard("Gems500BetOption", content.transform,
-                "500 DigitGems", "Win 1,000", "x2",
-                "Gems500CostText", "Gems500RewardText",
-                PURPLE, PURPLE_GLOW);
-
             // === CUSTOM BET ===
             CreateSectionDivider("CustomBetsHeader", content.transform, "CUSTOM", CUSTOM_TEAL, "CustomSectionText");
             CreateCustomBetSection(content.transform);
+
+            // === ROUNDS SELECTION ===
+            CreateSpacer(content.transform, 8f);
+            CreateRoundsSelector(content.transform);
 
             // === SPACER + ACTION BUTTONS ===
             CreateSpacer(content.transform, 8f);
@@ -540,7 +516,6 @@ namespace DigitPark.Editor
             trHLG.childControlHeight = true;
 
             CreateToggleButton("CustomCoinsToggle", toggleRow.transform, "DIGITCOINS", COIN_COLOR, true, "CoinsToggleText");
-            CreateToggleButton("CustomGemsToggle", toggleRow.transform, "DIGITGEMS", GEM_COLOR, false, "GemsToggleText");
 
             // === ROW 2: Stepper (minus, input, plus) ===
             GameObject inputRow = CreateUI("InputRow", card.transform);
@@ -749,6 +724,88 @@ namespace DigitPark.Editor
             lrLE.flexibleWidth = 1;
             lrLE.preferredHeight = 1;
             lineR.AddComponent<Image>().color = new Color(color.r, color.g, color.b, 0.3f);
+        }
+
+        // ==================== ROUNDS SELECTOR ====================
+
+        private static void CreateRoundsSelector(Transform parent)
+        {
+            GameObject roundsPanel = CreateUI("RoundsPanel", parent);
+            var rpLE = roundsPanel.AddComponent<LayoutElement>();
+            rpLE.preferredHeight = 90;
+
+            var rpVLG = roundsPanel.AddComponent<VerticalLayoutGroup>();
+            rpVLG.childAlignment = TextAnchor.MiddleCenter;
+            rpVLG.spacing = 8;
+            rpVLG.childForceExpandWidth = true;
+            rpVLG.childForceExpandHeight = false;
+            rpVLG.childControlWidth = true;
+            rpVLG.childControlHeight = true;
+            rpVLG.padding = new RectOffset(12, 12, 6, 6);
+
+            Image rpBg = roundsPanel.AddComponent<Image>();
+            rpBg.color = CARD_BG;
+            AddOutline(roundsPanel, CYAN_GLOW, 1);
+
+            // Label
+            GameObject label = CreateUI("RoundsLabel", roundsPanel.transform);
+            var labelLE = label.AddComponent<LayoutElement>();
+            labelLE.preferredHeight = 28;
+            TextMeshProUGUI labelTmp = label.AddComponent<TextMeshProUGUI>();
+            labelTmp.text = "ROUNDS";
+            labelTmp.fontSize = FontSizes.Body;
+            labelTmp.color = NEON_CYAN;
+            labelTmp.fontStyle = FontStyles.Bold;
+            labelTmp.alignment = TextAlignmentOptions.Center;
+            labelTmp.enableAutoSizing = true;
+            labelTmp.fontSizeMin = FontSizes.AutoMinBody;
+            labelTmp.fontSizeMax = FontSizes.Body;
+
+            // Buttons row
+            GameObject row = CreateUI("RoundsButtonsRow", roundsPanel.transform);
+            var rowLE = row.AddComponent<LayoutElement>();
+            rowLE.preferredHeight = 44;
+
+            var hlg = row.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 14;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+
+            // 3 round buttons: 1, 3, 5 — default "3" selected
+            CreateRoundsButton("Rounds1Button", row.transform, "1", false, NEON_CYAN, "Rounds1ButtonText");
+            CreateRoundsButton("Rounds3Button", row.transform, "3", true, NEON_CYAN, "Rounds3ButtonText");
+            CreateRoundsButton("Rounds5Button", row.transform, "5", false, NEON_CYAN, "Rounds5ButtonText");
+        }
+
+        private static void CreateRoundsButton(string name, Transform parent,
+            string text, bool selected, Color accentColor, string textGoName)
+        {
+            GameObject go = CreateUI(name, parent);
+            Image bg = go.AddComponent<Image>();
+            bg.color = selected ? new Color(accentColor.r, accentColor.g, accentColor.b, 0.3f) : TOGGLE_OFF_BG;
+            AddOutline(go, new Color(accentColor.r, accentColor.g, accentColor.b, selected ? 0.6f : 0.2f), 1);
+
+            Button btn = go.AddComponent<Button>();
+            var c = btn.colors;
+            c.normalColor = Color.white;
+            c.highlightedColor = new Color(1, 1, 1, 0.9f);
+            c.pressedColor = new Color(0.8f, 0.8f, 0.8f);
+            btn.colors = c;
+
+            GameObject textGO = CreateUI(textGoName, go.transform);
+            SetFullStretch(textGO.GetComponent<RectTransform>());
+            TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            tmp.fontSize = FontSizes.Body;
+            tmp.color = selected ? accentColor : TEXT_SECONDARY;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinBody;
+            tmp.fontSizeMax = FontSizes.Body;
         }
 
         // ==================== ACTION BUTTONS ====================

@@ -19,14 +19,13 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager para la escena de recompensas diarias.
-    /// Sistema de login rewards con racha de dias consecutivos.
+    /// Sistema de login rewards con ciclo de 7 dias (Modelo 2: sin reset por dias perdidos).
     /// </summary>
     public class DailyRewardsManager : MonoBehaviour
     {
         [Header("UI - Header")]
         [SerializeField] private Button backButton;
         [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI streakText;
         [SerializeField] private TextMeshProUGUI nextResetText;
 
         [Header("UI - Current Day")]
@@ -47,8 +46,6 @@ namespace DigitPark.Managers
 
         [Header("UI - Bonus Info")]
         [SerializeField] private TextMeshProUGUI bonusInfoText;
-        [SerializeField] private Slider streakProgressBar;
-        [SerializeField] private TextMeshProUGUI streakBonusText;
 
         [Header("UI - Claim Animation (Clash Royale style)")]
         [SerializeField] private GameObject claimAnimationPanel;
@@ -59,14 +56,8 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI celebTitleText;
         [SerializeField] private Image claimRewardIcon;
         [SerializeField] private TextMeshProUGUI claimRewardText;
-        [SerializeField] private TextMeshProUGUI streakInfoText;
         [SerializeField] private ParticleSystem claimParticles;
         [SerializeField] private Button continueButton;
-
-        [Header("UI - Streak Milestone")]
-        [SerializeField] private GameObject milestonePanel;
-        [SerializeField] private TextMeshProUGUI milestoneText;
-        [SerializeField] private TextMeshProUGUI milestoneBonusText;
 
         [Header("Reward Icons")]
         [SerializeField] private Sprite coinIcon;
@@ -82,8 +73,6 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField] private List<DailyRewardConfig> rewards = new List<DailyRewardConfig>();
-        [SerializeField] private int[] streakMilestones = { 7, 14, 30 };
-        [SerializeField] private int[] milestoneBonuses = { 100, 250, 500 };
 
         // Neon theme colors
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
@@ -104,7 +93,6 @@ namespace DigitPark.Managers
 
         // State
         private List<GameObject> spawnedDayItems = new List<GameObject>();
-        private int currentStreak = 0;
         private int currentDayInCycle = 0;
         private bool canClaimToday = false;
         private DateTime lastClaimDate;
@@ -195,8 +183,15 @@ namespace DigitPark.Managers
 
                 if (rewardsContainer == null)
                 {
-                    Transform grid = r.Find("DaysGrid");
-                    if (grid != null) rewardsContainer = grid;
+                    // ScrollView layout — cards inside Viewport/Content
+                    Transform scrollContent = r.Find("RewardsScrollView/Viewport/Content");
+                    if (scrollContent != null) rewardsContainer = scrollContent;
+                    else
+                    {
+                        // Direct children fallback
+                        Transform rewardsPanel = r.Find("RewardsScrollView");
+                        if (rewardsPanel != null) rewardsContainer = rewardsPanel;
+                    }
                 }
 
                 if (claimButton == null)
@@ -214,12 +209,6 @@ namespace DigitPark.Managers
                 {
                     Transform timer = r.Find("TimerBar/TimeText");
                     if (timer != null) nextResetText = timer.GetComponent<TextMeshProUGUI>();
-                }
-
-                if (streakText == null)
-                {
-                    Transform st = r.Find("StreakPanel/TopRow/StreakCount");
-                    if (st != null) streakText = st.GetComponent<TextMeshProUGUI>();
                 }
 
                 if (backButton == null)
@@ -258,6 +247,7 @@ namespace DigitPark.Managers
             {
                 "coins" => L("reward_coins"),
                 "gems" => L("reward_gems"),
+                "mixed" => L("reward_coins"), // Mixed shows coin name; gems shown separately
                 "xp" => L("reward_xp"),
                 _ => type
             };
@@ -272,6 +262,7 @@ namespace DigitPark.Managers
             {
                 "coins" => COIN_COLOR,
                 "gems" => GEM_COLOR,
+                "mixed" => COIN_COLOR,
                 "xp" => XP_COLOR,
                 _ => Color.white
             };
@@ -282,15 +273,18 @@ namespace DigitPark.Managers
             // Default rewards if not set in inspector
             if (rewards.Count == 0)
             {
+                // Economy Rebalance: ascending curve + gem drip D7 only
+                // DG is premium — only 3 DG/week to keep earn time 2-3 months for cheapest item
+                // Weekly total: 1,825 DC + 3 DG
                 rewards = new List<DailyRewardConfig>
                 {
-                    new DailyRewardConfig { day = 1, type = "coins", amount = 50, name = "reward_coins" },
-                    new DailyRewardConfig { day = 2, type = "coins", amount = 75, name = "reward_coins" },
-                    new DailyRewardConfig { day = 3, type = "coins", amount = 200, name = "reward_coins" },
-                    new DailyRewardConfig { day = 4, type = "coins", amount = 100, name = "reward_coins" },
-                    new DailyRewardConfig { day = 5, type = "coins", amount = 125, name = "reward_coins" },
-                    new DailyRewardConfig { day = 6, type = "coins", amount = 150, name = "reward_coins" },
-                    new DailyRewardConfig { day = 7, type = "coins", amount = 500, name = "reward_coins", isSpecial = true },
+                    new DailyRewardConfig { day = 1, type = "coins",  amount = 50,  name = "reward_coins" },
+                    new DailyRewardConfig { day = 2, type = "coins",  amount = 75,  name = "reward_coins" },
+                    new DailyRewardConfig { day = 3, type = "coins",  amount = 125, name = "reward_coins" },
+                    new DailyRewardConfig { day = 4, type = "coins",  amount = 175, name = "reward_coins" },
+                    new DailyRewardConfig { day = 5, type = "coins",  amount = 250, name = "reward_coins" },
+                    new DailyRewardConfig { day = 6, type = "coins",  amount = 400, name = "reward_coins" },
+                    new DailyRewardConfig { day = 7, type = "mixed",  amount = 750, gemsAmount = 3, name = "reward_mixed", isSpecial = true },
                 };
 
                 daysInCycle = rewards.Count;
@@ -299,7 +293,6 @@ namespace DigitPark.Managers
 
         private void LoadProgress()
         {
-            currentStreak = PlayerPrefs.GetInt("DailyRewards_Streak", 0);
             currentDayInCycle = PlayerPrefs.GetInt("DailyRewards_CurrentDay", 0);
 
             string lastClaimStr = PlayerPrefs.GetString("DailyRewards_LastClaim", "");
@@ -315,7 +308,6 @@ namespace DigitPark.Managers
 
         private void SaveProgress()
         {
-            PlayerPrefs.SetInt("DailyRewards_Streak", currentStreak);
             PlayerPrefs.SetInt("DailyRewards_CurrentDay", currentDayInCycle);
             PlayerPrefs.SetString("DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
             PlayerPrefs.Save();
@@ -337,7 +329,6 @@ namespace DigitPark.Managers
             {
                 var updates = new Dictionary<string, object>
                 {
-                    { "dailyRewardStreak", currentStreak },
                     { "dailyRewardDay", currentDayInCycle },
                     { "dailyRewardLastClaim", lastClaimDate.ToString("yyyy-MM-dd") }
                 };
@@ -374,25 +365,14 @@ namespace DigitPark.Managers
 
                 bool changed = false;
 
-                // Restore streak — use Firebase if higher
-                if (data.ContainsKey("dailyRewardStreak"))
-                {
-                    int fbStreak = Convert.ToInt32(data["dailyRewardStreak"]);
-                    if (fbStreak > currentStreak)
-                    {
-                        currentStreak = fbStreak;
-                        changed = true;
-                    }
-                }
-
                 // Restore day in cycle
                 if (data.ContainsKey("dailyRewardDay"))
                 {
                     int fbDay = Convert.ToInt32(data["dailyRewardDay"]);
-                    // Only use Firebase day if we also took the streak
-                    if (changed)
+                    if (fbDay > currentDayInCycle)
                     {
                         currentDayInCycle = fbDay;
+                        changed = true;
                     }
                 }
 
@@ -415,11 +395,10 @@ namespace DigitPark.Managers
                 if (changed)
                 {
                     // Save merged values back to PlayerPrefs
-                    PlayerPrefs.SetInt("DailyRewards_Streak", currentStreak);
                     PlayerPrefs.SetInt("DailyRewards_CurrentDay", currentDayInCycle);
                     PlayerPrefs.SetString("DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
                     PlayerPrefs.Save();
-                    Debug.Log($"[DailyRewards] Firebase restore merged — streak:{currentStreak}, day:{currentDayInCycle}, lastClaim:{lastClaimDate:yyyy-MM-dd}");
+                    Debug.Log($"[DailyRewards] Firebase restore merged — day:{currentDayInCycle}, lastClaim:{lastClaimDate:yyyy-MM-dd}");
                 }
                 else
                 {
@@ -435,10 +414,27 @@ namespace DigitPark.Managers
         private void SetupUI()
         {
             if (claimAnimationPanel) claimAnimationPanel.SetActive(false);
-            if (milestonePanel) milestonePanel.SetActive(false);
 
-            UpdateStreakDisplay();
             UpdateNextResetTimer();
+
+            // Auto-scroll to center current day card
+            StartCoroutine(ScrollToCurrentDay());
+        }
+
+        private System.Collections.IEnumerator ScrollToCurrentDay()
+        {
+            yield return null; // Wait one frame for layout
+
+            if (rewardsContainer == null) yield break;
+            var scrollRect = rewardsContainer.GetComponentInParent<ScrollRect>();
+            if (scrollRect == null) yield break;
+
+            int totalCards = rewardsContainer.childCount;
+            if (totalCards <= 1) yield break;
+
+            // 1 = top (day 1), 0 = bottom (day 7)
+            float targetNormalized = 1f - ((float)currentDayInCycle / (totalCards - 1));
+            scrollRect.verticalNormalizedPosition = Mathf.Clamp01(targetNormalized);
         }
 
         private void SetupListeners()
@@ -494,42 +490,10 @@ namespace DigitPark.Managers
             DateTime today = DateTime.UtcNow.Date;
             DateTime lastClaim = lastClaimDate.Date;
 
-            // Check if already claimed today
+            // Model 2: No reset on missed days — user continues from where they left off
             if (lastClaim == today)
             {
                 canClaimToday = false;
-            }
-            // Check if missed a day (streak broken)
-            else if (lastClaim < today.AddDays(-1) && currentStreak > 0)
-            {
-                int daysMissed = (today - lastClaim).Days - 1;
-
-                // Economy Rebalance V55 — Streak Shield: 1 free use every 14 days
-                bool shieldUsed = false;
-                if (daysMissed == 1) // Only protect 1-day gaps
-                {
-                    string lastShieldDate = PlayerPrefs.GetString("StreakShield_LastUsed", "");
-                    bool shieldAvailable = true;
-                    if (!string.IsNullOrEmpty(lastShieldDate) && DateTime.TryParse(lastShieldDate, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime lastUsed))
-                    {
-                        shieldAvailable = (DateTime.UtcNow - lastUsed).TotalDays >= 14;
-                    }
-                    if (shieldAvailable)
-                    {
-                        PlayerPrefs.SetString("StreakShield_LastUsed", DateTime.UtcNow.ToString("yyyy-MM-dd"));
-                        PlayerPrefs.Save();
-                        shieldUsed = true;
-                        Debug.Log("[DailyRewards] Streak Shield activated! Streak preserved.");
-                    }
-                }
-                if (!shieldUsed)
-                {
-                    // Streak broken, reset
-                    currentStreak = 0;
-                    currentDayInCycle = 0;
-                    Debug.Log("[DailyRewards] Streak broken, resetting");
-                }
-                canClaimToday = true;
             }
             else
             {
@@ -543,133 +507,6 @@ namespace DigitPark.Managers
             UpdateCurrentDayDisplay();
         }
 
-        private void UpdateStreakDisplay()
-        {
-            if (streakText)
-            {
-                streakText.text = L("dr_streak", currentStreak);
-            }
-
-            if (streakProgressBar)
-            {
-                int nextMilestone = GetNextMilestone();
-                streakProgressBar.maxValue = nextMilestone;
-                float targetValue = currentStreak % nextMilestone;
-                DOTween.Kill(streakProgressBar);
-                streakProgressBar.DOValue(targetValue, 0.6f).SetEase(Ease.OutQuad);
-
-                // Crear/actualizar milestone markers
-                UpdateStreakMilestoneMarkers(nextMilestone);
-            }
-
-            if (streakBonusText)
-            {
-                int nextMilestone = GetNextMilestone();
-                int bonusIndex = GetMilestoneIndex(nextMilestone);
-                if (bonusIndex >= 0 && bonusIndex < milestoneBonuses.Length)
-                {
-                    streakBonusText.text = L("dr_bonus_info", nextMilestone, milestoneBonuses[bonusIndex]);
-                }
-            }
-        }
-
-        private void UpdateStreakMilestoneMarkers(int maxMilestone)
-        {
-            if (streakProgressBar == null) return;
-            var barRT = streakProgressBar.GetComponent<RectTransform>();
-            if (barRT == null) return;
-
-            foreach (int milestone in streakMilestones)
-            {
-                if (milestone > maxMilestone) break;
-
-                string markerName = $"StreakMarker_{milestone}";
-                var existing = streakProgressBar.transform.Find(markerName);
-
-                GameObject markerObj;
-                if (existing != null)
-                {
-                    markerObj = existing.gameObject;
-                }
-                else
-                {
-                    markerObj = new GameObject(markerName);
-                    markerObj.transform.SetParent(streakProgressBar.transform, false);
-
-                    var mRT = markerObj.AddComponent<RectTransform>();
-                    float normalizedPos = (float)milestone / maxMilestone;
-                    mRT.anchorMin = new Vector2(normalizedPos, 0.5f);
-                    mRT.anchorMax = new Vector2(normalizedPos, 0.5f);
-                    mRT.sizeDelta = new Vector2(22, 22);
-                    mRT.anchoredPosition = Vector2.zero;
-
-                    var mImg = markerObj.AddComponent<Image>();
-
-                    var labelObj = new GameObject("Label");
-                    labelObj.transform.SetParent(markerObj.transform, false);
-                    var labelRT = labelObj.AddComponent<RectTransform>();
-                    labelRT.anchorMin = Vector2.zero;
-                    labelRT.anchorMax = Vector2.one;
-                    labelRT.offsetMin = Vector2.zero;
-                    labelRT.offsetMax = Vector2.zero;
-
-                    var labelText = labelObj.AddComponent<TMPro.TextMeshProUGUI>();
-                    labelText.text = milestone.ToString();
-                    labelText.fontSize = FontSizes.Body;
-                    labelText.fontStyle = TMPro.FontStyles.Bold;
-                    labelText.alignment = TMPro.TextAlignmentOptions.Center;
-
-                    // Label de recompensa debajo del marker
-                    int mIdx = GetMilestoneIndex(milestone);
-                    if (mIdx >= 0 && mIdx < milestoneBonuses.Length)
-                    {
-                        var rewardLabelObj = new GameObject("RewardLabel");
-                        rewardLabelObj.transform.SetParent(markerObj.transform, false);
-                        var rlRT = rewardLabelObj.AddComponent<RectTransform>();
-                        rlRT.anchorMin = new Vector2(0.5f, 0f);
-                        rlRT.anchorMax = new Vector2(0.5f, 0f);
-                        rlRT.pivot = new Vector2(0.5f, 1f);
-                        rlRT.sizeDelta = new Vector2(40, 12);
-                        rlRT.anchoredPosition = new Vector2(0, -3);
-
-                        var rlText = rewardLabelObj.AddComponent<TMPro.TextMeshProUGUI>();
-                        rlText.text = $"+{milestoneBonuses[mIdx]}";
-                        rlText.fontSize = FontSizes.Body;
-                        rlText.color = new Color(0.4f, 0.8f, 1f); // GEM_COLOR
-                        rlText.alignment = TMPro.TextAlignmentOptions.Center;
-                        rlText.overflowMode = TMPro.TextOverflowModes.Overflow;
-                    }
-                }
-
-                // Actualizar color basado en si se alcanzo
-                bool reached = currentStreak >= milestone;
-                var img = markerObj.GetComponent<Image>();
-                if (img != null)
-                    img.color = reached ? GOLD : new Color(0.15f, 0.15f, 0.2f);
-
-                var txt = markerObj.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-                if (txt != null)
-                    txt.color = reached ? new Color(0.05f, 0.05f, 0.08f) : new Color(0.5f, 0.5f, 0.5f);
-            }
-        }
-
-        private int GetNextMilestone()
-        {
-            foreach (int milestone in streakMilestones)
-            {
-                if (currentStreak < milestone) return milestone;
-            }
-            return streakMilestones[streakMilestones.Length - 1];
-        }
-
-        private int GetMilestoneIndex(int milestone)
-        {
-            for (int i = 0; i < streakMilestones.Length; i++)
-            {
-                if (streakMilestones[i] == milestone) return i;
-            }
-            return -1;
-        }
 
         private void UpdateNextResetTimer()
         {
@@ -772,8 +609,7 @@ namespace DigitPark.Managers
                 CreateFallbackDayCards();
             }
 
-            // Update Day7Card if it exists (UIBuilder creates it as "Day7Card" canvas sibling)
-            UpdateDay7Card();
+            // Day7 is now part of the ScrollView — no separate UpdateDay7Card needed
 
             // Add PulseAnimation to current day card (subtle breathing effect)
             AddPulseToCurrentDayCard();
@@ -790,7 +626,6 @@ namespace DigitPark.Managers
         {
             for (int i = 0; i < rewardsContainer.childCount && i < rewards.Count; i++)
             {
-                if (rewards[i].isSpecial) continue;
 
                 var card = rewardsContainer.GetChild(i).gameObject;
                 bool isClaimed = i < currentDayInCycle;
@@ -846,7 +681,8 @@ namespace DigitPark.Managers
                 var giftIcon = card.transform.Find("GiftIcon")?.GetComponent<Image>();
                 if (giftIcon != null)
                 {
-                    if (isClaimed) giftIcon.color = new Color(1f, 1f, 1f, 0.4f);
+                    if (isClaimed) giftIcon.color = new Color(1f, 1f, 1f, 0.5f);
+                    else if (!isToday && !isClaimed) giftIcon.color = new Color(0.5f, 0.5f, 0.5f, 0.6f);
                     else giftIcon.color = Color.white;
                 }
 
@@ -858,12 +694,8 @@ namespace DigitPark.Managers
                 var existingLock = card.transform.Find("LockedOverlay");
                 if (existingLock != null) Destroy(existingLock.gameObject);
 
-                // Add correct status overlay
-                if (isClaimed)
-                {
-                    CreateCheckOverlay(card.transform);
-                }
-                else if (isToday)
+                // Add correct status overlay — no check overlay, animations handle claimed state
+                if (isToday)
                 {
                     CreateTodayBadge(card.transform);
                 }
@@ -1640,6 +1472,7 @@ namespace DigitPark.Managers
             {
                 "coins" => coinIconNeon != null ? coinIconNeon : coinIcon,
                 "gems" => gemIconNeon != null ? gemIconNeon : gemIcon,
+                "mixed" => coinIconNeon != null ? coinIconNeon : coinIcon, // Mixed uses coin icon
                 "xp" => xpIcon,
                 _ => mysteryIcon
             };
@@ -1663,8 +1496,7 @@ namespace DigitPark.Managers
             // Capture before state update for animation
             int claimedDayIndex = currentDayInCycle;
 
-            // Update state
-            currentStreak++;
+            // Update state — Model 2: advance day, cycle resets at end of week
             currentDayInCycle = (currentDayInCycle + 1) % rewards.Count;
             lastClaimDate = DateTime.Now;
             canClaimToday = false;
@@ -1681,9 +1513,6 @@ namespace DigitPark.Managers
             // Show claim animation (pass original day index before increment)
             ShowClaimAnimation(todayReward, claimedDayIndex);
 
-            // Check for milestone
-            CheckMilestone();
-
             // Analytics: track daily reward claimed
             AnalyticsService.Instance?.LogDailyRewardClaimed(
                 currentDayInCycle,
@@ -1699,15 +1528,14 @@ namespace DigitPark.Managers
 #endif
 
             // Update UI
-            UpdateStreakDisplay();
             UpdateClaimButton();
             UpdateCurrentDayDisplay();
             AnimateClaimTransition(claimedDayIndex);
 
             // Achievement tracking
-            AchievementService.Instance?.OnDailyRewardClaimed(currentStreak);
+            AchievementService.Instance?.OnDailyRewardClaimed(currentDayInCycle);
 
-            Debug.Log($"[DailyRewards] Claimed day {currentDayInCycle}, streak: {currentStreak}");
+            Debug.Log($"[DailyRewards] Claimed day {currentDayInCycle}");
         }
 
         private void LaunchCoinFly(string rewardType)
@@ -1753,6 +1581,26 @@ namespace DigitPark.Managers
                     }
                     break;
 
+                case "mixed":
+                    // Economy Rebalance: mixed rewards grant both coins and gems
+                    if (currencyMgr != null)
+                    {
+                        currencyMgr.AddCoins(reward.amount);
+                        if (reward.gemsAmount > 0)
+                            currencyMgr.AddGems(reward.gemsAmount);
+                    }
+                    else
+                    {
+                        int currentCoins2 = PlayerPrefs.GetInt("PlayerCoins", 0);
+                        PlayerPrefs.SetInt("PlayerCoins", currentCoins2 + reward.amount);
+                        if (reward.gemsAmount > 0)
+                        {
+                            int currentGems2 = PlayerPrefs.GetInt("PlayerGems", 0);
+                            PlayerPrefs.SetInt("PlayerGems", currentGems2 + reward.gemsAmount);
+                        }
+                    }
+                    break;
+
                 case "xp":
                     int currentXP = PlayerPrefs.GetInt("PlayerXP", 0);
                     PlayerPrefs.SetInt("PlayerXP", currentXP + reward.amount);
@@ -1768,6 +1616,14 @@ namespace DigitPark.Managers
                 reward.amount,
                 "daily_reward"
             );
+            if (reward.type == "mixed" && reward.gemsAmount > 0)
+            {
+                AnalyticsService.Instance?.LogVirtualCurrencyEarned(
+                    "gems",
+                    reward.gemsAmount,
+                    "daily_reward_gems"
+                );
+            }
         }
 
         /// <summary>
@@ -1790,8 +1646,6 @@ namespace DigitPark.Managers
                 claimRewardText.text = $"+{reward.amount} {GetRewardTypeName(reward.type)}";
             if (claimRewardIcon)
                 claimRewardIcon.sprite = GetRewardIcon(reward.type);
-            if (streakInfoText)
-                streakInfoText.text = L("dr_streak", currentStreak);
             if (celebTitleText)
                 celebTitleText.text = L("dr_reward_obtained");
 
@@ -1947,69 +1801,10 @@ namespace DigitPark.Managers
             }
         }
 
-        private void CheckMilestone()
-        {
-            foreach (int milestone in streakMilestones)
-            {
-                if (currentStreak == milestone)
-                {
-                    int bonusIndex = GetMilestoneIndex(milestone);
-                    if (bonusIndex >= 0 && bonusIndex < milestoneBonuses.Length)
-                    {
-                        int bonus = milestoneBonuses[bonusIndex];
-                        ApplyMilestoneBonus(bonus);
-                        ShowMilestonePopup(milestone, bonus);
-                    }
-                    break;
-                }
-            }
-        }
-
-        private void ApplyMilestoneBonus(int coinBonus)
-        {
-            // Milestones now give DC (economy rebalance V55 — DG is purchase-only)
-            if (CurrencyManager.Instance != null)
-            {
-                CurrencyManager.Instance.AddCoins(coinBonus);
-            }
-            else
-            {
-                Debug.LogWarning("[DailyRewards] CurrencyManager not available, using PlayerPrefs fallback");
-                int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                PlayerPrefs.SetInt("PlayerCoins", currentCoins + coinBonus);
-                PlayerPrefs.Save();
-            }
-
-            // Analytics
-            AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitcoins", coinBonus, "daily_milestone");
-
-            Debug.Log($"[DailyRewards] Milestone bonus applied: +{coinBonus} DC");
-        }
-
-        private void ShowMilestonePopup(int days, int bonus)
-        {
-            if (milestonePanel)
-            {
-                if (milestoneText)
-                {
-                    milestoneText.text = L("dr_milestone_days", days);
-                }
-
-                if (milestoneBonusText)
-                {
-                    milestoneBonusText.text = L("dr_milestone_bonus_gems", bonus);
-                }
-
-                AnimatePanelIn(milestonePanel);
-            }
-        }
-
         private void OnContinueClicked()
         {
             if (claimAnimationPanel && claimAnimationPanel.activeSelf)
                 DismissClaimAnimation();
-            if (milestonePanel && milestonePanel.activeSelf)
-                AnimatePanelOut(milestonePanel);
         }
 
         /// <summary>
@@ -2130,8 +1925,9 @@ namespace DigitPark.Managers
     public class DailyRewardConfig
     {
         public int day;
-        public string type;
+        public string type; // "coins", "mixed"
         public int amount;
+        public int gemsAmount; // DG bonus for mixed-type rewards
         public string name;
         public bool isSpecial;
     }

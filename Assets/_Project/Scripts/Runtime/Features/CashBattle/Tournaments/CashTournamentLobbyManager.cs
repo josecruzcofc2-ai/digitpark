@@ -7,6 +7,7 @@ using TMPro;
 using DigitPark.Games;
 using DigitPark.Localization;
 using DigitPark.Services;
+using DigitPark.UI;
 using DigitPark.UI.Items;
 
 namespace DigitPark.Managers

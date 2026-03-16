@@ -514,12 +514,12 @@ namespace DigitPark.Editor
 
             // LAYOUT: 5 cards full-width apilados verticalmente
             // Distribucion uniforme con spacing entre cards
-            // Card 0 (top):    0.82 - 1.00 (18%)
-            // Card 1:          0.62 - 0.80 (18%)
-            // Card 2:          0.42 - 0.60 (18%)
+            // Card 0 (top):    0.79 - 0.97 (18%)  — 3% gap below header
+            // Card 1:          0.60 - 0.78 (18%)
+            // Card 2:          0.41 - 0.59 (18%)
             // Card 3:          0.22 - 0.40 (18%)
-            // Card 4 (bottom): 0.02 - 0.20 (18%)
-            // Gaps de 2% entre cards
+            // Card 4 (bottom): 0.03 - 0.21 (18%)
+            // Gaps de 1% entre cards
             CreateBattles1v1Card(cardsContainer.transform);
             CreateTournamentsCashCard(cardsContainer.transform);
             CreateWalletCard(cardsContainer.transform);
@@ -535,8 +535,8 @@ namespace DigitPark.Editor
                 "BATTLES 1v1",
                 "Challenge other players in real time",
                 "",
-                new Vector2(0, 0.82f),
-                new Vector2(1, 1f));
+                new Vector2(0, 0.79f),
+                new Vector2(1, 0.97f));
 
             AddCardIconImage(card.transform, "Battles1v1Icon");
         }
@@ -547,8 +547,8 @@ namespace DigitPark.Editor
                 "CASH TOURNAMENTS",
                 "Compete for big prizes",
                 "",
-                new Vector2(0, 0.62f),
-                new Vector2(1, 0.80f));
+                new Vector2(0, 0.60f),
+                new Vector2(1, 0.78f));
 
             AddCardIconImage(card.transform, "TournamentsCashIcon");
         }
@@ -559,8 +559,8 @@ namespace DigitPark.Editor
                 "MY WALLET",
                 "Deposit and withdraw funds",
                 "",
-                new Vector2(0, 0.42f),
-                new Vector2(1, 0.60f));
+                new Vector2(0, 0.41f),
+                new Vector2(1, 0.59f));
 
             AddCardIconImage(card.transform, "WalletCashIcon");
         }
@@ -574,7 +574,7 @@ namespace DigitPark.Editor
                 new Vector2(0, 0.22f),
                 new Vector2(1, 0.40f));
 
-            AddCardIconImage(card.transform, "CashProfileIcon");
+            AddCardIconImage(card.transform, "CashProfileIcon", 240f);
         }
 
         private static void CreateHistoryCard(Transform parent)
@@ -583,10 +583,10 @@ namespace DigitPark.Editor
                 "HISTORY",
                 "Your battles and results",
                 "",
-                new Vector2(0, 0.02f),
-                new Vector2(1, 0.20f));
+                new Vector2(0, 0.03f),
+                new Vector2(1, 0.21f));
 
-            AddCardIconImage(card.transform, "HistoryCashIcon");
+            AddCardIconImage(card.transform, "HistoryCashIcon", 240f);
         }
 
         /// <summary>
@@ -763,7 +763,7 @@ namespace DigitPark.Editor
         /// <summary>
         /// Añade icono de imagen al card (carga desde Assets)
         /// </summary>
-        private static void AddCardIconImage(Transform cardTransform, string iconName)
+        private static void AddCardIconImage(Transform cardTransform, string iconName, float sizeOverride = 200f)
         {
             GameObject iconObj = new GameObject("Icon");
             iconObj.transform.SetParent(cardTransform, false);
@@ -773,8 +773,10 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(0, 0.5f);
             rt.pivot = new Vector2(0, 0.5f);
 
-            rt.sizeDelta = new Vector2(200, 200);
-            rt.anchoredPosition = new Vector2(15, 0);
+            rt.sizeDelta = new Vector2(sizeOverride, sizeOverride);
+            // Compensar posición cuando el icono es más grande para mantener alineación visual
+            float offsetX = 15f - (sizeOverride - 200f) / 2f;
+            rt.anchoredPosition = new Vector2(offsetX, 0);
 
             // Imagen del icono
             Image iconImg = iconObj.AddComponent<Image>();

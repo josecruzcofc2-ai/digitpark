@@ -376,7 +376,7 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
             rt.anchoredPosition = new Vector2(0, -29);
-            rt.sizeDelta = new Vector2(0, 120);
+            rt.sizeDelta = new Vector2(0, 100);
 
             Image bg = header.AddComponent<Image>();
             bg.color = new Color(0, 0, 0, 0.3f);
@@ -527,7 +527,7 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
             rt.sizeDelta = new Vector2(-16, 480);  // Panel para 10 stats (5x2 grid)
-            rt.anchoredPosition = new Vector2(0, -105);
+            rt.anchoredPosition = new Vector2(0, -135);  // Below header (29+100+6)
 
             Image bg = panel.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -654,7 +654,7 @@ namespace DigitPark.Editor
             rt.anchorMax = new Vector2(1, 1);
             rt.pivot = new Vector2(0.5f, 1);
             rt.sizeDelta = new Vector2(-30, 60);
-            rt.anchoredPosition = new Vector2(0, -110);  // Debajo del header (105 + 5)
+            rt.anchoredPosition = new Vector2(0, -135);  // Below header (29+100+6)
 
             // Horizontal layout for filters
             HorizontalLayoutGroup hlg = panel.AddComponent<HorizontalLayoutGroup>();
@@ -720,7 +720,7 @@ namespace DigitPark.Editor
             svRT.anchorMin = new Vector2(0, 0);
             svRT.anchorMax = new Vector2(1, 1);
             svRT.offsetMin = new Vector2(10, 15);  // Bottom padding
-            svRT.offsetMax = new Vector2(-10, -180);  // Top offset (header 105 + gap 5 + filters 60 + gap 10)
+            svRT.offsetMax = new Vector2(-10, -205);  // Below filters (135+60+10)
 
             ScrollRect scroll = scrollView.AddComponent<ScrollRect>();
             scroll.horizontal = false;

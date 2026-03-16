@@ -77,7 +77,7 @@ namespace DigitPark.Games
         /// <summary>
         /// Inicia una sesion 1v1 de un solo juego
         /// </summary>
-        public void StartSingleGameSession(GameType gameType, string opponentId, string opponentName, decimal entryFee, string matchId)
+        public void StartSingleGameSession(GameType gameType, string opponentId, string opponentName, decimal entryFee, string matchId, int rounds = 1)
         {
             CurrentContext = new GameContext
             {
@@ -86,7 +86,8 @@ namespace DigitPark.Games
                 OpponentId = opponentId,
                 OpponentName = opponentName,
                 EntryFee = entryFee,
-                MatchId = matchId
+                MatchId = matchId,
+                Rounds = rounds
             };
 
             // Analytics
@@ -525,7 +526,7 @@ namespace DigitPark.Games
             {
                 case GameMode.Practice:
                     if (!result.Completed) return 0; // No reward if abandoned
-                    int reward = 15; // Base: complete practice
+                    int reward = 30; // Base: complete practice (Economy Rebalance)
                     // Bonus for beating personal best
                     if (result.Completed)
                     {
@@ -534,20 +535,20 @@ namespace DigitPark.Games
                         {
                             var stats = playerData.GetGameStats(CurrentContext.CurrentGame.Value.ToString());
                             if (stats != null && result.TotalTime < stats.bestTime)
-                                reward += 10; // Beat personal best bonus
+                                reward += 15; // Beat personal best bonus
                         }
                     }
                     return reward;
 
                 case GameMode.SingleGame:
                 case GameMode.Online:
-                    return result.Completed ? 25 : 10; // Win: +25, Loss: +10
+                    return result.Completed ? 50 : 15; // Win: +50, Loss: +15 (Economy Rebalance)
 
                 case GameMode.Tournament:
-                    return result.Completed ? 50 : 15; // Win: +50, Loss: +15
+                    return result.Completed ? 100 : 25; // Win: +100, Loss: +25 (Economy Rebalance)
 
                 case GameMode.CognitiveSprint:
-                    return result.Completed ? 30 : 10; // Win: +30, Loss: +10
+                    return result.Completed ? 60 : 15; // Win: +60, Loss: +15 (Economy Rebalance)
 
                 case GameMode.CashTournament:
                     return 0; // No coin rewards for cash tournaments (real money only)
