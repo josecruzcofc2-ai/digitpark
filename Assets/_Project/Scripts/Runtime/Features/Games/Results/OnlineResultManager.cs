@@ -5,6 +5,7 @@ using DigitPark.Games;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.UI;
+using DigitPark.Economy;
 
 namespace DigitPark.Managers
 {
@@ -156,6 +157,7 @@ namespace DigitPark.Managers
                 // Escuchar resultado del oponente
                 MatchmakingService.Instance.ListenForOpponentResult(matchId, (opponentScore, opponentTime) =>
                 {
+                    if (this == null) return;
                     isWaitingForOpponent = false;
 
                     // Crear resultado del oponente
@@ -168,7 +170,7 @@ namespace DigitPark.Managers
                     };
 
                     // Obtener nombre del oponente
-                    string opponentName = PlayerPrefs.GetString("CurrentOpponentId", "Oponente");
+                    string opponentName = PlayerPrefs.GetString("DP_CurrentOpponentId", "Oponente");
 
                     // Mostrar resultado
                     ShowResult(playerResult, opponentResult, playerName, opponentName);
@@ -240,7 +242,7 @@ namespace DigitPark.Managers
                     ResultPanelManager.Instance.ShowSprintSummary(sprintContext);
 
                     // Limpiar datos de partida
-                    PlayerPrefs.SetInt("IsOnlineMatch", 0);
+                    PlayerPrefs.SetInt("DP_IsOnlineMatch", 0);
                     PlayerPrefs.Save();
                 });
             }
@@ -317,13 +319,13 @@ namespace DigitPark.Managers
             var currency = DigitPark.Monetization.CurrencyManager.Instance;
             if (currency == null) return;
 
-            int dcReward = playerWon ? 15 : 5;
+            int dcReward = playerWon ? EconomyConstants.COINS_RANKED_WIN : EconomyConstants.COINS_RANKED_LOSS;
             string reason = playerWon ? "ranked_win" : "ranked_loss";
 
             // Perfect score bonus
             if (isPerfect && playerWon)
             {
-                dcReward += 25;
+                dcReward += EconomyConstants.COINS_RANKED_PERFECT_BONUS;
                 reason = "ranked_perfect_win";
             }
 
@@ -331,11 +333,11 @@ namespace DigitPark.Managers
             if (playerWon)
             {
                 string todayKey = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
-                string lastFWOTD = PlayerPrefs.GetString("FWOTD_LastDate", "");
+                string lastFWOTD = PlayerPrefs.GetString("DP_FWOTD_LastDate", "");
                 if (lastFWOTD != todayKey)
                 {
-                    dcReward += 50;
-                    PlayerPrefs.SetString("FWOTD_LastDate", todayKey);
+                    dcReward += EconomyConstants.COINS_RANKED_FWOTD_BONUS;
+                    PlayerPrefs.SetString("DP_FWOTD_LastDate", todayKey);
                     PlayerPrefs.Save();
                     reason = isPerfect ? "ranked_fwotd_perfect" : "ranked_fwotd";
                     Debug.Log("[OnlineResultManager] First Win of the Day! +50 DC bonus");
@@ -347,9 +349,9 @@ namespace DigitPark.Managers
             Debug.Log($"[OnlineResultManager] Ranked reward: +{dcReward} DC ({reason})");
 
             // Economy Rebalance V55 — Currency tutorial tooltip (shows once after first win)
-            if (playerWon && PlayerPrefs.GetInt("tutorial_currency_shown", 0) == 0)
+            if (playerWon && PlayerPrefs.GetInt("DP_tutorial_currency_shown", 0) == 0)
             {
-                PlayerPrefs.SetInt("tutorial_currency_shown", 1);
+                PlayerPrefs.SetInt("DP_tutorial_currency_shown", 1);
                 PlayerPrefs.Save();
                 // The tooltip is shown by the UI layer (OnlineResultPanelController checks this flag)
                 Debug.Log("[OnlineResultManager] Currency tutorial flag set — UI will show tooltip");
@@ -414,9 +416,9 @@ namespace DigitPark.Managers
             currentMatchId = null;
 
             // Limpiar datos de partida
-            PlayerPrefs.DeleteKey("CurrentMatchId");
-            PlayerPrefs.DeleteKey("CurrentOpponentId");
-            PlayerPrefs.SetInt("IsOnlineMatch", 0);
+            PlayerPrefs.DeleteKey("DP_CurrentMatchId");
+            PlayerPrefs.DeleteKey("DP_CurrentOpponentId");
+            PlayerPrefs.SetInt("DP_IsOnlineMatch", 0);
             PlayerPrefs.Save();
 
             ReturnToSelector();
@@ -443,7 +445,7 @@ namespace DigitPark.Managers
         /// </summary>
         public static bool IsOnlineMatch()
         {
-            return PlayerPrefs.GetInt("IsOnlineMatch", 0) == 1;
+            return PlayerPrefs.GetInt("DP_IsOnlineMatch", 0) == 1;
         }
 
         /// <summary>
@@ -451,7 +453,7 @@ namespace DigitPark.Managers
         /// </summary>
         public static string GetCurrentMatchId()
         {
-            return PlayerPrefs.GetString("CurrentMatchId", "");
+            return PlayerPrefs.GetString("DP_CurrentMatchId", "");
         }
 
         /// <summary>
@@ -459,7 +461,7 @@ namespace DigitPark.Managers
         /// </summary>
         public static string GetCurrentOpponentName()
         {
-            return PlayerPrefs.GetString("CurrentOpponentId", "Oponente");
+            return PlayerPrefs.GetString("DP_CurrentOpponentId", "Oponente");
         }
     }
 }

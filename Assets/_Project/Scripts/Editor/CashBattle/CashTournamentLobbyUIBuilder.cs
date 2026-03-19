@@ -332,6 +332,7 @@ namespace DigitPark.Editor
 
             RectTransform rt = safeArea.AddComponent<RectTransform>();
             SetFullStretch(rt);
+            safeArea.AddComponent<SafeAreaHandler>();
 
             return safeArea;
         }

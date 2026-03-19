@@ -91,7 +91,8 @@ namespace DigitPark.Services.Firebase
 
             if (PlayerPrefs.HasKey("SimLeaderboard"))
             {
-                string json = PlayerPrefs.GetString("SimLeaderboard");
+                string json = PlayerPrefs.GetString("SimLeaderboard", "");
+                if (string.IsNullOrEmpty(json)) return;
                 var wrapper = JsonUtility.FromJson<LeaderboardWrapper>(json);
                 if (wrapper?.entries != null)
                 {
@@ -837,6 +838,45 @@ namespace DigitPark.Services.Firebase
             }
 
             return scores;
+        }
+
+        #endregion
+
+        #region GDPR — Data Deletion
+
+        public async Task DeleteMatchHistory(string userId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try { await _databaseRef.Child("matchHistory").Child(userId).RemoveValueAsync(); }
+            catch (Exception ex) { Debug.LogWarning($"[Database] DeleteMatchHistory: {ex.Message}"); }
+        }
+
+        public async Task DeleteAchievements(string userId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try { await _databaseRef.Child("achievements").Child(userId).RemoveValueAsync(); }
+            catch (Exception ex) { Debug.LogWarning($"[Database] DeleteAchievements: {ex.Message}"); }
+        }
+
+        public async Task DeleteFriendsList(string userId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try { await _databaseRef.Child("friends").Child(userId).RemoveValueAsync(); }
+            catch (Exception ex) { Debug.LogWarning($"[Database] DeleteFriendsList: {ex.Message}"); }
+        }
+
+        public async Task DeleteNotifications(string userId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try { await _databaseRef.Child("notifications").Child(userId).RemoveValueAsync(); }
+            catch (Exception ex) { Debug.LogWarning($"[Database] DeleteNotifications: {ex.Message}"); }
+        }
+
+        public async Task DeleteTournamentHistory(string userId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try { await _databaseRef.Child("tournamentHistory").Child(userId).RemoveValueAsync(); }
+            catch (Exception ex) { Debug.LogWarning($"[Database] DeleteTournamentHistory: {ex.Message}"); }
         }
 
         #endregion

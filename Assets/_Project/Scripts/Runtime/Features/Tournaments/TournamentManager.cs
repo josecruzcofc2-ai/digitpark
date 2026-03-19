@@ -1119,8 +1119,8 @@ namespace DigitPark.Managers
             selectedTournament = tournament;
 
             // Guardar datos del torneo para cuando regrese del minijuego
-            PlayerPrefs.SetString("CurrentTournamentId", tournament.tournamentId);
-            PlayerPrefs.SetString("TournamentReturnScene", "Tournaments");
+            PlayerPrefs.SetString("DP_CurrentTournamentId", tournament.tournamentId);
+            PlayerPrefs.SetString("DP_TournamentReturnScene", "Tournaments");
             PlayerPrefs.Save();
 
             // Configurar modo competitivo (no práctica) antes de ir al selector

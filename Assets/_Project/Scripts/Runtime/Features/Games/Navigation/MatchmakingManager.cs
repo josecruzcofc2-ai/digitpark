@@ -119,6 +119,7 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
+            StopAllCoroutines();
             transform.DOKill();
 
             // Cleanup
@@ -160,13 +161,13 @@ namespace DigitPark.Managers
             try
             {
                 // Get player name
-                string playerName = PlayerPrefs.GetString("PlayerName", "Player");
-                string playerId = PlayerPrefs.GetString("PlayerId", "");
+                string playerName = PlayerPrefs.GetString("DP_PlayerName", "Player");
+                string playerId = PlayerPrefs.GetString("DP_PlayerId", "");
                 if (playerNameText != null)
                     playerNameText.text = playerName;
 
                 // Get player level
-                int level = PlayerPrefs.GetInt("PlayerLevel", 1);
+                int level = PlayerPrefs.GetInt("DP_PlayerLevel", 1);
                 if (playerLevelText != null)
                     playerLevelText.text = AutoLocalizer.Get("level_prefix", level);
 
@@ -435,11 +436,14 @@ namespace DigitPark.Managers
             {
                 if (isCognitiveSprint)
                 {
-                    MatchmakingService.Instance.FindCognitiveSprintMatch(
-                        CognitiveSprintManager.Instance?.SelectedGames,
-                        OnMatchFound,
-                        OnMatchFailed
-                    );
+                    if (CognitiveSprintManager.Instance?.SelectedGames?.Count > 0)
+                        MatchmakingService.Instance.FindCognitiveSprintMatch(
+                            CognitiveSprintManager.Instance.SelectedGames,
+                            OnMatchFound,
+                            OnMatchFailed
+                        );
+                    else
+                        OnMatchFailed("No games selected for Cognitive Sprint");
                 }
                 else
                 {
@@ -556,9 +560,9 @@ namespace DigitPark.Managers
                 if (opponentNameText != null)
                     opponentNameText.text = opponentInfo;
 
-                // Mock opponent level
+                // Real opponent level shown when available from matchmaking service
                 if (opponentLevelText != null)
-                    opponentLevelText.text = AutoLocalizer.Get("level_prefix", UnityEngine.Random.Range(1, 50));
+                    opponentLevelText.text = "---";
 
                 // Load opponent avatar
                 if (opponentAvatar != null)
@@ -619,6 +623,7 @@ namespace DigitPark.Managers
             }
 
             yield return new WaitForSeconds(0.5f);
+            if (this == null) yield break;
 
             // Show VS
             if (vsContainer != null)
@@ -626,6 +631,7 @@ namespace DigitPark.Managers
                 vsContainer.SetActive(true);
                 vsContainer.transform.localScale = Vector3.zero;
                 yield return StartCoroutine(AnimateVSPop());
+                if (this == null) yield break;
             }
 
             // Vibrate on mobile
@@ -634,6 +640,7 @@ namespace DigitPark.Managers
             #endif
 
             yield return new WaitForSeconds(1f);
+            if (this == null) yield break;
 
             // Start countdown
             StartCoroutine(CountdownSequence());
@@ -737,6 +744,7 @@ namespace DigitPark.Managers
                 // AudioManager.Instance?.PlaySFX("Countdown");
 
                 yield return new WaitForSeconds(1f);
+                if (this == null) yield break;
             }
 
             if (countdownText != null)
@@ -749,6 +757,7 @@ namespace DigitPark.Managers
                 getReadyText.text = "";
 
             yield return new WaitForSeconds(0.5f);
+            if (this == null) yield break;
 
             ResumeBattleCardAnimations();
             StartOnlineGame();
@@ -758,9 +767,9 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Matchmaking] Starting online game: {currentGameType}");
 
-            PlayerPrefs.SetString("CurrentMatchId", matchId);
-            PlayerPrefs.SetString("CurrentOpponentId", opponentId);
-            PlayerPrefs.SetInt("IsOnlineMatch", 1);
+            PlayerPrefs.SetString("DP_CurrentMatchId", matchId);
+            PlayerPrefs.SetString("DP_CurrentOpponentId", opponentId);
+            PlayerPrefs.SetInt("DP_IsOnlineMatch", 1);
             PlayerPrefs.Save();
 
             if (GameSessionManager.Instance != null)

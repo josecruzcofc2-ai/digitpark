@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -191,7 +193,9 @@ namespace DigitPark.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            GetOrAdd<Image>(bg).color = DARK_BG;
+            var bgImg = GetOrAdd<Image>(bg);
+            bgImg.color = Color.white; // ThemeApplier tints at runtime
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -210,6 +214,8 @@ namespace DigitPark.Editor
             tbRT.pivot = new Vector2(0.5f, 1);
             tbRT.anchoredPosition = new Vector2(0, -(1920f * (1f - TOPBAR_TOP))); // below top edge
             tbRT.sizeDelta = new Vector2(0, TOPBAR_HEIGHT);
+            // Safe area handler for Dynamic Island / notch devices
+            GetOrAdd<SafeAreaHandler>(topBar);
 
             // --- BackButton (left, 50x50) - Neon Cyan prefab ---
             // Remove old manual BackButton if exists
@@ -499,7 +505,7 @@ namespace DigitPark.Editor
                 plRT.offsetMin = new Vector2(10, 0);
                 plRT.offsetMax = new Vector2(-10, 0);
                 var plTMP = prizeLabel.AddComponent<TextMeshProUGUI>();
-                plTMP.text = "GRAND PRIZE";
+                plTMP.text = "Grand Prize";
                 plTMP.fontSize = FontSizes.H2;
                 plTMP.fontStyle = FontStyles.Bold;
                 plTMP.enableAutoSizing = true;

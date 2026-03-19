@@ -82,7 +82,7 @@ namespace DigitPark.Services
                     {
                         // Use anonymous ID for testing
                         currentUserId = SystemInfo.deviceUniqueIdentifier;
-                        currentUserName = PlayerPrefs.GetString("PlayerName", "Player");
+                        currentUserName = PlayerPrefs.GetString("DP_PlayerName", "Player");
                     }
 
                     Debug.Log($"[MatchmakingService] Initialized - User: {currentUserId}");
@@ -168,6 +168,21 @@ namespace DigitPark.Services
 
         private IEnumerator SearchForMatch(string gameKey, bool isCashMatch)
         {
+            // Guard: wait for Firebase to finish initializing (max 10s)
+            float initWait = 0f;
+            while (matchmakingQueueRef == null && initWait < 10f)
+            {
+                initWait += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            if (matchmakingQueueRef == null)
+            {
+                isSearching = false;
+                onMatchFailedCallback?.Invoke(AutoLocalizer.Get("matchmaking_error_connection"));
+                Debug.LogError("[MatchmakingService] Firebase not initialized after 10s — cannot search for match");
+                yield break;
+            }
+
             isSearching = true;
             currentGameKey = gameKey;
             float searchStartTime = Time.unscaledTime;

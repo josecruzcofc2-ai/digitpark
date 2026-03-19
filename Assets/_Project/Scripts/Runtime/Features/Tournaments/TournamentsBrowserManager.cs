@@ -30,6 +30,7 @@ namespace DigitPark.Managers
         [SerializeField] private TMP_Dropdown statusFilter;
         [SerializeField] private TMP_InputField searchInput;
         [SerializeField] private Button clearFiltersButton;
+        [SerializeField] private Button filterButton;  // TB-01: advanced filter button — Coming Soon
 
         [Header("UI - Tabs")]
         [SerializeField] private Button allTournamentsTab;
@@ -92,6 +93,15 @@ namespace DigitPark.Managers
         {
             DOTween.Kill(transform);
             CancelInvoke();
+            // TB-04: Remove listeners to prevent leaks on scene unload
+            backButton?.onClick.RemoveAllListeners();
+            createTournamentButton?.onClick.RemoveAllListeners();
+            clearFiltersButton?.onClick.RemoveAllListeners();
+            loadMoreButton?.onClick.RemoveAllListeners();
+            filterButton?.onClick.RemoveAllListeners();
+            allTournamentsTab?.onClick.RemoveAllListeners();
+            myTournamentsTab?.onClick.RemoveAllListeners();
+            featuredTab?.onClick.RemoveAllListeners();
         }
 
         private void SetupUI()
@@ -112,6 +122,9 @@ namespace DigitPark.Managers
             if (createTournamentButton) createTournamentButton.onClick.AddListener(OnCreateTournamentClicked);
             if (clearFiltersButton) clearFiltersButton.onClick.AddListener(ClearFilters);
             if (loadMoreButton) loadMoreButton.onClick.AddListener(LoadMoreTournaments);
+            // TB-01: FilterButton shows Coming Soon toast — advanced filters not yet implemented
+            if (filterButton) filterButton.onClick.AddListener(() =>
+                InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info"));
 
             // Tabs
             if (allTournamentsTab) allTournamentsTab.onClick.AddListener(() => SwitchTab(TournamentBrowserTab.All));
@@ -356,7 +369,7 @@ namespace DigitPark.Managers
         {
             if (tournamentsContainer == null || tournamentsContainer.childCount == 0) return;
 
-            var seq = DOTween.Sequence();
+            var seq = DOTween.Sequence().SetLink(gameObject);
             for (int i = 0; i < tournamentsContainer.childCount; i++)
             {
                 var child = tournamentsContainer.GetChild(i);

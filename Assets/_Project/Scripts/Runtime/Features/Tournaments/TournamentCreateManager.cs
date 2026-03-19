@@ -385,6 +385,9 @@ namespace DigitPark.Managers
         {
             if (isCreating) return;
 
+            // TC-01: Snapshot all UI values into currentConfig before creating
+            ReadConfigFromUI();
+
             // Validate
             if (string.IsNullOrWhiteSpace(currentConfig.name))
             {
@@ -393,6 +396,40 @@ namespace DigitPark.Managers
             }
 
             StartCreation();
+        }
+
+        /// <summary>
+        /// TC-01: Reads all current UI field values into currentConfig.
+        /// Ensures creation uses the latest user selections, not just reactive updates.
+        /// </summary>
+        private void ReadConfigFromUI()
+        {
+            if (tournamentNameInput != null)
+                currentConfig.name = tournamentNameInput.text.Trim();
+
+            if (gameTypeDropdown != null && gameTypeDropdown.options.Count > 0)
+                currentConfig.gameType = gameTypeDropdown.options[gameTypeDropdown.value].text;
+
+            if (entryFeeDropdown != null && entryFeeDropdown.value < entryFeeOptions.Length)
+                currentConfig.entryFee = entryFeeOptions[entryFeeDropdown.value];
+
+            if (maxPlayersDropdown != null && maxPlayersDropdown.value < maxPlayersOptions.Length)
+                currentConfig.maxPlayers = maxPlayersOptions[maxPlayersDropdown.value];
+
+            if (roundsDropdown != null)
+                currentConfig.rounds = roundsDropdown.value + 1; // value 0 = 1 round, etc.
+
+            if (startImmediatelyToggle != null)
+                currentConfig.startImmediately = startImmediatelyToggle.isOn;
+
+            if (privateToggle != null)
+                currentConfig.isPrivate = privateToggle.isOn;
+
+            if (privateCodeInput != null && currentConfig.isPrivate)
+                currentConfig.privateCode = privateCodeInput.text.Trim();
+
+            if (allowSpectatorsToggle != null)
+                currentConfig.allowSpectators = allowSpectatorsToggle.isOn;
         }
 
         private void StartCreation()

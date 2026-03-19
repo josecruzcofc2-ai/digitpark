@@ -86,10 +86,10 @@ namespace DigitPark.Managers
         [SerializeField] private ConfirmPanelUI selfExclusionConfirmPanel;
 
         // URLs Legales
-        private const string URL_TERMS = "https://docs.triumpharcade.com/terms-of-use";
-        private const string URL_PRIVACY = "https://docs.triumpharcade.com/privacy-policy";
-        private const string URL_RESPONSIBLE_GAMING = "https://docs.triumpharcade.com/responsible-gaming-policy";
-        private const string URL_TRIUMPH_TERMS = "https://docs.triumpharcade.com/terms-of-use";
+        private const string URL_TERMS = "https://digitpark.com/terms";
+        private const string URL_PRIVACY = "https://digitpark.com/privacy";
+        private const string URL_RESPONSIBLE_GAMING = "https://digitpark.com/responsible-gaming";
+        private const string URL_TRIUMPH_TERMS = "https://digitpark.com/terms";
 
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
@@ -208,7 +208,7 @@ namespace DigitPark.Managers
             // 0: English, 1: Español, 2: Français, 3: Português, 4: Deutsch
 
             // Establecer el valor actual
-            int currentIndex = PlayerPrefs.GetInt("Language", 0);
+            int currentIndex = PlayerPrefs.GetInt("DP_Language", 0);
 
             if (LocalizationManager.Instance != null)
             {
@@ -471,7 +471,7 @@ namespace DigitPark.Managers
             else
             {
                 // Guardar en PlayerPrefs si LocalizationManager no existe
-                PlayerPrefs.SetInt("Language", index);
+                PlayerPrefs.SetInt("DP_Language", index);
                 PlayerPrefs.Save();
             }
         }
@@ -991,7 +991,8 @@ namespace DigitPark.Managers
                     }
                     else
                     {
-                        createTournamentsButtonText.text = $"{AutoLocalizer.Get("create_tournaments_title")} - {PremiumManager.PRICE_CREATE_TOURNAMENTS}";
+                        string ctPrice = PremiumManager.Instance?.GetProductPrice(PremiumProduct.CreateTournaments) ?? PremiumManager.PRICE_CREATE_TOURNAMENTS;
+                        createTournamentsButtonText.text = $"{AutoLocalizer.Get("create_tournaments_title")} - {ctPrice}";
                     }
                 }
             }
@@ -1008,7 +1009,8 @@ namespace DigitPark.Managers
                     }
                     else
                     {
-                        tournamentBundleButtonText.text = $"{AutoLocalizer.Get("tournament_bundle_title")} - {PremiumManager.PRICE_TOURNAMENT_BUNDLE}";
+                        string tbPrice = PremiumManager.Instance?.GetProductPrice(PremiumProduct.TournamentBundle) ?? PremiumManager.PRICE_TOURNAMENT_BUNDLE;
+                        tournamentBundleButtonText.text = $"{AutoLocalizer.Get("tournament_bundle_title")} - {tbPrice}";
                     }
                 }
             }

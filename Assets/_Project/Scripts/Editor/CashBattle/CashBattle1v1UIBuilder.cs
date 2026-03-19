@@ -336,7 +336,7 @@ namespace DigitPark.Editor
                 rect.anchorMax = new Vector2(0, 0.5f);
                 rect.pivot = new Vector2(0, 0.5f);
                 rect.anchoredPosition = new Vector2(20, 0);
-                rect.sizeDelta = new Vector2(50, 50);
+                rect.sizeDelta = new Vector2(88, 88);
 
                 // Assign BackIconGold sprite to Icon child
                 Sprite backIcon = AssetDatabase.LoadAssetAtPath<Sprite>(BACK_ICON_GOLD_PATH);
@@ -359,7 +359,7 @@ namespace DigitPark.Editor
                 rt.anchorMin = new Vector2(0, 0.5f);
                 rt.anchorMax = new Vector2(0, 0.5f);
                 rt.pivot = new Vector2(0, 0.5f);
-                rt.sizeDelta = new Vector2(50, 50);
+                rt.sizeDelta = new Vector2(88, 88);
                 rt.anchoredPosition = new Vector2(20, 0);
 
                 Image img = backBtn.AddComponent<Image>();
@@ -871,9 +871,9 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
             hlg.padding = new RectOffset(8, 8, 4, 4);
 
-            // 3 round buttons: 1, 3, 5 — default "3" selected
-            CreateRoundButton("Rounds1Button", container.transform, "1", false);
-            CreateRoundButton("Rounds3Button", container.transform, "3", true);
+            // 3 round buttons: 1, 3, 5 — default "1" selected
+            CreateRoundButton("Rounds1Button", container.transform, "1", true);
+            CreateRoundButton("Rounds3Button", container.transform, "3", false);
             CreateRoundButton("Rounds5Button", container.transform, "5", false);
         }
 

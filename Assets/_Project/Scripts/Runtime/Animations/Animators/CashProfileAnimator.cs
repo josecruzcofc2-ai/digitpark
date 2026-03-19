@@ -63,6 +63,10 @@ namespace DigitPark.Animations
         private TextMeshProUGUI _summaryWinRateText;
         private TextMeshProUGUI _summaryNetProfitText;
 
+        // Cached scene references (C-P2-04: avoid repeated FindObjectOfType during animations)
+        private Canvas _cachedCanvas;
+        private HistoryManager _historyManager;
+
         // Active tweens
         private Sequence _entranceSeq;
         private List<Tween> _continuousTweens = new List<Tween>();
@@ -180,7 +184,11 @@ namespace DigitPark.Animations
         private void FindAnimationTargets()
         {
             var canvas = GetComponentInParent<Canvas>();
-            if (canvas == null) canvas = FindObjectOfType<Canvas>();
+            if (canvas == null)
+            {
+                if (_cachedCanvas == null) _cachedCanvas = FindObjectOfType<Canvas>();
+                canvas = _cachedCanvas;
+            }
             if (canvas == null) return;
 
             Transform root = canvas.transform;
@@ -506,8 +514,9 @@ namespace DigitPark.Animations
             if (HistoryManager.Instance != null)
                 return HistoryManager.Instance;
 
-            // Fallback: find in scene
-            return FindObjectOfType<HistoryManager>();
+            // Fallback: find in scene (cached to avoid repeated search)
+            if (_historyManager == null) _historyManager = FindObjectOfType<HistoryManager>();
+            return _historyManager;
         }
 
         private void AnimateCounter(TextMeshProUGUI text, int from, int to, float duration)

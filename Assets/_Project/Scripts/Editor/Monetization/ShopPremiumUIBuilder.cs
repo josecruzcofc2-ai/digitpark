@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.Editor.AutoAssigners;
 using DigitPark.UI;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -208,9 +210,10 @@ namespace DigitPark.Editor
             GameObject bg = CreateChild(canvas.gameObject, "Background");
             SetStretch(bg);
             Image bgImage = bg.AddComponent<Image>();
-            bgImage.color = DARK_BG;
+            bgImage.color = Color.white; // ThemeApplier tints at runtime
             bgImage.raycastTarget = false;
             bg.transform.SetAsFirstSibling();
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         private static GameObject CreateSafeArea(Canvas canvas)
@@ -236,8 +239,6 @@ namespace DigitPark.Editor
             Image headerBg = header.AddComponent<Image>();
             headerBg.color = HEADER_BG;
             headerBg.raycastTarget = false;
-
-            CreateGlowLine(header, CYAN_NEON, false);
 
             // Back Button (prefab)
             GameObject backPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -328,7 +329,7 @@ namespace DigitPark.Editor
             svRT.anchorMin = Vector2.zero;
             svRT.anchorMax = Vector2.one;
             svRT.offsetMin = new Vector2(0, 0);
-            svRT.offsetMax = new Vector2(0, -HEADER_HEIGHT);
+            svRT.offsetMax = new Vector2(0, -(HEADER_HEIGHT + 29));
 
             ScrollRect scrollRect = scrollView.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
@@ -769,7 +770,7 @@ namespace DigitPark.Editor
             // Badge — V4: only FREE badge
             if (isFree)
             {
-                CreateInlineBadge(item, "FREE", GREEN_FREE, 0);
+                CreateInlineBadge(item, "Free", GREEN_FREE, 0, "FreeBadgeText");
             }
 
             // Icon
@@ -1454,9 +1455,9 @@ namespace DigitPark.Editor
             // Price/Status
             if (isEquipped)
             {
-                GameObject statusObj = CreateChild(item, "StatusBadge");
+                GameObject statusObj = CreateChild(item, "PurchasedBadgeText");
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
-                statusText.text = "IN USE";
+                statusText.text = "Purchased";
                 statusText.fontSize = FontSizes.Body;
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
@@ -1593,7 +1594,7 @@ namespace DigitPark.Editor
 
             if (isEquipped)
             {
-                CreateInlineBadge(item, "EQUIPPED", itemColor, 0);
+                CreateInlineBadge(item, "Purchased", itemColor, 0, "PurchasedBadgeText");
             }
 
             // Icon/Preview
@@ -1624,9 +1625,9 @@ namespace DigitPark.Editor
             // Price — V4: color differentiates price type
             if (isEquipped)
             {
-                GameObject statusObj = CreateChild(item, "StatusBadge");
+                GameObject statusObj = CreateChild(item, "PurchasedBadgeText");
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
-                statusText.text = "IN USE";
+                statusText.text = "Purchased";
                 statusText.fontSize = FontSizes.Body;
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
@@ -1787,9 +1788,9 @@ namespace DigitPark.Editor
             // Price/Status
             if (isEquipped)
             {
-                GameObject statusObj = CreateChild(item, "StatusBadge");
+                GameObject statusObj = CreateChild(item, "PurchasedBadgeText");
                 TextMeshProUGUI statusText = statusObj.AddComponent<TextMeshProUGUI>();
-                statusText.text = "IN USE";
+                statusText.text = "Purchased";
                 statusText.fontSize = FontSizes.Body;
                 statusText.fontStyle = FontStyles.Bold;
                 statusText.color = TEXT_SECONDARY;
@@ -1802,7 +1803,7 @@ namespace DigitPark.Editor
             }
             else
             {
-                bool isGemPrice = !price.StartsWith("$") && !price.Equals("FREE");
+                bool isGemPrice = !price.StartsWith("$") && !price.Equals("Free");
                 Color btnColor = price.StartsWith("$") ? BUTTON_SUCCESS : (isGemPrice ? GEM_COLOR : COIN_COLOR);
 
                 GameObject priceContainer = CreateChild(item, "PriceContainer");
@@ -2380,7 +2381,7 @@ namespace DigitPark.Editor
 
         // ==================== HELPER: INLINE BADGE ====================
 
-        private static void CreateInlineBadge(GameObject parent, string text, Color accentColor, float width)
+        private static void CreateInlineBadge(GameObject parent, string text, Color accentColor, float width, string textGoName = "BadgeText")
         {
             GameObject badge = CreateChild(parent, "Badge");
             Image badgeBg = badge.AddComponent<Image>();
@@ -2395,7 +2396,7 @@ namespace DigitPark.Editor
                 badgeLE.preferredWidth = width;
             }
 
-            GameObject badgeText = CreateChild(badge, "Text");
+            GameObject badgeText = CreateChild(badge, textGoName);
             SetStretch(badgeText);
             TextMeshProUGUI bt = badgeText.AddComponent<TextMeshProUGUI>();
             bt.text = text;

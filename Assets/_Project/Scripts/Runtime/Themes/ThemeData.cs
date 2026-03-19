@@ -201,6 +201,13 @@ namespace DigitPark.Themes
         [Tooltip("Paleta de colores para confetti (6 colores). Si vacio, usa colores por defecto.")]
         public Color[] confettiPalette = new Color[0];
 
+        [Header("=== BACKGROUND PATTERN ===")]
+        [Tooltip("Si es true, este tema usa un tint cromático sobre el patrón de fondo")]
+        public bool isChromatic = false;
+
+        [Tooltip("Color de tint para el patrón de fondo en temas cromáticos")]
+        public Color patternTintColor = new Color(0f, 1f, 1f, 1f); // Cyan por defecto
+
         [Header("=== EFFECTS ===")]
         [Tooltip("Intensidad del efecto glow (0-1)")]
         [Range(0f, 1f)]

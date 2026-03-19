@@ -49,7 +49,7 @@ namespace DigitPark.UI
         private Canvas parentCanvas;
         private List<GameObject> activeParticles = new List<GameObject>();
 
-        private bool ReducedMotionEnabled => PlayerPrefs.GetInt("ReducedMotion", 0) == 1;
+        private bool ReducedMotionEnabled => PlayerPrefs.GetInt("DP_ReducedMotion", 0) == 1;
 
         private void Awake()
         {

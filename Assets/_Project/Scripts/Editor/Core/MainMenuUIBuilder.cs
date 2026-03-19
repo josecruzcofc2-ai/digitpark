@@ -5,6 +5,8 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Animations;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -200,7 +202,8 @@ namespace DigitPark.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            GetOrAdd<Image>(bg).color = DARK_BG;
+            GetOrAdd<Image>(bg).color = Color.white;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion

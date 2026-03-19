@@ -1185,8 +1185,9 @@ namespace DigitPark.Editor
             // \u2500\u2500 Streaks \u2500\u2500
             Assign(so, "currentStreakText", FindValue(root, "CurrentStreakCard"));
             Assign(so, "bestStreakText",    FindValue(root, "BestStreakCard"));
+            Assign(so, "rankBadgeText",     FindTMP(root, "RankText"));
 
-            // \u2500\u2500 Per-Game Stats \u2500\u2500
+            //\u2500\u2500 Per-Game Stats \u2500\u2500
             AssignGameRow(so, root, "GameRow_DigitRush",   "digitRush");
             AssignGameRow(so, root, "GameRow_MemoryPairs", "memoryPairs");
             AssignGameRow(so, root, "GameRow_QuickMath",   "quickMath");

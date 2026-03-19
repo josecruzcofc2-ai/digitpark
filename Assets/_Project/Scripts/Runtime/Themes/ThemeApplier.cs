@@ -163,6 +163,23 @@ namespace DigitPark.Themes
         }
 
         /// <summary>
+        /// Configura este ThemeApplier en runtime (para GOs instanciados dinámicamente).
+        /// Debe llamarse inmediatamente después de AddComponent, antes de que OnEnable corra.
+        /// </summary>
+        public void Configure(ElementType type, bool applyImg = true, bool applyTxt = true)
+        {
+            elementType = type;
+            applyToImage = applyImg;
+            applyToText = applyTxt;
+            DetectComponents();
+            if (ThemeManager.Instance?.CurrentTheme != null &&
+                ThemeManager.Instance.CurrentTheme.themeId != "neon_dark")
+            {
+                ApplyTheme(ThemeManager.Instance.CurrentTheme, false);
+            }
+        }
+
+        /// <summary>
         /// Aplica el tema especificado a este elemento
         /// </summary>
         public void ApplyTheme(ThemeData theme, bool animate = true)

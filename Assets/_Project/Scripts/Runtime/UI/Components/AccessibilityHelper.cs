@@ -31,8 +31,8 @@ namespace DigitPark.UI
 
         public static bool ReduceMotion
         {
-            get => PlayerPrefs.GetInt("reduce_motion", 0) == 1;
-            set => PlayerPrefs.SetInt("reduce_motion", value ? 1 : 0);
+            get => PlayerPrefs.GetInt("DP_reduce_motion", 0) == 1;
+            set => PlayerPrefs.SetInt("DP_reduce_motion", value ? 1 : 0);
         }
 
         public static float AnimDuration(float normalDuration)

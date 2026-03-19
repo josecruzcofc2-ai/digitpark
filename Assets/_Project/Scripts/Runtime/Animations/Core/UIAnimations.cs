@@ -36,12 +36,14 @@ namespace DigitPark.Animations
         /// <summary>
         /// Button bounce effect
         /// </summary>
-        public static Tween ButtonBounce(Transform target, float scale = 1.1f, float duration = DURATION_NORMAL)
+        public static Tween ButtonBounce(Transform target, float scale = 1.1f, float duration = DURATION_NORMAL, GameObject owner = null)
         {
             float d = AccessibilityHelper.AnimDuration(duration);
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(target.DOScale(scale, d * 0.4f).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Append(target.DOScale(1f, d * 0.6f).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)));
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         /// <summary>
@@ -57,13 +59,15 @@ namespace DigitPark.Animations
         /// <summary>
         /// Button 3D press effect (moves down)
         /// </summary>
-        public static Tween Button3DPress(RectTransform target, float pressDepth = 5f, float duration = DURATION_INSTANT)
+        public static Tween Button3DPress(RectTransform target, float pressDepth = 5f, float duration = DURATION_INSTANT, GameObject owner = null)
         {
             float d = AccessibilityHelper.AnimDuration(duration);
             Vector2 originalPos = target.anchoredPosition;
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(target.DOAnchorPosY(originalPos.y - pressDepth, d).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Append(target.DOAnchorPosY(originalPos.y, d).SetEase(AccessibilityHelper.AnimEase(Ease.OutBack)));
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         // ==================== PANEL ANIMATIONS ====================
@@ -170,26 +174,30 @@ namespace DigitPark.Animations
         /// <summary>
         /// Item flies to target position
         /// </summary>
-        public static Tween FlyToTarget(RectTransform item, Vector3 targetPosition, float duration = DURATION_SLOW, Action onComplete = null)
+        public static Tween FlyToTarget(RectTransform item, Vector3 targetPosition, float duration = DURATION_SLOW, Action onComplete = null, GameObject owner = null)
         {
             float d = AccessibilityHelper.AnimDuration(duration);
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(item.DOScale(1.2f, d * 0.2f).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Join(item.DOMove(targetPosition, d * 0.8f).SetEase(AccessibilityHelper.AnimEase(Ease.InBack)))
                 .Join(item.DOScale(0.5f, d * 0.8f).SetEase(AccessibilityHelper.AnimEase(Ease.InQuad)))
                 .OnComplete(() => onComplete?.Invoke());
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         /// <summary>
         /// Reward claim celebration
         /// </summary>
-        public static Tween RewardCelebration(Transform target, float duration = DURATION_NORMAL)
+        public static Tween RewardCelebration(Transform target, float duration = DURATION_NORMAL, GameObject owner = null)
         {
             float d = AccessibilityHelper.AnimDuration(duration);
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(target.DOScale(1.3f, d * 0.3f).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Append(target.DOScale(1f, d * 0.7f).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)))
                 .Join(target.DOPunchRotation(new Vector3(0, 0, 15f), d * 0.5f, 10, 0.5f));
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         // ==================== EFFECT ANIMATIONS ====================
@@ -224,13 +232,15 @@ namespace DigitPark.Animations
         /// <summary>
         /// Flash effect
         /// </summary>
-        public static Tween Flash(Image target, Color flashColor, float duration = DURATION_FAST)
+        public static Tween Flash(Image target, Color flashColor, float duration = DURATION_FAST, GameObject owner = null)
         {
             float d = AccessibilityHelper.AnimDuration(duration);
             Color originalColor = target.color;
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(target.DOColor(flashColor, d / 2).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Append(target.DOColor(originalColor, d / 2).SetEase(AccessibilityHelper.AnimEase(Ease.InQuad)));
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         // ==================== ENTRANCE ANIMATIONS ====================
@@ -310,28 +320,32 @@ namespace DigitPark.Animations
         /// <summary>
         /// Combo text animation (scale up with punch)
         /// </summary>
-        public static Tween ComboText(Transform target, int comboLevel)
+        public static Tween ComboText(Transform target, int comboLevel, GameObject owner = null)
         {
             float scale = 1f + (comboLevel * 0.1f);
             float shake = comboLevel * 2f;
             float dFast = AccessibilityHelper.AnimDuration(DURATION_FAST);
             float dNormal = AccessibilityHelper.AnimDuration(DURATION_NORMAL);
 
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(target.DOScale(scale, dFast).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Join(target.DOShakeRotation(dFast, new Vector3(0, 0, shake)))
                 .Append(target.DOScale(1f, dNormal).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)));
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         /// <summary>
         /// Ultra combo effect (screen shake + zoom)
         /// </summary>
-        public static Sequence UltraCombo(Transform screenTransform, Transform comboText)
+        public static Sequence UltraCombo(Transform screenTransform, Transform comboText, GameObject owner = null)
         {
-            return DOTween.Sequence()
+            var seq = DOTween.Sequence()
                 .Append(screenTransform.DOShakePosition(AccessibilityHelper.AnimDuration(0.5f), 20f, 30))
                 .Join(comboText.DOScale(2f, AccessibilityHelper.AnimDuration(0.2f)).SetEase(AccessibilityHelper.AnimEase(Ease.OutQuad)))
                 .Append(comboText.DOScale(1.5f, AccessibilityHelper.AnimDuration(0.3f)).SetEase(AccessibilityHelper.AnimEase(Ease.OutBounce)));
+            if (owner != null) seq.SetLink(owner);
+            return seq;
         }
 
         // ==================== HELPERS ====================

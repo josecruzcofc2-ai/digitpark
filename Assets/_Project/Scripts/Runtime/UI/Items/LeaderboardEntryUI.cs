@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 using TMPro;
 using DigitPark.Data;
 using DigitPark.Services.Firebase;
@@ -58,11 +60,12 @@ namespace DigitPark.UI.Items
                 positionText.fontStyle = FontStyles.Bold;
             }
 
-            // Avatar placeholder (futuro: cargar desde avatarUrl)
+            // Avatar
             if (avatarImage != null)
             {
                 avatarImage.color = new Color(0.2f, 0.25f, 0.35f);
-                // TODO: Si entry.avatarUrl no es vacío, cargar imagen async
+                if (!string.IsNullOrEmpty(entry.avatarUrl))
+                    StartCoroutine(LoadAvatarAsync(entry.avatarUrl));
             }
 
             // Medal indicator para top 3
@@ -157,6 +160,19 @@ namespace DigitPark.UI.Items
         }
 
         #endregion
+
+        private IEnumerator LoadAvatarAsync(string url)
+        {
+            using var req = UnityWebRequestTexture.GetTexture(url);
+            yield return req.SendWebRequest();
+            if (req.result == UnityWebRequest.Result.Success && avatarImage != null)
+            {
+                Texture2D tex = DownloadHandlerTexture.GetContent(req);
+                avatarImage.sprite = Sprite.Create(
+                    tex, new Rect(0, 0, tex.width, tex.height), Vector2.one * 0.5f);
+                avatarImage.color = Color.white;
+            }
+        }
 
         private void OnDestroy()
         {

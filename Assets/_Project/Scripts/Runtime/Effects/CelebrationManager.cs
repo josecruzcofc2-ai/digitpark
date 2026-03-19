@@ -34,7 +34,7 @@ namespace DigitPark.Effects
         /// <summary>
         /// Si esta habilitado, reduce efectos de particulas (accesibilidad).
         /// </summary>
-        private bool ReducedMotionEnabled => PlayerPrefs.GetInt("ReducedMotion", 0) == 1;
+        private bool ReducedMotionEnabled => PlayerPrefs.GetInt("DP_ReducedMotion", 0) == 1;
 
         private void Awake()
         {

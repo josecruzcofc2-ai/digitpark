@@ -423,9 +423,9 @@ namespace DigitPark.Monetization.Betting
             Color active = new Color(1f, 0.84f, 0f, 1f); // Gold
             Color inactive = new Color(0.15f, 0.15f, 0.2f, 1f);
 
-            if (_rounds1Button != null) _rounds1Button.GetComponent<Image>().color = rounds == 1 ? active : inactive;
-            if (_rounds3Button != null) _rounds3Button.GetComponent<Image>().color = rounds == 3 ? active : inactive;
-            if (_rounds5Button != null) _rounds5Button.GetComponent<Image>().color = rounds == 5 ? active : inactive;
+            _rounds1Button?.GetComponent<Image>()?.color = rounds == 1 ? active : inactive;
+            _rounds3Button?.GetComponent<Image>()?.color = rounds == 3 ? active : inactive;
+            _rounds5Button?.GetComponent<Image>()?.color = rounds == 5 ? active : inactive;
         }
 
         private void OnPlayClicked()

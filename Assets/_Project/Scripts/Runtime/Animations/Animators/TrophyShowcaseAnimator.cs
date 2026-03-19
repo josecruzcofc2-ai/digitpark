@@ -486,7 +486,10 @@ namespace DigitPark.Animations
             flyingRT.position = rewardIcon.position;
             flyingRT.SetAsLastSibling();
 
-            Vector3 targetPos = target != null ? target.position : Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.9f, Screen.height * 0.95f, 0));
+            Vector3 targetPos = target != null ? target.position :
+                (Camera.main != null
+                    ? Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.9f, Screen.height * 0.95f, 0))
+                    : Vector3.zero);
 
             // Animate
             Sequence seq = DOTween.Sequence().SetLink(gameObject);

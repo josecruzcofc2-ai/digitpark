@@ -141,7 +141,7 @@ namespace DigitPark.CashBattle
                     displayName = playerData?.username;
                 }
                 if (string.IsNullOrEmpty(displayName))
-                    displayName = PlayerPrefs.GetString("DisplayName", AutoLocalizer.Get("default_player_name"));
+                    displayName = PlayerPrefs.GetString("DP_DisplayName", AutoLocalizer.Get("default_player_name"));
 
                 usernameText.text = displayName;
             }

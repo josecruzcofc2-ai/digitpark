@@ -5,6 +5,8 @@ using UnityEditor.Events;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.UI.Common;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -147,7 +149,8 @@ namespace DigitPark.Editor
 
             Image image = bg.AddComponent<Image>();
             image.sprite = WhiteSprite;
-            image.color = DarkNavy;
+            image.color = Color.white; // ThemeApplier tints at runtime
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             bg.transform.SetAsFirstSibling();
         }
@@ -193,11 +196,13 @@ namespace DigitPark.Editor
             Image cardBg = card.AddComponent<Image>();
             cardBg.sprite = WhiteSprite;
             cardBg.color = CardBackground;
+            ThemeApplierHelper.Apply(card, ET.CardBackground);
 
             // Neon border
             Outline outline = card.AddComponent<Outline>();
             outline.effectColor = CyanNeon;
             outline.effectDistance = new Vector2(3, -3);
+            ThemeApplierHelper.ApplyOutline(card, ET.Glow);
 
             // Content container
             GameObject content = new GameObject("Content");
@@ -243,6 +248,7 @@ namespace DigitPark.Editor
             titleText.fontSizeMin = FontSizes.AutoMinTitle;
             titleText.fontSizeMax = FontSizes.H4;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
+            ThemeApplierHelper.ApplyText(title, ET.Accent);
 
             LayoutElement layout = title.AddComponent<LayoutElement>();
             layout.preferredHeight = 120;
@@ -257,10 +263,12 @@ namespace DigitPark.Editor
             Image bg = inputObj.AddComponent<Image>();
             bg.sprite = WhiteSprite;
             bg.color = InputBackground;
+            ThemeApplierHelper.Apply(inputObj, ET.InputBackground);
 
             Outline outline = inputObj.AddComponent<Outline>();
             outline.effectColor = CyanNeon;
             outline.effectDistance = new Vector2(2, -2);
+            ThemeApplierHelper.ApplyOutline(inputObj, ET.InputBorder);
 
             LayoutElement inputLayout = inputObj.AddComponent<LayoutElement>();
             inputLayout.preferredHeight = INPUT_HEIGHT;
@@ -300,6 +308,7 @@ namespace DigitPark.Editor
             placeholderText.fontSizeMin = FontSizes.AutoMinBody;
             placeholderText.fontSizeMax = FontSizes.H3;
             placeholderText.overflowMode = TextOverflowModes.Ellipsis;
+            ThemeApplierHelper.ApplyText(placeholderObj, ET.InputPlaceholder);
 
             // Input text
             GameObject textObj = new GameObject("Text");
@@ -347,6 +356,7 @@ namespace DigitPark.Editor
             Image eyeImage = eyeBtn.AddComponent<Image>();
             eyeImage.sprite = EyeOpenIcon;
             eyeImage.color = CyanNeon;
+            ThemeApplierHelper.Apply(eyeBtn, ET.Accent);
 
             Button btn = eyeBtn.AddComponent<Button>();
             btn.transition = Selectable.Transition.None;
@@ -371,6 +381,7 @@ namespace DigitPark.Editor
             Image bg = btn.AddComponent<Image>();
             bg.sprite = WhiteSprite;
             bg.color = CyanNeon;
+            ThemeApplierHelper.Apply(btn, ET.ButtonPrimary);
 
             Button button = btn.AddComponent<Button>();
             button.targetGraphic = bg;
@@ -398,6 +409,7 @@ namespace DigitPark.Editor
             btnText.fontSizeMin = FontSizes.AutoMinBody;
             btnText.fontSizeMax = FontSizes.H1;
             btnText.overflowMode = TextOverflowModes.Ellipsis;
+            ThemeApplierHelper.ApplyText(textObj, ET.TextOnPrimary);
         }
 
         #region Missing Elements (BackButton, LoadingPanel, ErrorPanel)
@@ -414,8 +426,8 @@ namespace DigitPark.Editor
                 rect.anchorMin = new Vector2(0, 1);
                 rect.anchorMax = new Vector2(0, 1);
                 rect.pivot = new Vector2(0, 1);
-                rect.anchoredPosition = new Vector2(20, -20);
-                rect.sizeDelta = new Vector2(50, 50);
+                rect.anchoredPosition = new Vector2(0, -60);
+                rect.sizeDelta = new Vector2(88, 88);
 
                 Debug.Log("✅ BackButton instantiated from prefab");
             }
@@ -428,8 +440,8 @@ namespace DigitPark.Editor
                 rect.anchorMin = new Vector2(0, 1);
                 rect.anchorMax = new Vector2(0, 1);
                 rect.pivot = new Vector2(0, 1);
-                rect.sizeDelta = new Vector2(50, 50);
-                rect.anchoredPosition = new Vector2(20, -20);
+                rect.sizeDelta = new Vector2(88, 88);
+                rect.anchoredPosition = new Vector2(0, -60);
 
                 Image bg = backBtn.AddComponent<Image>();
                 bg.sprite = WhiteSprite;

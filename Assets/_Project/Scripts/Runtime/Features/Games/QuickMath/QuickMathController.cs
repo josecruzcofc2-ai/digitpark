@@ -5,6 +5,7 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
 using DigitPark.Animations;
+using DigitPark.Themes;
 
 namespace DigitPark.Games
 {
@@ -334,10 +335,11 @@ namespace DigitPark.Games
             if (toggle == null) return;
             var bg = toggle.GetComponent<Image>();
             var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
-            Color onColor = new Color(0f, 1f, 1f, 1f);
-            Color offColor = new Color(0.08f, 0.12f, 0.18f, 1f);
+            var theme = ThemeManager.Instance?.CurrentTheme;
+            Color onColor = theme?.tabActive ?? new Color(0f, 1f, 1f, 1f);
+            Color offColor = theme?.tabInactive ?? new Color(0.08f, 0.12f, 0.18f, 1f);
             if (bg != null) bg.color = isOn ? onColor : offColor;
-            if (label != null) label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+            if (label != null) label.color = isOn ? (theme?.textOnPrimary ?? new Color(0.02f, 0.05f, 0.1f, 1f)) : (theme?.textSecondary ?? Color.white);
         }
 
         private void SetToggleDefault(Toggle toggle, bool value)

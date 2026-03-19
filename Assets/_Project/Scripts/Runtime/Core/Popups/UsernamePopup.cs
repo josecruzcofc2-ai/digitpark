@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using DigitPark.Localization;
 using DigitPark.UI;
+using DigitPark.Themes;
 
 namespace DigitPark.UI.Common
 {
@@ -64,6 +65,7 @@ namespace DigitPark.UI.Common
 
             Image panelImg = popupPanel.AddComponent<Image>();
             panelImg.color = new Color(0.1f, 0.1f, 0.2f, 0.98f);
+            popupPanel.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.CardBackground, true, false);
 
             // Outline para el panel
             Outline outline = popupPanel.AddComponent<Outline>();
@@ -87,6 +89,7 @@ namespace DigitPark.UI.Common
             RectTransform titleRT = titleText.GetComponent<RectTransform>();
             titleRT.anchoredPosition = new Vector2(0, 100);
             titleRT.sizeDelta = new Vector2(500, 60);
+            titleText.gameObject.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextTitle, false, true);
 
             // Input Field
             GameObject inputObj = new GameObject("UsernameInputField");
@@ -98,6 +101,7 @@ namespace DigitPark.UI.Common
 
             Image inputBg = inputObj.AddComponent<Image>();
             inputBg.color = new Color(0.2f, 0.2f, 0.3f);
+            inputObj.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.InputBackground, true, false);
 
             usernameInput = inputObj.AddComponent<TMP_InputField>();
             usernameInput.textViewport = inputRT;
@@ -178,6 +182,7 @@ namespace DigitPark.UI.Common
             RectTransform confirmRT = confirmButton.GetComponent<RectTransform>();
             confirmRT.anchoredPosition = new Vector2(-110, -90);
             confirmButton.onClick.AddListener(OnConfirmClicked);
+            confirmButton.gameObject.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonPrimary, true, false);
 
             AddRoundedCorners(confirmButton.gameObject, 12f);
 

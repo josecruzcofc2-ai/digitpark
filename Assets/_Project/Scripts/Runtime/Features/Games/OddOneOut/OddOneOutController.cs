@@ -6,6 +6,7 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
 using DigitPark.Animations;
+using DigitPark.Themes;
 
 namespace DigitPark.Games
 {
@@ -32,6 +33,7 @@ namespace DigitPark.Games
         [SerializeField] private TextMeshProUGUI roundText;
         [SerializeField] private TextMeshProUGUI errorsText;
         [SerializeField] private TextMeshProUGUI comboText;
+        [SerializeField] private GameObject comboContainer;  // OO-02: parent container for combo UI
         [SerializeField] private TextMeshProUGUI roundIndicatorText;
         [SerializeField] private RectTransform progressFill;
 
@@ -206,10 +208,11 @@ namespace DigitPark.Games
             if (toggle == null) return;
             var bg = toggle.GetComponent<Image>();
             var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
-            Color onColor = new Color(0f, 1f, 1f, 1f);
-            Color offColor = new Color(0.08f, 0.12f, 0.18f, 1f);
+            var theme = ThemeManager.Instance?.CurrentTheme;
+            Color onColor = theme?.tabActive ?? new Color(0f, 1f, 1f, 1f);
+            Color offColor = theme?.tabInactive ?? new Color(0.08f, 0.12f, 0.18f, 1f);
             if (bg != null) bg.color = isOn ? onColor : offColor;
-            if (label != null) label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+            if (label != null) label.color = isOn ? (theme?.textOnPrimary ?? new Color(0.02f, 0.05f, 0.1f, 1f)) : (theme?.textSecondary ?? Color.white);
         }
 
         private void SetToggleDefault(Toggle toggle, bool value)
@@ -479,6 +482,12 @@ namespace DigitPark.Games
             feedbackText.text = message;
             feedbackText.color = color;
 
+            // OO-01: Use CanvasGroup alpha for fade so ThemeApplier text color isn't clobbered
+            GameObject feedbackRoot = feedbackPanel != null ? feedbackPanel : feedbackText.gameObject;
+            CanvasGroup cg = feedbackRoot.GetComponent<CanvasGroup>();
+            if (cg == null) cg = feedbackRoot.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+
             if (feedbackPanel != null)
             {
                 feedbackPanel.SetActive(true);
@@ -491,10 +500,10 @@ namespace DigitPark.Games
                 feedbackText.gameObject.SetActive(true);
             }
 
-            Transform t = feedbackPanel != null ? feedbackPanel.transform : feedbackText.transform;
+            Transform t = feedbackRoot.transform;
             t.localScale = Vector3.zero;
 
-            // Pop-in (0.15s)
+            // Pop-in with alpha fade-in (0.15s)
             float popDuration = 0.15f;
             float elapsed = 0f;
             while (elapsed < popDuration)
@@ -503,22 +512,23 @@ namespace DigitPark.Games
                 float progress = elapsed / popDuration;
                 float scale = 1f + 0.3f * Mathf.Sin(progress * Mathf.PI);
                 t.localScale = Vector3.one * Mathf.Min(scale, 1.3f) * progress;
+                if (cg != null) cg.alpha = progress;
                 yield return null;
             }
             t.localScale = Vector3.one;
+            if (cg != null) cg.alpha = 1f;
 
             // Hold (0.6s)
             yield return new WaitForSeconds(0.6f);
 
-            // Fade out (0.25s)
+            // Fade out via CanvasGroup alpha (0.25s)
             float fadeDuration = 0.25f;
             elapsed = 0f;
-            Color startColor = feedbackText.color;
             while (elapsed < fadeDuration)
             {
                 elapsed += Time.deltaTime;
                 float alpha = 1f - (elapsed / fadeDuration);
-                feedbackText.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+                if (cg != null) cg.alpha = alpha;
                 t.localScale = Vector3.one * (0.8f + 0.2f * alpha);
                 yield return null;
             }
@@ -528,6 +538,7 @@ namespace DigitPark.Games
             else
                 feedbackText.gameObject.SetActive(false);
 
+            if (cg != null) cg.alpha = 0f;
             feedbackCoroutine = null;
         }
 
@@ -763,9 +774,16 @@ namespace DigitPark.Games
         {
             if (comboText == null) return;
 
-            if (currentCombo >= 2)
+            bool showCombo = currentCombo >= 2;
+
+            // OO-02: Toggle comboContainer if assigned, otherwise fall back to comboText GO
+            if (comboContainer != null)
+                comboContainer.SetActive(showCombo);
+            else
+                comboText.gameObject.SetActive(showCombo);
+
+            if (showCombo)
             {
-                comboText.gameObject.SetActive(true);
                 comboText.text = $"x{currentCombo}";
 
                 if (currentCombo >= 5)
@@ -776,10 +794,6 @@ namespace DigitPark.Games
                     comboText.color = new Color(0.3f, 1f, 0.5f); // Verde
                 else
                     comboText.color = new Color(0f, 0.9f, 1f); // Cyan
-            }
-            else
-            {
-                comboText.gameObject.SetActive(false);
             }
         }
 

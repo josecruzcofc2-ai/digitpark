@@ -72,6 +72,9 @@ namespace DigitPark.Managers
         [Header("UI - CTA Button")]
         [SerializeField] private Button challengeButton;  // Retar (solo si es amigo)
 
+        [Header("UI - Loading")]
+        [SerializeField] private GameObject loadingIndicator;  // PR-06: shown while loading another player's profile
+
         [Header("UI - Challenge Game Selection")]
         [SerializeField] private GameObject gameSelectionPanel;  // Panel para elegir juego
         [SerializeField] private Button darkOverlayButton;       // Para cerrar al tocar fuera
@@ -101,16 +104,17 @@ namespace DigitPark.Managers
 
             SetupListeners();
             HideGameSelectionPanel();
+            SetLoadingVisible(false);  // PR-06: ensure hidden on start
 
             // Verificar de qué escena venimos para el botón Back
-            returnScene = PlayerPrefs.GetString("ProfileReturnScene", "MainMenu");
-            PlayerPrefs.DeleteKey("ProfileReturnScene");
+            returnScene = PlayerPrefs.GetString("DP_ProfileReturnScene", "MainMenu");
+            PlayerPrefs.DeleteKey("DP_ProfileReturnScene");
 
             // Verificar si venimos a ver el perfil de otro jugador
-            string viewProfileId = PlayerPrefs.GetString("ViewProfileId", "");
+            string viewProfileId = PlayerPrefs.GetString("DP_ViewProfileId", "");
             if (!string.IsNullOrEmpty(viewProfileId))
             {
-                PlayerPrefs.DeleteKey("ViewProfileId");
+                PlayerPrefs.DeleteKey("DP_ViewProfileId");
                 LoadProfileData(viewProfileId);
             }
             else
@@ -152,6 +156,13 @@ namespace DigitPark.Managers
             {
                 AvatarService.Instance.OnAvatarChanged += OnAvatarChanged;
             }
+        }
+
+        private void Update()
+        {
+            // PR-05: Escape key / Android back button closes the scene
+            if (Input.GetKeyDown(KeyCode.Escape))
+                OnBackClicked();
         }
 
         #endregion
@@ -221,12 +232,16 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[Profile] Cargando perfil de: {playerId}");
 
+            SetLoadingVisible(true);  // PR-06
+
             if (DatabaseService.Instance != null)
             {
                 currentPlayerData = await DatabaseService.Instance.GetPlayerDataById(playerId);
             }
 
             if (this == null) return;
+
+            SetLoadingVisible(false);  // PR-06
 
             // Ocultar botones de edicion (no es nuestro perfil)
             if (editAvatarButton != null)
@@ -575,6 +590,12 @@ namespace DigitPark.Managers
 
         #region Button Callbacks
 
+        private void SetLoadingVisible(bool visible)
+        {
+            if (loadingIndicator != null)
+                loadingIndicator.SetActive(visible);
+        }
+
         private void OnBackClicked()
         {
             Debug.Log($"[Profile] Volviendo a: {returnScene}");
@@ -585,7 +606,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Profile] Navegando a escena de amigos");
 
-            PlayerPrefs.SetString("FriendsReturnScene", "Profile");
+            PlayerPrefs.SetString("DP_FriendsReturnScene", "Profile");
             PlayerPrefs.Save();
             SceneManager.LoadScene("Friends");
         }
@@ -594,7 +615,7 @@ namespace DigitPark.Managers
         {
             Debug.Log("[Profile] Abriendo historial de partidas");
 
-            PlayerPrefs.SetString("MatchHistoryReturnScene", "Profile");
+            PlayerPrefs.SetString("DP_MatchHistoryReturnScene", "Profile");
             PlayerPrefs.Save();
             SceneManager.LoadScene("MatchHistory");
         }
@@ -686,8 +707,8 @@ namespace DigitPark.Managers
             Debug.Log($"[Profile] Juego seleccionado para reto: {gameName}");
 
             // Guardar datos del reto
-            PlayerPrefs.SetString("ChallengePlayerId", viewingPlayerId);
-            PlayerPrefs.SetString("ChallengeGameName", gameName);
+            PlayerPrefs.SetString("DP_ChallengePlayerId", viewingPlayerId);
+            PlayerPrefs.SetString("DP_ChallengeGameName", gameName);
             PlayerPrefs.Save();
 
             HideGameSelectionPanel();
@@ -770,7 +791,7 @@ namespace DigitPark.Managers
                     Debug.Log("[Profile] Nombre actualizado exitosamente");
                     currentPlayerData.username = newUsername;
                     PlayerPrefs.SetInt(NAME_CHANGE_COUNT_KEY, changeCount + 1);
-                    PlayerPrefs.SetString("DisplayName", newUsername);
+                    PlayerPrefs.SetString("DP_DisplayName", newUsername);
                     PlayerPrefs.Save();
                     changeNamePanel?.Hide();
 

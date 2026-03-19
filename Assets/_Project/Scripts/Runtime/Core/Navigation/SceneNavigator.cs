@@ -279,6 +279,7 @@ namespace DigitPark.Navigation
         Currency,
         Styles,
         Effects,
-        BattleCards
+        BattleCards,
+        Backgrounds
     }
 }

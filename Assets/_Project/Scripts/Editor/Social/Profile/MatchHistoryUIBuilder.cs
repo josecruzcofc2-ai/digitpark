@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -155,7 +157,9 @@ namespace DigitPark.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            GetOrAdd<Image>(bg).color = DARK_BG;
+            var bgImg = GetOrAdd<Image>(bg);
+            bgImg.color = Color.white; // ThemeApplier tints at runtime
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -219,6 +223,26 @@ namespace DigitPark.Editor
             tTMP.fontSizeMin = FontSizes.AutoMinTitle;
             tTMP.fontSizeMax = FontSizes.H4;
             tTMP.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Total count label (e.g. "42 matches")
+            var totalCount = FindOrCreate(header.transform, "TotalCountText");
+            var tcRT = GetOrAdd<RectTransform>(totalCount);
+            tcRT.anchorMin = new Vector2(0.07f, 0f);
+            tcRT.anchorMax = new Vector2(0.45f, 0.42f);
+            tcRT.pivot = new Vector2(0f, 0.5f);
+            tcRT.sizeDelta = Vector2.zero;
+            tcRT.anchoredPosition = Vector2.zero;
+            var tcTMP = GetOrAdd<TextMeshProUGUI>(totalCount);
+            tcTMP.text = "";
+            tcTMP.fontSize = FontSizes.Body;
+            tcTMP.color = new Color(0.6f, 0.6f, 0.7f, 1f); // muted secondary — ThemeApplier overrides
+            tcTMP.fontStyle = FontStyles.Normal;
+            tcTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            tcTMP.raycastTarget = false;
+            tcTMP.enableAutoSizing = true;
+            tcTMP.fontSizeMin = FontSizes.AutoMinBody;
+            tcTMP.fontSizeMax = FontSizes.Body;
+            tcTMP.overflowMode = TextOverflowModes.Ellipsis;
 
             // Currency pills (right side of header)
             var pills = CurrencyHeaderBarHelper.CreateCurrencyPills(header.transform);

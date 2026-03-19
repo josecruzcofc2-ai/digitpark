@@ -5,6 +5,8 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
 using DigitPark.Editor.AutoAssigners;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -192,8 +194,9 @@ namespace DigitPark.Editor
             bgRT.offsetMax = Vector2.zero;
 
             Image bgImage = bg.AddComponent<Image>();
-            bgImage.color = DARK_BG;
+            bgImage.color = Color.white; // ThemeApplier tints at runtime
             bgImage.raycastTarget = false;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         // Layout: Header(100) -> ScoresPanel(rest) containing GameSelector(120) -> Tabs(70) -> ScrollView -> PlayerPosition(80)

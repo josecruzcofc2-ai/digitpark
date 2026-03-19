@@ -5,6 +5,8 @@ using TMPro;
 using System.Collections.Generic;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -228,8 +230,9 @@ namespace DigitPark.Editor
             bgRT.anchoredPosition = Vector2.zero;
 
             Image bgImage = GetOrAddComponent<Image>(bg);
-            bgImage.color = DARK_BG;
+            bgImage.color = Color.white; // ThemeApplier tints at runtime
             bgImage.raycastTarget = false;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             bg.transform.SetAsFirstSibling();
             EditorUtility.SetDirty(bg);
@@ -341,7 +344,7 @@ namespace DigitPark.Editor
             tabsRT.anchorMin = new Vector2(0, 1);
             tabsRT.anchorMax = new Vector2(1, 1);
             tabsRT.pivot = new Vector2(0.5f, 1);
-            tabsRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + 8));
+            tabsRT.anchoredPosition = new Vector2(0, -(HEADER_HEIGHT + 29));
             tabsRT.sizeDelta = new Vector2(-CONTENT_PADDING * 2, TABS_HEIGHT);
 
             Image tabsBg = GetOrAddComponent<Image>(tabsPanel);
@@ -380,7 +383,7 @@ namespace DigitPark.Editor
             SetupButtonColors(tabButton, isActive ? new Color(0f, 1f, 1f, 0.12f) : new Color(0.12f, 0.16f, 0.2f, 0.5f));
             AddOutline(tab, CYAN_DARK);
 
-            GameObject textObj = FindOrCreateChild(tab, "Text");
+            GameObject textObj = FindOrCreateChild(tab, name + "Text");
             TextMeshProUGUI tabText = GetOrAddComponent<TextMeshProUGUI>(textObj);
             tabText.text = label;
             tabText.fontSize = FontSizes.BodyLarge;

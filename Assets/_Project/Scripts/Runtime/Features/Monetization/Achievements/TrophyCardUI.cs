@@ -24,7 +24,7 @@ namespace DigitPark.UI.Items
         [SerializeField] private Image trophyIcon;
         [SerializeField] private Image trophyShadow;
         [SerializeField] private Image lockedOverlay;
-        [SerializeField] private Image questionMark;
+        [SerializeField] private TextMeshProUGUI questionMark;
 
         [Header("Progress")]
         [SerializeField] private GameObject progressContainer;
@@ -154,7 +154,7 @@ namespace DigitPark.UI.Items
             {
                 var questionTransform = transform.Find("CardContainer/TrophyIcon/QuestionMark");
                 if (questionTransform != null)
-                    questionMark = questionTransform.GetComponent<Image>();
+                    questionMark = questionTransform.GetComponent<TextMeshProUGUI>();
             }
 
             if (progressContainer == null)
@@ -620,6 +620,7 @@ namespace DigitPark.UI.Items
     public class AchievementData
     {
         public string id;
+        public string nameKey;  // AC-02: localization key for achievement name
         public string title;
         public string description;
         public string category;

@@ -582,6 +582,24 @@ namespace DigitPark.Editor
             timerTmp.fontSizeMin = FontSizes.AutoMinBody;
             timerTmp.fontSizeMax = FontSizes.H3;
             timerTmp.overflowMode = TextOverflowModes.Ellipsis;
+
+            // --- Searching Spinner (hidden by default, activated during search) ---
+            GameObject spinnerGO = CreateElement(searchSection.transform, "SearchingSpinner");
+            RectTransform spinnerRect = spinnerGO.GetComponent<RectTransform>();
+            spinnerRect.anchorMin = new Vector2(0.4f, 0.5f);
+            spinnerRect.anchorMax = new Vector2(0.6f, 0.95f);
+            spinnerRect.offsetMin = Vector2.zero;
+            spinnerRect.offsetMax = Vector2.zero;
+            spinnerGO.SetActive(false);
+
+            GameObject ringGO = CreateElement(spinnerGO.transform, "SearchingRing");
+            RectTransform ringRect = ringGO.GetComponent<RectTransform>();
+            ringRect.anchorMin = Vector2.zero;
+            ringRect.anchorMax = Vector2.one;
+            ringRect.offsetMin = Vector2.zero;
+            ringRect.offsetMax = Vector2.zero;
+            Image ringImg = ringGO.AddComponent<Image>();
+            ringImg.color = CYAN_ACCENT;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -745,6 +763,8 @@ namespace DigitPark.Editor
             // --- Search Status ---
             SetProperty(so, "statusText", sa, "SearchSection/StatusText");
             SetProperty(so, "timerText", sa, "SearchSection/CashTimerText");
+            SetProperty(so, "searchingSpinner", sa, "SearchSection/SearchingSpinner");
+            SetProperty(so, "searchingRing", sa, "SearchSection/SearchingSpinner/SearchingRing");
 
             // --- Countdown ---
             SetProperty(so, "countdownPanel", sa, "CountdownPanel");

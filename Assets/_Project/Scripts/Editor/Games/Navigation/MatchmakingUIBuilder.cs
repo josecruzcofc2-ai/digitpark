@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEditor;
 using DigitPark.UI;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -119,8 +121,10 @@ namespace DigitPark.Editor
             GameObject bg = CreateElement(parent, "Background");
             SetFullStretch(bg.GetComponent<RectTransform>());
             Image bgImg = bg.AddComponent<Image>();
-            bgImg.color = DARK_NAVY;
+            bgImg.color = Color.white; // ThemeApplier tints at runtime
             bgImg.raycastTarget = false;
+            // Matchmaking: only Background gets ThemeApplier — BattleCardApplier controls the rest
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             // Ambient spotlight (subtle glow behind battle area)
             GameObject spotlight = CreateElement(bg.transform, "Spotlight");

@@ -874,14 +874,14 @@ namespace DigitPark.Editor
             // At runtime, LoadTransactionHistory() shows it when transactions.Count == 0
             empty.SetActive(false);
 
-            // ── Sample Cards (design preview) ──
-            CreateSampleDepositCard(content.transform, "$10.00");
-            CreateSampleDepositCard(content.transform, "$25.00");
-            CreateSampleTransactionCard(content.transform, "Deposit via PayPal", "Mar 3, 2026 · 14:32", "+$10.00", "Completed", true);
-            CreateSampleTransactionCard(content.transform, "1v1 Battle Won", "Mar 2, 2026 · 19:15", "+$1.80", "Completed", true);
+            // ── Sample Cards (design preview, hidden at runtime) ──
+            var s1 = CreateSampleDepositCard(content.transform, "$10.00"); s1.SetActive(false);
+            var s2 = CreateSampleDepositCard(content.transform, "$25.00"); s2.SetActive(false);
+            var s3 = CreateSampleTransactionCard(content.transform, "Deposit via PayPal", "Mar 3, 2026 · 14:32", "+$10.00", "Completed", true); s3.SetActive(false);
+            var s4 = CreateSampleTransactionCard(content.transform, "1v1 Battle Won", "Mar 2, 2026 · 19:15", "+$1.80", "Completed", true); s4.SetActive(false);
         }
 
-        private static void CreateSampleDepositCard(Transform parent, string amount)
+        private static GameObject CreateSampleDepositCard(Transform parent, string amount)
         {
             GameObject root = new GameObject("SampleDeposit_" + amount.Replace("$", ""));
             root.transform.SetParent(parent, false);
@@ -949,9 +949,11 @@ namespace DigitPark.Editor
             dateTMP.enableAutoSizing = true;
             dateTMP.fontSizeMin = FontSizes.AutoMinBody;
             dateTMP.fontSizeMax = FontSizes.Body;
+
+            return root;
         }
 
-        private static void CreateSampleTransactionCard(Transform parent, string desc, string date, string amount, string status, bool isPositive)
+        private static GameObject CreateSampleTransactionCard(Transform parent, string desc, string date, string amount, string status, bool isPositive)
         {
             Color statusColor = isPositive ? GREEN : RED;
 
@@ -1066,6 +1068,8 @@ namespace DigitPark.Editor
             statusTMP.enableAutoSizing = true;
             statusTMP.fontSizeMin = FontSizes.AutoMinBody;
             statusTMP.fontSizeMax = FontSizes.Body;
+
+            return root;
         }
 
         #endregion

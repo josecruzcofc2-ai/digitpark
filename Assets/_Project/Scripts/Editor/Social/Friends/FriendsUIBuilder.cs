@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
 using DigitPark.UI;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -156,7 +158,9 @@ namespace DigitPark.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            GetOrAdd<Image>(bg).color = DARK_BG;
+            var bgImg = GetOrAdd<Image>(bg);
+            bgImg.color = Color.white; // ThemeApplier tints at runtime
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -730,13 +734,13 @@ namespace DigitPark.Editor
             brVLG.childForceExpandHeight = true;
 
             // Challenge Button
-            CreateCardButton(buttonsRow.transform, "ChallengeButton", "Challenge", CYAN_NEON, TEXT_DARK);
+            CreateCardButton(buttonsRow.transform, "ChallengeButton", "Challenge", "ChallengeButtonText", CYAN_NEON, TEXT_DARK);
 
             // View Profile Button
-            CreateCardButton(buttonsRow.transform, "ViewProfileButton", "Profile", CARD_BG_LIGHT, CYAN_NEON);
+            CreateCardButton(buttonsRow.transform, "ViewProfileButton", "Profile", "ViewProfileButtonText", CARD_BG_LIGHT, CYAN_NEON);
 
             // Remove Button (hidden)
-            var removeBtn = CreateCardButton(buttonsRow.transform, "RemoveButton", "Remove", CARD_BG_LIGHT, RED_BADGE);
+            var removeBtn = CreateCardButton(buttonsRow.transform, "RemoveButton", "Remove", "RemoveFriendButtonText", CARD_BG_LIGHT, RED_BADGE);
             removeBtn.SetActive(false);
 
             // Save as prefab
@@ -755,7 +759,7 @@ namespace DigitPark.Editor
             Debug.Log("[FriendsUI] Friend Card Prefab creado");
         }
 
-        private static GameObject CreateCardButton(Transform parent, string name, string label, Color bgColor, Color textColor)
+        private static GameObject CreateCardButton(Transform parent, string name, string label, string textGoName, Color bgColor, Color textColor)
         {
             var btn = new GameObject(name);
             btn.transform.SetParent(parent, false);
@@ -768,7 +772,7 @@ namespace DigitPark.Editor
             outline.effectColor = new Color(textColor.r, textColor.g, textColor.b, 0.3f);
             outline.effectDistance = new Vector2(1, 1);
 
-            var text = new GameObject("Text");
+            var text = new GameObject(textGoName);
             text.transform.SetParent(btn.transform, false);
             var tRT = text.AddComponent<RectTransform>();
             tRT.anchorMin = Vector2.zero;

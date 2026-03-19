@@ -68,16 +68,45 @@
       }
     },
 
-    "friendRequests": {
+    "friend_requests": {
       "$uid": {
-        // El usuario puede leer sus propias solicitudes
+        // El usuario puede leer sus propias solicitudes (enviadas y recibidas)
         ".read": "auth != null && auth.uid === $uid",
-        // Cualquier usuario autenticado puede crear una solicitud dirigida a otro (para enviar)
-        // El receptor puede actualizar (aceptar/rechazar) sus propias solicitudes
+        // Cualquier usuario autenticado puede crear/actualizar una solicitud
+        // (sender escribe bajo receiverId y senderId)
         "$requestId": {
           ".write": "auth != null",
-          ".validate": "newData.hasChildren(['fromUid', 'toUid', 'status'])"
+          ".validate": "newData.hasChildren(['requestId', 'senderId', 'receiverId', 'status'])"
         }
+      }
+    },
+
+    // Paths para borrado GDPR (DeleteAccount): solo el propio usuario puede borrar sus datos
+    "matchHistory": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "achievements": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "friends": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "tournamentHistory": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
       }
     },
 
@@ -110,6 +139,14 @@
         // (player1 crea, player2 actualiza su score)
         ".write": "auth != null",
         ".validate": "newData.hasChildren(['gameKey', 'player1Id', 'player2Id', 'status'])"
+      }
+    },
+
+    "ratelimits": {
+      "$uid": {
+        // Solo el usuario puede leer/escribir sus propios rate limits
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
       }
     },
 

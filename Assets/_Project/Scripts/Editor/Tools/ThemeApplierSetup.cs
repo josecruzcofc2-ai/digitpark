@@ -239,6 +239,7 @@ namespace DigitPark.Editor
             count += ProcessButtons();
             count += ProcessSliders();
             count += ProcessOutlines();
+            count += ProcessDualImageOutlines(); // Image+Outline dual: outline skipped by ProcessOutlines
             count += ProcessTabs();
             count += ProcessDividers();
             count += ProcessProgressBars();
@@ -281,13 +282,18 @@ namespace DigitPark.Editor
             // Backgrounds
             if (name.Contains("background") || name == "bg")
             {
-                if (name.Contains("main") || name.Contains("screen"))
+                if (name == "background" || name == "bg" || name.Contains("main") || name.Contains("screen"))
                     return ThemeApplier.ElementType.PrimaryBackground;
                 else if (name.Contains("card") || name.Contains("popup"))
                     return ThemeApplier.ElementType.CardBackground;
                 else
                     return ThemeApplier.ElementType.SecondaryBackground;
             }
+
+            // Overlay blockers (before generic panel check)
+            if (name.Contains("blocker") || name.Contains("dimmer") ||
+                (name.Contains("loading") && name.Contains("panel")))
+                return ThemeApplier.ElementType.Overlay;
 
             // Panels/cards
             if (name.Contains("panel"))
@@ -367,9 +373,11 @@ namespace DigitPark.Editor
 
             if (name.Contains("title") || name.Contains("header"))
                 return ThemeApplier.ElementType.TextTitle;
-            if (name.Contains("placeholder"))
+            if (name.Contains("placeholder") || name == "versiontext" || name.Contains("version"))
                 return ThemeApplier.ElementType.TextDisabled;
-            if (name.Contains("label") || name.Contains("subtitle") || (name.Contains("stats") && !name.Contains("value")))
+            if (name.Contains("label") || name.Contains("subtitle") || name == "loadingtext" ||
+                name.Contains("count") || name.Contains("total") ||
+                (name.Contains("stats") && !name.Contains("value")))
                 return ThemeApplier.ElementType.TextSecondary;
             if (name.Contains("error"))
                 return ThemeApplier.ElementType.Error;
@@ -576,6 +584,55 @@ namespace DigitPark.Editor
                 return ThemeApplier.ElementType.Accent;
 
             return ThemeApplier.ElementType.Glow;
+        }
+
+        // ==================== PROCESSOR: DUAL IMAGE + OUTLINE ====================
+        // GOs that have both Image AND Outline need a SECOND ThemeApplier for the outline.
+        // ProcessOutlines() skips them because ProcessImages() already added ThemeApplier.
+        // This processor detects that gap and adds the glow-only ThemeApplier.
+
+        private static int ProcessDualImageOutlines()
+        {
+            int count = 0;
+            var images = GameObject.FindObjectsOfType<Image>(true);
+
+            foreach (var img in images)
+            {
+                // Must have an Outline to be a dual case
+                Outline outline = img.GetComponent<Outline>();
+                if (outline == null) continue;
+
+                // Skip buttons (ProcessButtons handles their glow via applyToOutline)
+                if (img.GetComponent<Button>() != null) continue;
+                if (img.GetComponent<GameCardEffect>() != null) continue;
+
+                // Check if any existing ThemeApplier already covers the outline
+                bool outlineAlreadyCovered = false;
+                var existingAppliers = img.GetComponents<ThemeApplier>();
+                foreach (var ta in existingAppliers)
+                {
+                    var so = new SerializedObject(ta);
+                    if (so.FindProperty("applyToOutline").boolValue)
+                    {
+                        outlineAlreadyCovered = true;
+                        break;
+                    }
+                }
+                if (outlineAlreadyCovered) continue;
+
+                // If no ThemeApplier exists at all, ProcessOutlines() will handle it — skip
+                if (existingAppliers.Length == 0) continue;
+
+                // Dual case confirmed: has Image ThemeApplier but outline uncovered → add glow ThemeApplier
+                var applier = img.gameObject.AddComponent<ThemeApplier>();
+                SetElementType(applier, ThemeApplier.ElementType.Glow);
+                SetApplyToImage(applier, false);
+                SetApplyToText(applier, false);
+                SetApplyToOutline(applier, true);
+                EditorUtility.SetDirty(img.gameObject);
+                count++;
+            }
+            return count;
         }
 
         // ==================== PROCESSOR: TABS ====================

@@ -100,6 +100,8 @@ namespace DigitPark.UI
             _playerErrorsSeq?.Kill();
             _opponentTimeSeq?.Kill();
             _opponentErrorsSeq?.Kill();
+            continueButton?.onClick.RemoveAllListeners();
+            rematchButton?.onClick.RemoveAllListeners();
         }
 
         private void SetupButtons()

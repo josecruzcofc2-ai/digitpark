@@ -513,6 +513,7 @@ namespace DigitPark.Monetization
             if (item != null && !_shopItems.Contains(item))
             {
                 _shopItems.Add(item);
+                item.OnPurchaseRequested -= OnItemPurchaseRequested;
                 item.OnPurchaseRequested += OnItemPurchaseRequested;
             }
         }

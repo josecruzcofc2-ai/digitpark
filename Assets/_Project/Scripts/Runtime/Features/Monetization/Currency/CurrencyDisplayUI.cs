@@ -280,7 +280,7 @@ namespace DigitPark.Monetization
         private System.Collections.IEnumerator ShakeCoroutine()
         {
             float elapsed = 0f;
-            float duration = 0.3f;
+            float duration = _animationDuration;
             float intensity = 10f;
             Vector3 originalPosition = transform.localPosition;
 

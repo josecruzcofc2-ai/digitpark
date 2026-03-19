@@ -202,9 +202,9 @@ namespace DigitPark.Services
             switch (data.Type)
             {
                 case DeepLinkType.Profile:
-                    // Navegar a perfil del usuario
-                    // TODO: Pasar userId al ProfileManager
-                    PlayerPrefs.SetString("DeepLink_ProfileId", data.Id);
+                    PlayerPrefs.SetString("DP_ViewProfileId", data.Id);
+                    PlayerPrefs.SetString("DP_ProfileReturnScene", "MainMenu");
+                    PlayerPrefs.Save();
                     SceneNavigator.Instance.NavigateTo("Profile");
                     break;
 

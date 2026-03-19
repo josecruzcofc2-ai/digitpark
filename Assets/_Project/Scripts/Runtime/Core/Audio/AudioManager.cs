@@ -311,7 +311,7 @@ namespace DigitPark.Managers
             musicVolume = Mathf.Clamp01(volume);
             musicSource.volume = musicVolume;
 
-            PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+            PlayerPrefs.SetFloat("DP_MusicVolume", musicVolume);
             PlayerPrefs.Save();
 
             Debug.Log($"[Audio] Volumen de música: {musicVolume}");
@@ -325,7 +325,7 @@ namespace DigitPark.Managers
             sfxVolume = Mathf.Clamp01(volume);
             sfxSource.volume = sfxVolume;
 
-            PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
+            PlayerPrefs.SetFloat("DP_SFXVolume", sfxVolume);
             PlayerPrefs.Save();
 
             Debug.Log($"[Audio] Volumen de SFX: {sfxVolume}");
@@ -425,16 +425,16 @@ namespace DigitPark.Managers
         /// </summary>
         private void LoadAudioSettings()
         {
-            if (PlayerPrefs.HasKey("MusicVolume"))
+            if (PlayerPrefs.HasKey("DP_MusicVolume"))
             {
-                musicVolume = PlayerPrefs.GetFloat("MusicVolume");
-                musicSource.volume = musicVolume;
+                musicVolume = PlayerPrefs.GetFloat("DP_MusicVolume");
+                if (musicSource != null) musicSource.volume = musicVolume;
             }
 
-            if (PlayerPrefs.HasKey("SFXVolume"))
+            if (PlayerPrefs.HasKey("DP_SFXVolume"))
             {
-                sfxVolume = PlayerPrefs.GetFloat("SFXVolume");
-                sfxSource.volume = sfxVolume;
+                sfxVolume = PlayerPrefs.GetFloat("DP_SFXVolume");
+                if (sfxSource != null) sfxSource.volume = sfxVolume;
             }
 
             Debug.Log($"[Audio] Configuración cargada - Música: {musicVolume}, SFX: {sfxVolume}");

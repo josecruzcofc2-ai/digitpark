@@ -573,7 +573,7 @@ namespace DigitPark.Managers
         public void SetNotificationsEnabled(bool enabled)
         {
             showNotifications = enabled;
-            PlayerPrefs.SetInt("AchievementNotifications", enabled ? 1 : 0);
+            PlayerPrefs.SetInt("DP_AchievementNotifications", enabled ? 1 : 0);
             PlayerPrefs.Save();
         }
 

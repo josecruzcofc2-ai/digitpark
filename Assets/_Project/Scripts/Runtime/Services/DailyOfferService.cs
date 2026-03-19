@@ -174,6 +174,7 @@ namespace DigitPark.Services
             LoadState();
             GenerateOffersIfNeeded();
             _initialized = true;
+            WishlistService.Instance?.CheckAndNotifyWishlist(_todayOffers);
             Debug.Log($"[DailyOfferService] Initialized — today: {GetTodayKey()}");
         }
 
@@ -187,7 +188,9 @@ namespace DigitPark.Services
         private int GetDaySeed()
         {
             var today = DateTime.UtcNow.Date;
-            return today.Year * 10000 + today.Month * 100 + today.Day;
+            int dateBase = today.Year * 10000 + today.Month * 100 + today.Day;
+            int userId = Mathf.Abs(PlayerPrefs.GetString("DP_SavedUserId", "").GetHashCode());
+            return dateBase + userId;
         }
 
         private void GenerateOffersIfNeeded()
@@ -406,8 +409,8 @@ namespace DigitPark.Services
                         return false;
                 }
 
-                // TODO: Grant the actual item (theme/frame/effect/title/card)
-                // This will be wired when each cosmetic service has a UnlockById method
+                // Grant the actual item based on itemId prefix
+                GrantDailyOfferItem(offer);
                 Debug.Log($"[DailyOfferService] Purchased: {offer.displayName} for {offer.discountedPrice} {offer.currency}");
             }
 
@@ -428,6 +431,39 @@ namespace DigitPark.Services
             return true;
         }
 
+        private void GrantDailyOfferItem(DailyOffer offer)
+        {
+            string id = offer.itemId;
+            if (id.StartsWith("theme_"))
+            {
+                PlayerPrefs.SetInt($"Theme_Owned_{id}", 1);
+                PlayerPrefs.Save();
+            }
+            else if (id.StartsWith("frame_"))
+            {
+                PlayerPrefs.SetInt($"Frame_Owned_{id}", 1);
+                PlayerPrefs.Save();
+            }
+            else if (id.StartsWith("effect_"))
+            {
+                VictoryEffectService.Instance?.UnlockEffect(id);
+            }
+            else if (id.StartsWith("title_"))
+            {
+                PlayerPrefs.SetInt($"Title_Owned_{id}", 1);
+                PlayerPrefs.Save();
+            }
+            else if (id.StartsWith("card_"))
+            {
+                PlayerPrefs.SetInt($"BattleCard_Owned_{id}", 1);
+                PlayerPrefs.Save();
+            }
+            else
+            {
+                Debug.LogWarning($"[DailyOfferService] Unknown item type for grant: {id}");
+            }
+        }
+
         private void ApplyFreeReward(DailyOffer offer)
         {
             var currency = DigitPark.Monetization.CurrencyManager.Instance;
@@ -440,7 +476,7 @@ namespace DigitPark.Services
                 case FreeRewardType.XPBoost:
                     // Store XP boost expiry in PlayerPrefs
                     var expiry = DateTime.UtcNow.AddHours(offer.freeRewardAmount);
-                    PlayerPrefs.SetString("XPBoost_Expiry", expiry.ToString("o"));
+                    PlayerPrefs.SetString("DP_XPBoost_Expiry", expiry.ToString("o"));
                     PlayerPrefs.Save();
                     Debug.Log($"[DailyOfferService] XP Boost activated: x2 for {offer.freeRewardAmount}h");
                     break;

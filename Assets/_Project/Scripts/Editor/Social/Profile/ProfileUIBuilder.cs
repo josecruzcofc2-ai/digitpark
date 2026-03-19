@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -172,8 +174,9 @@ namespace DigitPark.Editor
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             var img = GetOrAdd<Image>(bg);
-            img.color = DARK_BG;
+            img.color = Color.white; // ThemeApplier tints at runtime
             img.raycastTarget = false;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -700,7 +703,7 @@ namespace DigitPark.Editor
             barImg.raycastTarget = false;
 
             // Game Name
-            var lbl = FindOrCreate(row.transform, "Label");
+            var lbl = FindOrCreate(row.transform, name + "Label");
             var lRT = GetOrAdd<RectTransform>(lbl);
             lRT.anchorMin = new Vector2(0, 0);
             lRT.anchorMax = new Vector2(0.30f, 1);

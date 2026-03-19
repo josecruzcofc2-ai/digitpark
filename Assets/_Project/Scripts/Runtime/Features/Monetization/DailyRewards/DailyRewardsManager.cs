@@ -131,10 +131,10 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            EnsureServicesExist();
+
             if (titleText != null)
                 titleText.text = AutoLocalizer.Get("daily_rewards");
-
-            EnsureServicesExist();
             LoadNeonIcons();
             InitializeRewards();
             LoadProgress();
@@ -274,17 +274,28 @@ namespace DigitPark.Managers
             if (rewards.Count == 0)
             {
                 // Economy Rebalance: ascending curve + gem drip D7 only
-                // DG is premium — only 3 DG/week to keep earn time 2-3 months for cheapest item
-                // Weekly total: 1,825 DC + 3 DG
+                // E-R05: 14-day cycle — Week 1+2 repeat with D14 grand bonus (+5 DG)
+                // Weekly total: 1,825 DC + 3 DG per week. D14 adds 5 DG biweekly bonus.
+                // Biweekly DG drip: 11 DG total (3+3+5) over 14 days
                 rewards = new List<DailyRewardConfig>
                 {
-                    new DailyRewardConfig { day = 1, type = "coins",  amount = 50,  name = "reward_coins" },
-                    new DailyRewardConfig { day = 2, type = "coins",  amount = 75,  name = "reward_coins" },
-                    new DailyRewardConfig { day = 3, type = "coins",  amount = 125, name = "reward_coins" },
-                    new DailyRewardConfig { day = 4, type = "coins",  amount = 175, name = "reward_coins" },
-                    new DailyRewardConfig { day = 5, type = "coins",  amount = 250, name = "reward_coins" },
-                    new DailyRewardConfig { day = 6, type = "coins",  amount = 400, name = "reward_coins" },
-                    new DailyRewardConfig { day = 7, type = "mixed",  amount = 750, gemsAmount = 3, name = "reward_mixed", isSpecial = true },
+                    // Week 1
+                    new DailyRewardConfig { day = 1,  type = "coins",  amount = 50,  name = "reward_coins" },
+                    new DailyRewardConfig { day = 2,  type = "coins",  amount = 75,  name = "reward_coins" },
+                    new DailyRewardConfig { day = 3,  type = "coins",  amount = 125, name = "reward_coins" },
+                    new DailyRewardConfig { day = 4,  type = "coins",  amount = 175, name = "reward_coins" },
+                    new DailyRewardConfig { day = 5,  type = "coins",  amount = 250, name = "reward_coins" },
+                    new DailyRewardConfig { day = 6,  type = "coins",  amount = 400, name = "reward_coins" },
+                    new DailyRewardConfig { day = 7,  type = "mixed",  amount = 750, gemsAmount = 3, name = "reward_mixed", isSpecial = true },
+                    // Week 2
+                    new DailyRewardConfig { day = 8,  type = "coins",  amount = 50,  name = "reward_coins" },
+                    new DailyRewardConfig { day = 9,  type = "coins",  amount = 75,  name = "reward_coins" },
+                    new DailyRewardConfig { day = 10, type = "coins",  amount = 125, name = "reward_coins" },
+                    new DailyRewardConfig { day = 11, type = "coins",  amount = 175, name = "reward_coins" },
+                    new DailyRewardConfig { day = 12, type = "coins",  amount = 250, name = "reward_coins" },
+                    new DailyRewardConfig { day = 13, type = "coins",  amount = 400, name = "reward_coins" },
+                    // E-R05: Day 14 — 2-week completion bonus (+8 DG: F2P path to Tier S in ~16 months)
+                    new DailyRewardConfig { day = 14, type = "mixed",  amount = 750, gemsAmount = 8, name = "reward_mixed", isSpecial = true },
                 };
 
                 daysInCycle = rewards.Count;
@@ -293,9 +304,9 @@ namespace DigitPark.Managers
 
         private void LoadProgress()
         {
-            currentDayInCycle = PlayerPrefs.GetInt("DailyRewards_CurrentDay", 0);
+            currentDayInCycle = PlayerPrefs.GetInt("DP_DailyRewards_CurrentDay", 0);
 
-            string lastClaimStr = PlayerPrefs.GetString("DailyRewards_LastClaim", "");
+            string lastClaimStr = PlayerPrefs.GetString("DP_DailyRewards_LastClaim", "");
             if (!string.IsNullOrEmpty(lastClaimStr))
             {
                 lastClaimDate = DateTime.TryParse(lastClaimStr, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsed) ? parsed : DateTime.MinValue;
@@ -308,8 +319,8 @@ namespace DigitPark.Managers
 
         private void SaveProgress()
         {
-            PlayerPrefs.SetInt("DailyRewards_CurrentDay", currentDayInCycle);
-            PlayerPrefs.SetString("DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
+            PlayerPrefs.SetInt("DP_DailyRewards_CurrentDay", currentDayInCycle);
+            PlayerPrefs.SetString("DP_DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
             PlayerPrefs.Save();
 
             // Sync to Firebase
@@ -394,11 +405,14 @@ namespace DigitPark.Managers
 
                 if (changed)
                 {
-                    // Save merged values back to PlayerPrefs
-                    PlayerPrefs.SetInt("DailyRewards_CurrentDay", currentDayInCycle);
-                    PlayerPrefs.SetString("DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
-                    PlayerPrefs.Save();
-                    Debug.Log($"[DailyRewards] Firebase restore merged — day:{currentDayInCycle}, lastClaim:{lastClaimDate:yyyy-MM-dd}");
+                    // Save merged values back to PlayerPrefs (must run on Unity main thread)
+                    UnityMainThreadDispatcher.Instance()?.Enqueue(() =>
+                    {
+                        PlayerPrefs.SetInt("DP_DailyRewards_CurrentDay", currentDayInCycle);
+                        PlayerPrefs.SetString("DP_DailyRewards_LastClaim", lastClaimDate.ToString("yyyy-MM-dd"));
+                        PlayerPrefs.Save();
+                        Debug.Log($"[DailyRewards] Firebase restore merged — day:{currentDayInCycle}, lastClaim:{lastClaimDate:yyyy-MM-dd}");
+                    });
                 }
                 else
                 {
@@ -483,6 +497,34 @@ namespace DigitPark.Managers
                 if (result != null) return result;
             }
             return null;
+        }
+
+        // ==================== SEC-B02: SERVER TIME VALIDATION ====================
+
+        /// <summary>
+        /// SEC-B02: Retrieves server time via Firebase ServerValue.Timestamp.
+        /// Falls back to DateTime.UtcNow if Firebase is unavailable.
+        /// Prevents client clock manipulation for claim bypass.
+        /// </summary>
+        private async Task<DateTime> GetValidatedTimeAsync()
+        {
+            try
+            {
+                var db = FirebaseDB.FirebaseDatabase.DefaultInstance;
+                var serverTimeRef = db.GetReference(".info/serverTimeOffset");
+                var snapshot = await serverTimeRef.GetValueAsync();
+                if (snapshot != null && snapshot.Value != null)
+                {
+                    // serverTimeOffset is the difference (ms) between server time and local time
+                    long offsetMs = Convert.ToInt64(snapshot.Value);
+                    return DateTime.UtcNow.AddMilliseconds(offsetMs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[DailyRewards] SEC-B02: Server time unavailable, using local time: {ex.Message}");
+            }
+            return DateTime.UtcNow;
         }
 
         private void CheckClaimStatus()
@@ -740,7 +782,7 @@ namespace DigitPark.Managers
             bdRT.anchorMin = new Vector2(0.5f, 1);
             bdRT.anchorMax = new Vector2(0.5f, 1);
             bdRT.pivot = new Vector2(0.5f, 0);
-            bdRT.anchoredPosition = new Vector2(0, 2);
+            bdRT.anchoredPosition = new Vector2(0, -14);
             bdRT.sizeDelta = new Vector2(180, 28);
             badge.AddComponent<LayoutElement>().ignoreLayout = true;
             badge.AddComponent<Image>().color = GOLD;
@@ -962,30 +1004,30 @@ namespace DigitPark.Managers
 
                 // Background → GREEN_CLAIMED
                 if (cardImage != null)
-                    cardImage.DOColor(GREEN_CLAIMED, 0.4f);
+                    cardImage.DOColor(GREEN_CLAIMED, 0.4f).SetLink(gameObject);
 
                 // Outline → GREEN_SUCCESS
                 if (cardOutline != null)
                 {
                     DOTween.To(() => cardOutline.effectColor, c => cardOutline.effectColor = c,
-                        GREEN_SUCCESS, 0.4f);
+                        GREEN_SUCCESS, 0.4f).SetLink(gameObject);
                     cardOutline.effectDistance = new Vector2(1, 1);
                 }
 
                 // DayLabel color → GREEN_SUCCESS
                 var dayLabelTMP = claimedCard.transform.Find("DayLabel")?.GetComponent<TextMeshProUGUI>();
                 if (dayLabelTMP != null)
-                    dayLabelTMP.DOColor(GREEN_SUCCESS, 0.4f);
+                    dayLabelTMP.DOColor(GREEN_SUCCESS, 0.4f).SetLink(gameObject);
 
                 // Fade icon to 40% opacity
                 var iconImg = claimedCard.transform.Find("RewardIcon")?.GetComponent<Image>();
                 if (iconImg != null)
-                    iconImg.DOFade(0.4f, 0.3f);
+                    iconImg.DOFade(0.4f, 0.3f).SetLink(gameObject);
 
                 // Fade amount text to 50% opacity
                 var amountTMP = claimedCard.transform.Find("AmountText")?.GetComponent<TextMeshProUGUI>();
                 if (amountTMP != null)
-                    amountTMP.DOFade(0.5f, 0.3f);
+                    amountTMP.DOFade(0.5f, 0.3f).SetLink(gameObject);
 
                 // Remove IconGlow if present
                 var iconGlow = claimedCard.transform.Find("RewardIcon/IconGlow");
@@ -993,14 +1035,14 @@ namespace DigitPark.Managers
                 {
                     var igImg = iconGlow.GetComponent<Image>();
                     if (igImg != null)
-                        igImg.DOFade(0f, 0.2f).OnComplete(() => Destroy(iconGlow.gameObject));
+                        igImg.DOFade(0f, 0.2f).SetLink(gameObject).OnComplete(() => Destroy(iconGlow.gameObject));
                 }
 
                 // Remove TodayBadge with scale-out
                 var todayBadge = claimedCard.transform.Find("TodayBadge");
                 if (todayBadge != null)
                 {
-                    todayBadge.DOScale(0f, 0.2f).SetEase(Ease.InBack)
+                    todayBadge.DOScale(0f, 0.2f).SetEase(Ease.InBack).SetLink(gameObject)
                         .OnComplete(() => Destroy(todayBadge.gameObject));
                 }
 
@@ -1038,7 +1080,7 @@ namespace DigitPark.Managers
                 ctTMP.alignment = TextAlignmentOptions.Center;
 
                 check.transform.localScale = Vector3.zero;
-                check.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetDelay(0.2f);
+                check.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetDelay(0.2f).SetLink(gameObject);
             }
 
             // --- Animate next day card to "today" state ---
@@ -1061,21 +1103,21 @@ namespace DigitPark.Managers
                     if (nextOutline != null)
                     {
                         DOTween.To(() => nextOutline.effectColor, c => nextOutline.effectColor = c,
-                            GOLD, 0.4f);
+                            GOLD, 0.4f).SetLink(gameObject);
                         nextOutline.effectDistance = new Vector2(2, 2);
                     }
 
                     // DayLabel color → GOLD
                     var nextDayLabel = nextCard.transform.Find("DayLabel")?.GetComponent<TextMeshProUGUI>();
                     if (nextDayLabel != null)
-                        nextDayLabel.DOColor(GOLD, 0.4f);
+                        nextDayLabel.DOColor(GOLD, 0.4f).SetLink(gameObject);
 
                     // Remove LockOverlay if present
                     var lockOverlay = nextCard.transform.Find("LockOverlay");
                     if (lockOverlay != null)
                     {
                         var loCG = lockOverlay.gameObject.GetComponent<CanvasGroup>() ?? lockOverlay.gameObject.AddComponent<CanvasGroup>();
-                        loCG.DOFade(0f, 0.3f).OnComplete(() => Destroy(lockOverlay.gameObject));
+                        loCG.DOFade(0f, 0.3f).SetLink(gameObject).OnComplete(() => Destroy(lockOverlay.gameObject));
                     }
 
                     // Create TodayBadge with bounce-in
@@ -1085,7 +1127,7 @@ namespace DigitPark.Managers
                     bdRT.anchorMin = new Vector2(0.5f, 1);
                     bdRT.anchorMax = new Vector2(0.5f, 1);
                     bdRT.pivot = new Vector2(0.5f, 1);
-                    bdRT.anchoredPosition = new Vector2(0, 2);
+                    bdRT.anchoredPosition = new Vector2(0, -14);
                     bdRT.sizeDelta = new Vector2(80, 22);
                     badge.AddComponent<Image>().color = GOLD;
 
@@ -1107,7 +1149,7 @@ namespace DigitPark.Managers
                     bttTMP.alignment = TextAlignmentOptions.Center;
 
                     badge.transform.localScale = Vector3.zero;
-                    badge.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetDelay(0.3f);
+                    badge.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetDelay(0.3f).SetLink(gameObject);
 
                     // Add PulseAnimation to new "today" card
                     var nextPulse = nextCard.AddComponent<PulseAnimation>();
@@ -1128,7 +1170,7 @@ namespace DigitPark.Managers
                         var igImg = iconGlow.AddComponent<Image>();
                         igImg.color = new Color(GOLD.r, GOLD.g, GOLD.b, 0f);
                         igImg.raycastTarget = false;
-                        igImg.DOFade(0.15f, 0.3f).SetDelay(0.3f);
+                        igImg.DOFade(0.15f, 0.3f).SetDelay(0.3f).SetLink(gameObject);
                     }
                 }
             }
@@ -1264,7 +1306,7 @@ namespace DigitPark.Managers
                 bdRT.anchorMin = new Vector2(0.5f, 1);
                 bdRT.anchorMax = new Vector2(0.5f, 1);
                 bdRT.pivot = new Vector2(0.5f, 1);
-                bdRT.anchoredPosition = new Vector2(0, 2);
+                bdRT.anchoredPosition = new Vector2(0, -14);
                 bdRT.sizeDelta = new Vector2(80, 22);
                 badge.AddComponent<Image>().color = GOLD;
 
@@ -1498,7 +1540,7 @@ namespace DigitPark.Managers
 
             // Update state — Model 2: advance day, cycle resets at end of week
             currentDayInCycle = (currentDayInCycle + 1) % rewards.Count;
-            lastClaimDate = DateTime.Now;
+            lastClaimDate = DateTime.UtcNow;
             canClaimToday = false;
 
             SaveProgress();
@@ -1566,8 +1608,8 @@ namespace DigitPark.Managers
                         currencyMgr.AddCoins(reward.amount);
                     else
                     {
-                        int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                        PlayerPrefs.SetInt("PlayerCoins", currentCoins + reward.amount);
+                        int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
+                        PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + reward.amount);
                     }
                     break;
 
@@ -1576,8 +1618,8 @@ namespace DigitPark.Managers
                         currencyMgr.AddGems(reward.amount);
                     else
                     {
-                        int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                        PlayerPrefs.SetInt("PlayerGems", currentGems + reward.amount);
+                        int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
+                        PlayerPrefs.SetInt("DP_PlayerGems", currentGems + reward.amount);
                     }
                     break;
 
@@ -1591,19 +1633,19 @@ namespace DigitPark.Managers
                     }
                     else
                     {
-                        int currentCoins2 = PlayerPrefs.GetInt("PlayerCoins", 0);
-                        PlayerPrefs.SetInt("PlayerCoins", currentCoins2 + reward.amount);
+                        int currentCoins2 = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
+                        PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins2 + reward.amount);
                         if (reward.gemsAmount > 0)
                         {
-                            int currentGems2 = PlayerPrefs.GetInt("PlayerGems", 0);
-                            PlayerPrefs.SetInt("PlayerGems", currentGems2 + reward.gemsAmount);
+                            int currentGems2 = PlayerPrefs.GetInt("DP_PlayerGems", 0);
+                            PlayerPrefs.SetInt("DP_PlayerGems", currentGems2 + reward.gemsAmount);
                         }
                     }
                     break;
 
                 case "xp":
-                    int currentXP = PlayerPrefs.GetInt("PlayerXP", 0);
-                    PlayerPrefs.SetInt("PlayerXP", currentXP + reward.amount);
+                    int currentXP = PlayerPrefs.GetInt("DP_PlayerXP", 0);
+                    PlayerPrefs.SetInt("DP_PlayerXP", currentXP + reward.amount);
                     break;
 
             }
@@ -1731,7 +1773,7 @@ namespace DigitPark.Managers
                 {
                     if (giftGlowImage)
                         giftGlowImage.transform.DORotate(new Vector3(0, 0, 360), 8f, RotateMode.FastBeyond360)
-                            .SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear);
+                            .SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear).SetLink(gameObject);
                 });
             }
 
@@ -1795,7 +1837,8 @@ namespace DigitPark.Managers
                         // Gentle breathing pulse on continue text
                         continueButton.transform.DOScale(1.05f, 0.8f)
                             .SetLoops(-1, LoopType.Yoyo)
-                            .SetEase(Ease.InOutSine);
+                            .SetEase(Ease.InOutSine)
+                            .SetLink(continueButton.gameObject);
                     }
                 });
             }
@@ -1879,6 +1922,10 @@ namespace DigitPark.Managers
         private void OnDisable()
         {
             CancelInvoke(nameof(UpdateNextResetTimer));
+            // DR-04: Remove listeners to prevent stale callbacks when scene is unloaded
+            backButton?.onClick.RemoveAllListeners();
+            claimButton?.onClick.RemoveAllListeners();
+            continueButton?.onClick.RemoveAllListeners();
         }
 
         private void AnimatePanelIn(GameObject panel)
@@ -1890,8 +1937,8 @@ namespace DigitPark.Managers
             cg.alpha = 0f;
             panel.transform.localScale = Vector3.one * 0.85f;
             DOTween.Kill(panel.transform);
-            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
-            cg.DOFade(1f, 0.25f);
+            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetLink(panel);
+            cg.DOFade(1f, 0.25f).SetLink(panel);
         }
 
         private void AnimatePanelOut(GameObject panel, Action onComplete = null)
@@ -1900,8 +1947,8 @@ namespace DigitPark.Managers
             CanvasGroup cg = panel.GetComponent<CanvasGroup>();
             if (cg == null) cg = panel.AddComponent<CanvasGroup>();
             DOTween.Kill(panel.transform);
-            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
-            cg.DOFade(0f, 0.2f).OnComplete(() =>
+            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad).SetLink(panel);
+            cg.DOFade(0f, 0.2f).SetLink(panel).OnComplete(() =>
             {
                 if (panel != null) panel.SetActive(false);
                 if (cg != null) cg.alpha = 1f;
@@ -1918,6 +1965,10 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             transform.DOKill();
+            // DR-04: Also remove listeners in OnDestroy (covers scenes that destroy without disabling)
+            backButton?.onClick.RemoveAllListeners();
+            claimButton?.onClick.RemoveAllListeners();
+            continueButton?.onClick.RemoveAllListeners();
         }
     }
 

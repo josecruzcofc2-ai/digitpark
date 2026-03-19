@@ -57,21 +57,21 @@ namespace DigitPark.UI
         public void RefreshAll()
         {
             // Emerald — 365 days login (non-consecutive)
-            int totalLoginDays = PlayerPrefs.GetInt("TotalLoginDays", 0);
+            int totalLoginDays = PlayerPrefs.GetInt("DP_TotalLoginDays", 0);
             UpdateBar(emeraldBar, "Emerald", "emerald_trophy",
                 totalLoginDays, 365,
                 AutoLocalizer.Get("trophy_emerald_desc"),
                 new Color(0.063f, 0.725f, 0.506f));
 
             // Electric Blue — 1,000 ranked wins
-            int rankedWins = PlayerPrefs.GetInt("RankedWins_Total", 0);
+            int rankedWins = PlayerPrefs.GetInt("DP_RankedWins_Total", 0);
             UpdateBar(electricBlueBar, "Electric Blue", "electric_blue_trophy",
                 rankedWins, 1000,
                 AutoLocalizer.Get("trophy_electric_blue_desc"),
                 new Color(0.231f, 0.51f, 0.965f));
 
             // Electric Violet — 100 perfect scores
-            int perfectScores = PlayerPrefs.GetInt("PerfectScores_Total", 0);
+            int perfectScores = PlayerPrefs.GetInt("DP_PerfectScores_Total", 0);
             UpdateBar(electricVioletBar, "Electric Violet", "electric_violet_trophy",
                 perfectScores, 100,
                 AutoLocalizer.Get("trophy_electric_violet_desc"),

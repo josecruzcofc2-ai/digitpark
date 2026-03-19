@@ -316,6 +316,7 @@ namespace DigitPark.Editor
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.sizeDelta = Vector2.zero;
+            safeArea.AddComponent<SafeAreaHandler>();
 
             return safeArea;
         }

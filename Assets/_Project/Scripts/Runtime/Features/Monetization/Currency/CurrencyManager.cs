@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
@@ -153,6 +154,14 @@ namespace DigitPark.Monetization
             else
                 _coins = PlayerPrefs.GetInt(COINS_KEY, DEFAULT_COINS);
 
+            // SEC-M04: Verify balance integrity — if tampered, Firebase restore will override
+            if (!VerifyBalanceIntegrity(_gems, _coins))
+            {
+                // On integrity failure reset to 0 locally — Firebase sync will restore correct values
+                _gems = 0;
+                _coins = 0;
+            }
+
             // D-8 FIX: Restore persisted escrow state. If escrow > 0 on boot,
             // a crash happened mid-escrow — refund the escrowed amount back to balance.
             _escrowedGems = PlayerPrefs.GetInt(ESCROW_GEMS_KEY, 0);
@@ -272,10 +281,52 @@ namespace DigitPark.Monetization
             }
         }
 
+        // ==================== SEC-M04: HMAC-SHA256 BALANCE INTEGRITY ====================
+
+        private const string BALANCE_HMAC_KEY = "dp_bal_hmac";
+        // Device-bound secret: SystemInfo.deviceUniqueIdentifier + salt. Not cryptographically
+        // perfect on rooted devices, but stops casual PlayerPrefs hex-editing.
+        private static string GetHmacSecret() =>
+            SystemInfo.deviceUniqueIdentifier + "_dp_bal_v1";
+
+        private static string ComputeBalanceHmac(int gems, int coins)
+        {
+            try
+            {
+                byte[] keyBytes = System.Text.Encoding.UTF8.GetBytes(GetHmacSecret());
+                byte[] data = System.Text.Encoding.UTF8.GetBytes($"{gems}:{coins}");
+                using var hmac = new HMACSHA256(keyBytes);
+                byte[] hash = hmac.ComputeHash(data);
+                return System.Convert.ToBase64String(hash);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[CurrencyManager] HMAC compute failed: {ex.Message}");
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// SEC-M04: Returns true if the stored balance HMAC matches expected value.
+        /// Call on load to detect tampering. On failure, falls back to Firebase sync.
+        /// </summary>
+        private bool VerifyBalanceIntegrity(int gems, int coins)
+        {
+            string storedHmac = PlayerPrefs.GetString(BALANCE_HMAC_KEY, "");
+            if (string.IsNullOrEmpty(storedHmac)) return true; // no HMAC yet — first run
+            string expectedHmac = ComputeBalanceHmac(gems, coins);
+            bool valid = storedHmac == expectedHmac;
+            if (!valid)
+                Debug.LogWarning("[CurrencyManager] SEC-M04: Balance integrity check FAILED — possible tampering detected. Firebase sync will override.");
+            return valid;
+        }
+
         private void SaveCurrency()
         {
             PlayerPrefs.SetInt(GEMS_KEY_V2, _gems ^ CURRENCY_XOR_SALT);
             PlayerPrefs.SetInt(COINS_KEY_V2, _coins ^ CURRENCY_XOR_SALT);
+            // SEC-M04: Write HMAC of raw (unobfuscated) balance values
+            PlayerPrefs.SetString(BALANCE_HMAC_KEY, ComputeBalanceHmac(_gems, _coins));
             // Remove legacy plain-text keys after migration
             if (PlayerPrefs.HasKey(GEMS_KEY)) PlayerPrefs.DeleteKey(GEMS_KEY);
             if (PlayerPrefs.HasKey(COINS_KEY)) PlayerPrefs.DeleteKey(COINS_KEY);

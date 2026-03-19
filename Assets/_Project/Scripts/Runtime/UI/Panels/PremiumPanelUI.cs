@@ -219,7 +219,8 @@ namespace DigitPark.UI.Panels
             if (createTournamentsDescriptionText != null)
                 createTournamentsDescriptionText.text = AutoLocalizer.Get("create_tournaments_description");
             if (createTournamentsPriceText != null)
-                createTournamentsPriceText.text = PremiumManager.PRICE_CREATE_TOURNAMENTS;
+                createTournamentsPriceText.text = PremiumManager.Instance?.GetProductPrice(PremiumProduct.CreateTournaments)
+                                                  ?? PremiumManager.PRICE_CREATE_TOURNAMENTS;
             if (createTournamentsBuyButtonText != null)
                 createTournamentsBuyButtonText.text = AutoLocalizer.Get("buy_button");
 
@@ -229,7 +230,8 @@ namespace DigitPark.UI.Panels
             if (bundleDescriptionText != null)
                 bundleDescriptionText.text = AutoLocalizer.Get("tournament_bundle_description");
             if (bundlePriceText != null)
-                bundlePriceText.text = PremiumManager.PRICE_TOURNAMENT_BUNDLE;
+                bundlePriceText.text = PremiumManager.Instance?.GetProductPrice(PremiumProduct.TournamentBundle)
+                                       ?? PremiumManager.PRICE_TOURNAMENT_BUNDLE;
             if (bundleBuyButtonText != null)
                 bundleBuyButtonText.text = AutoLocalizer.Get("buy_button");
             if (recommendedText != null)
@@ -607,7 +609,9 @@ namespace DigitPark.UI.Panels
             createTournamentsDescriptionText = CreateCardDescription(createTournamentsCard.transform, AutoLocalizer.Get("create_tournaments_description"));
 
             // Precio
-            createTournamentsPriceText = CreateCardPrice(createTournamentsCard.transform, PremiumManager.PRICE_CREATE_TOURNAMENTS, neonCyan);
+            createTournamentsPriceText = CreateCardPrice(createTournamentsCard.transform,
+                PremiumManager.Instance?.GetProductPrice(PremiumProduct.CreateTournaments) ?? PremiumManager.PRICE_CREATE_TOURNAMENTS,
+                neonCyan);
 
             // Boton comprar
             (createTournamentsBuyButton, createTournamentsBuyButtonText) = CreateBuyButton(createTournamentsCard.transform, neonCyan);
@@ -676,7 +680,9 @@ namespace DigitPark.UI.Panels
             bundleDescriptionText = CreateCardDescription(bundleCard.transform, AutoLocalizer.Get("tournament_bundle_description"));
 
             // Precio
-            bundlePriceText = CreateCardPrice(bundleCard.transform, PremiumManager.PRICE_TOURNAMENT_BUNDLE, neonGold);
+            bundlePriceText = CreateCardPrice(bundleCard.transform,
+                PremiumManager.Instance?.GetProductPrice(PremiumProduct.TournamentBundle) ?? PremiumManager.PRICE_TOURNAMENT_BUNDLE,
+                neonGold);
 
             // Boton comprar
             (bundleBuyButton, bundleBuyButtonText) = CreateBuyButton(bundleCard.transform, neonGold);

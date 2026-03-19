@@ -90,15 +90,15 @@ namespace DigitPark.Services
 
         private void SimulateLocationCheck()
         {
-            // En desarrollo: Asumir estado permitido
-            // En produccion: Triumph SDK determinara esto
-            CurrentCountry = "United States";
-            CurrentState = "California"; // Estado permitido por defecto
-            IsLocationKnown = true;
-            IsRestricted = IsStateRestricted(CurrentState);
+            // Triumph SDK no disponible — fail-closed: bloquear CashBattle
+            // hasta que la ubicación real sea conocida vía SDK.
+            CurrentCountry = "";
+            CurrentState = "";
+            IsLocationKnown = false;
+            IsRestricted = true;
             IsCheckingLocation = false;
 
-            Debug.Log($"[LocationRestriction] Ubicacion: {CurrentState}, {CurrentCountry}. Restringido: {IsRestricted}");
+            Debug.LogWarning("[LocationRestriction] SDK no disponible — CashBattle bloqueado (fail-closed).");
             OnLocationChecked?.Invoke(IsRestricted, CurrentState);
         }
 

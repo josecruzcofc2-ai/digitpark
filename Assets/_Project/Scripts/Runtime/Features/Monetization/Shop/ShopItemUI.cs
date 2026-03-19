@@ -4,6 +4,8 @@ using TMPro;
 using System;
 using DG.Tweening;
 using DigitPark.Localization;
+using DigitPark.Services;
+using DigitPark.Payments;
 
 namespace DigitPark.Monetization
 {
@@ -33,14 +35,20 @@ namespace DigitPark.Monetization
         [Header("Outline")]
         [SerializeField] private Outline _outline;
 
+        [Header("Wishlist")]
+        [SerializeField] private Button _wishlistButton;   // Optional — wire in prefab (M-39)
+        [SerializeField] private Image  _wishlistIcon;    // Heart icon image
+
         [Header("Audio")]
         [SerializeField] private AudioClip _clickSound;
 
         [Header("Colors")]
         [SerializeField] private Color _gemsColor = new Color(0.4f, 0.8f, 1f, 1f);
         [SerializeField] private Color _coinsColor = new Color(1f, 0.85f, 0.3f, 1f);
-        [SerializeField] private Color _popularColor = new Color(1f, 0.84f, 0f, 1f);
-        [SerializeField] private Color _disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        [SerializeField] private Color _popularColor      = new Color(1f, 0.84f, 0f, 1f);
+        [SerializeField] private Color _disabledColor     = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        [SerializeField] private Color _wishlistedColor   = new Color(1f, 0.27f, 0.27f, 1f); // red heart
+        [SerializeField] private Color _unwishlistedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f); // gray heart
 
         private AudioSource _audioSource;
         private bool _isProcessing = false;
@@ -70,9 +78,10 @@ namespace DigitPark.Monetization
         private void OnEnable()
         {
             if (_button != null)
-            {
                 _button.onClick.AddListener(OnButtonClick);
-            }
+
+            if (_wishlistButton != null)
+                _wishlistButton.onClick.AddListener(OnWishlistClick);
 
             // Subscribe to currency changes to update affordability
             if (CurrencyManager.Instance != null)
@@ -87,9 +96,10 @@ namespace DigitPark.Monetization
         private void OnDisable()
         {
             if (_button != null)
-            {
                 _button.onClick.RemoveListener(OnButtonClick);
-            }
+
+            if (_wishlistButton != null)
+                _wishlistButton.onClick.RemoveListener(OnWishlistClick);
 
             if (CurrencyManager.Instance != null)
             {
@@ -222,6 +232,9 @@ namespace DigitPark.Monetization
 
             // Update affordability visual
             UpdateAffordabilityVisual();
+
+            // Update wishlist visual
+            RefreshWishlistVisual();
         }
 
         private void UpdateAffordabilityVisual()
@@ -251,6 +264,25 @@ namespace DigitPark.Monetization
             UpdateAffordabilityVisual();
         }
 
+        private void OnWishlistClick()
+        {
+            if (_itemData == null) return;
+            WishlistService.Instance?.Toggle(_itemData.itemId);
+            RefreshWishlistVisual();
+
+            // Pulse animation on the heart
+            if (_wishlistIcon != null)
+                _wishlistIcon.transform.DOPunchScale(Vector3.one * 0.3f, 0.25f, 5, 0.5f)
+                    .SetLink(gameObject);
+        }
+
+        private void RefreshWishlistVisual()
+        {
+            if (_wishlistIcon == null || _itemData == null) return;
+            bool wishlisted = WishlistService.Instance?.IsWishlisted(_itemData.itemId) ?? false;
+            _wishlistIcon.color = wishlisted ? _wishlistedColor : _unwishlistedColor;
+        }
+
         private void OnButtonClick()
         {
             if (_isProcessing) return;
@@ -273,11 +305,11 @@ namespace DigitPark.Monetization
 
             try
             {
-                // For real money items, trigger IAP flow
+                // For real money items, delegate to PaymentManager
                 if (_itemData.priceType == PriceType.RealMoney)
                 {
-                    // TODO: Implement IAP purchase flow with Unity IAP / store configuration
-                    Debug.LogWarning("[ShopItemUI] IAP not implemented yet - requires store configuration");
+                    _isProcessing = false;
+                    _ = PaymentManager.Instance?.PurchaseCosmetic(_itemData.iapProductId);
                     return false;
                 }
 

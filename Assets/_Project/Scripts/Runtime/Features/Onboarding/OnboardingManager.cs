@@ -69,7 +69,7 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField, Range(0, 1000)] private int completionRewardCoins = 500;
-        [SerializeField, Range(0, 50)] private int completionRewardGems = 10; // Economy Rebalance: welcome bonus 10 DG
+        [SerializeField, Range(0, 50)] private int completionRewardGems = 0;
         [SerializeField] private float autoAdvanceDelay = 0f;
         [SerializeField] private bool allowSkip = true;
         [SerializeField] private float transitionDuration = 0.35f;
@@ -537,7 +537,7 @@ namespace DigitPark.Managers
             }
 
             playerName = name;
-            PlayerPrefs.SetString("PlayerName", playerName);
+            PlayerPrefs.SetString("DP_PlayerName", playerName);
             PlayerPrefs.Save();
 
             if (nextButton) nextButton.interactable = true;
@@ -672,7 +672,7 @@ namespace DigitPark.Managers
                 }
             }
 
-            PlayerPrefs.SetString("PlayerAvatar", selectedAvatarId);
+            PlayerPrefs.SetString("DP_PlayerAvatar", selectedAvatarId);
             PlayerPrefs.Save();
 
             if (nextButton) nextButton.interactable = true;
@@ -871,7 +871,7 @@ namespace DigitPark.Managers
 
         private void CompleteOnboarding(bool giveRewards = true)
         {
-            PlayerPrefs.SetInt("OnboardingComplete", 1);
+            PlayerPrefs.SetInt("DP_OnboardingComplete", 1);
             PlayerPrefs.Save();
 
             if (giveRewards)
@@ -886,10 +886,10 @@ namespace DigitPark.Managers
                 else
                 {
                     // Fallback if CurrencyManager not yet initialized
-                    int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                    PlayerPrefs.SetInt("PlayerCoins", currentCoins + completionRewardCoins);
-                    int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                    PlayerPrefs.SetInt("PlayerGems", currentGems + completionRewardGems);
+                    int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
+                    PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + completionRewardCoins);
+                    int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
+                    PlayerPrefs.SetInt("DP_PlayerGems", currentGems + completionRewardGems);
                     PlayerPrefs.Save();
                 }
 
@@ -904,14 +904,14 @@ namespace DigitPark.Managers
 
         public static bool IsOnboardingComplete()
         {
-            return PlayerPrefs.GetInt("OnboardingComplete", 0) == 1;
+            return PlayerPrefs.GetInt("DP_OnboardingComplete", 0) == 1;
         }
 
         public static void ResetOnboarding()
         {
-            PlayerPrefs.DeleteKey("OnboardingComplete");
-            PlayerPrefs.DeleteKey("PlayerName");
-            PlayerPrefs.DeleteKey("PlayerAvatar");
+            PlayerPrefs.DeleteKey("DP_OnboardingComplete");
+            PlayerPrefs.DeleteKey("DP_PlayerName");
+            PlayerPrefs.DeleteKey("DP_PlayerAvatar");
             PlayerPrefs.Save();
         }
 

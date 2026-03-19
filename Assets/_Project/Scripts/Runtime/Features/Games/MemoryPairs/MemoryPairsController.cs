@@ -6,6 +6,7 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Localization;
 using DigitPark.Animations;
+using DigitPark.Themes;
 
 namespace DigitPark.Games
 {
@@ -151,12 +152,13 @@ namespace DigitPark.Games
         {
             if (toggle == null) return;
             var bg = toggle.GetComponent<UnityEngine.UI.Image>();
+            var theme = ThemeManager.Instance?.CurrentTheme;
             if (bg != null)
-                bg.color = isOn ? new Color(0f, 1f, 1f, 1f) : new Color(0.08f, 0.12f, 0.18f, 1f);
+                bg.color = isOn ? (theme?.tabActive ?? new Color(0f, 1f, 1f, 1f)) : (theme?.tabInactive ?? new Color(0.08f, 0.12f, 0.18f, 1f));
 
             var label = toggle.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null)
-                label.color = isOn ? new Color(0.02f, 0.05f, 0.1f, 1f) : Color.white;
+                label.color = isOn ? (theme?.textOnPrimary ?? new Color(0.02f, 0.05f, 0.1f, 1f)) : (theme?.textSecondary ?? Color.white);
         }
 
         private void SetToggleDefault(Toggle toggle, bool value)
@@ -977,6 +979,9 @@ namespace DigitPark.Games
             if (cardButtons != null)
                 foreach (var btn in cardButtons)
                     btn?.onClick.RemoveAllListeners();
+            if (card3DEffects != null)
+                foreach (var c in card3DEffects)
+                    if (c != null) c.OnCardFlipped -= OnCard3DFlipped;
         }
     }
 }

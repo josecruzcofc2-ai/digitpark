@@ -81,9 +81,9 @@ namespace DigitPark.Managers
         public const string PRODUCT_ID_GEMS_14000 = "com.matrixsoftware.digitpark.gems_14000";
 
         [Header("=== PRECIOS (Solo para mostrar en UI) ===")]
-        public const string PRICE_CREATE_TOURNAMENTS = "$3.99";
+        public const string PRICE_CREATE_TOURNAMENTS = ""; // C-P1-30: Use IAP localizedPriceString; empty = not yet loaded
         public const string PRICE_CASH_BATTLE_CREATE = "$6.99";
-        public const string PRICE_TOURNAMENT_BUNDLE = "$7.99"; // Economy Rebalance V55: was $8.99 (27% off vs individual $10.98)
+        public const string PRICE_TOURNAMENT_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString; empty = not yet loaded
         public const string PRICE_PREMIUM_BUNDLE = "$26.25";
         public const string PRICE_COMPLETE_BUNDLE = "$30.45";
 

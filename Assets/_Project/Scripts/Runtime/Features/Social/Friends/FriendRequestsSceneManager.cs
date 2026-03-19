@@ -9,6 +9,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.UI.Components;
 using DigitPark.Localization;
+using DigitPark.Themes;
 using DG.Tweening;
 
 namespace DigitPark.Managers
@@ -48,11 +49,6 @@ namespace DigitPark.Managers
         private bool showingReceived = true;
         private string returnScene = "Friends";
 
-        // Tab colors
-        private static readonly Color ACTIVE_TAB = new Color(0f, 1f, 1f, 1f);
-        private static readonly Color INACTIVE_TAB = new Color(0.15f, 0.17f, 0.22f, 1f);
-        private static readonly Color ACTIVE_TEXT = new Color(0.05f, 0.05f, 0.08f, 1f);
-        private static readonly Color INACTIVE_TEXT = new Color(0.5f, 0.5f, 0.55f, 1f);
 
         #region Unity Lifecycle
 
@@ -62,8 +58,8 @@ namespace DigitPark.Managers
 
             SetupListeners();
 
-            returnScene = PlayerPrefs.GetString("FriendRequestsReturnScene", "Friends");
-            PlayerPrefs.DeleteKey("FriendRequestsReturnScene");
+            returnScene = PlayerPrefs.GetString("DP_FriendRequestsReturnScene", "Friends");
+            PlayerPrefs.DeleteKey("DP_FriendRequestsReturnScene");
 
             AnimateEntrance();
             SwitchTab(true);
@@ -108,15 +104,16 @@ namespace DigitPark.Managers
             showingReceived = received;
 
             // Update tab visuals
+            var theme = ThemeManager.Instance?.CurrentTheme;
             if (receivedTabBg != null)
-                receivedTabBg.color = received ? ACTIVE_TAB : INACTIVE_TAB;
+                receivedTabBg.color = received ? (theme?.tabActive ?? Color.cyan) : (theme?.tabInactive ?? Color.gray);
             if (receivedTabText != null)
-                receivedTabText.color = received ? ACTIVE_TEXT : INACTIVE_TEXT;
+                receivedTabText.color = received ? (theme?.textOnPrimary ?? Color.black) : (theme?.textSecondary ?? Color.gray);
 
             if (sentTabBg != null)
-                sentTabBg.color = received ? INACTIVE_TAB : ACTIVE_TAB;
+                sentTabBg.color = received ? (theme?.tabInactive ?? Color.gray) : (theme?.tabActive ?? Color.cyan);
             if (sentTabText != null)
-                sentTabText.color = received ? INACTIVE_TEXT : ACTIVE_TEXT;
+                sentTabText.color = received ? (theme?.textSecondary ?? Color.gray) : (theme?.textOnPrimary ?? Color.black);
 
             LoadRequests();
         }
@@ -183,6 +180,19 @@ namespace DigitPark.Managers
             GameObject item = Instantiate(requestItemPrefab, scrollContent);
             currentItems.Add(item);
             SetupRequestItem(item, request);
+
+            // Apply theme to request item
+            item.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.CardBackground, true, false);
+            var usernameGO = item.transform.Find("InfoSection/Username")?.gameObject;
+            if (usernameGO != null) usernameGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextPrimary, false, true);
+            var timestampGO = item.transform.Find("InfoSection/TimestampText")?.gameObject;
+            if (timestampGO != null) timestampGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
+            var acceptGO = item.transform.Find("ButtonsRow/AcceptButton")?.gameObject;
+            if (acceptGO != null) acceptGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonSuccess, true, false);
+            var rejectGO = item.transform.Find("ButtonsRow/RejectButton")?.gameObject;
+            if (rejectGO != null) rejectGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonDanger, true, false);
+            var cancelGO = item.transform.Find("ButtonsRow/CancelButton")?.gameObject;
+            if (cancelGO != null) cancelGO.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonSecondary, true, false);
 
             // Animacion de entrada staggered
             int index = currentItems.Count - 1;

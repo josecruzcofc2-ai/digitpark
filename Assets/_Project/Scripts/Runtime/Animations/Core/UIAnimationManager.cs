@@ -180,10 +180,10 @@ namespace DigitPark.Animations
                 .Join(cloneRT.DOScale(0.5f, 0.5f))
                 .OnComplete(() =>
                 {
-                    Destroy(clone);
+                    if (clone != null) Destroy(clone);
                     onComplete?.Invoke();
                 })
-                .SetLink(clone);
+                .SetLink(gameObject);
         }
 
         /// <summary>

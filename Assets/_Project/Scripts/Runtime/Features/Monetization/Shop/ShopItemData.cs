@@ -1,6 +1,8 @@
+using System;
 using UnityEngine;
 using DigitPark.Localization;
 using DigitPark.Navigation;
+using DigitPark.Managers;
 
 namespace DigitPark.Monetization
 {
@@ -20,7 +22,9 @@ namespace DigitPark.Monetization
         StarterPack,    // Paquete de inicio
         WinEffect,      // Efecto de victoria
         WinEffectBundle, // Bundle de efectos de victoria
-        BattleCard      // BattleCard cosmético de matchmaking
+        BattleCard,         // BattleCard cosmético de matchmaking
+        BackgroundPattern,  // Patrón de fondo cosmético
+        TemporaryDecoration // Decoración temporal (expira después de N días)
     }
 
     /// <summary>
@@ -92,6 +96,13 @@ namespace DigitPark.Monetization
 
         [Tooltip("ID del avatar que desbloquea (si aplica)")]
         public string avatarId;
+
+        [Tooltip("ID del patrón de fondo que desbloquea (si aplica)")]
+        public string backgroundPatternId;
+
+        [Header("Temporary Decoration Settings")]
+        [Tooltip("Duración en días tras la compra (solo para TemporaryDecoration)")]
+        public int itemDurationDays = 30;
 
         [Header("Special Offer Settings")]
         public bool isLimitedTime;
@@ -253,7 +264,8 @@ namespace DigitPark.Monetization
                     break;
 
                 case ShopItemType.Avatar:
-                    // TODO: Unlock avatar
+                    // SH-05: Avatar system not yet implemented — show Coming Soon toast
+                    InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info");
                     Debug.Log($"[ShopItemData] Avatar desbloqueado: {avatarId}");
                     break;
 
@@ -291,6 +303,25 @@ namespace DigitPark.Monetization
                         var bcService = DigitPark.Cosmetics.BattleCardService.Instance;
                         if (bcService != null)
                             bcService.UnlockCard(itemId);
+                    }
+                    break;
+
+                case ShopItemType.BackgroundPattern:
+                    if (!string.IsNullOrEmpty(backgroundPatternId))
+                    {
+                        var bgManager = DigitPark.Cosmetics.BackgroundPatternManager.Instance;
+                        if (bgManager != null)
+                            bgManager.UnlockBackground(backgroundPatternId);
+                    }
+                    break;
+
+                case ShopItemType.TemporaryDecoration:
+                    if (!string.IsNullOrEmpty(itemId))
+                    {
+                        long expiryBinary = DateTime.UtcNow.AddDays(itemDurationDays).ToBinary();
+                        PlayerPrefs.SetString($"TempDeco_Expiry_{itemId}", expiryBinary.ToString());
+                        PlayerPrefs.SetInt($"TempDeco_Active_{itemId}", 1);
+                        PlayerPrefs.Save();
                     }
                     break;
 
@@ -354,6 +385,12 @@ namespace DigitPark.Monetization
                     break;
                 case ShopItemType.BattleCard:
                     shopTab = ShopTab.BattleCards;
+                    break;
+                case ShopItemType.BackgroundPattern:
+                    shopTab = ShopTab.Backgrounds;
+                    break;
+                case ShopItemType.TemporaryDecoration:
+                    shopTab = ShopTab.Styles;
                     break;
             }
         }

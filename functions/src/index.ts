@@ -169,6 +169,9 @@ export const stripeSessionStatus = onRequest(
       return;
     }
 
+    const callerUid = await verifyAuthAndGetUid(req, res);
+    if (!callerUid) return;
+
     const sessionId = req.query.sessionId as string;
     if (!sessionId) {
       res.status(400).json({ error: 'missing_session_id', message: 'sessionId query param requerido' });
@@ -506,6 +509,110 @@ export const adminForceSwitch = onRequest(
       const message = err instanceof Error ? err.message : 'Unknown error';
       console.error('[adminForceSwitch] Error:', message);
       res.status(500).json({ error: 'switch_failed', message });
+    }
+  }
+);
+
+// ============================================================
+// VALIDATE SCORE — Server-side score validation + rate limiting (C-67/C-68)
+// POST https://us-central1-{project}.cloudfunctions.net/validateScore
+// Header: Authorization: Bearer <idToken>
+// Body: { gameType, score, timeSeconds }
+// ============================================================
+export const validateScore = onRequest(
+  { region: 'us-central1' },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'method_not_allowed' });
+      return;
+    }
+
+    const uid = await verifyAuthAndGetUid(req, res);
+    if (!uid) return;
+
+    // Rate limiting: max 1 score submission per 30 seconds
+    const db = admin.database();
+    const rateRef = db.ref(`ratelimits/${uid}/lastScoreSubmit`);
+    const snapshot = await rateRef.once('value');
+    const lastSubmit: number = snapshot.val() || 0;
+    const now = Date.now();
+    if (now - lastSubmit < 30000) {
+      res.status(429).json({ error: 'rate_limited', message: 'Too many requests. Wait 30s.' });
+      return;
+    }
+    await rateRef.set(now);
+
+    const { gameType, score, timeSeconds } = req.body as {
+      gameType?: string;
+      score?: number;
+      timeSeconds?: number;
+    };
+
+    if (!gameType || score === undefined || timeSeconds === undefined) {
+      res.status(400).json({ error: 'missing_fields' });
+      return;
+    }
+
+    const limits: Record<string, { minTime: number; maxScore: number }> = {
+      DigitRush:   { minTime: 5,  maxScore: 1000 },
+      FlashTap:    { minTime: 3,  maxScore: 500  },
+      MemoryPairs: { minTime: 8,  maxScore: 200  },
+      OddOneOut:   { minTime: 2,  maxScore: 100  },
+      QuickMath:   { minTime: 10, maxScore: 300  },
+    };
+
+    const limit = limits[gameType];
+    if (!limit) {
+      res.status(400).json({ error: 'unknown_game', message: `Unknown gameType: ${gameType}` });
+      return;
+    }
+    if (timeSeconds < limit.minTime) {
+      res.status(400).json({ error: 'score_too_fast', message: `Score submitted too quickly for ${gameType}` });
+      return;
+    }
+    if (score > limit.maxScore) {
+      res.status(400).json({ error: 'score_too_high', message: `Score exceeds maximum for ${gameType}` });
+      return;
+    }
+
+    res.json({ valid: true });
+  }
+);
+
+// ============================================================
+// DELETE USER DATA — GDPR data deletion (C-69)
+// POST https://us-central1-{project}.cloudfunctions.net/deleteUserData
+// Header: Authorization: Bearer <idToken>
+// ============================================================
+export const deleteUserData = onRequest(
+  { region: 'us-central1' },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'method_not_allowed' });
+      return;
+    }
+
+    const uid = await verifyAuthAndGetUid(req, res);
+    if (!uid) return;
+
+    try {
+      const db = admin.database();
+      await Promise.all([
+        db.ref(`users/${uid}`).remove(),
+        db.ref(`matchHistory/${uid}`).remove(),
+        db.ref(`achievements/${uid}`).remove(),
+        db.ref(`notifications/${uid}`).remove(),
+        db.ref(`friends/${uid}`).remove(),
+        db.ref(`tournamentHistory/${uid}`).remove(),
+        db.ref(`ratelimits/${uid}`).remove(),
+        db.ref(`leaderboard/${uid}`).remove(),
+      ]);
+      console.log(`[deleteUserData] All data deleted for uid: ${uid}`);
+      res.json({ success: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[deleteUserData] Error:', message);
+      res.status(500).json({ error: 'deletion_failed', message });
     }
   }
 );

@@ -689,9 +689,12 @@ namespace DigitPark.UI.CashBattle
             Color active = new Color(1f, 0.84f, 0f, 1f);
             Color inactive = new Color(0.2f, 0.18f, 0.25f, 1f);
 
-            if (rounds1Button != null) rounds1Button.GetComponent<Image>().color = rounds == 1 ? active : inactive;
-            if (rounds3Button != null) rounds3Button.GetComponent<Image>().color = rounds == 3 ? active : inactive;
-            if (rounds5Button != null) rounds5Button.GetComponent<Image>().color = rounds == 5 ? active : inactive;
+            var r1img = rounds1Button?.GetComponent<Image>();
+            var r3img = rounds3Button?.GetComponent<Image>();
+            var r5img = rounds5Button?.GetComponent<Image>();
+            if (r1img != null) r1img.color = rounds == 1 ? active : inactive;
+            if (r3img != null) r3img.color = rounds == 3 ? active : inactive;
+            if (r5img != null) r5img.color = rounds == 5 ? active : inactive;
         }
 
         private void OnFindOpponentClicked()

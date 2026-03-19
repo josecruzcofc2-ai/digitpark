@@ -102,7 +102,7 @@ namespace DigitPark.Games
         protected virtual void OnBackClicked()
         {
             Debug.Log($"[{GameType}] Volviendo a GameSelector");
-            SceneNavigator.Instance.NavigateTo("GameSelector");
+            SceneNavigator.Instance?.NavigateTo("GameSelector");
         }
 
         /// <summary>
@@ -143,6 +143,7 @@ namespace DigitPark.Games
             currentTime = 0f;
             errorCount = 0;
 
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
             OnGameStarted();
             Debug.Log($"{GameType} iniciado");
         }
@@ -174,6 +175,7 @@ namespace DigitPark.Games
         {
             isPlaying = false;
             isPaused = false;
+            Screen.sleepTimeout = SleepTimeout.SystemSetting;
 
             // Construir resultado
             currentResult.TotalTime = currentTime;
@@ -465,7 +467,7 @@ namespace DigitPark.Games
         {
             string matchId = OnlineResultManager.GetCurrentMatchId();
             string playerName = AuthenticationService.Instance?.GetCurrentPlayerData()?.username
-                ?? PlayerPrefs.GetString("PlayerName", AutoLocalizer.Get("default_player_name"));
+                ?? PlayerPrefs.GetString("DP_PlayerName", AutoLocalizer.Get("default_player_name"));
 
             Debug.Log($"[{GameType}] Partida online terminada. MatchId: {matchId}, Tiempo: {result.FinalScore:F2}s");
 
@@ -513,7 +515,7 @@ namespace DigitPark.Games
             }
 
             Debug.Log($"[{GameType}] Accept clicked - returning to selector");
-            SceneNavigator.Instance.NavigateTo("GameSelector");
+            SceneNavigator.Instance?.NavigateTo("GameSelector");
         }
 
         /// <summary>

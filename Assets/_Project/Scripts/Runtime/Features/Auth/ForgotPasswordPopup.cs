@@ -5,6 +5,7 @@ using System;
 using DG.Tweening;
 using DigitPark.Localization;
 using DigitPark.UI;
+using DigitPark.Themes;
 
 namespace DigitPark.UI.Common
 {
@@ -73,6 +74,7 @@ namespace DigitPark.UI.Common
 
             Image panelImg = popupPanel.AddComponent<Image>();
             panelImg.color = new Color(0.08f, 0.08f, 0.16f, 0.98f);
+            popupPanel.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.CardBackground, true, false);
 
             // Outline neon para el panel
             Outline outline = popupPanel.AddComponent<Outline>();
@@ -96,6 +98,7 @@ namespace DigitPark.UI.Common
             RectTransform titleRT = titleText.GetComponent<RectTransform>();
             titleRT.anchoredPosition = new Vector2(0, 140);
             titleRT.sizeDelta = new Vector2(550, 50);
+            titleText.gameObject.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextTitle, false, true);
 
             // Descripción
             TextMeshProUGUI descText = UIFactory.CreateText(
@@ -109,6 +112,7 @@ namespace DigitPark.UI.Common
             RectTransform descRT = descText.GetComponent<RectTransform>();
             descRT.anchoredPosition = new Vector2(0, 80);
             descRT.sizeDelta = new Vector2(550, 60);
+            descText.gameObject.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
 
             // Input Field para email
             CreateEmailInput();
@@ -142,6 +146,7 @@ namespace DigitPark.UI.Common
 
             Image inputBg = inputObj.AddComponent<Image>();
             inputBg.color = new Color(0.15f, 0.15f, 0.25f);
+            inputObj.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.InputBackground, true, false);
 
             // Outline sutil
             Outline inputOutline = inputObj.AddComponent<Outline>();
@@ -216,6 +221,7 @@ namespace DigitPark.UI.Common
             RectTransform sendRT = sendButton.GetComponent<RectTransform>();
             sendRT.anchoredPosition = new Vector2(-120, -110);
             sendButton.onClick.AddListener(OnSendClicked);
+            sendButton.gameObject.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.ButtonPrimary, true, false);
 
             // Texto del botón en negro para contraste
             TextMeshProUGUI sendText = sendButton.GetComponentInChildren<TextMeshProUGUI>();

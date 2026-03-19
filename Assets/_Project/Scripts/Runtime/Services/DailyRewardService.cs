@@ -10,9 +10,12 @@ using DigitPark.Localization;
 namespace DigitPark.Services
 {
     /// <summary>
-    /// Servicio de recompensas diarias
-    /// Recompensa a los jugadores por iniciar sesión consecutivamente
+    /// DEPRECATED — P0-1: DailyRewardService is no longer the source of truth.
+    /// All daily reward logic has been migrated to DailyRewardsManager (scene-level).
+    /// This class is retained only for backward compatibility during migration.
+    /// DO NOT ADD NEW LOGIC HERE. Remove this class in a future cleanup pass.
     /// </summary>
+    [System.Obsolete("Use DailyRewardsManager instead. DailyRewardService is deprecated.", false)]
     public class DailyRewardService : MonoBehaviour
     {
         private static DailyRewardService _instance;

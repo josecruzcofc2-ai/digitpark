@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -182,8 +184,9 @@ namespace DigitPark.Editor
         {
             GameObject bg = CreateChild(canvas.gameObject, "Background");
             StretchFull(bg);
-            SetImage(bg, DARK_BG);
+            SetImage(bg, Color.white); // ThemeApplier tints at runtime
             bg.transform.SetAsFirstSibling();
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         private static GameObject CreateSafeArea(Canvas canvas)
@@ -1015,7 +1018,7 @@ namespace DigitPark.Editor
             {
                 rt.anchorMin = new Vector2(0, 0);
                 rt.anchorMax = new Vector2(1, 0);
-                rt.pivot = new Vector2(0.5f, 1);
+                rt.pivot = new Vector2(0.5f, 0);
             }
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(0, 3);

@@ -271,7 +271,7 @@ namespace DigitPark.Managers
                 return ServiceLocator.KYC.CanAccessCashBattle;
             }
             // Fallback a PlayerPrefs para compatibilidad
-            return PlayerPrefs.GetInt("AgeVerified", 0) == 1;
+            return PlayerPrefs.GetInt("DP_AgeVerified", 0) == 1;
         }
 
         /// <summary>
@@ -302,8 +302,8 @@ namespace DigitPark.Managers
                     await ServiceLocator.KYC.ResetVerification();
                 }
                 // También limpiar PlayerPrefs por compatibilidad
-                PlayerPrefs.DeleteKey("AgeVerified");
-                PlayerPrefs.DeleteKey("BirthDate");
+                PlayerPrefs.DeleteKey("DP_AgeVerified");
+                PlayerPrefs.DeleteKey("DP_BirthDate");
                 PlayerPrefs.Save();
             }
             catch (System.Exception ex)

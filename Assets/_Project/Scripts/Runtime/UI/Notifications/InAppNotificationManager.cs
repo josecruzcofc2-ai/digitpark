@@ -56,6 +56,11 @@ namespace DigitPark.Managers
         private void OnDestroy()
         {
             CancelInvoke();
+            if (_currentToast != null)
+            {
+                _currentToast.OnToastDismissed -= OnToastDismissed;
+                _currentToast.OnToastAction -= OnToastAction;
+            }
             if (_instance == this)
             {
                 _instance = null;
@@ -341,7 +346,7 @@ namespace DigitPark.Managers
         private void AcceptChallenge(string challengeId)
         {
             if (!string.IsNullOrEmpty(challengeId))
-                PlayerPrefs.SetString("ChallengeId", challengeId);
+                PlayerPrefs.SetString("DP_ChallengeId", challengeId);
 
             UnityEngine.SceneManagement.SceneManager.LoadScene("PlayModeSelection");
         }
@@ -349,14 +354,14 @@ namespace DigitPark.Managers
         private void JoinTournament(string tournamentId)
         {
             if (!string.IsNullOrEmpty(tournamentId))
-                PlayerPrefs.SetString("OpenTournamentId", tournamentId);
+                PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
 
             UnityEngine.SceneManagement.SceneManager.LoadScene("CashBattleHub");
         }
 
         private void ClaimDailyReward()
         {
-            PlayerPrefs.SetString("OpenPanel", "DailyRewards");
+            PlayerPrefs.SetString("DP_OpenPanel", "DailyRewards");
             UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
         }
 
@@ -365,7 +370,7 @@ namespace DigitPark.Managers
             switch (promoAction)
             {
                 case "premium":
-                    PlayerPrefs.SetString("OpenPanel", "Premium");
+                    PlayerPrefs.SetString("DP_OpenPanel", "Premium");
                     UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
                     break;
                 case "deposit":
@@ -380,7 +385,7 @@ namespace DigitPark.Managers
         private void NavigateToNotifications()
         {
             string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            PlayerPrefs.SetString("NotificationsReturnScene", currentScene);
+            PlayerPrefs.SetString("DP_NotificationsReturnScene", currentScene);
             UnityEngine.SceneManagement.SceneManager.LoadScene("Notifications");
         }
 

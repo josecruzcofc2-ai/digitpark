@@ -9,6 +9,9 @@ using DigitPark.Localization;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
+#if FIREBASE_CRASHLYTICS
+using Firebase.Crashlytics;
+#endif
 
 namespace DigitPark.Services.Firebase
 {
@@ -245,7 +248,7 @@ namespace DigitPark.Services.Firebase
                 // Guardar preferencia de recordar
                 if (rememberMe)
                 {
-                    PlayerPrefs.SetInt("RememberMe", 1);
+                    PlayerPrefs.SetInt("DP_RememberMe", 1);
                     PlayerPrefs.Save();
                 }
 
@@ -275,6 +278,13 @@ namespace DigitPark.Services.Firebase
 
         public async Task<bool> RegisterWithEmail(string email, string password, string username)
         {
+            // C-P1-35: Minimum 8 chars — accounts may hold real money (CashBattle)
+            if (password.Length < 8)
+            {
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("error_password_too_short"));
+                return false;
+            }
+
             if (!useFirebaseReal)
             {
                 return await RegisterWithEmailSimulation(email, password, username);
@@ -319,7 +329,7 @@ namespace DigitPark.Services.Firebase
                 // Guardar en base de datos
                 await SavePlayerDataToDatabase(currentPlayerData);
 
-                PlayerPrefs.SetInt("RememberMe", 1);
+                PlayerPrefs.SetInt("DP_RememberMe", 1);
                 PlayerPrefs.Save();
 
                 AnalyticsService.Instance?.LogSignUp("email");
@@ -508,8 +518,8 @@ namespace DigitPark.Services.Firebase
             currentUser = null;
             currentPlayerData = null;
 
-            PlayerPrefs.DeleteKey("SavedUserId");
-            PlayerPrefs.DeleteKey("RememberMe");
+            PlayerPrefs.DeleteKey("DP_SavedUserId");
+            PlayerPrefs.DeleteKey("DP_RememberMe");
             PlayerPrefs.Save();
 
             OnLogout?.Invoke();
@@ -540,11 +550,16 @@ namespace DigitPark.Services.Firebase
 
                 Debug.Log($"[Auth] Eliminando cuenta de Firebase: {RedactEmail(email)}");
 
-                // Eliminar datos de la base de datos primero
+                // Eliminar datos de la base de datos primero (GDPR compliance)
                 var dbService = DatabaseService.Instance;
                 if (dbService != null)
                 {
                     await dbService.RemoveUserFromLeaderboards(userId);
+                    await dbService.DeleteMatchHistory(userId);
+                    await dbService.DeleteAchievements(userId);
+                    await dbService.DeleteFriendsList(userId);
+                    await dbService.DeleteNotifications(userId);
+                    await dbService.DeleteTournamentHistory(userId);
                 }
 
                 // Eliminar el usuario de Firebase Auth
@@ -552,14 +567,11 @@ namespace DigitPark.Services.Firebase
 
                 Debug.Log("[Auth] Cuenta eliminada de Firebase exitosamente");
 
-                // Limpiar datos locales
+                // Limpiar TODOS los datos locales
                 currentUser = null;
                 currentPlayerData = null;
 
-                PlayerPrefs.DeleteKey("SavedUserId");
-                PlayerPrefs.DeleteKey("RememberMe");
-                PlayerPrefs.DeleteKey($"SimUser_{userId}");
-                PlayerPrefs.DeleteKey($"SimUserByEmail_{email.ToLower()}");
+                PlayerPrefs.DeleteAll();
                 PlayerPrefs.Save();
 
                 OnLogout?.Invoke();
@@ -614,8 +626,8 @@ namespace DigitPark.Services.Firebase
                 PlayerPrefs.DeleteKey($"SimUser_{userId}");
                 PlayerPrefs.DeleteKey($"SimUserByEmail_{email}");
                 PlayerPrefs.DeleteKey($"SimPassword_{userId}");
-                PlayerPrefs.DeleteKey("SavedUserId");
-                PlayerPrefs.DeleteKey("RememberMe");
+                PlayerPrefs.DeleteKey("DP_SavedUserId");
+                PlayerPrefs.DeleteKey("DP_RememberMe");
                 PlayerPrefs.Save();
 
                 currentPlayerData = null;
@@ -751,6 +763,9 @@ namespace DigitPark.Services.Firebase
                         currentPlayerData.lastLoginDate = DateTime.UtcNow;
                         await SavePlayerDataToDatabase(currentPlayerData);
                         Debug.Log($"[Auth] Datos cargados: {currentPlayerData.username}");
+#if FIREBASE_CRASHLYTICS
+                        Crashlytics.SetUserId(currentPlayerData.userId);
+#endif
                         return;
                     }
                 }
@@ -771,6 +786,9 @@ namespace DigitPark.Services.Firebase
 
                 await SavePlayerDataToDatabase(currentPlayerData);
                 Debug.Log($"[Auth] Nuevos datos creados: {currentPlayerData.username}");
+#if FIREBASE_CRASHLYTICS
+                Crashlytics.SetUserId(currentPlayerData.userId);
+#endif
             }
             catch (Exception ex)
             {
@@ -827,9 +845,9 @@ namespace DigitPark.Services.Firebase
 
         private void CheckForSavedUserSimulation()
         {
-            if (PlayerPrefs.HasKey("SavedUserId") && PlayerPrefs.GetInt("RememberMe", 0) == 1)
+            if (PlayerPrefs.HasKey("DP_SavedUserId") && PlayerPrefs.GetInt("DP_RememberMe", 0) == 1)
             {
-                string savedUserId = PlayerPrefs.GetString("SavedUserId");
+                string savedUserId = PlayerPrefs.GetString("DP_SavedUserId");
                 string userDataKey = $"SimUser_{savedUserId}";
 
                 if (PlayerPrefs.HasKey(userDataKey))
@@ -877,8 +895,8 @@ namespace DigitPark.Services.Firebase
 
                 if (rememberMe)
                 {
-                    PlayerPrefs.SetString("SavedUserId", currentPlayerData.userId);
-                    PlayerPrefs.SetInt("RememberMe", 1);
+                    PlayerPrefs.SetString("DP_SavedUserId", currentPlayerData.userId);
+                    PlayerPrefs.SetInt("DP_RememberMe", 1);
                 }
                 PlayerPrefs.Save();
 
@@ -922,8 +940,8 @@ namespace DigitPark.Services.Firebase
                 PlayerPrefs.SetString($"SimUser_{newUserId}", JsonUtility.ToJson(currentPlayerData));
                 PlayerPrefs.SetString(emailKey, newUserId);
                 PlayerPrefs.SetString($"SimPassword_{newUserId}", HashPassword(password));
-                PlayerPrefs.SetString("SavedUserId", newUserId);
-                PlayerPrefs.SetInt("RememberMe", 1);
+                PlayerPrefs.SetString("DP_SavedUserId", newUserId);
+                PlayerPrefs.SetInt("DP_RememberMe", 1);
                 PlayerPrefs.Save();
 
                 AnalyticsService.Instance?.LogSignUp("email");
@@ -957,8 +975,8 @@ namespace DigitPark.Services.Firebase
                 };
 
                 PlayerPrefs.SetString($"SimUser_{googleUserId}", JsonUtility.ToJson(currentPlayerData));
-                PlayerPrefs.SetString("SavedUserId", googleUserId);
-                PlayerPrefs.SetInt("RememberMe", 1);
+                PlayerPrefs.SetString("DP_SavedUserId", googleUserId);
+                PlayerPrefs.SetInt("DP_RememberMe", 1);
                 PlayerPrefs.Save();
 
                 AnalyticsService.Instance?.LogLogin("google");
@@ -993,8 +1011,8 @@ namespace DigitPark.Services.Firebase
                 };
 
                 PlayerPrefs.SetString($"SimUser_{appleUserId}", JsonUtility.ToJson(currentPlayerData));
-                PlayerPrefs.SetString("SavedUserId", appleUserId);
-                PlayerPrefs.SetInt("RememberMe", 1);
+                PlayerPrefs.SetString("DP_SavedUserId", appleUserId);
+                PlayerPrefs.SetInt("DP_RememberMe", 1);
                 PlayerPrefs.Save();
 
                 Debug.Log($"[Auth] (Simulación) Login Apple exitoso: {RedactEmail(appleEmail)}");

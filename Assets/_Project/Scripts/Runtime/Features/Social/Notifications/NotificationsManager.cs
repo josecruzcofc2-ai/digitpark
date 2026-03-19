@@ -9,6 +9,7 @@ using DigitPark.Services.Firebase;
 using DG.Tweening;
 using DigitPark.UI;
 using DigitPark.Localization;
+using DigitPark.Themes;
 
 namespace DigitPark.Managers
 {
@@ -82,8 +83,8 @@ namespace DigitPark.Managers
 
             SetupListeners();
 
-            returnScene = PlayerPrefs.GetString("NotificationsReturnScene", "MainMenu");
-            PlayerPrefs.DeleteKey("NotificationsReturnScene");
+            returnScene = PlayerPrefs.GetString("DP_NotificationsReturnScene", "MainMenu");
+            PlayerPrefs.DeleteKey("DP_NotificationsReturnScene");
 
             AnimateEntrance();
             SwitchTab(NotificationCategory.All);
@@ -184,6 +185,7 @@ namespace DigitPark.Managers
             tmp.color = new Color(0.5f, 0.5f, 0.55f, 1f);
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
+            separator.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.TextSecondary, false, true);
         }
 
         private void CreateNotificationCard(StoredNotification notification, int index)
@@ -517,8 +519,8 @@ namespace DigitPark.Managers
         private void OnViewProfile(string userId)
         {
             if (string.IsNullOrEmpty(userId)) return;
-            PlayerPrefs.SetString("ViewProfileId", userId);
-            PlayerPrefs.SetString("ProfileReturnScene", "Notifications");
+            PlayerPrefs.SetString("DP_ViewProfileId", userId);
+            PlayerPrefs.SetString("DP_ProfileReturnScene", "Notifications");
             PlayerPrefs.Save();
             SceneManager.LoadScene("Profile");
         }
@@ -529,7 +531,7 @@ namespace DigitPark.Managers
             NotificationStorageService.Instance?.MarkAsRead(notificationId);
 
             if (!string.IsNullOrEmpty(notification.targetId))
-                PlayerPrefs.SetString("ChallengeId", notification.targetId);
+                PlayerPrefs.SetString("DP_ChallengeId", notification.targetId);
 
             SceneManager.LoadScene("PlayModeSelection");
         }
@@ -543,7 +545,7 @@ namespace DigitPark.Managers
         private void OnJoinTournament(string tournamentId)
         {
             if (!string.IsNullOrEmpty(tournamentId))
-                PlayerPrefs.SetString("OpenTournamentId", tournamentId);
+                PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
 
             SceneManager.LoadScene("CashBattleHub");
         }
@@ -551,14 +553,14 @@ namespace DigitPark.Managers
         private void OnViewTournamentResults(string tournamentId)
         {
             if (!string.IsNullOrEmpty(tournamentId))
-                PlayerPrefs.SetString("OpenTournamentId", tournamentId);
+                PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
 
             SceneManager.LoadScene("CashBattleHub");
         }
 
         private void OnClaimDailyReward()
         {
-            PlayerPrefs.SetString("OpenPanel", "DailyRewards");
+            PlayerPrefs.SetString("DP_OpenPanel", "DailyRewards");
             SceneManager.LoadScene("MainMenu");
         }
 
@@ -567,7 +569,7 @@ namespace DigitPark.Managers
             switch (promoAction)
             {
                 case "premium":
-                    PlayerPrefs.SetString("OpenPanel", "Premium");
+                    PlayerPrefs.SetString("DP_OpenPanel", "Premium");
                     SceneManager.LoadScene("MainMenu");
                     break;
                 case "deposit":

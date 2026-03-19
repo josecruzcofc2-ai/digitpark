@@ -471,7 +471,7 @@ namespace DigitPark.UI
 
             if (playerNameText != null)
             {
-                string pName = PlayerPrefs.GetString("PlayerName", "Player");
+                string pName = PlayerPrefs.GetString("DP_PlayerName", "Player");
                 playerNameText.text = pName;
                 playerNameText.color = playerColor;
             }

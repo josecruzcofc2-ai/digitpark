@@ -180,7 +180,7 @@ namespace DigitPark.DevTools
 
             if (GUILayout.Button("Limpiar PlayerPrefs"))
             {
-                if (UnityEngine.Application.isEditor)
+                if (Debug.isDebugBuild)
                 {
                     PlayerPrefs.DeleteAll();
                     PlayerPrefs.Save();
@@ -241,9 +241,9 @@ namespace DigitPark.DevTools
 
                 if (GUILayout.Button("Resetear Todo Premium"))
                 {
-                    PlayerPrefs.DeleteKey("Premium_CreateTournaments");
-                    PlayerPrefs.DeleteKey("Premium_CashBattleCreate");
-                    PlayerPrefs.DeleteKey("Premium_StylesPro");
+                    PlayerPrefs.DeleteKey("DP_Premium_CreateTournaments");
+                    PlayerPrefs.DeleteKey("DP_Premium_CashBattleCreate");
+                    PlayerPrefs.DeleteKey("DP_Premium_StylesPro");
                     PlayerPrefs.Save();
                     UnityEngine.Debug.Log("[Debug] Estado premium reseteado - reinicia la app");
                 }

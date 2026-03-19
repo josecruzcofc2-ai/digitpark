@@ -1,5 +1,5 @@
 # TAREAS MANUALES - Pasos que debe hacer el usuario
-**Ultima actualizacion**: 2026-03-13 (V52 Audit)
+**Ultima actualizacion**: 2026-03-17 (ThemeApplier audit + V53 state)
 
 Estas tareas NO se pueden automatizar con codigo. Requieren accion manual tuya.
 
@@ -105,13 +105,9 @@ Receipt Validation:
 
 ## P1 - IMPORTANTES (hacer antes o poco despues de publicar)
 
-### 9. Firebase Security Rules — Subir a Console (SEC-A14)
-- ~~Crear `database.rules.json`~~ YA HECHO — archivo en raiz del repo, reglas completas y auditadas
-- **Que hacer AHORA**: Copiar las reglas a Firebase Console:
-  1. Abrir: https://console.firebase.google.com/project/digitpark-7d772/database/rules
-  2. Pegar el contenido de `database.rules.json` (sin los comentarios `//`)
-  3. Click "Publish"
-- **Riesgo CRITICO**: Sin publicar las reglas, los datos siguen abiertos
+### ~~9. Firebase Security Rules — Subir a Console (SEC-A14)~~ ✅ COMPLETADO 2026-03-17
+- `firebase deploy --only database` ejecutado — reglas publicadas en `digitpark-7d772-default-rtdb`
+- SEC-M01/M02/M03 + friendRequests activos en producción
 
 ### 10. Activar Firebase Cloud Messaging (FIREBASE_MESSAGING)
 - **Que hacer**:
@@ -313,7 +309,27 @@ Receipt Validation:
 - `DigitRushController.cs:1172` - Obtener resultado real de oponente desde servidor
 
 ---
----
+
+## P1 - THEMEAPPLIER (implementacion sistema de temas)
+
+> Estado al 2026-03-17: 0% implementado. Todas las escenas tienen 0 ThemeApplier components.
+> Los bugs de clasificacion en ThemeApplierSetup.cs ya fueron corregidos en codigo.
+> Ver plan detallado en GUIA_IMPLEMENTACION_PASO_A_PASO.md > SECCION C > PLAN 6 PASOS.
+
+### TA-01. Ejecutar "Add to ALL Scenes" en Unity Editor
+- **Menu**: DigitPark > Polish > Themes > Add to ALL Scenes
+- **Resultado**: ~700+ ThemeApplier components en 29 escenas
+- **Cuando**: DESPUES de ejecutar todos los UIBuilders (para que no se borre)
+- **Escenas excluidas**: CashBattle (#08, #32-40), AgeVerification (paletas propias)
+
+### TA-02. BackButton.prefab — Child Arrow/Icon necesita ThemeApplier manual
+- **Archivo**: `Assets/_Project/Resources/Prefabs/BackButton.prefab`
+- **Por que**: El root GO (tiene `Button`) ya recibe ThemeApplier `Accent` via `ProcessButtons()`.
+  Pero el child `Arrow` o `Icon` (solo tiene `Image`, sin `Button`) → `ClassifyImage("Arrow")` retorna `None` → no se le asigna nada.
+- **Que hacer en Inspector**:
+  1. Abrir el prefab en modo prefab edit
+  2. Child `Arrow`/`Icon`: Add Component > ThemeApplier → ElementType = `Accent`, applyToImage = true
+
 
 # BLOQUE 2: TAREAS QUE REQUIEREN EL SDK DE TRIUMPH
 *(Solo se pueden completar una vez que Triumph responda el correo y envie el SDK)*

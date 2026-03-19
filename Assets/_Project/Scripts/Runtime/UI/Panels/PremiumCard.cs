@@ -135,28 +135,28 @@ namespace DigitPark.UI
             switch (_cardType)
             {
                 case PremiumCardType.PremiumBundle:
-                    SetContent(AutoLocalizer.Get("premium_bundle_title"), AutoLocalizer.Get("premium_bundle_desc"), "$14.99", "50%", true);
+                    SetContent(AutoLocalizer.Get("premium_bundle_title"), AutoLocalizer.Get("premium_bundle_desc"), string.Empty, "50%", true);
                     _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.StarterPack:
-                    SetContent(AutoLocalizer.Get("starter_pack_title"), AutoLocalizer.Get("starter_pack_desc"), "$2.99", "70%", true);
+                    SetContent(AutoLocalizer.Get("starter_pack_title"), AutoLocalizer.Get("starter_pack_desc"), string.Empty, "70%", true);
                     _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.DailyDeal:
-                    SetContent(AutoLocalizer.Get("daily_deal_title"), AutoLocalizer.Get("daily_deal_desc"), "$1.99", "50%", true);
+                    SetContent(AutoLocalizer.Get("daily_deal_title"), AutoLocalizer.Get("daily_deal_desc"), string.Empty, "50%", true);
                     _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.WeeklyBundle:
-                    SetContent(AutoLocalizer.Get("weekly_bundle_title"), AutoLocalizer.Get("weekly_bundle_desc"), "$4.99", "40%", true);
+                    SetContent(AutoLocalizer.Get("weekly_bundle_title"), AutoLocalizer.Get("weekly_bundle_desc"), string.Empty, "40%", true);
                     _targetTab = Navigation.ShopTab.Featured;
                     break;
 
                 case PremiumCardType.SpecialOffer:
                 default:
-                    SetContent(AutoLocalizer.Get("special_offer_title"), AutoLocalizer.Get("special_offer_desc"), "$4.99", "60%", true);
+                    SetContent(AutoLocalizer.Get("special_offer_title"), AutoLocalizer.Get("special_offer_desc"), string.Empty, "60%", true);
                     _targetTab = Navigation.ShopTab.Featured;
                     break;
             }

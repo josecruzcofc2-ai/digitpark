@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -89,9 +91,9 @@ namespace DigitPark.Managers
             LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
 
             // Cargar remember me si existe
-            if (PlayerPrefs.HasKey("RememberMe") && rememberToggle != null)
+            if (PlayerPrefs.HasKey("DP_RememberMe") && rememberToggle != null)
             {
-                rememberToggle.isOn = PlayerPrefs.GetInt("RememberMe", 0) == 1;
+                rememberToggle.isOn = PlayerPrefs.GetInt("DP_RememberMe", 0) == 1;
             }
 
             // Crear popup de username (oculto inicialmente)
@@ -335,12 +337,21 @@ namespace DigitPark.Managers
 
                 Debug.Log("[Login] Intentando login");
 
-                // Intentar login
-                bool success = await AuthenticationService.Instance.LoginWithEmail(
+                // Intentar login con timeout de 30 segundos
+                var loginTask = AuthenticationService.Instance.LoginWithEmail(
                     email,
                     password,
                     rememberToggle != null && rememberToggle.isOn
                 );
+                if (await Task.WhenAny(loginTask, Task.Delay(TimeSpan.FromSeconds(30))) != loginTask)
+                {
+                    if (this == null) return;
+                    isLoggingIn = false;
+                    ShowLoading(false);
+                    ShowErrorMessage(AutoLocalizer.Get("auth_error_timeout"));
+                    return;
+                }
+                bool success = await loginTask;
 
                 // MonoBehaviour may have been destroyed during await
                 if (this == null) return;

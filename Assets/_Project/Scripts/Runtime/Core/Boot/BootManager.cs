@@ -31,6 +31,7 @@ namespace DigitPark.Managers
 
         private bool servicesInitialized = false;
         private DigitPark.UI.BootAnimator bootAnimator;
+        private bool _consentGranted = false;
 
         private void Start()
         {
@@ -59,6 +60,9 @@ namespace DigitPark.Managers
             // Paso 1: Inicializar configuraciones básicas + NetworkService + ATT
             yield return StartCoroutine(InitializeBasicSettings());
             UpdateLoadingProgress(0.15f, "boot_initializing_config");
+
+            // Paso 1.5: Solicitar consentimiento GDPR si aún no se ha dado
+            yield return StartCoroutine(RequestGDPRConsentIfNeeded());
 
             // Paso 2: Solicitar ATT (iOS) - ANTES de Firebase Analytics
             yield return StartCoroutine(RequestTrackingAuthorization());
@@ -109,9 +113,6 @@ namespace DigitPark.Managers
 
             // Configurar target frame rate
             Application.targetFrameRate = 60;
-
-            // Evitar que la pantalla se apague
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
             // Configurar orientación
             Screen.orientation = ScreenOrientation.Portrait;
@@ -216,7 +217,8 @@ namespace DigitPark.Managers
                 dbService.AddComponent<DatabaseService>();
             }
 
-            if (AnalyticsService.Instance == null)
+            // Only initialize analytics if user has given GDPR consent
+            if (ConsentService.HasConsent() && AnalyticsService.Instance == null)
             {
                 GameObject analyticsService = new GameObject("AnalyticsService");
                 analyticsService.AddComponent<AnalyticsService>();
@@ -388,8 +390,8 @@ namespace DigitPark.Managers
                 }
 
                 // XP / Level
-                int xp = PlayerPrefs.GetInt("PlayerXP", 0);
-                int level = PlayerPrefs.GetInt("PlayerLevel", 1);
+                int xp = PlayerPrefs.GetInt("DP_PlayerXP", 0);
+                int level = PlayerPrefs.GetInt("DP_PlayerLevel", 1);
                 if (xp > 0 || level > 1)
                 {
                     updates["progression/xp"] = xp;
@@ -625,17 +627,173 @@ namespace DigitPark.Managers
         private void LoadPlayerPreferences()
         {
             // Cargar configuraciones básicas de PlayerPrefs
-            if (PlayerPrefs.HasKey("MusicVolume"))
+            if (PlayerPrefs.HasKey("DP_MusicVolume"))
             {
-                AudioListener.volume = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
+                AudioListener.volume = PlayerPrefs.GetFloat("DP_MusicVolume", 0.7f);
             }
 
-            if (PlayerPrefs.HasKey("TargetFPS"))
+            if (PlayerPrefs.HasKey("DP_TargetFPS"))
             {
-                Application.targetFrameRate = PlayerPrefs.GetInt("TargetFPS", 60);
+                Application.targetFrameRate = PlayerPrefs.GetInt("DP_TargetFPS", 60);
             }
 
             Debug.Log("[Boot] Preferencias del jugador cargadas");
+        }
+
+        /// <summary>
+        /// Muestra popup de consentimiento GDPR si el usuario aún no ha aceptado.
+        /// Bloquea el boot hasta recibir respuesta. Sin prefab — UI programática.
+        /// </summary>
+        private IEnumerator RequestGDPRConsentIfNeeded()
+        {
+            if (ConsentService.HasConsent())
+            {
+                _consentGranted = true;
+                yield break;
+            }
+
+            _consentGranted = false;
+
+            // --- Construir popup programáticamente ---
+            GameObject popupRoot = new GameObject("ConsentPopup");
+            DontDestroyOnLoad(popupRoot);
+
+            Canvas canvas = popupRoot.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 9999;
+            popupRoot.AddComponent<UnityEngine.UI.CanvasScaler>().uiScaleMode =
+                UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            popupRoot.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+            // Fondo oscuro semitransparente
+            GameObject backdrop = new GameObject("Backdrop");
+            backdrop.transform.SetParent(popupRoot.transform, false);
+            UnityEngine.UI.Image backdropImg = backdrop.AddComponent<UnityEngine.UI.Image>();
+            backdropImg.color = new Color(0f, 0f, 0f, 0.85f);
+            RectTransform backdropRT = backdrop.GetComponent<RectTransform>();
+            backdropRT.anchorMin = Vector2.zero;
+            backdropRT.anchorMax = Vector2.one;
+            backdropRT.offsetMin = backdropRT.offsetMax = Vector2.zero;
+
+            // Panel central
+            GameObject panel = new GameObject("Panel");
+            panel.transform.SetParent(popupRoot.transform, false);
+            UnityEngine.UI.Image panelImg = panel.AddComponent<UnityEngine.UI.Image>();
+            panelImg.color = new Color(0.08f, 0.10f, 0.16f, 1f);
+            RectTransform panelRT = panel.GetComponent<RectTransform>();
+            panelRT.anchorMin = new Vector2(0.07f, 0.25f);
+            panelRT.anchorMax = new Vector2(0.93f, 0.75f);
+            panelRT.offsetMin = panelRT.offsetMax = Vector2.zero;
+
+            // Título
+            GameObject titleGO = new GameObject("Title");
+            titleGO.transform.SetParent(panel.transform, false);
+            TextMeshProUGUI titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
+            titleTMP.text = "Privacy Policy & Terms";
+            titleTMP.fontSize = 22;
+            titleTMP.fontStyle = FontStyles.Bold;
+            titleTMP.color = Color.white;
+            titleTMP.alignment = TextAlignmentOptions.Center;
+            RectTransform titleRT = titleGO.GetComponent<RectTransform>();
+            titleRT.anchorMin = new Vector2(0.05f, 0.72f);
+            titleRT.anchorMax = new Vector2(0.95f, 0.95f);
+            titleRT.offsetMin = titleRT.offsetMax = Vector2.zero;
+
+            // Cuerpo de texto
+            GameObject bodyGO = new GameObject("Body");
+            bodyGO.transform.SetParent(panel.transform, false);
+            TextMeshProUGUI bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
+            bodyTMP.text =
+                "DigitPark uses analytics to improve your experience.\n\n" +
+                "By tapping Accept, you agree to our Privacy Policy " +
+                "(digitpark.com/privacy) and Terms of Service.\n\n" +
+                "You can withdraw consent at any time in Settings.";
+            bodyTMP.fontSize = 14;
+            bodyTMP.color = new Color(0.8f, 0.8f, 0.8f, 1f);
+            bodyTMP.alignment = TextAlignmentOptions.Center;
+            bodyTMP.enableWordWrapping = true;
+            RectTransform bodyRT = bodyGO.GetComponent<RectTransform>();
+            bodyRT.anchorMin = new Vector2(0.05f, 0.30f);
+            bodyRT.anchorMax = new Vector2(0.95f, 0.72f);
+            bodyRT.offsetMin = bodyRT.offsetMax = Vector2.zero;
+
+            // Botón Accept
+            bool accepted = false;
+            bool responded = false;
+
+            GameObject acceptBtn = new GameObject("AcceptButton");
+            acceptBtn.transform.SetParent(panel.transform, false);
+            UnityEngine.UI.Image acceptImg = acceptBtn.AddComponent<UnityEngine.UI.Image>();
+            acceptImg.color = new Color(0f, 0.898f, 1f, 1f);
+            UnityEngine.UI.Button acceptBtnComp = acceptBtn.AddComponent<UnityEngine.UI.Button>();
+            acceptBtnComp.onClick.AddListener(() => { accepted = true; responded = true; });
+            RectTransform acceptRT = acceptBtn.GetComponent<RectTransform>();
+            acceptRT.anchorMin = new Vector2(0.55f, 0.05f);
+            acceptRT.anchorMax = new Vector2(0.95f, 0.27f);
+            acceptRT.offsetMin = acceptRT.offsetMax = Vector2.zero;
+
+            GameObject acceptTextGO = new GameObject("Text");
+            acceptTextGO.transform.SetParent(acceptBtn.transform, false);
+            TextMeshProUGUI acceptTMP = acceptTextGO.AddComponent<TextMeshProUGUI>();
+            acceptTMP.text = "Accept & Continue";
+            acceptTMP.fontSize = 14;
+            acceptTMP.fontStyle = FontStyles.Bold;
+            acceptTMP.color = new Color(0.06f, 0.06f, 0.12f, 1f);
+            acceptTMP.alignment = TextAlignmentOptions.Center;
+            RectTransform acceptTextRT = acceptTextGO.GetComponent<RectTransform>();
+            acceptTextRT.anchorMin = Vector2.zero;
+            acceptTextRT.anchorMax = Vector2.one;
+            acceptTextRT.offsetMin = acceptTextRT.offsetMax = Vector2.zero;
+
+            // Botón Decline
+            GameObject declineBtn = new GameObject("DeclineButton");
+            declineBtn.transform.SetParent(panel.transform, false);
+            UnityEngine.UI.Image declineImg = declineBtn.AddComponent<UnityEngine.UI.Image>();
+            declineImg.color = new Color(0.15f, 0.15f, 0.20f, 1f);
+            UnityEngine.UI.Button declineBtnComp = declineBtn.AddComponent<UnityEngine.UI.Button>();
+            declineBtnComp.onClick.AddListener(() => { accepted = false; responded = true; });
+            RectTransform declineRT = declineBtn.GetComponent<RectTransform>();
+            declineRT.anchorMin = new Vector2(0.05f, 0.05f);
+            declineRT.anchorMax = new Vector2(0.45f, 0.27f);
+            declineRT.offsetMin = declineRT.offsetMax = Vector2.zero;
+
+            GameObject declineTextGO = new GameObject("Text");
+            declineTextGO.transform.SetParent(declineBtn.transform, false);
+            TextMeshProUGUI declineTMP = declineTextGO.AddComponent<TextMeshProUGUI>();
+            declineTMP.text = "Decline";
+            declineTMP.fontSize = 14;
+            declineTMP.color = new Color(0.6f, 0.6f, 0.6f, 1f);
+            declineTMP.alignment = TextAlignmentOptions.Center;
+            RectTransform declineTextRT = declineTextGO.GetComponent<RectTransform>();
+            declineTextRT.anchorMin = Vector2.zero;
+            declineTextRT.anchorMax = Vector2.one;
+            declineTextRT.offsetMin = declineTextRT.offsetMax = Vector2.zero;
+
+            // Esperar respuesta del usuario
+            yield return new WaitUntil(() => responded);
+
+            if (accepted)
+            {
+                Destroy(popupRoot);
+                ConsentService.Accept();
+                _consentGranted = true;
+                Debug.Log("[Boot] GDPR consent accepted.");
+            }
+            else
+            {
+                // Apple guideline 2.4.5: apps cannot terminate themselves on iOS.
+                // Instead, keep the popup visible and prompt again.
+                bodyTMP.text =
+                    "DigitPark requires your consent to function.\n\n" +
+                    "Please tap Accept & Continue to use the app.";
+                declineBtnComp.gameObject.SetActive(false);
+                responded = false;
+                yield return new WaitUntil(() => responded);
+                Destroy(popupRoot);
+                ConsentService.Accept();
+                _consentGranted = true;
+                Debug.Log("[Boot] GDPR consent accepted after re-prompt.");
+            }
         }
 
     }

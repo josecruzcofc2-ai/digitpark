@@ -94,7 +94,7 @@ namespace DigitPark.Localization
             { "AchRewardLabel", "reward_label" },
             // Celebration
             { "CelebrationTitle", "achievement_unlocked" },
-            { "CelebrationAchievementName", "ach_first_game" },
+            // C-P1-23: CelebrationAchievementName removed — AchievementsManager sets it dynamically via achievement.nameKey
 
             // ==================== SETTINGS ====================
             { "SettingsTitleText", "settings_title" },
@@ -605,6 +605,12 @@ namespace DigitPark.Localization
             { "BestStreakCardLabel", "best_streak" },
             // CashTournamentLobby chat
             { "SendChatButtonText", "send_button" },
+            // CashBattle Onboarding slide titles (C-21)
+            { "CBO_Slide1_Title", "cbo_slide1_title" },
+            { "CBO_Slide2_Title", "cbo_slide2_title" },
+            { "CBO_Slide3_Title", "cbo_slide3_title" },
+            { "CBO_Slide4_Title", "cbo_slide4_title" },
+            { "CBO_Slide5_Title", "cbo_slide5_title" },
 
             // ==================== TOURNAMENTS EXTRA ====================
             { "FeaturedTab", "featured_tab" },
@@ -1015,7 +1021,7 @@ namespace DigitPark.Localization
             { "MissionCompletedTitle", "mission_completed" },
 
             // ==================== DAILY REWARDS (V43 AUDIT) ====================
-            { "Day7GrandPrizeLabel", "day7_grand_prize" },
+            { "GrandPrizeLabel", "day7_grand_prize" },
             { "Reward2", "exclusive_item_bonus" },
             { "ClaimRewardText", "claim_reward_button" },
             { "NextRewardLabel", "next_reward_in" },

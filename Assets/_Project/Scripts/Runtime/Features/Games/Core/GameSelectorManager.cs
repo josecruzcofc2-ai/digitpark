@@ -37,14 +37,6 @@ namespace DigitPark.Games
         [Header("Navigation")]
         [SerializeField] private Button backButton;
 
-        [Header("Rules Panel")]
-        [SerializeField] private GameObject rulesPanel;
-        [SerializeField] private TextMeshProUGUI rulesTitleText;
-        [SerializeField] private TextMeshProUGUI rulesContentText;
-        [SerializeField] private Toggle dontShowToggle;
-        [SerializeField] private Button rulesPlayButton;
-        [SerializeField] private Button rulesCancelButton;
-
         [Header("Mode Selection")]
         [SerializeField] private bool isPracticeMode = true; // Por defecto practica
         [SerializeField] private bool isOnlineMatchMode = false; // Modo 1v1 online
@@ -58,23 +50,6 @@ namespace DigitPark.Games
         private const string PRACTICE_MODE_KEY = "DigitPark_IsPracticeMode";
         private const string ONLINE_MATCH_MODE_KEY = "DigitPark_IsOnlineMatchMode";
 
-        // Juego actual seleccionado para las reglas
-        private GameType currentRulesGame;
-
-        // Claves de PlayerPrefs para cada juego
-        private const string PREFS_PREFIX = "DigitPark_ShowRules_";
-
-        // Diccionario de reglas para cada juego
-        // Mapeo GameType → claves de localización para título y reglas
-        private static readonly Dictionary<GameType, (string titleKey, string rulesKey)> gameRulesKeys = new Dictionary<GameType, (string, string)>
-        {
-            { GameType.DigitRush, ("rules_digitrush_title", "rules_digitrush_content") },
-            { GameType.MemoryPairs, ("rules_memorypairs_title", "rules_memorypairs_content") },
-            { GameType.QuickMath, ("rules_quickmath_title", "rules_quickmath_content") },
-            { GameType.FlashTap, ("rules_flashtap_title", "rules_flashtap_content") },
-            { GameType.OddOneOut, ("rules_oddoneout_title", "rules_oddoneout_content") }
-        };
-
         private void Start()
         {
             AnalyticsService.Instance?.LogScreenView("GameSelector");
@@ -84,7 +59,6 @@ namespace DigitPark.Games
 
             SetupButtons();
             SetupCognitiveSprintPanel();
-            SetupRulesPanel();
 
             // Suscribirse a cambios de seleccion
             CognitiveSprintManager.Instance.OnSelectionChanged += UpdateSprintUI;
@@ -97,25 +71,36 @@ namespace DigitPark.Games
             {
                 CognitiveSprintManager.Instance.OnSelectionChanged -= UpdateSprintUI;
             }
+            digitRushButton?.onClick.RemoveAllListeners();
+            memoryPairsButton?.onClick.RemoveAllListeners();
+            quickMathButton?.onClick.RemoveAllListeners();
+            flashTapButton?.onClick.RemoveAllListeners();
+            oddOneOutButton?.onClick.RemoveAllListeners();
+            cognitiveSprintButton?.onClick.RemoveAllListeners();
+            backButton?.onClick.RemoveAllListeners();
+            startSprintButton?.onClick.RemoveAllListeners();
+            cancelSprintButton?.onClick.RemoveAllListeners();
+            if (gameToggles != null)
+                foreach (var toggle in gameToggles) toggle?.onValueChanged.RemoveAllListeners();
         }
 
         private void SetupButtons()
         {
-            // Botones de juegos individuales - ahora pasan por el sistema de reglas
+            // Botones de juegos individuales
             if (digitRushButton != null)
-                digitRushButton.onClick.AddListener(() => TryStartGame(GameType.DigitRush));
+                digitRushButton.onClick.AddListener(() => StartSingleGame(GameType.DigitRush));
 
             if (memoryPairsButton != null)
-                memoryPairsButton.onClick.AddListener(() => TryStartGame(GameType.MemoryPairs));
+                memoryPairsButton.onClick.AddListener(() => StartSingleGame(GameType.MemoryPairs));
 
             if (quickMathButton != null)
-                quickMathButton.onClick.AddListener(() => TryStartGame(GameType.QuickMath));
+                quickMathButton.onClick.AddListener(() => StartSingleGame(GameType.QuickMath));
 
             if (flashTapButton != null)
-                flashTapButton.onClick.AddListener(() => TryStartGame(GameType.FlashTap));
+                flashTapButton.onClick.AddListener(() => StartSingleGame(GameType.FlashTap));
 
             if (oddOneOutButton != null)
-                oddOneOutButton.onClick.AddListener(() => TryStartGame(GameType.OddOneOut));
+                oddOneOutButton.onClick.AddListener(() => StartSingleGame(GameType.OddOneOut));
 
             // Cognitive Sprint
             if (cognitiveSprintButton != null)
@@ -126,110 +111,6 @@ namespace DigitPark.Games
             if (autoNav != null) autoNav.DisableAutoNavigation();
             if (backButton != null)
                 backButton.onClick.AddListener(GoBack);
-        }
-
-        private void SetupRulesPanel()
-        {
-            if (rulesPanel != null)
-                rulesPanel.SetActive(false);
-
-            if (rulesPlayButton != null)
-                rulesPlayButton.onClick.AddListener(OnRulesPlayClicked);
-
-            if (rulesCancelButton != null)
-                rulesCancelButton.onClick.AddListener(CloseRulesPanel);
-
-            if (dontShowToggle != null)
-                dontShowToggle.isOn = false;
-        }
-
-        /// <summary>
-        /// Intenta iniciar un juego, mostrando reglas si es necesario
-        /// </summary>
-        private void TryStartGame(GameType gameType)
-        {
-            // Verificar si debemos mostrar las reglas
-            if (ShouldShowRules(gameType))
-            {
-                ShowRulesPanel(gameType);
-            }
-            else
-            {
-                // Iniciar directamente
-                StartSingleGame(gameType);
-            }
-        }
-
-        /// <summary>
-        /// Verifica si debemos mostrar las reglas para este juego
-        /// </summary>
-        private bool ShouldShowRules(GameType gameType)
-        {
-            string key = PREFS_PREFIX + gameType.ToString();
-            // Por defecto mostramos las reglas (1 = mostrar, 0 = no mostrar)
-            return PlayerPrefs.GetInt(key, 1) == 1;
-        }
-
-        /// <summary>
-        /// Guarda la preferencia de no mostrar reglas para un juego
-        /// </summary>
-        private void SaveDontShowRules(GameType gameType)
-        {
-            string key = PREFS_PREFIX + gameType.ToString();
-            PlayerPrefs.SetInt(key, 0); // 0 = no mostrar
-            PlayerPrefs.Save();
-        }
-
-        /// <summary>
-        /// Muestra el panel de reglas para un juego
-        /// </summary>
-        private void ShowRulesPanel(GameType gameType)
-        {
-            if (rulesPanel == null) return;
-
-            currentRulesGame = gameType;
-
-            // Obtener datos de reglas localizadas
-            if (gameRulesKeys.TryGetValue(gameType, out var keys))
-            {
-                if (rulesTitleText != null)
-                    rulesTitleText.text = AutoLocalizer.Get(keys.titleKey);
-
-                if (rulesContentText != null)
-                    rulesContentText.text = AutoLocalizer.Get(keys.rulesKey);
-            }
-
-            // Resetear toggle
-            if (dontShowToggle != null)
-                dontShowToggle.isOn = false;
-
-            rulesPanel.SetActive(true);
-            AnimatePanelIn(rulesPanel.transform);
-        }
-
-        /// <summary>
-        /// Cierra el panel de reglas
-        /// </summary>
-        private void CloseRulesPanel()
-        {
-            if (rulesPanel != null)
-                AnimatePanelOut(rulesPanel.transform, () => rulesPanel.SetActive(false));
-        }
-
-        /// <summary>
-        /// Cuando se presiona el botón Jugar en el panel de reglas
-        /// </summary>
-        private void OnRulesPlayClicked()
-        {
-            // Guardar preferencia si el toggle está marcado
-            if (dontShowToggle != null && dontShowToggle.isOn)
-            {
-                SaveDontShowRules(currentRulesGame);
-            }
-
-            // Cerrar panel e iniciar juego
-            CloseRulesPanel();
-            StartSingleGame(currentRulesGame);
         }
 
         private void SetupCognitiveSprintPanel()
@@ -464,20 +345,6 @@ namespace DigitPark.Games
             {
                 Debug.Log("[GameSelector] Modo 1v1 Online - Selecciona un juego para buscar oponente");
             }
-        }
-
-        /// <summary>
-        /// Resetea las preferencias de reglas (para testing)
-        /// </summary>
-        public static void ResetAllRulesPreferences()
-        {
-            foreach (GameType gameType in System.Enum.GetValues(typeof(GameType)))
-            {
-                string key = PREFS_PREFIX + gameType.ToString();
-                PlayerPrefs.DeleteKey(key);
-            }
-            PlayerPrefs.Save();
-            Debug.Log("Todas las preferencias de reglas han sido reseteadas");
         }
 
         private void AnimatePanelIn(Transform t)

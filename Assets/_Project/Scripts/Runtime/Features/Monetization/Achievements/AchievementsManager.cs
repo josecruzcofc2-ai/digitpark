@@ -66,6 +66,7 @@ namespace DigitPark.Managers
         [Header("Reward Celebration")]
         [SerializeField] private GameObject rewardCelebration;
         [SerializeField] private TextMeshProUGUI rewardAmountText;
+        [SerializeField] private TextMeshProUGUI celebrationNameText;  // AC-02: shows localized achievement name
         [SerializeField] private ParticleSystem celebrationParticles;
         [SerializeField] private Image celebrationGlow;
 
@@ -155,6 +156,14 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
+            // Remove all button/dropdown listeners to prevent stale references
+            backButton?.onClick.RemoveAllListeners();
+            closeDetailButton?.onClick.RemoveAllListeners();
+            cancelButton?.onClick.RemoveAllListeners();
+            detailBlocker?.GetComponent<Button>()?.onClick.RemoveAllListeners();
+            claimRewardButton?.onClick.RemoveAllListeners();
+            categoryDropdown?.onValueChanged.RemoveAllListeners();
+
             // Kill all tracked tweens
             _emptyIconFloatTween?.Kill();
 
@@ -201,7 +210,8 @@ namespace DigitPark.Managers
                     svcAch.points,
                     svcAch.targetValue,
                     svcAch.iconName,
-                    isSecret
+                    isSecret,
+                    svcAch.titleKey  // AC-02: pass through titleKey for runtime localization
                 );
 
                 // Load progress from Service
@@ -339,7 +349,7 @@ namespace DigitPark.Managers
             if (overallProgressBar)
             {
                 float progress = total > 0 ? (float)completed / total : 0f;
-                overallProgressBar.DOValue(progress, UIAnimations.DURATION_SLOW).SetEase(AnimConstants.SMOOTH);
+                overallProgressBar.DOValue(progress, UIAnimations.DURATION_SLOW).SetEase(AnimConstants.SMOOTH).SetLink(gameObject);
             }
         }
 
@@ -379,7 +389,7 @@ namespace DigitPark.Managers
             // Scroll to top
             if (scrollRect)
             {
-                scrollRect.DOVerticalNormalizedPos(1f, 0.3f);
+                scrollRect.DOVerticalNormalizedPos(1f, 0.3f).SetLink(gameObject);
             }
         }
 
@@ -452,6 +462,7 @@ namespace DigitPark.Managers
             var data = new DigitPark.UI.Items.AchievementData
             {
                 id = definition.id,
+                nameKey = definition.nameKey,  // AC-02: pass through for runtime localization
                 title = definition.title,
                 description = definition.description,
                 category = definition.category.ToString(),
@@ -473,7 +484,8 @@ namespace DigitPark.Managers
             cardObj.transform.localScale = Vector3.zero;
             cardObj.transform.DOScale(1f, 0.4f)
                 .SetDelay(delay)
-                .SetEase(AnimConstants.ENTER);
+                .SetEase(AnimConstants.ENTER)
+                .SetLink(cardObj);
         }
 
         private Sprite LoadAchievementIcon(string iconName)
@@ -571,7 +583,7 @@ namespace DigitPark.Managers
                 var cg = emptyStateContainer.GetComponent<CanvasGroup>();
                 if (cg == null) cg = emptyStateContainer.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.4f).SetEase(AnimConstants.SMOOTH);
+                cg.DOFade(1f, 0.4f).SetEase(AnimConstants.SMOOTH).SetLink(gameObject);
 
                 // Float icon if present
                 var icon = emptyStateContainer.transform.Find("Icon");
@@ -579,7 +591,7 @@ namespace DigitPark.Managers
                 {
                     icon.DOKill();
                     icon.localScale = Vector3.zero;
-                    icon.DOScale(1f, 0.4f).SetEase(AnimConstants.ENTER);
+                    icon.DOScale(1f, 0.4f).SetEase(AnimConstants.ENTER).SetLink(gameObject);
                     _emptyIconFloatTween = icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
                         .SetEase(Ease.InOutSine)
                         .SetLoops(-1, LoopType.Yoyo)
@@ -701,19 +713,19 @@ namespace DigitPark.Managers
             if (detailBlocker)
             {
                 detailBlocker.color = new Color(0, 0, 0, 0);
-                detailBlocker.DOColor(new Color(0, 0, 0, 0.85f), 0.3f);
+                detailBlocker.DOColor(new Color(0, 0, 0, 0.85f), 0.3f).SetLink(gameObject);
             }
 
             if (detailCard)
             {
                 detailCard.localScale = Vector3.one * 0.8f;
-                detailCard.DOScale(1f, UIAnimations.DURATION_NORMAL).SetEase(AnimConstants.ENTER);
+                detailCard.DOScale(1f, UIAnimations.DURATION_NORMAL).SetEase(AnimConstants.ENTER).SetLink(gameObject);
             }
 
             if (detailPanelCanvasGroup)
             {
                 detailPanelCanvasGroup.alpha = 0f;
-                detailPanelCanvasGroup.DOFade(1f, 0.3f);
+                detailPanelCanvasGroup.DOFade(1f, 0.3f).SetLink(gameObject);
             }
         }
 
@@ -779,11 +791,11 @@ namespace DigitPark.Managers
                 if (claimRewardButton)
                 {
                     claimRewardButton.interactable = false;
-                    claimRewardButton.transform.DOScale(0f, 0.2f);
+                    claimRewardButton.transform.DOScale(0f, 0.2f).SetLink(gameObject);
                 }
 
                 // Show celebration
-                ShowRewardCelebration(selectedAchievement.points);
+                ShowRewardCelebration(selectedAchievement.points, selectedAchievement);
 
                 // Update header
                 UpdateHeaderStats();
@@ -792,7 +804,7 @@ namespace DigitPark.Managers
             }
         }
 
-        private void ShowRewardCelebration(int points)
+        private void ShowRewardCelebration(int points, DigitPark.UI.Items.AchievementData achievement = null)
         {
             if (rewardCelebration == null) return;
 
@@ -802,7 +814,17 @@ namespace DigitPark.Managers
             {
                 rewardAmountText.text = $"+{points}";
                 rewardAmountText.transform.localScale = Vector3.zero;
-                rewardAmountText.transform.DOScale(1f, 0.4f).SetEase(AnimConstants.ENTER);
+                rewardAmountText.transform.DOScale(1f, 0.4f).SetEase(AnimConstants.ENTER).SetLink(gameObject);
+            }
+
+            // AC-02: Show localized achievement name in celebration
+            if (celebrationNameText != null && achievement != null)
+            {
+                string achievementName = !string.IsNullOrEmpty(achievement.nameKey)
+                    ? AutoLocalizer.Get(achievement.nameKey)
+                    : achievement.title;
+                celebrationNameText.text = achievementName;
+                celebrationNameText.gameObject.SetActive(true);
             }
 
             if (celebrationParticles)
@@ -814,7 +836,8 @@ namespace DigitPark.Managers
             {
                 celebrationGlow.color = new Color(1f, 0.84f, 0f, 0f);
                 celebrationGlow.DOColor(new Color(1f, 0.84f, 0f, 0.5f), 0.3f)
-                    .SetLoops(4, LoopType.Yoyo);
+                    .SetLoops(4, LoopType.Yoyo)
+                    .SetLink(gameObject);
             }
 
             // Hide after delay
@@ -824,7 +847,7 @@ namespace DigitPark.Managers
                 {
                     rewardCelebration.SetActive(false);
                 }
-            });
+            }).SetLink(gameObject);
         }
 
         #endregion
@@ -868,12 +891,14 @@ namespace DigitPark.Managers
         public bool isClaimed;
         public bool isSecret;
         public string iconName;
+        public string nameKey;  // AC-02: localization key for the achievement name
 
         public AchievementDefinition(string id, string title, string description,
             AchievementsManager.AchievementCategory category, int points, int target,
-            string iconName = null, bool isSecret = false)
+            string iconName = null, bool isSecret = false, string nameKey = null)
         {
             this.id = id;
+            this.nameKey = nameKey ?? id;  // default to id if no key provided
             this.title = title;
             this.description = description;
             this.category = category;

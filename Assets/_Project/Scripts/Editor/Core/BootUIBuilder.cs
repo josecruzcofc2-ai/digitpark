@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -156,9 +158,10 @@ namespace DigitPark.Editor
             bgRT.sizeDelta = Vector2.zero;
 
             Image bgImg = bg.AddComponent<Image>();
-            bgImg.color = PrimaryBackground;
+            bgImg.color = Color.white; // ThemeApplier will tint at runtime
             bgImg.raycastTarget = false;
             // Solid background — no gradient, no vignette (unified with all normal scenes)
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
         }
 
         #endregion
@@ -351,6 +354,7 @@ namespace DigitPark.Editor
             sub1.fontSizeMin = FONT_MIN_BODY;
             sub1.fontSizeMax = FONT_H2;
             if (DefaultFont != null) sub1.font = DefaultFont;
+            ThemeApplierHelper.ApplyText(sub1Obj, ET.TextSecondary);
 
             // Subtitle 2: "Mind Skills" (localized at runtime)
             GameObject sub2Obj = new GameObject("Subtitle2");
@@ -375,6 +379,7 @@ namespace DigitPark.Editor
             sub2.fontSizeMin = FONT_MIN_BODY;
             sub2.fontSizeMax = FONT_H3;
             if (DefaultFont != null) sub2.font = DefaultFont;
+            ThemeApplierHelper.ApplyText(sub2Obj, ET.Accent);
         }
 
         #endregion
@@ -396,6 +401,7 @@ namespace DigitPark.Editor
             Image barBG = container.AddComponent<Image>();
             barBG.color = InputBG;
             barBG.raycastTarget = false;
+            ThemeApplierHelper.Apply(container, ET.SliderTrack);
 
             // Glow outer (pulsing — animated by BootAnimator at runtime)
             GameObject glowOuter = new GameObject("LoadingBarGlowOuter");
@@ -460,6 +466,7 @@ namespace DigitPark.Editor
             tmp.fontSizeMin = FONT_MIN_BODY;
             tmp.fontSizeMax = FONT_SYMBOL;
             if (DefaultFont != null) tmp.font = DefaultFont;
+            ThemeApplierHelper.ApplyText(textObj, ET.TextSecondary);
 
             return tmp;
         }
@@ -489,6 +496,7 @@ namespace DigitPark.Editor
             tmp.color = TextDisabled;
             tmp.alignment = TextAlignmentOptions.BottomRight;
             if (DefaultFont != null) tmp.font = DefaultFont;
+            ThemeApplierHelper.ApplyText(textObj, ET.TextDisabled);
 
             return tmp;
         }

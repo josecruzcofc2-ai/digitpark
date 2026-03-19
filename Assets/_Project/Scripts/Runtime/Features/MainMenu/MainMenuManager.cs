@@ -73,6 +73,10 @@ namespace DigitPark.Managers
             // Configurar listeners
             SetupListeners();
 
+            // Ocultar CashBattle si Triumph SDK no está disponible via RemoteConfig
+            bool cashEnabled = DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.TriumphEnabled ?? false;
+            cashBattleButton?.gameObject.SetActive(cashEnabled);
+
             // Cargar datos del jugador
             LoadPlayerData();
 
@@ -89,7 +93,7 @@ namespace DigitPark.Managers
                 var cg = mainMenuPanel.GetComponent<CanvasGroup>();
                 if (cg == null) cg = mainMenuPanel.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(gameObject);
             }
         }
 
@@ -445,7 +449,7 @@ namespace DigitPark.Managers
             ClearNotifications();
 
             // Navegar a la escena de Notificaciones
-            PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
+            PlayerPrefs.SetString("DP_NotificationsReturnScene", "MainMenu");
             SceneNavigator.Instance?.NavigateTo("Notifications");
         }
 

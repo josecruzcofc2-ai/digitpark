@@ -707,8 +707,8 @@ namespace DigitPark.Services
                 descriptionKey = "ach_days_365_desc",
                 category = AchievementCategory.Time,
                 targetValue = 365,
-                rewardCoins = 600,
-                rewardGems = 12, // Economy Rebalance: gem drip
+                rewardCoins = 1000, // E-B13: upgraded from 600 DC
+                rewardGems = 25,    // E-B13: upgraded from 12 DG
                 points = 300,
                 iconName = "Logro_Racha_365_Dias",
                 isHidden = true
@@ -1381,7 +1381,7 @@ namespace DigitPark.Services
         public void OnDailyRewardClaimed(int consecutiveDays)
         {
             OnDailyLogin(
-                PlayerPrefs.GetInt("TotalDaysPlayed", consecutiveDays),
+                PlayerPrefs.GetInt("DP_TotalDaysPlayed", consecutiveDays),
                 consecutiveDays
             );
         }

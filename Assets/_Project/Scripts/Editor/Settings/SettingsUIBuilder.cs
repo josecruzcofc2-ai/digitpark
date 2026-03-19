@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using System.Collections.Generic;
 using DigitPark.UI;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -155,8 +157,9 @@ namespace DigitPark.Editor
 
             Image img = bg.AddComponent<Image>();
             img.sprite = WhiteSprite;
-            img.color = DARK_NAVY;
+            img.color = Color.white; // ThemeApplier tints at runtime
             img.raycastTarget = false;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             bg.transform.SetAsFirstSibling();
         }

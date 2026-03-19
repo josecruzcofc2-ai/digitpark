@@ -68,8 +68,8 @@ namespace DigitPark.Managers
         {
             Debug.Log("[MatchHistory] MatchHistorySceneManager iniciado");
 
-            returnScene = PlayerPrefs.GetString("MatchHistoryReturnScene", "Profile");
-            PlayerPrefs.DeleteKey("MatchHistoryReturnScene");
+            returnScene = PlayerPrefs.GetString("DP_MatchHistoryReturnScene", "Profile");
+            PlayerPrefs.DeleteKey("DP_MatchHistoryReturnScene");
 
             SetupFilterButtons();
             SetupListeners();
@@ -256,8 +256,8 @@ namespace DigitPark.Managers
                 resultText.color = entry.GetResultColor();
             }
 
-            // Subtitle (opponent or practice)
-            var subtitleText = item.transform.Find("InfoSection/Subtitle")?.GetComponent<TextMeshProUGUI>();
+            // MH-02: Align path to prefab GO name "OpponentText" (was "Subtitle")
+            var subtitleText = item.transform.Find("InfoSection/OpponentText")?.GetComponent<TextMeshProUGUI>();
             if (subtitleText != null)
                 subtitleText.text = entry.GetSubtitle();
 

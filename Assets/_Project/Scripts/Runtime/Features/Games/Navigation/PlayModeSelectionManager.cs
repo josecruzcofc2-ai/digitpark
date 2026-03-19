@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 using DigitPark.Localization;
 using DigitPark.Services.Firebase;
 using DigitPark.Games;
@@ -16,6 +17,8 @@ namespace DigitPark.Managers
     /// </summary>
     public class PlayModeSelectionManager : MonoBehaviour
     {
+        private bool _isNavigating = false;
+
         [Header("UI - Header")]
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private Button backButton;
@@ -58,6 +61,11 @@ namespace DigitPark.Managers
             {
                 LocalizationManager.OnLanguageChanged -= UpdateTexts;
             }
+
+            backButton?.onClick.RemoveAllListeners();
+            soloCard?.onClick.RemoveAllListeners();
+            oneVsOneCard?.onClick.RemoveAllListeners();
+            tournamentsCard?.onClick.RemoveAllListeners();
         }
 
         private void SetupListeners()
@@ -106,32 +114,40 @@ namespace DigitPark.Managers
 
         private void OnSoloClicked()
         {
+            if (_isNavigating) return;
+            _isNavigating = true;
+
             Debug.Log("[PlayModeSelection] Modo Solo seleccionado");
 
-            // Analytics - screen view ya que aún no se selecciona juego
-            AnalyticsService.Instance?.LogScreenView("GameSelector", "PlayModeSelection");
+            AnalyticsService.Instance?.LogCustomEvent("mode_selected", new Dictionary<string, object> { { "mode", "solo" } });
 
-            // Navigate to game selector in practice mode
             GameSelectorManager.SetPracticeMode(true);
             SceneManager.LoadScene("GameSelector");
         }
 
         private void OnOneVsOneClicked()
         {
+            if (_isNavigating) return;
+            _isNavigating = true;
+
             Debug.Log("[PlayModeSelection] Modo 1v1 seleccionado");
 
-            // Navigate to game selector in 1v1 online mode
-            // After selecting a game, it will search for an opponent
-            GameSelectorManager.SetPracticeMode(false); // Online 1v1 mode
+            AnalyticsService.Instance?.LogCustomEvent("mode_selected", new Dictionary<string, object> { { "mode", "1v1" } });
+
+            GameSelectorManager.SetPracticeMode(false);
             GameSelectorManager.SetOnlineMatchMode(true);
             SceneManager.LoadScene("GameSelector");
         }
 
         private void OnTournamentsClicked()
         {
+            if (_isNavigating) return;
+            _isNavigating = true;
+
             Debug.Log("[PlayModeSelection] Modo Torneos seleccionado");
 
-            // Navigate to Tournaments (free tournaments)
+            AnalyticsService.Instance?.LogCustomEvent("mode_selected", new Dictionary<string, object> { { "mode", "tournaments" } });
+
             SceneManager.LoadScene("TournamentsBrowser");
         }
 

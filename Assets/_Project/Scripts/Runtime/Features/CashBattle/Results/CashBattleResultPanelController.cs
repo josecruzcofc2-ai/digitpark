@@ -85,6 +85,8 @@ namespace DigitPark.UI
             _moneySeq?.Kill();
             _entryFeeSeq?.Kill();
             _winnerShareSeq?.Kill();
+            continueButton?.onClick.RemoveAllListeners();
+            newMatchButton?.onClick.RemoveAllListeners();
         }
 
         private void SetupButtons()
@@ -175,7 +177,7 @@ namespace DigitPark.UI
         private void PopulateVSSection(MinigameResult playerResult, MinigameResult opponentResult,
             bool playerWon, string opponentName)
         {
-            string pName = PlayerPrefs.GetString("PlayerName", AutoLocalizer.Get("default_player_name"));
+            string pName = PlayerPrefs.GetString("DP_PlayerName", AutoLocalizer.Get("default_player_name"));
 
             if (playerNameText != null)
             {

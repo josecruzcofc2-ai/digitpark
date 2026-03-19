@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.Editor.AutoAssigners;
 using DigitPark.UI;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -129,8 +131,9 @@ namespace DigitPark.Editor
             bgRT.offsetMax = Vector2.zero;
             Image bgImg = bg.GetComponent<Image>();
             if (bgImg == null) bgImg = bg.AddComponent<Image>();
-            bgImg.color = DARK_BG;
+            bgImg.color = Color.white; // ThemeApplier tints at runtime
             bgImg.raycastTarget = false;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             // ========== HEADER ==========
             GameObject header = CreateOrFind(canvasTransform, "Header");

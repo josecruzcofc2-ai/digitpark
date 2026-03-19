@@ -27,8 +27,7 @@ namespace DigitPark.Editor.AutoAssigners
             "digitRushButton", "memoryPairsButton", "quickMathButton",
             "flashTapButton", "oddOneOutButton",
             "cognitiveSprintButton", "cognitiveSprintPanel",
-            "backButton",
-            "rulesPanel", "rulesPlayButton", "rulesCancelButton"
+            "backButton"
         };
 
         private struct ReferenceResult
@@ -77,7 +76,6 @@ namespace DigitPark.Editor.AutoAssigners
                 "Assigns UI references to GameSelectorManager:\n" +
                 "• Game buttons (5 individual games)\n" +
                 "• Cognitive Sprint button and panel\n" +
-                "• Rules panel\n" +
                 "• Back button",
                 MessageType.Info);
 
@@ -269,11 +267,6 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Navigation
             AssignReference(so, "backButton", FindButtonByName("back", "return", "close"));
-
-            // Rules Panel
-            AssignReference(so, "rulesPanel", FindByNameContains<Transform>("rulespanel", "rules"));
-            AssignReference(so, "rulesPlayButton", FindButtonByName("rulesplay", "play", "start"));
-            AssignReference(so, "rulesCancelButton", FindButtonByName("rulescancel", "cancel", "close"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

@@ -140,7 +140,7 @@ namespace DigitPark.Services
 
             // AUDIT-FIXED [2026-03-10] B-03: Forzar Production en builds no-editor para
             // evitar que Mock services se usen accidentalmente en producción con dinero real.
-#if !UNITY_EDITOR && !DEVELOPMENT_BUILD
+#if !UNITY_EDITOR
             if (_serviceMode == ServiceMode.Mock)
             {
                 Debug.LogWarning("[ServiceLocator] AUDIT: _serviceMode era Mock en build de producción. Cambiando a Production.");

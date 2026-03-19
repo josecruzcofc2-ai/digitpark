@@ -399,8 +399,8 @@ namespace DigitPark.Managers
             Debug.Log($"[SearchPlayers] Ver perfil de: {playerId}");
 
             // Guardar ID y escena de retorno para navegar a perfil
-            PlayerPrefs.SetString("ViewProfileId", playerId);
-            PlayerPrefs.SetString("ProfileReturnScene", "SearchPlayers");
+            PlayerPrefs.SetString("DP_ViewProfileId", playerId);
+            PlayerPrefs.SetString("DP_ProfileReturnScene", "SearchPlayers");
             PlayerPrefs.Save();
 
             SceneManager.LoadScene("Profile");
@@ -477,7 +477,7 @@ namespace DigitPark.Managers
         {
             Debug.Log($"[SearchPlayers] Retar a: {playerId}");
 
-            PlayerPrefs.SetString("ChallengePlayerId", playerId);
+            PlayerPrefs.SetString("DP_ChallengePlayerId", playerId);
             PlayerPrefs.Save();
 
             InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info");

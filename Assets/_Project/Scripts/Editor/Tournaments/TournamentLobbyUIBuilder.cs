@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using System.Collections.Generic;
 using DigitPark.UI;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -219,7 +221,8 @@ namespace DigitPark.Editor
             bgRT.sizeDelta = Vector2.zero;
 
             Image bgImage = GetOrAddComponent<Image>(bg);
-            bgImage.color = DARK_BG;
+            bgImage.color = Color.white; // ThemeApplier tints at runtime
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             bg.transform.SetAsFirstSibling();
         }
@@ -1600,7 +1603,7 @@ namespace DigitPark.Editor
             Button leaveButton = GetOrAddComponent<Button>(leaveBtn);
             SetupButtonColors(leaveButton, BUTTON_DANGER);
 
-            GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "LeaveButtonText");
+            GameObject leaveTextObj = FindOrCreateChild(leaveBtn, "LeaveConfirmButtonText");
             TextMeshProUGUI leaveText = GetOrAddComponent<TextMeshProUGUI>(leaveTextObj);
             leaveText.text = "Leave";
             leaveText.fontSize = FontSizes.Subtitle;

@@ -5,6 +5,8 @@ using TMPro;
 using DigitPark.UI;
 using DigitPark.Games;
 using DigitPark.Editor.AutoAssigners;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -157,13 +159,15 @@ namespace DigitPark.Editor
                 GameObject background = CreateElement(root, "Background");
                 SetupRectTransform(background, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
                 Image bgImage = background.AddComponent<Image>();
-                bgImage.color = DARK_BG;
+                bgImage.color = Color.white; // ThemeApplier tints at runtime
                 background.transform.SetAsFirstSibling();
+                ThemeApplierHelper.Apply(background, ET.PrimaryBackground);
             }
 
             // ========== SAFE AREA (contenedor principal) ==========
             GameObject safeArea = CreateElement(root, "SafeArea");
             SetupRectTransform(safeArea, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            safeArea.AddComponent<SafeAreaHandler>();
 
             // ========== HEADER ==========
             GameObject header = CreateElement(safeArea.transform, "Header");

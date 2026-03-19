@@ -418,26 +418,26 @@ namespace DigitPark.Effects
         public void SetEffectsEnabled(bool enabled)
         {
             effectsEnabled = enabled;
-            PlayerPrefs.SetInt("EffectsEnabled", enabled ? 1 : 0);
+            PlayerPrefs.SetInt("DP_EffectsEnabled", enabled ? 1 : 0);
         }
 
         public void SetHapticsEnabled(bool enabled)
         {
             enableHaptics = enabled;
-            PlayerPrefs.SetInt("HapticsEnabled", enabled ? 1 : 0);
+            PlayerPrefs.SetInt("DP_HapticsEnabled", enabled ? 1 : 0);
         }
 
         public void SetEffectsIntensity(float intensity)
         {
             effectsIntensity = Mathf.Clamp(intensity, 0f, 2f);
-            PlayerPrefs.SetFloat("EffectsIntensity", effectsIntensity);
+            PlayerPrefs.SetFloat("DP_EffectsIntensity", effectsIntensity);
         }
 
         private void LoadSettings()
         {
-            effectsEnabled = PlayerPrefs.GetInt("EffectsEnabled", 1) == 1;
-            enableHaptics = PlayerPrefs.GetInt("HapticsEnabled", 1) == 1;
-            effectsIntensity = PlayerPrefs.GetFloat("EffectsIntensity", 1f);
+            effectsEnabled = PlayerPrefs.GetInt("DP_EffectsEnabled", 1) == 1;
+            enableHaptics = PlayerPrefs.GetInt("DP_HapticsEnabled", 1) == 1;
+            effectsIntensity = PlayerPrefs.GetFloat("DP_EffectsIntensity", 1f);
         }
 
         #endregion

@@ -50,11 +50,11 @@ namespace DigitPark.Payments
             new CosmeticProduct
             {
                 ProductId = "sparks_100",
-                DisplayName = "100 Sparks",
+                DisplayName = "150 Sparks",  // E-EC01: 100→150 DG, cubre exactamente 1 Tier B (150 DG)
                 Type = CosmeticProductType.Consumable,
                 PriceUSD = 0.99m,
                 AppleProductId = "com.matrixsoftware.digitpark.gems_100",
-                GemsAmount = 100,
+                GemsAmount = 150,
                 BonusPercent = 0
             },
             new CosmeticProduct
@@ -122,6 +122,79 @@ namespace DigitPark.Payments
                 Type = CosmeticProductType.NonConsumable,
                 PriceUSD = 30.45m,
                 AppleProductId = "com.matrixsoftware.digitpark.complete_bundle"
+            },
+            // Profile Frames
+            new CosmeticProduct
+            {
+                ProductId = "frame_plasma_spark",
+                DisplayName = "Plasma Spark Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 0.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_plasma_spark"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_prism_shift",
+                DisplayName = "Prism Shift Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 0.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_prism_shift"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_aurora_borealis",
+                DisplayName = "Aurora Borealis Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 3.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_aurora_borealis"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_void_walker",
+                DisplayName = "Void Walker Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 5.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_void_walker"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_storm_surge",
+                DisplayName = "Storm Surge Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 5.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_storm_surge"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_cosmic_rift",
+                DisplayName = "Cosmic Rift Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 9.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_cosmic_rift"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_infernal_god",
+                DisplayName = "Infernal God Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 9.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_infernal_god"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_divine_light",
+                DisplayName = "Divine Light Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 14.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_divine_light"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_quantum_break",
+                DisplayName = "Quantum Break Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 14.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_quantum_break"
             }
         };
 

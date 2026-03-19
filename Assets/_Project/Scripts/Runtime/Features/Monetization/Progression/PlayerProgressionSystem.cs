@@ -178,7 +178,7 @@ namespace DigitPark.Progression
         /// </summary>
         private bool IsXPBoostActive()
         {
-            string expiryStr = PlayerPrefs.GetString("XPBoost_Expiry", "");
+            string expiryStr = PlayerPrefs.GetString("DP_XPBoost_Expiry", "");
             if (string.IsNullOrEmpty(expiryStr)) return false;
             if (System.DateTime.TryParse(expiryStr, System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.RoundtripKind, out System.DateTime expiry))
@@ -279,7 +279,7 @@ namespace DigitPark.Progression
                 // Mid levels
                 { 30,  new LevelReward("1000 DigitCoins",       RewardType.DigitCoins,  "1000",             3) },
                 { 40,  new LevelReward("Avatar: Veteran",       RewardType.Avatar,      "avatar_veteran") },
-                { 50,  new LevelReward("Title: Veteran",        RewardType.Title,       "title_veteran",    7) },
+                { 50,  new LevelReward("Title: Veteran",        RewardType.Title,       "title_veteran",    25) },  // E-B10: upgraded from 7 DG
                 { 60,  new LevelReward("Frame: Bronze",         RewardType.Frame,       "frame_bronze") },
                 { 75,  new LevelReward("2000 DigitCoins",       RewardType.DigitCoins,  "2000",             8) },
 

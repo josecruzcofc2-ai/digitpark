@@ -52,11 +52,11 @@ namespace DigitPark.Editor
         private const float CONTENT_TOP = 0.48f;
         private const float CONTENT_BOT = 0.12f;
 
-        private const float DOTS_TOP = 0.095f;
-        private const float DOTS_BOT = 0.065f;
+        private const float DOTS_TOP = 0.115f;
+        private const float DOTS_BOT = 0.085f;
 
         private const float NAV_TOP = 0.075f;
-        private const float NAV_BOT = 0.025f;
+        private const float NAV_BOT = 0.030f;
 
         private const float SIDE_PAD = 30f;
 
@@ -339,7 +339,7 @@ namespace DigitPark.Editor
         {
             var slide = CreateSlideBase(parent, "Slide1", 0, true);
 
-            CreateSlideTitle(slide, "WELCOME TO\nCASH BATTLE!", GOLD);
+            CreateSlideTitle(slide, "WELCOME TO\nCASH BATTLE!", GOLD, "CBO_Slide1_Title");
 
             var card = CreateContentCard(slide);
             AddContentText(card, "The real money competition\nplatform in Digit Park", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
@@ -355,7 +355,7 @@ namespace DigitPark.Editor
         {
             var slide = CreateSlideBase(parent, "Slide2", 1, false);
 
-            CreateSlideTitle(slide, "VERIFY YOUR AGE\n(18+ REQUIRED)", GOLD);
+            CreateSlideTitle(slide, "VERIFY YOUR AGE\n(18+ REQUIRED)", GOLD, "CBO_Slide2_Title");
 
             var card = CreateContentCard(slide);
             AddContentText(card, "To play with real money, you must:", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
@@ -371,7 +371,7 @@ namespace DigitPark.Editor
         {
             var slide = CreateSlideBase(parent, "Slide3", 2, false);
 
-            CreateSlideTitle(slide, "DEPOSIT FUNDS\nTO YOUR WALLET", GOLD);
+            CreateSlideTitle(slide, "DEPOSIT FUNDS\nTO YOUR WALLET", GOLD, "CBO_Slide3_Title");
 
             var card = CreateContentCard(slide);
             AddContentText(card, "Add money to your account easily:", (int)FontSizes.Body, TEXT_WHITE, TextAlignmentOptions.Center);
@@ -387,7 +387,7 @@ namespace DigitPark.Editor
         {
             var slide = CreateSlideBase(parent, "Slide4", 3, false);
 
-            CreateSlideTitle(slide, "CHOOSE YOUR GAME\nAND BET", GOLD);
+            CreateSlideTitle(slide, "CHOOSE YOUR GAME\nAND BET", GOLD, "CBO_Slide4_Title");
 
             var card = CreateContentCard(slide);
             AddContentText(card, "1v1 COMPETITIONS", (int)FontSizes.Subtitle, ORANGE_GOLD, TextAlignmentOptions.Center, true);
@@ -405,7 +405,7 @@ namespace DigitPark.Editor
         {
             var slide = CreateSlideBase(parent, "Slide5", 4, false);
 
-            CreateSlideTitle(slide, "WIN AND WITHDRAW\nYOUR MONEY!", GREEN_WIN);
+            CreateSlideTitle(slide, "WIN AND WITHDRAW\nYOUR MONEY!", GREEN_WIN, "CBO_Slide5_Title");
 
             var card = CreateContentCard(slide);
             AddContentText(card, "FAST AND SECURE WITHDRAWALS", (int)FontSizes.Subtitle, GREEN_WIN, TextAlignmentOptions.Center, true);
@@ -468,9 +468,9 @@ namespace DigitPark.Editor
             return slide.transform;
         }
 
-        private static void CreateSlideTitle(Transform slide, string text, Color color)
+        private static void CreateSlideTitle(Transform slide, string text, Color color, string goName = "SlideTitle")
         {
-            var title = new GameObject("SlideTitle");
+            var title = new GameObject(goName);
             title.transform.SetParent(slide, false);
             var tRT = title.AddComponent<RectTransform>();
             tRT.anchorMin = new Vector2(0.05f, TITLE_BOT);
@@ -658,7 +658,7 @@ namespace DigitPark.Editor
             var legal = FindOrCreate(canvas.transform, "LegalText");
             var lRT = GetOrAdd<RectTransform>(legal);
             lRT.anchorMin = new Vector2(0.05f, 0);
-            lRT.anchorMax = new Vector2(0.95f, 0.012f);
+            lRT.anchorMax = new Vector2(0.95f, 0.025f);
             lRT.offsetMin = Vector2.zero;
             lRT.offsetMax = Vector2.zero;
 

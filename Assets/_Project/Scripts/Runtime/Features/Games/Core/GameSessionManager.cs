@@ -7,6 +7,7 @@ using DigitPark.Services.Firebase;
 using DigitPark.Data;
 using DigitPark.Progression;
 using DigitPark.Navigation;
+using DigitPark.Economy;
 
 namespace DigitPark.Games
 {
@@ -361,8 +362,8 @@ namespace DigitPark.Games
 
                     if (isWin)
                     {
-                        int currentStreak = PlayerPrefs.GetInt("CurrentWinStreak", 0) + 1;
-                        PlayerPrefs.SetInt("CurrentWinStreak", currentStreak);
+                        int currentStreak = PlayerPrefs.GetInt("DP_CurrentWinStreak", 0) + 1;
+                        PlayerPrefs.SetInt("DP_CurrentWinStreak", currentStreak);
                         PlayerPrefs.Save();
                         AchievementService.Instance?.OnWinStreakChanged(currentStreak);
 
@@ -371,7 +372,7 @@ namespace DigitPark.Games
                     }
                     else
                     {
-                        PlayerPrefs.SetInt("CurrentWinStreak", 0);
+                        PlayerPrefs.SetInt("DP_CurrentWinStreak", 0);
                         PlayerPrefs.Save();
 
                         // Sync reset streak to Firebase
@@ -463,7 +464,7 @@ namespace DigitPark.Games
         public void CancelSession()
         {
             CurrentContext = null;
-            SceneNavigator.Instance.NavigateTo("MainMenu");
+            SceneNavigator.Instance?.NavigateTo("MainMenu");
         }
 
         /// <summary>
@@ -526,7 +527,7 @@ namespace DigitPark.Games
             {
                 case GameMode.Practice:
                     if (!result.Completed) return 0; // No reward if abandoned
-                    int reward = 30; // Base: complete practice (Economy Rebalance)
+                    int reward = EconomyConstants.COINS_PRACTICE_BASE;
                     // Bonus for beating personal best
                     if (result.Completed)
                     {
@@ -535,20 +536,22 @@ namespace DigitPark.Games
                         {
                             var stats = playerData.GetGameStats(CurrentContext.CurrentGame.Value.ToString());
                             if (stats != null && result.TotalTime < stats.bestTime)
-                                reward += 15; // Beat personal best bonus
+                                reward += EconomyConstants.COINS_PRACTICE_PB_BONUS;
                         }
                     }
                     return reward;
 
                 case GameMode.SingleGame:
+                    return result.Completed ? EconomyConstants.COINS_SINGLEGAME_WIN : EconomyConstants.COINS_SINGLEGAME_LOSS;
+
                 case GameMode.Online:
-                    return result.Completed ? 50 : 15; // Win: +50, Loss: +15 (Economy Rebalance)
+                    return 0; // Handled by OnlineResultManager.GrantRankedRewards (FWOTD + perfect bonus)
 
                 case GameMode.Tournament:
-                    return result.Completed ? 100 : 25; // Win: +100, Loss: +25 (Economy Rebalance)
+                    return result.Completed ? EconomyConstants.COINS_TOURNAMENT_WIN : EconomyConstants.COINS_TOURNAMENT_LOSS;
 
                 case GameMode.CognitiveSprint:
-                    return result.Completed ? 60 : 15; // Win: +60, Loss: +15 (Economy Rebalance)
+                    return result.Completed ? EconomyConstants.COINS_SPRINT_WIN : EconomyConstants.COINS_SPRINT_LOSS;
 
                 case GameMode.CashTournament:
                     return 0; // No coin rewards for cash tournaments (real money only)

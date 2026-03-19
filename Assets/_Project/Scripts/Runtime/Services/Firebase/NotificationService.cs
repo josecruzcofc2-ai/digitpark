@@ -300,7 +300,7 @@ namespace DigitPark.Services.Firebase
         {
             // FCM callback fires on a background thread — marshal everything to main thread
             var token = e.Token;
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            UnityMainThreadDispatcher.Instance()?.Enqueue(() =>
             {
                 LogDebug("[FCM] Token registered");
                 _fcmToken = token;
@@ -319,7 +319,7 @@ namespace DigitPark.Services.Firebase
         {
             // FCM callback fires on a background thread — marshal everything to main thread
             var message = e.Message;
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            UnityMainThreadDispatcher.Instance()?.Enqueue(() =>
             {
                 LogDebug($"Mensaje recibido - From: {message.From}");
                 var notification = ParseNotification(message);
@@ -507,14 +507,14 @@ namespace DigitPark.Services.Firebase
         private void NavigateToFriendRequests()
         {
             // Navegar a Notifications con filtro social
-            PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
+            PlayerPrefs.SetString("DP_NotificationsReturnScene", "MainMenu");
             SceneNavigator.Instance.NavigateTo("Notifications");
         }
 
         private void NavigateToFriends()
         {
             // Navegar a Notifications con filtro social
-            PlayerPrefs.SetString("NotificationsReturnScene", "MainMenu");
+            PlayerPrefs.SetString("DP_NotificationsReturnScene", "MainMenu");
             SceneNavigator.Instance.NavigateTo("Notifications");
         }
 
@@ -522,7 +522,7 @@ namespace DigitPark.Services.Firebase
         {
             if (!string.IsNullOrEmpty(challengeId))
             {
-                PlayerPrefs.SetString("ChallengeId", challengeId);
+                PlayerPrefs.SetString("DP_ChallengeId", challengeId);
             }
             SceneNavigator.Instance.NavigateTo("PlayModeSelection");
         }
@@ -531,14 +531,14 @@ namespace DigitPark.Services.Firebase
         {
             if (!string.IsNullOrEmpty(tournamentId))
             {
-                PlayerPrefs.SetString("OpenTournamentId", tournamentId);
+                PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
             }
             SceneNavigator.Instance.NavigateTo("CashBattleHub");
         }
 
         private void NavigateToDailyRewards()
         {
-            PlayerPrefs.SetString("OpenPanel", "DailyRewards");
+            PlayerPrefs.SetString("DP_OpenPanel", "DailyRewards");
             SceneNavigator.Instance.NavigateTo("MainMenu");
         }
 
@@ -547,7 +547,7 @@ namespace DigitPark.Services.Firebase
             switch (promoAction)
             {
                 case "premium":
-                    PlayerPrefs.SetString("OpenPanel", "Premium");
+                    PlayerPrefs.SetString("DP_OpenPanel", "Premium");
                     SceneNavigator.Instance.NavigateTo("MainMenu");
                     break;
 

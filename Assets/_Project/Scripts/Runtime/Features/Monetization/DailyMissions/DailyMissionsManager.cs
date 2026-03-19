@@ -76,7 +76,7 @@ namespace DigitPark.Managers
         [SerializeField] private int dailyMissionsRequired = 3;
         [SerializeField] private int dailyBonusReward = 100; // Economy Rebalance
         [SerializeField] private int dailyBonusGems = 1; // Economy Rebalance: 1 DG/día max — premium currency drip lento
-        [SerializeField] private float refreshCheckInterval = 60f;
+        [SerializeField] private float refreshCheckInterval = 1f;
 
         // Neon theme colors
         private static readonly Color CYAN_NEON = new Color(0f, 1f, 1f, 1f);
@@ -280,6 +280,7 @@ namespace DigitPark.Managers
                 if (dbRef == null) return;
 
                 var snapshot = await dbRef.Child("players").Child(uid).GetValueAsync();
+                if (this == null || gameObject == null) return;
                 if (snapshot == null || !snapshot.Exists) return;
 
                 var data = snapshot.Value as Dictionary<string, object>;
@@ -333,6 +334,27 @@ namespace DigitPark.Managers
 
         #region Reset Logic
 
+        // SEC-B02: Server time validation — prevents client clock manipulation for mission resets
+        private async Task<DateTime> GetValidatedTimeAsync()
+        {
+            try
+            {
+                var db = FirebaseDB.FirebaseDatabase.DefaultInstance;
+                var serverTimeRef = db.GetReference(".info/serverTimeOffset");
+                var snapshot = await serverTimeRef.GetValueAsync();
+                if (snapshot != null && snapshot.Value != null)
+                {
+                    long offsetMs = Convert.ToInt64(snapshot.Value);
+                    return DateTime.UtcNow.AddMilliseconds(offsetMs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[DailyMissions] SEC-B02: Server time unavailable, using local time: {ex.Message}");
+            }
+            return DateTime.UtcNow;
+        }
+
         private void CheckResets()
         {
             string today = DateTime.Now.ToString("yyyy-MM-dd");
@@ -342,7 +364,7 @@ namespace DigitPark.Managers
             {
                 SelectNewMissions(dailyPool, state.daily, DateTime.Now);
                 state.lastDailyReset = today;
-                PlayerPrefs.SetInt("DailyBonusClaimed", 0);
+                PlayerPrefs.SetInt("DP_DailyBonusClaimed", 0);
             }
 
             // Weekly reset
@@ -520,7 +542,11 @@ namespace DigitPark.Managers
 
             if (dailyTab) dailyTab.onClick.AddListener(() => SwitchTab(MissionTab.Daily));
             if (weeklyTab) weeklyTab.onClick.AddListener(() => SwitchTab(MissionTab.Weekly));
-            if (specialTab) specialTab.onClick.AddListener(() => SwitchTab(MissionTab.Special));
+            if (specialTab)
+            {
+                specialTab.onClick.AddListener(() => SwitchTab(MissionTab.Special));
+                specialTab.gameObject.SetActive(false); // Special tab hidden until feature is ready
+            }
         }
 
         #endregion
@@ -601,13 +627,13 @@ namespace DigitPark.Managers
         {
             if (button == null) return;
             var image = button.GetComponent<Image>();
-            if (image) image.DOColor(isActive ? activeColor : inactiveColor, 0.2f);
+            if (image) image.DOColor(isActive ? activeColor : inactiveColor, 0.2f).SetLink(button.gameObject);
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
-            if (text) text.DOColor(isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f), 0.2f);
+            if (text) text.DOColor(isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f), 0.2f).SetLink(button.gameObject);
 
             // Scale animation for active tab
-            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
+            button.transform.DOScale(isActive ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic).SetLink(button.gameObject);
         }
 
         #endregion
@@ -636,7 +662,7 @@ namespace DigitPark.Managers
             // Bonus row removed from UI — markers on progress bar show rewards instead
 
             bool canClaimBonus = completedDaily >= dailyMissionsRequired &&
-                                PlayerPrefs.GetInt("DailyBonusClaimed", 0) == 0;
+                                PlayerPrefs.GetInt("DP_DailyBonusClaimed", 0) == 0;
 
             if (claimBonusButton)
             {
@@ -698,18 +724,19 @@ namespace DigitPark.Managers
             var cg = panel.GetComponent<CanvasGroup>();
             if (cg == null) cg = panel.AddComponent<CanvasGroup>();
             cg.alpha = 0f;
-            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(panel);
 
             // Float icon if present
             var icon = panel.transform.Find("Icon");
             if (icon != null)
             {
                 icon.localScale = Vector3.zero;
-                icon.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
+                icon.DOScale(1f, 0.4f).SetEase(Ease.OutBack).SetLink(icon.gameObject);
                 icon.DOLocalMoveY(icon.localPosition.y + 8f, 2f)
                     .SetEase(Ease.InOutSine)
                     .SetLoops(-1, LoopType.Yoyo)
-                    .SetDelay(0.4f);
+                    .SetDelay(0.4f)
+                    .SetLink(icon.gameObject);
             }
         }
 
@@ -1133,13 +1160,13 @@ namespace DigitPark.Managers
                 // Fallback to PlayerPrefs
                 if (coins > 0)
                 {
-                    int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                    PlayerPrefs.SetInt("PlayerCoins", currentCoins + coins);
+                    int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
+                    PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + coins);
                 }
                 if (gems > 0)
                 {
-                    int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                    PlayerPrefs.SetInt("PlayerGems", currentGems + gems);
+                    int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
+                    PlayerPrefs.SetInt("DP_PlayerGems", currentGems + gems);
                 }
                 PlayerPrefs.Save();
             }
@@ -1186,9 +1213,9 @@ namespace DigitPark.Managers
 
         private void ClaimDailyBonus()
         {
-            if (PlayerPrefs.GetInt("DailyBonusClaimed", 0) == 1) return;
+            if (PlayerPrefs.GetInt("DP_DailyBonusClaimed", 0) == 1) return;
 
-            PlayerPrefs.SetInt("DailyBonusClaimed", 1);
+            PlayerPrefs.SetInt("DP_DailyBonusClaimed", 1);
             PlayerPrefs.Save();
 
             if (CurrencyManager.Instance != null)
@@ -1200,12 +1227,12 @@ namespace DigitPark.Managers
             }
             else
             {
-                int currentCoins = PlayerPrefs.GetInt("PlayerCoins", 0);
-                PlayerPrefs.SetInt("PlayerCoins", currentCoins + dailyBonusReward);
+                int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
+                PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + dailyBonusReward);
                 if (dailyBonusGems > 0)
                 {
-                    int currentGems = PlayerPrefs.GetInt("PlayerGems", 0);
-                    PlayerPrefs.SetInt("PlayerGems", currentGems + dailyBonusGems);
+                    int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
+                    PlayerPrefs.SetInt("DP_PlayerGems", currentGems + dailyBonusGems);
                 }
                 PlayerPrefs.Save();
             }
@@ -1305,8 +1332,8 @@ namespace DigitPark.Managers
             cg.alpha = 0f;
             panel.transform.localScale = Vector3.one * 0.85f;
             DOTween.Kill(panel.transform);
-            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
-            cg.DOFade(1f, 0.25f);
+            panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetLink(panel);
+            cg.DOFade(1f, 0.25f).SetLink(panel);
         }
 
         private void AnimatePanelOut(GameObject panel, Action onComplete = null)
@@ -1315,8 +1342,8 @@ namespace DigitPark.Managers
             CanvasGroup cg = panel.GetComponent<CanvasGroup>();
             if (cg == null) cg = panel.AddComponent<CanvasGroup>();
             DOTween.Kill(panel.transform);
-            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad);
-            cg.DOFade(0f, 0.2f).OnComplete(() =>
+            panel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad).SetLink(panel);
+            cg.DOFade(0f, 0.2f).SetLink(panel).OnComplete(() =>
             {
                 if (panel != null) panel.SetActive(false);
                 if (cg != null) cg.alpha = 1f;

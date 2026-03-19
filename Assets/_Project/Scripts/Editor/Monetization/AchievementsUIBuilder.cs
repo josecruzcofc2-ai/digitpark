@@ -4,6 +4,8 @@ using UnityEditor;
 using TMPro;
 using DigitPark.UI;
 using DigitPark.Monetization;
+using DigitPark.Themes;
+using ET = DigitPark.Themes.ThemeApplier.ElementType;
 
 namespace DigitPark.Editor
 {
@@ -258,8 +260,9 @@ namespace DigitPark.Editor
             bgRT.sizeDelta = Vector2.zero;
 
             Image bgImage = GetOrAddComponent<Image>(bg);
-            bgImage.color = DARK_BG;
+            bgImage.color = Color.white; // ThemeApplier tints at runtime
             bgImage.raycastTarget = false;
+            ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
             // Ambient particles effect (visual layer)
             GameObject particles = FindOrCreateChild(bg, "AmbientParticles");
@@ -922,6 +925,9 @@ namespace DigitPark.Editor
             Image fillImage = GetOrAddComponent<Image>(progressFill);
             fillImage.color = accentColor;
             fillImage.raycastTarget = false;
+            fillImage.type = Image.Type.Filled;
+            fillImage.fillMethod = Image.FillMethod.Horizontal;
+            fillImage.fillAmount = 0f;
 
             // Progress Text
             GameObject progressTextObj = FindOrCreateChild(progressContainer, "ProgressText");
@@ -1588,6 +1594,9 @@ namespace DigitPark.Editor
 
             Image fillImage = progressFill.AddComponent<Image>();
             fillImage.color = GOLD;
+            fillImage.type = Image.Type.Filled;
+            fillImage.fillMethod = Image.FillMethod.Horizontal;
+            fillImage.fillAmount = 0f;
 
             // Progress Text - use smaller font that fits the container
             GameObject progressText = new GameObject("ProgressText");

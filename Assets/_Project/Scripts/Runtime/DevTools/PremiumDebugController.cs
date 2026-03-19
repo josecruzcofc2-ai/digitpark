@@ -139,9 +139,9 @@ namespace DigitPark.Tools
             }
 
             // Guardar en PlayerPrefs directamente
-            PlayerPrefs.SetInt("Premium_CreateTournaments", canCreateTournaments ? 1 : 0);
-            PlayerPrefs.SetInt("Premium_CashBattleCreate", canCreateCashBattle ? 1 : 0);
-            PlayerPrefs.SetInt("Premium_StylesPro", hasStylesPro ? 1 : 0);
+            PlayerPrefs.SetInt("DP_Premium_CreateTournaments", canCreateTournaments ? 1 : 0);
+            PlayerPrefs.SetInt("DP_Premium_CashBattleCreate", canCreateCashBattle ? 1 : 0);
+            PlayerPrefs.SetInt("DP_Premium_StylesPro", hasStylesPro ? 1 : 0);
             PlayerPrefs.Save();
 
             // Forzar recarga del PremiumManager
@@ -208,9 +208,9 @@ namespace DigitPark.Tools
         {
             // Guardar valores en PlayerPrefs cuando se cambian en el Inspector (antes de Play)
             // Esto permite que los valores persistan incluso si se configuran antes de ejecutar
-            PlayerPrefs.SetInt("Premium_CreateTournaments", canCreateTournaments ? 1 : 0);
-            PlayerPrefs.SetInt("Premium_CashBattleCreate", canCreateCashBattle ? 1 : 0);
-            PlayerPrefs.SetInt("Premium_StylesPro", hasStylesPro ? 1 : 0);
+            PlayerPrefs.SetInt("DP_Premium_CreateTournaments", canCreateTournaments ? 1 : 0);
+            PlayerPrefs.SetInt("DP_Premium_CashBattleCreate", canCreateCashBattle ? 1 : 0);
+            PlayerPrefs.SetInt("DP_Premium_StylesPro", hasStylesPro ? 1 : 0);
             PlayerPrefs.Save();
 
             UnityEngine.Debug.Log($"[PremiumDebug] Inspector values saved: Tournaments={canCreateTournaments}, CashBattle={canCreateCashBattle}, StylesPro={hasStylesPro}");
