@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace DigitPark.UI.Items
 {
@@ -22,6 +23,7 @@ namespace DigitPark.UI.Items
 
         private int stepIndex;
         private bool isActive;
+        private Tween pulseTween;
 
         public void Setup(int index)
         {
@@ -56,11 +58,10 @@ namespace DigitPark.UI.Items
                     break;
             }
 
-            // Apply immediately (no tweening)
             if (dotImage)
-                dotImage.color = targetColor;
+                dotImage.DOColor(targetColor, 0.2f).SetUpdate(true).SetLink(gameObject);
 
-            transform.localScale = Vector3.one * targetScale;
+            transform.DOScale(targetScale, 0.2f).SetEase(Ease.OutBack).SetUpdate(true).SetLink(gameObject);
         }
 
         private void StartPulseAnimation()
@@ -68,17 +69,29 @@ namespace DigitPark.UI.Items
             if (pulseImage == null) return;
             pulseImage.gameObject.SetActive(true);
             pulseImage.color = new Color(activeColor.r, activeColor.g, activeColor.b, 0.5f);
+
+            pulseTween?.Kill();
+            pulseImage.transform.localScale = Vector3.one;
+            pulseTween = pulseImage.transform.DOScale(1.15f, 0.8f)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetUpdate(true)
+                .SetLink(pulseImage.gameObject);
         }
 
         private void StopPulseAnimation()
         {
+            pulseTween?.Kill();
+            pulseTween = null;
             if (pulseImage == null) return;
+            pulseImage.transform.localScale = Vector3.one;
             pulseImage.gameObject.SetActive(false);
         }
 
         private void OnDisable()
         {
-            // Cleanup if needed
+            pulseTween?.Kill();
+            pulseTween = null;
         }
     }
 

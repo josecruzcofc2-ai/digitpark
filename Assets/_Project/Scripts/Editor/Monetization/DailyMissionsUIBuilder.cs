@@ -126,7 +126,7 @@ namespace DigitPark.Editor
             if (GUILayout.Button("Crear Pools SO (Daily + Weekly)", GUILayout.Height(30)))
                 CreateMissionPools();
             if (GUILayout.Button("Crear MissionCard Prefab", GUILayout.Height(30)))
-                MissionCardPrefabBuilder.CreateMissionCardPrefabFromScript();
+                EnsureMissionCardPrefab();
             GUI.backgroundColor = Color.white;
 
             GUILayout.Space(15);
@@ -191,7 +191,7 @@ namespace DigitPark.Editor
         private static void CreateMissionDefinitions()
         {
             // Delegar al MissionSystemCreator que ya tiene todas las definiciones
-            var method = typeof(MissionSystemCreator).GetMethod("ShowWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            // MissionSystemCreator was removed — definitions are created inline below
             // Crear definiciones directamente sin abrir ventana
             EnsureMissionDirectories();
             CreateDailyMissionSOs();
@@ -259,7 +259,8 @@ namespace DigitPark.Editor
             string prefabPath = "Assets/_Project/Prefabs/Monetization/DailyMissions/MissionCard.prefab";
             if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) == null)
             {
-                MissionCardPrefabBuilder.CreateMissionCardPrefabFromScript();
+                Debug.LogWarning("[DailyMissionsUIBuilder] MissionCard.prefab not found at " + prefabPath +
+                    ". Create it manually or run the appropriate builder.");
             }
         }
 

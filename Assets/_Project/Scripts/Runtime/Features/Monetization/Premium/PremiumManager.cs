@@ -42,7 +42,7 @@ namespace DigitPark.Managers
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<PremiumManager>();
+                    _instance = FindFirstObjectByType<PremiumManager>();
                     if (_instance != null)
                     {
                         // Found existing instance — ensure it persists across scenes
@@ -82,10 +82,10 @@ namespace DigitPark.Managers
 
         [Header("=== PRECIOS (Solo para mostrar en UI) ===")]
         public const string PRICE_CREATE_TOURNAMENTS = ""; // C-P1-30: Use IAP localizedPriceString; empty = not yet loaded
-        public const string PRICE_CASH_BATTLE_CREATE = "$6.99";
-        public const string PRICE_TOURNAMENT_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString; empty = not yet loaded
-        public const string PRICE_PREMIUM_BUNDLE = "$26.25";
-        public const string PRICE_COMPLETE_BUNDLE = "$30.45";
+        public const string PRICE_CASH_BATTLE_CREATE = ""; // C-P1-30: Use IAP localizedPriceString
+        public const string PRICE_TOURNAMENT_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
+        public const string PRICE_PREMIUM_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
+        public const string PRICE_COMPLETE_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
 
         [Header("=== Theme Pricing ===")]
         public const float THEME_PRICE_PREMIUM = 2.50f;
@@ -143,7 +143,19 @@ namespace DigitPark.Managers
         /// <summary>
         /// Indica si el usuario tiene algún tipo de premium
         /// </summary>
-        public bool IsPremium => _canCreateTournaments || _canCreateCashBattle || _hasStylesPro;
+        public bool IsPremium => _canCreateTournaments || _canCreateCashBattle || _hasStylesPro || IsPremiumPass;
+
+        /// <summary>
+        /// Indica si el usuario ha comprado Ad-Free permanente.
+        /// </summary>
+        public bool IsAdFree =>
+            DigitPark.Payments.Entitlements.EntitlementService.Instance?.HasEntitlement("adfree_permanent") == true;
+
+        /// <summary>
+        /// Indica si el usuario tiene Premium Pass activo (suscripción mensual).
+        /// </summary>
+        public bool IsPremiumPass =>
+            DigitPark.Payments.Entitlements.EntitlementService.Instance?.HasEntitlement("premium_pass_monthly") == true;
 
         private void Awake()
         {
@@ -252,16 +264,18 @@ namespace DigitPark.Managers
         /// <summary>
         /// Sincroniza estado premium a Firebase para que no se pierda al reinstalar
         /// </summary>
+        private bool _pendingSync = false;
+
         private async void SyncPremiumToFirebase()
         {
             try
             {
                 var auth = AuthenticationService.Instance;
                 var db = DatabaseService.Instance;
-                if (auth == null || db == null) return;
+                if (auth == null || db == null) { _pendingSync = true; return; }
 
                 string userId = auth.GetCurrentPlayerData()?.userId;
-                if (string.IsNullOrEmpty(userId)) return;
+                if (string.IsNullOrEmpty(userId)) { _pendingSync = true; return; }
 
                 var updates = new Dictionary<string, object>
                 {
@@ -271,12 +285,22 @@ namespace DigitPark.Managers
                 };
 
                 await db.UpdatePlayerFields(userId, updates);
+                _pendingSync = false;
                 Debug.Log("[Premium] Estado premium sincronizado a Firebase");
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[Premium] Error sincronizando premium a Firebase: {e.Message}");
+                _pendingSync = true;
+                Debug.LogWarning($"[Premium] Error sincronizando premium a Firebase (will retry): {e.Message}");
             }
+        }
+
+        /// <summary>
+        /// Retries pending sync. Call from OnApplicationFocus(true) or after auth login.
+        /// </summary>
+        public void RetrySyncIfPending()
+        {
+            if (_pendingSync) SyncPremiumToFirebase();
         }
 
         /// <summary>
@@ -762,7 +786,9 @@ namespace DigitPark.Managers
                 ProcessGemPackPurchase(productId);
                 _purchaseCallback?.Invoke(true);
                 _purchaseCallback = null;
-                _pendingPurchaseExtCallback?.Invoke(true, args.purchasedProduct.transactionID ?? "");
+                _pendingPurchaseExtCallback?.Invoke(true,
+                    args.purchasedProduct.transactionID ?? "",
+                    args.purchasedProduct.receipt ?? "");
                 _pendingPurchaseExtCallback = null;
                 return PurchaseProcessingResult.Complete;
             }
@@ -799,7 +825,9 @@ namespace DigitPark.Managers
             }
 
             _purchaseCallback = null;
-            _pendingPurchaseExtCallback?.Invoke(true, args.purchasedProduct.transactionID ?? "");
+            _pendingPurchaseExtCallback?.Invoke(true,
+                args.purchasedProduct.transactionID ?? "",
+                args.purchasedProduct.receipt ?? "");
             _pendingPurchaseExtCallback = null;
             return PurchaseProcessingResult.Complete;
         }
@@ -846,7 +874,7 @@ namespace DigitPark.Managers
 
             _purchaseCallback?.Invoke(false);
             _purchaseCallback = null;
-            _pendingPurchaseExtCallback?.Invoke(false, "");
+            _pendingPurchaseExtCallback?.Invoke(false, "", "");
             _pendingPurchaseExtCallback = null;
         }
 
@@ -859,7 +887,7 @@ namespace DigitPark.Managers
 
             _purchaseCallback?.Invoke(false);
             _purchaseCallback = null;
-            _pendingPurchaseExtCallback?.Invoke(false, "");
+            _pendingPurchaseExtCallback?.Invoke(false, "", "");
             _pendingPurchaseExtCallback = null;
         }
 
@@ -871,14 +899,18 @@ namespace DigitPark.Managers
         /// Bridge para que AppleIAPProvider llame compras IAP programáticamente.
         /// Retorna via callback porque Unity IAP es asíncrono basado en callbacks.
         /// </summary>
+        /// <summary>
+        /// Callback: (bool success, string transactionId, string receiptData)
+        /// receiptData es el JSON receipt de Unity IAP para validación server-side en AppleIAPProvider.
+        /// </summary>
         public void PurchaseProductWithCallback(string appleProductId,
-            System.Action<bool, string> onComplete)
+            System.Action<bool, string, string> onComplete)
         {
             _pendingPurchaseExtCallback = onComplete;
             PurchaseByProductId(appleProductId);
         }
 
-        private System.Action<bool, string> _pendingPurchaseExtCallback;
+        private System.Action<bool, string, string> _pendingPurchaseExtCallback;
 
         /// <summary>
         /// Bridge para restaurar compras con callback de finalización.

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -66,6 +67,7 @@ namespace DigitPark.Managers
         [Header("UI - Panels (Prefabs)")]
         [SerializeField] private InputPanelUI changeNamePanel;
         [SerializeField] private ConfirmPanelUI deleteConfirmPanel;
+        [SerializeField] private TMPro.TMP_InputField deletePasswordInput; // B2-A: opcional — wire en Inspector para re-auth
         [SerializeField] private ConfirmPanelUI logoutConfirmPanel;
         [SerializeField] private ErrorPanelUI errorPanel;
 
@@ -85,11 +87,18 @@ namespace DigitPark.Managers
         [SerializeField] private Button selfExclusionButton;
         [SerializeField] private ConfirmPanelUI selfExclusionConfirmPanel;
 
-        // URLs Legales
-        private const string URL_TERMS = "https://digitpark.com/terms";
-        private const string URL_PRIVACY = "https://digitpark.com/privacy";
-        private const string URL_RESPONSIBLE_GAMING = "https://digitpark.com/responsible-gaming";
-        private const string URL_TRIUMPH_TERMS = "https://digitpark.com/terms";
+        // URLs Legales — configurable via Firebase Remote Config, hardcoded fallback
+        private const string FALLBACK_TERMS = "https://digitpark.com/terms";
+        private const string FALLBACK_PRIVACY = "https://digitpark.com/privacy";
+        private const string FALLBACK_RESPONSIBLE_GAMING = "https://digitpark.com/responsible-gaming";
+
+        private static string URL_TERMS =>
+            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.TermsUrl ?? FALLBACK_TERMS;
+        private static string URL_PRIVACY =>
+            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.PrivacyUrl ?? FALLBACK_PRIVACY;
+        private static string URL_RESPONSIBLE_GAMING =>
+            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.ResponsibleGamingUrl ?? FALLBACK_RESPONSIBLE_GAMING;
+        private static string URL_TRIUMPH_TERMS => URL_TERMS;
 
         // Keys para PlayerPrefs
         private const string SOUND_VOLUME_KEY = "SoundVolume";
@@ -129,7 +138,7 @@ namespace DigitPark.Managers
                 var cg = settingsPanel.GetComponent<CanvasGroup>();
                 if (cg == null) cg = settingsPanel.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.35f).SetEase(Ease.OutQuad);
+                cg.DOFade(1f, 0.35f).SetEase(Ease.OutQuad).SetLink(gameObject);
             }
         }
 
@@ -795,6 +804,7 @@ namespace DigitPark.Managers
 
             if (changeNamePanel != null)
             {
+                changeNamePanel.SetContentType(TMPro.TMP_InputField.ContentType.Standard);
                 changeNamePanel.SetLengthLimits(3, 20);
                 changeNamePanel.Show(
                     changeCount == 0
@@ -886,7 +896,36 @@ namespace DigitPark.Managers
             }
         }
 
-        private async void OnConfirmDeleteClicked()
+        // B2-A: Paso 1 — usuario confirma intención. Paso 2 — pide password para re-auth.
+        private void OnConfirmDeleteClicked()
+        {
+            deleteConfirmPanel?.Hide();
+
+            if (changeNamePanel != null)
+            {
+                changeNamePanel.SetContentType(TMPro.TMP_InputField.ContentType.Password);
+                changeNamePanel.SetLengthLimits(1, 128);
+                changeNamePanel.SetButtonTexts(
+                    AutoLocalizer.Get("delete_account"),
+                    AutoLocalizer.Get("cancel")
+                );
+                changeNamePanel.Show(
+                    AutoLocalizer.Get("delete_account_enter_password"),
+                    AutoLocalizer.Get("confirm_password_placeholder"),
+                    OnPasswordForDeleteConfirmed,
+                    () => changeNamePanel.Hide()
+                );
+            }
+        }
+
+        private void OnPasswordForDeleteConfirmed(string password)
+        {
+            changeNamePanel?.Hide();
+            changeNamePanel?.SetContentType(TMPro.TMP_InputField.ContentType.Standard);
+            _ = DoDeleteAccountAsync(password);
+        }
+
+        private async Task DoDeleteAccountAsync(string confirmPassword)
         {
             try
             {
@@ -896,7 +935,7 @@ namespace DigitPark.Managers
 
                 if (AuthenticationService.Instance != null)
                 {
-                    bool success = await AuthenticationService.Instance.DeleteAccount();
+                    bool success = await AuthenticationService.Instance.DeleteAccount(confirmPassword);
 
                     // MonoBehaviour may have been destroyed during await
                     if (this == null) return;
@@ -909,14 +948,12 @@ namespace DigitPark.Managers
                     else
                     {
                         Debug.LogError("[Settings] Error al eliminar la cuenta");
-                        deleteConfirmPanel?.Hide();
-                        errorPanel?.Show(AutoLocalizer.Get("error_deleting_account"));
+                        errorPanel?.Show(AutoLocalizer.Get("error_wrong_password"));
                     }
                 }
                 else
                 {
                     Debug.LogError("[Settings] AuthenticationService no disponible");
-                    deleteConfirmPanel?.Hide();
                     errorPanel?.Show(AutoLocalizer.Get("error_server"));
                 }
             }
@@ -1099,7 +1136,10 @@ namespace DigitPark.Managers
         private void OnRestorePurchasesClicked()
         {
             Debug.Log("[Settings] Restaurando compras...");
-            PremiumManager.Instance.RestorePurchases();
+            if (PremiumManager.Instance != null)
+                PremiumManager.Instance.RestorePurchases();
+            else
+                Debug.LogWarning("[Settings] PremiumManager not available");
         }
 
         /// <summary>
@@ -1139,7 +1179,7 @@ namespace DigitPark.Managers
             {
                 premiumBadge.SetActive(true);
                 premiumBadge.transform.localScale = Vector3.zero;
-                premiumBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                premiumBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetLink(premiumBadge);
             }
             else if (!isPremium)
             {

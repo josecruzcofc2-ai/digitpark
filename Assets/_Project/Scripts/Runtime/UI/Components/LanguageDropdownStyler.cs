@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Themes;
 
 namespace DigitPark.UI.Components
@@ -359,8 +360,8 @@ namespace DigitPark.UI.Components
                 dropdownGlow.effectDistance = hover ? new Vector2(6f, -6f) : new Vector2(4f, -4f);
             }
 
-            // Escalar ligeramente el dropdown
-            transform.localScale = hover ? Vector3.one * 1.02f : Vector3.one;
+            // Escalar ligeramente el dropdown con transición suave
+            transform.DOScale(hover ? 1.02f : 1f, 0.1f).SetEase(Ease.OutQuad).SetUpdate(true).SetLink(gameObject);
         }
 
         #endregion

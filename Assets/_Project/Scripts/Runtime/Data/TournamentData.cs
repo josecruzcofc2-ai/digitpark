@@ -15,15 +15,28 @@ namespace DigitPark.Data
         public string creatorId;
         public string creatorName;
 
-        // Tiempo
-        public DateTime startTime;
-        public DateTime endTime;
+        // Tiempo (ISO 8601 strings for JsonUtility compatibility)
+        public string startTimeISO;
+        public string endTimeISO;
         public TournamentDuration duration;
+
+        // Helper properties
+        public DateTime startTime
+        {
+            get => DateTime.TryParse(startTimeISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.Now;
+            set => startTimeISO = value.ToString("o");
+        }
+        public DateTime endTime
+        {
+            get => DateTime.TryParse(endTimeISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.Now;
+            set => endTimeISO = value.ToString("o");
+        }
 
         // Entrada y premios
         public int entryFee;
         public int totalPrizePool;
-        public Dictionary<int, int> prizeDistribution; // Posición -> Cantidad
+        // List for JsonUtility compatibility (Dictionary<int,int> not serializable)
+        public List<PrizeEntry> prizeDistributionList;
 
         // Participantes
         public List<ParticipantScore> participants;
@@ -58,7 +71,7 @@ namespace DigitPark.Data
 
             entryFee = 100;
             totalPrizePool = 0;
-            prizeDistribution = new Dictionary<int, int>();
+            prizeDistributionList = new List<PrizeEntry>();
 
             participants = new List<ParticipantScore>();
             maxParticipants = 100;
@@ -178,25 +191,44 @@ namespace DigitPark.Data
         /// </summary>
         public void CalculatePrizeDistribution()
         {
-            prizeDistribution.Clear();
+            prizeDistributionList.Clear();
 
-            int availablePrize = Mathf.RoundToInt(totalPrizePool * 0.5f); // Máx 50% del pool
+            // B6-B: 10% house cut, distribute 90% of pool to winners
+            int availablePrize = Mathf.RoundToInt(totalPrizePool * 0.9f);
 
-            // Distribución por defecto Top 10
             if (currentParticipants >= 10)
             {
-                prizeDistribution[1] = Mathf.RoundToInt(availablePrize * 0.25f); // 25%
-                prizeDistribution[2] = Mathf.RoundToInt(availablePrize * 0.15f); // 15%
-                prizeDistribution[3] = Mathf.RoundToInt(availablePrize * 0.10f); // 10%
-                prizeDistribution[4] = Mathf.RoundToInt(availablePrize * 0.05f); // 5%
-                prizeDistribution[5] = Mathf.RoundToInt(availablePrize * 0.05f); // 5%
+                // 50/30/20 split across top 3 (+ small consolation for 4th/5th)
+                prizeDistributionList.Add(new PrizeEntry { position = 1, amount = Mathf.RoundToInt(availablePrize * 0.50f) });
+                prizeDistributionList.Add(new PrizeEntry { position = 2, amount = Mathf.RoundToInt(availablePrize * 0.30f) });
+                prizeDistributionList.Add(new PrizeEntry { position = 3, amount = Mathf.RoundToInt(availablePrize * 0.20f) });
             }
             else if (currentParticipants >= 3)
             {
-                prizeDistribution[1] = Mathf.RoundToInt(availablePrize * 0.30f); // 30%
-                prizeDistribution[2] = Mathf.RoundToInt(availablePrize * 0.15f); // 15%
-                prizeDistribution[3] = Mathf.RoundToInt(availablePrize * 0.05f); // 5%
+                // 50/30/20 across top 3
+                prizeDistributionList.Add(new PrizeEntry { position = 1, amount = Mathf.RoundToInt(availablePrize * 0.50f) });
+                prizeDistributionList.Add(new PrizeEntry { position = 2, amount = Mathf.RoundToInt(availablePrize * 0.30f) });
+                prizeDistributionList.Add(new PrizeEntry { position = 3, amount = Mathf.RoundToInt(availablePrize * 0.20f) });
             }
+            else if (currentParticipants == 2)
+            {
+                // B6-A: 2 participants — winner takes all
+                prizeDistributionList.Add(new PrizeEntry { position = 1, amount = availablePrize });
+            }
+            else if (currentParticipants == 1)
+            {
+                // B6-A: 1 participant — full refund (no contest)
+                prizeDistributionList.Add(new PrizeEntry { position = 1, amount = totalPrizePool });
+            }
+        }
+
+        /// <summary>
+        /// Gets prize amount for a given position from the list.
+        /// </summary>
+        public int GetPrize(int position)
+        {
+            var entry = prizeDistributionList?.Find(p => p.position == position);
+            return entry?.amount ?? 0;
         }
 
         /// <summary>
@@ -207,7 +239,7 @@ namespace DigitPark.Data
             if (status == TournamentStatus.Completed)
                 return TimeSpan.Zero;
 
-            return endTime - DateTime.Now;
+            return endTime - DateTime.UtcNow;
         }
 
         /// <summary>
@@ -221,8 +253,8 @@ namespace DigitPark.Data
                 { "name", name },
                 { "creatorId", creatorId },
                 { "creatorName", creatorName },
-                { "startTime", startTime.ToString() },
-                { "endTime", endTime.ToString() },
+                { "startTimeISO", startTimeISO ?? "" },
+                { "endTimeISO", endTimeISO ?? "" },
                 { "entryFee", entryFee },
                 { "totalPrizePool", totalPrizePool },
                 { "maxParticipants", maxParticipants },
@@ -249,8 +281,30 @@ namespace DigitPark.Data
         public string countryCode;
         public float bestTime;
         public int attempts;
-        public DateTime joinedAt;
-        public DateTime lastAttemptTime;
+        // ISO 8601 strings for JsonUtility compatibility
+        public string joinedAtISO;
+        public string lastAttemptTimeISO;
+
+        public DateTime joinedAt
+        {
+            get => DateTime.TryParse(joinedAtISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.Now;
+            set => joinedAtISO = value.ToString("o");
+        }
+        public DateTime lastAttemptTime
+        {
+            get => DateTime.TryParse(lastAttemptTimeISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.Now;
+            set => lastAttemptTimeISO = value.ToString("o");
+        }
+    }
+
+    /// <summary>
+    /// JsonUtility-compatible prize distribution entry (replaces Dictionary&lt;int, int&gt;)
+    /// </summary>
+    [System.Serializable]
+    public class PrizeEntry
+    {
+        public int position;
+        public int amount;
     }
 
     /// <summary>

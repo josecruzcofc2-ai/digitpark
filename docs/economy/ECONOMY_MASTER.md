@@ -166,7 +166,10 @@ Para que los DC mantengan valor y sean aspiracionales durante **18-24 meses**:
 | **Total** | **52** | — | **346** |
 
 ### 5.2 Level milestones — DG
-L5=3, L10=3, L15=2, L25=5, L30=3, L50=7, L75=8, L100=10, L150=8, L200=10, L300=8 = **67 DG**
+L5=3, L10=3, L15=2, L25=5, L30=3, **L50=25** ⭐, L75=8, L100=10, L150=8, L200=10, L300=8 = **~85 DG**
+
+> ⚠️ Corrección verificada en código: L50 otorga **25 DG** (no 7 DG como documentaba la versión anterior).
+> El total corregido es ~85 DG (vs 67 DG anterior). Ver ECONOMY_TASKS_CODE.md C-09.
 
 ### 5.3 Tiempo para ahorrar DG gratis (jugador activo ~10 DG/sem)
 | Item | DG | Semanas | Meses |
@@ -183,8 +186,10 @@ L5=3, L10=3, L15=2, L25=5, L30=3, L50=7, L75=8, L100=10, L150=8, L200=10, L300=8
 |--------|----|
 | Recurrente (10 DG/sem × 52) | 520 |
 | Achievements (~50% completados año 1) | ~175 |
-| Level rewards (llega ~L30) | ~16 |
-| **Total año 1** | **~711 DG** |
+| Level rewards (llega ~L30, incluye 25 DG en L50 si llega) | ~30 |
+| **Total año 1** | **~725 DG** |
+
+> ⚠️ Total ajustado: L50 da 25 DG (antes documentado 7 DG). Cambia ligeramente las proyecciones.
 
 Con 711 DG el jugador puede comprar:
 - 4 Tier A themes (600 DG) + algo de frames, o bien
@@ -250,16 +255,21 @@ Practice da 30-45 DC por partida sin riesgo ni oponente. Con los nuevos precios 
 
 ## 7. IAP Packs (DigitGems)
 
-| Pack | DG | Bonus | Precio | $/DG |
-|------|----|-------|--------|------|
-| Starter | 100 | — | $0.99 | $0.0099 |
-| Basic | 300 | — | $2.99 | $0.0100 |
-| Popular | 600 | +50 | $4.99 | $0.0077 |
-| Super | 1,200 | +150 | $9.99 | $0.0074 |
-| Mega | 2,500 | +500 | $19.99 | $0.0067 |
-| Ultra | 6,000 | +1,500 | $49.99 | $0.0067 |
+> ⚠️ Los nombres y amounts de diseño (columna "Diseño") difieren de los productIds en código.
+> La columna "Código" refleja `ProductCatalog.cs` — es lo que realmente se vende.
+> Ver ECONOMY_TASKS_CODE.md C-02 para decisión de alineación.
 
-**Tasa media:** ~$0.008/DG
+| Pack (diseño) | ProductId (código) | DG entregados | Precio | $/DG efectivo |
+|---|---|---|---|---|
+| Starter (100 DG) | `sparks_100` | **150 DG** | $0.99 | $0.0066 |
+| _(no existe)_ | _(no existe)_ | — | $2.99 | — |
+| Popular (600+50 DG) | `sparks_500` | **550 DG** (+10%) | $4.99 | $0.0091 |
+| Super (1,200+150 DG) | `sparks_1200` | **1,440 DG** (+20%) | $9.99 | $0.0069 |
+| Mega (2,500+500 DG) | `sparks_2500` | **3,125 DG** (+25%) | $19.99 | $0.0064 |
+| Ultra (6,000+1,500 DG) | `sparks_6500` | **8,450 DG** (+30%) | $49.99 | $0.0059 |
+| _(no existe en diseño)_ | `sparks_14000` | **18,900 DG** (+35%) | $99.99 | $0.0053 |
+
+**Tasa efectiva en código:** $0.0053–$0.0091/DG (mejor deal en packs grandes)
 
 ---
 
@@ -300,30 +310,42 @@ Practice da 30-45 DC por partida sin riesgo ni oponente. Con los nuevos precios 
 
 ## 11. Checklist de Producción
 
-### ✅ Implementado en código
-- [x] 5% rake en bets (BET_MULTIPLIER = 1.9f en CurrencyManager)
-- [x] Curva daily rewards ascendente (50/75/125/175/250/400/750 DC)
-- [x] DG en D7: 3 DG/semana
-- [x] Daily missions: 100 DC + 1 DG por completar
-- [x] Achievement gems (2/4/7/12/10 DG por tier) — 346 DG lifetime
-- [x] Level milestone gems (3-10 DG) — 67 DG lifetime
-- [x] Post-game rewards aumentados (30/50/100/60 DC)
-- [x] Cap custom bet 5,000 DC
-- [x] Labels BetSelection 1.9x (95/190/475/950/1,900)
-- [x] GrantLevelReward() otorga coins + gems
-- [x] GiveReward() en achievements otorga coins + gems
-- [x] Welcome bonus onboarding: 500 DC + 10 DG (campo `completionRewardGems` corregido 50→10)
-- [x] CompleteOnboarding() usa CurrencyManager en vez de PlayerPrefs directo (bug fix)
-- [x] AddProgress("tutorial_complete") al completar onboarding
-- [x] ShopItemType.Frame + ShopItemType.Title en enum
-- [x] GrantRewards() para Frame (UnlockFrame) y Title (UnlockTitle)
-- [x] OnValidate() asigna Frame/Title a ShopTab.Styles
-- [x] Free bet UI: muestra "Play for fun, no wager" (correcto, no promete recompensa)
+### ✅ Implementado en código (verificado contra fuentes)
+- [x] 5% rake en bets (BET_MULTIPLIER = 1.9f) — CurrencyManager.cs
+- [x] Curva daily rewards ascendente (50/75/125/175/250/400/750 DC) — DailyRewardsManager.cs
+- [x] Ciclo 14 días: día 7 = 750DC+3DG, día 14 = 750DC+8DG — DailyRewardsManager.cs
+- [x] Daily missions bonus: 100 DC + 1 DG por completar las 3 — DailyMissionsManager.cs
+- [x] Achievement gems (2/4/7/12/10 DG por tier) — 346 DG lifetime — AchievementService.cs
+- [x] Level milestone gems (~85 DG lifetime, L50=25DG⭐) — PlayerProgressionSystem.cs
+- [x] Post-game rewards: Practice +30DC, SingleGame +50/+15, Tournament +100/+25, Sprint +60/+15 — EconomyConstants.cs
+- [x] Ranked: win +15DC, loss +5DC, perfect bonus +25DC, FWOTD +50DC — OnlineResultManager.cs
+- [x] Cap custom bet 5,000 DC — BetSelectionPanel.cs
+- [x] Labels BetSelection 1.9x (95/190/475/950/1,900) — BetSelectionPanel.cs
+- [x] GrantLevelReward() otorga coins + gems — PlayerProgressionSystem.cs
+- [x] GiveReward() en achievements otorga coins + gems — AchievementService.cs
+- [x] Welcome bonus onboarding: 500 DC (completionRewardCoins = 500) — OnboardingManager.cs
+- [x] CompleteOnboarding() usa CurrencyManager en vez de PlayerPrefs directo — OnboardingManager.cs
+- [x] AddProgress("tutorial_complete") al completar onboarding — OnboardingManager.cs
+- [x] ShopItemType.Frame + Title + WinEffect + StarterPack + BattleCard + BackgroundPattern en enum — ShopItemData.cs
+- [x] GrantRewards() para Frame (UnlockFrame), Title (UnlockTitle), WinEffect (UnlockEffect) — ShopItemData.cs
+- [x] OnValidate() asigna tab automáticamente por tipo de item — ShopItemData.cs
+- [x] XOR + HMAC-SHA256 anti-cheat en PlayerPrefs (dp_cg_v2, dp_cc_v2, dp_bal_hmac) — CurrencyManager.cs
+- [x] Escrow crash-safe en PlayerPrefs (apuesta persiste si app crashea) — CurrencyManager.cs
+- [x] Firebase sync coins/gems en cada cambio — CurrencyManager.cs → DatabaseService.cs
+- [x] validateScore rate-limit (1 submit/30s/user) — functions/src/index.ts
 
-### ❌ Pendiente (trabajo Unity Editor solamente)
-- [ ] Actualizar precios DC de frames, titles, effects (×5-8) — requiere editar ScriptableObjects en Editor
-- [ ] Crear ScriptableObjects de todos los items del catálogo (frames, titles, effects, themes)
-- [ ] Tier B themes: confirmar que los ScriptableObjects no tienen opción DC
+### ⚠️ Pendiente verificación
+- [ ] Welcome bonus onboarding DG: `completionRewardGems` default = **0 en código** (OnboardingManager.cs ~L72). El doc anterior marcaba ✅ con 10 DG — verificar si fue sobreescrito en Inspector del prefab. Ver ECONOMY_TASKS_CODE.md C-03 y ECONOMY_TASKS_MANUAL.md M-01.
+- [ ] IAP pack amounts: código y diseño no coinciden — ver ECONOMY_TASKS_CODE.md C-02 para decisión.
+
+### ❌ Pendiente Editor (crear assets)
+- [ ] Crear 74 ShopItemData assets (frames DC/DG, titles DC/DG, effects DC/DG, themes ×30) — ECONOMY_TASKS_MANUAL.md
+- [ ] Configurar welcome pack content en Inspector de WelcomePackUIController — ECONOMY_TASKS_MANUAL.md M-15
+- [ ] Tier B/C themes: coinsPrice = 0 en todos sus ScriptableObjects (solo DG)
+
+### ❌ Pendiente código
+- [ ] Añadir 15 productos faltantes a ProductCatalog.cs — ECONOMY_TASKS_CODE.md C-01
+- [ ] Implementar Ad-Free, Premium Pass, Starter Pack lógica — ECONOMY_TASKS_CODE.md C-04/C-05/C-06
 
 ---
 

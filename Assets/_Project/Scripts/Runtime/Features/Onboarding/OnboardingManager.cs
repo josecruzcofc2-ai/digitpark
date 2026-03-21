@@ -43,12 +43,7 @@ namespace DigitPark.Managers
         [SerializeField] private Button confirmNameButton;
         [SerializeField] private TextMeshProUGUI nameErrorText;
 
-        [Header("UI - Avatar Selection (Slide 3)")]
-        [SerializeField] private GameObject avatarSelectionPanel;
-        [SerializeField] private Transform avatarContainer;
-        [SerializeField] private GameObject avatarOptionPrefab;
-
-        [Header("UI - Tutorial Completion (Slide 8)")]
+        [Header("UI - Tutorial Completion (Slide 7)")]
         [SerializeField] private GameObject completionPanel;
         [SerializeField] private TextMeshProUGUI completionTitleText;
         [SerializeField] private TextMeshProUGUI completionMessageText;
@@ -64,9 +59,6 @@ namespace DigitPark.Managers
         [SerializeField] private RectTransform dotsTransform;
         [SerializeField] private RectTransform navigationTransform;
 
-        [Header("Avatar Options")]
-        [SerializeField] private List<AvatarOption> avatarOptions = new List<AvatarOption>();
-
         [Header("Configuration")]
         [SerializeField, Range(0, 1000)] private int completionRewardCoins = 500;
         [SerializeField, Range(0, 50)] private int completionRewardGems = 0;
@@ -77,8 +69,6 @@ namespace DigitPark.Managers
         // State
         private int currentStepIndex = 0;
         private List<GameObject> spawnedDots = new List<GameObject>();
-        private List<GameObject> spawnedAvatars = new List<GameObject>();
-        private string selectedAvatarId = "";
         private string playerName = "";
         private bool isTransitioning = false;
 
@@ -131,14 +121,6 @@ namespace DigitPark.Managers
                     },
                     new OnboardingStep
                     {
-                        id = "avatar",
-                        title = L("onboarding_avatar_title"),
-                        description = L("onboarding_avatar_desc"),
-                        stepType = OnboardingStepType.AvatarSelection,
-                        requiresInteraction = true
-                    },
-                    new OnboardingStep
-                    {
                         id = "games",
                         title = L("onboarding_games_title"),
                         description = L("onboarding_games_desc"),
@@ -180,18 +162,6 @@ namespace DigitPark.Managers
                 };
             }
 
-            if (avatarOptions.Count == 0)
-            {
-                avatarOptions = new List<AvatarOption>
-                {
-                    new AvatarOption { id = "avatar_01", name = AutoLocalizer.Get("avatar_explorer") },
-                    new AvatarOption { id = "avatar_02", name = AutoLocalizer.Get("avatar_warrior") },
-                    new AvatarOption { id = "avatar_03", name = AutoLocalizer.Get("avatar_mage") },
-                    new AvatarOption { id = "avatar_04", name = AutoLocalizer.Get("avatar_ninja") },
-                    new AvatarOption { id = "avatar_05", name = AutoLocalizer.Get("avatar_robot") },
-                    new AvatarOption { id = "avatar_06", name = AutoLocalizer.Get("avatar_alien") },
-                };
-            }
         }
 
         private void LocalizeSlideTexts()
@@ -201,11 +171,10 @@ namespace DigitPark.Managers
             // Slide titles
             LocalizeSlideTitle(0, "onboarding_welcome_title");
             LocalizeSlideTitle(1, "onboarding_name_title");
-            LocalizeSlideTitle(2, "onboarding_avatar_title");
-            LocalizeSlideTitle(3, "onboarding_games_title");
-            LocalizeSlideTitle(4, "onboarding_cashbattle_title");
-            LocalizeSlideTitle(5, "tournament_button");
-            LocalizeSlideTitle(6, "dr_title");
+            LocalizeSlideTitle(2, "onboarding_games_title");
+            LocalizeSlideTitle(3, "onboarding_cashbattle_title");
+            LocalizeSlideTitle(4, "tournament_button");
+            LocalizeSlideTitle(5, "dr_title");
 
             // Slide 1 - Welcome content
             LocalizeContentTexts(0, new[]
@@ -443,10 +412,6 @@ namespace DigitPark.Managers
                     ShowNameInput();
                     break;
 
-                case OnboardingStepType.AvatarSelection:
-                    ShowAvatarSelection();
-                    break;
-
                 case OnboardingStepType.Completion:
                     ShowCompletion();
                     break;
@@ -480,10 +445,6 @@ namespace DigitPark.Managers
                 else if (step.stepType == OnboardingStepType.NameInput)
                 {
                     nextButtonText.text = AutoLocalizer.Get("onboarding_confirm");
-                }
-                else if (step.stepType == OnboardingStepType.AvatarSelection)
-                {
-                    nextButtonText.text = AutoLocalizer.Get("onboarding_select");
                 }
                 else
                 {
@@ -562,124 +523,6 @@ namespace DigitPark.Managers
             }
         }
 
-        private void ShowAvatarSelection()
-        {
-            if (avatarSelectionPanel)
-            {
-                avatarSelectionPanel.SetActive(true);
-                avatarSelectionPanel.transform.localScale = Vector3.one * 0.85f;
-                avatarSelectionPanel.transform.DOScale(1f, 0.25f).SetEase(Ease.OutBack);
-                PopulateAvatars();
-            }
-
-            if (nextButton) nextButton.interactable = !string.IsNullOrEmpty(selectedAvatarId);
-        }
-
-        private void PopulateAvatars()
-        {
-            if (avatarContainer == null) return;
-
-            foreach (var avatar in spawnedAvatars)
-            {
-                if (avatar) Destroy(avatar);
-            }
-            spawnedAvatars.Clear();
-
-            foreach (var option in avatarOptions)
-            {
-                CreateAvatarOption(option);
-            }
-        }
-
-        private void CreateAvatarOption(AvatarOption option)
-        {
-            GameObject item;
-
-            if (avatarOptionPrefab != null)
-            {
-                item = Instantiate(avatarOptionPrefab, avatarContainer);
-            }
-            else
-            {
-                item = CreateAvatarOptionFallback(option);
-            }
-
-            spawnedAvatars.Add(item);
-
-            var button = item.GetComponent<Button>() ?? item.AddComponent<Button>();
-            var opt = option;
-            button.onClick.AddListener(() => OnAvatarSelected(opt.id, item));
-        }
-
-        private GameObject CreateAvatarOptionFallback(AvatarOption option)
-        {
-            var item = new GameObject($"Avatar_{option.id}");
-            item.transform.SetParent(avatarContainer, false);
-
-            var rt = item.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(100, 130);
-
-            var image = item.AddComponent<Image>();
-            image.color = selectedAvatarId == option.id
-                ? new Color(0f, 0.5f, 0.8f, 0.9f)
-                : new Color(0.2f, 0.2f, 0.25f, 0.9f);
-
-            var avatarObj = new GameObject("AvatarImage");
-            avatarObj.transform.SetParent(item.transform, false);
-            var avatarRT = avatarObj.AddComponent<RectTransform>();
-            avatarRT.anchorMin = new Vector2(0.1f, 0.3f);
-            avatarRT.anchorMax = new Vector2(0.9f, 0.95f);
-            avatarRT.offsetMin = Vector2.zero;
-            avatarRT.offsetMax = Vector2.zero;
-
-            var avatarImg = avatarObj.AddComponent<Image>();
-            avatarImg.color = new Color(0.4f, 0.4f, 0.4f);
-            if (option.sprite != null) avatarImg.sprite = option.sprite;
-
-            var nameObj = new GameObject("Name");
-            nameObj.transform.SetParent(item.transform, false);
-            var nameRT = nameObj.AddComponent<RectTransform>();
-            nameRT.anchorMin = new Vector2(0, 0);
-            nameRT.anchorMax = new Vector2(1, 0.3f);
-            nameRT.offsetMin = new Vector2(5, 5);
-            nameRT.offsetMax = new Vector2(-5, 0);
-
-            var nameText = nameObj.AddComponent<TextMeshProUGUI>();
-            nameText.text = option.name;
-            nameText.fontSize = FontSizes.Body;
-            nameText.enableAutoSizing = true;
-            nameText.fontSizeMin = FontSizes.AutoMinBody;
-            nameText.fontSizeMax = nameText.fontSize;
-            nameText.alignment = TextAlignmentOptions.Center;
-            nameText.color = Color.white;
-
-            return item;
-        }
-
-        private void OnAvatarSelected(string avatarId, GameObject selectedItem)
-        {
-            selectedAvatarId = avatarId;
-
-            foreach (var avatar in spawnedAvatars)
-            {
-                if (avatar == null) continue;
-                var image = avatar.GetComponent<Image>();
-                if (image)
-                {
-                    image.color = avatar == selectedItem
-                        ? new Color(0f, 0.5f, 0.8f, 0.9f)
-                        : new Color(0.2f, 0.2f, 0.25f, 0.9f);
-                }
-            }
-
-            PlayerPrefs.SetString("DP_PlayerAvatar", selectedAvatarId);
-            PlayerPrefs.Save();
-
-            if (nextButton) nextButton.interactable = true;
-
-            Debug.Log($"[Onboarding] Avatar selected: {avatarId}");
-        }
-
         private void ShowCompletion()
         {
             if (completionPanel)
@@ -730,14 +573,6 @@ namespace DigitPark.Managers
                     return;
                 }
             }
-            else if (currentStep.stepType == OnboardingStepType.AvatarSelection)
-            {
-                if (string.IsNullOrEmpty(selectedAvatarId))
-                {
-                    return;
-                }
-            }
-
             if (currentStepIndex < steps.Count - 1)
             {
                 TransitionToStep(currentStepIndex + 1);
@@ -885,11 +720,11 @@ namespace DigitPark.Managers
                 }
                 else
                 {
-                    // Fallback if CurrencyManager not yet initialized
-                    int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
-                    PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + completionRewardCoins);
-                    int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
-                    PlayerPrefs.SetInt("DP_PlayerGems", currentGems + completionRewardGems);
+                    // Fallback if CurrencyManager not yet initialized (using correct keys)
+                    int currentCoins = PlayerPrefs.GetInt("dp_cc_v2", 0);
+                    PlayerPrefs.SetInt("dp_cc_v2", currentCoins + completionRewardCoins);
+                    int currentGems = PlayerPrefs.GetInt("dp_cg_v2", 0);
+                    PlayerPrefs.SetInt("dp_cg_v2", currentGems + completionRewardGems);
                     PlayerPrefs.Save();
                 }
 
@@ -911,7 +746,6 @@ namespace DigitPark.Managers
         {
             PlayerPrefs.DeleteKey("DP_OnboardingComplete");
             PlayerPrefs.DeleteKey("DP_PlayerName");
-            PlayerPrefs.DeleteKey("DP_PlayerAvatar");
             PlayerPrefs.Save();
         }
 
@@ -950,16 +784,7 @@ namespace DigitPark.Managers
     {
         Info,
         NameInput,
-        AvatarSelection,
         Interactive,
         Completion
-    }
-
-    [Serializable]
-    public class AvatarOption
-    {
-        public string id;
-        public string name;
-        public Sprite sprite;
     }
 }

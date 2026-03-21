@@ -70,9 +70,13 @@ namespace DigitPark.Payments
             _triumphEnabled = data.TriumphEnabled;
             _maintenanceMode = data.MaintenanceMode;
 
-            _activeCosmeticProvider = data.PaymentProvider == "stripe" && data.StripeEnabled
-                ? PaymentProvider.Stripe
-                : PaymentProvider.AppleIAP;
+            // WARN-02: manejar "none" guardado por ForceSwitch(PaymentProvider.None)
+            if (data.PaymentProvider == "none")
+                _activeCosmeticProvider = PaymentProvider.None;
+            else
+                _activeCosmeticProvider = data.PaymentProvider == "stripe" && data.StripeEnabled
+                    ? PaymentProvider.Stripe
+                    : PaymentProvider.AppleIAP;
         }
 
         public static void ForceSwitch(PaymentProvider provider, string reason)
@@ -84,10 +88,20 @@ namespace DigitPark.Payments
             if (provider == PaymentProvider.AppleIAP)
                 _stripeEnabled = false;
             else if (provider == PaymentProvider.Stripe)
+            {
                 _stripeEnabled = true;
+                // Resetear abort flag para que Stripe pueda ejecutar abort nuevamente si es necesario
+                StripeAbortProtocol.Reset();
+            }
 
-            // Persistir en cache local
-            LocalFlagCache.SaveProviderOverride(provider == PaymentProvider.Stripe ? "stripe" : "apple_iap");
+            // Persistir en cache local — WARN-02: manejar None explícitamente
+            string providerStr = provider switch
+            {
+                PaymentProvider.Stripe   => "stripe",
+                PaymentProvider.AppleIAP => "apple_iap",
+                _                        => "none"
+            };
+            LocalFlagCache.SaveProviderOverride(providerStr);
 
             Debug.Log($"[FeatureFlag] Switch forzado: {previous} -> {provider}. Razon: {reason}");
             PaymentEvents.EmitProviderSwitched(provider, reason);

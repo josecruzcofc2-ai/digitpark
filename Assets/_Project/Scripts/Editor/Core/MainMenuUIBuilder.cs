@@ -12,8 +12,8 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// MainMenu UI Builder v4 - Polish 2026
-    /// Avatar circular con ring CYAN, sin @ en username, íconos quick access +20%,
-    /// bottom safe area 4%, profile card más presencia visual.
+    /// ProfileBanner compacto (Username + LevelBadge + XP bar), sin avatar,
+    /// bottom safe area 4%, íconos quick access +20%.
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     /// </summary>
     public class MainMenuUIBuilder : EditorWindow
@@ -79,7 +79,7 @@ namespace DigitPark.Editor
         private const string ICON_SETTINGS = ICONS_BASE + "/Navigation/SettingsIcon.png";
         private const string ICON_NOTIFICATIONS = ICONS_BASE + "/Navigation/NotificationsIcon.png";
         private const string ICON_NOTIFICATIONS_ACTIVE = ICONS_BASE + "/Navigation/NotificationsIcon.png";
-        private const string ICON_AVATAR_DEFAULT = ICONS_BASE + "/Social/AvatarDefault.png";
+        // Avatar icon removed — ProfileBanner uses Username + LevelBadge + XP bar
         private const string ICON_GEM = ICONS_BASE + "/Currency/icon_digitgem_single.png";
         private const string ICON_COIN = ICONS_BASE + "/Currency/icon_digitcoin_single.png";
         private const string ICON_RANKINGS = ICONS_BASE + "/UI/RankingsIcon.png";
@@ -109,7 +109,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Layout completo (de arriba a abajo):\n\n" +
                 "1. Header (Settings, Logo, Notificaciones)\n" +
-                "2. Profile Card (Avatar grande + stats + nivel)\n" +
+                "2. Profile Banner (Username + Level + XP bar)\n" +
                 "3. Daily Reward (movida arriba, reclamar)\n" +
                 "4. Quick Access (Rankings, Buscar, Misiones)\n" +
                 "5. JUGAR (Card cyan neon)\n" +
@@ -369,89 +369,14 @@ namespace DigitPark.Editor
             for (int i = card.transform.childCount - 1; i >= 0; i--)
                 DestroyImmediate(card.transform.GetChild(i).gameObject);
 
-            // === Centered layout ===
+            // === ProfileBanner compacto (68px) — avatar removed ===
 
-            // Avatar Frame container (centered, circular matchmaking style)
-            Sprite circleSprite = GenerateCircleSprite();
-
-            var frame = new GameObject("AvatarFrame");
-            frame.transform.SetParent(card.transform, false);
-            var frameRT = frame.AddComponent<RectTransform>();
-            frameRT.anchorMin = new Vector2(0.5f, 0.63f);
-            frameRT.anchorMax = new Vector2(0.5f, 0.63f);
-            frameRT.pivot = new Vector2(0.5f, 0.5f);
-            frameRT.sizeDelta = new Vector2(220, 220);
-
-            // Circular glow ring (outer, slightly larger)
-            var glowRing = new GameObject("GlowRing");
-            glowRing.transform.SetParent(frame.transform, false);
-            var glowRT = glowRing.AddComponent<RectTransform>();
-            glowRT.anchorMin = Vector2.zero;
-            glowRT.anchorMax = Vector2.one;
-            glowRT.offsetMin = new Vector2(-8, -8);
-            glowRT.offsetMax = new Vector2(8, 8);
-            var glowImg = glowRing.AddComponent<Image>();
-            glowImg.sprite = circleSprite;
-            glowImg.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.25f);
-
-            // Circular border ring (solid cyan frame)
-            var borderRing = new GameObject("BorderRing");
-            borderRing.transform.SetParent(frame.transform, false);
-            var borderRT = borderRing.AddComponent<RectTransform>();
-            borderRT.anchorMin = Vector2.zero;
-            borderRT.anchorMax = Vector2.one;
-            borderRT.offsetMin = Vector2.zero;
-            borderRT.offsetMax = Vector2.zero;
-            var borderImg = borderRing.AddComponent<Image>();
-            borderImg.sprite = circleSprite;
-            borderImg.color = CYAN_NEON;
-            var fr_mainmenu = borderRing.AddComponent<DigitPark.Services.FrameRenderer>();
-            fr_mainmenu.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Full);
-
-            // Circular mask container (clips avatar to circle)
-            var avatarMask = new GameObject("AvatarMask");
-            avatarMask.transform.SetParent(frame.transform, false);
-            var maskRT = avatarMask.AddComponent<RectTransform>();
-            maskRT.anchorMin = new Vector2(0.06f, 0.06f);
-            maskRT.anchorMax = new Vector2(0.94f, 0.94f);
-            maskRT.offsetMin = Vector2.zero;
-            maskRT.offsetMax = Vector2.zero;
-            var maskImg = avatarMask.AddComponent<Image>();
-            maskImg.sprite = circleSprite;
-            maskImg.color = CARD_BG_LIGHT;
-            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
-
-            // Avatar Image (inside mask, fills circle, clipped circular)
-            var avImg = new GameObject("AvatarImage");
-            avImg.transform.SetParent(avatarMask.transform, false);
-            var avImgRT = avImg.AddComponent<RectTransform>();
-            avImgRT.anchorMin = Vector2.zero;
-            avImgRT.anchorMax = Vector2.one;
-            avImgRT.offsetMin = Vector2.zero;
-            avImgRT.offsetMax = Vector2.zero;
-            var avImgComp = avImg.AddComponent<Image>();
-            avImgComp.color = Color.white;
-            avImgComp.preserveAspect = true;
-
-            // AvatarUI component with default sprite
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
-            var avatarUI = GetOrAdd<DigitPark.UI.Components.AvatarUI>(avImg);
-            var avatarSO = new SerializedObject(avatarUI);
-            avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
-            avatarSO.FindProperty("isEditable").boolValue = false;
-            avatarSO.FindProperty("avatarImage").objectReferenceValue = avImgComp;
-            if (defaultAvatar != null)
-            {
-                avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
-            }
-            avatarSO.ApplyModifiedProperties();
-
-            // Username (centered below avatar)
+            // Username (left-aligned, top half)
             var user = new GameObject("Username");
             user.transform.SetParent(card.transform, false);
             var userRT = user.AddComponent<RectTransform>();
-            userRT.anchorMin = new Vector2(0.05f, 0.20f);
-            userRT.anchorMax = new Vector2(0.95f, 0.35f);
+            userRT.anchorMin = new Vector2(0.04f, 0.52f);
+            userRT.anchorMax = new Vector2(0.70f, 0.92f);
             userRT.offsetMin = Vector2.zero;
             userRT.offsetMax = Vector2.zero;
             var userTMP = user.AddComponent<TextMeshProUGUI>();
@@ -459,18 +384,20 @@ namespace DigitPark.Editor
             userTMP.fontSize = FontSizes.H3;
             userTMP.color = TEXT_WHITE;
             userTMP.fontStyle = FontStyles.Bold;
-            userTMP.alignment = TextAlignmentOptions.Center;
+            userTMP.alignment = TextAlignmentOptions.Left;
             userTMP.enableAutoSizing = true;
             userTMP.fontSizeMin = FontSizes.AutoMinBody;
             userTMP.fontSizeMax = FontSizes.H3;
+            userTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Level Badge (centered below username)
+            // Level Badge (right of username)
             var lvlBadge = new GameObject("LevelBadge");
             lvlBadge.transform.SetParent(card.transform, false);
             var lvlRT = lvlBadge.AddComponent<RectTransform>();
-            lvlRT.anchorMin = new Vector2(0.5f, 0.13f);
-            lvlRT.anchorMax = new Vector2(0.5f, 0.13f);
-            lvlRT.sizeDelta = new Vector2(140, 48);
+            lvlRT.anchorMin = new Vector2(0.72f, 0.58f);
+            lvlRT.anchorMax = new Vector2(0.96f, 0.88f);
+            lvlRT.offsetMin = Vector2.zero;
+            lvlRT.offsetMax = Vector2.zero;
             lvlBadge.AddComponent<Image>().color = CYAN_NEON;
 
             var lvlText = new GameObject("LevelText");
@@ -491,7 +418,43 @@ namespace DigitPark.Editor
             ltTMP.fontSizeMax = FontSizes.Caption;
             ltTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            Debug.Log("[MainMenuUI] Profile Card creado (centered layout)");
+            // XP Bar (bottom strip)
+            var xpBarBg = new GameObject("XPBarBackground");
+            xpBarBg.transform.SetParent(card.transform, false);
+            var xpBgRT = xpBarBg.AddComponent<RectTransform>();
+            xpBgRT.anchorMin = new Vector2(0.04f, 0.12f);
+            xpBgRT.anchorMax = new Vector2(0.96f, 0.42f);
+            xpBgRT.offsetMin = Vector2.zero;
+            xpBgRT.offsetMax = Vector2.zero;
+            xpBarBg.AddComponent<Image>().color = new Color(0.1f, 0.12f, 0.18f, 1f);
+
+            var xpBarFill = new GameObject("XPBarFill");
+            xpBarFill.transform.SetParent(xpBarBg.transform, false);
+            var xpFillRT = xpBarFill.AddComponent<RectTransform>();
+            xpFillRT.anchorMin = Vector2.zero;
+            xpFillRT.anchorMax = new Vector2(0.45f, 1f); // 45% placeholder
+            xpFillRT.offsetMin = Vector2.zero;
+            xpFillRT.offsetMax = Vector2.zero;
+            xpBarFill.AddComponent<Image>().color = CYAN_NEON;
+
+            var xpText = new GameObject("XPText");
+            xpText.transform.SetParent(xpBarBg.transform, false);
+            var xpTextRT = xpText.AddComponent<RectTransform>();
+            xpTextRT.anchorMin = Vector2.zero;
+            xpTextRT.anchorMax = Vector2.one;
+            xpTextRT.offsetMin = new Vector2(8, 0);
+            xpTextRT.offsetMax = new Vector2(-8, 0);
+            var xpTMP = xpText.AddComponent<TextMeshProUGUI>();
+            xpTMP.text = "450 / 1000 XP";
+            xpTMP.fontSize = FontSizes.Caption;
+            xpTMP.color = TEXT_WHITE;
+            xpTMP.fontStyle = FontStyles.Bold;
+            xpTMP.alignment = TextAlignmentOptions.Center;
+            xpTMP.enableAutoSizing = true;
+            xpTMP.fontSizeMin = FontSizes.AutoMinBody;
+            xpTMP.fontSizeMax = FontSizes.Caption;
+
+            Debug.Log("[MainMenuUI] Profile Banner creado (compact layout)");
         }
 
         #endregion
@@ -1175,7 +1138,7 @@ namespace DigitPark.Editor
             int a = 0;
             a += TryAssignIcon(canvas.transform, "Header/SettingsButton/Icon", ICON_SETTINGS);
             a += TryAssignIcon(canvas.transform, "Header/NotificationsButton/Icon", ICON_NOTIFICATIONS);
-            a += TryAssignIcon(canvas.transform, "ProfileCard/AvatarFrame/AvatarMask/AvatarImage", ICON_AVATAR_DEFAULT);
+            // Avatar icon removed from ProfileCard
             // Currency Display icons in header
             a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/GemsDisplay/Icon", ICON_GEM);
             a += TryAssignIcon(canvas.transform, "Header/CurrencyDisplay/CoinsDisplay/Icon", ICON_COIN);

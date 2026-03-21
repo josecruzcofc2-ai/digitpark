@@ -186,7 +186,7 @@ namespace DigitPark.Animations
             var canvas = GetComponentInParent<Canvas>();
             if (canvas == null)
             {
-                if (_cachedCanvas == null) _cachedCanvas = FindObjectOfType<Canvas>();
+                if (_cachedCanvas == null) _cachedCanvas = FindFirstObjectByType<Canvas>();
                 canvas = _cachedCanvas;
             }
             if (canvas == null) return;
@@ -515,7 +515,7 @@ namespace DigitPark.Animations
                 return HistoryManager.Instance;
 
             // Fallback: find in scene (cached to avoid repeated search)
-            if (_historyManager == null) _historyManager = FindObjectOfType<HistoryManager>();
+            if (_historyManager == null) _historyManager = FindFirstObjectByType<HistoryManager>();
             return _historyManager;
         }
 

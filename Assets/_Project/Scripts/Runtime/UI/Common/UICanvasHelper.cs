@@ -9,6 +9,17 @@ namespace DigitPark.UI
     public static class UICanvasHelper
     {
         /// <summary>
+        /// Strips TMP rich-text tags from user-generated strings to prevent injection.
+        /// Use on any .text assignment that comes from usernames, tournament names, or chat.
+        /// </summary>
+        public static string TmpSafe(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+            return System.Text.RegularExpressions.Regex.Replace(input, @"<[^>]*>", "");
+        }
+
+
+        /// <summary>
         /// Finds the main UI Canvas at runtime.
         /// Prioritizes root Canvas named "Canvas", then any root Canvas
         /// that is not a transition/effects overlay.
@@ -30,7 +41,7 @@ namespace DigitPark.UI
             }
 
             // Fallback: any Canvas at all
-            return Object.FindObjectOfType<Canvas>();
+            return Object.FindFirstObjectByType<Canvas>();
         }
 
         private static bool IsValidMainCanvas(Canvas c)

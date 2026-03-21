@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Services;
 using DigitPark.Localization;
 
@@ -61,12 +62,44 @@ namespace DigitPark.Monetization
                 backgroundGradient.color = Color.Lerp(effect.primaryColor, effect.secondaryColor, 0.5f) * 0.3f;
 
             UpdateButtons();
+            AnimateIn();
         }
 
         public void Hide()
         {
             CleanupPreview();
-            gameObject.SetActive(false);
+            AnimateOut(() => gameObject.SetActive(false));
+        }
+
+        private void AnimateIn()
+        {
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+                transform.localScale = Vector3.one * 0.9f;
+                DOTween.Sequence()
+                    .Join(transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                    .Join(canvasGroup.DOFade(1f, 0.25f))
+                    .SetUpdate(true)
+                    .SetLink(gameObject);
+            }
+        }
+
+        private void AnimateOut(System.Action onComplete)
+        {
+            if (canvasGroup == null) { onComplete?.Invoke(); return; }
+
+            DOTween.Sequence()
+                .Join(transform.DOScale(0.95f, 0.15f).SetEase(Ease.InQuad))
+                .Join(canvasGroup.DOFade(0f, 0.15f))
+                .OnComplete(() =>
+                {
+                    transform.localScale = Vector3.one;
+                    canvasGroup.alpha = 1f;
+                    onComplete?.Invoke();
+                })
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         private void UpdateButtons()

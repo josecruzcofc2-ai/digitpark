@@ -23,7 +23,7 @@ namespace DigitPark.Managers
                 // C-67: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
                 if (!_instance)
                 {
-                    _instance = FindObjectOfType<OnlineResultManager>();
+                    _instance = FindFirstObjectByType<OnlineResultManager>();
                     if (!_instance)
                     {
                         var go = new GameObject("OnlineResultManager");
@@ -316,6 +316,19 @@ namespace DigitPark.Managers
         /// </summary>
         private void GrantRankedRewards(bool playerWon, bool isPerfect)
         {
+            // B3-C: Idempotency guard — prevent double-grant if ShowResultPanel is called twice
+            if (!string.IsNullOrEmpty(currentMatchId))
+            {
+                string grantKey = $"DP_RewardGranted_{currentMatchId}";
+                if (PlayerPrefs.GetInt(grantKey, 0) == 1)
+                {
+                    Debug.LogWarning($"[OnlineResultManager] Reward already granted for match {currentMatchId} — skipping");
+                    return;
+                }
+                PlayerPrefs.SetInt(grantKey, 1);
+                PlayerPrefs.Save();
+            }
+
             var currency = DigitPark.Monetization.CurrencyManager.Instance;
             if (currency == null) return;
 

@@ -75,13 +75,13 @@ namespace DigitPark.Data
     [Serializable]
     public class FriendInfo
     {
-        public string odId;
+        public string odId; // NOTE: historical typo for "userId" — kept for serialization compatibility
         public string username;
-        public string avatarUrl;
         public bool isOnline;
         public string lastSeen;
         public float winRate;
         public string favoriteGame;
+        public int level;
 
         public DateTime GetLastSeen()
         {

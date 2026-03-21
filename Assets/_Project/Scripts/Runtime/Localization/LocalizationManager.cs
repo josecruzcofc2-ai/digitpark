@@ -80,7 +80,7 @@ namespace DigitPark.Localization
             Debug.Log("[Localization] Verificando AutoLocalizer...");
 
             // Buscar si ya existe en la escena
-            var existingAutoLocalizer = FindObjectOfType<AutoLocalizer>();
+            var existingAutoLocalizer = FindFirstObjectByType<AutoLocalizer>();
 
             if (existingAutoLocalizer == null)
             {
@@ -98,7 +98,7 @@ namespace DigitPark.Localization
         {
             Debug.Log("[Localization] Verificando LocalizedTextLayoutFixer...");
 
-            var existingFixer = FindObjectOfType<DigitPark.UI.LocalizedTextLayoutFixer>();
+            var existingFixer = FindFirstObjectByType<DigitPark.UI.LocalizedTextLayoutFixer>();
             if (existingFixer == null)
             {
                 GameObject fixerObj = new GameObject("LocalizedTextLayoutFixer");

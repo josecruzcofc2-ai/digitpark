@@ -31,11 +31,14 @@ namespace DigitPark.Managers
         [SerializeField] private GameObject successIcon;
         [SerializeField] private GameObject errorIcon;
 
-        [Header("URLs Legales")]
-        #pragma warning disable 0414
+        [Header("URLs Legales (fallback — Remote Config overrides)")]
         [SerializeField] private string termsUrl = "https://digitpark.com/terms";
         [SerializeField] private string privacyUrl = "https://digitpark.com/privacy";
-        #pragma warning restore 0414
+
+        private string TermsUrl =>
+            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.TermsUrl ?? termsUrl;
+        private string PrivacyUrl =>
+            DigitPark.Payments.RemoteConfigService.Instance?.GetCurrentConfig()?.PrivacyUrl ?? privacyUrl;
 
         // Events
         public static event Action<bool> OnVerificationComplete;

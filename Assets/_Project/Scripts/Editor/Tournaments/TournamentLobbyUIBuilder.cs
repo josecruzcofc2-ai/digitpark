@@ -47,7 +47,7 @@ namespace DigitPark.Editor
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
         private const string TIMER_ICON_PATH = "Assets/_Project/Art/Icons/UI/TimerIcon.png";
-        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
+        // Avatar icon removed — participants no longer display avatars
 
         // ==================== DIMENSIONES ====================
         private const float HEADER_HEIGHT = 100f;
@@ -1057,19 +1057,6 @@ namespace DigitPark.Editor
             rankText.overflowMode = TextOverflowModes.Ellipsis;
             LayoutElement rankLE = GetOrAddComponent<LayoutElement>(rankObj);
             rankLE.minWidth = 50;
-
-            // My Avatar
-            GameObject avatarObj = FindOrCreateChild(myPos, "MyAvatar");
-            Image avatarImage = GetOrAddComponent<Image>(avatarObj);
-            avatarImage.color = Color.white;
-            avatarImage.preserveAspect = true;
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
-            if (defaultAvatar != null) avatarImage.sprite = defaultAvatar;
-            LayoutElement avatarLE = GetOrAddComponent<LayoutElement>(avatarObj);
-            avatarLE.minWidth = 44;
-            avatarLE.minHeight = 44;
-            avatarLE.preferredWidth = 44;
-            avatarLE.preferredHeight = 44;
 
             // My Name
             GameObject nameObj = FindOrCreateChild(myPos, "MyName");

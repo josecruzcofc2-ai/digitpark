@@ -88,7 +88,7 @@ namespace DigitPark.UI.Items
             // Username
             if (usernameText != null)
             {
-                usernameText.text = entry.username;
+                usernameText.text = DigitPark.UI.UICanvasHelper.TmpSafe(entry.username);
                 usernameText.color = isCurrentPlayer ? new Color(0f, 1f, 1f) : Color.white;
                 usernameText.fontStyle = FontStyles.Bold;
             }

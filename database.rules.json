@@ -6,8 +6,10 @@
 
     "players": {
       "$uid": {
-        // Solo el usuario autenticado puede leer/escribir su propio perfil
-        ".read": "auth != null && auth.uid === $uid",
+        // B0-B [2026-03-20]: Cualquier usuario autenticado puede leer perfiles
+        // (necesario para búsqueda de jugadores, perfiles de amigos, participantes de torneo)
+        // Datos sensibles de pago están en Stripe/Triumph, no aquí.
+        ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid"
       }
     },
@@ -19,10 +21,8 @@
       "global": {
         "$gameId": {
           "$uid": {
-            // El usuario solo puede escribir su propio score
-            // NOTA: Para real-money, mover escritura a Cloud Functions
             ".write": "auth != null && auth.uid === $uid",
-            ".validate": "newData.hasChildren(['userId', 'username', 'time', 'countryCode'])"
+            ".validate": "newData.hasChildren(['userId', 'username', 'time', 'countryCode', 'validationToken']) && newData.child('userId').val() === auth.uid && newData.child('time').isNumber()"
           }
         }
       },
@@ -31,7 +31,7 @@
         "$countryCode": {
           "$uid": {
             ".write": "auth != null && auth.uid === $uid",
-            ".validate": "newData.hasChildren(['userId', 'username', 'time', 'countryCode'])"
+            ".validate": "newData.hasChildren(['userId', 'username', 'time', 'countryCode', 'validationToken']) && newData.child('userId').val() === auth.uid && newData.child('time').isNumber()"
           }
         }
       }
@@ -56,7 +56,15 @@
         // Solo el creador puede modificar su torneo (creación o actualización)
         // AUDIT-FIXED [2026-03-10] P1: era auth != null (cualquier usuario podía sobreescribir torneos ajenos)
         ".write": "auth != null && (!data.exists() && newData.child('creatorId').val() === auth.uid || data.child('creatorId').val() === auth.uid)",
-        ".validate": "newData.hasChildren(['tournamentId', 'name', 'status', 'creatorId'])"
+        ".validate": "newData.hasChildren(['tournamentId', 'name', 'status', 'creatorId'])",
+
+        "participants": {
+          // B0-B [2026-03-20]: Cada participante puede escribir SOLO su propia entrada
+          // El creador ya tiene acceso por la regla padre
+          "$participantId": {
+            ".write": "auth != null && auth.uid === $participantId"
+          }
+        }
       }
     },
 
@@ -70,13 +78,11 @@
 
     "friend_requests": {
       "$uid": {
-        // El usuario puede leer sus propias solicitudes (enviadas y recibidas)
         ".read": "auth != null && auth.uid === $uid",
-        // Cualquier usuario autenticado puede crear/actualizar una solicitud
-        // (sender escribe bajo receiverId y senderId)
         "$requestId": {
-          ".write": "auth != null",
-          ".validate": "newData.hasChildren(['requestId', 'senderId', 'receiverId', 'status'])"
+          // Allow write if: user owns this node OR is the sender of the request
+          ".write": "auth != null && (auth.uid === $uid || newData.child('senderId').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['requestId', 'senderId', 'receiverId', 'status']) && (newData.child('senderId').val() === auth.uid || newData.child('receiverId').val() === auth.uid)"
         }
       }
     },
@@ -99,7 +105,13 @@
     "friends": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
+        // B0-B [2026-03-20]: Solo el dueño puede leer su lista de amigos
+        // Para escritura: el dueño puede escribir cualquier entrada,
+        // Y otro usuario autenticado puede escribir SOLO su propia entrada ($friendId === auth.uid)
+        // Esto permite accept/reject bilateral sin Cloud Function
+        "$friendId": {
+          ".write": "auth != null && (auth.uid === $uid || auth.uid === $friendId)"
+        }
       }
     },
 
@@ -119,34 +131,38 @@
     },
 
     "matchmaking_queue": {
-      // Cualquier usuario autenticado puede leer la queue (para buscar oponentes)
       ".read": "auth != null",
       "$gameKey": {
         "$entryId": {
-          // Cualquier usuario autenticado puede crear/eliminar entradas
-          // (necesario para que el oponente pueda borrar la entrada al hacer match)
-          ".write": "auth != null",
-          ".validate": "newData.hasChildren(['userId', 'userName', 'timestamp', 'status']) && newData.child('battleCardId').exists()"
+          // Create: only if userId matches auth. Delete: owner or opponent who claimed the match.
+          ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || !newData.exists())",
+          ".validate": "newData.hasChildren(['userId', 'userName', 'timestamp', 'status']) && newData.child('userId').val() === auth.uid && newData.child('battleCardId').exists()"
         }
       }
     },
 
     "active_matches": {
-      // Cualquier usuario autenticado puede leer matches (para polling)
       ".read": "auth != null",
       "$matchId": {
-        // Cualquier usuario autenticado puede crear/actualizar matches
-        // (player1 crea, player2 actualiza su score)
-        ".write": "auth != null",
+        // Only match participants can write (creator sets player1Id, both update scores)
+        ".write": "auth != null && (!data.exists() || data.child('player1Id').val() === auth.uid || data.child('player2Id').val() === auth.uid)",
         ".validate": "newData.hasChildren(['gameKey', 'player1Id', 'player2Id', 'status'])"
       }
     },
 
     "ratelimits": {
       "$uid": {
-        // Solo el usuario puede leer/escribir sus propios rate limits
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    // CashBattle scores — server-only write (via submitCashScore Cloud Function)
+    // Client can read own scores but CANNOT write (prevents score injection in real-money games)
+    "cash_scores": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
       }
     },
 

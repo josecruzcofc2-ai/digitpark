@@ -10,6 +10,7 @@ using DG.Tweening;
 using DigitPark.Animations;
 using DigitPark.UI;
 using DigitPark.Localization;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Managers
 {
@@ -247,7 +248,7 @@ namespace DigitPark.Managers
             LoadTournaments(reset: true);
         }
 
-        private void LoadTournaments(bool reset)
+        private async void LoadTournaments(bool reset)
         {
             if (isLoading) return;
 
@@ -260,14 +261,18 @@ namespace DigitPark.Managers
             isLoading = true;
             ShowLoadingIndicator(true);
 
-            // Simulate API call
-            Invoke(nameof(SimulateLoadTournaments), 0.5f);
-        }
+            // B1-C: consultar Firebase real en lugar de datos simulados
+            List<TournamentData> tournaments = null;
+            try
+            {
+                tournaments = await DatabaseService.Instance.GetActiveTournaments();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[TournamentsBrowser] Error cargando torneos: {e.Message}");
+            }
 
-        private void SimulateLoadTournaments()
-        {
-            // Generate mock data
-            var tournaments = GenerateMockTournaments();
+            if (tournaments == null) tournaments = new List<TournamentData>();
 
             loadedTournaments.AddRange(tournaments);
             PopulateTournaments(tournaments);
@@ -288,7 +293,7 @@ namespace DigitPark.Managers
                     var cg = emptyStateText.GetComponent<CanvasGroup>();
                     if (cg == null) cg = emptyStateText.gameObject.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
-                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+                    cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(gameObject);
                 }
             }
 

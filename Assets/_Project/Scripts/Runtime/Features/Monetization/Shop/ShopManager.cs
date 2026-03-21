@@ -388,8 +388,20 @@ namespace DigitPark.Monetization
 
         public void PurchaseItem(string itemId)
         {
-            Debug.Log($"[ShopManager] Purchasing item: {itemId}");
-            OnItemPurchased?.Invoke(itemId);
+            // B2-D: no disparar OnItemPurchased sin verificación — redirigir al flujo de compra correcto
+            Debug.LogWarning($"[ShopManager] PurchaseItem(string) llamado directamente para '{itemId}' — use ShowPurchasePopup() o ConfirmPurchase()");
+            var item = GetShopItemById(itemId);
+            if (item == null) { Debug.LogError($"[ShopManager] Item '{itemId}' no encontrado"); return; }
+            ShowPurchasePopup(item);
+        }
+
+        private ShopItemUI GetShopItemById(string itemId)
+        {
+            foreach (var ui in GetComponentsInChildren<ShopItemUI>(true))
+            {
+                if (ui.ItemData?.itemId == itemId) return ui;
+            }
+            return null;
         }
 
         public void ConfirmPurchase()

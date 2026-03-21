@@ -149,6 +149,15 @@ namespace DigitPark.UI.Panels
         }
 
         /// <summary>
+        /// Configura el tipo de contenido del input (ej. Password para enmascarar texto)
+        /// </summary>
+        public void SetContentType(TMP_InputField.ContentType contentType)
+        {
+            if (inputField != null)
+                inputField.contentType = contentType;
+        }
+
+        /// <summary>
         /// Configura los límites de longitud del texto
         /// </summary>
         public void SetLengthLimits(int min, int max)

@@ -39,6 +39,7 @@ namespace DigitPark.Services.Firebase
         public event Action<PlayerData> OnLoginSuccess;
         public event Action<string> OnLoginFailed;
         public event Action OnLogout;
+        public event Action<string> OnInitFailed;
 
         // Firebase
         private FirebaseAuth firebaseAuth;
@@ -51,6 +52,9 @@ namespace DigitPark.Services.Firebase
         // Rate limiting
         private int _loginAttempts = 0;
         private float _loginCooldownUntil = 0f;
+
+        // Guard against race condition between manual login and OnAuthStateChanged
+        private bool _isManualLoginInProgress = false;
 
         // Propiedades públicas
         public bool IsFirebaseReal => useFirebaseReal;
@@ -110,6 +114,7 @@ namespace DigitPark.Services.Firebase
 #else
                     // En producción, NO caer a simulación — reportar error
                     Debug.LogError("[Auth] PRODUCCIÓN: Firebase no disponible. La autenticación no funcionará.");
+                    OnInitFailed?.Invoke($"Firebase dependency error: {dependencyTask.Result}");
 #endif
                 }
             }
@@ -145,6 +150,9 @@ namespace DigitPark.Services.Firebase
 
         private void OnAuthStateChanged(object sender, EventArgs e)
         {
+            // Skip if a manual login/register is in progress to avoid race condition
+            if (_isManualLoginInProgress) return;
+
             if (firebaseAuth.CurrentUser != currentUser)
             {
                 bool signedIn = firebaseAuth.CurrentUser != null;
@@ -171,8 +179,10 @@ namespace DigitPark.Services.Firebase
                             if (this == null) return;
                             if (t.IsFaulted)
                                 Debug.LogError($"[Auth] Error cargando datos en StateChanged: {t.Exception?.GetBaseException().Message}");
-                            else
+                            else if (currentPlayerData != null)
                                 OnLoginSuccess?.Invoke(currentPlayerData);
+                            else
+                                Debug.LogWarning("[Auth] StateChanged: LoadOrCreatePlayerData completed but currentPlayerData is null");
                         }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                     }
                 }
@@ -188,7 +198,19 @@ namespace DigitPark.Services.Firebase
                 {
                     if (this == null) return;
                     if (t.IsFaulted)
+                    {
                         Debug.LogWarning($"[Auth] Token refresh falló: {t.Exception?.GetBaseException().Message}");
+                        // Token revoked or user deleted server-side — force logout
+                        var baseEx = t.Exception?.GetBaseException();
+                        if (baseEx is FirebaseException fbEx &&
+                            ((AuthError)fbEx.ErrorCode == AuthError.UserNotFound ||
+                             (AuthError)fbEx.ErrorCode == AuthError.UserTokenExpired ||
+                             (AuthError)fbEx.ErrorCode == AuthError.InvalidUserToken))
+                        {
+                            Debug.LogWarning("[Auth] Token revoked — forcing logout");
+                            Logout();
+                        }
+                    }
                     else
                         Debug.Log("[Auth] Token refrescado al volver al foreground");
                 });
@@ -201,6 +223,10 @@ namespace DigitPark.Services.Firebase
             {
                 firebaseAuth.StateChanged -= OnAuthStateChanged;
             }
+            OnLoginSuccess = null;
+            OnLoginFailed = null;
+            OnLogout = null;
+            OnInitFailed = null;
         }
 
         #region Login con Email
@@ -233,6 +259,14 @@ namespace DigitPark.Services.Firebase
                 return await LoginWithEmailSimulation(email, password, rememberMe);
             }
 
+            if (firebaseAuth == null)
+            {
+                Debug.LogError("[Auth] Firebase Auth not initialized");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_not_initialized"));
+                return false;
+            }
+
+            _isManualLoginInProgress = true;
             try
             {
                 Debug.Log($"[Auth] Login con email: {RedactEmail(email)}");
@@ -270,6 +304,10 @@ namespace DigitPark.Services.Firebase
                 OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_connection"));
                 return false;
             }
+            finally
+            {
+                _isManualLoginInProgress = false;
+            }
         }
 
         #endregion
@@ -290,6 +328,14 @@ namespace DigitPark.Services.Firebase
                 return await RegisterWithEmailSimulation(email, password, username);
             }
 
+            if (firebaseAuth == null)
+            {
+                Debug.LogError("[Auth] Firebase Auth not initialized");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_not_initialized"));
+                return false;
+            }
+
+            _isManualLoginInProgress = true;
             try
             {
                 Debug.Log($"[Auth] Registro: {RedactEmail(email)}");
@@ -301,7 +347,6 @@ namespace DigitPark.Services.Firebase
                     if (taken)
                     {
                         Debug.LogWarning("[Auth] Username already taken");
-                        // AUDIT-FIXED [2026-03-10] M-06: usar AutoLocalizer en lugar de string hardcodeada
                         OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_username_taken"));
                         return false;
                     }
@@ -327,7 +372,20 @@ namespace DigitPark.Services.Firebase
                 };
 
                 // Guardar en base de datos
-                await SavePlayerDataToDatabase(currentPlayerData);
+                try
+                {
+                    await SavePlayerDataToDatabase(currentPlayerData);
+                }
+                catch (Exception saveEx)
+                {
+                    // Cleanup orphaned Firebase Auth user if DB save fails
+                    Debug.LogError($"[Auth] DB save failed after registration, cleaning up auth user: {saveEx.Message}");
+                    try { await currentUser.DeleteAsync(); } catch { }
+                    currentUser = null;
+                    currentPlayerData = null;
+                    OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_connection"));
+                    return false;
+                }
 
                 PlayerPrefs.SetInt("DP_RememberMe", 1);
                 PlayerPrefs.Save();
@@ -349,6 +407,10 @@ namespace DigitPark.Services.Firebase
                 OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_connection"));
                 return false;
             }
+            finally
+            {
+                _isManualLoginInProgress = false;
+            }
         }
 
         #endregion
@@ -360,6 +422,13 @@ namespace DigitPark.Services.Firebase
             if (!useFirebaseReal)
             {
                 return await LoginWithGoogleSimulation();
+            }
+
+            if (firebaseAuth == null)
+            {
+                Debug.LogError("[Auth] Firebase Auth not initialized");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_not_initialized"));
+                return false;
             }
 
             try
@@ -440,6 +509,13 @@ namespace DigitPark.Services.Firebase
                 return await LoginWithAppleSimulation();
             }
 
+            if (firebaseAuth == null)
+            {
+                Debug.LogError("[Auth] Firebase Auth not initialized");
+                OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_not_initialized"));
+                return false;
+            }
+
             try
             {
                 Debug.Log("[Auth] Iniciando login con Apple...");
@@ -512,7 +588,8 @@ namespace DigitPark.Services.Firebase
 
             if (useFirebaseReal && firebaseAuth != null)
             {
-                firebaseAuth.SignOut();
+                try { firebaseAuth.SignOut(); }
+                catch (Exception ex) { Debug.LogWarning($"[Auth] SignOut error (forcing local cleanup): {ex.Message}"); }
             }
 
             currentUser = null;
@@ -530,7 +607,7 @@ namespace DigitPark.Services.Firebase
 
         #region Delete Account
 
-        public async Task<bool> DeleteAccount()
+        public async Task<bool> DeleteAccount(string confirmPassword = "") // B2-A: acepta password para re-auth
         {
             if (!useFirebaseReal)
             {
@@ -550,29 +627,51 @@ namespace DigitPark.Services.Firebase
 
                 Debug.Log($"[Auth] Eliminando cuenta de Firebase: {RedactEmail(email)}");
 
-                // Eliminar datos de la base de datos primero (GDPR compliance)
+                // B2-A: Re-autenticar antes de borrar si se provee password
+                if (!string.IsNullOrEmpty(confirmPassword) && !string.IsNullOrEmpty(email))
+                {
+                    try
+                    {
+                        var credential = global::Firebase.Auth.EmailAuthProvider.GetCredential(email, confirmPassword);
+                        await currentUser.ReauthenticateAsync(credential);
+                        Debug.Log("[Auth] Re-autenticación exitosa");
+                    }
+                    catch (Exception reauthEx)
+                    {
+                        Debug.LogWarning($"[Auth] Re-autenticación fallida: {reauthEx.Message}");
+                        return false;
+                    }
+                }
+
+                // Step 1: Delete Firebase Auth FIRST (requires recent login)
+                // If this fails with RequiresRecentLogin, no data is lost
+                await currentUser.DeleteAsync();
+                Debug.Log("[Auth] Firebase Auth account deleted");
+
+                // Step 2: Delete DB data (best-effort — Cloud Function also handles GDPR delete)
                 var dbService = DatabaseService.Instance;
                 if (dbService != null)
                 {
-                    await dbService.RemoveUserFromLeaderboards(userId);
-                    await dbService.DeleteMatchHistory(userId);
-                    await dbService.DeleteAchievements(userId);
-                    await dbService.DeleteFriendsList(userId);
-                    await dbService.DeleteNotifications(userId);
-                    await dbService.DeleteTournamentHistory(userId);
+                    try
+                    {
+                        await dbService.RemoveUserFromLeaderboards(userId);
+                        await dbService.DeleteMatchHistory(userId);
+                        await dbService.DeleteAchievements(userId);
+                        await dbService.DeleteFriendsList(userId);
+                        await dbService.DeleteNotifications(userId);
+                        await dbService.DeleteTournamentHistory(userId);
+                    }
+                    catch (Exception dbEx)
+                    {
+                        // Auth already deleted — log but don't fail. Server-side deleteUserData handles full cleanup.
+                        Debug.LogWarning($"[Auth] DB cleanup partial (server will handle): {dbEx.Message}");
+                    }
                 }
 
-                // Eliminar el usuario de Firebase Auth
-                await currentUser.DeleteAsync();
-
-                Debug.Log("[Auth] Cuenta eliminada de Firebase exitosamente");
-
-                // Limpiar TODOS los datos locales
+                // Step 3: Clean local data (only DP_ prefixed keys, preserve system prefs)
                 currentUser = null;
                 currentPlayerData = null;
-
-                PlayerPrefs.DeleteAll();
-                PlayerPrefs.Save();
+                DeleteDigitParkPrefs();
 
                 OnLogout?.Invoke();
                 return true;
@@ -582,7 +681,6 @@ namespace DigitPark.Services.Firebase
                 string errorMessage = GetFirebaseErrorMessage(ex);
                 Debug.LogError($"[Auth] Error eliminando cuenta: {errorMessage}");
 
-                // Si requiere re-autenticación reciente
                 if ((AuthError)ex.ErrorCode == AuthError.RequiresRecentLogin)
                 {
                     OnLoginFailed?.Invoke(AutoLocalizer.Get("auth_error_requires_relogin"));
@@ -611,7 +709,8 @@ namespace DigitPark.Services.Firebase
                 }
 
                 string userId = currentPlayerData.userId;
-                string email = currentPlayerData.email?.ToLower() ?? "";
+                // S15-NEW-03: read email from Firebase Auth, not from RTDB PlayerData
+                string email = currentUser?.Email?.ToLower() ?? currentPlayerData.email?.ToLower() ?? "";
 
                 Debug.Log($"[Auth] (Simulación) Eliminando cuenta: {RedactEmail(email)}");
 
@@ -656,22 +755,48 @@ namespace DigitPark.Services.Firebase
                 return true;
             }
 
+            if (firebaseAuth == null)
+            {
+                Debug.LogError("[Auth] Firebase Auth not initialized");
+                return false;
+            }
+
             try
             {
                 await firebaseAuth.SendPasswordResetEmailAsync(email);
                 Debug.Log($"[Auth] Email de reseteo enviado a: {RedactEmail(email)}");
-                return true;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Auth] Error reset: {ex.Message}");
-                return false;
+                // B2-C: suprimir el error — no revelar si el email existe (account enumeration)
+                Debug.Log($"[Auth] ResetPassword suppressed: {ex.GetType().Name}");
             }
+            return true; // siempre true — la UI siempre muestra el mensaje genérico
         }
 
         #endregion
 
         #region Helpers
+
+        /// <summary>
+        /// Deletes only DigitPark-related PlayerPrefs keys instead of DeleteAll()
+        /// which would wipe system prefs (audio, accessibility, etc.)
+        /// </summary>
+        private static void DeleteDigitParkPrefs()
+        {
+            string[] prefixes = { "DP_", "dp_", "SimUser_", "SimPassword_", "Cash", "Equipped", "Owned" };
+            // PlayerPrefs doesn't expose key enumeration, so delete known keys
+            string[] knownKeys = {
+                "DP_SavedUserId", "DP_RememberMe", "DP_TotalLoginDays", "DP_RankedWins_Total",
+                "DP_PerfectScores_Total", "DP_ConsentGiven", "dp_cc_v2", "dp_cg_v2",
+                "EquippedBackground", "OwnedBackgrounds", "EquippedFrame", "OwnedFrames",
+                "EquippedTitle", "OwnedTitles", "EquippedEffect", "OwnedEffects",
+                "EquippedEmote", "OwnedEmotes", "EquippedBattleCard", "OwnedBattleCards",
+            };
+            foreach (var key in knownKeys)
+                PlayerPrefs.DeleteKey(key);
+            PlayerPrefs.Save();
+        }
 
         public bool IsUserAuthenticated()
         {
@@ -695,6 +820,14 @@ namespace DigitPark.Services.Firebase
 
         public async Task<bool> UpdateUsername(string newUsername)
         {
+            // S2-NEW-03: Validate format at service layer — UI validation is not sufficient
+            if (string.IsNullOrWhiteSpace(newUsername) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(newUsername, @"^[a-zA-Z0-9_]+$"))
+            {
+                Debug.LogWarning("[Auth] UpdateUsername rechazado: formato inválido");
+                return false;
+            }
+
             try
             {
                 if (currentPlayerData == null) return false;
@@ -827,8 +960,9 @@ namespace DigitPark.Services.Firebase
             return errorCode switch
             {
                 AuthError.InvalidEmail => AutoLocalizer.Get("auth_error_invalid_email"),
-                AuthError.WrongPassword => AutoLocalizer.Get("auth_error_wrong_password"),
-                AuthError.UserNotFound => AutoLocalizer.Get("auth_error_user_not_found"),
+                // HIGH-02: Same message for both — prevents account enumeration
+                AuthError.WrongPassword => AutoLocalizer.Get("auth_error_invalid_credentials"),
+                AuthError.UserNotFound => AutoLocalizer.Get("auth_error_invalid_credentials"),
                 AuthError.EmailAlreadyInUse => AutoLocalizer.Get("auth_error_email_in_use"),
                 AuthError.WeakPassword => AutoLocalizer.Get("auth_error_weak_password"),
                 AuthError.NetworkRequestFailed => AutoLocalizer.Get("auth_error_network"),

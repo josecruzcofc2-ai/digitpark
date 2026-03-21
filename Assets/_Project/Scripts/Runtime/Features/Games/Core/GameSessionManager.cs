@@ -254,13 +254,25 @@ namespace DigitPark.Games
                                 gameId
                             );
 
-                            // Si es torneo, actualizar score en el torneo
+                            // Si es torneo normal, actualizar score en el torneo
                             if (CurrentContext.Mode == GameMode.Tournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
                             {
                                 await DatabaseService.Instance.UpdateTournamentScore(
                                     CurrentContext.TournamentId,
                                     playerData.userId,
                                     result.TotalTime
+                                );
+                            }
+
+                            // SEC-06 Option A: CashBattle scores go through server-side validation
+                            if (CurrentContext.Mode == GameMode.CashTournament && !string.IsNullOrEmpty(CurrentContext.TournamentId))
+                            {
+                                await DatabaseService.Instance.SubmitCashScore(
+                                    playerData.userId,
+                                    gameId,
+                                    result.TotalTime,
+                                    (int)result.FinalScore,
+                                    CurrentContext.TournamentId
                                 );
                             }
                         }
@@ -480,7 +492,7 @@ namespace DigitPark.Games
 
             string sceneName = GetSceneNameForGame(CurrentContext.CurrentGame.Value);
             Debug.Log($"Cargando escena: {sceneName}");
-            SceneNavigator.Instance.NavigateTo(sceneName);
+            SceneNavigator.Instance?.NavigateTo(sceneName);
         }
 
         /// <summary>

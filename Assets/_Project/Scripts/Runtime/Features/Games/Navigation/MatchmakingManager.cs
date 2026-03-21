@@ -9,13 +9,14 @@ using DigitPark.Services;
 using DigitPark.UI.Components;
 using DigitPark.Localization;
 using DigitPark.UI;
+using DigitPark.Monetization;
 using DG.Tweening;
 
 namespace DigitPark.Managers
 {
     /// <summary>
     /// Premium Matchmaking Manager
-    /// - Professional VS screen with avatar integration
+    /// - Professional VS screen with color bar player identification
     /// - Dynamic game icon loading
     /// - Smooth animations and transitions
     /// - Firebase matchmaking integration
@@ -28,13 +29,11 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI gameTypeText;
 
         [Header("=== PLAYER CARD ===")]
-        [SerializeField] private Image playerAvatar;
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private TextMeshProUGUI playerLevelText;
         [SerializeField] private GameObject playerCard;
 
         [Header("=== OPPONENT CARD ===")]
-        [SerializeField] private Image opponentAvatar;
         [SerializeField] private TextMeshProUGUI opponentNameText;
         [SerializeField] private TextMeshProUGUI opponentLevelText;
         [SerializeField] private GameObject opponentCard;
@@ -122,11 +121,6 @@ namespace DigitPark.Managers
             StopAllCoroutines();
             transform.DOKill();
 
-            // Cleanup
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.OnAvatarChanged -= OnPlayerAvatarChanged;
-            }
         }
 
         #endregion
@@ -136,12 +130,6 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             cancelButton?.onClick.AddListener(OnCancelClicked);
-
-            // Subscribe to avatar changes
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.OnAvatarChanged += OnPlayerAvatarChanged;
-            }
         }
 
         private int matchRounds = 1;
@@ -170,39 +158,6 @@ namespace DigitPark.Managers
                 int level = PlayerPrefs.GetInt("DP_PlayerLevel", 1);
                 if (playerLevelText != null)
                     playerLevelText.text = AutoLocalizer.Get("level_prefix", level);
-
-                // Load player avatar
-                if (playerAvatar != null)
-                {
-                    if (AvatarService.Instance != null)
-                    {
-                        try
-                        {
-                            Sprite avatarSprite = await AvatarService.Instance.LoadCurrentUserAvatar();
-                            if (this == null) return;
-                            if (avatarSprite != null)
-                            {
-                                playerAvatar.sprite = avatarSprite;
-                                playerAvatar.color = Color.white;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogWarning($"[Matchmaking] Could not load player avatar: {e.Message}");
-                            // Fallback: generar avatar con inicial
-                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
-                            playerAvatar.sprite = initialAvatar;
-                            playerAvatar.color = Color.white;
-                        }
-                    }
-                    else
-                    {
-                        // Sin AvatarService: generar avatar con inicial
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
-                        playerAvatar.sprite = initialAvatar;
-                        playerAvatar.color = Color.white;
-                    }
-                }
 
                 // Setup opponent as searching
                 ShowOpponentSearching(true);
@@ -485,6 +440,7 @@ namespace DigitPark.Managers
         private void OnSearchTimeout()
         {
             isSearching = false;
+            CurrencyManager.Instance?.CancelEscrow(); // B1-A: devolver coins si no se encontró oponente
 
             if (titleText != null)
                 titleText.text = AutoLocalizer.Get("matchmaking_no_match");
@@ -537,12 +493,6 @@ namespace DigitPark.Managers
 
             if (opponentLevelText != null)
                 opponentLevelText.text = searching ? "---" : "";
-
-            // Hide avatar placeholder when searching
-            if (opponentAvatar != null)
-            {
-                opponentAvatar.color = searching ? new Color(1, 1, 1, 0.3f) : Color.white;
-            }
         }
 
         private async void ShowOpponentInfo(string opponentInfo)
@@ -565,41 +515,6 @@ namespace DigitPark.Managers
                     opponentLevelText.text = "---";
 
                 // Load opponent avatar
-                if (opponentAvatar != null)
-                {
-                    if (AvatarService.Instance != null && !string.IsNullOrEmpty(opponentId))
-                    {
-                        try
-                        {
-                            // Intentar cargar avatar real del oponente desde Firebase
-                            Sprite avatarSprite = await AvatarService.Instance.LoadAvatar(
-                                opponentId, "", opponentInfo);
-                            if (this == null) return;
-                            if (avatarSprite != null)
-                            {
-                                opponentAvatar.sprite = avatarSprite;
-                                opponentAvatar.color = Color.white;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogWarning($"[Matchmaking] Could not load opponent avatar: {e.Message}");
-                            // Fallback: generar avatar con inicial del oponente
-                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(opponentInfo, opponentId);
-                            opponentAvatar.sprite = initialAvatar;
-                            opponentAvatar.color = Color.white;
-                        }
-                    }
-                    else
-                    {
-                        // Sin AvatarService o sin opponentId: generar avatar con inicial
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
-                            opponentInfo, opponentId ?? opponentInfo);
-                        opponentAvatar.sprite = initialAvatar;
-                        opponentAvatar.color = Color.white;
-                    }
-                }
-
                 // Animate opponent card
                 if (opponentCard != null)
                 {
@@ -808,6 +723,7 @@ namespace DigitPark.Managers
         private void OnMatchFailed(string error)
         {
             isSearching = false;
+            CurrencyManager.Instance?.CancelEscrow(); // B1-A: devolver coins en fallo de matchmaking
 
             Debug.LogError($"[Matchmaking] Match failed: {error}");
 
@@ -833,23 +749,12 @@ namespace DigitPark.Managers
         private void CancelAndGoBack()
         {
             isSearching = false;
+            CurrencyManager.Instance?.CancelEscrow(); // B1-A: devolver coins al cancelar búsqueda
 
             if (MatchmakingService.Instance != null)
                 MatchmakingService.Instance.CancelMatchmaking();
 
             SceneManager.LoadScene("GameSelector");
-        }
-
-        #endregion
-
-        #region Avatar Events
-
-        private void OnPlayerAvatarChanged(Sprite newAvatar)
-        {
-            if (playerAvatar != null && newAvatar != null)
-            {
-                playerAvatar.sprite = newAvatar;
-            }
         }
 
         #endregion

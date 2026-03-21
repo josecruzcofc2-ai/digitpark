@@ -11,7 +11,7 @@ namespace DigitPark.Editor
     /// VS screen for Cash Battle matchmaking with:
     /// - Gold premium color palette
     /// - Vertical card layout (Player top, Opponent bottom)
-    /// - Horizontal cards: avatar left + info right
+    /// - Horizontal cards: color bar left + info right
     /// - Animated VS badge in center
     /// - Entry fee display
     /// - Search spinner + status section
@@ -46,7 +46,7 @@ namespace DigitPark.Editor
 
         // Asset paths
         // Back button removed — Cancel button handles exit
-        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
+        // Avatar icon removed — players identified by gold color bar + name
         private const string ICON_DIGIT_RUSH = "Assets/_Project/Art/Icons/Games/DigitRushIcon.png";
         private const string ICON_MEMORY_PAIRS = "Assets/_Project/Art/Icons/Games/MemoryPairsIcon.png";
         private const string ICON_QUICK_MATH = "Assets/_Project/Art/Icons/Games/QuickMathIcon.png";
@@ -300,7 +300,7 @@ namespace DigitPark.Editor
 
         /// <summary>
         /// Creates a horizontal player/opponent card with Gold theme:
-        /// - Avatar section on left (with glow ring)
+        /// - Color bar on left (gold accent)
         /// - Info section on right (name + level pill)
         /// - "YOU" badge for player card (AMBER color)
         /// </summary>
@@ -332,94 +332,21 @@ namespace DigitPark.Editor
             cardBorder.effectColor = new Color(GOLD_DARK.r, GOLD_DARK.g, GOLD_DARK.b, 0.6f);
             cardBorder.effectDistance = new Vector2(2, -2);
 
-            // --- Avatar Section (left 35%) ---
-            GameObject avatarSection = CreateElement(card.transform, "AvatarSection");
-            RectTransform avatarSectionRect = avatarSection.GetComponent<RectTransform>();
-            avatarSectionRect.anchorMin = new Vector2(0.03f, 0.08f);
-            avatarSectionRect.anchorMax = new Vector2(0.38f, 0.92f);
-            avatarSectionRect.offsetMin = Vector2.zero;
-            avatarSectionRect.offsetMax = Vector2.zero;
+            // --- ColorBar (left 8px strip — GOLD for player, accent for opponent) ---
+            GameObject colorBar = CreateElement(card.transform, "ColorBar");
+            RectTransform colorBarRect = colorBar.GetComponent<RectTransform>();
+            colorBarRect.anchorMin = new Vector2(0, 0.1f);
+            colorBarRect.anchorMax = new Vector2(0, 0.9f);
+            colorBarRect.pivot = new Vector2(0, 0.5f);
+            colorBarRect.anchoredPosition = new Vector2(10, 0);
+            colorBarRect.sizeDelta = new Vector2(8, 0);
+            Image colorBarImg = colorBar.AddComponent<Image>();
+            colorBarImg.color = accentColor;
 
-            // Force square aspect: avatar container centered in section
-            GameObject avatarContainer = CreateElement(avatarSection.transform, "AvatarContainer");
-            RectTransform avatarContRect = avatarContainer.GetComponent<RectTransform>();
-            avatarContRect.anchorMin = new Vector2(0.05f, 0.05f);
-            avatarContRect.anchorMax = new Vector2(0.95f, 0.95f);
-            avatarContRect.offsetMin = Vector2.zero;
-            avatarContRect.offsetMax = Vector2.zero;
-
-            // AspectRatioFitter to guarantee square
-            var aspectFitter = avatarContainer.AddComponent<AspectRatioFitter>();
-            aspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-            aspectFitter.aspectRatio = 1f;
-
-            // Generate circle sprite for circular avatar elements
-            Sprite circleSprite = GenerateCircleSprite();
-
-            // Circular glow ring (outer, slightly larger)
-            GameObject avatarGlow = CreateElement(avatarContainer.transform, "GlowRing");
-            RectTransform glowRect = avatarGlow.GetComponent<RectTransform>();
-            SetFullStretch(glowRect);
-            glowRect.offsetMin = new Vector2(-6, -6);
-            glowRect.offsetMax = new Vector2(6, 6);
-            Image glowImg = avatarGlow.AddComponent<Image>();
-            glowImg.sprite = circleSprite;
-            glowImg.color = new Color(accentColor.r, accentColor.g, accentColor.b, isPlayer ? 0.25f : 0.1f);
-
-            // Circular border ring
-            GameObject avatarFrame = CreateElement(avatarContainer.transform, "AvatarFrame");
-            SetFullStretch(avatarFrame.GetComponent<RectTransform>());
-            Image frameImg = avatarFrame.AddComponent<Image>();
-            frameImg.sprite = circleSprite;
-            frameImg.color = accentColor;
-
-            // Circular mask container (clips avatar to circle)
-            GameObject maskContainer = CreateElement(avatarContainer.transform, "AvatarMask");
-            RectTransform maskRect = maskContainer.GetComponent<RectTransform>();
-            maskRect.anchorMin = new Vector2(0.06f, 0.06f);
-            maskRect.anchorMax = new Vector2(0.94f, 0.94f);
-            maskRect.offsetMin = Vector2.zero;
-            maskRect.offsetMax = Vector2.zero;
-            Image maskImg = maskContainer.AddComponent<Image>();
-            maskImg.sprite = circleSprite;
-            maskImg.color = new Color(CARD_BG.r, CARD_BG.g, CARD_BG.b, 1f);
-            maskContainer.AddComponent<Mask>().showMaskGraphic = true;
-
-            // Avatar Image (inside mask — clipped to circle)
-            string avatarName = isPlayer ? "PlayerAvatar" : "OpponentAvatar";
-            GameObject avatar = CreateElement(maskContainer.transform, avatarName);
-            RectTransform avatarRect = avatar.GetComponent<RectTransform>();
-            avatarRect.anchorMin = Vector2.zero;
-            avatarRect.anchorMax = Vector2.one;
-            avatarRect.offsetMin = Vector2.zero;
-            avatarRect.offsetMax = Vector2.zero;
-            Image avatarImg = avatar.AddComponent<Image>();
-            avatarImg.color = Color.white;
-            avatarImg.preserveAspect = true;
-
-            // Set default avatar sprite
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
-            if (defaultAvatar != null)
-            {
-                avatarImg.sprite = defaultAvatar;
-            }
-
-            // Add AvatarUI component
-            var avatarUI = avatar.AddComponent<DigitPark.UI.Components.AvatarUI>();
-            SerializedObject avatarSO = new SerializedObject(avatarUI);
-            avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = isPlayer;
-            avatarSO.FindProperty("isEditable").boolValue = false;
-            avatarSO.FindProperty("avatarImage").objectReferenceValue = avatarImg;
-            if (defaultAvatar != null)
-            {
-                avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
-            }
-            avatarSO.ApplyModifiedProperties();
-
-            // --- Info Section (right 60%) ---
+            // --- Info Section (expanded — avatar removed) ---
             GameObject infoSection = CreateElement(card.transform, isPlayer ? "PlayerInfo" : "OpponentInfo");
             RectTransform infoRect = infoSection.GetComponent<RectTransform>();
-            infoRect.anchorMin = new Vector2(0.40f, 0.1f);
+            infoRect.anchorMin = new Vector2(0.05f, 0.1f);
             infoRect.anchorMax = new Vector2(0.97f, 0.9f);
             infoRect.offsetMin = Vector2.zero;
             infoRect.offsetMax = Vector2.zero;
@@ -747,13 +674,11 @@ namespace DigitPark.Editor
 
             // --- Player Card ---
             SetProperty(so, "playerCard", sa, "BattleArea/PlayerCard");
-            SetProperty(so, "playerAvatar", sa, "BattleArea/PlayerCard/AvatarSection/AvatarContainer/AvatarMask/PlayerAvatar");
             SetProperty(so, "playerNameText", sa, "BattleArea/PlayerCard/PlayerInfo/PlayerName");
             SetProperty(so, "playerLevelText", sa, "BattleArea/PlayerCard/PlayerInfo/PlayerLevel/LevelText");
 
             // --- Opponent Card ---
             SetProperty(so, "opponentCard", sa, "BattleArea/OpponentCard");
-            SetProperty(so, "opponentAvatar", sa, "BattleArea/OpponentCard/AvatarSection/AvatarContainer/AvatarMask/OpponentAvatar");
             SetProperty(so, "opponentNameText", sa, "BattleArea/OpponentCard/OpponentInfo/OpponentName");
             SetProperty(so, "opponentLevelText", sa, "BattleArea/OpponentCard/OpponentInfo/OpponentLevel/LevelText");
             // --- VS Section ---

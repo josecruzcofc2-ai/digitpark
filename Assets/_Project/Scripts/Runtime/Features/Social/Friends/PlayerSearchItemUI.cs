@@ -14,8 +14,6 @@ namespace DigitPark.UI.Items
     public class PlayerSearchItemUI : MonoBehaviour
     {
         [Header("UI - Player Info")]
-        [SerializeField] private Image avatarImage;
-        [SerializeField] private Image avatarBorder;
         [SerializeField] private TextMeshProUGUI usernameText;
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private Image countryFlag;
@@ -43,6 +41,8 @@ namespace DigitPark.UI.Items
         [SerializeField] private Color premiumBorderColor = new Color(1f, 0.7f, 0.2f);
 
         private string userId;
+        /// <summary>B5-E: Exposed for SearchPlayersManager to identify the correct item.</summary>
+        public string PlayerId => userId;
         private Action<string> onViewProfile;
         private Action<string> onAddFriend;
         private Action<string> onChallenge;
@@ -58,14 +58,8 @@ namespace DigitPark.UI.Items
             onChallenge = challengeCallback;
 
             // Player info
-            if (avatarImage && data.avatar != null)
-                avatarImage.sprite = data.avatar;
-
-            if (avatarBorder && data.isPremium)
-                avatarBorder.color = premiumBorderColor;
-
             if (usernameText)
-                usernameText.text = data.username;
+                usernameText.text = DigitPark.UI.UICanvasHelper.TmpSafe(data.username);
 
             if (levelText)
                 levelText.text = AutoLocalizer.Get("player_level", data.level);
@@ -209,7 +203,6 @@ namespace DigitPark.UI.Items
     {
         public string userId;
         public string username;
-        public Sprite avatar;
         public Sprite countryFlag;
         public int level;
         public int totalWins;

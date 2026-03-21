@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Managers;
 using DigitPark.Themes;
 using DigitPark.Localization;
@@ -25,6 +26,10 @@ namespace DigitPark.UI.Panels
         private Button cancelButton;
         private Button closeButton;
         private Transform gridContent;
+
+        // Animation
+        private CanvasGroup blockerCG;
+        private CanvasGroup panelCG;
 
         // Lock icons
         private Sprite lockGoldSprite;
@@ -75,6 +80,7 @@ namespace DigitPark.UI.Panels
 
             StylesProPromptPanel promptPanel = panelObj.AddComponent<StylesProPromptPanel>();
             promptPanel.CreateUI();
+            promptPanel.AnimateIn();
 
             Debug.Log("[StylesProPromptPanel] Panel creado y mostrado");
             return promptPanel;
@@ -124,6 +130,8 @@ namespace DigitPark.UI.Panels
             img.color = new Color(0f, 0f, 0f, 0.9f);
             img.raycastTarget = true;
 
+            blockerCG = obj.AddComponent<CanvasGroup>();
+
             return obj;
         }
 
@@ -144,6 +152,8 @@ namespace DigitPark.UI.Panels
             Outline outline = obj.AddComponent<Outline>();
             outline.effectColor = new Color(GOLD.r, GOLD.g, GOLD.b, 0.7f);
             outline.effectDistance = new Vector2(3, 3);
+
+            panelCG = obj.AddComponent<CanvasGroup>();
 
             // Vertical layout for all content
             VerticalLayoutGroup vlg = obj.AddComponent<VerticalLayoutGroup>();
@@ -819,15 +829,48 @@ namespace DigitPark.UI.Panels
         public void Hide()
         {
             Debug.Log("[StylesProPromptPanel] Cerrando panel...");
+            AnimateOut(() =>
+            {
+                if (transform.parent != null)
+                    Destroy(transform.parent.gameObject);
+                else
+                    Destroy(gameObject);
+            });
+        }
 
-            if (transform.parent != null)
+        private void AnimateIn()
+        {
+            if (blockerCG != null)
             {
-                Destroy(transform.parent.gameObject);
+                blockerCG.alpha = 0f;
+                blockerCG.DOFade(1f, 0.2f).SetUpdate(true).SetLink(blocker);
             }
-            else
+
+            if (panelCG != null && panel != null)
             {
-                Destroy(gameObject);
+                panelCG.alpha = 0f;
+                panel.transform.localScale = Vector3.one * 0.8f;
+                DOTween.Sequence()
+                    .Join(panel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                    .Join(panelCG.DOFade(1f, 0.25f))
+                    .SetUpdate(true)
+                    .SetLink(panel);
             }
+        }
+
+        private void AnimateOut(System.Action onComplete)
+        {
+            if (panelCG == null || panel == null) { onComplete?.Invoke(); return; }
+
+            DOTween.Sequence()
+                .Join(panel.transform.DOScale(0.85f, 0.2f).SetEase(Ease.InQuad))
+                .Join(panelCG.DOFade(0f, 0.2f))
+                .SetUpdate(true)
+                .SetLink(panel)
+                .OnComplete(() => onComplete?.Invoke());
+
+            if (blockerCG != null)
+                blockerCG.DOFade(0f, 0.2f).SetUpdate(true).SetLink(blocker);
         }
     }
 }

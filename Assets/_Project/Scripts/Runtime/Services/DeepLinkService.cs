@@ -205,25 +205,25 @@ namespace DigitPark.Services
                     PlayerPrefs.SetString("DP_ViewProfileId", data.Id);
                     PlayerPrefs.SetString("DP_ProfileReturnScene", "MainMenu");
                     PlayerPrefs.Save();
-                    SceneNavigator.Instance.NavigateTo("Profile");
+                    SceneNavigator.Instance?.NavigateTo("Profile");
                     break;
 
                 case DeepLinkType.Tournament:
                     // Navegar al lobby del torneo
                     PlayerPrefs.SetString("DeepLink_TournamentId", data.Id);
-                    SceneNavigator.Instance.NavigateTo("TournamentLobby");
+                    SceneNavigator.Instance?.NavigateTo("TournamentLobby");
                     break;
 
                 case DeepLinkType.Match:
                     // Navegar al historial de partida
                     PlayerPrefs.SetString("DeepLink_MatchId", data.Id);
-                    SceneNavigator.Instance.NavigateTo("MatchHistory");
+                    SceneNavigator.Instance?.NavigateTo("MatchHistory");
                     break;
 
                 case DeepLinkType.Invite:
                     // Ir a registro con codigo de referido
                     PlayerPrefs.SetString("DeepLink_ReferralCode", data.Id);
-                    SceneNavigator.Instance.NavigateTo("Login");
+                    SceneNavigator.Instance?.NavigateTo("Login");
                     break;
 
                 default:

@@ -28,9 +28,9 @@ namespace DigitPark.Editor.AutoAssigners
             // Entry Fee
             "entryFeeText",
             // Player Card
-            "playerAvatar", "playerNameText", "playerLevelText", "playerCard",
+            "playerNameText", "playerLevelText", "playerCard",
             // Opponent Card
-            "opponentAvatar", "opponentNameText", "opponentLevelText", "opponentCard",
+            "opponentNameText", "opponentLevelText", "opponentCard",
             // VS Section
             "vsContainer", "vsText",
             // Search Status
@@ -82,8 +82,8 @@ namespace DigitPark.Editor.AutoAssigners
                 "Assigns UI references to CashMatchmakingManager:\n" +
                 "- Header (title, game icon, game name)\n" +
                 "- Entry fee display\n" +
-                "- Player card (avatar, name, level)\n" +
-                "- Opponent card (avatar, name, level, searching indicator)\n" +
+                "- Player card (name, level)\n" +
+                "- Opponent card (name, level, searching indicator)\n" +
                 "- VS section\n" +
                 "- Search status (spinner, status text, timer)\n" +
                 "- Countdown panel\n" +
@@ -179,15 +179,13 @@ namespace DigitPark.Editor.AutoAssigners
             // Entry Fee (UIBuilder: "EntryFeeText")
             AssignReference(so, "entryFeeText", FindTextByName("entryfeetext"));
 
-            // Player Card (UIBuilder: "PlayerCard", "PlayerAvatar", "PlayerName", "PlayerLevel/LevelText")
+            // Player Card
             AssignGameObject(so, "playerCard", "PlayerCard");
-            AssignReference(so, "playerAvatar", FindImageByName("playeravatar"));
             AssignReference(so, "playerNameText", FindTextByName("playername"));
             AssignReference(so, "playerLevelText", FindTextByName("leveltext", "playerlevel"));
 
-            // Opponent Card (UIBuilder: "OpponentCard", "OpponentAvatar", "OpponentName", "OpponentLevel/LevelText")
+            // Opponent Card
             AssignGameObject(so, "opponentCard", "OpponentCard");
-            AssignReference(so, "opponentAvatar", FindImageByName("opponentavatar"));
             AssignReference(so, "opponentNameText", FindTextByName("opponentname"));
             AssignReference(so, "opponentLevelText", FindTextByName("opponentlevel"));
             // VS Section (UIBuilder: "VSContainer", "VSText")

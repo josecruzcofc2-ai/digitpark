@@ -83,6 +83,14 @@ namespace DigitPark.Managers
         private readonly int[] maxPlayersOptions = { 8, 16, 32, 64, 128 };
         private readonly int[] maxAttemptsOptions = { 1, 2, 3, 5, 10 };
 
+        private void OnEnable()
+        {
+            // B6-H: Reset creation lock when re-entering scene (back from lobby)
+            isCreating = false;
+            ShowLoadingOverlay(false);
+            UpdateCreateButtonState();
+        }
+
         private void Start()
         {
             if (titleText != null)
@@ -381,6 +389,12 @@ namespace DigitPark.Managers
             if (previewPlayersText) previewPlayersText.text = AutoLocalizer.Get("tournament_players_count", currentConfig.maxPlayers);
         }
 
+        private static string SanitizeTournamentName(string input)
+        {
+            // B6-E: Strip TMP rich text tags from tournament name
+            return System.Text.RegularExpressions.Regex.Replace(input ?? "", @"<[^>]*>", "").Trim();
+        }
+
         private void OnCreateClicked()
         {
             if (isCreating) return;
@@ -388,10 +402,20 @@ namespace DigitPark.Managers
             // TC-01: Snapshot all UI values into currentConfig before creating
             ReadConfigFromUI();
 
+            // B6-E: Sanitize name after snapshot
+            currentConfig.name = SanitizeTournamentName(currentConfig.name);
+
             // Validate
             if (string.IsNullOrWhiteSpace(currentConfig.name))
             {
                 ShowStatus(AutoLocalizer.Get("tournament_name_required"), true);
+                return;
+            }
+
+            // B6-D: Enforce minimum name length
+            if (currentConfig.name.Length < 3)
+            {
+                ShowStatus(AutoLocalizer.Get("tournament_name_too_short"), true);
                 return;
             }
 

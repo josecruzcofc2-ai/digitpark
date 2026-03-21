@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Services;
 using DigitPark.Localization;
 
@@ -30,6 +31,8 @@ namespace DigitPark.Monetization
         // Cached per-slot UI elements
         private SlotUI[] _slotUIs = new SlotUI[3];
         private Coroutine _timerCoroutine;
+        private Tween _timerFomoTween;
+        private bool _entranceAnimated;
 
         private class SlotUI
         {
@@ -44,8 +47,10 @@ namespace DigitPark.Monetization
 
         private void OnEnable()
         {
+            _entranceAnimated = false;
             AutoDetectSlots();
             RefreshUI();
+            AnimateSlotEntrance();
             StartTimer();
 
             if (DailyOfferService.Instance != null)
@@ -58,6 +63,8 @@ namespace DigitPark.Monetization
         private void OnDisable()
         {
             StopTimer();
+            _timerFomoTween?.Kill();
+            _timerFomoTween = null;
 
             if (DailyOfferService.Instance != null)
             {
@@ -213,6 +220,23 @@ namespace DigitPark.Monetization
         private void OnOfferPurchased(int slotIndex, DailyOffer offer)
         {
             RefreshUI();
+
+            // Purchase feedback: punch the slot
+            if (slotIndex >= 0 && slotIndex < _slotUIs.Length && _slotUIs[slotIndex]?.root != null)
+            {
+                var root = _slotUIs[slotIndex].root;
+                root.transform.DOPunchScale(Vector3.one * 0.1f, 0.25f, 8)
+                    .SetUpdate(true).SetLink(root);
+
+                // Badge pop
+                if (_slotUIs[slotIndex].badgeText != null)
+                {
+                    var badge = _slotUIs[slotIndex].badgeText.transform;
+                    badge.localScale = Vector3.zero;
+                    badge.DOScale(1f, 0.3f).SetEase(Ease.OutElastic)
+                        .SetUpdate(true).SetLink(badge.gameObject);
+                }
+            }
         }
 
         // ==================== TIMER ====================
@@ -254,6 +278,44 @@ namespace DigitPark.Monetization
 
             var remaining = service.TimeUntilRefresh;
             timerText.text = $"{remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+
+            // FOMO: pulse red when < 1 hour remaining
+            if (remaining.TotalHours < 1 && _timerFomoTween == null)
+            {
+                _timerFomoTween = timerText.DOColor(new Color(1f, 0.27f, 0.27f), 0.5f)
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetUpdate(true)
+                    .SetLink(timerText.gameObject);
+            }
+            else if (remaining.TotalHours >= 1 && _timerFomoTween != null)
+            {
+                _timerFomoTween.Kill();
+                _timerFomoTween = null;
+                timerText.color = Color.white;
+            }
+        }
+
+        private void AnimateSlotEntrance()
+        {
+            if (_entranceAnimated) return;
+            _entranceAnimated = true;
+
+            GameObject[] slots = { slot1Root, slot2Root, slot3Root };
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i] == null) continue;
+
+                var cg = slots[i].GetComponent<CanvasGroup>();
+                if (cg == null) cg = slots[i].AddComponent<CanvasGroup>();
+
+                cg.alpha = 0f;
+                slots[i].transform.localScale = Vector3.one * 0.85f;
+
+                float delay = i * 0.08f;
+                cg.DOFade(1f, 0.25f).SetDelay(delay).SetUpdate(true).SetLink(slots[i]);
+                slots[i].transform.DOScale(1f, 0.25f).SetDelay(delay)
+                    .SetEase(Ease.OutBack).SetUpdate(true).SetLink(slots[i]);
+            }
         }
 
         // ==================== HELPERS ====================

@@ -45,7 +45,7 @@ namespace DigitPark.Editor
             "Assets/_Project/Scenes/Tournaments/TournamentsBrowser.unity",
             "Assets/_Project/Scenes/Social/Profile/Profile.unity",
             "Assets/_Project/Scenes/Social/Friends/SearchPlayers.unity",
-            "Assets/_Project/Scenes/CashBattle/CashBattleHub.unity",
+            // CashBattleHub EXCLUIDA — estilo gold fijo, ThemeApplierProtector la protege
             "Assets/_Project/Scenes/Games/Navigation/GameSelector.unity"
         };
 

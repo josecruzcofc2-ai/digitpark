@@ -28,7 +28,7 @@ namespace DigitPark.CashBattle
                     {
                         if (_instance == null)
                         {
-                            _instance = FindObjectOfType<WalletManager>();
+                            _instance = FindFirstObjectByType<WalletManager>();
                             if (_instance == null)
                             {
                                 GameObject go = new GameObject("WalletManager");

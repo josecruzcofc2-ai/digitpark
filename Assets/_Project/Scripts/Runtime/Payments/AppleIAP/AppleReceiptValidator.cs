@@ -59,6 +59,14 @@ namespace DigitPark.Payments.AppleIAP
             string json = JsonUtility.ToJson(body);
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
 
+            // Obtain Firebase ID token for Authorization header
+            string idToken = null;
+            if (PaymentBridge.GetFirebaseIdToken != null)
+            {
+                try { idToken = await PaymentBridge.GetFirebaseIdToken(); }
+                catch (System.Exception e) { Debug.LogWarning($"[AppleReceiptValidator] Failed to get ID token: {e.Message}"); }
+            }
+
             using (var request = new UnityWebRequest(url, "POST"))
             {
                 request.uploadHandler = new UploadHandlerRaw(bytes);
@@ -66,6 +74,8 @@ namespace DigitPark.Payments.AppleIAP
                 request.SetRequestHeader("Content-Type", "application/json");
                 request.SetRequestHeader("X-App-Version",
                     Compliance.VersionGuard.GetRequiredAppVersionHeader());
+                if (!string.IsNullOrEmpty(idToken))
+                    request.SetRequestHeader("Authorization", $"Bearer {idToken}");
                 request.timeout = 15;
 
                 var op = request.SendWebRequest();

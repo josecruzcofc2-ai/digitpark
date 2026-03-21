@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -15,9 +18,10 @@ namespace DigitPark.Payments.AppleIAP
         /// Delegates injected by AppleIAPBridge (Assembly-CSharp) to avoid direct
         /// dependency on PremiumManager from this named assembly.
         /// Set these before Initialize() is called.
+        /// InvokePurchase callback: (bool success, string transactionId, string receiptData)
         /// </summary>
         public static System.Func<bool> GetIsPremiumAvailable = () => false;
-        public static System.Action<string, System.Action<bool, string>> InvokePurchase = null;
+        public static System.Action<string, System.Action<bool, string, string>> InvokePurchase = null;
         public static System.Action<System.Action> InvokeRestore = null;
 
         public string ProviderName => "AppleIAP";
@@ -68,22 +72,16 @@ namespace DigitPark.Payments.AppleIAP
 
             var tcs = new TaskCompletionSource<PaymentResult>();
 
-            InvokePurchase(appleProductId, (success, transactionId) =>
+            InvokePurchase(appleProductId, (success, transactionId, receiptData) =>
             {
                 if (success)
                 {
                     Debug.Log($"[AppleIAP] Compra exitosa: {appleProductId}, txId: {transactionId}");
 
-                    // Validación server-side adicional (no bloquea — Apple ya validó en su lado)
-                    ValidateReceiptAsync(appleProductId, userId, transactionId).ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                            Debug.LogWarning($"[AppleIAP] Server-side validation error: {t.Exception?.GetBaseException().Message}");
-                    }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
-
-                    tcs.SetResult(PaymentResult.Successful(
-                        product.ProductId, transactionId ?? System.Guid.NewGuid().ToString("N"),
-                        PaymentProvider.AppleIAP));
+                    // B2-J: await validación server antes de otorgar el ítem
+                    // Usar SHA256 del receipt como fallback — reproducible y sin colisiones por GUID random
+                    string txId = transactionId ?? ComputeSha256(receiptData ?? string.Empty).Substring(0, 32);
+                    GrantAfterValidationAsync(product, appleProductId, userId, txId, receiptData, tcs);
                 }
                 else
                 {
@@ -94,7 +92,16 @@ namespace DigitPark.Payments.AppleIAP
                 }
             });
 
-            return await tcs.Task;
+            // P3-10: Timeout to prevent hanging Task if callback never fires
+            var timeoutTask = System.Threading.Tasks.Task.Delay(120000); // 2 minutes
+            var completedTask = await System.Threading.Tasks.Task.WhenAny(tcs.Task, timeoutTask);
+            if (completedTask == timeoutTask)
+            {
+                Debug.LogWarning("[AppleIAP] Purchase timed out after 2 minutes");
+                return PaymentResult.Failed(product.ProductId, "iap_timeout",
+                    "Purchase timed out", PaymentProvider.AppleIAP);
+            }
+            return tcs.Task.Result;
         }
 
         public async Task<PaymentResult> RestorePurchases(string userId)
@@ -140,13 +147,57 @@ namespace DigitPark.Payments.AppleIAP
             Debug.Log("[AppleIAP] Disposed");
         }
 
-        private async Task ValidateReceiptAsync(string productId, string userId, string transactionId)
+        private static string ComputeSha256(string input)
         {
-            // La validación server-side es adicional — no bloquea la compra
-            Debug.Log($"[AppleIAP] Validando receipt server-side para: {productId}");
-            // El receiptData real viene de Unity IAP vía PremiumManager
-            // Por ahora log de intención
-            await Task.Yield();
+            using var sha = SHA256.Create();
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+            return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+        }
+
+        // B2-J: grant solo después de validación server exitosa
+        private async void GrantAfterValidationAsync(
+            CosmeticProduct product, string appleProductId, string userId,
+            string txId, string receiptData,
+            TaskCompletionSource<PaymentResult> tcs)
+        {
+            bool valid = await ValidateReceiptAsync(appleProductId, userId, txId, receiptData);
+            if (!valid)
+            {
+                Debug.LogWarning($"[AppleIAP] Validación server-side fallida — compra no otorgada para {appleProductId}");
+                tcs.SetResult(PaymentResult.Failed(
+                    product.ProductId, "receipt_invalid",
+                    "Server-side receipt validation failed", PaymentProvider.AppleIAP));
+                return;
+            }
+            tcs.SetResult(PaymentResult.Successful(product.ProductId, txId, PaymentProvider.AppleIAP));
+        }
+
+        private async Task<bool> ValidateReceiptAsync(string productId, string userId,
+            string transactionId, string receiptData)
+        {
+            string backendUrl = _config?.iapValidateReceiptUrl;
+            Debug.Log($"[AppleIAP] Iniciando validación server-side para: {productId}");
+
+            try
+            {
+                var result = await _receiptValidator.ValidateReceipt(receiptData, productId, userId, backendUrl);
+
+                if (result.IsValid)
+                {
+                    Debug.Log($"[AppleIAP] Server-side validation OK: {productId}, txId: {result.TransactionId}");
+                    return true;
+                }
+                else
+                {
+                    Debug.LogWarning($"[AppleIAP] Server-side validation FAILED: {result.ErrorMessage}");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[AppleIAP] ValidateReceiptAsync exception: {e.Message}");
+                return false;
+            }
         }
     }
 }

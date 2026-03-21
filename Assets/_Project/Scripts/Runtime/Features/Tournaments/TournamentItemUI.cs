@@ -53,7 +53,10 @@ namespace DigitPark.UI.Items
             // Creador
             if (creatorText != null)
             {
-                creatorText.text = tournament.creatorName;
+                // B6-I: Strip TMP tags from creatorName to prevent injection
+                string safeCreator = System.Text.RegularExpressions.Regex.Replace(
+                    tournament.creatorName ?? "", @"<[^>]*>", "");
+                creatorText.text = safeCreator;
                 creatorText.color = Color.white;
             }
 

@@ -58,6 +58,8 @@ namespace DigitPark.Payments.Stripe
             return result;
         }
 
+        private string _cachedIdToken;
+
         private IEnumerator PollCoroutine(
             string sessionId,
             string backendUrl,
@@ -67,9 +69,16 @@ namespace DigitPark.Payments.Stripe
         {
             float elapsed = 0f;
             float timeout = timeoutMinutes * 60f;
-            // Firebase Functions URL: PaymentConfig.stripeSessionStatusUrl
-            // e.g. https://us-central1-{project}.cloudfunctions.net/stripeSessionStatus
             string url = $"{backendUrl}?sessionId={sessionId}";
+
+            // Obtain Firebase ID token once before polling loop
+            if (PaymentBridge.GetFirebaseIdToken != null)
+            {
+                var tokenTask = PaymentBridge.GetFirebaseIdToken();
+                while (!tokenTask.IsCompleted) yield return null;
+                try { _cachedIdToken = tokenTask.Result; }
+                catch { _cachedIdToken = null; }
+            }
 
             Debug.Log($"[StripePoller] Iniciando polling para sesión: {sessionId}");
 
@@ -78,6 +87,8 @@ namespace DigitPark.Payments.Stripe
                 using (var request = UnityWebRequest.Get(url))
                 {
                     request.SetRequestHeader("X-App-Version", Compliance.VersionGuard.GetRequiredAppVersionHeader());
+                    if (!string.IsNullOrEmpty(_cachedIdToken))
+                        request.SetRequestHeader("Authorization", $"Bearer {_cachedIdToken}");
                     request.timeout = 10;
 
                     yield return request.SendWebRequest();

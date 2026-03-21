@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,6 +14,9 @@ using DigitPark.Payments;
 using DigitPark.Payments.Entitlements;
 using Firebase.Database;
 using DigitPark.Navigation;
+using DigitPark.Themes;
+using DigitPark.Progression;
+using DigitPark.Cosmetics;
 
 namespace DigitPark.Managers
 {
@@ -35,10 +40,14 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+#if !UNITY_EDITOR
+            // S3-NEW-01: Ensure debug bypass key never persists in production builds
+            PlayerPrefs.DeleteKey("CashBattleBypassAuth");
+#endif
             Debug.Log("[Boot] Iniciando BootManager...");
 
             // Buscar BootAnimator en la escena
-            bootAnimator = FindObjectOfType<DigitPark.UI.BootAnimator>();
+            bootAnimator = FindFirstObjectByType<DigitPark.UI.BootAnimator>();
 
             // Configurar versión
             if (versionText != null)
@@ -71,6 +80,10 @@ namespace DigitPark.Managers
             // Paso 3: Inicializar servicios de Firebase
             yield return StartCoroutine(InitializeFirebaseServices());
             UpdateLoadingProgress(0.5f, "boot_connecting_services");
+
+            // Paso 3.2: Sincronizar offset de tiempo del servidor (previene manipulación del reloj)
+            var serverTimeTask = ServerTimeHelper.RefreshOffsetAsync();
+            yield return new WaitUntil(() => serverTimeTask.IsCompleted);
 
             // Paso 3.5: Inicializar sistema de pagos
             DigitPark.Services.PaymentBridgeWiring.Wire();
@@ -154,6 +167,14 @@ namespace DigitPark.Managers
                 Debug.Log("[Boot] DeepLinkService creado");
             }
 
+            // Crear BackButtonManager (Android back button global handler)
+            if (DigitPark.Services.BackButtonManager.Instance == null)
+            {
+                GameObject backBtnObj = new GameObject("BackButtonManager");
+                backBtnObj.AddComponent<DigitPark.Services.BackButtonManager>();
+                Debug.Log("[Boot] BackButtonManager creado");
+            }
+
             // Cargar configuraciones guardadas del jugador
             LoadPlayerPreferences();
 
@@ -232,11 +253,19 @@ namespace DigitPark.Managers
                 Debug.Log("[Boot] AchievementService creado");
             }
 
-            // Esperar un frame para que los servicios se inicialicen
-            yield return new WaitForSeconds(0.5f);
+            // Wait for AuthenticationService to finish Firebase init (max 10s timeout)
+            float timeout = 10f;
+            float elapsed = 0f;
+            while (AuthenticationService.Instance != null && !AuthenticationService.Instance.IsInitialized && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            if (elapsed >= timeout)
+                Debug.LogError("[Boot] Firebase init timeout (10s) — services may not be ready");
 
             servicesInitialized = true;
-            Debug.Log("[Boot] Todos los servicios inicializados");
+            Debug.Log($"[Boot] Todos los servicios inicializados ({elapsed:F1}s)");
 
             // One-time PlayerPrefs → Firebase migration (economy rebalance V55)
             yield return StartCoroutine(MigratePlayerPrefsToFirebase());
@@ -284,21 +313,30 @@ namespace DigitPark.Managers
             var dbRef = FirebaseDatabase.DefaultInstance?.RootReference;
             if (dbRef != null)
             {
-                // Read gems from Firebase
+                // Read gems from Firebase (5s timeout per read)
                 var gemsTask = dbRef.Child("players").Child(playerData.userId).Child("gems").GetValueAsync();
-                while (!gemsTask.IsCompleted)
+                float migTimeout = 5f;
+                float migElapsed = 0f;
+                while (!gemsTask.IsCompleted && migElapsed < migTimeout)
+                {
+                    migElapsed += Time.deltaTime;
                     yield return null;
+                }
 
-                if (!gemsTask.IsFaulted && gemsTask.Result != null && gemsTask.Result.Exists)
+                if (gemsTask.IsCompleted && !gemsTask.IsFaulted && gemsTask.Result != null && gemsTask.Result.Exists)
                 {
                     try { firebaseGems = System.Convert.ToInt32(gemsTask.Result.Value); }
                     catch { firebaseGems = 0; }
                 }
 
-                // Read coins from Firebase
+                // Read coins from Firebase (5s timeout)
                 var coinsTask = dbRef.Child("players").Child(playerData.userId).Child("coins").GetValueAsync();
-                while (!coinsTask.IsCompleted)
+                migElapsed = 0f;
+                while (!coinsTask.IsCompleted && migElapsed < migTimeout)
+                {
+                    migElapsed += Time.deltaTime;
                     yield return null;
+                }
 
                 if (!coinsTask.IsFaulted && coinsTask.Result != null && coinsTask.Result.Exists)
                 {
@@ -351,6 +389,20 @@ namespace DigitPark.Managers
                     Debug.LogWarning($"[Boot] Reinstall restore error: {e.Message}");
                 }
 
+                // B4-A/B/C/D/E: Restore cosmetics + progression from Firebase on reinstall
+                string uid = playerData.userId;
+                var restoreTasks = new List<Task>
+                {
+                    ThemeManager.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
+                    PlayerFrameService.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
+                    PlayerTitleService.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
+                    PlayerProgressionSystem.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
+                    // B4-E: BackgroundPatternManager restore
+                    BackgroundPatternManager.Instance?.RestoreFromFirebaseAsync(uid) ?? Task.CompletedTask,
+                };
+                var restoreTask = Task.WhenAll(restoreTasks);
+                while (!restoreTask.IsCompleted) yield return null;
+
                 PlayerPrefs.SetInt(MIGRATION_FLAG, 1);
                 PlayerPrefs.Save();
                 Debug.Log("[Boot] Reinstall restore complete — Firebase data preserved");
@@ -396,6 +448,18 @@ namespace DigitPark.Managers
                 {
                     updates["progression/xp"] = xp;
                     updates["progression/level"] = level;
+                }
+
+                // B4-F: Cosmetics migration — trigger each service to sync its owned data to Firebase.
+                // Each service's Save method already writes the correct format.
+                PlayerFrameService.Instance?.TriggerFirebaseSync();
+                PlayerTitleService.Instance?.TriggerFirebaseSync();
+                var themeManager = ThemeManager.Instance;
+                if (themeManager != null)
+                {
+                    var ownedThemeIds = themeManager.GetOwnedThemeIds();
+                    if (ownedThemeIds != null && ownedThemeIds.Count > 0)
+                        updates["ownedThemes"] = string.Join(",", ownedThemeIds);
                 }
             }
             catch (System.Exception e)
@@ -477,14 +541,36 @@ namespace DigitPark.Managers
             }
 #endif
 
-            // 6. Sync entitlements en background (no bloquea el boot)
+            // 6. Sync entitlements con retry — B4-G
             if (EntitlementService.Instance != null)
             {
-                _ = EntitlementService.Instance.SyncWithServer();
+                _ = SyncEntitlementsWithRetry();
             }
 
             yield return new WaitForSeconds(0.1f);
             Debug.Log("[Boot] Sistema de pagos inicializado correctamente");
+        }
+
+        /// <summary>
+        /// B4-G: Sync entitlements with server, retrying up to 3 times on failure.
+        /// </summary>
+        private async Task SyncEntitlementsWithRetry()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    await EntitlementService.Instance.SyncWithServer();
+                    Debug.Log("[Boot] Entitlements synced successfully");
+                    return;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Boot] Entitlement sync attempt {i + 1}/3 failed: {e.Message}");
+                    if (i < 2) await Task.Delay(2000 * (i + 1));
+                }
+            }
+            Debug.LogWarning("[Boot] Entitlement sync failed after 3 attempts — using local cache");
         }
 
         /// <summary>
@@ -689,7 +775,7 @@ namespace DigitPark.Managers
             GameObject titleGO = new GameObject("Title");
             titleGO.transform.SetParent(panel.transform, false);
             TextMeshProUGUI titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
-            titleTMP.text = "Privacy Policy & Terms";
+            titleTMP.text = AutoLocalizer.Get("gdpr_title");
             titleTMP.fontSize = 22;
             titleTMP.fontStyle = FontStyles.Bold;
             titleTMP.color = Color.white;
@@ -703,11 +789,8 @@ namespace DigitPark.Managers
             GameObject bodyGO = new GameObject("Body");
             bodyGO.transform.SetParent(panel.transform, false);
             TextMeshProUGUI bodyTMP = bodyGO.AddComponent<TextMeshProUGUI>();
-            bodyTMP.text =
-                "DigitPark uses analytics to improve your experience.\n\n" +
-                "By tapping Accept, you agree to our Privacy Policy " +
-                "(digitpark.com/privacy) and Terms of Service.\n\n" +
-                "You can withdraw consent at any time in Settings.";
+            bodyTMP.richText = true;
+            bodyTMP.text = AutoLocalizer.Get("gdpr_body");
             bodyTMP.fontSize = 14;
             bodyTMP.color = new Color(0.8f, 0.8f, 0.8f, 1f);
             bodyTMP.alignment = TextAlignmentOptions.Center;
@@ -735,7 +818,7 @@ namespace DigitPark.Managers
             GameObject acceptTextGO = new GameObject("Text");
             acceptTextGO.transform.SetParent(acceptBtn.transform, false);
             TextMeshProUGUI acceptTMP = acceptTextGO.AddComponent<TextMeshProUGUI>();
-            acceptTMP.text = "Accept & Continue";
+            acceptTMP.text = AutoLocalizer.Get("gdpr_accept");
             acceptTMP.fontSize = 14;
             acceptTMP.fontStyle = FontStyles.Bold;
             acceptTMP.color = new Color(0.06f, 0.06f, 0.12f, 1f);
@@ -760,7 +843,7 @@ namespace DigitPark.Managers
             GameObject declineTextGO = new GameObject("Text");
             declineTextGO.transform.SetParent(declineBtn.transform, false);
             TextMeshProUGUI declineTMP = declineTextGO.AddComponent<TextMeshProUGUI>();
-            declineTMP.text = "Decline";
+            declineTMP.text = AutoLocalizer.Get("gdpr_decline");
             declineTMP.fontSize = 14;
             declineTMP.color = new Color(0.6f, 0.6f, 0.6f, 1f);
             declineTMP.alignment = TextAlignmentOptions.Center;
@@ -781,18 +864,11 @@ namespace DigitPark.Managers
             }
             else
             {
-                // Apple guideline 2.4.5: apps cannot terminate themselves on iOS.
-                // Instead, keep the popup visible and prompt again.
-                bodyTMP.text =
-                    "DigitPark requires your consent to function.\n\n" +
-                    "Please tap Accept & Continue to use the app.";
-                declineBtnComp.gameObject.SetActive(false);
-                responded = false;
-                yield return new WaitUntil(() => responded);
+                // GDPR Art. 7(4): consent must be freely given — allow decline
+                // App continues without analytics; user can enable later in Settings
                 Destroy(popupRoot);
-                ConsentService.Accept();
-                _consentGranted = true;
-                Debug.Log("[Boot] GDPR consent accepted after re-prompt.");
+                _consentGranted = false;
+                Debug.Log("[Boot] GDPR consent declined — continuing without analytics.");
             }
         }
 

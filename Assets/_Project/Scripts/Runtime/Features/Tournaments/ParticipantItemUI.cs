@@ -14,8 +14,6 @@ namespace DigitPark.UI.Items
     public class ParticipantItemUI : MonoBehaviour
     {
         [Header("UI Elements")]
-        [SerializeField] private Image avatarImage;
-        [SerializeField] private Image avatarBorder;
         [SerializeField] private TextMeshProUGUI usernameText;
         [SerializeField] private TextMeshProUGUI rankText;
         [SerializeField] private Image backgroundImage;
@@ -51,13 +49,9 @@ namespace DigitPark.UI.Items
             onViewProfile = profileCallback;
             onChallenge = challengeCallback;
 
-            // Avatar
-            if (avatarImage && data.avatar != null)
-                avatarImage.sprite = data.avatar;
-
             // Username
             if (usernameText)
-                usernameText.text = data.username;
+                usernameText.text = DigitPark.UI.UICanvasHelper.TmpSafe(data.username);
 
             // Rank
             if (rankText)
@@ -172,7 +166,6 @@ namespace DigitPark.UI.Items
     {
         public string userId;
         public string username;
-        public Sprite avatar;
         public Sprite countryFlag;
         public int rank;
         public int attemptsUsed;

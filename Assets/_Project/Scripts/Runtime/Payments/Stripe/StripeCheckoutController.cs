@@ -33,6 +33,17 @@ namespace DigitPark.Payments.Stripe
 #endif
         }
 
+        /// <summary>
+        /// Llama este método cuando la sesión Stripe termina (éxito, cancelación o timeout)
+        /// para desregistrar el deep link handler y evitar acumulación entre compras (WARN-01).
+        /// </summary>
+        public void CleanupCheckout()
+        {
+            PaymentBridge.UnregisterDeepLinkHandler?.Invoke("stripe-return");
+            _onCheckoutComplete = null;
+            _pendingSessionId = null;
+        }
+
         private void OnStripeReturn(string deepLink)
         {
             Debug.Log($"[StripeCheckout] Deep link recibido: {deepLink}");
@@ -44,7 +55,7 @@ namespace DigitPark.Payments.Stripe
             {
                 Debug.Log("[StripeCheckout] Checkout completado via deep link");
                 _onCheckoutComplete?.Invoke(true, sessionId);
-                _onCheckoutComplete = null;
+                CleanupCheckout();
             }
             else
             {
@@ -63,20 +74,11 @@ namespace DigitPark.Payments.Stripe
         }
 
 #if UNITY_IOS && !UNITY_EDITOR
-        [System.Runtime.InteropServices.DllImport("__Internal")]
-        private static extern void _OpenSafariViewController(string url);
-
         private void OpenIOSCheckout(string url)
         {
-            try
-            {
-                _OpenSafariViewController(url);
-            }
-            catch
-            {
-                // Fallback si el plugin nativo no está disponible
-                Application.OpenURL(url);
-            }
+            // S17-NEW-01: SFSafariViewControllerBridge.mm no implementado — usar Application.OpenURL
+            // La URL proviene de nuestro backend Stripe (fuente de confianza)
+            Application.OpenURL(url);
         }
 #endif
     }

@@ -540,55 +540,14 @@ namespace DigitPark.Editor
             Image cardBg = card.AddComponent<Image>();
             cardBg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
 
-            Sprite circleSprite = GenerateCircleSprite();
-
-            // ========== CIRCULAR AVATAR (left, vertically centered) ==========
-            GameObject avatarFrame = new GameObject("AvatarFrame");
-            avatarFrame.transform.SetParent(card.transform, false);
-            RectTransform avatarFrameRT = avatarFrame.AddComponent<RectTransform>();
-            avatarFrameRT.anchorMin = new Vector2(0, 0.5f);
-            avatarFrameRT.anchorMax = new Vector2(0, 0.5f);
-            avatarFrameRT.anchoredPosition = new Vector2(50, 0);
-            avatarFrameRT.sizeDelta = new Vector2(64, 64);
-            Image frameImg = avatarFrame.AddComponent<Image>();
-            frameImg.sprite = circleSprite;
-            frameImg.color = CYAN_DARK;
-            var fr_search = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
-            fr_search.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Reduced);
-
-            GameObject avatarMask = new GameObject("AvatarMask");
-            avatarMask.transform.SetParent(avatarFrame.transform, false);
-            RectTransform amRT = avatarMask.AddComponent<RectTransform>();
-            amRT.anchorMin = new Vector2(0.06f, 0.06f);
-            amRT.anchorMax = new Vector2(0.94f, 0.94f);
-            amRT.offsetMin = Vector2.zero;
-            amRT.offsetMax = Vector2.zero;
-            Image amImg = avatarMask.AddComponent<Image>();
-            amImg.sprite = circleSprite;
-            amImg.color = new Color(0.08f, 0.1f, 0.14f, 1f);
-            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
-
-            GameObject avatarImage = new GameObject("AvatarImage");
-            avatarImage.transform.SetParent(avatarMask.transform, false);
-            RectTransform avatarImgRT = avatarImage.AddComponent<RectTransform>();
-            avatarImgRT.anchorMin = Vector2.zero;
-            avatarImgRT.anchorMax = Vector2.one;
-            avatarImgRT.offsetMin = Vector2.zero;
-            avatarImgRT.offsetMax = Vector2.zero;
-            Image avatarImg = avatarImage.AddComponent<Image>();
-            avatarImg.color = Color.white;
-            avatarImg.preserveAspect = true;
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
-            if (defaultAvatar != null) avatarImg.sprite = defaultAvatar;
-
-            // ========== RIGHT CONTENT (anchored right of avatar) ==========
+            // ========== CONTENT SECTION (expanded — avatar removed) ==========
             GameObject content = new GameObject("ContentSection");
             content.transform.SetParent(card.transform, false);
             RectTransform contentRT = content.AddComponent<RectTransform>();
             contentRT.anchorMin = new Vector2(0, 0);
             contentRT.anchorMax = new Vector2(1, 1);
-            contentRT.offsetMin = new Vector2(90, 8);  // left padding past avatar
-            contentRT.offsetMax = new Vector2(-10, -8); // right padding
+            contentRT.offsetMin = new Vector2(12, 8);
+            contentRT.offsetMax = new Vector2(-10, -8);
 
             // --- Row 1: Username + Online status ---
             GameObject topRow = new GameObject("TopRow");
@@ -627,6 +586,7 @@ namespace DigitPark.Editor
             dotRT.anchoredPosition = new Vector2(-8, 0);
             dotRT.sizeDelta = new Vector2(12, 12);
             Image dotImg = onlineDot.AddComponent<Image>();
+            Sprite circleSprite = GenerateCircleSprite();
             dotImg.sprite = circleSprite;
             dotImg.color = new Color(0.2f, 1f, 0.4f, 1f);
 

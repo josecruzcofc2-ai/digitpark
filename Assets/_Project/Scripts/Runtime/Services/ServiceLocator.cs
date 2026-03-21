@@ -33,7 +33,7 @@ namespace DigitPark.Services
             get
             {
                 if (_instance == null)
-                    _instance = FindObjectOfType<ServiceLocator>();
+                    _instance = FindFirstObjectByType<ServiceLocator>();
                 return _instance != null;
             }
         }
@@ -44,7 +44,7 @@ namespace DigitPark.Services
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<ServiceLocator>();
+                    _instance = FindFirstObjectByType<ServiceLocator>();
                     if (_instance == null)
                     {
                         Debug.LogWarning("[ServiceLocator] No se encontró instancia. ServiceLocator debe estar en la escena Boot.");

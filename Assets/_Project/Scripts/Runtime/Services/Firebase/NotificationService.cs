@@ -144,6 +144,8 @@ namespace DigitPark.Services.Firebase
         private async Task Initialize()
         {
 #if FIREBASE_MESSAGING
+            if (_isInitialized) return; // Guard against double-init
+
             Debug.Log("[Notifications] Inicializando Firebase Cloud Messaging...");
 
             try
@@ -152,7 +154,9 @@ namespace DigitPark.Services.Firebase
 
                 if (dependencyStatus == DependencyStatus.Available)
                 {
-                    // Suscribirse a eventos de FCM
+                    // Unsub first to prevent double-subscribe if called twice
+                    FirebaseMessaging.TokenReceived -= OnFCMTokenReceived;
+                    FirebaseMessaging.MessageReceived -= OnFCMMessageReceived;
                     FirebaseMessaging.TokenReceived += OnFCMTokenReceived;
                     FirebaseMessaging.MessageReceived += OnFCMMessageReceived;
 
@@ -449,7 +453,7 @@ namespace DigitPark.Services.Firebase
 
                 default:
                     // Ir al menú principal
-                    SceneNavigator.Instance.NavigateTo("MainMenu");
+                    SceneNavigator.Instance?.NavigateTo("MainMenu");
                     break;
             }
         }
@@ -508,14 +512,14 @@ namespace DigitPark.Services.Firebase
         {
             // Navegar a Notifications con filtro social
             PlayerPrefs.SetString("DP_NotificationsReturnScene", "MainMenu");
-            SceneNavigator.Instance.NavigateTo("Notifications");
+            SceneNavigator.Instance?.NavigateTo("Notifications");
         }
 
         private void NavigateToFriends()
         {
             // Navegar a Notifications con filtro social
             PlayerPrefs.SetString("DP_NotificationsReturnScene", "MainMenu");
-            SceneNavigator.Instance.NavigateTo("Notifications");
+            SceneNavigator.Instance?.NavigateTo("Notifications");
         }
 
         private void NavigateToChallenge(string challengeId)
@@ -524,7 +528,7 @@ namespace DigitPark.Services.Firebase
             {
                 PlayerPrefs.SetString("DP_ChallengeId", challengeId);
             }
-            SceneNavigator.Instance.NavigateTo("PlayModeSelection");
+            SceneNavigator.Instance?.NavigateTo("PlayModeSelection");
         }
 
         private void NavigateToTournament(string tournamentId)
@@ -533,13 +537,13 @@ namespace DigitPark.Services.Firebase
             {
                 PlayerPrefs.SetString("DP_OpenTournamentId", tournamentId);
             }
-            SceneNavigator.Instance.NavigateTo("CashBattleHub");
+            SceneNavigator.Instance?.NavigateTo("CashBattleHub");
         }
 
         private void NavigateToDailyRewards()
         {
             PlayerPrefs.SetString("DP_OpenPanel", "DailyRewards");
-            SceneNavigator.Instance.NavigateTo("MainMenu");
+            SceneNavigator.Instance?.NavigateTo("MainMenu");
         }
 
         private void NavigateToPromo(string promoAction)
@@ -548,15 +552,15 @@ namespace DigitPark.Services.Firebase
             {
                 case "premium":
                     PlayerPrefs.SetString("DP_OpenPanel", "Premium");
-                    SceneNavigator.Instance.NavigateTo("MainMenu");
+                    SceneNavigator.Instance?.NavigateTo("MainMenu");
                     break;
 
                 case "deposit":
-                    SceneNavigator.Instance.NavigateTo("CashWallet");
+                    SceneNavigator.Instance?.NavigateTo("CashWallet");
                     break;
 
                 default:
-                    SceneNavigator.Instance.NavigateTo("MainMenu");
+                    SceneNavigator.Instance?.NavigateTo("MainMenu");
                     break;
             }
         }
@@ -640,12 +644,22 @@ namespace DigitPark.Services.Firebase
 
             if (!enabled && _isInitialized)
             {
-                // Desuscribirse de todos los topics
-                _ = UnsubscribeFromTopic("all_users").ContinueWithOnMainThread(t =>
+                // Desuscribirse de TODOS los topics (not just all_users)
+                string[] topics = { "all_users", "announcements",
+#if UNITY_IOS
+                    "ios_users"
+#elif UNITY_ANDROID
+                    "android_users"
+#endif
+                };
+                foreach (var topic in topics)
                 {
-                    if (this == null) return;
-                    if (t.IsFaulted) Debug.LogError($"[NotificationService] UnsubscribeFromTopic failed: {t.Exception?.GetBaseException().Message}");
-                });
+                    _ = UnsubscribeFromTopic(topic).ContinueWithOnMainThread(t =>
+                    {
+                        if (this == null) return;
+                        if (t.IsFaulted) Debug.LogWarning($"[NotificationService] Unsub '{topic}' failed: {t.Exception?.GetBaseException().Message}");
+                    });
+                }
             }
             else if (enabled && !_isInitialized)
             {

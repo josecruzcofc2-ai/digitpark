@@ -15,7 +15,7 @@ namespace DigitPark.Payments.Compliance
             get
             {
                 if (_instance == null)
-                    _instance = FindObjectOfType<TriumphIsolationGuard>();
+                    _instance = FindFirstObjectByType<TriumphIsolationGuard>();
                 return _instance;
             }
         }

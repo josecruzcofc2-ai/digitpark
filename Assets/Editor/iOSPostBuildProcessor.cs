@@ -19,7 +19,8 @@ namespace DigitPark.Editor
 
             ModifyPlist(pathToBuiltProject);
             ModifyPbxProject(pathToBuiltProject);
-            AddNativeATTPlugin(pathToBuiltProject);
+            // S17-NEW-02: AddNativeATTPlugin eliminado — ATTBridge.mm en Assets/Plugins/iOS/ ya lo cubre
+            // Generarlo aquí causaba "duplicate symbols" en el linker de Xcode
         }
 
         /// <summary>
@@ -68,59 +69,6 @@ namespace DigitPark.Editor
             UnityEngine.Debug.Log("[iOSPostBuild] Frameworks agregados: AppTrackingTransparency");
         }
 
-        /// <summary>
-        /// Agrega el plugin nativo de ATT como archivo .m en el proyecto
-        /// </summary>
-        private static void AddNativeATTPlugin(string pathToBuiltProject)
-        {
-            string pluginContent =
-                "#import <AppTrackingTransparency/AppTrackingTransparency.h>\n" +
-                "#import <AdSupport/AdSupport.h>\n" +
-                "\n" +
-                "extern \"C\" {\n" +
-                "    int ATTService_GetTrackingStatus() {\n" +
-                "        if (@available(iOS 14, *)) {\n" +
-                "            return (int)[ATTrackingManager trackingAuthorizationStatus];\n" +
-                "        }\n" +
-                "        return 3; // Authorized for iOS < 14\n" +
-                "    }\n" +
-                "\n" +
-                "    void ATTService_RequestTracking() {\n" +
-                "        if (@available(iOS 14.5, *)) {\n" +
-                "            [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {\n" +
-                "                dispatch_async(dispatch_get_main_queue(), ^{\n" +
-                "                    NSString *statusStr = [NSString stringWithFormat:@\"%d\", (int)status];\n" +
-                "                    UnitySendMessage(\"ATTService\", \"OnTrackingRequestComplete\", [statusStr UTF8String]);\n" +
-                "                });\n" +
-                "            }];\n" +
-                "        } else {\n" +
-                "            // iOS < 14.5: tracking always authorized\n" +
-                "            UnitySendMessage(\"ATTService\", \"OnTrackingRequestComplete\", \"3\");\n" +
-                "        }\n" +
-                "    }\n" +
-                "}\n";
-            string pluginDir = Path.Combine(pathToBuiltProject, "Libraries", "DigitPark");
-            if (!Directory.Exists(pluginDir))
-            {
-                Directory.CreateDirectory(pluginDir);
-            }
-
-            string pluginPath = Path.Combine(pluginDir, "ATTPlugin.mm");
-            File.WriteAllText(pluginPath, pluginContent);
-
-            // Agregar al proyecto Xcode
-            string pbxPath = PBXProject.GetPBXProjectPath(pathToBuiltProject);
-            PBXProject project = new PBXProject();
-            project.ReadFromFile(pbxPath);
-
-            string mainTarget = project.GetUnityMainTargetGuid();
-            string relativePath = "Libraries/DigitPark/ATTPlugin.mm";
-            string fileGuid = project.AddFile(relativePath, relativePath, PBXSourceTree.Source);
-            project.AddFileToBuild(mainTarget, fileGuid);
-
-            project.WriteToFile(pbxPath);
-            UnityEngine.Debug.Log("[iOSPostBuild] Plugin nativo ATT agregado");
-        }
     }
 }
 #endif

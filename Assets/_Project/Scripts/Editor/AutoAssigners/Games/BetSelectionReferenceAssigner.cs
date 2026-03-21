@@ -38,6 +38,7 @@ namespace DigitPark.Editor.AutoAssigners
             "_coins250Button", "_coins250CostText", "_coins250RewardText",
             "_coins500Button", "_coins500CostText", "_coins500RewardText",
             "_coins1000Button", "_coins1000CostText", "_coins1000RewardText",
+            "_coins2500Button", "_coins2500CostText", "_coins2500RewardText",
             // Custom Bet
             "_customBetCardBg", "_customCoinsToggle",
             "_customAmountInput", "_customMinusButton", "_customPlusButton",
@@ -45,7 +46,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Rounds Selection
             "_roundsPanel", "_rounds1Button", "_rounds3Button", "_rounds5Button",
             // Action Buttons
-            "_playButton", "_cancelButton"
+            "_playButton"
         };
 
         private struct ReferenceResult
@@ -96,7 +97,7 @@ namespace DigitPark.Editor.AutoAssigners
                 "- Free bet (button, cost, reward)\n" +
                 "- DigitCoin bets: 50, 100, 250, 500, 1000\n" +
                 "- Custom bet (card bg, input, stepper, preview)\n" +
-                "- Action buttons (play, cancel)",
+                "- Action buttons (play only — cancel removed)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -229,6 +230,11 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "_coins1000CostText", FindTextByName("coins1000costtext", "coins1000cost"));
             AssignReference(so, "_coins1000RewardText", FindTextByName("coins1000rewardtext", "coins1000reward"));
 
+            // Coin 2500
+            AssignReference(so, "_coins2500Button", FindButtonByParentName("coins2500bet", "coins2500"));
+            AssignReference(so, "_coins2500CostText", FindTextByName("coins2500costtext", "coins2500cost"));
+            AssignReference(so, "_coins2500RewardText", FindTextByName("coins2500rewardtext", "coins2500reward"));
+
             // Custom Bet
             AssignReference(so, "_customBetCardBg", FindImageByName("custombetcard"));
             AssignReference(so, "_customCoinsToggle", FindButtonByName("customcoinstoggle"));
@@ -245,7 +251,6 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Action Buttons
             AssignReference(so, "_playButton", FindButtonByName("playbutton", "play"));
-            AssignReference(so, "_cancelButton", FindButtonByName("cancelbutton", "cancel"));
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
@@ -265,7 +270,8 @@ namespace DigitPark.Editor.AutoAssigners
         {
             var prop = so.FindProperty(propertyName);
             if (prop == null) { AddResult(propertyName, "Property not found", false, null); failedCount++; return; }
-            if (prop.objectReferenceValue != null) { AddResult(propertyName, "Already Set", true, prop.objectReferenceValue); alreadySetCount++; return; }
+            // Always reassign — after UIBuilder rebuilds the scene, old references point to
+            // destroyed GOs that may still appear non-null during the same frame. Force update.
             if (value != null) { prop.objectReferenceValue = value; AddResult(propertyName, "Assigned", true, value); assignedCount++; }
             else { AddResult(propertyName, "Not found", false, null); failedCount++; }
         }

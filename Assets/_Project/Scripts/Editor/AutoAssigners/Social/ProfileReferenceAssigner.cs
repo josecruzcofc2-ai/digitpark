@@ -26,7 +26,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Header
             "backButton", "addFriendIconButton",
             // Profile Info
-            "usernameText", "avatarImage", "avatarUI", "editAvatarButton", "statusText",
+            "usernameText", "statusText",
             // General Stats
             "totalGamesText", "winsText", "winRateText",
             // Game Stats
@@ -76,7 +76,7 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to ProfileManager:\n" +
                 "• Header (back, add friend)\n" +
-                "• Profile info (username, avatar, status)\n" +
+                "• Profile info (username, status)\n" +
                 "• Stats (general and per-game)\n" +
                 "• Action buttons and game selection panel",
                 MessageType.Info);
@@ -167,9 +167,6 @@ namespace DigitPark.Editor.AutoAssigners
 
             // Profile Info
             AssignReference(so, "usernameText", FindTextByName("username", "nombre", "playername"));
-            AssignReference(so, "avatarImage", FindImageByName("avatar", "profile", "foto"));
-            AssignReference(so, "avatarUI", FindComponentByName<DigitPark.UI.Components.AvatarUI>("avatar"));
-            AssignReference(so, "editAvatarButton", FindButtonByName("editavatar", "changeavatar", "editphoto", "camera"));
             AssignReference(so, "statusText", FindTextByName("status", "estado", "relation"));
 
             // General Stats

@@ -64,6 +64,10 @@ namespace DigitPark.Services.Firebase
 
                 if (dependencyStatus == DependencyStatus.Available)
                 {
+                    // DES-01: Enable offline persistence (auto-caches reads, queues writes)
+                    try { FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(true); }
+                    catch (DatabaseException) { /* Already set — safe to ignore */ }
+
                     _databaseRef = FirebaseDatabase.DefaultInstance.RootReference;
                     _isInitialized = true;
                     Debug.Log("[Database] Firebase Realtime Database inicializado correctamente");
@@ -93,10 +97,17 @@ namespace DigitPark.Services.Firebase
             {
                 string json = PlayerPrefs.GetString("SimLeaderboard", "");
                 if (string.IsNullOrEmpty(json)) return;
-                var wrapper = JsonUtility.FromJson<LeaderboardWrapper>(json);
-                if (wrapper?.entries != null)
+                try
                 {
-                    globalLeaderboard = wrapper.entries;
+                    var wrapper = JsonUtility.FromJson<LeaderboardWrapper>(json);
+                    if (wrapper?.entries != null)
+                    {
+                        globalLeaderboard = wrapper.entries;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Database] Corrupt local leaderboard JSON: {e.Message}");
                 }
             }
 
@@ -218,6 +229,11 @@ namespace DigitPark.Services.Firebase
                     {
                         string json = snapshot.GetRawJsonValue();
                         var playerData = JsonUtility.FromJson<PlayerData>(json);
+                        if (playerData == null)
+                        {
+                            Debug.LogWarning($"[Database] Malformed player JSON for userId={userId}");
+                            return null;
+                        }
                         Debug.Log($"[Database] Jugador cargado de Firebase: {userId}");
                         return playerData;
                     }
@@ -238,7 +254,8 @@ namespace DigitPark.Services.Firebase
             if (PlayerPrefs.HasKey(key))
             {
                 string json = PlayerPrefs.GetString(key);
-                return JsonUtility.FromJson<PlayerData>(json);
+                try { return JsonUtility.FromJson<PlayerData>(json); }
+                catch (Exception e) { Debug.LogWarning($"[Database] Corrupt local player JSON: {e.Message}"); return null; }
             }
             return null;
         }
@@ -383,6 +400,7 @@ namespace DigitPark.Services.Firebase
 #endif
 
             var results = new List<PlayerSearchResult>();
+            if (string.IsNullOrEmpty(query)) return results;
             string queryLower = query.ToLower();
 
             // Obtener datos del usuario actual para verificar amistades
@@ -461,19 +479,17 @@ namespace DigitPark.Services.Firebase
             string safeGameId = SanitizeFirebasePath(gameId);
             string safeCountryCode = SanitizeFirebasePath(countryCode);
 
-            // Determinar paths según si hay gameId
-            bool hasGameId = !string.IsNullOrEmpty(safeGameId);
-            string globalPath = hasGameId
-                ? $"{LEADERBOARD_PATH}/{safeGameId}/{userId}"
-                : $"{LEADERBOARD_PATH}/{userId}";
-            string countryPath = hasGameId
-                ? $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}/{safeGameId}/{userId}"
-                : $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}/{userId}";
+            if (string.IsNullOrEmpty(safeGameId)) safeGameId = "general";
+            string globalPath = $"{LEADERBOARD_PATH}/{safeGameId}/{userId}";
+            string countryPath = $"{COUNTRY_LEADERBOARD_PATH}/{safeCountryCode}/{userId}";
 
             if (_isInitialized && _databaseRef != null)
             {
                 try
                 {
+                    // SEC-06 Option B: Get validation token from server before writing
+                    string validationToken = await RequestValidationToken(userId, safeGameId, time);
+
                     // Verificar si ya existe un score para este usuario
                     var existingSnapshot = await _databaseRef.Child(globalPath).GetValueAsync();
 
@@ -490,7 +506,6 @@ namespace DigitPark.Services.Firebase
 
                     if (shouldUpdate)
                     {
-                        // Guardar en leaderboard global
                         var entryData = new Dictionary<string, object>
                         {
                             { "userId", userId },
@@ -498,20 +513,24 @@ namespace DigitPark.Services.Firebase
                             { "time", time },
                             { "countryCode", countryCode },
                             { "gameId", gameId },
-                            { "timestamp", DateTime.UtcNow.ToString("o") }
+                            { "timestamp", DateTime.UtcNow.ToString("o") },
+                            { "validationToken", validationToken ?? "" }
                         };
 
-                        await _databaseRef.Child(globalPath).SetValueAsync(entryData);
-
-                        // Guardar en leaderboard por país
-                        await _databaseRef.Child(countryPath).SetValueAsync(entryData);
-
-                        // Guardar en historial de scores
+                        // Atomic multi-path update: global + country + score history
                         string scoreId = _databaseRef.Child(SCORES_PATH).Child(userId).Push().Key;
-                        entryData["scoreId"] = scoreId;
-                        await _databaseRef.Child(SCORES_PATH).Child(userId).Child(scoreId).SetValueAsync(entryData);
+                        var multiUpdate = new Dictionary<string, object>
+                        {
+                            { globalPath, entryData },
+                            { countryPath, entryData },
+                        };
+                        // Score history entry includes scoreId
+                        var historyData = new Dictionary<string, object>(entryData) { { "scoreId", scoreId } };
+                        multiUpdate[$"{SCORES_PATH}/{userId}/{scoreId}"] = historyData;
 
-                        Debug.Log($"[Database] Score guardado en Firebase: {time}s (gameId: {gameId})");
+                        await _databaseRef.UpdateChildrenAsync(multiUpdate);
+
+                        Debug.Log($"[Database] Score guardado en Firebase (atomic): {time}s (gameId: {gameId})");
 
                         // Recargar leaderboard
                         await LoadLeaderboardFromFirebase();
@@ -556,6 +575,157 @@ namespace DigitPark.Services.Firebase
 
             SaveLeaderboardLocal();
         }
+
+        // ==================== Score Validation (SEC-06) ====================
+
+        /// <summary>
+        /// SEC-06 Option B: Requests a validation token from the server for ranked scores.
+        /// The token is included in the RTDB write so rules can verify it exists.
+        /// Returns empty string if server is unreachable (graceful degradation).
+        /// </summary>
+        private async Task<string> RequestValidationToken(string userId, string gameId, float time)
+        {
+            string url = _validateScoreUrl;
+            if (string.IsNullOrEmpty(url)) return "";
+
+            try
+            {
+                string idToken = null;
+                if (Payments.PaymentBridge.GetFirebaseIdToken != null)
+                {
+                    try { idToken = await Payments.PaymentBridge.GetFirebaseIdToken(); }
+                    catch { }
+                }
+
+                var body = new Dictionary<string, object>
+                {
+                    { "gameType", gameId },
+                    { "score", 0 },
+                    { "timeSeconds", time }
+                };
+                string json = JsonUtility.ToJson(new ValidationRequestBody { gameType = gameId, score = 0, timeSeconds = time });
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+                using (var request = new UnityEngine.Networking.UnityWebRequest(url, "POST"))
+                {
+                    request.uploadHandler = new UnityEngine.Networking.UploadHandlerRaw(bytes);
+                    request.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
+                    request.SetRequestHeader("Content-Type", "application/json");
+                    if (!string.IsNullOrEmpty(idToken))
+                        request.SetRequestHeader("Authorization", $"Bearer {idToken}");
+                    request.timeout = 5;
+
+                    var op = request.SendWebRequest();
+                    while (!op.isDone) await Task.Yield();
+
+                    if (request.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+                    {
+                        var response = JsonUtility.FromJson<ValidationTokenResponse>(request.downloadHandler.text);
+                        return response?.validationToken ?? "";
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Database] Validation token request failed (score will still save): {e.Message}");
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// SEC-06 Option A: Submit CashBattle score via server-side Cloud Function.
+        /// Server validates and writes directly — client CANNOT write to cash_scores path.
+        /// </summary>
+        public async Task<bool> SubmitCashScore(string userId, string gameId, float time, int score, string tournamentId)
+        {
+            string url = _submitCashScoreUrl;
+            if (string.IsNullOrEmpty(url))
+            {
+                Debug.LogError("[Database] submitCashScoreUrl not configured");
+                return false;
+            }
+
+            try
+            {
+                string idToken = null;
+                if (Payments.PaymentBridge.GetFirebaseIdToken != null)
+                {
+                    try { idToken = await Payments.PaymentBridge.GetFirebaseIdToken(); }
+                    catch { }
+                }
+
+                string json = JsonUtility.ToJson(new CashScoreRequestBody
+                {
+                    gameType = gameId, score = score, timeSeconds = time, tournamentId = tournamentId
+                });
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+                using (var request = new UnityEngine.Networking.UnityWebRequest(url, "POST"))
+                {
+                    request.uploadHandler = new UnityEngine.Networking.UploadHandlerRaw(bytes);
+                    request.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
+                    request.SetRequestHeader("Content-Type", "application/json");
+                    if (!string.IsNullOrEmpty(idToken))
+                        request.SetRequestHeader("Authorization", $"Bearer {idToken}");
+                    request.timeout = 10;
+
+                    var op = request.SendWebRequest();
+                    while (!op.isDone) await Task.Yield();
+
+                    if (request.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+                    {
+                        Debug.Log($"[Database] CashScore submitted server-side: {gameId} {time}s tournament={tournamentId}");
+                        return true;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[Database] CashScore submission failed: {request.error} — {request.downloadHandler.text}");
+                        return false;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[Database] CashScore submission error: {e.Message}");
+                return false;
+            }
+        }
+
+        // URL config — set from PaymentConfig or BootManager
+        private string _validateScoreUrl;
+        private string _submitCashScoreUrl;
+
+        public void SetScoreEndpoints(string validateUrl, string cashScoreUrl)
+        {
+            _validateScoreUrl = validateUrl;
+            _submitCashScoreUrl = cashScoreUrl;
+        }
+
+        [Serializable]
+        private class ValidationRequestBody
+        {
+            public string gameType;
+            public int score;
+            public float timeSeconds;
+        }
+
+        [Serializable]
+        private class ValidationTokenResponse
+        {
+            public bool valid;
+            public string validationToken;
+        }
+
+        [Serializable]
+        private class CashScoreRequestBody
+        {
+            public string gameType;
+            public int score;
+            public float timeSeconds;
+            public string tournamentId;
+        }
+
+        // ==================== Leaderboard Queries ====================
 
         public async Task<List<LeaderboardEntry>> GetGlobalLeaderboard(int topCount = 200)
         {
@@ -754,7 +924,9 @@ namespace DigitPark.Services.Firebase
                 {
                     // Obtener el país del usuario primero
                     var userSnapshot = await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).GetValueAsync();
-                    string countryCode = userSnapshot.Child("countryCode").Value?.ToString() ?? "";
+                    string countryCode = (userSnapshot != null && userSnapshot.Exists)
+                        ? userSnapshot.Child("countryCode").Value?.ToString() ?? ""
+                        : "";
 
                     // Eliminar de leaderboard global (legacy flat path)
                     await _databaseRef.Child(LEADERBOARD_PATH).Child(userId).RemoveValueAsync();
@@ -858,6 +1030,42 @@ namespace DigitPark.Services.Firebase
             catch (Exception ex) { Debug.LogWarning($"[Database] DeleteAchievements: {ex.Message}"); }
         }
 
+        /// <summary>
+        /// B5-A: Writes /friends/{userId}/{friendId} = true.
+        /// The bilateral rule allows the current user (friendId) to write to this path.
+        /// Use instead of SavePlayerData(senderData) in AcceptFriendRequest.
+        /// </summary>
+        public async Task AddFriendEntry(string userId, string friendId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try
+            {
+                await _databaseRef.Child("friends").Child(userId).Child(friendId).SetValueAsync(true);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[Database] AddFriendEntry({userId},{friendId}): {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// B5-B: Removes /friends/{userId}/{friendId}.
+        /// The bilateral rule allows the current user (friendId) to write to this path.
+        /// Use instead of SavePlayerData(friendData) in RemoveFriend.
+        /// </summary>
+        public async Task RemoveFriendEntry(string userId, string friendId)
+        {
+            if (!_isInitialized || _databaseRef == null) return;
+            try
+            {
+                await _databaseRef.Child("friends").Child(userId).Child(friendId).RemoveValueAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[Database] RemoveFriendEntry({userId},{friendId}): {ex.Message}");
+            }
+        }
+
         public async Task DeleteFriendsList(string userId)
         {
             if (!_isInitialized || _databaseRef == null) return;
@@ -953,9 +1161,13 @@ namespace DigitPark.Services.Firebase
             string key = $"SimTournament_{tournamentId}";
             if (PlayerPrefs.HasKey(key))
             {
-                var tournament = JsonUtility.FromJson<TournamentData>(PlayerPrefs.GetString(key));
-                tournaments[tournamentId] = tournament;
-                return tournament;
+                try
+                {
+                    var tournament = JsonUtility.FromJson<TournamentData>(PlayerPrefs.GetString(key));
+                    if (tournament != null) tournaments[tournamentId] = tournament;
+                    return tournament;
+                }
+                catch (Exception e) { Debug.LogWarning($"[Database] Corrupt local tournament JSON: {e.Message}"); }
             }
 
             return null;
@@ -1014,20 +1226,23 @@ namespace DigitPark.Services.Firebase
             return localActive;
         }
 
-        public async Task UpdateTournament(TournamentData tournament)
+        public async Task<bool> UpdateTournament(TournamentData tournament) // B1-E: retorna bool para propagación de error
         {
             Debug.Log($"[Database] Actualizando torneo: {tournament.tournamentId}");
 
+            bool firebaseSuccess = false;
             if (_isInitialized && _databaseRef != null)
             {
                 try
                 {
                     string json = JsonUtility.ToJson(tournament);
                     await _databaseRef.Child(TOURNAMENTS_PATH).Child(tournament.tournamentId).SetRawJsonValueAsync(json);
+                    firebaseSuccess = true;
                 }
                 catch (Exception e)
                 {
                     Debug.LogWarning($"[Database] Error actualizando torneo: {e.Message}");
+                    return false;
                 }
             }
 
@@ -1036,6 +1251,7 @@ namespace DigitPark.Services.Firebase
             string key = $"SimTournament_{tournament.tournamentId}";
             PlayerPrefs.SetString(key, JsonUtility.ToJson(tournament));
             PlayerPrefs.Save();
+            return firebaseSuccess;
         }
 
         public async Task<bool> JoinTournament(string tournamentId, string userId)
@@ -1173,14 +1389,12 @@ namespace DigitPark.Services.Firebase
 
         public async Task SaveFriendRequest(FriendRequest request)
         {
-            if (!_isInitialized || request == null) return;
+            if (!_isInitialized || _databaseRef == null || request == null) return;
 
             try
             {
                 string json = JsonUtility.ToJson(request);
-                // Store under receiver's node so they can load their incoming requests
                 await _databaseRef.Child("friend_requests").Child(request.receiverId).Child(request.requestId).SetRawJsonValueAsync(json);
-                // Also store under sender's node for sent requests tracking
                 await _databaseRef.Child("friend_requests").Child(request.senderId).Child(request.requestId).SetRawJsonValueAsync(json);
             }
             catch (Exception e)
@@ -1191,7 +1405,7 @@ namespace DigitPark.Services.Firebase
 
         public async Task UpdateFriendRequestStatus(FriendRequest request)
         {
-            if (!_isInitialized || request == null) return;
+            if (!_isInitialized || _databaseRef == null || request == null) return;
 
             try
             {
@@ -1208,7 +1422,7 @@ namespace DigitPark.Services.Firebase
 
         public async Task DeleteFriendRequest(FriendRequest request)
         {
-            if (!_isInitialized || request == null) return;
+            if (!_isInitialized || _databaseRef == null || request == null) return;
 
             try
             {

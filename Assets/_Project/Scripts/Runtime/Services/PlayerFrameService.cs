@@ -77,7 +77,7 @@ namespace DigitPark.Services
                 nameKey = "frame_basic",
                 rarity = FrameRarity.Common,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 500,
+                coinPrice = 2000,
                 primaryColor = new Color(0.5f, 0.5f, 0.5f),
                 secondaryColor = new Color(0.3f, 0.3f, 0.3f)
             });
@@ -88,7 +88,7 @@ namespace DigitPark.Services
                 nameKey = "frame_bronze",
                 rarity = FrameRarity.Common,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 1000,
+                coinPrice = 5000,
                 primaryColor = new Color(0.8f, 0.5f, 0.2f),
                 secondaryColor = new Color(0.6f, 0.35f, 0.1f)
             });
@@ -99,7 +99,7 @@ namespace DigitPark.Services
                 nameKey = "frame_silver",
                 rarity = FrameRarity.Common,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 2500,
+                coinPrice = 12000,
                 primaryColor = new Color(0.75f, 0.75f, 0.8f),
                 secondaryColor = new Color(0.5f, 0.5f, 0.55f)
             });
@@ -110,7 +110,7 @@ namespace DigitPark.Services
                 nameKey = "frame_gold",
                 rarity = FrameRarity.Rare,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 5000,
+                coinPrice = 25000,
                 primaryColor = new Color(1f, 0.84f, 0f),
                 secondaryColor = new Color(0.85f, 0.65f, 0f)
             });
@@ -121,7 +121,7 @@ namespace DigitPark.Services
                 nameKey = "frame_neon",
                 rarity = FrameRarity.Rare,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 7500,
+                coinPrice = 40000,
                 primaryColor = new Color(0f, 1f, 0.5f),
                 secondaryColor = new Color(0f, 0.8f, 1f)
             });
@@ -132,7 +132,7 @@ namespace DigitPark.Services
                 nameKey = "frame_diamond",
                 rarity = FrameRarity.Epic,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 10000,
+                coinPrice = 60000,
                 primaryColor = new Color(0.7f, 0.9f, 1f),
                 secondaryColor = new Color(0.4f, 0.7f, 1f)
             });
@@ -143,7 +143,7 @@ namespace DigitPark.Services
                 nameKey = "frame_crystal",
                 rarity = FrameRarity.Epic,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 12000,
+                coinPrice = 80000,
                 primaryColor = new Color(0.702f, 1f, 1f),
                 secondaryColor = new Color(0.4f, 1f, 0.933f)
             });
@@ -154,7 +154,7 @@ namespace DigitPark.Services
                 nameKey = "frame_platinum",
                 rarity = FrameRarity.Legendary,
                 priceType = FramePriceType.DigitCoins,
-                coinPrice = 15000,
+                coinPrice = 100000,
                 primaryColor = new Color(0.9f, 0.95f, 1f),
                 secondaryColor = new Color(0.7f, 0.75f, 0.85f),
                 isAnimated = true,
@@ -169,7 +169,7 @@ namespace DigitPark.Services
                 nameKey = "frame_sapphire",
                 rarity = FrameRarity.Rare,
                 priceType = FramePriceType.DigitGems,
-                gemPrice = 50,
+                gemPrice = 100,
                 primaryColor = new Color(0.05f, 0.2f, 0.8f),
                 secondaryColor = new Color(0.1f, 0.4f, 1f)
             });
@@ -180,7 +180,7 @@ namespace DigitPark.Services
                 nameKey = "frame_ruby",
                 rarity = FrameRarity.Rare,
                 priceType = FramePriceType.DigitGems,
-                gemPrice = 150,
+                gemPrice = 200,
                 primaryColor = new Color(0.9f, 0.1f, 0.2f),
                 secondaryColor = new Color(1f, 0.3f, 0.4f)
             });
@@ -191,7 +191,7 @@ namespace DigitPark.Services
                 nameKey = "frame_emerald",
                 rarity = FrameRarity.Epic,
                 priceType = FramePriceType.DigitGems,
-                gemPrice = 300,
+                gemPrice = 350,
                 primaryColor = new Color(0.1f, 0.8f, 0.3f),
                 secondaryColor = new Color(0.05f, 0.5f, 0.15f)
             });
@@ -596,7 +596,50 @@ namespace DigitPark.Services
             }
         }
 
+        /// <summary>
+        /// B4-C: Restore owned frames from Firebase after reinstall.
+        /// Call from BootManager in reinstall path.
+        /// </summary>
+        public async Task RestoreFromFirebaseAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId) || DatabaseService.Instance == null) return;
+            try
+            {
+                var db = global::Firebase.Database.FirebaseDatabase.DefaultInstance;
+                var snapshot = await db.GetReference("players").Child(userId).Child("ownedFrames").GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                string ownedJson = snapshot.Value?.ToString() ?? "";
+                if (string.IsNullOrEmpty(ownedJson)) return;
+
+                var data = JsonUtility.FromJson<StringListWrapper>(ownedJson);
+                if (data?.items == null) return;
+
+                bool changed = false;
+                foreach (var id in data.items)
+                {
+                    if (!_ownedFrames.Contains(id))
+                    {
+                        _ownedFrames.Add(id);
+                        changed = true;
+                    }
+                }
+                if (changed)
+                {
+                    SaveOwnedFrames();
+                    Debug.Log($"[PlayerFrameService] Frames restored from Firebase");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[PlayerFrameService] RestoreFromFirebaseAsync failed: {e.Message}");
+            }
+        }
+
         // ==================== PUBLIC API ====================
+
+        /// <summary>B4-F: Force a Firebase sync of current owned frames (used during migration).</summary>
+        public void TriggerFirebaseSync() => SaveOwnedFrames();
 
         public bool IsOwned(string frameId)
         {

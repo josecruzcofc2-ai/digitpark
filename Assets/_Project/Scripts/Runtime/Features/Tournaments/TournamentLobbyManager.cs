@@ -13,6 +13,7 @@ using DigitPark.Themes;
 using DigitPark.Games;
 using DG.Tweening;
 using DigitPark.Animations;
+using DigitPark.Services.Firebase;
 
 namespace DigitPark.Managers
 {
@@ -78,7 +79,7 @@ namespace DigitPark.Managers
 
         [Header("Configuration")]
         [SerializeField] private float refreshInterval = 5f;
-        [SerializeField] private Sprite defaultAvatarSprite;
+        // Avatar removed — participant items no longer display avatars
 
         // State
         private TournamentData currentTournament;
@@ -181,12 +182,21 @@ namespace DigitPark.Managers
 
         // ── Chat ──
 
+        private static string SanitizeChatMessage(string input)
+        {
+            // B6-C: Strip TMP rich text tags to prevent injection into TextMeshPro
+            return System.Text.RegularExpressions.Regex.Replace(input, @"<[^>]*>", "");
+        }
+
         private void OnSendChat()
         {
             if (chatInput == null || string.IsNullOrWhiteSpace(chatInput.text)) return;
 
             string message = chatInput.text.Trim();
             chatInput.text = "";
+
+            // B6-C: Strip TMP tags before profanity filter
+            message = SanitizeChatMessage(message);
 
             // Filter profanity
             if (DigitPark.Services.ChatFilterService.Instance != null)
@@ -324,20 +334,33 @@ namespace DigitPark.Managers
             LoadChatHistory();
         }
 
-        private void LoadTournamentById(string id)
+        private async void LoadTournamentById(string id)
         {
             isLoading = true;
             ShowLoadingOverlay(true);
 
-            // Simulate API call
-            Invoke(nameof(SimulateLoadTournament), 1f);
-        }
+            // B1-D: consultar Firebase real por ID
+            try
+            {
+                currentTournament = await DatabaseService.Instance.GetTournament(id);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[TournamentLobby] Error cargando torneo {id}: {e.Message}");
+            }
 
-        private void SimulateLoadTournament()
-        {
-            currentTournament = CreateMockTournament();
+            if (currentTournament == null)
+            {
+                Debug.LogWarning($"[TournamentLobby] Torneo {id} no encontrado");
+                PopupManager.Instance?.ShowErrorMessage(AutoLocalizer.Get("error_tournament_not_found"));
+                isLoading = false;
+                ShowLoadingOverlay(false);
+                return;
+            }
+
             isLoading = false;
             ShowLoadingOverlay(false);
+            SceneNavigator.Instance?.ClearPendingParams();
             UpdateUI();
             LoadParticipants();
             LoadChatHistory();
@@ -354,8 +377,8 @@ namespace DigitPark.Managers
                 currentParticipants = 12,
                 maxParticipants = 32,
                 status = TournamentStatus.Scheduled,
-                startTime = DateTime.Now.AddMinutes(30),
-                endTime = DateTime.Now.AddHours(2),
+                startTime = DateTime.UtcNow.AddMinutes(30),
+                endTime = DateTime.UtcNow.AddHours(2),
                 rules = new TournamentRules { maxAttempts = 3 }
             };
         }
@@ -367,7 +390,7 @@ namespace DigitPark.Managers
             if (currentTournament == null) return;
 
             // Header
-            if (tournamentNameText) tournamentNameText.text = currentTournament.name;
+            if (tournamentNameText) tournamentNameText.text = UICanvasHelper.TmpSafe(currentTournament.name);
             if (statusBadgeText) statusBadgeText.text = GetStatusText(currentTournament.status);
 
             // Update status badge color
@@ -456,7 +479,7 @@ namespace DigitPark.Managers
         {
             if (currentTournament == null) return;
 
-            TimeSpan timeUntilStart = currentTournament.startTime - DateTime.Now;
+            TimeSpan timeUntilStart = currentTournament.startTime - DateTime.UtcNow; // B6-K: use UTC
 
             if (countdownText)
             {
@@ -588,7 +611,6 @@ namespace DigitPark.Managers
                 {
                     id = Guid.NewGuid().ToString(),
                     username = $"Player{i + 1}",
-                    avatarUrl = "",
                     rank = i + 1,
                     bestTime = UnityEngine.Random.Range(8f, 45f)
                 });
@@ -654,7 +676,6 @@ namespace DigitPark.Managers
                     {
                         userId = participant.id,
                         username = participant.username,
-                        avatar = defaultAvatarSprite, // Default avatar, replaced if user has photo
                         rank = participant.rank,
                         bestTime = participant.bestTime,
                         showRank = true,
@@ -706,23 +727,11 @@ namespace DigitPark.Managers
                 rankLE.minWidth = 50;
                 rankLE.preferredWidth = 50;
 
-                // Avatar
-                var avatarObj = new GameObject("Avatar");
-                avatarObj.transform.SetParent(item.transform, false);
-                var avatarImg = avatarObj.AddComponent<Image>();
-                avatarImg.sprite = defaultAvatarSprite;
-                avatarImg.preserveAspect = true;
-                var avatarLE = avatarObj.AddComponent<LayoutElement>();
-                avatarLE.minWidth = 44;
-                avatarLE.minHeight = 44;
-                avatarLE.preferredWidth = 44;
-                avatarLE.preferredHeight = 44;
-
                 // Name
                 var nameObj = new GameObject("PlayerName");
                 nameObj.transform.SetParent(item.transform, false);
                 var nameText = nameObj.AddComponent<TextMeshProUGUI>();
-                nameText.text = participant.username;
+                nameText.text = UICanvasHelper.TmpSafe(participant.username);
                 nameText.fontSize = FontSizes.Body;
                 nameText.enableAutoSizing = true;
                 nameText.fontSizeMin = FontSizes.AutoMinBody;
@@ -796,7 +805,7 @@ namespace DigitPark.Managers
             UpdateUI();
         }
 
-        private void OnJoinClicked()
+        private async void OnJoinClicked() // B1-E: join real en Firebase
         {
             if (isLoading || hasJoined) return;
 
@@ -804,31 +813,76 @@ namespace DigitPark.Managers
             ShowLoadingOverlay(true);
             ShowStatus(L("tournament_joining"));
 
-            // Simulate join
-            Invoke(nameof(ProcessJoin), 1.5f);
-        }
+            bool success = false;
+            try
+            {
+                success = await DatabaseService.Instance.JoinTournament(
+                    currentTournament.tournamentId, GetCurrentUserId());
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[TournamentLobby] Error al unirse: {e.Message}");
+            }
 
-        private void ProcessJoin()
-        {
-            hasJoined = true;
             isLoading = false;
             ShowLoadingOverlay(false);
-            ShowStatus(L("tournament_joined"));
 
-            currentTournament.currentParticipants++;
-            UpdateUI();
-            UpdateActionButtons();
+            if (success)
+            {
+                hasJoined = true;
+                currentTournament.currentParticipants++;
+                ShowStatus(L("tournament_joined"));
+                UpdateUI();
+                UpdateActionButtons();
+            }
+            else
+            {
+                ShowStatus(L("tournament_join_failed"));
+            }
         }
 
-        private void OnLeaveClicked()
+        private async void OnLeaveClicked() // B1-E: leave real en Firebase
         {
             if (isLoading || !hasJoined) return;
 
-            hasJoined = false;
-            currentTournament.currentParticipants--;
-            UpdateUI();
-            UpdateActionButtons();
-            ShowStatus(L("tournament_left"));
+            isLoading = true;
+            ShowLoadingOverlay(true);
+
+            bool success = false;
+            try
+            {
+                success = await DatabaseService.Instance.LeaveTournament(
+                    currentTournament.tournamentId, GetCurrentUserId());
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[TournamentLobby] Error al salir: {e.Message}");
+            }
+
+            isLoading = false;
+            ShowLoadingOverlay(false);
+
+            if (success)
+            {
+                hasJoined = false;
+                currentTournament.currentParticipants--;
+
+                // B6-G: Refund entry fee on leave
+                if (currentTournament.entryFee > 0)
+                {
+                    var currency = DigitPark.Monetization.CurrencyManager.Instance;
+                    currency?.AddCoins(currentTournament.entryFee);
+                    Debug.Log($"[TournamentLobby] Refunded {currentTournament.entryFee} coins on leave");
+                }
+
+                UpdateUI();
+                UpdateActionButtons();
+                ShowStatus(L("tournament_left"));
+            }
+            else
+            {
+                ShowStatus(L("tournament_leave_failed"));
+            }
         }
 
         private void OnShareClicked()
@@ -907,13 +961,13 @@ namespace DigitPark.Managers
                 var cg = loadingOverlay.GetComponent<CanvasGroup>();
                 if (cg == null) cg = loadingOverlay.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.2f).SetUpdate(true);
+                cg.DOFade(1f, 0.2f).SetUpdate(true).SetLink(loadingOverlay);
             }
             else
             {
                 var cg = loadingOverlay.GetComponent<CanvasGroup>();
                 if (cg != null)
-                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingOverlay.SetActive(false));
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).SetLink(loadingOverlay).OnComplete(() => loadingOverlay.SetActive(false));
                 else
                     loadingOverlay.SetActive(false);
             }
@@ -936,7 +990,6 @@ namespace DigitPark.Managers
     {
         public string id;
         public string username;
-        public string avatarUrl;
         public int rank;
         public float bestTime;
     }

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using DG.Tweening;
 
 namespace DigitPark.Monetization
 {
@@ -20,6 +21,9 @@ namespace DigitPark.Monetization
         private TextMeshProUGUI _starterTimer;
         private TextMeshProUGUI _premiumTimer;
         private Coroutine _timerCoroutine;
+        private Tween _lastChancePulseTween;
+        private Tween _starterFomoTween;
+        private Tween _premiumFomoTween;
 
         private void OnEnable()
         {
@@ -34,6 +38,9 @@ namespace DigitPark.Monetization
         private void OnDisable()
         {
             StopTimer();
+            _lastChancePulseTween?.Kill();
+            _starterFomoTween?.Kill();
+            _premiumFomoTween?.Kill();
             if (WelcomePackService.Instance != null)
                 WelcomePackService.Instance.OnVisibilityChanged -= RefreshVisibility;
         }
@@ -54,7 +61,6 @@ namespace DigitPark.Monetization
             var service = WelcomePackService.Instance;
             if (service == null || !service.IsInitialized)
             {
-                // Service not ready — hide all
                 SetActive(_starterBanner, false);
                 SetActive(_premiumBanner, false);
                 gameObject.SetActive(false);
@@ -64,11 +70,47 @@ namespace DigitPark.Monetization
             bool starterVis = service.IsStarterVisible;
             bool premiumVis = service.IsPremiumVisible;
 
-            SetActive(_starterBanner, starterVis);
-            SetActive(_premiumBanner, premiumVis);
-
-            // Hide entire container if nothing to show
             gameObject.SetActive(starterVis || premiumVis);
+            AnimateBannerIn(_starterBanner, starterVis);
+            AnimateBannerIn(_premiumBanner, premiumVis);
+
+            // "LAST CHANCE" pulse on D7 starter banner
+            _lastChancePulseTween?.Kill();
+            if (starterVis && service.IsStarterLastChance && _starterBanner != null)
+            {
+                _lastChancePulseTween = _starterBanner.transform
+                    .DOScale(1.03f, 1f)
+                    .SetEase(Ease.InOutSine)
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetUpdate(true)
+                    .SetLink(_starterBanner);
+            }
+        }
+
+        private void AnimateBannerIn(GameObject banner, bool visible)
+        {
+            if (banner == null) return;
+
+            if (!visible)
+            {
+                banner.SetActive(false);
+                return;
+            }
+
+            bool wasActive = banner.activeSelf;
+            banner.SetActive(true);
+
+            if (!wasActive)
+            {
+                var cg = banner.GetComponent<CanvasGroup>();
+                if (cg == null) cg = banner.AddComponent<CanvasGroup>();
+
+                cg.alpha = 0f;
+                banner.transform.localScale = Vector3.one * 0.9f;
+                cg.DOFade(1f, 0.25f).SetUpdate(true).SetLink(banner);
+                banner.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack)
+                    .SetUpdate(true).SetLink(banner);
+            }
         }
 
         private void UpdateTimers()
@@ -81,12 +123,25 @@ namespace DigitPark.Monetization
                 var remaining = service.StarterTimeRemaining;
                 string prefix = service.IsStarterLastChance ? "LAST CHANCE: " : "Expires in: ";
                 _starterTimer.text = $"{prefix}{remaining.Days}d {remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+
+                // FOMO pulse when < 1 hour
+                if (remaining.TotalHours < 1 && _starterFomoTween == null)
+                {
+                    _starterFomoTween = _starterTimer.DOColor(new Color(1f, 0.27f, 0.27f), 0.5f)
+                        .SetLoops(-1, LoopType.Yoyo).SetUpdate(true).SetLink(_starterTimer.gameObject);
+                }
             }
 
             if (_premiumTimer != null && service.IsPremiumVisible)
             {
                 var remaining = service.PremiumTimeRemaining;
                 _premiumTimer.text = $"Expires in: {remaining.Days}d {remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+
+                if (remaining.TotalHours < 1 && _premiumFomoTween == null)
+                {
+                    _premiumFomoTween = _premiumTimer.DOColor(new Color(1f, 0.27f, 0.27f), 0.5f)
+                        .SetLoops(-1, LoopType.Yoyo).SetUpdate(true).SetLink(_premiumTimer.gameObject);
+                }
             }
         }
 

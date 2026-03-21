@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
+using DigitPark.Themes;
 using FirebaseDB = global::Firebase.Database;
 
 namespace DigitPark.Monetization
@@ -54,7 +55,7 @@ namespace DigitPark.Monetization
             grantDG = 200,
             grantThemeId = "", // Random Tier A — resolved at purchase time
             grantFrameId = "frame_ruby",
-            grantTitleId = "title_estratega",
+            grantTitleId = "mastermind",
             grantEffectId = "",
         };
 
@@ -104,7 +105,8 @@ namespace DigitPark.Monetization
         {
             get
             {
-                int days = (DateTime.UtcNow.Date - _firstLoginDate.Date).Days + 1;
+                // B3-F: Use ServerTimeHelper to prevent client clock manipulation
+                int days = (ServerTimeHelper.UtcNow.Date - _firstLoginDate.Date).Days + 1;
                 return Mathf.Max(1, days);
             }
         }
@@ -271,7 +273,7 @@ namespace DigitPark.Monetization
                 // Merge: Firebase purchased flags override local (if true in Firebase, mark true locally)
                 if (wpData.ContainsKey("starterPurchased") && !_starterPurchased)
                 {
-                    bool fbStarter = wpData["starterPurchased"] is bool b ? b : false;
+                    bool fbStarter = TryParseBool(wpData["starterPurchased"]);
                     if (fbStarter)
                     {
                         _starterPurchased = true;
@@ -281,7 +283,7 @@ namespace DigitPark.Monetization
 
                 if (wpData.ContainsKey("premiumPurchased") && !_premiumPurchased)
                 {
-                    bool fbPremium = wpData["premiumPurchased"] is bool b2 ? b2 : false;
+                    bool fbPremium = TryParseBool(wpData["premiumPurchased"]);
                     if (fbPremium)
                     {
                         _premiumPurchased = true;
@@ -329,8 +331,13 @@ namespace DigitPark.Monetization
         /// <summary>
         /// Called after IAP payment confirmed. Grants pack contents.
         /// </summary>
-        public void OnStarterPackPurchased()
+        public void OnStarterPackPurchased(string verifiedTransactionId = "") // B2-E: solo PaymentManager debe llamar esto con un txId válido
         {
+            if (string.IsNullOrEmpty(verifiedTransactionId))
+            {
+                Debug.LogWarning("[WelcomePack] OnStarterPackPurchased ignorado — se requiere verifiedTransactionId");
+                return;
+            }
             if (_starterPurchased) return;
             _starterPurchased = true;
 
@@ -381,11 +388,10 @@ namespace DigitPark.Monetization
                 AnalyticsService.Instance?.LogVirtualCurrencyEarned("digitgems", pack.grantDG, pack.packId);
             }
 
-            // Theme
+            // Theme — B3-E: use ThemeManager service
             if (!string.IsNullOrEmpty(pack.grantThemeId))
             {
-                // TODO: ThemeManager.Instance.UnlockTheme(pack.grantThemeId)
-                PlayerPrefs.SetInt($"Theme_Owned_{pack.grantThemeId}", 1);
+                ThemeManager.Instance?.UnlockTheme(pack.grantThemeId);
                 Debug.Log($"[WelcomePackService] Granted theme: {pack.grantThemeId}");
             }
             else if (pack.packId == StarterPack.packId)
@@ -394,21 +400,21 @@ namespace DigitPark.Monetization
                 string[] tierAThemes = { "theme_glitch", "theme_bioluminescence", "theme_volcanic", "theme_matrix",
                     "theme_infrared", "theme_blood_moon", "theme_phantom", "theme_ultraviolet" };
                 string picked = tierAThemes[UnityEngine.Random.Range(0, tierAThemes.Length)];
-                PlayerPrefs.SetInt($"Theme_Owned_{picked}", 1);
+                ThemeManager.Instance?.UnlockTheme(picked);
                 Debug.Log($"[WelcomePackService] Granted random Tier A theme: {picked}");
             }
 
-            // Frame
+            // Frame — B3-E: use PlayerFrameService
             if (!string.IsNullOrEmpty(pack.grantFrameId))
             {
-                PlayerPrefs.SetInt($"Frame_Owned_{pack.grantFrameId}", 1);
+                PlayerFrameService.Instance?.UnlockFrame(pack.grantFrameId);
                 Debug.Log($"[WelcomePackService] Granted frame: {pack.grantFrameId}");
             }
 
-            // Title
+            // Title — B3-E: use PlayerTitleService
             if (!string.IsNullOrEmpty(pack.grantTitleId))
             {
-                PlayerPrefs.SetInt($"Title_Owned_{pack.grantTitleId}", 1);
+                PlayerTitleService.Instance?.UnlockTitle(pack.grantTitleId);
                 Debug.Log($"[WelcomePackService] Granted title: {pack.grantTitleId}");
             }
 
@@ -420,6 +426,18 @@ namespace DigitPark.Monetization
             }
 
             PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// Safely parse a Firebase value as bool. Handles bool, long (0/1), and string ("true"/"false").
+        /// </summary>
+        private static bool TryParseBool(object value)
+        {
+            if (value is bool b) return b;
+            if (value is long l) return l != 0;
+            if (value is int i) return i != 0;
+            if (value is string s) return s.Equals("true", System.StringComparison.OrdinalIgnoreCase);
+            try { return System.Convert.ToBoolean(value); } catch { return false; }
         }
     }
 

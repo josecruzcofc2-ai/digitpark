@@ -11,7 +11,7 @@ namespace DigitPark.Editor
     /// <summary>
     /// Main Onboarding UI Builder - Slide-Based Architecture
     /// Each step is an independent slide inside SlidesContainer (like CashBattle).
-    /// 8 slides: Welcome, Name, Avatar, Games, CashBattle, Tournaments, Rewards, Completion
+    /// 7 slides: Welcome, Name, Games, CashBattle, Tournaments, Rewards, Completion
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
     /// Menu: DigitPark/UI Builders/Onboarding/Main Onboarding
@@ -72,7 +72,6 @@ namespace DigitPark.Editor
         {
             "Assets/_Project/Art/Icons/Onboarding/WelcomeIcon.png",
             "Assets/_Project/Art/Icons/Social/ProfileIcon.png",
-            "Assets/_Project/Art/Icons/Social/AvatarDefault.png",
             "Assets/_Project/Art/Icons/Onboarding/GamesIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/CashBattleIcon.png",
             "Assets/_Project/Art/Icons/Onboarding/TournamentsIcon.png",
@@ -101,7 +100,7 @@ namespace DigitPark.Editor
                 "  ProgressBar (Slider, maxValue=7)\n" +
                 "  TopBar (DIGITPARK 36px + StepCounter 28px + SkipButton 28px)\n" +
                 "  SlidesContainer\n" +
-                "    Slide1 (Welcome) - Slide8 (Completion)\n" +
+                "    Slide1 (Welcome) - Slide7 (Completion)\n" +
                 "  DotsContainer\n" +
                 "  NavigationPanel (PrevButton 36px + NextButton 36px)",
                 MessageType.Info);
@@ -326,14 +325,13 @@ namespace DigitPark.Editor
 
             CreateSlide1_Welcome(container.transform);
             CreateSlide2_Name(container.transform);
-            CreateSlide3_Avatar(container.transform);
-            CreateSlide4_Games(container.transform);
-            CreateSlide5_CashBattle(container.transform);
-            CreateSlide6_Tournaments(container.transform);
-            CreateSlide7_Rewards(container.transform);
-            CreateSlide8_Completion(container.transform);
+            CreateSlide3_Games(container.transform);
+            CreateSlide4_CashBattle(container.transform);
+            CreateSlide5_Tournaments(container.transform);
+            CreateSlide6_Rewards(container.transform);
+            CreateSlide7_Completion(container.transform);
 
-            Debug.Log("[OnboardingUI] SlidesContainer creado (8 slides)");
+            Debug.Log("[OnboardingUI] SlidesContainer creado (7 slides)");
         }
 
         // --- Slide Base: Icon + Title (shared by info slides) ---
@@ -642,46 +640,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 3 - Avatar Selection
+        #region Slide 3 - Games
 
-        private static void CreateSlide3_Avatar(Transform parent)
+        private static void CreateSlide3_Games(Transform parent)
         {
             var slide = CreateSlideBase(parent, "Slide3", 2, false);
-            CreateSlideTitle(slide, "Choose your Avatar", CYAN_NEON);
-
-            // AvatarSelectionPanel
-            var panel = new GameObject("AvatarSelectionPanel");
-            panel.transform.SetParent(slide, false);
-            var pRT = panel.AddComponent<RectTransform>();
-            pRT.anchorMin = new Vector2(0.05f, 0.14f);
-            pRT.anchorMax = new Vector2(0.95f, 0.48f);
-            pRT.offsetMin = Vector2.zero;
-            pRT.offsetMax = Vector2.zero;
-
-            var grid = new GameObject("AvatarContainer");
-            grid.transform.SetParent(panel.transform, false);
-            var gRT = grid.AddComponent<RectTransform>();
-            gRT.anchorMin = Vector2.zero;
-            gRT.anchorMax = Vector2.one;
-            gRT.offsetMin = new Vector2(10, 10);
-            gRT.offsetMax = new Vector2(-10, -10);
-
-            var gridLayout = grid.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(150, 180);
-            gridLayout.spacing = new Vector2(20, 15);
-            gridLayout.padding = new RectOffset(10, 10, 5, 5);
-            gridLayout.childAlignment = TextAnchor.MiddleCenter;
-            gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gridLayout.constraintCount = 3;
-        }
-
-        #endregion
-
-        #region Slide 4 - Games
-
-        private static void CreateSlide4_Games(Transform parent)
-        {
-            var slide = CreateSlideBase(parent, "Slide4", 3, false);
             CreateSlideTitle(slide, "Cognitive Games", CYAN_NEON);
 
             var content = CreateContentCard(slide);
@@ -700,11 +663,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 5 - CashBattle
+        #region Slide 4 - CashBattle
 
-        private static void CreateSlide5_CashBattle(Transform parent)
+        private static void CreateSlide4_CashBattle(Transform parent)
         {
-            var slide = CreateSlideBase(parent, "Slide5", 4, false);
+            var slide = CreateSlideBase(parent, "Slide4", 3, false);
             CreateSlideTitle(slide, "CashBattle", CYAN_NEON);
 
             var content = CreateContentCard(slide);
@@ -721,11 +684,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 6 - Tournaments
+        #region Slide 5 - Tournaments
 
-        private static void CreateSlide6_Tournaments(Transform parent)
+        private static void CreateSlide5_Tournaments(Transform parent)
         {
-            var slide = CreateSlideBase(parent, "Slide6", 5, false);
+            var slide = CreateSlideBase(parent, "Slide5", 4, false);
             CreateSlideTitle(slide, "Tournaments", CYAN_NEON);
 
             var content = CreateContentCard(slide);
@@ -742,11 +705,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 7 - Rewards
+        #region Slide 6 - Rewards
 
-        private static void CreateSlide7_Rewards(Transform parent)
+        private static void CreateSlide6_Rewards(Transform parent)
         {
-            var slide = CreateSlideBase(parent, "Slide7", 6, false);
+            var slide = CreateSlideBase(parent, "Slide6", 5, false);
             CreateSlideTitle(slide, "Daily Rewards", CYAN_NEON);
 
             var content = CreateContentCard(slide);
@@ -763,11 +726,11 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Slide 8 - Completion
+        #region Slide 7 - Completion
 
-        private static void CreateSlide8_Completion(Transform parent)
+        private static void CreateSlide7_Completion(Transform parent)
         {
-            var slide = FindOrCreate(parent, "Slide8");
+            var slide = FindOrCreate(parent, "Slide7");
             var sRT = GetOrAdd<RectTransform>(slide);
             sRT.anchorMin = Vector2.zero;
             sRT.anchorMax = Vector2.one;
@@ -1035,19 +998,13 @@ namespace DigitPark.Editor
             SetRef(so, "confirmNameButton", FindInPath<Button>(r, "SlidesContainer/Slide2/NameInputPanel/InputContainer/ConfirmNameButton"));
             SetRef(so, "nameErrorText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide2/NameInputPanel/InputContainer/NameErrorText"));
 
-            // UI - Avatar Selection (inside Slide3)
-            Transform avatarPanel = r.Find("SlidesContainer/Slide3/AvatarSelectionPanel");
-            if (avatarPanel != null) SetRef(so, "avatarSelectionPanel", avatarPanel.gameObject);
-            Transform avatarGrid = r.Find("SlidesContainer/Slide3/AvatarSelectionPanel/AvatarContainer");
-            if (avatarGrid != null) SetRef(so, "avatarContainer", avatarGrid);
-
-            // UI - Tutorial Completion (inside Slide8)
-            Transform compPanel = r.Find("SlidesContainer/Slide8/CompletionPanel");
+            // UI - Tutorial Completion (inside Slide7)
+            Transform compPanel = r.Find("SlidesContainer/Slide7/CompletionPanel");
             if (compPanel != null) SetRef(so, "completionPanel", compPanel.gameObject);
-            SetRef(so, "completionTitleText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide8/CompletionPanel/CompletionTitle"));
-            SetRef(so, "completionMessageText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide8/CompletionPanel/CompletionMessage"));
-            SetRef(so, "rewardText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide8/CompletionPanel/RewardsCard/RewardText"));
-            SetRef(so, "startPlayingButton", FindInPath<Button>(r, "SlidesContainer/Slide8/CompletionPanel/StartPlayingButton"));
+            SetRef(so, "completionTitleText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide7/CompletionPanel/CompletionTitle"));
+            SetRef(so, "completionMessageText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide7/CompletionPanel/CompletionMessage"));
+            SetRef(so, "rewardText", FindInPath<TextMeshProUGUI>(r, "SlidesContainer/Slide7/CompletionPanel/RewardsCard/RewardText"));
+            SetRef(so, "startPlayingButton", FindInPath<Button>(r, "SlidesContainer/Slide7/CompletionPanel/StartPlayingButton"));
 
             // UI - Sections (for animations)
             Transform progressBarT = r.Find("ProgressBar");

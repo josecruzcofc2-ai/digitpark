@@ -61,7 +61,8 @@ namespace DigitPark.Games
             SetupCognitiveSprintPanel();
 
             // Suscribirse a cambios de seleccion
-            CognitiveSprintManager.Instance.OnSelectionChanged += UpdateSprintUI;
+            if (CognitiveSprintManager.Instance != null)
+                CognitiveSprintManager.Instance.OnSelectionChanged += UpdateSprintUI;
         }
 
         private void OnDestroy()
@@ -149,20 +150,24 @@ namespace DigitPark.Games
         /// </summary>
         private void StartSingleGame(GameType gameType)
         {
+            if (GameSessionManager.Instance == null)
+            {
+                Debug.LogError("[GameSelector] GameSessionManager not available");
+                return;
+            }
+
             if (isPracticeMode)
             {
                 GameSessionManager.Instance.StartPracticeSession(gameType);
             }
             else if (isOnlineMatchMode)
             {
-                // Modo 1v1 online - navegar a seleccion de apuesta
                 Debug.Log($"[GameSelector] Iniciando seleccion de apuesta para {gameType}");
                 MatchmakingManager.SetMatchGameType(gameType, false);
                 SceneManager.LoadScene("BetSelection");
             }
             else
             {
-                // Modo competitivo sin matchmaking (ej: torneos)
                 Debug.Log($"Modo competitivo para {gameType}");
                 GameSessionManager.Instance.StartPracticeSession(gameType);
             }

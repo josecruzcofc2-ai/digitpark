@@ -10,7 +10,7 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// FriendRequests UI Builder - Escena dedicada de Solicitudes de Amistad
-    /// Tabs Recibidas/Enviadas, lista de solicitudes con avatar y acciones
+    /// Tabs Recibidas/Enviadas, lista de solicitudes con acciones
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
     /// Menu: DigitPark/UI Builders/Social/FriendRequests
@@ -83,7 +83,7 @@ namespace DigitPark.Editor
                 "1. Header (Back, SOLICITUDES, contador)\n" +
                 "2. Tabs (Recibidas | Enviadas)\n" +
                 "3. ScrollView (lista de request items)\n" +
-                "4. RequestItem Prefab (avatar, info, botones)",
+                "4. RequestItem Prefab (info, botones)",
                 MessageType.Info);
 
             GUILayout.Space(15);
@@ -482,58 +482,14 @@ namespace DigitPark.Editor
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);
 
-            // ---- Circular Avatar (left) ----
-            Sprite circleSprite = GenerateCircleSprite();
-
-            var avatarFrame = new GameObject("AvatarFrame");
-            avatarFrame.transform.SetParent(card.transform, false);
-            var afRT = avatarFrame.AddComponent<RectTransform>();
-            afRT.anchorMin = new Vector2(0, 0.5f);
-            afRT.anchorMax = new Vector2(0, 0.5f);
-            afRT.pivot = new Vector2(0, 0.5f);
-            afRT.anchoredPosition = new Vector2(12, 0);
-            afRT.sizeDelta = new Vector2(60, 60);
-            var afImg = avatarFrame.AddComponent<Image>();
-            afImg.sprite = circleSprite;
-            afImg.color = CYAN_DARK;
-            var fr_friendreq = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
-            fr_friendreq.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Reduced);
-
-            // Circular mask
-            var avatarMask = new GameObject("AvatarMask");
-            avatarMask.transform.SetParent(avatarFrame.transform, false);
-            var amRT = avatarMask.AddComponent<RectTransform>();
-            amRT.anchorMin = new Vector2(0.06f, 0.06f);
-            amRT.anchorMax = new Vector2(0.94f, 0.94f);
-            amRT.offsetMin = Vector2.zero;
-            amRT.offsetMax = Vector2.zero;
-            var amImg = avatarMask.AddComponent<Image>();
-            amImg.sprite = circleSprite;
-            amImg.color = CARD_BG_LIGHT;
-            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
-
-            // Avatar Image (clipped to circle)
-            var avatarImg = new GameObject("AvatarImage");
-            avatarImg.transform.SetParent(avatarMask.transform, false);
-            var aiRT = avatarImg.AddComponent<RectTransform>();
-            aiRT.anchorMin = Vector2.zero;
-            aiRT.anchorMax = Vector2.one;
-            aiRT.offsetMin = Vector2.zero;
-            aiRT.offsetMax = Vector2.zero;
-            var aiImg = avatarImg.AddComponent<Image>();
-            aiImg.color = Color.white;
-            aiImg.preserveAspect = true;
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
-            if (defaultAvatar != null) aiImg.sprite = defaultAvatar;
-
-            // ---- Info Section (center) ----
+            // ---- Info Section (left, expanded — avatar removed) ----
             var infoSection = new GameObject("InfoSection");
             infoSection.transform.SetParent(card.transform, false);
             var isRT = infoSection.AddComponent<RectTransform>();
             isRT.anchorMin = new Vector2(0, 0.5f);
             isRT.anchorMax = new Vector2(0.58f, 0.5f);
             isRT.pivot = new Vector2(0, 0.5f);
-            isRT.anchoredPosition = new Vector2(85, 0);
+            isRT.anchoredPosition = new Vector2(12, 0);
             isRT.sizeDelta = new Vector2(0, 70);
 
             // Username

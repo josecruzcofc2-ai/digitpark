@@ -962,8 +962,11 @@ namespace DigitPark.Services
             PlayerPrefs.SetString(ACHIEVEMENTS_KEY, json);
             PlayerPrefs.Save();
 
-            // Guardar en Firebase
-            _ = SaveToFirebase();
+            // Guardar en Firebase (with error logging)
+            _ = SaveToFirebase().ContinueWith(t =>
+            {
+                if (t.IsFaulted) Debug.LogWarning($"[AchievementService] Firebase save failed: {t.Exception?.GetBaseException().Message}");
+            }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private async Task SaveToFirebase()

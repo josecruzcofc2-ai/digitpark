@@ -932,7 +932,6 @@ namespace DigitPark.Localization
 
             // ==================== TOURNAMENT LOBBY (V41) ====================
             { "GameTypeText", "game_type" },
-            { "ChatBadgeText", "chat_badge" },
             { "RankCol", "rank_column" },
             { "PlayerCol", "player_column" },
             { "LeaveButtonText", "leave" },

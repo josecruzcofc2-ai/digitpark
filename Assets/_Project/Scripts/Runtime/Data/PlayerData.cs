@@ -32,8 +32,8 @@ namespace DigitPark.Data
         // Historial de tiempos (ultimos 30)
         public List<ScoreEntry> scoreHistory;
 
-        // Torneos participados
-        public Dictionary<string, TournamentResult> tournaments;
+        // Torneos participados (List for JsonUtility compatibility — Dictionary not serializable)
+        public List<TournamentResultEntry> tournamentResults;
 
         // Configuraciones del jugador
         public PlayerSettings settings;
@@ -43,11 +43,29 @@ namespace DigitPark.Data
 
         // Estado premium
         public bool isPremium;
-        public DateTime premiumExpiryDate;
+        // ISO 8601 strings for JsonUtility compatibility (DateTime serializes as {})
+        public string premiumExpiryDateISO;
 
         // Ultima sesion
-        public DateTime lastLoginDate;
-        public DateTime createdDate;
+        public string lastLoginDateISO;
+        public string createdDateISO;
+
+        // Helper properties for DateTime access
+        public DateTime premiumExpiryDate
+        {
+            get => DateTime.TryParse(premiumExpiryDateISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.MinValue;
+            set => premiumExpiryDateISO = value.ToString("o");
+        }
+        public DateTime lastLoginDate
+        {
+            get => DateTime.TryParse(lastLoginDateISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.Now;
+            set => lastLoginDateISO = value.ToString("o");
+        }
+        public DateTime createdDate
+        {
+            get => DateTime.TryParse(createdDateISO, null, System.Globalization.DateTimeStyles.RoundtripKind, out var d) ? d : DateTime.Now;
+            set => createdDateISO = value.ToString("o");
+        }
 
         public PlayerData()
         {
@@ -57,7 +75,7 @@ namespace DigitPark.Data
             avatarUrl = "";
             countryCode = "US";
 
-            bestTime = float.MaxValue;
+            bestTime = -1f; // Sentinel: no score yet (float.MaxValue corrupts Firebase queries)
             averageTime = 0f;
             totalGamesPlayed = 0;
             totalGamesWon = 0;
@@ -70,7 +88,7 @@ namespace DigitPark.Data
             oddOneOutStats = new GameStats();
 
             scoreHistory = new List<ScoreEntry>();
-            tournaments = new Dictionary<string, TournamentResult>();
+            tournamentResults = new List<TournamentResultEntry>();
             settings = new PlayerSettings();
             friends = new List<string>();
 
@@ -163,11 +181,11 @@ namespace DigitPark.Data
         /// </summary>
         public Dictionary<string, object> ToDictionary()
         {
+            // S15-NEW-03: email omitido — Firebase Auth ya lo tiene; no guardarlo en RTDB
             return new Dictionary<string, object>
             {
                 { "userId", userId },
                 { "username", username },
-                { "email", email },
                 { "avatarUrl", avatarUrl },
                 { "countryCode", countryCode },
                 { "bestTime", bestTime },
@@ -175,9 +193,15 @@ namespace DigitPark.Data
                 { "totalGamesPlayed", totalGamesPlayed },
                 { "totalGamesWon", totalGamesWon },
                 { "isPremium", isPremium },
-                { "premiumExpiryDate", premiumExpiryDate.ToString() },
-                { "lastLoginDate", lastLoginDate.ToString() },
-                { "createdDate", createdDate.ToString() }
+                { "premiumExpiryDateISO", premiumExpiryDateISO ?? "" },
+                { "lastLoginDateISO", lastLoginDateISO ?? "" },
+                { "createdDateISO", createdDateISO ?? "" },
+                // Per-game stats (P2-DATA-03: were missing from ToDictionary)
+                { "digitRushStats", JsonUtility.ToJson(digitRushStats ?? new GameStats()) },
+                { "memoryPairsStats", JsonUtility.ToJson(memoryPairsStats ?? new GameStats()) },
+                { "quickMathStats", JsonUtility.ToJson(quickMathStats ?? new GameStats()) },
+                { "flashTapStats", JsonUtility.ToJson(flashTapStats ?? new GameStats()) },
+                { "oddOneOutStats", JsonUtility.ToJson(oddOneOutStats ?? new GameStats()) },
             };
         }
 
@@ -206,7 +230,7 @@ namespace DigitPark.Data
         {
             gamesPlayed = 0;
             gamesWon = 0;
-            bestTime = float.MaxValue;
+            bestTime = -1f;
             averageTime = 0f;
         }
 
@@ -224,7 +248,7 @@ namespace DigitPark.Data
         /// </summary>
         public string GetBestTimeFormatted()
         {
-            if (bestTime >= float.MaxValue || bestTime <= 0) return "--";
+            if (bestTime < 0) return "--";
             return $"{bestTime:F2}s";
         }
     }
@@ -265,6 +289,16 @@ namespace DigitPark.Data
         public int finalPosition;
         public int totalParticipants;
         public int prizeWon;
-        public string completionDate; // String para serialización JSON
+        public string completionDate;
+    }
+
+    /// <summary>
+    /// JsonUtility-compatible wrapper for tournament results (replaces Dictionary&lt;string, TournamentResult&gt;)
+    /// </summary>
+    [System.Serializable]
+    public class TournamentResultEntry
+    {
+        public string key;
+        public TournamentResult value;
     }
 }

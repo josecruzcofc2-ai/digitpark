@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DigitPark.Monetization;
 using DigitPark.Navigation;
 using DigitPark.Localization;
+using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.UI;
 using DigitPark.UI.Items;
@@ -139,6 +140,8 @@ namespace DigitPark.Managers
 
             LoadNeonIcons();
             LoadState();
+            // Fetch server time offset before checking resets (fire-and-forget, uses cached value if fails)
+            _ = GetValidatedTimeAsync();
             CheckResets();
             ApplyPendingProgress();
             SetupUI();
@@ -334,43 +337,33 @@ namespace DigitPark.Managers
 
         #region Reset Logic
 
-        // SEC-B02: Server time validation — prevents client clock manipulation for mission resets
+        // SEC-B02: Server time validation — delegates to ServerTimeHelper (initialized at boot).
         private async Task<DateTime> GetValidatedTimeAsync()
         {
-            try
-            {
-                var db = FirebaseDB.FirebaseDatabase.DefaultInstance;
-                var serverTimeRef = db.GetReference(".info/serverTimeOffset");
-                var snapshot = await serverTimeRef.GetValueAsync();
-                if (snapshot != null && snapshot.Value != null)
-                {
-                    long offsetMs = Convert.ToInt64(snapshot.Value);
-                    return DateTime.UtcNow.AddMilliseconds(offsetMs);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"[DailyMissions] SEC-B02: Server time unavailable, using local time: {ex.Message}");
-            }
-            return DateTime.UtcNow;
+            await ServerTimeHelper.RefreshOffsetAsync();
+            return ServerTimeHelper.UtcNow;
         }
+
+        /// <summary>Returns best-effort server time via ServerTimeHelper (non-async for CheckResets).</summary>
+        private DateTime GetNow() => ServerTimeHelper.UtcNow;
 
         private void CheckResets()
         {
-            string today = DateTime.Now.ToString("yyyy-MM-dd");
+            DateTime now = GetNow();
+            string today = now.ToString("yyyy-MM-dd");
 
             // Daily reset
             if (state.lastDailyReset != today)
             {
-                SelectNewMissions(dailyPool, state.daily, DateTime.Now);
+                SelectNewMissions(dailyPool, state.daily, now);
                 state.lastDailyReset = today;
                 PlayerPrefs.SetInt("DP_DailyBonusClaimed", 0);
             }
 
             // Weekly reset
             DayOfWeek startOfWeek = DayOfWeek.Monday;
-            DateTime thisWeekStart = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek + (int)startOfWeek);
-            if (thisWeekStart > DateTime.Now) thisWeekStart = thisWeekStart.AddDays(-7);
+            DateTime thisWeekStart = now.AddDays(-(int)now.DayOfWeek + (int)startOfWeek);
+            if (thisWeekStart > now) thisWeekStart = thisWeekStart.AddDays(-7);
             string weekStartStr = thisWeekStart.ToString("yyyy-MM-dd");
 
             if (state.lastWeeklyReset != weekStartStr)
@@ -569,15 +562,16 @@ namespace DigitPark.Managers
 
         private void UpdateRefreshTimer()
         {
-            DateTime tomorrow = DateTime.Now.Date.AddDays(1);
-            TimeSpan timeUntilReset = tomorrow - DateTime.Now;
+            DateTime now = GetNow();
+            DateTime tomorrow = now.Date.AddDays(1);
+            TimeSpan timeUntilReset = tomorrow - now;
 
             if (refreshTimerText)
             {
                 refreshTimerText.text = L("ms_refresh_in", UIPolish.FormatTimerHHMMSS(timeUntilReset.Hours, timeUntilReset.Minutes, timeUntilReset.Seconds));
             }
 
-            string today = DateTime.Now.ToString("yyyy-MM-dd");
+            string today = now.ToString("yyyy-MM-dd");
             if (state.lastDailyReset != today)
             {
                 CheckResets();
@@ -1157,16 +1151,16 @@ namespace DigitPark.Managers
             }
             else
             {
-                // Fallback to PlayerPrefs
+                // Fallback to PlayerPrefs (using CurrencyManager's actual keys)
                 if (coins > 0)
                 {
-                    int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
-                    PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + coins);
+                    int currentCoins = PlayerPrefs.GetInt("dp_cc_v2", 0);
+                    PlayerPrefs.SetInt("dp_cc_v2", currentCoins + coins);
                 }
                 if (gems > 0)
                 {
-                    int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
-                    PlayerPrefs.SetInt("DP_PlayerGems", currentGems + gems);
+                    int currentGems = PlayerPrefs.GetInt("dp_cg_v2", 0);
+                    PlayerPrefs.SetInt("dp_cg_v2", currentGems + gems);
                 }
                 PlayerPrefs.Save();
             }
@@ -1227,12 +1221,12 @@ namespace DigitPark.Managers
             }
             else
             {
-                int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
-                PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + dailyBonusReward);
+                int currentCoins = PlayerPrefs.GetInt("dp_cc_v2", 0);
+                PlayerPrefs.SetInt("dp_cc_v2", currentCoins + dailyBonusReward);
                 if (dailyBonusGems > 0)
                 {
-                    int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
-                    PlayerPrefs.SetInt("DP_PlayerGems", currentGems + dailyBonusGems);
+                    int currentGems = PlayerPrefs.GetInt("dp_cg_v2", 0);
+                    PlayerPrefs.SetInt("dp_cg_v2", currentGems + dailyBonusGems);
                 }
                 PlayerPrefs.Save();
             }

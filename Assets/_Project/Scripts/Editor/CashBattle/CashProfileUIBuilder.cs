@@ -16,7 +16,7 @@ namespace DigitPark.Editor
     ///   Header (100px) FIJO arriba \u2014 BackButton + Titulo + BalanceWidget
     ///   \u2500\u2500\u2500 gold glow separator \u2500\u2500\u2500
     ///   [ScrollView rellena el resto]
-    ///     PlayerCard (330px)     \u2014 Avatar centrado grande + username + rank badge
+    ///     PlayerCard (280px)     \u2014 Username GOLD + rank badge + earnings bar
     ///     RecordCard (170px)     \u2014 W\u00b7L\u00b7D + win rate progress bar
     ///     StreakCards (120px)    \u2014 Racha Actual + Mejor Racha (side-by-side)
     ///     Section "STATS POR JUEGO"
@@ -69,8 +69,7 @@ namespace DigitPark.Editor
 
         private const string BACK_BTN_PREFAB           = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
         private const string BACK_ICON_GOLD_PATH        = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
-        private const string ICON_AVATAR_DEFAULT_GOLD   = "Assets/_Project/Art/Icons/CashBattle/UI/AvatarDefaultGold.png";
-        private const string ICON_AVATAR_DEFAULT_NEON   = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
+        // Avatar icons removed — CashProfileHeaderCard uses Username GOLD + Rank badge + earnings bar
 
         #endregion
 
@@ -102,7 +101,7 @@ namespace DigitPark.Editor
                 "Construye la UI completa para CashProfile.unity.\n\n" +
                 "Dise\u00f1o Competitive Gamer (Neon Gold):\n" +
                 "  \u2022 Header fijo + ScrollView con todo el contenido\n" +
-                "  \u2022 PlayerCard: Avatar centrado grande + rank badge\n" +
+                "  \u2022 PlayerCard: Username GOLD + rank badge + earnings bar\n" +
                 "  \u2022 RecordCard: W\u00b7L\u00b7D + win rate progress bar\n" +
                 "  \u2022 StreakCards: Racha actual + mejor racha\n" +
                 "  \u2022 GameStats: 5 juegos con progress bars\n\n" +
@@ -542,7 +541,7 @@ namespace DigitPark.Editor
         }
 
         // ================================================================
-        //  PLAYER CARD \u2014 Avatar centrado + Username + Rank Badge
+        //  PLAYER CARD \u2014 Username GOLD + Rank Badge + Earnings Bar
         // ================================================================
 
         private static void CreatePlayerCard(Transform parent)
@@ -551,7 +550,7 @@ namespace DigitPark.Editor
             card.transform.SetParent(parent, false);
 
             LayoutElement le = card.AddComponent<LayoutElement>();
-            le.preferredHeight = 450; le.flexibleWidth = 1;
+            le.preferredHeight = 280; le.flexibleWidth = 1;
 
             Image bg = card.AddComponent<Image>();
             bg.color = CARD_BG;
@@ -568,89 +567,21 @@ namespace DigitPark.Editor
             tlRT.pivot = new Vector2(0.5f, 1); tlRT.sizeDelta = new Vector2(0, 3);
             topLine.AddComponent<Image>().color = GOLD_PRIMARY;
 
-            // === Circular Avatar (matchmaking style) ===
-            Sprite circleSprite = GenerateCircleSprite();
+            // === CashProfileHeaderCard (compact, no avatar) ===
 
-            GameObject avatarFrame = new GameObject("AvatarFrame");
-            avatarFrame.transform.SetParent(card.transform, false);
-            RectTransform frameRT = avatarFrame.AddComponent<RectTransform>();
-            frameRT.anchorMin = new Vector2(0.5f, 1f);
-            frameRT.anchorMax = new Vector2(0.5f, 1f);
-            frameRT.pivot = new Vector2(0.5f, 1f);
-            frameRT.sizeDelta = new Vector2(225, 225);
-            frameRT.anchoredPosition = new Vector2(0, -14);
-
-            // Circular glow ring (outer)
-            GameObject glowRing = new GameObject("GlowRing");
-            glowRing.transform.SetParent(avatarFrame.transform, false);
-            RectTransform glowRT = glowRing.AddComponent<RectTransform>();
-            glowRT.anchorMin = Vector2.zero; glowRT.anchorMax = Vector2.one;
-            glowRT.offsetMin = new Vector2(-8, -8); glowRT.offsetMax = new Vector2(8, 8);
-            Image glowImg = glowRing.AddComponent<Image>();
-            glowImg.sprite = circleSprite;
-            glowImg.color = new Color(GOLD_PRIMARY.r, GOLD_PRIMARY.g, GOLD_PRIMARY.b, 0.25f);
-
-            // Circular border ring (solid gold frame)
-            GameObject borderRing = new GameObject("BorderRing");
-            borderRing.transform.SetParent(avatarFrame.transform, false);
-            RectTransform borderRT = borderRing.AddComponent<RectTransform>();
-            borderRT.anchorMin = Vector2.zero; borderRT.anchorMax = Vector2.one;
-            borderRT.offsetMin = Vector2.zero; borderRT.offsetMax = Vector2.zero;
-            Image borderImg = borderRing.AddComponent<Image>();
-            borderImg.sprite = circleSprite;
-            borderImg.color = GOLD_DARK;
-
-            // Add GlowPulse to frame for subtle animation
-            UIBuilderAnimationUtils.AddGlowPulse(avatarFrame, 0.25f, 0.5f);
-
-            // Circular mask container (clips avatar to circle)
-            GameObject avatarMask = new GameObject("AvatarMask");
-            avatarMask.transform.SetParent(avatarFrame.transform, false);
-            RectTransform amRT = avatarMask.AddComponent<RectTransform>();
-            amRT.anchorMin = new Vector2(0.06f, 0.06f);
-            amRT.anchorMax = new Vector2(0.94f, 0.94f);
-            amRT.offsetMin = Vector2.zero; amRT.offsetMax = Vector2.zero;
-            Image amImg = avatarMask.AddComponent<Image>();
-            amImg.sprite = circleSprite;
-            amImg.color = CARD_BG;
-            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
-
-            // Avatar Image (inside mask — clipped to circle)
-            GameObject avatar = new GameObject("AvatarImage");
-            avatar.transform.SetParent(avatarMask.transform, false);
-            RectTransform avRT = avatar.AddComponent<RectTransform>();
-            avRT.anchorMin = Vector2.zero; avRT.anchorMax = Vector2.one;
-            avRT.offsetMin = Vector2.zero; avRT.offsetMax = Vector2.zero;
-
-            Image avImg = avatar.AddComponent<Image>();
-            avImg.color = Color.white;
-            avImg.preserveAspect = true;
-
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT_GOLD);
-            if (defaultAvatar == null)
-                defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT_NEON);
-            if (defaultAvatar != null)
-            {
-                avImg.sprite = defaultAvatar;
-            }
-            else
-            {
-                avImg.color = new Color(0.15f, 0.13f, 0.20f, 1f);
-            }
-
-            // === Username (debajo del avatar) ===
+            // === Username GOLD (top, centered) ===
             GameObject uname = new GameObject("UsernameText");
             uname.transform.SetParent(card.transform, false);
             RectTransform unRT = uname.AddComponent<RectTransform>();
             unRT.anchorMin = new Vector2(0.05f, 1f);
             unRT.anchorMax = new Vector2(0.95f, 1f);
             unRT.pivot = new Vector2(0.5f, 1f);
-            unRT.sizeDelta = new Vector2(0, 50);
-            unRT.anchoredPosition = new Vector2(0, -250);
+            unRT.sizeDelta = new Vector2(0, 55);
+            unRT.anchoredPosition = new Vector2(0, -15);
 
             TextMeshProUGUI unTmp = uname.AddComponent<TextMeshProUGUI>();
             unTmp.text = "Player";
-            unTmp.fontSize = FontSizes.H3; unTmp.color = TEXT_WHITE;
+            unTmp.fontSize = FontSizes.H2; unTmp.color = GOLD_LIGHT;
             unTmp.alignment = TextAlignmentOptions.Center;
             unTmp.fontStyle = FontStyles.Bold;
             unTmp.enableAutoSizing = true;
@@ -664,7 +595,7 @@ namespace DigitPark.Editor
             msRT.anchorMax = new Vector2(0.9f, 1f);
             msRT.pivot = new Vector2(0.5f, 1f);
             msRT.sizeDelta = new Vector2(0, 36);
-            msRT.anchoredPosition = new Vector2(0, -305);
+            msRT.anchoredPosition = new Vector2(0, -75);
 
             TextMeshProUGUI msTmp = msince.AddComponent<TextMeshProUGUI>();
             msTmp.text = "Member since 2024";
@@ -683,7 +614,7 @@ namespace DigitPark.Editor
             rbRT.anchorMax = new Vector2(0.5f, 1f);
             rbRT.pivot = new Vector2(0.5f, 1f);
             rbRT.sizeDelta = new Vector2(260, 50);
-            rbRT.anchoredPosition = new Vector2(0, -350);
+            rbRT.anchoredPosition = new Vector2(0, -115);
             Image rbBg = rankBadge.AddComponent<Image>();
             rbBg.color = new Color(GOLD_DARK.r * 0.25f, GOLD_DARK.g * 0.25f, GOLD_DARK.b * 0.25f, 0.9f);
             Outline rbOutline = rankBadge.AddComponent<Outline>();
@@ -702,6 +633,31 @@ namespace DigitPark.Editor
             rkTmp.fontStyle = FontStyles.Bold;
             rkTmp.enableAutoSizing = true;
             rkTmp.fontSizeMin = FontSizes.Caption; rkTmp.fontSizeMax = FontSizes.Body;
+
+            // === Earnings Bar (bottom of card) ===
+            GameObject earningsBar = new GameObject("EarningsBar");
+            earningsBar.transform.SetParent(card.transform, false);
+            RectTransform ebRT = earningsBar.AddComponent<RectTransform>();
+            ebRT.anchorMin = new Vector2(0.08f, 1f);
+            ebRT.anchorMax = new Vector2(0.92f, 1f);
+            ebRT.pivot = new Vector2(0.5f, 1f);
+            ebRT.sizeDelta = new Vector2(0, 40);
+            ebRT.anchoredPosition = new Vector2(0, -180);
+            earningsBar.AddComponent<Image>().color = new Color(0.1f, 0.09f, 0.14f, 1f);
+
+            GameObject earningsText = new GameObject("EarningsText");
+            earningsText.transform.SetParent(earningsBar.transform, false);
+            RectTransform etRT = earningsText.AddComponent<RectTransform>();
+            etRT.anchorMin = Vector2.zero; etRT.anchorMax = Vector2.one;
+            etRT.offsetMin = new Vector2(10, 0); etRT.offsetMax = new Vector2(-10, 0);
+            TextMeshProUGUI etTmp = earningsText.AddComponent<TextMeshProUGUI>();
+            etTmp.text = "Total Earnings: $0.00";
+            etTmp.fontSize = FontSizes.Body; etTmp.color = GOLD_PRIMARY;
+            etTmp.alignment = TextAlignmentOptions.Center;
+            etTmp.fontStyle = FontStyles.Bold;
+            etTmp.enableAutoSizing = true;
+            etTmp.fontSizeMin = FontSizes.AutoMinBody;
+            etTmp.fontSizeMax = FontSizes.Body;
 
         }
 
@@ -1170,8 +1126,6 @@ namespace DigitPark.Editor
             Assign(so, "titleText",   FindTMP(root, "TitleText"));
 
             // \u2500\u2500 Avatar \u2500\u2500
-            Transform avT = Deep(root, "AvatarImage");
-            Assign(so, "avatarImage", avT != null ? avT.GetComponent<Image>() : null);
             Assign(so, "usernameText",    FindTMP(root, "UsernameText"));
             Assign(so, "memberSinceText", FindTMP(root, "MemberSinceText"));
 

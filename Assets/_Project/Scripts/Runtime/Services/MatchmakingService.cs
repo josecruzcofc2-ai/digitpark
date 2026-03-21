@@ -80,9 +80,8 @@ namespace DigitPark.Services
                     }
                     else
                     {
-                        // Use anonymous ID for testing
-                        currentUserId = SystemInfo.deviceUniqueIdentifier;
-                        currentUserName = PlayerPrefs.GetString("DP_PlayerName", "Player");
+                        // HIGH-15: No anonymous fallback — user must be authenticated to use matchmaking
+                        Debug.LogWarning("[MatchmakingService] No authenticated user. Matchmaking unavailable until login.");
                     }
 
                     Debug.Log($"[MatchmakingService] Initialized - User: {currentUserId}");
@@ -101,6 +100,14 @@ namespace DigitPark.Services
         /// </summary>
         public void FindMatch(GameType gameType, bool isCashMatch, Action<string, string> onFound, Action<string> onFailed)
         {
+            // HIGH-15: Require authenticated user — no anonymous fallback
+            if (FirebaseAuth.DefaultInstance.CurrentUser == null)
+            {
+                Debug.LogError("[MatchmakingService] Usuario no autenticado. Abortando matchmaking.");
+                onFailed?.Invoke("not_authenticated");
+                return;
+            }
+
             if (isSearching)
             {
                 Debug.LogWarning("[MatchmakingService] Already searching for a match");
@@ -222,7 +229,7 @@ namespace DigitPark.Services
                     foreach (var child in task.Result.Children)
                     {
                         var data = child.Value as Dictionary<string, object>;
-                        if (data != null)
+                        if (data != null && data.ContainsKey("userId"))
                         {
                             string odId = data["userId"].ToString();
                             // Don't match with yourself
@@ -380,7 +387,7 @@ namespace DigitPark.Services
             };
 
             var newEntryRef = matchmakingQueueRef.Child(gameKey).Push();
-            newEntryRef.SetValueAsync(queueEntry).ContinueWith(t =>
+            newEntryRef.SetValueAsync(queueEntry).ContinueWithOnMainThread(t =>
             {
                 if (t.IsFaulted)
                     Debug.LogError($"[MatchmakingService] Failed to add to queue: {t.Exception?.GetBaseException().Message}");
@@ -396,7 +403,11 @@ namespace DigitPark.Services
 
             if (!string.IsNullOrEmpty(gameKey))
             {
-                matchmakingQueueRef.Child(gameKey).Child(entryKey).RemoveValueAsync();
+                matchmakingQueueRef.Child(gameKey).Child(entryKey).RemoveValueAsync().ContinueWithOnMainThread(t =>
+                {
+                    if (t.IsFaulted)
+                        Debug.LogWarning($"[MatchmakingService] Failed to remove queue entry: {t.Exception?.GetBaseException().Message}");
+                });
             }
             else
             {
@@ -427,7 +438,7 @@ namespace DigitPark.Services
             };
 
             var newMatchRef = activeMatchesRef.Push();
-            newMatchRef.SetValueAsync(matchData).ContinueWith(t =>
+            newMatchRef.SetValueAsync(matchData).ContinueWithOnMainThread(t =>
             {
                 if (t.IsFaulted)
                     Debug.LogError($"[MatchmakingService] Failed to create match: {t.Exception?.GetBaseException().Message}");
@@ -454,7 +465,7 @@ namespace DigitPark.Services
                 if (task.IsCompleted && !task.IsFaulted && task.Result.Exists)
                 {
                     var data = task.Result.Value as Dictionary<string, object>;
-                    if (data != null)
+                    if (data != null && data.ContainsKey("player1Id"))
                     {
                         bool isPlayer1 = data["player1Id"].ToString() == currentUserId;
                         string scoreKey = isPlayer1 ? "player1Score" : "player2Score";
@@ -468,7 +479,7 @@ namespace DigitPark.Services
                             { finishedKey, true }
                         };
 
-                        activeMatchesRef.Child(matchId).UpdateChildrenAsync(updates).ContinueWith(t =>
+                        activeMatchesRef.Child(matchId).UpdateChildrenAsync(updates).ContinueWithOnMainThread(t =>
                         {
                             if (t.IsFaulted)
                                 Debug.LogError($"[MatchmakingService] Failed to submit result: {t.Exception?.GetBaseException().Message}");
@@ -491,10 +502,15 @@ namespace DigitPark.Services
             _opponentResultRef = activeMatchesRef.Child(matchId);
             _opponentResultHandler = (sender, args) =>
             {
+                if (args.DatabaseError != null)
+                {
+                    Debug.LogError($"[MatchmakingService] ValueChanged error: {args.DatabaseError.Message}");
+                    return;
+                }
                 if (args.Snapshot.Exists)
                 {
                     var data = args.Snapshot.Value as Dictionary<string, object>;
-                    if (data != null)
+                    if (data != null && data.ContainsKey("player1Id"))
                     {
                         bool isPlayer1 = data["player1Id"].ToString() == currentUserId;
                         string opponentFinishedKey = isPlayer1 ? "player2Finished" : "player1Finished";

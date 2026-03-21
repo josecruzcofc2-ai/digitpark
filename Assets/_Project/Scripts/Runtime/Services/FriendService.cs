@@ -41,7 +41,7 @@ namespace DigitPark.Services
                 // C-67: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
                 if (!_instance)
                 {
-                    _instance = FindObjectOfType<FriendService>();
+                    _instance = FindFirstObjectByType<FriendService>();
                     if (!_instance)
                     {
                         GameObject go = new GameObject("FriendService");
@@ -72,7 +72,10 @@ namespace DigitPark.Services
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
                 LoadRequestsLocal(); // Immediate local load
-                _ = LoadRequestsAsync(); // Async Firebase load (overwrites if available)
+                _ = LoadRequestsAsync().ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogWarning($"[FriendService] Initial load failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                 Debug.Log("[FriendService] Inicializado");
             }
             else if (_instance != this)
@@ -193,10 +196,13 @@ namespace DigitPark.Services
             _allRequests.Add(request);
             SaveRequests();
 
-            // Sync to Firebase
+            // Sync to Firebase (with error logging)
             if (DatabaseService.Instance != null)
             {
-                _ = DatabaseService.Instance.SaveFriendRequest(request);
+                _ = DatabaseService.Instance.SaveFriendRequest(request).ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogWarning($"[FriendService] SaveFriendRequest sync failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
             }
 
             Debug.Log($"[FriendService] Solicitud enviada a {receiverUsername}");
@@ -245,23 +251,24 @@ namespace DigitPark.Services
                 currentUser.friends.Add(request.senderId);
             }
 
-            // Agregar al usuario actual a la lista del remitente
             if (DatabaseService.Instance == null) { Debug.LogWarning("[FriendService] DatabaseService not available"); return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "SERVICE_UNAVAILABLE"); }
-            var senderData = await DatabaseService.Instance.GetPlayerDataById(request.senderId);
-            if (senderData != null && !senderData.friends.Contains(currentUser.userId))
-            {
-                senderData.friends.Add(currentUser.userId);
-                await DatabaseService.Instance.SavePlayerData(senderData);
-            }
 
-            // Guardar datos del usuario actual
+            // B5-A: Write bilateral friendship via /friends node (authorized by bilateral rule).
+            // We write /friends/{senderId}/{currentUserId} — the bilateral rule allows auth.uid === $friendId.
+            // Avoids writing to /players/{senderId}/ which only the sender is authorized to do.
+            await DatabaseService.Instance.AddFriendEntry(request.senderId, currentUser.userId);
+
+            // Guardar datos del usuario actual (own node — authorized)
             await DatabaseService.Instance.SavePlayerData(currentUser);
             SaveRequests();
 
             // Sync status to Firebase
             if (DatabaseService.Instance != null)
             {
-                _ = DatabaseService.Instance.UpdateFriendRequestStatus(request);
+                _ = DatabaseService.Instance.UpdateFriendRequestStatus(request).ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogWarning($"[FriendService] UpdateStatus failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
             }
 
             Debug.Log($"[FriendService] Solicitud de {request.senderUsername} aceptada");
@@ -274,6 +281,16 @@ namespace DigitPark.Services
 
             return FriendOperationResult.Successful(AutoLocalizer.Get("now_friends_with", request.senderUsername));
         }
+
+        // B1-B: helper para aceptar por senderId (usado desde notificaciones, que no tienen requestId)
+        public async System.Threading.Tasks.Task<FriendOperationResult> AcceptFriendRequestBySenderId(string senderId)
+        {
+            var request = _allRequests.Find(r => r.senderId == senderId && r.status == FriendRequestStatus.Pending);
+            if (request == null)
+                return FriendOperationResult.Failed(AutoLocalizer.Get("error_request_not_found"), "NOT_FOUND");
+            return await AcceptFriendRequest(request.requestId);
+        }
+
 
         /// <summary>
         /// Rechaza una solicitud de amistad
@@ -304,7 +321,10 @@ namespace DigitPark.Services
             // Sync status to Firebase
             if (DatabaseService.Instance != null)
             {
-                _ = DatabaseService.Instance.UpdateFriendRequestStatus(request);
+                _ = DatabaseService.Instance.UpdateFriendRequestStatus(request).ContinueWith(t =>
+                {
+                    if (t.IsFaulted) Debug.LogWarning($"[FriendService] UpdateStatus failed: {t.Exception?.GetBaseException().Message}");
+                }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
             }
 
 #if UNITY_EDITOR
@@ -468,16 +488,13 @@ namespace DigitPark.Services
             // Eliminar de la lista del usuario actual
             currentUser.friends.Remove(friendId);
 
-            // Eliminar de la lista del otro usuario
             if (DatabaseService.Instance == null) { Debug.LogWarning("[FriendService] DatabaseService not available"); return FriendOperationResult.Failed(AutoLocalizer.Get("error_not_authenticated"), "SERVICE_UNAVAILABLE"); }
-            var friendData = await DatabaseService.Instance.GetPlayerDataById(friendId);
-            if (friendData != null)
-            {
-                friendData.friends.Remove(currentUser.userId);
-                await DatabaseService.Instance.SavePlayerData(friendData);
-            }
 
-            // Guardar cambios
+            // B5-B: Remove bilateral friendship via /friends node (authorized by bilateral rule).
+            // Avoids writing to /players/{friendId}/ which only the friend is authorized to do.
+            await DatabaseService.Instance.RemoveFriendEntry(friendId, currentUser.userId);
+
+            // Guardar cambios propios (own node — authorized)
             await DatabaseService.Instance.SavePlayerData(currentUser);
 
             Debug.Log($"[FriendService] Amigo {friendId} eliminado");
@@ -512,7 +529,6 @@ namespace DigitPark.Services
                     {
                         odId = friendId,
                         username = friendData.username,
-                        avatarUrl = friendData.avatarUrl,
                         isOnline = online,
                         winRate = friendData.GetWinRate(),
                         favoriteGame = GetFavoriteGame(friendData)

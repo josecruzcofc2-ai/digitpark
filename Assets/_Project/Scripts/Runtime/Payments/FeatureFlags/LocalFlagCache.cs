@@ -90,5 +90,8 @@ namespace DigitPark.Payments
         public bool TriumphEnabled = false;
         public bool MaintenanceMode = false;
         public string AppVersion = "pro";
+        public string TermsUrl = "https://digitpark.com/terms";
+        public string PrivacyUrl = "https://digitpark.com/privacy";
+        public string ResponsibleGamingUrl = "https://digitpark.com/responsible-gaming";
     }
 }

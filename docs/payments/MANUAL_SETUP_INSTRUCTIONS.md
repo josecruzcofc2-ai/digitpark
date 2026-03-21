@@ -59,9 +59,9 @@ Stripe requiere que los productos y precios se creen en el Dashboard antes de po
 2. Clic en **"Add product"** (boton azul, esquina superior derecha)
 3. Crear cada uno de los siguientes productos — los nombres deben coincidir EXACTAMENTE con los valores en `ProductCatalog.cs`:
 
-#### Producto 1: 100 Sparks
-- **Name**: `100 Sparks`
-- **Description**: `100 units of virtual currency for Digit Park cosmetic shop`
+#### Producto 1: 150 Sparks
+- **Name**: `150 Sparks`
+- **Description**: `150 units of virtual currency for Digit Park cosmetic shop`
 - **Image**: (opcional) subir imagen del paquete de Sparks
 - En **Pricing**, clic en **"Add pricing"**:
   - **Pricing model**: Standard pricing
@@ -121,7 +121,7 @@ Abrir `Assets/_Project/Scripts/Runtime/Payments/Core/ProductCatalog.cs` y agrega
 new CosmeticProduct
 {
     ProductId = "sparks_100",
-    DisplayName = "100 Sparks",
+    DisplayName = "150 Sparks",
     StripePriceId = "price_XXXXX_EL_QUE_COPIASTE",  // <-- agregar aqui
     AppleProductId = "com.matrixsoftware.digitpark.gems_100",
     ...
@@ -212,16 +212,16 @@ Los IAP deben coincidir EXACTAMENTE con los Apple Product IDs en `ProductCatalog
 1. En la app recien creada, en el menu lateral izquierdo: **"In-App Purchases"**
 2. Clic en **"Create"** (boton azul)
 
-#### IAP 1: 100 Sparks (Consumable)
+#### IAP 1: 150 Sparks (Consumable)
 - **Type**: Consumable
-- **Reference Name**: `100 Sparks` (nombre interno para App Store Connect)
+- **Reference Name**: `150 Sparks` (nombre interno para App Store Connect)
 - **Product ID**: `com.matrixsoftware.digitpark.gems_100`
 - Clic en **"Create"**
 - En la pagina del IAP:
   - **Pricing**: clic en **"Add Pricing"** → seleccionar **Tier 1** ($0.99)
   - En **Localizations**: clic en **"Add Localization"** → English (U.S.)
-    - **Display Name**: `100 Sparks`
-    - **Description**: `100 units of virtual currency to spend in the Digit Park cosmetic shop`
+    - **Display Name**: `150 Sparks`
+    - **Description**: `150 units of virtual currency to spend in the Digit Park cosmetic shop`
   - Clic en **"Save"**
 
 #### IAP 2: 500 Sparks (Consumable)
@@ -786,7 +786,7 @@ Verificar cada item antes de subir a App Store Connect para review.
 Ejecutar este script de testing manual en un dispositivo fisico (no simulador):
 
 1. **Test 1 — Compra exitosa via Stripe**:
-   - Abrir tienda → comprar "100 Sparks" → tarjeta 4242... → verificar que los Sparks se otorgan
+   - Abrir tienda → comprar "150 Sparks" → tarjeta 4242... → verificar que los Sparks se otorgan
 
 2. **Test 2 — Rechazo via Stripe**:
    - Abrir tienda → comprar "500 Sparks" → tarjeta 4000...9995 → verificar mensaje de error correcto

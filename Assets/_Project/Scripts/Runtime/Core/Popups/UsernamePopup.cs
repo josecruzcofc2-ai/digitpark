@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using DG.Tweening;
 using DigitPark.Localization;
 using DigitPark.UI;
 using DigitPark.Themes;
@@ -23,6 +24,8 @@ namespace DigitPark.UI.Common
         private Action<string> onConfirmCallback;
         private Action onCancelCallback;
         private TextMeshProUGUI errorText;
+        private CanvasGroup overlayCG;
+        private CanvasGroup panelCG;
 
         /// <summary>
         /// Crea un popup de username
@@ -52,6 +55,8 @@ namespace DigitPark.UI.Common
             Image overlayImg = overlay.AddComponent<Image>();
             overlayImg.color = new Color(0, 0, 0, 0.7f);
 
+            overlayCG = overlay.AddComponent<CanvasGroup>();
+
             // Panel del popup
             popupPanel = new GameObject("Panel");
             popupPanel.transform.SetParent(overlay.transform, false);
@@ -66,6 +71,8 @@ namespace DigitPark.UI.Common
             Image panelImg = popupPanel.AddComponent<Image>();
             panelImg.color = new Color(0.1f, 0.1f, 0.2f, 0.98f);
             popupPanel.AddComponent<ThemeApplier>().Configure(ThemeApplier.ElementType.CardBackground, true, false);
+
+            panelCG = popupPanel.AddComponent<CanvasGroup>();
 
             // Outline para el panel
             Outline outline = popupPanel.AddComponent<Outline>();
@@ -239,6 +246,7 @@ namespace DigitPark.UI.Common
             gameObject.SetActive(true);
             usernameInput.text = "";
             usernameInput.Select();
+            AnimateIn();
         }
 
         /// <summary>
@@ -263,14 +271,55 @@ namespace DigitPark.UI.Common
             gameObject.SetActive(true);
             usernameInput.text = "";
             usernameInput.Select();
+            AnimateIn();
         }
 
         /// <summary>
-        /// Oculta el popup
+        /// Oculta el popup con animación
         /// </summary>
         public void Hide()
         {
-            gameObject.SetActive(false);
+            AnimateOut(() => gameObject.SetActive(false));
+        }
+
+        private void AnimateIn()
+        {
+            if (overlayCG != null)
+            {
+                overlayCG.alpha = 0f;
+                overlayCG.DOFade(1f, 0.2f).SetUpdate(true).SetLink(gameObject);
+            }
+
+            if (panelCG != null && popupPanel != null)
+            {
+                panelCG.alpha = 0f;
+                popupPanel.transform.localScale = Vector3.one * 0.85f;
+                DOTween.Sequence()
+                    .Join(popupPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack))
+                    .Join(panelCG.DOFade(1f, 0.25f))
+                    .SetUpdate(true)
+                    .SetLink(gameObject);
+            }
+        }
+
+        private void AnimateOut(Action onComplete)
+        {
+            if (panelCG == null || popupPanel == null) { onComplete?.Invoke(); return; }
+
+            DOTween.Sequence()
+                .Join(popupPanel.transform.DOScale(0.9f, 0.2f).SetEase(Ease.InQuad))
+                .Join(panelCG.DOFade(0f, 0.2f))
+                .OnComplete(() =>
+                {
+                    popupPanel.transform.localScale = Vector3.one;
+                    panelCG.alpha = 1f;
+                    onComplete?.Invoke();
+                })
+                .SetUpdate(true)
+                .SetLink(gameObject);
+
+            if (overlayCG != null)
+                overlayCG.DOFade(0f, 0.2f).SetUpdate(true).SetLink(gameObject);
         }
 
         private void OnConfirmClicked()
@@ -315,6 +364,8 @@ namespace DigitPark.UI.Common
                 errorText.text = message;
                 errorText.gameObject.SetActive(true);
             }
+            if (usernameInput != null)
+                usernameInput.transform.DOShakePosition(0.3f, 5f, 20).SetUpdate(true).SetLink(usernameInput.gameObject);
         }
 
         private void HideError()

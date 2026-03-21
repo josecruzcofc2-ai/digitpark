@@ -489,7 +489,7 @@ namespace DigitPark.Managers
                     var cg = loadingPanel.GetComponent<CanvasGroup>();
                     if (cg == null) cg = loadingPanel.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
-                    cg.DOFade(1f, 0.2f).SetUpdate(true);
+                    cg.DOFade(1f, 0.2f).SetUpdate(true).SetLink(loadingPanel);
                 }
                 else
                 {

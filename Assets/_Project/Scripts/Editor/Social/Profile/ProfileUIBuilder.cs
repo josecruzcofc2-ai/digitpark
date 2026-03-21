@@ -11,7 +11,7 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// Profile UI Builder - Rediseño 2026
-    /// Avatar centrado + stats en cards + game selection overlay
+    /// ProfileHeaderCard + stats en cards + game selection overlay
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0.5
     ///
     /// Menu: DigitPark/UI Builders/Social/Profile
@@ -69,7 +69,7 @@ namespace DigitPark.Editor
         #region Prefab
 
         private const string BACK_BUTTON_PREFAB = "Assets/_Project/Prefabs/Common/BackButton.prefab";
-        private const string ICON_AVATAR_DEFAULT = "Assets/_Project/Art/Icons/Social/AvatarDefault.png";
+        // Avatar icon removed — ProfileHeaderCard uses Username + Level + XP bar
         private const string ICON_EDIT = "Assets/_Project/Art/Icons/Social/EditIcon.png";
 
         #endregion
@@ -89,7 +89,7 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 "Layout completo (de arriba a abajo):\n\n" +
                 "1. Header (Back, PERFIL, Add Friend)\n" +
-                "2. Avatar Card (Avatar grande + username + status)\n" +
+                "2. Profile Header (Username + Level + XP bar + status)\n" +
                 "3. General Stats (Partidas, Wins, Rate, Tiempos)\n" +
                 "4. Game Stats (stats por juego con colores)\n" +
                 "5. Action Buttons (Amigos, Historial)\n" +
@@ -108,7 +108,7 @@ namespace DigitPark.Editor
             GUILayout.Label("Secciones individuales:", EditorStyles.boldLabel);
 
             if (GUILayout.Button("1. Header", GUILayout.Height(25))) CreateHeader();
-            if (GUILayout.Button("2. Avatar Card", GUILayout.Height(25))) CreateAvatarCard();
+            if (GUILayout.Button("2. Profile Header", GUILayout.Height(25))) CreateProfileHeaderCard();
             if (GUILayout.Button("3. General Stats", GUILayout.Height(25))) CreateGeneralStatsCard();
             if (GUILayout.Button("4. Game Stats", GUILayout.Height(25))) CreateGameStatsCard();
             if (GUILayout.Button("5. Action Buttons", GUILayout.Height(25))) CreateActionRow();
@@ -149,7 +149,7 @@ namespace DigitPark.Editor
 
             CreateBackground(canvas.transform);
             CreateHeader();
-            CreateAvatarCard();
+            CreateProfileHeaderCard();
             CreateGeneralStatsCard();
             CreateGameStatsCard();
             CreateActionRow();
@@ -281,14 +281,14 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Avatar Card
+        #region Profile Header Card
 
-        private static void CreateAvatarCard()
+        private static void CreateProfileHeaderCard()
         {
             Canvas canvas = FindMainCanvas();
             if (canvas == null) return;
 
-            var card = FindOrCreate(canvas.transform, "AvatarCard");
+            var card = FindOrCreate(canvas.transform, "ProfileHeaderCard");
             var rt = GetOrAdd<RectTransform>(card);
             SetAnchorsWithPad(rt, AVATAR_BOT, AVATAR_TOP);
 
@@ -298,150 +298,88 @@ namespace DigitPark.Editor
             outline.effectColor = CYAN_DARK;
             outline.effectDistance = new Vector2(2, 2);
 
-            // Generate circle sprite for circular avatar elements
-            Sprite circleSprite = GenerateCircleSprite();
-
-            // Avatar Frame container (centered, upper area)
-            var frame = FindOrCreate(card.transform, "AvatarFrame");
-            var fRT = GetOrAdd<RectTransform>(frame);
-            fRT.anchorMin = new Vector2(0.5f, 0.45f);
-            fRT.anchorMax = new Vector2(0.5f, 0.45f);
-            fRT.pivot = new Vector2(0.5f, 0f);
-            fRT.anchoredPosition = Vector2.zero;
-            fRT.sizeDelta = new Vector2(225, 225);
-
-            // Circular glow ring (outer, slightly larger) - matchmaking style
-            var glowRing = FindOrCreate(frame.transform, "GlowRing");
-            var glowRT = GetOrAdd<RectTransform>(glowRing);
-            glowRT.anchorMin = Vector2.zero;
-            glowRT.anchorMax = Vector2.one;
-            glowRT.offsetMin = new Vector2(-8, -8);
-            glowRT.offsetMax = new Vector2(8, 8);
-            var glowImg = GetOrAdd<Image>(glowRing);
-            glowImg.sprite = circleSprite;
-            glowImg.color = new Color(CYAN_NEON.r, CYAN_NEON.g, CYAN_NEON.b, 0.25f);
-
-            // Circular border ring (solid cyan frame)
-            var borderRing = FindOrCreate(frame.transform, "BorderRing");
-            var borderRT = GetOrAdd<RectTransform>(borderRing);
-            borderRT.anchorMin = Vector2.zero;
-            borderRT.anchorMax = Vector2.one;
-            borderRT.offsetMin = Vector2.zero;
-            borderRT.offsetMax = Vector2.zero;
-            var borderImg = GetOrAdd<Image>(borderRing);
-            borderImg.sprite = circleSprite;
-            borderImg.color = CYAN_NEON;
-            var fr_profile = borderRing.AddComponent<DigitPark.Services.FrameRenderer>();
-            fr_profile.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Full);
-
-            // Circular mask container (clips avatar to circle)
-            var avatarMask = FindOrCreate(frame.transform, "AvatarMask");
-            var amRT = GetOrAdd<RectTransform>(avatarMask);
-            amRT.anchorMin = new Vector2(0.06f, 0.06f);
-            amRT.anchorMax = new Vector2(0.94f, 0.94f);
-            amRT.offsetMin = Vector2.zero;
-            amRT.offsetMax = Vector2.zero;
-            var amImg = GetOrAdd<Image>(avatarMask);
-            amImg.sprite = circleSprite;
-            amImg.color = CARD_BG_LIGHT;
-            GetOrAdd<Mask>(avatarMask).showMaskGraphic = true;
-
-            // Avatar Image (inside mask — clipped to circle)
-            var avImg = FindOrCreate(avatarMask.transform, "AvatarImage");
-            var avRT = GetOrAdd<RectTransform>(avImg);
-            avRT.anchorMin = Vector2.zero;
-            avRT.anchorMax = Vector2.one;
-            avRT.offsetMin = Vector2.zero;
-            avRT.offsetMax = Vector2.zero;
-            var avImgComp = GetOrAdd<Image>(avImg);
-            avImgComp.color = Color.white;
-            avImgComp.preserveAspect = true;
-
-            // Set default avatar sprite on Image
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_AVATAR_DEFAULT);
-            if (defaultAvatar != null)
-            {
-                avImgComp.sprite = defaultAvatar;
-            }
-
-            // AvatarUI component
-            var avatarUI = GetOrAdd<DigitPark.UI.Components.AvatarUI>(avImg);
-            var avatarSO = new SerializedObject(avatarUI);
-            avatarSO.FindProperty("loadCurrentUserOnStart").boolValue = true;
-            avatarSO.FindProperty("isEditable").boolValue = true;
-            avatarSO.FindProperty("avatarImage").objectReferenceValue = avImgComp;
-            if (defaultAvatar != null)
-            {
-                avatarSO.FindProperty("defaultAvatarSprite").objectReferenceValue = defaultAvatar;
-            }
-            avatarSO.ApplyModifiedProperties();
-
-            // Edit Avatar Button (bottom-right corner of avatar)
-            var editBtn = FindOrCreate(frame.transform, "EditButton");
-            var eRT = GetOrAdd<RectTransform>(editBtn);
-            eRT.anchorMin = new Vector2(1, 0);
-            eRT.anchorMax = new Vector2(1, 0);
-            eRT.pivot = new Vector2(0.5f, 0.5f);
-            eRT.anchoredPosition = new Vector2(-10, 10);
-            eRT.sizeDelta = new Vector2(55, 55);
-            var eBg = GetOrAdd<Image>(editBtn);
-            eBg.color = CARD_BG;
-            GetOrAdd<Button>(editBtn).targetGraphic = eBg;
-
-            var editOutline = GetOrAdd<Outline>(editBtn);
-            editOutline.effectColor = CYAN_GLOW;
-            editOutline.effectDistance = new Vector2(2, 2);
-
-            // Edit icon sprite (instead of TMP text)
-            var editIcon = FindOrCreate(editBtn.transform, "Icon");
-            var eiRT = GetOrAdd<RectTransform>(editIcon);
-            eiRT.anchorMin = Vector2.zero;
-            eiRT.anchorMax = Vector2.one;
-            eiRT.offsetMin = new Vector2(6, 6);
-            eiRT.offsetMax = new Vector2(-6, -6);
-            // Remove old TMP if exists from previous build
-            var oldTMP = editIcon.GetComponent<TextMeshProUGUI>();
-            if (oldTMP != null) DestroyImmediate(oldTMP);
-            var eiImg = GetOrAdd<Image>(editIcon);
-            eiImg.preserveAspect = true;
-            eiImg.raycastTarget = false;
-            Sprite editSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_EDIT);
-            if (editSprite != null)
-            {
-                eiImg.sprite = editSprite;
-                eiImg.color = Color.white;
-            }
-            else
-            {
-                eiImg.color = CYAN_NEON;
-                Debug.LogWarning("[ProfileUI] EditIcon.png not found, using fallback color");
-            }
-
-            // Username
+            // === ProfileHeaderCard (compact, no avatar) ===
+            // Username (top, centered)
             var username = FindOrCreate(card.transform, "UsernameText");
             var uRT = GetOrAdd<RectTransform>(username);
-            uRT.anchorMin = new Vector2(0.1f, 0.18f);
-            uRT.anchorMax = new Vector2(0.9f, 0.42f);
+            uRT.anchorMin = new Vector2(0.05f, 0.62f);
+            uRT.anchorMax = new Vector2(0.70f, 0.92f);
             uRT.offsetMin = Vector2.zero;
             uRT.offsetMax = Vector2.zero;
             var uTMP = GetOrAdd<TextMeshProUGUI>(username);
-            uTMP.text = "@Username";
+            uTMP.text = "Username";
             uTMP.fontSize = FontSizes.Subtitle;
             uTMP.color = TEXT_WHITE;
             uTMP.fontStyle = FontStyles.Bold;
-            uTMP.alignment = TextAlignmentOptions.Center;
+            uTMP.alignment = TextAlignmentOptions.Left;
             uTMP.enableAutoSizing = true;
             uTMP.fontSizeMin = FontSizes.AutoMinBody;
             uTMP.fontSizeMax = FontSizes.Subtitle;
             uTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            // EditNameButton removed — name change only available in Settings
+            // Level Badge (right of username)
+            var lvlBadge = FindOrCreate(card.transform, "LevelBadge");
+            var lvlRT = GetOrAdd<RectTransform>(lvlBadge);
+            lvlRT.anchorMin = new Vector2(0.72f, 0.68f);
+            lvlRT.anchorMax = new Vector2(0.95f, 0.88f);
+            lvlRT.offsetMin = Vector2.zero;
+            lvlRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(lvlBadge).color = CYAN_NEON;
 
-            // Status Text
+            var lvlText = FindOrCreate(lvlBadge.transform, "LevelText");
+            var ltRT = GetOrAdd<RectTransform>(lvlText);
+            ltRT.anchorMin = Vector2.zero;
+            ltRT.anchorMax = Vector2.one;
+            ltRT.offsetMin = Vector2.zero;
+            ltRT.offsetMax = Vector2.zero;
+            var ltTMP = GetOrAdd<TextMeshProUGUI>(lvlText);
+            ltTMP.text = "Lv. 12";
+            ltTMP.fontSize = FontSizes.Caption;
+            ltTMP.color = new Color(0.05f, 0.05f, 0.1f);
+            ltTMP.fontStyle = FontStyles.Bold;
+            ltTMP.alignment = TextAlignmentOptions.Center;
+            ltTMP.enableAutoSizing = true;
+            ltTMP.fontSizeMin = FontSizes.AutoMinBody;
+            ltTMP.fontSizeMax = FontSizes.Caption;
+
+            // XP Bar (middle strip)
+            var xpBarBg = FindOrCreate(card.transform, "XPBarBackground");
+            var xpBgRT = GetOrAdd<RectTransform>(xpBarBg);
+            xpBgRT.anchorMin = new Vector2(0.05f, 0.38f);
+            xpBgRT.anchorMax = new Vector2(0.95f, 0.58f);
+            xpBgRT.offsetMin = Vector2.zero;
+            xpBgRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(xpBarBg).color = new Color(0.08f, 0.1f, 0.15f, 1f);
+
+            var xpFill = FindOrCreate(xpBarBg.transform, "XPBarFill");
+            var xpFillRT = GetOrAdd<RectTransform>(xpFill);
+            xpFillRT.anchorMin = Vector2.zero;
+            xpFillRT.anchorMax = new Vector2(0.45f, 1f);
+            xpFillRT.offsetMin = Vector2.zero;
+            xpFillRT.offsetMax = Vector2.zero;
+            GetOrAdd<Image>(xpFill).color = CYAN_NEON;
+
+            var xpText = FindOrCreate(xpBarBg.transform, "XPText");
+            var xpTRT = GetOrAdd<RectTransform>(xpText);
+            xpTRT.anchorMin = Vector2.zero;
+            xpTRT.anchorMax = Vector2.one;
+            xpTRT.offsetMin = new Vector2(8, 0);
+            xpTRT.offsetMax = new Vector2(-8, 0);
+            var xpTMP = GetOrAdd<TextMeshProUGUI>(xpText);
+            xpTMP.text = "450 / 1000 XP";
+            xpTMP.fontSize = FontSizes.Caption;
+            xpTMP.color = TEXT_WHITE;
+            xpTMP.fontStyle = FontStyles.Bold;
+            xpTMP.alignment = TextAlignmentOptions.Center;
+            xpTMP.enableAutoSizing = true;
+            xpTMP.fontSizeMin = FontSizes.AutoMinBody;
+            xpTMP.fontSizeMax = FontSizes.Caption;
+
+            // Status Text (subtitle)
             var status = FindOrCreate(card.transform, "StatusText");
             var sRT = GetOrAdd<RectTransform>(status);
-            sRT.anchorMin = new Vector2(0.15f, 0.04f);
-            sRT.anchorMax = new Vector2(0.85f, 0.18f);
+            sRT.anchorMin = new Vector2(0.15f, 0.08f);
+            sRT.anchorMax = new Vector2(0.85f, 0.32f);
             sRT.offsetMin = Vector2.zero;
             sRT.offsetMax = Vector2.zero;
             var sTMP = GetOrAdd<TextMeshProUGUI>(status);
@@ -455,7 +393,7 @@ namespace DigitPark.Editor
             sTMP.fontSizeMax = FontSizes.Body;
             sTMP.overflowMode = TextOverflowModes.Ellipsis;
 
-            Debug.Log("[ProfileUI] Avatar Card creado");
+            Debug.Log("[ProfileUI] Profile Header Card creado");
         }
 
         #endregion
@@ -1061,11 +999,8 @@ namespace DigitPark.Editor
             SetRef(so, "addFriendIconButton", FindInPath<Button>(r, "Header/AddFriendButton"));
 
             // Profile Info
-            SetRef(so, "usernameText", FindInPath<TextMeshProUGUI>(r, "AvatarCard/UsernameText"));
-            SetRef(so, "avatarImage", FindInPath<Image>(r, "AvatarCard/AvatarFrame/AvatarMask/AvatarImage"));
-            SetRef(so, "avatarUI", FindInPath<DigitPark.UI.Components.AvatarUI>(r, "AvatarCard/AvatarFrame/AvatarMask/AvatarImage"));
-            SetRef(so, "editAvatarButton", FindInPath<Button>(r, "AvatarCard/AvatarFrame/EditButton"));
-            SetRef(so, "statusText", FindInPath<TextMeshProUGUI>(r, "AvatarCard/StatusText"));
+            SetRef(so, "usernameText", FindInPath<TextMeshProUGUI>(r, "ProfileHeaderCard/UsernameText"));
+            SetRef(so, "statusText", FindInPath<TextMeshProUGUI>(r, "ProfileHeaderCard/StatusText"));
             SetRef(so, "errorPanel", FindInPath<DigitPark.UI.Panels.ErrorPanelUI>(r, "ErrorPanel"));
 
             // General Stats

@@ -20,28 +20,28 @@ namespace DigitPark.Payments
                 return;
             }
 
-            Debug.LogError($"[AbortProtocol] EJECUTANDO ABORT: {reason}");
-            _abortExecuted = true;
-
-            // Paso 1: Switch INMEDIATO a AppleIAP (local, sin depender de red)
-            PaymentFeatureFlag.ForceSwitch(PaymentProvider.AppleIAP, reason.ToString());
-            Debug.Log("[AbortProtocol] Paso 1: Switch a Apple IAP completado");
-
-            // Paso 2: Notificar backend (fuera de await para no bloquear)
-            _ = NotifyBackend(reason);
-
-            // Paso 3: Log analytics
-            PaymentBridge.LogCustomEvent?.Invoke(
-                "stripe_abort_executed",
-                new System.Collections.Generic.Dictionary<string, object>
-                {
-                    { "reason", reason.ToString() },
-                    { "timestamp", System.DateTime.UtcNow.ToString("O") }
-                });
-            Debug.Log("[AbortProtocol] Paso 3: Analytics logueado");
-
             try
             {
+                Debug.LogError($"[AbortProtocol] EJECUTANDO ABORT: {reason}");
+                _abortExecuted = true;
+
+                // Paso 1: Switch INMEDIATO a AppleIAP (local, sin depender de red)
+                PaymentFeatureFlag.ForceSwitch(PaymentProvider.AppleIAP, reason.ToString());
+                Debug.Log("[AbortProtocol] Paso 1: Switch a Apple IAP completado");
+
+                // Paso 2: Notificar backend (fuera de await para no bloquear)
+                _ = NotifyBackend(reason);
+
+                // Paso 3: Log analytics
+                PaymentBridge.LogCustomEvent?.Invoke(
+                    "stripe_abort_executed",
+                    new System.Collections.Generic.Dictionary<string, object>
+                    {
+                        { "reason", reason.ToString() },
+                        { "timestamp", System.DateTime.UtcNow.ToString("O") }
+                    });
+                Debug.Log("[AbortProtocol] Paso 3: Analytics logueado");
+
                 // Paso 4: Verificar Apple IAP
                 await Task.Delay(500);
                 var iapProvider = PaymentManager.Instance?.GetIAPProvider();
@@ -58,16 +58,16 @@ namespace DigitPark.Payments
                         Debug.Log("[AbortProtocol] Apple IAP saludable. Continuando operación.");
                     }
                 }
+
+                // Paso 5: Notificar a UIs activas
+                PaymentEvents.EmitAbortExecuted(reason);
+
+                Debug.Log($"[AbortProtocol] Abort completado. Razón: {reason}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[AbortProtocol] Error en paso 4: {e.Message}");
+                Debug.LogError($"[AbortProtocol] Error crítico durante abort: {e.Message}");
             }
-
-            // Paso 5: Notificar a UIs activas
-            PaymentEvents.EmitAbortExecuted(reason);
-
-            Debug.Log($"[AbortProtocol] Abort completado. Razón: {reason}");
         }
 
         public static void Reset()
@@ -81,14 +81,11 @@ namespace DigitPark.Payments
             var paymentManager = PaymentManager.Instance;
             if (paymentManager == null) return;
 
-            // Usar la config del PaymentManager para obtener la URL
-            string backendUrl = null;
+            // Usar la config del PaymentManager para obtener la URL del Cloud Function
             try
             {
-                backendUrl = PlayerPrefs.GetString("dp_backend_url", "");
-                if (string.IsNullOrEmpty(backendUrl)) return;
-
-                string url = $"{backendUrl}/api/admin/force-switch";
+                string url = paymentManager.Config?.adminForceSwitchUrl;
+                if (string.IsNullOrEmpty(url)) return;
                 var body = new AbortNotification
                 {
                     provider = "apple_iap",
@@ -99,11 +96,21 @@ namespace DigitPark.Payments
                 string json = UnityEngine.JsonUtility.ToJson(body);
                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
 
+                // Obtain Firebase ID token for auth
+                string idToken = null;
+                if (PaymentBridge.GetFirebaseIdToken != null)
+                {
+                    try { idToken = await PaymentBridge.GetFirebaseIdToken(); }
+                    catch { }
+                }
+
                 using (var request = new UnityWebRequest(url, "POST"))
                 {
                     request.uploadHandler = new UploadHandlerRaw(bytes);
                     request.downloadHandler = new DownloadHandlerBuffer();
                     request.SetRequestHeader("Content-Type", "application/json");
+                    if (!string.IsNullOrEmpty(idToken))
+                        request.SetRequestHeader("Authorization", $"Bearer {idToken}");
                     request.timeout = 5;
 
                     var op = request.SendWebRequest();

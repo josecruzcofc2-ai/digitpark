@@ -47,24 +47,35 @@ namespace DigitPark.Payments
     {
         public static readonly CosmeticProduct[] ProProducts = new CosmeticProduct[]
         {
+            // ── Gem Packs (C-02: amounts alineados al diseño) ──
             new CosmeticProduct
             {
                 ProductId = "sparks_100",
-                DisplayName = "150 Sparks",  // E-EC01: 100→150 DG, cubre exactamente 1 Tier B (150 DG)
+                DisplayName = "100 Sparks",
                 Type = CosmeticProductType.Consumable,
                 PriceUSD = 0.99m,
                 AppleProductId = "com.matrixsoftware.digitpark.gems_100",
-                GemsAmount = 150,
+                GemsAmount = 100,
+                BonusPercent = 0
+            },
+            new CosmeticProduct
+            {
+                ProductId = "sparks_300",
+                DisplayName = "300 Sparks",
+                Type = CosmeticProductType.Consumable,
+                PriceUSD = 2.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.gems_300",
+                GemsAmount = 300,
                 BonusPercent = 0
             },
             new CosmeticProduct
             {
                 ProductId = "sparks_500",
-                DisplayName = "500 Sparks",
+                DisplayName = "650 Sparks",
                 Type = CosmeticProductType.Consumable,
                 PriceUSD = 4.99m,
                 AppleProductId = "com.matrixsoftware.digitpark.gems_500",
-                GemsAmount = 500,
+                GemsAmount = 650,
                 BonusPercent = 10
             },
             new CosmeticProduct
@@ -100,13 +111,15 @@ namespace DigitPark.Payments
             new CosmeticProduct
             {
                 ProductId = "sparks_14000",
-                DisplayName = "14,000 Sparks",
+                DisplayName = "18,900 Sparks",
                 Type = CosmeticProductType.Consumable,
                 PriceUSD = 99.99m,
                 AppleProductId = "com.matrixsoftware.digitpark.gems_14000",
-                GemsAmount = 14000,
+                GemsAmount = 18900,
                 BonusPercent = 35
             },
+
+            // ── Theme Bundles ──
             new CosmeticProduct
             {
                 ProductId = "premium_bundle",
@@ -123,7 +136,116 @@ namespace DigitPark.Payments
                 PriceUSD = 30.45m,
                 AppleProductId = "com.matrixsoftware.digitpark.complete_bundle"
             },
-            // Profile Frames
+
+            // ── Welcome Packs (C-01) ──
+            new CosmeticProduct
+            {
+                ProductId = "welcome_pack_basic",
+                DisplayName = "Welcome Pack",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 1.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.welcome_pack_basic"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "welcome_pack_vip",
+                DisplayName = "VIP Welcome Pack",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 4.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.welcome_pack_vip"
+            },
+
+            // ── Starter Pack (C-01) ──
+            new CosmeticProduct
+            {
+                ProductId = "starter_pack",
+                DisplayName = "Starter Pack",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 2.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.starter_pack"
+            },
+
+            // ── Ad-Free (C-01) ──
+            new CosmeticProduct
+            {
+                ProductId = "adfree_permanent",
+                DisplayName = "Ad-Free",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 4.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.adfree_permanent"
+            },
+
+            // ── Premium Pass (C-01) ──
+            new CosmeticProduct
+            {
+                ProductId = "premium_pass_monthly",
+                DisplayName = "Premium Pass",
+                Type = CosmeticProductType.Subscription,
+                PriceUSD = 9.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.premium_pass_monthly"
+            },
+
+            // ── Titles USD (C-01) ──
+            new CosmeticProduct
+            {
+                ProductId = "title_quantum",
+                DisplayName = "Quantum",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 1.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.title_quantum"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "title_immortal",
+                DisplayName = "Immortal",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 2.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.title_immortal"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "title_transcendent",
+                DisplayName = "Transcendent",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 4.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.title_transcendent"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "title_apex_predator",
+                DisplayName = "Apex Predator",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 9.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.title_apex_predator"
+            },
+
+            // ── Win Effects USD (C-01) ──
+            new CosmeticProduct
+            {
+                ProductId = "effect_cosmic_shatter",
+                DisplayName = "Cosmic Shatter",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 1.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.effect_cosmic_shatter"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "effect_quantum_rift",
+                DisplayName = "Quantum Rift",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 3.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.effect_quantum_rift"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "effect_divine_ascension",
+                DisplayName = "Divine Ascension",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 6.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.effect_divine_ascension"
+            },
+
+            // ── Profile Frames USD ──
             new CosmeticProduct
             {
                 ProductId = "frame_plasma_spark",
@@ -195,6 +317,31 @@ namespace DigitPark.Payments
                 Type = CosmeticProductType.NonConsumable,
                 PriceUSD = 14.99m,
                 AppleProductId = "com.matrixsoftware.digitpark.frame_quantum_break"
+            },
+            // C-01: Frames USD adicionales
+            new CosmeticProduct
+            {
+                ProductId = "frame_holographic",
+                DisplayName = "Holographic Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 1.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_holographic"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_quantum_fire",
+                DisplayName = "Quantum Fire Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 2.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_quantum_fire"
+            },
+            new CosmeticProduct
+            {
+                ProductId = "frame_legendary_crown",
+                DisplayName = "Legendary Crown Frame",
+                Type = CosmeticProductType.NonConsumable,
+                PriceUSD = 4.99m,
+                AppleProductId = "com.matrixsoftware.digitpark.frame_legendary_crown"
             }
         };
 
@@ -222,9 +369,10 @@ namespace DigitPark.Payments
 
         public static bool ValidateCatalogCompliance()
         {
+            // DISC-02: Sincronizado con StripeComplianceGuard.ProhibitedTerms (incluye "triumph")
             string[] prohibitedTerms = {
                 "tournament", "prize", "cash_game", "skill_game",
-                "real_money", "entry_fee", "wager", "bet", "gambling"
+                "real_money", "entry_fee", "wager", "bet", "gambling", "triumph"
             };
 
             foreach (var product in ProProducts)

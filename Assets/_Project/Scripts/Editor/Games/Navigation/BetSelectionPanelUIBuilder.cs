@@ -94,7 +94,7 @@ namespace DigitPark.Editor
                 "- 11 preset bet cards (Free + 5 DigitCoins + 5 DigitGems)\n" +
                 "- Custom bet section (input + toggles + stepper)\n" +
                 "- ScrollRect for smooth scrolling\n" +
-                "- Play/Cancel action buttons\n" +
+                "- Play button (full-width, no Cancel — back button covers it)\n" +
                 "- Auto-assigns all references",
                 MessageType.Info);
 
@@ -141,11 +141,15 @@ namespace DigitPark.Editor
 
             CleanCanvasChildren(canvas.transform);
 
+            // Destroy any orphaned Scrollbar GOs at scene root (may survive across builds)
+            foreach (var sb in Object.FindObjectsOfType<Scrollbar>(true))
+                DestroyImmediate(sb.gameObject);
+
             // === BACKGROUND ===
             GameObject bg = CreateUI("Background", canvas.transform);
             SetFullStretch(bg.GetComponent<RectTransform>());
             var bgImg = bg.AddComponent<Image>();
-            bgImg.color = Color.white; // ThemeApplier tints at runtime
+            bgImg.color = Color.white;
             bgImg.raycastTarget = false;
             ThemeApplierHelper.Apply(bg, ET.PrimaryBackground);
 
@@ -208,6 +212,11 @@ namespace DigitPark.Editor
                 "Coins1000CostText", "Coins1000RewardText",
                 new Color(1f, 0.7f, 0.1f), new Color(1f, 0.7f, 0.1f, 0.4f));
 
+            CreateBetCard("Coins2500BetOption", content.transform,
+                "2,500 DigitCoins", "Win 5,000", "x2",
+                "Coins2500CostText", "Coins2500RewardText",
+                new Color(1f, 0.5f, 0f), new Color(1f, 0.5f, 0f, 0.4f));
+
             // === CUSTOM BET ===
             CreateSectionDivider("CustomBetsHeader", content.transform, "CUSTOM", CUSTOM_TEAL, "CustomSectionText");
             CreateCustomBetSection(content.transform);
@@ -215,11 +224,10 @@ namespace DigitPark.Editor
             // === ROUNDS SELECTION ===
             CreateSpacer(content.transform, 8f);
             CreateRoundsSelector(content.transform);
+            CreateSpacer(content.transform, 12f);
 
-            // === SPACER + ACTION BUTTONS ===
-            CreateSpacer(content.transform, 8f);
-            CreateActionButtons(content.transform);
-            CreateSpacer(content.transform, 20f);
+            // === FIXED PLAY BUTTON (on Canvas, not in scroll) ===
+            CreateFixedPlayButton(canvas.transform);
 
             // === FORCE LAYOUT REBUILD ===
             // Without this, ContentSizeFitter won't compute the Content height,
@@ -309,9 +317,10 @@ namespace DigitPark.Editor
             // ScrollRect wrapper (matches ShopPremiumUIBuilder + AchievementsUIBuilder pattern)
             GameObject scrollArea = CreateUI("ScrollArea", parent);
             RectTransform srt = scrollArea.GetComponent<RectTransform>();
-            srt.anchorMin = new Vector2(0, 0.01f);
+            // Leave 90px at bottom for fixed PlayButton, respect header at top
+            srt.anchorMin = Vector2.zero;
             srt.anchorMax = new Vector2(1, 0.923f);
-            srt.offsetMin = Vector2.zero;
+            srt.offsetMin = new Vector2(0, 200f); // 200px clearance for fixed PLAY button (175h + 10 margin + 15 padding)
             srt.offsetMax = Vector2.zero;
 
             ScrollRect scrollRect = scrollArea.AddComponent<ScrollRect>();
@@ -363,6 +372,9 @@ namespace DigitPark.Editor
 
             scrollRect.content = crt;
             scrollRect.viewport = vpRT;
+            // Explicitly remove any scrollbar (may linger from previous builds)
+            scrollRect.verticalScrollbar = null;
+            scrollRect.horizontalScrollbar = null;
 
             return content;
         }
@@ -536,13 +548,13 @@ namespace DigitPark.Editor
             CreateFlexSpacer(inputRow.transform);
 
             // Minus button
-            CreateStepperButton("CustomMinusButton", inputRow.transform, "-5", 65);
+            CreateStepperButton("CustomMinusButton", inputRow.transform, "-50", 65);
 
             // Input field
             CreateAmountInputField("CustomAmountInput", inputRow.transform);
 
             // Plus button
-            CreateStepperButton("CustomPlusButton", inputRow.transform, "+5", 65);
+            CreateStepperButton("CustomPlusButton", inputRow.transform, "+50", 65);
 
             // Right spacer
             CreateFlexSpacer(inputRow.transform);
@@ -552,7 +564,7 @@ namespace DigitPark.Editor
             var pvLE = previewGO.AddComponent<LayoutElement>();
             pvLE.preferredHeight = 34;
             TextMeshProUGUI pvTMP = previewGO.AddComponent<TextMeshProUGUI>();
-            pvTMP.text = "Win: 20 DigitCoins";
+            pvTMP.text = "Win: 100 DigitCoins";
             pvTMP.fontSize = FontSizes.Body;
             pvTMP.color = CUSTOM_TEAL;
             pvTMP.fontStyle = FontStyles.Bold;
@@ -661,7 +673,7 @@ namespace DigitPark.Editor
             RectTransform txtRT = txtGO.GetComponent<RectTransform>();
             SetFullStretch(txtRT);
             TextMeshProUGUI txtTMP = txtGO.AddComponent<TextMeshProUGUI>();
-            txtTMP.text = "10";
+            txtTMP.text = "50";
             txtTMP.fontSize = FontSizes.Body;
             txtTMP.color = TEXT_PRIMARY;
             txtTMP.fontStyle = FontStyles.Bold;
@@ -811,7 +823,44 @@ namespace DigitPark.Editor
             tmp.fontSizeMax = FontSizes.Body;
         }
 
-        // ==================== ACTION BUTTONS ====================
+        // ==================== FIXED PLAY BUTTON (anchored to bottom of Canvas) ====================
+
+        private static void CreateFixedPlayButton(Transform canvasParent)
+        {
+            GameObject go = CreateUI("PlayButton", canvasParent);
+            RectTransform rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 0);
+            rt.pivot = new Vector2(0.5f, 0);
+            rt.anchoredPosition = new Vector2(0, 10f);
+            rt.sizeDelta = new Vector2(-32f, 175f);
+
+            go.AddComponent<Image>().color = BTN_PLAY;
+            AddOutline(go, BTN_PLAY_GLOW, 2);
+            AddShadow(go, BTN_PLAY_GLOW, new Vector2(0, -3));
+
+            Button btn = go.AddComponent<Button>();
+            var c = btn.colors;
+            c.normalColor = Color.white;
+            c.highlightedColor = new Color(1, 1, 1, 0.9f);
+            c.pressedColor = new Color(0.8f, 0.8f, 0.8f);
+            btn.colors = c;
+
+            GameObject textGO = CreateUI("PlayButtonText", go.transform);
+            SetFullStretch(textGO.GetComponent<RectTransform>());
+            TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = "PLAY";
+            tmp.fontSize = FontSizes.H3;
+            tmp.color = TEXT_PRIMARY;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = FontSizes.AutoMinTitle;
+            tmp.fontSizeMax = FontSizes.H3;
+            tmp.raycastTarget = false;
+        }
+
+        // ==================== ACTION BUTTONS (legacy, unused) ====================
 
         private static void CreateActionButtons(Transform parent)
         {
@@ -828,7 +877,7 @@ namespace DigitPark.Editor
             hlg.childControlHeight = true;
 
             CreateActionButton("PlayButton", row.transform, "PLAY", BTN_PLAY, BTN_PLAY_GLOW, true, "PlayButtonText");
-            CreateActionButton("CancelButton", row.transform, "CANCEL", BTN_CANCEL, Color.clear, false, "CancelButtonText");
+            // CancelButton removed — back button covers cancel; matchmaking scene has its own cancel
         }
 
         private static void CreateActionButton(string name, Transform parent, string text,

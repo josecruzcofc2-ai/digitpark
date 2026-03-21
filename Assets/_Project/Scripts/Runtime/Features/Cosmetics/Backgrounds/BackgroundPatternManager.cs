@@ -173,6 +173,41 @@ namespace DigitPark.Cosmetics
         }
 
         /// <summary>
+        /// B4-E: Fetch background data from Firebase and restore locally.
+        /// Call from BootManager after login (reinstall scenario).
+        /// </summary>
+        public async System.Threading.Tasks.Task RestoreFromFirebaseAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return;
+            try
+            {
+                var db   = DigitPark.Services.Firebase.DatabaseService.Instance;
+                if (db == null) return;
+                var dbRef = Firebase.Database.FirebaseDatabase.DefaultInstance?.RootReference;
+                if (dbRef == null) return;
+
+                var snapshot = await dbRef.Child("players").Child(userId).GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                string equippedId = snapshot.Child("equippedBackground").Value?.ToString() ?? "";
+                var ownedList = new List<string>();
+                var ownedSnap = snapshot.Child("ownedBackgrounds");
+                if (ownedSnap.Exists)
+                {
+                    foreach (var child in ownedSnap.Children)
+                        ownedList.Add(child.Value?.ToString() ?? "");
+                }
+
+                if (!string.IsNullOrEmpty(equippedId) || ownedList.Count > 0)
+                    RestoreFromFirebase(equippedId, ownedList);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[BackgroundPatternManager] RestoreFromFirebaseAsync failed: {e.Message}");
+            }
+        }
+
+        /// <summary>
         /// Restores equipped pattern from Firebase data (called by AuthenticationService
         /// after profile load).
         /// </summary>

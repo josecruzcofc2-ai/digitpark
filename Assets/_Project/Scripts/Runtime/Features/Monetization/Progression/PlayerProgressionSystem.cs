@@ -125,6 +125,10 @@ namespace DigitPark.Progression
             if (result.isCashBattle)
                 xpGained = Mathf.RoundToInt(xpGained * cashBattleXPMultiplier);
 
+            // Premium Pass — 2x XP multiplier
+            float premiumMultiplier = DigitPark.Managers.PremiumManager.Instance?.IsPremiumPass == true ? 2f : 1f;
+            xpGained = Mathf.RoundToInt(xpGained * premiumMultiplier);
+
             AddXP(xpGained);
 
             _gamesPlayed++;
@@ -415,13 +419,56 @@ namespace DigitPark.Progression
             if (PlayerPrefs.HasKey(SAVE_KEY))
             {
                 string json = PlayerPrefs.GetString(SAVE_KEY);
-                var data = JsonUtility.FromJson<PlayerProgressionData>(json);
+                PlayerProgressionData data = null;
+                try
+                {
+                    data = JsonUtility.FromJson<PlayerProgressionData>(json);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[Progression] JSON corrupto: {e.Message}");
+                    data = new PlayerProgressionData();
+                }
+                if (data == null) return;
 
-                _currentLevel = data.level;
-                _currentXP = data.currentXP;
+                _currentLevel = Mathf.Max(data.level, 1); // Guard: level 0 from corrupt JSON would break XP calc
+                _currentXP = Mathf.Max(data.currentXP, 0);
                 _totalXPEarned = data.totalXPEarned;
                 _gamesPlayed = data.gamesPlayed;
                 _gamesWon = data.gamesWon;
+            }
+        }
+
+        /// <summary>
+        /// B4-A: Restore progression from Firebase after reinstall.
+        /// Call from BootManager in reinstall path. Takes the higher level/XP (never downgrades).
+        /// </summary>
+        public async Task RestoreFromFirebaseAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId) || DatabaseService.Instance == null) return;
+            try
+            {
+                var db = Firebase.Database.FirebaseDatabase.DefaultInstance;
+                var snapshot = await db.GetReference("players").Child(userId).Child("progression").GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                var firebaseData = JsonUtility.FromJson<PlayerProgressionData>(snapshot.GetRawJsonValue());
+                if (firebaseData == null) return;
+
+                if (firebaseData.level > _currentLevel || firebaseData.totalXPEarned > _totalXPEarned)
+                {
+                    _currentLevel = Mathf.Max(firebaseData.level, 1);
+                    _currentXP = Mathf.Max(firebaseData.currentXP, 0);
+                    _totalXPEarned = firebaseData.totalXPEarned;
+                    _gamesPlayed = Mathf.Max(firebaseData.gamesPlayed, _gamesPlayed);
+                    _gamesWon = Mathf.Max(firebaseData.gamesWon, _gamesWon);
+                    SaveProgress();
+                    Debug.Log($"[Progression] Restored from Firebase — Level {_currentLevel}, XP {_currentXP}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Progression] RestoreFromFirebaseAsync failed: {e.Message}");
             }
         }
 

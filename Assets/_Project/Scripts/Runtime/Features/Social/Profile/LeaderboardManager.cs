@@ -90,16 +90,12 @@ namespace DigitPark.Managers
         {
             if (AuthenticationService.Instance == null)
             {
-                Debug.LogWarning("[Leaderboard] AuthenticationService no encontrado, creando instancia de respaldo...");
-                GameObject authService = new GameObject("AuthenticationService");
-                authService.AddComponent<AuthenticationService>();
+                Debug.LogError("[Leaderboard] AuthenticationService not found — was BootManager skipped? Leaderboard will use offline data.");
             }
 
             if (DatabaseService.Instance == null)
             {
-                Debug.LogWarning("[Leaderboard] DatabaseService no encontrado, creando instancia de respaldo...");
-                GameObject dbService = new GameObject("DatabaseService");
-                dbService.AddComponent<DatabaseService>();
+                Debug.LogError("[Leaderboard] DatabaseService not found — was BootManager skipped? Leaderboard will use offline data.");
             }
         }
 
@@ -296,7 +292,7 @@ namespace DigitPark.Managers
             {
                 buttonImage.DOColor(isSelected
                     ? new Color(0f, 0.83f, 1f)
-                    : new Color(0.15f, 0.2f, 0.25f), 0.2f);
+                    : new Color(0.15f, 0.2f, 0.25f), 0.2f).SetLink(button.gameObject);
             }
 
             var text = button.GetComponentInChildren<TextMeshProUGUI>();
@@ -304,11 +300,11 @@ namespace DigitPark.Managers
             {
                 text.DOColor(isSelected
                     ? new Color(0.02f, 0.05f, 0.1f)
-                    : Color.white, 0.2f);
+                    : Color.white, 0.2f).SetLink(text.gameObject);
             }
 
             // Scale animation for active tab
-            button.transform.DOScale(isSelected ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
+            button.transform.DOScale(isSelected ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic).SetLink(button.gameObject);
         }
 
         #endregion
@@ -426,7 +422,7 @@ namespace DigitPark.Managers
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
 
-            foreach (var entry in entries)
+            foreach (var entry in entries.Take(50))
             {
                 CreateLeaderboardEntry(entry);
             }
@@ -502,7 +498,7 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Fallback: Crea entrada por codigo con nuevo diseño (Pos + Avatar + Username + Tiempo)
+        /// Fallback: Crea entrada por codigo (Pos + Username + Tiempo)
         /// </summary>
         private void CreateLeaderboardEntryFallback(LeaderboardEntry entry, bool isCurrentPlayer)
         {
@@ -569,25 +565,12 @@ namespace DigitPark.Managers
             posLE.minWidth = 55;
             posLE.preferredWidth = 55;
 
-            // 2. Avatar placeholder (50x50)
-            GameObject avatarObj = new GameObject("AvatarImage");
-            avatarObj.transform.SetParent(entryObj.transform, false);
-            avatarObj.AddComponent<RectTransform>();
-            Image avatarImg = avatarObj.AddComponent<Image>();
-            avatarImg.color = new Color(0.2f, 0.25f, 0.35f);
-            avatarImg.raycastTarget = false;
-            LayoutElement avatarLE = avatarObj.AddComponent<LayoutElement>();
-            avatarLE.minWidth = 50;
-            avatarLE.minHeight = 50;
-            avatarLE.preferredWidth = 50;
-            avatarLE.preferredHeight = 50;
-
-            // 3. Username (flex)
+            // 2. Username (flex, expanded +50px — avatar removed)
             GameObject nameObj = new GameObject("UsernameText");
             nameObj.transform.SetParent(entryObj.transform, false);
             nameObj.AddComponent<RectTransform>();
             TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
-            nameText.text = entry.username;
+            nameText.text = UICanvasHelper.TmpSafe(entry.username);
             nameText.fontSize = FontSizes.Body;
             nameText.enableAutoSizing = true;
             nameText.fontSizeMin = FontSizes.AutoMinBody;
@@ -712,14 +695,14 @@ namespace DigitPark.Managers
                     var cg = loadingPanel.GetComponent<CanvasGroup>();
                     if (cg == null) cg = loadingPanel.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
-                    cg.DOFade(1f, 0.25f).SetUpdate(true);
+                    cg.DOFade(1f, 0.25f).SetUpdate(true).SetLink(loadingPanel);
                 }
                 else
                 {
                     var cg = loadingPanel.GetComponent<CanvasGroup>();
                     if (cg != null)
                     {
-                        cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() =>
+                        cg.DOFade(0f, 0.2f).SetUpdate(true).SetLink(loadingPanel).OnComplete(() =>
                         {
                             loadingPanel.SetActive(false);
                             cg.alpha = 1f;

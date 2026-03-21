@@ -36,10 +36,13 @@ namespace DigitPark.Editor
         private const float MISSION_ITEM_HEIGHT = 90f;
         private const float REWARD_DAY_SIZE = 100f;
         private const float STEP_DOT_SIZE = 12f;
-        private const float AVATAR_OPTION_SIZE = 90f;
+        // AVATAR_OPTION_SIZE removed — avatar system eliminated
         private const float PRIZE_ROW_HEIGHT = 50f;
         private const float PARTICIPANT_ITEM_HEIGHT = 70f;
         private const float PLAYER_SEARCH_HEIGHT = 80f;
+        private const float TOURNAMENT_ITEM_H = 80f;
+        private const float LEADERBOARD_ENTRY_H = 70f;
+        private const float MISSION_CARD_H = 120f;
 
         [MenuItem("DigitPark/Prefabs/Monetization/Create All")]
         private static void CreateAllFromMenu()
@@ -72,10 +75,21 @@ namespace DigitPark.Editor
             if (GUILayout.Button("MissionItem")) CreateMissionItemPrefab();
             if (GUILayout.Button("RewardDayItem")) CreateRewardDayItemPrefab();
             if (GUILayout.Button("StepDotItem")) CreateStepDotItemPrefab();
-            if (GUILayout.Button("AvatarOptionItem")) CreateAvatarOptionItemPrefab();
+            // AvatarOptionItem removed
             if (GUILayout.Button("PrizeRowItem")) CreatePrizeRowItemPrefab();
             if (GUILayout.Button("ParticipantItem")) CreateParticipantItemPrefab();
             if (GUILayout.Button("PlayerSearchItem")) CreatePlayerSearchItemPrefab();
+            GUILayout.Space(5);
+            GUILayout.Label("Tournaments:", EditorStyles.miniBoldLabel);
+            if (GUILayout.Button("TournamentItem")) CreateTournamentItemPrefab();
+            if (GUILayout.Button("TournamentSearchItem")) CreateTournamentSearchItemPrefab();
+            if (GUILayout.Button("TournamentMyItem")) CreateTournamentMyItemPrefab();
+            GUILayout.Space(5);
+            GUILayout.Label("Social:", EditorStyles.miniBoldLabel);
+            if (GUILayout.Button("LeaderboardEntry")) CreateLeaderboardEntryPrefab();
+            GUILayout.Space(5);
+            GUILayout.Label("Missions:", EditorStyles.miniBoldLabel);
+            if (GUILayout.Button("MissionCard")) CreateMissionCardPrefab();
         }
 
         private static void CreateAllPrefabs()
@@ -85,10 +99,15 @@ namespace DigitPark.Editor
             CreateMissionItemPrefab();
             CreateRewardDayItemPrefab();
             CreateStepDotItemPrefab();
-            CreateAvatarOptionItemPrefab();
+            // AvatarOptionItemPrefab removed
             CreatePrizeRowItemPrefab();
             CreateParticipantItemPrefab();
             CreatePlayerSearchItemPrefab();
+            CreateTournamentItemPrefab();
+            CreateTournamentSearchItemPrefab();
+            CreateTournamentMyItemPrefab();
+            CreateLeaderboardEntryPrefab();
+            CreateMissionCardPrefab();
 
             Debug.Log("[MonetizationPrefabBuilder] Todos los prefabs creados!");
             EditorUtility.DisplayDialog("Completado", "Todos los prefabs han sido creados exitosamente!", "OK");
@@ -464,99 +483,7 @@ namespace DigitPark.Editor
 
         #endregion
 
-        #region Onboarding - Avatar Option Item Prefab
-
-        [MenuItem("DigitPark/Prefabs/Monetization/AvatarOptionItem")]
-        private static void CreateAvatarOptionItemPrefab()
-        {
-            GameObject item = new GameObject("AvatarOptionItem");
-
-            RectTransform rt = item.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(AVATAR_OPTION_SIZE, AVATAR_OPTION_SIZE + 20);
-
-            LayoutElement le = item.AddComponent<LayoutElement>();
-            le.preferredWidth = AVATAR_OPTION_SIZE;
-            le.preferredHeight = AVATAR_OPTION_SIZE + 20;
-
-            // Background
-            Image bg = item.AddComponent<Image>();
-            bg.color = CARD_BG;
-
-            // Border
-            GameObject border = CreateImageElement(item.transform, "BorderImage",
-                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            Outline outline = border.AddComponent<Outline>();
-            outline.effectColor = new Color(0.3f, 0.3f, 0.35f);
-            outline.effectDistance = new Vector2(2, 2);
-
-            // Circular Avatar Frame
-            Sprite circleSprite = GenerateCircleSprite();
-            GameObject avatarFrame = CreateImageElement(item.transform, "AvatarFrame",
-                new Vector2(0.5f, 0.55f), new Vector2(0.5f, 0.55f),
-                new Vector2(-37, -37), new Vector2(37, 37));
-            avatarFrame.GetComponent<Image>().sprite = circleSprite;
-            avatarFrame.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.35f);
-            var fr_monetization = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
-            fr_monetization.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Full);
-
-            // Circular mask
-            GameObject avatarMask = CreateImageElement(avatarFrame.transform, "AvatarMask",
-                new Vector2(0.06f, 0.06f), new Vector2(0.94f, 0.94f),
-                Vector2.zero, Vector2.zero);
-            avatarMask.GetComponent<Image>().sprite = circleSprite;
-            avatarMask.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f);
-            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
-
-            // Avatar Image (clipped to circle)
-            GameObject avatar = CreateImageElement(avatarMask.transform, "AvatarImage",
-                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            avatar.GetComponent<Image>().color = Color.white;
-            avatar.GetComponent<Image>().preserveAspect = true;
-            Sprite defAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
-            if (defAvatar != null) avatar.GetComponent<Image>().sprite = defAvatar;
-
-            // Name Text
-            CreateTextElement(item.transform, "NameText", "",
-                new Vector2(0, 0), new Vector2(1, 0.18f), (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
-
-            // Selection Ring
-            GameObject ring = CreateImageElement(item.transform, "SelectionRing",
-                new Vector2(0.5f, 0.55f), new Vector2(0.5f, 0.55f),
-                new Vector2(-42, -42), new Vector2(42, 42));
-            ring.GetComponent<Image>().color = Color.clear;
-            Outline ringOutline = ring.AddComponent<Outline>();
-            ringOutline.effectColor = CYAN_NEON;
-            ringOutline.effectDistance = new Vector2(3, 3);
-            ring.SetActive(false);
-
-            // Locked Overlay
-            GameObject locked = CreateOverlay(item.transform, "LockedOverlay", LOCKED_BG);
-            GameObject lockIcon = new GameObject("LockIcon");
-            lockIcon.transform.SetParent(locked.transform, false);
-            RectTransform lockRT = lockIcon.AddComponent<RectTransform>();
-            lockRT.anchorMin = new Vector2(0.5f, 0.5f);
-            lockRT.anchorMax = new Vector2(0.5f, 0.5f);
-            lockRT.sizeDelta = new Vector2(30, 30);
-            lockRT.anchoredPosition = Vector2.zero;
-            Image lockImg = lockIcon.AddComponent<Image>();
-            lockImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/UI/icon_lock_silver.png");
-            lockImg.preserveAspect = true;
-            lockImg.color = Color.white;
-            CreateTextElement(locked.transform, "UnlockRequirementText", "Level 5",
-                new Vector2(0, 0), new Vector2(1, 0.25f), (int)FontSizes.Body, new Color(0.7f, 0.7f, 0.7f), FontStyles.Bold, TextAlignmentOptions.Center);
-            locked.SetActive(false);
-
-            // Button
-            Button btn = item.AddComponent<Button>();
-            btn.targetGraphic = bg;
-
-            // Add UI Component
-            AvatarOptionItemUI ui = item.AddComponent<AvatarOptionItemUI>();
-
-            SavePrefab(item, "Assets/_Project/Prefabs/Onboarding/AvatarOptionItem.prefab");
-        }
-
-        #endregion
+        // Avatar Option Item Prefab removed — avatar system eliminated
 
         #region Tournament Lobby - Prize Row Item Prefab
 
@@ -855,6 +782,285 @@ namespace DigitPark.Editor
             PlayerSearchItemUI ui = item.AddComponent<PlayerSearchItemUI>();
 
             SavePrefab(item, "Assets/_Project/Prefabs/Social/PlayerSearchItem.prefab");
+        }
+
+        #endregion
+
+        #region Tournament Item Prefabs
+
+        [MenuItem("DigitPark/Prefabs/Tournaments/TournamentItem")]
+        public static void CreateTournamentItemPrefab() =>
+            BuildTournamentCard("TournamentItem", "Assets/_Project/Prefabs/Tournaments/Browser/TournamentItem.prefab", CYAN_NEON);
+
+        [MenuItem("DigitPark/Prefabs/Tournaments/TournamentSearchItem")]
+        public static void CreateTournamentSearchItemPrefab() =>
+            BuildTournamentCard("TournamentSearchItem", "Assets/_Project/Prefabs/Tournaments/Browser/TournamentSearchItem.prefab", GOLD);
+
+        [MenuItem("DigitPark/Prefabs/Tournaments/TournamentMyItem")]
+        public static void CreateTournamentMyItemPrefab() =>
+            BuildTournamentCard("TournamentMyItem", "Assets/_Project/Prefabs/Tournaments/Browser/TournamentMyItem.prefab", GREEN);
+
+        private static void BuildTournamentCard(string goName, string savePath, Color accent)
+        {
+            GameObject item = new GameObject(goName);
+            RectTransform rt = item.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0, TOURNAMENT_ITEM_H);
+            LayoutElement le = item.AddComponent<LayoutElement>();
+            le.preferredHeight = TOURNAMENT_ITEM_H;
+            le.flexibleWidth = 1;
+            Image bg = item.AddComponent<Image>();
+            bg.color = CARD_BG;
+            Button btn = item.AddComponent<Button>();
+            btn.targetGraphic = bg;
+
+            // Participants (left column)
+            CreateTextElement(item.transform, "ParticipantsText", "4/8",
+                new Vector2(0, 0.55f), new Vector2(0.35f, 1f),
+                new Vector2(10, 0), new Vector2(0, -4),
+                (int)FontSizes.Body, new Color(1f, 0.84f, 0f), FontStyles.Bold, TextAlignmentOptions.Left);
+
+            // Creator
+            CreateTextElement(item.transform, "CreatorText", "Player123",
+                new Vector2(0, 0.1f), new Vector2(0.35f, 0.55f),
+                new Vector2(10, 0), new Vector2(0, 0),
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+
+            // Vertical divider 1
+            GameObject div1 = CreateImageElement(item.transform, "VerticalDivider1",
+                new Vector2(0.35f, 0.1f), new Vector2(0.35f, 0.9f),
+                new Vector2(0, 0), new Vector2(2, 0));
+            div1.GetComponent<Image>().color = new Color(accent.r, accent.g, accent.b, 0.3f);
+
+            // Time (center column)
+            CreateTextElement(item.transform, "TimeText", "2h 30m",
+                new Vector2(0.37f, 0.1f), new Vector2(0.72f, 0.9f),
+                Vector2.zero, Vector2.zero,
+                (int)FontSizes.Body, new Color(0f, 1f, 0.53f), FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // Vertical divider 2
+            GameObject div2 = CreateImageElement(item.transform, "VerticalDivider2",
+                new Vector2(0.72f, 0.1f), new Vector2(0.72f, 0.9f),
+                new Vector2(0, 0), new Vector2(2, 0));
+            div2.GetComponent<Image>().color = new Color(accent.r, accent.g, accent.b, 0.3f);
+
+            // Action label (right column)
+            CreateTextElement(item.transform, "ActionText", "JOIN",
+                new Vector2(0.74f, 0.2f), new Vector2(1f, 0.8f),
+                new Vector2(4, 0), new Vector2(-8, 0),
+                (int)FontSizes.Body, accent, FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // Horizontal divider (bottom separator)
+            GameObject hdiv = CreateImageElement(item.transform, "HorizontalDivider",
+                new Vector2(0, 0), new Vector2(1, 0),
+                new Vector2(8, 0), new Vector2(-8, 2));
+            hdiv.GetComponent<Image>().color = new Color(accent.r, accent.g, accent.b, 0.15f);
+
+            var comp = item.AddComponent<TournamentItemUI>();
+            comp.AutoSetupReferences();
+            SavePrefab(item, savePath);
+        }
+
+        #endregion
+
+        #region Leaderboard Entry Prefab
+
+        [MenuItem("DigitPark/Prefabs/Social/LeaderboardEntry")]
+        public static void CreateLeaderboardEntryPrefab()
+        {
+            GameObject item = new GameObject("LeaderboardEntry");
+            RectTransform rt = item.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0, LEADERBOARD_ENTRY_H);
+            LayoutElement le = item.AddComponent<LayoutElement>();
+            le.preferredHeight = LEADERBOARD_ENTRY_H;
+            le.flexibleWidth = 1;
+            Image bg = item.AddComponent<Image>();
+            bg.color = new Color(0.04f, 0.08f, 0.13f, 0.95f);
+            Button btn = item.AddComponent<Button>();
+            btn.targetGraphic = bg;
+
+            // Medal glow strip (left edge, top-3 indicator)
+            GameObject medal = CreateImageElement(item.transform, "MedalIndicator",
+                new Vector2(0, 0.1f), new Vector2(0, 0.9f),
+                new Vector2(2, 0), new Vector2(6, 0));
+            medal.GetComponent<Image>().color = new Color(1f, 0.84f, 0f, 0.4f);
+
+            // Position
+            CreateTextElement(item.transform, "PositionText", "1",
+                new Vector2(0, 0.1f), new Vector2(0.13f, 0.9f),
+                new Vector2(8, 0), new Vector2(0, 0),
+                (int)FontSizes.Body, new Color(1f, 0.84f, 0f), FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // Avatar placeholder
+            GameObject avatar = CreateImageElement(item.transform, "AvatarImage",
+                new Vector2(0.13f, 0.1f), new Vector2(0.13f, 0.9f),
+                new Vector2(4, 2), new Vector2(58, -2));
+            avatar.GetComponent<Image>().color = new Color(0.2f, 0.25f, 0.35f);
+            avatar.GetComponent<Image>().raycastTarget = true;
+
+            // Username
+            CreateTextElement(item.transform, "UsernameText", "Player123",
+                new Vector2(0.26f, 0.45f), new Vector2(0.7f, 0.95f),
+                Vector2.zero, Vector2.zero,
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+
+            // Time / score
+            CreateTextElement(item.transform, "TimeText", "1.234s",
+                new Vector2(0.7f, 0.1f), new Vector2(1f, 0.9f),
+                new Vector2(0, 0), new Vector2(-10, 0),
+                (int)FontSizes.Body, new Color(0f, 1f, 0.53f), FontStyles.Bold, TextAlignmentOptions.Right);
+
+            var comp = item.AddComponent<LeaderboardEntryUI>();
+            comp.AutoSetupReferences();
+            SavePrefab(item, "Assets/_Project/Prefabs/Social/LeaderboardEntry.prefab");
+        }
+
+        #endregion
+
+        #region Mission Card Prefab
+
+        [MenuItem("DigitPark/Prefabs/Monetization/MissionCard")]
+        public static void CreateMissionCardPrefab()
+        {
+            GameObject item = new GameObject("MissionCard");
+            RectTransform rt = item.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(0, MISSION_CARD_H);
+            LayoutElement le = item.AddComponent<LayoutElement>();
+            le.preferredHeight = MISSION_CARD_H;
+            le.flexibleWidth = 1;
+            Image bg = item.AddComponent<Image>();
+            bg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+
+            // Category border (left accent strip)
+            GameObject catBorderGO = CreateImageElement(item.transform, "CategoryBorder",
+                new Vector2(0, 0), new Vector2(0, 1),
+                new Vector2(0, 0), new Vector2(5, 0));
+            catBorderGO.GetComponent<Image>().color = CYAN_NEON;
+
+            // Difficulty indicator (top-right badge)
+            GameObject diffGO = CreateImageElement(item.transform, "DifficultyIndicator",
+                new Vector2(1, 1), new Vector2(1, 1),
+                new Vector2(-52, -14), new Vector2(-6, -4));
+            diffGO.GetComponent<Image>().color = GREEN;
+
+            // Icon glow
+            GameObject iconGlowGO = CreateImageElement(item.transform, "IconGlow",
+                new Vector2(0, 0.1f), new Vector2(0, 0.9f),
+                new Vector2(8, -4), new Vector2(76, 4));
+            iconGlowGO.GetComponent<Image>().color = new Color(0f, 1f, 1f, 0.22f);
+
+            // Mission icon
+            GameObject iconGO = CreateImageElement(item.transform, "MissionIcon",
+                new Vector2(0, 0.12f), new Vector2(0, 0.88f),
+                new Vector2(14, 0), new Vector2(72, 0));
+            iconGO.GetComponent<Image>().color = CYAN_NEON;
+            iconGO.GetComponent<Image>().preserveAspect = true;
+
+            // Title
+            CreateTextElement(item.transform, "TitleText", "Mission Title",
+                new Vector2(0, 0.6f), new Vector2(0.68f, 0.96f),
+                new Vector2(84, 0), new Vector2(0, 0),
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Left);
+
+            // Description
+            CreateTextElement(item.transform, "DescriptionText", "Complete 3 matches",
+                new Vector2(0, 0.36f), new Vector2(0.68f, 0.6f),
+                new Vector2(84, 0), new Vector2(0, 0),
+                (int)FontSizes.Body, new Color(0.6f, 0.65f, 0.75f), FontStyles.Bold, TextAlignmentOptions.Left);
+
+            // Progress bar (Slider)
+            GameObject pBarGO = new GameObject("ProgressBar");
+            pBarGO.transform.SetParent(item.transform, false);
+            RectTransform pBarRT = pBarGO.AddComponent<RectTransform>();
+            pBarRT.anchorMin = new Vector2(0, 0.08f);
+            pBarRT.anchorMax = new Vector2(0.68f, 0.3f);
+            pBarRT.offsetMin = new Vector2(84, 2);
+            pBarRT.offsetMax = new Vector2(0, -2);
+            Image pBarBg = pBarGO.AddComponent<Image>();
+            pBarBg.color = PROGRESS_BG;
+            Slider slider = pBarGO.AddComponent<Slider>();
+            slider.minValue = 0; slider.maxValue = 1; slider.value = 0.4f;
+            slider.interactable = false;
+            // Fill Area
+            GameObject fillArea = new GameObject("Fill Area");
+            fillArea.transform.SetParent(pBarGO.transform, false);
+            RectTransform faRT = fillArea.AddComponent<RectTransform>();
+            faRT.anchorMin = Vector2.zero; faRT.anchorMax = Vector2.one;
+            faRT.offsetMin = Vector2.zero; faRT.offsetMax = Vector2.zero;
+            // Fill
+            GameObject fillGO = new GameObject("Fill");
+            fillGO.transform.SetParent(fillArea.transform, false);
+            RectTransform fillRT = fillGO.AddComponent<RectTransform>();
+            fillRT.anchorMin = Vector2.zero; fillRT.anchorMax = new Vector2(0.4f, 1);
+            fillRT.offsetMin = Vector2.zero; fillRT.offsetMax = Vector2.zero;
+            Image fillImg = fillGO.AddComponent<Image>();
+            fillImg.color = PROGRESS_FILL;
+            slider.fillRect = fillRT;
+
+            // Progress text
+            CreateTextElement(item.transform, "ProgressText", "1/3",
+                new Vector2(0.68f, 0.08f), new Vector2(1f, 0.3f),
+                new Vector2(0, 0), new Vector2(-6, 0),
+                (int)FontSizes.Body, Color.white, FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // Reward icon
+            GameObject rewardIconGO = CreateImageElement(item.transform, "RewardIcon",
+                new Vector2(0.7f, 0.45f), new Vector2(0.7f, 0.88f),
+                new Vector2(0, 0), new Vector2(34, 0));
+            rewardIconGO.GetComponent<Image>().color = new Color(1f, 0.85f, 0.3f);
+
+            // Reward amount
+            CreateTextElement(item.transform, "RewardAmountText", "+50",
+                new Vector2(0.78f, 0.45f), new Vector2(1f, 0.88f),
+                new Vector2(0, 0), new Vector2(-6, 0),
+                (int)FontSizes.Body, new Color(1f, 0.85f, 0.3f), FontStyles.Bold, TextAlignmentOptions.Left);
+
+            // Claim button
+            GameObject claimBtnGO = new GameObject("ClaimButton");
+            claimBtnGO.transform.SetParent(item.transform, false);
+            RectTransform claimRT = claimBtnGO.AddComponent<RectTransform>();
+            claimRT.anchorMin = new Vector2(0.7f, 0.05f);
+            claimRT.anchorMax = new Vector2(0.99f, 0.42f);
+            claimRT.offsetMin = Vector2.zero; claimRT.offsetMax = Vector2.zero;
+            Image claimBg = claimBtnGO.AddComponent<Image>();
+            claimBg.color = GREEN;
+            claimBtnGO.AddComponent<Button>().targetGraphic = claimBg;
+            CreateTextElement(claimBtnGO.transform, "ClaimButtonText", "CLAIM",
+                Vector2.zero, Vector2.one, (int)FontSizes.Body, Color.black, FontStyles.Bold, TextAlignmentOptions.Center);
+
+            // Completed overlay
+            GameObject completedGO = CreateOverlay(item.transform, "CompletedOverlay", new Color(0.08f, 0.2f, 0.1f, 0.7f));
+            completedGO.SetActive(false);
+
+            // Claimed checkmark
+            GameObject claimedGO = CreateImageElement(item.transform, "ClaimedCheckmark",
+                new Vector2(0.82f, 0.3f), new Vector2(0.96f, 0.7f),
+                Vector2.zero, Vector2.zero);
+            claimedGO.GetComponent<Image>().color = GREEN;
+            claimedGO.SetActive(false);
+
+            // Add component + wire SerializedObject
+            MissionCardUI cardComp = item.AddComponent<MissionCardUI>();
+            SerializedObject so = new SerializedObject(cardComp);
+            so.Update();
+            so.FindProperty("backgroundImage").objectReferenceValue = bg;
+            so.FindProperty("categoryBorder").objectReferenceValue = catBorderGO.GetComponent<Image>();
+            so.FindProperty("difficultyIndicator").objectReferenceValue = diffGO.GetComponent<Image>();
+            so.FindProperty("missionIcon").objectReferenceValue = iconGO.GetComponent<Image>();
+            so.FindProperty("iconGlow").objectReferenceValue = iconGlowGO.GetComponent<Image>();
+            so.FindProperty("titleText").objectReferenceValue = item.transform.Find("TitleText").GetComponent<TextMeshProUGUI>();
+            so.FindProperty("descriptionText").objectReferenceValue = item.transform.Find("DescriptionText").GetComponent<TextMeshProUGUI>();
+            so.FindProperty("progressText").objectReferenceValue = item.transform.Find("ProgressText").GetComponent<TextMeshProUGUI>();
+            so.FindProperty("progressBar").objectReferenceValue = slider;
+            so.FindProperty("progressFill").objectReferenceValue = fillImg;
+            so.FindProperty("rewardIcon").objectReferenceValue = rewardIconGO.GetComponent<Image>();
+            so.FindProperty("rewardAmountText").objectReferenceValue = item.transform.Find("RewardAmountText").GetComponent<TextMeshProUGUI>();
+            so.FindProperty("claimButton").objectReferenceValue = claimBtnGO.GetComponent<Button>();
+            so.FindProperty("claimButtonText").objectReferenceValue = claimBtnGO.transform.Find("ClaimButtonText").GetComponent<TextMeshProUGUI>();
+            so.FindProperty("completedOverlay").objectReferenceValue = completedGO;
+            so.FindProperty("claimedCheckmark").objectReferenceValue = claimedGO;
+            so.ApplyModifiedProperties();
+
+            SavePrefab(item, "Assets/_Project/Prefabs/Monetization/DailyMissions/MissionCard.prefab");
         }
 
         #endregion

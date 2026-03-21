@@ -543,29 +543,28 @@ namespace DigitPark.Managers
 
             try
             {
-                bool success = await AuthenticationService.Instance.ResetPassword(email);
-
-                if (success)
-                {
-                    Debug.Log("[Login] Email de recuperación enviado exitosamente");
-                    forgotPasswordPopup?.ShowSuccess(AutoLocalizer.Get("forgot_password_success"));
-
-                    // Cerrar popup después de 3 segundos
-                    StartCoroutine(CloseForgotPasswordPopupDelayed(3f));
-                }
-                else
-                {
-                    Debug.LogWarning("[Login] Error al enviar email de recuperación");
-                    forgotPasswordPopup?.ShowError(AutoLocalizer.Get("forgot_password_error"));
-                    forgotPasswordPopup?.SetSendButtonInteractable(true);
-                }
+                // B2-C: ignorar si email existe — siempre retorna true para evitar account enumeration
+                await AuthenticationService.Instance.ResetPassword(email);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[Login] Excepción al enviar email de recuperación: {e.Message}");
-                forgotPasswordPopup?.ShowError(AutoLocalizer.Get("forgot_password_error"));
-                forgotPasswordPopup?.SetSendButtonInteractable(true);
+                Debug.Log($"[Login] ResetPassword: {e.Message}"); // debug only — no exponer al usuario
             }
+
+            // B2-B + B2-C: siempre mostrar el mismo mensaje genérico (no revelar si el email existe)
+            forgotPasswordPopup?.ShowSuccess(AutoLocalizer.Get("forgot_password_sent_generic"));
+
+            // B2-B: cooldown 60s antes de re-habilitar el botón
+            StartCoroutine(ReenableSendButtonAfterCooldown(60f));
+
+            // Cerrar popup después de 4 segundos
+            StartCoroutine(CloseForgotPasswordPopupDelayed(4f));
+        }
+
+        private System.Collections.IEnumerator ReenableSendButtonAfterCooldown(float seconds)
+        {
+            yield return new UnityEngine.WaitForSeconds(seconds);
+            forgotPasswordPopup?.SetSendButtonInteractable(true);
         }
 
         private IEnumerator CloseForgotPasswordPopupDelayed(float delay)
@@ -617,24 +616,33 @@ namespace DigitPark.Managers
             usernamePopup?.ShowForFirstTime(
                 onConfirm: async (username) =>
                 {
-                    Debug.Log($"[Login] Usuario eligió username: {username}");
-
-                    // Actualizar username
-                    bool success = await AuthenticationService.Instance.UpdateUsername(username);
-
-                    if (success)
+                    try
                     {
-                        currentPlayerData.username = username;
-                        Debug.Log("[Login] Username actualizado, yendo a MainMenu");
-                        if (!_isTransitioning)
+                        Debug.Log($"[Login] Usuario eligió username: {username}");
+
+                        if (AuthenticationService.Instance == null) { ShowErrorMessage("Auth not available"); return; }
+                        bool success = await AuthenticationService.Instance.UpdateUsername(username);
+
+                        if (this == null) return;
+                        if (success)
                         {
-                            _isTransitioning = true;
-                            StartCoroutine(TransitionToMainMenu());
+                            currentPlayerData.username = username;
+                            Debug.Log("[Login] Username actualizado, yendo a MainMenu");
+                            if (!_isTransitioning)
+                            {
+                                _isTransitioning = true;
+                                StartCoroutine(TransitionToMainMenu());
+                            }
+                        }
+                        else
+                        {
+                            ShowErrorMessage(AutoLocalizer.Get("error_save_username"));
                         }
                     }
-                    else
+                    catch (System.Exception ex)
                     {
-                        ShowErrorMessage(AutoLocalizer.Get("error_save_username"));
+                        Debug.LogError($"[Login] Username update error: {ex.Message}");
+                        if (this != null) ShowErrorMessage(AutoLocalizer.Get("error_save_username"));
                     }
                 },
                 onLater: () =>
@@ -717,7 +725,7 @@ namespace DigitPark.Managers
                     var cg = loadingPanel.GetComponent<CanvasGroup>();
                     if (cg == null) cg = loadingPanel.AddComponent<CanvasGroup>();
                     cg.alpha = 0f;
-                    cg.DOFade(1f, 0.2f).SetUpdate(true);
+                    cg.DOFade(1f, 0.2f).SetUpdate(true).SetLink(loadingPanel);
                 }
                 else
                 {
@@ -769,11 +777,9 @@ namespace DigitPark.Managers
         /// </summary>
         private string GetFriendlyErrorMessage(string technicalError)
         {
-            if (technicalError.Contains("auth/user-not-found"))
-                return AutoLocalizer.Get("error_user_not_found");
-
-            if (technicalError.Contains("auth/wrong-password"))
-                return AutoLocalizer.Get("error_wrong_password");
+            // HIGH-02: Same message for both — prevents account enumeration
+            if (technicalError.Contains("auth/user-not-found") || technicalError.Contains("auth/wrong-password"))
+                return AutoLocalizer.Get("auth_error_invalid_credentials");
 
             if (technicalError.Contains("auth/email-already-in-use"))
                 return AutoLocalizer.Get("error_email_already_registered");

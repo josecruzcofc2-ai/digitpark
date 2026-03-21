@@ -35,9 +35,6 @@ namespace DigitPark.Managers
         [Header("UI - Profile Info")]
         [SerializeField] private TextMeshProUGUI usernameText;
         [SerializeField] private Button editNameButton;
-        [SerializeField] private Image avatarImage;
-        [SerializeField] private AvatarUI avatarUI;
-        [SerializeField] private Button editAvatarButton;
         [SerializeField] private TextMeshProUGUI statusText;  // "Tu perfil", "Amigo", "No es amigo"
 
         [Header("UI - Change Name")]
@@ -132,7 +129,6 @@ namespace DigitPark.Managers
             addFriendIconButton?.onClick.AddListener(OnAddFriendClicked);
 
             // Edit buttons (solo perfil propio)
-            editAvatarButton?.onClick.AddListener(OnEditAvatarClicked);
             editNameButton?.onClick.AddListener(OnEditNameClicked);
 
             // Action Buttons
@@ -151,11 +147,7 @@ namespace DigitPark.Managers
             flashTapButton?.onClick.AddListener(() => OnGameSelected("FlashTap"));
             oddOneOutButton?.onClick.AddListener(() => OnGameSelected("OddOneOut"));
 
-            // Avatar change events
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.OnAvatarChanged += OnAvatarChanged;
-            }
+            // Avatar system removed
         }
 
         private void Update()
@@ -207,16 +199,8 @@ namespace DigitPark.Managers
                 challengeButton.gameObject.SetActive(false);
 
             // Mostrar botones de edicion (solo en perfil propio)
-            if (editAvatarButton != null)
-                editAvatarButton.gameObject.SetActive(true);
             if (editNameButton != null)
                 editNameButton.gameObject.SetActive(true);
-
-            // Cargar avatar del usuario actual
-            _ = LoadAvatarAsync().ContinueWith(t =>
-            {
-                if (t.IsFaulted) Debug.LogError($"[ProfileManager] LoadAvatarAsync failed: {t.Exception?.GetBaseException().Message}");
-            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 
             // Mostrar botones de accion
             if (friendsButton != null)
@@ -244,16 +228,8 @@ namespace DigitPark.Managers
             SetLoadingVisible(false);  // PR-06
 
             // Ocultar botones de edicion (no es nuestro perfil)
-            if (editAvatarButton != null)
-                editAvatarButton.gameObject.SetActive(false);
             if (editNameButton != null)
                 editNameButton.gameObject.SetActive(false);
-
-            // Cargar avatar del otro jugador
-            _ = LoadAvatarAsync().ContinueWith(t =>
-            {
-                if (t.IsFaulted) Debug.LogError($"[ProfileManager] LoadAvatarAsync failed: {t.Exception?.GetBaseException().Message}");
-            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 
             // Verificar estado de amistad
             CheckFriendStatus(playerId);
@@ -370,7 +346,7 @@ namespace DigitPark.Managers
 
             // Info basica
             if (usernameText != null)
-                usernameText.text = currentPlayerData.username ?? AutoLocalizer.Get("profile_no_user");
+                usernameText.text = DigitPark.UI.UICanvasHelper.TmpSafe(currentPlayerData.username) ?? AutoLocalizer.Get("profile_no_user");
 
             // Estadisticas generales con animación
             AnimateGeneralStats();
@@ -459,120 +435,15 @@ namespace DigitPark.Managers
 
         #endregion
 
-        #region Avatar
-
-        private async Task LoadAvatarAsync()
-        {
-            if (currentPlayerData == null) return;
-
-            // Si hay AvatarUI component, usarlo (ya maneja todo el flujo)
-            if (avatarUI != null)
-            {
-                if (isOwnProfile)
-                {
-                    await avatarUI.LoadCurrentUserAvatar();
-                }
-                else
-                {
-                    await avatarUI.LoadUserAvatar(
-                        currentPlayerData.userId,
-                        currentPlayerData.avatarUrl,
-                        currentPlayerData.username
-                    );
-                }
-                return;
-            }
-
-            // Fallback: cargar directamente en el Image
-            if (avatarImage != null)
-            {
-                if (AvatarService.Instance != null)
-                {
-                    try
-                    {
-                        Sprite avatar;
-                        if (isOwnProfile)
-                        {
-                            avatar = await AvatarService.Instance.LoadCurrentUserAvatar();
-                        }
-                        else
-                        {
-                            avatar = await AvatarService.Instance.LoadAvatar(
-                                currentPlayerData.userId,
-                                currentPlayerData.avatarUrl,
-                                currentPlayerData.username
-                            );
-                        }
-                        if (avatar != null)
-                        {
-                            avatarImage.sprite = avatar;
-                            avatarImage.color = Color.white;
-                        }
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning($"[Profile] Error cargando avatar: {e.Message}");
-                        // Generar avatar con inicial como fallback
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
-                            currentPlayerData.username, currentPlayerData.userId);
-                        avatarImage.sprite = initialAvatar;
-                        avatarImage.color = Color.white;
-                    }
-                }
-                else
-                {
-                    // Sin AvatarService, generar avatar con inicial
-                    Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
-                        currentPlayerData.username, currentPlayerData.userId);
-                    avatarImage.sprite = initialAvatar;
-                    avatarImage.color = Color.white;
-                }
-            }
-        }
-
-        private void OnEditAvatarClicked()
-        {
-            if (!isOwnProfile) return;
-
-            // Si hay AvatarUI con edición, ya lo maneja
-            if (avatarUI != null && avatarUI.isActiveAndEnabled)
-            {
-                // AvatarUI ya tiene su propio editButton, pero permitimos trigger externo
-            }
-
-            // Abrir selector de galería directamente
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.PickAvatarFromGallery();
-            }
-            else
-            {
-                Debug.LogWarning("[Profile] AvatarService no disponible para editar avatar");
-            }
-        }
-
-        private void OnAvatarChanged(Sprite newAvatar)
-        {
-            // Actualizar avatar si estamos viendo nuestro propio perfil
-            if (isOwnProfile && avatarImage != null && newAvatar != null)
-            {
-                avatarImage.sprite = newAvatar;
-                avatarImage.color = Color.white;
-            }
-        }
+        #region Cleanup
 
         private void OnDestroy()
         {
             DOTween.Kill(transform);
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.OnAvatarChanged -= OnAvatarChanged;
-            }
 
             // Remove button listeners to prevent leaks
             backButton?.onClick.RemoveAllListeners();
             addFriendIconButton?.onClick.RemoveAllListeners();
-            editAvatarButton?.onClick.RemoveAllListeners();
             editNameButton?.onClick.RemoveAllListeners();
             friendsButton?.onClick.RemoveAllListeners();
             historyButton?.onClick.RemoveAllListeners();
@@ -631,7 +502,7 @@ namespace DigitPark.Managers
                 }
 
                 // Verificar si ya hay solicitud pendiente
-                if (FriendService.Instance.HasPendingRequestWith(viewingPlayerId))
+                if (FriendService.Instance != null && FriendService.Instance.HasPendingRequestWith(viewingPlayerId))
                 {
                     Debug.Log("[Profile] Ya existe solicitud pendiente");
                     SetStatusText(AutoLocalizer.Get("profile_request_pending"), new Color32(255, 204, 0, 255));
@@ -641,6 +512,7 @@ namespace DigitPark.Managers
                 Debug.Log($"[Profile] Enviando solicitud de amistad a: {viewingPlayerId}");
 
                 // Enviar solicitud usando FriendService
+                if (FriendService.Instance == null) { Debug.LogWarning("[Profile] FriendService not available"); return; }
                 var result = await FriendService.Instance.SendFriendRequest(viewingPlayerId);
 
                 if (result.Success)
@@ -784,6 +656,7 @@ namespace DigitPark.Managers
 
                 Debug.Log($"[Profile] Cambiando nombre a: {newUsername}");
 
+                if (AuthenticationService.Instance == null) { Debug.LogError("[Profile] AuthService not available"); return; }
                 bool success = await AuthenticationService.Instance.UpdateUsername(newUsername);
 
                 if (success)

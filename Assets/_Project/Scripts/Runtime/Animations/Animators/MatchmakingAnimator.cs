@@ -17,8 +17,6 @@ namespace DigitPark.Animations
         [Header("Player Cards")]
         [SerializeField] private RectTransform playerCard;
         [SerializeField] private RectTransform opponentCard;
-        [SerializeField] private Image playerAvatar;
-        [SerializeField] private Image opponentAvatar;
         [SerializeField] private TextMeshProUGUI playerName;
         [SerializeField] private TextMeshProUGUI opponentName;
 
@@ -195,12 +193,12 @@ namespace DigitPark.Animations
         /// <summary>
         /// Play opponent found sequence
         /// </summary>
-        public void PlayOpponentFoundSequence(Sprite opponentAvatarSprite, string opponentNameStr, Action onComplete = null)
+        public void PlayOpponentFoundSequence(string opponentNameStr, Action onComplete = null)
         {
-            StartCoroutine(OpponentFoundCoroutine(opponentAvatarSprite, opponentNameStr, onComplete));
+            StartCoroutine(OpponentFoundCoroutine(opponentNameStr, onComplete));
         }
 
-        private IEnumerator OpponentFoundCoroutine(Sprite avatarSprite, string nameStr, Action onComplete)
+        private IEnumerator OpponentFoundCoroutine(string nameStr, Action onComplete)
         {
             // Stop search
             StopSearchAnimation();
@@ -244,9 +242,6 @@ namespace DigitPark.Animations
             // Show actual opponent card
             if (opponentCard != null)
             {
-                if (opponentAvatar != null)
-                    opponentAvatar.sprite = avatarSprite;
-
                 if (opponentName != null)
                     opponentName.text = nameStr;
 
@@ -399,11 +394,8 @@ namespace DigitPark.Animations
         /// <summary>
         /// Set player info
         /// </summary>
-        public void SetPlayerInfo(Sprite avatar, string name)
+        public void SetPlayerInfo(string name)
         {
-            if (playerAvatar != null)
-                playerAvatar.sprite = avatar;
-
             if (playerName != null)
                 playerName.text = name;
         }

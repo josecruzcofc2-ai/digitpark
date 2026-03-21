@@ -16,7 +16,7 @@ namespace DigitPark.Payments
             get
             {
                 if (_instance == null)
-                    _instance = FindObjectOfType<RemoteConfigService>();
+                    _instance = FindFirstObjectByType<RemoteConfigService>();
                 return _instance;
             }
         }
@@ -75,8 +75,11 @@ namespace DigitPark.Payments
 #if FIREBASE_REMOTE_CONFIG
         private IEnumerator FetchFromFirebase()
         {
-            var fetchTask = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance
-                .FetchAsync(System.TimeSpan.Zero);
+            Firebase.RemoteConfig.FirebaseRemoteConfig rcInstance;
+            try { rcInstance = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance; }
+            catch (System.Exception e) { Debug.LogWarning($"[RemoteConfig] DefaultInstance failed: {e.Message}"); yield break; }
+
+            var fetchTask = rcInstance.FetchAsync(System.TimeSpan.Zero);
 
             float elapsed = 0f;
             while (!fetchTask.IsCompleted && elapsed < FETCH_TIMEOUT)
@@ -87,8 +90,9 @@ namespace DigitPark.Payments
 
             if (fetchTask.IsCompletedSuccessfully)
             {
-                yield return Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance
-                    .ActivateAsync().AsIEnumerator();
+                // WARN-03: .AsIEnumerator() no existe en todas las versiones del Firebase SDK
+                var activateTask = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.ActivateAsync();
+                while (!activateTask.IsCompleted) yield return null;
 
                 var rc = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance;
                 _currentConfig = new RemoteConfigData

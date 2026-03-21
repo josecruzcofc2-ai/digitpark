@@ -208,14 +208,6 @@ namespace DigitPark.Managers
             string displayUsername = showingReceived ? request.senderUsername : request.receiverUsername;
             string displayId = showingReceived ? request.senderId : request.receiverId;
 
-            // Avatar
-            var avatarImage = item.transform.Find("AvatarFrame/AvatarImage")?.GetComponent<Image>();
-            if (avatarImage != null)
-            {
-                LoadRequestAvatar(avatarImage, displayUsername, displayId,
-                    showingReceived ? request.senderAvatarUrl : null);
-            }
-
             // Username
             var usernameText = item.transform.Find("InfoSection/Username")?.GetComponent<TextMeshProUGUI>();
             if (usernameText != null)
@@ -273,41 +265,6 @@ namespace DigitPark.Managers
             }
         }
 
-        private async void LoadRequestAvatar(Image avatarImage, string username, string userId, string avatarUrl)
-        {
-            try
-            {
-                if (AvatarService.Instance != null && !string.IsNullOrEmpty(avatarUrl))
-                {
-                    Sprite avatar = await AvatarService.Instance.LoadAvatar(userId, avatarUrl, username);
-                    if (avatar != null && avatarImage != null)
-                    {
-                        avatarImage.sprite = avatar;
-                        avatarImage.color = Color.white;
-                    }
-                }
-                else
-                {
-                    SetInitialAvatar(avatarImage, username, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[FriendRequestsSceneManager] {ex.Message}");
-                SetInitialAvatar(avatarImage, username, userId);
-            }
-        }
-
-        private void SetInitialAvatar(Image avatarImage, string username, string userId)
-        {
-            Sprite initial = AvatarInitialGenerator.GenerateAvatar(username, userId);
-            if (avatarImage != null)
-            {
-                avatarImage.sprite = initial;
-                avatarImage.color = Color.white;
-            }
-        }
-
         private void ClearItems()
         {
             foreach (var item in currentItems)
@@ -352,6 +309,7 @@ namespace DigitPark.Managers
             {
                 Debug.Log($"[FriendRequests] Aceptando solicitud: {requestId}");
 
+                if (FriendService.Instance == null) { Debug.LogWarning("[FriendRequests] FriendService not available"); return; }
                 var result = await FriendService.Instance.AcceptFriendRequest(requestId);
 
                 if (result.Success)
@@ -377,6 +335,7 @@ namespace DigitPark.Managers
             {
                 Debug.Log($"[FriendRequests] Rechazando solicitud: {requestId}");
 
+                if (FriendService.Instance == null) { Debug.LogWarning("[FriendRequests] FriendService not available"); return; }
                 var result = await FriendService.Instance.RejectFriendRequest(requestId);
 
                 if (result.Success)
@@ -402,6 +361,7 @@ namespace DigitPark.Managers
             {
                 Debug.Log($"[FriendRequests] Cancelando solicitud: {requestId}");
 
+                if (FriendService.Instance == null) { Debug.LogWarning("[FriendRequests] FriendService not available"); return; }
                 var result = await FriendService.Instance.CancelFriendRequest(requestId);
 
                 if (result.Success)
@@ -426,7 +386,7 @@ namespace DigitPark.Managers
             {
                 currentItems.Remove(item);
                 item.transform.DOScale(0f, 0.2f).SetEase(Ease.InBack)
-                    .OnComplete(() => { if (item != null) Destroy(item); });
+                    .SetLink(item).OnComplete(() => { if (item != null) Destroy(item); });
             }
         }
 
@@ -452,7 +412,7 @@ namespace DigitPark.Managers
             var cg = emptyText.GetComponent<CanvasGroup>();
             if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
             cg.alpha = 0f;
-            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(gameObject);
         }
 
         private void AnimateEntrance()
@@ -462,13 +422,14 @@ namespace DigitPark.Managers
             {
                 Vector2 pos = headerTransform.anchoredPosition;
                 headerTransform.anchoredPosition = new Vector2(pos.x, pos.y + 200);
-                headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack);
+                headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack).SetLink(gameObject);
             }
 
             // Tabs fade + slide desde izquierda
             if (tabsBarTransform != null)
             {
-                var cg = tabsBarTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = tabsBarTransform.gameObject.GetComponent<CanvasGroup>();
+                if (cg == null) cg = tabsBarTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 Vector2 pos = tabsBarTransform.anchoredPosition;
                 tabsBarTransform.anchoredPosition = new Vector2(pos.x - 100, pos.y);
@@ -482,7 +443,8 @@ namespace DigitPark.Managers
             // ScrollView fade in
             if (scrollViewTransform != null)
             {
-                var cg = scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
+                var cg = scrollViewTransform.gameObject.GetComponent<CanvasGroup>();
+                if (cg == null) cg = scrollViewTransform.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 DOTween.Sequence()
                     .AppendInterval(0.25f)
@@ -505,13 +467,13 @@ namespace DigitPark.Managers
                 var cg = loadingIndicator.GetComponent<CanvasGroup>();
                 if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.2f).SetUpdate(true);
+                cg.DOFade(1f, 0.2f).SetUpdate(true).SetLink(loadingIndicator);
             }
             else
             {
                 var cg = loadingIndicator.GetComponent<CanvasGroup>();
                 if (cg != null)
-                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).SetLink(loadingIndicator).OnComplete(() => loadingIndicator.SetActive(false));
                 else
                     loadingIndicator.SetActive(false);
             }

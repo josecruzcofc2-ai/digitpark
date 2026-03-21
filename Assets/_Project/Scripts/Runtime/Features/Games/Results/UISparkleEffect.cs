@@ -55,6 +55,7 @@ namespace DigitPark.UI
         {
             rectTransform = GetComponent<RectTransform>();
             parentCanvas = GetComponentInParent<Canvas>();
+            if (parentCanvas == null) { enabled = false; return; }
         }
 
         /// <summary>

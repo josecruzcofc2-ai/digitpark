@@ -441,7 +441,8 @@ namespace DigitPark.DevTools
 
             try
             {
-                await DatabaseService.Instance?.SaveScore(
+                if (DatabaseService.Instance == null) { UnityEngine.Debug.LogWarning("[Debug] DatabaseService not available"); return; }
+                await DatabaseService.Instance.SaveScore(
                     playerData.userId,
                     playerData.username,
                     _testScore,
@@ -517,8 +518,9 @@ namespace DigitPark.DevTools
         /// <summary>
         /// Desbloquea todos los productos premium (solo debug)
         /// </summary>
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
         [ContextMenu("Debug: Unlock All Premium")]
-        public void UnlockAllPremium()
+        private void UnlockAllPremium()
         {
             if (PremiumManager.Instance != null)
             {
@@ -527,6 +529,7 @@ namespace DigitPark.DevTools
                 UnityEngine.Debug.Log("[Debug] Todos los productos premium desbloqueados");
             }
         }
+#endif
 
         /// <summary>
         /// Simula recibir una notificacion push

@@ -42,9 +42,7 @@ namespace DigitPark.Editor.AutoAssigners
             // Actions
             "joinButton", "leaveButton", "shareButton", "joinButtonText",
             // Status
-            "loadingOverlay", "statusText", "startingOverlay", "startingCountdownText",
-            // Configuration
-            "defaultAvatarSprite"
+            "loadingOverlay", "statusText", "startingOverlay", "startingCountdownText"
         };
 
         private struct ReferenceResult
@@ -227,9 +225,6 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "statusText", FindTextByExactName("StatusText"));
             AssignGameObject(so, "startingOverlay", "StartingOverlay");
             AssignReference(so, "startingCountdownText", FindTextByExactName("StartingCountdownText"));
-
-            // Configuration - Default avatar sprite
-            AssignSpriteAsset(so, "defaultAvatarSprite", "Assets/_Project/Art/Icons/Social/AvatarDefault.png");
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);

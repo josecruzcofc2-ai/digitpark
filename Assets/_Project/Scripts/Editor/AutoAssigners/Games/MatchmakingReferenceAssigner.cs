@@ -26,9 +26,9 @@ namespace DigitPark.Editor.AutoAssigners
             // Header
             "titleText", "gameIconImage", "gameTypeText",
             // Player Card
-            "playerAvatar", "playerNameText", "playerLevelText", "playerCard",
+            "playerNameText", "playerLevelText", "playerCard",
             // Opponent Card
-            "opponentAvatar", "opponentNameText", "opponentLevelText",
+            "opponentNameText", "opponentLevelText",
             "opponentCard",
             // VS Section
             "vsContainer", "vsText",
@@ -80,8 +80,8 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to MatchmakingManager:\n" +
                 "• Header (title, game icon, game type)\n" +
-                "• Player card (avatar, name, level)\n" +
-                "• Opponent card (avatar, name, level, search ring)\n" +
+                "• Player card (name, level)\n" +
+                "• Opponent card (name, level, search ring)\n" +
                 "• VS section and search status\n" +
                 "• Countdown panel and effects\n" +
                 "• Buttons (cancel)",
@@ -173,13 +173,11 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "gameTypeText", FindTextByName("gamenametext", "gametype", "gamename"));
 
             // Player Card
-            AssignReference(so, "playerAvatar", FindImageByName("playeravatar"));
             AssignReference(so, "playerNameText", FindTextByName("playername"));
             AssignReference(so, "playerLevelText", FindTextByName("playerlevel", "leveltext"));
             AssignReference(so, "playerCard", FindByNameContains<Transform>("playercard"));
 
             // Opponent Card
-            AssignReference(so, "opponentAvatar", FindImageByName("opponentavatar"));
             AssignReference(so, "opponentNameText", FindTextByName("opponentname"));
             AssignReference(so, "opponentLevelText", FindTextByName("opponentlevel"));
             AssignReference(so, "opponentCard", FindByNameContains<Transform>("opponentcard"));

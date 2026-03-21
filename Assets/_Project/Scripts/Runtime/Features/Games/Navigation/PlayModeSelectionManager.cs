@@ -128,6 +128,15 @@ namespace DigitPark.Managers
         private void OnOneVsOneClicked()
         {
             if (_isNavigating) return;
+
+            // B3-I: Require network for online modes
+            if (DigitPark.Services.NetworkService.Instance != null &&
+                !DigitPark.Services.NetworkService.Instance.IsOnline)
+            {
+                Debug.LogWarning("[PlayModeSelection] Sin conexión — 1v1 no disponible");
+                return;
+            }
+
             _isNavigating = true;
 
             Debug.Log("[PlayModeSelection] Modo 1v1 seleccionado");
@@ -142,6 +151,15 @@ namespace DigitPark.Managers
         private void OnTournamentsClicked()
         {
             if (_isNavigating) return;
+
+            // B3-I: Require network for online modes
+            if (DigitPark.Services.NetworkService.Instance != null &&
+                !DigitPark.Services.NetworkService.Instance.IsOnline)
+            {
+                Debug.LogWarning("[PlayModeSelection] Sin conexión — Torneos no disponible");
+                return;
+            }
+
             _isNavigating = true;
 
             Debug.Log("[PlayModeSelection] Modo Torneos seleccionado");

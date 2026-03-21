@@ -34,7 +34,7 @@ namespace DigitPark.Monetization
                 // C-67: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
                 if (!_instance)
                 {
-                    _instance = FindObjectOfType<CurrencyManager>();
+                    _instance = FindFirstObjectByType<CurrencyManager>();
                     if (_instance)
                     {
                         // Found existing instance — ensure it persists across scenes
@@ -182,6 +182,24 @@ namespace DigitPark.Monetization
         }
 
         /// <summary>
+        /// B3-H: Force-set currency to Firebase values, bypassing the MAX check.
+        /// Used for chargeback or admin corrections where Firebase has the lower authoritative value.
+        /// Only call this from a trusted server-side response.
+        /// </summary>
+        public void ForceRestoreFromFirebase(int gems, int coins)
+        {
+            lock (_currencyLock)
+            {
+                _gems = Mathf.Max(gems, 0);
+                _coins = Mathf.Max(coins, 0);
+            }
+            SaveCurrency();
+            OnGemsChanged?.Invoke(_gems, 0);
+            OnCoinsChanged?.Invoke(_coins, 0);
+            Debug.Log($"[CurrencyManager] ForceRestore (chargeback/admin) — Gems: {_gems}, Coins: {_coins}");
+        }
+
+        /// <summary>
         /// D-23 FIX: Called by BootManager when a reinstall is detected.
         /// Sets local currency to the Firebase values and saves to PlayerPrefs.
         /// </summary>
@@ -209,8 +227,17 @@ namespace DigitPark.Monetization
         {
             try
             {
-                // Wait briefly for auth to be ready (CurrencyManager may init before AuthService)
-                await Task.Delay(2000);
+                // Wait for auth to be ready (CurrencyManager may init before AuthService)
+                // Use polling with timeout instead of fixed 2s delay
+                float waited = 0f;
+                while (waited < 10f)
+                {
+                    if (AuthenticationService.Instance != null && AuthenticationService.Instance.IsInitialized
+                        && AuthenticationService.Instance.GetCurrentPlayerData() != null)
+                        break;
+                    await Task.Delay(250);
+                    waited += 0.25f;
+                }
 
                 var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
                 if (playerData == null || string.IsNullOrEmpty(playerData.userId))

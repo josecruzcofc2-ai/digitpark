@@ -26,9 +26,8 @@ namespace DigitPark.CashBattle
         [SerializeField] private Button backButton;
         [SerializeField] private TextMeshProUGUI titleText;
 
-        // ==================== AVATAR SECTION ====================
-        [Header("Avatar")]
-        [SerializeField] private Image avatarImage;
+        // ==================== PLAYER INFO ====================
+        [Header("Player Info")]
         [SerializeField] private TextMeshProUGUI usernameText;
         [SerializeField] private TextMeshProUGUI memberSinceText;
 
@@ -82,7 +81,7 @@ namespace DigitPark.CashBattle
         private void Start()
         {
             _animator = GetComponent<CashProfileAnimator>()
-                ?? FindObjectOfType<CashProfileAnimator>();
+                ?? FindFirstObjectByType<CashProfileAnimator>();
             SetupListeners();
             SetupButtonEffects();
             RefreshProfile();
@@ -143,7 +142,7 @@ namespace DigitPark.CashBattle
                 if (string.IsNullOrEmpty(displayName))
                     displayName = PlayerPrefs.GetString("DP_DisplayName", AutoLocalizer.Get("default_player_name"));
 
-                usernameText.text = displayName;
+                usernameText.text = DigitPark.UI.UICanvasHelper.TmpSafe(displayName);
             }
 
             if (memberSinceText)

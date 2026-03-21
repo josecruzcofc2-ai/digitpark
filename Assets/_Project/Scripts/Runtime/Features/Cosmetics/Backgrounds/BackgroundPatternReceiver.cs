@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 using DigitPark.Themes;
 
 namespace DigitPark.Cosmetics
@@ -15,6 +16,7 @@ namespace DigitPark.Cosmetics
     public class BackgroundPatternReceiver : MonoBehaviour
     {
         private RawImage _rawImage;
+        private bool _hasAppliedOnce;
 
         private void Awake()
         {
@@ -44,18 +46,48 @@ namespace DigitPark.Cosmetics
         {
             if (sprite == null)
             {
-                _rawImage.enabled = false;
+                if (_hasAppliedOnce && _rawImage.enabled)
+                {
+                    // Fade out before disabling
+                    _rawImage.DOColor(new Color(1f, 1f, 1f, 0f), 0.3f)
+                        .SetUpdate(true).SetLink(gameObject)
+                        .OnComplete(() => _rawImage.enabled = false);
+                }
+                else
+                {
+                    _rawImage.enabled = false;
+                }
                 return;
             }
 
-            _rawImage.enabled = true;
-            _rawImage.texture = sprite.texture;
-            _rawImage.color   = GetPatternTint(opacity);
+            Color targetTint = GetPatternTint(opacity);
 
             // Tiling: repeat the 512px pattern across the full screen
             float tilesX = Screen.width  / 512f;
             float tilesY = Screen.height / 512f;
-            _rawImage.uvRect = new Rect(0, 0, tilesX, tilesY);
+
+            if (_hasAppliedOnce && _rawImage.enabled)
+            {
+                // Crossfade: fade out → swap → fade in
+                _rawImage.DOColor(new Color(targetTint.r, targetTint.g, targetTint.b, 0f), 0.2f)
+                    .SetUpdate(true).SetLink(gameObject)
+                    .OnComplete(() =>
+                    {
+                        _rawImage.texture = sprite.texture;
+                        _rawImage.uvRect = new Rect(0, 0, tilesX, tilesY);
+                        _rawImage.DOColor(targetTint, 0.25f).SetUpdate(true).SetLink(gameObject);
+                    });
+            }
+            else
+            {
+                // First apply — instant
+                _rawImage.enabled = true;
+                _rawImage.texture = sprite.texture;
+                _rawImage.color   = targetTint;
+                _rawImage.uvRect  = new Rect(0, 0, tilesX, tilesY);
+            }
+
+            _hasAppliedOnce = true;
         }
 
         // ==================== Tint Logic ====================

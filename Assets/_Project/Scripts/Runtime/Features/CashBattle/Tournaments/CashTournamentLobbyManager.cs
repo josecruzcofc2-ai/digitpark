@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using DG.Tweening;
 using DigitPark.Games;
 using DigitPark.Localization;
 using DigitPark.Services;
@@ -83,6 +84,11 @@ namespace DigitPark.Managers
         private static readonly Color TEXT_SECONDARY = new Color(0.7f, 0.7f, 0.7f, 1f);
         private static readonly Color TEXT_GOLD = new Color(1f, 0.84f, 0f, 1f);
 
+        // Animation
+        private CanvasGroup participantsCG;
+        private CanvasGroup chatCG;
+        private CanvasGroup startingOverlayCG;
+
         // State
         private string currentTab = "participants";
         private bool hasJoined = true; // Player already joined from CashTournaments browser
@@ -105,12 +111,33 @@ namespace DigitPark.Managers
 
         private void Start()
         {
+            InitCanvasGroups();
             SetupListeners();
             LoadTournamentData();
             LoadAttemptsState();
             UpdatePlayButton();
             SwitchToTab("participants");
+            AnimateParticipantEntrance();
             refreshCoroutine = StartCoroutine(AutoRefreshCoroutine());
+        }
+
+        private void InitCanvasGroups()
+        {
+            if (participantsContent != null)
+            {
+                participantsCG = participantsContent.GetComponent<CanvasGroup>();
+                if (participantsCG == null) participantsCG = participantsContent.AddComponent<CanvasGroup>();
+            }
+            if (chatContent != null)
+            {
+                chatCG = chatContent.GetComponent<CanvasGroup>();
+                if (chatCG == null) chatCG = chatContent.AddComponent<CanvasGroup>();
+            }
+            if (startingOverlay != null)
+            {
+                startingOverlayCG = startingOverlay.GetComponent<CanvasGroup>();
+                if (startingOverlayCG == null) startingOverlayCG = startingOverlay.AddComponent<CanvasGroup>();
+            }
         }
 
         private void SetupListeners()
@@ -327,9 +354,6 @@ namespace DigitPark.Managers
             var ui = item.GetComponent<ParticipantItemUI>();
             if (ui != null)
             {
-                if (data.avatar == null && defaultAvatarSprite != null)
-                    data.avatar = defaultAvatarSprite;
-
                 ui.Setup(data,
                     profileId => Debug.Log($"[CashTournamentLobby] View profile: {profileId}"),
                     challengeId => Debug.Log($"[CashTournamentLobby] Challenge: {challengeId}")
@@ -339,15 +363,9 @@ namespace DigitPark.Managers
 
         public void SwitchToTab(string tab)
         {
-            currentTab = tab;
-
             bool isParticipants = tab == "participants";
-
-            if (participantsContent != null)
-                participantsContent.SetActive(isParticipants);
-
-            if (chatContent != null)
-                chatContent.SetActive(!isParticipants);
+            bool isFirstLoad = string.IsNullOrEmpty(currentTab) || currentTab == tab;
+            currentTab = tab;
 
             // Update tab indicator colors
             if (participantsTabIndicator != null)
@@ -356,9 +374,39 @@ namespace DigitPark.Managers
             if (chatTabIndicator != null)
                 chatTabIndicator.color = !isParticipants ? GOLD_PRIMARY : Color.clear;
 
-            // Update tab button text colors
             UpdateTabButtonTextColor(participantsTabButton, isParticipants);
             UpdateTabButtonTextColor(chatTabButton, !isParticipants);
+
+            if (isFirstLoad)
+            {
+                // First load — instant, no crossfade
+                if (participantsContent != null) participantsContent.SetActive(isParticipants);
+                if (chatContent != null) chatContent.SetActive(!isParticipants);
+                return;
+            }
+
+            // Crossfade: fade out old, fade in new
+            CanvasGroup fadeOut = isParticipants ? chatCG : participantsCG;
+            CanvasGroup fadeIn = isParticipants ? participantsCG : chatCG;
+            GameObject showGO = isParticipants ? participantsContent : chatContent;
+            GameObject hideGO = isParticipants ? chatContent : participantsContent;
+
+            if (fadeOut != null && hideGO != null)
+            {
+                fadeOut.DOFade(0f, 0.15f).SetUpdate(true).SetLink(hideGO)
+                    .OnComplete(() =>
+                    {
+                        hideGO.SetActive(false);
+                        fadeOut.alpha = 1f;
+                    });
+            }
+
+            if (fadeIn != null && showGO != null)
+            {
+                showGO.SetActive(true);
+                fadeIn.alpha = 0f;
+                fadeIn.DOFade(1f, 0.2f).SetDelay(0.1f).SetUpdate(true).SetLink(showGO);
+            }
         }
 
         private void UpdateTabButtonTextColor(Button tabButton, bool isActive)
@@ -443,12 +491,21 @@ namespace DigitPark.Managers
                 playButtonText.text = remaining > 0 ? AutoLocalizer.Get("play_button") : AutoLocalizer.Get("tournament_no_attempts");
         }
 
+        private static string SanitizeChatMessage(string input)
+        {
+            // B6-C: Strip TMP rich text tags to prevent injection into TextMeshPro
+            return System.Text.RegularExpressions.Regex.Replace(input, @"<[^>]*>", "");
+        }
+
         private void OnSendChat()
         {
             if (chatInput == null || string.IsNullOrWhiteSpace(chatInput.text)) return;
 
             string message = chatInput.text.Trim();
             chatInput.text = "";
+
+            // B6-C: Strip TMP tags before profanity filter
+            message = SanitizeChatMessage(message);
 
             // Filter profanity
             if (ChatFilterService.Instance != null)
@@ -506,18 +563,41 @@ namespace DigitPark.Managers
         private IEnumerator CountdownCoroutine()
         {
             if (startingOverlay != null)
+            {
                 startingOverlay.SetActive(true);
+                if (startingOverlayCG != null)
+                {
+                    startingOverlayCG.alpha = 0f;
+                    startingOverlayCG.DOFade(1f, 0.2f).SetUpdate(true).SetLink(startingOverlay);
+                }
+            }
 
             for (int i = 3; i > 0; i--)
             {
                 if (startingCountdownText != null)
+                {
                     startingCountdownText.text = i.ToString();
+                    startingCountdownText.transform.localScale = Vector3.one * 1.5f;
+                    startingCountdownText.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetUpdate(true).SetLink(startingCountdownText.gameObject);
+
+                    var cg = startingCountdownText.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = startingCountdownText.gameObject.AddComponent<CanvasGroup>();
+                    cg.alpha = 1f;
+                    cg.DOFade(0.3f, 0.7f).SetDelay(0.3f).SetUpdate(true).SetLink(startingCountdownText.gameObject);
+                }
 
                 yield return new WaitForSeconds(1f);
             }
 
             if (startingCountdownText != null)
+            {
                 startingCountdownText.text = AutoLocalizer.Get("matchmaking_go");
+                startingCountdownText.transform.localScale = Vector3.one * 1.3f;
+                startingCountdownText.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetUpdate(true).SetLink(startingCountdownText.gameObject);
+
+                var cg = startingCountdownText.GetComponent<CanvasGroup>();
+                if (cg != null) { cg.alpha = 1f; }
+            }
 
             yield return new WaitForSeconds(0.5f);
 
@@ -539,8 +619,16 @@ namespace DigitPark.Managers
                 RectTransform fillRT = playersProgressBar.GetComponent<RectTransform>();
                 if (fillRT != null)
                 {
-                    float ratio = max > 0 ? (float)current / max : 0f;
-                    fillRT.anchorMax = new Vector2(ratio, 1f);
+                    float targetRatio = max > 0 ? (float)current / max : 0f;
+                    float currentRatio = fillRT.anchorMax.x;
+                    DOTween.To(() => currentRatio, x =>
+                    {
+                        currentRatio = x;
+                        fillRT.anchorMax = new Vector2(x, 1f);
+                    }, targetRatio, 0.4f)
+                    .SetEase(Ease.OutQuad)
+                    .SetUpdate(true)
+                    .SetLink(playersProgressBar.gameObject);
                 }
             }
         }
@@ -572,14 +660,6 @@ namespace DigitPark.Managers
             {
                 yield return new WaitForSeconds(refreshInterval);
                 UpdateCountdownDisplay();
-
-                // Simulate player count changes
-                int change = UnityEngine.Random.Range(-1, 3);
-                int newCount = Mathf.Clamp(currentPlayers + change, 1, maxPlayers);
-                if (!hasJoined || newCount != currentPlayers)
-                {
-                    UpdatePlayersProgress(newCount, maxPlayers);
-                }
             }
         }
 
@@ -588,6 +668,26 @@ namespace DigitPark.Managers
             // Player cannot leave once joined - back just returns to tournament browser
             // The tournament entry stays active
             SceneManager.LoadScene("CashTournaments");
+        }
+
+        private void AnimateParticipantEntrance()
+        {
+            if (participantsContainer == null) return;
+
+            var seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
+            for (int i = 0; i < participantsContainer.childCount; i++)
+            {
+                Transform child = participantsContainer.GetChild(i);
+                CanvasGroup cg = child.GetComponent<CanvasGroup>();
+                if (cg == null) cg = child.gameObject.AddComponent<CanvasGroup>();
+
+                cg.alpha = 0f;
+                child.localScale = Vector3.one * 0.9f;
+
+                float delay = i * 0.05f;
+                seq.Insert(delay, cg.DOFade(1f, 0.2f));
+                seq.Insert(delay, child.DOScale(1f, 0.2f).SetEase(Ease.OutBack));
+            }
         }
 
         private void OnDestroy()

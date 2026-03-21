@@ -91,7 +91,10 @@ namespace DigitPark.Services
             LoadPurchased();
             RefreshActiveItems();
             _initialized = true;
-            Debug.Log($"[RotatingContent] Initialized — {_activeItems.Count} active items, {_purchasedIds.Count} owned");
+            Debug.Log($"[RotatingContent] Initialized — {_activeItems.Count} active items (local), {_purchasedIds.Count} owned");
+
+            // Load catalog from Firebase RTDB — overrides local if entries exist
+            _ = LoadCatalogFromFirebase();
 
             // B-78: Restore purchased IDs from Firebase after local load
             _ = RestoreFromFirebase();
@@ -157,13 +160,86 @@ namespace DigitPark.Services
             Debug.Log($"[RotatingContent] Catalog initialized with {_catalog.Count} entries");
         }
 
+        // ==================== FIREBASE CATALOG ====================
+
+        /// <summary>
+        /// Loads the rotating content catalog from Firebase RTDB path: rotating_content/catalog/{itemId}
+        /// Each child node maps 1:1 to RotatingContentItem fields (string/int/float).
+        /// Overrides the local catalog if Firebase has entries.
+        /// No app update needed to add new seasonal items — manage from Firebase Console.
+        /// </summary>
+        private async Task LoadCatalogFromFirebase()
+        {
+            try
+            {
+                var db = FirebaseDB.FirebaseDatabase.DefaultInstance;
+                var snapshot = await db.GetReference("rotating_content/catalog").GetValueAsync();
+
+                if (!snapshot.Exists || snapshot.ChildrenCount == 0)
+                {
+                    Debug.Log("[RotatingContent] No catalog in Firebase — using local.");
+                    return;
+                }
+
+                _catalog.Clear();
+                foreach (var child in snapshot.Children)
+                {
+                    try
+                    {
+                        var item = ParseItemFromSnapshot(child);
+                        if (item != null && !string.IsNullOrEmpty(item.itemId))
+                            _catalog.Add(item);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"[RotatingContent] Parse error for {child.Key}: {ex.Message}");
+                    }
+                }
+
+                RefreshActiveItems();
+                Debug.Log($"[RotatingContent] Firebase catalog loaded — {_catalog.Count} items, {_activeItems.Count} active");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[RotatingContent] Firebase catalog unavailable, using local: {ex.Message}");
+            }
+        }
+
+        private RotatingContentItem ParseItemFromSnapshot(FirebaseDB.DataSnapshot snap)
+        {
+            var dict = snap.Value as Dictionary<string, object>;
+            if (dict == null) return null;
+
+            string Str(string k) => dict.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
+            int Int(string k) => dict.TryGetValue(k, out var v) && int.TryParse(v?.ToString(), out int i) ? i : 0;
+            float Flt(string k) => dict.TryGetValue(k, out var v) &&
+                float.TryParse(v?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float f) ? f : 0f;
+
+            return new RotatingContentItem
+            {
+                itemId             = Str("itemId"),
+                displayNameKey     = Str("displayNameKey"),
+                displayNameFallback = Str("displayNameFallback"),
+                contentType        = Enum.TryParse<RotatingContentType>(Str("contentType"), out var ct) ? ct : RotatingContentType.LimitedThemeVariant,
+                currency           = Enum.TryParse<RotatingCurrency>(Str("currency"), out var cur) ? cur : RotatingCurrency.DG,
+                price              = Int("price"),
+                iapPrice           = Flt("iapPrice"),
+                iapProductId       = Str("iapProductId"),
+                startDate          = Str("startDate"),
+                endDate            = Str("endDate"),
+                seasonLabel        = Str("seasonLabel"),
+                baseThemeId        = Str("baseThemeId"),
+                description        = Str("description"),
+            };
+        }
+
         // ==================== ACTIVE ITEMS ====================
 
         /// <summary>Filter catalog to currently-active items based on UTC date</summary>
         private void RefreshActiveItems()
         {
             _activeItems.Clear();
-            DateTime now = DateTime.UtcNow;
+            DateTime now = ServerTimeHelper.UtcNow;
 
             foreach (var item in _catalog)
             {
@@ -191,7 +267,7 @@ namespace DigitPark.Services
                 return TimeSpan.Zero;
 
             end = end.Date.AddDays(1); // Midnight after end day
-            var remaining = end - DateTime.UtcNow;
+            var remaining = end - ServerTimeHelper.UtcNow;
             return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
         }
 
@@ -282,7 +358,7 @@ namespace DigitPark.Services
                         foreach (var id in data.items)
                             _purchasedIds.Add(id);
                 }
-                catch { }
+                catch (System.Exception e) { Debug.LogWarning($"[RotatingContentService] JSON parse error: {e.Message}"); }
             }
         }
 

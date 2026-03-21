@@ -15,17 +15,24 @@ namespace DigitPark.Payments
         // Auth
         public static Func<string> GetCurrentUserId = () => "anonymous";
 
-        // Analytics
-        public static Action<string, Dictionary<string, object>> LogCustomEvent = null;
-        public static Action<string, double, string, string> LogPurchaseCompleted = null;
+        // Analytics — safe no-ops to prevent NRE if not wired
+        public static Action<string, Dictionary<string, object>> LogCustomEvent = (_, __) => { };
+        public static Action<string, double, string, string> LogPurchaseCompleted = (_, __, ___, ____) => { };
 
         // Currency
-        public static Action<int, int> ProcessGemsPurchase = null;
+        public static Action<int, int> ProcessGemsPurchase = (_, __) =>
+            UnityEngine.Debug.LogWarning("[PaymentBridge] ProcessGemsPurchase not wired");
 
         // Firebase Database
-        public static Func<Dictionary<string, object>, Task> UpdatePlayerFields = null;
+        public static Func<Dictionary<string, object>, Task> UpdatePlayerFields = _ =>
+            Task.CompletedTask;
 
         // DeepLink
-        public static Action<string, Action<string>> RegisterDeepLinkHandler = null;
+        public static Action<string, Action<string>> RegisterDeepLinkHandler = (_, __) => { };
+        public static Action<string> UnregisterDeepLinkHandler = _ => { };
+
+        // Auth — Firebase ID token para Authorization header en Cloud Functions
+        // BUG-06: necesario para que SyncWithServer() pueda llamar a getEntitlements autenticado
+        public static Func<Task<string>> GetFirebaseIdToken = null;
     }
 }

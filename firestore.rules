@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// Reglas de Firestore para DigitPark
+// Entitlements y payment_audit son write-only desde Admin SDK (Cloud Functions)
+// Los clientes solo pueden leer sus propios entitlements
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ================================================
+    // ENTITLEMENTS — lectura propia, escritura solo Admin SDK
+    // ================================================
+    match /entitlements/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // Solo Admin SDK desde Cloud Functions
+    }
+
+    match /entitlements/{userId}/products/{productId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // Solo Admin SDK desde Cloud Functions
+    }
+
+    // ================================================
+    // PAYMENT AUDIT — solo Admin SDK
+    // ================================================
+    match /payment_audit/{docId} {
+      allow read, write: if false; // Solo Admin SDK
+    }
+
+    // ================================================
+    // PAYMENT CONFIG — solo Admin SDK
+    // ================================================
+    match /payment_config/{docId} {
+      allow read, write: if false; // Solo Admin SDK
+    }
+
+    // ================================================
+    // DEFAULT — denegar todo lo no especificado
+    // ================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

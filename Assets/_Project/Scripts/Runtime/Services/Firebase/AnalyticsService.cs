@@ -560,5 +560,10 @@ namespace DigitPark.Services.Firebase
         }
 
         #endregion
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
     }
 }

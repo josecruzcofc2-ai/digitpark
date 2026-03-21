@@ -24,7 +24,7 @@ namespace DigitPark.Payments
             {
                 // D-49: Use implicit bool to detect destroyed Unity objects (== null is overloaded)
                 if (!_instance)
-                    _instance = FindObjectOfType<PaymentManager>();
+                    _instance = FindFirstObjectByType<PaymentManager>();
                 return _instance;
             }
         }
@@ -40,6 +40,7 @@ namespace DigitPark.Payments
         private bool _isInitialized = false;
 
         public bool IsInitialized => _isInitialized;
+        public PaymentConfig Config => _config;
         public IPaymentProvider GetIAPProvider() => _iapProvider;
 
         private void Awake()
@@ -66,8 +67,8 @@ namespace DigitPark.Payments
             // Validar que la config no sea la por defecto vacía
             if (_config == null || string.IsNullOrEmpty(_config.paymentsHealthUrl))
             {
-                Debug.LogError("[PaymentManager] PaymentConfig no está asignada en Inspector o está vacía. " +
-                               "Asigna el ScriptableObject en el Inspector antes de hacer builds.");
+                Debug.LogError("[PaymentManager] PaymentConfig no está configurada en el Inspector. " +
+                               "Completa todos los campos de URL antes de hacer builds.");
                 _isInitialized = true; // Continuar para no bloquear, pero Stripe no estará disponible
                 return;
             }
@@ -147,12 +148,22 @@ namespace DigitPark.Payments
                                 $"Stripe falló {MAX_STRIPE_FAILURES} veces");
                         }
 
-                        // Fallback a Apple IAP
-                        if (_iapProvider != null && _iapProvider.IsAvailable)
+                        // BUG-04: Solo hacer fallback si el fallo ocurrió ANTES de que el usuario pagara.
+                        // session_expired y session_creation_failed pueden significar que Stripe ya procesó
+                        // el cobro — hacer fallback a Apple IAP causaría un doble cargo.
+                        bool safeToFallback = result.ErrorCode != "session_expired"
+                            && result.ErrorCode != "session_creation_failed";
+
+                        if (safeToFallback && _iapProvider != null && _iapProvider.IsAvailable)
                         {
                             Debug.Log("[PaymentManager] Haciendo fallback a Apple IAP...");
                             result = await _iapProvider.PurchaseProduct(product, userId);
                             usedFallback = true;
+                        }
+                        else if (!safeToFallback)
+                        {
+                            Debug.LogWarning($"[PaymentManager] Fallback omitido (errorCode='{result.ErrorCode}'). " +
+                                "El pago puede estar procesándose en Stripe. El usuario debe revisar su correo de confirmación.");
                         }
                     }
                     else

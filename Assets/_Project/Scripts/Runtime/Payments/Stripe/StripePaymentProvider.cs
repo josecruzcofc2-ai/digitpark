@@ -78,6 +78,9 @@ namespace DigitPark.Payments.Stripe
                 _config.stripePollingIntervalMs / 1000f
             );
 
+            // WARN-01: limpiar deep link handler cuando el poller termina (sea cual sea el resultado)
+            _checkoutController.CleanupCheckout();
+
             switch (status)
             {
                 case StripeSessionStatus.Completed:
@@ -160,6 +163,14 @@ namespace DigitPark.Payments.Stripe
         private async Task<CheckoutSessionData> CreateCheckoutSession(
             CosmeticProduct product, string userId)
         {
+            // BUG-02: Rechazar productos sin StripePriceId — enviar priceId="" causa 400 en el backend
+            if (string.IsNullOrEmpty(product.StripePriceId))
+            {
+                Debug.LogError($"[StripeProvider] Producto '{product.ProductId}' no tiene StripePriceId. " +
+                               "Crea el producto en Stripe Dashboard y asigna el price_xxx a ProductCatalog.");
+                return null;
+            }
+
             string url = _config.stripeCreateCheckoutUrl;
 
             var body = new CheckoutRequestBody
@@ -167,7 +178,7 @@ namespace DigitPark.Payments.Stripe
                 productId = product.ProductId,
                 userId = userId,
                 appVersion = PaymentFeatureFlag.IsProVersion ? "pro" : "global",
-                priceId = product.StripePriceId ?? "",
+                priceId = product.StripePriceId,
                 metadata_type = "cosmetic",
                 metadata_has_tournament_benefit = "false"
             };
@@ -175,12 +186,22 @@ namespace DigitPark.Payments.Stripe
             string json = JsonUtility.ToJson(body);
             byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
 
+            // Obtain Firebase ID token for Authorization header
+            string idToken = null;
+            if (PaymentBridge.GetFirebaseIdToken != null)
+            {
+                try { idToken = await PaymentBridge.GetFirebaseIdToken(); }
+                catch (System.Exception e) { Debug.LogWarning($"[StripeProvider] Failed to get ID token: {e.Message}"); }
+            }
+
             using (var request = new UnityWebRequest(url, "POST"))
             {
                 request.uploadHandler = new UploadHandlerRaw(jsonBytes);
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.SetRequestHeader("Content-Type", "application/json");
                 request.SetRequestHeader("X-App-Version", VersionGuard.GetRequiredAppVersionHeader());
+                if (!string.IsNullOrEmpty(idToken))
+                    request.SetRequestHeader("Authorization", $"Bearer {idToken}");
                 request.timeout = 15;
 
                 var op = request.SendWebRequest();

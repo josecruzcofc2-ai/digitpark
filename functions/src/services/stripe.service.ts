@@ -13,7 +13,7 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor(secretKey: string) {
-    this.stripe = new Stripe(secretKey, { apiVersion: '2023-10-16' });
+    this.stripe = new Stripe(secretKey, { apiVersion: '2024-12-18.acacia' });
   }
 
   async createCheckoutSession(req: CheckoutSessionRequest): Promise<CheckoutSessionResponse> {

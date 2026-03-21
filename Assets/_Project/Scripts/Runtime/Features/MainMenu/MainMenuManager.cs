@@ -251,12 +251,12 @@ namespace DigitPark.Managers
                 {
                     premiumBadge.SetActive(true);
                     premiumBadge.transform.localScale = Vector3.zero;
-                    premiumBadge.transform.DOScale(1f, AnimConstants.DURATION_ENTER).SetEase(AnimConstants.ENTER);
+                    premiumBadge.transform.DOScale(1f, AnimConstants.DURATION_ENTER).SetEase(AnimConstants.ENTER).SetLink(premiumBadge);
                 }
                 else if (!isPremium && premiumBadge.activeSelf)
                 {
                     premiumBadge.transform.DOScale(0f, AnimConstants.DURATION_QUICK).SetEase(AnimConstants.EXIT)
-                        .OnComplete(() => premiumBadge.SetActive(false));
+                        .SetLink(premiumBadge).OnComplete(() => premiumBadge.SetActive(false));
                 }
             }
         }
@@ -421,7 +421,6 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            // TODO: Abrir panel de perfil o navegar a escena Profile
             SceneNavigator.Instance?.NavigateTo("Profile");
         }
 
@@ -434,7 +433,6 @@ namespace DigitPark.Managers
 
             // AudioManager.Instance?.PlaySFX("ButtonClick");
 
-            // TODO: Abrir panel de búsqueda de jugadores
             SceneNavigator.Instance?.NavigateTo("SearchPlayers");
         }
 

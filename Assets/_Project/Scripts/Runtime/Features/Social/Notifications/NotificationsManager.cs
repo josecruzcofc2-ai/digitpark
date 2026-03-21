@@ -200,7 +200,8 @@ namespace DigitPark.Managers
             card.transform.localScale = Vector3.zero;
             card.transform.DOScale(1f, 0.25f)
                 .SetDelay(index * 0.04f)
-                .SetEase(Ease.OutBack);
+                .SetEase(Ease.OutBack)
+                .SetLink(card);
         }
 
         private void SetupNotificationCard(GameObject card, StoredNotification notification)
@@ -218,7 +219,7 @@ namespace DigitPark.Managers
                 {
                     unreadDot.gameObject.SetActive(true);
                     unreadDot.localScale = Vector3.zero;
-                    unreadDot.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                    unreadDot.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetLink(unreadDot.gameObject);
                 }
                 else
                 {
@@ -369,7 +370,7 @@ namespace DigitPark.Managers
                 var cg = emptyText.GetComponent<CanvasGroup>();
                 if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+                cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(gameObject);
             }
         }
 
@@ -424,12 +425,12 @@ namespace DigitPark.Managers
         private void SetTabState(Image indicator, bool active, Color color)
         {
             if (indicator == null) return;
-            indicator.DOColor(active ? color : Color.clear, 0.2f);
+            indicator.DOColor(active ? color : Color.clear, 0.2f).SetLink(indicator.gameObject);
 
             // Scale animation for parent tab button
             if (indicator.transform.parent != null)
             {
-                indicator.transform.parent.DOScale(active ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic);
+                indicator.transform.parent.DOScale(active ? 1.05f : 1f, 0.2f).SetEase(Ease.OutCubic).SetLink(indicator.gameObject);
             }
         }
 
@@ -480,7 +481,8 @@ namespace DigitPark.Managers
 
                 if (FriendService.Instance != null && !string.IsNullOrEmpty(notification.senderId))
                 {
-                    var result = await FriendService.Instance.AcceptFriendRequest(notification.senderId);
+                    // B1-B: usar senderId para encontrar el requestId correcto en FriendService
+                    var result = await FriendService.Instance.AcceptFriendRequestBySenderId(notification.senderId);
                     if (result.Success)
                     {
                         NotificationStorageService.Instance?.Delete(notificationId);
@@ -618,7 +620,7 @@ namespace DigitPark.Managers
             {
                 Vector2 pos = headerTransform.anchoredPosition;
                 headerTransform.anchoredPosition = new Vector2(pos.x, pos.y + 200);
-                headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack);
+                headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack).SetLink(gameObject);
             }
 
             // Tabs fade + slide

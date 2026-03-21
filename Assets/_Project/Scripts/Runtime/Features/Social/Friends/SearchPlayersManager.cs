@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using DigitPark.Services;
 using DigitPark.Services.Firebase;
 using DigitPark.Localization;
+using DigitPark.UI.Items;
 using DG.Tweening;
 using DigitPark.Animations;
 
@@ -40,6 +41,10 @@ namespace DigitPark.Managers
         private List<GameObject> currentResults = new List<GameObject>();
         private string lastSearchQuery;
         private bool isSearching = false;
+
+        // B5-D: Rate limiting for friend requests
+        private DateTime _lastFriendRequestTime = DateTime.MinValue;
+        private const int FRIEND_REQUEST_COOLDOWN_SECONDS = 5;
 
         private void Start()
         {
@@ -173,7 +178,10 @@ namespace DigitPark.Managers
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[SearchPlayersManager] {ex.Message}");
+                Debug.LogError($"[SearchPlayersManager] Search error: {ex.Message}");
+                isSearching = false;
+                lastSearchQuery = null;
+                ShowLoadingIndicator(false);
             }
         }
 
@@ -273,7 +281,7 @@ namespace DigitPark.Managers
                     if (usernameT != null)
                     {
                         var tmp = usernameT.GetComponent<TextMeshProUGUI>();
-                        if (tmp != null) tmp.text = result.username;
+                        if (tmp != null) tmp.text = DigitPark.UI.UICanvasHelper.TmpSafe(result.username);
                     }
 
                     // Online status
@@ -410,6 +418,14 @@ namespace DigitPark.Managers
         {
             try
             {
+                // B5-D: Rate limit — prevent spam clicks
+                if ((DateTime.UtcNow - _lastFriendRequestTime).TotalSeconds < FRIEND_REQUEST_COOLDOWN_SECONDS)
+                {
+                    ShowMessage(AutoLocalizer.Get("please_wait"));
+                    return;
+                }
+                _lastFriendRequestTime = DateTime.UtcNow;
+
                 Debug.Log($"[SearchPlayers] Agregar amigo: {playerId}");
 
                 // Verificar si ya hay solicitud pendiente
@@ -441,36 +457,35 @@ namespace DigitPark.Managers
 
         private void UpdateAddFriendButton(string playerId, bool requestSent)
         {
+            // B5-E: Find only the item belonging to this specific playerId (not all items)
             foreach (var item in currentResults)
             {
-                // Buscar el item correspondiente a este playerId
+                // Each item stores its playerId in the PlayerSearchItemUI component
+                var itemUI = item.GetComponent<PlayerSearchItemUI>();
+                if (itemUI == null || itemUI.PlayerId != playerId) continue;
+
                 Transform buttonsRow = item.transform.Find("ContentSection/ButtonsRow");
-                if (buttonsRow != null)
+                if (buttonsRow == null) continue;
+
+                Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
+                if (addFriendBtn == null) continue;
+
+                var btn = addFriendBtn.GetComponent<Button>();
+                var tmpText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
+                if (btn != null && requestSent)
                 {
-                    Transform addFriendBtn = buttonsRow.Find("AddFriendButton");
-                    if (addFriendBtn != null)
-                    {
-                        var btn = addFriendBtn.GetComponent<Button>();
-                        if (btn != null)
-                        {
-                            // Verificar si este es el item correcto comparando con los datos almacenados
-                            var tmpText = addFriendBtn.GetComponentInChildren<TextMeshProUGUI>();
-                            if (requestSent && tmpText != null)
-                            {
-                                tmpText.text = AutoLocalizer.Get("search_request_sent");
-                                btn.interactable = false;
-                            }
-                        }
-                    }
+                    if (tmpText != null) tmpText.text = AutoLocalizer.Get("search_request_sent");
+                    btn.interactable = false;
                 }
+                break; // Found the right item — stop iterating
             }
         }
 
         private void ShowMessage(string message)
         {
             Debug.Log($"[SearchPlayers] {message}");
-            // TODO: Mostrar toast o popup con el mensaje
-            // Por ahora solo log
+            // B5-F: Show toast via InAppNotificationManager instead of only logging
+            InAppNotificationManager.Instance?.Show(message, "", "info");
         }
 
         private void OnChallengeClicked(string playerId)
@@ -495,13 +510,13 @@ namespace DigitPark.Managers
                 var cg = loadingIndicator.GetComponent<CanvasGroup>();
                 if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.2f).SetUpdate(true);
+                cg.DOFade(1f, 0.2f).SetUpdate(true).SetLink(loadingIndicator);
             }
             else
             {
                 var cg = loadingIndicator.GetComponent<CanvasGroup>();
                 if (cg != null)
-                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).SetLink(loadingIndicator).OnComplete(() => loadingIndicator.SetActive(false));
                 else
                     loadingIndicator.SetActive(false);
             }

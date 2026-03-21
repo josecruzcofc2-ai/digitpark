@@ -369,6 +369,7 @@ namespace DigitPark.Managers
                 if (dbRef == null) return;
 
                 var snapshot = await dbRef.Child("players").Child(uid).GetValueAsync();
+                if (this == null) return; // MonoBehaviour destroyed during await
                 if (snapshot == null || !snapshot.Exists) return;
 
                 var data = snapshot.Value as Dictionary<string, object>;
@@ -513,6 +514,7 @@ namespace DigitPark.Managers
                 var db = FirebaseDB.FirebaseDatabase.DefaultInstance;
                 var serverTimeRef = db.GetReference(".info/serverTimeOffset");
                 var snapshot = await serverTimeRef.GetValueAsync();
+                if (this == null) return DateTime.UtcNow; // MonoBehaviour destroyed during await
                 if (snapshot != null && snapshot.Value != null)
                 {
                     // serverTimeOffset is the difference (ms) between server time and local time
@@ -529,7 +531,8 @@ namespace DigitPark.Managers
 
         private void CheckClaimStatus()
         {
-            DateTime today = DateTime.UtcNow.Date;
+            // B3-A: Use ServerTimeHelper to prevent client clock manipulation
+            DateTime today = ServerTimeHelper.UtcNow.Date;
             DateTime lastClaim = lastClaimDate.Date;
 
             // Model 2: No reset on missed days — user continues from where they left off
@@ -1608,8 +1611,8 @@ namespace DigitPark.Managers
                         currencyMgr.AddCoins(reward.amount);
                     else
                     {
-                        int currentCoins = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
-                        PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins + reward.amount);
+                        int currentCoins = PlayerPrefs.GetInt("dp_cc_v2", 0);
+                        PlayerPrefs.SetInt("dp_cc_v2", currentCoins + reward.amount);
                     }
                     break;
 
@@ -1618,8 +1621,8 @@ namespace DigitPark.Managers
                         currencyMgr.AddGems(reward.amount);
                     else
                     {
-                        int currentGems = PlayerPrefs.GetInt("DP_PlayerGems", 0);
-                        PlayerPrefs.SetInt("DP_PlayerGems", currentGems + reward.amount);
+                        int currentGems = PlayerPrefs.GetInt("dp_cg_v2", 0);
+                        PlayerPrefs.SetInt("dp_cg_v2", currentGems + reward.amount);
                     }
                     break;
 
@@ -1633,12 +1636,12 @@ namespace DigitPark.Managers
                     }
                     else
                     {
-                        int currentCoins2 = PlayerPrefs.GetInt("DP_PlayerCoins", 0);
-                        PlayerPrefs.SetInt("DP_PlayerCoins", currentCoins2 + reward.amount);
+                        int currentCoins2 = PlayerPrefs.GetInt("dp_cc_v2", 0);
+                        PlayerPrefs.SetInt("dp_cc_v2", currentCoins2 + reward.amount);
                         if (reward.gemsAmount > 0)
                         {
-                            int currentGems2 = PlayerPrefs.GetInt("DP_PlayerGems", 0);
-                            PlayerPrefs.SetInt("DP_PlayerGems", currentGems2 + reward.gemsAmount);
+                            int currentGems2 = PlayerPrefs.GetInt("dp_cg_v2", 0);
+                            PlayerPrefs.SetInt("dp_cg_v2", currentGems2 + reward.gemsAmount);
                         }
                     }
                     break;

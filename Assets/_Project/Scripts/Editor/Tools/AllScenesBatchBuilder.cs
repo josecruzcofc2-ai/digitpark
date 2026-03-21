@@ -149,11 +149,40 @@ namespace DigitPark.Editor
             E("Prefabs / Toasts", null, "In-App Toast",               "InAppToastUIBuilder",            "CreateInAppToastPrefab"),
 
             // Monetization & Item Prefabs
-            E("Prefabs / Items", null, "Monetization Prefabs (All)",  "MonetizationPrefabBuilder",      "CreateAllPrefabs"),
-            E("Prefabs / Items", null, "Mission Card Prefab",         "MissionCardPrefabBuilder",       "CreateMissionCardPrefab"),
-            E("Prefabs / Items", null, "Tournament Search Item",      "ItemPrefabBuilder",              "CreateTournamentSearchItemPrefab"),
-            E("Prefabs / Items", null, "Tournament My Item",          "ItemPrefabBuilder",              "CreateTournamentMyItemPrefab"),
-            E("Prefabs / Items", null, "Leaderboard Entry",           "ItemPrefabBuilder",              "CreateLeaderboardEntryPrefab"),
+            E("Prefabs / Items", null, "Monetization Prefabs (All)",  "MonetizationPrefabBuilder", "CreateAllPrefabs"),
+            E("Prefabs / Items", null, "Mission Card",                "MonetizationPrefabBuilder", "CreateMissionCardPrefab"),
+            E("Prefabs / Items", null, "Tournament Item",             "MonetizationPrefabBuilder", "CreateTournamentItemPrefab"),
+            E("Prefabs / Items", null, "Tournament Search Item",      "MonetizationPrefabBuilder", "CreateTournamentSearchItemPrefab"),
+            E("Prefabs / Items", null, "Tournament My Item",          "MonetizationPrefabBuilder", "CreateTournamentMyItemPrefab"),
+            E("Prefabs / Items", null, "Leaderboard Entry",           "MonetizationPrefabBuilder", "CreateLeaderboardEntryPrefab"),
+
+            // Social Item Prefabs (builders live inside scene UIBuilders)
+            E("Prefabs / Social", null, "Friend Card",         "FriendsUIBuilder",        "CreateFriendCardPrefab"),
+            E("Prefabs / Social", null, "Request Item",        "FriendRequestsUIBuilder", "CreateRequestItemPrefab"),
+            E("Prefabs / Social", null, "Notification Card",   "NotificationsUIBuilder",  "CreateNotificationCardPrefab"),
+            E("Prefabs / Social", null, "Match History Entry", "MatchHistoryUIBuilder",   "CreateMatchEntryPrefab"),
+            E("Prefabs / Social", null, "Player Card",         "SearchPlayersUIBuilder",  "CreatePlayerCardPrefab"),
+
+            // Monetization extras (builders live inside scene UIBuilders)
+            E("Prefabs / Items", null, "Trophy Card",          "AchievementsUIBuilder",   "CreateTrophyCardPrefab"),
+
+            // CashBattle Item Prefabs
+            E("Prefabs / CashBattle", null, "Cash Match History Item", "CashHistoryUIBuilder", "CreateMatchHistoryItem"),
+        };
+
+        // ==================== POLISH ENTRIES ====================
+        // Setup scripts that iterate scenes internally (no scene opening needed).
+        // Order matters: Background → Pattern → ThemeApplier → BackButton → Effects → Glow → Animations
+
+        private static readonly Entry[] POLISH_ENTRIES = new Entry[]
+        {
+            E("Polish / Backgrounds", null, "Background (Image + ThemeApplier)",  "BackgroundSetup",            "AddBackgroundToAllScenes"),
+            E("Polish / Backgrounds", null, "Background Pattern Layer",           "BackgroundPatternSetup",     "AddPatternLayerToAllScenes"),
+            E("Polish / Theme",       null, "ThemeApplier to All Scenes",         "ThemeApplierSetup",          "AddToAllScenes"),
+            E("Polish / UI",          null, "BackButtons (cyan + gold)",          "BackButtonAutoAdder",        "AddBackButtonsToAllScenes"),
+            E("Polish / Effects",     null, "FeedbackManager + ButtonEffects",    "EffectsSetup",               "SetupAllScenes"),
+            E("Polish / Effects",     null, "Neon Glow on Buttons",               "NeonButtonGlowSetup",        "AddGlowToAllScenes"),
+            E("Polish / Animations",  null, "Animation System (managers + 3D)",   "AnimationSystemBatchSetup",  "ApplyAllAnimationsToAllScenes"),
         };
 
         // ==================== MENU ====================
@@ -179,16 +208,30 @@ namespace DigitPark.Editor
             EditorGUILayout.HelpBox(
                 $"Builds every scene and prefab in the app without dialog interruptions.\n" +
                 $"Opens each scene, runs its UIBuilder silently, and saves.\n\n" +
-                $"{sceneCount} scenes + {prefabCount} prefab builders = {ALL_ENTRIES.Length} total entries",
+                $"{sceneCount} scenes + {prefabCount} prefab builders = {ALL_ENTRIES.Length} total entries\n" +
+                $"{POLISH_ENTRIES.Length} polish setup steps",
                 MessageType.Info);
 
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(isRunning);
 
-            // === BUILD ALL ===
+            // === MASTER: BUILD + POLISH ===
+            GUI.backgroundColor = new Color(0.9f, 0.5f, 1f);
+            if (GUILayout.Button("★  BUILD EVERYTHING  (Scenes + Prefabs + Polish)", GUILayout.Height(55)))
+            {
+                results.Clear();
+                BuildAll();
+                BuildEntries(POLISH_ENTRIES);
+                Repaint();
+            }
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.Space(5);
+
+            // === BUILD ALL (Scenes + Prefabs) ===
             GUI.backgroundColor = new Color(0.3f, 0.85f, 0.4f);
-            if (GUILayout.Button("BUILD ALL SCENES + PREFABS", GUILayout.Height(50)))
+            if (GUILayout.Button("BUILD ALL SCENES + PREFABS", GUILayout.Height(40)))
             {
                 results.Clear();
                 BuildAll();
@@ -196,21 +239,32 @@ namespace DigitPark.Editor
             }
             GUI.backgroundColor = Color.white;
 
+            GUILayout.Space(3);
+
+            // === POLISH ALL ===
+            GUI.backgroundColor = new Color(0f, 0.85f, 1f);
+            if (GUILayout.Button("POLISH ALL SCENES  (Theme + BackButton + Effects + Animations)", GUILayout.Height(40)))
+            {
+                results.Clear();
+                BuildEntries(POLISH_ENTRIES);
+                Repaint();
+            }
+            GUI.backgroundColor = Color.white;
+
             GUILayout.Space(5);
 
-            // === BUILD SCENES ONLY ===
+            // === BUILD SCENES ONLY / PREFABS ONLY ===
             EditorGUILayout.BeginHorizontal();
             GUI.backgroundColor = new Color(0.3f, 0.7f, 1f);
-            if (GUILayout.Button("Scenes Only", GUILayout.Height(30)))
+            if (GUILayout.Button("Scenes Only", GUILayout.Height(28)))
             {
                 results.Clear();
                 BuildFiltered(scenesOnly: true);
                 Repaint();
             }
 
-            // === BUILD PREFABS ONLY ===
             GUI.backgroundColor = new Color(1f, 0.84f, 0f);
-            if (GUILayout.Button("Prefabs Only", GUILayout.Height(30)))
+            if (GUILayout.Button("Prefabs Only", GUILayout.Height(28)))
             {
                 results.Clear();
                 BuildFiltered(scenesOnly: false);
@@ -223,6 +277,26 @@ namespace DigitPark.Editor
 
             // === PER-GROUP BUTTONS ===
             DrawGroupButtons();
+
+            // === POLISH PER-STEP BUTTONS ===
+            GUILayout.Space(5);
+            GUILayout.Label("Polish steps (individual):", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            int col = 0;
+            foreach (var pe in POLISH_ENTRIES)
+            {
+                if (col > 0 && col % 3 == 0) { EditorGUILayout.EndHorizontal(); EditorGUILayout.BeginHorizontal(); }
+                GUI.backgroundColor = new Color(0f, 0.85f, 1f);
+                if (GUILayout.Button(pe.displayName, GUILayout.Height(22)))
+                {
+                    results.Clear();
+                    BuildEntries(new[] { pe });
+                    Repaint();
+                }
+                col++;
+            }
+            EditorGUILayout.EndHorizontal();
+            GUI.backgroundColor = Color.white;
 
             EditorGUI.EndDisabledGroup();
 
@@ -273,9 +347,29 @@ namespace DigitPark.Editor
 
         private void DrawSceneList()
         {
-            GUILayout.Label("All Entries:", EditorStyles.boldLabel);
+            GUILayout.Label("All Entries (Scenes + Prefabs + Polish):", EditorStyles.boldLabel);
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(200));
+
+            // Polish entries header
+            GUI.color = new Color(0f, 0.85f, 1f);
+            GUILayout.Label("--- Polish / Setup ---", EditorStyles.miniLabel);
+            GUI.color = Color.white;
+            foreach (var pe in POLISH_ENTRIES)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = new Color(0f, 0.85f, 1f);
+                GUILayout.Label("SET", EditorStyles.miniLabel, GUILayout.Width(30));
+                GUI.color = Color.yellow;
+                GUILayout.Label("---", EditorStyles.miniLabel, GUILayout.Width(35));
+                GUI.color = Color.white;
+                GUILayout.Label(pe.displayName, GUILayout.Width(200));
+                GUI.color = new Color(0.6f, 0.6f, 0.6f);
+                GUILayout.Label(pe.className, EditorStyles.miniLabel);
+                GUI.color = Color.white;
+                EditorGUILayout.EndHorizontal();
+            }
+            GUILayout.Space(4);
 
             string currentGroup = "";
             foreach (var entry in ALL_ENTRIES)

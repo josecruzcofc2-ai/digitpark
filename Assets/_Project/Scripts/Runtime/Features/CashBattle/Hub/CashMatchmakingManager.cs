@@ -14,7 +14,7 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Cash Matchmaking Manager - Gold Premium Theme
-    /// - Professional VS screen with avatar integration
+    /// - Professional VS screen with gold color bar player identification
     /// - Entry fee display ($X.XX format)
     /// - ServiceLocator matchmaking (with mock fallback)
     /// - Dynamic game icon loading
@@ -32,13 +32,11 @@ namespace DigitPark.Managers
         [SerializeField] private TextMeshProUGUI entryFeeText;
 
         [Header("=== PLAYER CARD ===")]
-        [SerializeField] private Image playerAvatar;
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private TextMeshProUGUI playerLevelText;
         [SerializeField] private GameObject playerCard;
 
         [Header("=== OPPONENT CARD ===")]
-        [SerializeField] private Image opponentAvatar;
         [SerializeField] private TextMeshProUGUI opponentNameText;
         [SerializeField] private TextMeshProUGUI opponentLevelText;
         [SerializeField] private GameObject opponentCard;
@@ -90,10 +88,13 @@ namespace DigitPark.Managers
         private string matchId;
         private string opponentId;
 
+        // In-memory session state — not persisted to disk (not editable on rooted devices)
+        public static decimal CurrentEntryFee { get; private set; }
+        public static bool CurrentIsCashMatch { get; private set; }
+
         // PlayerPrefs Keys
         private const string CASH_MATCH_GAME_TYPE_KEY = "DigitPark_CashMatchGameType";
         private const string CASH_MATCH_IS_SPRINT_KEY = "DigitPark_CashMatchIsSprint";
-        private const string CASH_MATCH_ENTRY_FEE_KEY = "DigitPark_CashMatchEntryFee";
 
         #region Unity Lifecycle
 
@@ -126,11 +127,6 @@ namespace DigitPark.Managers
 
         private void OnDestroy()
         {
-            // Cleanup
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.OnAvatarChanged -= OnPlayerAvatarChanged;
-            }
         }
 
         #endregion
@@ -140,12 +136,6 @@ namespace DigitPark.Managers
         private void SetupListeners()
         {
             cancelButton?.onClick.AddListener(OnCancelClicked);
-
-            // Subscribe to avatar changes
-            if (AvatarService.Instance != null)
-            {
-                AvatarService.Instance.OnAvatarChanged += OnPlayerAvatarChanged;
-            }
         }
 
         private void LoadMatchParameters()
@@ -154,13 +144,7 @@ namespace DigitPark.Managers
             currentGameType = (GameType)gameTypeInt;
             isCognitiveSprint = PlayerPrefs.GetInt(CASH_MATCH_IS_SPRINT_KEY, 0) == 1;
 
-            // Read entry fee from PlayerPrefs (stored as string for decimal precision)
-            string feeStr = PlayerPrefs.GetString(CASH_MATCH_ENTRY_FEE_KEY, "0");
-            if (!decimal.TryParse(feeStr, System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out entryFee))
-            {
-                entryFee = 0m;
-            }
+            entryFee = CurrentEntryFee;
 
             Debug.Log($"[CashMatchmaking] Game: {currentGameType}, IsSprint: {isCognitiveSprint}, EntryFee: ${entryFee:F2}");
         }
@@ -173,44 +157,12 @@ namespace DigitPark.Managers
                 string playerName = PlayerPrefs.GetString("PlayerName", "Player");
                 string playerId = PlayerPrefs.GetString("PlayerId", "");
                 if (playerNameText != null)
-                    playerNameText.text = playerName;
+                    playerNameText.text = UICanvasHelper.TmpSafe(playerName);
 
                 // Get player level
                 int level = PlayerPrefs.GetInt("PlayerLevel", 1);
                 if (playerLevelText != null)
                     playerLevelText.text = AutoLocalizer.Get("player_level", level);
-
-                // Load player avatar
-                if (playerAvatar != null)
-                {
-                    if (AvatarService.Instance != null)
-                    {
-                        try
-                        {
-                            Sprite avatarSprite = await AvatarService.Instance.LoadCurrentUserAvatar();
-                            if (this == null) return;
-                            if (avatarSprite != null && playerAvatar != null)
-                            {
-                                playerAvatar.sprite = avatarSprite;
-                                playerAvatar.color = Color.white;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogWarning($"[CashMatchmaking] Could not load player avatar: {e.Message}");
-                            if (this == null) return;
-                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
-                            playerAvatar.sprite = initialAvatar;
-                            playerAvatar.color = Color.white;
-                        }
-                    }
-                    else
-                    {
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(playerName, playerId);
-                        playerAvatar.sprite = initialAvatar;
-                        playerAvatar.color = Color.white;
-                    }
-                }
 
                 // Setup opponent as searching
                 ShowOpponentSearching(true);
@@ -549,11 +501,6 @@ namespace DigitPark.Managers
             if (opponentLevelText != null)
                 opponentLevelText.text = searching ? "---" : "";
 
-            // Dim avatar when searching
-            if (opponentAvatar != null)
-            {
-                opponentAvatar.color = searching ? new Color(1, 1, 1, 0.3f) : Color.white;
-            }
         }
 
         private async void ShowOpponentInfo(string opponentInfo)
@@ -564,45 +511,11 @@ namespace DigitPark.Managers
 
                 // Parse opponent name
                 if (opponentNameText != null)
-                    opponentNameText.text = opponentInfo;
+                    opponentNameText.text = UICanvasHelper.TmpSafe(opponentInfo);
 
                 // Mock opponent level
                 if (opponentLevelText != null)
                     opponentLevelText.text = AutoLocalizer.Get("player_level", UnityEngine.Random.Range(1, 50));
-
-                // Load opponent avatar
-                if (opponentAvatar != null)
-                {
-                    if (AvatarService.Instance != null && !string.IsNullOrEmpty(opponentId))
-                    {
-                        try
-                        {
-                            Sprite avatarSprite = await AvatarService.Instance.LoadAvatar(
-                                opponentId, "", opponentInfo);
-                            if (this == null) return;
-                            if (avatarSprite != null && opponentAvatar != null)
-                            {
-                                opponentAvatar.sprite = avatarSprite;
-                                opponentAvatar.color = Color.white;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogWarning($"[CashMatchmaking] Could not load opponent avatar: {e.Message}");
-                            if (this == null) return;
-                            Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(opponentInfo, opponentId);
-                            opponentAvatar.sprite = initialAvatar;
-                            opponentAvatar.color = Color.white;
-                        }
-                    }
-                    else
-                    {
-                        Sprite initialAvatar = AvatarInitialGenerator.GenerateAvatar(
-                            opponentInfo, opponentId ?? opponentInfo);
-                        opponentAvatar.sprite = initialAvatar;
-                        opponentAvatar.color = Color.white;
-                    }
-                }
 
                 // Animate opponent card
                 if (opponentCard != null)
@@ -763,8 +676,7 @@ namespace DigitPark.Managers
             PlayerPrefs.SetString("CurrentMatchId", matchId);
             PlayerPrefs.SetString("CurrentOpponentId", opponentId);
             PlayerPrefs.SetInt("IsOnlineMatch", 1);
-            PlayerPrefs.SetInt("IsCashMatch", 1);
-            PlayerPrefs.SetString(CASH_MATCH_ENTRY_FEE_KEY, entryFee.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            CurrentIsCashMatch = true;
             PlayerPrefs.SetInt(CASH_MATCH_GAME_TYPE_KEY, (int)currentGameType);
             PlayerPrefs.Save();
 
@@ -852,18 +764,6 @@ namespace DigitPark.Managers
 
         #endregion
 
-        #region Avatar Events
-
-        private void OnPlayerAvatarChanged(Sprite newAvatar)
-        {
-            if (playerAvatar != null && newAvatar != null)
-            {
-                playerAvatar.sprite = newAvatar;
-            }
-        }
-
-        #endregion
-
         #region Animation Helpers
 
         private IEnumerator AnimateScale(Transform target, Vector3 targetScale, float duration)
@@ -912,8 +812,7 @@ namespace DigitPark.Managers
         /// </summary>
         public static void SetEntryFee(decimal fee)
         {
-            PlayerPrefs.SetString(CASH_MATCH_ENTRY_FEE_KEY, fee.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            PlayerPrefs.Save();
+            CurrentEntryFee = fee;
             Debug.Log($"[CashMatchmaking] Set entry fee: ${fee:F2}");
         }
 

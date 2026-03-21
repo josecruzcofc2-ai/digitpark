@@ -68,7 +68,7 @@ Una vez que Stripe esta desactivado, confirmar que Apple IAP puede procesar pago
 
 | Product ID | Nombre | Tipo | Estado Esperado |
 |---|---|---|---|
-| `com.matrixsoftware.digitpark.gems_100` | 100 Sparks | Consumable | Approved |
+| `com.matrixsoftware.digitpark.gems_100` | 150 Sparks | Consumable | Approved |
 | `com.matrixsoftware.digitpark.gems_500` | 500 Sparks | Consumable | Approved |
 | `com.matrixsoftware.digitpark.gems_1200` | 1,200 Sparks | Consumable | Approved |
 | `com.matrixsoftware.digitpark.gems_2500` | 2,500 Sparks | Consumable | Approved |

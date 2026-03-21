@@ -17,7 +17,7 @@ namespace DigitPark.Payments.Entitlements
             get
             {
                 if (_instance == null)
-                    _instance = FindObjectOfType<EntitlementService>();
+                    _instance = FindFirstObjectByType<EntitlementService>();
                 return _instance;
             }
         }
@@ -42,6 +42,21 @@ namespace DigitPark.Payments.Entitlements
             _currentUserId = GetCurrentUserId();
             LoadFromLocal();
             Debug.Log($"[EntitlementService] Iniciado. {_localEntitlements.Count} entitlements cargados.");
+        }
+
+        /// <summary>
+        /// Call after login/logout to refresh the userId and reload entitlements.
+        /// Wire this to AuthenticationService.OnLoginSuccess / OnLogout.
+        /// </summary>
+        public void RefreshUserId()
+        {
+            string newId = GetCurrentUserId();
+            if (newId != _currentUserId)
+            {
+                _currentUserId = newId;
+                LoadFromLocal();
+                Debug.Log($"[EntitlementService] UserId refreshed to {_currentUserId}, {_localEntitlements.Count} entitlements loaded.");
+            }
         }
 
         private string GetCurrentUserId()
@@ -131,22 +146,92 @@ namespace DigitPark.Payments.Entitlements
 
         /// <summary>
         /// Sincroniza entitlements con Firebase Cloud Functions.
-        /// Firebase Functions endpoints:
-        ///   GET  https://us-central1-{project}.cloudfunctions.net/getEntitlements?userId={userId}
-        ///   POST https://us-central1-{project}.cloudfunctions.net/syncEntitlements
-        ///        Body: { userId, localEntitlements: EntitlementRecord[] }
-        /// Configurar PaymentConfig.backendBaseUrl con la URL base del proyecto Firebase.
+        /// GET {getEntitlementsUrl}?userId={userId}
+        /// Merge: los entitlements del servidor que no están en local se añaden (nunca se eliminan locales).
+        /// Si el backend no responde, se opera con la cache local (fail-open).
         /// </summary>
         public async Task SyncWithServer()
         {
             Debug.Log("[EntitlementService] Sincronizando entitlements con servidor...");
-            // En produccion: GET {syncEntitlementsUrl}?userId={_currentUserId}
-            // URL Firebase Functions: https://us-central1-{project}.cloudfunctions.net/getEntitlements
-            // Por ahora solo recarga desde local
-            LoadFromLocal();
-            await Task.Yield();
-            if (this == null) return;
-            Debug.Log("[EntitlementService] Sync completado");
+
+            var config = PaymentManager.Instance?.Config;
+            if (config == null || string.IsNullOrEmpty(config.getEntitlementsUrl))
+            {
+                Debug.LogWarning("[EntitlementService] SyncWithServer: getEntitlementsUrl no configurada. Usando cache local.");
+                return;
+            }
+
+            // Obtener Firebase ID token para Authorization header
+            string idToken = null;
+            if (PaymentBridge.GetFirebaseIdToken != null)
+            {
+                try { idToken = await PaymentBridge.GetFirebaseIdToken(); }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[EntitlementService] No se pudo obtener ID token: {e.Message}");
+                }
+            }
+
+            string url = $"{config.getEntitlementsUrl}?userId={_currentUserId}";
+
+            using (var request = UnityWebRequest.Get(url))
+            {
+                if (!string.IsNullOrEmpty(idToken))
+                    request.SetRequestHeader("Authorization", $"Bearer {idToken}");
+                request.timeout = 10;
+
+                var op = request.SendWebRequest();
+                while (!op.isDone) await Task.Yield();
+                if (this == null) return;
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    MergeServerEntitlements(request.downloadHandler.text);
+                    Debug.Log("[EntitlementService] Sync completado desde servidor.");
+                }
+                else
+                {
+                    // Fail-open: operar con cache local, reintentar en la próxima sesión
+                    Debug.LogWarning($"[EntitlementService] SyncWithServer falló ({request.error}). Usando cache local.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Merge de entitlements del servidor en la lista local.
+        /// Añade los que faltan, nunca elimina los locales (evitar pérdida por race condition).
+        /// </summary>
+        private void MergeServerEntitlements(string responseJson)
+        {
+            try
+            {
+                var wrapper = JsonUtility.FromJson<EntitlementListWrapper>(
+                    "{\"items\":" + responseJson + "}");
+                if (wrapper?.items == null) return;
+
+                int added = 0;
+                foreach (var serverRecord in wrapper.items)
+                {
+                    bool exists = _localEntitlements.Exists(e =>
+                        e.productId == serverRecord.productId &&
+                        e.transactionId == serverRecord.transactionId);
+                    if (!exists)
+                    {
+                        _localEntitlements.Add(serverRecord);
+                        added++;
+                    }
+                }
+
+                if (added > 0)
+                {
+                    SaveToLocal();
+                    Debug.Log($"[EntitlementService] Merge: {added} entitlement(s) restaurados desde servidor.");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[EntitlementService] Error parseando respuesta del servidor: {e.Message}");
+            }
         }
 
         private async Task SyncToFirebase(EntitlementRecord record)

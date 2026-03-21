@@ -462,6 +462,7 @@ namespace DigitPark.Services
         /// <summary>
         /// Reinicia los datos de recompensas (debug)
         /// </summary>
+#if UNITY_EDITOR
         [ContextMenu("Debug: Reset Daily Rewards")]
         public void ResetData()
         {
@@ -488,6 +489,7 @@ namespace DigitPark.Services
                 Debug.Log("[DailyReward] Día simulado pasado");
             }
         }
+#endif // UNITY_EDITOR
 
         #endregion
     }

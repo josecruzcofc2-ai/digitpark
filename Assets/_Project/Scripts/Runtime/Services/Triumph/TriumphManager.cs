@@ -18,7 +18,7 @@ namespace DigitPark.Services
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<TriumphManager>();
+                    _instance = FindFirstObjectByType<TriumphManager>();
                 }
                 return _instance;
             }

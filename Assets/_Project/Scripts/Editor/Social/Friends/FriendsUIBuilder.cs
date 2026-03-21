@@ -10,7 +10,7 @@ namespace DigitPark.Editor
 {
     /// <summary>
     /// Friends UI Builder - Escena dedicada de Amigos
-    /// Lista de amigos con avatar, online status, stats, acciones
+    /// Lista de amigos con online status, stats, acciones
     /// Portrait 9:16 (1080x1920), matchWidthOrHeight=0
     ///
     /// Menu: DigitPark/UI Builders/Social/Friends
@@ -86,7 +86,7 @@ namespace DigitPark.Editor
                 "2. Search Bar (buscar amigos)\n" +
                 "3. Requests Nav (ir a solicitudes + badge)\n" +
                 "4. ScrollView (lista de friend cards)\n" +
-                "5. Friend Card Prefab (avatar, info, botones)",
+                "5. Friend Card Prefab (online dot, info, botones)",
                 MessageType.Info);
 
             GUILayout.Space(15);
@@ -589,73 +589,31 @@ namespace DigitPark.Editor
             cardShadow.effectColor = new Color(0f, 0f, 0f, 0.4f);
             cardShadow.effectDistance = new Vector2(3, -4);
 
-            // ---- Circular Avatar (left) ----
+            // ---- Online Indicator (small dot, left edge) ----
             Sprite circleSprite = GenerateCircleSprite();
 
-            var avatarFrame = new GameObject("AvatarFrame");
-            avatarFrame.transform.SetParent(card.transform, false);
-            var afRT = avatarFrame.AddComponent<RectTransform>();
-            afRT.anchorMin = new Vector2(0, 0.5f);
-            afRT.anchorMax = new Vector2(0, 0.5f);
-            afRT.pivot = new Vector2(0, 0.5f);
-            afRT.anchoredPosition = new Vector2(12, 0);
-            afRT.sizeDelta = new Vector2(70, 70);
-            var afImg = avatarFrame.AddComponent<Image>();
-            afImg.sprite = circleSprite;
-            afImg.color = CYAN_DARK;
-            var fr_friends = avatarFrame.AddComponent<DigitPark.Services.FrameRenderer>();
-            fr_friends.SetRenderMode(DigitPark.Services.FrameRenderer.RenderMode.Reduced);
-
-            // Circular mask
-            var avatarMask = new GameObject("AvatarMask");
-            avatarMask.transform.SetParent(avatarFrame.transform, false);
-            var amRT = avatarMask.AddComponent<RectTransform>();
-            amRT.anchorMin = new Vector2(0.06f, 0.06f);
-            amRT.anchorMax = new Vector2(0.94f, 0.94f);
-            amRT.offsetMin = Vector2.zero;
-            amRT.offsetMax = Vector2.zero;
-            var amImg = avatarMask.AddComponent<Image>();
-            amImg.sprite = circleSprite;
-            amImg.color = CARD_BG_LIGHT;
-            avatarMask.AddComponent<Mask>().showMaskGraphic = true;
-
-            // Avatar Image (clipped to circle)
-            var avatarImg = new GameObject("AvatarImage");
-            avatarImg.transform.SetParent(avatarMask.transform, false);
-            var aiRT = avatarImg.AddComponent<RectTransform>();
-            aiRT.anchorMin = Vector2.zero;
-            aiRT.anchorMax = Vector2.one;
-            aiRT.offsetMin = Vector2.zero;
-            aiRT.offsetMax = Vector2.zero;
-            var aiImg = avatarImg.AddComponent<Image>();
-            aiImg.color = Color.white;
-            aiImg.preserveAspect = true;
-            Sprite defaultAvatar = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/Icons/Social/AvatarDefault.png");
-            if (defaultAvatar != null) aiImg.sprite = defaultAvatar;
-
-            // ---- Online Indicator ----
             var onlineInd = new GameObject("OnlineIndicator");
-            onlineInd.transform.SetParent(avatarFrame.transform, false);
+            onlineInd.transform.SetParent(card.transform, false);
             var oiRT = onlineInd.AddComponent<RectTransform>();
-            oiRT.anchorMin = new Vector2(1, 0);
-            oiRT.anchorMax = new Vector2(1, 0);
+            oiRT.anchorMin = new Vector2(0, 0.5f);
+            oiRT.anchorMax = new Vector2(0, 0.5f);
             oiRT.pivot = new Vector2(0.5f, 0.5f);
-            oiRT.anchoredPosition = new Vector2(-5, 5);
-            oiRT.sizeDelta = new Vector2(16, 16);
+            oiRT.anchoredPosition = new Vector2(20, 0);
+            oiRT.sizeDelta = new Vector2(12, 12);
             var oiImg = onlineInd.AddComponent<Image>();
             oiImg.sprite = circleSprite;
             oiImg.color = GREEN_SUCCESS;
             var oiOutline = onlineInd.AddComponent<Outline>();
             oiOutline.effectColor = DARK_BG;
-            oiOutline.effectDistance = new Vector2(2, 2);
+            oiOutline.effectDistance = new Vector2(1, 1);
 
-            // ---- Info Section (center) ----
+            // ---- Info Section (expanded — avatar removed) ----
             var infoSection = new GameObject("InfoSection");
             infoSection.transform.SetParent(card.transform, false);
             var isRT = infoSection.AddComponent<RectTransform>();
             isRT.anchorMin = new Vector2(0, 0);
             isRT.anchorMax = new Vector2(1, 1);
-            isRT.offsetMin = new Vector2(95, 10);
+            isRT.offsetMin = new Vector2(36, 10);
             isRT.offsetMax = new Vector2(-15, -10);
 
             // Username

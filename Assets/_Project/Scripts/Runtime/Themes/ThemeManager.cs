@@ -338,9 +338,66 @@ namespace DigitPark.Themes
             if (string.IsNullOrEmpty(themeId)) return;
             PlayerPrefs.SetInt($"OwnedTheme_{themeId}", 1);
             PlayerPrefs.Save();
-            _ = SyncThemeToFirebase(themeId);
+            _ = SyncUnlockToFirebase(themeId);
             Debug.Log($"[ThemeManager] Tema desbloqueado: {themeId}");
             OnThemeChanged?.Invoke(_currentTheme);
+        }
+
+        private async System.Threading.Tasks.Task SyncUnlockToFirebase(string themeId)
+        {
+            try
+            {
+                var playerData = AuthenticationService.Instance?.GetCurrentPlayerData();
+                if (playerData == null || DatabaseService.Instance == null) return;
+                // Sync owned themes list (NOT equippedTheme — that only changes on SetTheme)
+                var ownedIds = GetOwnedThemeIds();
+                await DatabaseService.Instance.UpdatePlayerFields(playerData.userId, new Dictionary<string, object>
+                {
+                    { "ownedThemes", string.Join(",", ownedIds) }
+                });
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[ThemeManager] Firebase unlock sync failed: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// B4-B: Restore owned themes from Firebase after reinstall.
+        /// Call from BootManager in reinstall path.
+        /// </summary>
+        public async System.Threading.Tasks.Task RestoreFromFirebaseAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId) || DatabaseService.Instance == null) return;
+            try
+            {
+                var db = Firebase.Database.FirebaseDatabase.DefaultInstance;
+                var snapshot = await db.GetReference("players").Child(userId).Child("ownedThemes").GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                string csv = snapshot.Value?.ToString() ?? "";
+                if (string.IsNullOrEmpty(csv)) return;
+
+                bool changed = false;
+                foreach (var id in csv.Split(','))
+                {
+                    string trimmed = id.Trim();
+                    if (!string.IsNullOrEmpty(trimmed) && PlayerPrefs.GetInt($"OwnedTheme_{trimmed}", 0) == 0)
+                    {
+                        PlayerPrefs.SetInt($"OwnedTheme_{trimmed}", 1);
+                        changed = true;
+                    }
+                }
+                if (changed)
+                {
+                    PlayerPrefs.Save();
+                    Debug.Log($"[ThemeManager] Themes restored from Firebase");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[ThemeManager] RestoreFromFirebaseAsync failed: {e.Message}");
+            }
         }
 
         /// <summary>

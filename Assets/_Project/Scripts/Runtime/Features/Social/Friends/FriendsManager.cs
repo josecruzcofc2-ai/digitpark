@@ -18,7 +18,7 @@ namespace DigitPark.Managers
 {
     /// <summary>
     /// Manager para la escena dedicada de Amigos.
-    /// Muestra lista de amigos con avatar, estado online, stats.
+    /// Muestra lista de amigos con estado online, nivel, stats.
     /// Permite buscar, ver perfil, retar y eliminar amigos.
     /// Navega a FriendRequests para solicitudes.
     /// </summary>
@@ -186,13 +186,6 @@ namespace DigitPark.Managers
 
         private void SetupFriendCard(GameObject card, FriendInfo friend)
         {
-            // Avatar
-            var avatarImage = card.transform.Find("AvatarFrame/AvatarImage")?.GetComponent<Image>();
-            if (avatarImage != null)
-            {
-                LoadFriendAvatar(avatarImage, friend);
-            }
-
             // Online indicator
             var onlineIndicator = card.transform.Find("OnlineIndicator")?.GetComponent<Image>();
             if (onlineIndicator != null)
@@ -205,18 +198,20 @@ namespace DigitPark.Managers
             // Username
             var usernameText = card.transform.Find("InfoSection/Username")?.GetComponent<TextMeshProUGUI>();
             if (usernameText != null)
-                usernameText.text = friend.username;
+                usernameText.text = UICanvasHelper.TmpSafe(friend.username);
 
             // Stats
             var statsText = card.transform.Find("InfoSection/StatsText")?.GetComponent<TextMeshProUGUI>();
             if (statsText != null)
                 statsText.text = $"{friend.winRate:F0}% {AutoLocalizer.Get("win_rate_abbr")} \u00B7 {friend.favoriteGame}";
 
-            // Status
+            // Status (includes level)
             var statusText = card.transform.Find("InfoSection/StatusText")?.GetComponent<TextMeshProUGUI>();
             if (statusText != null)
             {
-                statusText.text = friend.isOnline ? AutoLocalizer.Get("player_online") : friend.GetLastSeenText();
+                string levelTag = friend.level > 0 ? $"Lv. {friend.level} \u00B7 " : "";
+                string statusStr = friend.isOnline ? AutoLocalizer.Get("player_online") : friend.GetLastSeenText();
+                statusText.text = $"{levelTag}{statusStr}";
                 statusText.color = friend.isOnline
                     ? new Color(0.2f, 1f, 0.4f, 1f)
                     : new Color(0.5f, 0.5f, 0.5f, 1f);
@@ -239,42 +234,6 @@ namespace DigitPark.Managers
             var removeBtn = card.transform.Find("ButtonsRow/RemoveButton")?.GetComponent<Button>();
             if (removeBtn != null)
                 removeBtn.onClick.AddListener(() => OnRemoveFriendClicked(odId, card));
-        }
-
-        private async void LoadFriendAvatar(Image avatarImage, FriendInfo friend)
-        {
-            try
-            {
-                if (AvatarService.Instance != null)
-                {
-                    Sprite avatar = await AvatarService.Instance.LoadAvatar(
-                        friend.odId, friend.avatarUrl, friend.username);
-                    if (avatar != null && avatarImage != null)
-                    {
-                        avatarImage.sprite = avatar;
-                        avatarImage.color = Color.white;
-                    }
-                }
-                else
-                {
-                    Sprite initial = AvatarInitialGenerator.GenerateAvatar(friend.username, friend.odId);
-                    if (avatarImage != null)
-                    {
-                        avatarImage.sprite = initial;
-                        avatarImage.color = Color.white;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[FriendsManager] {ex.Message}");
-                Sprite initial = AvatarInitialGenerator.GenerateAvatar(friend.username, friend.odId);
-                if (avatarImage != null)
-                {
-                    avatarImage.sprite = initial;
-                    avatarImage.color = Color.white;
-                }
-            }
         }
 
         private void ClearCards()
@@ -403,7 +362,7 @@ namespace DigitPark.Managers
                     {
                         currentCards.Remove(card);
                         card.transform.DOScale(0f, 0.2f).SetEase(Ease.InBack)
-                            .OnComplete(() => { if (card != null) Destroy(card); });
+                            .SetLink(card).OnComplete(() => { if (card != null) Destroy(card); });
                     }
 
                     allFriends.RemoveAll(f => f.odId == odId);
@@ -437,12 +396,12 @@ namespace DigitPark.Managers
                 {
                     requestsBadge.SetActive(true);
                     requestsBadge.transform.localScale = Vector3.zero;
-                    requestsBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+                    requestsBadge.transform.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetLink(requestsBadge);
                 }
                 else
                 {
                     requestsBadge.transform.DOScale(0f, 0.15f).SetEase(Ease.InBack)
-                        .OnComplete(() => requestsBadge.SetActive(false));
+                        .SetLink(requestsBadge).OnComplete(() => requestsBadge.SetActive(false));
                 }
             }
 
@@ -460,7 +419,7 @@ namespace DigitPark.Managers
             var cg = emptyText.GetComponent<CanvasGroup>();
             if (cg == null) cg = emptyText.gameObject.AddComponent<CanvasGroup>();
             cg.alpha = 0f;
-            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad);
+            cg.DOFade(1f, 0.4f).SetEase(Ease.OutQuad).SetLink(gameObject);
         }
 
         private void AnimateEntrance()
@@ -470,7 +429,7 @@ namespace DigitPark.Managers
             {
                 Vector2 pos = headerTransform.anchoredPosition;
                 headerTransform.anchoredPosition = new Vector2(pos.x, pos.y + 200);
-                headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack);
+                headerTransform.DOAnchorPos(pos, 0.4f).SetEase(Ease.OutBack).SetLink(gameObject);
             }
 
             // Search bar fade + slide
@@ -527,13 +486,13 @@ namespace DigitPark.Managers
                 var cg = loadingIndicator.GetComponent<CanvasGroup>();
                 if (cg == null) cg = loadingIndicator.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
-                cg.DOFade(1f, 0.2f).SetUpdate(true);
+                cg.DOFade(1f, 0.2f).SetUpdate(true).SetLink(loadingIndicator);
             }
             else
             {
                 var cg = loadingIndicator.GetComponent<CanvasGroup>();
                 if (cg != null)
-                    cg.DOFade(0f, 0.2f).SetUpdate(true).OnComplete(() => loadingIndicator.SetActive(false));
+                    cg.DOFade(0f, 0.2f).SetUpdate(true).SetLink(loadingIndicator).OnComplete(() => loadingIndicator.SetActive(false));
                 else
                     loadingIndicator.SetActive(false);
             }

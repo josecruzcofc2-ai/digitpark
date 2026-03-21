@@ -37,7 +37,7 @@ namespace DigitPark.Services
 
     /// <summary>
     /// Servicio singleton que gestiona titulos de perfil.
-    /// ~20 titulos predefinidos + 1 titulo custom (IAP).
+    /// 24 titulos: 1 free + 4 DC + 5 DG + 4 USD + 1 custom + 6 achievement + 4 secret.
     /// Persistencia via PlayerPrefs.
     /// </summary>
     public class PlayerTitleService : MonoBehaviour
@@ -49,7 +49,7 @@ namespace DigitPark.Services
         private const string OWNED_TITLES_KEY = "OwnedTitles";
         private const string EQUIPPED_TITLE_KEY = "EquippedTitle";
         private const string CUSTOM_TITLE_KEY = "CustomTitle";
-        private const string DEFAULT_TITLE_ID = "novato";
+        private const string DEFAULT_TITLE_ID = "novice";
         private const int MAX_CUSTOM_LENGTH = 20;
 
         // State
@@ -110,130 +110,123 @@ namespace DigitPark.Services
 
         private void SetupTitles()
         {
-            // ==================== COINS (5 titles) ====================
+            // ==================== FREE (1 title — default) ====================
             _allTitles.Add(new TitleData
             {
-                titleId = "novato",
-                nameKey = "title_novato",
+                titleId = "novice",
+                nameKey = "title_novice",
                 priceType = TitlePriceType.Free,
                 coinPrice = 0
             });
 
+            // ==================== DIGIT COINS (4 titles) ====================
             _allTitles.Add(new TitleData
             {
-                titleId = "jugador",
-                nameKey = "title_jugador",
+                titleId = "strategist",
+                nameKey = "title_strategist",
                 priceType = TitlePriceType.DigitCoins,
-                coinPrice = 500
+                coinPrice = 8000
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "veterano",
-                nameKey = "title_veterano",
+                titleId = "analyst",
+                nameKey = "title_analyst",
                 priceType = TitlePriceType.DigitCoins,
-                coinPrice = 3000
+                coinPrice = 8000
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "leyenda",
-                nameKey = "title_leyenda",
+                titleId = "champion",
+                nameKey = "title_champion",
                 priceType = TitlePriceType.DigitCoins,
-                coinPrice = 10000
+                coinPrice = 20000
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "inmortal",
-                nameKey = "title_inmortal",
+                titleId = "gladiator",
+                nameKey = "title_gladiator",
                 priceType = TitlePriceType.DigitCoins,
-                coinPrice = 25000
+                coinPrice = 20000
             });
 
-            // ==================== GEMS (4 titles) ====================
+            // ==================== DIGIT GEMS (5 titles) ====================
             _allTitles.Add(new TitleData
             {
-                titleId = "estratega",
-                nameKey = "title_estratega",
+                titleId = "mastermind",
+                nameKey = "title_mastermind",
                 priceType = TitlePriceType.DigitGems,
-                gemPrice = 100
+                gemPrice = 150
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "genio",
-                nameKey = "title_genio",
+                titleId = "prodigy",
+                nameKey = "title_prodigy",
+                priceType = TitlePriceType.DigitGems,
+                gemPrice = 150
+            });
+
+            _allTitles.Add(new TitleData
+            {
+                titleId = "titan",
+                nameKey = "title_titan",
                 priceType = TitlePriceType.DigitGems,
                 gemPrice = 300
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "maestro",
-                nameKey = "title_maestro",
+                titleId = "oracle",
+                nameKey = "title_oracle",
                 priceType = TitlePriceType.DigitGems,
-                gemPrice = 600
+                gemPrice = 300
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "iluminado",
-                nameKey = "title_iluminado",
+                titleId = "phoenix",
+                nameKey = "title_phoenix",
                 priceType = TitlePriceType.DigitGems,
-                gemPrice = 1000
+                gemPrice = 500
             });
 
-            // ==================== ACHIEVEMENT (6 titles) ====================
+            // ==================== REAL MONEY (4 titles via IAP) ====================
             _allTitles.Add(new TitleData
             {
-                titleId = "primer_paso",
-                nameKey = "title_primer_paso",
-                priceType = TitlePriceType.Achievement,
-                achievementId = "first_game"
-            });
-
-            _allTitles.Add(new TitleData
-            {
-                titleId = "imparable",
-                nameKey = "title_imparable",
-                priceType = TitlePriceType.Achievement,
-                achievementId = "streak_10"
+                titleId = "quantum",
+                nameKey = "title_quantum",
+                priceType = TitlePriceType.RealMoney,
+                realMoneyPrice = 1.99f
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "madrugador",
-                nameKey = "title_madrugador",
-                priceType = TitlePriceType.Achievement,
-                achievementId = "night_owl"
+                titleId = "immortal_title",
+                nameKey = "title_immortal",
+                priceType = TitlePriceType.RealMoney,
+                realMoneyPrice = 2.99f
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "perfeccionista",
-                nameKey = "title_perfeccionista",
-                priceType = TitlePriceType.Achievement,
-                achievementId = "perfect_game"
+                titleId = "transcendent",
+                nameKey = "title_transcendent",
+                priceType = TitlePriceType.RealMoney,
+                realMoneyPrice = 4.99f
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "campeon",
-                nameKey = "title_campeon",
-                priceType = TitlePriceType.Achievement,
-                achievementId = "tournament_win"
+                titleId = "apex_predator",
+                nameKey = "title_apex_predator",
+                priceType = TitlePriceType.RealMoney,
+                realMoneyPrice = 9.99f
             });
 
-            _allTitles.Add(new TitleData
-            {
-                titleId = "coleccionista",
-                nameKey = "title_coleccionista",
-                priceType = TitlePriceType.Achievement,
-                achievementId = "days_365"  // Placeholder for "all themes" - maps to dedication
-            });
-
-            // ==================== REAL MONEY (1 title) ====================
+            // ==================== CUSTOM (1 title — player sets text) ====================
             _allTitles.Add(new TitleData
             {
                 titleId = "custom_title",
@@ -243,37 +236,86 @@ namespace DigitPark.Services
                 isCustom = true
             });
 
-            // ==================== SECRET (4 titles) ====================
+            // ==================== ACHIEVEMENT (6 titles) ====================
             _allTitles.Add(new TitleData
             {
-                titleId = "fantasma",
-                nameKey = "title_fantasma",
-                priceType = TitlePriceType.Secret,
-                achievementId = "night_owl"  // play 100 games at night (reuses achievement)
+                titleId = "first_step",
+                nameKey = "title_first_step",
+                priceType = TitlePriceType.Achievement,
+                achievementId = "first_game"
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "velocista",
-                nameKey = "title_velocista",
+                titleId = "unstoppable",
+                nameKey = "title_unstoppable",
+                priceType = TitlePriceType.Achievement,
+                achievementId = "streak_10"
+            });
+
+            _allTitles.Add(new TitleData
+            {
+                titleId = "night_owl",
+                nameKey = "title_night_owl",
+                priceType = TitlePriceType.Achievement,
+                achievementId = "night_owl"
+            });
+
+            _allTitles.Add(new TitleData
+            {
+                titleId = "perfectionist",
+                nameKey = "title_perfectionist",
+                priceType = TitlePriceType.Achievement,
+                achievementId = "perfect_game"
+            });
+
+            _allTitles.Add(new TitleData
+            {
+                titleId = "tournament_champion",
+                nameKey = "title_tournament_champion",
+                priceType = TitlePriceType.Achievement,
+                achievementId = "tournament_win"
+            });
+
+            _allTitles.Add(new TitleData
+            {
+                titleId = "collector",
+                nameKey = "title_collector",
+                priceType = TitlePriceType.Achievement,
+                achievementId = "days_365"
+            });
+
+            // ==================== SECRET (4 titles) ====================
+            _allTitles.Add(new TitleData
+            {
+                titleId = "ghost",
+                nameKey = "title_ghost",
+                priceType = TitlePriceType.Secret,
+                achievementId = "night_owl"
+            });
+
+            _allTitles.Add(new TitleData
+            {
+                titleId = "speed_demon",
+                nameKey = "title_speed_demon",
                 priceType = TitlePriceType.Secret,
                 achievementId = "speed_demon"
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "rey_comeback",
-                nameKey = "title_rey_comeback",
+                titleId = "comeback_king",
+                nameKey = "title_comeback_king",
                 priceType = TitlePriceType.Secret,
                 achievementId = "comeback_king"
             });
 
             _allTitles.Add(new TitleData
             {
-                titleId = "completo",
-                nameKey = "title_completo",
+                titleId = "completionist",
+                nameKey = "title_completionist",
                 priceType = TitlePriceType.Secret,
-                achievementId = "level_100"  // Placeholder for 100% achievements
+                achievementId = "level_100"
             });
         }
 
@@ -359,7 +401,50 @@ namespace DigitPark.Services
             }
         }
 
+        /// <summary>
+        /// B4-D: Restore owned titles from Firebase after reinstall.
+        /// Call from BootManager in reinstall path.
+        /// </summary>
+        public async Task RestoreFromFirebaseAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId) || DatabaseService.Instance == null) return;
+            try
+            {
+                var db = global::Firebase.Database.FirebaseDatabase.DefaultInstance;
+                var snapshot = await db.GetReference("players").Child(userId).Child("ownedTitles").GetValueAsync();
+                if (snapshot == null || !snapshot.Exists) return;
+
+                string ownedJson = snapshot.Value?.ToString() ?? "";
+                if (string.IsNullOrEmpty(ownedJson)) return;
+
+                var data = JsonUtility.FromJson<StringListWrapper>(ownedJson);
+                if (data?.items == null) return;
+
+                bool changed = false;
+                foreach (var id in data.items)
+                {
+                    if (!_ownedTitles.Contains(id))
+                    {
+                        _ownedTitles.Add(id);
+                        changed = true;
+                    }
+                }
+                if (changed)
+                {
+                    SaveOwnedTitles();
+                    Debug.Log($"[PlayerTitleService] Titles restored from Firebase");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[PlayerTitleService] RestoreFromFirebaseAsync failed: {e.Message}");
+            }
+        }
+
         // ==================== PUBLIC API ====================
+
+        /// <summary>B4-F: Force a Firebase sync of current owned titles (used during migration).</summary>
+        public void TriggerFirebaseSync() => SaveOwnedTitles();
 
         public bool IsOwned(string titleId)
         {

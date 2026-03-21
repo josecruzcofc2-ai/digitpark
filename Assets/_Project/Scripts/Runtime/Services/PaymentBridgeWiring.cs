@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using DigitPark.Payments;
+using DigitPark.Payments.UI;
 using DigitPark.Services.Firebase;
 using DigitPark.Monetization;
+using DigitPark.UI;
 
 namespace DigitPark.Services
 {
@@ -61,18 +64,58 @@ namespace DigitPark.Services
                 Application.deepLinkActivated += OnDeepLinkActivated;
             };
 
+            // WARN-01: unregister para evitar acumulación de handlers entre compras
+            PaymentBridge.UnregisterDeepLinkHandler = (path) =>
+            {
+                _deepLinkHandlers.Remove(path);
+            };
+
+            // BUG-06: Firebase ID token para Authorization en Cloud Functions (getEntitlements, syncEntitlements)
+            PaymentBridge.GetFirebaseIdToken = async () =>
+            {
+                try
+                {
+#if FIREBASE_AUTH
+                    var user = Firebase.Auth.FirebaseAuth.DefaultInstance.CurrentUser;
+                    if (user != null)
+                        return await user.TokenAsync(false);
+#endif
+                    return null;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[PaymentBridgeWiring] GetFirebaseIdToken failed: {e.Message}");
+                    return null;
+                }
+            };
+
+            PaymentErrorDialog.ShowPopupCallback = (title, message, buttonText, onButton) =>
+            {
+                if (onButton != null)
+                    PopupManager.Instance?.ShowConfirmMessage(message, onButton);
+                else
+                    PopupManager.Instance?.ShowErrorMessage(message);
+            };
+
             Debug.Log("[PaymentBridgeWiring] All delegates wired to game services");
         }
 
         private static void OnDeepLinkActivated(string url)
         {
             if (string.IsNullOrEmpty(url)) return;
-            foreach (var kvp in _deepLinkHandlers)
+
+            // S9-NEW-01: Strict URI parsing — prevent handler hijacking via crafted URLs
+            System.Uri uri;
+            try { uri = new System.Uri(url); }
+            catch { return; } // URL malformada — ignorar
+
+            // Verificar scheme exacto
+            if (uri.Scheme != "digitpark") return;
+
+            // Match host exacto, no substring Contains
+            if (_deepLinkHandlers.TryGetValue(uri.Host, out var handler))
             {
-                if (url.Contains(kvp.Key))
-                {
-                    kvp.Value?.Invoke(url);
-                }
+                handler?.Invoke(url);
             }
         }
     }

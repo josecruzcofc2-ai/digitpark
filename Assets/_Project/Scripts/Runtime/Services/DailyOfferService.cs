@@ -86,12 +86,16 @@ namespace DigitPark.Services
             new OfferItem("effect_fireworks",  "Fireworks",  OfferCurrency.DC, 2000, OfferTier.B),
             new OfferItem("effect_lightning",  "Lightning",  OfferCurrency.DC, 5000, OfferTier.A),
             // Titles DG
-            new OfferItem("title_estratega", "Estratega",  OfferCurrency.DG, 100, OfferTier.B),
-            new OfferItem("title_genio",     "Genio",      OfferCurrency.DG, 300, OfferTier.A),
-            new OfferItem("title_maestro",   "Maestro",    OfferCurrency.DG, 600, OfferTier.A),
-            new OfferItem("title_iluminado", "Iluminado",  OfferCurrency.DG, 1000, OfferTier.S),
+            new OfferItem("mastermind",  "Mastermind",  OfferCurrency.DG, 150, OfferTier.B),
+            new OfferItem("prodigy",     "Prodigy",     OfferCurrency.DG, 150, OfferTier.B),
+            new OfferItem("titan",       "Titan",       OfferCurrency.DG, 300, OfferTier.A),
+            new OfferItem("oracle",      "Oracle",      OfferCurrency.DG, 300, OfferTier.A),
+            new OfferItem("phoenix",     "Phoenix",     OfferCurrency.DG, 500, OfferTier.S),
             // Titles DC
-            new OfferItem("title_veterano",  "Veterano",   OfferCurrency.DC, 3000, OfferTier.B),
+            new OfferItem("strategist",  "Strategist",  OfferCurrency.DC, 8000, OfferTier.B),
+            new OfferItem("analyst",     "Analyst",     OfferCurrency.DC, 8000, OfferTier.B),
+            new OfferItem("champion",    "Champion",    OfferCurrency.DC, 20000, OfferTier.A),
+            new OfferItem("gladiator",   "Gladiator",   OfferCurrency.DC, 20000, OfferTier.A),
             // BattleCards DG
             new OfferItem("card_frost",   "Frost Card",   OfferCurrency.DG, 75, OfferTier.B),
             new OfferItem("card_shadow",  "Shadow Card",  OfferCurrency.DG, 150, OfferTier.B),
@@ -125,6 +129,7 @@ namespace DigitPark.Services
         private DailyOfferState _state;
         private DailyOffer[] _todayOffers = new DailyOffer[3];
         private bool _initialized;
+        private bool _isPurchasing; // B3-G: double-tap guard
 
         private const string STATE_KEY = "DailyOfferState";
         private const float SLOT1_DISCOUNT = 0.50f; // 50% off
@@ -148,8 +153,8 @@ namespace DigitPark.Services
         {
             get
             {
-                DateTime tomorrow = DateTime.UtcNow.Date.AddDays(1);
-                return tomorrow - DateTime.UtcNow;
+                DateTime tomorrow = ServerTimeHelper.UtcNow.Date.AddDays(1);
+                return tomorrow - ServerTimeHelper.UtcNow;
             }
         }
 
@@ -180,14 +185,14 @@ namespace DigitPark.Services
 
         // ==================== CORE GENERATION ====================
 
-        private string GetTodayKey() => DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        private string GetTodayKey() => ServerTimeHelper.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Deterministic seed from UTC date — all players see the same offers.
         /// </summary>
         private int GetDaySeed()
         {
-            var today = DateTime.UtcNow.Date;
+            var today = ServerTimeHelper.UtcNow.Date;
             int dateBase = today.Year * 10000 + today.Month * 100 + today.Day;
             int userId = Mathf.Abs(PlayerPrefs.GetString("DP_SavedUserId", "").GetHashCode());
             return dateBase + userId;
@@ -383,8 +388,12 @@ namespace DigitPark.Services
             var offer = _todayOffers[slotIndex];
             if (offer == null || offer.purchased) return false;
 
+            // B3-G: Prevent double-tap / re-entrant purchase
+            if (_isPurchasing) return false;
+            _isPurchasing = true;
+
             var currency = DigitPark.Monetization.CurrencyManager.Instance;
-            if (currency == null) return false;
+            if (currency == null) { _isPurchasing = false; return false; }
 
             if (offer.isFree)
             {
@@ -399,13 +408,14 @@ namespace DigitPark.Services
                 {
                     case OfferCurrency.DG:
                         success = currency.SpendGems(offer.discountedPrice);
-                        if (!success) return false;
+                        if (!success) { _isPurchasing = false; return false; }
                         break;
                     case OfferCurrency.DC:
                         success = currency.SpendCoins(offer.discountedPrice);
-                        if (!success) return false;
+                        if (!success) { _isPurchasing = false; return false; }
                         break;
                     default:
+                        _isPurchasing = false;
                         return false;
                 }
 
@@ -416,6 +426,7 @@ namespace DigitPark.Services
 
             offer.purchased = true;
             SaveState();
+            _isPurchasing = false;
 
             // Analytics
             AnalyticsService.Instance?.LogCustomEvent("daily_offer_purchased", new Dictionary<string, object>
@@ -448,10 +459,10 @@ namespace DigitPark.Services
             {
                 VictoryEffectService.Instance?.UnlockEffect(id);
             }
-            else if (id.StartsWith("title_"))
+            else if (PlayerTitleService.Instance?.GetTitleData(id) != null)
             {
-                PlayerPrefs.SetInt($"Title_Owned_{id}", 1);
-                PlayerPrefs.Save();
+                // B3-D: Use service instead of broken "title_" prefix check (titles have no prefix)
+                PlayerTitleService.Instance.UnlockTitle(id);
             }
             else if (id.StartsWith("card_"))
             {
@@ -475,7 +486,7 @@ namespace DigitPark.Services
                     break;
                 case FreeRewardType.XPBoost:
                     // Store XP boost expiry in PlayerPrefs
-                    var expiry = DateTime.UtcNow.AddHours(offer.freeRewardAmount);
+                    var expiry = ServerTimeHelper.UtcNow.AddHours(offer.freeRewardAmount);
                     PlayerPrefs.SetString("DP_XPBoost_Expiry", expiry.ToString("o"));
                     PlayerPrefs.Save();
                     Debug.Log($"[DailyOfferService] XP Boost activated: x2 for {offer.freeRewardAmount}h");

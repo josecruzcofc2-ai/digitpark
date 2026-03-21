@@ -30,14 +30,12 @@ namespace DigitPark.UI
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private TextMeshProUGUI playerTimeText;
         [SerializeField] private TextMeshProUGUI playerErrorsText;
-        [SerializeField] private Image playerAvatar;
         [SerializeField] private GameObject playerHighlight;
 
         [Header("Opponent Section")]
         [SerializeField] private TextMeshProUGUI opponentNameText;
         [SerializeField] private TextMeshProUGUI opponentTimeText;
         [SerializeField] private TextMeshProUGUI opponentErrorsText;
-        [SerializeField] private Image opponentAvatar;
         [SerializeField] private GameObject opponentHighlight;
 
         [Header("Time Difference")]

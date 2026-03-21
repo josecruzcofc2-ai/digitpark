@@ -27,8 +27,8 @@ namespace DigitPark.UI
         private void Awake()
         {
             // Si la UI ya fue construida por el Editor UIBuilder, solo iniciar animaciones
-            bootAnimator = FindObjectOfType<BootAnimator>();
-            bootManager = FindObjectOfType<DigitPark.Managers.BootManager>();
+            bootAnimator = FindFirstObjectByType<BootAnimator>();
+            bootManager = FindFirstObjectByType<DigitPark.Managers.BootManager>();
 
             bool uiAlreadyBuilt = bootManager != null && bootManager.loadingBar != null;
 

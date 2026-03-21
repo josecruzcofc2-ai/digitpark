@@ -36,7 +36,7 @@ namespace DigitPark.Services
 
     /// <summary>
     /// Servicio singleton que gestiona efectos de victoria post-juego.
-    /// 8 efectos con diferentes metodos de obtencion.
+    /// 12 efectos: 1 free + 2 DC + 4 DG + 5 USD.
     /// Persistencia via PlayerPrefs.
     /// </summary>
     public class VictoryEffectService : MonoBehaviour
@@ -98,7 +98,8 @@ namespace DigitPark.Services
             {
                 effectId = "confetti",
                 nameKey = "effect_confetti",
-                priceType = EffectPriceType.Free,
+                priceType = EffectPriceType.DigitCoins,
+                coinPrice = 12000,
                 primaryColor = new Color(1f, 0.8f, 0f),
                 secondaryColor = new Color(0f, 0.8f, 1f),
                 particlePrefabName = "Effects/Confetti"
@@ -109,7 +110,7 @@ namespace DigitPark.Services
                 effectId = "fireworks",
                 nameKey = "effect_fireworks",
                 priceType = EffectPriceType.DigitCoins,
-                coinPrice = 2000,
+                coinPrice = 20000,
                 primaryColor = new Color(1f, 0.3f, 0.1f),
                 secondaryColor = new Color(1f, 0.8f, 0f),
                 particlePrefabName = "Effects/Fireworks"
@@ -119,8 +120,8 @@ namespace DigitPark.Services
             {
                 effectId = "lightning",
                 nameKey = "effect_lightning",
-                priceType = EffectPriceType.DigitCoins,
-                coinPrice = 5000,
+                priceType = EffectPriceType.DigitGems,
+                gemPrice = 200,
                 primaryColor = new Color(0.3f, 0.6f, 1f),
                 secondaryColor = new Color(0.8f, 0.9f, 1f),
                 particlePrefabName = "Effects/Lightning"
@@ -142,7 +143,7 @@ namespace DigitPark.Services
                 effectId = "neon_explosion",
                 nameKey = "effect_neon_explosion",
                 priceType = EffectPriceType.DigitGems,
-                gemPrice = 400, // Economy rebalance V55: was 500
+                gemPrice = 350, // Economy V56: was 400
                 primaryColor = new Color(0f, 1f, 1f),
                 secondaryColor = new Color(1f, 0f, 1f),
                 particlePrefabName = "Effects/NeonExplosion"
@@ -179,6 +180,50 @@ namespace DigitPark.Services
                 primaryColor = new Color(1f, 0.4f, 0f),
                 secondaryColor = new Color(1f, 0.8f, 0f),
                 particlePrefabName = "Effects/FireRing"
+            });
+
+            _allEffects.Add(new VictoryEffectData
+            {
+                effectId = "pixel_rain",
+                nameKey = "effect_pixel_rain",
+                priceType = EffectPriceType.DigitGems,
+                gemPrice = 500,
+                primaryColor = new Color(0f, 1f, 1f),
+                secondaryColor = new Color(1f, 0f, 1f),
+                particlePrefabName = "Effects/PixelRain"
+            });
+
+            _allEffects.Add(new VictoryEffectData
+            {
+                effectId = "cosmic_shatter",
+                nameKey = "effect_cosmic_shatter",
+                priceType = EffectPriceType.RealMoney,
+                realMoneyPrice = 1.99f,
+                primaryColor = new Color(0.5f, 0f, 1f),
+                secondaryColor = new Color(0.2f, 0.4f, 1f),
+                particlePrefabName = "Effects/CosmicShatter"
+            });
+
+            _allEffects.Add(new VictoryEffectData
+            {
+                effectId = "quantum_rift",
+                nameKey = "effect_quantum_rift",
+                priceType = EffectPriceType.RealMoney,
+                realMoneyPrice = 3.99f,
+                primaryColor = new Color(0f, 1f, 0.4f),
+                secondaryColor = new Color(0f, 1f, 1f),
+                particlePrefabName = "Effects/QuantumRift"
+            });
+
+            _allEffects.Add(new VictoryEffectData
+            {
+                effectId = "divine_ascension",
+                nameKey = "effect_divine_ascension",
+                priceType = EffectPriceType.RealMoney,
+                realMoneyPrice = 6.99f,
+                primaryColor = new Color(1f, 0.84f, 0f),
+                secondaryColor = new Color(1f, 1f, 1f),
+                particlePrefabName = "Effects/DivineAscension"
             });
         }
 

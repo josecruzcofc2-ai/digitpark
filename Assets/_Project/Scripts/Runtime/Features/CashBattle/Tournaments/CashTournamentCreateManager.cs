@@ -163,7 +163,10 @@ namespace DigitPark.Managers
 
             // Input field listeners
             if (tournamentNameInput != null)
+            {
+                tournamentNameInput.characterLimit = 40; // B6-J: enforce max length at input level
                 tournamentNameInput.onValueChanged.AddListener(OnNameChanged);
+            }
 
             if (customEntryFeeInput != null)
                 customEntryFeeInput.onEndEdit.AddListener(OnCustomEntryFeeEndEdit);

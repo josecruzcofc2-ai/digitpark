@@ -33,9 +33,7 @@ namespace DigitPark.Editor.AutoAssigners
             "progressBar", "stepCounterText",
             // Name Input (Slide 2)
             "nameInputPanel", "nameInput", "confirmNameButton", "nameErrorText",
-            // Avatar Selection (Slide 3)
-            "avatarSelectionPanel", "avatarContainer",
-            // Tutorial Completion (Slide 8)
+            // Tutorial Completion (Slide 7)
             "completionPanel", "completionTitleText", "completionMessageText",
             "rewardText", "startPlayingButton",
             // Sections (for animations)
@@ -80,10 +78,10 @@ namespace DigitPark.Editor.AutoAssigners
             EditorGUILayout.HelpBox(
                 "Assigns UI references to OnboardingManager (slide-based):\n" +
                 "• Main (skip button)\n" +
-                "• SlidesContainer (Slide1-Slide8)\n" +
+                "• SlidesContainer (Slide1-Slide7)\n" +
                 "• Navigation (next, prev, dots, progress)\n" +
-                "• Name input (Slide2) and Avatar selection (Slide3)\n" +
-                "• Completion panel (Slide8)",
+                "• Name input (Slide2)\n" +
+                "• Completion panel (Slide7)",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -190,11 +188,7 @@ namespace DigitPark.Editor.AutoAssigners
             AssignReference(so, "confirmNameButton", FindButtonByName("confirmname", "confirm", "confirmar"));
             AssignReference(so, "nameErrorText", FindTextByName("nameerror", "error"));
 
-            // Avatar Selection (Slide 3)
-            AssignGameObject(so, "avatarSelectionPanel", "avatarselection", "avatarpanel");
-            AssignReference(so, "avatarContainer", FindByNameContains<Transform>("avatarcontainer", "avatargrid", "avatars"));
-
-            // Tutorial Completion (Slide 8)
+            // Tutorial Completion (Slide 7)
             AssignGameObject(so, "completionPanel", "completionpanel", "completion", "finish");
             AssignReference(so, "completionTitleText", FindTextByName("completiontitle", "congratulations"));
             AssignReference(so, "completionMessageText", FindTextByName("completionmessage", "completiondesc"));

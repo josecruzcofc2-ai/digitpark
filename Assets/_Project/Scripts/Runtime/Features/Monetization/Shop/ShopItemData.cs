@@ -14,7 +14,7 @@ namespace DigitPark.Monetization
         DigitGemsPack,  // Paquete de DigitGems (compra con dinero real)
         DigitCoinsPack, // Paquete de DigitCoins (compra con DigitGems)
         Theme,          // Tema visual
-        Avatar,         // Avatar
+        Avatar,         // DEPRECATED — avatar system removed, kept for ScriptableObject backwards compat
         Frame,          // Marco de perfil (DC, DG o USD)
         Title,          // Título de jugador (DC, DG o USD)
         SpecialOffer,   // Oferta especial (bundle)
@@ -264,9 +264,8 @@ namespace DigitPark.Monetization
                     break;
 
                 case ShopItemType.Avatar:
-                    // SH-05: Avatar system not yet implemented — show Coming Soon toast
-                    InAppNotificationManager.Instance?.Show(AutoLocalizer.Get("feature_coming_soon"), "", "info");
-                    Debug.Log($"[ShopItemData] Avatar desbloqueado: {avatarId}");
+                    // Avatar system removed — no-op
+                    Debug.LogWarning("[ShopItemData] Avatar type is deprecated");
                     break;
 
                 case ShopItemType.WinEffect:
@@ -326,6 +325,15 @@ namespace DigitPark.Monetization
                     break;
 
                 case ShopItemType.SpecialOffer:
+                    // Bundle - grant multiple rewards
+                    if (gemsAmount > 0) currency.AddGems(GetTotalGems());
+                    if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
+                    if (!string.IsNullOrEmpty(themeId))
+                    {
+                        DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
+                    }
+                    break;
+
                 case ShopItemType.StarterPack:
                     // Bundle - grant multiple rewards
                     if (gemsAmount > 0) currency.AddGems(GetTotalGems());
@@ -334,6 +342,14 @@ namespace DigitPark.Monetization
                     {
                         DigitPark.Themes.ThemeManager.Instance?.UnlockTheme(themeId);
                     }
+                    // Frame exclusivo del Starter Pack
+                    if (!string.IsNullOrEmpty(itemId))
+                    {
+                        var frameService = DigitPark.Services.PlayerFrameService.Instance;
+                        frameService?.UnlockFrame($"{itemId}_frame");
+                    }
+                    // One-time flag
+                    PlayerPrefs.SetInt($"StarterPack_Claimed_{itemId}", 1);
                     break;
             }
 
