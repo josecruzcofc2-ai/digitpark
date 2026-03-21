@@ -183,15 +183,27 @@ namespace DigitPark.Editor
                 GameObject backButtonInstance = (GameObject)PrefabUtility.InstantiatePrefab(backButtonPrefab, parent);
                 backButtonInstance.name = buttonType == "GOLD" ? "BackButtonGold" : "BackButton";
 
-                // Position it at top-left corner
+                // Position button — gold buttons sit inside the CashBattle header (h≈120px at y=-29),
+                // cyan buttons float at the top-left corner above a standard header.
                 RectTransform backButtonRect = backButtonInstance.GetComponent<RectTransform>();
                 if (backButtonRect != null)
                 {
                     backButtonRect.anchorMin = new Vector2(0, 1);
                     backButtonRect.anchorMax = new Vector2(0, 1);
                     backButtonRect.pivot = new Vector2(0, 1);
-                    backButtonRect.anchoredPosition = new Vector2(15, -15);
-                    backButtonRect.sizeDelta = new Vector2(50, 50);
+
+                    if (buttonType == "GOLD")
+                    {
+                        // Header starts at y=-29, height=120 → header center at y=-89.
+                        // Button 88×88 with pivot top-left: top at -45, center at -89 → perfectly centred.
+                        backButtonRect.anchoredPosition = new Vector2(15, -45);
+                        backButtonRect.sizeDelta = new Vector2(88, 88);
+                    }
+                    else
+                    {
+                        backButtonRect.anchoredPosition = new Vector2(15, -15);
+                        backButtonRect.sizeDelta = new Vector2(50, 50);
+                    }
                 }
 
                 // Make sure it's on top (last sibling = rendered last = on top)
@@ -242,7 +254,49 @@ namespace DigitPark.Editor
             return null;
         }
 
-        [MenuItem("DigitPark/Polish/UI/Remove All BackButtons", false, 201)]
+        /// <summary>
+        /// Re-places the BackButtonGold in every gold scene with the corrected 88×88 / (15,-45) position.
+        /// Use this to fix misaligned gold buttons without touching cyan scenes.
+        /// </summary>
+        [MenuItem("DigitPark/Polish/UI/Fix Gold BackButton Positions", false, 201)]
+        public static void FixGoldBackButtonPositions()
+        {
+            GameObject goldPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BACK_BUTTON_GOLD_PATH);
+            if (goldPrefab == null)
+            {
+                Debug.LogError($"[BackButton] Gold prefab not found: {BACK_BUTTON_GOLD_PATH}");
+                return;
+            }
+
+            int fixed_ = 0;
+            int errors = 0;
+
+            string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { SCENES_PATH });
+            foreach (string guid in sceneGuids)
+            {
+                string scenePath = AssetDatabase.GUIDToAssetPath(guid);
+                string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+                if (!GOLD_SCENES.Contains(sceneName)) continue;
+
+                if (AddBackButtonToScene(scenePath, sceneName, goldPrefab, "GOLD"))
+                    fixed_++;
+                else
+                    errors++;
+            }
+
+            Debug.Log($"[BackButton] Fix Gold complete — {fixed_} fixed, {errors} errors");
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            if (!AllScenesBatchBuilder.SilentMode)
+                EditorUtility.DisplayDialog("Fix Gold BackButtons",
+                    $"Repositioned BackButtonGold in {fixed_} scenes.\n\n" +
+                    "Posición: anchoredPosition=(15,-45), sizeDelta=(88,88)\n" +
+                    "Centrado verticalmente en el header de 120px.",
+                    "OK");
+        }
+
+        [MenuItem("DigitPark/Polish/UI/Remove All BackButtons", false, 202)]
         public static void RemoveBackButtonFromAllScenes()
         {
             if (!EditorUtility.DisplayDialog(
@@ -285,7 +339,7 @@ namespace DigitPark.Editor
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("DigitPark/Polish/UI/BackButton to Current Scene", false, 202)]
+        [MenuItem("DigitPark/Polish/UI/BackButton to Current Scene", false, 203)]
         public static void AddBackButtonToCurrentScene()
         {
             Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
@@ -337,8 +391,17 @@ namespace DigitPark.Editor
                 rt.anchorMin = new Vector2(0, 1);
                 rt.anchorMax = new Vector2(0, 1);
                 rt.pivot = new Vector2(0, 1);
-                rt.anchoredPosition = new Vector2(15, -15);
-                rt.sizeDelta = new Vector2(50, 50);
+
+                if (isGold)
+                {
+                    rt.anchoredPosition = new Vector2(15, -45);
+                    rt.sizeDelta = new Vector2(88, 88);
+                }
+                else
+                {
+                    rt.anchoredPosition = new Vector2(15, -15);
+                    rt.sizeDelta = new Vector2(50, 50);
+                }
             }
 
             instance.transform.SetAsLastSibling();
