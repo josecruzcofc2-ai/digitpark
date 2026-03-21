@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
@@ -269,6 +270,59 @@ namespace DigitPark.Editor
 
             EditorUtility.DisplayDialog("Fix Tier B Theme Prices", summary + detail, "OK");
             Debug.Log($"[SetupTools] Tier B Themes — {summary}\n{log}");
+        }
+
+        // ============================================================
+        // Fix BackButtonGold missing sprite
+        // DigitPark > Setup > Fix BackButtonGold Sprite
+        // ============================================================
+        [MenuItem("DigitPark/Setup/Fix BackButtonGold Sprite", false, 50)]
+        public static void FixBackButtonGoldSprite()
+        {
+            const string prefabPath = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
+            const string spritePath = "Assets/_Project/Art/Icons/Navigation/BackIconGold.png";
+
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+            if (sprite == null)
+            {
+                EditorUtility.DisplayDialog("Error",
+                    $"No se encontro el sprite:\n{spritePath}\n\nVerifica que BackIconGold.png exista.", "OK");
+                return;
+            }
+
+            using (var scope = new PrefabUtility.EditPrefabContentsScope(prefabPath))
+            {
+                var root = scope.prefabContentsRoot;
+                var images = root.GetComponentsInChildren<Image>(true);
+                bool found = false;
+
+                foreach (var img in images)
+                {
+                    if (img.gameObject.name == "Icon")
+                    {
+                        img.sprite = sprite;
+                        EditorUtility.SetDirty(img.gameObject);
+                        found = true;
+                        Debug.Log($"[SetupTools] BackButtonGold.Icon sprite asignado: {spritePath}");
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    EditorUtility.DisplayDialog("Error",
+                        "No se encontro un GameObject 'Icon' con Image en BackButtonGold.prefab.", "OK");
+                    return;
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            EditorUtility.DisplayDialog("Listo",
+                "BackButtonGold.prefab — sprite asignado correctamente.\n\n" +
+                "Todas las escenas CashBattle que usen este prefab verán el icono gold.",
+                "OK");
         }
     }
 }
