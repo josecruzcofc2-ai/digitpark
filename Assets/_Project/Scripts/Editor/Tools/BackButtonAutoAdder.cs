@@ -19,6 +19,7 @@ namespace DigitPark.Editor
         private const string SCENES_PATH = "Assets/_Project/Scenes";
 
         // Scenes that use GOLD back button (Cash Battle theme)
+        // Note: CashMatchmaking excluded — has Cancel button, no back button needed
         private static readonly HashSet<string> GOLD_SCENES = new HashSet<string>
         {
             "CashBattle1v1",
@@ -27,7 +28,6 @@ namespace DigitPark.Editor
             "CashTournaments",
             "CashTournamentCreate",
             "CashTournamentLobby",
-            "CashMatchmaking",
             "CashProfile",
             "CashWallet",
             "AgeVerification"
@@ -51,8 +51,9 @@ namespace DigitPark.Editor
             "OddOneOut",
             "CognitiveSprint",
 
-            // Matchmaking (has cancel button instead)
+            // Matchmaking scenes (have cancel button instead)
             "Matchmaking",
+            "CashMatchmaking",  // has Cancel button, no back button needed
 
             // Onboarding scenes (have own navigation)
             "Onboarding",
@@ -176,38 +177,51 @@ namespace DigitPark.Editor
                     Debug.Log($"  🗑️ Removed old BackButton from {sceneName}");
                 }
 
-                // Find SafeArea or use Canvas directly (NO Header creation)
-                Transform parent = canvas.transform.Find("SafeArea") ?? canvas.transform;
+                // Determine parent: gold buttons go inside SafeArea > Header for perfect alignment
+                // with TitleText and currency pill (both live inside Header).
+                // Cyan buttons go inside SafeArea (or Canvas fallback).
+                Transform safeArea = canvas.transform.Find("SafeArea");
+                Transform parent;
 
-                // Instantiate BackButton prefab directly on parent
+                if (buttonType == "GOLD" && safeArea != null)
+                {
+                    Transform header = safeArea.Find("Header");
+                    parent = header != null ? header : safeArea;
+                }
+                else
+                {
+                    parent = safeArea ?? canvas.transform;
+                }
+
+                // Instantiate BackButton prefab
                 GameObject backButtonInstance = (GameObject)PrefabUtility.InstantiatePrefab(backButtonPrefab, parent);
                 backButtonInstance.name = buttonType == "GOLD" ? "BackButtonGold" : "BackButton";
 
-                // Position button — gold buttons sit inside the CashBattle header (h≈120px at y=-29),
-                // cyan buttons float at the top-left corner above a standard header.
                 RectTransform backButtonRect = backButtonInstance.GetComponent<RectTransform>();
                 if (backButtonRect != null)
                 {
-                    backButtonRect.anchorMin = new Vector2(0, 1);
-                    backButtonRect.anchorMax = new Vector2(0, 1);
-                    backButtonRect.pivot = new Vector2(0, 1);
-
-                    if (buttonType == "GOLD")
+                    if (buttonType == "GOLD" && parent.name == "Header")
                     {
-                        // Header starts at y=-29, height=120 → header center at y=-89.
-                        // Button 50×50 with pivot top-left: top at -64, center at -89 → perfectly centred.
-                        // Same size as cyan button so both look identical in scale.
-                        backButtonRect.anchoredPosition = new Vector2(15, -64);
-                        backButtonRect.sizeDelta = new Vector2(50, 50);
+                        // Inside Header: anchor left, vertically centred.
+                        // pivot (0, 0.5) → anchoredPosition.x = left edge offset, y = 0 = header centre.
+                        backButtonRect.anchorMin  = new Vector2(0, 0.5f);
+                        backButtonRect.anchorMax  = new Vector2(0, 0.5f);
+                        backButtonRect.pivot      = new Vector2(0, 0.5f);
+                        backButtonRect.anchoredPosition = new Vector2(15, 0);
+                        backButtonRect.sizeDelta  = new Vector2(50, 50);
                     }
                     else
                     {
+                        // Fallback (cyan or no Header found): top-left of SafeArea / Canvas
+                        backButtonRect.anchorMin  = new Vector2(0, 1);
+                        backButtonRect.anchorMax  = new Vector2(0, 1);
+                        backButtonRect.pivot      = new Vector2(0, 1);
                         backButtonRect.anchoredPosition = new Vector2(15, -15);
-                        backButtonRect.sizeDelta = new Vector2(50, 50);
+                        backButtonRect.sizeDelta  = new Vector2(50, 50);
                     }
                 }
 
-                // Make sure it's on top (last sibling = rendered last = on top)
+                // Render on top of other Header children
                 backButtonInstance.transform.SetAsLastSibling();
 
                 // Mark scene as dirty and save
@@ -227,26 +241,27 @@ namespace DigitPark.Editor
 
         private static Transform FindExistingBackButton(Transform canvas)
         {
-            // Try all common locations
+            // Try all known locations (including nested under SafeArea > Header)
             string[] searchPaths = new string[]
             {
                 "BackButton",
                 "BackButtonGold",
                 "SafeArea/BackButton",
                 "SafeArea/BackButtonGold",
+                "SafeArea/Header/BackButton",
+                "SafeArea/Header/BackButtonGold",
                 "Header/BackButton",
                 "Header/BackButtonGold"
             };
 
             foreach (string path in searchPaths)
             {
-                Transform backButton = canvas.Find(path);
-                if (backButton != null) return backButton;
+                Transform found = canvas.Find(path);
+                if (found != null) return found;
             }
 
-            // Also search recursively for any BackButton component
-            var allButtons = canvas.GetComponentsInChildren<Transform>(true);
-            foreach (var t in allButtons)
+            // Recursive fallback
+            foreach (var t in canvas.GetComponentsInChildren<Transform>(true))
             {
                 if (t.name == "BackButton" || t.name == "BackButtonGold")
                     return t;
@@ -291,9 +306,10 @@ namespace DigitPark.Editor
 
             if (!AllScenesBatchBuilder.SilentMode)
                 EditorUtility.DisplayDialog("Fix Gold BackButtons",
-                    $"Repositioned BackButtonGold in {fixed_} scenes.\n\n" +
-                    "Posición: anchoredPosition=(15,-64), sizeDelta=(50,50)\n" +
-                    "Mismo tamaño que BackButton cyan, centrado en header 120px.",
+                    $"BackButtonGold reposicionado en {fixed_} escenas.\n\n" +
+                    "Ubicación: SafeArea > Header\n" +
+                    "Posición: anchor=(0,0.5), anchoredPosition=(15,0), size=(50,50)\n" +
+                    "Centrado verticalmente con TitleText y currency pill.",
                     "OK");
         }
 
@@ -379,8 +395,19 @@ namespace DigitPark.Editor
                 Debug.Log($"Removed old BackButton from {sceneName}");
             }
 
-            // Find SafeArea or use Canvas
-            Transform parent = canvas.transform.Find("SafeArea") ?? canvas.transform;
+            // Determine parent (same logic as batch method)
+            Transform safeArea2 = canvas.transform.Find("SafeArea");
+            Transform parent;
+
+            if (isGold && safeArea2 != null)
+            {
+                Transform header = safeArea2.Find("Header");
+                parent = header != null ? header : safeArea2;
+            }
+            else
+            {
+                parent = safeArea2 ?? canvas.transform;
+            }
 
             // Instantiate
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
@@ -389,19 +416,21 @@ namespace DigitPark.Editor
             RectTransform rt = instance.GetComponent<RectTransform>();
             if (rt != null)
             {
-                rt.anchorMin = new Vector2(0, 1);
-                rt.anchorMax = new Vector2(0, 1);
-                rt.pivot = new Vector2(0, 1);
-
-                if (isGold)
+                if (isGold && parent.name == "Header")
                 {
-                    rt.anchoredPosition = new Vector2(15, -64);
-                    rt.sizeDelta = new Vector2(50, 50);
+                    rt.anchorMin  = new Vector2(0, 0.5f);
+                    rt.anchorMax  = new Vector2(0, 0.5f);
+                    rt.pivot      = new Vector2(0, 0.5f);
+                    rt.anchoredPosition = new Vector2(15, 0);
+                    rt.sizeDelta  = new Vector2(50, 50);
                 }
                 else
                 {
+                    rt.anchorMin  = new Vector2(0, 1);
+                    rt.anchorMax  = new Vector2(0, 1);
+                    rt.pivot      = new Vector2(0, 1);
                     rt.anchoredPosition = new Vector2(15, -15);
-                    rt.sizeDelta = new Vector2(50, 50);
+                    rt.sizeDelta  = new Vector2(50, 50);
                 }
             }
 
