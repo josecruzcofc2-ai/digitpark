@@ -195,9 +195,10 @@ namespace DigitPark.Editor
                     if (buttonType == "GOLD")
                     {
                         // Header starts at y=-29, height=120 → header center at y=-89.
-                        // Button 88×88 with pivot top-left: top at -45, center at -89 → perfectly centred.
-                        backButtonRect.anchoredPosition = new Vector2(15, -45);
-                        backButtonRect.sizeDelta = new Vector2(88, 88);
+                        // Button 50×50 with pivot top-left: top at -64, center at -89 → perfectly centred.
+                        // Same size as cyan button so both look identical in scale.
+                        backButtonRect.anchoredPosition = new Vector2(15, -64);
+                        backButtonRect.sizeDelta = new Vector2(50, 50);
                     }
                     else
                     {
@@ -291,8 +292,8 @@ namespace DigitPark.Editor
             if (!AllScenesBatchBuilder.SilentMode)
                 EditorUtility.DisplayDialog("Fix Gold BackButtons",
                     $"Repositioned BackButtonGold in {fixed_} scenes.\n\n" +
-                    "Posición: anchoredPosition=(15,-45), sizeDelta=(88,88)\n" +
-                    "Centrado verticalmente en el header de 120px.",
+                    "Posición: anchoredPosition=(15,-64), sizeDelta=(50,50)\n" +
+                    "Mismo tamaño que BackButton cyan, centrado en header 120px.",
                     "OK");
         }
 
@@ -394,8 +395,8 @@ namespace DigitPark.Editor
 
                 if (isGold)
                 {
-                    rt.anchoredPosition = new Vector2(15, -45);
-                    rt.sizeDelta = new Vector2(88, 88);
+                    rt.anchoredPosition = new Vector2(15, -64);
+                    rt.sizeDelta = new Vector2(50, 50);
                 }
                 else
                 {
