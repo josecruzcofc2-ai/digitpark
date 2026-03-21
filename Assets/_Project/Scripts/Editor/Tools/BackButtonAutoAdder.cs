@@ -177,19 +177,26 @@ namespace DigitPark.Editor
                     Debug.Log($"  🗑️ Removed old BackButton from {sceneName}");
                 }
 
-                // Determine parent: gold buttons go inside SafeArea > Header for perfect alignment
-                // with TitleText and currency pill (both live inside Header).
-                // Cyan buttons go inside SafeArea (or Canvas fallback).
-                Transform safeArea = canvas.transform.Find("SafeArea");
+                // Determine parent: gold buttons go inside the Header GO for perfect alignment
+                // with TitleText and currency pill. Header may live at different depths:
+                //   SafeArea > Header  (most CashBattle scenes)
+                //   WalletUI > Header  (CashWallet — no SafeArea)
                 Transform parent;
 
-                if (buttonType == "GOLD" && safeArea != null)
+                if (buttonType == "GOLD")
                 {
-                    Transform header = safeArea.Find("Header");
-                    parent = header != null ? header : safeArea;
+                    Transform header = FindHeaderInCanvas(canvas.transform);
+                    if (header != null)
+                        parent = header;
+                    else
+                    {
+                        Transform safeAreaFallback = canvas.transform.Find("SafeArea");
+                        parent = safeAreaFallback ?? canvas.transform;
+                    }
                 }
                 else
                 {
+                    Transform safeArea = canvas.transform.Find("SafeArea");
                     parent = safeArea ?? canvas.transform;
                 }
 
@@ -237,6 +244,34 @@ namespace DigitPark.Editor
                 Debug.LogError($"❌ {sceneName}: Error adding BackButton - {e.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Finds the Header GO in the canvas regardless of depth.
+        /// Checks: direct child, SafeArea>Header, any first-level child>Header.
+        /// </summary>
+        private static Transform FindHeaderInCanvas(Transform canvas)
+        {
+            // 1. Direct child of Canvas named "Header"
+            Transform direct = canvas.Find("Header");
+            if (direct != null) return direct;
+
+            // 2. SafeArea > Header  (CashBattleHub, CashHistory, CashTournaments…)
+            Transform safeArea = canvas.Find("SafeArea");
+            if (safeArea != null)
+            {
+                Transform h = safeArea.Find("Header");
+                if (h != null) return h;
+            }
+
+            // 3. Any immediate child > Header  (WalletUI > Header, etc.)
+            foreach (Transform child in canvas)
+            {
+                Transform h = child.Find("Header");
+                if (h != null) return h;
+            }
+
+            return null;
         }
 
         private static Transform FindExistingBackButton(Transform canvas)
@@ -304,13 +339,45 @@ namespace DigitPark.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
+            // Also remove any leftover BackButtonGold from now-excluded scenes (e.g. CashMatchmaking)
+            RemoveBackButtonFromExcludedGoldScenes();
+
             if (!AllScenesBatchBuilder.SilentMode)
                 EditorUtility.DisplayDialog("Fix Gold BackButtons",
                     $"BackButtonGold reposicionado en {fixed_} escenas.\n\n" +
-                    "Ubicación: SafeArea > Header\n" +
+                    "Ubicación: Header (SafeArea>Header o WalletUI>Header)\n" +
                     "Posición: anchor=(0,0.5), anchoredPosition=(15,0), size=(50,50)\n" +
                     "Centrado verticalmente con TitleText y currency pill.",
                     "OK");
+        }
+
+        // Scenes that were previously gold but now excluded — remove any leftover BackButtonGold
+        private static readonly HashSet<string> FORMERLY_GOLD_EXCLUDED = new HashSet<string>
+        {
+            "CashMatchmaking"
+        };
+
+        private static void RemoveBackButtonFromExcludedGoldScenes()
+        {
+            string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new[] { SCENES_PATH });
+            foreach (string guid in sceneGuids)
+            {
+                string scenePath = AssetDatabase.GUIDToAssetPath(guid);
+                string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+                if (!FORMERLY_GOLD_EXCLUDED.Contains(sceneName)) continue;
+
+                var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                Canvas canvas = UIBuilderCanvasHelper.FindMainCanvas();
+                if (canvas == null) continue;
+
+                Transform existing = FindExistingBackButton(canvas.transform);
+                if (existing != null)
+                {
+                    Object.DestroyImmediate(existing.gameObject);
+                    EditorSceneManager.SaveScene(scene);
+                    Debug.Log($"[BackButton] Removed BackButtonGold from {sceneName} (excluded scene)");
+                }
+            }
         }
 
         [MenuItem("DigitPark/Polish/UI/Remove All BackButtons", false, 202)]
@@ -396,16 +463,22 @@ namespace DigitPark.Editor
             }
 
             // Determine parent (same logic as batch method)
-            Transform safeArea2 = canvas.transform.Find("SafeArea");
             Transform parent;
 
-            if (isGold && safeArea2 != null)
+            if (isGold)
             {
-                Transform header = safeArea2.Find("Header");
-                parent = header != null ? header : safeArea2;
+                Transform header = FindHeaderInCanvas(canvas.transform);
+                if (header != null)
+                    parent = header;
+                else
+                {
+                    Transform safeAreaFallback = canvas.transform.Find("SafeArea");
+                    parent = safeAreaFallback ?? canvas.transform;
+                }
             }
             else
             {
+                Transform safeArea2 = canvas.transform.Find("SafeArea");
                 parent = safeArea2 ?? canvas.transform;
             }
 
