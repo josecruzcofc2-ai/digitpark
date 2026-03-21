@@ -199,7 +199,8 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Polish/Themes/Add to ALL Scenes")]
         public static void AddToAllScenes()
         {
-            if (!EditorUtility.DisplayDialog("Confirmar",
+            if (!AllScenesBatchBuilder.SilentMode &&
+                !EditorUtility.DisplayDialog("Confirmar",
                 "¿Agregar ThemeApplier a TODAS las escenas?\n\nEsto permitirá cambiar temas en runtime.",
                 "Sí", "Cancelar"))
                 return;

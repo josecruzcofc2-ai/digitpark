@@ -48,7 +48,8 @@ namespace DigitPark.Editor
         [MenuItem("DigitPark/Polish/Animation Batch/APPLY ALL ANIMATIONS TO ALL SCENES", false, 599)]
         public static void ApplyAllAnimationsToAllScenes()
         {
-            if (!EditorUtility.DisplayDialog("Apply All Animations",
+            if (!AllScenesBatchBuilder.SilentMode &&
+                !EditorUtility.DisplayDialog("Apply All Animations",
                 "This will process ALL scenes and add:\n\n" +
                 "✓ UI Animation Manager\n" +
                 "✓ Scene Transition Manager\n" +
