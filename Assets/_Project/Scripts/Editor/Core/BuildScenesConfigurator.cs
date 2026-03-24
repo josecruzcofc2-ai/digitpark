@@ -280,8 +280,7 @@ namespace DigitPark.Editor
                 "[8-16] Games\n" +
                 "[17-22] Social\n" +
                 "[23-26] Monetization\n" +
-                "[27-29] Tournaments\n" +
-                "[30-39] Cash Battle",
+                "[27-29] Tournaments",
                 "OK");
         }
     }

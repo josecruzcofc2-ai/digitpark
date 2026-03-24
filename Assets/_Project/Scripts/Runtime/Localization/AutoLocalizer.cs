@@ -43,8 +43,6 @@ namespace DigitPark.Localization
             { "AppleSignInText", "sign_in_apple" },
             { "GeneralLoadingText", "loading" },
             { "CreatingAccountText", "creating_account" },
-            { "AgeVerificationStatusText", "age_verification_tap" },
-            { "AgeVerificationLegalText", "age_verification_powered" },
 
             // ==================== MAIN MENU ====================
             { "PlayButton", "play_button" },
@@ -144,7 +142,6 @@ namespace DigitPark.Localization
             { "TermsButtonText", "terms_conditions" },
             { "PrivacyButtonText", "privacy_policy" },
             { "ResponsibleGamingButtonText", "responsible_gaming" },
-            { "TriumphTermsButtonText", "triumph_terms" },
             { "SelfExclusionButtonText", "self_exclusion" },
 
             { "BackButton", "back_button" },
@@ -226,7 +223,6 @@ namespace DigitPark.Localization
             { "CreateTab", "create_tab" },
             { "CreateTabText", "create_tab" },
             { "CreateButton", "create_tournament" },
-            { "PaymentTitle", "payment_title" },
             { "CreateTournamentButton", "create_tournament" },
             { "CreateTournamentButtonText", "create_tournament" },
             { "JoinButton", "join_tournament" },
@@ -701,7 +697,6 @@ namespace DigitPark.Localization
             { "OpponentScoreLabel", "opponent_label" },
             { "OnlineWinTitle", "you_won" },
             { "OnlineLoseTitle", "defeat_title" },
-            { "WinnerShare", "cash_winner_share" },
 
             // ==================== SPRINT SUMMARY (V42) ====================
             { "SprintSummarySubtitle", "sprint_summary" },

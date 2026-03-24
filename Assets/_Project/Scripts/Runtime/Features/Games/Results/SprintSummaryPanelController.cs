@@ -281,7 +281,7 @@ namespace DigitPark.UI
                 rematchButton.onClick.RemoveAllListeners();
                 rematchButton.onClick.AddListener(() => OnNewMatchClicked?.Invoke());
                 if (rematchButtonText != null)
-                    rematchButtonText.text = AutoLocalizer.Get("cash_new_match");
+                    rematchButtonText.text = AutoLocalizer.Get("new_match");
             }
 
             PopulateGameTable(ctx.Results, ctx.OpponentResults);

@@ -607,7 +607,7 @@ namespace DigitPark.Games
                     Debug.LogError($"[GameSession] Error guardando resultados: {e.Message}");
                 }
 
-                // Guardar en historial de partidas generales (Practice y Online, no CashBattle)
+                // Guardar en historial de partidas generales
                 RecordToMatchHistory(ctx);
             }
             catch (Exception ex)

@@ -72,8 +72,7 @@ namespace DigitPark.Payments.AppleIAP
                 request.uploadHandler = new UploadHandlerRaw(bytes);
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.SetRequestHeader("Content-Type", "application/json");
-                request.SetRequestHeader("X-App-Version",
-                    Compliance.VersionGuard.GetRequiredAppVersionHeader());
+                request.SetRequestHeader("X-App-Version", Application.version);
                 if (!string.IsNullOrEmpty(idToken))
                     request.SetRequestHeader("Authorization", $"Bearer {idToken}");
                 request.timeout = 15;

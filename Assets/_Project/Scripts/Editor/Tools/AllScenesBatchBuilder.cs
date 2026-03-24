@@ -71,8 +71,6 @@ namespace DigitPark.Editor
             // ── AUTH ──
             E("Auth",       S + "Auth/Login.unity",            "Login",            "LoginUIBuilder",               "RebuildLoginScene"),
             E("Auth",       S + "Auth/Register.unity",         "Register",         "RegisterUIBuilder",            "RebuildRegisterScene"),
-            E("Auth",       S + "Auth/AgeVerification.unity",  "AgeVerification",  "AgeVerificationUIBuilder",     "RebuildAgeVerificationScene"),
-
             // ── ONBOARDING ──
             E("Onboarding", S + "Onboarding/Onboarding.unity",             "Onboarding",             "OnboardingUIBuilder",             "RebuildOnboarding"),
 
@@ -113,8 +111,6 @@ namespace DigitPark.Editor
             E("Tournaments", S + "Tournaments/TournamentCreate.unity",   "TournamentCreate",   "TournamentCreateUIBuilder",   "BuildCompleteUI"),
             E("Tournaments", S + "Tournaments/TournamentLobby.unity",    "TournamentLobby",    "TournamentLobbyUIBuilder",    "BuildCompleteUI"),
 
-            // ── CASH BATTLE ──
-
             // ── PREFAB BUILDERS (no scene required) ──
             // Win Panels
             E("Prefabs / Win Panels", null, "WinPanel Normal (Win)",       "WinPanelUIBuilder",              "CreateNormalWinPanel"),
@@ -128,9 +124,6 @@ namespace DigitPark.Editor
             E("Prefabs / Result Panels", null, "Tournament Result (Win)",   "TournamentResultPanelUIBuilder", "BuildWinPanel"),
             E("Prefabs / Result Panels", null, "Tournament Result (Lose)",  "TournamentResultPanelUIBuilder", "BuildLosePanel"),
             E("Prefabs / Result Panels", null, "Sprint Summary Panel",      "SprintSummaryPanelUIBuilder",    "BuildSprintSummaryPanel"),
-
-            // Cash Tournament Results (overlay panel — needs a Canvas open)
-            E("Prefabs / Result Panels", null, "CashTournament Results Panel", "CashTournamentResultsUIBuilder", "BuildResultPanel"),
 
             // Toast / Notification Prefabs
             E("Prefabs / Toasts", null, "Achievement Toast",          "AchievementToastUIBuilder",      "CreateAchievementToastPrefab"),

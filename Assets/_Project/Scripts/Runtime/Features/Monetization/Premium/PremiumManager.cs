@@ -16,10 +16,10 @@ namespace DigitPark.Managers
     public enum PremiumProduct
     {
         CreateTournaments,      // $3.99 USD - Crear torneos
-        TournamentBundle,       // $7.99 USD - Ambos: Crear torneos + Cash Battle (Economy Rebalance V55)
-        StylesPro,              // Legacy - Desbloquea todos los temas premium (backwards compat)
-        PremiumBundle,          // 3,430 DG - 19 premium themes (30% off) — Economy Rebalance V55: DG pricing
-        CompleteBundle          // ELIMINATED — earnable themes are trophies, not purchasable
+        TournamentBundle,       // $7.99 USD - Crear torneos (bundle)
+        StylesPro,              // Desbloquea pack de cosméticos premium: Frames + Titles (backwards compat)
+        PremiumBundle,          // All Frames + All Titles bundle (30% off)
+        CompleteBundle          // All Frames + All Titles + All Win Effects bundle (30% off)
     }
 
     /// <summary>
@@ -84,13 +84,6 @@ namespace DigitPark.Managers
         public const string PRICE_PREMIUM_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
         public const string PRICE_COMPLETE_BUNDLE = ""; // C-P1-30: Use IAP localizedPriceString
 
-        [Header("=== Theme Pricing ===")]
-        public const float THEME_PRICE_PREMIUM = 2.50f;
-        public const float THEME_PRICE_EARNABLE = 1.50f;
-        public const int PREMIUM_THEME_COUNT = 15;
-        public const int EARNABLE_THEME_COUNT = 4;
-        public const float BUNDLE_DISCOUNT = 0.30f;
-
         // Gem pack definitions: productId → (baseGems, bonusPercent)
         private static readonly Dictionary<string, (int gems, int bonus)> GEM_PACK_MAP = new Dictionary<string, (int, int)>
         {
@@ -126,7 +119,7 @@ namespace DigitPark.Managers
         public bool CanCreateTournaments => _canCreateTournaments;
 
         /// <summary>
-        /// Indica si el usuario tiene los estilos/temas premium desbloqueados (legacy)
+        /// Indica si el usuario tiene el pack de cosméticos premium desbloqueado (Frames + Titles + Win Effects)
         /// </summary>
         public bool HasStylesPro => _hasStylesPro;
 
@@ -223,17 +216,17 @@ namespace DigitPark.Managers
 
                 case PremiumProduct.StylesPro:
                     _hasStylesPro = true;
-                    Debug.Log("[Premium] Desbloqueado: Estilos PRO (legacy)");
+                    Debug.Log("[Premium] Desbloqueado: Cosmetics PRO (Frames + Titles)");
                     break;
 
                 case PremiumProduct.PremiumBundle:
                     _hasStylesPro = true;
-                    Debug.Log("[Premium] Desbloqueado: Premium Bundle (15 temas premium)");
+                    Debug.Log("[Premium] Desbloqueado: Premium Bundle (All Frames + All Titles)");
                     break;
 
                 case PremiumProduct.CompleteBundle:
                     _hasStylesPro = true;
-                    Debug.Log("[Premium] Desbloqueado: Complete Bundle (19 temas)");
+                    Debug.Log("[Premium] Desbloqueado: Complete Bundle (All Frames + Titles + Win Effects)");
                     break;
             }
 
@@ -359,20 +352,20 @@ namespace DigitPark.Managers
         }
 
         /// <summary>
-        /// Compra: Premium Bundle - 15 premium themes ($26.25 USD, 30% off)
+        /// Compra: Premium Bundle — All Frames + All Titles ($26.25 USD, 30% off)
         /// </summary>
         public void PurchasePremiumBundle(Action<bool> onComplete = null)
         {
-            Debug.Log("[Premium] Iniciando compra: Premium Bundle (15 themes)");
+            Debug.Log("[Premium] Iniciando compra: Premium Bundle (All Frames + Titles)");
             BuyProduct(PRODUCT_ID_PREMIUM_BUNDLE, PremiumProduct.PremiumBundle, onComplete);
         }
 
         /// <summary>
-        /// Compra: Complete Bundle - All 19 themes ($30.45 USD, 30% off)
+        /// Compra: Complete Bundle — All Frames + Titles + Win Effects ($30.45 USD, 30% off)
         /// </summary>
         public void PurchaseCompleteBundle(Action<bool> onComplete = null)
         {
-            Debug.Log("[Premium] Iniciando compra: Complete Bundle (19 themes)");
+            Debug.Log("[Premium] Iniciando compra: Complete Bundle (All Frames + Titles + Win Effects)");
             BuyProduct(PRODUCT_ID_COMPLETE_BUNDLE, PremiumProduct.CompleteBundle, onComplete);
         }
 
@@ -614,18 +607,18 @@ namespace DigitPark.Managers
 
                 case PremiumProduct.StylesPro:
                     return string.Equals(language, "es", System.StringComparison.OrdinalIgnoreCase)
-                        ? "Desbloquea todos los temas premium"
-                        : "Unlock all premium themes";
+                        ? "Desbloquea todos los frames y títulos premium"
+                        : "Unlock all premium frames and titles";
 
                 case PremiumProduct.PremiumBundle:
                     return string.Equals(language, "es", System.StringComparison.OrdinalIgnoreCase)
-                        ? "15 temas premium con 30% de descuento"
-                        : "15 premium themes with 30% discount";
+                        ? "Todos los frames y títulos con 30% de descuento"
+                        : "All frames and titles with 30% discount";
 
                 case PremiumProduct.CompleteBundle:
                     return string.Equals(language, "es", System.StringComparison.OrdinalIgnoreCase)
-                        ? "Los 19 temas con 30% de descuento"
-                        : "All 19 themes with 30% discount";
+                        ? "Todos los frames, títulos y efectos de victoria con 30% de descuento"
+                        : "All frames, titles and win effects with 30% discount";
 
                 default:
                     return "";

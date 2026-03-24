@@ -13,8 +13,6 @@ namespace DigitPark.Monetization
     {
         DigitGemsPack,  // Paquete de DigitGems (compra con dinero real)
         DigitCoinsPack, // Paquete de DigitCoins (compra con DigitGems)
-        Theme,          // Tema visual
-        Avatar,         // DEPRECATED — avatar system removed, kept for ScriptableObject backwards compat
         Frame,          // Marco de perfil (DC, DG o USD)
         Title,          // Título de jugador (DC, DG o USD)
         SpecialOffer,   // Oferta especial (bundle)
@@ -90,13 +88,7 @@ namespace DigitPark.Monetization
         [Range(0, 100)]
         public int bonusPercent;
 
-        [Header("Theme/Avatar Data")]
-        [Tooltip("ID del tema que desbloquea (si aplica)")]
-        public string themeId;
-
-        [Tooltip("ID del avatar que desbloquea (si aplica)")]
-        public string avatarId;
-
+        [Header("Cosmetic IDs")]
         [Tooltip("ID del patrón de fondo que desbloquea (si aplica)")]
         public string backgroundPatternId;
 
@@ -258,15 +250,6 @@ namespace DigitPark.Monetization
                     currency.AddCoins(GetTotalCoins());
                     break;
 
-                case ShopItemType.Theme:
-                    if (!string.IsNullOrEmpty(themeId))
-                    break;
-
-                case ShopItemType.Avatar:
-                    // Avatar system removed — no-op
-                    Debug.LogWarning("[ShopItemData] Avatar type is deprecated");
-                    break;
-
                 case ShopItemType.WinEffect:
                 case ShopItemType.WinEffectBundle:
                     if (!string.IsNullOrEmpty(itemId))
@@ -327,18 +310,12 @@ namespace DigitPark.Monetization
                     // Bundle - grant multiple rewards
                     if (gemsAmount > 0) currency.AddGems(GetTotalGems());
                     if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
-                    if (!string.IsNullOrEmpty(themeId))
-                    {
-                    }
                     break;
 
                 case ShopItemType.StarterPack:
                     // Bundle - grant multiple rewards
                     if (gemsAmount > 0) currency.AddGems(GetTotalGems());
                     if (coinsAmount > 0) currency.AddCoins(GetTotalCoins());
-                    if (!string.IsNullOrEmpty(themeId))
-                    {
-                    }
                     // Frame exclusivo del Starter Pack
                     if (!string.IsNullOrEmpty(itemId))
                     {
@@ -381,8 +358,6 @@ namespace DigitPark.Monetization
                     if (itemType == ShopItemType.DigitCoinsPack)
                         priceType = PriceType.DigitGems;
                     break;
-                case ShopItemType.Theme:
-                case ShopItemType.Avatar:
                 case ShopItemType.Frame:
                 case ShopItemType.Title:
                     shopTab = ShopTab.Styles;
