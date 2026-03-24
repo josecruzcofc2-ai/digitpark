@@ -18,18 +18,8 @@ namespace DigitPark.Editor
         private const string BACK_BUTTON_GOLD_PATH = "Assets/_Project/Prefabs/Common/BackButtonGold.prefab";
         private const string SCENES_PATH = "Assets/_Project/Scenes";
 
-        // Scenes that use GOLD back button (Cash Battle theme)
-        // Note: CashMatchmaking excluded — has Cancel button, no back button needed
-        private static readonly HashSet<string> GOLD_SCENES = new HashSet<string>
-        {
-            "CashHistory",
-            "CashTournaments",
-            "CashTournamentCreate",
-            "CashTournamentLobby",
-            "CashProfile",
-            "CashWallet",
-            "AgeVerification"
-        };
+        // No gold-button scenes remain after CashBattle removal
+        private static readonly HashSet<string> GOLD_SCENES = new HashSet<string>();
 
         // Scenes that should NOT have ANY back button
         private static readonly HashSet<string> EXCLUDED_SCENES = new HashSet<string>
@@ -51,7 +41,6 @@ namespace DigitPark.Editor
 
             // Matchmaking scenes (have cancel button instead)
             "Matchmaking",
-            "CashMatchmaking",  // has Cancel button, no back button needed
 
             // Onboarding scenes (have own navigation)
             "Onboarding",

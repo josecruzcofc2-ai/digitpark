@@ -274,7 +274,7 @@ namespace DigitPark.Editor
                 $"{count} escenas asignadas al Build Settings.\n\n" +
                 "Orden:\n" +
                 "[0] Boot (entry point)\n" +
-                "[1-3] Auth (Login, Register, AgeVerification)\n" +
+                "[1-2] Auth (Login, Register)\n" +
                 "[4] Onboarding\n" +
                 "[5-7] Core (MainMenu, Settings, Profile)\n" +
                 "[8-16] Games\n" +

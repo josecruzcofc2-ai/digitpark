@@ -20,11 +20,9 @@ namespace DigitPark.Payments
         public string DisplayName { get; set; }
         public CosmeticProductType Type { get; set; }
         public decimal PriceUSD { get; set; }
-        public string StripePriceId { get; set; }
         public string AppleProductId { get; set; }
         public int GemsAmount { get; set; }
         public int BonusPercent { get; set; }
-        public string ThemeId { get; set; }
         public Dictionary<string, string> Metadata { get; set; }
 
         public CosmeticProduct()

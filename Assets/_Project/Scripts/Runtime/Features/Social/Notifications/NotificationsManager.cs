@@ -573,7 +573,7 @@ namespace DigitPark.Managers
                     SceneManager.LoadScene("MainMenu");
                     break;
                 case "deposit":
-                    SceneManager.LoadScene("CashWallet");
+                    SceneManager.LoadScene("Shop");
                     break;
                 default:
                     SceneManager.LoadScene("Shop");

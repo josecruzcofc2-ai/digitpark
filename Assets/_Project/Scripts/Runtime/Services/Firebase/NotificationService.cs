@@ -556,7 +556,7 @@ namespace DigitPark.Services.Firebase
                     break;
 
                 case "deposit":
-                    SceneNavigator.Instance?.NavigateTo("CashWallet");
+                    SceneNavigator.Instance?.NavigateTo("Shop");
                     break;
 
                 default:

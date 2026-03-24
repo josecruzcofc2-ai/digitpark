@@ -374,7 +374,7 @@ namespace DigitPark.Managers
                     UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
                     break;
                 case "deposit":
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("CashWallet");
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("Shop");
                     break;
                 default:
                     UnityEngine.SceneManagement.SceneManager.LoadScene("Shop");
